@@ -1,0 +1,9 @@
+
+---
+# xMind Config
+XlangStartDebuger: true 
+XlangStartPythonDebuger: false 
+ 
+Log:
+ OutputLevel: 79999
+ MBSize: 10
