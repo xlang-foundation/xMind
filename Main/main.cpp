@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
     Cantor::log.Init();
 
     std::string xlangSearchPath = paramConfig.appPath;
-    auto* pCfg = LoadXLangEngine(paramConfig, xlangSearchPath, false);
+    auto* pCfg = LoadXLangEngine(paramConfig, xlangSearchPath, true);
 
     X::RegisterPackage<xMind::MindAPISet>(paramConfig.appName.c_str(), "xMind", &xMind::MindAPISet::I());
 

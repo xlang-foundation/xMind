@@ -24,7 +24,7 @@ public:
 		m_maxSize = maxSize;
 		m_currentSize = 0; 
 		m_fileIndex = 0;
-		scanExistingFiles();
+		//scanExistingFiles();
 		openNewFile();
 		return true;
 	}

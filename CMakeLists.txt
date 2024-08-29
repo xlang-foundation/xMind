@@ -5,7 +5,6 @@ cmake_minimum_required(VERSION 3.10)
 
 # Project settings
 project(xMindProject)
-set(CMAKE_CXX_STANDARD 20)
 
 # Enable Hot Reload for MSVC compilers if supported
 if (POLICY CMP0141)

@@ -6,7 +6,8 @@ cmake_minimum_required(VERSION 3.10)
 # Project settings
 project(xMind)
 
-
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Include directories
 include_directories(
   "../ThirdParty/xlang/Api"
