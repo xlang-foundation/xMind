@@ -1,7 +1,18 @@
 # Example Configuration
+name: SuperAgent007
+type: agent|compositeAgent|library
+version: 1.0
+Description: "This is a super agent that processes data in a complex way."
+inputs:
+    - name: input1
+      connecto: AgentA.input1
+    - name: AgentA.input2
+    
 imports:
   - file: "other_agents.yml"
     alias: "other"
+  - file: "planning.yml"
+    alias: "planner"
 
 agents:
   - name: AgentA
@@ -20,6 +31,7 @@ agents:
       python: "agent_a.py"
       xlang: "agent_a.x"
       shared_lib: "libagent_a.so"
+
     parameters:
       param1: "value1"
       param2: "value2"
@@ -73,6 +85,10 @@ connections:
   - fromAgentName: other.AgentX
     fromPinName: output1
     toAgentName: AgentA
+    toPinName: input2
+  - fromAgentName: planner.AgentY
+    fromPinName: input1
+    toAgentName: AgentB
     toPinName: input2
 
 # Schema Definition

@@ -1,0 +1,139 @@
+# Agent Schema Definition
+type: object
+properties:
+  name:
+    type: string
+  type:
+    type: string
+    enum: [agent, compositeAgent, library]
+  version:
+    type: string
+  description:
+    type: string
+  inputs:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        connecto:
+          type: string
+  outputs:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        formats:
+          type: array
+          items:
+            type: string
+          description: "Optional"
+  source:
+    type: object
+    properties:
+      python:
+        type: string
+      xlang:
+        type: string
+      shared_lib:
+        type: string
+  parameters:
+    type: object
+    additionalProperties:
+      type: string
+  group:
+    type: string
+    description: "Optional"
+  imports:
+    type: array
+    items:
+      type: object
+      properties:
+        file:
+          type: string
+        alias:
+          type: string
+  agents:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        inputs:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              formats:
+                type: array
+                items:
+                  type: string
+                description: "Optional"
+        outputs:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              formats:
+                type: array
+                items:
+                  type: string
+                description: "Optional"
+        source:
+          type: object
+          properties:
+            python:
+              type: string
+            xlang:
+              type: string
+            shared_lib:
+              type: string
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+        group:
+          type: string
+          description: "Optional"
+  connections:
+    type: array
+    items:
+      type: object
+      properties:
+        fromAgentName:
+          type: string
+        fromPinName:
+          type: string
+        toAgentName:
+          type: string
+        toPinName:
+          type: string
+  groups:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        agents:
+          type: array
+          items:
+            type: string
+    description: "Optional"
+required:
+  - name
+  - type
+  - version
+  - description
+  - agents
+  - connections

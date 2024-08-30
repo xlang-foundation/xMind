@@ -1,0 +1,22 @@
+name: singleAgent007
+type: agent
+version: 1.0
+description: "This is a single agent that processes single task"
+inputs:
+  - name: input1
+    connecto: AgentA.input1
+  - name: input2
+    connecto: AgentA.input2
+outputs:
+  - name: output1
+    formats: ["format1", "format2"]
+  - name: output2
+    formats: ["format3"]
+source:
+  python: "super_agent_007.py"
+  xlang: "super_agent_007.x"
+  shared_lib: "libsuper_agent_007.so"
+parameters:
+  param1: "value1"
+  param2: "value2"
+
