@@ -10,6 +10,7 @@ namespace xMind
         public Singleton<MindAPISet>
     {
         std::string m_RootPath;
+        X::Runtime* m_defaultRuntime = nullptr;
 
         BEGIN_PACKAGE(MindAPISet)
             APISET().AddEvent("OnReady");
@@ -28,6 +29,9 @@ namespace xMind
         {
             return m_RootPath;
         }
+        X::Runtime& RT() { return *m_defaultRuntime; }
+        bool Start();
+        void Shutdown();
         inline bool Log(X::XRuntime* rt, X::XObj* pContext,
             X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
         {

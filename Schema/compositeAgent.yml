@@ -9,7 +9,7 @@ imports:
   - file: "planning.yml"
     alias: "planner"
 
-agents:
+notes:
   - name: AgentA
     description: "This is Agent A, responsible for processing input data and producing output."
     inputs:

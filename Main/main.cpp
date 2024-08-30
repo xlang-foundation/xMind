@@ -73,6 +73,7 @@ int main(int argc, char* argv[])
     ParseCommandLine(params, paramConfig);
 
     xMind::MindAPISet::I().SetRootInfo(paramConfig.appPath);
+    xMind::MindAPISet::I().Start();
 
     std::string logFolder = paramConfig.appPath + Path_Sep_S + "Logs";
     if (isDir(logFolder.c_str()) == false)
@@ -100,7 +101,7 @@ int main(int argc, char* argv[])
 
     xMind::MindAPISet::I().Fire(1, p_dummy, kp_dummy);
     UnloadXLangEngine();
-
+    xMind::MindAPISet::I().Shutdown();
     delete pCfg;
     LOG << "xMind Shutdown" << LINE_END;
     return 0;

@@ -23,11 +23,10 @@ include_directories(
 # Source files
 file(GLOB Xlang_Api_SRC "../ThirdParty/xlang/Api/*.cpp")
 file(GLOB AppEntry_SRC "*.cpp")
-file(GLOB Common_SRC "Common/*.cpp" "Log/*.cpp")
+file(GLOB Common_SRC "Common/*.cpp" "Log/*.cpp" "AgentGraph/*.cpp")
 
 # Add executable
 add_executable(${PROJECT_NAME}
   ${Xlang_Api_SRC}
   ${Common_SRC}
-  ${AppEntry_SRC}
-)
+  ${AppEntry_SRC})
