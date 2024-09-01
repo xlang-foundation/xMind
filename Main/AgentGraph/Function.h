@@ -9,5 +9,42 @@ namespace xMind
 		BEGIN_PACKAGE(Function)
 			ADD_BASE(Callable);
 		END_PACKAGE
+		virtual bool ReceiveData(int inputIndex, X::Value& data) override
+		{
+			//when receive data, call the real function
+			//and push the result to the next node
+			//only support one input data
+			if (m_implObject.IsObject())
+			{
+				X::ARGS params(1);
+				params.push_back(data);
+				X::KWARGS kwParams;
+				auto* pXPack = Function::APISET().GetProxy(this);
+				X::Value varOwner = X::Value(pXPack);
+				kwParams.Add("owner", varOwner);
+				X::Value retData = m_implObject.ObjCall(params, kwParams);
+				PushToOutput(0, retData);
+			}
+			return true;
+		}
+		virtual bool Run() override
+		{
+			return true;
+		}
+		virtual X::Value Clone() override
+		{
+			Function* pFuncObj = new Function();
+			pFuncObj->Copy(this);
+			auto* pXPack = Function::APISET().GetProxy(pFuncObj);
+			X::Value retValue = X::Value(pXPack);
+			return retValue;
+		}
+		public:
+		Function()
+		{
+			m_inputs.push_back(Pin{ "input" });
+			m_outputs.push_back(Pin{ "output" });
+		}
+
 	};
 }

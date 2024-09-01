@@ -27,6 +27,7 @@ namespace xMind
 	{
 		BEGIN_PACKAGE(Callable)
 			APISET().AddPropWithType<std::string>("name", &Callable::m_name);
+			APISET().AddPropWithType<X::Value>("graph", &Callable::m_varGraph);
 			APISET().AddPropWithType<std::string>("description", &Callable::m_description);
 			APISET().AddPropL("inputs",
 				[](auto* pThis, X::Value v) { pThis->SetInputs(v); },
@@ -37,7 +38,13 @@ namespace xMind
 		END_PACKAGE
 
 	protected:
+		//real object such as Xlang func/class
+		//or native lib's function
+		X::Value m_implObject;
+		X::KWARGS m_params;
+		X::XRuntime* m_rt;
 		int m_index;//index in the agentGraph
+		X::Value m_varGraph;
 		AgentGraph* m_agentGraph;
 		std::string m_name; // Callable Name
 		std::string m_instanceName;
@@ -48,6 +55,7 @@ namespace xMind
 		std::vector<Pin> m_outputs;
 		Locker m_locker;
 
+		void Copy(Callable* other);
 	public:
 		Callable() :
 			m_type(CallableType::callable),
@@ -59,13 +67,33 @@ namespace xMind
 		virtual ~Callable()
 		{
 		}
+		inline void SetImplObject(X::Value implObject)
+		{
+			m_implObject = implObject;
+		}
 		inline void SetName(const std::string& name)
 		{
 			m_name = name;
 		}
+		inline X::XRuntime* GetRT()
+		{
+			return m_rt;
+		}
+		inline void SetRT(X::XRuntime* rt)
+		{
+			m_rt = rt;
+			if (m_implObject.IsObject())
+			{
+				m_implObject.GetObj()->SetRT(rt);
+			}
+		}
 		inline std::string GetName()
 		{
 			return m_name;
+		}
+		inline void SetParams(X::KWARGS params)
+		{
+			m_params = params;
 		}
 		inline void SetInstanceName(const std::string& instanceName)
 		{
@@ -73,7 +101,7 @@ namespace xMind
 		}
 		inline std::string GetInstanceName()
 		{
-			return m_instanceName;
+			return m_instanceName.empty()? m_name: m_instanceName;
 		}
 		inline void SetDescription(const std::string& description)
 		{
@@ -93,6 +121,8 @@ namespace xMind
 		}
 		void PushToOutput(int outputIndex, X::Value data);
 		virtual bool ReceiveData(int inputIndex, X::Value& data) = 0;
+		virtual bool Run() = 0;
+		virtual X::Value Clone() = 0;
 
 		int GetOutputIndex(const std::string& pinName)
 		{
@@ -122,9 +152,14 @@ namespace xMind
 			m_locker.Unlock();
 			return -1;
 		}
-		inline void SetAgentGraph(AgentGraph* agentGraph)
+		inline bool InGraph()
 		{
-			m_agentGraph = agentGraph;
+			return m_agentGraph != nullptr;
+		}
+		void SetAgentGraph(AgentGraph* agentGraph);
+		inline X::Value GetGraph()
+		{
+			return m_varGraph;
 		}
 		inline X::Value GetInputs()
 		{

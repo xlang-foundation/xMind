@@ -49,6 +49,18 @@ namespace xMind
             m_locker.Unlock();
             return true;
         }
+        virtual bool Run() override
+		{
+			return true;
+		}
+        virtual X::Value Clone() override
+        {
+			BaseAgent* pAgent = new BaseAgent();
+			pAgent->Copy(this);
+			auto* pXPack = BaseAgent::APISET().GetProxy(pAgent);
+			X::Value retValue = X::Value(pXPack);
+			return retValue;
+		}
 #if __TODO__
         // Dequeue data from the input queue of a specific pin
         inline X::Value DequeueInput(const std::string& pinName)

@@ -14,6 +14,36 @@ namespace xMind
 		}
 	}
 
+	bool AgentGraph::AddNode(X::XRuntime* rt, X::XObj* pContext,
+		X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+	{
+		X::Value varObj;
+		if (params.size() >= 1)
+		{
+			varObj = params[0];
+		}
+		else
+		{
+			return false;
+		}
+
+		X::XPackageValue<Callable> varCallable(varObj);
+		Callable* callable = (Callable*)varCallable.GetRealObj();
+		//check if callable exists in Graph, if exists, clone a new one
+		if (callable->InGraph())
+		{
+			X::Value cloneCallable = callable->Clone();
+			X::XPackageValue<Callable> varCallableClone(cloneCallable);
+			callable = (Callable*)varCallableClone.GetRealObj();
+		}
+		if (params.size() >= 2)
+		{
+			callable->SetInstanceName(params[1].ToString());
+		}
+		AddCallable(callable);
+		return true;
+	}
+
 	bool AgentGraph::Parse(const std::string& yamlContent)
 	{
 		try
@@ -104,7 +134,14 @@ namespace xMind
 
 					if (fromInstanceName.IsValid() && fromPinName.IsValid() && toInstanceName.IsValid() && toPinName.IsValid())
 					{
-						AddConnection(fromInstanceName.ToString(), fromPinName.ToString(), toInstanceName.ToString(), toPinName.ToString());
+						X::ARGS params(4);
+						params.push_back(fromInstanceName.ToString());
+						params.push_back(fromPinName.ToString());
+						params.push_back(toInstanceName.ToString());
+						params.push_back(toPinName.ToString());
+						X::KWARGS kwParams;
+						X::Value retValue;
+						AddConnection(nullptr,nullptr,params, kwParams,retValue);
 					}
 				}
 			}
@@ -125,6 +162,7 @@ namespace xMind
 		int index = (int)m_callables.size();
 		m_callableNameToIndex[callable->GetInstanceName()] = index;
 		m_callables.push_back(callable);
+		callable->SetAgentGraph(this);
 		callable->SetIndex(index);
 		return index;
 	}
@@ -140,17 +178,56 @@ namespace xMind
 		}
 	}
 
-	void AgentGraph::AddConnection(const std::string& fromInstanceName, const std::string& fromPinName, const std::string& toInstanceName, const std::string& toPinName)
+	void AgentGraph::AddConnection(X::XRuntime* rt, X::XObj* pContext,
+		X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
 	{
-		AutoLock lock(m_locker); // Lock for thread safety
-
-		int fromCallableIndex = m_callableNameToIndex[fromInstanceName];
-		int fromPinIndex = m_callables[fromCallableIndex]->GetOutputIndex(fromPinName);
-		int toCallableIndex = m_callableNameToIndex[toInstanceName];
-		int toPinIndex = m_callables[toCallableIndex]->GetInputIndex(toPinName);
-
+		int fromCallableIndex=-1;
+		int fromPinIndex=0;
+		int toCallableIndex=-1;
+		int toPinIndex=0;
+		if (params.size() == 2)
+		{
+			auto fromInstanceName = params[0].ToString();
+			auto it = m_callableNameToIndex.find(fromInstanceName);
+			if(it != m_callableNameToIndex.end())
+			{
+				fromCallableIndex = it->second;
+			}
+			auto toInstanceName = params[1].ToString();
+			it = m_callableNameToIndex.find(toInstanceName);
+			if (it != m_callableNameToIndex.end())
+			{
+				toCallableIndex = it->second;
+			}
+		}
+		else if (params.size() == 4)
+		{
+			auto fromInstanceName = params[0].ToString();
+			auto fromPinName = params[1].ToString();
+			auto toInstanceName = params[2].ToString();
+			auto toPinName = params[3].ToString();
+			auto it = m_callableNameToIndex.find(fromInstanceName);
+			if (it != m_callableNameToIndex.end())
+			{
+				fromCallableIndex = it->second;
+				fromPinIndex = m_callables[fromCallableIndex]->GetOutputIndex(fromPinName);
+			}
+			it = m_callableNameToIndex.find(toInstanceName);
+			if (it != m_callableNameToIndex.end())
+			{
+				toCallableIndex = it->second;
+				toPinIndex = m_callables[toCallableIndex]->GetInputIndex(toPinName);
+			}
+		}
+		if(fromCallableIndex == -1 || toCallableIndex == -1)
+		{
+			retValue = X::Value(false);
+			return;
+		}
+		AutoLock lock(m_locker);
 		Connection newConnection{ fromCallableIndex, fromPinIndex, toCallableIndex, toPinIndex };
 		m_connections.push_back(newConnection);
+		retValue = X::Value(true);
 	}
 
 	void AgentGraph::RemoveConnection(const std::string& fromInstanceName, const std::string& fromPinName, const std::string& toInstanceName, const std::string& toPinName)
@@ -178,7 +255,10 @@ namespace xMind
 	void AgentGraph::PushDataToCallable(Callable* fromCallable, int outputIndex, X::Value& data)
 	{
 		AutoLock lock(m_locker);
-
+		if (!m_running)
+		{
+			return;
+		}
 		int fromCallableIndex = fromCallable->GetIndex();
 
 		for (const auto& connection : m_connections)
@@ -186,8 +266,75 @@ namespace xMind
 			if (connection.fromCallableIndex == fromCallableIndex && connection.fromPinIndex == outputIndex)
 			{
 				Callable* toCallable = m_callables[connection.toCallableIndex];
+				toCallable->SetRT(fromCallable->GetRT());
 				toCallable->ReceiveData(connection.toPinIndex, data);
 			}
 		}
+	}
+	bool AgentGraph::Run(X::XRuntime* rt, X::XObj* pContext, 
+		X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+	{
+		m_locker.Lock();
+		m_running = true;
+		m_locker.Unlock();
+		return true;
+	}
+	bool AgentGraph::StartOnce(X::XRuntime* rt, X::XObj* pContext, 
+		X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+	{
+		AutoLock lock(m_locker);
+		m_running = true;
+		//find start nodes from m_connections, start node is the node that has no input
+		std::vector<int> startNodes;
+		for (int i = 0; i < m_callables.size(); i++)
+		{
+			bool isStartNode = true;
+			for (const auto& connection : m_connections)
+			{
+				if (connection.toCallableIndex == i)
+				{
+					isStartNode = false;
+					break;
+				}
+			}
+			if (isStartNode)
+			{
+				startNodes.push_back(i);
+			}
+		}
+		//call each with ReceiveData
+		for (const auto& startNode : startNodes)
+		{
+			X::Value dummyData;
+			auto* pCallable = m_callables[startNode];
+			if (pCallable)
+			{
+				pCallable->SetRT(rt);
+				pCallable->ReceiveData(0, dummyData);
+			}
+		}
+		return true;
+	}
+	bool AgentGraph::StartFrom(X::XRuntime* rt, X::XObj* pContext, 
+		X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+	{
+		AutoLock lock(m_locker);
+		m_running = true;
+		//for each Callable inside params, call ReceiveData
+		for (auto& param : params)
+		{
+			auto it = m_callableNameToIndex.find(param.ToString());
+			if (it != m_callableNameToIndex.end())
+			{
+				X::Value dummyData;
+				auto* pCallable = m_callables[it->second];
+				if (pCallable)
+				{
+					pCallable->SetRT(rt);
+					pCallable->ReceiveData(0, dummyData);
+				}
+			}
+		}
+		return true;
 	}
 }

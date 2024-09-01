@@ -1,15 +1,13 @@
 import xMind
 
-root = xMind.GetRootPath()
-xMind.log("Root path: ",root)
-@xMind.Function(Name="Start",
-	Prompt="any prompt",
-	EnvType ="Local"
-	)
+
+@xMind.Function()
 def Start():
-	thismyName = owner.name
-	xMind.log(myName, ",input a sentence to start the graph:")
+	myName = owner.name
+	xMind.log(myName, ",input a sentence to start the graph(input !quit to stop):")
 	str0 = input()
+	if str0 == '!quit':
+		owner.graph.stop()
 	return str0
 
 @xMind.Function()
@@ -31,6 +29,7 @@ graph.addNode(PassOne,"P3")
 graph.connect("Start","P1")
 graph.connect("P1","output","P2","input")
 graph.connect("P2","P3")
-graph.startOnce()
+graph.connect("P3","Start")
+graph.startFrom("Start")
 
 print("Done")
