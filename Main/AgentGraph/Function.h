@@ -27,9 +27,12 @@ namespace xMind
 			}
 			return true;
 		}
-		virtual bool Run() override
+		inline virtual bool Run() override
 		{
 			return true;
+		}
+		inline virtual void Stop() override
+		{
 		}
 		virtual X::Value Clone() override
 		{

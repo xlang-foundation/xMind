@@ -121,6 +121,7 @@ namespace xMind
 		}
 		void PushToOutput(int outputIndex, X::Value data);
 		virtual bool ReceiveData(int inputIndex, X::Value& data) = 0;
+		virtual void Stop() = 0;
 		virtual bool Run() = 0;
 		virtual X::Value Clone() = 0;
 

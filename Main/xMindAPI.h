@@ -6,7 +6,8 @@
 #include "AgentGraph.h"
 #include "BaseAgent.h"
 #include "Function.h"
-
+#include "BaseAction.h"
+#include "type_def.h"
 
 namespace xMind
 {
@@ -17,16 +18,22 @@ namespace xMind
         X::Runtime* m_defaultRuntime = nullptr;
 
         BEGIN_PACKAGE(MindAPISet)
+            APISET().AddConst("OK", (int)Status::Ok);
+            APISET().AddConst("Fail", (int)Status::Fail);
+            APISET().AddConst("Timeout", (int)Status::Timeout);
             APISET().AddEvent("OnReady");
             APISET().AddEvent("OnShutdown");
             APISET().AddVarFunc("log", &MindAPISet::Log);
             APISET().AddVarFunc("logV", &MindAPISet::LogV);
             APISET().AddVarFunc("log_nolineend", &MindAPISet::Log_nolineend);
             APISET().AddFunc<0>("GetRootPath", &MindAPISet::GetRootPath);
-            APISET().AddVarFuncEx("Function", &MindAPISet::CreateFunction);
+            APISET().AddVarFuncEx("Function", &MindAPISet::Create<Function>);
+            APISET().AddVarFuncEx("Action", &MindAPISet::Create<BaseAction>);
+            APISET().AddVarFuncEx("Agent", &MindAPISet::Create<BaseAgent>);
             APISET().AddClass<0, AgentGraph>("Graph");
             APISET().AddClass<0, Function>("MindFunction");
-            APISET().AddClass<0, BaseAgent>("Agent");
+            APISET().AddClass<0, BaseAction>("MindAction");
+            APISET().AddClass<0, BaseAgent>("MindAgent");
 
         END_PACKAGE
     public:
@@ -42,7 +49,9 @@ namespace xMind
         bool Start();
         void Shutdown();
         void CalcDecoratorParameter(X::ARGS& expres, X::KWARGS* pKwParams);
-        inline void CreateFunction(X::XRuntime* rt, X::XObj* pThis, X::XObj* pContext,
+
+        template<class T>   
+        inline void Create(X::XRuntime* rt, X::XObj* pThis, X::XObj* pContext,
             X::ARGS& params, X::KWARGS& kwParams, X::Value& trailer, X::Value& retValue)
         {   
             X::Value realObj;
@@ -93,11 +102,11 @@ namespace xMind
 					}
 				}
             }
-            Function* pFuncObj = new Function();
-            pFuncObj->SetName(name);
-            pFuncObj->SetParams(kwParams);
-            pFuncObj->SetImplObject(realObj);
-            auto* pXPack = Function::APISET().GetProxy(pFuncObj);
+            T* pObj = new T();
+            pObj->SetName(name);
+            pObj->SetParams(kwParams);
+            pObj->SetImplObject(realObj);
+            auto* pXPack = T::APISET().GetProxy(pObj);
             retValue = X::Value(pXPack);
         }
         inline bool Log(X::XRuntime* rt, X::XObj* pContext,
