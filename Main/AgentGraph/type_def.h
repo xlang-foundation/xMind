@@ -7,5 +7,7 @@ namespace xMind
 		Ok,
 		Fail,
 		Timeout,
+		Running,
+		Stopped
 	};
 }

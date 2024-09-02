@@ -21,6 +21,8 @@ namespace xMind
             APISET().AddConst("OK", (int)Status::Ok);
             APISET().AddConst("Fail", (int)Status::Fail);
             APISET().AddConst("Timeout", (int)Status::Timeout);
+            APISET().AddConst("Running", (int)Status::Running);
+            APISET().AddConst("Stopped", (int)Status::Stopped);
             APISET().AddEvent("OnReady");
             APISET().AddEvent("OnShutdown");
             APISET().AddVarFunc("log", &MindAPISet::Log);
@@ -106,6 +108,7 @@ namespace xMind
             pObj->SetName(name);
             pObj->SetParams(kwParams);
             pObj->SetImplObject(realObj);
+            pObj->Create();
             auto* pXPack = T::APISET().GetProxy(pObj);
             retValue = X::Value(pXPack);
         }

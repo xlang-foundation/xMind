@@ -22,11 +22,17 @@ namespace xMind
 		BEGIN_PACKAGE(BufferedProcessor)
 			ADD_BASE(Callable);
 			APISET().AddFunc<2>("waitInput", &BufferedProcessor::WaitInput);
+			APISET().AddFunc<1>("isRunning", &BufferedProcessor::IsRunning);
+			APISET().AddFunc<2>("pushToOutput", &Callable::PushToOutput);
 		END_PACKAGE
 	protected:
 		inline virtual bool ReceiveData(int inputIndex, X::Value& data) override
 		{
 			std::unique_lock<std::mutex> lock(m_mutex);
+			if(inputIndex < 0 || inputIndex >= static_cast<int>(m_inputQueues.size()))
+			{
+				return false;
+			}
 			m_inputQueues[inputIndex].push(data);
 			m_condVar.notify_all();
 			return true;
@@ -57,7 +63,38 @@ namespace xMind
 		{
 			Stop();
 		}
+		inline bool Create()
+		{
+			auto it = m_params.find("inputs");
+			if (it)
+			{
+				SetInputs(it->val);
+				m_inputQueues.resize(m_inputs.size());
+			}
+			it = m_params.find("outputs");
+			if (it)
+			{
+				SetOutputs(it->val);
+			}
 
+			return true;
+		}
+		int IsRunning(int timeout = 0)
+		{
+			std::unique_lock<std::mutex> lock(m_mutex);
+
+			if (timeout == 0)
+			{
+				return int(m_running ? Status::Running : Status::Stopped);
+			}
+			else
+			{
+				bool bRun = m_condVar.wait_for(lock, std::chrono::milliseconds(timeout), [this] {
+					return m_running?true:false;
+					});
+				return int(bRun ? Status::Running : Status::Stopped);
+			}
+		}
 		X::Value WaitInput(int inputIndex = -1, int timeoutMs = -1)
 		{
 			std::unique_lock<std::mutex> lock(m_mutex);
@@ -118,7 +155,11 @@ namespace xMind
 				inputData.status = Status::Timeout;
 			}
 
-			return CreateXlangStructInputData(inputData);
+			X::List list;
+			list += (int)inputData.status;
+			list += inputData.inputIndex;
+			list += inputData.data;
+			return list;//CreateXlangStructInputData(inputData);
 		}
 
 		inline virtual void Stop() override

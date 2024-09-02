@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 #include <memory>
+#include <condition_variable> 
 
 namespace xMind
 {
@@ -28,6 +29,7 @@ namespace xMind
 			APISET().AddVarFunc("startOnce", &AgentGraph::StartOnce);
 			APISET().AddVarFunc("startFrom", &AgentGraph::StartFrom);
 			APISET().AddFunc<0>("stop", &AgentGraph::Stop);
+			APISET().AddFunc<0>("waitToStop", &AgentGraph::WaitToStop);
 		END_PACKAGE
 	public:
 		AgentGraph() = default;
@@ -50,9 +52,15 @@ namespace xMind
 			X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
 		void Stop()
 		{
-			m_locker.Lock();
+			std::unique_lock<std::mutex> lock(m_mutex);
 			m_running = false;
-			m_locker.Unlock();
+			m_condVar.notify_all(); // Notify all waiting threads
+		}
+		void WaitToStop()
+		{
+			std::unique_lock<std::mutex> lock(m_mutex);
+			m_condVar.wait(lock, [this] { return !m_running; });
+			//todo: also need to wait all callable to stop
 		}
 	private:
 		bool m_running = false;
@@ -60,5 +68,7 @@ namespace xMind
 		std::vector<Connection> m_connections;
 		std::unordered_map<std::string, int> m_callableNameToIndex;
 		Locker m_locker;
+		std::mutex m_mutex; // Mutex for condition variable
+		std::condition_variable m_condVar; // Condition variable
 	};
 }

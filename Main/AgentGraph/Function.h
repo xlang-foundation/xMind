@@ -27,6 +27,10 @@ namespace xMind
 			}
 			return true;
 		}
+		inline bool Create()
+		{
+			return true;
+		}
 		inline virtual bool Run() override
 		{
 			return true;

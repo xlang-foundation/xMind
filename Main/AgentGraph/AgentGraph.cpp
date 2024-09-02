@@ -276,6 +276,12 @@ namespace xMind
 	{
 		m_locker.Lock();
 		m_running = true;
+		//call run all Callables
+		for (auto& callable : m_callables)
+		{
+			callable->SetRT(rt);
+			callable->Run();
+		}
 		m_locker.Unlock();
 		return true;
 	}
