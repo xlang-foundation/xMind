@@ -2,17 +2,17 @@ import xMind
 
 @xMind.Agent(inputs=[{"name":"input"}])
 def AgentFirst():
-	while owner.isRunning(0) == xMind.Running:
-		inputData = owner.waitInput(-1,-1)
+	while owner.isRunning() == xMind.Running:
+		inputData = owner.waitInput()
 		if inputData[0] == xMind.Ok:
 			data = inputData[2]
 			xMind.log("AgentFirst LLM->: ",data)
-	xMind.Log("AgentFirst: Stop")
+	xMind.log("AgentFirst: Stop")
 
 @xMind.Action(outputs=[{"name":"output"}])
 def ActionFirst():
 	xMind.log("ActionFirst: Start")
-	while owner.isRunning(0) == xMind.Running:
+	while owner.isRunning() == xMind.Running:
 		xMind.log("Input a prompt to ask AgentFirst:")
 		prompt = input()
 		if prompt == '!quit':

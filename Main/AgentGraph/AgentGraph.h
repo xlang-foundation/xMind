@@ -60,7 +60,10 @@ namespace xMind
 		{
 			std::unique_lock<std::mutex> lock(m_mutex);
 			m_condVar.wait(lock, [this] { return !m_running; });
-			//todo: also need to wait all callable to stop
+			for(auto& callable : m_callables)
+			{
+				callable->Stop();
+			}
 		}
 	private:
 		bool m_running = false;

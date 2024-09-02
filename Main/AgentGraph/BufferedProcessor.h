@@ -21,8 +21,8 @@ namespace xMind
 	{
 		BEGIN_PACKAGE(BufferedProcessor)
 			ADD_BASE(Callable);
-			APISET().AddFunc<2>("waitInput", &BufferedProcessor::WaitInput);
-			APISET().AddFunc<1>("isRunning", &BufferedProcessor::IsRunning);
+			APISET().AddVarFunc("waitInput", &BufferedProcessor::WaitInput);
+			APISET().AddVarFunc("isRunning", &BufferedProcessor::IsRunning);
 			APISET().AddFunc<2>("pushToOutput", &Callable::PushToOutput);
 		END_PACKAGE
 	protected:
@@ -79,28 +79,71 @@ namespace xMind
 
 			return true;
 		}
-		int IsRunning(int timeout = 0)
+		bool IsRunning(X::XRuntime* rt, X::XObj* pContext,
+			X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
 		{
+			int timeout = 0;
+			if (params.size() > 0)
+			{
+				timeout = (int)params[0];
+			}
+			else
+			{
+				auto it = kwParams.find("timeout");
+				if (it)
+				{
+					timeout = (int)it->val;
+				}
+			}
 			std::unique_lock<std::mutex> lock(m_mutex);
 
 			if (timeout == 0)
 			{
-				return int(m_running ? Status::Running : Status::Stopped);
+				retValue = int(m_running ? Status::Running : Status::Stopped);
 			}
 			else
 			{
 				bool bRun = m_condVar.wait_for(lock, std::chrono::milliseconds(timeout), [this] {
 					return m_running?true:false;
 					});
-				return int(bRun ? Status::Running : Status::Stopped);
+				retValue = int(bRun ? Status::Running : Status::Stopped);
 			}
+			return true;
 		}
-		X::Value WaitInput(int inputIndex = -1, int timeoutMs = -1)
+		bool WaitInput(X::XRuntime* rt, X::XObj* pContext,
+			X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
 		{
+			int inputIndex = -1;
+			int timeoutMs = -1;
+			if (params.size() > 0)
+			{
+				inputIndex = (int)params[0];
+			}
+			else if (params.size() > 1)
+			{
+				timeoutMs = (int)params[1];
+			}
+			else
+			{
+				auto it = kwParams.find("inputIndex");
+				if (it)
+				{
+					inputIndex = (int)it->val;
+				}
+				it = kwParams.find("timeout");
+				if (it)
+				{
+					timeoutMs = (int)it->val;
+				}
+			}
 			std::unique_lock<std::mutex> lock(m_mutex);
 			InputData inputData{ Status::Ok, inputIndex, X::Value() };
 
 			auto waitCondition = [this, inputIndex] {
+				if (!m_running)
+				{
+					return true;
+				}
 				if (inputIndex == -1)
 				{
 					for (const auto& queue : m_inputQueues)
@@ -118,18 +161,18 @@ namespace xMind
 				return false;
 				};
 
-			bool hasData = false;
+			bool isNotTimeout = true;
 			if (timeoutMs == -1)
 			{
 				m_condVar.wait(lock, waitCondition);
-				hasData = true;
 			}
 			else
 			{
-				hasData = m_condVar.wait_for(lock, std::chrono::milliseconds(timeoutMs), waitCondition);
+				//timeout will set isTimeout to false
+				isNotTimeout = m_condVar.wait_for(lock, std::chrono::milliseconds(timeoutMs), waitCondition);
 			}
-
-			if (hasData)
+			//if still running,whatever timeout or not,we try to get the data
+			if (m_running)
 			{
 				if (inputIndex == -1)
 				{
@@ -140,26 +183,36 @@ namespace xMind
 							inputData.inputIndex = static_cast<int>(i);
 							inputData.data = m_inputQueues[i].front();
 							m_inputQueues[i].pop();
+							isNotTimeout = true;
 							break;
 						}
 					}
 				}
 				else
 				{
-					inputData.data = m_inputQueues[inputIndex].front();
-					m_inputQueues[inputIndex].pop();
+					auto& q = m_inputQueues[inputIndex];
+					if (!q.empty())
+					{
+						inputData.data = m_inputQueues[inputIndex].front();
+						m_inputQueues[inputIndex].pop();
+						isNotTimeout = true;
+					}
 				}
+				inputData.status = isNotTimeout ? Status::Ok : Status::Timeout;
 			}
 			else
 			{
-				inputData.status = Status::Timeout;
+				inputData.status = Status::Stopped;
 			}
 
 			X::List list;
 			list += (int)inputData.status;
 			list += inputData.inputIndex;
 			list += inputData.data;
-			return list;//CreateXlangStructInputData(inputData);
+			//xlang struct has issues to call destructor for members like X::Value
+			//so here use list to return the data
+			retValue = list;//CreateXlangStructInputData(inputData);
+			return true;
 		}
 
 		inline virtual void Stop() override
