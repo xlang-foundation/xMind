@@ -7,7 +7,7 @@ xMind.log("Root path: ",root)
 	EnvType ="Local"
 	)
 def Start():
-	thismyName = owner.name
+	myName = owner.name
 	xMind.log(myName, ",input a sentence to start the graph:")
 	str0 = input()
 	return str0

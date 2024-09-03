@@ -17,8 +17,11 @@ properties:
       properties:
         name:
           type: string
-        connecto:
-          type: string
+        formats:
+          type: array
+          items:
+            type: string
+          description: "Optional"
   outputs:
     type: array
     items:
@@ -35,11 +38,11 @@ properties:
     type: object
     properties:
       python:
-        type: string
+        type: [string, array]
       xlang:
-        type: string
+        type: [string, array]
       shared_lib:
-        type: string
+        type: [string, array]
   parameters:
     type: object
     additionalProperties:
@@ -56,7 +59,7 @@ properties:
           type: string
         alias:
           type: string
-  agents:
+  nodes:
     type: array
     items:
       type: object
@@ -110,14 +113,16 @@ properties:
     items:
       type: object
       properties:
-        fromAgentName:
+        fromNodeName:
           type: string
         fromPinName:
           type: string
-        toAgentName:
+          description: "Optional"
+        toNodeName:
           type: string
         toPinName:
           type: string
+          description: "Optional"
   groups:
     type: array
     items:
@@ -125,7 +130,7 @@ properties:
       properties:
         name:
           type: string
-        agents:
+        nodes:
           type: array
           items:
             type: string
@@ -135,5 +140,5 @@ required:
   - type
   - version
   - description
-  - agents
+  - nodes
   - connections

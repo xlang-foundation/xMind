@@ -4,18 +4,18 @@ version: 1.0
 description: "This is a single agent that processes single task"
 inputs:
   - name: input1
-    connecto: AgentA.input1
+    formats: ["format1", "format2"]
   - name: input2
-    connecto: AgentA.input2
+    formats: ["format4", "format6"]
 outputs:
   - name: output1
     formats: ["format1", "format2"]
   - name: output2
     formats: ["format3"]
 source:
-  python: "super_agent_007.py"
-  xlang: "super_agent_007.x"
-  shared_lib: "libsuper_agent_007.so"
+  python: ["super_agent_007.py","entrypoint"]
+  xlang: ["super_agent_007.x#entry","entrypoint"]
+  shared_lib: ["libsuper_agent_007.so#entry","entrypoint"]
 parameters:
   param1: "value1"
   param2: "value2"
