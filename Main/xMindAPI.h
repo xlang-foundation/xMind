@@ -25,6 +25,7 @@ namespace xMind
             APISET().AddConst("Stopped", (int)Status::Stopped);
             APISET().AddEvent("OnReady");
             APISET().AddEvent("OnShutdown");
+            APISET().AddVarFunc("Test", &MindAPISet::Test);
             APISET().AddVarFunc("log", &MindAPISet::Log);
             APISET().AddVarFunc("logV", &MindAPISet::LogV);
             APISET().AddVarFunc("log_nolineend", &MindAPISet::Log_nolineend);
@@ -39,6 +40,30 @@ namespace xMind
 
         END_PACKAGE
     public:
+        inline bool Test(X::XRuntime* rt, X::XObj* pContext,
+            X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+        {
+            if (params.size() > 0)
+            {
+				X::Value obj = params[0];
+                obj.GetObj()->SetRT(rt);
+                X::ARGS args(1);
+				args.push_back("call from host side");
+				X::Value retFromClient = obj.ObjCall(args);
+                if (!retFromClient.IsObject())
+                {
+					std::cout << "retFromClient is not object" << std::endl;
+                }
+                retValue = retFromClient;
+            }
+            else
+            {
+				X::ARGS args(0);
+				X::KWARGS kwargs;
+                Fire(0, args, kwargs);
+            }
+            return true;
+        }
         void SetRootInfo(std::string path)
         {
             m_RootPath = path;
@@ -78,7 +103,8 @@ namespace xMind
 					}
                     else
                     {
-                        if (trailer.IsObject())
+                        if (trailer.IsObject() 
+                            && trailer.GetObj()->GetType() == X::ObjType::Function)
                         {
                             X::Func func(trailer);
                             name = func->GetName().ToString();

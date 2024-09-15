@@ -2,6 +2,7 @@
 #include "log.h"
 #include "port.h"
 #include "utility.h"
+#include "DescParser.h"
 
 struct ParamConfig
 {
@@ -96,6 +97,11 @@ int main(int argc, char* argv[])
     xMind::MindAPISet::I().Fire(0, p_dummy, kp_dummy);
     X::g_pXHost->Lrpc_Listen(lrpc_port, false);
     LOG << "xMind Started" << LINE_END;
+
+    //test
+    xMind::DescParser descParser;
+    xMind::AgentGraph agentGraph;
+    descParser.LoadFromFile("D:\\Github\\xMind\\Schema\\compositeAgent.yml", agentGraph);
 
     g_xLoad.EventLoop();
 

@@ -24,6 +24,7 @@ namespace xMind
 		}
 		else
 		{
+			retValue = X::Value(false);
 			return false;
 		}
 
@@ -41,10 +42,11 @@ namespace xMind
 			callable->SetInstanceName(params[1].ToString());
 		}
 		AddCallable(callable);
+		retValue = X::Value(true);
 		return true;
 	}
 
-	bool AgentGraph::Parse(const std::string& yamlContent)
+bool AgentGraph::Parse(const std::string& yamlContent)
 	{
 		try
 		{
@@ -141,7 +143,7 @@ namespace xMind
 						params.push_back(toPinName.ToString());
 						X::KWARGS kwParams;
 						X::Value retValue;
-						AddConnection(nullptr,nullptr,params, kwParams,retValue);
+						AddConnection(nullptr, nullptr, params, kwParams, retValue);
 					}
 				}
 			}

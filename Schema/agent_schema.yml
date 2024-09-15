@@ -5,7 +5,7 @@ properties:
     type: string
   type:
     type: string
-    enum: [agent, compositeAgent, library]
+    enum: [action, agent, compositeAgent, library]
   version:
     type: string
   description:
@@ -66,6 +66,9 @@ properties:
       properties:
         name:
           type: string
+        type:
+          type: string
+          enum: [function, action, agent]
         description:
           type: string
         inputs:

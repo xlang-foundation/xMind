@@ -1,5 +1,14 @@
-import xMind
+x =10
+yes = isinstance(x,int)
 
+import xMind
+import pandas as pd
+import test_lib
+py_ret = test_lib.hello_xMind(xMind)
+xlang_ret = to_xlang(py_ret)
+yes = isinstance(xlang_ret,dict)
+yes = isinstance(xlang_ret,(dict,list))
+xlang_ret.set("test_key","this is a key")
 root = xMind.GetRootPath()
 xMind.log("Root path: ",root)
 @xMind.Function(Name="Start",

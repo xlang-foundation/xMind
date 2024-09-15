@@ -1,3 +1,4 @@
+--- 
 name: DataProcessingPipeline
 type: compositeAgent
 version: 1.0
@@ -29,6 +30,7 @@ nodes:
     parameters:
       param1: "value1"
       param2: "value2"
+      param3: {'k1':1}
     group: Group1
 
   - name: AgentB
