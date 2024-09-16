@@ -31,10 +31,14 @@ class xMind:
         """
         Check all nodes where self.hasInputs is False and call their self.func without parameters.
         """
+        hasNodes = False
         for node in cls._nodes:
             if not node.hasInputs:
                 real_func = getattr(node.func, '_original_function', node.func)
                 real_func(owner=node.core_object)
+                hasNodes = True
+        return hasNodes
+
     @staticmethod
     def Function(*args, **kwargs):
         def decorator(func):
@@ -133,14 +137,18 @@ class xMind:
         xMind._isRunning = True
         xMind_Core.log("MainLoop: Starting...")
 
+        cur_pacing_time = pacing_time
         # Get the list of node IDs
         node_ids = [node.id for node in xMind._nodes]
         sub_Id = xMind_Core.SubscribeEvents(node_ids)
         while xMind._isRunning and xMind_Core.IsRunning():
             # Detect events
-            events = xMind_Core.PullEvents(sub_Id,pacing_time)
+            events = xMind_Core.PullEvents(sub_Id,cur_pacing_time)
+            cur_pacing_time = pacing_time #keep same pacing time
             if not isinstance(events,list):
-                xMind.RunNonInputNodes()
+                hasNodes = xMind.RunNonInputNodes()
+                if hasNodes:
+                    cur_pacing_time = 0 # Call PullEvents immediately  
                 continue
             # Process each event
             for event in events:
