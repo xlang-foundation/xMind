@@ -26,6 +26,7 @@ namespace xMind
 	class Callable
 	{
 		BEGIN_PACKAGE(Callable)
+			APISET().AddPropWithType<unsigned long long> ("ID", &Callable::m_ID);
 			APISET().AddPropWithType<std::string>("name", &Callable::m_name);
 			APISET().AddPropWithType<X::Value>("graph", &Callable::m_varGraph);
 			APISET().AddPropWithType<std::string>("description", &Callable::m_description);
@@ -38,6 +39,7 @@ namespace xMind
 		END_PACKAGE
 
 	protected:
+		static std::atomic<unsigned long long> s_idCounter;
 		//real object such as Xlang func/class
 		//or native lib's function
 		X::Value m_implObject;
@@ -46,6 +48,7 @@ namespace xMind
 		int m_index;//index in the agentGraph
 		X::Value m_varGraph;
 		AgentGraph* m_agentGraph;
+		unsigned long long m_ID;//unique ID inside XMind not just the graph
 		std::string m_name; // Callable Name
 		std::string m_instanceName;
 		std::string m_description;
@@ -56,11 +59,12 @@ namespace xMind
 		Locker m_locker;
 
 		void Copy(Callable* other);
+		void PushEvent(int inputIndex, X::Value data);
 	public:
 		Callable() :
 			m_type(CallableType::callable),
-			m_agentGraph(nullptr),
-			m_index(-1)
+			m_agentGraph(nullptr), m_rt(nullptr),
+			m_index(-1), m_ID(++s_idCounter)
 		{
 		}
 

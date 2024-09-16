@@ -8,10 +8,11 @@ namespace xMind
 {
 	AgentGraph::~AgentGraph()
 	{
-		for (auto callable : m_callables)
+		for (auto& info : m_callables)
 		{
-			delete callable;
+			delete info.callable;
 		}
+		m_callables.clear();
 	}
 
 	bool AgentGraph::AddNode(X::XRuntime* rt, X::XObj* pContext,
@@ -41,7 +42,7 @@ namespace xMind
 		{
 			callable->SetInstanceName(params[1].ToString());
 		}
-		AddCallable(callable);
+		AddCallable(callable,varObj);
 		retValue = X::Value(true);
 		return true;
 	}
@@ -116,8 +117,9 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 					{
 						//newAgent->SetGroup(group.ToString());
 					}
-
-					int index = AddCallable(newAgent);
+					//TODO: for varCallable
+					X::Value varCallable;
+					int index = AddCallable(newAgent, varCallable);
 					newAgent->SetAgentGraph(this);
 				}
 			}
@@ -157,13 +159,13 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 		}
 	}
 
-	int AgentGraph::AddCallable(Callable* callable)
+	int AgentGraph::AddCallable(Callable* callable, X::Value& varCallable)
 	{
 		AutoLock lock(m_locker); // Lock for thread safety
 
 		int index = (int)m_callables.size();
 		m_callableNameToIndex[callable->GetInstanceName()] = index;
-		m_callables.push_back(callable);
+		m_callables.push_back({ callable,varCallable });
 		callable->SetAgentGraph(this);
 		callable->SetIndex(index);
 		return index;
@@ -175,8 +177,10 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 
 		if (index >= 0 && index < m_callables.size())
 		{
-			delete m_callables[index];
-			m_callables[index] = nullptr;
+			auto& callInfo = m_callables[index];
+			delete callInfo.callable;
+			callInfo.callable = nullptr;
+			callInfo.varCallable.Clear();
 		}
 	}
 
@@ -212,13 +216,15 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 			if (it != m_callableNameToIndex.end())
 			{
 				fromCallableIndex = it->second;
-				fromPinIndex = m_callables[fromCallableIndex]->GetOutputIndex(fromPinName);
+				auto& info = m_callables[fromCallableIndex];
+				fromPinIndex = info.callable->GetOutputIndex(fromPinName);
 			}
 			it = m_callableNameToIndex.find(toInstanceName);
 			if (it != m_callableNameToIndex.end())
 			{
 				toCallableIndex = it->second;
-				toPinIndex = m_callables[toCallableIndex]->GetInputIndex(toPinName);
+				auto& info = m_callables[toCallableIndex];
+				toPinIndex = info.callable->GetInputIndex(toPinName);
 			}
 		}
 		if(fromCallableIndex == -1 || toCallableIndex == -1)
@@ -237,9 +243,9 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 		AutoLock lock(m_locker); // Lock for thread safety
 
 		int fromCallableIndex = m_callableNameToIndex[fromInstanceName];
-		int fromPinIndex = m_callables[fromCallableIndex]->GetOutputIndex(fromPinName);
+		int fromPinIndex = m_callables[fromCallableIndex].callable->GetOutputIndex(fromPinName);
 		int toCallableIndex = m_callableNameToIndex[toInstanceName];
-		int toPinIndex = m_callables[toCallableIndex]->GetInputIndex(toPinName);
+		int toPinIndex = m_callables[toCallableIndex].callable->GetInputIndex(toPinName);
 
 		for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
 		{
@@ -267,7 +273,7 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 		{
 			if (connection.fromCallableIndex == fromCallableIndex && connection.fromPinIndex == outputIndex)
 			{
-				Callable* toCallable = m_callables[connection.toCallableIndex];
+				Callable* toCallable = m_callables[connection.toCallableIndex].callable;
 				toCallable->SetRT(fromCallable->GetRT());
 				toCallable->ReceiveData(connection.toPinIndex, data);
 			}
@@ -279,10 +285,10 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 		m_locker.Lock();
 		m_running = true;
 		//call run all Callables
-		for (auto& callable : m_callables)
+		for (auto& info : m_callables)
 		{
-			callable->SetRT(rt);
-			callable->Run();
+			info.callable->SetRT(rt);
+			info.callable->Run();
 		}
 		m_locker.Unlock();
 		return true;
@@ -314,7 +320,7 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 		for (const auto& startNode : startNodes)
 		{
 			X::Value dummyData;
-			auto* pCallable = m_callables[startNode];
+			auto* pCallable = m_callables[startNode].callable;
 			if (pCallable)
 			{
 				pCallable->SetRT(rt);
@@ -335,7 +341,7 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 			if (it != m_callableNameToIndex.end())
 			{
 				X::Value dummyData;
-				auto* pCallable = m_callables[it->second];
+				auto* pCallable = m_callables[it->second].callable;
 				if (pCallable)
 				{
 					pCallable->SetRT(rt);

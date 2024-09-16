@@ -28,6 +28,7 @@ namespace xMind
 	protected:
 		inline virtual bool ReceiveData(int inputIndex, X::Value& data) override
 		{
+			PushEvent(inputIndex, X::Value());//just notify if there is subscriber
 			std::unique_lock<std::mutex> lock(m_mutex);
 			if(inputIndex < 0 || inputIndex >= static_cast<int>(m_inputQueues.size()))
 			{
@@ -219,7 +220,7 @@ namespace xMind
 		{
 			m_running = false;
 			m_condVar.notify_all();
-			if (m_thread.joinable())
+			if (m_implObject.IsObject() && m_thread.joinable())
 			{
 				m_thread.join();
 			}
@@ -228,7 +229,12 @@ namespace xMind
 		virtual bool Run() override
 		{
 			m_running = true;
-			m_thread = std::thread(&BufferedProcessor::ThreadRun, this);
+			//for python non-threading mode,we don't run in thread
+			//it will not pass in m_implObject
+			if (m_implObject.IsObject())
+			{
+				m_thread = std::thread(&BufferedProcessor::ThreadRun, this);
+			}
 			return true;
 		}
 

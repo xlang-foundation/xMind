@@ -1,8 +1,10 @@
 #include "Callable.h"
 #include "AgentGraph.h"
+#include "xMindAPI.h"
 
 namespace xMind
 {
+	std::atomic<unsigned long long> Callable::s_idCounter{ 0 };
 	void Callable::Copy(Callable* other)
 	{
 		m_implObject = other->m_implObject;
@@ -16,6 +18,10 @@ namespace xMind
 		m_type = other->m_type;
 		m_inputs = other->m_inputs;
 		m_outputs = other->m_outputs;
+	}
+	void Callable::PushEvent(int inputIndex, X::Value data)
+	{
+		MindAPISet::I().PushEvent(m_ID, inputIndex, data);
 	}
 	void Callable::SetAgentGraph(AgentGraph* agentGraph)
 	{

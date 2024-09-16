@@ -8,14 +8,25 @@
 #include "Function.h"
 #include "BaseAction.h"
 #include "type_def.h"
+#include <map>
 
 namespace xMind
 {
+	struct SubscriptionInfo
+	{
+		int subId;
+		std::vector<int> nodeIds;
+		std::vector<X::Value> dataList;//list of [id,inputIndex,data]
+        std::condition_variable condVar;
+	};
     class MindAPISet :
         public Singleton<MindAPISet>
     {
         std::string m_RootPath;
         X::Runtime* m_defaultRuntime = nullptr;
+        std::mutex m_mutex;
+        std::map<int, SubscriptionInfo*> m_subscriptions;
+        int m_nextSubscriptionId = 1;
 
         BEGIN_PACKAGE(MindAPISet)
             APISET().AddConst("OK", (int)Status::Ok);
@@ -25,6 +36,10 @@ namespace xMind
             APISET().AddConst("Stopped", (int)Status::Stopped);
             APISET().AddEvent("OnReady");
             APISET().AddEvent("OnShutdown");
+            APISET().AddVarFunc("SubscribeEvents", &MindAPISet::SubscribeEvents);
+            APISET().AddFunc<1>("UnsubscribeEvents", &MindAPISet::UnsubscribeEvents);
+            APISET().AddFunc<0>("IsRunning", &MindAPISet::IsRunning);
+            APISET().AddVarFunc("PullEvents", &MindAPISet::PullEvents);
             APISET().AddVarFunc("Test", &MindAPISet::Test);
             APISET().AddVarFunc("log", &MindAPISet::Log);
             APISET().AddVarFunc("logV", &MindAPISet::LogV);
@@ -40,6 +55,128 @@ namespace xMind
 
         END_PACKAGE
     public:
+        inline bool IsRunning()
+        {
+            return true;
+        }
+        inline bool SubscribeEvents(X::XRuntime* rt, X::XObj* pContext,
+            X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+        {
+            if (params.size() == 0)
+            {
+                retValue = false;
+                return true;
+            }
+
+            X::List listID(params[0]);
+            if (listID)
+            {
+                std::unique_lock<std::mutex> lock(m_mutex);
+                int subscriptionId = m_nextSubscriptionId++;
+                SubscriptionInfo* info =new SubscriptionInfo;
+                info->subId = subscriptionId;
+
+                for (auto& id : *listID)
+                {
+                    info->nodeIds.push_back(id);
+                }
+                m_subscriptions.emplace(subscriptionId, info);
+                retValue = subscriptionId;
+            }
+            else
+            {
+                retValue = false;
+            }
+
+            return true;
+        }
+        inline bool UnsubscribeEvents(int id)
+        {
+            std::unique_lock<std::mutex> lock(m_mutex);
+            auto it = m_subscriptions.find(id);
+            if (it != m_subscriptions.end())
+            {
+				SubscriptionInfo* info = it->second;
+                info->condVar.notify_all();
+                delete info;
+                m_subscriptions.erase(it);
+                return true;
+            }
+            return false;
+        }
+        inline bool PullEvents(X::XRuntime* rt, X::XObj* pContext,
+            X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+        {
+            int timeout = -1;
+            if (params.size() < 1)
+            {
+                retValue = false;
+                return true;
+            }
+
+            int subscriptionId = params[0];
+            if (params.size() > 1)
+            {
+                timeout = params[1];
+            }
+			std::unique_lock<std::mutex> lock(m_mutex);
+			auto it = m_subscriptions.find(subscriptionId);
+            if (it == m_subscriptions.end())
+            {
+                retValue = false;
+            }
+			else
+			{
+				auto& info = *it->second;
+				if (info.dataList.empty())
+				{
+					if (timeout > 0)
+					{
+						info.condVar.wait_for(lock, std::chrono::milliseconds(timeout));
+					}
+                    else
+					{
+						info.condVar.wait(lock);
+					}
+				}
+				if (info.dataList.empty())
+				{
+					retValue = false;
+				}
+				else
+				{
+					X::List retList;
+					for (auto& dataEntry : info.dataList)
+					{
+						retList->AddItem(dataEntry);
+					}
+					info.dataList.clear();
+					retValue = retList;
+				}
+			}
+
+            return true;
+        }
+
+        void PushEvent(int ID, int inputIndex, X::Value data)
+        {
+            X::List dataEntry;
+			dataEntry += ID;
+			dataEntry += inputIndex;
+			dataEntry += data;
+
+            std::unique_lock<std::mutex> lock(m_mutex);
+			for (auto& it : m_subscriptions)
+			{
+				auto& info = *it.second;
+				if (std::find(info.nodeIds.begin(), info.nodeIds.end(), ID) != info.nodeIds.end())
+				{
+					info.dataList.push_back(dataEntry);
+					info.condVar.notify_all();
+				}
+			}
+        }
+
         inline bool Test(X::XRuntime* rt, X::XObj* pContext,
             X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
         {
@@ -129,6 +266,22 @@ namespace xMind
 						name = func->GetName().ToString();
 					}
 				}
+                else 
+                {
+                    auto it = kwParams.find("name");
+                    if (it)
+                    {
+                        name = it->val.ToString();
+                    }
+                    else
+                    {
+                        it = kwParams.find("Name");
+                        if (it)
+                        {
+                            name = it->val.ToString();
+                        }
+                    }
+                }
             }
             T* pObj = new T();
             pObj->SetName(name);

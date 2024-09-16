@@ -25,6 +25,10 @@ namespace xMind
 				X::Value retData = m_implObject.ObjCall(params, kwParams);
 				PushToOutput(0, retData);
 			}
+			else
+			{
+				PushEvent(inputIndex,data);
+			}
 			return true;
 		}
 		inline bool Create()

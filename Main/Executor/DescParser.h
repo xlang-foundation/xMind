@@ -179,8 +179,8 @@ namespace xMind
 							{
 								//callable->SetGroup(group.ToString());
 							}
-
-							graph.AddCallable(callable);
+							X::Value varCallable;
+							graph.AddCallable(callable, varCallable);
 						}
 					}
 				}
