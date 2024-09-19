@@ -4,6 +4,8 @@ type: compositeAgent
 version: 1.0
 description: "This is a composite agent that orchestrates multiple agents to process data."
 
+prompts:
+    
 imports:
   - file: "other_agents.yml"
     alias: "other"
@@ -12,6 +14,7 @@ imports:
 
 nodes:
   - name: AgentA
+    type: agent   #agent/action/function
     description: "This is Agent A, responsible for processing input data and producing output."
     inputs:
       - name: input1
@@ -34,6 +37,7 @@ nodes:
     group: Group1
 
   - name: AgentB
+    type: agent
     description: "This is Agent B, which receives data from Agent A and processes it further."
     inputs:
       - name: input1

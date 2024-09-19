@@ -89,6 +89,17 @@ int WorkerMain(ParamConfig& paramConfig)
     return 0;
 }
 
+#include "AgentGraphParser.h"
+void Test()
+{
+    std::string fileName = "D:\\Github\\xMind\\Schema\\compositeAgent.yml";
+    //test
+    xMind::Parser parser;
+    X::Package yaml(xMind::MindAPISet::I().RT(), "yaml", "xlang_yaml");
+    X::Value root = yaml["load"](fileName);
+	parser.ParseAgentGraphDesc(root);
+	std::cout << "Test Done" << std::endl;
+}
 int main(int argc, char* argv[]) 
 {
     ParamConfig paramConfig;
@@ -120,10 +131,7 @@ int main(int argc, char* argv[])
     X::g_pXHost->Lrpc_Listen(lrpc_port, false);
     LOG << "xMind Started" << LINE_END;
 
-    //test
-    xMind::DescParser descParser;
-    xMind::AgentGraph agentGraph;
-    descParser.LoadFromFile("D:\\Github\\xMind\\Schema\\compositeAgent.yml", agentGraph);
+	Test();
 
     g_xLoad.EventLoop();
 

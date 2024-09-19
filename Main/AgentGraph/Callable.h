@@ -26,6 +26,8 @@ namespace xMind
 	class AgentGraph;
 	class Callable
 	{
+		friend class Parser;
+
 		BEGIN_PACKAGE(Callable)
 			APISET().AddPropWithType<unsigned long long> ("ID", &Callable::m_ID);
 			APISET().AddPropWithType<std::string>("name", &Callable::m_name);

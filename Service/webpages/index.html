@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>xMind</title>
+</head>
+<body>
+    <canvas id="myCanvas" width="500" height="400" style="border:1px solid #000000;">
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
+
+    <script>
+        // Get the canvas element by its ID
+        var canvas = document.getElementById('myCanvas');
+        var context = canvas.getContext('2d');
+
+        // Draw a red rectangle
+        context.fillStyle = '#FF0000';
+        context.fillRect(50, 50, 150, 100);
+
+        // Draw a blue circle
+        context.beginPath();
+        context.arc(300, 150, 50, 0, 2 * Math.PI);
+        context.fillStyle = '#0000FF';
+        context.fill();
+
+        // Draw green text
+        context.font = '20px Arial';
+        context.fillStyle = '#008000';
+        context.fillText('Hello, Canvas!', 200, 300);
+    </script>
+</body>
+</html>
