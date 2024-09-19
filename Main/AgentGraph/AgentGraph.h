@@ -38,7 +38,11 @@ namespace xMind
 			APISET().AddFunc<0>("waitToStop", &AgentGraph::WaitToStop);
 		END_PACKAGE
 	public:
-		AgentGraph() = default;
+		AgentGraph() :
+			m_ID(++s_idCounter)
+		{
+
+		}
 		~AgentGraph();
 
 		bool AddNode(X::XRuntime* rt, X::XObj* pContext,
@@ -102,7 +106,17 @@ namespace xMind
 				info.callable->Stop();
 			}
 		}
+		inline unsigned long long ID()
+		{
+			return m_ID;
+		}
+		inline std::vector<Connection>& GetConnections()
+		{
+			return m_connections;
+		}
 	private:
+		static std::atomic<unsigned long long> s_idCounter;
+		unsigned long long m_ID;
 		bool m_running = false;
 		std::vector<CallableInfo> m_callables;
 		std::vector<Connection> m_connections;

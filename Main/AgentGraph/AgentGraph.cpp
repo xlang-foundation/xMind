@@ -6,6 +6,7 @@
 
 namespace xMind
 {
+	std::atomic<unsigned long long> AgentGraph::s_idCounter{ 0 };
 	AgentGraph::~AgentGraph()
 	{
 		for (auto& info : m_callables)

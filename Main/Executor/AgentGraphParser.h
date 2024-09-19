@@ -203,13 +203,13 @@ namespace xMind
         }
 
         // Main function to parse the agent graph description
-        void ParseAgentGraphDesc(X::Value& root)
+        bool ParseAgentGraphDesc(X::Value& root)
         {
             // Check if root is a Dict
             if (!root.IsDict())
             {
                 std::cerr << "Error: root is not a dictionary." << std::endl;
-                return;
+                return false;
             }
 
             // Extract basic information
@@ -256,12 +256,15 @@ namespace xMind
                 X::Value retValue;
                 graph->AddConnection(nullptr, nullptr, params, kwParams, retValue);
             }
+            NodeManager::I().AddGraph(graph);
             // Parse groups
             X::Value groupsValue = root["groups"];
             std::vector<Group> groups = ParseGroups(groupsValue);
 
 
             std::cout << "Parsed Callables:" << std::endl;
+            return true;
+
         }
 
     private:

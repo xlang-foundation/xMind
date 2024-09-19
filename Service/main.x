@@ -16,10 +16,18 @@ srv.StaticIndexFile = "index.html"
 
 xMind.logV("root folder:",www_root,",pid=",pid())
 
-@srv.route("/api/nodes")
+# Link:http://localhost:9901/api/loadGraph?filename=D:\Github\xMind\Schema\compositeAgent.yml
+@srv.route("/api/loadGraph")
+def loadGraph():
+	params = req.params
+	fileName = params["fileName"]
+	isOK = xMind.LoadAgentFlowFromFile(fileName)
+	return [str(isOK,format=True), "text/json"]
+
+@srv.route("/api/queryGraph")
 def queryGraph():
-	nodes = metrics.queryNodes()
-	return [str(nodes,format=True), "text/json"]
+	graphJson = xMind.QueryAgentFlow()
+	return [graphJson, "text/json"]
 
 xMind.logV("xMind WebServer Started,port:",port)
 srv.listen("::", port)

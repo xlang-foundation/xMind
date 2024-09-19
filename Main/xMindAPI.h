@@ -9,6 +9,7 @@
 #include "BaseAction.h"
 #include "type_def.h"
 #include <map>
+#include "AgentGraphParser.h"
 
 namespace xMind
 {
@@ -39,6 +40,9 @@ namespace xMind
             APISET().AddVarFunc("SubscribeEvents", &MindAPISet::SubscribeEvents);
             APISET().AddFunc<1>("UnsubscribeEvents", &MindAPISet::UnsubscribeEvents);
             APISET().AddFunc<0>("IsRunning", &MindAPISet::IsRunning);
+            APISET().AddFunc<1>("LoadAgentFlowFromFile", &MindAPISet::LoadAgentFlowFromFile);
+            APISET().AddFunc<1>("LoadAgentFlowFromFile", &MindAPISet::LoadAgentFlowFromFile);
+            APISET().AddFunc<0>("QueryAgentFlow", &MindAPISet::QueryAgentFlow);
             APISET().AddVarFunc("PullEvents", &MindAPISet::PullEvents);
             APISET().AddVarFunc("Test", &MindAPISet::Test);
             APISET().AddVarFunc("log", &MindAPISet::Log);
@@ -349,6 +353,31 @@ namespace xMind
             }
             Cantor::log.LineEndUnlock();
             return true;
+        }
+        inline bool LoadAgentFlowFromFile(const std::string& fileName)
+        {
+            xMind::Parser parser;
+            X::Package yaml(xMind::MindAPISet::I().RT(), "yaml", "xlang_yaml");
+            X::Value root = yaml["load"](fileName);
+            if (root.IsObject() && root.GetObj()->GetType() == X::ObjType::Error)
+            {
+                return false;
+
+            }
+            bool bOK = parser.ParseAgentGraphDesc(root);
+            return bOK;
+        }
+        inline bool LoadAgentFlowFromString(const std::string& desc)
+        {
+            xMind::Parser parser;
+            X::Package yaml(xMind::MindAPISet::I().RT(), "yaml", "xlang_yaml");
+            X::Value root = yaml["loads"](desc);
+            bool bOK = parser.ParseAgentGraphDesc(root);
+            return bOK;
+        }
+        inline std::string QueryAgentFlow()
+        {
+            return NodeManager::I().BuildGraphAsJson();
         }
     };
 }

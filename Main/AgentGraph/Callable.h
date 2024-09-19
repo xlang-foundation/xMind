@@ -74,6 +74,14 @@ namespace xMind
 		virtual ~Callable()
 		{
 		}
+		inline unsigned long long ID()
+		{
+			return m_ID;
+		}
+		inline CallableType Type()
+		{
+			return m_type;
+		}
 		inline void SetImplObject(X::Value implObject)
 		{
 			m_implObject = implObject;
