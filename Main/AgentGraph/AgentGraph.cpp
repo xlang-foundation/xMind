@@ -70,7 +70,7 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 			if (nodes.IsValid())
 			{
 				X::List nodeList(nodes);
-				for (auto& node : *nodeList)
+				for (auto node : *nodeList)
 				{
 					auto newAgent = new BaseAgent();
 					auto nodeName = node.Query("name");
@@ -106,7 +106,7 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 					if (parameters.IsValid())
 					{
 						X::Dict paramDict(parameters);
-						for (auto& param : *paramDict)
+						for (auto param : *paramDict)
 						{
 							//newAgent->AddParameter(param.first.ToString(), param.second.ToString());
 						}
@@ -129,7 +129,7 @@ bool AgentGraph::Parse(const std::string& yamlContent)
 			if (connections.IsValid())
 			{
 				X::List connectionList(connections);
-				for (auto& connection : *connectionList)
+				for (auto connection : *connectionList)
 				{
 					auto fromInstanceName = connection.Query("fromInstanceName");
 					auto fromPinName = connection.Query("fromPinName");

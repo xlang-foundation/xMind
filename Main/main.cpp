@@ -12,15 +12,37 @@ struct ParamConfig
 
 bool ParseCommandLine(std::vector<std::string>& params, ParamConfig& paramCfg)
 {
-    char buffer[MAX_PATH];
-    DWORD length = GetModuleFileName(nullptr, buffer, MAX_PATH);
-    std::string  strPath = buffer;
-    auto pos = strPath.rfind(Path_Sep);
-    if (pos > 0)
+    std::string progName = params[0];
+    std::string strAppPath;
+    std::string strAppName;
+    auto pos = progName.rfind(Path_Sep);
+    if (pos != progName.npos)
     {
-        paramCfg.appPath = strPath.substr(0, pos);
-        paramCfg.appName = strPath.substr(pos + 1);
+        strAppPath = progName.substr(0, pos);
+        strAppName = progName.substr(pos + 1);
     }
+#if (WIN32)
+    else
+    {
+        char buffer[MAX_PATH];
+        DWORD length = GetModuleFileName(nullptr, buffer, MAX_PATH);
+        progName = buffer;
+        auto pos = progName.rfind(Path_Sep);
+        if (pos != progName.npos)
+        {
+            strAppPath = progName.substr(0, pos);
+            strAppName = progName.substr(pos + 1);
+        }
+        else
+        {
+            strAppPath = "";
+			strAppName = "";
+        }
+    }
+#endif
+    paramCfg.appPath = strAppPath;
+    paramCfg.appName = strAppName;
+
     return true;
 }
 

@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <filesystem>
 #include <regex>
+#include <atomic>
 #include <fstream>
 #include <iostream>
 #include <algorithm>
@@ -193,14 +194,14 @@ namespace xMind
 			m_inputs.clear();
 			for (size_t i = 0; i < (size_t)list.Size(); ++i)
 			{
-				auto& item = list[i];
+				auto item = list[i];
 				Pin pin;
 				pin.name = item["name"].ToString();
 				X::Value varFormats = item["formats"];
 				if (varFormats.IsList())
 				{
 					X::List formats(varFormats);
-					for (auto& format : *formats)
+					for (auto format : *formats)
 					{
 						pin.formats.push_back(format.ToString());
 					}
@@ -239,7 +240,7 @@ namespace xMind
 			m_locker.Lock();
 			X::List list(v);
 			m_outputs.clear();
-			for (auto& item : *list)
+			for (auto item : *list)
 			{
 				Pin pin;
 				pin.name = item["name"].ToString();
@@ -247,7 +248,7 @@ namespace xMind
 				if (varFormats.IsList())
 				{
 					X::List formats(varFormats);
-					for (auto& format : *formats)
+					for (auto format : *formats)
 					{
 						pin.formats.push_back(format.ToString());
 					}

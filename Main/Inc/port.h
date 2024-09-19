@@ -17,6 +17,7 @@ typedef void* PasWaitHandle;
 #include <memory.h>
 #include <netinet/in.h>
 #define SCANF sscanf
+#define SPRINTF snprintf
 
 #define STRCMPNOCASE strncasecmp
 #define MS_SLEEP(t)  usleep((t)*1000)

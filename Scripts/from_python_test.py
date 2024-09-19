@@ -9,6 +9,7 @@ def OnReady():
     print("Call from OnReady")
     
 xMind.OnReady +=OnReady
+print("Before fire event")
 xMind.Test() #Fire OnReady event
 
 def CallFromHost(info):
@@ -17,7 +18,7 @@ def CallFromHost(info):
 
 xTest = xMind.Test(CallFromHost)
 print("xTest:",xTest)
-for i in range(100):
+for i in range(1,101):
     xMind.Test() 
     print("i=",i)
 xMind.log("Done")

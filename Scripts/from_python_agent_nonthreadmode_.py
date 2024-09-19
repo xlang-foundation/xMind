@@ -11,7 +11,8 @@ def AgentFirst(owner):
 
 @xMind.Action(outputs=[{"name":"output"}],name="ActionB")
 def ActionFirst(owner):
-	xMind.log("Input a prompt to ask AgentFirst:")
+	xMind.log("Wait a prompt to input to ask AgentFirst:")
+	print("Input a prompt to ask AgentFirst:")
 	prompt = input()
 	if prompt == '!quit':
 		xMind.Stop()
@@ -26,7 +27,7 @@ graph.addNode(AgentFirst)
 
 graph.connect("ActionB","AgentA")
 graph.run()
-
+print("Entern Mainloop")
 xMind.MainLoop()
 
 xMind.log("Done")

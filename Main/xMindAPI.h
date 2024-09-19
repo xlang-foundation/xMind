@@ -76,7 +76,7 @@ namespace xMind
                 SubscriptionInfo* info =new SubscriptionInfo;
                 info->subId = subscriptionId;
 
-                for (auto& id : *listID)
+                for (auto id : *listID)
                 {
                     info->nodeIds.push_back(id);
                 }
@@ -180,6 +180,7 @@ namespace xMind
         inline bool Test(X::XRuntime* rt, X::XObj* pContext,
             X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
         {
+			std::cout << "xMind->Test" << std::endl;
             if (params.size() > 0)
             {
 				X::Value obj = params[0];
@@ -199,6 +200,7 @@ namespace xMind
 				X::KWARGS kwargs;
                 Fire(0, args, kwargs);
             }
+            std::cout << "End xMind->Test" << std::endl;
             return true;
         }
         void SetRootInfo(std::string path)
