@@ -30,3 +30,7 @@ add_executable(${PROJECT_NAME}
   ${Xlang_Api_SRC}
   ${Common_SRC}
   ${AppEntry_SRC})
+
+if(APPLE)
+target_link_libraries(xMind PUBLIC "-framework CoreFoundation")
+endif()
