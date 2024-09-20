@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Graph Visualization with D3.js</title>
+    <style>
+        /* Basic styling for nodes and links */
+        .node rect {
+            fill: #fff;
+            stroke-width: 2px;
+            cursor: pointer;
+        }
+
+        .title-bar {
+            stroke: #000;
+            stroke-width: 1px;
+            cursor: pointer;
+        }
+
+        .pin {
+            fill: #000;
+        }
+
+        .link {
+            stroke: #0000ff;
+            stroke-width: 2px;
+            fill: none;
+        }
+
+        .label {
+            font: 12px sans-serif;
+            pointer-events: none;
+        }
+        /* Tooltip styling */
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 5px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Container for the SVG -->
+    <div id="graph"></div>
+    <!-- Tooltip div -->
+    <div id="tooltip" class="tooltip"></div>
+
+    <!-- Include D3.js from CDN -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        // Fetch the JSON data from the specified URL
+        fetch('http://localhost:9901/api/queryGraph')
+            .then(response => response.json())
+            .then(data => {
+                drawGraph(data);
+            })
+            .catch(error => {
+                console.error('Error fetching or parsing JSON:', error);
+            });
+
+        function drawGraph(data) {
+            const nodesData = data.Nodes;
+            const graphsData = data.Graphs;
+
+            // Map node types to labels and colors
+            const typeInfo = {
+                0: { label: 'callable', borderColor: '#ff0000', titleColor: '#ffcccc' },
+                1: { label: 'function', borderColor: '#00ff00', titleColor: '#ccffcc' },
+                2: { label: 'action', borderColor: '#0000ff', titleColor: '#ccccff' },
+                3: { label: 'agent', borderColor: '#ffff00', titleColor: '#ffffcc' },
+                4: { label: 'compositeAgent', borderColor: '#00ffff', titleColor: '#ccffff' },
+            };
+
+            // Initialize positions
+            const width = 1000;
+            const height = 800;
+
+            // Create an SVG container with zoom and pan functionality
+            const svg = d3.select('#graph')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .call(d3.zoom().on('zoom', (event) => {
+                    svgGroup.attr('transform', event.transform);
+                }));
+
+            const svgGroup = svg.append('g');
+
+            // Tooltip div
+            const tooltip = d3.select('#tooltip');
+
+            // Arrange nodes in a grid
+            const nodes = nodesData.map((nodeData, index) => {
+                // Ensure inputs and outputs are arrays
+                const inputs = Array.isArray(nodeData.inputs) ? nodeData.inputs : [];
+                const outputs = Array.isArray(nodeData.outputs) ? nodeData.outputs : [];
+
+                const node = {
+                    id: nodeData.id,
+                    name: nodeData.name,
+                    instanceName: nodeData.instanceName,
+                    inputs: inputs,
+                    outputs: outputs,
+                    type: nodeData.type,
+                    typeLabel: typeInfo[nodeData.type]?.label || 'unknown',
+                    typeBorderColor: typeInfo[nodeData.type]?.borderColor || '#000',
+                    typeTitleColor: typeInfo[nodeData.type]?.titleColor || '#e0e0e0',
+                    x: 100 + (index % 3) * 250,
+                    y: 100 + Math.floor(index / 3) * 200,
+                    width: 200,
+                    height: 40 + Math.max(inputs.length, outputs.length, 1) * 20,
+                    inputPins: [],
+                    outputPins: [],
+                };
+                return node;
+            });
+
+            // Draw the nodes
+            const nodeGroup = svgGroup.selectAll('.node')
+                .data(nodes)
+                .enter()
+                .append('g')
+                .attr('class', 'node')
+                .attr('transform', d => `translate(${d.x},${d.y})`)
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended))
+                .on('mouseover', nodeMouseOver)
+                .on('mousemove', nodeMouseMove)
+                .on('mouseout', nodeMouseOut);
+
+            // Draw the node rectangle
+            nodeGroup.append('rect')
+                .attr('width', d => d.width)
+                .attr('height', d => d.height)
+                .attr('fill', '#fff')
+                .attr('stroke', d => d.typeBorderColor)
+                .attr('stroke-width', 2);
+
+            // Draw the title bar
+            nodeGroup.append('rect')
+                .attr('class', 'title-bar')
+                .attr('width', d => d.width)
+                .attr('height', 20)
+                .attr('fill', d => d.typeTitleColor)
+                .attr('stroke', '#000');
+
+            // Add the node name in the title bar
+            nodeGroup.append('text')
+                .attr('class', 'label')
+                .attr('x', 5)
+                .attr('y', 15)
+                .text(d => d.name);
+
+            // Add the instanceName, centered vertically and horizontally
+            nodeGroup.append('text')
+                .attr('class', 'label')
+                .attr('x', d => d.width / 2)
+                .attr('y', d => d.height / 2)
+                .attr('text-anchor', 'middle')
+                .attr('alignment-baseline', 'middle')
+                .text(d => d.instanceName);
+
+            // Draw inputs on the left and store pin positions
+            nodeGroup.each(function (node) {
+                const g = d3.select(this);
+                const pinSpacing = 20;
+                let pinY = 40;
+
+                if (node.inputs.length > 0) {
+                    node.inputs.forEach((input, index) => {
+                        // Input pin position relative to node
+                        const pinX = 0;
+                        const pinCenterY = pinY - 5;
+
+                        // Draw the pin circle
+                        g.append('circle')
+                            .attr('class', 'pin')
+                            .attr('cx', pinX)
+                            .attr('cy', pinCenterY)
+                            .attr('r', 5);
+
+                        // Store the pin position (relative and absolute)
+                        node.inputPins.push({
+                            relativeX: pinX,
+                            relativeY: pinCenterY,
+                            x: node.x + pinX,
+                            y: node.y + pinCenterY
+                        });
+
+                        // Add the pin label
+                        g.append('text')
+                            .attr('class', 'label')
+                            .attr('x', pinX + 10)
+                            .attr('y', pinY)
+                            .text(input.name);
+
+                        pinY += pinSpacing;
+                    });
+                } else {
+                    // No inputs; adjust node height if necessary
+                    node.height = Math.max(node.height, 60);
+                }
+            });
+
+            // Draw outputs on the right and store pin positions
+            nodeGroup.each(function (node) {
+                const g = d3.select(this);
+                const pinSpacing = 20;
+                let pinY = 40;
+
+                if (node.outputs.length > 0) {
+                    node.outputs.forEach((output, index) => {
+                        // Output pin position relative to node
+                        const pinX = node.width;
+                        const pinCenterY = pinY - 5;
+
+                        // Draw the pin circle
+                        g.append('circle')
+                            .attr('class', 'pin')
+                            .attr('cx', pinX)
+                            .attr('cy', pinCenterY)
+                            .attr('r', 5);
+
+                        // Store the pin position (relative and absolute)
+                        node.outputPins.push({
+                            relativeX: pinX,
+                            relativeY: pinCenterY,
+                            x: node.x + pinX,
+                            y: node.y + pinCenterY
+                        });
+
+                        // Add the pin label
+                        g.append('text')
+                            .attr('class', 'label')
+                            .attr('x', pinX - 10)
+                            .attr('y', pinY)
+                            .attr('text-anchor', 'end')
+                            .text(output.name);
+
+                        pinY += pinSpacing;
+                    });
+                } else {
+                    // No outputs; adjust node height if necessary
+                    node.height = Math.max(node.height, 60);
+                }
+            });
+
+            // Update the node rectangles with the new heights
+            nodeGroup.select('rect')
+                .attr('height', d => d.height);
+
+            // Prepare the links data
+            const links = [];
+            for (let graphId in graphsData) {
+                const connections = graphsData[graphId];
+                connections.forEach(connection => {
+                    const fromNode = nodes[connection.fromCallableIndex];
+                    const toNode = nodes[connection.toCallableIndex];
+
+                    // Check if fromNode and toNode exist
+                    if (fromNode && toNode) {
+                        links.push({
+                            source: fromNode,
+                            target: toNode,
+                            fromPinIndex: connection.fromPinIndex,
+                            toPinIndex: connection.toPinIndex,
+                        });
+                    } else {
+                        console.warn(`Connection skipped due to missing node(s): from ${connection.fromCallableIndex} to ${connection.toCallableIndex}`);
+                    }
+                });
+            }
+
+            // Draw the links after nodes so they appear beneath nodes
+            const linkGroup = svgGroup.append('g')
+                .attr('class', 'links');
+
+            const linkElements = linkGroup.selectAll('.link')
+                .data(links)
+                .enter()
+                .append('path')
+                .attr('class', 'link')
+                .attr('d', d => {
+                    const sourcePin = getPinAbsolutePosition(d.source, 'output', d.fromPinIndex);
+                    const targetPin = getPinAbsolutePosition(d.target, 'input', d.toPinIndex);
+                    return diagonal(sourcePin, targetPin);
+                });
+
+            // Drag functions
+            function dragstarted(event, d) {
+                d3.select(this).raise().classed('active', true);
+            }
+
+            function dragged(event, d) {
+                d.x += event.dx;
+                d.y += event.dy;
+                d3.select(this).attr('transform', `translate(${d.x},${d.y})`);
+                updateNodePins(d);
+                updateLinks();
+            }
+
+            function dragended(event, d) {
+                d3.select(this).classed('active', false);
+            }
+
+            // Update the positions of the pins when a node is moved
+            function updateNodePins(node) {
+                node.inputPins.forEach((pin, index) => {
+                    pin.x = node.x + pin.relativeX;
+                    pin.y = node.y + pin.relativeY;
+                });
+                node.outputPins.forEach((pin, index) => {
+                    pin.x = node.x + pin.relativeX;
+                    pin.y = node.y + pin.relativeY;
+                });
+            }
+
+            // Update links when nodes are moved
+            function updateLinks() {
+                linkElements.attr('d', d => {
+                    const sourcePin = getPinAbsolutePosition(d.source, 'output', d.fromPinIndex);
+                    const targetPin = getPinAbsolutePosition(d.target, 'input', d.toPinIndex);
+                    return diagonal(sourcePin, targetPin);
+                });
+            }
+
+            // Helper function to get the absolute position of a pin
+            function getPinAbsolutePosition(node, pinType, pinIndex) {
+                const pinArray = pinType === 'input' ? node.inputPins : node.outputPins;
+                if (pinArray.length === 0) {
+                    // Return default position if no pins
+                    return {
+                        x: node.x + (pinType === 'input' ? 0 : node.width),
+                        y: node.y + 30
+                    };
+                }
+                const pin = pinArray[pinIndex] || pinArray[0];
+                return {
+                    x: pin.x,
+                    y: pin.y
+                };
+            }
+
+            // Function to create a path between two points
+            function diagonal(source, target) {
+                const path = `M${source.x},${source.y} C${(source.x + target.x) / 2},${source.y} ${(source.x + target.x) / 2},${target.y} ${target.x},${target.y}`;
+                return path;
+            }
+
+            // Tooltip functions
+            function nodeMouseOver(event, d) {
+                tooltip.transition()
+                    .duration(200)
+                    .style('opacity', 0.9);
+                tooltip.html(`Name: ${d.name}<br>Type: ${d.typeLabel}<br>Instance: ${d.instanceName}`)
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY - 28) + 'px');
+            }
+
+            function nodeMouseMove(event, d) {
+                tooltip.style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY - 28) + 'px');
+            }
+
+            function nodeMouseOut(event, d) {
+                tooltip.transition()
+                    .duration(500)
+                    .style('opacity', 0);
+            }
+        }
+    </script>
+</body>
+</html>

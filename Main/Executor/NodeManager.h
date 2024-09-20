@@ -10,6 +10,12 @@
 
 namespace xMind
 {
+	struct ModuleInfo
+	{
+		std::string moduleName;
+		std::string path;
+		std::unordered_map<std::string, X::Value> mapCallables;
+	};
 	class NodeManager : public Singleton<NodeManager>
 	{
 		Locker m_lock;
@@ -18,34 +24,55 @@ namespace xMind
 		~NodeManager() = default;
 
 		// Add a Callable to the list and map
-		bool addCallable(const std::string& name, Callable* callable)
+		bool addCallable(const std::string& moduleName,
+			const std::string& moduleFilePath,
+			const std::string& name, X::Value& callable)
 		{
-			//check same name callable need to release previous one
-			auto it = m_callablesMap.find(name);
-			if (it != m_callablesMap.end())
+			AutoLock lock(m_lock);
+			//find from m_modules with moduleName
+			auto it = std::find_if(m_modules.begin(), m_modules.end(), 
+				[moduleName](const ModuleInfo& module) {
+				return module.moduleName == moduleName;
+				});
+			if (it == m_modules.end())
 			{
-				return false;
+				ModuleInfo moduleInfo;
+				moduleInfo.moduleName = moduleName;
+				moduleInfo.mapCallables[name] = callable;
+				moduleInfo.path = moduleFilePath;
+				m_modules.push_back(moduleInfo);
 			}
-			m_callables.push_back(callable);
-			m_callablesMap[name] = callable;
+			else
+			{
+				//check if mapCallables has the same name
+				auto it2 = it->mapCallables.find(name);
+				if (it2 != it->mapCallables.end())
+				{
+					return false;
+				}
+				it->mapCallables[name] = callable;
+			}
 			return true;
 		}
 
-		// Get a Callable by name
-		Callable* getCallable(const std::string& name) const
-		{
-			auto it = m_callablesMap.find(name);
-			if (it != m_callablesMap.end())
-			{
-				return it->second;
-			}
-			return nullptr;
-		}
-
 		// Get all Callables
-		const std::vector<Callable*>& getAllCallables() const
+		X::Value queryCallable(const std::string& moduleName,
+			const std::string& name)
 		{
-			return m_callables;
+			AutoLock lock(m_lock);
+			auto it = std::find_if(m_modules.begin(), m_modules.end(),
+				[moduleName](const ModuleInfo& module) {
+					return module.moduleName == moduleName;
+				});
+			if (it != m_modules.end())
+			{
+				auto it2 = it->mapCallables.find(name);
+				if (it2 != it->mapCallables.end())
+				{
+					return it2->second;
+				}
+			}
+			return X::Value();
 		}
 
 		void AddGraph(AgentGraph* pGraph)
@@ -61,15 +88,30 @@ namespace xMind
 			char convertBuf[online_len];
 
 			X::List listNodes;
-			// Collect all callables
-			for (const auto& callable : m_callables)
+			//Collect all callables with module names
+			for (const auto& module : m_modules)
 			{
-				X::Dict dict;
-				dict->Set("id",callable->ID());
-				dict->Set("name",callable->GetName());
-				dict->Set("type",static_cast<int>(callable->Type()));
-				listNodes += dict;
+				for (const auto& it : module.mapCallables)
+				{
+					X::XPackageValue<Callable> varCallable(it.second);
+					Callable* callable = (Callable*)varCallable.GetRealObj();
+					if (!callable)
+					{
+						continue;
+					}
+					X::Dict dict;
+					dict->Set("moduleName", (std::string)module.moduleName);
+					dict->Set("path", (std::string)module.path);
+					dict->Set("name", callable->GetName());
+					dict->Set("instanceName", callable->GetInstanceName());
+					dict->Set("type", static_cast<int>(callable->Type()));
+					dict->Set("id", callable->ID());
+					dict->Set("inputs", callable->GetInputs());
+					dict->Set("outputs", callable->GetOutputs());
+					listNodes += dict;
+				}
 			}
+
 			X::Dict graphDict;
 			for (auto* pGraph : m_graphs)
 			{
@@ -96,8 +138,7 @@ namespace xMind
 			return graphJson;
 		}
 	private:
-		std::vector<Callable*> m_callables;
-		std::unordered_map<std::string, Callable*> m_callablesMap;
+		std::vector<ModuleInfo> m_modules;
 		std::vector<AgentGraph*> m_graphs;
 	};
 }

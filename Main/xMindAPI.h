@@ -356,15 +356,10 @@ namespace xMind
         }
         inline bool LoadAgentFlowFromFile(const std::string& fileName)
         {
+            std::filesystem::path filePath(fileName);
+			std::string moduleName = filePath.stem().string();
             xMind::Parser parser;
-            X::Package yaml(xMind::MindAPISet::I().RT(), "yaml", "xlang_yaml");
-            X::Value root = yaml["load"](fileName);
-            if (root.IsObject() && root.GetObj()->GetType() == X::ObjType::Error)
-            {
-                return false;
-
-            }
-            bool bOK = parser.ParseAgentGraphDesc(root);
+            bool bOK = parser.ParseAgentGraphDesc(moduleName, fileName);
             return bOK;
         }
         inline bool LoadAgentFlowFromString(const std::string& desc)

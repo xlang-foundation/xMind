@@ -55,7 +55,9 @@ nodes:
       param1: "value1"
       param2: "value2"
     group: Group2
-
+  # instance of AgentA, just need to specify the instance name
+  - name: AgentA
+    instanceName: AgentA_Clone1
 connections:
   - fromAgentName: AgentA
     fromPinName: output1

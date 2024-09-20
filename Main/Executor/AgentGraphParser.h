@@ -17,16 +17,14 @@
 #include "NodeManager.h"
 
 
+//use this for agent no module name
+#define NO_MODULE_NAME "module"
+
 namespace xMind
 {
     struct GroupInfo {
         std::string name;
         std::vector<std::string> agents;
-    };
-
-    struct ImportInfo {
-        std::string file;
-        std::string alias;
     };
     struct ConnectionInfo {
         std::string fromAgentName;
@@ -43,115 +41,58 @@ namespace xMind
     {
     public:
         // Function to parse imports
-        std::vector<ImportInfo> ParseImports(const X::Value& importsValue)
+        bool ParseImports(const X::Value& importsValue)
         {
-            std::vector<ImportInfo> imports;
-            if (importsValue.IsList())
+            if (!importsValue.IsList())
             {
-				X::List list(importsValue);
-                for (const auto item : *list)
-                {
-					X::Dict importItem(item);
-                    ImportInfo imp;
-                    imp.file = importItem["file"].ToString();
-                    imp.alias = importItem["alias"].ToString();
-                    imports.push_back(imp);
-                }
+                return false;
             }
-            return imports;
-        }
-
-        // Function to parse agents/actions/functions
-        bool ParseNodes(const X::Value& nodesValue)
-        {
-            if (!nodesValue.IsList())
-            {
-				return false;
-            }
-			X::List list(nodesValue);
+            X::List list(importsValue);
             for (const auto item : *list)
             {
-				X::Dict nodeItem(item);
-                std::string typeStr = nodeItem["type"].ToString();
-                CallableType callableType = CallableType::callable;
-
-                if (typeStr == "agent")
-                {
-                    callableType = CallableType::agent;
-                }
-                else if (typeStr == "action")
-                {
-                    callableType = CallableType::action;
-                }
-                else if (typeStr == "function")
-                {
-                    callableType = CallableType::function;
-                }
-                else
-                {
-					std::cerr << "Error: Unknown node type: " << typeStr << std::endl;
-					continue;
-                }
-
-                Callable* callable = nullptr;
-
-                switch (callableType)
-                {
-                case CallableType::agent:
-                    callable = new BaseAgent();
-                    break;
-                case CallableType::action:
-                    callable = new BaseAction();
-                    break;
-                case CallableType::function:
-                    callable = new Function();
-                    break;
-                default:
-                    break;
-                }
-				std::string name = nodeItem["name"].ToString();
-                callable->SetName(name);
-                callable->SetDescription(nodeItem["description"].ToString());
-                //TODO:
-                std::string instanceName = name;
-                callable->SetInstanceName(instanceName);
-
-                // Parse inputs
-                callable->SetInputs(nodeItem["inputs"]);
-
-                // Parse outputs
-                callable->SetOutputs(nodeItem["outputs"]);
-
-                // Parse source
-                X::Value sourceValue = nodeItem["source"];
-                if (sourceValue.IsDict())
-                {
-                    // Assuming we have a method to set the source in Callable
-                    // callable->SetSource(sourceValue);
-                }
-
-                // Parse parameters
-                X::Value parametersValue = nodeItem["parameters"];
-                if (parametersValue.IsDict())
-                {
-					X::Dict parameters(parametersValue);
-                    X::KWARGS params;
-                    parameters->Enum([&](X::Value& key, X::Value& value) {
-                        params.Add(key.ToString().c_str(), value);
-                        });
-                    callable->SetParams(params);
-                }
-
-                // Parse group
-                //TODO:
-                // callable->SetGroup(nodeItem["group"].ToString());
-
-				NodeManager::I().addCallable(name, callable);
+                X::Dict importItem(item);
+                auto fileName = importItem["file"].ToString();
+                auto alias = importItem["alias"].ToString();
+				if (alias.empty())
+				{
+					//use the file name exclude the extension as the alias
+					size_t pos = fileName.find_last_of('.');
+					if (pos != std::string::npos)
+					{
+						alias = fileName.substr(0, pos);
+					}
+                    else
+                    {
+                        alias = fileName;
+                    }
+				}
+				// Parse the file
+				ParseAgentGraphDesc(alias, fileName);
             }
-     
             return true;
         }
 
+        X::Value QueyNode(const std::string& curModuleName,std::string combineName)
+        {
+			std::string moduleName;
+			std::string callableName;
+            size_t pos = combineName.find('.');
+            if (pos != std::string::npos)
+            {
+                moduleName = combineName.substr(0, pos);
+                callableName = combineName.substr(pos + 1);
+            }
+            else
+            {//if no module prefix use current module name
+                moduleName = curModuleName;
+                callableName = combineName;
+            }
+            //check from NodeManager to find the callable with the name
+            return NodeManager::I().queryCallable(moduleName, callableName);
+        }
+        // Function to parse agents/actions/functions
+        bool ParseNodes(const X::Value& nodesValue,
+            const std::string& moduleName, const std::string& fileName);
         // Function to parse connections
         std::vector<ConnectionInfo> ParseConnections(const X::Value& connectionsValue)
         {
@@ -203,17 +144,32 @@ namespace xMind
         }
 
         // Main function to parse the agent graph description
-        bool ParseAgentGraphDesc(X::Value& root)
+        bool ParseAgentGraphDesc(const std::string& moduleName = "", const std::string& fileName = "");
+        bool ParseAgentGraphDescFromString(const std::string& desc);
+		bool ParseAgentGraphDescFromRoot(X::Value& root,
+            const std::string& moduleName = "", const std::string& fileName = "")
         {
             // Check if root is a Dict
             if (!root.IsDict())
             {
-                std::cerr << "Error: root is not a dictionary." << std::endl;
+                std::cerr << "Error: Invalid yaml format." << std::endl;
                 return false;
             }
+			std::string strModuleName = moduleName;
 
             // Extract basic information
             std::string name = root["name"].ToString();
+            if (strModuleName.empty())
+            {
+                strModuleName = root["module"].ToString();
+				// if no module name is provided,
+				// use a default module name
+				if (strModuleName.empty())
+				{
+					strModuleName = NO_MODULE_NAME;
+				}
+            }
+
             std::string type = root["type"].ToString();
             std::string version = root["version"].ToString();
             std::string description = root["description"].ToString();
@@ -224,11 +180,11 @@ namespace xMind
 
             // Parse imports
             X::Value importsValue = root["imports"];
-            std::vector<ImportInfo> imports = ParseImports(importsValue);
+            ParseImports(importsValue);
 
             // Parse agents/actions/functions
             X::Value nodesValue = root["nodes"];
-            ParseNodes(nodesValue);
+            ParseNodes(nodesValue, moduleName,fileName);
 
             // Parse connections
             X::Value connectionsValue = root["connections"];
@@ -237,15 +193,14 @@ namespace xMind
 			for (auto& connection : connections)
 			{
 				//Add into Graph
-                X::Value varCallable;
-				Callable* pCallableFrom = NodeManager::I().getCallable(connection.fromAgentName);
-                Callable* pCallableTo = NodeManager::I().getCallable(connection.toAgentName);
-                if (pCallableFrom == nullptr || pCallableTo == nullptr)
+                X::Value CallableFrom = QueyNode(moduleName,connection.fromAgentName);
+                X::Value CallableTo = QueyNode(moduleName,connection.toAgentName);
+                if (!CallableFrom.IsObject() || !CallableTo.IsObject())
                 {
                     continue;
                 }
-                graph->AddCallable(pCallableFrom, varCallable);
-                graph->AddCallable(pCallableTo, varCallable);
+                graph->AddCallable(CallableFrom);
+                graph->AddCallable(CallableTo);
 
                 X::ARGS params(4);
                 params.push_back(connection.fromAgentName);

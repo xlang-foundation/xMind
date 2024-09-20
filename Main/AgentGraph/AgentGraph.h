@@ -47,8 +47,7 @@ namespace xMind
 
 		bool AddNode(X::XRuntime* rt, X::XObj* pContext,
 			X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
-		bool Parse(const std::string& yamlContent);
-		int AddCallable(Callable* callable,X::Value& varCallable);
+		int AddCallable(X::Value& varCallable, Callable* callable = nullptr);
 		void RemoveCallable(int index);
 		void AddConnection(X::XRuntime* rt, X::XObj* pContext,
 			X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);

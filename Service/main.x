@@ -16,7 +16,7 @@ srv.StaticIndexFile = "index.html"
 
 xMind.logV("root folder:",www_root,",pid=",pid())
 
-# Link: http://localhost:9901/api/loadGraph?filename=D:\Github\xMind\Schema\compositeAgent.yml
+# Link: http://localhost:9901/api/loadGraph?fileName=D:\Github\xMind\Schema\compositeAgent.yml
 @srv.route("/api/loadGraph")
 def loadGraph():
 	params = req.params

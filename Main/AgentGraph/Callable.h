@@ -54,7 +54,7 @@ namespace xMind
 		unsigned long long m_ID;//unique ID inside XMind not just the graph
 		std::string m_name; // Callable Name
 		std::string m_instanceName;
-		std::string m_description;
+		std::string m_description;//ablity description
 		CallableType m_type;
 
 		std::vector<Pin> m_inputs;
@@ -184,13 +184,13 @@ namespace xMind
 			for (auto& pin : m_inputs)
 			{
 				X::Dict dict;
-				dict["name"] = pin.name;
+				dict->Set("name",pin.name);
 				X::List formats;
 				for (auto& format : pin.formats)
 				{
 					formats += format;
 				}
-				dict["formats"] = formats;
+				dict->Set("formats",formats);
 				list += dict;
 			}
 			m_locker.Unlock();
@@ -232,13 +232,13 @@ namespace xMind
 			for (auto& pin : m_outputs)
 			{
 				X::Dict dict;
-				dict["name"] = pin.name;
+				dict->Set("name", pin.name);
 				X::List formats;
 				for (auto& format : pin.formats)
 				{
 					formats += format;
 				}
-				dict["formats"] = formats;
+				dict->Set("formats", formats);
 				list += dict;
 			}
 			m_locker.Unlock();
