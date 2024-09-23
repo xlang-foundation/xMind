@@ -2,7 +2,7 @@
 #include "log.h"
 #include "port.h"
 #include "utility.h"
-
+#include "start.h"
 
 struct ParamConfig
 {
@@ -119,7 +119,9 @@ int main(int argc, char* argv[])
     X::g_pXHost->Lrpc_Listen(lrpc_port, false);
     LOG << "xMind Started" << LINE_END;
 
+	xMind::Starter::I().Start(paramConfig.appPath);
     g_xLoad.EventLoop();
+	xMind::Starter::I().Stop();
 
     xMind::MindAPISet::I().Fire(1, p_dummy, kp_dummy);
     xMind::MindAPISet::I().Shutdown();

@@ -32,11 +32,11 @@ namespace xMind
 		auto* pXPack = AgentGraph::APISET().GetProxy(m_agentGraph);
 		m_varGraph = X::Value(pXPack);
 	}
-	void Callable::PushToOutput(int outputIndex, X::Value data)
+	void Callable::PushToOutput(int sessionId,int outputIndex, X::Value data)
 	{
 		if (m_agentGraph)
 		{
-			m_agentGraph->PushDataToCallable(this, outputIndex, data);
+			m_agentGraph->PushDataToCallable(this, sessionId,outputIndex, data);
 		}
 	}
 }

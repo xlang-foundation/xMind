@@ -15,7 +15,8 @@
 #include "BaseAction.h"
 #include "BaseAgent.h"
 #include "NodeManager.h"
-
+#include "varible.h"
+#include "LlmPool.h"
 
 //use this for agent no module name
 #define NO_MODULE_NAME "module"
@@ -39,9 +40,42 @@ namespace xMind
     // Parser class definition
     class Parser
     {
+        //for example: Bearer ${openai_key}
+		//replace the ${var} with the value of varible's value
+        std::string RepVar(const std::string& input, const std::string& moduleName)
+        {
+            std::string result = input;
+            std::regex varPattern(R"(\$\{([^\}]+)\})");
+            std::smatch matches;
+
+            while (std::regex_search(result, matches, varPattern))
+            {
+                std::string varName = matches[1].str();
+                X::Value replacement;
+
+                // Check if the variable name contains a scope
+                size_t pos = varName.find("::");
+                if (pos != std::string::npos)
+                {
+                    replacement = VariableManager::I().Query(varName);
+                }
+                else
+                {
+                    replacement = VariableManager::I().Query(moduleName, varName);
+                }
+                if (replacement.IsValid())
+                {
+                    result.replace(matches.position(0), matches.length(0), replacement.ToString());
+                }
+            }
+
+            return result;
+        }
     public:
         // Function to parse imports
-        bool ParseImports(const X::Value& importsValue)
+        bool ParseImports(const std::string& curModuleName, 
+            std::string& curModule_FileName,
+            const X::Value& importsValue)
         {
             if (!importsValue.IsList())
             {
@@ -51,8 +85,8 @@ namespace xMind
             for (const auto item : *list)
             {
                 X::Dict importItem(item);
-                auto fileName = importItem["file"].ToString();
-                auto alias = importItem["alias"].ToString();
+                auto fileName = RepVar(importItem["file"].ToString(),curModuleName);
+                auto alias = RepVar(importItem["alias"].ToString(), curModuleName);
 				if (alias.empty())
 				{
 					//use the file name exclude the extension as the alias
@@ -66,12 +100,98 @@ namespace xMind
                         alias = fileName;
                     }
 				}
+                // Check if fileName is an absolute path
+                std::filesystem::path filePath(fileName);
+                if (!filePath.is_absolute())
+                {
+                    // If not absolute, construct the absolute path using curModule_FileName's directory
+                    std::filesystem::path modulePath(curModule_FileName);
+                    filePath = modulePath.parent_path() / fileName;
+                    fileName = filePath.string();
+                }
 				// Parse the file
 				ParseAgentGraphDesc(alias, fileName);
             }
             return true;
         }
-
+        bool ParsePrompts(BaseAgent* pAgent,const std::string& curModuleName, X::Value& prompts)
+        {
+            if (prompts.IsList())
+            {
+                X::List promptList(prompts);
+                for (const auto prompt : *promptList)
+                {
+                    X::Dict promptDict(prompt);
+                    std::string name = RepVar(promptDict["name"].ToString(), curModuleName);
+                    std::string role = RepVar(promptDict["role"].ToString(), curModuleName);
+                    std::string content = RepVar(promptDict["content"].ToString(), curModuleName);
+					//todo: we skip name now
+					pAgent->AddPrompt(role, content);
+                }
+            }
+            return true;
+        }
+        bool ParseVariables(const std::string& curModuleName, X::Value& root)
+        {
+            X::Dict rootDict(root);
+            // Parse variables
+            X::Value variables = rootDict["varibles"];
+            if (variables.IsList())
+            {
+                X::List varList(variables);
+                for (const auto var : *varList)
+                {
+                    X::Dict varDict(var);
+					//name can't use ${} inside
+                    std::string name = varDict["name"].ToString();
+                    X::Value value = varDict["value"];
+                    if (value.IsString() || value.IsObject() && value.GetObj()->GetType() == X::ObjType::Str)
+                    {
+						value = RepVar(value.ToString(), curModuleName);
+                    }
+                    std::string description = RepVar(varDict["description"].ToString(),curModuleName);
+                    VariableManager::I().Add(curModuleName, name, description, value);
+                }
+            }
+            return true;
+        }
+        bool ParseLlmPool(const std::string& curModuleName, X::Value& root)
+        {
+            X::Dict rootDict(root);
+            // Parse LLM pool
+            X::Value llmPool = rootDict["llm_pool"];
+            if (llmPool.IsList())
+            {
+                X::List llmList(llmPool);
+                for (const auto llm : *llmList)
+                {
+                    X::Dict llmDict(llm);
+                    std::string name = RepVar(llmDict["name"].ToString(),curModuleName);
+                    std::string tag = RepVar(llmDict["tag"].ToString(),curModuleName);
+                    std::string contentType = RepVar(llmDict["content_type"].ToString(),curModuleName);
+                    std::string url = RepVar(llmDict["url"].ToString(),curModuleName);
+                    X::Dict headers0 = llmDict["headers"];
+                    X::Dict headers;
+					//for headers, need to check if need call RepVar with value is string
+                    headers0->Enum([&](const std::string& key, X::Value& value)
+                        {
+                            if (value.IsString())
+                            {
+                                value = RepVar(value.ToString(), curModuleName);
+                                X::Value valKey(key);
+                                headers->Set(valKey, value);
+                            }
+                            else
+                            {
+								headers->Set(key.c_str(), value);
+                            }
+                        }
+                    );
+					LlmPool::I().Add(name,url,tag, contentType,headers);
+                }
+            }
+            return true;
+        }
         X::Value QueyNode(const std::string& curModuleName,std::string combineName)
         {
 			std::string moduleName;
@@ -91,7 +211,7 @@ namespace xMind
             return NodeManager::I().queryCallable(moduleName, callableName);
         }
         // Function to parse agents/actions/functions
-        bool ParseNodes(const X::Value& nodesValue,
+        bool ParseNodes(X::Value& firstAgent,const X::Value& nodesValue,
             const std::string& moduleName, const std::string& fileName);
         // Function to parse connections
         std::vector<ConnectionInfo> ParseConnections(const X::Value& connectionsValue)
@@ -142,12 +262,15 @@ namespace xMind
             }
             return groups;
         }
-
+        //for top agent, if no connections, add one graph with first Agent
+        bool ParseRootAgent(const std::string& fileName, X::Value& graph);
         // Main function to parse the agent graph description
         bool ParseAgentGraphDesc(const std::string& moduleName = "", const std::string& fileName = "");
         bool ParseAgentGraphDescFromString(const std::string& desc);
-		bool ParseAgentGraphDescFromRoot(X::Value& root,
-            const std::string& moduleName = "", const std::string& fileName = "")
+		bool ParseAgentGraphDescFromRoot(bool needCreateGraph,
+            X::Value& agentGraph,X::Value& root,
+            const std::string& moduleName = "", 
+            const std::string& fileName = "")
         {
             // Check if root is a Dict
             if (!root.IsDict())
@@ -172,46 +295,63 @@ namespace xMind
 
             std::string type = root["type"].ToString();
             std::string version = root["version"].ToString();
-            std::string description = root["description"].ToString();
+            std::string description = RepVar(root["description"].ToString(),moduleName);
 
+			ParseVariables(strModuleName, root);
+			ParseLlmPool(strModuleName, root);
             // Process 'prompts' if any (assuming it's a list or dict)
             X::Value prompts = root["prompts"];
             // TODO: Process prompts as needed
 
             // Parse imports
             X::Value importsValue = root["imports"];
-            ParseImports(importsValue);
+            ParseImports(moduleName, (std::string&)fileName,importsValue);
 
             // Parse agents/actions/functions
             X::Value nodesValue = root["nodes"];
-            ParseNodes(nodesValue, moduleName,fileName);
+			X::Value firstAgent;
+            ParseNodes(firstAgent,nodesValue, moduleName,fileName);
 
             // Parse connections
             X::Value connectionsValue = root["connections"];
             std::vector<ConnectionInfo> connections = ParseConnections(connectionsValue);
-			AgentGraph* graph = new AgentGraph();
-			for (auto& connection : connections)
-			{
-				//Add into Graph
-                X::Value CallableFrom = QueyNode(moduleName,connection.fromAgentName);
-                X::Value CallableTo = QueyNode(moduleName,connection.toAgentName);
-                if (!CallableFrom.IsObject() || !CallableTo.IsObject())
+            if (connections.size() > 0) 
+            {
+                X::XPackageValue<AgentGraph> valGraph;
+                AgentGraph* graph = valGraph.GetRealObj();
+                for (auto& connection : connections)
                 {
-                    continue;
-                }
-                graph->AddCallable(CallableFrom);
-                graph->AddCallable(CallableTo);
+                    //Add into Graph
+                    X::Value CallableFrom = QueyNode(moduleName, connection.fromAgentName);
+                    X::Value CallableTo = QueyNode(moduleName, connection.toAgentName);
+                    if (!CallableFrom.IsObject() || !CallableTo.IsObject())
+                    {
+                        continue;
+                    }
+                    graph->AddCallable(CallableFrom);
+                    graph->AddCallable(CallableTo);
 
-                X::ARGS params(4);
-                params.push_back(connection.fromAgentName);
-                params.push_back(connection.fromPinName);
-                params.push_back(connection.toAgentName);
-                params.push_back(connection.toPinName);
-                X::KWARGS kwParams;
-                X::Value retValue;
-                graph->AddConnection(nullptr, nullptr, params, kwParams, retValue);
+                    X::ARGS params(4);
+                    params.push_back(connection.fromAgentName);
+                    params.push_back(connection.fromPinName);
+                    params.push_back(connection.toAgentName);
+                    params.push_back(connection.toPinName);
+                    X::KWARGS kwParams;
+                    X::Value retValue;
+                    graph->AddConnection(nullptr, nullptr, params, kwParams, retValue);
+                }
+                NodeManager::I().AddGraph((X::Value)valGraph);
+				agentGraph = valGraph;
             }
-            NodeManager::I().AddGraph(graph);
+            else if(needCreateGraph && firstAgent.IsValid())
+            { 
+                X::XPackageValue<AgentGraph> valGraph;
+                AgentGraph* graph = valGraph.GetRealObj();
+                graph->AddCallable(firstAgent);
+                NodeManager::I().AddGraph((X::Value)valGraph);
+                agentGraph = valGraph;
+            }
+
             // Parse groups
             X::Value groupsValue = root["groups"];
             std::vector<Group> groups = ParseGroups(groupsValue);

@@ -3,8 +3,6 @@ name: DataProcessingPipeline
 type: compositeAgent
 version: 1.0
 description: "This is a composite agent that orchestrates multiple agents to process data."
-
-prompts:
     
 imports:
   - file: "other_agents.yml"
@@ -30,6 +28,10 @@ nodes:
       python: "agent_a.py"
       xlang: "agent_a.x"
       shared_lib: "libagent_a.so"
+    prompts:
+        -name: prompt1
+         role: user
+         content: "This is a prompt for Agent A"
     parameters:
       param1: "value1"
       param2: "value2"

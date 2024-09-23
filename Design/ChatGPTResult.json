@@ -1,0 +1,23 @@
+{
+  "id": "chatcmpl-AAOE4euL2Gb1cB4fO864greeI6pfR",
+  "object": "chat.completion",
+  "created": 1727039768,
+  "model": "gpt-4-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Sure, I'd be happy to explain...",
+        "refusal": "None"
+      },
+      "logprobs": "None",
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 27,
+    "completion_tokens": 323,
+    "total_tokens": 350
+  }
+}

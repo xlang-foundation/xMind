@@ -9,7 +9,7 @@ namespace xMind
 		BEGIN_PACKAGE(Function)
 			ADD_BASE(Callable);
 		END_PACKAGE
-		virtual bool ReceiveData(int inputIndex, X::Value& data) override
+		virtual bool ReceiveData(int sessionId, int inputIndex, X::Value& data) override
 		{
 			//when receive data, call the real function
 			//and push the result to the next node
@@ -23,7 +23,7 @@ namespace xMind
 				X::Value varOwner = X::Value(pXPack);
 				kwParams.Add("owner", varOwner);
 				X::Value retData = m_implObject.ObjCall(params, kwParams);
-				PushToOutput(0, retData);
+				PushToOutput(sessionId,0, retData);
 			}
 			else
 			{

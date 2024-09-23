@@ -14,8 +14,10 @@ namespace xMind
 	{
 		Status status;
 		int inputIndex;
+		int sessionId;
 		X::Value data;
 	};
+	using SessionValue = std::pair<int, X::Value>;
 
 	class BufferedProcessor : public Callable
 	{
@@ -23,10 +25,10 @@ namespace xMind
 			ADD_BASE(Callable);
 			APISET().AddVarFunc("waitInput", &BufferedProcessor::WaitInput);
 			APISET().AddVarFunc("isRunning", &BufferedProcessor::IsRunning);
-			APISET().AddFunc<2>("pushToOutput", &Callable::PushToOutput);
+			APISET().AddFunc<3>("pushToOutput", &Callable::PushToOutput);
 		END_PACKAGE
 	protected:
-		inline virtual bool ReceiveData(int inputIndex, X::Value& data) override
+		inline virtual bool ReceiveData(int sessionId, int inputIndex, X::Value& data) override
 		{
 			PushEvent(inputIndex, X::Value());//just notify if there is subscriber
 			std::unique_lock<std::mutex> lock(m_mutex);
@@ -34,7 +36,7 @@ namespace xMind
 			{
 				return false;
 			}
-			m_inputQueues[inputIndex].push(data);
+			m_inputQueues[inputIndex].push(std::pair(sessionId,data));
 			m_condVar.notify_all();
 			return true;
 		}
@@ -70,7 +72,6 @@ namespace xMind
 			if (it)
 			{
 				SetInputs(it->val);
-				m_inputQueues.resize(m_inputs.size());
 			}
 			it = m_params.find("outputs");
 			if (it)
@@ -79,6 +80,11 @@ namespace xMind
 			}
 
 			return true;
+		}
+		inline virtual void SetInputs(X::Value v) override
+		{
+			Callable::SetInputs(v);
+			m_inputQueues.resize(m_inputs.size());
 		}
 		bool IsRunning(X::XRuntime* rt, X::XObj* pContext,
 			X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
@@ -138,7 +144,7 @@ namespace xMind
 				}
 			}
 			std::unique_lock<std::mutex> lock(m_mutex);
-			InputData inputData{ Status::Ok, inputIndex, X::Value() };
+			InputData inputData{ Status::Ok, inputIndex,0, X::Value() };
 
 			auto waitCondition = [this, inputIndex] {
 				if (!m_running)
@@ -182,7 +188,9 @@ namespace xMind
 						if (!m_inputQueues[i].empty())
 						{
 							inputData.inputIndex = static_cast<int>(i);
-							inputData.data = m_inputQueues[i].front();
+							auto pair = m_inputQueues[i].front();
+							inputData.sessionId = pair.first;
+							inputData.data = pair.second;
 							m_inputQueues[i].pop();
 							isNotTimeout = true;
 							break;
@@ -194,7 +202,9 @@ namespace xMind
 					auto& q = m_inputQueues[inputIndex];
 					if (!q.empty())
 					{
-						inputData.data = m_inputQueues[inputIndex].front();
+						auto pair = m_inputQueues[inputIndex].front();
+						inputData.sessionId = pair.first;
+						inputData.data = pair.second;
 						m_inputQueues[inputIndex].pop();
 						isNotTimeout = true;
 					}
@@ -208,6 +218,7 @@ namespace xMind
 
 			X::List list;
 			list += (int)inputData.status;
+			list += inputData.sessionId;
 			list += inputData.inputIndex;
 			list += inputData.data;
 			//xlang struct has issues to call destructor for members like X::Value
@@ -231,7 +242,7 @@ namespace xMind
 			m_running = true;
 			//for python non-threading mode,we don't run in thread
 			//it will not pass in m_implObject
-			if (m_implObject.IsObject())
+			if (m_RunInThread || m_implObject.IsObject())
 			{
 				m_thread = std::thread(&BufferedProcessor::ThreadRun, this);
 			}
@@ -240,21 +251,33 @@ namespace xMind
 
 		void ThreadRun()
 		{
-			X::KWARGS kwParams;
-			X::Value varOwner = GetOwner();
-			kwParams.Add("owner", varOwner);
-
-			//while (m_running)
+			while (m_running)
 			{
-				X::ARGS params(0);
-				X::Value retData = m_implObject.ObjCall(params, kwParams);
+				X::Value retData = RunOnce();
+				if (retData.IsObject() && retData.GetObj()->GetType() == X::ObjType::Error)
+				{
+					//error happened
+					break;
+				}
 			}
 		}
-
-		inline X::Value DequeueInput(int inputIndex)
+		virtual X::Value RunOnce()
+		{
+			X::Value retData;
+			if (m_implObject.IsValid())
+			{
+				X::KWARGS kwParams;
+				X::Value varOwner = GetOwner();
+				kwParams.Add("owner", varOwner);
+				X::ARGS params(0);
+				retData = m_implObject.ObjCall(params, kwParams);
+			}
+			return retData;
+		}
+		inline SessionValue DequeueInput(int inputIndex)
 		{
 			std::unique_lock<std::mutex> lock(m_mutex);
-			X::Value retVal;
+			SessionValue retVal;
 			auto& q = m_inputQueues[inputIndex];
 			retVal = q.front();
 			q.pop();
@@ -262,8 +285,9 @@ namespace xMind
 		}
 
 	protected:
+		bool m_RunInThread = false;
 		AgentGroup* m_group;
-		std::vector<std::queue<X::Value>> m_inputQueues;
+		std::vector<std::queue<SessionValue>> m_inputQueues;
 		std::thread m_thread;
 		std::atomic<bool> m_running;
 		std::mutex m_mutex;

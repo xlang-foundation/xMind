@@ -23,6 +23,12 @@ namespace xMind
 		std::string name;
 		std::vector<std::string> formats;
 	};
+	struct Source
+	{
+		std::string python;
+		std::string xlang;
+		std::string shared_lib;
+	};
 	class AgentGraph;
 	class Callable
 	{
@@ -32,6 +38,7 @@ namespace xMind
 			APISET().AddPropWithType<unsigned long long> ("ID", &Callable::m_ID);
 			APISET().AddPropWithType<std::string>("name", &Callable::m_name);
 			APISET().AddPropWithType<X::Value>("graph", &Callable::m_varGraph);
+			APISET().AddProp0("nodeDesc", &Callable::m_nodeYamlDesc);
 			APISET().AddPropWithType<std::string>("description", &Callable::m_description);
 			APISET().AddPropL("inputs",
 				[](auto* pThis, X::Value v) { pThis->SetInputs(v); },
@@ -56,7 +63,8 @@ namespace xMind
 		std::string m_instanceName;
 		std::string m_description;//ablity description
 		CallableType m_type;
-
+		Source m_source;
+		X::Value m_nodeYamlDesc;//all node info pack as X::Value put here
 		std::vector<Pin> m_inputs;
 		std::vector<Pin> m_outputs;
 		Locker m_locker;
@@ -77,6 +85,22 @@ namespace xMind
 		inline unsigned long long ID()
 		{
 			return m_ID;
+		}
+		inline void SetSource(const Source& source)
+		{
+			m_source = source;
+		}
+		inline Source& GetSource()
+		{
+			return m_source;
+		}
+		inline X::Value& GetNodeYamlDesc()
+		{
+			return m_nodeYamlDesc;
+		}
+		inline void SetNodeYamlDesc(X::Value& v)
+		{
+			m_nodeYamlDesc = v;
 		}
 		inline CallableType Type()
 		{
@@ -134,8 +158,8 @@ namespace xMind
 		{
 			return m_index;
 		}
-		void PushToOutput(int outputIndex, X::Value data);
-		virtual bool ReceiveData(int inputIndex, X::Value& data) = 0;
+		void PushToOutput(int sessionId,int outputIndex, X::Value data);
+		virtual bool ReceiveData(int sessionId,int inputIndex, X::Value& data) = 0;
 		virtual void Stop() = 0;
 		virtual bool Run() = 0;
 		virtual X::Value Clone() = 0;
@@ -197,7 +221,7 @@ namespace xMind
 			return list;
 		}
 
-		inline void SetInputs(X::Value v)
+		inline virtual void SetInputs(X::Value v)
 		{
 			m_locker.Lock();
 			X::List list(v);

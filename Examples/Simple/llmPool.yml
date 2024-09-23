@@ -1,0 +1,20 @@
+--- 
+name: openaiPool
+type: llmPool
+version: 1.0
+description: "llm pool"
+
+
+varibles:
+  - name: openai_key
+    value: "You Key here"
+    description: "OpenAI API key"
+
+llm_pool:
+   - name: openai_001
+     tag: openai
+     content_type : "application/json"
+     url: https://api.openai.com/v1/chat/completions
+     headers:
+        Authorization: Bearer ${openai_key}
+    

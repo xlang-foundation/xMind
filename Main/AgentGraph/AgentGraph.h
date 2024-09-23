@@ -23,6 +23,12 @@ namespace xMind
 		Callable* callable;
 		X::Value varCallable;
 	};
+	struct SessionData
+	{
+		Callable* callable;
+		int outputIndex;
+		X::Value data;
+	};
 	class AgentGraph
 	{
 		BEGIN_PACKAGE(AgentGraph)
@@ -52,7 +58,7 @@ namespace xMind
 		void AddConnection(X::XRuntime* rt, X::XObj* pContext,
 			X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
 		void RemoveConnection(const std::string& fromInstanceName, const std::string& fromPinName, const std::string& toInstanceName, const std::string& toPinName);
-		void PushDataToCallable(Callable* fromCallable, int outputIndex, X::Value& data);
+		void PushDataToCallable(Callable* fromCallable, int sessionId,int outputIndex, X::Value& data);
 		bool Run(X::XRuntime* rt, X::XObj* pContext,
 			X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
 		bool StartOnce(X::XRuntime* rt, X::XObj* pContext,
@@ -113,7 +119,9 @@ namespace xMind
 		{
 			return m_connections;
 		}
+		X::Value RunInputs(int sid,X::Value& inputs);
 	private:
+		void RunAllCallables(X::XRuntime* rt0 = nullptr);
 		static std::atomic<unsigned long long> s_idCounter;
 		unsigned long long m_ID;
 		bool m_running = false;
@@ -123,5 +131,11 @@ namespace xMind
 		Locker m_locker;
 		std::mutex m_mutex; // Mutex for condition variable
 		std::condition_variable m_condVar; // Condition variable
+
+		//Session Data
+		std::unordered_map<int, std::vector<SessionData>> m_sessionData;
+		std::condition_variable m_sessionDataCondVar;
+		std::mutex m_sessionDataMutex;
+		void AddSessionData(int sessionId, Callable* pCallable, int outputIndex,X::Value& data);
 	};
 }

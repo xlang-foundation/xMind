@@ -1,0 +1,14 @@
+---
+# xMind Config
+XlangStartDebuger: true 
+XlangStartPythonDebuger: false 
+ 
+Log:
+ OutputLevel: 79999
+ MBSize: 10
+
+RootAgents:
+   - name: simple
+     file: D:\Github\xMind\Examples\Simple\simple.yml
+   - name: QAJudge
+     file: D:\Github\xMind\Examples\Simple\two_simples.yml

@@ -1,0 +1,95 @@
+#pragma once
+#include "value.h"
+#include "singleton.h"
+#include <string>
+#include <unordered_map>
+#include <mutex>
+
+namespace xMind
+{
+	class Variable
+	{
+	private:
+		X::Value m_value;
+		std::string m_name;
+		std::string m_desc;
+		std::string m_scope; // use file or module name
+
+	public:
+		Variable() = default;
+		Variable(const std::string& name, const std::string& desc, 
+			const std::string& scope)
+			: m_name(name), m_desc(desc), m_scope(scope){}
+
+		const std::string& GetName() const { return m_name; }
+		const std::string& GetScope() const { return m_scope; }
+		const X::Value& GetValue() const { return m_value; }
+		const std::string& GetDesc() const { return m_desc; }
+		Variable& SetValue(const X::Value& value) { m_value = value; return *this; }
+	};
+
+	class VariableManager : public Singleton<VariableManager>
+	{
+	private:
+		std::unordered_map<std::string, Variable> m_variables;
+		std::mutex m_mutex;
+
+		std::string MakeKey(const std::string& scope, const std::string& name) const
+		{
+			return scope + "::" + name;
+		}
+
+	public:
+		void Add(const std::string& scope, const std::string& name, const std::string& desc)
+		{
+			std::lock_guard<std::mutex> lock(m_mutex);
+			std::string key = MakeKey(scope, name);
+			auto var = Variable(name, desc, scope);
+			m_variables[key] = Variable(name, desc, scope);
+		}
+		void Add(const std::string& scope, const std::string& name, 
+			const std::string& desc, const X::Value& value)
+		{
+			std::lock_guard<std::mutex> lock(m_mutex);
+			std::string key = MakeKey(scope, name);
+			m_variables[key] = Variable(name, desc, scope).SetValue(value);
+		}
+		void Remove(const std::string& scope, const std::string& name)
+		{
+			std::lock_guard<std::mutex> lock(m_mutex);
+			std::string key = MakeKey(scope, name);
+			m_variables.erase(key);
+		}
+		void Set(const std::string& scope, const std::string& name, const X::Value& value)
+		{
+			std::lock_guard<std::mutex> lock(m_mutex);
+			std::string key = MakeKey(scope, name);
+			auto it = m_variables.find(key);
+			if (it != m_variables.end())
+			{
+				it->second.SetValue(value);
+			}
+		}
+		X::Value Query(const std::string& scope, const std::string& name)
+		{
+			std::lock_guard<std::mutex> lock(m_mutex);
+			std::string key = MakeKey(scope, name);
+			auto it = m_variables.find(key);
+			if (it != m_variables.end())
+			{
+				return it->second.GetValue();
+			}
+			return X::Value(); // Return a default value if not found
+		}
+		X::Value Query(const std::string& scope_name)
+		{
+			std::lock_guard<std::mutex> lock(m_mutex);
+			auto it = m_variables.find(scope_name);
+			if (it != m_variables.end())
+			{
+				return it->second.GetValue();
+			}
+			return X::Value(); // Return a default value if not found
+		}
+	};
+}

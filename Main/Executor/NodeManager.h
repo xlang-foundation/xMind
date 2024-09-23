@@ -75,10 +75,10 @@ namespace xMind
 			return X::Value();
 		}
 
-		void AddGraph(AgentGraph* pGraph)
+		void AddGraph(X::Value& graph)
 		{
 			m_lock.Lock();
-			m_graphs.push_back(pGraph);
+			m_graphs.push_back(graph);
 			m_lock.Unlock();
 		}
 		// Build JSON representation of the graph
@@ -113,8 +113,10 @@ namespace xMind
 			}
 
 			X::Dict graphDict;
-			for (auto* pGraph : m_graphs)
+			for (auto& graph : m_graphs)
 			{
+				X::XPackageValue<AgentGraph> varGraph(graph);
+				AgentGraph* pGraph = (AgentGraph*)varGraph.GetRealObj();
 				auto graphId = pGraph->ID();
 				// Collect all connections
 				X::List connList;
@@ -139,6 +141,6 @@ namespace xMind
 		}
 	private:
 		std::vector<ModuleInfo> m_modules;
-		std::vector<AgentGraph*> m_graphs;
+		std::vector<X::Value> m_graphs;
 	};
 }

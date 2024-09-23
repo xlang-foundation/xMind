@@ -22,3 +22,8 @@ Clone the repository:
 ```bash
 git clone https://github.com/xlang-foundation/xMind.git
 cd xMind
+
+# Term and Concept
+```
+1. Blueprint: use YAML to define like variables,prompts,actions,etc.
+2. Variable: it is global variable,but in same scope file, no prefix needed. but for other file, need to use prefix. for example: `file1.var1`

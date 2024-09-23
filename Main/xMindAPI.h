@@ -10,6 +10,7 @@
 #include "type_def.h"
 #include <map>
 #include "AgentGraphParser.h"
+#include "start.h"
 
 namespace xMind
 {
@@ -40,8 +41,8 @@ namespace xMind
             APISET().AddVarFunc("SubscribeEvents", &MindAPISet::SubscribeEvents);
             APISET().AddFunc<1>("UnsubscribeEvents", &MindAPISet::UnsubscribeEvents);
             APISET().AddFunc<0>("IsRunning", &MindAPISet::IsRunning);
-            APISET().AddFunc<1>("LoadAgentFlowFromFile", &MindAPISet::LoadAgentFlowFromFile);
-            APISET().AddFunc<1>("LoadAgentFlowFromFile", &MindAPISet::LoadAgentFlowFromFile);
+            APISET().AddFunc<1>("LoadBlueprintFromFile", &MindAPISet::LoadBlueprintFromFile);
+            APISET().AddFunc<1>("LoadAgentFlowFromString", &MindAPISet::LoadAgentFlowFromString);
             APISET().AddFunc<0>("QueryAgentFlow", &MindAPISet::QueryAgentFlow);
             APISET().AddVarFunc("PullEvents", &MindAPISet::PullEvents);
             APISET().AddVarFunc("Test", &MindAPISet::Test);
@@ -57,12 +58,20 @@ namespace xMind
             APISET().AddClass<0, BaseAction>("MindAction");
             APISET().AddClass<0, BaseAgent>("MindAgent");
 
+            APISET().AddFunc<0>("GetRootAgents", &MindAPISet::GetRootAgents);
+            APISET().AddVarFunc("ChatRequest", &MindAPISet::ChatRequest);
+            APISET().AddVarFunc("CompletionRequest", &MindAPISet::CompletionRequest);
+
         END_PACKAGE
     public:
         inline bool IsRunning()
         {
             return true;
         }
+        bool ChatRequest(X::XRuntime* rt, X::XObj* pContext,
+            X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
+        bool CompletionRequest(X::XRuntime* rt, X::XObj* pContext,
+            X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
         inline bool SubscribeEvents(X::XRuntime* rt, X::XObj* pContext,
             X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
         {
@@ -354,7 +363,7 @@ namespace xMind
             Cantor::log.LineEndUnlock();
             return true;
         }
-        inline bool LoadAgentFlowFromFile(const std::string& fileName)
+        inline bool LoadBlueprintFromFile(const std::string& fileName)
         {
             std::filesystem::path filePath(fileName);
 			std::string moduleName = filePath.stem().string();
@@ -374,5 +383,15 @@ namespace xMind
         {
             return NodeManager::I().BuildGraphAsJson();
         }
+		inline X::Value GetRootAgents()
+		{
+			auto list = Starter::I().GetRootAgents();
+			X::List retList;
+			for (auto& item : list)
+			{
+				retList+=item;
+			}
+			return retList;
+		}
     };
 }

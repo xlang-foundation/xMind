@@ -154,7 +154,8 @@ namespace xMind
 		}
 	}
 
-	void AgentGraph::PushDataToCallable(Callable* fromCallable, int outputIndex, X::Value& data)
+	void AgentGraph::PushDataToCallable(Callable* fromCallable, 
+		int sessionId,int outputIndex, X::Value& data)
 	{
 		AutoLock lock(m_locker);
 		if (!m_running)
@@ -162,29 +163,26 @@ namespace xMind
 			return;
 		}
 		int fromCallableIndex = fromCallable->GetIndex();
-
+		bool hasReceiver = false;
 		for (const auto& connection : m_connections)
 		{
 			if (connection.fromCallableIndex == fromCallableIndex && connection.fromPinIndex == outputIndex)
 			{
 				Callable* toCallable = m_callables[connection.toCallableIndex].callable;
 				toCallable->SetRT(fromCallable->GetRT());
-				toCallable->ReceiveData(connection.toPinIndex, data);
+				toCallable->ReceiveData(sessionId,connection.toPinIndex, data);
+				hasReceiver = true;
 			}
+		}
+		if (!hasReceiver)
+		{//cache to quque for each session
+			AddSessionData(sessionId, fromCallable,outputIndex, data);
 		}
 	}
 	bool AgentGraph::Run(X::XRuntime* rt, X::XObj* pContext, 
 		X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
 	{
-		m_locker.Lock();
-		m_running = true;
-		//call run all Callables
-		for (auto& info : m_callables)
-		{
-			info.callable->SetRT(rt);
-			info.callable->Run();
-		}
-		m_locker.Unlock();
+		RunAllCallables(rt);
 		return true;
 	}
 	bool AgentGraph::StartOnce(X::XRuntime* rt, X::XObj* pContext, 
@@ -218,7 +216,7 @@ namespace xMind
 			if (pCallable)
 			{
 				pCallable->SetRT(rt);
-				pCallable->ReceiveData(0, dummyData);
+				pCallable->ReceiveData(0,0, dummyData);
 			}
 		}
 		return true;
@@ -239,10 +237,126 @@ namespace xMind
 				if (pCallable)
 				{
 					pCallable->SetRT(rt);
-					pCallable->ReceiveData(0, dummyData);
+					//TODO: sessionId  need to set
+					int sessionId = 0;
+					pCallable->ReceiveData(sessionId,0, dummyData);
 				}
 			}
 		}
 		return true;
+	}
+	X::Value AgentGraph::RunInputs(int sid, X::Value& inputs)
+	{
+		m_locker.Lock();
+		if (!m_running)
+		{
+			m_locker.Unlock();
+			RunAllCallables();
+		}
+		else
+		{
+			m_locker.Unlock();
+		}
+		//find start nodes from m_connections, start node is the node that has no input
+		std::vector<int> startNodes;
+		for (int i = 0; i < m_callables.size(); i++)
+		{
+			bool isStartNode = true;
+			for (const auto& connection : m_connections)
+			{
+				if (connection.toCallableIndex == i)
+				{
+					isStartNode = false;
+					break;
+				}
+			}
+			if (isStartNode)
+			{
+				startNodes.push_back(i);
+			}
+		}
+		//call each with ReceiveData,if it has multiple inputs, pass for each input from inputs
+
+		for (const auto& startNode : startNodes)
+		{
+			X::Value dummyData;
+			auto* pCallable = m_callables[startNode].callable;
+			if (pCallable)
+			{
+				pCallable->SetRT(xMind::MindAPISet::I().RT());
+				pCallable->ReceiveData(sid, 0, inputs);
+			}
+		}
+		//Find all agent output pin without connection, and wait for its outputs
+		std::vector<int> endNodes;
+		for (int i = 0; i < m_callables.size(); i++)
+		{
+			bool isEndNode = true;
+			for (const auto& connection : m_connections)
+			{
+				if (connection.fromCallableIndex == i)
+				{
+					isEndNode = false;
+					break;
+				}
+			}
+			if (isEndNode)
+			{
+				endNodes.push_back(i);
+			}
+		}
+		//check sessionData for this SessionID
+		{
+			std::unique_lock<std::mutex> lock(m_sessionDataMutex);
+			auto it = m_sessionData.find(sid);
+			if (it != m_sessionData.end())
+			{
+				if (it->second.size() > 0)
+				{
+					X::Value retData = it->second[0].data;
+					it->second.erase(it->second.begin());
+					return retData;
+				}
+			}
+			m_sessionDataCondVar.wait(lock, [this, sid] {
+				auto it = m_sessionData.find(sid);
+				if (it != m_sessionData.end())
+				{
+					return it->second.size() > 0;
+				}
+				return false;
+				});
+			it = m_sessionData.find(sid);
+			if (it != m_sessionData.end())
+			{
+				if (it->second.size() > 0)
+				{
+					X::Value retData = it->second[0].data;
+					it->second.erase(it->second.begin());
+					return retData;
+				}
+			}
+		}
+
+		return X::Value();
+	}
+	void AgentGraph::RunAllCallables(X::XRuntime* rt0)
+	{
+		auto rt = (rt0==nullptr)?xMind::MindAPISet::I().RT():rt0;
+		m_locker.Lock();
+		m_running = true;
+		//call run all Callables
+		for (auto& info : m_callables)
+		{
+			info.callable->SetRT(rt);
+			info.callable->Run();
+		}
+		m_locker.Unlock();
+	}
+	void AgentGraph::AddSessionData(int sessionId, Callable* pCallable,int outputIndex,X::Value& data)
+	{
+		std::lock_guard<std::mutex> lock(m_sessionDataMutex);
+		m_sessionData[sessionId].push_back(SessionData{ pCallable ,outputIndex ,data});
+		m_sessionDataCondVar.notify_all();
 	}
 }

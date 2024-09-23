@@ -1,8 +1,31 @@
 #include "xMindAPI.h"
 #include "PropScope.h"
+#include "Session.h"
 
 namespace xMind
 {
+    bool MindAPISet::ChatRequest(X::XRuntime* rt, X::XObj* pContext, 
+        X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+    {
+        if (params.size() < 1)
+        {
+            retValue = false;
+			return false;
+        }
+        retValue = SessionManager::I().HandleChatRequest(params[0]);
+        return true;
+    }
+    bool MindAPISet::CompletionRequest(X::XRuntime* rt, X::XObj* pContext, 
+        X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+    {
+        if (params.size() < 1)
+        {
+            retValue = false;
+            return false;
+        }
+		retValue = SessionManager::I().HandleCompletionRequest(params[0]);
+		return true;
+    }
     bool MindAPISet::Start()
     {
         m_defaultRuntime = new X::Runtime();
