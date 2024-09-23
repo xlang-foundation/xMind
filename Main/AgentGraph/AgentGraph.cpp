@@ -340,9 +340,12 @@ namespace xMind
 
 		return X::Value();
 	}
-	void AgentGraph::RunAllCallables(X::XRuntime* rt0)
+	void AgentGraph::RunAllCallables(X::XRuntime* rt)
 	{
-		auto rt = (rt0==nullptr)?xMind::MindAPISet::I().RT():rt0;
+		if (rt == nullptr)
+		{
+			rt = xMind::MindAPISet::I().RT();
+		}
 		m_locker.Lock();
 		m_running = true;
 		//call run all Callables

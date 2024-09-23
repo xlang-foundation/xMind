@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <string>
 #include <mutex>
+#include <vector>
 
 namespace xMind
 {

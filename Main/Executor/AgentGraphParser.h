@@ -340,7 +340,7 @@ namespace xMind
                     X::Value retValue;
                     graph->AddConnection(nullptr, nullptr, params, kwParams, retValue);
                 }
-                NodeManager::I().AddGraph((X::Value)valGraph);
+                NodeManager::I().AddGraph((X::Value&)valGraph);
 				agentGraph = valGraph;
             }
             else if(needCreateGraph && firstAgent.IsValid())
@@ -348,7 +348,7 @@ namespace xMind
                 X::XPackageValue<AgentGraph> valGraph;
                 AgentGraph* graph = valGraph.GetRealObj();
                 graph->AddCallable(firstAgent);
-                NodeManager::I().AddGraph((X::Value)valGraph);
+                NodeManager::I().AddGraph((X::Value&)valGraph);
                 agentGraph = valGraph;
             }
 
