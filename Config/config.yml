@@ -7,8 +7,12 @@ Log:
  OutputLevel: 79999
  MBSize: 10
 
+WebServer:
+  Port: 9901
+  ServiceEntry: ../Service/main.x
+
 RootAgents:
    - name: simple
-     file: D:\Github\xMind\Examples\Simple\simple.yml
+     file: ../Examples/Simple/simple.yml
    - name: QAJudge
-     file: D:\Github\xMind\Examples\Simple\two_simples.yml
+     file: ../Examples/Simple/two_simples.yml

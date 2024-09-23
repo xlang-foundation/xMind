@@ -30,7 +30,11 @@ add_subdirectory("Main")
 add_subdirectory("ThirdParty/xlang")
 
 # Copy necessary directories to output
+file(COPY "${PROJECT_SOURCE_DIR}/Service/" 
+     DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Service")
 file(COPY "${PROJECT_SOURCE_DIR}/Scripts/" 
      DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Scripts")
 file(COPY "${PROJECT_SOURCE_DIR}/Config/" 
      DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Config")
+file(COPY "${PROJECT_SOURCE_DIR}/Examples/" 
+     DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Examples")

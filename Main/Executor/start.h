@@ -18,6 +18,7 @@ namespace xMind
 	class Starter : public Singleton<Starter>
 	{
 		bool ParseConfig(X::Value& root);
+		void RunService(const std::string& serviceEntry,int port =9901);
 	public:
 		Starter() = default;
 		~Starter() = default;
@@ -27,6 +28,8 @@ namespace xMind
 		std::vector<std::string> GetRootAgents();
 		X::Value GetOrCreateRunningGraph(const std::string& rootAgent);
 	private:
+		std::string m_appPath;
+		std::string m_configPath;
 		std::mutex m_rootAgents_mtx;
 		std::unordered_map<std::string, RootAgentDetail> m_rootAgents;
 	};
