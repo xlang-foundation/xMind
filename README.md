@@ -54,7 +54,5 @@ make
 7. **LlmPool**:
    - Managed by xMind, this concept involves handling LLM requests in a pool, based on factors like HTTP request status and LLM key usage time limits.
 
-Let me know if you need any further adjustments or additions!
-
 ### Running the Framework
   [Start Guide](./Start.md)
