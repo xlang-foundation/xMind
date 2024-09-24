@@ -13,15 +13,19 @@
 
 ### Prerequisites
 
-- [XLang](https://github.com/xlang-foundation/xlang) (Ensure you have XLang installed and properly configured)
+- [XLang](https://github.com/xlang-foundation/xlang) (Ensure you have XLang installed and properly configured,Please use the **Jit** branch)
 
-### Installation
+### Build the Framework
 
-Clone the repository (Please use the **Jit** branch):
+Clone the repository:
 
 ```bash
 git clone https://github.com/xlang-foundation/xMind.git
 cd xMind
+mkdir build
+cd build
+cmake ..
+make
 
 # Term and Concept
 ```
