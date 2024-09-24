@@ -115,6 +115,10 @@ namespace xMind
 			X::Dict graphDict;
 			for (auto& graph : m_graphs)
 			{
+				if (!graph.IsObject())
+				{
+					continue;
+				}
 				X::XPackageValue<AgentGraph> varGraph(graph);
 				AgentGraph* pGraph = (AgentGraph*)varGraph.GetRealObj();
 				auto graphId = pGraph->ID();

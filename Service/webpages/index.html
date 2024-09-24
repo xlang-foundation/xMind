@@ -1,32 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xMind</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        a {
+            display: block;
+            margin: 10px 0;
+            font-size: 1.2em;
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+            a:hover {
+                text-decoration: underline;
+            }
+    </style>
 </head>
 <body>
-    <canvas id="myCanvas" width="500" height="400" style="border:1px solid #000000;">
-        Your browser does not support the HTML5 canvas tag.
-    </canvas>
-
-    <script>
-        // Get the canvas element by its ID
-        var canvas = document.getElementById('myCanvas');
-        var context = canvas.getContext('2d');
-
-        // Draw a red rectangle
-        context.fillStyle = '#FF0000';
-        context.fillRect(50, 50, 150, 100);
-
-        // Draw a blue circle
-        context.beginPath();
-        context.arc(300, 150, 50, 0, 2 * Math.PI);
-        context.fillStyle = '#0000FF';
-        context.fill();
-
-        // Draw green text
-        context.font = '20px Arial';
-        context.fillStyle = '#008000';
-        context.fillText('Hello, Canvas!', 200, 300);
-    </script>
+    <div class="container">
+        <a href="xmind_chat.html">Chat with xMind</a>
+        <a href="showGraph.html">Show Agent Graph</a>
+        <a href="editGraph2.html">Edit AgentGraph (In Developing...)</a>
+    </div>
 </body>
 </html>
