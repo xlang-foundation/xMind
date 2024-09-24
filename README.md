@@ -1,4 +1,4 @@
-# xMind
+# xMind -- AgentFlow Framework
 
 **xMind** is a modular framework built with XLang, designed to implement Large Language Model (LLM) Memory, Planning, and Agent-flow capabilities. This project allows developers to seamlessly integrate advanced AI features like context retention, decision-making, and dynamic dataflows into their applications.
 
