@@ -38,9 +38,7 @@ The `config.yml` file contains critical configurations for the xMind application
    ```bash
    ./xMind
    ```
-    [Start Guide](./Start.md)
-  
- 
+    
 2. **Access the Web Interface**:
    - Open a web browser and navigate to [http://localhost:9901](http://localhost:9901) to access the index page.
    - If accessing from another machine, replace `localhost` with the IP address of the machine running xMind.
