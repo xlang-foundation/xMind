@@ -28,9 +28,33 @@ cmake ..
 make
 
 ```
-# Term and Concept
-1. Blueprint: use YAML to define like variables,prompts,actions,etc.
-2. Variable: it is global variable,but in same scope file, no prefix needed. but for other file, need to use prefix. for example: `file1.var1`
+
+## Terms and Concepts
+
+1. **Blueprint**: A YAML-based structure used to define various elements such as variables, prompts, actions, and more.
+
+2. **Variable**: 
+   - **Scope**: Variables are global within the same file and do not require a prefix. 
+   - **Cross-File Access**: When accessing a variable from another file, a prefix must be used, e.g., `file1.var1`.
+
+3. **Node**: 
+   - Represents a component in AgentFlow, using a graph-based approach to connect various nodes.
+
+4. **Function**:
+   - A node within AgentFlow that serves as an inline translate node. It supports only one input and one output.
+
+5. **Action**:
+   - A buffered node in AgentFlow that processes input through a separate thread (in XLang) or a process (in Python).
+   - **Use Case**: Actions are typically used to connect to external environments such as REST APIs, file access, or UIs.
+
+6. **Agent**:
+   - A specialized node within AgentFlow that performs LLM (Large Language Model) inference. 
+   - **Core Node**: It serves as the core of AgentFlow, buffering inputs and combining them with prompts from various sources before making an inference request to an LLM.
+
+7. **LlmPool**:
+   - Managed by xMind, this concept involves handling LLM requests in a pool, based on factors like HTTP request status and LLM key usage time limits.
+
+Let me know if you need any further adjustments or additions!
 
 ### Running the Framework
   [Start Guide](./Start.md)
