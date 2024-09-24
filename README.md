@@ -53,7 +53,7 @@ make
 
 7. **LlmPool**:
    - Managed by xMind, this concept involves handling LLM requests in a pool, based on factors like HTTP request status and LLM key usage time limits.
-8. **Session Memory**:
+8. **Session Memory**: 
    •	Session Persistence: Each chat completion is maintained within a session, ensuring continuity across interactions.
 	•	Session Identifiers: Externally, each session is identified by a globally unique identifier (GUID). Internally, sessions are tracked using an integer that loops for efficient resource management.
 	•	Node Data Handling: The first item in each node’s input and output data is the internal session ID. This approach allows a single graph instance to serve multiple chat instances, optimizing resource usage.
