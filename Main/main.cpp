@@ -13,6 +13,7 @@ struct ParamConfig
 bool ParseCommandLine(std::vector<std::string>& params, ParamConfig& paramCfg)
 {
     std::string progName = params[0];
+    std::cout << "appFileName:" << progName << std::endl;
     std::string strAppPath;
     std::string strAppName;
     auto pos = progName.rfind(Path_Sep);
