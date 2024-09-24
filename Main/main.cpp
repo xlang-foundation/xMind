@@ -3,6 +3,14 @@
 #include "port.h"
 #include "utility.h"
 #include "start.h"
+#ifdef __linux__
+#include <unistd.h>
+#elif __APPLE__
+#include <mach-o/dyld.h>
+#elif _WIN32
+#include <windows.h>
+#endif
+
 
 struct ParamConfig
 {
@@ -10,40 +18,49 @@ struct ParamConfig
     std::string appName;
 };
 
+std::string getExecutableFilePath() 
+{
+    std::string exe_path;
+#ifdef __linux__
+    std::filesystem::path fs_exe_path = std::filesystem::canonical("/proc/self/exe");
+	exe_path = fs_exe_path.string();
+#elif __APPLE__
+    char path[1024];
+    uint32_t size = sizeof(path);
+    if (_NSGetExecutablePath(path, &size) == 0) {
+        std::filesystem::path fs_exe_path = std::filesystem::canonical(path);
+		exe_path = fs_exe_path.string();
+    }
+#elif _WIN32
+    char buffer[MAX_PATH];
+    DWORD length = GetModuleFileName(nullptr, buffer, MAX_PATH);
+    if (length > 0) {
+        exe_path = buffer;
+    }    
+#endif
+    return exe_path;
+}
+
 bool ParseCommandLine(std::vector<std::string>& params, ParamConfig& paramCfg)
 {
     std::string progName = params[0];
-    std::cout << "appFileName:" << progName << std::endl;
-    std::string strAppPath;
-    std::string strAppName;
+    std::filesystem::path fsPath(progName);
+    // Check if the path is absolute, if not, combine it with RootPath
+    if (!fsPath.is_absolute())
+    {
+		progName = getExecutableFilePath();
+    }
     auto pos = progName.rfind(Path_Sep);
     if (pos != progName.npos)
     {
-        strAppPath = progName.substr(0, pos);
-        strAppName = progName.substr(pos + 1);
+        paramCfg.appName = progName.substr(pos + 1);
+		paramCfg.appPath = progName.substr(0, pos);
     }
-#if (WIN32)
     else
     {
-        char buffer[MAX_PATH];
-        DWORD length = GetModuleFileName(nullptr, buffer, MAX_PATH);
-        progName = buffer;
-        auto pos = progName.rfind(Path_Sep);
-        if (pos != progName.npos)
-        {
-            strAppPath = progName.substr(0, pos);
-            strAppName = progName.substr(pos + 1);
-        }
-        else
-        {
-            strAppPath = "";
-			strAppName = "";
-        }
+        paramCfg.appName = progName;
     }
-#endif
-    paramCfg.appPath = strAppPath;
-    paramCfg.appName = strAppName;
-
+	std::cout << "AppPath: " << paramCfg.appPath <<",AppName:"<< paramCfg.appName << std::endl;
     return true;
 }
 
