@@ -17,7 +17,7 @@
 
 ### Installation
 
-Clone the repository:
+Clone the repository (Please use the <u>Jit</u> branch):
 
 ```bash
 git clone https://github.com/xlang-foundation/xMind.git
