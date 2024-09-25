@@ -15,7 +15,7 @@
 
 ### Prerequisites
 
-- [XLang](https://github.com/xlang-foundation/xlang) Please clone the Jit branch of XLang into the xMind/ThirdParty folder and ensure the folder is named xlang.
+- [XLang](https://github.com/xlang-foundation/xlang) Please clone XLang into the xMind/ThirdParty folder and ensure the folder is named xlang.
 
 ### Build the Framework
 
