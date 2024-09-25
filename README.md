@@ -7,8 +7,10 @@
 - **LLM Memory**: Retain and utilize context across sessions to enhance interaction and decision-making.
 - **Planning**: Implement sophisticated planning mechanisms that allow LLMs to make informed decisions based on historical data and projected outcomes.
 - **Agent-flow Management**: Orchestrate complex Agent-flows to streamline processing and enhance the performance of AI-driven applications.
-- **Modular Design**: Easily extend and customize the framework to fit your specific needs.
+- **Modular Design**: Easily extend and customize the framework to fit your specific needs.  
+
 [AgentFlow Graph](./AgentFlow.md)
+
 ## Getting Started
 
 ### Prerequisites
