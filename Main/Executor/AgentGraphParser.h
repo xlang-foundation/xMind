@@ -317,8 +317,8 @@ namespace xMind
             std::vector<ConnectionInfo> connections = ParseConnections(connectionsValue);
             if (connections.size() > 0) 
             {
-                X::XPackageValue<AgentGraph> valGraph;
-                AgentGraph* graph = valGraph.GetRealObj();
+                X::XPackageValue<AgentGraph> packGraph;
+                AgentGraph* graph = packGraph.GetRealObj();
                 for (auto& connection : connections)
                 {
                     //Add into Graph
@@ -340,15 +340,17 @@ namespace xMind
                     X::Value retValue;
                     graph->AddConnection(nullptr, nullptr, params, kwParams, retValue);
                 }
-                NodeManager::I().AddGraph((X::Value&)valGraph);
+				X::Value valGraph(packGraph);
+                NodeManager::I().AddGraph(valGraph);
 				agentGraph = valGraph;
             }
             else if(needCreateGraph && firstAgent.IsValid())
             { 
-                X::XPackageValue<AgentGraph> valGraph;
-                AgentGraph* graph = valGraph.GetRealObj();
+                X::XPackageValue<AgentGraph> packGraph;
+                AgentGraph* graph = packGraph.GetRealObj();
                 graph->AddCallable(firstAgent);
-                NodeManager::I().AddGraph((X::Value&)valGraph);
+                X::Value valGraph(packGraph);
+                NodeManager::I().AddGraph(valGraph);
                 agentGraph = valGraph;
             }
 
@@ -356,8 +358,6 @@ namespace xMind
             X::Value groupsValue = root["groups"];
             std::vector<Group> groups = ParseGroups(groupsValue);
 
-
-            std::cout << "Parsed Callables:" << std::endl;
             return true;
 
         }

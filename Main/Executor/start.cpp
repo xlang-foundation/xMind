@@ -87,7 +87,7 @@ namespace xMind
 			xlangCode.c_str(), (int)xlangCode.size(), args, kwargs);
 		if (bOK)
 		{
-			LOG << "xMind Service Starting," << "http://localhost:" << port <<"/xmind_chat.html" << LINE_END;
+			LOG << "xMind Service Starting," << " http://localhost:" << port << LINE_END;
 		}
 	}
 	bool Starter::ParseConfig(X::Value& root)

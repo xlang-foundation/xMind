@@ -119,6 +119,10 @@ namespace xMind
 		{
 			return m_connections;
 		}
+		inline Callable* GetCallableByIndex(int idx)
+		{
+			return m_callables[idx].callable;
+		}
 		X::Value RunInputs(int sid,X::Value& inputs);
 	private:
 		void RunAllCallables(X::XRuntime* rt0 = nullptr);

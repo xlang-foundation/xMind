@@ -127,15 +127,19 @@ namespace xMind
 				for (const auto& connection : pGraph->GetConnections())
 				{
 					X::Dict oneConn;
-					oneConn->Set("fromCallableIndex",connection.fromCallableIndex);
+					int idFrom = pGraph->GetCallableByIndex(connection.fromCallableIndex)->ID();
+					oneConn->Set("fromCallableId", idFrom);
 					oneConn->Set("fromPinIndex",connection.fromPinIndex);
-					oneConn->Set("toCallableIndex",connection.toCallableIndex);
+					int idTo = pGraph->GetCallableByIndex(connection.toCallableIndex)->ID();
+					oneConn->Set("toCallableId", idTo);
 					oneConn->Set("toPinIndex",connection.toPinIndex);
 					connList += oneConn;
 				}
 
 				SPRINTF(convertBuf, online_len, "%llu", graphId);
-				graphDict->Set(convertBuf,connList);
+				std::string graphIdStr = convertBuf;
+				X::Value graphIdValue(graphIdStr);
+				graphDict->Set(graphIdValue,connList);
 			}
 			X::Dict all;
 			all->Set("Nodes",listNodes);
