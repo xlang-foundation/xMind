@@ -63,3 +63,6 @@ make
    - LLM Output Integration: All outputs from the language model (LLM) are fed back into the session memory, continuously enriching the session’s context.
 ### Running the Framework
   [Start Guide](./Start.md)
+
+### CLI - xmcli
+  [CLI](./xmcli.md)
