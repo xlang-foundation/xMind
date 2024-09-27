@@ -26,69 +26,145 @@ limitations under the License.
 
 namespace xMind
 {
+	//Module has name(treat as alias),
+	//blueprint is a yaml description file
+	//and a few codebehind can be python(.py) or xlang(.x) and shared lib(.so/.dll/.dylib)
+	//mapCallables is a map with callable name as key
+
+	//the Relationship between blueprint and codebehind is one to many
+
 	struct ModuleInfo
 	{
 		std::string moduleName;
-		std::string path;
+		std::string blueprint;
+		std::vector<std::string> codebehinds;
 		std::unordered_map<std::string, X::Value> mapCallables;
 	};
+
 	class NodeManager : public Singleton<NodeManager>
 	{
 		Locker m_lock;
+		std::unordered_map<int, ModuleInfo> m_modules; // Map with ModuleId as key
+		std::vector<X::Value> m_graphs;
+		int m_nextModuleId = 1; // To auto-increment ModuleId
+
 	public:
 		NodeManager() = default;
 		~NodeManager() = default;
 
-		// Add a Callable to the list and map
+		// Register a Module and return its ModuleId
+		int RegisterModule(const std::string& moduleName, const std::string& blueprintFilePath)
+		{
+			AutoLock lock(m_lock);
+
+			// Check if the module with the same file path already exists
+			for (const auto& [id, module] : m_modules)
+			{
+				if (module.blueprint == blueprintFilePath)
+				{
+					return id; // Return existing ModuleId if found
+				}
+			}
+
+			// Create a new ModuleInfo and insert into map with a new ModuleId
+			ModuleInfo moduleInfo;
+			moduleInfo.moduleName = moduleName;
+			moduleInfo.blueprint = blueprintFilePath;
+			int moduleId = m_nextModuleId++;
+			m_modules[moduleId] = moduleInfo;
+
+			return moduleId; // Return the new ModuleId
+		}
+
+		void SetCodebehinds(int moduleId, const std::vector<std::string>& codebehinds)
+		{
+			AutoLock lock(m_lock);
+
+			// Find the module by ModuleId
+			auto it = m_modules.find(moduleId);
+			if (it != m_modules.end())
+			{
+				it->second.codebehinds = codebehinds;
+			}
+		}
+		// Old addCallable method
 		bool addCallable(const std::string& moduleName,
 			const std::string& moduleFilePath,
 			const std::string& name, X::Value& callable)
 		{
+			// First, register the module (or find its existing ModuleId)
+			int moduleId = RegisterModule(moduleName, moduleFilePath);
+
+			// Then, use the moduleId to add the callable
+			return addCallable(moduleId, name, callable);
+		}
+
+		// New addCallable method with ModuleId
+		bool addCallable(int moduleId, const std::string& name, X::Value& callable)
+		{
 			AutoLock lock(m_lock);
-			//find from m_modules with moduleName
-			auto it = std::find_if(m_modules.begin(), m_modules.end(), 
-				[moduleName](const ModuleInfo& module) {
-				return module.moduleName == moduleName;
-				});
+
+			// Find the module by ModuleId
+			auto it = m_modules.find(moduleId);
 			if (it == m_modules.end())
 			{
-				ModuleInfo moduleInfo;
-				moduleInfo.moduleName = moduleName;
-				moduleInfo.mapCallables[name] = callable;
-				moduleInfo.path = moduleFilePath;
-				m_modules.push_back(moduleInfo);
+				return false; // ModuleId not found
 			}
-			else
+
+			ModuleInfo& moduleInfo = it->second;
+
+			// Check if mapCallables has the same name
+			if (moduleInfo.mapCallables.find(name) != moduleInfo.mapCallables.end())
 			{
-				//check if mapCallables has the same name
-				auto it2 = it->mapCallables.find(name);
-				if (it2 != it->mapCallables.end())
-				{
-					return false;
-				}
-				it->mapCallables[name] = callable;
+				return false; // Callable with the same name already exists
 			}
+
+			// Add the callable to the map
+			moduleInfo.mapCallables[name] = callable;
 			return true;
 		}
 
-		// Get all Callables
-		X::Value queryCallable(const std::string& moduleName,
-			const std::string& name)
+		// Old queryCallable method
+		X::Value queryCallable(const std::string& moduleName, const std::string& name)
 		{
 			AutoLock lock(m_lock);
-			auto it = std::find_if(m_modules.begin(), m_modules.end(),
-				[moduleName](const ModuleInfo& module) {
-					return module.moduleName == moduleName;
-				});
+
+			// Find the module by name and get its ModuleId
+			int moduleId = -1;
+			for (const auto& [id, module] : m_modules)
+			{
+				if (module.moduleName == moduleName)
+				{
+					moduleId = id;
+					break;
+				}
+			}
+
+			if (moduleId != -1)
+			{
+				// Use the ModuleId to query the callable
+				return queryCallable(moduleId, name);
+			}
+
+			return X::Value(); // Return empty X::Value if not found
+		}
+
+		// New queryCallable method with ModuleId
+		X::Value queryCallable(int moduleId, const std::string& name)
+		{
+			AutoLock lock(m_lock);
+
+			// Find the module by ModuleId
+			auto it = m_modules.find(moduleId);
 			if (it != m_modules.end())
 			{
-				auto it2 = it->mapCallables.find(name);
-				if (it2 != it->mapCallables.end())
+				auto it2 = it->second.mapCallables.find(name);
+				if (it2 != it->second.mapCallables.end())
 				{
 					return it2->second;
 				}
 			}
-			return X::Value();
+			return X::Value(); // Return empty X::Value if not found
 		}
 
 		void AddGraph(X::Value& graph)
@@ -97,6 +173,7 @@ namespace xMind
 			m_graphs.push_back(graph);
 			m_lock.Unlock();
 		}
+
 		// Build JSON representation of the graph
 		std::string BuildGraphAsJson()
 		{
@@ -104,8 +181,8 @@ namespace xMind
 			char convertBuf[online_len];
 
 			X::List listNodes;
-			//Collect all callables with module names
-			for (const auto& module : m_modules)
+			// Collect all callables with module names
+			for (const auto& [id, module] : m_modules)
 			{
 				for (const auto& it : module.mapCallables)
 				{
@@ -117,7 +194,7 @@ namespace xMind
 					}
 					X::Dict dict;
 					dict->Set("moduleName", (std::string)module.moduleName);
-					dict->Set("path", (std::string)module.path);
+					dict->Set("blueprint", (std::string)module.blueprint);
 					dict->Set("name", callable->GetName());
 					dict->Set("instanceName", callable->GetInstanceName());
 					dict->Set("type", static_cast<int>(callable->Type()));
@@ -143,28 +220,26 @@ namespace xMind
 				for (const auto& connection : pGraph->GetConnections())
 				{
 					X::Dict oneConn;
-					int idFrom = pGraph->GetCallableByIndex(connection.fromCallableIndex)->ID();
+					auto idFrom = pGraph->GetCallableByIndex(connection.fromCallableIndex)->ID();
 					oneConn->Set("fromCallableId", idFrom);
-					oneConn->Set("fromPinIndex",connection.fromPinIndex);
-					int idTo = pGraph->GetCallableByIndex(connection.toCallableIndex)->ID();
+					oneConn->Set("fromPinIndex", connection.fromPinIndex);
+					auto idTo = pGraph->GetCallableByIndex(connection.toCallableIndex)->ID();
 					oneConn->Set("toCallableId", idTo);
-					oneConn->Set("toPinIndex",connection.toPinIndex);
+					oneConn->Set("toPinIndex", connection.toPinIndex);
 					connList += oneConn;
 				}
 
 				SPRINTF(convertBuf, online_len, "%llu", graphId);
 				std::string graphIdStr = convertBuf;
 				X::Value graphIdValue(graphIdStr);
-				graphDict->Set(graphIdValue,connList);
+				graphDict->Set(graphIdValue, connList);
 			}
 			X::Dict all;
-			all->Set("Nodes",listNodes);
-			all->Set("Graphs",graphDict);
+			all->Set("Nodes", listNodes);
+			all->Set("Graphs", graphDict);
 			std::string graphJson = all->ToString(true);
 			return graphJson;
 		}
-	private:
-		std::vector<ModuleInfo> m_modules;
-		std::vector<X::Value> m_graphs;
-	};
-}
+	}; // class NodeManager
+} // namespace xMind
+

@@ -16,42 +16,24 @@
 
 --- 
 name: simple_app
-type: compositeAgent
+type: agent
 version: 1.0
-description: "a simple app"
+description: "single Agent"
     
 imports:
-  - file: "llmPool.yml"
-  
+  - file: "../Simple/llmPool.yml"
+codebehind: 
+  - file: "simple.py"
 nodes:
-  - name: SimpleAgent
-    type: function
+  - name: SingleAgent
+    type: agent
     model: gpt-4
-    description: "a simple agent for Q/A"
     prompts:
         - name: QA_Expert
           role: assistant
           content: when you anser questions, please always include questions with your answers as your output
+    description: "a single agent with code behind"
     inputs:
       - name: input1
     outputs:
       - name: output1
-
-  - name: SimpleAgent_Check
-    type: agent
-    model: gpt-4
-    description: "a simple agent to check previous agent's output"
-    prompts:
-        - name: QA_Judge
-          role: assistant
-          content: You are a judge to determine if the question and answer are correct or not. When you output your judgement, please include the question and answer that were passed in, and use a prefix to indicate your judgement.
-    inputs:
-      - name: input1
-    outputs:
-      - name: output1
-connections:
-  - fromAgentName: SimpleAgent
-    fromPinName: output1
-    toAgentName: SimpleAgent_Check
-    toPinName: input1
-  

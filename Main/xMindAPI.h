@@ -69,6 +69,8 @@ namespace xMind
             APISET().AddVarFuncEx("Function", &MindAPISet::Create<Function>);
             APISET().AddVarFuncEx("Action", &MindAPISet::Create<BaseAction>);
             APISET().AddVarFuncEx("Agent", &MindAPISet::Create<BaseAgent>);
+            APISET().AddVarFunc("AddGraph", &MindAPISet::AddGraph);
+            APISET().AddVarFunc("AddNode", &MindAPISet::AddNode);
             APISET().AddClass<0, AgentGraph>("Graph");
             APISET().AddClass<0, Function>("MindFunction");
             APISET().AddClass<0, BaseAction>("MindAction");
@@ -84,6 +86,10 @@ namespace xMind
         {
             return true;
         }
+        bool AddGraph(X::XRuntime* rt, X::XObj* pContext,
+            X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
+        bool AddNode(X::XRuntime* rt, X::XObj* pContext,
+            X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
         bool ChatRequest(X::XRuntime* rt, X::XObj* pContext,
             X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
         bool CompletionRequest(X::XRuntime* rt, X::XObj* pContext,
@@ -187,7 +193,7 @@ namespace xMind
             return true;
         }
 
-        void PushEvent(int ID, int inputIndex, X::Value data)
+        void PushEvent(unsigned long long ID, int inputIndex, X::Value data)
         {
             X::List dataEntry;
 			dataEntry += ID;

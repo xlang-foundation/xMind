@@ -20,7 +20,70 @@ limitations under the License.
 
 namespace xMind
 {
-    bool MindAPISet::ChatRequest(X::XRuntime* rt, X::XObj* pContext, 
+    bool MindAPISet::AddGraph(X::XRuntime* rt, X::XObj* pContext, 
+        X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+    {
+        if (params.size() == 0)
+        {
+            retValue = false;
+            return true;
+        }
+        X::Value graph = params[0];
+        if (!graph.IsObject())
+        {
+            retValue = false;
+            return true;
+        }
+        if (params.size() > 1)
+        {
+            std::string graphName = params[1].ToString();
+            //TODO::
+        }
+		NodeManager::I().AddGraph(graph);
+		retValue = true;
+        return true;
+    }
+
+	//Call as xMind.AddNode(moduleName, callableName, callable)
+    bool MindAPISet::AddNode(X::XRuntime* rt, X::XObj* pContext, 
+        X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+    {
+		if (params.size() < 3)
+		{
+			retValue = false;
+			return true;
+		}
+		std::string moduleName = params[0].ToString();
+		std::string callableName = params[1].ToString();
+		X::Value callable = params[2];
+        if (!callable.IsObject())
+        {
+            retValue = false;
+            return true;
+        }
+        X::Value node;
+        if (callable.GetObj()->GetType() == X::ObjType::RemoteObject)
+        {
+            X::Value nativeObj;
+            if (X::g_pXHost->ExtractNativeObjectFromRemoteObject(callable, nativeObj))
+            {
+                node = nativeObj;
+            }
+        }
+        if (node.IsInvalid())
+        {
+            node = callable;
+        }
+        std::string moduleFilePath;
+		auto it = kwParams.find("moduleFilePath");
+		if (it)
+		{
+			moduleFilePath = it->val.ToString();
+		}
+		NodeManager::I().addCallable(moduleName, moduleFilePath,callableName, node);
+        return true;
+    }
+    bool MindAPISet::ChatRequest(X::XRuntime* rt, X::XObj* pContext,
         X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
     {
         if (params.size() < 1)

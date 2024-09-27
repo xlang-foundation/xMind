@@ -148,7 +148,16 @@ namespace xMind
 			{
 				temperature = (double)it->val;
 			}
-			retValue = LlmPool::I().RunTask(model, m_prompts, temperature, llmSelections);
+			X::List prompts = m_prompts;
+			if (params.size() > 0)
+			{
+				std::string strData = params[0].ToString();
+				X::Dict dictPrompt;
+				dictPrompt->Set("role", "user");
+				dictPrompt->Set("content", strData);
+				prompts += dictPrompt;
+			}
+			retValue = LlmPool::I().RunTask(model, prompts, temperature, llmSelections);
             return true;
         }
 		inline void SetTemperature(double temperature)

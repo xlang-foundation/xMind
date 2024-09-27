@@ -14,7 +14,7 @@
 # limitations under the License.
 # <END>
 
-import xlang
+import xlang,os,inspect
 
 # Import xMind API from xLang
 xMind_Core = xlang.importModule("xMind", thru="lrpc:99023")
@@ -61,9 +61,13 @@ class xMind:
             # Use the real function name if 'name' is not provided in kwargs
             if 'name' not in kwargs:
                 kwargs['name'] = func.__name__
-
+            module_name = func.__module__
+            file_name = func.__globals__['__file__']
             # Call xMind_Core.Function and store the returned object
+            moduleName ="xMind"
+            nodeName = kwargs['name'];
             core_object = xMind_Core.Function(*args, **kwargs)()
+            xMind_Core.AddNode(moduleName,nodeName,core_object)
 
             # Store the original function in the wrapper
             def wrapper(*f_args, **f_kwargs):
@@ -87,9 +91,13 @@ class xMind:
             # Use the real function name if 'name' is not provided in kwargs
             if 'name' not in kwargs:
                 kwargs['name'] = func.__name__
-
+            module_name = func.__module__
+            file_name = func.__globals__['__file__']
             # Call xMind_Core.Agent and store the returned object
+            moduleName ="xMind"
+            nodeName = kwargs['name'];
             core_object = xMind_Core.Agent(*args, **kwargs)()
+            xMind_Core.AddNode(moduleName,nodeName,core_object,"")
 
             # Store the original function in the wrapper
             def wrapper(*f_args, **f_kwargs):
@@ -113,10 +121,13 @@ class xMind:
             # Use the real function name if 'name' is not provided in kwargs
             if 'name' not in kwargs:
                 kwargs['name'] = func.__name__
-
+            module_name = func.__module__
+            file_name = func.__globals__['__file__']
             # Call xMind_Core.Action and store the returned object
+            moduleName ="xMind"
+            nodeName = kwargs['name'];
             core_object = xMind_Core.Action(*args, **kwargs)()
-
+            xMind_Core.AddNode(moduleName,nodeName,core_object)
             # Store the original function in the wrapper
             def wrapper(*f_args, **f_kwargs):
                 xMind_Core.log(f"Calling Action: {func.__name__}")
@@ -138,7 +149,9 @@ class xMind:
         """
         Create and return a new graph using xMind_Core.Graph().
         """
-        return xMind_Core.Graph()
+        graph = xMind_Core.Graph()
+        xMind_Core.AddGraph(graph)
+        return graph
 
     @classmethod
     def Stop(cls):
@@ -183,3 +196,18 @@ class xMind:
     @staticmethod
     def log(*args, **kwargs):
         xMind_Core.log(*args, **kwargs)
+    
+    @staticmethod
+    def importBlueprint(yamlBlueprint):
+        # Check if yamlBlueprint is an absolute path
+        if not os.path.isabs(yamlBlueprint):
+            # Get the caller's file path
+            caller_frame = inspect.stack()[1]
+            caller_module = inspect.getmodule(caller_frame[0])
+            caller_file_path = caller_module.__file__
+            caller_dir = os.path.dirname(os.path.abspath(caller_file_path))
+            yamlBlueprint = os.path.join(caller_dir, yamlBlueprint)
+        
+        # Load the blueprint using xMind_Core
+        xMind_Core.LoadBlueprintFromFile(yamlBlueprint)
+

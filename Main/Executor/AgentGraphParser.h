@@ -147,6 +147,35 @@ namespace xMind
             }
             return true;
         }
+        bool ParseCodebehinds(const std::string& curModuleName, 
+            const std::string& curModule_FileName, 
+            X::Value& root, std::vector<std::string>& codebehindList)
+        {
+            X::Dict rootDict(root);
+            // Parse variables
+            X::Value codebehind = rootDict["codebehinds"];
+            if (codebehind.IsList())
+            {
+                X::List varList(codebehind);
+                for (const auto var : *varList)
+                {
+                    X::Dict varDict(var);
+                    std::string fileName = varDict["file"].ToString();
+                    fileName = RepVar(fileName, curModuleName);
+                    // Check if fileName is an absolute path
+                    std::filesystem::path filePath(fileName);
+                    if (!filePath.is_absolute())
+                    {
+                        // If not absolute, construct the absolute path using curModule_FileName's directory
+                        std::filesystem::path modulePath(curModule_FileName);
+                        filePath = modulePath.parent_path() / fileName;
+                        fileName = filePath.string();
+						codebehindList.push_back(fileName);
+                    }
+                }
+            }
+            return true;
+        }
         bool ParseVariables(const std::string& curModuleName, X::Value& root)
         {
             X::Dict rootDict(root);
@@ -285,8 +314,8 @@ namespace xMind
         bool ParseAgentGraphDescFromString(const std::string& desc);
 		bool ParseAgentGraphDescFromRoot(bool needCreateGraph,
             X::Value& agentGraph,X::Value& root,
-            const std::string& moduleName = "", 
-            const std::string& fileName = "")
+            const std::string& moduleName, 
+            const std::string& blueprintFileName)
         {
             // Check if root is a Dict
             if (!root.IsDict())
@@ -313,6 +342,11 @@ namespace xMind
             std::string version = root["version"].ToString();
             std::string description = RepVar(root["description"].ToString(),moduleName);
 
+			int moduleId = NodeManager::I().RegisterModule(strModuleName, blueprintFileName);
+			std::vector<std::string> codebehindList;
+            ParseCodebehinds(strModuleName, blueprintFileName, root,codebehindList);
+			NodeManager::I().SetCodebehinds(moduleId, codebehindList);
+
 			ParseVariables(strModuleName, root);
 			ParseLlmPool(strModuleName, root);
             // Process 'prompts' if any (assuming it's a list or dict)
@@ -321,12 +355,12 @@ namespace xMind
 
             // Parse imports
             X::Value importsValue = root["imports"];
-            ParseImports(moduleName, (std::string&)fileName,importsValue);
+            ParseImports(moduleName, (std::string&)blueprintFileName,importsValue);
 
             // Parse agents/actions/functions
             X::Value nodesValue = root["nodes"];
 			X::Value firstAgent;
-            ParseNodes(firstAgent,nodesValue, moduleName,fileName);
+            ParseNodes(firstAgent,nodesValue, moduleName, blueprintFileName);
 
             // Parse connections
             X::Value connectionsValue = root["connections"];

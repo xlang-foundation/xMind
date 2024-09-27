@@ -55,7 +55,9 @@ namespace xMind
 
         }
         X::Value agentGraph;
-        return ParseAgentGraphDescFromRoot(false, agentGraph,root);
+        std::string moduleName;
+		std::string blueprintName;
+        return ParseAgentGraphDescFromRoot(false, agentGraph,root, moduleName, blueprintName);
     }
     
     bool Parser::ParseNodes(X::Value& firstAgent,const X::Value& nodesValue,

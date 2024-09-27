@@ -26,6 +26,7 @@ endif()
 
 # Add subdirectories
 add_subdirectory("Main")
+add_subdirectory("cli")
 add_subdirectory("ThirdParty/xlang")
 
 # Copy necessary directories to output
