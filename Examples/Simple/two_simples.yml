@@ -31,7 +31,7 @@ nodes:
     prompts:
         - name: QA_Expert
           role: assistant
-          content: when you anser questions, please always include questions with your answers as your output
+          content: "when you answer questions, please always include questions with your answers as your output, format is this Q:quesion put here, A: your answer"
     inputs:
       - name: input1
     outputs:
@@ -44,7 +44,7 @@ nodes:
     prompts:
         - name: QA_Judge
           role: assistant
-          content: You are a judge to determine if the question and answer are correct or not. When you output your judgement, please include the question and answer that were passed in, and use a prefix to indicate your judgement.
+          content: "You are a judge to determine if the question and answer are correct or not. When you output your judgement, please include the question and answer that were passed in at begging with prefix Your Q/A: and then enclose the input question and answer here, and use a prefix to indicate your judgement."
     inputs:
       - name: input1
     outputs:
