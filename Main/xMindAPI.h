@@ -45,6 +45,7 @@ namespace xMind
         std::mutex m_mutex;
         std::map<int, SubscriptionInfo*> m_subscriptions;
         int m_nextSubscriptionId = 1;
+		std::unordered_map<std::string,X::Value> m_xlangModules;
 
         BEGIN_PACKAGE(MindAPISet)
             APISET().AddConst("OK", (int)Status::Ok);
@@ -80,8 +81,23 @@ namespace xMind
             APISET().AddVarFunc("ChatRequest", &MindAPISet::ChatRequest);
             APISET().AddVarFunc("CompletionRequest", &MindAPISet::CompletionRequest);
 
+            APISET().AddFunc<1>("GetXModule", &MindAPISet::GetXModule);
+
         END_PACKAGE
     public:
+        inline X::Value GetXModule(std::string name)
+        {
+			auto it = m_xlangModules.find(name);
+			if (it != m_xlangModules.end())
+			{
+				return it->second;
+			}
+			return X::Value();
+        }
+		inline void AddXlangModule(const std::string& name, X::Value module)
+		{
+			m_xlangModules[name] = module;
+		}
         inline bool IsRunning()
         {
             return true;

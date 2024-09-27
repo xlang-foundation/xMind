@@ -60,6 +60,18 @@ namespace xMind
         return ParseAgentGraphDescFromRoot(false, agentGraph,root, moduleName, blueprintName);
     }
     
+    std::string Parser::QueryKeyStore(std::string key)
+    {
+        std::string strRet;
+        X::Value keystore = MindAPISet::I().GetXModule("keystore");
+        if (keystore.IsObject())
+        {
+            X::Value val = keystore["query"](key);
+            strRet = val.ToString();
+        }
+        return strRet;
+    }
+
     bool Parser::ParseNodes(X::Value& firstAgent,const X::Value& nodesValue,
         const std::string& moduleName, const std::string& fileName)
     {

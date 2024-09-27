@@ -23,7 +23,7 @@ description: "llm pool"
 
 varibles:
   - name: openai_key
-    value: "You Key here"
+    value: $keystore$
     description: "OpenAI API key"
 
 llm_pool:

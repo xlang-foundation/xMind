@@ -36,6 +36,7 @@ limitations under the License.
 
 //use this for agent no module name
 #define NO_MODULE_NAME "module"
+#define keystore_tag "$keystore$"
 
 namespace xMind
 {
@@ -176,6 +177,7 @@ namespace xMind
             }
             return true;
         }
+        std::string QueryKeyStore(std::string key);
         bool ParseVariables(const std::string& curModuleName, X::Value& root)
         {
             X::Dict rootDict(root);
@@ -190,9 +192,15 @@ namespace xMind
 					//name can't use ${} inside
                     std::string name = varDict["name"].ToString();
                     X::Value value = varDict["value"];
+                  
                     if (value.IsString() || value.IsObject() && value.GetObj()->GetType() == X::ObjType::Str)
                     {
-						value = RepVar(value.ToString(), curModuleName);
+						std::string strValue = RepVar(value.ToString(), curModuleName);
+                        if (strValue == keystore_tag)
+                        {
+                            strValue = QueryKeyStore(name);
+                        }
+                        value = strValue;
                     }
                     std::string description = RepVar(varDict["description"].ToString(),curModuleName);
                     VariableManager::I().Add(curModuleName, name, description, value);

@@ -1,7 +1,8 @@
 args = get_args()
-args = ["","-uk","1","2"]
 def PrintUsage():
 	print("xmcli --updatekey or -uk key_name value")
+	print("xmcli --getkey or -gk key_name")
+	print("xmcli --deletekey or -dk key_name")
 
 if args.size() <= 2:
 	PrintUsage()
@@ -16,7 +17,24 @@ firstArg = args[1]
 if (firstArg == "-uk" or firstArg == "--updatekey") and args.size()>=4:
 	key = args[2]
 	value = args[3]
-	print("Update Key Store with (",key,",",value,")")
+	keyStore = xMind.GetXModule("keystore")
+	keyStore.store(key, value)
+	print("Updated ${key}:${value}")
+
+elif (firstArg == "-gk" or firstArg == "--getkey") and args.size()>=3:
+	key = args[2]
+	keyStore = xMind.GetXModule("keystore")
+	value = keyStore.query(key)
+	if value == None:
+		print("No ${key}")
+	else:
+		print("${key}:${value}")
+
+elif (firstArg == "-dk" or firstArg == "--deletekey") and args.size()>=3:
+	key = args[2]
+	keyStore = xMind.GetXModule("keystore")
+	keyStore.remove(key)
+	print("Deleted ${key}")
 else:
-	alert("dbg")
-print("Done")
+	pass
+

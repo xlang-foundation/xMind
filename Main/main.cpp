@@ -122,6 +122,57 @@ int WorkerMain(ParamConfig& paramConfig)
     }
     return 0;
 }
+
+static std::string Script_Files[] = {
+    "keystore.x",
+};
+
+#define Script_Folder "Scripts"
+
+static std::string ReadFileContent(const std::string& fileName) {
+    std::filesystem::path fsFile(fileName);
+    // Open the file
+    std::ifstream file(fsFile, std::ios::in | std::ios::binary);
+    if (!file) {
+        throw std::runtime_error("Failed to open the file: " + fsFile.string());
+    }
+
+    // Read the entire file content into a string
+    std::ostringstream contentStream;
+    contentStream << file.rdbuf();
+
+    // Close the file
+    file.close();
+
+    return contentStream.str();
+}
+void LoadScripts(ParamConfig paramConfig)
+{
+	std::filesystem::path fsAppPath(paramConfig.appPath);
+    for (int i = 0; i < sizeof(Script_Files) / sizeof(std::string); i++)
+    {
+        auto& script_file = Script_Files[i];
+        std::filesystem::path ScriptFolder(Script_Folder);
+		std::filesystem::path fsFilePath = fsAppPath;
+        fsFilePath = fsFilePath / ScriptFolder /script_file;
+        std::string strScriptFile = fsFilePath.string();
+        std::string script_content = ReadFileContent(strScriptFile);
+        if (!script_content.empty())
+        {
+            X::Value objModule;
+            bool bOK = X::g_pXHost->LoadModule(strScriptFile.c_str(),
+                script_content.c_str(), (int)script_content.size(), objModule);
+            if (bOK)
+            {
+                X::Value moduleRetValue;
+                X::g_pXHost->RunModule(objModule, moduleRetValue, true);
+				std::string scriptName = fsFilePath.stem().string();
+                xMind::MindAPISet::I().AddXlangModule(scriptName,objModule);
+            }
+        }
+    }
+}
+
 int main(int argc, char* argv[]) 
 {
     ParamConfig paramConfig;
@@ -144,6 +195,8 @@ int main(int argc, char* argv[])
     xMind::MindAPISet::I().Start();
 
     X::RegisterPackage<xMind::MindAPISet>(paramConfig.appName.c_str(), "xMind", &xMind::MindAPISet::I());
+
+    LoadScripts(paramConfig);
 
     int lrpc_port = 99023;
     LOG << "Local RPC(shared memory) Listen on virtual port " << lrpc_port << LINE_END;

@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
 		}
 		return 0;
 	}
-	::MessageBox(nullptr, "XLang Engine Loaded", "XLang", MB_OK);
+	//::MessageBox(nullptr, "XLang Engine Loaded", "XLang", MB_OK);
 	//Run Script
 	static std::string script_files[] =
 	{
