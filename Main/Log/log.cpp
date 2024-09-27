@@ -59,7 +59,6 @@ Cantor::Log& Cantor::Log::SetCurInfo(const char* fileName,
 		}
 		unsigned long pid = GetPID();
 		unsigned long tid = GetThreadID();
-		//int64_t ts = getCurTimeStamp();
 		auto curTime = getCurrentTimeString();
 		const int buf_Len = 1000;
 		char szFilter[buf_Len];

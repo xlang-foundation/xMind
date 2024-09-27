@@ -300,6 +300,7 @@ namespace xMind
 			if (pCallable)
 			{
 				pCallable->SetRT(xMind::MindAPISet::I().RT());
+				LOG5 << "Put inputs:" << inputs.ToString() << "To:" << pCallable->GetInstanceName()<<LINE_END;
 				pCallable->ReceiveData(sid, 0, inputs);
 			}
 		}
