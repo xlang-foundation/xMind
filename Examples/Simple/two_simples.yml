@@ -25,7 +25,7 @@ imports:
   
 nodes:
   - name: SimpleAgent
-    type: function
+    type: agent
     model: gpt-4
     description: "a simple agent for Q/A"
     prompts:

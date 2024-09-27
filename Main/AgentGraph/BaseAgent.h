@@ -17,6 +17,7 @@ limitations under the License.
 #pragma once
 #include "BufferedProcessor.h"
 #include "LlmPool.h"
+#include "log.h"
 namespace xMind
 {
     class BaseAgent: public BufferedProcessor
@@ -63,6 +64,7 @@ namespace xMind
 
 			X::Value retValue;
 			int data_SessionId = 0;
+			LOG5 << "Agent: " << m_instanceName << " WaitInput" <<LINE_END;
 			if (WaitInput(nullptr, nullptr, params, kwParams, varData))
 			{
 				X::List prompts;
@@ -99,12 +101,14 @@ namespace xMind
 						}
 					}
 				}
-
+				LOG5 << "Agent: "<< m_instanceName << " Have prompts:"<< prompts.ToString() << LINE_END;
 				retValue = LlmPool::I().RunTask(m_model, prompts, m_temperature, llmSelections);
 				if (retValue.IsObject() && retValue.GetObj()->GetType() == X::ObjType::Error)
 				{
+					LOG5 << "Agent: " << m_instanceName << "Got Error" << LINE_END;
 					return retValue;
 				}
+				LOG5 << "Agent: " << m_instanceName << " Results:" << retValue.ToString() << LINE_END;
 				//Need parse the result
 				//then push to next node
 				PushToOutput(data_SessionId,0, retValue);
