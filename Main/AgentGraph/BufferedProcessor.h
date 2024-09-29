@@ -19,8 +19,9 @@ limitations under the License.
 #include <thread>
 #include <vector>
 #include <condition_variable>
+#include <optional>
 #include "Callable.h"
-#include "type_def.h"
+
 
 namespace xMind
 {
@@ -30,21 +31,43 @@ namespace xMind
 	{
 		Status status;
 		int inputIndex;
-		int sessionId;
+		SESSION_ID sessionId;
 		X::Value data;
 	};
-	using SessionValue = std::pair<int, X::Value>;
+	using SessionValue = std::pair<SESSION_ID, X::Value>;
 
 	class BufferedProcessor : public Callable
 	{
 		BEGIN_PACKAGE(BufferedProcessor)
 			ADD_BASE(Callable);
-			APISET().AddVarFunc("waitInput", &BufferedProcessor::WaitInput);
+			APISET().AddVarFunc("waitInputs", &BufferedProcessor::WaitInputs);
 			APISET().AddVarFunc("isRunning", &BufferedProcessor::IsRunning);
 			APISET().AddFunc<3>("pushToOutput", &Callable::PushToOutput);
+			APISET().AddPropL("TrigerCondition",
+				[](auto* pThis, X::Value v) {
+					if (v.IsNumber())
+					{
+						pThis->m_trigerCondition = (TrigerCondition)(int)v;
+					}
+					else
+					{
+						std::string condi = v.ToString();
+						if (condi == "WaitEitherInput")
+						{
+							pThis->m_trigerCondition = TrigerCondition::WaitEitherInput;
+						}
+						else if (condi == "WaitAllInputs")
+						{
+							pThis->m_trigerCondition = TrigerCondition::WaitAllInputs;
+						}
+					}
+				},
+				[](auto* pThis) {
+					return (int)pThis->m_trigerCondition;
+				});
 		END_PACKAGE
 	protected:
-		inline virtual bool ReceiveData(int sessionId, int inputIndex, X::Value& data) override
+		inline virtual bool ReceiveData(SESSION_ID sessionId, int inputIndex, X::Value& data) override
 		{
 			PushEvent(inputIndex, X::Value());//just notify if there is subscriber
 			std::unique_lock<std::mutex> lock(m_mutex);
@@ -52,7 +75,7 @@ namespace xMind
 			{
 				return false;
 			}
-			m_inputQueues[inputIndex].push(std::pair(sessionId,data));
+			m_inputQueues[inputIndex].push_back(std::pair(sessionId,data));
 			m_condVar.notify_all();
 			return true;
 		}
@@ -76,7 +99,7 @@ namespace xMind
 		}
 
 	public:
-		BufferedProcessor() : m_running(false) {}
+		BufferedProcessor() : m_running(false){}
 
 		virtual ~BufferedProcessor()
 		{
@@ -133,54 +156,140 @@ namespace xMind
 			}
 			return true;
 		}
-		bool WaitInput(X::XRuntime* rt, X::XObj* pContext,
+		bool WaitInputs(X::XRuntime* rt, X::XObj* pContext,
 			X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
 		{
-			int inputIndex = -1;
 			int timeoutMs = -1;
+			bool either = (m_trigerCondition != TrigerCondition::WaitAllInputs);
+
 			if (params.size() > 0)
 			{
-				inputIndex = (int)params[0];
-			}
-			else if (params.size() > 1)
-			{
-				timeoutMs = (int)params[1];
+				timeoutMs = (int)params[0];
 			}
 			else
 			{
-				auto it = kwParams.find("inputIndex");
-				if (it)
-				{
-					inputIndex = (int)it->val;
-				}
-				it = kwParams.find("timeout");
+				auto it = kwParams.find("timeout");
 				if (it)
 				{
 					timeoutMs = (int)it->val;
 				}
 			}
-			std::unique_lock<std::mutex> lock(m_mutex);
-			InputData inputData{ Status::Ok, inputIndex,0, X::Value() };
 
-			auto waitCondition = [this, inputIndex] {
+			// Check for "Either" parameter
+			//override again with Keyword parameter
+			auto itEither = kwParams.find("Either");
+			if (itEither && itEither->val.IsBool())
+			{
+				either = itEither->val.ToBool();
+			}
+
+			std::unique_lock<std::mutex> lock(m_mutex);
+
+			auto waitCondition = [this, &retValue, either] {
 				if (!m_running)
 				{
 					return true;
 				}
-				if (inputIndex == -1)
+
+				if (m_inputQueues.empty())
 				{
-					for (const auto& queue : m_inputQueues)
+					return false;
+				}
+
+				std::optional<SESSION_ID> commonSessionId;
+				std::vector<SessionValue> matchedItems(m_inputQueues.size());
+
+				for (size_t i = 0; i < m_inputQueues.size(); ++i)
+				{
+					auto& vec = m_inputQueues[i];
+					for (auto it = vec.begin(); it != vec.end(); ++it)
 					{
-						if (!queue.empty())
+						SESSION_ID sessionId = it->first;
+						bool isCommon = true;
+
+						if (either)
 						{
+							// If 'Either' is true, return as soon as we find a session ID in one vector
+							commonSessionId = sessionId;
+							matchedItems[i] = *it;
+
+							X::List outerList;
+							X::List innerList;
+							innerList += it->first;  // sessionId
+							innerList += static_cast<int>(i); // inputIndex
+							innerList += it->second; // data
+							outerList->AddItem(innerList);
+							retValue = outerList;
+
+							// Remove the matched item from the vector
+							vec.erase(it);
+
 							return true;
 						}
+
+						// Check if this sessionId exists in all other vectors
+						for (size_t j = 0; j < m_inputQueues.size(); ++j)
+						{
+							if (i == j)
+							{
+								matchedItems[j] = *it; // save the match for this vector
+								continue;
+							}
+
+							auto& otherVec = m_inputQueues[j];
+							auto found = std::find_if(otherVec.begin(), otherVec.end(),
+								[sessionId](const SessionValue& pair) {
+									return pair.first == sessionId;
+								});
+
+							if (found == otherVec.end())
+							{
+								isCommon = false;
+								break;
+							}
+							else
+							{
+								matchedItems[j] = *found; // save the match for the other vector
+							}
+						}
+
+						if (isCommon)
+						{
+							commonSessionId = sessionId;
+							break;
+						}
+					}
+
+					if (commonSessionId.has_value())
+					{
+						X::List outerList;
+						for (size_t k = 0; k < m_inputQueues.size(); ++k)
+						{
+							const auto& data = matchedItems[k];
+							X::List innerList;
+							innerList += data.first;  // sessionId
+							innerList += static_cast<int>(k); // inputIndex
+							innerList += data.second; // data
+							outerList->AddItem(innerList);
+
+							// Remove the matched item from the vector
+							auto& vec = m_inputQueues[k];
+							auto it = std::find_if(vec.begin(), vec.end(),
+								[commonSessionId](const SessionValue& pair) {
+									return pair.first == commonSessionId.value();
+								});
+
+							if (it != vec.end())
+							{
+								vec.erase(it);
+							}
+						}
+
+						retValue = outerList;
+						return true;
 					}
 				}
-				else if (inputIndex >= 0 && inputIndex < static_cast<int>(m_inputQueues.size()))
-				{
-					return !m_inputQueues[inputIndex].empty();
-				}
+
 				return false;
 				};
 
@@ -191,57 +300,18 @@ namespace xMind
 			}
 			else
 			{
-				//timeout will set isTimeout to false
 				isNotTimeout = m_condVar.wait_for(lock, std::chrono::milliseconds(timeoutMs), waitCondition);
 			}
-			//if still running,whatever timeout or not,we try to get the data
-			if (m_running)
+
+			if (!isNotTimeout || !m_running)
 			{
-				if (inputIndex == -1)
-				{
-					for (size_t i = 0; i < m_inputQueues.size(); ++i)
-					{
-						if (!m_inputQueues[i].empty())
-						{
-							inputData.inputIndex = static_cast<int>(i);
-							auto pair = m_inputQueues[i].front();
-							inputData.sessionId = pair.first;
-							inputData.data = pair.second;
-							m_inputQueues[i].pop();
-							isNotTimeout = true;
-							break;
-						}
-					}
-				}
-				else
-				{
-					auto& q = m_inputQueues[inputIndex];
-					if (!q.empty())
-					{
-						auto pair = m_inputQueues[inputIndex].front();
-						inputData.sessionId = pair.first;
-						inputData.data = pair.second;
-						m_inputQueues[inputIndex].pop();
-						isNotTimeout = true;
-					}
-				}
-				inputData.status = isNotTimeout ? Status::Ok : Status::Timeout;
-			}
-			else
-			{
-				inputData.status = Status::Stopped;
+				retValue = X::Value();  // return an empty value if timed out or stopped
+				return false;
 			}
 
-			X::List list;
-			list += (int)inputData.status;
-			list += inputData.sessionId;
-			list += inputData.inputIndex;
-			list += inputData.data;
-			//xlang struct has issues to call destructor for members like X::Value
-			//so here use list to return the data
-			retValue = list;//CreateXlangStructInputData(inputData);
 			return true;
 		}
+
 
 		inline virtual void Stop() override
 		{
@@ -290,20 +360,11 @@ namespace xMind
 			}
 			return retData;
 		}
-		inline SessionValue DequeueInput(int inputIndex)
-		{
-			std::unique_lock<std::mutex> lock(m_mutex);
-			SessionValue retVal;
-			auto& q = m_inputQueues[inputIndex];
-			retVal = q.front();
-			q.pop();
-			return retVal;
-		}
 
 	protected:
 		bool m_RunInThread = false;
 		AgentGroup* m_group;
-		std::vector<std::queue<SessionValue>> m_inputQueues;
+		std::vector<std::vector<SessionValue>> m_inputQueues;
 		std::thread m_thread;
 		std::atomic<bool> m_running;
 		std::mutex m_mutex;

@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace xMind
 {
-	std::atomic<unsigned long long> Callable::s_idCounter{ 0 };
+	std::atomic<unsigned long long> Callable::s_idCounter{ 1 };
 	void Callable::Copy(Callable* other)
 	{
 		m_implObject = other->m_implObject;
@@ -48,11 +48,33 @@ namespace xMind
 		auto* pXPack = AgentGraph::APISET().GetProxy(m_agentGraph);
 		m_varGraph = X::Value(pXPack);
 	}
-	void Callable::PushToOutput(int sessionId,int outputIndex, X::Value data)
+	void Callable::PushToOutput(SESSION_ID sessionId,int outputIndex, X::Value data)
 	{
 		if (m_agentGraph)
 		{
 			m_agentGraph->PushDataToCallable(this, sessionId,outputIndex, data);
+		}
+	}
+	void Callable::BreakConnection(std::string outputPinName)
+	{
+		int outputPinIndex = GetOutputIndex(outputPinName);
+		if (outputPinIndex < 0)
+		{
+			//if not found, LLM make errors
+			std::vector<int> loopBackOutputPins;
+			bool isTerminalNode = m_agentGraph->IsTerminalNodeWithLoopBackConnections(this,
+				loopBackOutputPins);
+			if (isTerminalNode)
+			{
+				for (auto outputPinIndex : loopBackOutputPins)
+				{
+					m_agentGraph->BreakConnection(this, outputPinIndex);
+				}
+			}
+		}
+		else if (m_agentGraph)
+		{
+			m_agentGraph->BreakConnection(this, outputPinIndex);
 		}
 	}
 }

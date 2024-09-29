@@ -77,17 +77,17 @@ nodes:
   - name: AgentA
     instanceName: AgentA_Clone1
 connections:
-  - fromAgentName: AgentA
+  - fromNodeName: AgentA
     fromPinName: output1
-    toAgentName: AgentB
+    toNodeName: AgentB
     toPinName: input1
-  - fromAgentName: other.AgentX
+  - fromNodeName: other.AgentX
     fromPinName: output1
-    toAgentName: AgentA
+    toNodeName: AgentA
     toPinName: input2
-  - fromAgentName: planner.AgentY
+  - fromNodeName: planner.AgentY
     fromPinName: input1
-    toAgentName: AgentB
+    toNodeName: AgentB
     toPinName: input2
 
 groups:

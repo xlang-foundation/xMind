@@ -27,6 +27,7 @@ limitations under the License.
 #include <algorithm>
 #include "xpackage.h"
 #include "Locker.h"
+#include "type_def.h"
 
 namespace xMind
 {
@@ -71,18 +72,19 @@ namespace xMind
 		X::Value m_implObject;
 		X::KWARGS m_params;
 		X::XRuntime* m_rt;
-		int m_index;//index in the agentGraph
 		X::Value m_varGraph;
 		AgentGraph* m_agentGraph;
 		unsigned long long m_ID;//unique ID inside XMind not just the graph
 		std::string m_name; // Callable Name
 		std::string m_instanceName;
-		std::string m_description;//ablity description
+		std::string m_description;//ability description
 		CallableType m_type;
 		Source m_source;
 		X::Value m_nodeYamlDesc;//all node info pack as X::Value put here
 		std::vector<Pin> m_inputs;
 		std::vector<Pin> m_outputs;
+		TrigerCondition m_trigerCondition = TrigerCondition::Default;
+		unsigned long m_iterationLimit = 0;//default to 0, mean no limit
 		Locker m_locker;
 
 		void Copy(Callable* other);
@@ -91,7 +93,7 @@ namespace xMind
 		Callable() :
 			m_type(CallableType::callable),
 			m_agentGraph(nullptr), m_rt(nullptr),
-			m_index(-1), m_ID(++s_idCounter)
+			m_ID(++s_idCounter)
 		{
 		}
 
@@ -101,6 +103,22 @@ namespace xMind
 		inline unsigned long long ID()
 		{
 			return m_ID;
+		}
+		inline void SetTriggerCondition(TrigerCondition trigerCondition)
+		{
+			m_trigerCondition = trigerCondition;
+		}
+		inline TrigerCondition GetTriggerCondition()
+		{
+			return m_trigerCondition;
+		}
+		inline void SetIterationLimit(unsigned long limit)
+		{
+			m_iterationLimit = limit;
+		}
+		inline unsigned long GetIterationLimit()
+		{
+			return m_iterationLimit;
 		}
 		inline void SetSource(const Source& source)
 		{
@@ -166,16 +184,9 @@ namespace xMind
 		{
 			return m_description;
 		}
-		inline void SetIndex(int index)
-		{
-			m_index = index;
-		}
-		inline int GetIndex()
-		{
-			return m_index;
-		}
-		void PushToOutput(int sessionId,int outputIndex, X::Value data);
-		virtual bool ReceiveData(int sessionId,int inputIndex, X::Value& data) = 0;
+		void PushToOutput(SESSION_ID sessionId,int outputIndex, X::Value data);
+		void BreakConnection(std::string outputPinName);
+		virtual bool ReceiveData(SESSION_ID sessionId,int inputIndex, X::Value& data) = 0;
 		virtual void Stop() = 0;
 		virtual bool Run() = 0;
 		virtual X::Value Clone() = 0;

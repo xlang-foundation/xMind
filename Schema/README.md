@@ -48,9 +48,9 @@ A `compositeAgent` configuration defines a composite agent that orchestrates mul
 - `agents` (array of objects, required): Defines the agents within the composite agent.
   - See the Agent Configuration section for the structure of each agent.
 - `connections` (array of objects, required): Defines the connections between agents.
-  - `fromAgentName` (string, required): The name of the source agent.
+  - `fromNodeName` (string, required): The name of the source agent.
   - `fromPinName` (string, required): The name of the source pin.
-  - `toAgentName` (string, required): The name of the destination agent.
+  - `toNodeName` (string, required): The name of the destination agent.
   - `toPinName` (string, required): The name of the destination pin.
 - `groups` (array of objects, optional): Defines the execution groups for the agents.
   - `name` (string, required): The name of the group.

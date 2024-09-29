@@ -64,57 +64,63 @@ namespace xMind
 		return true;
 	}
 
-	int AgentGraph::AddCallable(X::Value& varCallable, Callable* callable)
+	unsigned long long AgentGraph::AddCallable(X::Value& varCallable, Callable* callable)
 	{
 		if (callable == nullptr)
 		{
 			X::XPackageValue<Callable> packObj(varCallable);
 			callable = packObj.GetRealObj();
 		}
+		auto id = callable->ID();
 		AutoLock lock(m_locker); // Lock for thread safety
-
-		int index = (int)m_callables.size();
-		m_callableNameToIndex[callable->GetInstanceName()] = index;
+		for (auto& info : m_callables)
+		{
+			if (info.callable->ID() == id)
+			{
+				return id;
+			}
+		}
 		m_callables.push_back({ callable,varCallable });
 		callable->SetAgentGraph(this);
-		callable->SetIndex(index);
-		return index;
+		return id;
 	}
 
-	void AgentGraph::RemoveCallable(int index)
+	void AgentGraph::RemoveCallable(int id)
 	{
 		AutoLock lock(m_locker); // Lock for thread safety
 
-		if (index >= 0 && index < m_callables.size())
+		for (auto& callInfo : m_callables)
 		{
-			auto& callInfo = m_callables[index];
-			delete callInfo.callable;
-			callInfo.callable = nullptr;
-			callInfo.varCallable.Clear();
+			if (callInfo.callable->ID() == id)
+			{
+				delete callInfo.callable;
+				callInfo.callable = nullptr;
+				callInfo.varCallable.Clear();
+				break;
+			}
 		}
 	}
 
 	void AgentGraph::AddConnection(X::XRuntime* rt, X::XObj* pContext,
 		X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
 	{
-		int fromCallableIndex=-1;
-		int fromPinIndex=0;
-		int toCallableIndex=-1;
-		int toPinIndex=0;
+		unsigned long long fromCallableId = 0;
+		unsigned long long toCallableId = 0;
+		int fromPinIndex=-1;
+		int toPinIndex=-1;
 		if (params.size() == 2)
 		{
 			auto fromInstanceName = params[0].ToString();
-			auto it = m_callableNameToIndex.find(fromInstanceName);
-			if(it != m_callableNameToIndex.end())
-			{
-				fromCallableIndex = it->second;
-			}
 			auto toInstanceName = params[1].ToString();
-			it = m_callableNameToIndex.find(toInstanceName);
-			if (it != m_callableNameToIndex.end())
+			Callable* fromCallable = FindCallable(fromInstanceName);
+			Callable* toCallable = FindCallable(toInstanceName);
+			if (fromCallable == nullptr || toCallable == nullptr)
 			{
-				toCallableIndex = it->second;
+				retValue = X::Value(false);
+				return;
 			}
+			fromCallableId = fromCallable->ID();
+			toCallableId = toCallable->ID();
 		}
 		else if (params.size() == 4)
 		{
@@ -122,46 +128,42 @@ namespace xMind
 			auto fromPinName = params[1].ToString();
 			auto toInstanceName = params[2].ToString();
 			auto toPinName = params[3].ToString();
-			auto it = m_callableNameToIndex.find(fromInstanceName);
-			if (it != m_callableNameToIndex.end())
+			Callable* fromCallable = FindCallable(fromInstanceName);
+			Callable* toCallable = FindCallable(toInstanceName);
+			if (fromCallable == nullptr || toCallable == nullptr)
 			{
-				fromCallableIndex = it->second;
-				auto& info = m_callables[fromCallableIndex];
-				fromPinIndex = info.callable->GetOutputIndex(fromPinName);
+				retValue = X::Value(false);
+				return;
 			}
-			it = m_callableNameToIndex.find(toInstanceName);
-			if (it != m_callableNameToIndex.end())
-			{
-				toCallableIndex = it->second;
-				auto& info = m_callables[toCallableIndex];
-				toPinIndex = info.callable->GetInputIndex(toPinName);
-			}
+			fromCallableId = fromCallable->ID();
+			toCallableId = toCallable->ID();
+			fromPinIndex = fromCallable->GetOutputIndex(fromPinName);
+			toPinIndex = toCallable->GetInputIndex(toPinName);
 		}
-		if(fromCallableIndex == -1 || toCallableIndex == -1)
+		if(fromPinIndex == -1 || toPinIndex == -1)
 		{
 			retValue = X::Value(false);
 			return;
 		}
 		AutoLock lock(m_locker);
-		Connection newConnection{ fromCallableIndex, fromPinIndex, toCallableIndex, toPinIndex };
+		Connection newConnection{ fromCallableId, fromPinIndex, toCallableId, toPinIndex,true};
 		m_connections.push_back(newConnection);
 		retValue = X::Value(true);
 	}
 
 	void AgentGraph::RemoveConnection(const std::string& fromInstanceName, const std::string& fromPinName, const std::string& toInstanceName, const std::string& toPinName)
 	{
+		Callable* fromCallable = FindCallable(fromInstanceName);
+		Callable* toCallable = FindCallable(toInstanceName);
+		int fromPinIndex = fromCallable->GetOutputIndex(fromPinName);
+		int toPinIndex = toCallable->GetInputIndex(toPinName);
 		AutoLock lock(m_locker); // Lock for thread safety
-
-		int fromCallableIndex = m_callableNameToIndex[fromInstanceName];
-		int fromPinIndex = m_callables[fromCallableIndex].callable->GetOutputIndex(fromPinName);
-		int toCallableIndex = m_callableNameToIndex[toInstanceName];
-		int toPinIndex = m_callables[toCallableIndex].callable->GetInputIndex(toPinName);
 
 		for (auto it = m_connections.begin(); it != m_connections.end(); ++it)
 		{
-			if (it->fromCallableIndex == fromCallableIndex &&
+			if (it->fromCallableId == fromCallable->ID() &&
 				it->fromPinIndex == fromPinIndex &&
-				it->toCallableIndex == toCallableIndex &&
+				it->toCallableId == toCallable->ID() &&
 				it->toPinIndex == toPinIndex)
 			{
 				m_connections.erase(it);
@@ -171,20 +173,21 @@ namespace xMind
 	}
 
 	void AgentGraph::PushDataToCallable(Callable* fromCallable, 
-		int sessionId,int outputIndex, X::Value& data)
+		SESSION_ID sessionId,int outputIndex, X::Value& data)
 	{
 		AutoLock lock(m_locker);
 		if (!m_running)
 		{
 			return;
 		}
-		int fromCallableIndex = fromCallable->GetIndex();
+		auto fromCallableId = fromCallable->ID();
 		bool hasReceiver = false;
 		for (const auto& connection : m_connections)
 		{
-			if (connection.fromCallableIndex == fromCallableIndex && connection.fromPinIndex == outputIndex)
+			if (connection.connected && connection.fromCallableId == fromCallableId
+				&& connection.fromPinIndex == outputIndex)
 			{
-				Callable* toCallable = m_callables[connection.toCallableIndex].callable;
+				Callable* toCallable = FindCallable(connection.toCallableId);
 				toCallable->SetRT(fromCallable->GetRT());
 				toCallable->ReceiveData(sessionId,connection.toPinIndex, data);
 				hasReceiver = true;
@@ -206,34 +209,16 @@ namespace xMind
 	{
 		AutoLock lock(m_locker);
 		m_running = true;
-		//find start nodes from m_connections, start node is the node that has no input
-		std::vector<int> startNodes;
-		for (int i = 0; i < m_callables.size(); i++)
-		{
-			bool isStartNode = true;
-			for (const auto& connection : m_connections)
-			{
-				if (connection.toCallableIndex == i)
-				{
-					isStartNode = false;
-					break;
-				}
-			}
-			if (isStartNode)
-			{
-				startNodes.push_back(i);
-			}
-		}
+		auto& startNodes = GetNodesWithUnconnectedInputPins();
 		//call each with ReceiveData
-		for (const auto& startNode : startNodes)
+		for (const auto& it : startNodes)
 		{
 			X::Value dummyData;
-			auto* pCallable = m_callables[startNode].callable;
-			if (pCallable)
-			{
-				pCallable->SetRT(rt);
-				pCallable->ReceiveData(0,0, dummyData);
-			}
+			auto* pCallable = it.first;
+			pCallable->SetRT(rt);
+			//TODO: sessionId  need to set
+			SESSION_ID sessionId = 0;
+			pCallable->ReceiveData(sessionId, it.second, dummyData);
 		}
 		return true;
 	}
@@ -243,25 +228,22 @@ namespace xMind
 		AutoLock lock(m_locker);
 		m_running = true;
 		//for each Callable inside params, call ReceiveData
+		X::Value dummyData;
 		for (auto& param : params)
 		{
-			auto it = m_callableNameToIndex.find(param.ToString());
-			if (it != m_callableNameToIndex.end())
+			std::string instanceName = param.ToString();
+			auto* pCallable = FindCallable(instanceName);
+			if (pCallable)
 			{
-				X::Value dummyData;
-				auto* pCallable = m_callables[it->second].callable;
-				if (pCallable)
-				{
-					pCallable->SetRT(rt);
-					//TODO: sessionId  need to set
-					int sessionId = 0;
-					pCallable->ReceiveData(sessionId,0, dummyData);
-				}
+				pCallable->SetRT(rt);
+				//TODO: sessionId  need to set
+				SESSION_ID sessionId = 0;
+				pCallable->ReceiveData(sessionId,0, dummyData);
 			}
 		}
 		return true;
 	}
-	X::Value AgentGraph::RunInputs(int sid, X::Value& inputs)
+	X::Value AgentGraph::RunInputs(SESSION_ID sid, X::Value& inputs)
 	{
 		m_locker.Lock();
 		if (!m_running)
@@ -273,30 +255,12 @@ namespace xMind
 		{
 			m_locker.Unlock();
 		}
-		//find start nodes from m_connections, start node is the node that has no input
-		std::vector<int> startNodes;
-		for (int i = 0; i < m_callables.size(); i++)
-		{
-			bool isStartNode = true;
-			for (const auto& connection : m_connections)
-			{
-				if (connection.toCallableIndex == i)
-				{
-					isStartNode = false;
-					break;
-				}
-			}
-			if (isStartNode)
-			{
-				startNodes.push_back(i);
-			}
-		}
-		//call each with ReceiveData,if it has multiple inputs, pass for each input from inputs
+		auto& startNodes = GetNodesWithUnconnectedInputPins();
 
 		for (const auto& startNode : startNodes)
 		{
 			X::Value dummyData;
-			auto* pCallable = m_callables[startNode].callable;
+			auto* pCallable = startNode.first;
 			if (pCallable)
 			{
 				pCallable->SetRT(xMind::MindAPISet::I().RT());
@@ -304,24 +268,7 @@ namespace xMind
 				pCallable->ReceiveData(sid, 0, inputs);
 			}
 		}
-		//Find all agent output pin without connection, and wait for its outputs
-		std::vector<int> endNodes;
-		for (int i = 0; i < m_callables.size(); i++)
-		{
-			bool isEndNode = true;
-			for (const auto& connection : m_connections)
-			{
-				if (connection.fromCallableIndex == i)
-				{
-					isEndNode = false;
-					break;
-				}
-			}
-			if (isEndNode)
-			{
-				endNodes.push_back(i);
-			}
-		}
+
 		//check sessionData for this SessionID
 		{
 			std::unique_lock<std::mutex> lock(m_sessionDataMutex);
@@ -373,10 +320,20 @@ namespace xMind
 		}
 		m_locker.Unlock();
 	}
-	void AgentGraph::AddSessionData(int sessionId, Callable* pCallable,int outputIndex,X::Value& data)
+
+	//when AddSessionData Called, the pass in sessionId
+	//will include valid input index and loop count
+	//but the wait side will not use loop count,so we move loop count to
+	// SessionData
+	void AgentGraph::AddSessionData(SESSION_ID sessionId, Callable* pCallable,
+		int outputIndex,X::Value& data)
 	{
+		SessionIDInfo idInfo = FromSessionID(sessionId);
+		SessionData sessionData{ pCallable ,outputIndex ,data,idInfo.iterationCount };
+		idInfo.iterationCount = 0;
+		SESSION_ID sessionIdNoIt = ToSessionID(idInfo);
 		std::lock_guard<std::mutex> lock(m_sessionDataMutex);
-		m_sessionData[sessionId].push_back(SessionData{ pCallable ,outputIndex ,data});
+		m_sessionData[sessionIdNoIt].push_back(sessionData);
 		m_sessionDataCondVar.notify_all();
 	}
 }

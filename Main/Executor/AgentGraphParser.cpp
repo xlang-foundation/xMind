@@ -87,6 +87,9 @@ namespace xMind
             std::string name = nodeItem["name"].ToString();
             std::string instanceName = nodeItem["instanceName"].ToString();
             std::string typeStr = nodeItem["type"].ToString();
+            std::string strTrigerCondition = nodeItem["TrigerCondition"].ToString();
+
+			TrigerCondition trigerCondition = StrToEnum<TrigerCondition>(strTrigerCondition);
             CallableType callableType = CallableType::callable;
             Callable* callable = nullptr;
             X::Value varCallable;
@@ -126,9 +129,20 @@ namespace xMind
                 std::cerr << "Error: Unknown node type: " << typeStr << std::endl;
                 continue;
             }
+			callable->SetTriggerCondition(trigerCondition);
             callable->SetNodeYamlDesc((X::Value&)item);
             callable->SetName(name);
             callable->SetDescription(nodeItem["description"].ToString());
+
+            X::Value varIterationLimit = nodeItem["IterationLimit"];
+            if (varIterationLimit.IsValid())
+            {
+                unsigned long iterationLimit = (unsigned long)varIterationLimit;
+                if (iterationLimit > 0)
+                {
+                    callable->SetIterationLimit(iterationLimit);
+                }
+            }
 
             if (instanceName.empty())
             {

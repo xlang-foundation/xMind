@@ -32,3 +32,5 @@ RootAgents:
      file: ../Examples/Simple/simple.yml
    - name: QAJudge
      file: ../Examples/Simple/two_simples.yml
+   - name: ConversationalFlowOrchestrator
+     file: ../Examples/Routing/ConversationalFlowOrchestrator.yml

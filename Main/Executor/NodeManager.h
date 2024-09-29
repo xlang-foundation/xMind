@@ -220,11 +220,9 @@ namespace xMind
 				for (const auto& connection : pGraph->GetConnections())
 				{
 					X::Dict oneConn;
-					auto idFrom = pGraph->GetCallableByIndex(connection.fromCallableIndex)->ID();
-					oneConn->Set("fromCallableId", idFrom);
+					oneConn->Set("fromCallableId", connection.fromCallableId);
 					oneConn->Set("fromPinIndex", connection.fromPinIndex);
-					auto idTo = pGraph->GetCallableByIndex(connection.toCallableIndex)->ID();
-					oneConn->Set("toCallableId", idTo);
+					oneConn->Set("toCallableId", connection.toCallableId);
 					oneConn->Set("toPinIndex", connection.toPinIndex);
 					connList += oneConn;
 				}
