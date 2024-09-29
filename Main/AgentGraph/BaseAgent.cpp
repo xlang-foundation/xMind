@@ -131,7 +131,7 @@ namespace xMind
             // Need to parse the result and then push it to the next node
             data_SessionId = ToSessionID(idInfo);
             int outputIndex = 0;//TODO: decide which output to use
-            PushToOutput(data_SessionId, outputIndex, retValue);
+            PushToOutput(data_SessionId, outputIndex, strRet);
         }
 
         return retValue;

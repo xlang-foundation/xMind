@@ -54,6 +54,7 @@ namespace xMind
 
     // Function to parse and return a list of commands found in the input string
     //also change the input to remove command parts
+#if 0
     std::vector<Command> parseCmd(std::string& input) {
         std::vector<Command> commands;
 
@@ -102,6 +103,72 @@ namespace xMind
             // Erase the matched section from the input string
             input.erase(match.position(), match.length());
         }
+
+        return commands;
+    }
+#endif
+    std::vector<Command> parseCmd(std::string& input) {
+        std::vector<Command> commands;
+
+        // Define the regular expression to match the entire pattern, allowing spaces around '{', 'xmind-cmd', and ':'
+        std::regex fullPattern(R"(\{\s*xmind-cmd\s*:\s*(.+?)\s*\})");
+        std::sregex_iterator matchIt(input.begin(), input.end(), fullPattern);
+        std::sregex_iterator endIt;
+
+        std::string newInput;
+        size_t lastPos = 0;
+
+        for (; matchIt != endIt; ++matchIt) {
+            std::smatch match = *matchIt;
+
+            // Append the text before the match to newInput
+            size_t matchPos = match.position();
+            newInput += input.substr(lastPos, matchPos - lastPos);
+
+            std::string cmdsPart = match[1].str();  // Extract the commands part
+
+            // Define the regular expression to match each command with or without parameters
+            std::regex cmdPattern(R"((\w+)\s*\(([^)]*)\)\s*|(\w+))");
+            std::sregex_iterator cmdIt(cmdsPart.begin(), cmdsPart.end(), cmdPattern);
+            std::sregex_iterator cmdEnd;
+
+            // Iterate through each command in the matched section
+            for (; cmdIt != cmdEnd; ++cmdIt) {
+                Command cmd;
+                if ((*cmdIt)[1].matched) {
+                    // Command with parameters
+                    cmd.name = (*cmdIt)[1].str();
+                    std::string paramsStr = (*cmdIt)[2].str();
+
+                    // Split parameters by commas, taking care of floats, integers, strings, and quoted strings
+                    std::regex paramPattern(R"(([^,]+))");
+                    std::sregex_token_iterator paramIt(paramsStr.begin(), paramsStr.end(), paramPattern);
+                    std::sregex_token_iterator paramEnd;
+                    for (; paramIt != paramEnd; ++paramIt) {
+                        std::string trimmedParam = trimSpace(paramIt->str());
+                        trimmedParam = removeQuotes(trimmedParam);  // Remove surrounding quotes if present
+                        if (!trimmedParam.empty()) {
+                            cmd.params.push_back(trimmedParam);  // Add parameter after trimming and removing quotes
+                        }
+                    }
+                }
+                else if ((*cmdIt)[3].matched) {
+                    // Command without parameters (just a name)
+                    cmd.name = (*cmdIt)[3].str();
+                }
+
+                commands.push_back(cmd);
+            }
+
+            // Update lastPos to the end of the current match
+            lastPos = matchPos + match.length();
+        }
+
+        // Append the remaining text to newInput
+        newInput += input.substr(lastPos);
+
+        // Replace input with newInput
+        input = newInput;
 
         return commands;
     }
