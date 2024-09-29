@@ -79,26 +79,4 @@ namespace xMind
 		}
 		return body;
 	}
-	void LlmPool::Test()
-	{
-		X::Dict headers;
-		headers->Set("Authorization",
-			"Bearer sk-MLQjkKBgq23taG8Ze4N7rPtAZ20tDPKfduzNLN3jOwT3BlbkFJwKoGCDADhKcm6XpumMS-jMd6E2vDw0zgzu0q5vZn4A");
-		Add("openai-001",
-			"https://api.openai.com/v1/chat/completions", 
-			"openai", "application/json", headers
-			);
-		std::string model = "gpt-4";
-		X::List listPrompts;
-		X::Dict prompt;
-		prompt->Set("role", "system");
-		prompt->Set("content", "You are a helpful assistant for xlang coding, xlang has same syntax like python.");
-		listPrompts += prompt;
-		prompt->Set("role", "user");
-		prompt->Set("content", "give me an example code for list and dict");
-		listPrompts += prompt;
-		std::vector<std::string> allSelectons;
-		X::Value ret = RunTask(model, listPrompts, 0.7, allSelectons);
-		LOG << ret.ToString() << LINE_END;
-	}
 }
