@@ -78,10 +78,10 @@ nodes:
     prompts:
       - name: Improvement_Takeaways
         role: assistant
-        content: "After the conversation, what are the key takeaways to improve future interactions? If the analysis is sufficient, then output {xmind-cmd: BreakConnection(output1)}."
+        content: "Please identify the key takeaways from the conversation to improve future interactions. Provide your feedback and include the original questions so the next agent can understand what the original questions were."
       - name: Effectiveness_Summary
         role: assistant
-        content: "How would you summarize the overall effectiveness of the conversation? If the analysis is sufficient, then in your results enclose {xmind-cmd: BreakConnection(input1)} in the end of results."
+        content: "As a FeedbackLoop agent, please summarize the overall effectiveness of the conversation. Provide your feedback and include the original questions. If your analysis is sufficient, then append {xmind-cmd: BreakConnection(input1)} at the end of your response, this will end the conversation."
     inputs:
       - name: input1
     outputs:
