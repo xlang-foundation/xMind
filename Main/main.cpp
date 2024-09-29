@@ -27,7 +27,6 @@ limitations under the License.
 #include <windows.h>
 #endif
 
-
 struct ParamConfig
 {
     std::string appPath;

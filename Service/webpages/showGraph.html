@@ -1,19 +1,3 @@
-<!--
-Copyright (C) 2024 The XLang Foundation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -134,7 +118,7 @@ limitations under the License.
 
             // Map node IDs to node data
             const nodeIdMap = {};
-            nodesData.forEach((nodeData, index) => {
+            nodesData.forEach((nodeData) => {
                 nodeIdMap[nodeData.id] = nodeData;
             });
 
@@ -216,6 +200,15 @@ limitations under the License.
                     }
                 }).filter(link => link != null);
 
+                // Assign indices to links between the same pair of nodes
+                const linkGroups = d3.group(links, d => `${d.source.id}-${d.target.id}`);
+                links.forEach(link => {
+                    const groupKey = `${link.source.id}-${link.target.id}`;
+                    const group = linkGroups.get(groupKey);
+                    link.linkIndex = group.indexOf(link);
+                    link.totalLinks = group.length;
+                });
+
                 // Store the nodes and links in the graph object
                 graphs.push({
                     id: graphId,
@@ -244,22 +237,7 @@ limitations under the License.
                     .attr('stroke-dasharray', '5,5')
                     .attr('stroke-width', 2);
 
-                // Draw the links
-                const linkGroup = graphGroup.append('g')
-                    .attr('class', 'links');
-
-                const linkElements = linkGroup.selectAll('.link')
-                    .data(graph.links)
-                    .enter()
-                    .append('path')
-                    .attr('class', 'link')
-                    .attr('d', d => {
-                        const sourcePin = getPinAbsolutePosition(d.source, 'output', d.fromPinIndex);
-                        const targetPin = getPinAbsolutePosition(d.target, 'input', d.toPinIndex);
-                        return diagonal(sourcePin, targetPin);
-                    });
-
-                // Draw the nodes
+                // Draw the nodes first
                 const nodeGroup = graphGroup.selectAll('.node')
                     .data(graph.nodes)
                     .enter()
@@ -276,9 +254,28 @@ limitations under the License.
 
                 drawNodes(nodeGroup);
 
+                // Draw the links after nodes
+                const linkGroup = graphGroup.append('g')
+                    .attr('class', 'links');
+
+                const linkElements = linkGroup.selectAll('.link')
+                    .data(graph.links)
+                    .enter()
+                    .append('path')
+                    .attr('class', 'link')
+                    .attr('d', d => {
+                        const sourcePin = getPinAbsolutePosition(d.source, 'output', d.fromPinIndex);
+                        const targetPin = getPinAbsolutePosition(d.target, 'input', d.toPinIndex);
+                        return diagonal(sourcePin, targetPin, d.linkIndex);
+                    });
+
                 // Store references for later updates
                 graph.nodeGroup = nodeGroup;
                 graph.linkElements = linkElements;
+                graph.linkGroup = linkGroup; // Store linkGroup for reordering
+
+                // Bring links to front
+                linkGroup.raise();
 
                 // Calculate the bounding box and draw the rectangle
                 updateGraphBoundingRect(graph);
@@ -372,7 +369,7 @@ limitations under the License.
                     if (node.inputs.length > 0) {
                         node.inputs.forEach((input, index) => {
                             // Input pin position relative to node
-                            const pinX = 0;
+                            const pinX = -5; // Move the pin 5 units to the left of the node
                             const pinCenterY = pinY - 5;
 
                             // Draw the pin circle
@@ -393,8 +390,9 @@ limitations under the License.
                             // Add the pin label
                             g.append('text')
                                 .attr('class', 'label')
-                                .attr('x', pinX + 10)
+                                .attr('x', pinX - 10) // Move label further to the left
                                 .attr('y', pinY)
+                                .attr('text-anchor', 'end') // Right-align the text
                                 .text(input.name);
 
                             pinY += pinSpacing;
@@ -414,7 +412,7 @@ limitations under the License.
                     if (node.outputs.length > 0) {
                         node.outputs.forEach((output, index) => {
                             // Output pin position relative to node
-                            const pinX = node.width;
+                            const pinX = node.width + 5; // Move the pin 5 units to the right of the node
                             const pinCenterY = pinY - 5;
 
                             // Draw the pin circle
@@ -435,9 +433,8 @@ limitations under the License.
                             // Add the pin label
                             g.append('text')
                                 .attr('class', 'label')
-                                .attr('x', pinX - 10)
+                                .attr('x', pinX + 10) // Move label further to the right
                                 .attr('y', pinY)
-                                .attr('text-anchor', 'end')
                                 .text(output.name);
 
                             pinY += pinSpacing;
@@ -455,7 +452,7 @@ limitations under the License.
 
             // Drag functions
             function dragstarted(event, d) {
-                d3.select(this).raise().classed('active', true);
+                d3.select(this).classed('active', true);
             }
 
             function dragged(event, d) {
@@ -467,6 +464,10 @@ limitations under the License.
                 if (d.graphId) {
                     updateLinks(d.graphId);
                     updateGraphBoundingRect(graphs.find(g => g.id === d.graphId));
+
+                    // Bring the links to front after node movement
+                    const graph = graphs.find(g => g.id === d.graphId);
+                    graph.linkGroup.raise();
                 }
             }
 
@@ -476,11 +477,11 @@ limitations under the License.
 
             // Update the positions of the pins when a node is moved
             function updateNodePins(node) {
-                node.inputPins.forEach((pin, index) => {
+                node.inputPins.forEach((pin) => {
                     pin.x = node.x + pin.relativeX;
                     pin.y = node.y + pin.relativeY;
                 });
-                node.outputPins.forEach((pin, index) => {
+                node.outputPins.forEach((pin) => {
                     pin.x = node.x + pin.relativeX;
                     pin.y = node.y + pin.relativeY;
                 });
@@ -492,7 +493,7 @@ limitations under the License.
                 graph.linkElements.attr('d', d => {
                     const sourcePin = getPinAbsolutePosition(d.source, 'output', d.fromPinIndex);
                     const targetPin = getPinAbsolutePosition(d.target, 'input', d.toPinIndex);
-                    return diagonal(sourcePin, targetPin);
+                    return diagonal(sourcePin, targetPin, d.linkIndex);
                 });
             }
 
@@ -502,7 +503,7 @@ limitations under the License.
                 if (pinArray.length === 0) {
                     // Return default position if no pins
                     return {
-                        x: node.x + (pinType === 'input' ? 0 : node.width),
+                        x: node.x + (pinType === 'input' ? -5 : node.width + 5),
                         y: node.y + 30
                     };
                 }
@@ -513,23 +514,51 @@ limitations under the License.
                 };
             }
 
-            // Function to create a path between two points
-            function diagonal(source, target) {
-                const path = `M${source.x},${source.y} C${(source.x + target.x) / 2},${source.y} ${(source.x + target.x) / 2},${target.y} ${target.x},${target.y}`;
-                return path;
+            // Function to create a path between two points, avoiding node overlap
+            function diagonal(source, target, linkIndex) {
+                if (source.x === target.x && source.y === target.y) {
+                    // Self-loop
+                    const x = source.x;
+                    const y = source.y;
+                    const loopRadius = 30 + linkIndex * 10;
+                    const path = `M${x},${y}
+                                      m0,-${loopRadius}
+                                      a${loopRadius},${loopRadius} 0 1,1 0,${2 * loopRadius}
+                                      a${loopRadius},${loopRadius} 0 1,1 0,-${2 * loopRadius}`;
+                    return path;
+                } else {
+                    // Calculate offset based on link index to avoid overlap
+                    const offset = 50 + linkIndex * 10;
+                    const deltaX = target.x - source.x;
+                    const deltaY = target.y - source.y;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    const normX = deltaX / distance;
+                    const normY = deltaY / distance;
+                    const perpX = -normY;
+                    const perpY = normX;
+
+                    const controlPointX1 = source.x + (deltaX / 2) + (perpX * offset);
+                    const controlPointY1 = source.y + (deltaY / 2) + (perpY * offset);
+
+                    const path = `M${source.x},${source.y}
+                                      C${controlPointX1},${controlPointY1}
+                                       ${controlPointX1},${controlPointY1}
+                                       ${target.x},${target.y}`;
+                    return path;
+                }
             }
 
             // Function to update the bounding rectangle of a graph
             function updateGraphBoundingRect(graph) {
-                const xs = graph.nodes.map(node => node.x);
-                const ys = graph.nodes.map(node => node.y);
-                const ws = graph.nodes.map(node => node.width);
-                const hs = graph.nodes.map(node => node.height);
+                const xs = graph.nodes.map(node => node.x - 50); // Adjusted for pins and labels
+                const ys = graph.nodes.map(node => node.y - 50);
+                const ws = graph.nodes.map(node => node.width + 100); // Adjusted for pins and labels
+                const hs = graph.nodes.map(node => node.height + 100);
 
-                const minX = Math.min(...xs) - 20; // Add some padding
-                const minY = Math.min(...ys) - 20;
-                const maxX = Math.max(...xs.map((x, i) => x + ws[i])) + 20;
-                const maxY = Math.max(...ys.map((y, i) => y + hs[i])) + 20;
+                const minX = Math.min(...xs);
+                const minY = Math.min(...ys);
+                const maxX = Math.max(...xs.map((x, i) => x + ws[i]));
+                const maxY = Math.max(...ys.map((y, i) => y + hs[i]));
 
                 // Update the rectangle attributes
                 graph.boundingRect
@@ -545,12 +574,12 @@ limitations under the License.
                     .duration(200)
                     .style('opacity', 0.9);
                 tooltip.html(`Name: ${d.name}<br>Type: ${d.typeLabel}<br>Instance: ${d.instanceName}`)
-                    .style('left', (event.pageX + 10) + 'px')
+                    .style('left', (event.pageX + 15) + 'px')
                     .style('top', (event.pageY - 28) + 'px');
             }
 
             function nodeMouseMove(event, d) {
-                tooltip.style('left', (event.pageX + 10) + 'px')
+                tooltip.style('left', (event.pageX + 15) + 'px')
                     .style('top', (event.pageY - 28) + 'px');
             }
 

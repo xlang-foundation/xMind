@@ -22,6 +22,7 @@ limitations under the License.
 #include "xlang.h"
 #include <mutex>
 #include <chrono>
+#include "type_def.h"
 
 namespace xMind
 {
@@ -46,7 +47,7 @@ namespace xMind
     };
 
     struct ChatCompletionResponse {
-        std::string id;
+        std::string sessionId;
         std::string object;
         int64_t created;
         std::string model;
@@ -90,7 +91,7 @@ namespace xMind
         CompletionUsage usage;
     };
     struct SessionInfo {
-        int id;
+        SESSION_ID id;
         int64_t created;
         std::string sessionId;
     };
@@ -100,8 +101,8 @@ namespace xMind
         ChatRequest parseChatRequest(X::Value& reqData);
         CompletionRequest parseCompletionRequest(X::Value& reqData);
         X::Value createCompletionResponse(const CompletionResponse& response);
-        int createSession(const std::string& sessionId);
-        int getSessionId(const std::string& sessionId)
+        SESSION_ID createSession(const std::string& sessionId);
+        SESSION_ID getSessionId(const std::string& sessionId)
         {
             std::lock_guard<std::mutex> lock(m_session_mtx);
             if (m_sessionIdToSidMap.find(sessionId) != m_sessionIdToSidMap.end())
@@ -114,9 +115,11 @@ namespace xMind
 		X::Value HandleChatRequest(X::Value& reqData);
 		X::Value HandleCompletionRequest(X::Value& reqData);
     private:
-        std::unordered_map<std::string, int> m_sessionIdToSidMap;
-        std::unordered_map<int, SessionInfo> m_sessions;
-        int nextSid = 1;
+        std::unordered_map<std::string, SESSION_ID> m_sessionIdToSidMap;
+        std::unordered_map<SESSION_ID, SessionInfo> m_sessions;
+		//used for non-session request
+		SessionIDInfo m_noSessionInfo = { NO_SESSION_ID, 0, 0 };
+        unsigned long nextSid = 1;
         std::mutex m_session_mtx;
     };
 }

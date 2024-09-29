@@ -25,7 +25,7 @@ namespace xMind
 		BEGIN_PACKAGE(Function)
 			ADD_BASE(Callable);
 		END_PACKAGE
-		virtual bool ReceiveData(int sessionId, int inputIndex, X::Value& data) override
+		virtual bool ReceiveData(SESSION_ID sessionId, int inputIndex, X::Value& data) override
 		{
 			//when receive data, call the real function
 			//and push the result to the next node

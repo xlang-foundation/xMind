@@ -45,9 +45,9 @@ namespace xMind
         std::vector<std::string> agents;
     };
     struct ConnectionInfo {
-        std::string fromAgentName;
+        std::string fromNodeName;
         std::string fromPinName;
-        std::string toAgentName;
+        std::string toNodeName;
         std::string toPinName;
     };
     struct Group {
@@ -277,9 +277,9 @@ namespace xMind
                 {
 					X::Dict connectionItem(item);
                     ConnectionInfo connection;
-                    connection.fromAgentName = connectionItem["fromAgentName"].ToString();
+                    connection.fromNodeName = connectionItem["fromNodeName"].ToString();
                     connection.fromPinName = connectionItem["fromPinName"].ToString();
-                    connection.toAgentName = connectionItem["toAgentName"].ToString();
+                    connection.toNodeName = connectionItem["toNodeName"].ToString();
                     connection.toPinName = connectionItem["toPinName"].ToString();
                     connections.push_back(connection);
                 }
@@ -380,8 +380,8 @@ namespace xMind
                 for (auto& connection : connections)
                 {
                     //Add into Graph
-                    X::Value CallableFrom = QueyNode(moduleName, connection.fromAgentName);
-                    X::Value CallableTo = QueyNode(moduleName, connection.toAgentName);
+                    X::Value CallableFrom = QueyNode(moduleName, connection.fromNodeName);
+                    X::Value CallableTo = QueyNode(moduleName, connection.toNodeName);
                     if (!CallableFrom.IsObject() || !CallableTo.IsObject())
                     {
                         continue;
@@ -390,9 +390,9 @@ namespace xMind
                     graph->AddCallable(CallableTo);
 
                     X::ARGS params(4);
-                    params.push_back(connection.fromAgentName);
+                    params.push_back(connection.fromNodeName);
                     params.push_back(connection.fromPinName);
-                    params.push_back(connection.toAgentName);
+                    params.push_back(connection.toNodeName);
                     params.push_back(connection.toPinName);
                     X::KWARGS kwParams;
                     X::Value retValue;

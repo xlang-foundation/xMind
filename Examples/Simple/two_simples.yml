@@ -50,8 +50,8 @@ nodes:
     outputs:
       - name: output1
 connections:
-  - fromAgentName: SimpleAgent
+  - fromNodeName: SimpleAgent
     fromPinName: output1
-    toAgentName: SimpleAgent_Check
+    toNodeName: SimpleAgent_Check
     toPinName: input1
   

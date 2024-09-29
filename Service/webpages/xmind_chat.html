@@ -94,7 +94,7 @@ limitations under the License.
     </div>
 
     <script>
-        let sessionId = 0;
+        let sessionId = "";
 
         // Get the base URL from the page's location
         const baseUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
@@ -150,14 +150,14 @@ limitations under the License.
                 body: JSON.stringify({
                     model: model,
                     messages: [{ role: 'user', content: prompt }],
-                    //SessionID: sessionId
+                    sessionId: sessionId
                 })
             })
                 .then(response => response.json())
                 .then(data => {
                     // Get the response from the API
+                    sessionId = data.sessionId;
                     const responseText = data.choices[0].message.content;
-                    //sessionId = data.SessionID; // Update session ID
 
                     // Add the response to the history list
                     const responseItem = document.createElement('li');

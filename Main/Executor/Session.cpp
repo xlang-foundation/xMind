@@ -21,18 +21,21 @@ limitations under the License.
 
 namespace xMind
 {
-    int SessionManager::createSession(const std::string& sessionId) {
+    SESSION_ID SessionManager::createSession(const std::string& strSessionId) {
         std::lock_guard<std::mutex> lock(m_session_mtx);
         int64_t createdTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-        int sid = nextSid++;
-        m_sessions[sid] = { sid, createdTime, sessionId };
-        m_sessionIdToSidMap[sessionId] = sid;
-        return sid;
+        auto sid = nextSid++;
+		SessionIDInfo info = { sid, 0, 0 };
+		SESSION_ID sessionId = ToSessionID(info);
+        m_sessions[sessionId] = { sessionId, createdTime, strSessionId };
+        m_sessionIdToSidMap[strSessionId] = sessionId;
+        return sessionId;
     }
+    //each chat request in same session but will start with a input index from 1
     X::Value SessionManager::HandleChatRequest(X::Value& reqData)
     {
 		ChatRequest request = parseChatRequest(reqData);
-		int sid = getSessionId(request.sessionId);
+		SESSION_ID sid = getSessionId(request.sessionId);
 		if (sid == NO_SESSION_ID)
 		{
             X::Package utils(xMind::MindAPISet::I().RT(), "utils", "xlang_os");
@@ -48,9 +51,20 @@ namespace xMind
 		{
 			return X::Value();
 		}
+		//set input index ( not input Pin index)
+		SessionIDInfo idInfo = FromSessionID(sid);
+        idInfo.inputIndex++;
+		idInfo.iterationCount = 0;
+        sid = ToSessionID(idInfo);
+        {
+			//set back to remember the input index increased
+			std::lock_guard<std::mutex> lock(m_session_mtx);
+			m_sessionIdToSidMap[request.sessionId] = sid;
+			//we don't change m_sessions, so if need sessionInfo, use {sid, 0, 0} to get
+        }
 		X::Value retMsg = pGraph->RunInputs(sid, request.messageList);
         ChatCompletionResponse response;
-		response.id = request.sessionId;
+		response.sessionId = request.sessionId;
 		response.object = "text";
 		response.created = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 		response.model = request.model;
@@ -76,7 +90,7 @@ namespace xMind
     X::Value SessionManager::createChatResponse(const ChatCompletionResponse& response) {
         // Create the main dictionary
         X::Dict mainDict;
-        mainDict->Set("id", response.id);
+        mainDict->Set("sessionId", response.sessionId);
         mainDict->Set("object", response.object);
         mainDict->Set("created", response.created);
         mainDict->Set("model", response.model);
@@ -142,7 +156,7 @@ namespace xMind
             request.temperature = varTemperature.ToDouble();
         }
 
-		X::Value varSessionId = reqData["sessionId"];
+		X::Value varSessionId = reqDict["sessionId"];
         if (varSessionId.IsValid()) {
             request.sessionId = varSessionId.ToString();
         }

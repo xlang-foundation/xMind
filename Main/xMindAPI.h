@@ -53,6 +53,8 @@ namespace xMind
             APISET().AddConst("Timeout", (int)Status::Timeout);
             APISET().AddConst("Running", (int)Status::Running);
             APISET().AddConst("Stopped", (int)Status::Stopped);
+            APISET().AddConst("WaitAllInputs", (int)TrigerCondition::WaitAllInputs);
+            APISET().AddConst("WaitEitherInput", (int)TrigerCondition::WaitEitherInput);
             APISET().AddEvent("OnReady");
             APISET().AddEvent("OnShutdown");
             APISET().AddVarFunc("SubscribeEvents", &MindAPISet::SubscribeEvents);
@@ -82,7 +84,6 @@ namespace xMind
             APISET().AddVarFunc("CompletionRequest", &MindAPISet::CompletionRequest);
 
             APISET().AddFunc<1>("GetXModule", &MindAPISet::GetXModule);
-
         END_PACKAGE
     public:
         inline X::Value GetXModule(std::string name)

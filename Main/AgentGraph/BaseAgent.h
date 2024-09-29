@@ -18,6 +18,9 @@ limitations under the License.
 #include "BufferedProcessor.h"
 #include "LlmPool.h"
 #include "log.h"
+#include "XMindCmd.h"
+#include <vector>
+
 namespace xMind
 {
     class BaseAgent: public BufferedProcessor
@@ -44,77 +47,7 @@ namespace xMind
         virtual ~BaseAgent()
         {
         }
-		virtual X::Value RunOnce() override
-		{
-            if (m_implObject.IsValid())
-            {
-				return BufferedProcessor::RunOnce();
-            }
-			//we are agent, if no process function, we still use input as prompts,
-            //combine other prompts to llm
-			//and return result from llm inference
-			std::vector<std::string> llmSelections;
-			for (auto selection : *m_selections)
-			{
-				llmSelections.push_back(selection.ToString());
-			}
-			X::ARGS params(0);
-			X::KWARGS kwParams;
-			X::Value varData;
-
-			X::Value retValue;
-			int data_SessionId = 0;
-			LOG5 << "Agent: " << m_instanceName << " WaitInput" <<LINE_END;
-			if (WaitInput(nullptr, nullptr, params, kwParams, varData))
-			{
-				X::List prompts;
-				for (auto prompt : *m_prompts)
-				{
-					prompts += prompt;
-				}
-				if (varData.IsList() && varData.Size()==4)
-				{
-					Status status = (Status)(int)varData.GetItemValue(0);
-					if (status == Status::Ok)
-					{
-						X::Value data = varData[3];
-						data_SessionId = (int)varData[1];
-						if (data.IsList())
-						{
-							X::List listData = data;
-							for (auto prompt : *listData)
-							{
-								prompts += prompt;
-							}
-						}
-						else if (data.IsDict())
-						{
-							prompts += data;
-						}
-						else
-						{
-							std::string strData = data.ToString();
-							X::Dict dictPrompt;
-							dictPrompt->Set("role", "user");
-							dictPrompt->Set("content", strData);
-							prompts += dictPrompt;
-						}
-					}
-				}
-				LOG5 << "Agent: "<< m_instanceName << " Have prompts:"<< prompts.ToString() << LINE_END;
-				retValue = LlmPool::I().RunTask(m_model, prompts, m_temperature, llmSelections);
-				if (retValue.IsObject() && retValue.GetObj()->GetType() == X::ObjType::Error)
-				{
-					LOG5 << "Agent: " << m_instanceName << "Got Error" << LINE_END;
-					return retValue;
-				}
-				LOG5 << "Agent: " << m_instanceName << " Results:" << retValue.ToString() << LINE_END;
-				//Need parse the result
-				//then push to next node
-				PushToOutput(data_SessionId,0, retValue);
-			}
-			return retValue;
-		}
+		virtual X::Value RunOnce() override;
         virtual X::Value Clone() override
         {
 			BaseAgent* pAgent = new BaseAgent();
