@@ -25,7 +25,7 @@ if(MSVC)
 endif()
 
 # Add subdirectories
-add_subdirectory("Main")
+add_subdirectory("Core")
 add_subdirectory("cli")
 add_subdirectory("ThirdParty/xlang")
 
