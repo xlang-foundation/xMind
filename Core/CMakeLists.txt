@@ -17,12 +17,12 @@ include_directories(
   "."
   "Executor"
   "AgentGraph"
-
+  "Planner"
 )
 
 # Source files
 file(GLOB Xlang_Api_SRC "../ThirdParty/xlang/Api/*.cpp")
-file(GLOB AppEntry_SRC "*.cpp" "Executor/*.cpp")
+file(GLOB AppEntry_SRC "*.cpp" "Executor/*.cpp" "Planner/*.cpp")
 file(GLOB Common_SRC "Common/*.cpp" "Log/*.cpp" "AgentGraph/*.cpp")
 
 # Add executable

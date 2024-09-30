@@ -203,6 +203,26 @@ namespace xMind
 			// If we found no downstream connections except for loop-backs, this node is terminal
 			return !hasDownstreamConnections;
 		}
+		bool HasTerminalNodeWithOutputs()
+		{
+			AutoLock lock(m_locker); // Ensure thread safety
+
+			for (const auto& info : m_callables)
+			{
+				Callable* callable = info.callable;
+
+				// Check if the callable is a terminal node
+				if (IsTerminalNode(callable))
+				{
+					// Check if the terminal node has at least one output
+					if (callable->GetOutputs().size()>0)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
 
 		bool IsTerminalNode(Callable* pCallable)
 		{
@@ -257,6 +277,60 @@ namespace xMind
 			}
 
 			return loopBackOutputPins;
+		}
+		bool AreAllNodesConnected()
+		{
+			AutoLock lock(m_locker); // Ensure thread safety
+
+			for (const auto& info : m_callables)
+			{
+				Callable* callable = info.callable;
+				unsigned long long callableId = callable->ID();
+
+				bool hasConnection = false;
+
+				for (const auto& connection : m_connections)
+				{
+					if (connection.connected && (connection.fromCallableId == callableId 
+						|| connection.toCallableId == callableId))
+					{
+						hasConnection = true;
+						break;
+					}
+				}
+
+				if (!hasConnection)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		std::vector<std::pair<Callable*, int>> GetNodesWithUnconnectedInputPins()
+		{
+			std::vector<std::pair<Callable*, int>> nodesWithUnconnectedInputPins;
+			AutoLock lock(m_locker); // Lock for thread safety
+
+			for (auto& info : m_callables) {
+				Callable* callable = info.callable;
+				int inputPinCount = (int)callable->GetInputs().size();
+
+				for (int i = 0; i < inputPinCount; ++i) {
+					bool isConnected = false;
+					for (const auto& connection : m_connections) {
+						if (connection.toCallableId == callable->ID() && connection.toPinIndex == i) {
+							isConnected = true;
+							break;
+						}
+					}
+					if (!isConnected) {
+						nodesWithUnconnectedInputPins.push_back(std::make_pair(callable, i));
+						break; // Only add the first unconnected input pin
+					}
+				}
+			}
+
+			return nodesWithUnconnectedInputPins;
 		}
 
 	private:
@@ -313,32 +387,6 @@ namespace xMind
 			return nodesWithUnconnectedOutputPins;
 		}
 
-		std::vector<std::pair<Callable*, int>> GetNodesWithUnconnectedInputPins() 
-		{
-			std::vector<std::pair<Callable*, int>> nodesWithUnconnectedInputPins;
-			AutoLock lock(m_locker); // Lock for thread safety
-
-			for (auto& info : m_callables) {
-				Callable* callable = info.callable;
-				int inputPinCount = (int)callable->GetInputs().size();
-
-				for (int i = 0; i < inputPinCount; ++i) {
-					bool isConnected = false;
-					for (const auto& connection : m_connections) {
-						if (connection.toCallableId == callable->ID() && connection.toPinIndex == i) {
-							isConnected = true;
-							break;
-						}
-					}
-					if (!isConnected) {
-						nodesWithUnconnectedInputPins.push_back(std::make_pair(callable, i));
-						break; // Only add the first unconnected input pin
-					}
-				}
-			}
-
-			return nodesWithUnconnectedInputPins;
-		}
 
 		void RunAllCallables(X::XRuntime* rt0 = nullptr);
 
