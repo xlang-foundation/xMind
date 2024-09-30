@@ -167,7 +167,7 @@ namespace xMind
 				}
 			}
 		}
-		bool AgentGraph::IsTerminalNodeWithLoopBackConnections(Callable* pCallable, 
+		bool IsTerminalNodeWithLoopBackConnections(Callable* pCallable, 
 			std::vector<int>& loopBackOutputPins)
 		{
 			loopBackOutputPins.clear(); // Clear the output list to start fresh
@@ -204,7 +204,7 @@ namespace xMind
 			return !hasDownstreamConnections;
 		}
 
-		bool AgentGraph::IsTerminalNode(Callable* pCallable)
+		bool IsTerminalNode(Callable* pCallable)
 		{
 			AutoLock lock(m_locker); // Lock for thread safety
 
@@ -284,7 +284,7 @@ namespace xMind
 			return false; // No loop-back found
 		}
 
-		std::vector<std::pair<Callable*, int>> AgentGraph::GetNodesWithUnconnectedOutputPins() 
+		std::vector<std::pair<Callable*, int>> GetNodesWithUnconnectedOutputPins() 
 		{
 			std::vector<std::pair<Callable*, int>> nodesWithUnconnectedOutputPins;
 			AutoLock lock(m_locker); // Lock for thread safety
@@ -313,7 +313,7 @@ namespace xMind
 			return nodesWithUnconnectedOutputPins;
 		}
 
-		std::vector<std::pair<Callable*, int>> AgentGraph::GetNodesWithUnconnectedInputPins() 
+		std::vector<std::pair<Callable*, int>> GetNodesWithUnconnectedInputPins() 
 		{
 			std::vector<std::pair<Callable*, int>> nodesWithUnconnectedInputPins;
 			AutoLock lock(m_locker); // Lock for thread safety

@@ -319,7 +319,8 @@ namespace xMind
         bool ParseRootAgent(const std::string& fileName, X::Value& graph);
         // Main function to parse the agent graph description
         bool ParseAgentGraphDesc(const std::string& moduleName = "", const std::string& fileName = "");
-        bool ParseAgentGraphDescFromString(const std::string& desc);
+        bool ParseAgentGraphDescFromString(X::Value& agentGraph,
+            const std::string& desc,std::string& moduleName, std::string& blueprintName);
 		bool ParseAgentGraphDescFromRoot(bool needCreateGraph,
             X::Value& agentGraph,X::Value& root,
             const std::string& moduleName, 

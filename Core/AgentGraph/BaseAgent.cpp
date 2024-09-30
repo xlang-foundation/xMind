@@ -43,50 +43,7 @@ namespace xMind
         if (WaitInputs(nullptr, nullptr, params, kwParams, varData))
         {
             X::List prompts;
-            for (auto prompt : *m_prompts)
-            {
-                prompts += prompt;
-            }
-
-            if (varData.IsList())
-            {
-                X::List dataList = varData;
-                if (dataList.Size() > 0)
-                {
-                    X::Value sessionIdValue = dataList.GetItemValue(0).GetItemValue(0);
-                    data_SessionId = (unsigned long long)sessionIdValue;
-
-                    for (int i = 0; i < dataList.Size(); ++i)
-                    {
-                        X::Value listEntry = dataList[i];
-                        if (listEntry.IsList() && listEntry.Size() == 3)
-                        {
-                            X::Value data = listEntry[2];
-                            if (data.IsList())
-                            {
-                                X::List listData = data;
-                                for (auto prompt : *listData)
-                                {
-                                    prompts += prompt;
-                                }
-                            }
-                            else if (data.IsDict())
-                            {
-                                prompts += data;
-                            }
-                            else
-                            {
-                                std::string strData = data.ToString();
-                                X::Dict dictPrompt;
-                                dictPrompt->Set("role", "user");
-                                dictPrompt->Set("content", strData);
-                                prompts += dictPrompt;
-                            }
-                        }
-                    }
-                }
-            }
-
+			data_SessionId = BuildPrompts(varData, prompts);
             LOG5 << "Agent: " << m_instanceName << " Have prompts:" << prompts.ToString() << LINE_END;
             retValue = LlmPool::I().RunTask(m_model, prompts, m_temperature, llmSelections);
             if (retValue.IsObject() && retValue.GetObj()->GetType() == X::ObjType::Error)
@@ -135,6 +92,55 @@ namespace xMind
         }
 
         return retValue;
+    }
+    //return SessionId
+    unsigned long long BaseAgent::BuildPrompts(X::Value& varData, X::List& prompts)
+    {
+		unsigned long long data_SessionId = 0;
+        for (auto prompt : *m_prompts)
+        {
+            prompts += prompt;
+        }
+
+        if (varData.IsList())
+        {
+            X::List dataList = varData;
+            if (dataList.Size() > 0)
+            {
+                X::Value sessionIdValue = dataList.GetItemValue(0).GetItemValue(0);
+                data_SessionId = (unsigned long long)sessionIdValue;
+
+                for (int i = 0; i < dataList.Size(); ++i)
+                {
+                    X::Value listEntry = dataList[i];
+                    if (listEntry.IsList() && listEntry.Size() == 3)
+                    {
+                        X::Value data = listEntry[2];
+                        if (data.IsList())
+                        {
+                            X::List listData = data;
+                            for (auto prompt : *listData)
+                            {
+                                prompts += prompt;
+                            }
+                        }
+                        else if (data.IsDict())
+                        {
+                            prompts += data;
+                        }
+                        else
+                        {
+                            std::string strData = data.ToString();
+                            X::Dict dictPrompt;
+                            dictPrompt->Set("role", "user");
+                            dictPrompt->Set("content", strData);
+                            prompts += dictPrompt;
+                        }
+                    }
+                }
+            }
+        }
+        return data_SessionId;
     }
 
 }
