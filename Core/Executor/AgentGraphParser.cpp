@@ -45,7 +45,8 @@ namespace xMind
         X::Value agentGraph;
         return ParseAgentGraphDescFromRoot(false, agentGraph,root, moduleName, fileName);
     }
-    bool Parser::ParseAgentGraphDescFromString(const std::string& desc)
+    bool Parser::ParseAgentGraphDescFromString(X::Value& agentGraph,
+        const std::string& desc,std::string& moduleName, std::string& blueprintName)
     {
         X::Package yaml(xMind::MindAPISet::I().RT(), "yaml", "xlang_yaml");
         X::Value root = yaml["loads"](desc);
@@ -54,9 +55,6 @@ namespace xMind
             return false;
 
         }
-        X::Value agentGraph;
-        std::string moduleName;
-		std::string blueprintName;
         return ParseAgentGraphDescFromRoot(false, agentGraph,root, moduleName, blueprintName);
     }
     

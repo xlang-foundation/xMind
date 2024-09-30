@@ -121,6 +121,8 @@ namespace xMind
 		{
 			return m_model;
 		}
+	protected:
+		unsigned long long BuildPrompts(X::Value& varData,X::List& prompts);
 	private:
 		X::List m_prompts;
 		double m_temperature = 0.7;

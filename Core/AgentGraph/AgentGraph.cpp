@@ -209,7 +209,7 @@ namespace xMind
 	{
 		AutoLock lock(m_locker);
 		m_running = true;
-		auto& startNodes = GetNodesWithUnconnectedInputPins();
+		auto startNodes = GetNodesWithUnconnectedInputPins();
 		//call each with ReceiveData
 		for (const auto& it : startNodes)
 		{
@@ -255,7 +255,7 @@ namespace xMind
 		{
 			m_locker.Unlock();
 		}
-		auto& startNodes = GetNodesWithUnconnectedInputPins();
+		auto startNodes = GetNodesWithUnconnectedInputPins();
 
 		for (const auto& startNode : startNodes)
 		{

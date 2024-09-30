@@ -105,14 +105,19 @@ namespace xMind {
     std::string GetEnumListAsStr() {
         std::string enumName = typeid(EnumType).name();
         std::string result;
-        for (const auto& pair : globalEnumMap[enumName].first) {
-            result += pair.first;
-            if (std::next(pair) != globalEnumMap[enumName].first.end()) {
+        auto it = globalEnumMap[enumName].first.begin();
+        auto end = globalEnumMap[enumName].first.end();
+
+        while (it != end) {
+            result += it->first;
+            ++it;  // Move the iterator forward
+            if (it != end) {
                 result += ", ";
             }
         }
         return result;
     }
+
 }
 
 #define ENUM_MAP(EnumName, ...) \
