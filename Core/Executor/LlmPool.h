@@ -26,6 +26,7 @@ limitations under the License.
 #include <condition_variable>
 #include <future>
 #include <algorithm>
+#include "log.h"
 
 namespace xMind
 {

@@ -123,7 +123,7 @@ namespace xMind
 		}
 	protected:
 		unsigned long long BuildPrompts(X::Value& varData,X::List& prompts);
-	private:
+		void ProcessLLMResult(SESSION_ID data_SessionId, std::string& retLLM);
 		X::List m_prompts;
 		double m_temperature = 0.7;
 		X::List m_selections;

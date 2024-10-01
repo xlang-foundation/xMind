@@ -52,46 +52,53 @@ namespace xMind
                 return retValue;
             }
             std::string strRet = retValue.ToString();
-            //check if has xmind-cmd, if have, run them first
-            auto cmds = parseCmd(strRet);
-            if (cmds.size() > 0)
-            {
-                for (auto cmd : cmds)
-                {
-                    executeCmd(this, cmd);
-                }
-            }
-            //check if has xmind-cmd
-            //we increase the iterationCount per each node finish the calc
-            SessionIDInfo idInfo = FromSessionID(data_SessionId);
-            auto it_cnt = idInfo.iterationCount++;
-            if (m_iterationLimit > 0)//have the iteration limit
-            {
-                if (idInfo.iterationCount >= m_iterationLimit)
-                {
-                    LOG5 << "Agent: " << m_instanceName << " Reach iteration limit" << LINE_END;
-                    //break the connection with its outputs
-                    std::vector<int> loopBackOutputPins;
-                    bool isTerminalNode = m_agentGraph->IsTerminalNodeWithLoopBackConnections(this,
-                        loopBackOutputPins);
-                    if (isTerminalNode)
-                    {
-                        for (auto outputPinIndex : loopBackOutputPins)
-                        {
-                            m_agentGraph->BreakConnection(this, outputPinIndex);
-                        }
-                    }
-                }
-            }
-            LOG5 << "Agent: " << m_instanceName << " Results:" << strRet <<",iterationCount:"<< it_cnt << LINE_END;
-
-            // Need to parse the result and then push it to the next node
-            data_SessionId = ToSessionID(idInfo);
-            int outputIndex = 0;//TODO: decide which output to use
-            PushToOutput(data_SessionId, outputIndex, strRet);
+			ProcessLLMResult(data_SessionId, strRet);
+			retValue = X::Value(strRet);
         }
 
         return retValue;
+    }
+
+    void BaseAgent::ProcessLLMResult(SESSION_ID data_SessionId, std::string& retLLM)
+    {
+        //check if has xmind-cmd, if have, run them first
+        auto cmds = parseCmd(retLLM);
+        if (cmds.size() > 0)
+        {
+            for (auto cmd : cmds)
+            {
+                executeCmd(this, cmd);
+            }
+        }
+        //check if has xmind-cmd
+        //we increase the iterationCount per each node finish the calc
+        SessionIDInfo idInfo = FromSessionID(data_SessionId);
+        auto it_cnt = idInfo.iterationCount++;
+        if (m_iterationLimit > 0)//have the iteration limit
+        {
+            if (idInfo.iterationCount >= m_iterationLimit)
+            {
+                LOG5 << "Agent: " << m_instanceName << " Reach iteration limit" << LINE_END;
+                //break the connection with its outputs
+                std::vector<int> loopBackOutputPins;
+                bool isTerminalNode = m_agentGraph->IsTerminalNodeWithLoopBackConnections(this,
+                    loopBackOutputPins);
+                if (isTerminalNode)
+                {
+                    for (auto outputPinIndex : loopBackOutputPins)
+                    {
+                        m_agentGraph->BreakConnection(this, outputPinIndex);
+                    }
+                }
+            }
+        }
+        LOG5 << "Agent: " << m_instanceName << " Results:" << retLLM << ",iterationCount:" << it_cnt << LINE_END;
+
+        // Need to parse the result and then push it to the next node
+        data_SessionId = ToSessionID(idInfo);
+        int outputIndex = 0;//TODO: decide which output to use
+        PushToOutput(data_SessionId, outputIndex, retLLM);
+
     }
     //return SessionId
     unsigned long long BaseAgent::BuildPrompts(X::Value& varData, X::List& prompts)
@@ -142,5 +149,4 @@ namespace xMind
         }
         return data_SessionId;
     }
-
 }

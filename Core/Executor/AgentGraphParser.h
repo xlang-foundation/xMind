@@ -226,17 +226,18 @@ namespace xMind
                     X::Dict headers0 = llmDict["headers"];
                     X::Dict headers;
 					//for headers, need to check if need call RepVar with value is string
-                    headers0->Enum([&](const std::string& key, X::Value& value)
+                    headers0->Enum([&](X::Value& varKey, X::Value& value)
                         {
                             if (value.IsString())
                             {
-                                value = RepVar(value.ToString(), curModuleName);
-                                X::Value valKey(key);
-                                headers->Set(valKey, value);
+                                std::string newValue = RepVar(value.ToString(), curModuleName);
+                                std::string key = varKey.ToString();
+							    X::Value varNewValue(newValue);
+                                headers->Set((const X::Value&)varKey, (const X::Value&)varNewValue);
                             }
                             else
                             {
-								headers->Set(key.c_str(), value);
+								headers->Set(varKey, value);
                             }
                         }
                     );
