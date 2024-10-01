@@ -232,7 +232,6 @@ namespace xMind
                             {
                                 std::string newValue = RepVar(value.ToString(), curModuleName);
                                 std::string key = varKey.ToString();
-								LOG5 << "key:" << key << ",value:" << newValue << LINE_END;
 							    X::Value varNewValue(newValue);
                                 headers->Set((const X::Value&)varKey, (const X::Value&)varNewValue);
                             }

@@ -118,7 +118,6 @@ namespace xMind
 			pRequest->m_tag = tag;
 			pRequest->m_content_type = content_type;
 			pRequest->m_headers = headers;
-			LOG5 <<"LlmPool,headers:" << headers.ToString() << LINE_END;
 			m_requests.push_back(pRequest);
 		}
 		//llmSelections empty means choose all
