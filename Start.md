@@ -34,7 +34,7 @@ The `config.yml` file contains critical configurations for the xMind application
 
 ## Running xMind
 
-1. **Start xMind**: Execute the `xMind` binary from the build directory.
+1. **Start xMind**: Execute the `xMind` binary from the ```out/bin``` directory.
    ```bash
    ./xMind
    ```
