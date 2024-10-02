@@ -1,4 +1,5 @@
 args = get_args()
+# args = ["-uk", "key1", "value1"]
 def PrintUsage():
 	print("xmcli --updatekey or -uk key_name value")
 	print("xmcli --getkey or -gk key_name")
