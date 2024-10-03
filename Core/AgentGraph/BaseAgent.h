@@ -94,6 +94,11 @@ namespace xMind
 					X::Dict dictPrompt(varData);
 					prompts += dictPrompt;
 				}
+				if (varData.IsList())
+				{
+					X::List listPrompts(varData);
+					prompts += listPrompts;
+				}
 				else
 				{
 					std::string strData = varData.ToString();
