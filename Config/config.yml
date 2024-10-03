@@ -37,3 +37,6 @@ RootAgents:
    - name: PySimple
      # file: "D:\\Github\\xMind\\Examples\\PySimple\\simple.yml"
      file: ../Examples/PySimple/simple.yml
+   - name: PyGraph
+     # file: "D:\\Github\\xMind\\Examples\\PyGraph\\PyGraph.yml"
+     file: ../Examples/PySimple/simple.yml

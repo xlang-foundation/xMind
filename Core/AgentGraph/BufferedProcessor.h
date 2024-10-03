@@ -217,7 +217,7 @@ namespace xMind
 							X::List innerList;
 							innerList += it->first;  // sessionId
 							innerList += static_cast<int>(i); // inputIndex
-							innerList += it->second; // data
+							innerList->AddItem(it->second); // data may be a list,so use AddItem
 							outerList->AddItem(innerList);
 							retValue = outerList;
 

@@ -34,11 +34,13 @@ class xMind:
 
     @classmethod
     def SetModuleIDIfNotSet(cls,module_name,py_file_name):
+        if cls._xMind_ModuleId >=0:
+            return
         if 'moduleId' in sys.argv:
             idx = sys.argv.index('moduleId') + 1
             if idx < len(sys.argv):
                 _xMind_ModuleId = int(sys.argv[idx])
-        elif cls._xMind_ModuleId == -1:
+        else:
             if py_file_name.endswith('.py'):
                 py_file_name = py_file_name.replace('.py', '.yml')
             cls._xMind_ModuleId = xMind_Core.RegisterModule(module_name,py_file_name)
@@ -223,6 +225,17 @@ class xMind:
     
     @staticmethod
     def importBlueprint(yamlBlueprint):
+        # check if there is a moudle loaded or have moduleId pass in from run parameters
+        if xMind._xMind_ModuleId >=0:
+            xMind_Core.log(f"use existing moduleId: {xMind._xMind_ModuleId}")
+            return
+        if 'moduleId' in sys.argv:
+            idx = sys.argv.index('moduleId') + 1
+            if idx < len(sys.argv):
+                moduleId = int(sys.argv[idx])
+                xMind._xMind_ModuleId = moduleId
+                xMind_Core.log(f"use existing moduleId: {moduleId}")
+                return
         # Check if yamlBlueprint is an absolute path
         if not os.path.isabs(yamlBlueprint):
             # Get the caller's file path
