@@ -23,23 +23,24 @@ namespace xMind
     bool MindAPISet::AddGraph(X::XRuntime* rt, X::XObj* pContext, 
         X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
     {
-        if (params.size() == 0)
+        if (params.size() < 2)
         {
             retValue = false;
             return true;
         }
-        X::Value graph = params[0];
+        int moduleId = (int)params[0];
+        X::Value graph = params[1];
         if (!graph.IsObject())
         {
             retValue = false;
             return true;
         }
-        if (params.size() > 1)
+        if (params.size() > 2)
         {
-            std::string graphName = params[1].ToString();
+            std::string graphName = params[2].ToString();
             //TODO::
         }
-		NodeManager::I().AddGraph(graph);
+		NodeManager::I().AddGraph(moduleId,graph);
 		retValue = true;
         return true;
     }
@@ -82,6 +83,39 @@ namespace xMind
 		}
 		NodeManager::I().addCallable(moduleName, moduleFilePath,callableName, node);
         return true;
+    }
+    bool MindAPISet::AddNodeWithModuleId(X::XRuntime* rt, X::XObj* pContext, 
+        X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
+    {
+        if (params.size() < 3)
+        {
+            retValue = false;
+            return true;
+        }
+        int  moduleId = (int)params[0];
+        std::string callableName = params[1].ToString();
+        X::Value callable = params[2];
+        if (!callable.IsObject())
+        {
+            retValue = false;
+            return true;
+        }
+        X::Value node;
+        if (callable.GetObj()->GetType() == X::ObjType::RemoteObject)
+        {
+            X::Value nativeObj;
+            if (X::g_pXHost->ExtractNativeObjectFromRemoteObject(callable, nativeObj))
+            {
+                node = nativeObj;
+            }
+        }
+        if (node.IsInvalid())
+        {
+            node = callable;
+        }
+        NodeManager::I().addCallable(moduleId, callableName, node);
+        return true;
+
     }
     bool MindAPISet::ChatRequest(X::XRuntime* rt, X::XObj* pContext,
         X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)

@@ -21,7 +21,7 @@ namespace xMind
 {
     X::Value BaseAgent::RunOnce()
     {
-        if (m_implObject.IsValid())
+        if (m_implObject.IsValid() || m_subscriptionId >=0)
         {
             return BufferedProcessor::RunOnce();
         }

@@ -22,6 +22,18 @@ namespace xMind
 {
     bool Parser::ParseRootAgent(const std::string& fileName, X::Value& graph)
     {
+        std::filesystem::path fsPath(fileName);
+        std::string moduleName = fsPath.stem().string();
+		int moduleId = NodeManager::I().QueryModuleWithBlurprint(fileName);
+        if (moduleId >= 0)
+        {
+            X::Value rootGraph = NodeManager::I().QueryOrCreateRootGraph(moduleId);
+            if (rootGraph.IsValid())
+            {
+                graph = rootGraph;
+                return true;
+            }
+        }
         X::Package yaml(xMind::MindAPISet::I().RT(), "yaml", "xlang_yaml");
         X::Value root = yaml["load"](fileName);
         if (root.IsObject() && root.GetObj()->GetType() == X::ObjType::Error)
@@ -29,11 +41,9 @@ namespace xMind
             return false;
 
         }
-        std::filesystem::path fsPath(fileName);
-		std::string moduleName = fsPath.stem().string();
         return ParseAgentGraphDescFromRoot(true, graph, root, moduleName, fileName);
     }
-    bool Parser::ParseAgentGraphDesc(const std::string& moduleName, const std::string& fileName)
+    int Parser::ParseAgentGraphDesc(const std::string& moduleName, const std::string& fileName)
     {
         X::Package yaml(xMind::MindAPISet::I().RT(), "yaml", "xlang_yaml");
         X::Value root = yaml["load"](fileName);
@@ -45,14 +55,14 @@ namespace xMind
         X::Value agentGraph;
         return ParseAgentGraphDescFromRoot(false, agentGraph,root, moduleName, fileName);
     }
-    bool Parser::ParseAgentGraphDescFromString(X::Value& agentGraph,
+    int Parser::ParseAgentGraphDescFromString(X::Value& agentGraph,
         const std::string& desc,std::string& moduleName, std::string& blueprintName)
     {
         X::Package yaml(xMind::MindAPISet::I().RT(), "yaml", "xlang_yaml");
         X::Value root = yaml["loads"](desc);
         if (root.IsObject() && root.GetObj()->GetType() == X::ObjType::Error)
         {
-            return false;
+            return -1;
 
         }
         return ParseAgentGraphDescFromRoot(false, agentGraph,root, moduleName, blueprintName);

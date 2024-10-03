@@ -74,6 +74,7 @@ namespace xMind
             APISET().AddVarFuncEx("Agent", &MindAPISet::Create<BaseAgent>);
             APISET().AddVarFunc("AddGraph", &MindAPISet::AddGraph);
             APISET().AddVarFunc("AddNode", &MindAPISet::AddNode);
+            APISET().AddVarFunc("AddNodeWithModuleId", &MindAPISet::AddNodeWithModuleId);
             APISET().AddClass<0, AgentGraph>("Graph");
             APISET().AddClass<0, Function>("MindFunction");
             APISET().AddClass<0, BaseAction>("MindAction");
@@ -84,8 +85,13 @@ namespace xMind
             APISET().AddVarFunc("CompletionRequest", &MindAPISet::CompletionRequest);
 
             APISET().AddFunc<1>("GetXModule", &MindAPISet::GetXModule);
+            APISET().AddFunc<2>("RegisterModule", &MindAPISet::RegisterModule);
         END_PACKAGE
     public:
+		inline int RegisterModule(std::string moduleName, std::string filePath)
+		{
+			return NodeManager::I().RegisterModule(moduleName, filePath);
+		}
         inline X::Value GetXModule(std::string name)
         {
 			auto it = m_xlangModules.find(name);
@@ -106,6 +112,8 @@ namespace xMind
         bool AddGraph(X::XRuntime* rt, X::XObj* pContext,
             X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
         bool AddNode(X::XRuntime* rt, X::XObj* pContext,
+            X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
+        bool AddNodeWithModuleId(X::XRuntime* rt, X::XObj* pContext,
             X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
         bool ChatRequest(X::XRuntime* rt, X::XObj* pContext,
             X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue);
@@ -337,6 +345,29 @@ namespace xMind
                     }
                 }
             }
+            //check if it has moduleName
+			auto it = kwParams.find("moduleId");
+            if (it)
+            {
+                int moduleId = it->val.ToInt();
+                //check if this module and name is registered or not
+                X::Value node = NodeManager::I().queryCallable(moduleId, name);
+                if (node.IsObject())
+                {
+                    X::XPackageValue<T> packNode(node);
+                    T* pNodeObj = packNode.GetRealObj();
+                    if (pNodeObj)
+                    {
+                        pNodeObj->SetParams(kwParams);
+                        if(realObj.IsObject())
+                        {
+                            pNodeObj->SetImplObject(realObj);
+                        }
+                    }
+                    retValue =  node;
+					return;
+                }
+            }
             T* pObj = new T();
             pObj->SetName(name);
             pObj->SetParams(kwParams);
@@ -402,21 +433,21 @@ namespace xMind
             Cantor::log.LineEndUnlock();
             return true;
         }
-        inline bool LoadBlueprintFromFile(const std::string& fileName)
+        inline int LoadBlueprintFromFile(const std::string& fileName)
         {
             std::filesystem::path filePath(fileName);
 			std::string moduleName = filePath.stem().string();
             xMind::Parser parser;
-            bool bOK = parser.ParseAgentGraphDesc(moduleName, fileName);
-            return bOK;
+            int moduleId = parser.ParseAgentGraphDesc(moduleName, fileName);
+            return moduleId;
         }
-        inline bool LoadAgentFlowFromString(const std::string& desc)
+        inline int LoadAgentFlowFromString(const std::string& desc)
         {
             xMind::Parser parser;
             X::Package yaml(xMind::MindAPISet::I().RT(), "yaml", "xlang_yaml");
             X::Value root = yaml["loads"](desc);
-            bool bOK = parser.ParseAgentGraphDesc(root);
-            return bOK;
+            int moduleId = parser.ParseAgentGraphDesc(root);
+            return moduleId;
         }
         inline std::string QueryAgentFlow()
         {

@@ -88,11 +88,20 @@ namespace xMind
 			X::List prompts = m_prompts;
 			if (params.size() > 0)
 			{
-				std::string strData = params[0].ToString();
-				X::Dict dictPrompt;
-				dictPrompt->Set("role", "user");
-				dictPrompt->Set("content", strData);
-				prompts += dictPrompt;
+				X::Value varData = params[0];
+				if (varData.IsDict())
+				{
+					X::Dict dictPrompt(varData);
+					prompts += dictPrompt;
+				}
+				else
+				{
+					std::string strData = varData.ToString();
+					X::Dict dictPrompt;
+					dictPrompt->Set("role", "user");
+					dictPrompt->Set("content", strData);
+					prompts += dictPrompt;
+				}
 			}
 			retValue = LlmPool::I().RunTask(model, prompts, temperature, llmSelections);
             return true;

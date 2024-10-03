@@ -63,6 +63,7 @@ namespace xMind
 			APISET().AddPropL("outputs",
 				[](auto* pThis, X::Value v) { pThis->SetOutputs(v); },
 				[](auto* pThis) { return pThis->GetOutputs(); });
+			APISET().AddFunc<1>("setSubscriptionId", &Callable::SetSubscriptionId);
 		END_PACKAGE
 
 	protected:
@@ -70,6 +71,7 @@ namespace xMind
 		//real object such as Xlang func/class
 		//or native lib's function
 		X::Value m_implObject;
+		int m_subscriptionId;//if there is a subscription, set here
 		X::KWARGS m_params;
 		X::XRuntime* m_rt;
 		X::Value m_varGraph;
@@ -93,7 +95,7 @@ namespace xMind
 		Callable() :
 			m_type(CallableType::callable),
 			m_agentGraph(nullptr), m_rt(nullptr),
-			m_ID(++s_idCounter)
+			m_subscriptionId(-1),m_ID(++s_idCounter)
 		{
 		}
 
@@ -103,6 +105,10 @@ namespace xMind
 		inline unsigned long long ID()
 		{
 			return m_ID;
+		}
+		inline void SetSubscriptionId(int subId)
+		{
+			m_subscriptionId = subId;
 		}
 		inline void SetTriggerCondition(TrigerCondition trigerCondition)
 		{

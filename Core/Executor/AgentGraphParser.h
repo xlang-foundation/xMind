@@ -319,10 +319,12 @@ namespace xMind
         //for top agent, if no connections, add one graph with first Agent
         bool ParseRootAgent(const std::string& fileName, X::Value& graph);
         // Main function to parse the agent graph description
-        bool ParseAgentGraphDesc(const std::string& moduleName = "", const std::string& fileName = "");
-        bool ParseAgentGraphDescFromString(X::Value& agentGraph,
+        int ParseAgentGraphDesc(const std::string& moduleName = "", const std::string& fileName = "");
+        int ParseAgentGraphDescFromString(X::Value& agentGraph,
             const std::string& desc,std::string& moduleName, std::string& blueprintName);
-		bool ParseAgentGraphDescFromRoot(bool needCreateGraph,
+
+		//return ModuleId if -1, means failed
+		int ParseAgentGraphDescFromRoot(bool needCreateGraph,
             X::Value& agentGraph,X::Value& root,
             const std::string& moduleName, 
             const std::string& blueprintFileName)
@@ -331,7 +333,7 @@ namespace xMind
             if (!root.IsDict())
             {
                 std::cerr << "Error: Invalid yaml format." << std::endl;
-                return false;
+                return -1;
             }
 			std::string strModuleName = moduleName;
 
@@ -347,12 +349,11 @@ namespace xMind
 					strModuleName = NO_MODULE_NAME;
 				}
             }
-
+            int moduleId = NodeManager::I().RegisterModule(strModuleName, blueprintFileName);
             std::string type = root["type"].ToString();
             std::string version = root["version"].ToString();
             std::string description = RepVar(root["description"].ToString(),moduleName);
 
-			int moduleId = NodeManager::I().RegisterModule(strModuleName, blueprintFileName);
 			std::vector<std::string> codebehindList;
             ParseCodebehinds(strModuleName, blueprintFileName, root,codebehindList);
 			NodeManager::I().SetCodebehinds(moduleId, codebehindList);
@@ -401,7 +402,7 @@ namespace xMind
                     graph->AddConnection(nullptr, nullptr, params, kwParams, retValue);
                 }
 				X::Value valGraph(packGraph);
-                NodeManager::I().AddGraph(valGraph);
+                NodeManager::I().AddGraph(moduleId,valGraph);
 				agentGraph = valGraph;
             }
             else if(needCreateGraph && firstAgent.IsValid())
@@ -410,7 +411,7 @@ namespace xMind
                 AgentGraph* graph = packGraph.GetRealObj();
                 graph->AddCallable(firstAgent);
                 X::Value valGraph(packGraph);
-                NodeManager::I().AddGraph(valGraph);
+                NodeManager::I().AddGraph(moduleId,valGraph);
                 agentGraph = valGraph;
             }
 
@@ -418,7 +419,7 @@ namespace xMind
             X::Value groupsValue = root["groups"];
             std::vector<Group> groups = ParseGroups(groupsValue);
 
-            return true;
+            return moduleId;
 
         }
 

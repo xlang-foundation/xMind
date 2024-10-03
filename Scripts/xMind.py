@@ -14,7 +14,7 @@
 # limitations under the License.
 # <END>
 
-import xlang,os,inspect
+import xlang,os,inspect,sys
 
 # Import xMind API from xLang
 xMind_Core = xlang.importModule("xMind", thru="lrpc:99023")
@@ -30,6 +30,19 @@ class xMind:
     # Internal list to hold registered nodes
     _nodes = []
     _isRunning = False
+    _xMind_ModuleId = -1 # no module yet
+
+    @classmethod
+    def SetModuleIDIfNotSet(cls,module_name,py_file_name):
+        if 'moduleId' in sys.argv:
+            idx = sys.argv.index('moduleId') + 1
+            if idx < len(sys.argv):
+                _xMind_ModuleId = int(sys.argv[idx])
+        elif cls._xMind_ModuleId == -1:
+            if py_file_name.endswith('.py'):
+                py_file_name = py_file_name.replace('.py', '.yml')
+            cls._xMind_ModuleId = xMind_Core.RegisterModule(module_name,py_file_name)
+        pass
 
     class Node:
         def __init__(self, node_type, core_object, func):
@@ -42,6 +55,9 @@ class xMind:
                 self.hasInputs = False
             self.core_object = core_object
             self.func = func
+        def setSubscriptionId(self,subId):
+            self.core_object.setSubscriptionId(subId)
+            
     @classmethod
     def RunNonInputNodes(cls):
         """
@@ -63,11 +79,13 @@ class xMind:
                 kwargs['name'] = func.__name__
             module_name = func.__module__
             file_name = func.__globals__['__file__']
+            xMind.SetModuleIDIfNotSet(module_name,file_name)
             # Call xMind_Core.Function and store the returned object
-            moduleName ="xMind"
+            moduleId = xMind._xMind_ModuleId
             nodeName = kwargs['name'];
+            kwargs["moduleId"] = moduleId;
             core_object = xMind_Core.Function(*args, **kwargs)()
-            xMind_Core.AddNode(moduleName,nodeName,core_object)
+            xMind_Core.AddNodeWithModuleId(moduleId,nodeName,core_object)
 
             # Store the original function in the wrapper
             def wrapper(*f_args, **f_kwargs):
@@ -93,11 +111,13 @@ class xMind:
                 kwargs['name'] = func.__name__
             module_name = func.__module__
             file_name = func.__globals__['__file__']
+            xMind.SetModuleIDIfNotSet(module_name,file_name)
             # Call xMind_Core.Agent and store the returned object
-            moduleName ="xMind"
+            moduleId = xMind._xMind_ModuleId
             nodeName = kwargs['name'];
+            kwargs["moduleId"] = moduleId;
             core_object = xMind_Core.Agent(*args, **kwargs)()
-            xMind_Core.AddNode(moduleName,nodeName,core_object,"")
+            xMind_Core.AddNodeWithModuleId(moduleId,nodeName,core_object)
 
             # Store the original function in the wrapper
             def wrapper(*f_args, **f_kwargs):
@@ -123,11 +143,13 @@ class xMind:
                 kwargs['name'] = func.__name__
             module_name = func.__module__
             file_name = func.__globals__['__file__']
+            xMind.SetModuleIDIfNotSet(module_name,file_name)
             # Call xMind_Core.Action and store the returned object
-            moduleName ="xMind"
+            moduleId = xMind._xMind_ModuleId
             nodeName = kwargs['name'];
+            kwargs["moduleId"] = moduleId;
             core_object = xMind_Core.Action(*args, **kwargs)()
-            xMind_Core.AddNode(moduleName,nodeName,core_object)
+            xMind_Core.AddNodeWithModuleId(moduleId,nodeName,core_object)
             # Store the original function in the wrapper
             def wrapper(*f_args, **f_kwargs):
                 xMind_Core.log(f"Calling Action: {func.__name__}")
@@ -150,7 +172,7 @@ class xMind:
         Create and return a new graph using xMind_Core.Graph().
         """
         graph = xMind_Core.Graph()
-        xMind_Core.AddGraph(graph)
+        xMind_Core.AddGraph(xMind._xMind_ModuleId,graph)
         return graph
 
     @classmethod
@@ -170,6 +192,8 @@ class xMind:
         # Get the list of node IDs
         node_ids = [node.id for node in xMind._nodes]
         sub_Id = xMind_Core.SubscribeEvents(node_ids)
+        for node in xMind._nodes:
+            node.setSubscriptionId(sub_Id)
         while xMind._isRunning and xMind_Core.IsRunning():
             # Detect events
             events = xMind_Core.PullEvents(sub_Id,cur_pacing_time)
@@ -209,5 +233,7 @@ class xMind:
             yamlBlueprint = os.path.join(caller_dir, yamlBlueprint)
         
         # Load the blueprint using xMind_Core
-        xMind_Core.LoadBlueprintFromFile(yamlBlueprint)
+        moduleId = xMind_Core.LoadBlueprintFromFile(yamlBlueprint)
+        xMind._xMind_ModuleId = moduleId
+        xMind_Core.log(f"Blueprint loaded,moduleId: {moduleId}")
 
