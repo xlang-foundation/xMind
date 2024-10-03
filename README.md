@@ -30,7 +30,7 @@ cmake ..
 make
 
 ```
-
+for xcode, use cmake -G Xcode .. to generate Xcode project
 ## Terms and Concepts
 
 1. **Blueprint**: A YAML-based structure used to define various elements such as variables, prompts, actions, and more.
