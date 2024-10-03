@@ -34,3 +34,6 @@ RootAgents:
      file: ../Examples/Simple/two_simples.yml
    - name: ConversationalFlowOrchestrator
      file: ../Examples/Routing/ConversationalFlowOrchestrator.yml
+   - name: PySimple
+     # file: "D:\\Github\\xMind\\Examples\\PySimple\\simple.yml"
+     file: ../Examples/PySimple/simple.yml

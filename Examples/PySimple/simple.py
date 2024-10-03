@@ -14,7 +14,7 @@
 # limitations under the License.
 # <END>
 import sys,os
-sys.path.append(os.path.abspath('../Scripts'))
+sys.path.append(os.path.abspath('../../Scripts'))
 
 from xMind import xMind
 import time
@@ -22,15 +22,18 @@ import time
 xMind.importBlueprint("simple.yml")
 
 @xMind.Agent()
-def SingleAgent(owner):
-	inputData = owner.waitInput()
-	if inputData[0] == xMind.Ok:
-		sessionId = inputData[1]
-		inputIndex = inputData[2]
-		data = inputData[3]
-		resp = owner.llm(data)
-		owner.pushToOutput(sessionId,0,resp)
+def simple_py_agent(owner):
+	inputDataList = owner.waitInputs()
+	if inputDataList != None:
+		for inputData in inputDataList:
+			sessionId = inputData[0]
+			inputIndex = inputData[1]
+			data = inputData[2]
+			resp = owner.llm(data)
+			resp = "{Python Agent:simple_py_agent}"+resp
+			owner.pushToOutput(sessionId,0,resp)
+
 		
 xMind.MainLoop()
 
-xMind.log("SingleAgent Done")
+xMind.log("simple_py_agent Done")

@@ -15,17 +15,17 @@
 # <END>
 
 --- 
-name: simple_app
+name: simple_py_agent
 type: agent
 version: 1.0
-description: "single Agent"
+description: "single python Agent"
     
 imports:
   - file: "../Simple/llmPool.yml"
 codebehind: 
   - file: "simple.py"
 nodes:
-  - name: SingleAgent
+  - name: simple_py_agent
     type: agent
     model: gpt-4
     prompts:

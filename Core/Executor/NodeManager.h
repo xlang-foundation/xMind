@@ -39,6 +39,7 @@ namespace xMind
 		std::string blueprint;
 		std::vector<std::string> codebehinds;
 		std::unordered_map<std::string, X::Value> mapCallables;
+		X::Value rootGraph;
 	};
 
 	class NodeManager : public Singleton<NodeManager>
@@ -75,7 +76,20 @@ namespace xMind
 
 			return moduleId; // Return the new ModuleId
 		}
+		int QueryModuleWithBlurprint(const std::string& blueprintFilePath)
+		{
+			AutoLock lock(m_lock);
 
+			// Check if the module with the same file path already exists
+			for (const auto& [id, module] : m_modules)
+			{
+				if (module.blueprint == blueprintFilePath)
+				{
+					return id; // Return existing ModuleId if found
+				}
+			}
+			return -1;
+		}
 		void SetCodebehinds(int moduleId, const std::vector<std::string>& codebehinds)
 		{
 			AutoLock lock(m_lock);
@@ -124,7 +138,6 @@ namespace xMind
 			return true;
 		}
 
-		// Old queryCallable method
 		X::Value queryCallable(const std::string& moduleName, const std::string& name)
 		{
 			AutoLock lock(m_lock);
@@ -167,13 +180,43 @@ namespace xMind
 			return X::Value(); // Return empty X::Value if not found
 		}
 
-		void AddGraph(X::Value& graph)
+		void AddGraph(int moduleId,X::Value& graph)
 		{
 			m_lock.Lock();
 			m_graphs.push_back(graph);
+			auto it = m_modules.find(moduleId);
+			if (it != m_modules.end())
+			{
+				ModuleInfo& moduleInfo = it->second;
+				moduleInfo.rootGraph = graph;
+			}
 			m_lock.Unlock();
 		}
-
+		X::Value QueryOrCreateRootGraph(int moduleId)
+		{
+			AutoLock lock(m_lock);
+			auto it = m_modules.find(moduleId);
+			if (it != m_modules.end())
+			{
+				ModuleInfo& moduleInfo = it->second;
+				if (moduleInfo.rootGraph.IsObject())
+				{
+					return moduleInfo.rootGraph;
+				}
+				if (moduleInfo.mapCallables.size() > 0)
+				{
+					X::XPackageValue<AgentGraph> packGraph;
+					X::Value& firstAgent = moduleInfo.mapCallables.begin()->second;
+					AgentGraph* graph = packGraph.GetRealObj();
+					graph->AddCallable(firstAgent);
+					X::Value valGraph(packGraph);
+					NodeManager::I().AddGraph(moduleId, valGraph);
+					moduleInfo.rootGraph = valGraph;
+					return valGraph;
+				}
+			}
+			return X::Value();
+		}
 		// Build JSON representation of the graph
 		std::string BuildGraphAsJson()
 		{
