@@ -34,3 +34,7 @@ add_executable(${PROJECT_NAME}
 if(APPLE)
 target_link_libraries(xMind PUBLIC "-framework CoreFoundation")
 endif()
+
+if(NOT (WIN32))
+target_link_libraries(${PROJECT_NAME} pthread dl)
+endif()

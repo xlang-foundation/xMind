@@ -14,7 +14,9 @@
 # limitations under the License.
 # <END>
 import sys,os
-sys.path.append(os.path.abspath('../../Scripts'))
+script_dir = os.path.dirname(os.path.abspath(__file__))
+normalized_path = os.path.normpath(os.path.join(script_dir, '../../Scripts'))
+sys.path.append(normalized_path)
 
 from xMind import xMind
 import time

@@ -28,6 +28,7 @@ limitations under the License.
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <cstring>
 
 #if defined(__APPLE__)
 #include <mach/mach.h>
