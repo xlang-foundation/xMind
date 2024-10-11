@@ -57,3 +57,4 @@ bool CheckIfNumber(const std::string& str, long long& value);
 bool CheckIfDouble(const std::string& str, double& value);
 bool CheckIfNumber(const std::string& str, int& value);
 char* NewFromString(std::string& inStr);
+std::string MakeAbsPath(std::string rootPath, std::string path);

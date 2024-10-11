@@ -24,6 +24,7 @@ limitations under the License.
 #include "xlang.h"
 #include "xMindAPI.h"
 #include "AgentGraphParser.h"
+#include "utility.h"
 
 namespace xMind
 {
@@ -74,19 +75,42 @@ namespace xMind
 		}
 		return X::Value();
 	}
-	inline std::string MakeAbsPath(std::string rootPath, std::string path)
-	{
-		std::filesystem::path fsPath(path);
-		// Check if the path is absolute, if not, combine it with RootPath
-		if (!fsPath.is_absolute())
-		{
-			fsPath = std::filesystem::path(rootPath) / fsPath;
-		}
 
-		// Normalize the path
-		fsPath = fsPath.lexically_normal();
-		return fsPath.string();
+	bool Starter::AddRootAgent(std::string& strFile)
+	{
+		std::lock_guard<std::mutex> lock(m_rootAgents_mtx);
+		//loop into the root agents to check if the agent is already added
+		for (auto& item : m_rootAgents)
+		{
+			if (item.second.filename == strFile)
+			{
+				return true;
+			}
+		}
+		//add the new agent
+		//get the file's stem as the agent name
+		std::filesystem::path fsFile(strFile);
+		std::string agentName = fsFile.stem().string();
+		m_rootAgents.emplace(std::make_pair(agentName, RootAgentDetail{ strFile }));
+		return true;
 	}
+
+	bool Starter::RemoveRootAgent(std::string& strFile)
+	{
+		std::lock_guard<std::mutex> lock(m_rootAgents_mtx);
+		//loop into the root agents to check if the agent is already added
+		for (auto it = m_rootAgents.begin(); it != m_rootAgents.end();)
+		{
+			if (it->second.filename == strFile)
+			{
+				m_rootAgents.erase(it);
+				return true;
+			}
+			++it;
+		}
+		return false;
+	}
+
 	void Starter::RunService(const std::string& serviceEntry, int port)
 	{
 		std::string strServiceEntry = MakeAbsPath(m_configPath, serviceEntry);

@@ -17,10 +17,20 @@ limitations under the License.
 #include "xMindAPI.h"
 #include "PropScope.h"
 #include "Session.h"
+#include "utility.h"
+#include "start.h"
 
 namespace xMind
 {
-    bool MindAPISet::AddGraph(X::XRuntime* rt, X::XObj* pContext, 
+    bool MindAPISet::AddRootAgent(std::string agentFile)
+    {
+		return  Starter::I().AddRootAgent(agentFile);
+    }
+    bool MindAPISet::RemoveRootAgent(std::string aggentFile)
+    {
+		return Starter::I().RemoveRootAgent(aggentFile);
+    }
+    bool MindAPISet::AddGraph(X::XRuntime* rt, X::XObj* pContext,
         X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
     {
         if (params.size() < 2)

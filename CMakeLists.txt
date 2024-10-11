@@ -30,6 +30,8 @@ add_subdirectory("cli")
 add_subdirectory("ThirdParty/xlang")
 
 # Copy necessary directories to output
+file(COPY "${PROJECT_SOURCE_DIR}/DevSrv_Plugins/" 
+     DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/DevSrv_Plugins")
 file(COPY "${PROJECT_SOURCE_DIR}/Service/" 
      DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Service")
 file(COPY "${PROJECT_SOURCE_DIR}/Scripts/" 

@@ -81,6 +81,8 @@ namespace xMind
             APISET().AddClass<0, BaseAgent>("MindAgent");
 
             APISET().AddFunc<0>("GetRootAgents", &MindAPISet::GetRootAgents);
+            APISET().AddFunc<1>("AddRootAgent", &MindAPISet::AddRootAgent);
+            APISET().AddFunc<1>("RemoveRootAgent", &MindAPISet::RemoveRootAgent);
             APISET().AddVarFunc("ChatRequest", &MindAPISet::ChatRequest);
             APISET().AddVarFunc("CompletionRequest", &MindAPISet::CompletionRequest);
 
@@ -101,6 +103,8 @@ namespace xMind
 			}
 			return X::Value();
         }
+        bool AddRootAgent(std::string agentFile);
+        bool RemoveRootAgent(std::string aggentFile);
 		inline void AddXlangModule(const std::string& name, X::Value module)
 		{
 			m_xlangModules[name] = module;
