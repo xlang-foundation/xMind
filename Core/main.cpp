@@ -124,6 +124,7 @@ int WorkerMain(ParamConfig& paramConfig)
 
 static std::string Script_Files[] = {
     "keystore.x",
+    "session_memory.x"
 };
 
 #define Script_Folder "Scripts"

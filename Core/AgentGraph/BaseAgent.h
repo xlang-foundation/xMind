@@ -136,6 +136,7 @@ namespace xMind
 			return m_model;
 		}
 	protected:
+		void BuildPromptsFromSessionMemory(SESSION_ID sessionId, X::List& prompts);
 		unsigned long long BuildPrompts(X::Value& varData,X::List& prompts);
 		void ProcessLLMResult(SESSION_ID data_SessionId, std::string& retLLM);
 		X::List m_prompts;

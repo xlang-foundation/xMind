@@ -71,5 +71,30 @@ def query_rootagents():
     rootAgents = xMind.GetRootAgents()
     return [str(rootAgents,format=True), "text/json"]
 
+# Link: http://localhost:9901/api/sessionlist
+@srv.route("/api/sessionlist")
+def query_sessionlist():
+    session_memory = xMind.GetXModule("session_memory")
+    session_list = session_memory.session_list()
+    return [str(session_list,format=True), "text/json"]
+
+# Link: http://localhost:9901/api/chat/history
+@srv.route("/api/chat/history")
+def query_history():
+    params = json.loads(req.body)
+    sessionId = params["sessionId"]
+    session_memory = xMind.GetXModule("session_memory")
+    chat_history = session_memory.query(sessionId)
+    return [str(chat_history,format=True), "text/json"]
+
+# Link: http://localhost:9901/api/chat/history
+@srv.route("/api/chat/removesession")
+def query_history():
+    params = json.loads(req.body)
+    sessionId = params["sessionId"]
+    session_memory = xMind.GetXModule("session_memory")
+    session_memory.remove_all(sessionId)
+    return [str({'status':'ok'},format=True), "text/json"]
+
 xMind.logV("xMind WebServer Started,port:",port)
 srv.listen("::", port)
