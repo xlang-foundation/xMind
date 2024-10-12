@@ -5,6 +5,8 @@
     <title>xMind Chat Page</title>
     <!-- Include Showdown.js for Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/showdown/dist/showdown.min.js"></script>
+    <!-- Include D3.js for graph drawing -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         html, body {
             height: 100%;
@@ -24,9 +26,30 @@
             width: 300px;
             background-color: #2c3e50;
             color: white;
-            overflow-y: auto;
-            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
             height: 100vh; /* Fill the viewport height */
+            overflow: hidden; /* Prevent overflow */
+        }
+
+        /* Top area for session list */
+        #session-list-container {
+            flex: 1;
+            overflow-y: auto;
+            background-color: #2c3e50;
+            padding-top: 20px;
+            border-bottom-width: 2px;
+            margin-bottom: 10px; /* Added margin to create gap between session list and graph */
+        }
+
+        /* Bottom area for graph */
+        #graph-container {
+            height: 200px; /* Fixed height for the graph area */
+            padding: 10px; /* Add padding */
+            box-sizing: border-box; /* Include padding and border in width and height calculations */
+            border: 1px solid #007BFF; /* Added border */
+            border-radius: 10px;
+            background-color: #1a252f; /* Set background color */
         }
 
         #session-list {
@@ -231,15 +254,39 @@
         .ai-message {
             text-align: left;
         }
+
+        /* Graph styles */
+        .link {
+            stroke: #0000ff; /* Visible blue color */
+            stroke-width: 2px;
+            fill: none;
+        }
+
+        .node circle {
+            fill: #fff;
+            stroke-width: 2px;
+        }
+
+        .label {
+            font: 10px sans-serif;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
     <!-- Left Panel -->
     <div id="left-panel">
-        <ul id="session-list">
-            <!-- Session IDs will be populated here -->
-        </ul>
+        <!-- Top Area for Session List -->
+        <div id="session-list-container">
+            <ul id="session-list">
+                <!-- Session IDs will be populated here -->
+            </ul>
+        </div>
+        <!-- Bottom Area for Graph -->
+        <div id="graph-container">
+            <!-- Graph will be rendered here -->
+        </div>
     </div>
 
     <!-- Main Content Area -->
@@ -297,6 +344,12 @@
                         option.textContent = model;
                         modelSelect.appendChild(option);
                     });
+
+                    // Set initial model and draw graph
+                    if (data.length > 0) {
+                        modelSelect.value = data[0];
+                        fetchAndDrawGraph(modelSelect.value);
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching models:', error);
@@ -635,6 +688,266 @@
                 });
         }
 
+        // Fetch and draw the graph based on the selected model
+        function fetchAndDrawGraph(modelName) {
+            // Fetch the JSON data from the specified URL
+            fetch(`${baseUrl}/api/queryRootAgentGraph`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer NO_KEY`
+                },
+                body: JSON.stringify({ model: modelName })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    drawGraph(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching or parsing JSON:', error);
+                });
+        }
+
+        function drawGraph_circle(data) {
+            const nodesData = data.Nodes;
+            const linksData = []; // Array to hold link data
+
+            // Convert data.Graphs into an array of link objects
+            for (let graphId in data.Graphs) {
+                const connections = data.Graphs[graphId];
+                connections.forEach(connection => {
+                    linksData.push({
+                        source: connection.fromCallableId,
+                        target: connection.toCallableId,
+                        fromPinIndex: connection.fromPinIndex,
+                        toPinIndex: connection.toPinIndex
+                    });
+                });
+            }
+
+            // Clear any existing graph
+            d3.select('#graph-container').selectAll('*').remove();
+
+            // Map node types to labels and colors
+            const typeInfo = {
+                0: { label: 'callable', borderColor: '#ff0000', titleColor: '#ffcccc' },
+                1: { label: 'function', borderColor: '#00ff00', titleColor: '#ccffcc' },
+                2: { label: 'action', borderColor: '#0000ff', titleColor: '#ccccff' },
+                3: { label: 'agent', borderColor: '#ffff00', titleColor: '#ffffcc' },
+                4: { label: 'compositeAgent', borderColor: '#00ffff', titleColor: '#ccffff' },
+            };
+
+            // Get the dimensions of the graph container
+            const container = document.getElementById('graph-container');
+            const style = window.getComputedStyle(container);
+            const paddingLeft = parseFloat(style.paddingLeft);
+            const paddingRight = parseFloat(style.paddingRight);
+            const paddingTop = parseFloat(style.paddingTop);
+            const paddingBottom = parseFloat(style.paddingBottom);
+            const borderLeft = parseFloat(style.borderLeftWidth);
+            const borderRight = parseFloat(style.borderRightWidth);
+            const borderTop = parseFloat(style.borderTopWidth);
+            const borderBottom = parseFloat(style.borderBottomWidth);
+
+            const totalHorizontalPadding = paddingLeft + paddingRight + borderLeft + borderRight;
+            const totalVerticalPadding = paddingTop + paddingBottom + borderTop + borderBottom;
+
+            const width = container.clientWidth - totalHorizontalPadding;
+            const height = container.clientHeight - totalVerticalPadding;
+
+            // Create an SVG container in the graph-container
+            const svg = d3.select('#graph-container')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .append('g')
+                .attr('transform', `translate(${paddingLeft + borderLeft},${paddingTop + borderTop})`);
+
+            // Initialize simulation with forces
+            const simulation = d3.forceSimulation(nodesData)
+                .force('link', d3.forceLink(linksData).id(d => d.id).distance(50))
+                .force('charge', d3.forceManyBody().strength(-200))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(20));
+
+            // Create links
+            const link = svg.append('g')
+                .attr('class', 'links')
+                .selectAll('line')
+                .data(linksData)
+                .enter()
+                .append('line')
+                .attr('class', 'link');
+
+            // Create nodes
+            const node = svg.append('g')
+                .attr('class', 'nodes')
+                .selectAll('g')
+                .data(nodesData)
+                .enter()
+                .append('g');
+
+            // Append circles to the nodes
+            const circles = node.append('circle')
+                .attr('r', 10)
+                .attr('fill', d => typeInfo[d.type]?.titleColor || '#e0e0e0')
+                .attr('stroke', d => typeInfo[d.type]?.borderColor || '#000')
+                .attr('stroke-width', 2);
+
+            // Add labels to nodes
+            const labels = node.append('text')
+                .text(d => d.instanceName)
+                .attr('x', 12)
+                .attr('y', 3)
+                .style('font-size', '10px')
+                .style('fill', '#fff');
+
+            // Simulation tick
+            simulation.on('tick', () => {
+                // Constrain nodes within the visible area
+                nodesData.forEach(d => {
+                    d.x = Math.max(10, Math.min(width - 10, d.x));
+                    d.y = Math.max(10, Math.min(height - 10, d.y));
+                });
+
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+
+                node
+                    .attr('transform', d => `translate(${d.x},${d.y})`);
+            });
+
+            // Disable drag and zoom interactions
+            svg.on('.zoom', null);
+        }
+        function drawGraph(data) {
+            const nodesData = data.Nodes;
+            const linksData = [];
+
+            // Convert data.Graphs into an array of link objects
+            for (let graphId in data.Graphs) {
+                const connections = data.Graphs[graphId];
+                connections.forEach(connection => {
+                    linksData.push({
+                        source: connection.fromCallableId,
+                        target: connection.toCallableId,
+                        fromPinIndex: connection.fromPinIndex,
+                        toPinIndex: connection.toPinIndex
+                    });
+                });
+            }
+
+            // Clear any existing graph
+            d3.select('#graph-container').selectAll('*').remove();
+
+            // Map node types to labels and colors
+            const typeInfo = {
+                0: { label: 'callable', borderColor: '#ff0000', fillColor: '#ffcccc' },
+                1: { label: 'function', borderColor: '#00ff00', fillColor: '#ccffcc' },
+                2: { label: 'action', borderColor: '#0000ff', fillColor: '#ccccff' },
+                3: { label: 'agent', borderColor: '#ffff00', fillColor: '#ffffcc' },
+                4: { label: 'compositeAgent', borderColor: '#00ffff', fillColor: '#ccffff' },
+            };
+
+            // Get the dimensions of the graph container
+            const container = document.getElementById('graph-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Create an SVG container in the graph-container
+            const svg = d3.select('#graph-container')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            // Define rectangle dimensions
+            const rectWidth = 100;
+            const rectHeight = 30; // Reduced height
+
+            // Initialize simulation with adjusted forces
+            const simulation = d3.forceSimulation(nodesData)
+                .force('link', d3.forceLink(linksData)
+                    .id(d => d.id)
+                    .distance(150)
+                )
+                .force('charge', d3.forceManyBody()
+                    .strength(-500)
+                )
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide()
+                    .radius(Math.max(rectWidth, rectHeight) / 2 + 10) // Adjusted to prevent overlap
+                );
+
+            // Create links
+            const link = svg.append('g')
+                .attr('class', 'links')
+                .selectAll('line')
+                .data(linksData)
+                .enter()
+                .append('line')
+                .attr('stroke', '#999')
+                .attr('stroke-width', 2);
+
+            // Create nodes
+            const node = svg.append('g')
+                .attr('class', 'nodes')
+                .selectAll('g')
+                .data(nodesData)
+                .enter()
+                .append('g')
+                .attr('class', 'node');
+
+            // Append rectangles to the nodes
+            node.append('rect')
+                .attr('width', rectWidth)
+                .attr('height', rectHeight)
+                .attr('x', -rectWidth / 2)
+                .attr('y', -rectHeight / 2)
+                .attr('fill', d => typeInfo[d.type]?.fillColor || '#e0e0e0')
+                .attr('stroke', d => typeInfo[d.type]?.borderColor || '#000')
+                .attr('stroke-width', 2)
+                .attr('rx', 6)
+                .attr('ry', 6);
+
+            // Add labels to nodes
+            node.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '.35em')
+                .style('font-size', '10px') // Reduced font size
+                .style('fill', '#000')
+                .text(d => {
+                    // Truncate text if it's too long
+                    const maxChars = 12;
+                    return d.instanceName.length > maxChars ? d.instanceName.substring(0, maxChars) + '...' : d.instanceName;
+                });
+
+            // Simulation tick
+            simulation.on('tick', () => {
+                // Update link positions
+                link
+                    .attr('x1', d => limitWithinBounds(d.source.x, rectWidth, width))
+                    .attr('y1', d => limitWithinBounds(d.source.y, rectHeight, height))
+                    .attr('x2', d => limitWithinBounds(d.target.x, rectWidth, width))
+                    .attr('y2', d => limitWithinBounds(d.target.y, rectHeight, height));
+
+                // Update node positions
+                node.attr('transform', d => {
+                    d.x = limitWithinBounds(d.x, rectWidth, width);
+                    d.y = limitWithinBounds(d.y, rectHeight, height);
+                    return `translate(${d.x},${d.y})`;
+                });
+            });
+
+            // Helper function to constrain nodes within bounds
+            function limitWithinBounds(value, size, max) {
+                const halfSize = size / 2;
+                return Math.max(halfSize, Math.min(max - halfSize, value));
+            }
+        }
+
         // Event listeners
         document.getElementById('send-btn').addEventListener('click', sendMessage);
 
@@ -642,6 +955,12 @@
             if (e.key === 'Enter') {
                 sendMessage();
             }
+        });
+
+        // Update graph when model changes
+        document.getElementById('model-select').addEventListener('change', function () {
+            const model = this.value;
+            fetchAndDrawGraph(model);
         });
 
         // Initial function calls

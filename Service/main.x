@@ -47,9 +47,22 @@ def loadGraph():
 # Link: http://localhost:9901/api/queryGraph
 @srv.route("/api/queryGraph")
 def queryGraph():
-	graphJson = xMind.QueryAgentFlow()
-	return [graphJson, "text/json"]
+    modelName =""
+    params = json.loads(req.body)
+    if params.has("model"):
+        modelName = params["model"]
+    graphJson = xMind.QueryAgentFlow(modelName)
+    return [graphJson, "text/json"]
 
+# Link: http://localhost:9901/api/queryRootAgentGraph
+@srv.route("/api/queryRootAgentGraph")
+def queryRootAgentGraph():
+    modelName =""
+    params = json.loads(req.body)
+    if params.has("model"):
+        modelName = params["model"]
+    graphJson = xMind.QueryRootAgentFlow(modelName)
+    return [graphJson, "text/json"]
 
 # this call will keep session history
 @srv.route("/api/chat/completions")
