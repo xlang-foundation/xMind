@@ -23,6 +23,7 @@ import time
 
 xMind.importBlueprint("simple.yml")
 
+# if need use session memory, call llm with use_session_memory = True
 @xMind.Agent()
 def simple_py_agent(owner):
 	inputDataList = owner.waitInputs()
@@ -31,7 +32,7 @@ def simple_py_agent(owner):
 			sessionId = inputData[0]
 			inputIndex = inputData[1]
 			data = inputData[2]
-			resp = owner.llm(data)
+			resp = owner.llm(data,sessionId)
 			resp = "{Python Agent:simple_py_agent}"+resp
 			owner.pushToOutput(sessionId,0,resp)
 

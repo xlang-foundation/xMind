@@ -63,6 +63,7 @@ namespace xMind
 			prompt->Set("content", (std::string&) content);
 			m_prompts += prompt;
         }
+		//llm(data,sessionId)
         bool RunLlm(X::XRuntime* rt, X::XObj* pContext,
             X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
         {
@@ -85,10 +86,26 @@ namespace xMind
 			{
 				temperature = (double)it->val;
 			}
+			bool useSessionMemory = false;
+			it = kwParams.find("use_session_memory");
+			if (it)
+			{
+				useSessionMemory = (bool)it->val;
+			}
 			X::List prompts = m_prompts;
+
 			if (params.size() > 0)
 			{
+				SESSION_ID data_SessionId = 0;
 				X::Value varData = params[0];
+				if (params.size() > 1)
+				{
+					data_SessionId = (SESSION_ID)params[1].ToLongLong();
+				}
+				if (useSessionMemory)
+				{
+					BuildPromptsFromSessionMemory(data_SessionId, prompts);
+				}
 				if (varData.IsDict())
 				{
 					X::Dict dictPrompt(varData);
