@@ -174,4 +174,25 @@ namespace xMind
 			}
 		}
     }
+    X::Value MindAPISet::QueryRootAgentFlowStatus(std::string rootAgentName, 
+        std::string sessionId)
+    {
+        std::string blueprintName = Starter::I().GetRootAgentBlueprintFileName(rootAgentName);
+        if (blueprintName == "")
+        {
+            return X::Value();
+        }
+        //just make sure load it
+        X::Value graph = Starter::I().GetOrCreateRunningGraph(rootAgentName);
+		if (graph.IsInvalid())
+		{
+            return X::Value();
+		}
+        SESSION_ID sid= SessionManager::I().getSessionId(sessionId);
+        sid = GetShortSessionID(sid);
+		X::XPackageValue<AgentGraph> packGraph(graph);
+        AgentGraph* pGraph = packGraph.GetRealObj();
+		X::Value status = pGraph->GetStatus(sid);
+        return status;
+    }
 }

@@ -102,6 +102,8 @@ namespace xMind
         CompletionRequest parseCompletionRequest(X::Value& reqData);
         X::Value createCompletionResponse(const CompletionResponse& response);
         SESSION_ID createSession(const std::string& sessionId);
+
+    public:
         SESSION_ID getSessionId(const std::string& sessionId)
         {
             std::lock_guard<std::mutex> lock(m_session_mtx);
@@ -111,7 +113,6 @@ namespace xMind
             }
             return NO_SESSION_ID;
         }
-    public:
         inline std::string GetSessionIdString(SESSION_ID id)
         {
             SessionIDInfo idInfo = FromSessionID(id);

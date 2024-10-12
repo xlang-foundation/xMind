@@ -171,7 +171,38 @@ namespace xMind
 			}
 		}
 	}
+	void AgentGraph::AddStatus(SESSION_ID sessionId,
+		unsigned long long from_nodeId, unsigned long long to_nodeId)
+	{
+		SESSION_ID shortID = GetShortSessionID(sessionId);
+		m_statusMutex.lock();
+		auto it = m_statusMap.find(shortID);
+		if (it == m_statusMap.end())
+		{
+			if (to_nodeId > 0)
+			{
+				std::vector<unsigned long long> vec{ to_nodeId };
+				m_statusMap.emplace(shortID, vec);
+			}
+		}
+		else
+		{
+			//remove from_nodeId from vector
+			auto& vec = it->second;
+			auto it1 = std::find(vec.begin(), vec.end(), from_nodeId);
+			if (it1 != vec.end())
+			{
+				vec.erase(it1);
+			}
+			//add to_nodeId to as it is going to working on this data
+			if (to_nodeId > 0)
+			{
+				it->second.push_back(to_nodeId);
+			}
+		}
+		m_statusMutex.unlock();
 
+	}
 	void AgentGraph::PushDataToCallable(Callable* fromCallable, 
 		SESSION_ID sessionId,int outputIndex, X::Value& data)
 	{
@@ -187,6 +218,7 @@ namespace xMind
 			if (connection.connected && connection.fromCallableId == fromCallableId
 				&& connection.fromPinIndex == outputIndex)
 			{
+				AddStatus(sessionId, fromCallableId, connection.toCallableId);
 				Callable* toCallable = FindCallable(connection.toCallableId);
 				toCallable->SetRT(fromCallable->GetRT());
 				toCallable->ReceiveData(sessionId,connection.toPinIndex, data);
@@ -195,6 +227,7 @@ namespace xMind
 		}
 		if (!hasReceiver)
 		{//cache to quque for each session
+			AddStatus(sessionId, fromCallableId, 0);
 			AddSessionData(sessionId, fromCallable,outputIndex, data);
 		}
 	}
@@ -263,6 +296,7 @@ namespace xMind
 			auto* pCallable = startNode.first;
 			if (pCallable)
 			{
+				AddStatus(sid, 0, pCallable->ID());
 				pCallable->SetRT(xMind::MindAPISet::I().RT());
 				LOG5 << "Put inputs:" << inputs.ToString() << "To:" << pCallable->GetInstanceName()<<LINE_END;
 				pCallable->ReceiveData(sid, 0, inputs);
@@ -336,4 +370,5 @@ namespace xMind
 		m_sessionData[sessionIdNoIt].push_back(sessionData);
 		m_sessionDataCondVar.notify_all();
 	}
+
 }

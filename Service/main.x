@@ -109,5 +109,14 @@ def query_history():
     session_memory.remove_all(sessionId)
     return [str({'status':'ok'},format=True), "text/json"]
 
+# Link: http://localhost:9901/api/session/graphstatus
+@srv.route("/api/session/graphstatus")
+def query_session_graphstatus():
+    params = json.loads(req.body)
+    sessionId = params["sessionId"]
+    model = params["model"]
+    status = xMind.QueryRootAgentFlowStatus(model,sessionId)
+    return [str(status,format=True), "text/json"]
+
 xMind.logV("xMind WebServer Started,port:",port)
 srv.listen("::", port)

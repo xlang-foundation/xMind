@@ -262,14 +262,33 @@
             fill: none;
         }
 
-        .node circle {
-            fill: #fff;
-            stroke-width: 2px;
+        .node rect {
+            /* Initially, no animation */
         }
 
-        .label {
-            font: 10px sans-serif;
-            pointer-events: none;
+        /* Animation for processing nodes */
+        .processing-node rect {
+            animation: processingAnimation 0.5s infinite;
+        }
+
+        @keyframes processingAnimation {
+            0% {
+                fill: #ffcc00;
+                transform: scale(1);
+                filter: drop-shadow(0 0 5px #ffcc00);
+            }
+
+            50% {
+                fill: #ff0000;
+                transform: scale(1.2);
+                filter: drop-shadow(0 0 10px #ff0000);
+            }
+
+            100% {
+                fill: #ffcc00;
+                transform: scale(1);
+                filter: drop-shadow(0 0 5px #ffcc00);
+            }
         }
     </style>
 </head>
@@ -321,6 +340,10 @@
 
     <script>
         let sessionId = "";
+        let processingNodeIds = new Set();
+        let graphNodes = {}; // To store node elements by ID
+        let graphStatusInterval = null;
+        let sessionIdCallbacks = []; // To handle cases where sessionId is not yet available
 
         // Get the base URL from the page's location
         const baseUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
@@ -620,6 +643,17 @@
             // Clear the input box
             document.getElementById('prompt-input').value = '';
 
+            // Start fetching graph status immediately
+            if (sessionId) {
+                // If sessionId is available, start fetching
+                startFetchingGraphStatus(model, sessionId);
+            } else {
+                // If sessionId is not available, wait until it's set
+                sessionIdCallbacks.push(() => {
+                    startFetchingGraphStatus(model, sessionId);
+                });
+            }
+
             // Send the prompt to the API with SessionID
             fetch(`${baseUrl}/api/chat/completions`, {
                 method: 'POST',
@@ -635,16 +669,15 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Hide status message
-                    statusMessage.style.display = 'none';
-
-                    // Re-enable input and button
-                    document.getElementById('prompt-input').disabled = false;
-                    document.getElementById('send-btn').disabled = false;
-                    document.getElementById('prompt-input').focus();
-
                     // Get the response from the API
+                    const previousSessionId = sessionId; // Store previous sessionId
                     sessionId = data.sessionId;
+
+                    // If sessionId was not set before, run callbacks
+                    if (!previousSessionId && sessionIdCallbacks.length > 0) {
+                        sessionIdCallbacks.forEach(callback => callback());
+                        sessionIdCallbacks = [];
+                    }
 
                     // Add the session ID to the session list if it's new
                     if (!document.querySelector(`[data-session-id="${sessionId}"]`)) {
@@ -675,6 +708,24 @@
 
                     // Scroll the history to the bottom
                     historyList.scrollTop = historyList.scrollHeight;
+
+                    // Stop fetching graph status here
+                    if (graphStatusInterval) {
+                        clearInterval(graphStatusInterval);
+                        graphStatusInterval = null;
+                    }
+
+                    // Remove animations from all nodes
+                    d3.selectAll('.processing-node').classed('processing-node', false);
+                    processingNodeIds.clear();
+
+                    // Re-enable input and button
+                    document.getElementById('prompt-input').disabled = false;
+                    document.getElementById('send-btn').disabled = false;
+                    document.getElementById('prompt-input').focus();
+
+                    // Hide status message when done
+                    statusMessage.style.display = 'none';
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -708,121 +759,6 @@
                 });
         }
 
-        function drawGraph_circle(data) {
-            const nodesData = data.Nodes;
-            const linksData = []; // Array to hold link data
-
-            // Convert data.Graphs into an array of link objects
-            for (let graphId in data.Graphs) {
-                const connections = data.Graphs[graphId];
-                connections.forEach(connection => {
-                    linksData.push({
-                        source: connection.fromCallableId,
-                        target: connection.toCallableId,
-                        fromPinIndex: connection.fromPinIndex,
-                        toPinIndex: connection.toPinIndex
-                    });
-                });
-            }
-
-            // Clear any existing graph
-            d3.select('#graph-container').selectAll('*').remove();
-
-            // Map node types to labels and colors
-            const typeInfo = {
-                0: { label: 'callable', borderColor: '#ff0000', titleColor: '#ffcccc' },
-                1: { label: 'function', borderColor: '#00ff00', titleColor: '#ccffcc' },
-                2: { label: 'action', borderColor: '#0000ff', titleColor: '#ccccff' },
-                3: { label: 'agent', borderColor: '#ffff00', titleColor: '#ffffcc' },
-                4: { label: 'compositeAgent', borderColor: '#00ffff', titleColor: '#ccffff' },
-            };
-
-            // Get the dimensions of the graph container
-            const container = document.getElementById('graph-container');
-            const style = window.getComputedStyle(container);
-            const paddingLeft = parseFloat(style.paddingLeft);
-            const paddingRight = parseFloat(style.paddingRight);
-            const paddingTop = parseFloat(style.paddingTop);
-            const paddingBottom = parseFloat(style.paddingBottom);
-            const borderLeft = parseFloat(style.borderLeftWidth);
-            const borderRight = parseFloat(style.borderRightWidth);
-            const borderTop = parseFloat(style.borderTopWidth);
-            const borderBottom = parseFloat(style.borderBottomWidth);
-
-            const totalHorizontalPadding = paddingLeft + paddingRight + borderLeft + borderRight;
-            const totalVerticalPadding = paddingTop + paddingBottom + borderTop + borderBottom;
-
-            const width = container.clientWidth - totalHorizontalPadding;
-            const height = container.clientHeight - totalVerticalPadding;
-
-            // Create an SVG container in the graph-container
-            const svg = d3.select('#graph-container')
-                .append('svg')
-                .attr('width', width)
-                .attr('height', height)
-                .append('g')
-                .attr('transform', `translate(${paddingLeft + borderLeft},${paddingTop + borderTop})`);
-
-            // Initialize simulation with forces
-            const simulation = d3.forceSimulation(nodesData)
-                .force('link', d3.forceLink(linksData).id(d => d.id).distance(50))
-                .force('charge', d3.forceManyBody().strength(-200))
-                .force('center', d3.forceCenter(width / 2, height / 2))
-                .force('collision', d3.forceCollide().radius(20));
-
-            // Create links
-            const link = svg.append('g')
-                .attr('class', 'links')
-                .selectAll('line')
-                .data(linksData)
-                .enter()
-                .append('line')
-                .attr('class', 'link');
-
-            // Create nodes
-            const node = svg.append('g')
-                .attr('class', 'nodes')
-                .selectAll('g')
-                .data(nodesData)
-                .enter()
-                .append('g');
-
-            // Append circles to the nodes
-            const circles = node.append('circle')
-                .attr('r', 10)
-                .attr('fill', d => typeInfo[d.type]?.titleColor || '#e0e0e0')
-                .attr('stroke', d => typeInfo[d.type]?.borderColor || '#000')
-                .attr('stroke-width', 2);
-
-            // Add labels to nodes
-            const labels = node.append('text')
-                .text(d => d.instanceName)
-                .attr('x', 12)
-                .attr('y', 3)
-                .style('font-size', '10px')
-                .style('fill', '#fff');
-
-            // Simulation tick
-            simulation.on('tick', () => {
-                // Constrain nodes within the visible area
-                nodesData.forEach(d => {
-                    d.x = Math.max(10, Math.min(width - 10, d.x));
-                    d.y = Math.max(10, Math.min(height - 10, d.y));
-                });
-
-                link
-                    .attr('x1', d => d.source.x)
-                    .attr('y1', d => d.source.y)
-                    .attr('x2', d => d.target.x)
-                    .attr('y2', d => d.target.y);
-
-                node
-                    .attr('transform', d => `translate(${d.x},${d.y})`);
-            });
-
-            // Disable drag and zoom interactions
-            svg.on('.zoom', null);
-        }
         function drawGraph(data) {
             const nodesData = data.Nodes;
             const linksData = [];
@@ -865,7 +801,7 @@
 
             // Define rectangle dimensions
             const rectWidth = 100;
-            const rectHeight = 30; // Reduced height
+            const rectHeight = 30;
 
             // Initialize simulation with adjusted forces
             const simulation = d3.forceSimulation(nodesData)
@@ -878,7 +814,7 @@
                 )
                 .force('center', d3.forceCenter(width / 2, height / 2))
                 .force('collision', d3.forceCollide()
-                    .radius(Math.max(rectWidth, rectHeight) / 2 + 10) // Adjusted to prevent overlap
+                    .radius(Math.max(rectWidth, rectHeight) / 2 + 10)
                 );
 
             // Create links
@@ -898,7 +834,13 @@
                 .data(nodesData)
                 .enter()
                 .append('g')
-                .attr('class', 'node');
+                .attr('class', 'node')
+                .attr('id', d => 'node-' + d.id); // Assign an ID for easy selection
+
+            // Store node elements for easy access
+            nodesData.forEach(d => {
+                graphNodes[d.id] = d;
+            });
 
             // Append rectangles to the nodes
             node.append('rect')
@@ -916,10 +858,9 @@
             node.append('text')
                 .attr('text-anchor', 'middle')
                 .attr('dy', '.35em')
-                .style('font-size', '10px') // Reduced font size
+                .style('font-size', '10px')
                 .style('fill', '#000')
                 .text(d => {
-                    // Truncate text if it's too long
                     const maxChars = 12;
                     return d.instanceName.length > maxChars ? d.instanceName.substring(0, maxChars) + '...' : d.instanceName;
                 });
@@ -946,6 +887,74 @@
                 const halfSize = size / 2;
                 return Math.max(halfSize, Math.min(max - halfSize, value));
             }
+        }
+
+        // Function to start fetching graph status
+        function startFetchingGraphStatus(model, sessionId) {
+            // Clear any existing interval
+            if (graphStatusInterval) {
+                clearInterval(graphStatusInterval);
+            }
+
+            // Fetch status immediately and then set interval
+            fetchGraphStatus(model, sessionId);
+            graphStatusInterval = setInterval(() => {
+                fetchGraphStatus(model, sessionId);
+            }, 1000); // Fetch every 2 seconds
+        }
+
+        // Function to fetch graph status and update node animations
+        function fetchGraphStatus(model, sessionId) {
+            if (!sessionId) {
+                // If sessionId is still not available, skip this fetch
+                return;
+            }
+            fetch(`${baseUrl}/api/session/graphstatus`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer NO_KEY`
+                },
+                body: JSON.stringify({
+                    model: model,
+                    sessionId: sessionId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data === 'Invalid') {
+                        // No nodes are processing data
+                        // Remove animations from all nodes
+                        d3.selectAll('.processing-node').classed('processing-node', false);
+                        processingNodeIds.clear();
+                        return;
+                    }
+
+                    const newProcessingNodeIds = new Set(data); // Assuming data is an array of node IDs
+
+                    // Nodes no longer processing
+                    processingNodeIds.forEach(nodeId => {
+                        if (!newProcessingNodeIds.has(nodeId)) {
+                            // Remove animation
+                            d3.select('#node-' + nodeId).classed('processing-node', false);
+                        }
+                    });
+
+                    // Nodes now processing
+                    newProcessingNodeIds.forEach(nodeId => {
+                        if (!processingNodeIds.has(nodeId)) {
+                            // Add animation
+                            d3.select('#node-' + nodeId).classed('processing-node', true);
+                        }
+                    });
+
+                    // Update the set
+                    processingNodeIds = newProcessingNodeIds;
+                })
+                .catch(error => {
+                    console.error('Error fetching graph status:', error);
+                    // Optionally handle the error
+                });
         }
 
         // Event listeners

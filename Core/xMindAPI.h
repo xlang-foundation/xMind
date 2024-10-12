@@ -64,6 +64,7 @@ namespace xMind
             APISET().AddFunc<1>("LoadAgentFlowFromString", &MindAPISet::LoadAgentFlowFromString);
             APISET().AddFunc<1>("QueryAgentFlow", &MindAPISet::QueryAgentFlow);
             APISET().AddFunc<1>("QueryRootAgentFlow", &MindAPISet::QueryRootAgentFlow);
+            APISET().AddFunc<2>("QueryRootAgentFlowStatus", &MindAPISet::QueryRootAgentFlowStatus);
             APISET().AddVarFunc("PullEvents", &MindAPISet::PullEvents);
             APISET().AddVarFunc("Test", &MindAPISet::Test);
             APISET().AddVarFunc("log", &MindAPISet::Log);
@@ -469,6 +470,9 @@ namespace xMind
             X::Value graph = Starter::I().GetOrCreateRunningGraph(rootAgentName);
             return NodeManager::I().BuildGraphAsJson(blueprintName);
         }
+        X::Value  QueryRootAgentFlowStatus(std::string rootAgentName,
+            std::string sessionId);
+
 		inline X::Value GetRootAgents()
 		{
 			auto list = Starter::I().GetRootAgents();
