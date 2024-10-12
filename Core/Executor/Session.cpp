@@ -78,8 +78,9 @@ namespace xMind
 		X::Value retMsg = pGraph->RunInputs(sid, request.messageList);
 
 		std::string retRole = "assistant";
+		std::string retMsgStr = retMsg.ToString();
 		AddSessionRecord(request.sessionId,
-			retMsg.ToString(), retRole, request.model);
+            retMsgStr,retRole, request.model);
 
         ChatCompletionResponse response;
 		response.sessionId = request.sessionId;
