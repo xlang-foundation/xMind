@@ -43,6 +43,18 @@ namespace xMind
 		void Stop();
 		std::vector<std::string> GetRootAgents();
 		X::Value GetOrCreateRunningGraph(const std::string& rootAgent);
+		bool AddRootAgent(std::string& strFile);
+		bool RemoveRootAgent(std::string& strFile);
+		inline std::string GetRootAgentBlueprintFileName(const std::string& rootAgent)
+		{
+			std::lock_guard<std::mutex> lock(m_rootAgents_mtx);
+			auto it = m_rootAgents.find(rootAgent);
+			if (it != m_rootAgents.end())
+			{
+				return it->second.filename;
+			}
+			return "";
+		}
 	private:
 		std::string m_appPath;
 		std::string m_configPath;

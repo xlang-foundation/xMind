@@ -415,6 +415,33 @@ namespace xMind
 		std::unordered_map<SESSION_ID, std::vector<SessionData>> m_sessionData;
 		std::condition_variable m_sessionDataCondVar;
 		std::mutex m_sessionDataMutex;
-		void AddSessionData(SESSION_ID sessionId, Callable* pCallable, int outputIndex,X::Value& data);
+		void AddSessionData(SESSION_ID sessionId, Callable* pCallable, 
+			int outputIndex,X::Value& data);
+		private:
+		//Status
+		//per session, record these nodes have input data not come out the output yet
+		std::mutex m_statusMutex;
+		std::unordered_map<SESSION_ID, std::vector<unsigned long long>> m_statusMap;
+		//when deliver data from one node to another, call this function to update status
+		void AddStatus(SESSION_ID sessionId, 
+			unsigned long long from_nodeId,
+			unsigned long long to_nodeId);
+		public:
+			X::Value GetStatus(SESSION_ID sessionId)
+			{
+				std::unique_lock<std::mutex> lock(m_statusMutex);
+				auto it = m_statusMap.find(sessionId);
+				if (it == m_statusMap.end())
+				{
+					return X::Value();
+				}
+				X::List list;
+				for (auto id : it->second)
+				{
+					list += id;
+				}
+				return list;
+			}
+
 	};
 }

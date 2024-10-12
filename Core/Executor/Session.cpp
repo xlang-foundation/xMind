@@ -35,15 +35,28 @@ namespace xMind
     X::Value SessionManager::HandleChatRequest(X::Value& reqData)
     {
 		ChatRequest request = parseChatRequest(reqData);
+
 		SESSION_ID sid = getSessionId(request.sessionId);
 		if (sid == NO_SESSION_ID)
 		{
-            X::Package utils(xMind::MindAPISet::I().RT(), "utils", "xlang_os");
-            X::Value uuid = utils["generate_uid"]();
-            std::string strSessionId = uuid.ToString();
+            std::string strSessionId;
+            if (request.sessionId.empty())
+            {
+                X::Package utils(xMind::MindAPISet::I().RT(), "utils", "xlang_os");
+                X::Value uuid = utils["generate_uid"]();
+                strSessionId = uuid.ToString();
+                request.sessionId = strSessionId;
+            }
+            else
+            {
+                strSessionId = request.sessionId;
+            }
 			sid = createSession(strSessionId);
-            request.sessionId = strSessionId;
 		}
+        AddSessionRecord(request.sessionId,
+            request.messages[0].content,
+            request.messages[0].role, request.model);
+
 		X::Value graph = Starter::I().GetOrCreateRunningGraph(request.model);
         X::XPackageValue<AgentGraph> packGraph(graph);
 		AgentGraph* pGraph = packGraph.GetRealObj();
@@ -63,9 +76,15 @@ namespace xMind
 			//we don't change m_sessions, so if need sessionInfo, use {sid, 0, 0} to get
         }
 		X::Value retMsg = pGraph->RunInputs(sid, request.messageList);
+
+		std::string retRole = "assistant";
+		std::string retMsgStr = retMsg.ToString();
+		AddSessionRecord(request.sessionId,
+            retMsgStr,retRole, request.model);
+
         ChatCompletionResponse response;
 		response.sessionId = request.sessionId;
-		response.object = "text";
+        response.object = "text";
 		response.created = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 		response.model = request.model;
 		response.choices.push_back({ 0, { "assistant", retMsg.ToString(), "" }, "", "complete" });
@@ -86,6 +105,17 @@ namespace xMind
 		X::Value valInput = request.prompt;
 		pGraph->RunInputs(NO_SESSION_ID, valInput);
         return X::Value();
+    }
+    bool SessionManager::AddSessionRecord(std::string& session_id, 
+        std::string& content, std::string& role, std::string& agent)
+    {
+        bool bOK = false;
+        X::Value session_memory = MindAPISet::I().GetXModule("session_memory");
+        if (session_memory.IsObject())
+        {
+            bOK = (bool)session_memory["add"](session_id, content, role, agent);
+        }
+        return bOK;
     }
     X::Value SessionManager::createChatResponse(const ChatCompletionResponse& response) {
         // Create the main dictionary

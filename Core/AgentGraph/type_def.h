@@ -41,7 +41,13 @@ namespace xMind
 		info.iterationCount = static_cast<unsigned short>((session_id >> 48) & 0xFFFF);
 		return info;
 	}
-
+	inline SESSION_ID GetShortSessionID(SESSION_ID session_id)
+	{
+		SessionIDInfo info = FromSessionID(session_id);
+		info.inputIndex = 0;
+		info.iterationCount = 0;
+		return ToSessionID(info);
+	}
 
 	enum class Status
 	{

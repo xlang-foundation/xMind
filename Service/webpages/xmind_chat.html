@@ -1,54 +1,140 @@
-<!--
-Copyright (C) 2024 The XLang Foundation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>xMind Chat Test Page</title>
+    <title>xMind Chat Page</title>
+    <!-- Include Showdown.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/showdown/dist/showdown.min.js"></script>
+    <!-- Include D3.js for graph drawing -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        html, body {
+            height: 100%;
             margin: 0;
             padding: 0;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
             background-color: #f4f4f4;
         }
 
+        /* Left panel styles */
+        #left-panel {
+            width: 300px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* Fill the viewport height */
+            overflow: hidden; /* Prevent overflow */
+        }
+
+        /* Top area for session list */
+        #session-list-container {
+            flex: 1;
+            overflow-y: auto;
+            background-color: #2c3e50;
+            padding-top: 20px;
+            border-bottom-width: 2px;
+            margin-bottom: 10px; /* Added margin to create gap between session list and graph */
+        }
+
+        /* Bottom area for graph */
+        #graph-container {
+            height: 200px; /* Fixed height for the graph area */
+            padding: 10px; /* Add padding */
+            box-sizing: border-box; /* Include padding and border in width and height calculations */
+            border: 1px solid #007BFF; /* Added border */
+            border-radius: 10px;
+            background-color: #1a252f; /* Set background color */
+        }
+
+        #session-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+            #session-list li {
+                padding: 10px;
+                cursor: pointer;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                position: relative;
+            }
+
+                #session-list li:hover {
+                    background-color: #34495e;
+                }
+
+                #session-list li small {
+                    font-size: 12px;
+                    color: #ecf0f1;
+                }
+
+                #session-list li strong {
+                    font-size: 14px;
+                    color: #bdc3c7;
+                }
+
+        /* Remove button styles */
+        .remove-session-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+            .remove-session-btn:hover {
+                color: red;
+            }
+
+        /* Main content styles */
+        #main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden; /* Prevent main content scroll */
+        }
+
         #chat-container {
-            width: 60%;
-            max-width: 600px;
+            width: 100%;
+            max-width: 800px;
+            flex: 1;
             background: white;
             border-radius: 8px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent chat container scroll */
         }
 
-        #history {
-            list-style-type: none;
-            padding: 0;
-            margin-bottom: 20px;
-            max-height: 300px;
-            overflow-y: auto;
+        /* Top area for model selection */
+        #top-area {
+            padding: 20px;
             border-bottom: 1px solid #ddd;
+        }
+
+        #model-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Middle area for chat history */
+        #history {
+            flex: 1;
+            list-style-type: none;
+            padding: 20px;
+            margin: 0;
+            overflow-y: auto; /* Enable scrolling */
         }
 
             #history li {
@@ -60,10 +146,55 @@ limitations under the License.
                     background-color: #f9f9f9;
                 }
 
-        #prompt-input, #model-select {
-            width: calc(100% - 22px);
-            padding: 10px;
+        /* Bottom area for input */
+        #bottom-area {
+            padding: 20px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Status message styles */
+        #status-message {
             margin-bottom: 10px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Spinner styles */
+        .spinner {
+            margin-left: 10px;
+            border: 4px solid #f3f3f3; /* Light gray */
+            border-top: 4px solid #007BFF; /* Blue */
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #prompt-input-area {
+            display: flex;
+            align-items: center;
+        }
+
+        #prompt-input {
+            flex: 1;
+            padding: 10px;
+            margin-right: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
@@ -80,65 +211,448 @@ limitations under the License.
             #send-btn:hover {
                 background-color: #0056b3;
             }
+
+            #send-btn:disabled {
+                background-color: #999;
+                cursor: not-allowed;
+            }
+
+        /* Styles for rendered content */
+        .rendered-content {
+            width: 100%;
+            overflow: auto;
+        }
+
+            .rendered-content iframe {
+                width: 100%;
+                height: 300px;
+                border: none;
+            }
+
+            .rendered-content pre {
+                background-color: #f0f0f0;
+                padding: 10px;
+                overflow: auto;
+            }
+
+            .rendered-content div {
+                margin-bottom: 10px;
+            }
+
+        /* Timestamp styles */
+        .message-timestamp {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        /* Differentiate user and AI messages */
+        .user-message {
+            text-align: right;
+        }
+
+        .ai-message {
+            text-align: left;
+        }
+
+        /* Graph styles */
+        .link {
+            stroke: #0000ff; /* Visible blue color */
+            stroke-width: 2px;
+            fill: none;
+        }
+
+        .node rect {
+            /* Initially, no animation */
+        }
+
+        /* Animation for processing nodes */
+        .processing-node rect {
+            animation: processingAnimation 0.5s infinite;
+        }
+
+        @keyframes processingAnimation {
+            0% {
+                fill: #ffcc00;
+                transform: scale(1);
+                filter: drop-shadow(0 0 5px #ffcc00);
+            }
+
+            50% {
+                fill: #ff0000;
+                transform: scale(1.2);
+                filter: drop-shadow(0 0 10px #ff0000);
+            }
+
+            100% {
+                fill: #ffcc00;
+                transform: scale(1);
+                filter: drop-shadow(0 0 5px #ffcc00);
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div id="chat-container">
-        <select id="model-select"></select>
-        <ul id="history">
-            <!-- History of prompts and responses will appear here -->
-        </ul>
-        <input type="text" id="prompt-input" placeholder="Enter your prompt here...">
-        <button id="send-btn">Send</button>
+    <!-- Left Panel -->
+    <div id="left-panel">
+        <!-- Top Area for Session List -->
+        <div id="session-list-container">
+            <ul id="session-list">
+                <!-- Session IDs will be populated here -->
+            </ul>
+        </div>
+        <!-- Bottom Area for Graph -->
+        <div id="graph-container">
+            <!-- Graph will be rendered here -->
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div id="main-content">
+        <div id="chat-container">
+            <!-- Top Area for Model Selection -->
+            <div id="top-area">
+                <select id="model-select"></select>
+            </div>
+
+            <!-- Middle Area for Chat History -->
+            <ul id="history">
+                <!-- Chat history will appear here -->
+            </ul>
+
+            <!-- Bottom Area for Input and Status -->
+            <div id="bottom-area">
+                <!-- Status Message -->
+                <div id="status-message" style="display: none;">
+                    Agent is working...
+                    <div class="spinner"></div>
+                </div>
+
+                <!-- Prompt Input Area -->
+                <div id="prompt-input-area">
+                    <input type="text" id="prompt-input" placeholder="Enter your prompt here...">
+                    <button id="send-btn">Send</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         let sessionId = "";
+        let processingNodeIds = new Set();
+        let graphNodes = {}; // To store node elements by ID
+        let graphStatusInterval = null;
+        let sessionIdCallbacks = []; // To handle cases where sessionId is not yet available
 
         // Get the base URL from the page's location
         const baseUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
 
         // Fetch available models
-        fetch(`${baseUrl}/api/rootagents`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer NO_KEY`
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                const modelSelect = document.getElementById('model-select');
-                data.forEach(model => {
-                    const option = document.createElement('option');
-                    option.value = model;
-                    option.textContent = model;
-                    modelSelect.appendChild(option);
-                });
+        function fetchModels() {
+            fetch(`${baseUrl}/api/rootagents`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer NO_KEY`
+                }
             })
-            .catch(error => {
-                console.error('Error fetching models:', error);
-                alert('An error occurred while fetching the models!');
+                .then(response => response.json())
+                .then(data => {
+                    const modelSelect = document.getElementById('model-select');
+                    modelSelect.innerHTML = ''; // Clear existing options
+                    data.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model;
+                        option.textContent = model;
+                        modelSelect.appendChild(option);
+                    });
+
+                    // Set initial model and draw graph
+                    if (data.length > 0) {
+                        modelSelect.value = data[0];
+                        fetchAndDrawGraph(modelSelect.value);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching models:', error);
+                    alert('An error occurred while fetching the models!');
+                });
+        }
+
+        // Create a session list item
+        function createSessionListItem(session) {
+            const listItem = document.createElement('li');
+            const formattedTime = new Date(session.time).toLocaleString();
+
+            // Create small element to hold time and remove button
+            const timeRow = document.createElement('small');
+            timeRow.textContent = formattedTime + ' ';
+
+            // Create remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.classList.add('remove-session-btn');
+            removeBtn.textContent = '🗑️'; // Use trash can emoji or any symbol
+
+            // Add event listener to remove button
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent the click from triggering the list item click event
+                removeSession(session.id, listItem);
             });
 
-        document.getElementById('send-btn').addEventListener('click', function () {
+            // Append remove button to timeRow
+            timeRow.appendChild(removeBtn);
+
+            // Create the strong element for session id
+            const idRow = document.createElement('strong');
+            idRow.textContent = session.id;
+
+            // Append timeRow and idRow to listItem
+            listItem.appendChild(timeRow);
+            listItem.appendChild(document.createElement('br'));
+            listItem.appendChild(idRow);
+
+            listItem.dataset.sessionId = session.id;
+            listItem.addEventListener('click', () => {
+                sessionId = session.id;
+                fetchChatHistory(sessionId);
+            });
+
+            return listItem;
+        }
+
+        // Fetch session list and populate the left panel
+        function fetchSessionList() {
+            fetch(`${baseUrl}/api/sessionlist`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer NO_KEY`
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const sessionList = document.getElementById('session-list');
+                    sessionList.innerHTML = ''; // Clear existing sessions
+                    data.forEach(session => {
+                        const listItem = createSessionListItem(session);
+                        sessionList.appendChild(listItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching session list:', error);
+                    alert('An error occurred while fetching the session list!');
+                });
+        }
+
+        // Remove session function
+        function removeSession(sessionIdToRemove, listItem) {
+            fetch(`${baseUrl}/api/chat/removesession`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer NO_KEY`
+                },
+                body: JSON.stringify({ sessionId: sessionIdToRemove })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        // Remove the session item from the list
+                        listItem.remove();
+                        // If the removed session is the current session, clear the chat history
+                        if (sessionId === sessionIdToRemove) {
+                            sessionId = "";
+                            document.getElementById('history').innerHTML = '';
+                        }
+                    } else {
+                        alert('Failed to remove the session.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error removing session:', error);
+                    alert('An error occurred while removing the session!');
+                });
+        }
+
+        // Fetch chat history for a given session ID
+        function fetchChatHistory(sessionId) {
+            fetch(`${baseUrl}/api/chat/history`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer NO_KEY`
+                },
+                body: JSON.stringify({ sessionId: sessionId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const historyList = document.getElementById('history');
+                    historyList.innerHTML = ''; // Clear existing history
+                    data.forEach(messageArray => {
+                        const [content, timestamp, role, agent] = messageArray;
+                        const historyItem = document.createElement('li');
+
+                        // Include the timestamp
+                        const timeDiv = document.createElement('div');
+                        timeDiv.classList.add('message-timestamp');
+                        timeDiv.textContent = new Date(timestamp).toLocaleString();
+                        historyItem.appendChild(timeDiv);
+
+                        if (role === 'user') {
+                            historyItem.classList.add('user-message');
+                            historyItem.textContent = `You: ${content}`;
+                        } else {
+                            historyItem.classList.add('ai-message');
+                            processResponse(content, 'text', historyItem);
+                        }
+
+                        historyList.appendChild(historyItem);
+                    });
+                    // Scroll to bottom
+                    historyList.scrollTop = historyList.scrollHeight;
+                })
+                .catch(error => {
+                    console.error('Error fetching chat history:', error);
+                    alert('An error occurred while fetching the chat history!');
+                });
+        }
+
+        // Process the API response and render accordingly
+        function processResponse(responseContent, responseType, responseItem) {
+            if (responseType === 'html') {
+                // Render the HTML content in an iframe
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('rendered-content');
+
+                const iframe = document.createElement('iframe');
+                iframe.srcdoc = responseContent;
+                contentDiv.appendChild(iframe);
+
+                responseItem.appendChild(contentDiv);
+            } else if (responseType === 'markdown') {
+                // Render markdown content
+                const converter = new showdown.Converter();
+                const html = converter.makeHtml(responseContent);
+
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('rendered-content');
+                contentDiv.innerHTML = html;
+
+                responseItem.appendChild(contentDiv);
+            } else if (responseType === 'json' || responseType === 'yaml') {
+                // Display as formatted code
+                const codeBlock = document.createElement('pre');
+                codeBlock.textContent = responseContent;
+
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('rendered-content');
+                contentDiv.appendChild(codeBlock);
+
+                responseItem.appendChild(contentDiv);
+            } else if (responseType === 'url') {
+                // Display the URL in an iframe
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('rendered-content');
+
+                const iframe = document.createElement('iframe');
+                iframe.src = responseContent;
+                contentDiv.appendChild(iframe);
+
+                responseItem.appendChild(contentDiv);
+            } else if (responseType === 'text') {
+                // Check for the specific pattern in the text
+                const pattern = /([\s\S]*?)```html\s*([\s\S]*?<\/html>)\s*```([\s\S]*)/i;
+                const matches = responseContent.match(pattern);
+
+                if (matches) {
+                    const beforeHtml = matches[1];
+                    const htmlContent = matches[2];
+                    const afterHtml = matches[3];
+
+                    // Create container div
+                    const contentDiv = document.createElement('div');
+                    contentDiv.classList.add('rendered-content');
+
+                    // Add the first part
+                    if (beforeHtml.trim() !== '') {
+                        const beforeDiv = document.createElement('div');
+                        beforeDiv.textContent = beforeHtml.trim();
+                        contentDiv.appendChild(beforeDiv);
+                    }
+
+                    // Render the HTML content in an iframe
+                    const iframe = document.createElement('iframe');
+                    iframe.srcdoc = htmlContent;
+                    contentDiv.appendChild(iframe);
+
+                    // Add the third part
+                    if (afterHtml.trim() !== '') {
+                        const afterDiv = document.createElement('div');
+                        afterDiv.textContent = afterHtml.trim();
+                        contentDiv.appendChild(afterDiv);
+                    }
+
+                    responseItem.appendChild(contentDiv);
+                } else {
+                    // No matching pattern, display as plain text
+                    responseItem.textContent = `AI: ${responseContent}`;
+                }
+            } else {
+                // Default to plain text
+                responseItem.textContent = `AI: ${responseContent}`;
+            }
+        }
+
+        // Send message function with status updates and spinner
+        function sendMessage() {
             const prompt = document.getElementById('prompt-input').value;
             const model = document.getElementById('model-select').value;
+            const statusMessage = document.getElementById('status-message');
 
             if (prompt.trim() === '') {
                 alert('Please enter a prompt!');
                 return;
             }
 
+            // Show status message with spinner
+            statusMessage.style.display = 'flex';
+            statusMessage.innerHTML = 'Agent: ' + model + ' is working...<div class="spinner"></div>';
+
+            // Disable input and button
+            document.getElementById('prompt-input').disabled = true;
+            document.getElementById('send-btn').disabled = true;
+
             // Add the prompt to the history list
             const historyList = document.getElementById('history');
             const promptItem = document.createElement('li');
+
+            // Include timestamp
+            const timeDiv = document.createElement('div');
+            timeDiv.classList.add('message-timestamp');
+            timeDiv.textContent = new Date().toLocaleString();
+            promptItem.appendChild(timeDiv);
+
+            promptItem.classList.add('user-message');
             promptItem.textContent = `You: ${prompt}`;
             historyList.appendChild(promptItem);
 
+            // Scroll the history to the bottom
+            historyList.scrollTop = historyList.scrollHeight;
+
             // Clear the input box
             document.getElementById('prompt-input').value = '';
+
+            // Start fetching graph status immediately
+            if (sessionId) {
+                // If sessionId is available, start fetching
+                startFetchingGraphStatus(model, sessionId);
+            } else {
+                // If sessionId is not available, wait until it's set
+                sessionIdCallbacks.push(() => {
+                    startFetchingGraphStatus(model, sessionId);
+                });
+            }
 
             // Send the prompt to the API with SessionID
             fetch(`${baseUrl}/api/chat/completions`, {
@@ -156,22 +670,311 @@ limitations under the License.
                 .then(response => response.json())
                 .then(data => {
                     // Get the response from the API
+                    const previousSessionId = sessionId; // Store previous sessionId
                     sessionId = data.sessionId;
-                    const responseText = data.choices[0].message.content;
 
-                    // Add the response to the history list
+                    // If sessionId was not set before, run callbacks
+                    if (!previousSessionId && sessionIdCallbacks.length > 0) {
+                        sessionIdCallbacks.forEach(callback => callback());
+                        sessionIdCallbacks = [];
+                    }
+
+                    // Add the session ID to the session list if it's new
+                    if (!document.querySelector(`[data-session-id="${sessionId}"]`)) {
+                        const sessionList = document.getElementById('session-list');
+                        const session = {
+                            id: sessionId,
+                            time: new Date().toISOString()
+                        };
+                        const listItem = createSessionListItem(session);
+                        sessionList.appendChild(listItem);
+                    }
+
                     const responseItem = document.createElement('li');
-                    responseItem.textContent = `AI: ${responseText}`;
+
+                    // Include timestamp
+                    const timeDiv = document.createElement('div');
+                    timeDiv.classList.add('message-timestamp');
+                    timeDiv.textContent = new Date().toLocaleString();
+                    responseItem.appendChild(timeDiv);
+
+                    responseItem.classList.add('ai-message');
+                    const responseType = data.object; // 'text', 'html', etc.
+                    const responseContent = data.choices[0].message.content;
+
+                    processResponse(responseContent, responseType, responseItem);
+
                     historyList.appendChild(responseItem);
 
                     // Scroll the history to the bottom
                     historyList.scrollTop = historyList.scrollHeight;
+
+                    // Stop fetching graph status here
+                    if (graphStatusInterval) {
+                        clearInterval(graphStatusInterval);
+                        graphStatusInterval = null;
+                    }
+
+                    // Remove animations from all nodes
+                    d3.selectAll('.processing-node').classed('processing-node', false);
+                    processingNodeIds.clear();
+
+                    // Re-enable input and button
+                    document.getElementById('prompt-input').disabled = false;
+                    document.getElementById('send-btn').disabled = false;
+                    document.getElementById('prompt-input').focus();
+
+                    // Hide status message when done
+                    statusMessage.style.display = 'none';
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     alert('An error occurred while fetching the response!');
+                    // Hide status message
+                    statusMessage.style.display = 'none';
+
+                    // Re-enable input and button
+                    document.getElementById('prompt-input').disabled = false;
+                    document.getElementById('send-btn').disabled = false;
                 });
+        }
+
+        // Fetch and draw the graph based on the selected model
+        function fetchAndDrawGraph(modelName) {
+            // Fetch the JSON data from the specified URL
+            fetch(`${baseUrl}/api/queryRootAgentGraph`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer NO_KEY`
+                },
+                body: JSON.stringify({ model: modelName })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    drawGraph(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching or parsing JSON:', error);
+                });
+        }
+
+        function drawGraph(data) {
+            const nodesData = data.Nodes;
+            const linksData = [];
+
+            // Convert data.Graphs into an array of link objects
+            for (let graphId in data.Graphs) {
+                const connections = data.Graphs[graphId];
+                connections.forEach(connection => {
+                    linksData.push({
+                        source: connection.fromCallableId,
+                        target: connection.toCallableId,
+                        fromPinIndex: connection.fromPinIndex,
+                        toPinIndex: connection.toPinIndex
+                    });
+                });
+            }
+
+            // Clear any existing graph
+            d3.select('#graph-container').selectAll('*').remove();
+
+            // Map node types to labels and colors
+            const typeInfo = {
+                0: { label: 'callable', borderColor: '#ff0000', fillColor: '#ffcccc' },
+                1: { label: 'function', borderColor: '#00ff00', fillColor: '#ccffcc' },
+                2: { label: 'action', borderColor: '#0000ff', fillColor: '#ccccff' },
+                3: { label: 'agent', borderColor: '#ffff00', fillColor: '#ffffcc' },
+                4: { label: 'compositeAgent', borderColor: '#00ffff', fillColor: '#ccffff' },
+            };
+
+            // Get the dimensions of the graph container
+            const container = document.getElementById('graph-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Create an SVG container in the graph-container
+            const svg = d3.select('#graph-container')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            // Define rectangle dimensions
+            const rectWidth = 100;
+            const rectHeight = 30;
+
+            // Initialize simulation with adjusted forces
+            const simulation = d3.forceSimulation(nodesData)
+                .force('link', d3.forceLink(linksData)
+                    .id(d => d.id)
+                    .distance(150)
+                )
+                .force('charge', d3.forceManyBody()
+                    .strength(-500)
+                )
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide()
+                    .radius(Math.max(rectWidth, rectHeight) / 2 + 10)
+                );
+
+            // Create links
+            const link = svg.append('g')
+                .attr('class', 'links')
+                .selectAll('line')
+                .data(linksData)
+                .enter()
+                .append('line')
+                .attr('stroke', '#999')
+                .attr('stroke-width', 2);
+
+            // Create nodes
+            const node = svg.append('g')
+                .attr('class', 'nodes')
+                .selectAll('g')
+                .data(nodesData)
+                .enter()
+                .append('g')
+                .attr('class', 'node')
+                .attr('id', d => 'node-' + d.id); // Assign an ID for easy selection
+
+            // Store node elements for easy access
+            nodesData.forEach(d => {
+                graphNodes[d.id] = d;
+            });
+
+            // Append rectangles to the nodes
+            node.append('rect')
+                .attr('width', rectWidth)
+                .attr('height', rectHeight)
+                .attr('x', -rectWidth / 2)
+                .attr('y', -rectHeight / 2)
+                .attr('fill', d => typeInfo[d.type]?.fillColor || '#e0e0e0')
+                .attr('stroke', d => typeInfo[d.type]?.borderColor || '#000')
+                .attr('stroke-width', 2)
+                .attr('rx', 6)
+                .attr('ry', 6);
+
+            // Add labels to nodes
+            node.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '.35em')
+                .style('font-size', '10px')
+                .style('fill', '#000')
+                .text(d => {
+                    const maxChars = 12;
+                    return d.instanceName.length > maxChars ? d.instanceName.substring(0, maxChars) + '...' : d.instanceName;
+                });
+
+            // Simulation tick
+            simulation.on('tick', () => {
+                // Update link positions
+                link
+                    .attr('x1', d => limitWithinBounds(d.source.x, rectWidth, width))
+                    .attr('y1', d => limitWithinBounds(d.source.y, rectHeight, height))
+                    .attr('x2', d => limitWithinBounds(d.target.x, rectWidth, width))
+                    .attr('y2', d => limitWithinBounds(d.target.y, rectHeight, height));
+
+                // Update node positions
+                node.attr('transform', d => {
+                    d.x = limitWithinBounds(d.x, rectWidth, width);
+                    d.y = limitWithinBounds(d.y, rectHeight, height);
+                    return `translate(${d.x},${d.y})`;
+                });
+            });
+
+            // Helper function to constrain nodes within bounds
+            function limitWithinBounds(value, size, max) {
+                const halfSize = size / 2;
+                return Math.max(halfSize, Math.min(max - halfSize, value));
+            }
+        }
+
+        // Function to start fetching graph status
+        function startFetchingGraphStatus(model, sessionId) {
+            // Clear any existing interval
+            if (graphStatusInterval) {
+                clearInterval(graphStatusInterval);
+            }
+
+            // Fetch status immediately and then set interval
+            fetchGraphStatus(model, sessionId);
+            graphStatusInterval = setInterval(() => {
+                fetchGraphStatus(model, sessionId);
+            }, 1000); // Fetch every 2 seconds
+        }
+
+        // Function to fetch graph status and update node animations
+        function fetchGraphStatus(model, sessionId) {
+            if (!sessionId) {
+                // If sessionId is still not available, skip this fetch
+                return;
+            }
+            fetch(`${baseUrl}/api/session/graphstatus`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer NO_KEY`
+                },
+                body: JSON.stringify({
+                    model: model,
+                    sessionId: sessionId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data === 'Invalid') {
+                        // No nodes are processing data
+                        // Remove animations from all nodes
+                        d3.selectAll('.processing-node').classed('processing-node', false);
+                        processingNodeIds.clear();
+                        return;
+                    }
+
+                    const newProcessingNodeIds = new Set(data); // Assuming data is an array of node IDs
+
+                    // Nodes no longer processing
+                    processingNodeIds.forEach(nodeId => {
+                        if (!newProcessingNodeIds.has(nodeId)) {
+                            // Remove animation
+                            d3.select('#node-' + nodeId).classed('processing-node', false);
+                        }
+                    });
+
+                    // Nodes now processing
+                    newProcessingNodeIds.forEach(nodeId => {
+                        if (!processingNodeIds.has(nodeId)) {
+                            // Add animation
+                            d3.select('#node-' + nodeId).classed('processing-node', true);
+                        }
+                    });
+
+                    // Update the set
+                    processingNodeIds = newProcessingNodeIds;
+                })
+                .catch(error => {
+                    console.error('Error fetching graph status:', error);
+                    // Optionally handle the error
+                });
+        }
+
+        // Event listeners
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+
+        document.getElementById('prompt-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
         });
+
+        // Update graph when model changes
+        document.getElementById('model-select').addEventListener('change', function () {
+            const model = this.value;
+            fetchAndDrawGraph(model);
+        });
+
+        // Initial function calls
+        fetchModels();
+        fetchSessionList();
     </script>
 
 </body>

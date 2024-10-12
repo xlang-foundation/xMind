@@ -52,9 +52,12 @@ namespace xMind
 		if (status == 200)
 		{
 			body = m_request["body"]();
-			X::Package json(xMind::MindAPISet::I().RT(), "json");
-			X::Value jsonBody =json["loads"](body);
-			X::Dict dictBody(jsonBody);
+			//X::Package json(xMind::MindAPISet::I().RT(), "json");
+			//X::Value jsonBody =json["loads"](body);
+			X::Package yaml(xMind::MindAPISet::I().RT(), "yaml", "xlang_yaml");
+			X::Value root = yaml["loads"](body);
+
+			X::Dict dictBody(root);
 			X::Value choices = dictBody["choices"];
 			if (choices.IsList())
 			{

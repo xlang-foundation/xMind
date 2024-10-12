@@ -29,6 +29,7 @@ limitations under the License.
 #include <sstream>
 #include <string>
 #include <cstring>
+#include <filesystem>
 
 #if defined(__APPLE__)
 #include <mach/mach.h>
@@ -60,6 +61,19 @@ void _mkdir(const char* dir)
 #endif
 
 
+std::string MakeAbsPath(std::string rootPath, std::string path)
+{
+	std::filesystem::path fsPath(path);
+	// Check if the path is absolute, if not, combine it with RootPath
+	if (!fsPath.is_absolute())
+	{
+		fsPath = std::filesystem::path(rootPath) / fsPath;
+	}
+
+	// Normalize the path
+	fsPath = fsPath.lexically_normal();
+	return fsPath.string();
+}
 void ReplaceAll(std::string& data, std::string toSearch, std::string replaceStr)
 {
     // Get the first occurrence

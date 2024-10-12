@@ -32,7 +32,7 @@ def py_graph_agent(owner):
 			sessionId = inputData[0]
 			inputIndex = inputData[1]
 			data = inputData[2]
-			resp = owner.llm(data)
+			resp = owner.llm(data,sessionId)
 			resp = "{Python Agent:simple_py_agent}"+resp
 			owner.pushToOutput(sessionId,0,resp)
 

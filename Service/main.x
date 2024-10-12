@@ -47,9 +47,22 @@ def loadGraph():
 # Link: http://localhost:9901/api/queryGraph
 @srv.route("/api/queryGraph")
 def queryGraph():
-	graphJson = xMind.QueryAgentFlow()
-	return [graphJson, "text/json"]
+    modelName =""
+    params = json.loads(req.body)
+    if params.has("model"):
+        modelName = params["model"]
+    graphJson = xMind.QueryAgentFlow(modelName)
+    return [graphJson, "text/json"]
 
+# Link: http://localhost:9901/api/queryRootAgentGraph
+@srv.route("/api/queryRootAgentGraph")
+def queryRootAgentGraph():
+    modelName =""
+    params = json.loads(req.body)
+    if params.has("model"):
+        modelName = params["model"]
+    graphJson = xMind.QueryRootAgentFlow(modelName)
+    return [graphJson, "text/json"]
 
 # this call will keep session history
 @srv.route("/api/chat/completions")
@@ -70,6 +83,40 @@ def completions():
 def query_rootagents():
     rootAgents = xMind.GetRootAgents()
     return [str(rootAgents,format=True), "text/json"]
+
+# Link: http://localhost:9901/api/sessionlist
+@srv.route("/api/sessionlist")
+def query_sessionlist():
+    session_memory = xMind.GetXModule("session_memory")
+    session_list = session_memory.session_list()
+    return [str(session_list,format=True), "text/json"]
+
+# Link: http://localhost:9901/api/chat/history
+@srv.route("/api/chat/history")
+def query_history():
+    params = json.loads(req.body)
+    sessionId = params["sessionId"]
+    session_memory = xMind.GetXModule("session_memory")
+    chat_history = session_memory.query(sessionId)
+    return [str(chat_history,format=True), "text/json"]
+
+# Link: http://localhost:9901/api/chat/history
+@srv.route("/api/chat/removesession")
+def query_history():
+    params = json.loads(req.body)
+    sessionId = params["sessionId"]
+    session_memory = xMind.GetXModule("session_memory")
+    session_memory.remove_all(sessionId)
+    return [str({'status':'ok'},format=True), "text/json"]
+
+# Link: http://localhost:9901/api/session/graphstatus
+@srv.route("/api/session/graphstatus")
+def query_session_graphstatus():
+    params = json.loads(req.body)
+    sessionId = params["sessionId"]
+    model = params["model"]
+    status = xMind.QueryRootAgentFlowStatus(model,sessionId)
+    return [str(status,format=True), "text/json"]
 
 xMind.logV("xMind WebServer Started,port:",port)
 srv.listen("::", port)

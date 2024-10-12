@@ -15,11 +15,10 @@
 # <END>
 
 from xlang_sqlite import sqlite
-
+sqlite.UseDatabase("../Config/keystore")
 def create_db():
     pushWritepad(sqlite)
     # Create a keystore database
-    %USE ../Config/keystore;
     %key_store_if = SELECT name FROM sqlite_master WHERE type='table' AND name='key_store';
     re = key_store_if.fetch()
     if re == None:
@@ -28,7 +27,6 @@ def create_db():
 
 def query(key):
     pushWritepad(sqlite)
-    %USE ../Config/keystore;
     %kv_query = SELECT value FROM key_store WHERE key = ${key};
     results = kv_query.fetch()
     popWritepad()
@@ -39,13 +37,11 @@ def query(key):
     
 def store(key, value):
     pushWritepad(sqlite)
-    %USE ../Config/keystore;
     %INSERT OR REPLACE INTO key_store (key, value) VALUES (${key}, ${value});
     popWritepad()
 
 def remove(key):
     pushWritepad(sqlite)
-    %USE ../Config/keystore;
     %DELETE FROM key_store WHERE key = ${key};
     popWritepad()
 

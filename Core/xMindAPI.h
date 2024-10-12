@@ -62,7 +62,9 @@ namespace xMind
             APISET().AddFunc<0>("IsRunning", &MindAPISet::IsRunning);
             APISET().AddFunc<1>("LoadBlueprintFromFile", &MindAPISet::LoadBlueprintFromFile);
             APISET().AddFunc<1>("LoadAgentFlowFromString", &MindAPISet::LoadAgentFlowFromString);
-            APISET().AddFunc<0>("QueryAgentFlow", &MindAPISet::QueryAgentFlow);
+            APISET().AddFunc<1>("QueryAgentFlow", &MindAPISet::QueryAgentFlow);
+            APISET().AddFunc<1>("QueryRootAgentFlow", &MindAPISet::QueryRootAgentFlow);
+            APISET().AddFunc<2>("QueryRootAgentFlowStatus", &MindAPISet::QueryRootAgentFlowStatus);
             APISET().AddVarFunc("PullEvents", &MindAPISet::PullEvents);
             APISET().AddVarFunc("Test", &MindAPISet::Test);
             APISET().AddVarFunc("log", &MindAPISet::Log);
@@ -81,6 +83,8 @@ namespace xMind
             APISET().AddClass<0, BaseAgent>("MindAgent");
 
             APISET().AddFunc<0>("GetRootAgents", &MindAPISet::GetRootAgents);
+            APISET().AddFunc<1>("AddRootAgent", &MindAPISet::AddRootAgent);
+            APISET().AddFunc<1>("RemoveRootAgent", &MindAPISet::RemoveRootAgent);
             APISET().AddVarFunc("ChatRequest", &MindAPISet::ChatRequest);
             APISET().AddVarFunc("CompletionRequest", &MindAPISet::CompletionRequest);
 
@@ -101,6 +105,8 @@ namespace xMind
 			}
 			return X::Value();
         }
+        bool AddRootAgent(std::string agentFile);
+        bool RemoveRootAgent(std::string aggentFile);
 		inline void AddXlangModule(const std::string& name, X::Value module)
 		{
 			m_xlangModules[name] = module;
@@ -449,10 +455,24 @@ namespace xMind
             int moduleId = parser.ParseAgentGraphDesc(root);
             return moduleId;
         }
-        inline std::string QueryAgentFlow()
+        inline std::string QueryAgentFlow(std::string moduleName)
         {
-            return NodeManager::I().BuildGraphAsJson();
+            return NodeManager::I().BuildGraphAsJson(moduleName);
         }
+        inline std::string QueryRootAgentFlow(std::string rootAgentName)
+        {
+            std::string blueprintName = Starter::I().GetRootAgentBlueprintFileName(rootAgentName);
+            if (blueprintName == "")
+            {
+                return "";
+            }
+            //just make sure load it
+            X::Value graph = Starter::I().GetOrCreateRunningGraph(rootAgentName);
+            return NodeManager::I().BuildGraphAsJson(blueprintName);
+        }
+        X::Value  QueryRootAgentFlowStatus(std::string rootAgentName,
+            std::string sessionId);
+
 		inline X::Value GetRootAgents()
 		{
 			auto list = Starter::I().GetRootAgents();

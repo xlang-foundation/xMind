@@ -17,10 +17,20 @@ limitations under the License.
 #include "xMindAPI.h"
 #include "PropScope.h"
 #include "Session.h"
+#include "utility.h"
+#include "start.h"
 
 namespace xMind
 {
-    bool MindAPISet::AddGraph(X::XRuntime* rt, X::XObj* pContext, 
+    bool MindAPISet::AddRootAgent(std::string agentFile)
+    {
+		return  Starter::I().AddRootAgent(agentFile);
+    }
+    bool MindAPISet::RemoveRootAgent(std::string aggentFile)
+    {
+		return Starter::I().RemoveRootAgent(aggentFile);
+    }
+    bool MindAPISet::AddGraph(X::XRuntime* rt, X::XObj* pContext,
         X::ARGS& params, X::KWARGS& kwParams, X::Value& retValue)
     {
         if (params.size() < 2)
@@ -163,5 +173,26 @@ namespace xMind
 			{
 			}
 		}
+    }
+    X::Value MindAPISet::QueryRootAgentFlowStatus(std::string rootAgentName, 
+        std::string sessionId)
+    {
+        std::string blueprintName = Starter::I().GetRootAgentBlueprintFileName(rootAgentName);
+        if (blueprintName == "")
+        {
+            return X::Value();
+        }
+        //just make sure load it
+        X::Value graph = Starter::I().GetOrCreateRunningGraph(rootAgentName);
+		if (graph.IsInvalid())
+		{
+            return X::Value();
+		}
+        SESSION_ID sid= SessionManager::I().getSessionId(sessionId);
+        sid = GetShortSessionID(sid);
+		X::XPackageValue<AgentGraph> packGraph(graph);
+        AgentGraph* pGraph = packGraph.GetRealObj();
+		X::Value status = pGraph->GetStatus(sid);
+        return status;
     }
 }

@@ -102,6 +102,8 @@ namespace xMind
         CompletionRequest parseCompletionRequest(X::Value& reqData);
         X::Value createCompletionResponse(const CompletionResponse& response);
         SESSION_ID createSession(const std::string& sessionId);
+
+    public:
         SESSION_ID getSessionId(const std::string& sessionId)
         {
             std::lock_guard<std::mutex> lock(m_session_mtx);
@@ -111,10 +113,27 @@ namespace xMind
             }
             return NO_SESSION_ID;
         }
-    public:
+        inline std::string GetSessionIdString(SESSION_ID id)
+        {
+            SessionIDInfo idInfo = FromSessionID(id);
+            //for m_sessions we just use the idInfo.sid part
+            idInfo.inputIndex = 0;
+            idInfo.iterationCount = 0;
+            SESSION_ID sessionId_s = ToSessionID(idInfo);
+
+            std::lock_guard<std::mutex> lock(m_session_mtx);
+            auto it = m_sessions.find(sessionId_s);
+            if (it != m_sessions.end())
+            {
+                return it->second.sessionId;
+            }
+            return "";
+        }
 		X::Value HandleChatRequest(X::Value& reqData);
 		X::Value HandleCompletionRequest(X::Value& reqData);
     private:
+        bool AddSessionRecord(std::string& session_id, std::string& content,
+            std::string& role, std::string& agent);
         std::unordered_map<std::string, SESSION_ID> m_sessionIdToSidMap;
         std::unordered_map<SESSION_ID, SessionInfo> m_sessions;
 		//used for non-session request

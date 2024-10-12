@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "BaseAgent.h"
 #include "AgentGraph.h"
+#include "Session.h"
+#include "xMindAPI.h"
 
 namespace xMind
 {
@@ -100,6 +102,30 @@ namespace xMind
         PushToOutput(data_SessionId, outputIndex, retLLM);
 
     }
+    void BaseAgent::BuildPromptsFromSessionMemory(SESSION_ID sessionId, X::List& prompts)
+    {
+		X::Value session_memory = MindAPISet::I().GetXModule("session_memory");
+        if (!session_memory.IsObject())
+        {
+            return;
+        }
+        auto strSessionId = SessionManager::I().GetSessionIdString(sessionId);
+		X::Value varSM = session_memory["query"](strSessionId);
+		X::List listSM(varSM);
+        for (auto memItem : *listSM)
+        {
+            X::List listItem(memItem);
+            //content, timestamp, role, agent
+            X::Value Content;
+            listItem->GetIndexValue(0, Content);
+            X::Value role;
+            listItem->GetIndexValue(2, role);
+            X::Dict dictPrompt;
+            dictPrompt->Set("role", role);
+            dictPrompt->Set("content", Content);
+            prompts += dictPrompt;
+        }
+    }
     //return SessionId
     unsigned long long BaseAgent::BuildPrompts(X::Value& varData, X::List& prompts)
     {
@@ -116,7 +142,7 @@ namespace xMind
             {
                 X::Value sessionIdValue = dataList.GetItemValue(0).GetItemValue(0);
                 data_SessionId = (unsigned long long)sessionIdValue;
-
+				BuildPromptsFromSessionMemory(data_SessionId, prompts);
                 for (int i = 0; i < dataList.Size(); ++i)
                 {
                     X::Value listEntry = dataList[i];

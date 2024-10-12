@@ -218,15 +218,21 @@ namespace xMind
 			return X::Value();
 		}
 		// Build JSON representation of the graph
-		std::string BuildGraphAsJson()
+		std::string BuildGraphAsJson(std::string moduleBlueprintName)
 		{
 			const int online_len = 20;
 			char convertBuf[online_len];
 
+			bool bQueryAll = (moduleBlueprintName == "");
+			std::vector<unsigned long long> nodeIds;
 			X::List listNodes;
 			// Collect all callables with module names
 			for (const auto& [id, module] : m_modules)
 			{
+				if (!bQueryAll && (module.blueprint != moduleBlueprintName))
+				{
+					continue;
+				}
 				for (const auto& it : module.mapCallables)
 				{
 					X::XPackageValue<Callable> varCallable(it.second);
@@ -234,6 +240,10 @@ namespace xMind
 					if (!callable)
 					{
 						continue;
+					}
+					if (!bQueryAll)
+					{
+						nodeIds.push_back(callable->ID());
 					}
 					X::Dict dict;
 					dict->Set("moduleName", (std::string)module.moduleName);
@@ -262,6 +272,18 @@ namespace xMind
 				X::List connList;
 				for (const auto& connection : pGraph->GetConnections())
 				{
+					//if from or to not inside the nodeIds, then continue
+					if (!bQueryAll)
+					{
+						if (std::find(nodeIds.begin(), nodeIds.end(), 
+							connection.fromCallableId) == nodeIds.end() ||
+							std::find(nodeIds.begin(), nodeIds.end(), 
+								connection.toCallableId) == nodeIds.end())
+						{
+							continue;
+						}
+					}
+
 					X::Dict oneConn;
 					oneConn->Set("fromCallableId", connection.fromCallableId);
 					oneConn->Set("fromPinIndex", connection.fromPinIndex);
