@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (C) 2024 The XLang Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,43 +15,43 @@
 # <END>
 
 --- 
-name: simple_app
+name: 问答判定专家
 type: compositeAgent
 version: 1.0
-description: "a simple app"
+description: "简单的问答判定"
     
 imports:
   - file: "llmPool.yml"
   
 nodes:
-  - name: SimpleAgent
+  - name: 问答判定专家
     type: agent
     model: gpt-4
-    description: "a simple agent for Q/A"
+    description: "简单的问答判定"
     prompts:
         - name: QA_Expert
           role: assistant
-          content: "when you answer questions, please always include questions with your answers as your output, format is this Q:quesion put here, A: your answer"
+          content: "当你回答问题的时候请带上输入的问题，格式是：用户的问题：问题写这里，AI回答：你的答案"
     inputs:
       - name: input1
     outputs:
       - name: output1
 
-  - name: SimpleAgent_Check
+  - name: 法官
     type: agent
     model: gpt-4
     description: "a simple agent to check previous agent's output"
     prompts:
         - name: QA_Judge
           role: assistant
-          content: "You are a judge to determine if the question and answer are correct or not. When you output your judgement, please include the question and answer that were passed in at begging with prefix Your Q/A: and then enclose the input question and answer here, and use a prefix to indicate your judgement."
+          content: "你是个法官，你对输入的问题及答案进行评价，请同时把前面的问题和答案一并放入你的评价"
     inputs:
       - name: input1
     outputs:
       - name: output1
 connections:
-  - fromNodeName: SimpleAgent
+  - fromNodeName: 问答判定专家
     fromPinName: output1
-    toNodeName: SimpleAgent_Check
+    toNodeName: 法官
     toPinName: input1
   

@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (C) 2024 The XLang Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ WebServer:
 RootAgents:
    - name: simple
      file: ../Examples/Simple/simple.yml
-   - name: QAJudge
+   - name: 问题评价专家
      file: ../Examples/Simple/two_simples.yml
    - name: ConversationalFlowOrchestrator
      file: ../Examples/Routing/ConversationalFlowOrchestrator.yml
@@ -38,5 +38,5 @@ RootAgents:
      # file: "D:\\Github\\xMind\\Examples\\PySimple\\simple.yml"
      file: ../Examples/PySimple/simple.yml
    - name: PyGraph
-     # file: "D:\\Github\\xMind\\Examples\\PyGraph\\PyGraph.yml"
-     file: ../Examples/PySimple/simple.yml
+     file: "D:\\Github\\xMind\\Examples\\PyGraph\\PyGraph.yml"
+     # file: ../Examples/PySimple/simple.yml

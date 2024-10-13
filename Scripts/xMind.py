@@ -49,7 +49,7 @@ class xMind:
     class Node:
         def __init__(self, node_type, core_object, func):
             self.type = node_type
-            self.id = core_object.ID()
+            self.id = core_object.ID
             inputCount = len(core_object.inputs())
             if inputCount >0:
                 self.hasInputs = True
