@@ -1,6 +1,6 @@
 ## Introduction
 
-This document provides instructions on how to set up and run the xMind project. After building the project, you'll find the following key folders and files:
+This document provides instructions on how to set up and run the **xMind** project. After building the project, you'll find the following key folders and files:
 
 - **Config**: Contains configuration files, including `config.yml` and `config.xml`.
 - **Examples**: Includes example agents and reference files.
@@ -34,17 +34,31 @@ The `config.yml` file contains critical configurations for the xMind application
 
 ## Running xMind
 
-1. **Start xMind**: Execute the `xMind` binary from the ```out/bin``` directory.
+1. **Start xMind**:
+   Execute the `xMind` binary from the `out/bin` directory:
    ```bash
    ./xMind
    ```
-    
-2. **Access the Web Interface**:
-   - Open a web browser and navigate to [http://localhost:9901](http://localhost:9901) to access the index page.
+
+2. **Update OpenAI Key**:
+   In a separate terminal window, run the following command to update your OpenAI API key:
+   ```bash
+   ./xmcli --updatekey openai_key your_key
+   ```
+   After running this command, your `config.yml` will be updated with the provided key.
+
+3. **Restart xMind**:
+   Stop the running `xMind` process (if necessary) and restart it:
+   ```bash
+   ./xMind
+   ```
+
+4. **Access the Web Interface**:
+   - Open a web browser and navigate to [http://localhost:9901](http://localhost:9901) to access the chat interface.
    - If accessing from another machine, replace `localhost` with the IP address of the machine running xMind.
 
-3. **Using RootAgents**:
-   - The RootAgents defined in `config.yml` will appear in the chat page under the Agent/Model choose list, allowing you to interact with the registered agents.
+5. **Using RootAgents**:
+   - The `RootAgents` defined in `config.yml` will appear in the chat page's Agent/Model choose list, allowing you to interact with the registered agents.
 
 ## Folder Structure
 
@@ -52,9 +66,7 @@ The `config.yml` file contains critical configurations for the xMind application
 - **Examples**: Holds example agents that serve as references for creating and configuring your agents.
 - **Service**: Contains the webserver code and pages, including `main.x`, which serves as the service entry point.
 
-## Additional Information
+## Logs
 
-- **Service Folder**: The `Service` folder includes the webserver's xLang code (`main.x`) and associated web pages.
-- **Logs**: Log files are stored in the `Logs` directory for troubleshooting and monitoring.
+Log files are stored in the `Logs` directory for troubleshooting and monitoring.
 
-This should cover the essentials needed to start and run the xMind project successfully. If you encounter any issues, please refer to the logs in the `Logs` directory for more detailed information.
