@@ -44,5 +44,9 @@ namespace xMind
 			kwParams->Add(Keys[idx].c_str(), v,true);
 			return true;
 		}
+		virtual bool VerifyNameIndex(const char* name, int idx)
+		{
+			return true;
+		}
 	};
 }
