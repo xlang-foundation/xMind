@@ -2,6 +2,11 @@
 #include "nlohmann/json.hpp"
 #include <future>
 #include <iostream>
+#include <fstream>
+#include <filesystem>
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
 
 using namespace agentflow;
 using Json=nlohmann::json;
@@ -15,6 +20,47 @@ int main(int argc,char** argv) {
     if(argc!=3 && argc!=4 && argc!=5) return 2;
     try {
         if(std::string(argv[1])=="--identity") {WorkspaceTools tools(argv[2]);std::cout<<tools.identity()<<'\n';return 0;}
+        if(std::string(argv[1])=="--apply") {
+            WorkspaceTools tools(argv[2]);
+            const auto path=std::filesystem::path(argv[2])/"edit.txt";
+            auto write=[&](const std::string& bytes) {std::ofstream output(path,std::ios::binary|std::ios::trunc);output.write(bytes.data(),bytes.size());output.close();require(bool(output),"Fixture write failed");};
+            const auto original=tools.snapshot_file("edit.txt");
+            auto plan=tools.plan_replacement("edit.txt","original","\xe4\xb8\xad longer replacement");
+            auto bad=plan;bad.before.file_id="changed-identity";
+            rejects<ToolContentConflict>([&]{tools.apply_plan(bad);});
+            bad=plan;bad.before.path="edit-copy.txt";
+            rejects<ToolContentConflict>([&]{tools.apply_plan(bad);});
+            require(tools.read_file("edit-copy.txt").content==original.content,"Different actual file identity must preserve the other file");
+            bad=plan;bad.before.workspace_id="different-workspace";
+            rejects<ToolAccessDenied>([&]{tools.apply_plan(bad);});
+            bad=plan;bad.before.path="../workspace-other/secret.txt";
+            rejects<ToolAccessDenied>([&]{tools.apply_plan(bad);});
+            bad=plan;bad.before.path="outside-link/secret.txt";
+            rejects<ToolAccessDenied>([&]{tools.apply_plan(bad);});
+            bad=plan;bad.before.path="hard-link.txt";
+            rejects<ToolAccessDenied>([&]{tools.apply_plan(bad);});
+            bad=plan;bad.after_sha256="incorrect";
+            rejects<ToolContentConflict>([&]{tools.apply_plan(bad);});
+            std::stop_source stopped;stopped.request_stop();
+            rejects<ToolCancelled>([&]{tools.apply_plan(plan,stopped.get_token());});
+            require(tools.read_file("edit.txt").content==original.content,"Rejected applications must preserve bytes");
+            const auto held=CreateFileW(path.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,0,nullptr);
+            require(held!=INVALID_HANDLE_VALUE,"Fixture must hold an actual competing file handle");
+            try {rejects<ToolFileError>([&]{tools.apply_plan(plan);});} catch(...) {CloseHandle(held);throw;}
+            CloseHandle(held);
+            write("external edit\n");
+            rejects<ToolContentConflict>([&]{tools.apply_plan(plan);});
+            require(tools.read_file("edit.txt").content=="external edit\n","Stale plan must not overwrite external edits");
+            write(original.content);
+            const auto longer=tools.apply_plan(plan);
+            require(longer.content==plan.after_content && longer.content_sha256==plan.after_sha256 && longer.file_id==original.file_id,"Actual longer edit must preserve file identity and verify its bytes");
+            plan=tools.plan_replacement("edit.txt",longer.content,"short");
+            require(tools.apply_plan(plan).content=="short","Shorter application must truncate old trailing bytes");
+            plan=tools.plan_replacement("edit.txt","short","");
+            require(tools.apply_plan(plan).content.empty(),"Empty replacement must actually truncate the file");
+            const auto raw=tools.fingerprint_file("binary.bin");
+            std::cout<<Json{{"raw_hash",raw.content_sha256},{"raw_size",raw.size},{"edit_hash",tools.fingerprint_file("edit.txt").content_sha256}}.dump()<<'\n';return 0;
+        }
         if(argc==4 && std::string(argv[1])=="--snapshot") {
             WorkspaceTools tools(argv[2]);const auto snapshot=tools.snapshot_file(argv[3]);
             std::cout<<Json{{"workspace_id",snapshot.workspace_id},{"file_id",snapshot.file_id},{"content_sha256",snapshot.content_sha256},{"content",snapshot.content}}.dump()<<'\n';return 0;

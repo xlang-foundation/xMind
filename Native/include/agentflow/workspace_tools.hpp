@@ -7,6 +7,7 @@ struct ToolAccessDenied : std::runtime_error {using std::runtime_error::runtime_
 struct ToolFileError : std::runtime_error {using std::runtime_error::runtime_error;};
 struct ToolCancelled : std::runtime_error {using std::runtime_error::runtime_error;};
 struct ToolContentConflict : std::runtime_error {using std::runtime_error::runtime_error;};
+struct ToolMutationUncertain : std::runtime_error {using std::runtime_error::runtime_error;};
 struct WorkspaceFile {std::string path,content;};
 struct WorkspaceSnapshot {
     std::string path,content,workspace_id,file_id,content_sha256;
@@ -16,6 +17,7 @@ struct WorkspaceEditPlan {
     std::string after_content,after_sha256;
     std::size_t replaced_occurrences;
 };
+struct WorkspaceFingerprint {std::string path,workspace_id,file_id,content_sha256;std::size_t size;};
 struct WorkspaceEntry {std::string name,kind;};
 struct WorkspaceListing {std::vector<WorkspaceEntry> entries;bool truncated=false;};
 struct WorkspaceMatch {std::string path,text;std::int64_t line;bool text_truncated=false;};
@@ -25,7 +27,7 @@ struct WorkspaceSearch {
     bool truncated=false;
 };
 // Workspace boundary is an opened OS directory, not a caller-controlled path.
-// Read-only tools; mutations/process execution require separate policy contracts.
+// Model definitions remain read-only; backend mutations require separate policy contracts.
 class WorkspaceTools {
 public:
     explicit WorkspaceTools(const std::string& root);
@@ -45,13 +47,21 @@ public:
     // executor that revalidates its exact snapshot preconditions.
     WorkspaceEditPlan plan_replacement(const std::string& path,const std::string& old_text,
         const std::string& new_text,std::size_t expected_occurrences=1,std::stop_token cancel={}) const;
+    // Backend effect primitive, not a model-invokable tool. The caller must
+    // hold a matching durable operation claim and record the actual outcome.
+    // In-place application is not atomic replacement. After writes begin, any
+    // failure/cancellation is uncertain and must not be retried blindly.
+    WorkspaceSnapshot apply_plan(const WorkspaceEditPlan& plan,std::stop_token cancel={}) const;
+    // Reconciliation inspection hashes bounded raw bytes, including a partial
+    // write that is no longer valid UTF-8. It never exposes those bytes to models.
+    WorkspaceFingerprint fingerprint_file(const std::string& path,std::stop_token cancel={}) const;
     WorkspaceListing list_files(const std::string& path=".",std::stop_token cancel={}) const;
     WorkspaceSearch search_files(const std::string& query,std::stop_token cancel={}) const;
     static std::vector<ModelToolDefinition> definitions();
     // Validate exact built-in argument shapes and return a bounded JSON result.
     std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={}) const;
 private:
-    WorkspaceSnapshot read_snapshot(const std::string& path,bool capture_version,std::stop_token cancel) const;
+    WorkspaceSnapshot read_snapshot(const std::string& path,bool capture_version,std::stop_token cancel,bool require_text=true) const;
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };

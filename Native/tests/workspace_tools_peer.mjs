@@ -11,6 +11,8 @@ try {
   await Promise.all([mkdir(join(root,'sub'),{recursive:true}),mkdir(join(root,'.git'),{recursive:true}),mkdir(join(root,'many'),{recursive:true}),mkdir(join(outside,'sub'),{recursive:true})]);
   await Promise.all([
     writeFile(join(root,'README.txt'),'first\r\nalpha[.]needle 中\r\nlast\n'),
+    writeFile(join(root,'edit.txt'),'original\n'),
+    writeFile(join(root,'edit-copy.txt'),'original\n'),
     writeFile(join(root,'sub','inside.txt'),'alpha[.]needle nested\n'),
     writeFile(join(root,'.git','ignored.txt'),'alpha[.]needle excluded\n'),
     writeFile(join(root,'binary.bin'),Buffer.from([0,255,128])),
@@ -33,6 +35,11 @@ try {
   assert.equal(newVersion.workspace_id,oldVersion.workspace_id);
   assert.notEqual(newVersion.content_sha256,oldVersion.content_sha256,'Content modification must change the edit precondition');
   assert.equal(newVersion.content_sha256,createHash('sha256').update(await readFile(join(root,'README.txt'))).digest('hex'));
+  const applied=JSON.parse((await execute(process.argv[2],['--apply',root],{windowsHide:true,timeout:5000})).stdout);
+  assert.equal((await readFile(join(root,'edit.txt'))).length,0,'Native edit must really truncate the file');
+  assert.equal(applied.edit_hash,createHash('sha256').update(await readFile(join(root,'edit.txt'))).digest('hex'));
+  assert.equal(applied.raw_hash,createHash('sha256').update(await readFile(join(root,'binary.bin'))).digest('hex'));
+  assert.equal(applied.raw_size,3);
   assert.equal(await readFile(join(outside,'secret.txt'),'utf8'),'outside marker\n','Outside fixture must remain unchanged');
   const before=await execute(process.argv[2],['--identity',root],{windowsHide:true,timeout:5000});
   const moved=join(folder,'moved-workspace');

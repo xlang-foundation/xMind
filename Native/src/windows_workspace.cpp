@@ -130,7 +130,62 @@ WorkspaceEditPlan WorkspaceTools::plan_replacement(const std::string& path,const
     const auto hash=content_hash(after);
     return {std::move(before),std::move(after),hash,matches.size()};
 }
-WorkspaceSnapshot WorkspaceTools::read_snapshot(const std::string& input,bool capture_version,std::stop_token cancel) const {
+WorkspaceFingerprint WorkspaceTools::fingerprint_file(const std::string& path,std::stop_token cancel) const {
+    auto value=read_snapshot(path,true,cancel,false);
+    return {std::move(value.path),std::move(value.workspace_id),std::move(value.file_id),std::move(value.content_sha256),value.content.size()};
+}
+WorkspaceSnapshot WorkspaceTools::apply_plan(const WorkspaceEditPlan& plan,std::stop_token cancel) const {
+    check_cancel(cancel);
+    if(plan.before.content.size()>1024*1024 || plan.after_content.size()>1024*1024 || !valid_text(plan.before.content) || !valid_text(plan.after_content)) throw std::invalid_argument("Invalid edit plan contents");
+    if(plan.before.content==plan.after_content) throw ToolContentConflict("Edit makes no change");
+    if(content_hash(plan.before.content)!=plan.before.content_sha256 || content_hash(plan.after_content)!=plan.after_sha256) throw ToolContentConflict("Edit plan hashes differ from contents");
+    if(identity()!=plan.before.workspace_id) throw ToolAccessDenied("Edit belongs to another workspace");
+    const auto relative=relative_path(plan.before.path);
+    Handle file(CreateFileW(impl_->path(relative).c_str(),GENERIC_READ|GENERIC_WRITE,0,nullptr,OPEN_EXISTING,FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_WRITE_THROUGH,nullptr));
+    impl_->verify(file.value);BY_HANDLE_FILE_INFORMATION info{};
+    if(!GetFileInformationByHandle(file.value,&info) || GetFileType(file.value)!=FILE_TYPE_DISK || (info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)) throw ToolFileError("Expected a regular edit target");
+    if((info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT) || info.nNumberOfLinks!=1) throw ToolAccessDenied("Linked edit targets require a separate policy");
+    if(file_identity(file.value)!=plan.before.file_id) throw ToolContentConflict("Edit target identity changed");
+    auto read=[&](std::stop_token token) {
+        LARGE_INTEGER zero{};if(!SetFilePointerEx(file.value,zero,nullptr,FILE_BEGIN)) throw ToolFileError("Cannot inspect edit target");
+        std::string bytes;std::array<char,8192> buffer{};
+        for(;;) {
+            check_cancel(token);DWORD count=0;
+            if(!ReadFile(file.value,buffer.data(),static_cast<DWORD>(buffer.size()),&count,nullptr)) throw ToolFileError("Cannot inspect edit target");
+            if(!count) break;if(count>1024*1024-bytes.size()) throw ToolFileError("Edit target exceeds its limit");bytes.append(buffer.data(),count);
+        }
+        return bytes;
+    };
+    const auto current=read(cancel);
+    if(current!=plan.before.content || content_hash(current)!=plan.before.content_sha256) throw ToolContentConflict("Edit target contents changed");
+    LARGE_INTEGER zero{};if(!SetFilePointerEx(file.value,zero,nullptr,FILE_BEGIN)) throw ToolFileError("Cannot prepare edit target");
+    bool attempted=false;
+    try {
+        std::size_t offset=0;
+        while(offset<plan.after_content.size()) {
+            check_cancel(cancel);impl_->verify(file.value);
+            if(identity()!=plan.before.workspace_id) throw ToolAccessDenied("Workspace changed during edit");
+            const auto amount=static_cast<DWORD>(std::min<std::size_t>(8192,plan.after_content.size()-offset));DWORD written=0;
+            attempted=true;
+            if(!WriteFile(file.value,plan.after_content.data()+offset,amount,&written,nullptr) || !written || written>amount) throw ToolFileError("Cannot write edit target");
+            offset+=written;
+        }
+        check_cancel(cancel);impl_->verify(file.value);
+        if(identity()!=plan.before.workspace_id) throw ToolAccessDenied("Workspace changed during edit");
+        attempted=true;
+        if(!SetEndOfFile(file.value) || !FlushFileBuffers(file.value)) throw ToolFileError("Cannot finalize edit target");
+        // The effect has occurred. Inspect it even if cancellation arrived;
+        // reporting pre-effect cancellation here would hide actual changes.
+        const auto actual=read({});impl_->verify(file.value);
+        const auto hash=content_hash(actual),id=file_identity(file.value);
+        if(actual!=plan.after_content || hash!=plan.after_sha256 || id!=plan.before.file_id || identity()!=plan.before.workspace_id) throw ToolFileError("Edit readback differs from the plan");
+        return {relative,actual,plan.before.workspace_id,id,hash};
+    } catch(...) {
+        if(attempted) throw ToolMutationUncertain("Edit may have changed the file; reconciliation is required");
+        throw;
+    }
+}
+WorkspaceSnapshot WorkspaceTools::read_snapshot(const std::string& input,bool capture_version,std::stop_token cancel,bool require_text) const {
     check_cancel(cancel);const auto relative=relative_path(input);
     const auto workspace_id=capture_version?identity():std::string{};
     Handle file(CreateFileW(impl_->path(relative).c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN,nullptr));
@@ -147,7 +202,7 @@ WorkspaceSnapshot WorkspaceTools::read_snapshot(const std::string& input,bool ca
         if(read>1024*1024-content.size()) throw ToolFileError("File exceeds the 1 MiB text limit");
         content.append(buffer.data(),read);
     }
-    if(!valid_text(content)) throw ToolFileError("File is binary or not UTF-8 text");
+    if(require_text && !valid_text(content)) throw ToolFileError("File is binary or not UTF-8 text");
     if(capture_version) {
         check_cancel(cancel);impl_->verify(file.value);
         const auto id=file_identity(file.value),hash=content_hash(content);
