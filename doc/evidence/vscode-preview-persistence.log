@@ -6,123 +6,129 @@ TAP version 13
 # Subtest: session discovery, URL encoding, error handling and origin boundaries
 ok 1 - session discovery, URL encoding, error handling and origin boundaries
   ---
-  duration_ms: 65.5592
+  duration_ms: 54.1046
   type: 'test'
   ...
 # Subtest: origin-scoped authentication and native request bodies
 ok 2 - origin-scoped authentication and native request bodies
   ---
-  duration_ms: 1.4369
+  duration_ms: 1.3399
   type: 'test'
   ...
 # Subtest: native terminal state refreshes transcript and stops polling with durable operation inspection
 ok 3 - native terminal state refreshes transcript and stops polling with durable operation inspection
   ---
-  duration_ms: 12.7456
+  duration_ms: 11.3852
   type: 'test'
   ...
 # Subtest: only a reviewed pending operation can be decided and payload stays backend-owned
 ok 4 - only a reviewed pending operation can be decided and payload stays backend-owned
   ---
-  duration_ms: 3.6606
+  duration_ms: 3.9706
   type: 'test'
   ...
 # Subtest: closing the view during proposal revalidation cannot send an approval
 ok 5 - closing the view during proposal revalidation cannot send an approval
   ---
-  duration_ms: 4.6835
+  duration_ms: 2.9347
   type: 'test'
   ...
 # Subtest: changed proposal bytes invalidate the displayed review
 ok 6 - changed proposal bytes invalidate the displayed review
   ---
-  duration_ms: 2.1897
+  duration_ms: 1.733
   type: 'test'
   ...
 # Subtest: session selection intent invalidates an in-flight approval before queued selection runs
 ok 7 - session selection intent invalidates an in-flight approval before queued selection runs
   ---
-  duration_ms: 2.0486
+  duration_ms: 1.7246
   type: 'test'
   ...
 # Subtest: closing a panel during history loading cannot start a detached poller
 ok 8 - closing a panel during history loading cannot start a detached poller
   ---
-  duration_ms: 1.875
+  duration_ms: 1.4651
   type: 'test'
   ...
 # Subtest: older native servers without a catalogue keep default execution without invented model IDs
 ok 9 - older native servers without a catalogue keep default execution without invented model IDs
   ---
-  duration_ms: 2.1978
+  duration_ms: 1.7723
   type: 'test'
   ...
 # Subtest: edit comparison opens exact revalidated backend snapshots without granting or writing
 ok 10 - edit comparison opens exact revalidated backend snapshots without granting or writing
   ---
-  duration_ms: 4.5033
+  duration_ms: 3.2961
   type: 'test'
   ...
 # Subtest: refresh reloads backend execution capabilities and history without submitting a run
 ok 11 - refresh reloads backend execution capabilities and history without submitting a run
   ---
-  duration_ms: 2.6281
+  duration_ms: 2.061
   type: 'test'
   ...
 # Subtest: selected configured model survives view reopening and retired models fall back on refresh
 ok 12 - selected configured model survives view reopening and retired models fall back on refresh
   ---
-  duration_ms: 3.0996
+  duration_ms: 2.3997
+  type: 'test'
+  ...
+# Subtest: normal development bootstrap completes activation before resolving the sidebar and clears private environment
+ok 13 - normal development bootstrap completes activation before resolving the sidebar and clears private environment
+  ---
+  duration_ms: 2.2314
   type: 'test'
   ...
 # Subtest: history renders Markdown/code, copies plain code and shows exact provider usage
-ok 13 - history renders Markdown/code, copies plain code and shows exact provider usage
+ok 14 - history renders Markdown/code, copies plain code and shows exact provider usage
   ---
-  duration_ms: 165.0351
+  duration_ms: 158.5648
   type: 'test'
   ...
 # Subtest: unknown historical usage stays unavailable and malicious Markdown is sanitized
-ok 14 - unknown historical usage stays unavailable and malicious Markdown is sanitized
+ok 15 - unknown historical usage stays unavailable and malicious Markdown is sanitized
   ---
-  duration_ms: 36.1601
+  duration_ms: 32.8806
   type: 'test'
   ...
 # Subtest: live token badges use model usage events and reset when the persisted transcript arrives
-ok 15 - live token badges use model usage events and reset when the persisted transcript arrives
+ok 16 - live token badges use model usage events and reset when the persisted transcript arrives
   ---
-  duration_ms: 24.747
+  duration_ms: 21.9622
   type: 'test'
   ...
 # Subtest: tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
-ok 16 - tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
+ok 17 - tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
   ---
-  duration_ms: 19.5949
+  duration_ms: 18.4856
   type: 'test'
   ...
 # Subtest: bottom model selector exposes only backend-advertised IDs and sends the selected ID
-ok 17 - bottom model selector exposes only backend-advertised IDs and sends the selected ID
+ok 18 - bottom model selector exposes only backend-advertised IDs and sends the selected ID
   ---
-  duration_ms: 16.2428
+  duration_ms: 15.8844
   type: 'test'
   ...
 # Subtest: provider cache/reasoning counts and backend first-token time render without derived estimates
-ok 18 - provider cache/reasoning counts and backend first-token time render without derived estimates
+ok 19 - provider cache/reasoning counts and backend first-token time render without derived estimates
   ---
-  duration_ms: 13.672
+  duration_ms: 11.8764
   type: 'test'
   ...
 # Subtest: pending file comparison sends only an operation ID and remains separate from approval
-ok 19 - pending file comparison sends only an operation ID and remains separate from approval
+ok 20 - pending file comparison sends only an operation ID and remains separate from approval
   ---
-  duration_ms: 14.3202
+  duration_ms: 11.6258
   type: 'test'
   ...
-1..19
-# tests 19
+1..20
+# tests 20
 # suites 0
-# pass 19
+# pass 20
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 1108.5889
+# duration_ms 1046.4175

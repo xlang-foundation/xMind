@@ -38,7 +38,7 @@ try {
     $env:XMIND_UI_READY_FILE=$uiReady
     # User explicitly requested a visible UI. This is an isolated development
     # host for this known repository, with its own settings/extensions directory.
-    $uiCodeArgs=@('--new-window','--disable-workspace-trust','--skip-welcome','--remote-debugging-port=57217','--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('--extensionTestsPath="'+(Join-Path $PSScriptRoot 'open-vscode-ui.cjs')+'"'),('"'+$uiProject+'"'))
+    $uiCodeArgs=@('--new-window','--disable-workspace-trust','--skip-welcome','--remote-debugging-port=57217','--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiProject+'"'))
     $uiHost=Start-Process -FilePath $CodeExecutable -ArgumentList $uiCodeArgs -WorkingDirectory $uiProject -WindowStyle Normal -PassThru
     $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=$false} | ConvertTo-Json
     [System.IO.File]::WriteAllText((Join-Path $uiState 'active.json'),$uiMetadata)

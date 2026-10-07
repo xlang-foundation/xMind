@@ -10,6 +10,7 @@ exports.run=async()=>{
   const subscriptions=[];const output=process.env.XMIND_REVIEW_TEST_RESULT;
   if(!output) throw new Error('Missing review-test evidence destination');
   try {
+    await vscode.extensions.getExtension('agentflow-local.agentflow').activate();
     const review=editReview(vscode,{subscriptions});
     const proposal={id:'actual-host-fixture',tool:'replace_file',arguments_json:JSON.stringify({
       path:'labeled-test-fixture.cpp',before_content:'// Synthetic review fixture\nint value = 1;\n',

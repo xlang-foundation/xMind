@@ -5,7 +5,18 @@ const { BackendClient, backendOrigin, validateToken } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 
-function activate(context) {
+async function activate(context) {
+  // Interactive preview uses a normal development host. VS Code test hosts
+  // deliberately use in-memory storage and cannot verify reconnect persistence.
+  let previewReady,previewOrigin;
+  if(typeof process!=='undefined' && context.extensionMode===vscode.ExtensionMode?.Development && process.env.XMIND_UI_BACKEND_ORIGIN && process.env.XMIND_UI_READY_FILE) {
+    previewOrigin=backendOrigin(process.env.XMIND_UI_BACKEND_ORIGIN);previewReady=process.env.XMIND_UI_READY_FILE;
+    const token=process.env.XMIND_UI_BOOTSTRAP_TOKEN;
+    delete process.env.XMIND_UI_BOOTSTRAP_TOKEN;delete process.env.XMIND_UI_BACKEND_ORIGIN;delete process.env.XMIND_UI_READY_FILE;
+    if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before connecting to xMind Server.');
+    await vscode.workspace.getConfiguration('agentflow').update('backendUrl',previewOrigin,vscode.ConfigurationTarget.Global);
+    if(token)await context.secrets.store(`xmind.auth:${previewOrigin}`,validateToken(token));
+  }
   const showEditReview=editReview(vscode,context);
   let panel;
   let sidebarView;
@@ -273,6 +284,17 @@ function activate(context) {
     } catch (error) { vscode.window.showErrorMessage(error.message); }
   }));
   context.subscriptions.push({ dispose: stop });
+  if(previewReady) {
+    // View resolution waits for extension activation. Opening synchronously
+    // inside activation would wait on itself in a normal development host.
+    const bootstrap=setTimeout(()=>{
+      open().then(async()=>{
+        await vscode.commands.executeCommand('workbench.view.explorer');
+        require('node:fs').writeFileSync(previewReady,JSON.stringify({opened:true,location:'secondarySidebar',origin:previewOrigin,time:new Date().toISOString(),storage:'Normal development host; no extension test runner',scope:'Actual sidebar opened; no live inference claimed'})+'\n');
+      }).catch(error=>vscode.window.showErrorMessage(error.message));
+    },0);
+    context.subscriptions.push({dispose:()=>clearTimeout(bootstrap)});
+  }
 }
 
 module.exports = { activate };

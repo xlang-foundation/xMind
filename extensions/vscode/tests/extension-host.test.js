@@ -11,7 +11,7 @@ const { BackendClient,backendOrigin,validateToken } = require('../client');
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
   const commands=new Map(),secrets=new Map(),requests=[],views=[],intervals=new Map();
-  const state=new Map(),errors=[],comparisons=[];let documentProvider;
+  const state=new Map(),errors=[],comparisons=[],bootstrapTasks=[],ready=[];let documentProvider;
   let pendingHistory;
   let pendingOperation;
   let operations=options.operations||[];
@@ -43,11 +43,12 @@ function harness(options={}) {
   };
   class TestClient extends BackendClient {constructor(url,provider) {super(url,provider,fetchImpl);}}
   const vscode={
+    ExtensionMode:{Development:2},ConfigurationTarget:{Global:1},
     Uri:{joinPath:(root,...parts)=>[root,...parts].join('/'),parse:value=>({toString:()=>value})},
-    workspace:{isTrusted:true,getConfiguration:()=>({get:()=> 'http://localhost:8765'}),registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
+    workspace:{isTrusted:true,getConfiguration:()=>({get:()=> 'http://localhost:8765',update:async()=>{}}),registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
-      executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(name==='workbench.view.extension.xmind')return;assert.equal(name,'xmind.workspace.focus');sidebarProvider.resolveWebviewView(makeView());}},
+      executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(['workbench.view.extension.xmind','workbench.view.explorer'].includes(name))return;assert.equal(name,'xmind.workspace.focus');sidebarProvider.resolveWebviewView(makeView());}},
     window:{showInputBox:async options=>{assert.equal(options.password,true);return token;},showErrorMessage:message=>errors.push(message),
       registerWebviewViewProvider:(id,provider)=>{assert.equal(id,'xmind.workspace');sidebarProvider=provider;return {dispose(){}};}}
   };
@@ -57,16 +58,17 @@ function harness(options={}) {
           onDidDispose:callback=>{view.close=callback;return {dispose(){}};},show(){}};
         views.push(view);return view;
       }
-  const context={extensionUri:'https://fixture-extension',subscriptions:[],secrets:{get:async key=>secrets.get(key),store:async (key,value)=>{secrets.set(key,value);}},
+  const context={extensionMode:options.bootstrap?2:1,extensionUri:'https://fixture-extension',subscriptions:[],secrets:{get:async key=>secrets.get(key),store:async (key,value)=>{secrets.set(key,value);}},
     workspaceState:{get:key=>state.get(key),update:async (key,value)=>{state.set(key,value);}}};
   state.set('agentflow.session',{url:'http://127.0.0.1:8765',id:'saved'});
   let intervalID=0;
   const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken}:name==='./webview'?require('../webview'):require(name),
-    setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
-  const originalRequire=sandbox.require;sandbox.require=name=>name==='./edit-review'?require('../edit-review'):originalRequire(name);
+    setTimeout:callback=>{bootstrapTasks.push(callback);return 1;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
+  if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
+  const originalRequire=sandbox.require;sandbox.require=name=>name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
-  sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,state,errors,context,decisions,comparisons,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  const activation=sandbox.module.exports.activate(context);
+  return {token,commands,secrets,requests,views,intervals,state,errors,context,decisions,comparisons,activation,bootstrapTasks,ready,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     pauseOperation(promise) {pendingOperation=promise;},
     pauseHistory(promise) {pendingHistory=promise;}};
@@ -193,4 +195,14 @@ test('selected configured model survives view reopening and retired models fall 
   h.configureBackend({agent_execution:true},{default_model:'new-configured-model',models:[{id:'new-configured-model'}]});view.receive({type:'refresh'});
   await until(()=>view.posted.some(message=>message.type==='capabilities'&&message.model==='new-configured-model'));
   assert.equal(view.posted.filter(message=>message.type==='capabilities').at(-1).models.length,1);view.close();
+});
+
+test('normal development bootstrap completes activation before resolving the sidebar and clears private environment',async()=>{
+  const h=harness({bootstrap:true});await h.activation;
+  assert.ok(h.commands.has('agentflow.open'));assert.equal(h.views.length,0);assert.equal(h.bootstrapTasks.length,1);
+  assert.equal(h.secrets.get('xmind.auth:http://127.0.0.1:8765'),h.token);
+  assert.equal(Object.keys(h.bootstrapEnvironment).length,0,'Private bootstrap variables must be cleared before view opening');
+  h.bootstrapTasks[0]();await until(()=>h.ready.length===1);
+  assert.equal(h.ready[0].location,'secondarySidebar');assert.equal(h.ready[0].origin,'http://127.0.0.1:8765');
+  assert.ok(!JSON.stringify(h.ready).includes(h.token));assert.ok(!h.views[0].webview.html.includes(h.token));h.views[0].close();
 });

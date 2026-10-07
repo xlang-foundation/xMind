@@ -12,6 +12,7 @@
     "Other"
   ],
   "main": "./extension.js",
+  "activationEvents": ["onStartupFinished"],
   "capabilities": {
     "untrustedWorkspaces": {
       "supported": false

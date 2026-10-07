@@ -1,4 +1,6 @@
 // Real VS Code Extension Development Host bootstrap, without synthetic APIs.
+// Test-host use only: --extensionTestsPath selects in-memory VS Code storage.
+// Interactive previews use normal activation in the development host instead.
 // The CLI supplies its local access token privately in the process environment.
 // Remain open for interactive inspection; no agent/model output is fabricated.
 'use strict';

@@ -1,0 +1,15 @@
+{
+  "model_configured": false,
+  "passed": true,
+  "host_mode": "Normal development host; no extension test runner",
+  "scope": "Actual normal VS Code development host reopened against the same authenticated native backend using saved SecretStorage; no bootstrap token supplied on reopen",
+  "ready_time": "2026-10-07T08:29:42.149Z",
+  "checks": [
+    "fresh unique readiness marker",
+    "same native backend origin",
+    "no extension test runner",
+    "persistent VS Code storage exists",
+    "authenticated health succeeded before sidebar readiness"
+  ],
+  "origin": "http://127.0.0.1:61700"
+}
