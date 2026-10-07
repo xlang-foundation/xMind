@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "vscode": "1.140.0",
+  "scope": "Actual VS Code product snapshot provider and native diff; synthetic proposal, no live model or approved effect",
+  "checks": [
+    "native diff tab",
+    "exact before/after text",
+    "typing cannot mutate snapshot",
+    "filesystem writes rejected",
+    "snapshot remains clean"
+  ]
+}
