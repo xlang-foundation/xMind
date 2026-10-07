@@ -15,6 +15,7 @@ The Release build and eighteen native contracts passed, including configured run
 | Method | Path | Behavior |
 | --- | --- | --- |
 | GET | /v1/health | Reports API, core/storage and execution capability |
+| GET | /v1/mcp/servers | Saved stdio server ID/revision/enabled metadata; connections are per run, secrets and command configuration stay private |
 | GET / POST | /v1/sessions | List/create durable sessions |
 | GET | /v1/sessions/{id}/history | Read conversation history |
 | POST | /v1/sessions/{id}/messages | Persist `{role:"user",data:{content:"nonempty text"}}`; rejects other roles, fields, NUL and non-text content |

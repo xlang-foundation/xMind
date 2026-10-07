@@ -2,6 +2,7 @@
 #include "agentflow/model_provider.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include "agentflow/mcp_configuration.hpp"
 
 namespace agentflow {
 struct CredentialReference {std::string scope,id,purpose;};
@@ -15,6 +16,7 @@ struct AgentSettings {
     std::size_t max_turns=16;
     std::optional<std::int64_t> max_output_tokens;
     std::chrono::milliseconds run_timeout{600000};
+    std::vector<McpServerSetting> mcp_servers;
 };
 // Shared native single-agent/model-tool loop, callable by backend workers and
 // future graph nodes. Always invokes the configured real provider transport.

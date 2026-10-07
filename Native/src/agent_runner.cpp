@@ -1,6 +1,10 @@
 #include "agentflow/agent_runner.hpp"
 #include "nlohmann/json.hpp"
 #include "agentflow/edit_executor.hpp"
+#include "agentflow/mcp_tool_registry.hpp"
+#include "agentflow/schema_worker.hpp"
+#define NOMINMAX
+#include <windows.h>
 #include <random>
 #include <sstream>
 #include <iomanip>
@@ -9,6 +13,8 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
+#include <map>
+#include <set>
 
 namespace agentflow {
 namespace {
@@ -49,6 +55,9 @@ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings)
         workspace_=std::make_unique<WorkspaceTools>(*settings_.workspace);
     }
     if(settings_.approved_edits && !workspace_) throw std::invalid_argument("Approved edits require a workspace");
+    if(settings_.mcp_servers.size()>16)throw std::invalid_argument("MCP server count exceeds limits");
+    std::set<std::string> mcp_ids;
+    for(const auto& server:settings_.mcp_servers){if(server.id.empty() || server.revision<=0 || !mcp_ids.insert(server.id).second)throw std::invalid_argument("Invalid registered MCP configuration");if(server.enabled && !workspace_)throw std::invalid_argument("MCP execution requires a verified workspace and model tool capability");}
     if(settings_.selectable_models.size()>64) throw std::invalid_argument("Model catalogue exceeds limits");
     for(const auto& model:models()) if(model.empty() || model.size()>256 || model.find('\0')!=std::string::npos) throw std::invalid_argument("Invalid configured model ID");
 }
@@ -89,6 +98,23 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         for(const auto& stored:persistence_.history(owned.session_id).get()) request.messages.push_back(message(stored));
         if(workspace_) request.tools=workspace_->definitions();
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
+        struct McpRuntime {std::unique_ptr<McpStdioClient> client;std::unique_ptr<McpToolRegistry> registry;};
+        std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;
+        const auto run_deadline=std::chrono::steady_clock::now()+settings_.run_timeout;
+        for(const auto& server:settings_.mcp_servers) {
+            if(!server.enabled)continue;cancelled(token);
+            persistence_.append_event(id,"mcp.connecting",Json{{"server_id",server.id},{"config_revision",server.revision}}.dump()).get();
+            McpStdioConfiguration configuration{server.executable,server.working_directory,server.arguments,{}};
+            struct ClearEnvironment {McpStdioConfiguration& config;~ClearEnvironment(){for(auto& entry:config.environment)if(!entry.second.empty())SecureZeroMemory(entry.second.data(),entry.second.size());}} clear{configuration};
+            for(const auto& reference:server.credentials){auto secret=persistence_.resolve_credential(reference.scope,reference.id,mcp_credential_purpose(server,reference.name)).get();const auto bytes=secret.view();configuration.environment.emplace_back(reference.name,std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size()));}
+            McpRuntime runtime;runtime.client=std::make_unique<McpStdioClient>(configuration);runtime.client->connect(run_deadline,token);
+            persistence_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",runtime.client->server().protocol_version}}.dump()).get();
+            runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,run_deadline,token);
+            const auto definitions=runtime.registry->definitions();
+            for(const auto& definition:definitions){if(request.tools.size()>=64 || !mcp_tools.emplace(definition.name,runtime.registry.get()).second)throw std::invalid_argument("Model tool catalogue exceeds limits or has an alias collision");request.tools.push_back(definition);}
+            persistence_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()}}.dump()).get();
+            mcp_runtimes.push_back(std::move(runtime));
+        }
         for(std::size_t turn=0;turn<settings_.max_turns;++turn) {
             cancelled(token);
             std::optional<SecretBytes> credential;
@@ -115,12 +141,16 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     if(call.name=="edit_file" && settings_.approved_edits) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(EditExecutor(persistence_,*workspace_).invoke(operation_id(),id,call.arguments_json,expiry,token));
+                    } else if(const auto registered=mcp_tools.find(call.name);registered!=mcp_tools.end()) {
+                        const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
+                        output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token));
                     } else output=Json::parse(workspace_->invoke(call.name,call.arguments_json,token));
                     success=true;
                 }
                 catch(const PermissionCancelled&) {throw;}
-                catch(const PermissionDenied&) {output={{"error",{{"code","permission_denied"},{"message","Controller denied this edit; no edit was applied"}}}};}
-                catch(const PermissionExpired&) {output={{"error",{{"code","permission_expired"},{"message","Edit approval expired; no edit was applied"}}}};}
+                catch(const PermissionDenied&) {output={{"error",{{"code","permission_denied"},{"message","Controller denied this operation; the requested effect was not dispatched"}}}};}
+                catch(const PermissionExpired&) {output={{"error",{{"code","permission_expired"},{"message","Approval expired; the requested effect was not dispatched"}}}};}
+                catch(const McpEffectNotDispatched&) {output={{"error",{{"code","mcp_not_dispatched"},{"message","MCP request was not dispatched"}}}};}
                 catch(const ToolContentConflict&) {output={{"error",{{"code","content_conflict"},{"message","Edit does not match the actual file or replacement count"}}}};}
                 catch(const ToolCancelled&) {throw;}
                 catch(const ToolAccessDenied&) {output={{"error",{{"code","access_denied"},{"message","Workspace policy denied this operation"}}}};}
@@ -141,6 +171,13 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
       catch(const PermissionCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
       catch(const ToolMutationUncertain&) {return terminate(RunState::failed,{{"reason","file_effect_uncertain"}});}
       catch(const EditOutcomeUnrecorded&) {throw;} // Leave claim for recovery; AgentService degrades admission.
+      catch(const McpOutcomeUnrecorded&) {throw;}
+      catch(const McpEffectUncertain&) {return terminate(RunState::failed,{{"reason","mcp_effect_uncertain"}});}
+      catch(const SchemaEvaluationCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
+      catch(const SchemaEvaluationFailure&) {return terminate(RunState::failed,{{"reason","mcp_schema_evaluation_unavailable"}});}
+      catch(const McpTransportCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
+      catch(const McpTransportError&) {return terminate(RunState::failed,{{"reason","mcp_transport_failure"}});}
+      catch(const McpProtocolError&) {return terminate(RunState::failed,{{"reason","mcp_protocol_failure"}});}
       catch(const ToolCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
       catch(const ProviderHttpError& error) {return terminate(RunState::failed,{{"reason","provider_http_error"},{"status",error.status}});}
       catch(const TransportTimeout&) {return terminate(RunState::failed,{{"reason","provider_timeout"}});}

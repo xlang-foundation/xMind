@@ -51,12 +51,14 @@ $ciExpected+='native_mcp_client_contract'
 $ciExpected+='native_json_schema_contract'
 $ciExpected+='native_mcp_effect_contract'
 $ciExpected+='native_schema_worker_contract'
+$ciExpected+='native_mcp_configuration_contract'
+$ciExpected+='native_agent_mcp_http_contract'
 $ciActual=($ciTests|ConvertFrom-Json).tests.name
 if(@($ciActual).Count -ne $ciExpected.Count -or (Compare-Object ($ciActual|Sort-Object) ($ciExpected|Sort-Object))){throw 'The complete expected native contract set was not registered; refusing a partial green build.'}
 Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error')
 $ciBundle=Join-Path $ciRoot 'build/native-distribution'
 New-Item -ItemType Directory -Force -Path (Join-Path $ciBundle 'modules'),(Join-Path $ciBundle 'licenses')|Out-Null
-foreach($ciBinary in @('xmind_server.exe','xmind_cli.exe','xmind_schema_worker.exe','xlang3_runtime.dll')){
+foreach($ciBinary in @('xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe','xlang3_runtime.dll')){
     Copy-Item -LiteralPath (Join-Path $ciNative ('Release/'+$ciBinary)) -Destination $ciBundle
 }
 foreach($ciModule in @('xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll')){

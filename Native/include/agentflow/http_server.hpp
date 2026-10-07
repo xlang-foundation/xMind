@@ -5,11 +5,12 @@
 
 namespace agentflow {
 class EditRecoveryReader;
+struct McpServerMetadata {std::string id;std::int64_t revision;bool enabled;};
 void validate_local_auth_token(std::string_view token);
 // Loopback transport adapter. No HTTP/Electron/WebRTC dependencies in core.
 class HttpServer {
 public:
-    HttpServer(PersistenceService& persistence,std::string auth_token,RunExecutor* executor=nullptr,EditRecoveryReader* recovery=nullptr);
+    HttpServer(PersistenceService& persistence,std::string auth_token,RunExecutor* executor=nullptr,EditRecoveryReader* recovery=nullptr,std::vector<McpServerMetadata> mcp_servers={});
     ~HttpServer();
     HttpServer(const HttpServer&)=delete;
     HttpServer& operator=(const HttpServer&)=delete;

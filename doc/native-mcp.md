@@ -47,3 +47,30 @@ The full twenty-six-contract local run passed. Existing real MCP file-effect fix
 
 Latest local resource/schema-worker evidence: revision `9582dee1e17f37fe5e00220dda4c1a63f53188fe`, all twenty-six native contracts passed. [Original build/CTest output](evidence/native-mcp-resources-schema-local-build-ctest.log), [source and reused-runtime/worker binary hashes](evidence/native-mcp-resources-schema-local-provenance.json). Allocation and regex resource faults are worker evaluation failures, not evidence that a schema is invalid. Received peer tool errors, actual output-schema rejection and unavailable output validation receive distinct journal reasons. Once permission is claimed, the owning effect adapter handles pre-dispatch cancellation and records its outcome; permission acquisition cannot conceal a claimed operation through a cancellation/storage race. Claimed encoding/storage failures stop execution for recovery.
 Native job budget semantics follow Microsoft's [extended limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information) and [basic limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_basic_limit_information).
+
+## Registered stdio servers in the native agent
+
+The native agent now loads durable backend-owned stdio configuration, starts an owned MCP client for each enabled server per run, discovers and validates its actual tools, and adds their bound aliases to the model request. Connections belong to that run; configured metadata is not a claim that a server is currently connected. Real `mcp.connecting`, `mcp.connected` and `mcp.discovered` events record progress. Controller approvals, exact argument binding, multi-resource claims, peer acknowledgements and uncertain outcomes use the existing journal. A lost effect reply ends the run without model continuation or replay. Outcome-storage failure degrades agent admission until recovery.
+
+Configuration is replaced only by trusted startup or an offline administrator while the backend is stopped. The xlang3 information repository stores it separately from encrypted credential blobs. Revisions are assigned by the backend; unchanged settings retain their revision, changed settings increment it, and removed IDs are permanently retired. This is an immutable service snapshot, not dynamic/team configuration administration. Absolute executable and working-directory paths are required. Arguments are public literal metadata; use credential references for secrets.
+
+Example configuration file (replace paths with the actual trusted server):
+
+```json
+{"servers":[{"id":"project-tools","transport":"stdio","enabled":true,"executable":"D:\\tools\\server.exe","working_directory":"D:\\project","arguments":[],"credentials":[{"name":"SERVICE_API_KEY","scope":"server","id":"project-tools-key"}]}]}
+```
+
+Import and provision through the compiled native administrator while xMind Server is stopped:
+
+```powershell
+.\build\native\Release\xmind_admin.exe --db STATE_DB --modules XLANG3_MODULES --stdlib PURE_STDLIB import-mcp CONFIG_FILE
+.\build\native\Release\xmind_admin.exe --db STATE_DB --modules XLANG3_MODULES --stdlib PURE_STDLIB put-mcp-credential project-tools SERVICE_API_KEY PRIVATE_SOURCE_ENV
+```
+
+`PRIVATE_SOURCE_ENV` names an environment variable privately provisioned in the administrator process. The secret itself is never a command argument or printed output. The administrator derives scope/ID from the registered reference and purpose from the exact configured command, directory, server ID and normalized environment name. Command changes require a credential provisioned for the new purpose. Existing credential IDs cannot silently change purpose; assign a new reference when changing the command. Storage uses the existing user-bound Windows DPAPI protection and embedded xlang3 SQLite adapter. There is no CPython executable/bridge.
+
+The native server also accepts `--mcp-config CONFIG_FILE` before creating workers; omitting it restores saved settings. Enabled MCP execution requires the trusted execution workspace and explicit supported model-tool capability. A model-free server can list saved metadata without executing tools. Authenticated `GET /v1/mcp/servers` and `xmind_cli PORT mcp-servers` expose only ID, revision, enabled flag and transport, with `runtime_state:"per_run"`; they do not expose command paths, arguments or credential references/values. The existing sidebar presents exact proposals, names the external server/tool, and uses “Allow tool”. An uncertain MCP operation offers no retry or file-inspection inference; a succeeded operation is labeled peer-acknowledged, without independent verification.
+
+Local Release compilation and all twenty-eight native contracts passed, including `native_mcp_configuration_contract` and `native_agent_mcp_http_contract`. The latter uses the actual compiled administrator, server and CLI, DPAPI credentials, embedded xlang3 persistence, independent MCP subprocesses and real files. It verifies restored configuration, restricted environment, exact numeric argument bytes, approval/denial/cancellation, peer-result model continuation and lost-reply uncertainty after restart without replay. Inference is explicitly synthetic. All twenty-eight extension contracts passed, including external-tool approval and uncertainty rendering. Actual populated editor MCP execution, live inference, SDK interoperability, Streamable HTTP/OAuth, resources/prompts/subscriptions, modern interactive continuations, shared-account mapping and full upstream schema conformance remain required.
+
+The preceding resource/schema-worker revision `9582dee1e17f37fe5e00220dda4c1a63f53188fe` also passed isolated [CI run 37614949089](https://github.com/xlang-foundation/xMind/actions/runs/37614949089), all twenty-six native and twenty-seven extension contracts. Its evidence does not establish the newer configuration/agent integration result.

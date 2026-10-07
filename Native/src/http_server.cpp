@@ -110,10 +110,11 @@ struct HttpServer::Impl {
     PersistenceService& persistence;
     RunExecutor* executor;
     EditRecoveryReader* recovery;
+    std::vector<McpServerMetadata> mcp_servers;
     std::string authorization;
     httplib::Server server;
     int port=-1;
-    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection):persistence(store),executor(execution),recovery(inspection),authorization("Bearer "+token) {
+    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured):persistence(store),executor(execution),recovery(inspection),mcp_servers(std::move(configured)),authorization("Bearer "+token) {
         validate_local_auth_token(token);
         server.new_task_queue=[] {return new httplib::ThreadPool(4,4,32);};
         server.set_payload_max_length(1024*1024);
@@ -143,6 +144,11 @@ struct HttpServer::Impl {
             const auto models=executor?executor->models():std::vector<std::string>{};
             auto entries=Json::array();for(const auto& model:models)entries.push_back({{"id",model}});
             reply(response,{{"default_model",models.empty()?"":models.front()},{"models",entries}});
+        }));
+        server.Get("/v1/mcp/servers",guarded([this](const Request& request,Response& response) {
+            if(!request.params.empty())throw std::invalid_argument("MCP metadata does not accept query parameters");
+            Json configured=Json::array();for(const auto& item:mcp_servers)configured.push_back({{"id",item.id},{"revision",item.revision},{"enabled",item.enabled},{"transport","stdio"}});
+            reply(response,{{"servers",configured},{"runtime_state","per_run"}});
         }));
         server.Get("/v1/sessions",guarded([this](const Request&,Response& response) {reply(response,encode_all(persistence.sessions().get()));}));
         server.Post("/v1/sessions",guarded([this](const Request& request,Response& response) {
@@ -202,7 +208,7 @@ struct HttpServer::Impl {
         }
     }
 };
-HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery)) {}
+HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured))) {}
 HttpServer::~HttpServer()=default;
 int HttpServer::bind(int port) {
     if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");

@@ -3,7 +3,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {createInterface} from 'node:readline';
-const [mode,file,marker]=process.argv.slice(2),input=createInterface({input:process.stdin});
+const [mode,file,marker,expectedCredential]=process.argv.slice(2),input=createInterface({input:process.stdin});
+if(expectedCredential){assert.equal(expectedCredential,'credential-fixture');assert.equal(process.env.MCP_TEST_KEY,'synthetic-mcp-credential-fixture');assert.equal(process.env.XMIND_AUTH_TOKEN,undefined);assert.equal(process.env.XMIND_API_KEY,undefined);assert.equal(process.env.XMIND_SETUP_SECRET,undefined);}
 let initialized=false,ack=false,called=false,callId,cancelled=false;
 const send=value=>process.stdout.write(JSON.stringify({jsonrpc:'2.0',...value})+'\n');
 const tool={name:'fixture.write',description:'Labeled external file effect despite untrusted read-only hint',inputSchema:{type:'object',properties:{body:{type:'string',minLength:1},decimal:{type:'number'}},required:['body','decimal'],additionalProperties:false},outputSchema:{type:'object',properties:{bytes:{type:'integer',minimum:1}},required:['bytes'],additionalProperties:false},annotations:{readOnlyHint:true}};

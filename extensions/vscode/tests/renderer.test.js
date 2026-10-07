@@ -9,6 +9,19 @@ function renderer(){
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+
+test('external MCP approval names the server and tool and uncertainty never offers replay',()=>{
+  const r=renderer(),doc=r.dom.window.document;
+  const operation={id:'fixture-mcp',tool:'mcp_tool',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({server_config_id:'<fixture-server>',peer_tool:'fixture.write',config_revision:2,arguments_json:'{"body":"fixture"}'}),result_json:'{}'};
+  r.send({type:'operations',operations:[operation]});
+  assert.match(doc.querySelector('#operations').textContent,/External tool: <fixture-server> \/ fixture.write/);
+  assert.equal(doc.querySelectorAll('#operations fixture-server').length,0);
+  const allow=[...doc.querySelectorAll('#operations button')].find(button=>button.textContent==='Allow tool');assert.ok(allow);allow.click();
+  assert.equal(JSON.stringify(r.posted.at(-1)),JSON.stringify({type:'decide',id:operation.id,decision:'allow'}));
+  r.send({type:'operations',operations:[{...operation,state:'uncertain'}]});
+  assert.equal(doc.querySelectorAll('#operations button').length,0);assert.match(doc.querySelector('#operations').textContent,/on this configured server remain blocked/);
+  r.send({type:'operations',operations:[{...operation,state:'succeeded'}]});assert.match(doc.querySelector('#operations').textContent,/not independently verified/);r.dom.window.close();
+});
 test('run detail selector preserves conversation history and blocks submission while another run is active',()=>{
   const r=renderer(),doc=r.dom.window.document;
   r.send({type:'capabilities',execution:true,models:[{id:'fixture-model'}],model:'fixture-model'});
