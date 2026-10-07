@@ -141,6 +141,12 @@ ProcessResult ForegroundProcess::run(const ProcessConfiguration& config,std::sto
     const auto executable=wide(config.executable),directory=wide(config.working_directory);
     if(!std::filesystem::path(executable).is_absolute() || !std::filesystem::is_regular_file(std::filesystem::path(executable)))throw std::invalid_argument("Process executable must be an explicit existing absolute path");
     std::wstring command=quote(executable);for(const auto& arg:config.arguments){command.push_back(L' ');command+=quote(wide(arg));if(command.size()>32766)throw std::invalid_argument("Process command line exceeds limits");}
+    std::unique_ptr<DirectoryLease> workspace;
+    if(!config.workspace_root.empty() || !config.workspace_root_id.empty()) {
+        if(config.workspace_root.empty() || config.workspace_root_id.empty())throw std::invalid_argument("Incomplete process workspace capability");
+        workspace=std::make_unique<DirectoryLease>(wide(config.workspace_root));
+        if(workspace->id()!=config.workspace_root_id)throw ProcessBeforeDispatchError("Process workspace identity changed");
+    }
     DirectoryLease lease(directory);if(lease.id()!=config.working_directory_id)throw ProcessBeforeDispatchError("Process working directory identity changed");
     auto env=environment(config);CapturePipe output,errors;
     SECURITY_ATTRIBUTES inherited{sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};Handle input(CreateFileW(L"NUL",GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,&inherited,OPEN_EXISTING,0,nullptr));

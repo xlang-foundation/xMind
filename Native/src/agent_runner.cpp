@@ -56,6 +56,10 @@ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings)
         workspace_=std::make_unique<WorkspaceTools>(*settings_.workspace);
     }
     if(settings_.approved_edits && !workspace_) throw std::invalid_argument("Approved edits require a workspace");
+    if(!settings_.process_profiles.empty()) {
+        if(!workspace_)throw std::invalid_argument("Process profiles require a verified workspace");
+        process_=std::make_unique<ProcessExecutor>(persistence_,*workspace_,*settings_.workspace,settings_.process_profiles);
+    }
     if(settings_.mcp_servers.size()>16)throw std::invalid_argument("MCP server count exceeds limits");
     std::set<std::string> mcp_ids;
     for(const auto& server:settings_.mcp_servers){if(server.id.empty() || server.revision<=0 || !mcp_ids.insert(server.id).second)throw std::invalid_argument("Invalid registered MCP configuration");if(server.enabled && !workspace_)throw std::invalid_argument("MCP execution requires a verified workspace and model tool capability");}
@@ -100,6 +104,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(workspace_) request.tools=workspace_->definitions();
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
+        if(process_)request.tools.push_back(process_->definition());
         struct McpRuntime {std::unique_ptr<McpStdioClient> client;std::unique_ptr<McpToolRegistry> registry;};
         std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;
         const auto run_deadline=std::chrono::steady_clock::now()+settings_.run_timeout;
@@ -146,6 +151,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     } else if(call.name=="create_file" && settings_.approved_edits) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(CreateExecutor(persistence_,*workspace_).invoke(operation_id(),id,call.arguments_json,expiry,token));
+                    } else if(call.name=="run_process" && process_) {
+                        const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
+                        output=Json::parse(process_->invoke(operation_id(),id,call.arguments_json,expiry,token));
                     } else if(const auto registered=mcp_tools.find(call.name);registered!=mcp_tools.end()) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token));
@@ -156,6 +164,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const PermissionDenied&) {output={{"error",{{"code","permission_denied"},{"message","Controller denied this operation; the requested effect was not dispatched"}}}};}
                 catch(const PermissionExpired&) {output={{"error",{{"code","permission_expired"},{"message","Approval expired; the requested effect was not dispatched"}}}};}
                 catch(const McpEffectNotDispatched&) {output={{"error",{{"code","mcp_not_dispatched"},{"message","MCP request was not dispatched"}}}};}
+                catch(const ProcessBeforeDispatchError&) {output={{"error",{{"code","process_not_dispatched"},{"message","Process did not execute; launch preconditions were unavailable or changed"}}}};}
                 catch(const ToolContentConflict&) {output={{"error",{{"code","content_conflict"},{"message","File contents, identity, replacement count or target absence no longer match the operation"}}}};}
                 catch(const ToolCancelled&) {throw;}
                 catch(const ToolAccessDenied&) {output={{"error",{{"code","access_denied"},{"message","Workspace policy denied this operation"}}}};}
@@ -177,6 +186,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
       catch(const ToolMutationUncertain&) {return terminate(RunState::failed,{{"reason","file_effect_uncertain"}});}
       catch(const EditOutcomeUnrecorded&) {throw;} // Leave claim for recovery; AgentService degrades admission.
       catch(const McpOutcomeUnrecorded&) {throw;}
+      catch(const ProcessOutcomeUnrecorded&) {throw;}
+      catch(const ProcessEffectUncertain&) {return terminate(RunState::failed,{{"reason","process_effect_uncertain"}});}
       catch(const McpEffectUncertain&) {return terminate(RunState::failed,{{"reason","mcp_effect_uncertain"}});}
       catch(const SchemaEvaluationCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
       catch(const SchemaEvaluationFailure&) {return terminate(RunState::failed,{{"reason","mcp_schema_evaluation_unavailable"}});}

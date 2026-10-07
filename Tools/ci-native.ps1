@@ -59,6 +59,7 @@ $ciExpected+='native_mcp_sdk_modern_contract'
 $ciExpected+='native_mcp_sdk_legacy_contract'
 $ciExpected+='native_create_executor_contract'
 $ciExpected+='native_process_adapter_contract'
+$ciExpected+='native_process_executor_contract'
 $ciActual=($ciTests|ConvertFrom-Json).tests.name
 if(@($ciActual).Count -ne $ciExpected.Count -or (Compare-Object ($ciActual|Sort-Object) ($ciExpected|Sort-Object))){throw 'The complete expected native contract set was not registered; refusing a partial green build.'}
 Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error')

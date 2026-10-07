@@ -20,6 +20,8 @@ if(mode==='normal') {
     if(mode==='parent-exit')process.exit(0);
   });
   if(mode==='tree')setInterval(()=>{},1000);
+} else if(mode==='cancel-effect') {
+  writeFileSync(marker,'actual effect before cancellation');process.stdout.write('ACTUAL EFFECT\n');setInterval(()=>{},1000);
 } else if(mode==='handle') {
   process.stdout.write('READY\n');
   const tick=setInterval(()=>{

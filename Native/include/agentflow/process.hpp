@@ -22,6 +22,9 @@ struct ProcessConfiguration {
     std::vector<std::pair<std::string,std::string>> environment;
     std::chrono::milliseconds timeout{120000};
     std::size_t output_limit=1024*1024;
+    // Optional enclosing workspace capability, supplied by its owning executor.
+    // Held throughout launch/execution in addition to the selected directory.
+    std::string workspace_root,workspace_root_id;
 };
 struct ProcessResult {
     std::uint32_t pid,exit_code;
