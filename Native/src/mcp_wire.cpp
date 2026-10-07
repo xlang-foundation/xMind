@@ -1,0 +1,119 @@
+#include "agentflow/mcp_wire.hpp"
+#include "nlohmann/json.hpp"
+#include <set>
+#include <vector>
+#include <utility>
+
+namespace agentflow {
+namespace {
+using Json=nlohmann::json;
+constexpr std::size_t message_limit=1024*1024;
+Json parse(std::string_view bytes) {
+    if(bytes.empty() || bytes.size()>message_limit) throw McpProtocolError("MCP message exceeds byte limits");
+    std::vector<std::set<std::string>> fields;
+    try {
+        return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& parsed) {
+            if(depth>64) throw McpProtocolError("MCP JSON nesting exceeds limits");
+            if(event==Json::parse_event_t::object_start) fields.emplace_back();
+            else if(event==Json::parse_event_t::object_end) fields.pop_back();
+            else if(event==Json::parse_event_t::key && !fields.back().insert(parsed.get<std::string>()).second) throw McpProtocolError("Duplicate MCP JSON field");
+            return true;
+        });
+    } catch(const Json::exception&) {throw McpProtocolError("Invalid MCP JSON or UTF-8");}
+}
+void text(const std::string& value,std::size_t limit,const char* error) {
+    if(value.empty() || value.size()>limit || value.find('\0')!=std::string::npos) throw McpProtocolError(error);
+}
+std::string id_json(const Json& value,bool diagnostic=false) {
+    if(value.is_null() && diagnostic) return "null";
+    if(value.is_string()) {text(value.get<std::string>(),128,"Invalid MCP request ID");return value.dump();}
+    if(!value.is_number_integer()) throw McpProtocolError("MCP IDs must be strings or integers");
+    return value.dump();
+}
+McpWireMessage decode(const std::string& bytes) {
+    const auto value=parse(bytes);
+    if(!value.is_object() || !value.contains("jsonrpc") || value["jsonrpc"]!="2.0") throw McpProtocolError("Invalid MCP JSON-RPC envelope");
+    const bool method=value.contains("method"),result=value.contains("result"),error=value.contains("error");
+    if(static_cast<int>(method)+static_cast<int>(result)+static_cast<int>(error)!=1) throw McpProtocolError("Ambiguous MCP message kind");
+    McpWireMessage message;message.raw_json=bytes;
+    if(method) {
+        if(!value["method"].is_string()) throw McpProtocolError("Invalid MCP method");
+        message.method=value["method"].get<std::string>();text(message.method,256,"Invalid MCP method");
+        if(value.contains("params") && !value["params"].is_object()) throw McpProtocolError("MCP parameters must be an object");
+        message.payload_json=value.contains("params")?value["params"].dump():"{}";
+        if(value.contains("id")) {message.kind=McpMessageKind::request;message.id_json=id_json(value["id"]);}
+        else message.kind=McpMessageKind::notification;
+    } else {
+        if(value.contains("params")) throw McpProtocolError("MCP responses cannot contain request parameters");
+        if(result) {
+            if(!value.contains("id") || !value["result"].is_object()) throw McpProtocolError("Invalid MCP result response");
+            message.kind=McpMessageKind::result;message.id_json=id_json(value["id"]);message.payload_json=value["result"].dump();
+        } else {
+            const auto& failure=value["error"];
+            if(!failure.is_object() || !failure.contains("code") || !failure["code"].is_number_integer() || !failure.contains("message") || !failure["message"].is_string()) throw McpProtocolError("Invalid MCP error response");
+            const auto description=failure["message"].get<std::string>();
+            if(description.size()>65536 || description.find('\0')!=std::string::npos) throw McpProtocolError("MCP error description exceeds limits");
+            message.kind=McpMessageKind::error;message.payload_json=failure.dump();
+            if(value.contains("id")) message.id_json=id_json(value["id"],true);
+        }
+    }
+    return message;
+}
+Json parameters(std::string_view source) {
+    auto value=parse(source);if(!value.is_object()) throw McpProtocolError("MCP parameters must be an object");return value;
+}
+std::string frame(const Json& value) {
+    try {
+        auto encoded=value.dump();
+        if(encoded.size()>message_limit) throw McpProtocolError("Encoded MCP message exceeds byte limits");
+        // Validate the complete envelope too: metadata wrapping counts toward
+        // depth limits, not only the caller's standalone parameter object.
+        decode(encoded);encoded.push_back('\n');return encoded;
+    } catch(const Json::exception&) {throw McpProtocolError("Invalid outgoing MCP UTF-8");}
+}
+}
+struct McpLineStream::Impl {
+    Sink sink;
+    std::string pending;
+    bool failed=false,closed=false;
+    explicit Impl(Sink callback):sink(std::move(callback)) {if(!sink) throw std::invalid_argument("MCP stream requires a sink");}
+};
+McpLineStream::McpLineStream(Sink sink):impl_(std::make_unique<Impl>(std::move(sink))) {}
+McpLineStream::~McpLineStream()=default;
+void McpLineStream::feed(std::string_view bytes) {
+    auto& state=*impl_;
+    if(state.failed || state.closed) throw McpProtocolError("MCP stream is no longer usable");
+    try {
+        while(!bytes.empty()) {
+            const auto newline=bytes.find('\n');const auto count=newline==std::string_view::npos?bytes.size():newline;
+            if(count>message_limit-state.pending.size()) throw McpProtocolError("MCP line exceeds byte limits");
+            state.pending.append(bytes.data(),count);
+            if(newline==std::string_view::npos) break;
+            if(!state.pending.empty() && state.pending.back()=='\r') state.pending.pop_back();
+            const auto message=decode(state.pending);state.pending.clear();state.sink(message);
+            bytes.remove_prefix(count+1);
+        }
+    } catch(...) {state.failed=true;state.pending.clear();throw;}
+}
+void McpLineStream::finish() {
+    auto& state=*impl_;if(state.failed) throw McpProtocolError("MCP stream failed");
+    if(!state.pending.empty()) {state.failed=true;state.pending.clear();throw McpProtocolError("Incomplete MCP line at EOF");}
+    state.closed=true;
+}
+std::string mcp_request(std::string id,std::string method,std::string_view source,McpWireEra era,const McpClientIdentity& identity) {
+    text(id,128,"Invalid outgoing MCP request ID");text(method,256,"Invalid outgoing MCP method");
+    auto params=parameters(source);
+    if(era==McpWireEra::modern) {
+        if(params.contains("_meta")) throw McpProtocolError("Modern MCP metadata is owned by the backend");
+        text(identity.name,128,"Invalid MCP client identity");text(identity.version,64,"Invalid MCP client version");
+        params["_meta"]={{"io.modelcontextprotocol/protocolVersion","2026-07-28"},
+            {"io.modelcontextprotocol/clientInfo",{{"name",identity.name},{"version",identity.version}}},
+            {"io.modelcontextprotocol/clientCapabilities",parameters(identity.capabilities_json)}};
+    }
+    return frame(Json{{"jsonrpc","2.0"},{"id",id},{"method",method},{"params",std::move(params)}});
+}
+std::string mcp_notification(std::string method,std::string_view source) {
+    text(method,256,"Invalid outgoing MCP notification method");
+    return frame(Json{{"jsonrpc","2.0"},{"method",method},{"params",parameters(source)}});
+}
+}
