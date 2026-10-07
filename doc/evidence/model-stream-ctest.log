@@ -1,0 +1,115 @@
+Start testing: Oct 06 21:48 Pacific Daylight Time
+----------------------------------------------------------
+1/7 Testing: model_stream_protocol_contract
+1/7 Test: model_stream_protocol_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_model_stream_contract.exe"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"model_stream_protocol_contract" start time: Oct 06 21:48 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Synthetic model-stream protocol contracts passed; no live provider was called
+<end of output>
+Test time =   0.21 sec
+----------------------------------------------------------
+Test Passed.
+"model_stream_protocol_contract" end time: Oct 06 21:48 Pacific Daylight Time
+"model_stream_protocol_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/7 Testing: native_secret_protection_contract
+2/7 Test: native_secret_protection_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_secret_contract.exe"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"native_secret_protection_contract" start time: Oct 06 21:48 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Windows native secret-protection contracts passed
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"native_secret_protection_contract" end time: Oct 06 21:48 Pacific Daylight Time
+"native_secret_protection_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/7 Testing: native_http_cli_contract
+3/7 Test: native_http_cli_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/AgentFlow/Native/tests/http_cli_contract.mjs" "D:/CantorAI2026/AgentFlow/build/native/Release/xmind_server.exe" "D:/CantorAI2026/AgentFlow/build/native/Release/xmind_cli.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"native_http_cli_contract" start time: Oct 06 21:48 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native HTTP/CLI contracts passed: authentication, shared clients, concurrent messages, restart persistence; execution routes absent
+<end of output>
+Test time =   9.89 sec
+----------------------------------------------------------
+Test Passed.
+"native_http_cli_contract" end time: Oct 06 21:48 Pacific Daylight Time
+"native_http_cli_contract" time elapsed: 00:00:09
+----------------------------------------------------------
+
+4/7 Testing: embedded_xlang_sqlite_contract
+4/7 Test: embedded_xlang_sqlite_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_xlang_sqlite_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"embedded_xlang_sqlite_contract" start time: Oct 06 21:48 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Embedded xlang3 SQLite contracts passed
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"embedded_xlang_sqlite_contract" end time: Oct 06 21:48 Pacific Daylight Time
+"embedded_xlang_sqlite_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/7 Testing: xlang_repository_contract
+5/7 Test: xlang_repository_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_repository_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"xlang_repository_contract" start time: Oct 06 21:48 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+xlang3-backed repository contracts passed
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"xlang_repository_contract" end time: Oct 06 21:48 Pacific Daylight Time
+"xlang_repository_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/7 Testing: persistence_service_contract
+6/7 Test: persistence_service_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_persistence_service_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"persistence_service_contract" start time: Oct 06 21:48 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Persistence service ownership/concurrency contracts passed
+<end of output>
+Test time =   0.26 sec
+----------------------------------------------------------
+Test Passed.
+"persistence_service_contract" end time: Oct 06 21:48 Pacific Daylight Time
+"persistence_service_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/7 Testing: encrypted_credential_repository_contract
+7/7 Test: encrypted_credential_repository_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_credential_repository_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"encrypted_credential_repository_contract" start time: Oct 06 21:48 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Encrypted credential repository contracts passed
+<end of output>
+Test time =   0.24 sec
+----------------------------------------------------------
+Test Passed.
+"encrypted_credential_repository_contract" end time: Oct 06 21:48 Pacific Daylight Time
+"encrypted_credential_repository_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 06 21:48 Pacific Daylight Time
