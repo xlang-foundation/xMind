@@ -63,5 +63,10 @@ std::vector<McpPendingRequest> McpRequestTracker::abandon_all() {
     for(const auto& [key,request]:state.active) {lost.push_back(request);state.retire(key,Impl::Retired::abandoned);}
     state.active.clear();return lost;
 }
+McpPendingRequest McpRequestTracker::abandon(const std::string& id) {
+    auto& state=*impl_;const auto key=nlohmann::json(id).dump();const auto found=state.active.find(key);
+    if(found==state.active.end()) throw McpProtocolError("MCP abandonment has no pending request");
+    auto request=found->second;state.retire(key,Impl::Retired::abandoned);state.active.erase(found);return request;
+}
 std::size_t McpRequestTracker::pending() const {return impl_->active.size();}
 }

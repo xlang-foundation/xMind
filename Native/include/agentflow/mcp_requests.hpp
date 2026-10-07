@@ -22,6 +22,7 @@ public:
     // Duplicates and unknown IDs are protocol failures, never guessed matches.
     std::optional<McpCorrelatedReply> receive(const McpWireMessage& message);
     std::string cancel(const std::string& id);
+    McpPendingRequest abandon(const std::string& id); // local retirement, no wire cancellation
     // Transport loss returns outstanding identities for owning runtime recovery.
     // No replay, peer error, cancellation success or effect outcome is invented.
     std::vector<McpPendingRequest> abandon_all();
