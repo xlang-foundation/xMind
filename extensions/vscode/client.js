@@ -18,7 +18,7 @@ function validateToken(token) {
 }
 class BackendClient {
   #tokenProvider;
-  constructor(baseUrl, tokenProvider, fetchImpl = fetch) {
+  constructor(baseUrl, tokenProvider, fetchImpl = (...args) => fetch(...args)) {
     this.baseUrl = backendOrigin(baseUrl);
     if (typeof tokenProvider !== 'function') throw new Error('Server authentication is required.');
     this.#tokenProvider = tokenProvider;
@@ -67,4 +67,5 @@ class BackendClient {
   }
 }
 
-module.exports = { BackendClient, backendOrigin, validateToken };
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken};
+else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken};

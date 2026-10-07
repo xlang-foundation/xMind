@@ -2,9 +2,9 @@ name: Native Windows contracts
 on:
   push:
     branches: [main, 'checkpoint/**']
-    paths: ['Native/**', 'Tools/**', 'doc/runtime-prerequisites/**', 'extensions/vscode/**', '.github/workflows/native-windows.yml']
+    paths: ['Native/**', 'Tools/**', 'doc/runtime-prerequisites/**', 'extensions/vscode/**', 'views/browser/**', '.github/workflows/native-windows.yml']
   pull_request:
-    paths: ['Native/**', 'Tools/**', 'doc/runtime-prerequisites/**', 'extensions/vscode/**', '.github/workflows/native-windows.yml']
+    paths: ['Native/**', 'Tools/**', 'doc/runtime-prerequisites/**', 'extensions/vscode/**', 'views/browser/**', '.github/workflows/native-windows.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -52,6 +52,15 @@ jobs:
           npm ci --ignore-scripts
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm test
+          exit $LASTEXITCODE
+      - name: Verify browser view and native runtime separation
+        working-directory: xmind
+        run: |
+          node views/browser/build.mjs build/browser-assets
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --test views/browser/tests/controller.test.cjs > build/ci-evidence/browser-controller.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node views/browser/tests/native-contract.mjs build/native/Release/xmind_server.exe ../xlang3/build/Release/modules ../stdlib-source/Lib build/browser-assets > build/ci-evidence/browser-native.log
           exit $LASTEXITCODE
       - name: Preserve build and test diagnostics
         if: always()

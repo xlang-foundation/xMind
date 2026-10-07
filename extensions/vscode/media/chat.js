@@ -1,5 +1,5 @@
 'use strict';
-const api=acquireVsCodeApi(),byId=id=>document.getElementById(id);
+const api=globalThis.xMindView||acquireVsCodeApi(),byId=id=>document.getElementById(id);
 let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null;
 const operationSections=new Map();
 const processStreams=new Map();
@@ -169,7 +169,9 @@ byId('settings-close').onclick=()=>settings.close();
 settings.addEventListener('close',()=>{byId('provider-key').value='';byId('settings').focus();});
 byId('provider-form').onsubmit=event=>{event.preventDefault();const key=byId('provider-key').value;byId('provider-key').value='';byId('settings-save').disabled=true;byId('settings-status').textContent='Fetching models…';api.postMessage({type:'saveProviderKey',key});};
 function renderModels(models,selected){byId('model').replaceChildren();const placeholder=node('option','Choose a model');placeholder.value='';placeholder.disabled=true;placeholder.selected=!models.some(model=>model.id===selected);byId('model').append(placeholder);for(const model of models){const option=node('option',model.id);option.value=model.id;option.selected=model.id===selected;byId('model').append(option);}byId('model').disabled=!models.length;}
-window.addEventListener('message',({data:m})=>{
+window.addEventListener('message',event=>{
+  if(globalThis.xMindView&&(event.source!==window||event.origin!==location.origin))return;
+  const m=event.data;if(!m||typeof m.type!=='string')return;
   const scroll=byId('scroll'),follow=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<80;
   if(m.type==='graphs'){const select=byId('workflow');select.replaceChildren();const single=node('option','Single agent');single.value='';select.append(single);for(const graph of m.graphs){const option=node('option',graph.id+' · '+graph.node_count+' nodes'+(graph.executable?'':' · unavailable'));option.value=graph.id;option.disabled=!graph.executable;option.dataset.executable=graph.executable?'true':'';option.selected=graph.id===m.selected;select.append(option);}if(!m.selected)select.value='';workflowExecutable=!!m.graphs.find(g=>g.id===m.selected&&g.executable);byId('workflow-picker').hidden=!m.graphs.length;byId('send').disabled=!canExecute()||activeRun||sessionBusy;}
   else if(m.type==='graph-clear')clearGraph();
