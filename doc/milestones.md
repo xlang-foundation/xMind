@@ -27,6 +27,8 @@ Delivered evidence: Release build, passing default embedded adapter/repository c
 
 ## Following milestones
 
+Native workspace tools checkpoint: [actual C++ filesystem tools](native-workspace-tools.md) now read, list and search authorized Windows workspace files, with handle checks, argument validation and bounded results. The tools contract passed on real filesystem fixtures. Agent integration, mutation/process tools, policy and complete coding workflows remain required.
+
 Native HTTP/console checkpoint: [xMind Server](native-server.md) exposes real session and user-message persistence, with authenticated independent HTTP/CLI clients. Product run creation/manual transitions are absent until the real execution engine owns them. This is backend storage delivery, not completion of the planned native agent, cancellation, streaming or coding milestone.
 
 Native persistence worker checkpoint: [PersistenceService](persistence-service.md) owns embedded xlang3 and the repository on one thread, serving typed requests from concurrent backend callers. All five native contracts passed, including concurrent writes, queue backpressure, owner recovery, failure cleanup and shutdown draining. It is ready for native HTTP/agent callers; those services and their authentication remain incomplete.

@@ -1,0 +1,19 @@
+Start testing: Oct 06 22:03 Pacific Daylight Time
+----------------------------------------------------------
+4/11 Testing: native_workspace_tools_contract
+4/11 Test: native_workspace_tools_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/AgentFlow/Native/tests/workspace_tools_peer.mjs" "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_workspace_tools_contract.exe"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"native_workspace_tools_contract" start time: Oct 06 22:03 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native workspace tools passed on real filesystem fixtures; no model was called
+<end of output>
+Test time =   0.50 sec
+----------------------------------------------------------
+Test Passed.
+"native_workspace_tools_contract" end time: Oct 06 22:03 Pacific Daylight Time
+"native_workspace_tools_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 06 22:03 Pacific Daylight Time
