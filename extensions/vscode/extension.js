@@ -14,6 +14,7 @@ function activate(context) {
   let generation = 0;
   let opening;
   let messages = Promise.resolve();
+  let reviewed = new Map();
   const stateKey = 'agentflow.session';
 
   const post = message => panel?.webview.postMessage(message);
@@ -34,6 +35,10 @@ function activate(context) {
       const run = await client.status(id);
       if (version !== generation) return;
       post({ type: 'status', text: run.state });
+      const operations = await client.operations(id);
+      if (version !== generation) return;
+      reviewed = new Map(operations.map(operation => [operation.id, operation]));
+      post({ type: 'operations', operations });
       if (['completed', 'cancelled', 'failed'].includes(run.state)) {
         // A terminal transition can occur between the event query and status query.
         const finalEvents = await client.events(id, cursor);
@@ -53,6 +58,8 @@ function activate(context) {
     const version = generation;
     sessionId = id;
     runId = undefined;
+    reviewed.clear();
+    post({ type: 'operations', operations: [] });
     cursor = 0;
     await context.workspaceState.update(stateKey, { url: client.baseUrl, id });
     if (version !== generation || !panel) return;
@@ -107,8 +114,13 @@ function activate(context) {
       { enableScripts: true, localResourceRoots: [] });
     panel.webview.html = html(crypto.randomBytes(16).toString('hex'));
     const view = panel;
-    panel.onDidDispose(() => { if (panel === view) { stop(); panel = undefined; } }, null, context.subscriptions);
+    panel.onDidDispose(() => { if (panel === view) { stop(); reviewed.clear(); panel = undefined; } }, null, context.subscriptions);
     panel.webview.onDidReceiveMessage(message => {
+      // Selection intent invalidates an in-flight approval immediately, before
+      // its queued selection handler can run behind that network request.
+      if (panel === view && (message?.type === 'select' || message?.type === 'new')) {
+        stop(); reviewed.clear(); post({ type: 'operations', operations: [] });
+      }
       // Serialize view commands so overlapping selections/submissions cannot
       // overwrite the observed session or display one session's response in another.
       messages = messages.then(async () => { try {
@@ -137,11 +149,29 @@ function activate(context) {
           const run = await client.run(sessionId, message.prompt);
           if (panel !== view) return; // Accepted backend execution survives view closure.
           stop(); runId = run.id; cursor = 0;
+          reviewed.clear(); post({ type: 'operations', operations: [] });
           post({ type: 'user', text: message.prompt });
           timer = setInterval(poll, 500);
           await poll();
         } else if (message.type === 'cancel' && runId) {
           await client.cancel(runId); await poll();
+        } else if (message.type === 'decide' && typeof message.id === 'string') {
+          if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before deciding an operation.');
+          if (message.decision !== 'allow' && message.decision !== 'deny') throw new Error('Decision must be allow or deny.');
+          const proposal = reviewed.get(message.id);
+          if (!proposal || proposal.run_id !== runId || proposal.state !== 'awaiting_approval') throw new Error('Inspect a pending operation in the selected run before deciding.');
+          const version = generation;
+          const current = await client.operation(message.id);
+          if (panel !== view || version !== generation) return;
+          if (current.id !== proposal.id || current.state !== 'awaiting_approval' || current.run_id !== proposal.run_id || current.workspace_id !== proposal.workspace_id || current.tool !== proposal.tool || current.arguments_json !== proposal.arguments_json || current.expires_unix_ms !== proposal.expires_unix_ms) {
+            await poll();
+            throw new Error('The operation changed since review. Inspect its current state before deciding.');
+          }
+          const decided = await client.decide(message.id, message.decision);
+          if (panel !== view || version !== generation) return;
+          reviewed.set(decided.id, decided);
+          post({ type: 'operations', operations: [...reviewed.values()] });
+          await poll();
         }
       } catch (error) { if (panel === view) post({ type: 'error', text: error.message }); } });
     }, null, context.subscriptions);
@@ -179,6 +209,7 @@ function html(nonce) {
   <h2>xMind</h2><select id="sessions" aria-label="Session"></select><button id="new">New session</button><button id="refresh">Refresh</button>
   <div id="status" role="status">Connecting…</div><div id="history"></div>
   <label for="prompt">Prompt</label><textarea id="prompt"></textarea><br><button id="send">Run</button><button id="cancel">Cancel</button>
+  <h3>Operation review</h3><div id="operations"></div>
   <h3>Run events</h3><pre id="events"></pre>
   <script nonce="${nonce}">
   const api=acquireVsCodeApi();const byId=id=>document.getElementById(id);
@@ -186,6 +217,24 @@ function html(nonce) {
   byId('sessions').onchange=()=>api.postMessage({type:'select',id:byId('sessions').value});
   byId('send').onclick=()=>{api.postMessage({type:'send',prompt:byId('prompt').value});};
   function entry(role,text){const p=document.createElement('pre');p.textContent=role+': '+text;byId('history').append(p);}
+  function operations(items){
+    byId('operations').replaceChildren();
+    for(const item of items){
+      const section=document.createElement('section');const title=document.createElement('h4');
+      title.textContent=item.tool+' — '+item.state+' ('+item.id+')';section.append(title);
+      const metadata=document.createElement('pre');metadata.textContent='Workspace: '+item.workspace_id+'\\nExpires: '+new Date(item.expires_unix_ms).toISOString()+'\\nController: '+(item.decision_actor||'Awaiting decision');section.append(metadata);
+      // Render every recorded argument byte as text. Never evaluate tool/file
+      // content or rebuild approval arguments from a parsed browser object.
+      const payload=document.createElement('pre');payload.textContent=item.arguments_json;section.append(payload);
+      if(item.tool==='replace_file'){
+        try{const plan=JSON.parse(item.arguments_json);for(const [label,key] of [['Before','before_content'],['After','after_content']]){const heading=document.createElement('strong');heading.textContent=label;const content=document.createElement('pre');content.textContent=plan[key];section.append(heading,content);}}catch{}
+      }
+      if(item.state==='awaiting_approval'){
+        for(const decision of ['allow','deny']){const button=document.createElement('button');button.textContent=decision==='allow'?'Allow this operation':'Deny this operation';button.disabled=Date.now()>=item.expires_unix_ms;button.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision});};section.append(button);}
+      } else {const result=document.createElement('pre');result.textContent=item.result_json;section.append(result);}
+      byId('operations').append(section);
+    }
+  }
   window.addEventListener('message',({data:m})=>{
     if(m.type==='sessions'){byId('sessions').replaceChildren();for(const s of m.sessions){const o=document.createElement('option');o.value=s.id;o.textContent=s.title;o.selected=s.id===m.selected;byId('sessions').append(o);}}
     else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(m.type==='history')byId('events').textContent='';for(const item of m.history)entry(item.role,item.data.content||JSON.stringify(item.data));}
@@ -193,6 +242,7 @@ function html(nonce) {
     else if(m.type==='user'){entry('user',m.text);byId('events').textContent='';byId('prompt').value='';}
     else if(m.type==='draft')byId('prompt').value=m.text;
     else if(m.type==='event'){byId('events').textContent+=JSON.stringify(m.event)+'\\n';}
+    else if(m.type==='operations')operations(m.operations);
     else if(m.type==='status'||m.type==='error')byId('status').textContent=m.text;
   });api.postMessage({type:'ready'});
   </script></body></html>`;
