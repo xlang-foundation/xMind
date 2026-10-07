@@ -2,11 +2,15 @@
 #include "agentflow/mcp_wire.hpp"
 #include <jsoncons/json.hpp>
 #include <jsoncons_ext/jsonschema/jsonschema.hpp>
+#include <regex>
 
 namespace agentflow {
 namespace {
 using Json=jsoncons::json;
 namespace Schema=jsoncons::jsonschema;
+bool resource_failure(const std::regex_error& error) {
+    return error.code()==std::regex_constants::error_space || error.code()==std::regex_constants::error_stack || error.code()==std::regex_constants::error_complexity;
+}
 Schema::evaluation_options options() {
     Schema::evaluation_options result;
     result.default_version(Schema::schema_version::draft202012());
@@ -25,7 +29,12 @@ Schema::json_schema<Json> compile(const std::string& source) {
         // Unresolved application refs fail compilation; no I/O resolver exists.
         return Schema::make_json_schema(std::move(value),options());
     }catch(const SchemaInvalid&){throw;}
-    catch(const std::exception&){throw SchemaInvalid("MCP schema is invalid or has unresolved references");}
+    catch(const McpProtocolError&){throw SchemaInvalid("Invalid MCP schema JSON");}
+    catch(const Schema::schema_error&){throw SchemaInvalid("MCP schema is invalid or has unresolved references");}
+    catch(const jsoncons::ser_error&){throw SchemaInvalid("Invalid MCP schema JSON");}
+    catch(const std::regex_error& error){if(resource_failure(error))throw;throw SchemaInvalid("Invalid MCP schema regular expression");}
+    // Allocation/unexpected evaluation faults must reach the isolated worker
+    // failure boundary; they do not prove that a schema is invalid.
 }
 }
 struct JsonSchema202012::Impl {
@@ -42,7 +51,8 @@ void JsonSchema202012::validate_object(std::string_view instance) const {
         const auto value=Json::parse(compact,jsoncons::json_options{}.max_nesting_depth(64));
         if(!impl_->compiled.is_valid(value))throw SchemaArgumentsInvalid("Arguments do not match the MCP input schema");
     }catch(const SchemaArgumentsInvalid&){throw;}
-    catch(const std::exception&){throw SchemaArgumentsInvalid("Invalid MCP arguments or schema evaluation failure");}
+    catch(const McpProtocolError&){throw SchemaArgumentsInvalid("Invalid MCP argument JSON");}
+    catch(const jsoncons::ser_error&){throw SchemaArgumentsInvalid("Invalid MCP argument JSON");}
 }
 const std::string& JsonSchema202012::source() const {return impl_->source;}
 }
