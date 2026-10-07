@@ -136,9 +136,9 @@ struct McpStdioProcess::Impl {
         output_pump=std::jthread([this](std::stop_token token){pump(output.get(),false,token);});
         error_pump=std::jthread([this](std::stop_token token){pump(errors.get(),true,token);});
     }
-    void fail() noexcept {fault=true;stopping=true;SetEvent(wake.get());ready.notify_all();TerminateJobObject(job.get(),1);}
+    void fail() noexcept {fault=true;stopping=true;SetEvent(wake.get());{std::lock_guard lock(mutex);ready.notify_all();}TerminateJobObject(job.get(),1);}
     void pump(HANDLE channel,bool stderr_channel,std::stop_token token) noexcept {
-        std::stop_callback cancel(token,[this]{stopping=true;SetEvent(wake.get());ready.notify_all();});
+        std::stop_callback cancel(token,[this]{stopping=true;SetEvent(wake.get());std::lock_guard lock(mutex);ready.notify_all();});
         try {
             std::array<char,8192> buffer{};
             while(!stopping.load()) {
@@ -187,7 +187,7 @@ void McpStdioProcess::write(std::string_view frame,Deadline deadline,std::stop_t
     if(written!=frame.size()){state.fail();throw McpTransportError("MCP frame write was incomplete; remote outcome is not established");}
 }
 std::optional<std::string> McpStdioProcess::read(Deadline deadline,std::stop_token token) {
-    auto& state=*impl_;std::stop_callback callback(token,[&]{state.ready.notify_all();});std::unique_lock lock(state.mutex);
+    auto& state=*impl_;std::stop_callback callback(token,[&]{std::lock_guard lock(state.mutex);state.ready.notify_all();});std::unique_lock lock(state.mutex);
     while(state.chunks.empty() && !state.eof && !state.stopping.load() && !token.stop_requested())if(state.ready.wait_until(lock,deadline)==std::cv_status::timeout)break;
     if(token.stop_requested())throw McpTransportCancelled("MCP read cancelled");
     if(!state.chunks.empty()){auto result=std::move(state.chunks.front());state.chunks.pop_front();state.buffered-=result.size();return result;}

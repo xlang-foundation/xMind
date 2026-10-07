@@ -50,6 +50,9 @@ int main(int argc,char** argv) {
             const auto frame=mcp_request("silent","server/discover","{}",McpWireEra::modern);process.write(frame,std::chrono::steady_clock::now()+5s);
             rejects<McpTransportTimeout>([&]{process.read(std::chrono::steady_clock::now()+150ms);});
             std::stop_source stop;stop.request_stop();rejects<McpTransportCancelled>([&]{process.read(std::chrono::steady_clock::now()+5s,stop.get_token());});
+            std::stop_source delayed;std::jthread read_cancel([&]{std::this_thread::sleep_for(100ms);delayed.request_stop();});
+            const auto cancelled_at=std::chrono::steady_clock::now();rejects<McpTransportCancelled>([&]{process.read(cancelled_at+5s,delayed.get_token());});
+            require(std::chrono::steady_clock::now()-cancelled_at<2s,"Cancellation must wake an actual waiting reader promptly");
             require(!process.status().faulted,"Read timeout/cancellation alone must not invent peer failure or effect outcome");
         }
         const auto large=mcp_request("blocked","tools/call",nlohmann::json{{"payload",std::string(800000,'x')}}.dump(),McpWireEra::modern);
