@@ -13,17 +13,22 @@ const count=value=>Number.isSafeInteger(value)&&value>=0?value.toLocaleString():
 function metrics(el,data={}){const usage=data.usage||{};el.replaceChildren();for(const text of ['Input '+count(usage.prompt_tokens),'Output '+count(usage.completion_tokens),'Total '+count(usage.total_tokens)])el.append(node('span',text));if(Number.isSafeInteger(usage.prompt_tokens_details?.cached_tokens))el.append(node('span','Cached '+count(usage.prompt_tokens_details.cached_tokens)));if(Number.isSafeInteger(usage.completion_tokens_details?.reasoning_tokens))el.append(node('span','Reasoning '+count(usage.completion_tokens_details.reasoning_tokens)));if(data.model)el.append(node('span',data.model));if(Number.isFinite(data.first_token_ms)&&data.first_token_ms>=0)el.append(node('span','First token '+(data.first_token_ms/1000).toFixed(2)+'s'));if(Number.isFinite(data.elapsed_ms)&&data.elapsed_ms>=0)el.append(node('span',(data.elapsed_ms/1000).toFixed(2)+'s'));el.title='Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.';}
 function processProposal(section,item){
   let plan;try{plan=JSON.parse(item.arguments_json);}catch{}
-  if(!plan||typeof plan.profile_id!=='string'||!Number.isSafeInteger(plan.profile_revision)||plan.profile_revision<1||typeof plan.executable!=='string'||!Array.isArray(plan.arguments)||plan.arguments.length>64||plan.arguments.some(arg=>typeof arg!=='string')||typeof plan.workdir!=='string'||typeof plan.directory_id!=='string'||!plan.directory_id||!Number.isSafeInteger(plan.timeout_ms)||plan.timeout_ms<1||plan.timeout_ms>600000||!Number.isSafeInteger(plan.output_limit)||plan.output_limit<1||plan.output_limit>4194304){
+  if(!plan||typeof plan.profile_id!=='string'||!Number.isSafeInteger(plan.profile_revision)||plan.profile_revision<1||typeof plan.executable!=='string'||typeof plan.executable_id!=='string'||!plan.executable_id||plan.executable_id.length>512||plan.executable_id.includes('\0')||!Array.isArray(plan.arguments)||plan.arguments.length>64||plan.arguments.some(arg=>typeof arg!=='string')||typeof plan.workdir!=='string'||typeof plan.directory_id!=='string'||!plan.directory_id||!Number.isSafeInteger(plan.timeout_ms)||plan.timeout_ms<1||plan.timeout_ms>600000||!Number.isSafeInteger(plan.output_limit)||plan.output_limit<1||plan.output_limit>4194304){
     section.append(node('p','Command details are unavailable. Refresh from the backend before allowing this operation.','inspection-note'));return false;
   }
   const view=node('div',undefined,'process-proposal');
   view.append(node('strong','Profile '+plan.profile_id+' · revision '+plan.profile_revision),node('p','Directory: '+plan.workdir),node('div','Executable and literal argument vector'),node('pre',JSON.stringify([plan.executable,...plan.arguments],null,2),'process-argv'));
+  const binding=node('details');binding.append(node('summary','Executable binding'),node('pre',plan.executable_id));view.append(binding);
   const badges=node('div',undefined,'metrics');badges.append(node('span','Timeout '+(plan.timeout_ms/1000).toLocaleString()+'s'),node('span','Output limit '+count(plan.output_limit)+' bytes'));view.append(badges);
   section.append(view);return true;
 }
 function processOutcome(value){
   if(!value||typeof value!=='object'||typeof value.operation_id!=='string'||typeof value.profile_id!=='string'||!['exited','cancelled','timed_out'].includes(value.termination)||!Number.isSafeInteger(value.exit_code)||value.exit_code<0||value.exit_code>0xffffffff||!Number.isSafeInteger(value.pid)||value.pid<1||!Number.isFinite(value.elapsed_ms)||value.elapsed_ms<0||typeof value.truncated!=='boolean'||value.process_tree_retired!==true||value.independently_verified!==false)return;
-  for(const key of ['stdout','stderr'])if(!value[key]||!['utf-8','hex'].includes(value[key].encoding)||typeof value[key].data!=='string'||value[key].data.length>524288||(value[key].encoding==='hex'&&(!/^(?:[0-9a-fA-F]{2})*$/.test(value[key].data))))return;
+  for(const key of ['stdout','stderr']){
+    const channel=value[key];
+    if(!channel||!['utf-8','hex'].includes(channel.encoding)||typeof channel.data!=='string'||channel.data.length>524288||(channel.encoding==='hex'&&(!/^(?:[0-9a-fA-F]{2})*$/.test(channel.data)))||!Number.isSafeInteger(channel.byte_count)||!Number.isSafeInteger(channel.retained_bytes)||channel.retained_bytes<0||channel.byte_count<channel.retained_bytes)return;
+    if(channel.retained_bytes!==(channel.encoding==='hex'?channel.data.length/2:new TextEncoder().encode(channel.data).length))return;
+  }
   return value;
 }
 function renderProcessOutcome(section,result){

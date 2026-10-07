@@ -7,12 +7,13 @@ function renderer(){
   const dom=new JSDOM(html('fixture-nonce',{source:'https://fixture',css:'fixture.css',marked:'marked.js',purify:'purify.js',script:'chat.js'}),{runScripts:'outside-only'}),posted=[];
   dom.window.acquireVsCodeApi=()=>({postMessage:message=>posted.push(message)});
   dom.window.TextDecoder=TextDecoder;
+  dom.window.TextEncoder=TextEncoder;
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
 
 const processProposalFixture=()=>({id:'fixture-command',tool:'run_process',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,
-  arguments_json:JSON.stringify({profile_id:'fixture-profile',profile_revision:2,executable:'C:/fixture/tool.exe',arguments:['space argument','<script>fixtureAttack()</script>','trailing\\'],workdir:'src',directory_id:'fixture-directory',timeout_ms:120000,output_limit:65536}),result_json:'{}'});
+  arguments_json:JSON.stringify({profile_id:'fixture-profile',profile_revision:2,executable:'C:/fixture/tool.exe',executable_id:'opaque-fixture-backend-executable-binding',arguments:['space argument','<script>fixtureAttack()</script>','trailing\\'],workdir:'src',directory_id:'fixture-directory',timeout_ms:120000,output_limit:65536}),result_json:'{}'});
 const processOutcomeFixture=()=>{
   const output='<script>fixtureAttack()</script>\u001b[31m\nfixture stdout';
   return {operation_id:'fixture-command',profile_id:'fixture-profile',pid:123,exit_code:7,termination:'exited',elapsed_ms:1500,
@@ -56,6 +57,7 @@ test('command approval reviews literal arguments before sending only a decision 
   assert.equal(section.querySelector('.process-argv').textContent,JSON.stringify([payload.executable,...payload.arguments],null,2));
   assert.match(section.textContent,/Profile fixture-profile · revision 2/);assert.match(section.textContent,/Directory: src/);assert.match(section.textContent,/Timeout 120s/);assert.match(section.textContent,/65,536 bytes/);
   assert.equal(section.querySelectorAll('script').length,0);
+  assert.ok(section.textContent.includes('Executable binding'));assert.ok(section.textContent.includes('opaque-fixture-backend-executable-binding'));
   const allow=[...section.querySelectorAll('button')].find(button=>button.textContent==='Allow command');allow.click();
   assert.equal(JSON.stringify(r.posted.at(-1)),JSON.stringify({type:'decide',id:operation.id,decision:'allow'}));assert.ok([...section.querySelectorAll('button')].every(button=>button.disabled));r.dom.window.close();
 });
@@ -65,6 +67,10 @@ test('malformed or expired command proposals cannot be allowed',()=>{
   r.send({type:'operations',operations:[{...operation,arguments_json:'{"profile_id":"fixture-profile"}'}]});
   let buttons=[...doc.querySelectorAll('#operations button')];assert.ok(buttons.find(button=>button.textContent==='Allow command').disabled);assert.ok(!buttons.find(button=>button.textContent==='Deny').disabled);
   assert.match(doc.querySelector('#operations').textContent,/details are unavailable/);
+  for(const binding of [undefined,'',null,'contains\0NUL','x'.repeat(513)]){
+    const plan=JSON.parse(operation.arguments_json);plan.executable_id=binding;r.send({type:'operations',operations:[{...operation,arguments_json:JSON.stringify(plan)}]});
+    buttons=[...doc.querySelectorAll('#operations button')];assert.ok(buttons.find(button=>button.textContent==='Allow command').disabled);assert.ok(!buttons.find(button=>button.textContent==='Deny').disabled);
+  }
   r.send({type:'operations',operations:[{...operation,expires_unix_ms:Date.now()-1000}]});buttons=[...doc.querySelectorAll('#operations button')];assert.ok(buttons.every(button=>button.disabled));r.dom.window.close();
 });
 
@@ -85,6 +91,16 @@ test('uncertain commands remain blocked and malformed outcomes retain raw eviden
   assert.match(doc.querySelector('#operations').textContent,/Cancelled · exit 1/);assert.match(doc.querySelector('#operations').textContent,/through this profile are blocked/);assert.match(doc.querySelector('#operations').textContent,/will not retry/);assert.equal(doc.querySelectorAll('#operations button').length,0);
   const malformed={...result,stderr:{encoding:'hex',data:'not valid hex'}};r.send({type:'history',history:[{role:'tool',data:{content:JSON.stringify(malformed)}}]});
   assert.equal(doc.querySelectorAll('#history .process-result').length,0);assert.equal(doc.querySelector('#history pre').textContent,JSON.stringify(malformed));r.dom.window.close();
+});
+
+test('command output metrics require exact encoded retained bytes and safe drained counts',()=>{
+  const r=renderer(),doc=r.dom.window.document,result=processOutcomeFixture();result.stdout={encoding:'utf-8',data:'🌍\0',byte_count:5,retained_bytes:5};
+  r.send({type:'history',history:[{role:'tool',data:{content:JSON.stringify(result)}}]});assert.equal(doc.querySelector('.process-stdout').textContent,'🌍\\u0000');assert.ok(doc.querySelector('.process-result').textContent.includes('5 bytes · 5 retained'));
+  for(const patch of [{retained_bytes:3},{byte_count:4},{byte_count:-1},{byte_count:undefined},{retained_bytes:undefined},{byte_count:Number.MAX_SAFE_INTEGER+1}]){
+    const malformed={...result,stdout:{...result.stdout,...patch}};r.send({type:'history',history:[{role:'tool',data:{content:JSON.stringify(malformed)}}]});
+    assert.equal(doc.querySelector('.process-result'),null);assert.equal(doc.querySelector('#history pre').textContent,JSON.stringify(malformed));
+  }
+  const malformed={...result,stderr:{...result.stderr,retained_bytes:3}};r.send({type:'history',history:[{role:'tool',data:{content:JSON.stringify(malformed)}}]});assert.equal(doc.querySelector('.process-result'),null);assert.equal(doc.querySelector('#history pre').textContent,JSON.stringify(malformed));r.dom.window.close();
 });
 test('new-file review distinguishes absence, previews exact content and never retries uncertainty',()=>{
   const r=renderer(),doc=r.dom.window.document;const operation={id:'fixture-create',tool:'create_file',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'new.cpp',parent_id:'fixture-parent',before_exists:false,before_content:'',after_content:'actual proposed source\n'}),result_json:'{}'};
