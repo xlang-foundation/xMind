@@ -2,7 +2,7 @@
 #include "agentflow/agent_service.hpp"
 #include "agentflow/graph_service.hpp"
 namespace agentflow {
-struct ProviderSetupMetadata {std::int64_t revision=0;std::string provider,model,endpoint;bool configured=false;};
+struct ProviderSetupMetadata {std::int64_t revision=0;std::string provider,model,endpoint;bool configured=false;ProviderWire wire=ProviderWire::chat_completions;};
 // Full-access local-owner setup. The endpoint/workspace remain backend policy;
 // clients supply model identity and a key, never an arbitrary destination.
 class ProviderSetup {
@@ -16,7 +16,7 @@ class ProviderRuntime final : public RunExecutor,public ProviderSetup,public Gra
 public:
     ProviderRuntime(PersistenceService& store,AgentSettings base,std::size_t workers=2,std::size_t capacity=128,
         std::string endpoint="https://api.openai.com/v1/chat/completions",
-        std::string discovery_endpoint="https://api.openai.com/v1/models");
+        std::string discovery_endpoint="https://api.openai.com/v1/models",std::string responses_endpoint={});
     ~ProviderRuntime();
     ProviderSetupMetadata configuration() const override;
     std::vector<std::string> discover(SecretBytes key,std::int64_t expected_revision) override;

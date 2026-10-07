@@ -42,5 +42,25 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
  // This checks masking/repair without making secure-erasure claims about pages.
  {PersistenceService store(database,imports);auto legacy=Json::parse(store.information("native-provider","active").get());legacy["model"]="sk-fixture-legacy-identity";store.put_information("native-provider","active",legacy.dump()).get();}
  {PersistenceService store(database,imports);ProviderRuntime legacy(store,{},2,128,argv[4],std::string(argv[4])+"/models");require(legacy.configuration().configured && legacy.configuration().model.empty() && legacy.models().empty() && !legacy.available(),"An older credential accidentally entered as model must not be advertised or enable inference");const auto models=legacy.discover(SecretBytes(std::span<const std::uint8_t>{}),2);require(models.size()==2,"Legacy repair must reuse encrypted key for actual discovery");const auto repaired=legacy.configure("fixture-model",SecretBytes(std::span<const std::uint8_t>{}),2);require(repaired.revision==3 && legacy.available(),"Actual discovered selection must repair legacy enrollment");}
- std::cout<<"Provider setup passed actual native discovery/transport, encrypted xlang3 storage, saved-key reuse, legacy selection repair, stale/active configuration rejection, actual SQL write fault preservation and persisted reopen. Provider response/key are synthetic fixture data.\n";return 0;
+ const auto wireDatabase=(std::filesystem::u8path(argv[1])/"wire.sqlite").string(),chatEndpoint=std::string(argv[4]),responsesEndpoint=chatEndpoint+"/responses";
+ {
+   PersistenceService store(wireDatabase,imports);ProviderRuntime routed(store,{},2,128,chatEndpoint,chatEndpoint+"/models",responsesEndpoint);
+   const auto original=routed.configure("fixture-model",key(),0);require(original.wire==ProviderWire::chat_completions && original.endpoint==chatEndpoint,"Custom backend must retain its configured chat endpoint");
+   const auto oldRecord=Json::parse(store.information("native-provider","active").get());
+   const auto selected=routed.configure("gpt-5.6-sol",SecretBytes(std::span<const std::uint8_t>{}),1);
+   const auto newRecord=Json::parse(store.information("native-provider","active").get());
+   require(selected.wire==ProviderWire::responses && selected.endpoint==responsesEndpoint && selected.revision==2,"Reasoning model enrollment must use the approved native Responses route");
+   require(newRecord["wire"]=="responses" && oldRecord["credential_id"]!=newRecord["credential_id"],"Wire change must persist a newly bound credential identity");
+   Access access(store,routed);httplib::Client client("127.0.0.1",access.port);const auto metadata=client.Get("/v1/provider/configuration",httplib::Headers{{"Authorization","Bearer synthetic-provider-setup-server-access-token"}});require(metadata && Json::parse(metadata->body)["wire"]=="responses","Clients must observe the selected wire without receiving the key");
+ }
+ {
+   PersistenceService store(wireDatabase,imports);ProviderRuntime reopened(store,{},2,128,chatEndpoint,chatEndpoint+"/models",responsesEndpoint);
+   require(reopened.available() && reopened.configuration().wire==ProviderWire::responses && reopened.configuration().endpoint==responsesEndpoint,"Restart must restore Responses routing and its saved credential");
+   const auto restored=reopened.configure("fixture-model",SecretBytes(std::span<const std::uint8_t>{}),2);require(restored.wire==ProviderWire::chat_completions && restored.endpoint==chatEndpoint,"Legacy selection must rebind the saved credential to the approved Chat route");
+ }
+ {
+   PersistenceService store(wireDatabase,imports);auto value=Json::parse(store.information("native-provider","active").get());value["wire"]="responses";value["endpoint"]="https://unapproved.invalid/v1/responses";store.put_information("native-provider","active",value.dump()).get();
+   rejects<DatabaseError>([&]{ProviderRuntime invalid(store,{},2,128,chatEndpoint,chatEndpoint+"/models",responsesEndpoint);});
+ }
+ std::cout<<"Provider setup passed actual native discovery/transport, encrypted xlang3 storage, saved-key reuse, native wire routing/rebinding/reopen, unapproved endpoint rejection, legacy selection repair, stale/active configuration rejection, actual SQL write fault preservation and persisted reopen. Provider response/key are synthetic fixture data.\n";return 0;
  }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
