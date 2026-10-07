@@ -1,0 +1,12 @@
+{
+  "xmind": "51724ab8fdda3b9349b18f110a1256ec4f1398eb",
+  "workflowRun": 37700262597,
+  "job": 113062483031,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37700262597",
+  "conclusion": "success",
+  "nativeContractsPassed": 52,
+  "extensionContractsPassed": 63,
+  "scope": "Downloaded exact successful job log; inspected full CTest results and source-at-revision interactive chat and graph-watch assertions. Browser and packaging steps succeeded; their redirected contract output is not included in this projected log.",
+  "providerScope": "Synthetic inference peers; real native server, CLI, workspace and embedded-xlang3 persistence. No live coding acceptance claim.",
+  "newerSource": "Native diagnostics, resumed-history output, chat controls and interactive effect approval were added after this revision and remain pending compiled validation."
+}

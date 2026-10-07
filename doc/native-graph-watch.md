@@ -8,6 +8,13 @@ The graph service HTTP/CLI contract now covers closing an observer while the nat
 
 ## Validation status
 
-Source and regression cases are prepared. The Node contract syntax check and source whitespace check pass. Native compilation/execution is **not yet verified**: the guarded local build returned exit status 3 because live sibling xlang3 benchmark processes were detected on two checks. No benchmark was stopped and no old binary was used to claim the new command works. The unchanged Windows CI graph-service contract will compile and exercise these new cases alongside the complete native suite. Hosted acceptance is pending.
+Hosted checkpoint `51724ab8fdda3b9349b18f110a1256ec4f1398eb` passed all 52 native
+contracts and 63 extension contracts, including the graph service HTTP/CLI
+contract containing these observer cases. [Run](https://github.com/xlang-foundation/xMind/actions/runs/37700262597),
+[projected contract log](evidence/native-interactive-chat-hosted-contract-summary.log),
+[exact-source provenance](evidence/native-interactive-chat-hosted-provenance.json).
+The guarded local build remained deferred while sibling benchmarks ran; no
+benchmark was stopped. This hosted result validates graph observation with real
+native execution and labelled synthetic inference, not live coding parity.
 
 The existing webpage remains on its previously verified native snapshot; this CLI source checkpoint does not replace its backend or affect its provider key/session state.
