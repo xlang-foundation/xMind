@@ -32,6 +32,15 @@ int main() {
         require(messages.size()==5 && messages[1].kind==McpMessageKind::notification && messages[1].id_json.empty(),"Notifications must have no correlation ID");
         require(messages[2].kind==McpMessageKind::error && messages[2].id_json=="18446744073709551615","Integer IDs cannot lose precision through a double");
         require(messages[3].kind==McpMessageKind::request && messages[3].id_json=="-9","Legacy incoming requests remain distinguishable from responses");
+        const auto unsupported=Json::parse(mcp_peer_reply(messages[3],McpWireEra::legacy));
+        require(unsupported["id"]==-9 && unsupported["error"]["code"]==-32601 && !unsupported.contains("result"),"Unsupported peer methods must receive a correlated error without executing work");
+        rejected([&]{mcp_peer_reply(messages[3],McpWireEra::modern);});
+        auto forged=messages[3];forged.id_json="123";rejected([&]{mcp_peer_reply(forged,McpWireEra::legacy);});
+        rejected([&]{mcp_peer_reply(messages[1],McpWireEra::legacy);});
+        for(const auto& id:{Json("ping\"雪"),Json(std::uint64_t(18446744073709551615ULL)),Json(-9)}) {
+            McpLineStream peer([&](const auto& request){const auto answer=Json::parse(mcp_peer_reply(request,McpWireEra::legacy));require(answer["id"]==id && answer["result"]==Json::object() && !answer.contains("error"),"Legacy ping must preserve exact integer/string identity and return an empty result");});
+            peer.feed(Json{{"jsonrpc","2.0"},{"id",id},{"method","ping"}}.dump()+"\n");
+        }
         require(messages[4].kind==McpMessageKind::error && messages[4].id_json.empty(),"Malformed-request diagnostics cannot be mistaken for results");
         stream.finish();rejected([&]{stream.feed("\n");});
 

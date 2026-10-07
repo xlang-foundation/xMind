@@ -38,4 +38,8 @@ private:
 std::string mcp_request(std::string id,std::string method,std::string_view params_json,
     McpWireEra era,const McpClientIdentity& identity={});
 std::string mcp_notification(std::string method,std::string_view params_json="{}");
+// Respond to an actual decoded legacy peer request. Ping returns an empty
+// result; unimplemented methods return -32601 without invoking model/tool/UI
+// work. Modern peers cannot send requests and must never receive responses.
+std::string mcp_peer_reply(const McpWireMessage& request,McpWireEra era);
 }

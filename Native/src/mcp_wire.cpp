@@ -116,4 +116,17 @@ std::string mcp_notification(std::string method,std::string_view source) {
     text(method,256,"Invalid outgoing MCP notification method");
     return frame(Json{{"jsonrpc","2.0"},{"method",method},{"params",parameters(source)}});
 }
+std::string mcp_peer_reply(const McpWireMessage& request,McpWireEra era) {
+    if(era!=McpWireEra::legacy) throw McpProtocolError("Modern MCP peers cannot send client requests");
+    // Revalidate the original envelope. Public structs cannot bypass framing,
+    // ID precision or envelope checks by supplying fabricated parsed fields.
+    const auto decoded=decode(request.raw_json);
+    if(decoded.kind!=McpMessageKind::request || request.kind!=decoded.kind ||
+        request.id_json!=decoded.id_json || request.method!=decoded.method ||
+        request.payload_json!=decoded.payload_json) throw McpProtocolError("Invalid MCP peer request");
+    Json reply{{"jsonrpc","2.0"},{"id",parse(decoded.id_json)}};
+    if(decoded.method=="ping") reply["result"]=Json::object();
+    else reply["error"]={{"code",-32601},{"message","Client method is not supported"}};
+    return frame(reply);
+}
 }

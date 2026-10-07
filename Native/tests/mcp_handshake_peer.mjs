@@ -2,11 +2,18 @@
 import assert from 'node:assert/strict';
 import {createInterface} from 'node:readline';
 const mode=process.argv[2],input=createInterface({input:process.stdin});
-let probe,initialized=false,acknowledged=false;
+let probe,initialized=false,acknowledged=false,listed,pingAnswered=false,unsupportedAnswered=false;
 const reply=(id,result)=>process.stdout.write(JSON.stringify({jsonrpc:'2.0',id,result})+'\n');
 const error=(id,code,data)=>process.stdout.write(JSON.stringify({jsonrpc:'2.0',id,error:{code,message:'Labeled fixture error',...(data?{data}:{})}})+'\n');
 for await(const line of input){
   const request=JSON.parse(line);assert.equal(request.jsonrpc,'2.0');
+  if(request.method===undefined){
+    assert.ok(mode.startsWith('legacy') && acknowledged && listed,'Only initialized legacy peers may issue client requests');
+    if(request.id==='fixture-ping'){assert.equal(pingAnswered,false);assert.deepEqual(request.result,{});assert.equal(request.error,undefined);pingAnswered=true;}
+    else {assert.equal(request.id,-37);assert.equal(unsupportedAnswered,false);assert.equal(request.error.code,-32601);assert.equal(request.result,undefined);unsupportedAnswered=true;}
+    if(pingAnswered && unsupportedAnswered)reply(listed,{tools:[]});
+    continue;
+  }
   if(request.method==='server/discover'){
     assert.equal(probe,undefined);probe=request.id;
     assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
@@ -27,7 +34,7 @@ for await(const line of input){
   }else if(request.method==='notifications/initialized'){
     assert.ok(initialized);assert.equal(acknowledged,false);acknowledged=true;assert.equal(request.id,undefined);
   }else if(request.method==='tools/list'){
-    if(mode.startsWith('legacy')){assert.ok(acknowledged,'Tool discovery cannot precede the initialized notification');assert.equal(request.params._meta,undefined);reply(request.id,{tools:[]});}
+    if(mode.startsWith('legacy')){assert.ok(acknowledged,'Tool discovery cannot precede the initialized notification');assert.equal(request.params._meta,undefined);listed=request.id;process.stdout.write(JSON.stringify({jsonrpc:'2.0',id:'fixture-ping',method:'ping'})+'\n'+JSON.stringify({jsonrpc:'2.0',id:-37,method:'sampling/createMessage',params:{messages:[]}})+'\n');}
     else{assert.equal(initialized,false);assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');reply(request.id,{resultType:'complete',tools:[]});}
   }else throw new Error('Unexpected fixture lifecycle method');
 }
