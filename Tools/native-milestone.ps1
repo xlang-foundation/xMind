@@ -10,7 +10,8 @@ $projectRoot=Split-Path $PSScriptRoot -Parent
 $nativeBuild=Join-Path $projectRoot 'build\native'
 if($Action -eq 'Build') {
     $benchmarks=@(Get-CimInstance Win32_Process | Where-Object {
-        $_.Name -eq 'xlang3.exe' -and $_.CommandLine -match 'pyperformance|run_benchmark\.py|benchmarks[\\/]'
+        ($_.Name -eq 'xlang3.exe' -and $_.CommandLine -match 'pyperformance|run_benchmark\.py|benchmarks[\\/]') -or
+        ($_.Name -in @('python.exe','pythonw.exe','xlang3.exe') -and $_.CommandLine -match 'run_pyperformance_xlang3_shimmed\.py|benchmarks[\\/]check_regression\.py|benchmarks[\\/]diagnostics[\\/]compare_subscription_dispatch\.py')
     })
     if($benchmarks.Count -gt 0) {
         Write-Host "Build deferred: live xlang3 benchmark processes $($benchmarks.ProcessId -join ', ')."
