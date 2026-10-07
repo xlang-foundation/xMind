@@ -1,0 +1,15 @@
+{
+  "repository_schema_version": 7,
+  "installed_preview": "Verified older CI bundle 3297a4bce2d591c0f1c1dd37ccc18a15297369e7 remains model-free; provider key location pending",
+  "source_native_git_tree": "3bd6f5ef6d4c51e55792144c2d94eed28c31ccdb",
+  "binary_sha256": {
+    "build/native/Release/agentflow_graph_runner_contract.exe": "8108FCF11654C88D3AA79A89D389E191550261090B4CA155E3ACA2FE4AAC065C",
+    "build/native/Release/xlang3_runtime.dll": "FB02403BFF1BF9967D5E49CB4F2A5A4F6D13AD139CC02B069E20FC03CC6C4862",
+    "build/native/Release/xmind_server.exe": "26645ED45C29B3F4E36393184FF9C6CDB63E0A7DED920D610CD92E6664458DEB",
+    "D:/CantorAI2026/xlang3/build/Release/modules/xlang_sqlite3.x3pkg.dll": "FCB0E481352672EB72D86A96E2EF5D9B58939A35AD03A4AC3E32BFE7DC733B8C"
+  },
+  "runtime_source_checkout": "914783909835116969aad7c66b210a5ac9a27661",
+  "source_extension_git_tree": "65e86e44c6357a2aa95417a123170886ebe2e417",
+  "scope": "Native GraphRunner component: actual agent transport, tools, approvals and journal-fault recovery; provider replies synthetic; public graph service and client workflows pending",
+  "runtime": "Embedded xlang3; no CPython execution or bridge"
+}

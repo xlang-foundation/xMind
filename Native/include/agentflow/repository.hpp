@@ -7,7 +7,7 @@
 
 namespace agentflow {
 class GraphPlan;
-struct GraphRootRecord {Run run;std::string graph_id;std::int64_t graph_revision;std::string specification_json;std::int64_t checkpoint_revision;std::string checkpoint_json;};
+struct GraphRootRecord {Run run;std::string graph_id;std::int64_t graph_revision;std::string specification_json;std::int64_t checkpoint_revision;std::string checkpoint_json;std::string input_json;};
 struct CredentialMetadata {
     std::string scope,id,purpose,label;
     std::int64_t revision;
@@ -32,6 +32,7 @@ public:
     GraphRootRecord start_graph_human(const std::string& id,const std::string& node_id,std::int64_t expected_checkpoint_revision);
     GraphRootRecord input_graph_human(const std::string& id,const std::string& node_id,const std::string& input_json,const std::string& actor,std::int64_t expected_checkpoint_revision);
     GraphRootRecord skip_graph_node(const std::string& id,const std::string& node_id,std::int64_t expected_checkpoint_revision);
+    Run retire_graph_run(const std::string& id,RunState terminal_state,const std::string& reason_json);
     std::vector<Run> children(const std::string& parent_id);
     std::vector<Message> run_history(const std::string& id);
     std::vector<Event> graph_events(const std::string& id,std::int64_t after=0);

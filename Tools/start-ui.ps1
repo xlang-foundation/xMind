@@ -1,5 +1,23 @@
-param([string]$CodeExecutable,[string]$RuntimeDirectory,[string]$BundleDirectory,[string]$StdlibSource='C:\Python\Python314\Lib')
+param(
+    [string]$CodeExecutable,[string]$RuntimeDirectory,[string]$BundleDirectory,
+    [string]$StdlibSource='C:\Python\Python314\Lib',
+    [string]$Model,[string]$ModelEndpoint,[string]$SelectableModels,
+    [string]$ProviderKeyEnvironment='OPENAI_API_KEY',
+    [string]$CredentialId,
+    [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
+    [ValidateSet('unknown','unsupported','supported')][string]$StreamUsage='unknown',
+    [string]$Workspace,[switch]$ApprovedEdits
+)
 $ErrorActionPreference='Stop'
+if([bool]$Model -ne [bool]$ModelEndpoint){throw 'Provide both -Model and -ModelEndpoint.'}
+if(-not $Model -and ($Workspace -or $ApprovedEdits -or $CredentialId -or $SelectableModels)){throw 'Agent settings require -Model and -ModelEndpoint.'}
+if($ApprovedEdits -and -not $Workspace){throw 'Approved file edits require a workspace.'}
+if($Workspace -and $ModelTools -ne 'supported'){throw 'Workspace execution requires -ModelTools supported.'}
+if($ProviderKeyEnvironment -notmatch '^[A-Za-z_][A-Za-z0-9_]*$'){throw 'Invalid provider key environment name.'}
+if($ProviderKeyEnvironment -eq 'XMIND_AUTH_TOKEN' -or $ProviderKeyEnvironment -like 'XMIND_UI_*'){throw 'Select a provider credential variable, not a preview authentication variable.'}
+foreach($uiArgument in @($CodeExecutable,$RuntimeDirectory,$BundleDirectory,$StdlibSource,$Model,$ModelEndpoint,$SelectableModels,$CredentialId,$Workspace)){
+    if($uiArgument -and $uiArgument.IndexOfAny([char[]]@([char]0,[char]10,[char]13,[char]34)) -ge 0){throw 'Preview arguments cannot contain quotes or control characters.'}
+}
 $uiProject=Split-Path $PSScriptRoot -Parent
 $uiState=Join-Path $uiProject '.agentflow\ui-host'
 New-Item -ItemType Directory -Force -Path $uiState | Out-Null
@@ -26,6 +44,8 @@ $uiOriginalAuth=$env:XMIND_AUTH_TOKEN
 $uiOriginalBootstrap=$env:XMIND_UI_BOOTSTRAP_TOKEN
 $uiOriginalOrigin=$env:XMIND_UI_BACKEND_ORIGIN
 $uiOriginalReady=$env:XMIND_UI_READY_FILE
+$uiOriginalProviderKey=$env:XMIND_API_KEY
+$uiEditorProviderEnvironment=[Environment]::GetEnvironmentVariable($ProviderKeyEnvironment,'Process')
 $uiProcess=$null
 try {
     $env:XMIND_AUTH_TOKEN=$uiAccess
@@ -34,7 +54,25 @@ try {
     $uiErrorLog=Join-Path $uiState 'backend-error.log'
     $uiReady=Join-Path $uiState ('opened-'+[Guid]::NewGuid().ToString('N')+'.json')
     $uiArgs=@('--db',('"'+$uiDatabase+'"'),'--modules',('"'+$uiModules+'"'),'--stdlib',('"'+$StdlibSource+'"'),'--port','0')
+    if($Model){
+        $uiArgs+=@('--model',('"'+$Model+'"'),'--model-endpoint',('"'+$ModelEndpoint+'"'),'--model-tools',$ModelTools,'--model-stream-usage',$StreamUsage)
+        if($SelectableModels){$uiArgs+=@('--models',('"'+$SelectableModels+'"'))}
+        if($CredentialId){$uiArgs+=@('--credential-id',('"'+$CredentialId+'"'))}
+        if($Workspace){$uiArgs+=@('--workspace',('"'+[System.IO.Path]::GetFullPath($Workspace)+'"'))}
+        if($ApprovedEdits){$uiArgs+=@('--workspace-edits','approved')}
+        $uiProviderKey=[Environment]::GetEnvironmentVariable($ProviderKeyEnvironment,'Process')
+        if(-not $uiProviderKey){$uiProviderKey=[Environment]::GetEnvironmentVariable($ProviderKeyEnvironment,'User')}
+        if(-not $uiProviderKey){$uiProviderKey=[Environment]::GetEnvironmentVariable($ProviderKeyEnvironment,'Machine')}
+        if($uiProviderKey){$env:XMIND_API_KEY=$uiProviderKey}
+        elseif(-not $CredentialId){throw 'No provider key found. Set the selected provider environment variable privately, or provide an existing -CredentialId.'}
+    }else{$env:XMIND_API_KEY=$null}
+    if($ProviderKeyEnvironment -ne 'XMIND_API_KEY'){[Environment]::SetEnvironmentVariable($ProviderKeyEnvironment,$null,'Process')}
     $uiProcess=Start-Process -FilePath $uiServer -ArgumentList $uiArgs -WorkingDirectory $uiProject -WindowStyle Hidden -RedirectStandardOutput $uiLog -RedirectStandardError $uiErrorLog -PassThru
+    # Only the native backend receives the provider key. It encrypts the key
+    # through its credential repository; the editor must not inherit it.
+    $env:XMIND_API_KEY=$null
+    $uiProviderKey=$null
+    [Environment]::SetEnvironmentVariable($ProviderKeyEnvironment,$null,'Process')
     $uiDeadline=[DateTime]::UtcNow.AddSeconds(20)
     $uiPort=$null
     while([DateTime]::UtcNow -lt $uiDeadline) {
@@ -54,7 +92,7 @@ try {
     # host for this known repository, with its own settings/extensions directory.
     $uiCodeArgs=@('--new-window','--disable-workspace-trust','--skip-welcome','--remote-debugging-port=57217','--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiProject+'"'))
     $uiHost=Start-Process -FilePath $CodeExecutable -ArgumentList $uiCodeArgs -WorkingDirectory $uiProject -WindowStyle Normal -PassThru
-    $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=$false;server_executable=$uiServer;modules=$uiModules;source_revision=$uiBuildProvenance.xmind} | ConvertTo-Json
+    $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=[bool]$uiHealth.agent_execution;server_executable=$uiServer;modules=$uiModules;source_revision=$uiBuildProvenance.xmind} | ConvertTo-Json
     [System.IO.File]::WriteAllText((Join-Path $uiState 'active.json'),$uiMetadata)
     $uiMetadata
 } catch {
@@ -65,4 +103,6 @@ try {
     $env:XMIND_UI_BOOTSTRAP_TOKEN=$uiOriginalBootstrap
     $env:XMIND_UI_BACKEND_ORIGIN=$uiOriginalOrigin
     $env:XMIND_UI_READY_FILE=$uiOriginalReady
+    $env:XMIND_API_KEY=$uiOriginalProviderKey
+    if($null -ne $uiEditorProviderEnvironment){[Environment]::SetEnvironmentVariable($ProviderKeyEnvironment,$uiEditorProviderEnvironment,'Process')}
 }

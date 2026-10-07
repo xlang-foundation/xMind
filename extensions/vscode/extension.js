@@ -172,7 +172,7 @@ async function activate(context) {
     const origin = configuredOrigin();
     const token = typeof initialToken === 'string' ? validateToken(initialToken) : await vscode.window.showInputBox({
       title: 'xMind Server authentication', password: true, ignoreFocusOut: true,
-      prompt: `Enter the XMIND_AUTH_TOKEN for ${origin}. This is the server access token.`,
+      prompt: `Enter the XMIND_AUTH_TOKEN for ${origin}. This authenticates with xMind Server. Configure provider API keys separately on that server.`,
       validateInput: value => { try { validateToken(value); return undefined; } catch (error) { return error.message; } }
     });
     if (token === undefined) return false;

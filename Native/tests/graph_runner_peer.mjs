@@ -1,0 +1,10 @@
+// Synthetic model replies; real compiled graph scheduler, tools and xlang3 DB.
+import assert from 'node:assert/strict';
+import {createServer} from 'node:http';import {execFile} from 'node:child_process';import {promisify} from 'node:util';
+import {mkdtemp,writeFile,rm} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join,resolve,dirname,basename} from 'node:path';
+const [binary,modules,stdlib]=process.argv.slice(2),root=await mkdtemp(join(tmpdir(),'xmind-graph-runner-'));let failure,requests=0;const pending=[];
+const peer=createServer((request,response)=>{let raw='';request.on('data',data=>raw+=data);request.on('end',()=>{try{
+ ++requests;const body=JSON.parse(raw),users=body.messages.filter(x=>x.role==='user');assert.equal(users.length,1);assert.ok(users[0].content.includes('root actual graph task'));assert.ok(users[0].content.includes('Actual left file'));const side=users[0].content.includes('parallel-left')?'left':'right';assert.ok(!users[0].content.includes('parallel-'+(side==='left'?'right':'left')));pending.push({response,side});
+ if(pending.length===2)for(const item of pending){item.response.writeHead(200,{'Content-Type':'text/event-stream'});item.response.end(`data: ${JSON.stringify({choices:[{index:0,delta:{content:`Synthetic ${item.side} response after actual dependency read`},finish_reason:'stop'}]})}\n\ndata: [DONE]\n\n`);}
+ }catch(error){failure=error;response.writeHead(500);response.end('Synthetic graph runner peer failed');}});});
+try{await writeFile(join(root,'left.txt'),'Actual left file\n');await writeFile(join(root,'right.txt'),'Actual right file\n');await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));const result=await promisify(execFile)(binary,[root,modules,stdlib,`http://127.0.0.1:${peer.address().port}/chat`],{windowsHide:true,timeout:35000});if(failure)throw failure;assert.equal(requests,2);process.stdout.write(result.stdout);}finally{peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));assert.equal(dirname(resolve(root)),resolve(tmpdir()));assert.ok(basename(root).startsWith('xmind-graph-runner-'));await rm(root,{recursive:true,force:true});}

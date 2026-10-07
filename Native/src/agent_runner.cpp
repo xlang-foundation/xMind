@@ -82,7 +82,8 @@ Run AgentRunner::start(std::string id,std::string session_id,std::string prompt)
     return persistence_.start_prompt_run(std::move(id),std::move(session_id),Json{{"content",std::move(prompt)}}.dump()).get();
 }
 Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id) {
-    if(persistence_.run(id).get().graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
+    const auto admitted=persistence_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
+    if(!admitted.parent_id.empty()){const auto graph=Json::parse(persistence_.graph_run(admitted.parent_id).get().specification_json);bool agent=false;for(const auto& node:graph.at("nodes"))if(node.at("id")==admitted.node_id && node.at("type")=="agent")agent=true;if(!agent)throw std::invalid_argument("Only agent graph children can invoke the model engine");}
     auto provider=settings_.provider;
     if(!model_id.empty()) {const auto allowed=models();if(std::find(allowed.begin(),allowed.end(),model_id)==allowed.end()) throw std::invalid_argument("Model is not configured on this backend");provider.model=model_id;}
     // Claim outside the failure handler. A duplicate worker losing this update

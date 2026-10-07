@@ -31,6 +31,7 @@ public:
     std::future<GraphRootRecord> start_graph_human(std::string id,std::string node_id,std::int64_t expected_checkpoint_revision);
     std::future<GraphRootRecord> input_graph_human(std::string id,std::string node_id,std::string input_json,std::string actor,std::int64_t expected_checkpoint_revision);
     std::future<GraphRootRecord> skip_graph_node(std::string id,std::string node_id,std::int64_t expected_checkpoint_revision);
+    std::future<Run> retire_graph_run(std::string id,RunState terminal_state,std::string reason_json);
     std::future<std::vector<Run>> children(std::string parent_id);
     std::future<std::vector<Message>> run_history(std::string id);
     std::future<std::vector<Event>> graph_events(std::string id,std::int64_t after=0);
