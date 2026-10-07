@@ -1,0 +1,25 @@
+{
+  "repository": "xlang-foundation/xMind",
+  "workflow": ".github/workflows/native-windows.yml",
+  "branch": "checkpoint/native-persistence-m1",
+  "cancelled_run": {
+    "id": 37634432691,
+    "revision": "a3cba526ffd757f5d9384aa11316f2bb1627be3f",
+    "observed_status": "completed",
+    "observed_conclusion": "cancelled",
+    "reason": "Exact test blob matches the already recorded b6173ec MSVC C7692 failure; corrected successor was queued",
+    "test_blob": "f0e97a4ce00386ff33ef57e402a49e5ecfe74a43",
+    "native_tests": "not established",
+    "extension_tests": "skipped",
+    "runtime_bundle": "not published"
+  },
+  "successor_run": {
+    "id": 37635775031,
+    "revision": "3297a4bce2d591c0f1c1dd37ccc18a15297369e7",
+    "observed_status": "in_progress",
+    "job_id": 112842788500,
+    "observed_stage": "Check out xMind",
+    "scope": "Corrected explicit string comparison, native CLI watcher, durable output and sidebar evidence validation; full gate remains pending"
+  },
+  "qualification": "Cancellation is not a build or test result. Live successor status is not a pass."
+}
