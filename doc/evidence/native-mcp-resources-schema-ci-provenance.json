@@ -1,0 +1,13 @@
+{
+  "runtime": "Native xlang3; no CPython execution or bridge",
+  "toolchain_version": "18.10.12217.157",
+  "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+  "sqlite_patch_sha256": "5388CDB3D1946CE48A2416055E27B422A2AA1364271A24DC8EB124C72C2C64B4",
+  "xmind": "9582dee1e17f37fe5e00220dda4c1a63f53188fe",
+  "toolchain": "Visual Studio 18 2026",
+  "xlang3": "914783909835116969aad7c66b210a5ac9a27661",
+  "run_url": "https://github.com/xlang-foundation/xMind/actions/runs/37614949089",
+  "native_result": "26 passed, zero failed",
+  "extension_result": "27 passed, zero failed; successful CI job step",
+  "artifact_id": 11480600871
+}
