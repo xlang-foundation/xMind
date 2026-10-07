@@ -10,16 +10,74 @@ function markdown(el,text){
 }
 const count=value=>Number.isSafeInteger(value)&&value>=0?value.toLocaleString():'—';
 function metrics(el,data={}){const usage=data.usage||{};el.replaceChildren();for(const text of ['Input '+count(usage.prompt_tokens),'Output '+count(usage.completion_tokens),'Total '+count(usage.total_tokens)])el.append(node('span',text));if(Number.isSafeInteger(usage.prompt_tokens_details?.cached_tokens))el.append(node('span','Cached '+count(usage.prompt_tokens_details.cached_tokens)));if(Number.isSafeInteger(usage.completion_tokens_details?.reasoning_tokens))el.append(node('span','Reasoning '+count(usage.completion_tokens_details.reasoning_tokens)));if(data.model)el.append(node('span',data.model));if(Number.isFinite(data.first_token_ms)&&data.first_token_ms>=0)el.append(node('span','First token '+(data.first_token_ms/1000).toFixed(2)+'s'));if(Number.isFinite(data.elapsed_ms)&&data.elapsed_ms>=0)el.append(node('span',(data.elapsed_ms/1000).toFixed(2)+'s'));el.title='Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.';}
+function processProposal(section,item){
+  let plan;try{plan=JSON.parse(item.arguments_json);}catch{}
+  if(!plan||typeof plan.profile_id!=='string'||!Number.isSafeInteger(plan.profile_revision)||plan.profile_revision<1||typeof plan.executable!=='string'||!Array.isArray(plan.arguments)||plan.arguments.length>64||plan.arguments.some(arg=>typeof arg!=='string')||typeof plan.workdir!=='string'||typeof plan.directory_id!=='string'||!plan.directory_id||!Number.isSafeInteger(plan.timeout_ms)||plan.timeout_ms<1||plan.timeout_ms>600000||!Number.isSafeInteger(plan.output_limit)||plan.output_limit<1||plan.output_limit>4194304){
+    section.append(node('p','Command details are unavailable. Refresh from the backend before allowing this operation.','inspection-note'));return false;
+  }
+  const view=node('div',undefined,'process-proposal');
+  view.append(node('strong','Profile '+plan.profile_id+' · revision '+plan.profile_revision),node('p','Directory: '+plan.workdir),node('div','Executable and literal argument vector'),node('pre',JSON.stringify([plan.executable,...plan.arguments],null,2),'process-argv'));
+  const badges=node('div',undefined,'metrics');badges.append(node('span','Timeout '+(plan.timeout_ms/1000).toLocaleString()+'s'),node('span','Output limit '+count(plan.output_limit)+' bytes'));view.append(badges);
+  section.append(view);return true;
+}
+function processOutcome(value){
+  if(!value||typeof value!=='object'||typeof value.operation_id!=='string'||typeof value.profile_id!=='string'||!['exited','cancelled','timed_out'].includes(value.termination)||!Number.isSafeInteger(value.exit_code)||value.exit_code<0||value.exit_code>0xffffffff||!Number.isSafeInteger(value.pid)||value.pid<1||!Number.isFinite(value.elapsed_ms)||value.elapsed_ms<0||typeof value.truncated!=='boolean'||value.process_tree_retired!==true||value.independently_verified!==false)return;
+  for(const key of ['stdout','stderr'])if(!value[key]||!['utf-8','hex'].includes(value[key].encoding)||typeof value[key].data!=='string'||value[key].data.length>524288||(value[key].encoding==='hex'&&(!/^(?:[0-9a-fA-F]{2})*$/.test(value[key].data))))return;
+  return value;
+}
+function renderProcessOutcome(section,result){
+  const view=node('div',undefined,'process-result'),labels={exited:'Exited',cancelled:'Cancelled',timed_out:'Timed out'};
+  view.append(node('strong',labels[result.termination]+' · exit '+result.exit_code,result.termination==='exited'&&result.exit_code===0?'':'process-interrupted'));
+  const badges=node('div',undefined,'metrics');badges.append(node('span','Profile '+result.profile_id),node('span','PID '+result.pid),node('span',(result.elapsed_ms/1000).toFixed(2)+'s'));view.append(badges);
+  for(const key of ['stdout','stderr']){
+    const channel=result[key],detail=node('details',undefined,'process-output');
+    detail.open=channel.data.length>0;
+    detail.append(node('summary',key+' · '+count(channel.byte_count)+' bytes · '+count(channel.retained_bytes)+' retained'+(channel.encoding==='hex'?' · hex':'')));
+    // Controls are visible escapes; markup and terminal escapes never execute.
+    const visible=channel.encoding==='hex'?channel.data:channel.data.replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));
+    detail.append(node('pre',visible,'process-'+key));view.append(detail);
+    if(channel.encoding==='utf-8'&&visible!==channel.data)detail.append(node('p','Control bytes are shown as Unicode escapes.','inspection-note'));
+  }
+  if(result.truncated)view.append(node('p','Output exceeded the retained capture limit. Byte counts include drained output.','inspection-note'));
+  view.append(node('p','Exit status and output are observed process results. File or remote effects have not been independently verified.','inspection-note'));
+  section.append(view);
+}
 function entry(role,data){
   byId('empty').hidden=true;
   const card=node('article',undefined,'message '+role);card.append(node('h4',role==='assistant'?'xMind':role==='user'?'You':role));
-  if(role==='tool'){const detail=node('details',undefined,'tool');detail.append(node('summary','Tool result'),node('pre',data.content||JSON.stringify(data,null,2)));card.append(detail);}
+  if(role==='tool'){
+    let process;try{process=processOutcome(JSON.parse(data.content));}catch{}
+    const detail=node('details',undefined,'tool');detail.append(node('summary',process?'Command result · '+process.profile_id:'Tool result'));
+    if(process){renderProcessOutcome(detail,process);const raw=node('details');raw.append(node('summary','Raw result'),node('pre',data.content));detail.append(raw);}else detail.append(node('pre',data.content||JSON.stringify(data,null,2)));card.append(detail);
+  }
   else {const content=node('div',undefined,'message-body markdown');markdown(content,data.content||data.refusal||'');card.append(content);if(data.tool_calls?.length){const detail=node('details',undefined,'tool');detail.append(node('summary',data.tool_calls.length+' tool request(s)'),node('pre',JSON.stringify(data.tool_calls,null,2)));card.append(detail);}if(role==='assistant'){const info=node('div',undefined,'metrics');metrics(info,data);card.append(info);}}
   byId('history').append(card);return card;
 }
 function resetLive(){byId('live').replaceChildren();live=undefined;streamText='';streamUsage=null;}
 function stream(text){if(!live){live=node('article',undefined,'message assistant streaming');live.append(node('h4','xMind · responding'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));byId('live').append(live);byId('empty').hidden=true;}streamText+=text;markdown(live.querySelector('.message-body'),streamText);metrics(live.querySelector('.metrics'),{usage:streamUsage});}
-function operations(items){byId('operations').replaceChildren();for(const item of items){const section=node('section',undefined,'operation');section.append(node('h4',item.tool+' · '+item.state));const meta=node('details');meta.append(node('summary','Operation '+item.id),node('pre','Workspace: '+item.workspace_id+'\nExpires: '+new Date(item.expires_unix_ms).toISOString()+'\nController: '+(item.decision_actor||'Awaiting decision')),node('pre',item.arguments_json));section.append(meta);if(['replace_file','create_file'].includes(item.tool)){try{const plan=JSON.parse(item.arguments_json);section.append(node('strong',plan.path));for(const [label,key] of [['Before','before_content'],['After','after_content']]){section.append(node('div',label),node('pre',plan[key],label.toLowerCase()));}}catch{}}if(item.state==='awaiting_approval'){for(const decision of ['allow','deny']){const button=node('button',decision==='allow'?(item.tool==='replace_file'?'Allow edit':item.tool==='create_file'?'Allow creation':'Allow tool'):'Deny',decision==='allow'?'primary':'');button.disabled=Date.now()>=item.expires_unix_ms;button.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision});};section.append(button);}}else{const detail=node('details');detail.append(node('summary','Outcome'),node('pre',item.result_json));section.append(detail);}byId('operations').append(section);}}
+function operations(items){
+  byId('operations').replaceChildren();
+  for(const item of items){
+    const section=node('section',undefined,'operation');section.append(node('h4',(item.tool==='run_process'?'Command':item.tool)+' · '+item.state));
+    const meta=node('details');meta.append(node('summary','Operation '+item.id),node('pre','Workspace: '+item.workspace_id+'\nExpires: '+new Date(item.expires_unix_ms).toISOString()+'\nController: '+(item.decision_actor||'Awaiting decision')),node('pre',item.arguments_json));section.append(meta);
+    let reviewable=true;
+    if(item.tool==='run_process')reviewable=processProposal(section,item);
+    if(['replace_file','create_file'].includes(item.tool)){try{const plan=JSON.parse(item.arguments_json);section.append(node('strong',plan.path));for(const [label,key] of [['Before','before_content'],['After','after_content']])section.append(node('div',label),node('pre',plan[key],label.toLowerCase()));}catch{}}
+    if(item.state==='awaiting_approval'){
+      for(const decision of ['allow','deny']){
+        const labels={replace_file:'Allow edit',create_file:'Allow creation',run_process:'Allow command'};
+        const button=node('button',decision==='allow'?(labels[item.tool]||'Allow tool'):'Deny',decision==='allow'?'primary':'');
+        button.disabled=Date.now()>=item.expires_unix_ms||(decision==='allow'&&!reviewable);
+        button.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision});};section.append(button);
+      }
+    }else{
+      if(item.tool==='run_process'){let result;try{result=processOutcome(JSON.parse(item.result_json));}catch{}if(result)renderProcessOutcome(section,result);}
+      const detail=node('details');detail.append(node('summary','Outcome'),node('pre',item.result_json));section.append(detail);
+    }
+    if(item.tool==='run_process'&&item.state==='uncertain')section.append(node('p','Possible command effects remain uncertain. Further effects in this workspace and through this profile are blocked; xMind will not retry the command.','inspection-note'));
+    byId('operations').append(section);
+  }
+}
 function send(){if(execution&&!activeRun&&!sessionBusy&&byId('prompt').value.trim())api.postMessage({type:'send',prompt:byId('prompt').value});}
 for(const type of ['new','refresh','cancel'])byId(type).onclick=()=>api.postMessage({type});
 byId('sessions').onchange=()=>api.postMessage({type:'select',id:byId('sessions').value});byId('send').onclick=send;

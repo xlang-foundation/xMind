@@ -4,6 +4,8 @@ The user requested visible milestones. Show a runnable result, validation eviden
 
 Next coding component: the native foreground process adapter, durable approval executor and conditional agent-loop source are prepared, with 33 native contracts expected by isolated CI. Local compilation was deferred by a currently observed xlang3 timing controller; no process pass or verified model/server/editor integration is claimed. [Implementation/acceptance contract](native-process-tools.md). The latest verified runnable product remains the 31-native/30-extension creation checkpoint below.
 
+Sidebar command review/output contracts now pass all **34 local extension tests**, including literal argument review, escaped/control/hex output, actual supplied exit/timing/count fields, malformed/expired proposal rejection and uncertain-command handling: [complete output](evidence/vscode-process-review.log). These are labeled DOM/host fixtures, not a populated command run in the interactive preview. Native process profile configuration and end-to-end model/server/editor validation remain required.
+
 ## M1: persistence through embedded xlang3 — verified
 
 Verified supporting component: native Windows credential protection compiled and passed its synthetic binary/context/tamper/ownership test. It is now connected to SQLite through embedded xlang3; see [credential-storage.md](credential-storage.md). The historical native test log `build/native/evidence/contracts-20261006.log` preserves the passing protection test and the two initial failing SQLite tests; the later passing logs below supersede those failures.
