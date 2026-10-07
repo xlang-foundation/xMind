@@ -31,7 +31,7 @@ std::string serialize_responses_request(const ChatProviderConfig& config,const M
             for(std::size_t i=0;i<calls.size();++i)if(calls[i].id!=message.tool_calls[i].id||calls[i].name!=message.tool_calls[i].name||calls[i].arguments_json!=message.tool_calls[i].arguments_json)throw std::invalid_argument("Responses call differs from conversation");
         }else if(message.role==MessageRole::tool)body["input"].push_back({{"type","function_call_output"},{"call_id",message.tool_call_id},{"output",message.content}});
         else {
-            if(!message.refusal.empty())throw std::invalid_argument("Responses refusal history requires original output items");
+            if(!message.refusal.empty())throw IncompatibleProviderHistory("Responses refusal history requires original output items");
             if(!message.content.empty()||!message.refusal.empty()||message.tool_calls.empty()){
                 Json parts=Json::array({{{"type","input_text"},{"text",message.content}}});
                 body["input"].push_back({{"type","message"},{"role",validated["role"]},{"content",std::move(parts)}});

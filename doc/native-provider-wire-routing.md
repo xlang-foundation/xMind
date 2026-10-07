@@ -64,3 +64,15 @@ native Responses request through the preserved service/key. Only after that
 request settles does it retry the explicit legacy selection. The independent
 synthetic peer requires two Responses requests, so metadata checks alone cannot
 satisfy this rollback case. Syntax checks passed; compiled execution is pending.
+
+Switching a Responses conversation back to the Chat wire preserves its original
+output items. The serializer now raises a typed incompatibility; the agent
+records `incompatible_provider_history` before transport instead of the generic
+agent error. The shared renderer explains that the user can start a conversation
+or return to the previous wire, without inventing a reply or usage. The native
+routing contract submits this incompatible continuation and requires preserved
+history, a durable typed failure and no additional peer request. Native execution
+of this addition remains pending: the local build guard observed active sibling
+xlang3 benchmark processes and deferred compilation. All 70 extension and 11
+browser adapter/DOM contracts pass locally. These checks do not establish live
+OpenAI compatibility or completed native execution for this addition.

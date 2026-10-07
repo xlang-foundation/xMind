@@ -2,8 +2,13 @@
 #include "agentflow/model_stream.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #include <optional>
+#include <stdexcept>
 
 namespace agentflow {
+class IncompatibleProviderHistory : public std::invalid_argument {
+public:
+    using std::invalid_argument::invalid_argument;
+};
 enum class Capability {unknown,unsupported,supported};
 enum class ProviderWire {chat_completions,responses};
 enum class ReasoningEffort {none,minimal,low,medium,high,xhigh,max};

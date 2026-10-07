@@ -92,6 +92,8 @@ function runFailure(data){
   const status=data?.status;
   card.append(node('p',data?.reason==='provider_http_error'&&Number.isInteger(status)&&status>=100&&status<=599
     ?'The model provider returned HTTP '+status+'. This run stopped before completing its response.'
+    :data?.reason==='incompatible_provider_history'
+    ?'This conversation contains provider history that the selected model’s wire cannot use. Start a new conversation or select a model using the previous wire. The recorded history is preserved.'
     :'Execution failed. Inspect the selected run activity for the recorded reason.'));
   if(data?.reason==='provider_http_error'){
     const fields=[

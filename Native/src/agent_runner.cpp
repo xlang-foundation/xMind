@@ -248,6 +248,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
       catch(const TransportTimeout&) {return terminate(RunState::failed,{{"reason","provider_timeout"}});}
       catch(const TransportError&) {return terminate(RunState::failed,{{"reason","provider_transport_error"}});}
       catch(const ModelProtocolError&) {return terminate(RunState::failed,{{"reason","model_protocol_error"}});}
+      catch(const IncompatibleProviderHistory&) {return terminate(RunState::failed,{{"reason","incompatible_provider_history"}});}
       catch(const std::exception&) {return terminate(RunState::failed,{{"reason","agent_error"}});}
 }
 }

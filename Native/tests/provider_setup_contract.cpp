@@ -73,6 +73,13 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
    ProviderSetupMetadata restored;bool changed=false;const auto idleDeadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);
    while(!changed){try{restored=reopened.configure("fixture-model",SecretBytes(std::span<const std::uint8_t>{}),2);changed=true;}catch(const Conflict&){require(std::chrono::steady_clock::now()<idleDeadline,"Wire worker did not release ownership");std::this_thread::sleep_for(std::chrono::milliseconds(5));}}
    require(restored.wire==ProviderWire::chat_completions && restored.endpoint==chatEndpoint,"Legacy selection must rebind the saved credential to the approved Chat route");
+   const auto originalHistory=store.history("wire-session").get();
+   const auto incompatibleRun=reopened.submit("wire-incompatible-run","wire-session","Synthetic incompatible history fixture");auto incompatibleState=incompatibleRun;const auto incompatibleDeadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);
+   while(incompatibleState.state==RunState::queued||incompatibleState.state==RunState::running){require(std::chrono::steady_clock::now()<incompatibleDeadline,"Incompatible history request did not settle");std::this_thread::sleep_for(std::chrono::milliseconds(5));incompatibleState=store.run(incompatibleRun.id).get();}
+   require(incompatibleState.state==RunState::failed,"Responses history cannot silently become a Chat request");
+   bool diagnosed=false;for(const auto& event:store.events(incompatibleRun.id,0).get())if(event.kind=="run.failed")diagnosed=Json::parse(event.json).value("reason",std::string{})=="incompatible_provider_history";
+   require(diagnosed,"Incompatible provider history must have a typed durable failure reason");
+   const auto preservedHistory=store.history("wire-session").get();require(preservedHistory.size()==originalHistory.size()+1 && preservedHistory[0].json==originalHistory[0].json && preservedHistory[1].json==originalHistory[1].json,"Failed wire conversion must preserve original provider items and add no assistant reply");
  }
  {
    PersistenceService store(wireDatabase,imports);auto value=Json::parse(store.information("native-provider","active").get());value["wire"]="responses";value["endpoint"]="https://unapproved.invalid/v1/responses";store.put_information("native-provider","active",value.dump()).get();

@@ -34,6 +34,14 @@ test('provider failures remain visible through transcript refresh without invent
   r.send({type:'reset-run'});assert.equal(card.hidden,true);r.send(failure);r.send({type:'history',history:[]});assert.equal(card.hidden,true);
   r.send(failure);r.send({type:'user',text:'Fixture next request'});assert.equal(card.hidden,true);
 });
+test('incompatible provider history explains recovery without fabricating a reply',()=>{
+  const r=renderer(),doc=r.dom.window.document;
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'incompatible_provider_history',message:'private-fixture-history'}}});
+  r.send({type:'transcript',history:[]});
+  const card=doc.getElementById('run-failure');assert.equal(card.hidden,false);assert.match(card.textContent,/Start a new conversation/);assert.match(card.textContent,/recorded history is preserved/);
+  assert.ok(!card.textContent.includes('private-fixture-history'));assert.equal(card.querySelector('.metrics'),null);assert.equal(doc.querySelector('#history .assistant'),null);
+  r.send({type:'reset-run'});assert.equal(card.hidden,true);
+});
 test('unknown failure reasons do not interpolate untrusted payloads or guess provider causes',()=>{
   const r=renderer(),doc=r.dom.window.document;r.send({type:'event',event:{kind:'run.failed',data:{reason:'<img onerror=fixtureAttack()>',status:'401'}}});
   const card=doc.getElementById('run-failure');assert.match(card.textContent,/Execution failed/);assert.ok(!card.textContent.includes('401'));assert.equal(card.querySelector('img'),null);

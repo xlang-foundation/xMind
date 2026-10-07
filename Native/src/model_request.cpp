@@ -63,7 +63,7 @@ std::string serialize_chat_request(const ChatProviderConfig& config,const ModelR
         }
     }
     for(const auto& message:request.messages) {
-        if(message.provider_items_json!="[]")throw std::invalid_argument("Responses continuation requires the Responses wire");
+        if(message.provider_items_json!="[]")throw IncompatibleProviderHistory("Responses continuation requires the Responses wire");
         account(message.content.size());account(message.tool_call_id.size());account(message.refusal.size());
         if(message.content.size()>4*1024*1024 || message.tool_calls.size()>64) throw std::invalid_argument("Model message exceeds configured limits");
         Json item={{"role",role_name(message.role)},{"content",message.content}};
