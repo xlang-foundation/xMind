@@ -1,0 +1,27 @@
+{
+  "native_source_tree": "46d8729fa89d92584ba851a969514e5b2bccb32f",
+  "binary_sha256": {
+    "server": "a0d69e26046a90b3c7c529db6a5c709dc450ab3ad659b926d00ab81614979a71",
+    "runtime": "fb02403bff1bf9967d5e49cb4f2a5a4f6d13ad139cc02b069e20fc03cc6c4862",
+    "sqlite_module": "fcb0e481352672eb72d86a96e2ef5d9b58939a35ad03a4ac3e32bfe7dc733b8c"
+  },
+  "verification": "50/50 native,60/60 extension,0 skipped; complete final CTest after constructing valid typed SDK listing requests",
+  "sdk": {
+    "package": "@a2a-js/sdk",
+    "version": "1.3.0",
+    "mode": "Native 1.0 resolver/transport with no legacy compatibility enabled; separate legacy peer explicitly selects 0.3",
+    "scope": "Test-only, not a production core dependency"
+  },
+  "scope": "Actual C++/embedded-xlang3 native versioned core RPCs, blocking/default semantics, task streams/control, schema9 measured clocks, cursor root listing, atomic faults, migration and cross-version restart retries. Provider replies and storage lifecycle fixtures are synthetic.",
+  "legacy_status_times": "No wall-clock backfill. Unknown-time tasks retain journal order; matching unknown times reject timestamp-filtered listings.",
+  "previous_hosted_checkpoint": {
+    "revision": "b13ea224b026b9b750f43bdd311254ca7855b53c",
+    "run": 37689748037,
+    "job": 113027820926,
+    "conclusion": "success",
+    "verification": "48 native,60 extension,0 skipped; applies to that earlier source only"
+  },
+  "runtime": "No CPython execution; all database I/O through embedded xlang3",
+  "installed_previews": "Existing model/configuration and graph previews preserved on their previous runtimes; this source is not installed there.",
+  "remaining": "Full A2A compliance, continuation/references, files/data/push/extended cards/delegation, additional bindings, team policies, metadata/part fidelity and full platform parity incomplete. Hosted verification of current source pending."
+}

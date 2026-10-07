@@ -33,7 +33,6 @@ async function finished(id){const deadline=Date.now()+10000;while(Date.now()<dea
 try{
  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));await start();
  const invalid=[
-  [{...message('blocked','a'),configuration:{blocking:true}},-32004],
   [{...message('push','a'),configuration:{pushNotificationConfig:{}}},-32003],
   [{message:{...message('file','a').message,parts:[{kind:'file',file:{bytes:'AA=='}}]}},-32005],
   [{...message('modes','a'),configuration:{acceptedOutputModes:['image/png']}},-32005],

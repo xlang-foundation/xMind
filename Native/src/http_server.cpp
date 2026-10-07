@@ -171,11 +171,26 @@ struct HttpServer::Impl {
         });
         server.set_exception_handler([](const Request&,Response& response,std::exception_ptr) {reply(response,{{"detail","Backend operation failed"}},500);});
         server.Post("/a2a",[this](const Request& request,Response& response){
-            if(request.get_header_value("Content-Type")!="application/json"){reply(response,{{"detail","Use application/json"}},415);return;}
+            if(request.get_header_value("Content-Type")!="application/json"&&request.get_header_value("Content-Type")!="application/a2a+json"){reply(response,{{"detail","Use application/json"}},415);return;}
             if(!request.params.empty()){reply(response,{{"detail","A2A does not accept query parameters"}},400);return;}
+            const auto requested=request.get_header_value("A2A-Version");
+            const auto version=request.get_header_value_count("A2A-Version")>1?A2aVersion::unsupported:(requested.empty()||requested=="0.3")?A2aVersion::legacy:requested=="1.0"?A2aVersion::v1:A2aVersion::unsupported;
             A2aStreamStart start;auto lease=std::make_shared<StreamLease>(active_streams);
-            const auto result=A2aTaskControl(persistence,executor).dispatch(request.body,&start,[&]{return !stopping&&lease->acquire();});
+            const auto result=A2aTaskControl(persistence,executor,version).dispatch(request.body,&start,[&]{return !stopping&&lease->acquire();});
             response.set_header("Cache-Control","no-store");response.set_header("X-Content-Type-Options","nosniff");
+            if(version!=A2aVersion::unsupported)response.set_header("A2A-Version",version==A2aVersion::v1?"1.0":"0.3");
+            if(start.blocking){
+                try{
+                    while(!stopping&&!request.is_connection_closed()){
+                        const auto run=persistence.run(start.task_id).get();
+                        if(run.state==RunState::completed||run.state==RunState::failed||run.state==RunState::cancelled||run.state==RunState::paused){
+                            response.set_content(A2aTaskControl(persistence,executor,version).snapshot(start),"application/json");return;
+                        }
+                        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                    }
+                    response.set_content(Json{{"jsonrpc","2.0"},{"id",Json::parse(start.id_json)},{"error",{{"code",-32004},{"message","Blocking interaction interrupted"}}}}.dump(),"application/json");response.status=503;return;
+                }catch(...){response.set_content(Json{{"jsonrpc","2.0"},{"id",Json::parse(start.id_json)},{"error",{{"code",-32603},{"message","Blocking interaction interrupted"}}}}.dump(),"application/json");return;}
+            }
             if(start.enabled){
                 auto stream=std::make_shared<A2aTaskStream>(persistence,start);
                 const auto id=start.id_json;
@@ -201,8 +216,19 @@ struct HttpServer::Impl {
         });
         server.Get("/.well-known/agent-card.json",guarded([this](const Request& request,Response& response){
             if(!request.params.empty())throw std::invalid_argument("Agent Card does not accept query parameters");
+            const auto requested=request.get_header_value("A2A-Version");
+            if(request.get_header_value_count("A2A-Version")>1||(!requested.empty()&&requested!="0.3"&&requested!="1.0")){reply(response,{{"jsonrpc","2.0"},{"id",nullptr},{"error",{{"code",-32009},{"message","Protocol version is not supported"}}}},400);return;}
             auto skills=Json::array();
             if(executor&&executor->available())skills.push_back({{"id","native.agent"},{"name","Native agent"},{"description","Run text requests using the configured model and native agent executor."},{"tags",Json::array({"general-agent"})}});
+            if(requested=="1.0"){
+                response.set_header("A2A-Version","1.0");
+                reply(response,{{"name","xMind"},{"description","Local native agent tasks with persistent conversations and authenticated task controls."},{"version","0.1.0"},
+                    {"supportedInterfaces",Json::array({{{"url","http://127.0.0.1:"+std::to_string(port)+"/a2a"},{"protocolBinding","JSONRPC"},{"protocolVersion","1.0"}},{{"url","http://127.0.0.1:"+std::to_string(port)+"/a2a"},{"protocolBinding","JSONRPC"},{"protocolVersion","0.3"}}})},
+                    {"capabilities",{{"streaming",true},{"pushNotifications",false},{"extendedAgentCard",false}}},
+                    {"securitySchemes",{{"ownerToken",{{"httpAuthSecurityScheme",{{"scheme","Bearer"}}}}}}},{"securityRequirements",Json::array({{{"schemes",{{"ownerToken",{{"list",Json::array()}}}}}}})},
+                    {"defaultInputModes",Json::array({"text/plain"})},{"defaultOutputModes",Json::array({"text/plain"})},{"skills",std::move(skills)}});return;
+            }
+            response.set_header("A2A-Version","0.3");
             reply(response,{{"protocolVersion","0.3.0"},{"name","xMind"},{"description","Local native agent tasks with persistent conversations and authenticated task controls."},
                 {"url","http://127.0.0.1:"+std::to_string(port)+"/a2a"},{"preferredTransport","JSONRPC"},{"version","0.1.0"},
                 {"capabilities",{{"streaming",true},{"pushNotifications",false},{"stateTransitionHistory",false}}},

@@ -9,6 +9,9 @@
 namespace agentflow {
 class GraphPlan;
 struct GraphRootRecord {Run run;std::string graph_id;std::int64_t graph_revision;std::string specification_json;std::int64_t checkpoint_revision;std::string checkpoint_json;std::string input_json;};
+struct RootRunRecord {Run run;std::optional<std::int64_t> status_ms;std::int64_t status_sequence;};
+struct RootRunPage {std::vector<RootRunRecord> entries;std::int64_t total,watermark;bool more;};
+struct StatusTimeUnavailable : std::runtime_error {using std::runtime_error::runtime_error;};
 struct CredentialMetadata {
     std::string scope,id,purpose,label;
     std::int64_t revision;
@@ -45,6 +48,8 @@ public:
     Run complete_run(const std::string& run_id,const std::string& assistant_json);
     Run run(const std::string& id);
     std::vector<Run> runs(const std::string& session_id);
+    RootRunPage list_root_runs(const std::string& context,const std::string& state,std::optional<std::int64_t> since,std::size_t count,
+        std::int64_t watermark=0,std::optional<std::int64_t> cursor_ms={},std::int64_t cursor_sequence=0);
     Run transition(const std::string& id,RunState expected,RunState next,const std::string& json="{}");
     Event append_event(const std::string& id,const std::string& kind,const std::string& json);
     std::vector<Event> events(const std::string& id,std::int64_t after=0);

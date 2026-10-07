@@ -27,6 +27,8 @@ public:
     std::future<Run> start_incoming_message(std::string id,std::string context,std::string message,std::string prompt_json,std::string identity);
     std::future<std::optional<std::vector<Message>>> task_history(std::string id);
     std::future<std::vector<Event>> event_batch(std::string id,std::int64_t after,std::size_t count);
+    std::future<RootRunPage> list_root_runs(std::string context,std::string state,std::optional<std::int64_t> since,std::size_t count,
+        std::int64_t watermark=0,std::optional<std::int64_t> cursor_ms={},std::int64_t cursor_sequence=0);
     std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json);
     std::future<Run> start_graph_run(std::string id,std::string session_id,std::string graph_id,std::int64_t revision,GraphPlan plan,std::string prompt_json);
     std::future<GraphRootRecord> graph_run(std::string id);

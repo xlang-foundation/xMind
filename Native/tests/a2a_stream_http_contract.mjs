@@ -64,7 +64,7 @@ try{
  // Official SDK 1.3.0 uses its explicit v0.3 compatibility transport. Native
  // v1.0 wire support is not inferred from translated client-side objects.
  const origin=`http://127.0.0.1:${port}`;
- const authenticatedFetch=(url,init={})=>{assert.equal(new URL(url).origin,origin);const headers=new Headers(init.headers);headers.set('Authorization','Bearer '+token);return fetch(url,{...init,headers,redirect:'error',signal:init.signal?AbortSignal.any([init.signal,AbortSignal.timeout(10000)]):AbortSignal.timeout(10000)});};
+ const authenticatedFetch=(url,init={})=>{assert.equal(new URL(url).origin,origin);const headers=new Headers(init.headers);headers.set('Authorization','Bearer '+token);if(new URL(url).pathname==='/.well-known/agent-card.json')headers.set('A2A-Version','0.3');return fetch(url,{...init,headers,redirect:'error',signal:init.signal?AbortSignal.any([init.signal,AbortSignal.timeout(10000)]):AbortSignal.timeout(10000)});};
  const factory=new ClientFactory({cardResolver:new DefaultAgentCardResolver({fetchImpl:authenticatedFetch,legacyCompat:{enabled:true}}),transports:[new JsonRpcTransportFactory({fetchImpl:authenticatedFetch,legacyCompat:{enabled:true}})]});
  const client=await factory.createFromUrl(origin),sdkRecords=[];let sdkError;
  const sdkPump=(async()=>{for await(const event of client.sendMessageStream({message:{messageId:'sdk-message',role:Role.ROLE_USER,parts:[{content:{$case:'text',value:'sdk-slow'}}]},configuration:{returnImmediately:true,historyLength:8}}))sdkRecords.push(event);})().catch(error=>{sdkError=error;});
