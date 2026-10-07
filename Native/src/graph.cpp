@@ -79,7 +79,7 @@ bool GraphCoordinator::eligible(std::size_t i,bool& skipped) const {
     if(!skipped && !node.condition_json.empty()){const auto condition=Json::parse(node.condition_json);skipped=at_path(outputs.at(condition.at("node").get<std::string>()),condition.value("path",Json::array()))!=condition.at("equals");}
     return true;
 }
-GraphCoordinator::GraphCoordinator(GraphPlan plan,const std::string& source):plan_(std::move(plan)),states_(plan_.nodes().size()){
+GraphCoordinator::GraphCoordinator(GraphPlan plan,const std::string& source,GraphRestoreMode mode):plan_(std::move(plan)),states_(plan_.nodes().size()){
     if(source.empty())return;const auto saved=object(source,1048576);fields(saved,{"version","spec","nodes"});
     if(!saved.contains("version") || !saved["version"].is_number_integer() || saved["version"]!=1 || !saved.contains("spec") || saved["spec"].dump()!=plan_.json() || !saved.contains("nodes") || !saved["nodes"].is_array() || saved["nodes"].size()!=states_.size())throw std::invalid_argument("Graph checkpoint does not match its immutable plan");
     std::set<std::string> seen;
@@ -87,7 +87,7 @@ GraphCoordinator::GraphCoordinator(GraphPlan plan,const std::string& source):pla
     std::size_t bytes=0;for(const auto& record:states_)bytes+=record.output.size();if(bytes>524288)throw std::invalid_argument("Graph checkpoint output budget exceeded");
     for(const auto i:plan_.order()){const auto current=states_[i].state;if(current==GraphNodeState::pending || current==GraphNodeState::cancelled)continue;bool skipped=false;if(!eligible(i,skipped) || (current==GraphNodeState::skipped)!=skipped)throw std::invalid_argument("Graph checkpoint violates dependency or condition order");if(current==GraphNodeState::waiting_human && plan_.nodes()[i].kind!=GraphNodeKind::human)throw std::invalid_argument("Only a human node can await input");if(current==GraphNodeState::running && plan_.nodes()[i].kind==GraphNodeKind::human)throw std::invalid_argument("Human checkpoint must await input");}
     // Running work may already have had effects. Never replay it on restore.
-    for(auto& record:states_)if(record.state==GraphNodeState::running)record.state=GraphNodeState::uncertain;
+    if(mode==GraphRestoreMode::recover)for(auto& record:states_)if(record.state==GraphNodeState::running)record.state=GraphNodeState::uncertain;
 }
 GraphDecision GraphCoordinator::inspect() const {
     GraphDecision result;result.finished=true;

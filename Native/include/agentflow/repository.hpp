@@ -7,7 +7,7 @@
 
 namespace agentflow {
 class GraphPlan;
-struct GraphRootRecord {Run run;std::string graph_id;std::int64_t graph_revision;std::string specification_json;};
+struct GraphRootRecord {Run run;std::string graph_id;std::int64_t graph_revision;std::string specification_json;std::int64_t checkpoint_revision;std::string checkpoint_json;};
 struct CredentialMetadata {
     std::string scope,id,purpose,label;
     std::int64_t revision;
@@ -27,7 +27,11 @@ public:
     Run start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json);
     Run start_graph_run(const std::string& id,const std::string& session_id,const std::string& graph_id,std::int64_t revision,const GraphPlan& plan,const std::string& prompt_json);
     GraphRootRecord graph_run(const std::string& id);
-    Run start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt_json);
+    Run start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt_json,std::int64_t expected_checkpoint_revision=0);
+    GraphRootRecord settle_graph_child(const std::string& child_id,std::int64_t expected_checkpoint_revision=0);
+    GraphRootRecord start_graph_human(const std::string& id,const std::string& node_id,std::int64_t expected_checkpoint_revision);
+    GraphRootRecord input_graph_human(const std::string& id,const std::string& node_id,const std::string& input_json,const std::string& actor,std::int64_t expected_checkpoint_revision);
+    GraphRootRecord skip_graph_node(const std::string& id,const std::string& node_id,std::int64_t expected_checkpoint_revision);
     std::vector<Run> children(const std::string& parent_id);
     std::vector<Message> run_history(const std::string& id);
     std::vector<Event> graph_events(const std::string& id,std::int64_t after=0);

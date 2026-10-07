@@ -1,0 +1,1542 @@
+﻿2026-10-07T16:26:02.1934253Z Current runner version: '2.337.0'
+2026-10-07T16:26:02.1956448Z ##[group]Runner Image Provisioner
+2026-10-07T16:26:02.1957134Z Hosted Compute Agent
+2026-10-07T16:26:02.1957568Z Version: 20260901.588
+2026-10-07T16:26:02.1958027Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-07T16:26:02.1958613Z Build Date: 2026-09-01T19:56:44Z
+2026-10-07T16:26:02.1959114Z Worker ID: {e9dadd17-d188-4fc1-9eaf-714e687ec2b0}
+2026-10-07T16:26:02.1959626Z Azure Region: westus3
+2026-10-07T16:26:02.1960051Z ##[endgroup]
+2026-10-07T16:26:02.1961118Z ##[group]Operating System
+2026-10-07T16:26:02.1961679Z Microsoft Windows Server 2025
+2026-10-07T16:26:02.1962133Z 10.0.26100
+2026-10-07T16:26:02.1962583Z Datacenter
+2026-10-07T16:26:02.1962993Z ##[endgroup]
+2026-10-07T16:26:02.1963442Z ##[group]Runner Image
+2026-10-07T16:26:02.1963960Z Image: windows-2025-vs2026
+2026-10-07T16:26:02.1964432Z Version: 20260925.250.1
+2026-10-07T16:26:02.1965730Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20260925.250/images/windows/Windows2025-VS2026-Readme.md
+2026-10-07T16:26:02.1967387Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20260925.250
+2026-10-07T16:26:02.1968183Z ##[endgroup]
+2026-10-07T16:26:02.1969076Z ##[group]GITHUB_TOKEN Permissions
+2026-10-07T16:26:02.1970791Z Contents: read
+2026-10-07T16:26:02.1971309Z Metadata: read
+2026-10-07T16:26:02.1971788Z ##[endgroup]
+2026-10-07T16:26:02.1973530Z Secret source: Actions
+2026-10-07T16:26:02.1974173Z Cache mode: write
+2026-10-07T16:26:02.1974887Z Prepare workflow directory
+2026-10-07T16:26:02.2317665Z Prepare all required actions
+2026-10-07T16:26:02.2357315Z Getting action download info
+2026-10-07T16:26:02.5621667Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-10-07T16:26:02.6678545Z Download action repository 'actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38' (SHA:249970729cb0ef3589644e2896645e5dc5ba9c38)
+2026-10-07T16:26:02.7928043Z Download action repository 'actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f' (SHA:b7c566a772e6b6bfb58ed0dc250532a479d7789f)
+2026-10-07T16:26:03.3496062Z Complete job name: contracts
+2026-10-07T16:26:03.5385183Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-10-07T16:26:03.5386603Z with:
+2026-10-07T16:26:03.5387092Z   path: xmind
+2026-10-07T16:26:03.5387630Z   persist-credentials: false
+2026-10-07T16:26:03.5388275Z   repository: xlang-foundation/xMind
+2026-10-07T16:26:03.5394411Z   token: ***
+2026-10-07T16:26:03.5394932Z   ssh-strict: true
+2026-10-07T16:26:03.5395451Z   ssh-user: git
+2026-10-07T16:26:03.5395952Z   clean: true
+2026-10-07T16:26:03.5396490Z   sparse-checkout-cone-mode: true
+2026-10-07T16:26:03.5397119Z   fetch-depth: 1
+2026-10-07T16:26:03.5397642Z   fetch-tags: false
+2026-10-07T16:26:03.5398174Z   show-progress: true
+2026-10-07T16:26:03.5398722Z   lfs: false
+2026-10-07T16:26:03.5399224Z   submodules: false
+2026-10-07T16:26:03.5399801Z   set-safe-directory: true
+2026-10-07T16:26:03.5400422Z   allow-unsafe-pr-checkout: false
+2026-10-07T16:26:03.5401297Z ##[endgroup]
+2026-10-07T16:26:03.6627071Z Syncing repository: xlang-foundation/xMind
+2026-10-07T16:26:03.6628908Z ##[group]Getting Git version info
+2026-10-07T16:26:03.6629638Z Working directory is 'D:\a\xMind\xMind\xmind'
+2026-10-07T16:26:03.7333005Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-07T16:26:04.5683389Z git version 2.55.0.windows.5
+2026-10-07T16:26:04.5723508Z ##[endgroup]
+2026-10-07T16:26:04.5738517Z Temporarily overriding HOME='D:\a\_temp\ed657803-21e9-4d67-a5c0-10beb30d3050' before making global git config changes
+2026-10-07T16:26:04.5739183Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T16:26:04.5746833Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\xmind
+2026-10-07T16:26:04.6279131Z ##[group]Determining repository object format
+2026-10-07T16:26:04.6281957Z ##[endgroup]
+2026-10-07T16:26:04.6282580Z ##[group]Initializing the repository
+2026-10-07T16:26:04.6289929Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\xMind\xMind\xmind
+2026-10-07T16:26:04.7034472Z Initialized empty Git repository in D:/a/xMind/xMind/xmind/.git/
+2026-10-07T16:26:04.7077707Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/xlang-foundation/xMind
+2026-10-07T16:26:04.7803255Z ##[endgroup]
+2026-10-07T16:26:04.7803923Z ##[group]Disabling automatic garbage collection
+2026-10-07T16:26:04.7810745Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-07T16:26:04.8036250Z ##[endgroup]
+2026-10-07T16:26:04.8036893Z ##[group]Setting up auth
+2026-10-07T16:26:04.8037873Z Removing SSH command configuration
+2026-10-07T16:26:04.8046278Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T16:26:04.8266964Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T16:26:06.5344365Z Removing HTTP extra header
+2026-10-07T16:26:06.5352932Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T16:26:06.5597403Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T16:26:06.9848550Z Removing includeIf entries pointing to credentials config files
+2026-10-07T16:26:06.9857786Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T16:26:07.0089144Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T16:26:07.4589827Z [command]"C:\Program Files\Git\bin\git.exe" config --file D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-07T16:26:07.4838820Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/xmind/.git.path D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:07.5083810Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:07.5384044Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/xmind/.git.path /github/runner_temp/git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:07.5640445Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/xmind/.git/worktrees/*.path /github/runner_temp/git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:07.5896059Z ##[endgroup]
+2026-10-07T16:26:07.5896646Z ##[group]Fetching the repository
+2026-10-07T16:26:07.5907852Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +fbf2cfe9962c6d364893090e4590f765f92b61a3:refs/remotes/origin/checkpoint/native-persistence-m1
+2026-10-07T16:26:09.1511220Z From https://github.com/xlang-foundation/xMind
+2026-10-07T16:26:09.1512282Z  * [new ref]         fbf2cfe9962c6d364893090e4590f765f92b61a3 -> origin/checkpoint/native-persistence-m1
+2026-10-07T16:26:09.1564544Z [command]"C:\Program Files\Git\bin\git.exe" branch --list --remote origin/checkpoint/native-persistence-m1
+2026-10-07T16:26:09.1888353Z   origin/checkpoint/native-persistence-m1
+2026-10-07T16:26:09.1927780Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse refs/remotes/origin/checkpoint/native-persistence-m1
+2026-10-07T16:26:09.2146452Z fbf2cfe9962c6d364893090e4590f765f92b61a3
+2026-10-07T16:26:09.2173147Z ##[endgroup]
+2026-10-07T16:26:09.2173458Z ##[group]Determining the checkout info
+2026-10-07T16:26:09.2174420Z ##[endgroup]
+2026-10-07T16:26:09.2181723Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-07T16:26:09.2552988Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-07T16:26:09.2780343Z ##[group]Checking out the ref
+2026-10-07T16:26:09.2787883Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B checkpoint/native-persistence-m1 refs/remotes/origin/checkpoint/native-persistence-m1
+2026-10-07T16:26:09.4826791Z Switched to a new branch 'checkpoint/native-persistence-m1'
+2026-10-07T16:26:09.4887891Z branch 'checkpoint/native-persistence-m1' set up to track 'origin/checkpoint/native-persistence-m1'.
+2026-10-07T16:26:09.4932196Z ##[endgroup]
+2026-10-07T16:26:09.5301515Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-07T16:26:09.5525890Z fbf2cfe9962c6d364893090e4590f765f92b61a3
+2026-10-07T16:26:09.5559876Z ##[group]Removing auth
+2026-10-07T16:26:09.5560276Z Removing SSH command configuration
+2026-10-07T16:26:09.5566820Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T16:26:09.5803310Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T16:26:09.9894742Z Removing HTTP extra header
+2026-10-07T16:26:09.9902329Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T16:26:10.0148511Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T16:26:10.4477259Z Removing includeIf entries pointing to credentials config files
+2026-10-07T16:26:10.4484581Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T16:26:10.4682057Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-07T16:26:10.4682592Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-07T16:26:10.4682995Z includeif.gitdir:/github/workspace/xmind/.git.path
+2026-10-07T16:26:10.4683292Z includeif.gitdir:/github/workspace/xmind/.git/worktrees/*.path
+2026-10-07T16:26:10.4719989Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-07T16:26:10.4919782Z D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:10.4954422Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:10.5193764Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-07T16:26:10.5395567Z D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:10.5429274Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:10.5668850Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/xmind/.git.path
+2026-10-07T16:26:10.5946286Z /github/runner_temp/git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:10.6000561Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/xmind/.git.path /github/runner_temp/git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:10.6282467Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/xmind/.git/worktrees/*.path
+2026-10-07T16:26:10.6486529Z /github/runner_temp/git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:10.6518914Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/xmind/.git/worktrees/*.path /github/runner_temp/git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:26:10.6755117Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T16:26:11.0817171Z Removing credentials config 'D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config'
+2026-10-07T16:26:11.0828135Z ##[endgroup]
+2026-10-07T16:26:11.1174315Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-10-07T16:26:11.1174676Z with:
+2026-10-07T16:26:11.1174848Z   repository: CantorAI/xlang3
+2026-10-07T16:26:11.1175051Z   ref: 914783909835116969aad7c66b210a5ac9a27661
+2026-10-07T16:26:11.1175274Z   path: xlang3
+2026-10-07T16:26:11.1175426Z   persist-credentials: false
+2026-10-07T16:26:11.1177483Z   token: ***
+2026-10-07T16:26:11.1177635Z   ssh-strict: true
+2026-10-07T16:26:11.1177784Z   ssh-user: git
+2026-10-07T16:26:11.1177926Z   clean: true
+2026-10-07T16:26:11.1178080Z   sparse-checkout-cone-mode: true
+2026-10-07T16:26:11.1178276Z   fetch-depth: 1
+2026-10-07T16:26:11.1178416Z   fetch-tags: false
+2026-10-07T16:26:11.1178563Z   show-progress: true
+2026-10-07T16:26:11.1178711Z   lfs: false
+2026-10-07T16:26:11.1178843Z   submodules: false
+2026-10-07T16:26:11.1178994Z   set-safe-directory: true
+2026-10-07T16:26:11.1179170Z   allow-unsafe-pr-checkout: false
+2026-10-07T16:26:11.1179387Z ##[endgroup]
+2026-10-07T16:26:11.2035362Z Syncing repository: CantorAI/xlang3
+2026-10-07T16:26:11.2042366Z ##[group]Getting Git version info
+2026-10-07T16:26:11.2043059Z Working directory is 'D:\a\xMind\xMind\xlang3'
+2026-10-07T16:26:11.2497980Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-07T16:26:11.2715363Z git version 2.55.0.windows.5
+2026-10-07T16:26:11.2756629Z ##[endgroup]
+2026-10-07T16:26:11.2772853Z Temporarily overriding HOME='D:\a\_temp\0948930b-fff2-4624-9ca9-29c28f7f4d7f' before making global git config changes
+2026-10-07T16:26:11.2773998Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T16:26:11.2781480Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\xlang3
+2026-10-07T16:26:11.3013523Z ##[group]Determining repository object format
+2026-10-07T16:26:11.3015816Z ##[endgroup]
+2026-10-07T16:26:11.3016303Z ##[group]Initializing the repository
+2026-10-07T16:26:11.3023913Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\xMind\xMind\xlang3
+2026-10-07T16:26:11.3295932Z Initialized empty Git repository in D:/a/xMind/xMind/xlang3/.git/
+2026-10-07T16:26:11.3331677Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/CantorAI/xlang3
+2026-10-07T16:26:11.3561712Z ##[endgroup]
+2026-10-07T16:26:11.3562123Z ##[group]Disabling automatic garbage collection
+2026-10-07T16:26:11.3570499Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-07T16:26:11.3785339Z ##[endgroup]
+2026-10-07T16:26:11.3785629Z ##[group]Setting up auth
+2026-10-07T16:26:11.3786881Z Removing SSH command configuration
+2026-10-07T16:26:11.3795808Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T16:26:11.4020121Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T16:26:11.8597742Z Removing HTTP extra header
+2026-10-07T16:26:11.8605936Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T16:26:11.8835893Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T16:26:12.3305115Z Removing includeIf entries pointing to credentials config files
+2026-10-07T16:26:12.3314936Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T16:26:12.3542514Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T16:26:12.7458677Z [command]"C:\Program Files\Git\bin\git.exe" config --file D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-07T16:26:12.7692427Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/xlang3/.git.path D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:12.7919818Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:12.8145521Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/xlang3/.git.path /github/runner_temp/git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:12.8372093Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/xlang3/.git/worktrees/*.path /github/runner_temp/git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:12.8595279Z ##[endgroup]
+2026-10-07T16:26:12.8595579Z ##[group]Fetching the repository
+2026-10-07T16:26:12.8606282Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 914783909835116969aad7c66b210a5ac9a27661
+2026-10-07T16:26:16.3783285Z From https://github.com/CantorAI/xlang3
+2026-10-07T16:26:16.3783797Z  * branch            914783909835116969aad7c66b210a5ac9a27661 -> FETCH_HEAD
+2026-10-07T16:26:16.3826624Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse --verify --quiet 914783909835116969aad7c66b210a5ac9a27661^{object}
+2026-10-07T16:26:16.4028242Z 914783909835116969aad7c66b210a5ac9a27661
+2026-10-07T16:26:16.4053604Z ##[endgroup]
+2026-10-07T16:26:16.4054205Z ##[group]Determining the checkout info
+2026-10-07T16:26:16.4055469Z ##[endgroup]
+2026-10-07T16:26:16.4062752Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-07T16:26:16.4320444Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-07T16:26:16.4550678Z ##[group]Checking out the ref
+2026-10-07T16:26:16.4551161Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force 914783909835116969aad7c66b210a5ac9a27661
+2026-10-07T16:26:18.0940483Z Updating files:  51% (3023/5836)
+2026-10-07T16:26:18.1135120Z Updating files:  52% (3035/5836)
+2026-10-07T16:26:18.1298953Z Updating files:  53% (3094/5836)
+2026-10-07T16:26:18.1430109Z Updating files:  54% (3152/5836)
+2026-10-07T16:26:18.1555613Z Updating files:  55% (3210/5836)
+2026-10-07T16:26:18.1741615Z Updating files:  56% (3269/5836)
+2026-10-07T16:26:18.2398815Z Updating files:  57% (3327/5836)
+2026-10-07T16:26:18.2511619Z Updating files:  58% (3385/5836)
+2026-10-07T16:26:18.2600901Z Updating files:  59% (3444/5836)
+2026-10-07T16:26:18.2695490Z Updating files:  60% (3502/5836)
+2026-10-07T16:26:18.2783732Z Updating files:  61% (3560/5836)
+2026-10-07T16:26:18.2867210Z Updating files:  62% (3619/5836)
+2026-10-07T16:26:18.2951423Z Updating files:  63% (3677/5836)
+2026-10-07T16:26:18.3036980Z Updating files:  64% (3736/5836)
+2026-10-07T16:26:18.3128917Z Updating files:  65% (3794/5836)
+2026-10-07T16:26:18.3218756Z Updating files:  66% (3852/5836)
+2026-10-07T16:26:18.3302197Z Updating files:  67% (3911/5836)
+2026-10-07T16:26:18.3398372Z Updating files:  68% (3969/5836)
+2026-10-07T16:26:18.3501964Z Updating files:  69% (4027/5836)
+2026-10-07T16:26:18.3590459Z Updating files:  70% (4086/5836)
+2026-10-07T16:26:18.3678546Z Updating files:  71% (4144/5836)
+2026-10-07T16:26:18.3768933Z Updating files:  72% (4202/5836)
+2026-10-07T16:26:18.3858775Z Updating files:  73% (4261/5836)
+2026-10-07T16:26:18.3949161Z Updating files:  74% (4319/5836)
+2026-10-07T16:26:18.4044551Z Updating files:  75% (4377/5836)
+2026-10-07T16:26:18.4128653Z Updating files:  76% (4436/5836)
+2026-10-07T16:26:18.4226263Z Updating files:  77% (4494/5836)
+2026-10-07T16:26:18.4312410Z Updating files:  78% (4553/5836)
+2026-10-07T16:26:18.4392294Z Updating files:  79% (4611/5836)
+2026-10-07T16:26:18.4476526Z Updating files:  80% (4669/5836)
+2026-10-07T16:26:18.4553884Z Updating files:  81% (4728/5836)
+2026-10-07T16:26:18.4632918Z Updating files:  82% (4786/5836)
+2026-10-07T16:26:18.4710830Z Updating files:  83% (4844/5836)
+2026-10-07T16:26:18.4787158Z Updating files:  84% (4903/5836)
+2026-10-07T16:26:18.4863643Z Updating files:  85% (4961/5836)
+2026-10-07T16:26:18.4929575Z Updating files:  86% (5019/5836)
+2026-10-07T16:26:18.4946112Z Updating files:  86% (5068/5836)
+2026-10-07T16:26:18.5036598Z Updating files:  87% (5078/5836)
+2026-10-07T16:26:18.5136731Z Updating files:  88% (5136/5836)
+2026-10-07T16:26:18.5278900Z Updating files:  89% (5195/5836)
+2026-10-07T16:26:18.5407038Z Updating files:  90% (5253/5836)
+2026-10-07T16:26:18.6064816Z Updating files:  91% (5311/5836)
+2026-10-07T16:26:18.6175504Z Updating files:  92% (5370/5836)
+2026-10-07T16:26:18.6283266Z Updating files:  93% (5428/5836)
+2026-10-07T16:26:18.6401233Z Updating files:  94% (5486/5836)
+2026-10-07T16:26:18.6508278Z Updating files:  95% (5545/5836)
+2026-10-07T16:26:18.6709370Z Updating files:  96% (5603/5836)
+2026-10-07T16:26:18.6838471Z Updating files:  97% (5661/5836)
+2026-10-07T16:26:18.6994418Z Updating files:  98% (5720/5836)
+2026-10-07T16:26:18.7166517Z Updating files:  99% (5778/5836)
+2026-10-07T16:26:18.7166851Z Updating files: 100% (5836/5836)
+2026-10-07T16:26:18.7167119Z Updating files: 100% (5836/5836), done.
+2026-10-07T16:26:18.7290122Z Note: switching to '914783909835116969aad7c66b210a5ac9a27661'.
+2026-10-07T16:26:18.7290441Z 
+2026-10-07T16:26:18.7290671Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-07T16:26:18.7291183Z changes and commit them, and you can discard any commits you make in this
+2026-10-07T16:26:18.7291532Z state without impacting any branches by switching back to a branch.
+2026-10-07T16:26:18.7291734Z 
+2026-10-07T16:26:18.7291869Z If you want to create a new branch to retain commits you create, you may
+2026-10-07T16:26:18.7292219Z do so (now or later) by using -c with the switch command. Example:
+2026-10-07T16:26:18.7292419Z 
+2026-10-07T16:26:18.7292520Z   git switch -c <new-branch-name>
+2026-10-07T16:26:18.7292650Z 
+2026-10-07T16:26:18.7292724Z Or undo this operation with:
+2026-10-07T16:26:18.7292835Z 
+2026-10-07T16:26:18.7292903Z   git switch -
+2026-10-07T16:26:18.7292989Z 
+2026-10-07T16:26:18.7293148Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-07T16:26:18.7293370Z 
+2026-10-07T16:26:18.7293484Z HEAD is now at 9147839 Fix quadratic bytearray append in Base32
+2026-10-07T16:26:18.7438145Z ##[endgroup]
+2026-10-07T16:26:18.7690445Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-07T16:26:18.7893979Z 914783909835116969aad7c66b210a5ac9a27661
+2026-10-07T16:26:18.7925384Z ##[group]Removing auth
+2026-10-07T16:26:18.7925667Z Removing SSH command configuration
+2026-10-07T16:26:18.7932726Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T16:26:18.8167157Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T16:26:19.2310954Z Removing HTTP extra header
+2026-10-07T16:26:19.2318454Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T16:26:19.2563833Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T16:26:19.7057826Z Removing includeIf entries pointing to credentials config files
+2026-10-07T16:26:19.7065194Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T16:26:19.7265828Z includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path
+2026-10-07T16:26:19.7266383Z includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path
+2026-10-07T16:26:19.7266834Z includeif.gitdir:/github/workspace/xlang3/.git.path
+2026-10-07T16:26:19.7267262Z includeif.gitdir:/github/workspace/xlang3/.git/worktrees/*.path
+2026-10-07T16:26:19.7298100Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path
+2026-10-07T16:26:19.7495299Z D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:19.7527056Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:19.7752376Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path
+2026-10-07T16:26:19.7954113Z D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:19.7986163Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:19.8214826Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/xlang3/.git.path
+2026-10-07T16:26:19.8412064Z /github/runner_temp/git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:19.8442296Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/xlang3/.git.path /github/runner_temp/git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:19.8671591Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/xlang3/.git/worktrees/*.path
+2026-10-07T16:26:19.8871898Z /github/runner_temp/git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:19.8903344Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/xlang3/.git/worktrees/*.path /github/runner_temp/git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:26:19.9137427Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T16:26:20.3232810Z Removing credentials config 'D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config'
+2026-10-07T16:26:20.3241916Z ##[endgroup]
+2026-10-07T16:26:20.3525270Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-10-07T16:26:20.3525604Z with:
+2026-10-07T16:26:20.3525764Z   repository: python/cpython
+2026-10-07T16:26:20.3525976Z   ref: ebf955df7a89ed0c7968f79faec1de49f61ed7cb
+2026-10-07T16:26:20.3526205Z   path: stdlib-source
+2026-10-07T16:26:20.3526368Z   sparse-checkout: Lib
+
+2026-10-07T16:26:20.3526547Z   persist-credentials: false
+2026-10-07T16:26:20.3528601Z   token: ***
+2026-10-07T16:26:20.3528937Z   ssh-strict: true
+2026-10-07T16:26:20.3529089Z   ssh-user: git
+2026-10-07T16:26:20.3529230Z   clean: true
+2026-10-07T16:26:20.3529390Z   sparse-checkout-cone-mode: true
+2026-10-07T16:26:20.3529575Z   fetch-depth: 1
+2026-10-07T16:26:20.3529717Z   fetch-tags: false
+2026-10-07T16:26:20.3529865Z   show-progress: true
+2026-10-07T16:26:20.3530016Z   lfs: false
+2026-10-07T16:26:20.3530149Z   submodules: false
+2026-10-07T16:26:20.3530298Z   set-safe-directory: true
+2026-10-07T16:26:20.3530500Z   allow-unsafe-pr-checkout: false
+2026-10-07T16:26:20.3530685Z ##[endgroup]
+2026-10-07T16:26:20.4399577Z Syncing repository: python/cpython
+2026-10-07T16:26:20.4406493Z ##[group]Getting Git version info
+2026-10-07T16:26:20.4406833Z Working directory is 'D:\a\xMind\xMind\stdlib-source'
+2026-10-07T16:26:20.4867304Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-07T16:26:20.5082626Z git version 2.55.0.windows.5
+2026-10-07T16:26:20.5120465Z ##[endgroup]
+2026-10-07T16:26:20.5134005Z Temporarily overriding HOME='D:\a\_temp\521d3e24-1752-4424-a41e-650cbc6b9fba' before making global git config changes
+2026-10-07T16:26:20.5134546Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T16:26:20.5142856Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\stdlib-source
+2026-10-07T16:26:20.5368626Z ##[group]Determining repository object format
+2026-10-07T16:26:20.5371049Z ##[endgroup]
+2026-10-07T16:26:20.5371364Z ##[group]Initializing the repository
+2026-10-07T16:26:20.5379145Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\xMind\xMind\stdlib-source
+2026-10-07T16:26:20.5641860Z Initialized empty Git repository in D:/a/xMind/xMind/stdlib-source/.git/
+2026-10-07T16:26:20.5683086Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/python/cpython
+2026-10-07T16:26:20.5938858Z ##[endgroup]
+2026-10-07T16:26:20.5939348Z ##[group]Disabling automatic garbage collection
+2026-10-07T16:26:20.5946878Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-07T16:26:20.6177149Z ##[endgroup]
+2026-10-07T16:26:20.6177434Z ##[group]Setting up auth
+2026-10-07T16:26:20.6178839Z Removing SSH command configuration
+2026-10-07T16:26:20.6188862Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T16:26:20.6428776Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T16:26:21.0662014Z Removing HTTP extra header
+2026-10-07T16:26:21.0670373Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T16:26:21.0907789Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T16:26:21.5567287Z Removing includeIf entries pointing to credentials config files
+2026-10-07T16:26:21.5576654Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T16:26:21.5811148Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T16:26:22.0207964Z [command]"C:\Program Files\Git\bin\git.exe" config --file D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-07T16:26:22.0438361Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:22.0660014Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:22.0886938Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/stdlib-source/.git.path /github/runner_temp/git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:22.1112405Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/stdlib-source/.git/worktrees/*.path /github/runner_temp/git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:22.1331761Z ##[endgroup]
+2026-10-07T16:26:22.1332175Z ##[group]Fetching the repository
+2026-10-07T16:26:22.1343163Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin ebf955df7a89ed0c7968f79faec1de49f61ed7cb
+2026-10-07T16:26:22.7719807Z From https://github.com/python/cpython
+2026-10-07T16:26:22.7720363Z  * branch            ebf955df7a89ed0c7968f79faec1de49f61ed7cb -> FETCH_HEAD
+2026-10-07T16:26:22.7761802Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse --verify --quiet ebf955df7a89ed0c7968f79faec1de49f61ed7cb^{object}
+2026-10-07T16:26:22.7972424Z ebf955df7a89ed0c7968f79faec1de49f61ed7cb
+2026-10-07T16:26:22.8001009Z ##[endgroup]
+2026-10-07T16:26:22.8001455Z ##[group]Determining the checkout info
+2026-10-07T16:26:22.8003165Z ##[endgroup]
+2026-10-07T16:26:22.8003583Z ##[group]Setting up sparse checkout
+2026-10-07T16:26:22.8010888Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout set Lib
+2026-10-07T16:26:22.8280279Z ##[endgroup]
+2026-10-07T16:26:22.8280561Z ##[group]Checking out the ref
+2026-10-07T16:26:22.8287563Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force ebf955df7a89ed0c7968f79faec1de49f61ed7cb
+2026-10-07T16:26:27.8265282Z Updating files:   0% (1/2406)
+2026-10-07T16:26:27.8337247Z Updating files:   1% (25/2406)
+2026-10-07T16:26:27.8397659Z Updating files:   2% (49/2406)
+2026-10-07T16:26:27.8454434Z Updating files:   3% (73/2406)
+2026-10-07T16:26:27.8515347Z Updating files:   4% (97/2406)
+2026-10-07T16:26:27.8576055Z Updating files:   5% (121/2406)
+2026-10-07T16:26:27.8642201Z Updating files:   6% (145/2406)
+2026-10-07T16:26:27.8701793Z Updating files:   7% (169/2406)
+2026-10-07T16:26:27.8721665Z Updating files:   8% (193/2406)
+2026-10-07T16:26:27.8755276Z Updating files:   8% (202/2406)
+2026-10-07T16:26:27.8814655Z Updating files:   9% (217/2406)
+2026-10-07T16:26:27.8857328Z Updating files:  10% (241/2406)
+2026-10-07T16:26:27.8910424Z Updating files:  11% (265/2406)
+2026-10-07T16:26:27.8960008Z Updating files:  12% (289/2406)
+2026-10-07T16:26:27.9077676Z Updating files:  13% (313/2406)
+2026-10-07T16:26:27.9155713Z Updating files:  14% (337/2406)
+2026-10-07T16:26:27.9207711Z Updating files:  15% (361/2406)
+2026-10-07T16:26:27.9272067Z Updating files:  16% (385/2406)
+2026-10-07T16:26:27.9324059Z Updating files:  17% (410/2406)
+2026-10-07T16:26:27.9372274Z Updating files:  18% (434/2406)
+2026-10-07T16:26:27.9420435Z Updating files:  19% (458/2406)
+2026-10-07T16:26:27.9474277Z Updating files:  20% (482/2406)
+2026-10-07T16:26:27.9532810Z Updating files:  21% (506/2406)
+2026-10-07T16:26:27.9611376Z Updating files:  22% (530/2406)
+2026-10-07T16:26:27.9669694Z Updating files:  23% (554/2406)
+2026-10-07T16:26:27.9760677Z Updating files:  24% (578/2406)
+2026-10-07T16:26:27.9850421Z Updating files:  25% (602/2406)
+2026-10-07T16:26:27.9920651Z Updating files:  26% (626/2406)
+2026-10-07T16:26:27.9983421Z Updating files:  27% (650/2406)
+2026-10-07T16:26:28.0033088Z Updating files:  28% (674/2406)
+2026-10-07T16:26:28.0073018Z Updating files:  29% (698/2406)
+2026-10-07T16:26:28.0112379Z Updating files:  30% (722/2406)
+2026-10-07T16:26:28.0204712Z Updating files:  31% (746/2406)
+2026-10-07T16:26:28.0275884Z Updating files:  32% (770/2406)
+2026-10-07T16:26:28.0349548Z Updating files:  33% (794/2406)
+2026-10-07T16:26:28.0405314Z Updating files:  34% (819/2406)
+2026-10-07T16:26:28.0452487Z Updating files:  35% (843/2406)
+2026-10-07T16:26:28.0529700Z Updating files:  36% (867/2406)
+2026-10-07T16:26:28.0594015Z Updating files:  37% (891/2406)
+2026-10-07T16:26:28.0661224Z Updating files:  38% (915/2406)
+2026-10-07T16:26:28.0721677Z Updating files:  39% (939/2406)
+2026-10-07T16:26:28.0784486Z Updating files:  40% (963/2406)
+2026-10-07T16:26:28.0839665Z Updating files:  41% (987/2406)
+2026-10-07T16:26:28.0895874Z Updating files:  42% (1011/2406)
+2026-10-07T16:26:28.0974391Z Updating files:  43% (1035/2406)
+2026-10-07T16:26:28.1048666Z Updating files:  44% (1059/2406)
+2026-10-07T16:26:28.1131340Z Updating files:  45% (1083/2406)
+2026-10-07T16:26:28.1185546Z Updating files:  46% (1107/2406)
+2026-10-07T16:26:28.1260361Z Updating files:  47% (1131/2406)
+2026-10-07T16:26:28.1330083Z Updating files:  48% (1155/2406)
+2026-10-07T16:26:28.1389704Z Updating files:  49% (1179/2406)
+2026-10-07T16:26:28.1445619Z Updating files:  50% (1203/2406)
+2026-10-07T16:26:28.1493742Z Updating files:  51% (1228/2406)
+2026-10-07T16:26:28.1552657Z Updating files:  52% (1252/2406)
+2026-10-07T16:26:28.1632131Z Updating files:  53% (1276/2406)
+2026-10-07T16:26:28.1683213Z Updating files:  54% (1300/2406)
+2026-10-07T16:26:28.1721968Z Updating files:  55% (1324/2406)
+2026-10-07T16:26:28.1763113Z Updating files:  56% (1348/2406)
+2026-10-07T16:26:28.1832758Z Updating files:  57% (1372/2406)
+2026-10-07T16:26:28.1908116Z Updating files:  58% (1396/2406)
+2026-10-07T16:26:28.1963444Z Updating files:  59% (1420/2406)
+2026-10-07T16:26:28.2021740Z Updating files:  60% (1444/2406)
+2026-10-07T16:26:28.2091985Z Updating files:  61% (1468/2406)
+2026-10-07T16:26:28.2158462Z Updating files:  62% (1492/2406)
+2026-10-07T16:26:28.2199804Z Updating files:  63% (1516/2406)
+2026-10-07T16:26:28.2250431Z Updating files:  64% (1540/2406)
+2026-10-07T16:26:28.2298465Z Updating files:  65% (1564/2406)
+2026-10-07T16:26:28.2353372Z Updating files:  66% (1588/2406)
+2026-10-07T16:26:28.2405080Z Updating files:  67% (1613/2406)
+2026-10-07T16:26:28.2488933Z Updating files:  68% (1637/2406)
+2026-10-07T16:26:28.2535924Z Updating files:  69% (1661/2406)
+2026-10-07T16:26:28.2624725Z Updating files:  70% (1685/2406)
+2026-10-07T16:26:28.2672817Z Updating files:  71% (1709/2406)
+2026-10-07T16:26:28.2759505Z Updating files:  72% (1733/2406)
+2026-10-07T16:26:28.2824837Z Updating files:  73% (1757/2406)
+2026-10-07T16:26:28.2881455Z Updating files:  74% (1781/2406)
+2026-10-07T16:26:28.2956923Z Updating files:  75% (1805/2406)
+2026-10-07T16:26:28.3040985Z Updating files:  76% (1829/2406)
+2026-10-07T16:26:28.3118368Z Updating files:  77% (1853/2406)
+2026-10-07T16:26:28.3215074Z Updating files:  78% (1877/2406)
+2026-10-07T16:26:28.3272142Z Updating files:  79% (1901/2406)
+2026-10-07T16:26:28.3311476Z Updating files:  80% (1925/2406)
+2026-10-07T16:26:28.3348960Z Updating files:  81% (1949/2406)
+2026-10-07T16:26:28.3385581Z Updating files:  82% (1973/2406)
+2026-10-07T16:26:28.3430803Z Updating files:  83% (1997/2406)
+2026-10-07T16:26:28.3497086Z Updating files:  84% (2022/2406)
+2026-10-07T16:26:28.3567786Z Updating files:  85% (2046/2406)
+2026-10-07T16:26:28.3634386Z Updating files:  86% (2070/2406)
+2026-10-07T16:26:28.3701421Z Updating files:  87% (2094/2406)
+2026-10-07T16:26:28.3767536Z Updating files:  88% (2118/2406)
+2026-10-07T16:26:28.3856603Z Updating files:  89% (2142/2406)
+2026-10-07T16:26:28.3906281Z Updating files:  90% (2166/2406)
+2026-10-07T16:26:28.3994561Z Updating files:  91% (2190/2406)
+2026-10-07T16:26:28.4030012Z Updating files:  92% (2214/2406)
+2026-10-07T16:26:28.4065153Z Updating files:  93% (2238/2406)
+2026-10-07T16:26:28.4127317Z Updating files:  94% (2262/2406)
+2026-10-07T16:26:28.4186990Z Updating files:  95% (2286/2406)
+2026-10-07T16:26:28.4246096Z Updating files:  96% (2310/2406)
+2026-10-07T16:26:28.4309810Z Updating files:  97% (2334/2406)
+2026-10-07T16:26:28.4367356Z Updating files:  98% (2358/2406)
+2026-10-07T16:26:28.4514116Z Updating files:  99% (2382/2406)
+2026-10-07T16:26:28.4514704Z Updating files: 100% (2406/2406)
+2026-10-07T16:26:28.4514923Z Updating files: 100% (2406/2406), done.
+2026-10-07T16:26:28.4633079Z Note: switching to 'ebf955df7a89ed0c7968f79faec1de49f61ed7cb'.
+2026-10-07T16:26:28.4633312Z 
+2026-10-07T16:26:28.4633465Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-07T16:26:28.4633828Z changes and commit them, and you can discard any commits you make in this
+2026-10-07T16:26:28.4634195Z state without impacting any branches by switching back to a branch.
+2026-10-07T16:26:28.4634398Z 
+2026-10-07T16:26:28.4634535Z If you want to create a new branch to retain commits you create, you may
+2026-10-07T16:26:28.4634859Z do so (now or later) by using -c with the switch command. Example:
+2026-10-07T16:26:28.4635044Z 
+2026-10-07T16:26:28.4635126Z   git switch -c <new-branch-name>
+2026-10-07T16:26:28.4635248Z 
+2026-10-07T16:26:28.4635325Z Or undo this operation with:
+2026-10-07T16:26:28.4635456Z 
+2026-10-07T16:26:28.4635512Z   git switch -
+2026-10-07T16:26:28.4635604Z 
+2026-10-07T16:26:28.4635757Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-07T16:26:28.4635981Z 
+2026-10-07T16:26:28.4636054Z HEAD is now at ebf955d Python 3.14.0
+2026-10-07T16:26:28.4698354Z ##[endgroup]
+2026-10-07T16:26:28.4965183Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-07T16:26:28.5179480Z ebf955df7a89ed0c7968f79faec1de49f61ed7cb
+2026-10-07T16:26:28.5214625Z ##[group]Removing auth
+2026-10-07T16:26:28.5215056Z Removing SSH command configuration
+2026-10-07T16:26:28.5222601Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T16:26:28.5516955Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T16:26:29.0228593Z Removing HTTP extra header
+2026-10-07T16:26:29.0236626Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T16:26:29.0492543Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T16:26:29.4817826Z Removing includeIf entries pointing to credentials config files
+2026-10-07T16:26:29.4826391Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T16:26:29.5029372Z includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path
+2026-10-07T16:26:29.5029922Z includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path
+2026-10-07T16:26:29.5030338Z includeif.gitdir:/github/workspace/stdlib-source/.git.path
+2026-10-07T16:26:29.5030669Z includeif.gitdir:/github/workspace/stdlib-source/.git/worktrees/*.path
+2026-10-07T16:26:29.5066792Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path
+2026-10-07T16:26:29.5263244Z D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:29.5296870Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:29.5526683Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path
+2026-10-07T16:26:29.5729504Z D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:29.5765474Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:29.5995516Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/stdlib-source/.git.path
+2026-10-07T16:26:29.6192968Z /github/runner_temp/git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:29.6223623Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/stdlib-source/.git.path /github/runner_temp/git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:29.6463698Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/stdlib-source/.git/worktrees/*.path
+2026-10-07T16:26:29.6668415Z /github/runner_temp/git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:29.6700173Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/stdlib-source/.git/worktrees/*.path /github/runner_temp/git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:26:29.6929877Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T16:26:30.1171168Z Removing credentials config 'D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config'
+2026-10-07T16:26:30.1180913Z ##[endgroup]
+2026-10-07T16:26:30.1458997Z ##[group]Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+2026-10-07T16:26:30.1459351Z with:
+2026-10-07T16:26:30.1459495Z   node-version: 22
+2026-10-07T16:26:30.1459649Z   check-latest: false
+2026-10-07T16:26:30.1461898Z   token: ***
+2026-10-07T16:26:30.1462063Z   package-manager-cache: true
+2026-10-07T16:26:30.1462249Z ##[endgroup]
+2026-10-07T16:26:30.3222299Z Found in cache @ C:\hostedtoolcache\windows\node\22.23.3\x64
+2026-10-07T16:26:30.3227941Z ##[group]Environment details
+2026-10-07T16:26:36.2146139Z node: v22.23.3
+2026-10-07T16:26:36.2146357Z npm: 10.9.9
+2026-10-07T16:26:36.2146534Z yarn: 1.22.22
+2026-10-07T16:26:36.2146938Z ##[endgroup]
+2026-10-07T16:26:36.2397795Z ##[group]Run ./xmind/Tools/ci-native.ps1 -RuntimeSource ./xlang3 -StdlibSource ./stdlib-source/Lib
+2026-10-07T16:26:36.2398411Z [36;1m./xmind/Tools/ci-native.ps1 -RuntimeSource ./xlang3 -StdlibSource ./stdlib-source/Lib[0m
+2026-10-07T16:26:36.3210030Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-07T16:26:36.3210324Z ##[endgroup]
+2026-10-07T16:26:37.4388928Z [31;1mSwitched to a new branch 'xmind-ci-sqlite'[0m
+2026-10-07T16:26:48.0691542Z -- The C compiler identification is MSVC 19.51.36260.0
+2026-10-07T16:26:49.5186038Z -- The CXX compiler identification is MSVC 19.51.36260.0
+2026-10-07T16:26:49.6403898Z -- Detecting C compiler ABI info
+2026-10-07T16:26:50.9715729Z -- Detecting C compiler ABI info - done
+2026-10-07T16:26:51.0578494Z -- Check for working C compiler: C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe - skipped
+2026-10-07T16:26:51.0592507Z -- Detecting C compile features
+2026-10-07T16:26:51.0654174Z -- Detecting C compile features - done
+2026-10-07T16:26:51.1384206Z -- Detecting CXX compiler ABI info
+2026-10-07T16:26:51.7411854Z -- Detecting CXX compiler ABI info - done
+2026-10-07T16:26:51.7576193Z -- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe - skipped
+2026-10-07T16:26:51.7577041Z -- Detecting CXX compile features
+2026-10-07T16:26:51.7589904Z -- Detecting CXX compile features - done
+2026-10-07T16:26:52.2652417Z -- Looking for sys/types.h
+2026-10-07T16:26:53.3202978Z -- Looking for sys/types.h - found
+2026-10-07T16:26:53.3203518Z -- Looking for stdint.h
+2026-10-07T16:26:54.0216894Z -- Looking for stdint.h - found
+2026-10-07T16:26:54.0217592Z -- Looking for stddef.h
+2026-10-07T16:26:54.6347490Z -- Looking for stddef.h - found
+2026-10-07T16:26:54.6347934Z -- Check size of off64_t
+2026-10-07T16:26:55.5753078Z -- Check size of off64_t - failed
+2026-10-07T16:26:55.5753542Z -- Looking for fseeko
+2026-10-07T16:26:56.2870221Z -- Looking for fseeko - not found
+2026-10-07T16:26:56.2870655Z -- Looking for stdarg.h
+2026-10-07T16:26:56.9349397Z -- Looking for stdarg.h - found
+2026-10-07T16:26:56.9350092Z -- Looking for unistd.h
+2026-10-07T16:26:57.6214382Z -- Looking for unistd.h - not found
+2026-10-07T16:26:57.6214880Z -- Performing Test HAVE___ATTR__VIS_HIDDEN
+2026-10-07T16:26:58.0845595Z -- Performing Test HAVE___ATTR__VIS_HIDDEN - Failed
+2026-10-07T16:26:58.2540705Z -- The ASM_MASM compiler identification is MSVC
+2026-10-07T16:26:58.2580856Z -- Found assembler: C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/ml64.exe
+2026-10-07T16:26:58.3129679Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+2026-10-07T16:26:58.7167797Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+2026-10-07T16:26:58.7168546Z -- Looking for pthread_create in pthreads
+2026-10-07T16:26:59.1977489Z -- Looking for pthread_create in pthreads - not found
+2026-10-07T16:26:59.1977890Z -- Looking for pthread_create in pthread
+2026-10-07T16:26:59.6589268Z -- Looking for pthread_create in pthread - not found
+2026-10-07T16:26:59.6741211Z -- Found Threads: TRUE
+2026-10-07T16:26:59.6821260Z -- Configuring done (21.2s)
+2026-10-07T16:27:00.3196202Z -- Generating done (0.6s)
+2026-10-07T16:27:00.3207467Z -- Build files have been written to: D:/a/xMind/xMind/xlang3/build
+2026-10-07T16:27:00.4525899Z MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+2026-10-07T16:27:00.4837222Z 
+2026-10-07T16:27:00.6648805Z   Checking File Globs
+2026-10-07T16:27:00.7931267Z   1>Checking Build System
+2026-10-07T16:27:01.0540041Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-07T16:27:01.1941766Z   blocksort.c
+2026-10-07T16:27:01.3022055Z   Building Custom Rule D:/a/xMind/xMind/xlang3/third_party/zlib/CMakeLists.txt
+2026-10-07T16:27:01.4695217Z   Building Custom Rule D:/a/xMind/xMind/xlang3/modules/ctypes/CMakeLists.txt
+2026-10-07T16:27:01.4701297Z   Assembling D:\a\xMind\xMind\xlang3\modules\cffi\libffi\win64.asm...
+2026-10-07T16:27:01.5028051Z   adler32.c
+2026-10-07T16:27:01.5201123Z   compress.c
+2026-10-07T16:27:01.5285822Z   crc32.c
+2026-10-07T16:27:01.5448034Z   deflate.c
+2026-10-07T16:27:01.5631645Z   gzclose.c
+2026-10-07T16:27:01.6716398Z   gzlib.c
+2026-10-07T16:27:01.6936901Z   gzread.c
+2026-10-07T16:27:01.7173502Z   gzwrite.c
+2026-10-07T16:27:01.7406893Z   inflate.c
+2026-10-07T16:27:01.7572067Z   infback.c
+2026-10-07T16:27:01.7725690Z   inftrees.c
+2026-10-07T16:27:01.7880459Z   inffast.c
+2026-10-07T16:27:01.8063515Z   trees.c
+2026-10-07T16:27:01.8249314Z   uncompr.c
+2026-10-07T16:27:01.8338356Z   zutil.c
+2026-10-07T16:27:01.8557866Z   Generating Code...
+2026-10-07T16:27:03.5485208Z   zlibstatic.vcxproj -> D:\a\xMind\xMind\xlang3\build\third_party\zlib\Release\zs.lib
+2026-10-07T16:27:03.6036964Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-07T16:27:03.6816115Z   task_module.cpp
+2026-10-07T16:27:03.6816485Z   task_objects.cpp
+2026-10-07T16:27:04.4822280Z   ctypes_ffi.cpp
+2026-10-07T16:27:05.5689936Z   huffman.c
+2026-10-07T16:27:05.7370541Z   crctable.c
+2026-10-07T16:27:05.9484444Z   randtable.c
+2026-10-07T16:27:06.1823304Z   compress.c
+2026-10-07T16:27:06.3583082Z   decompress.c
+2026-10-07T16:27:06.5334256Z   bzlib.c
+2026-10-07T16:27:06.7061496Z   Generating Code...
+2026-10-07T16:27:08.8551945Z   xlang3_task_runtime.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\xlang3_task_runtime.lib
+2026-10-07T16:27:08.9177083Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-07T16:27:09.1638681Z   runtime_lock.cpp
+2026-10-07T16:27:09.2813876Z   thread_module.cpp
+2026-10-07T16:27:09.3249006Z   thread_objects.cpp
+2026-10-07T16:27:09.9508946Z   bzip2static.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\bzip2static.lib
+2026-10-07T16:27:10.0232938Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-07T16:27:10.2985824Z   abc_module.cpp
+2026-10-07T16:27:10.3648833Z   ast_module.cpp
+2026-10-07T16:27:10.4324806Z   atexit_module.cpp
+2026-10-07T16:27:10.4716081Z   binascii_module.cpp
+2026-10-07T16:27:11.0374047Z   ffi.c
+2026-10-07T16:27:11.1322529Z   prep_cif.c
+2026-10-07T16:27:11.1898413Z   types.c
+2026-10-07T16:27:11.2360674Z   Generating Code...
+2026-10-07T16:27:11.7627878Z   xlang3_ctypes_ffi.vcxproj -> D:\a\xMind\xMind\xlang3\build\modules\ctypes\Release\xlang3_ctypes_ffi.lib
+2026-10-07T16:27:12.0418914Z   xlang3_thread_runtime.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\xlang3_thread_runtime.lib
+2026-10-07T16:27:12.2180476Z   bisect_module.cpp
+2026-10-07T16:27:12.2695480Z   bz2_module.cpp
+2026-10-07T16:27:12.2998543Z   cmath_module.cpp
+2026-10-07T16:27:12.7935313Z   decimal_module.cpp
+2026-10-07T16:27:13.5659225Z   codecs_module.cpp
+2026-10-07T16:27:13.7437630Z   locale_module.cpp
+2026-10-07T16:27:14.0777037Z   multibytecodec_module.cpp
+2026-10-07T16:27:14.2445348Z   collections_module.cpp
+2026-10-07T16:27:15.3851078Z   contextvars_module.cpp
+2026-10-07T16:27:15.5741916Z   asyncio_module.cpp
+2026-10-07T16:27:15.7426889Z   asyncio_future.cpp
+2026-10-07T16:27:16.3127398Z   asyncio_task.cpp
+2026-10-07T16:27:16.9214133Z   csv_module.cpp
+2026-10-07T16:27:17.1316536Z   ctypes_module.cpp
+2026-10-07T16:27:17.3728376Z   errno_module.cpp
+2026-10-07T16:27:17.8713310Z   faulthandler_module.cpp
+2026-10-07T16:27:18.4264779Z   functools_module.cpp
+2026-10-07T16:27:18.8226241Z   gc_module.cpp
+2026-10-07T16:27:18.9456162Z   lsprof_module.cpp
+2026-10-07T16:27:19.2478075Z   array_module.cpp
+2026-10-07T16:27:19.7907738Z   imp_module.cpp
+2026-10-07T16:27:20.2292928Z   importlib_module.cpp
+2026-10-07T16:27:20.4925118Z   interpreters_module.cpp
+2026-10-07T16:27:20.6403971Z   itertools_module.cpp
+2026-10-07T16:27:21.1109747Z   io_module.cpp
+2026-10-07T16:27:21.9348989Z   json_module.cpp
+2026-10-07T16:27:22.1648279Z   marshal_module.cpp
+2026-10-07T16:27:22.4675585Z   msvcrt_module.cpp
+2026-10-07T16:27:22.8063905Z   multiprocessing_module.cpp
+2026-10-07T16:27:23.5795217Z   opcode_module.cpp
+2026-10-07T16:27:23.8498355Z   operator_module.cpp
+2026-10-07T16:27:24.2720472Z   os_module.cpp
+2026-10-07T16:27:24.3157843Z   overlapped_module.cpp
+2026-10-07T16:27:24.8999802Z   pickle_module.cpp
+2026-10-07T16:27:25.2195022Z   pyexpat_module.cpp
+2026-10-07T16:27:26.2865521Z   queue_module.cpp
+2026-10-07T16:27:26.3920547Z   random_module.cpp
+2026-10-07T16:27:26.8202267Z   signal_module.cpp
+2026-10-07T16:27:26.9221758Z   sha2_module.cpp
+2026-10-07T16:27:27.7060148Z   socket_select_module.cpp
+2026-10-07T16:27:27.8216330Z   sre_module.cpp
+2026-10-07T16:27:28.3239140Z   source_encoding.cpp
+2026-10-07T16:27:28.7933655Z   stat_module.cpp
+2026-10-07T16:27:29.1780914Z   string_module.cpp
+2026-10-07T16:27:29.7657672Z   struct_module.cpp
+2026-10-07T16:27:30.1021666Z   sysconfig_native_module.cpp
+2026-10-07T16:27:30.2699166Z   sys_module.cpp
+2026-10-07T16:27:30.5214239Z   time_module.cpp
+2026-10-07T16:27:31.2350402Z   tokenize_module.cpp
+2026-10-07T16:27:31.4525787Z   typing_module.cpp
+2026-10-07T16:27:32.6622075Z   unicodedata_module.cpp
+2026-10-07T16:27:32.6846105Z   weakref_module.cpp
+2026-10-07T16:27:32.8329021Z   warnings_module.cpp
+2026-10-07T16:27:32.8927829Z   winapi_module.cpp
+2026-10-07T16:27:34.0318801Z   posix_process_module.cpp
+2026-10-07T16:27:34.1670949Z   winreg_module.cpp
+2026-10-07T16:27:34.8640117Z   zlib_module.cpp
+2026-10-07T16:27:34.8974118Z   zip_archive.cpp
+2026-10-07T16:27:35.3556532Z   zipimport_module.cpp
+2026-10-07T16:27:38.5737781Z   xlang3_system_runtime.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\xlang3_system_runtime.lib
+2026-10-07T16:27:38.6129596Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-07T16:27:38.7166151Z   builtins.cpp
+2026-10-07T16:27:38.7173216Z   builtin_modules.cpp
+2026-10-07T16:27:38.7173978Z   exception_builtins.cpp
+2026-10-07T16:27:38.7174705Z   functional_builtins.cpp
+2026-10-07T16:27:40.0036160Z   io_builtins.cpp
+2026-10-07T16:27:40.0865393Z   math_module.cpp
+2026-10-07T16:27:43.5048237Z   object_type_builtins.cpp
+2026-10-07T16:27:44.2576389Z   raw_block_builtins.cpp
+2026-10-07T16:27:45.7297879Z   sequence_builtins.cpp
+2026-10-07T16:27:46.4760904Z   ipc_runtime.cpp
+2026-10-07T16:27:50.4585811Z   shared_memory_block_stream.cpp
+2026-10-07T16:27:52.4201712Z   shared_memory_transport.cpp
+2026-10-07T16:27:54.2985107Z   block_stream.cpp
+2026-10-07T16:27:54.4772000Z   ipc_value_marshal.cpp
+2026-10-07T16:27:54.7973957Z   xlang_stream.cpp
+2026-10-07T16:27:55.3750620Z   c_api_bridge.cpp
+2026-10-07T16:27:55.6599859Z   exceptions.cpp
+2026-10-07T16:27:56.0019355Z   expression.cpp
+2026-10-07T16:27:56.6675279Z   functional_iterators.cpp
+2026-10-07T16:27:57.7503716Z   generator.cpp
+2026-10-07T16:27:57.8475167Z   attribute.cpp
+2026-10-07T16:28:00.1778976Z   list_methods.cpp
+2026-10-07T16:28:01.0740762Z   dict_methods.cpp
+2026-10-07T16:28:01.1263467Z   file_methods.cpp
+2026-10-07T16:28:01.7668524Z   int_methods.cpp
+2026-10-07T16:28:03.1756850Z   set_methods.cpp
+2026-10-07T16:28:04.8711978Z   string_methods.cpp
+2026-10-07T16:28:05.5063131Z   tuple_methods.cpp
+2026-10-07T16:28:06.8861002Z   bytes_methods.cpp
+2026-10-07T16:28:06.9589052Z   iterator_methods.cpp
+2026-10-07T16:28:08.1419636Z   property_methods.cpp
+2026-10-07T16:28:10.3662791Z   x3_bucket_allocator.cpp
+2026-10-07T16:28:11.8905058Z   x3_memory.cpp
+2026-10-07T16:28:12.9291595Z   x3_object_pool.cpp
+2026-10-07T16:28:13.1576267Z   x3_page_allocator.cpp
+2026-10-07T16:28:13.1835303Z   x3_runtime_memory.cpp
+2026-10-07T16:28:13.2413770Z   x3_temp_arena.cpp
+2026-10-07T16:28:13.7165650Z   perf_counters.cpp
+2026-10-07T16:28:13.7488357Z   interpreter_events.cpp
+2026-10-07T16:28:13.7921172Z   bigint.cpp
+2026-10-07T16:28:13.8576332Z   value.cpp
+2026-10-07T16:28:13.8932906Z   value_hash.cpp
+2026-10-07T16:28:15.2727463Z   object_model.cpp
+2026-10-07T16:28:15.3421554Z   sequence.cpp
+2026-10-07T16:28:16.5844165Z   mapping.cpp
+2026-10-07T16:28:22.5424101Z   set_object.cpp
+2026-10-07T16:28:22.8081746Z   module_object.cpp
+2026-10-07T16:28:23.0699598Z   module_slots.cpp
+2026-10-07T16:28:25.4742057Z   runtime.cpp
+2026-10-07T16:28:26.1478676Z   unicode_data.cpp
+2026-10-07T16:28:27.8745498Z   unicode_names.cpp
+2026-10-07T16:28:29.0984606Z   vfs.cpp
+2026-10-07T16:28:34.0934862Z   source_cursor.cpp
+2026-10-07T16:28:34.5105651Z   lexer.cpp
+2026-10-07T16:28:34.7689831Z   parser.cpp
+2026-10-07T16:28:37.4477390Z   scope_analysis.cpp
+2026-10-07T16:28:40.2201322Z   xlang_module_globals.cpp
+2026-10-07T16:28:40.9932418Z   lower.cpp
+2026-10-07T16:28:41.3183996Z   codec.cpp
+2026-10-07T16:28:42.3464966Z   xlang_interpreter.cpp
+2026-10-07T16:28:44.4192931Z   xlang_vm_attr.cpp
+2026-10-07T16:28:44.9128651Z   xlang_vm_loop.cpp
+2026-10-07T16:28:48.6585728Z   object_table.cpp
+2026-10-07T16:28:50.1105780Z   memory_file_store.cpp
+2026-10-07T16:28:52.3511528Z   shared_memory_transport_win32.cpp
+2026-10-07T16:28:53.7598649Z   debug_session.cpp
+2026-10-07T16:28:56.9526654Z   dap_session.cpp
+2026-10-07T16:28:58.2763723Z   dump.cpp
+2026-10-07T16:29:00.7434992Z   c_api.cpp
+2026-10-07T16:29:04.2720563Z   buffer_api.cpp
+2026-10-07T16:29:06.5487940Z   tensor_storage.cpp
+2026-10-07T16:29:08.3025539Z   tensor_serialization.cpp
+2026-10-07T16:29:11.0665382Z   tensor_graph.cpp
+2026-10-07T16:29:11.5976898Z   tensor_cpu.cpp
+2026-10-07T16:29:12.1990226Z   tensor_module.cpp
+2026-10-07T16:29:15.2177864Z   tensor_api.cpp
+2026-10-07T16:29:15.7481145Z   protocol_api.cpp
+2026-10-07T16:29:17.0988933Z   stream_api.cpp
+2026-10-07T16:29:17.5901756Z   native_serialization_api.cpp
+2026-10-07T16:29:17.7409156Z   ipc_api.cpp
+2026-10-07T16:29:18.7018366Z   value_graph_writer.cpp
+2026-10-07T16:29:19.1425716Z   value_graph_reader.cpp
+2026-10-07T16:29:19.2056973Z   value_graph_lifetime.cpp
+2026-10-07T16:29:21.9101357Z   import_loader.cpp
+2026-10-07T16:29:24.0988617Z   native_package_loader.cpp
+2026-10-07T16:29:27.9618652Z   Auto build dll exports
+2026-10-07T16:29:28.3100217Z   xlang3_thread_runtime.lib(thread_module.obj) : MSIL .netmodule or module compiled with /GL found; restarting link with /LTCG; add /LTCG to the link command line to improve linker performance
+2026-10-07T16:29:30.4589930Z      Creating library D:/a/xMind/xMind/xlang3/build/Release/xlang3_runtime.lib and object D:/a/xMind/xMind/xlang3/build/Release/xlang3_runtime.exp
+2026-10-07T16:29:30.7906744Z   Generating code
+2026-10-07T16:30:24.6972168Z   Finished generating code
+2026-10-07T16:30:25.5067687Z   xlang3_runtime.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\xlang3_runtime.dll
+2026-10-07T16:30:25.5487829Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-07T16:30:25.6084491Z   xlang3.cpp
+2026-10-07T16:30:29.3335192Z   xlang3.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\xlang3.exe
+2026-10-07T16:30:29.4572366Z MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+2026-10-07T16:30:29.4856029Z 
+2026-10-07T16:30:29.6541963Z   Checking File Globs
+2026-10-07T16:30:29.8057023Z   Building Custom Rule D:/a/xMind/xMind/xlang3/modules/json/CMakeLists.txt
+2026-10-07T16:30:29.9113557Z   main.cpp
+2026-10-07T16:30:30.3446963Z   json_package.cpp
+2026-10-07T16:30:31.8545120Z   json_convert.cpp
+2026-10-07T16:30:33.1796488Z   Generating Code...
+2026-10-07T16:30:35.5366079Z      Creating library D:/a/xMind/xMind/xlang3/build/Release/modules/xlang_json.x3pkg.lib and object D:/a/xMind/xMind/xlang3/build/Release/modules/xlang_json.x3pkg.exp
+2026-10-07T16:30:35.6295362Z   xlang_json_native_package.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\modules\xlang_json.x3pkg.dll
+2026-10-07T16:30:35.7381649Z MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+2026-10-07T16:30:35.7653660Z 
+2026-10-07T16:30:35.9081654Z   Checking File Globs
+2026-10-07T16:30:36.0568904Z   Building Custom Rule D:/a/xMind/xMind/xlang3/modules/sqlite/CMakeLists.txt
+2026-10-07T16:30:36.1650623Z   main.cpp
+2026-10-07T16:30:36.6096973Z   sqlite_package.cpp
+2026-10-07T16:30:37.1271246Z   sqlite_values.cpp
+2026-10-07T16:30:37.5640451Z   sqlite_handles.cpp
+2026-10-07T16:30:38.0060492Z   Generating Code...
+2026-10-07T16:30:38.4562028Z   sqlite3.c
+2026-10-07T16:30:54.1077382Z      Creating library D:/a/xMind/xMind/xlang3/build/Release/modules/xlang_sqlite3.x3pkg.lib and object D:/a/xMind/xMind/xlang3/build/Release/modules/xlang_sqlite3.x3pkg.exp
+2026-10-07T16:30:54.1773767Z   xlang_sqlite3_native_package.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\modules\xlang_sqlite3.x3pkg.dll
+2026-10-07T16:30:54.3274769Z Pinned jsoncons native source and license hashes verified: 176 files
+2026-10-07T16:31:00.9199342Z 
+2026-10-07T16:31:00.9200356Z added 96 packages in 6s
+2026-10-07T16:31:05.1925795Z -- The C compiler identification is MSVC 19.51.36260.0
+2026-10-07T16:31:05.7663387Z -- The CXX compiler identification is MSVC 19.51.36260.0
+2026-10-07T16:31:05.7861858Z -- Detecting C compiler ABI info
+2026-10-07T16:31:06.3703981Z -- Detecting C compiler ABI info - done
+2026-10-07T16:31:06.3868601Z -- Check for working C compiler: C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe - skipped
+2026-10-07T16:31:06.3872286Z -- Detecting C compile features
+2026-10-07T16:31:06.3879046Z -- Detecting C compile features - done
+2026-10-07T16:31:06.3965962Z -- Detecting CXX compiler ABI info
+2026-10-07T16:31:07.0016106Z -- Detecting CXX compiler ABI info - done
+2026-10-07T16:31:07.0184807Z -- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe - skipped
+2026-10-07T16:31:07.0187952Z -- Detecting CXX compile features
+2026-10-07T16:31:07.0198013Z -- Detecting CXX compile features - done
+2026-10-07T16:31:07.0608987Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+2026-10-07T16:31:07.4838244Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+2026-10-07T16:31:07.4838923Z -- Looking for pthread_create in pthreads
+2026-10-07T16:31:07.9658283Z -- Looking for pthread_create in pthreads - not found
+2026-10-07T16:31:07.9659232Z -- Looking for pthread_create in pthread
+2026-10-07T16:31:08.5620756Z -- Looking for pthread_create in pthread - not found
+2026-10-07T16:31:08.5632932Z -- Found Threads: TRUE
+2026-10-07T16:31:08.5690356Z -- Configuring done (4.3s)
+2026-10-07T16:31:09.1118556Z -- Generating done (0.5s)
+2026-10-07T16:31:09.1127367Z -- Build files have been written to: D:/a/xMind/xMind/xmind/build/native
+2026-10-07T16:31:09.2460017Z MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+2026-10-07T16:31:09.2981106Z 
+2026-10-07T16:31:09.5157883Z   1>Checking Build System
+2026-10-07T16:31:09.7047713Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:31:09.7085105Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:31:09.8060324Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:31:09.9002844Z   secret_protection.cpp
+2026-10-07T16:31:09.9110284Z   windows_process.cpp
+2026-10-07T16:31:09.9280051Z   mcp_wire.cpp
+2026-10-07T16:31:11.4202150Z   agentflow_secrets.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_secrets.lib
+2026-10-07T16:31:11.4973846Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:31:11.5843043Z   workspace_tools.cpp
+2026-10-07T16:31:14.0204756Z   mcp_requests.cpp
+2026-10-07T16:31:14.1131510Z   agentflow_process.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process.lib
+2026-10-07T16:31:14.1703092Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:31:14.2525921Z   backend_lease.cpp
+2026-10-07T16:31:15.0622369Z   windows_workspace.cpp
+2026-10-07T16:31:15.9031713Z D:\a\xMind\xMind\xmind\Native\src\backend_lease.cpp(20,72): warning C4996: 'std::filesystem::u8path': warning STL4021: The std::filesystem::u8path() overloads are deprecated in C++20. The constructors of std::filesystem::path provide equivalent functionality via construction from u8string, u8string_view, or iterators with value_type char8_t. You can define _SILENCE_CXX20_U8PATH_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [D:\a\xMind\xMind\xmind\build\native\agentflow_core.vcxproj]
+2026-10-07T16:31:16.4339150Z   xlang_sqlite.cpp
+2026-10-07T16:31:17.2307838Z   mcp_handshake.cpp
+2026-10-07T16:31:17.4046378Z C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Tools\MSVC\14.51.36231\include\memory(3997,10): warning C4996: 'std::atomic_store_explicit': warning STL4029: std::atomic_*() overloads for shared_ptr are deprecated in C++20. The shared_ptr specialization of std::atomic provides superior functionality. You can define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [D:\a\xMind\xMind\xmind\build\native\agentflow_core.vcxproj]
+2026-10-07T16:31:17.4049463Z   (compiling source file '../../Native/src/xlang_sqlite.cpp')
+2026-10-07T16:31:17.4051839Z       C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Tools\MSVC\14.51.36231\include\memory(3997,10):
+2026-10-07T16:31:17.4052952Z       the template instantiation context (the oldest one first) is
+2026-10-07T16:31:17.4053819Z           D:\a\xMind\xMind\xlang3\sdk\xlang3\cpp\package.h(49,23):
+2026-10-07T16:31:17.4055543Z           see reference to function template instantiation 'void std::atomic_store<X::detail::InstanceEvents>(std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents>)' being compiled
+2026-10-07T16:31:17.4056926Z   
+2026-10-07T16:31:17.6658087Z   repository_instruction_context.cpp
+2026-10-07T16:31:17.6714572Z   repository.cpp
+2026-10-07T16:31:20.3525844Z   Generating Code...
+2026-10-07T16:31:22.9272110Z   Generating Code...
+2026-10-07T16:31:29.0201630Z   agentflow_workspace.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_workspace.lib
+2026-10-07T16:31:29.1552263Z   agentflow_mcp_wire.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_wire.lib
+2026-10-07T16:31:29.2305008Z   persistence_service.cpp
+2026-10-07T16:31:30.8354999Z   Generating Code...
+2026-10-07T16:31:36.9929451Z   agentflow_core.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_core.lib
+2026-10-07T16:31:37.0322928Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:31:37.1029548Z   permission_waiter.cpp
+2026-10-07T16:31:38.9996827Z   agentflow_policy.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_policy.lib
+2026-10-07T16:31:39.0441831Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:31:39.1126814Z   process_executor.cpp
+2026-10-07T16:31:44.8490665Z   agentflow_process_effects.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_effects.lib
+2026-10-07T16:31:44.8887624Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:31:44.9542975Z   process_executor_contract.cpp
+2026-10-07T16:31:51.5654911Z   agentflow_process_executor_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_executor_contract.exe
+2026-10-07T16:31:51.7544040Z MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+2026-10-07T16:31:51.7816462Z 
+2026-10-07T16:31:52.2424948Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:31:52.3581807Z   agentflow_workspace.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_workspace.lib
+2026-10-07T16:31:52.3787347Z   agentflow_mcp_wire.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_wire.lib
+2026-10-07T16:31:52.4097227Z   agentflow_secrets.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_secrets.lib
+2026-10-07T16:31:52.5173301Z   model_stream.cpp
+2026-10-07T16:31:52.5408271Z   agentflow_process.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process.lib
+2026-10-07T16:31:52.7106277Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:31:52.7377322Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:31:52.8003628Z   windows_mcp_stdio.cpp
+2026-10-07T16:31:52.8342657Z   json_schema.cpp
+2026-10-07T16:31:55.4204709Z   mcp_client.cpp
+2026-10-07T16:31:56.0306126Z   model_request.cpp
+2026-10-07T16:31:58.7436117Z   Generating Code...
+2026-10-07T16:32:01.9170353Z   Generating Code...
+2026-10-07T16:32:02.1572014Z   agentflow_mcp_stdio.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_stdio.lib
+2026-10-07T16:32:08.5391499Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:09.0800222Z   agentflow_models.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_models.lib
+2026-10-07T16:32:10.0682703Z   winhttp_stream_transport.cpp
+2026-10-07T16:32:14.3577968Z   agentflow_core.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_core.lib
+2026-10-07T16:32:16.9209269Z   agentflow_provider_transport.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_provider_transport.lib
+2026-10-07T16:32:16.9495250Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:17.0489370Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:17.0787919Z   mcp_wire_contract.cpp
+2026-10-07T16:32:17.0868552Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:17.5963572Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:17.6022712Z   mcp_configuration.cpp
+2026-10-07T16:32:17.6625487Z   graph.cpp
+2026-10-07T16:32:25.5305947Z   agent_instructions.cpp
+2026-10-07T16:32:26.0756523Z   graph_catalog.cpp
+2026-10-07T16:32:27.4770910Z   agentflow_mcp_wire_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_wire_contract.exe
+2026-10-07T16:32:27.7627874Z   agentflow_json_schema.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_json_schema.lib
+2026-10-07T16:32:27.8086602Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:27.9010501Z   credential_repository_contract.cpp
+2026-10-07T16:32:30.5481074Z   Generating Code...
+2026-10-07T16:32:33.7057770Z   agentflow_instruction_configuration.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_instruction_configuration.lib
+2026-10-07T16:32:33.8874003Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:33.9659353Z   http_server.cpp
+2026-10-07T16:32:34.3028706Z   agentflow_credential_repository_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_credential_repository_contract.exe
+2026-10-07T16:32:34.5170134Z   agentflow_mcp_configuration.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_configuration.lib
+2026-10-07T16:32:36.3085997Z   agentflow_policy.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_policy.lib
+2026-10-07T16:32:36.4573143Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:36.5669648Z   edit_executor.cpp
+2026-10-07T16:32:37.6017317Z   agentflow_graph.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph.lib
+2026-10-07T16:32:37.7820518Z   agentflow_process_effects.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_effects.lib
+2026-10-07T16:32:37.8313197Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:37.9256029Z   mcp_configuration_contract.cpp
+2026-10-07T16:32:39.9992934Z   create_executor.cpp
+2026-10-07T16:32:44.7980695Z   Generating Code...
+2026-10-07T16:32:48.1170887Z   agentflow_mcp_configuration_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_configuration_contract.exe
+2026-10-07T16:32:48.3035603Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:48.6119678Z   agentflow_edits.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_edits.lib
+2026-10-07T16:32:48.7110483Z   instruction_configuration_contract.cpp
+2026-10-07T16:32:54.7743207Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:54.8475795Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:54.9409164Z   edit_executor_contract.cpp
+2026-10-07T16:32:55.7648732Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:32:55.7728523Z   agentflow_instruction_configuration_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_instruction_configuration_contract.exe
+2026-10-07T16:32:55.8481945Z   operation_repository_contract.cpp
+2026-10-07T16:32:56.0198964Z   agentflow_http.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_http.lib
+2026-10-07T16:32:56.0938141Z   create_executor_contract.cpp
+2026-10-07T16:33:00.7257451Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:01.8436899Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:02.7655313Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:03.6016355Z   agentflow_operation_repository_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_operation_repository_contract.exe
+2026-10-07T16:33:03.7874560Z   mcp_client_contract.cpp
+2026-10-07T16:33:04.0943119Z   agentflow_edit_executor_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_edit_executor_contract.exe
+2026-10-07T16:33:04.1421771Z   mcp_handshake_contract.cpp
+2026-10-07T16:33:05.2786960Z   agentflow_create_executor_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_create_executor_contract.exe
+2026-10-07T16:33:05.3246039Z   mcp_stdio_contract.cpp
+2026-10-07T16:33:09.6752240Z   agentflow_mcp_client_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_client_contract.exe
+2026-10-07T16:33:09.9313401Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:10.0196976Z   permission_waiter_contract.cpp
+2026-10-07T16:33:10.3146534Z   agentflow_mcp_handshake_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_handshake_contract.exe
+2026-10-07T16:33:10.4006427Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:10.4842647Z   persistence_service_contract.cpp
+2026-10-07T16:33:14.9744499Z   agentflow_permission_waiter_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_permission_waiter_contract.exe
+2026-10-07T16:33:15.2120353Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:15.2965299Z   process_configuration.cpp
+2026-10-07T16:33:15.7720074Z   agentflow_persistence_service_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_persistence_service_contract.exe
+2026-10-07T16:33:15.8640150Z   agentflow_mcp_stdio_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_stdio_contract.exe
+2026-10-07T16:33:15.9506213Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:15.9730085Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:16.0437669Z   approved_edit_http_fixture.cpp
+2026-10-07T16:33:16.0590434Z   process_contract.cpp
+2026-10-07T16:33:22.6612462Z   agentflow_process_configuration.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_configuration.lib
+2026-10-07T16:33:22.6666762Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:22.7097503Z   process_configuration_contract.cpp
+2026-10-07T16:33:23.9610478Z   agentflow_process_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_contract.exe
+2026-10-07T16:33:24.5762004Z   agentflow_process_executor_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_executor_contract.exe
+2026-10-07T16:33:24.7439777Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:24.8345542Z   repository_contract.cpp
+2026-10-07T16:33:25.6330767Z   agentflow_approved_edit_http_fixture.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_approved_edit_http_fixture.exe
+2026-10-07T16:33:25.7789473Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:25.8684118Z   schema_budget_fixture.cpp
+2026-10-07T16:33:28.9588457Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:29.0311938Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:29.0973591Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:29.1333004Z   agentflow_process_configuration_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_configuration_contract.exe
+2026-10-07T16:33:29.1969966Z   graph_contract.cpp
+2026-10-07T16:33:29.4225375Z   agentflow_repository_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_repository_contract.exe
+2026-10-07T16:33:29.5705837Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:29.6510927Z   model_stream_contract.cpp
+2026-10-07T16:33:32.2795207Z   agentflow_schema_budget_fixture.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_schema_budget_fixture.exe
+2026-10-07T16:33:32.3332686Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:32.4198403Z   model_request_contract.cpp
+2026-10-07T16:33:34.8606974Z   agentflow_model_stream_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_model_stream_contract.exe
+2026-10-07T16:33:34.9322906Z   chat_provider.cpp
+2026-10-07T16:33:37.7903427Z   http_stream_transport_contract.cpp
+2026-10-07T16:33:39.2128166Z   agentflow_chat_provider.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_chat_provider.lib
+2026-10-07T16:33:39.3628680Z   agentflow_model_request_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_model_request_contract.exe
+2026-10-07T16:33:39.5052569Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:39.5884071Z   secret_protection_contract.cpp
+2026-10-07T16:33:40.9029746Z   agentflow_secret_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_secret_contract.exe
+2026-10-07T16:33:40.9523577Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:41.0394177Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:41.1217238Z   workspace_tools_contract.cpp
+2026-10-07T16:33:41.1590668Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:41.2386025Z   xlang_sqlite_contract.cpp
+2026-10-07T16:33:41.3107784Z   agentflow_graph_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph_contract.exe
+2026-10-07T16:33:41.4746781Z   agentflow_http_stream_transport_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_http_stream_transport_contract.exe
+2026-10-07T16:33:41.5351611Z   chat_provider_contract.cpp
+2026-10-07T16:33:42.9589521Z   agentflow_xlang_sqlite_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_xlang_sqlite_contract.exe
+2026-10-07T16:33:43.0999195Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:43.1743650Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:43.2590047Z   schema_worker_main.cpp
+2026-10-07T16:33:44.2101748Z   agentflow_chat_provider_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_chat_provider_contract.exe
+2026-10-07T16:33:44.2669791Z   json_schema_contract.cpp
+2026-10-07T16:33:47.3040822Z   agentflow_json_schema_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_json_schema_contract.exe
+2026-10-07T16:33:47.3874192Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:47.4696865Z   admin_main.cpp
+2026-10-07T16:33:47.9929798Z   agentflow_workspace_tools_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_workspace_tools_contract.exe
+2026-10-07T16:33:48.0768690Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:48.1501855Z   cli_main.cpp
+2026-10-07T16:33:51.2683670Z   xmind_schema_worker.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind_schema_worker.exe
+2026-10-07T16:33:51.3078745Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:51.3890267Z   schema_worker.cpp
+2026-10-07T16:33:54.1465450Z   xmind_admin.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind_admin.exe
+2026-10-07T16:33:54.2058702Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:33:54.2959971Z   persistence_demo.cpp
+2026-10-07T16:33:59.8137265Z   xmind_persistence_demo.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind_persistence_demo.exe
+2026-10-07T16:34:00.5731754Z   agentflow_schema_worker.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_schema_worker.lib
+2026-10-07T16:34:01.6631083Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:34:01.7275566Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:34:01.8114300Z   mcp_tool_registry.cpp
+2026-10-07T16:34:01.8194775Z   schema_worker_contract.cpp
+2026-10-07T16:34:02.9243653Z   xmind_cli.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind_cli.exe
+2026-10-07T16:34:08.1619978Z   agentflow_mcp_effects.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_effects.lib
+2026-10-07T16:34:08.2110472Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:34:08.2826588Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:34:08.3572710Z   mcp_effect_contract.cpp
+2026-10-07T16:34:08.3700038Z   agent_runner.cpp
+2026-10-07T16:34:08.9545924Z   agentflow_schema_worker_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_schema_worker_contract.exe
+2026-10-07T16:34:12.8341797Z   agent_service.cpp
+2026-10-07T16:34:14.8998723Z   agentflow_mcp_effect_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_effect_contract.exe
+2026-10-07T16:34:15.0798569Z   Generating Code...
+2026-10-07T16:34:23.3398912Z   agentflow_agent.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_agent.lib
+2026-10-07T16:34:23.3888068Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:34:23.3912988Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:34:23.4753685Z   server_main.cpp
+2026-10-07T16:34:23.4834169Z   graph_children_contract.cpp
+2026-10-07T16:34:23.4908731Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:34:23.5840824Z   agent_service_contract.cpp
+2026-10-07T16:34:27.5697251Z   agentflow_agent_service_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_agent_service_contract.exe
+2026-10-07T16:34:27.7152308Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:34:27.8100936Z   agent_runner_contract.cpp
+2026-10-07T16:34:28.6523558Z   xmind_server.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind_server.exe
+2026-10-07T16:34:34.7822361Z   agentflow_graph_children_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph_children_contract.exe
+2026-10-07T16:34:35.5522244Z   agentflow_agent_runner_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_agent_runner_contract.exe
+2026-10-07T16:34:35.7235282Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-07T16:34:43.2141948Z Test project D:/a/xMind/xMind/xmind/build/native
+2026-10-07T16:34:43.2189262Z       Start  1: native_json_schema_contract
+2026-10-07T16:34:43.2362372Z  1/39 Test  #1: native_json_schema_contract .................   Passed    0.02 sec
+2026-10-07T16:34:43.2438909Z       Start  2: native_mcp_wire_contract
+2026-10-07T16:34:43.2639618Z  2/39 Test  #2: native_mcp_wire_contract ....................   Passed    0.02 sec
+2026-10-07T16:34:43.2642566Z       Start  3: model_stream_protocol_contract
+2026-10-07T16:34:43.3283179Z  3/39 Test  #3: model_stream_protocol_contract ..............   Passed    0.06 sec
+2026-10-07T16:34:43.3285916Z       Start  4: model_request_contract
+2026-10-07T16:34:43.3427306Z  4/39 Test  #4: model_request_contract ......................   Passed    0.01 sec
+2026-10-07T16:34:43.3430906Z       Start  5: native_secret_protection_contract
+2026-10-07T16:34:43.3551553Z  5/39 Test  #5: native_secret_protection_contract ...........   Passed    0.01 sec
+2026-10-07T16:34:43.3556613Z       Start  6: native_graph_children_contract
+2026-10-07T16:34:44.4678931Z  6/39 Test  #6: native_graph_children_contract ..............   Passed    1.11 sec
+2026-10-07T16:34:44.4681977Z       Start  7: native_graph_contract
+2026-10-07T16:34:45.6777667Z  7/39 Test  #7: native_graph_contract .......................   Passed    1.21 sec
+2026-10-07T16:34:45.6778794Z       Start  8: native_instruction_configuration_contract
+2026-10-07T16:34:46.6729106Z  8/39 Test  #8: native_instruction_configuration_contract ...   Passed    0.99 sec
+2026-10-07T16:34:46.6732059Z       Start  9: native_process_configuration_contract
+2026-10-07T16:34:49.4427639Z  9/39 Test  #9: native_process_configuration_contract .......   Passed    2.77 sec
+2026-10-07T16:34:49.4429884Z       Start 10: native_process_executor_contract
+2026-10-07T16:35:09.6404012Z 10/39 Test #10: native_process_executor_contract ............   Passed   20.20 sec
+2026-10-07T16:35:09.6405466Z       Start 11: native_agent_process_http_contract
+2026-10-07T16:35:12.7999135Z 11/39 Test #11: native_agent_process_http_contract ..........   Passed    3.16 sec
+2026-10-07T16:35:12.7999794Z       Start 12: native_process_adapter_contract
+2026-10-07T16:35:16.9266292Z 12/39 Test #12: native_process_adapter_contract .............   Passed    4.13 sec
+2026-10-07T16:35:16.9269816Z       Start 13: native_mcp_configuration_contract
+2026-10-07T16:35:17.1042541Z 13/39 Test #13: native_mcp_configuration_contract ...........   Passed    0.18 sec
+2026-10-07T16:35:17.1044630Z       Start 14: native_schema_worker_contract
+2026-10-07T16:35:19.4534814Z 14/39 Test #14: native_schema_worker_contract ...............   Passed    2.35 sec
+2026-10-07T16:35:19.4537085Z       Start 15: native_mcp_stdio_contract
+2026-10-07T16:35:22.4923513Z 15/39 Test #15: native_mcp_stdio_contract ...................   Passed    3.04 sec
+2026-10-07T16:35:22.4926671Z       Start 16: native_mcp_handshake_contract
+2026-10-07T16:35:23.2914255Z 16/39 Test #16: native_mcp_handshake_contract ...............   Passed    0.80 sec
+2026-10-07T16:35:23.2916636Z       Start 17: native_mcp_client_contract
+2026-10-07T16:35:24.2807158Z 17/39 Test #17: native_mcp_client_contract ..................   Passed    0.99 sec
+2026-10-07T16:35:24.2815950Z       Start 18: native_mcp_effect_contract
+2026-10-07T16:35:40.4253039Z 18/39 Test #18: native_mcp_effect_contract ..................   Passed   16.14 sec
+2026-10-07T16:35:40.4254797Z       Start 19: native_agent_service_contract
+2026-10-07T16:35:40.7934463Z 19/39 Test #19: native_agent_service_contract ...............   Passed    0.37 sec
+2026-10-07T16:35:40.7937231Z       Start 20: native_agent_runner_contract
+2026-10-07T16:35:42.5463743Z 20/39 Test #20: native_agent_runner_contract ................   Passed    1.75 sec
+2026-10-07T16:35:42.5466233Z       Start 21: native_create_executor_contract
+2026-10-07T16:35:43.9181979Z 21/39 Test #21: native_create_executor_contract .............   Passed    1.37 sec
+2026-10-07T16:35:43.9184453Z       Start 22: native_edit_executor_contract
+2026-10-07T16:35:44.7688789Z 22/39 Test #22: native_edit_executor_contract ...............   Passed    0.85 sec
+2026-10-07T16:35:44.7690808Z       Start 23: native_approved_edit_http_contract
+2026-10-07T16:35:45.5617445Z 23/39 Test #23: native_approved_edit_http_contract ..........   Passed    0.79 sec
+2026-10-07T16:35:45.5619836Z       Start 24: native_workspace_tools_contract
+2026-10-07T16:35:46.7756541Z 24/39 Test #24: native_workspace_tools_contract .............   Passed    1.21 sec
+2026-10-07T16:35:46.7758948Z       Start 25: native_repository_instructions_contract
+2026-10-07T16:35:47.1284490Z 25/39 Test #25: native_repository_instructions_contract .....   Passed    0.35 sec
+2026-10-07T16:35:47.1286260Z       Start 26: native_chat_provider_contract
+2026-10-07T16:35:47.2489862Z 26/39 Test #26: native_chat_provider_contract ...............   Passed    0.12 sec
+2026-10-07T16:35:47.2492497Z       Start 27: native_http_stream_transport_contract
+2026-10-07T16:35:52.1921149Z 27/39 Test #27: native_http_stream_transport_contract .......   Passed    4.94 sec
+2026-10-07T16:35:52.1923959Z       Start 28: native_agent_http_contract
+2026-10-07T16:35:53.6565385Z 28/39 Test #28: native_agent_http_contract ..................   Passed    1.46 sec
+2026-10-07T16:35:53.6567796Z       Start 29: native_agent_edit_http_contract
+2026-10-07T16:36:00.4834216Z 29/39 Test #29: native_agent_edit_http_contract .............   Passed    6.83 sec
+2026-10-07T16:36:00.4836765Z       Start 30: native_agent_mcp_http_contract
+2026-10-07T16:36:03.6745714Z 30/39 Test #30: native_agent_mcp_http_contract ..............   Passed    3.19 sec
+2026-10-07T16:36:03.6748509Z       Start 31: native_mcp_sdk_modern_contract
+2026-10-07T16:36:06.8415595Z 31/39 Test #31: native_mcp_sdk_modern_contract ..............   Passed    3.17 sec
+2026-10-07T16:36:06.8417943Z       Start 32: native_mcp_sdk_legacy_contract
+2026-10-07T16:36:09.5602627Z 32/39 Test #32: native_mcp_sdk_legacy_contract ..............   Passed    2.72 sec
+2026-10-07T16:36:09.5605132Z       Start 33: native_http_cli_contract
+2026-10-07T16:36:19.8641519Z 33/39 Test #33: native_http_cli_contract ....................   Passed   10.30 sec
+2026-10-07T16:36:19.8643811Z       Start 34: embedded_xlang_sqlite_contract
+2026-10-07T16:36:19.9083968Z 34/39 Test #34: embedded_xlang_sqlite_contract ..............   Passed    0.04 sec
+2026-10-07T16:36:19.9086652Z       Start 35: native_permission_waiter_contract
+2026-10-07T16:36:23.9665086Z 35/39 Test #35: native_permission_waiter_contract ...........   Passed    4.06 sec
+2026-10-07T16:36:23.9666814Z       Start 36: native_operation_repository_contract
+2026-10-07T16:36:26.6463575Z 36/39 Test #36: native_operation_repository_contract ........   Passed    2.68 sec
+2026-10-07T16:36:26.6466025Z       Start 37: xlang_repository_contract
+2026-10-07T16:36:27.4282189Z 37/39 Test #37: xlang_repository_contract ...................   Passed    0.78 sec
+2026-10-07T16:36:27.4284378Z       Start 38: persistence_service_contract
+2026-10-07T16:36:29.8963429Z 38/39 Test #38: persistence_service_contract ................   Passed    2.47 sec
+2026-10-07T16:36:29.8964943Z       Start 39: encrypted_credential_repository_contract
+2026-10-07T16:36:30.5653398Z 39/39 Test #39: encrypted_credential_repository_contract ....   Passed    0.67 sec
+2026-10-07T16:36:30.5661318Z 
+2026-10-07T16:36:30.5661873Z 100% tests passed, 0 tests failed out of 39
+2026-10-07T16:36:30.5662384Z 
+2026-10-07T16:36:30.5663381Z Total Test time (real) = 107.35 sec
+2026-10-07T16:36:30.7222125Z ##[group]Run npm ci --ignore-scripts
+2026-10-07T16:36:30.7222594Z [36;1mnpm ci --ignore-scripts[0m
+2026-10-07T16:36:30.7222885Z [36;1mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }[0m
+2026-10-07T16:36:30.7223176Z [36;1mnpm test[0m
+2026-10-07T16:36:30.7223394Z [36;1mexit $LASTEXITCODE[0m
+2026-10-07T16:36:30.7306886Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-07T16:36:30.7307250Z ##[endgroup]
+2026-10-07T16:36:32.9919950Z npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+2026-10-07T16:36:33.7602707Z npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
+2026-10-07T16:36:38.9253212Z 
+2026-10-07T16:36:38.9254168Z added 325 packages, and audited 326 packages in 8s
+2026-10-07T16:36:38.9254891Z 
+2026-10-07T16:36:38.9255072Z 93 packages are looking for funding
+2026-10-07T16:36:38.9255603Z   run `npm fund` for details
+2026-10-07T16:36:38.9299243Z 
+2026-10-07T16:36:38.9299829Z 6 high severity vulnerabilities
+2026-10-07T16:36:38.9300215Z 
+2026-10-07T16:36:38.9300605Z To address all issues (including breaking changes), run:
+2026-10-07T16:36:38.9301149Z   npm audit fix --force
+2026-10-07T16:36:38.9301451Z 
+2026-10-07T16:36:38.9301696Z Run `npm audit` for details.
+2026-10-07T16:36:39.1917076Z 
+2026-10-07T16:36:39.1917682Z > agentflow@0.1.0 test
+2026-10-07T16:36:39.1918079Z > node --test tests/*.test.js
+2026-10-07T16:36:39.1918287Z 
+2026-10-07T16:36:39.3116863Z TAP version 13
+2026-10-07T16:36:39.4646939Z # Subtest: session discovery, URL encoding, error handling and origin boundaries
+2026-10-07T16:36:39.4676521Z ok 1 - session discovery, URL encoding, error handling and origin boundaries
+2026-10-07T16:36:39.4682072Z   ---
+2026-10-07T16:36:39.4716129Z   duration_ms: 105.75
+2026-10-07T16:36:39.4717077Z   type: 'test'
+2026-10-07T16:36:39.4717708Z   ...
+2026-10-07T16:36:39.4718345Z # Subtest: origin-scoped authentication and native request bodies
+2026-10-07T16:36:39.4719097Z ok 2 - origin-scoped authentication and native request bodies
+2026-10-07T16:36:39.4719619Z   ---
+2026-10-07T16:36:39.4719963Z   duration_ms: 2.1201
+2026-10-07T16:36:39.4720336Z   type: 'test'
+2026-10-07T16:36:39.4720669Z   ...
+2026-10-07T16:36:39.5289687Z # Subtest: native terminal state refreshes transcript and stops polling with durable operation inspection
+2026-10-07T16:36:39.5291515Z ok 3 - native terminal state refreshes transcript and stops polling with durable operation inspection
+2026-10-07T16:36:39.5292111Z   ---
+2026-10-07T16:36:39.5292339Z   duration_ms: 21.0057
+2026-10-07T16:36:39.5292597Z   type: 'test'
+2026-10-07T16:36:39.5292818Z   ...
+2026-10-07T16:36:39.5293551Z # Subtest: older run inspection remains accessible and selected run persists across view reopening
+2026-10-07T16:36:39.5295015Z ok 4 - older run inspection remains accessible and selected run persists across view reopening
+2026-10-07T16:36:39.5295813Z   ---
+2026-10-07T16:36:39.5296042Z   duration_ms: 7.6643
+2026-10-07T16:36:39.5296293Z   type: 'test'
+2026-10-07T16:36:39.5296512Z   ...
+2026-10-07T16:36:39.5297113Z # Subtest: run selection rejects IDs outside the selected conversation before fetching their details
+2026-10-07T16:36:39.5298236Z ok 5 - run selection rejects IDs outside the selected conversation before fetching their details
+2026-10-07T16:36:39.5298861Z   ---
+2026-10-07T16:36:39.5299096Z   duration_ms: 2.4143
+2026-10-07T16:36:39.5299350Z   type: 'test'
+2026-10-07T16:36:39.5299575Z   ...
+2026-10-07T16:36:39.5302274Z # Subtest: older terminal run keeps observing an active conversation and rejects another submission
+2026-10-07T16:36:39.5303935Z ok 6 - older terminal run keeps observing an active conversation and rejects another submission
+2026-10-07T16:36:39.5304672Z   ---
+2026-10-07T16:36:39.5305003Z   duration_ms: 2.7784
+2026-10-07T16:36:39.5305365Z   type: 'test'
+2026-10-07T16:36:39.5309308Z   ...
+2026-10-07T16:36:39.5310234Z # Subtest: uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+2026-10-07T16:36:39.5311404Z ok 7 - uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+2026-10-07T16:36:39.5312040Z   ---
+2026-10-07T16:36:39.5312252Z   duration_ms: 4.7101
+2026-10-07T16:36:39.5312473Z   type: 'test'
+2026-10-07T16:36:39.5312695Z   ...
+2026-10-07T16:36:39.5313351Z # Subtest: inspection rejects a different backend operation and discards observations after selection changes
+2026-10-07T16:36:39.5314403Z ok 8 - inspection rejects a different backend operation and discards observations after selection changes
+2026-10-07T16:36:39.5316729Z   ---
+2026-10-07T16:36:39.5316958Z   duration_ms: 9.2686
+2026-10-07T16:36:39.5317223Z   type: 'test'
+2026-10-07T16:36:39.5317444Z   ...
+2026-10-07T16:36:39.5317955Z # Subtest: only a reviewed pending operation can be decided and payload stays backend-owned
+2026-10-07T16:36:39.5320348Z ok 9 - only a reviewed pending operation can be decided and payload stays backend-owned
+2026-10-07T16:36:39.5320865Z   ---
+2026-10-07T16:36:39.5321085Z   duration_ms: 6.1772
+2026-10-07T16:36:39.5321342Z   type: 'test'
+2026-10-07T16:36:39.5321546Z   ...
+2026-10-07T16:36:39.5322027Z # Subtest: closing the view during proposal revalidation cannot send an approval
+2026-10-07T16:36:39.5322735Z ok 10 - closing the view during proposal revalidation cannot send an approval
+2026-10-07T16:36:39.5323198Z   ---
+2026-10-07T16:36:39.5323429Z   duration_ms: 3.3566
+2026-10-07T16:36:39.5323686Z   type: 'test'
+2026-10-07T16:36:39.5323908Z   ...
+2026-10-07T16:36:39.5324614Z # Subtest: changed proposal bytes invalidate the displayed review
+2026-10-07T16:36:39.5326041Z ok 11 - changed proposal bytes invalidate the displayed review
+2026-10-07T16:36:39.5326423Z   ---
+2026-10-07T16:36:39.5326633Z   duration_ms: 6.992
+2026-10-07T16:36:39.5326865Z   type: 'test'
+2026-10-07T16:36:39.5327540Z   ...
+2026-10-07T16:36:39.5331980Z # Subtest: session selection intent invalidates an in-flight approval before queued selection runs
+2026-10-07T16:36:39.5332975Z ok 12 - session selection intent invalidates an in-flight approval before queued selection runs
+2026-10-07T16:36:39.5333541Z   ---
+2026-10-07T16:36:39.5333756Z   duration_ms: 2.5193
+2026-10-07T16:36:39.5334005Z   type: 'test'
+2026-10-07T16:36:39.5334221Z   ...
+2026-10-07T16:36:39.5334691Z # Subtest: closing a panel during history loading cannot start a detached poller
+2026-10-07T16:36:39.5336294Z ok 13 - closing a panel during history loading cannot start a detached poller
+2026-10-07T16:36:39.5337039Z   ---
+2026-10-07T16:36:39.5337258Z   duration_ms: 1.9466
+2026-10-07T16:36:39.5337507Z   type: 'test'
+2026-10-07T16:36:39.5337725Z   ...
+2026-10-07T16:36:39.5338537Z # Subtest: older native servers without a catalogue keep default execution without invented model IDs
+2026-10-07T16:36:39.5339498Z ok 14 - older native servers without a catalogue keep default execution without invented model IDs
+2026-10-07T16:36:39.5340053Z   ---
+2026-10-07T16:36:39.5340259Z   duration_ms: 2.0395
+2026-10-07T16:36:39.5340510Z   type: 'test'
+2026-10-07T16:36:39.5340729Z   ...
+2026-10-07T16:36:39.5341299Z # Subtest: edit comparison opens exact revalidated backend snapshots without granting or writing
+2026-10-07T16:36:39.5342188Z ok 15 - edit comparison opens exact revalidated backend snapshots without granting or writing
+2026-10-07T16:36:39.5342720Z   ---
+2026-10-07T16:36:39.5342933Z   duration_ms: 5.0738
+2026-10-07T16:36:39.5343159Z   type: 'test'
+2026-10-07T16:36:39.5343378Z   ...
+2026-10-07T16:36:39.5343989Z # Subtest: creation comparison opens absent-to-proposed snapshots without creating a file or granting
+2026-10-07T16:36:39.5344943Z ok 16 - creation comparison opens absent-to-proposed snapshots without creating a file or granting
+2026-10-07T16:36:39.5345484Z   ---
+2026-10-07T16:36:39.5345669Z   duration_ms: 2.456
+2026-10-07T16:36:39.5346790Z   type: 'test'
+2026-10-07T16:36:39.5347086Z   ...
+2026-10-07T16:36:39.5347655Z # Subtest: refresh reloads backend execution capabilities and history without submitting a run
+2026-10-07T16:36:39.5348522Z ok 17 - refresh reloads backend execution capabilities and history without submitting a run
+2026-10-07T16:36:39.5349051Z   ---
+2026-10-07T16:36:39.5349274Z   duration_ms: 3.1672
+2026-10-07T16:36:39.5349511Z   type: 'test'
+2026-10-07T16:36:39.5349742Z   ...
+2026-10-07T16:36:39.5350301Z # Subtest: selected configured model survives view reopening and retired models fall back on refresh
+2026-10-07T16:36:39.5351220Z ok 18 - selected configured model survives view reopening and retired models fall back on refresh
+2026-10-07T16:36:39.5351741Z   ---
+2026-10-07T16:36:39.5351958Z   duration_ms: 4.3356
+2026-10-07T16:36:39.5352209Z   type: 'test'
+2026-10-07T16:36:39.5352422Z   ...
+2026-10-07T16:36:39.5353093Z # Subtest: normal development bootstrap completes activation before resolving the sidebar and clears private environment
+2026-10-07T16:36:39.5354248Z ok 19 - normal development bootstrap completes activation before resolving the sidebar and clears private environment
+2026-10-07T16:36:39.5354888Z   ---
+2026-10-07T16:36:39.5355102Z   duration_ms: 2.8976
+2026-10-07T16:36:39.5355359Z   type: 'test'
+2026-10-07T16:36:39.5355576Z   ...
+2026-10-07T16:36:40.9058686Z # Subtest: durable command output renders independent channels without executing markup or controls
+2026-10-07T16:36:40.9059717Z ok 20 - durable command output renders independent channels without executing markup or controls
+2026-10-07T16:36:40.9060271Z   ---
+2026-10-07T16:36:40.9060499Z   duration_ms: 145.6488
+2026-10-07T16:36:40.9060753Z   type: 'test'
+2026-10-07T16:36:40.9060984Z   ...
+2026-10-07T16:36:40.9062604Z # Subtest: output replay preserves fragmented Unicode and ignores only exact duplicate bytes
+2026-10-07T16:36:40.9063568Z ok 21 - output replay preserves fragmented Unicode and ignores only exact duplicate bytes
+2026-10-07T16:36:40.9064094Z   ---
+2026-10-07T16:36:40.9064307Z   duration_ms: 27.3647
+2026-10-07T16:36:40.9064564Z   type: 'test'
+2026-10-07T16:36:40.9064789Z   ...
+2026-10-07T16:36:40.9065652Z # Subtest: gaps, malformed bytes and capture overflow never invent output
+2026-10-07T16:36:40.9067799Z ok 22 - gaps, malformed bytes and capture overflow never invent output
+2026-10-07T16:36:40.9068400Z   ---
+2026-10-07T16:36:40.9068787Z   duration_ms: 119.3659
+2026-10-07T16:36:40.9087403Z   type: 'test'
+2026-10-07T16:36:40.9101892Z   ...
+2026-10-07T16:36:40.9102771Z # Subtest: recorded output survives transcript refresh and clears on run or conversation change
+2026-10-07T16:36:40.9103823Z ok 23 - recorded output survives transcript refresh and clears on run or conversation change
+2026-10-07T16:36:40.9104482Z   ---
+2026-10-07T16:36:40.9105218Z   duration_ms: 31.7222
+2026-10-07T16:36:40.9105598Z   type: 'test'
+2026-10-07T16:36:40.9105928Z   ...
+2026-10-07T16:36:40.9106620Z # Subtest: the sidebar bounds command stream cards and leaves excess output in recorded activity
+2026-10-07T16:36:40.9107897Z ok 24 - the sidebar bounds command stream cards and leaves excess output in recorded activity
+2026-10-07T16:36:40.9108567Z   ---
+2026-10-07T16:36:40.9108892Z   duration_ms: 45.357
+2026-10-07T16:36:40.9109248Z   type: 'test'
+2026-10-07T16:36:40.9109574Z   ...
+2026-10-07T16:36:40.9110198Z # Subtest: command approval reviews literal arguments before sending only a decision ID
+2026-10-07T16:36:40.9111113Z ok 25 - command approval reviews literal arguments before sending only a decision ID
+2026-10-07T16:36:40.9111714Z   ---
+2026-10-07T16:36:40.9112037Z   duration_ms: 19.536
+2026-10-07T16:36:40.9112388Z   type: 'test'
+2026-10-07T16:36:40.9112710Z   ...
+2026-10-07T16:36:40.9113345Z # Subtest: approval displays bound guidance hashes and rejects malformed source metadata
+2026-10-07T16:36:40.9114278Z ok 26 - approval displays bound guidance hashes and rejects malformed source metadata
+2026-10-07T16:36:40.9114881Z   ---
+2026-10-07T16:36:40.9115383Z   duration_ms: 28.3902
+2026-10-07T16:36:40.9115745Z   type: 'test'
+2026-10-07T16:36:40.9116076Z   ...
+2026-10-07T16:36:40.9116590Z # Subtest: malformed or expired command proposals cannot be allowed
+2026-10-07T16:36:40.9117310Z ok 27 - malformed or expired command proposals cannot be allowed
+2026-10-07T16:36:40.9117863Z   ---
+2026-10-07T16:36:40.9118185Z   duration_ms: 20.9952
+2026-10-07T16:36:40.9118551Z   type: 'test'
+2026-10-07T16:36:40.9118875Z   ...
+2026-10-07T16:36:40.9119530Z # Subtest: command results preserve separate escaped output, hex bytes and actual exit metrics
+2026-10-07T16:36:40.9120520Z ok 28 - command results preserve separate escaped output, hex bytes and actual exit metrics
+2026-10-07T16:36:40.9121151Z   ---
+2026-10-07T16:36:40.9121479Z   duration_ms: 22.7209
+2026-10-07T16:36:40.9121838Z   type: 'test'
+2026-10-07T16:36:40.9122160Z   ...
+2026-10-07T16:36:40.9122842Z # Subtest: uncertain commands remain blocked and malformed outcomes retain raw evidence
+2026-10-07T16:36:40.9123763Z ok 29 - uncertain commands remain blocked and malformed outcomes retain raw evidence
+2026-10-07T16:36:40.9124374Z   ---
+2026-10-07T16:36:40.9124692Z   duration_ms: 20.5878
+2026-10-07T16:36:40.9125055Z   type: 'test'
+2026-10-07T16:36:40.9125377Z   ...
+2026-10-07T16:36:40.9126178Z # Subtest: command output metrics require exact encoded retained bytes and safe drained counts
+2026-10-07T16:36:40.9127183Z ok 30 - command output metrics require exact encoded retained bytes and safe drained counts
+2026-10-07T16:36:40.9128033Z   ---
+2026-10-07T16:36:40.9128384Z   duration_ms: 17.9339
+2026-10-07T16:36:40.9128758Z   type: 'test'
+2026-10-07T16:36:40.9129100Z   ...
+2026-10-07T16:36:40.9129834Z # Subtest: new-file review distinguishes absence, previews exact content and never retries uncertainty
+2026-10-07T16:36:40.9130927Z ok 31 - new-file review distinguishes absence, previews exact content and never retries uncertainty
+2026-10-07T16:36:40.9131608Z   ---
+2026-10-07T16:36:40.9131944Z   duration_ms: 19.5452
+2026-10-07T16:36:40.9132326Z   type: 'test'
+2026-10-07T16:36:40.9132660Z   ...
+2026-10-07T16:36:40.9133352Z # Subtest: external MCP approval names the server and tool and uncertainty never offers replay
+2026-10-07T16:36:40.9134344Z ok 32 - external MCP approval names the server and tool and uncertainty never offers replay
+2026-10-07T16:36:40.9134985Z   ---
+2026-10-07T16:36:40.9135340Z   duration_ms: 19.3501
+2026-10-07T16:36:40.9135693Z   type: 'test'
+2026-10-07T16:36:40.9136016Z   ...
+2026-10-07T16:36:40.9136782Z # Subtest: run detail selector preserves conversation history and blocks submission while another run is active
+2026-10-07T16:36:40.9137944Z ok 33 - run detail selector preserves conversation history and blocks submission while another run is active
+2026-10-07T16:36:40.9138855Z   ---
+2026-10-07T16:36:40.9139180Z   duration_ms: 20.6608
+2026-10-07T16:36:40.9139535Z   type: 'test'
+2026-10-07T16:36:40.9139857Z   ...
+2026-10-07T16:36:40.9141996Z # Subtest: uncertain edit inspection renders escaped observations and never offers an effect approval
+2026-10-07T16:36:40.9143066Z ok 34 - uncertain edit inspection renders escaped observations and never offers an effect approval
+2026-10-07T16:36:40.9144088Z   ---
+2026-10-07T16:36:40.9144425Z   duration_ms: 13.6574
+2026-10-07T16:36:40.9144793Z   type: 'test'
+2026-10-07T16:36:40.9145128Z   ...
+2026-10-07T16:36:40.9145794Z # Subtest: history renders Markdown/code, copies plain code and shows exact provider usage
+2026-10-07T16:36:40.9180625Z ok 35 - history renders Markdown/code, copies plain code and shows exact provider usage
+2026-10-07T16:36:40.9181505Z   ---
+2026-10-07T16:36:40.9182351Z   duration_ms: 45.8743
+2026-10-07T16:36:40.9182843Z   type: 'test'
+2026-10-07T16:36:40.9183159Z   ...
+2026-10-07T16:36:40.9183777Z # Subtest: unknown historical usage stays unavailable and malicious Markdown is sanitized
+2026-10-07T16:36:40.9184924Z ok 36 - unknown historical usage stays unavailable and malicious Markdown is sanitized
+2026-10-07T16:36:40.9185528Z   ---
+2026-10-07T16:36:40.9185850Z   duration_ms: 20.0866
+2026-10-07T16:36:40.9186393Z   type: 'test'
+2026-10-07T16:36:40.9186721Z   ...
+2026-10-07T16:36:40.9187360Z # Subtest: live token badges use model usage events and reset when the persisted transcript arrives
+2026-10-07T16:36:40.9188296Z ok 37 - live token badges use model usage events and reset when the persisted transcript arrives
+2026-10-07T16:36:40.9188790Z   ---
+2026-10-07T16:36:40.9189000Z   duration_ms: 15.6962
+2026-10-07T16:36:40.9189235Z   type: 'test'
+2026-10-07T16:36:40.9189463Z   ...
+2026-10-07T16:36:40.9190150Z # Subtest: tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
+2026-10-07T16:36:40.9191290Z ok 38 - tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
+2026-10-07T16:36:40.9192042Z   ---
+2026-10-07T16:36:40.9192396Z   duration_ms: 15.2613
+2026-10-07T16:36:40.9192628Z   type: 'test'
+2026-10-07T16:36:40.9192843Z   ...
+2026-10-07T16:36:40.9193363Z # Subtest: bottom model selector exposes only backend-advertised IDs and sends the selected ID
+2026-10-07T16:36:40.9194191Z ok 39 - bottom model selector exposes only backend-advertised IDs and sends the selected ID
+2026-10-07T16:36:40.9194544Z   ---
+2026-10-07T16:36:40.9194684Z   duration_ms: 16.8122
+2026-10-07T16:36:40.9194837Z   type: 'test'
+2026-10-07T16:36:40.9194974Z   ...
+2026-10-07T16:36:40.9195333Z # Subtest: provider cache/reasoning counts and backend first-token time render without derived estimates
+2026-10-07T16:36:40.9195898Z ok 40 - provider cache/reasoning counts and backend first-token time render without derived estimates
+2026-10-07T16:36:40.9196231Z   ---
+2026-10-07T16:36:40.9196367Z   duration_ms: 18.0747
+2026-10-07T16:36:40.9196528Z   type: 'test'
+2026-10-07T16:36:40.9196665Z   ...
+2026-10-07T16:36:40.9196991Z # Subtest: pending file comparison sends only an operation ID and remains separate from approval
+2026-10-07T16:36:40.9197506Z ok 41 - pending file comparison sends only an operation ID and remains separate from approval
+2026-10-07T16:36:40.9197814Z   ---
+2026-10-07T16:36:40.9197993Z   duration_ms: 12.527
+2026-10-07T16:36:40.9198151Z   type: 'test'
+2026-10-07T16:36:40.9198284Z   ...
+2026-10-07T16:36:40.9410113Z 1..41
+2026-10-07T16:36:40.9410364Z # tests 41
+2026-10-07T16:36:40.9411164Z # suites 0
+2026-10-07T16:36:40.9411443Z # pass 41
+2026-10-07T16:36:40.9412141Z # fail 0
+2026-10-07T16:36:40.9412454Z # cancelled 0
+2026-10-07T16:36:40.9413109Z # skipped 0
+2026-10-07T16:36:40.9413444Z # todo 0
+2026-10-07T16:36:40.9414169Z # duration_ms 1659.8685
+2026-10-07T16:36:41.0387355Z ##[group]Run actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+2026-10-07T16:36:41.0387737Z with:
+2026-10-07T16:36:41.0388188Z   name: native-windows-evidence-fbf2cfe9962c6d364893090e4590f765f92b61a3
+2026-10-07T16:36:41.0388548Z   path: xmind/build/ci-evidence/
+xmind/build/native/Testing/
+
+2026-10-07T16:36:41.0388801Z   retention-days: 14
+2026-10-07T16:36:41.0388968Z   if-no-files-found: warn
+2026-10-07T16:36:41.0389139Z   compression-level: 6
+2026-10-07T16:36:41.0389302Z   overwrite: false
+2026-10-07T16:36:41.0389464Z   include-hidden-files: false
+2026-10-07T16:36:41.0389640Z ##[endgroup]
+2026-10-07T16:36:41.1979685Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-07T16:36:41.1982342Z The least common ancestor is D:\a\xMind\xMind\xmind\build. This will be the root directory of the artifact
+2026-10-07T16:36:41.1982926Z With the provided path, there will be 13 files uploaded
+2026-10-07T16:36:41.1986463Z Artifact name is valid!
+2026-10-07T16:36:41.1987870Z Root directory input is valid!
+2026-10-07T16:36:41.5378185Z Beginning upload of artifact content to blob storage
+2026-10-07T16:36:41.8426326Z Uploaded bytes 15816
+2026-10-07T16:36:41.9025329Z Finished uploading artifact content to blob storage!
+2026-10-07T16:36:41.9027919Z SHA256 digest of uploaded artifact zip is d1eda8c117d50c1f05f233f4382a89d2a5246642956e81e9c62c46055719a794
+2026-10-07T16:36:41.9029973Z Finalizing artifact upload
+2026-10-07T16:36:42.2471720Z Artifact native-windows-evidence-fbf2cfe9962c6d364893090e4590f765f92b61a3.zip successfully finalized. Artifact ID 11497351840
+2026-10-07T16:36:42.2472829Z Artifact native-windows-evidence-fbf2cfe9962c6d364893090e4590f765f92b61a3 has been successfully uploaded! Final size is 15816 bytes. Artifact ID is 11497351840
+2026-10-07T16:36:42.2480149Z Artifact download URL: https://github.com/xlang-foundation/xMind/actions/runs/37651959372/artifacts/11497351840
+2026-10-07T16:36:42.2728470Z ##[group]Run actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+2026-10-07T16:36:42.2728835Z with:
+2026-10-07T16:36:42.2729088Z   name: native-windows-runtime-fbf2cfe9962c6d364893090e4590f765f92b61a3
+2026-10-07T16:36:42.2729409Z   path: xmind/build/native-distribution/
+2026-10-07T16:36:42.2729620Z   if-no-files-found: error
+2026-10-07T16:36:42.2729793Z   retention-days: 14
+2026-10-07T16:36:42.2729955Z   compression-level: 6
+2026-10-07T16:36:42.2730117Z   overwrite: false
+2026-10-07T16:36:42.2730291Z   include-hidden-files: false
+2026-10-07T16:36:42.2730473Z ##[endgroup]
+2026-10-07T16:36:42.4513225Z With the provided path, there will be 29 files uploaded
+2026-10-07T16:36:42.4517667Z Artifact name is valid!
+2026-10-07T16:36:42.4518938Z Root directory input is valid!
+2026-10-07T16:36:42.8086522Z Beginning upload of artifact content to blob storage
+2026-10-07T16:36:44.4805144Z Uploaded bytes 8388608
+2026-10-07T16:36:44.5398665Z Uploaded bytes 8403338
+2026-10-07T16:36:44.6006157Z Finished uploading artifact content to blob storage!
+2026-10-07T16:36:44.6007087Z SHA256 digest of uploaded artifact zip is cc2a7352121995b685d1aaac239aa2511451bee98aa14219fa84d74f53512e01
+2026-10-07T16:36:44.6009556Z Finalizing artifact upload
+2026-10-07T16:36:44.9604607Z Artifact native-windows-runtime-fbf2cfe9962c6d364893090e4590f765f92b61a3.zip successfully finalized. Artifact ID 11496842538
+2026-10-07T16:36:44.9606247Z Artifact native-windows-runtime-fbf2cfe9962c6d364893090e4590f765f92b61a3 has been successfully uploaded! Final size is 8403338 bytes. Artifact ID is 11496842538
+2026-10-07T16:36:44.9612974Z Artifact download URL: https://github.com/xlang-foundation/xMind/actions/runs/37651959372/artifacts/11496842538
+2026-10-07T16:36:44.9928821Z Post job cleanup.
+2026-10-07T16:36:45.1496755Z Post job cleanup.
+2026-10-07T16:36:45.3164035Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-07T16:36:45.3437152Z git version 2.55.0.windows.5
+2026-10-07T16:36:45.3507584Z Temporarily overriding HOME='D:\a\_temp\9024cf6e-781e-4f2e-8fa6-07d88eb35335' before making global git config changes
+2026-10-07T16:36:45.3508697Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T16:36:45.3516292Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\stdlib-source
+2026-10-07T16:36:45.3788830Z Removing SSH command configuration
+2026-10-07T16:36:45.3801345Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T16:36:45.4069786Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T16:36:45.8745779Z Removing HTTP extra header
+2026-10-07T16:36:45.8755268Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T16:36:45.9029831Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T16:36:46.3716588Z Removing includeIf entries pointing to credentials config files
+2026-10-07T16:36:46.3726868Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T16:36:46.3937114Z includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path
+2026-10-07T16:36:46.3937733Z includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path
+2026-10-07T16:36:46.3969937Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path
+2026-10-07T16:36:46.4179248Z D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:36:46.4216017Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:36:46.4468756Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path
+2026-10-07T16:36:46.4676680Z D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:36:46.4709996Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config
+2026-10-07T16:36:46.4952314Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T16:36:46.9892825Z Removing credentials config 'D:\a\_temp\git-credentials-8e2759c2-2cfa-43ae-8a81-8ed5eed20cb2.config'
+2026-10-07T16:36:47.0156836Z Post job cleanup.
+2026-10-07T16:36:47.1489652Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-07T16:36:47.1708396Z git version 2.55.0.windows.5
+2026-10-07T16:36:47.1763928Z Temporarily overriding HOME='D:\a\_temp\3f061225-a868-4eb8-9709-eb7840f48752' before making global git config changes
+2026-10-07T16:36:47.1764947Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T16:36:47.1772370Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\xlang3
+2026-10-07T16:36:47.2005734Z Removing SSH command configuration
+2026-10-07T16:36:47.2015264Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T16:36:47.2260390Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T16:36:47.8415895Z Removing HTTP extra header
+2026-10-07T16:36:47.8424660Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T16:36:47.8661489Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T16:36:48.3015593Z Removing includeIf entries pointing to credentials config files
+2026-10-07T16:36:48.3024949Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T16:36:48.3239591Z includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path
+2026-10-07T16:36:48.3240179Z includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path
+2026-10-07T16:36:48.3273470Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path
+2026-10-07T16:36:48.3476133Z D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:36:48.3511548Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:36:48.3751217Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path
+2026-10-07T16:36:48.3955384Z D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:36:48.3988539Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config
+2026-10-07T16:36:48.4230162Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T16:36:48.8403582Z Removing credentials config 'D:\a\_temp\git-credentials-eb312914-a203-4f93-b6a4-5487871d091e.config'
+2026-10-07T16:36:48.8667968Z Post job cleanup.
+2026-10-07T16:36:49.0024797Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-07T16:36:49.0238122Z git version 2.55.0.windows.5
+2026-10-07T16:36:49.0292524Z Temporarily overriding HOME='D:\a\_temp\072ab1bc-ec30-479e-8ec9-ecd6e2bccf50' before making global git config changes
+2026-10-07T16:36:49.0293358Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T16:36:49.0301089Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\xmind
+2026-10-07T16:36:49.0539186Z Removing SSH command configuration
+2026-10-07T16:36:49.0549108Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T16:36:49.0797634Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T16:36:49.5216810Z Removing HTTP extra header
+2026-10-07T16:36:49.5225597Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T16:36:49.5469567Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T16:36:50.0276216Z Removing includeIf entries pointing to credentials config files
+2026-10-07T16:36:50.0286066Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T16:36:50.0493165Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-07T16:36:50.0493743Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-07T16:36:50.0526777Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-07T16:36:50.0731706Z D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:36:50.0769902Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:36:50.1010531Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-07T16:36:50.1211556Z D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:36:50.1245631Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config
+2026-10-07T16:36:50.1489109Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T16:36:50.6600669Z Removing credentials config 'D:\a\_temp\git-credentials-487b6c22-967c-4265-95c9-eede3c2248d3.config'
+2026-10-07T16:36:50.6834939Z Cleaning up orphan processes
+2026-10-07T16:36:50.7018951Z Terminate orphan process: pid (6044) (vctip)
+2026-10-07T16:36:50.7132478Z Terminate orphan process: pid (4148) (MSBuild)
+2026-10-07T16:36:50.7188880Z Terminate orphan process: pid (6712) (conhost)

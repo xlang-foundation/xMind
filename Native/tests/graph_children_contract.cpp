@@ -19,8 +19,10 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
   rejects<Conflict>([&]{store.start_graph_child("too-early",root.id,"left",R"({"content":"early"})").get();});
   store.transition(root.id,RunState::queued,RunState::running).get();
   const auto before=store.events(root.id).get().size();
+  const auto beforeCheckpoint=store.graph_run(root.id).get().checkpoint_revision;
   {XlangSqlite inject(database,imports);inject.execute("CREATE TRIGGER reject_child_event BEFORE INSERT ON events WHEN NEW.kind='graph.child.queued' BEGIN SELECT RAISE(ABORT,'actual child event fixture failure'); END");}
   rejects<DatabaseError>([&]{store.start_graph_child("faulted",root.id,"left",R"({"content":"faulted-private"})").get();});rejects<NotFound>([&]{store.run("faulted").get();});require(store.children(root.id).get().empty() && store.events(root.id).get().size()==before,"Child/message/events must roll back together");
+  require(store.graph_run(root.id).get().checkpoint_revision==beforeCheckpoint,"Child checkpoint must roll back with failed admission");
   {XlangSqlite inject(database,imports);inject.execute("DROP TRIGGER reject_child_event");}
   const auto left=store.start_graph_child("left-run",root.id,"left",R"({"content":"child-left"})").get();const auto right=store.start_graph_child("right-run",root.id,"right",R"({"content":"child-right"})").get();
   require(left.parent_id==root.id && right.session_id==root.session_id,"Children must belong to the root session");require(store.runs(root.session_id).get().size()==1,"Root run listing must not present children as competing roots");
@@ -28,6 +30,7 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
   rejects<Conflict>([&]{store.transition(root.id,RunState::running,RunState::paused).get();});rejects<Conflict>([&]{store.transition(root.id,RunState::running,RunState::cancelled).get();});rejects<Conflict>([&]{store.complete_run(root.id,R"({"content":"premature"})").get();});
   auto a=std::async(std::launch::async,[&]{return runner.execute(left.id);});auto b=std::async(std::launch::async,[&]{return runner.execute(right.id);});require(a.get().state==RunState::completed && b.get().state==RunState::completed,"Both native child agent loops must finish");
   const auto leftHistory=store.run_history(left.id).get(),rightHistory=store.run_history(right.id).get();require(leftHistory.size()==4 && rightHistory.size()==4,"Child tool conversations must remain isolated");require(store.history(root.session_id).get().size()==1,"Child conversations must not leak into root history");
+  rejects<Conflict>([&]{store.complete_run(root.id,R"({"content":"unsettled graph"})").get();});store.settle_graph_child(left.id).get();store.settle_graph_child(right.id).get();
   require(Json::parse(leftHistory.front().json).at("content")=="child-left" && Json::parse(rightHistory.front().json).at("content")=="child-right","Each child must retain its own prompt");
   const auto tail=store.graph_events(root.id).get();bool l=false,r=false;std::int64_t cursor=0;for(const auto& event:tail){require(event.sequence>cursor,"Graph cursor must preserve global committed order");cursor=event.sequence;if(event.run_id==left.id)l=true;if(event.run_id==right.id)r=true;}require(l&&r,"Root observation must include identified child events");require(store.graph_events(root.id,cursor).get().empty(),"Committed graph cursor must not replay old rows");
   store.complete_run(root.id,Json{{"content",Json::parse(leftHistory.back().json).at("content").get<std::string>()+" / "+Json::parse(rightHistory.back().json).at("content").get<std::string>()},{"source","fixture-native-join"}}.dump()).get();

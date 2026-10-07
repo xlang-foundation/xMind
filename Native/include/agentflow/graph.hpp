@@ -4,6 +4,7 @@
 namespace agentflow {
 enum class GraphNodeKind {agent,tool,human};
 enum class GraphNodeState {pending,running,waiting_human,completed,skipped,failed,uncertain,cancelled};
+enum class GraphRestoreMode {recover,live};
 struct GraphNodeDefinition {
     std::string id;
     GraphNodeKind kind;
@@ -33,7 +34,7 @@ struct GraphPreparedNode {GraphNodeDefinition definition;std::string dependency_
 // Persistence/child execution integration belongs to the graph service.
 class GraphCoordinator {
 public:
-    explicit GraphCoordinator(GraphPlan plan,const std::string& checkpoint="");
+    explicit GraphCoordinator(GraphPlan plan,const std::string& checkpoint="",GraphRestoreMode mode=GraphRestoreMode::recover);
     GraphDecision inspect() const;
     GraphPreparedNode start(const std::string& id);
     void skip(const std::string& id);
