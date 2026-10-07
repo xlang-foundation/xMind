@@ -23,7 +23,7 @@ for await(const line of input){
     assert.deepEqual(request.params.capabilities,{});assert.equal(request.params.clientInfo.name,'xMind');
     if(mode==='legacy-timeout')error(probe,-32601); // late retired probe must not consume initialization
     if(mode==='legacy-rejected'){error(request.id,-32602);continue;}
-    reply(request.id,{protocolVersion:mode==='legacy-older'?'2025-06-18':mode==='legacy-unsupported'?'1900-01-01':'2025-11-25',capabilities:{tools:{}},serverInfo:{name:'labeled-legacy-peer',version:'fixture'}});
+    reply(request.id,{protocolVersion:mode==='legacy-older'?'2025-06-18':mode==='legacy-oldest'?'2024-11-05':mode==='legacy-unsupported'?'1900-01-01':'2025-11-25',capabilities:{tools:{}},serverInfo:{name:'labeled-legacy-peer',version:'fixture'}});
   }else if(request.method==='notifications/initialized'){
     assert.ok(initialized);assert.equal(acknowledged,false);acknowledged=true;assert.equal(request.id,undefined);
   }else if(request.method==='tools/list'){

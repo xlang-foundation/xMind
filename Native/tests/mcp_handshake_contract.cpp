@@ -35,7 +35,7 @@ void negotiate(char** argv,const std::string& mode,bool expected_failure=false) 
     if(!failed){
         const auto& server=handshake.server();const bool legacy=mode.starts_with("legacy");
         require(server.era==(legacy?McpWireEra::legacy:McpWireEra::modern),"Negotiated protocol era must match the actual peer");
-        require(server.protocol_version==(legacy?(mode=="legacy-older"?"2025-06-18":"2025-11-25"):"2026-07-28"),"Negotiated version must be supported");
+        require(server.protocol_version==(legacy?(mode=="legacy-older"?"2025-06-18":mode=="legacy-oldest"?"2024-11-05":"2025-11-25"):"2026-07-28"),"Negotiated version must be supported");
         require(nlohmann::json::parse(server.capabilities_json).contains("tools"),"Actual peer capabilities must be retained");
         const auto listed=requests.prepare("tools/list","{}",server.era);process.write(listed.frame,deadline);
         while(!ordinary){const auto bytes=process.read(deadline);require(bool(bytes),"Peer exited before the post-negotiation request");wire.feed(*bytes);}
@@ -47,7 +47,7 @@ void negotiate(char** argv,const std::string& mode,bool expected_failure=false) 
 int main(int argc,char** argv){
     if(argc!=4)return 2;
     try {
-        for(const auto* mode:{"modern","legacy","legacy-invalid-params","legacy-timeout","legacy-older"})negotiate(argv,mode);
+        for(const auto* mode:{"modern","legacy","legacy-invalid-params","legacy-timeout","legacy-older","legacy-oldest"})negotiate(argv,mode);
         for(const auto* mode:{"modern-unsupported","modern-capability-error","modern-no-version","legacy-rejected","legacy-unsupported"})negotiate(argv,mode,true);
         std::cout<<"Native MCP negotiation passed actual independent stdio peers: modern discovery, legacy error/timeout fallback, retired late probe, acknowledgement ordering, post-connect metadata and unsupported/error rejection. No model/tool effect or full MCP integration claimed\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
