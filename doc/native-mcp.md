@@ -1,5 +1,13 @@
 # Native MCP implementation boundary
 
+The public PowerShell launcher accepts
+`Tools/agentflow.ps1 -Action Serve -McpConfig CONFIG_FILE` and forwards the file
+to the native server's `--mcp-config` contract. Loading, validation, credential
+binding and execution remain native backend responsibilities. This forwarding
+was checked against the native argument parser and PowerShell syntax; a new live
+MCP connection through this launcher has not been exercised. Existing component
+validation and remaining protocol gaps below retain their documented scope.
+
 Target: a C++ MCP client owned by xMind Server, reachable through the common agent/tool registry and CLI/editor views. No Python/TypeScript SDK runs the core. The existing historical SDK probes do not establish native MCP support. Implementation and independent peer verification remain required.
 
 Verified wire checkpoint: [CI run 37601682734](https://github.com/xlang-foundation/xMind/actions/runs/37601682734), revision `f0e44b029d6a28a57a80f77e921641301105a104`, passed all twenty native and twenty-seven extension contracts. [Complete CTest evidence](evidence/native-mcp-wire-ci-ctest.log), [provenance](evidence/native-mcp-wire-ci-provenance.json). `Native/src/mcp_wire.cpp` implements transport-neutral bounded newline framing and JSON-RPC envelope parsing. It retains original bytes and exact string/integer ID spelling, distinguishes request/notification/result/error, validates object parameters/results, rejects duplicate fields/deep JSON/invalid UTF-8, bounds each frame to 1 MiB, and fails closed after malformed input, consumer failure or incomplete EOF. Outgoing modern requests carry backend-owned metadata; legacy framing is explicit. The compiled contract exercises in-memory fragmented byte fixtures, including non-ASCII text and maximum 64-bit IDs. Request correlation, era selection, native process pipes, HTTP, schema/tool/policy integration and SDK interoperability are not established by that verified revision.

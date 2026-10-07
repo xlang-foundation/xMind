@@ -17,6 +17,7 @@ param(
     [switch]$ApprovedEdits,
     [string]$CredentialId,
     [string]$ProcessConfig,
+    [string]$McpConfig,
     [string]$InstructionsConfig,
     [string]$GraphsConfig,
     [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
@@ -29,6 +30,7 @@ if($Action -eq 'Build') {
     exit $LASTEXITCODE
 }
 if($Port -lt 0 -or $Port -gt 65535 -or ($Action -in @('Client','Chat') -and $Port -eq 0)) {throw 'Invalid port.'}
+if($Action -eq 'Serve' -and $ModelWire -eq 'responses' -and (-not $Model -or -not $ModelEndpoint)){throw 'Responses startup requires -Model and -ModelEndpoint.'}
 if(-not $BinaryDirectory){$BinaryDirectory=Join-Path $projectRoot 'build\native\Release'}
 $binary=Join-Path ([System.IO.Path]::GetFullPath($BinaryDirectory)) $(if($Action -eq 'Serve') {'xmind_server.exe'} else {'xmind_cli.exe'})
 if(-not (Test-Path -LiteralPath $binary)) {throw 'Build the native xMind targets first with -Action Build.'}
@@ -48,6 +50,7 @@ if($Action -eq 'Serve') {
     if($ApprovedEdits) {$serverArguments+=@('--workspace-edits','approved')}
     if($CredentialId) {$serverArguments+=@('--credential-id',$CredentialId)}
     if($ProcessConfig) {$serverArguments+=@('--process-config',$ProcessConfig)}
+    if($McpConfig) {$serverArguments+=@('--mcp-config',$McpConfig)}
     if($InstructionsConfig) {$serverArguments+=@('--instructions-config',$InstructionsConfig)}
     if($GraphsConfig) {$serverArguments+=@('--graphs-config',$GraphsConfig)}
     & $binary @serverArguments
