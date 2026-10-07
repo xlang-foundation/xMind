@@ -185,12 +185,16 @@ test('closing the view during proposal revalidation cannot send an approval',asy
   await h.commands.get('agentflow.open')();assert.equal(h.decisions.length,0,'Disposed view must not issue a grant after late response');h.views[1].close();
 });
 test('changed proposal bytes invalidate the displayed review',async()=>{
-  const h=harness({running:true,operations:[pendingEdit]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
-  await until(()=>view.posted.some(message=>message.type==='operations' && message.operations.length));
-  h.pauseOperation(Promise.resolve({...pendingEdit,arguments_json:'{"different":"payload"}'}));
-  view.receive({type:'decide',id:'edit',decision:'allow'});
-  await until(()=>view.posted.some(message=>message.type==='error'));
-  assert.equal(h.decisions.length,0,'Changed reviewed bytes must never be approved');view.close();
+  const process={...pendingEdit,tool:'run_process',arguments_json:JSON.stringify({profile_id:'fixture-profile',profile_revision:1,executable:'C:/fixture/xlang3.exe',executable_id:'fixture-reviewed-binding',arguments:['fixture-script.py'],workdir:'.',directory_id:'fixture-directory',timeout_ms:120000,output_limit:65536})};
+  const changedBinding=JSON.stringify({...JSON.parse(process.arguments_json),executable_id:'fixture-changed-binding'});
+  for(const [proposal,replacement] of [[pendingEdit,'{"different":"payload"}'],[process,changedBinding]]){
+    const h=harness({running:true,operations:[proposal]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+    await until(()=>view.posted.some(message=>message.type==='operations' && message.operations.length));
+    h.pauseOperation(Promise.resolve({...proposal,arguments_json:replacement}));
+    view.receive({type:'decide',id:'edit',decision:'allow'});
+    await until(()=>view.posted.some(message=>message.type==='error'));
+    assert.equal(h.decisions.length,0,'Changed file proposal or executable binding must never receive a late approval');view.close();
+  }
 });
 test('session selection intent invalidates an in-flight approval before queued selection runs',async()=>{
   const h=harness({running:true,operations:[pendingEdit]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
