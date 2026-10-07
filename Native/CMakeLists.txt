@@ -292,6 +292,9 @@ if(BUILD_TESTING)
       add_test(NAME native_workspace_tools_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/workspace_tools_peer.mjs" "$<TARGET_FILE:agentflow_workspace_tools_contract>")
       set_tests_properties(native_workspace_tools_contract PROPERTIES TIMEOUT 45)
+      add_test(NAME native_repository_instructions_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/repository_instructions_peer.mjs" "$<TARGET_FILE:agentflow_workspace_tools_contract>")
+      set_tests_properties(native_repository_instructions_contract PROPERTIES TIMEOUT 45)
     endif()
     add_executable(agentflow_chat_provider_contract tests/chat_provider_contract.cpp)
     target_link_libraries(agentflow_chat_provider_contract PRIVATE agentflow_chat_provider)

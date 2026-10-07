@@ -82,13 +82,13 @@ struct NativeFiles {
 };
 // One literal component relative to the already opened parent. Never parses a
 // model-supplied absolute NT/DOS namespace and never follows final reparses.
-HANDLE relative_file(HANDLE parent,std::wstring name,bool directory,bool creating,bool absent_ok=false){
+HANDLE relative_file(HANDLE parent,std::wstring name,bool directory,bool creating,bool absent_ok=false,bool read_content=false){
     static const NativeFiles api;
     if(name.empty() || name.size()>32767 || name.find_first_of(L"\\/:")!=std::wstring::npos)throw std::invalid_argument("Invalid relative file component");
     UNICODE_STRING text{};text.Buffer=name.data();text.Length=static_cast<USHORT>(name.size()*sizeof(wchar_t));text.MaximumLength=text.Length;
     OBJECT_ATTRIBUTES attributes{};attributes.Length=sizeof(attributes);attributes.RootDirectory=parent;attributes.ObjectName=&text;attributes.Attributes=OBJ_CASE_INSENSITIVE;
     IO_STATUS_BLOCK outcome{};HANDLE file=nullptr;
-    const auto access=creating?(GENERIC_READ|GENERIC_WRITE|SYNCHRONIZE):(FILE_READ_ATTRIBUTES|SYNCHRONIZE|(directory?FILE_LIST_DIRECTORY|FILE_TRAVERSE:0));
+    const auto access=creating?(GENERIC_READ|GENERIC_WRITE|SYNCHRONIZE):(FILE_READ_ATTRIBUTES|SYNCHRONIZE|(directory?FILE_LIST_DIRECTORY|FILE_TRAVERSE:0)|(read_content?FILE_READ_DATA:0));
     const auto flags=FILE_SYNCHRONOUS_IO_NONALERT|FILE_OPEN_REPARSE_POINT|(directory?FILE_DIRECTORY_FILE:0)|(creating?FILE_NON_DIRECTORY_FILE|FILE_WRITE_THROUGH:0);
     const auto status=api.create(&file,access,&attributes,&outcome,nullptr,FILE_ATTRIBUTE_NORMAL,creating?0:FILE_SHARE_READ,creating?FILE_CREATE:FILE_OPEN,flags,nullptr,0);
     if(status<0){const auto code=api.error(status);if(file && file!=INVALID_HANDLE_VALUE)CloseHandle(file);
@@ -177,6 +177,34 @@ WorkspaceFile WorkspaceTools::read_file(const std::string& input,std::stop_token
 }
 WorkspaceSnapshot WorkspaceTools::snapshot_file(const std::string& input,std::stop_token cancel) const {
     return read_snapshot(input,true,cancel);
+}
+std::optional<WorkspaceSnapshot> WorkspaceTools::instruction_file(const std::string& input,std::stop_token cancel) const {
+    check_cancel(cancel);const auto workspace=identity();auto parent=impl_->creation_parent(input,cancel);
+    const auto opened=relative_file(parent.directories.back()->value,parent.leaf,false,false,true,true);
+    if(!opened){check_cancel(cancel);if(identity()!=workspace)throw ToolAccessDenied("Workspace changed during guidance discovery");return std::nullopt;}
+    Handle file(opened);impl_->verify(file.value);BY_HANDLE_FILE_INFORMATION info{};
+    if(!GetFileInformationByHandle(file.value,&info) || GetFileType(file.value)!=FILE_TYPE_DISK || (info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Guidance must be a regular file");
+    if((info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT) || info.nNumberOfLinks!=1)throw ToolAccessDenied("Guidance does not follow linked files");
+    if(info.nFileSizeHigh || info.nFileSizeLow>16384)throw ToolFileError("Guidance file exceeds 16 KiB");
+    std::string content;std::array<char,4096> buffer{};
+    for(;;){check_cancel(cancel);DWORD count=0;if(!ReadFile(file.value,buffer.data(),static_cast<DWORD>(buffer.size()),&count,nullptr))throw ToolFileError("Guidance is unreadable");if(!count)break;if(count>16384-content.size())throw ToolFileError("Guidance file exceeds 16 KiB");content.append(buffer.data(),count);}
+    if(!valid_text(content))throw ToolFileError("Guidance must be UTF-8 text without NUL");
+    check_cancel(cancel);impl_->verify(file.value);if(identity()!=workspace)throw ToolAccessDenied("Workspace changed during guidance snapshot");
+    return WorkspaceSnapshot{parent.relative,content,workspace,file_identity(file.value),content_hash(content)};
+}
+std::vector<WorkspaceSnapshot> WorkspaceTools::repository_instructions(const std::string& input,std::stop_token cancel) const {
+    check_cancel(cancel);const auto directory=relative_path(input);std::vector<std::string> paths{"AGENTS.md"};std::string prefix;
+    if(directory!=".")for(const auto& component:std::filesystem::u8path(directory)){
+        const auto bytes=component.generic_u8string();const std::string part(reinterpret_cast<const char*>(bytes.data()),bytes.size());
+        if(part==".")continue;if(paths.size()>=33)throw std::invalid_argument("Guidance directory depth exceeds 32");
+        if(!prefix.empty())prefix+='/';prefix+=part;paths.push_back(prefix+"/AGENTS.md");
+    }
+    const auto workspace=identity();std::vector<WorkspaceSnapshot> result;std::size_t bytes=0;
+    for(const auto& path:paths)if(auto file=instruction_file(path,cancel)){
+        if(file->workspace_id!=workspace)throw ToolAccessDenied("Workspace changed during guidance discovery");
+        if(file->content.size()>32768-bytes)throw ToolFileError("Scoped guidance exceeds 32 KiB");bytes+=file->content.size();result.push_back(std::move(*file));
+    }
+    if(identity()!=workspace)throw ToolAccessDenied("Workspace changed during guidance discovery");return result;
 }
 WorkspaceEditPlan WorkspaceTools::plan_replacement(const std::string& path,const std::string& old_text,const std::string& new_text,std::size_t expected,std::stop_token cancel) const {
     check_cancel(cancel);

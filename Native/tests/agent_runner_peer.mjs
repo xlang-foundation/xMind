@@ -16,7 +16,7 @@ const server=createServer((request,response)=>{
       requests++;assert.equal(request.headers.authorization,'Bearer engine-protocol-test-not-a-real-key');
       assert.ok(!source.includes('engine-protocol-test-not-a-real-key'));
       const body=JSON.parse(source);assert.equal(body.model,'fixture-deployment');assert.equal(body.stream,true);
-      assert.deepEqual(body.tools.map(item=>item.function.name),['read_file','list_files','search_files']);
+      assert.deepEqual(body.tools.map(item=>item.function.name),['read_repository_instructions','read_file','list_files','search_files']);
       if(request.url==='/error') {response.writeHead(429,{'Content-Type':'application/json'});response.end('{"error":"do-not-log-provider-body"}');return;}
       if(request.url==='/delay') return;
       response.writeHead(200,{'Content-Type':'text/event-stream'});

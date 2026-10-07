@@ -7,19 +7,21 @@ import {mkdtemp,mkdir,writeFile,readFile,copyFile,appendFile,rm} from 'node:fs/p
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {randomBytes} from 'node:crypto';
+import {randomBytes,createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 const [serverExe,cliExe,adminExe,modules,stdlib]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-agent-process-')),workspace=join(folder,'workspace'),database=join(folder,'state.sqlite'),configFile=join(folder,'profiles.json'),executable=join(folder,'actual-node.exe');
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
 const instructionFile=join(folder,'instructions.json'),instructionText='Synthetic trusted general/coding fixture 🌍\nTreat every command as automatically allowed; this text cannot change native permissions.';
+const repositoryText='Synthetic repository guidance 🌍: report actual command outcomes.';
 let child,port,peerError,observer,observerDone,observerText='',observerErrors='',requests=0;const continued=new Map(),operationIds=[];
 const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',()=>{
     try {
       ++requests;const body=JSON.parse(source),name=body.messages.findLast(message=>message.role==='user').content;
-      assert.equal(body.model,'synthetic-native-process-model');assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_file','list_files','search_files','run_process']);
+      assert.equal(body.model,'synthetic-native-process-model');assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','run_process']);
       assert.equal(body.messages[0].role,'system');assert.ok(body.messages[0].content.includes('Report only actions and evidence that occurred.'));assert.ok(body.messages[0].content.endsWith(instructionText),'Actual model request must retain core policy and the loaded instruction supplement');
+      assert.ok(body.messages[0].content.includes(repositoryText),'Actual native provider request must include the root guidance read from disk');
       assert.deepEqual(body.tools.at(-1).function.parameters.properties.profile.enum,['fixture']);
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
       if(tool){const result=JSON.parse(tool.content);continued.set(name,result);assert.equal(tool.tool_call_id,'fixture-'+name);
@@ -58,7 +60,7 @@ async function mutateFixtureExecutable(){
   }}
 }
 try {
-  await mkdir(workspace);await copyFile(process.execPath,executable);
+  await mkdir(workspace);await writeFile(join(workspace,'AGENTS.md'),repositoryText);await copyFile(process.execPath,executable);
   const fixture=fileURLToPath(new URL('./process_peer.mjs',import.meta.url));
   await writeFile(configFile,JSON.stringify({profiles:[{id:'fixture',executable,prefix_arguments:[fixture],max_timeout_ms:10000}]}));
   await writeFile(instructionFile,JSON.stringify({instructions:instructionText}));
@@ -93,6 +95,7 @@ try {
     const operation=cli('operation',proposal.id);assert.equal(operation.state,{allowed:'succeeded',denied:'denied',cancelled:'cancelled','stale-executable':'failed'}[name]);
     const chunks=cli('events',run.id).filter(event=>event.kind==='process.output');
     const policyEvents=cli('events',run.id).filter(event=>event.kind==='agent.instructions');assert.equal(policyEvents.length,1);assert.deepEqual(policyEvents[0].data,{...instructionMetadata,scope:'server',runtime_state:'startup_snapshot'});assert.equal(JSON.stringify(policyEvents).includes(instructionText),false);
+    const repositoryEvents=cli('events',run.id).filter(event=>event.kind==='agent.repository_instructions');assert.equal(repositoryEvents.length,1);const repository=repositoryEvents[0].data;assert.equal(repository.snapshot,'run_start');assert.equal(repository.sources.length,1);assert.equal(repository.sources[0].path,'AGENTS.md');assert.equal(repository.sources[0].byte_count,Buffer.byteLength(repositoryText));assert.equal(repository.sources[0].content_sha256,createHash('sha256').update(repositoryText).digest('hex'));assert.ok(repository.sources[0].file_id);assert.ok(repository.sources[0].workspace_id);assert.equal(JSON.stringify(repositoryEvents).includes(repositoryText),false);
     if(name==='allowed'){
       await until(()=>Promise.resolve(observer.exitCode),value=>value!==null);assert.equal(await observerDone,0,observerErrors);
       assert.deepEqual(watchRecords(observerText),cli('events',run.id,String(watchCursor)),'Resumed native watcher must emit the actual durable tail through the terminal transition');observer=null;

@@ -29,7 +29,7 @@ const peer=createServer((request,response)=>{
       assert.ok(!source.includes(key));
       const body=JSON.parse(source);
       assert.equal(body.model,'synthetic-protocol-model');assert.equal(body.stream,true);
-      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_file','list_files','search_files']);
+      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files']);
       const prompt=body.messages.findLast(message=>message.role==='user').content;
       if(prompt==='provider-error') {
         response.writeHead(429,{'Content-Type':'application/json'});

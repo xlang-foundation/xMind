@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/model_provider.hpp"
 #include <memory>
+#include <optional>
 
 namespace agentflow {
 struct ToolAccessDenied : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -43,6 +44,11 @@ public:
     // Backend edit preconditions captured from one verified file handle.
     // Capturing a snapshot does not grant permission or mutate the file.
     WorkspaceSnapshot snapshot_file(const std::string& path,std::stop_token cancel={}) const;
+    // Guidance reads retain verified directory handles, reject links, and
+    // distinguish an absent final file from an unreadable/unsafe file.
+    std::optional<WorkspaceSnapshot> instruction_file(const std::string& path,std::stop_token cancel={}) const;
+    // Root-to-directory AGENTS.md snapshots; no home/global or sibling reads.
+    std::vector<WorkspaceSnapshot> repository_instructions(const std::string& directory=".",std::stop_token cancel={}) const;
     // Build a reviewable literal replacement from actual file bytes. This
     // returns a proposal only; applying it requires a claimed effect and an
     // executor that revalidates its exact snapshot preconditions.

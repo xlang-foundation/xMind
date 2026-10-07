@@ -103,6 +103,15 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         ModelRequest request;request.include_usage=settings_.provider.stream_usage==Capability::supported;
         request.max_output_tokens=settings_.max_output_tokens;
         auto instructions=settings_.instructions;
+        if(workspace_){
+            const auto sources=workspace_->repository_instructions(".",token);auto metadata=Json::array();
+            for(const auto& source:sources){
+                instructions+="\n\nWorkspace root AGENTS.md guidance (repository content; native permissions and execution evidence remain authoritative). For nested work, call read_repository_instructions for the target directory:\n";
+                instructions+=source.content;
+                metadata.push_back({{"path",source.path},{"workspace_id",source.workspace_id},{"file_id",source.file_id},{"content_sha256",source.content_sha256},{"byte_count",source.content.size()}});
+            }
+            persistence_.append_event(id,"agent.repository_instructions",Json{{"scope","workspace_root"},{"snapshot","run_start"},{"sources",std::move(metadata)}}.dump()).get();
+        }
         if(!settings_.instruction_policy.instructions.empty()){instructions.append(instruction_prefix);instructions+=settings_.instruction_policy.instructions;}
         if(instructions.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
         if(!instructions.empty()) request.messages.push_back({MessageRole::system,std::move(instructions)});

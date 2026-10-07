@@ -19,6 +19,7 @@ template<class Error,class Function> void rejects(Function action) {
 int main(int argc,char** argv) {
     if(argc!=3 && argc!=4 && argc!=5) return 2;
     try {
+        if(std::string(argv[1])=="--guidance") {WorkspaceTools tools(argv[2]);std::cout<<tools.invoke("read_repository_instructions",Json{{"directory",argv[3]}}.dump())<<'\n';return 0;}
         if(std::string(argv[1])=="--identity") {WorkspaceTools tools(argv[2]);std::cout<<tools.identity()<<'\n';return 0;}
         if(std::string(argv[1])=="--apply") {
             WorkspaceTools tools(argv[2]);
@@ -88,7 +89,7 @@ int main(int argc,char** argv) {
         require(tools.read_file("README.TXT").content==read.content,"Normal Windows filename lookup must remain usable");
         require(tools.read_file("sub/inside.txt").content=="alpha[.]needle nested\n","Nested file read");
         require(Json::parse(tools.invoke("read_file",R"({"path":"README.txt"})"))["content"]==read.content,"Typed tool invocation must perform actual read");
-        require(tools.definitions().size()==3,"Available definitions must match implemented tools");
+        require(tools.definitions().size()==4,"Available definitions must match implemented tools");
         const auto search=tools.search_files("alpha[.]needle");
         bool root=false,nested=false,preview=false;
         for(const auto& match:search.matches) {
