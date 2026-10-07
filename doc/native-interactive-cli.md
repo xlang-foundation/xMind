@@ -65,6 +65,16 @@ product acceptance results.
 
 ## Verification status
 
+The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
+passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
+52 native and 66 extension contracts. This verifies initial-model prevalidation
+and `/provider-models` saved-key discovery in the actual CLI, in addition to the
+earlier controls/approval cases. [Exact-source scope](evidence/native-cli-discovery-setup-hosted-provenance.json),
+[projected results](evidence/native-cli-discovery-setup-hosted-summary.log).
+The source-prepared notes above/below retain their historical introduction
+status; this exact hosted result supersedes pending status for those features.
+New reasoning and Responses enrollment/routing changes remain separately pending.
+
 Update: `d0a70fef888c3724c2490bcb2cf8ef38d60f08c0` passed its
 [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37701625318)
 with 52 native and 66 extension contracts. This extends the initial chat result

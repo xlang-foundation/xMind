@@ -1,5 +1,12 @@
 # Bounded native provider HTTP diagnostics
 
+Later checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` passed
+[hosted validation](https://github.com/xlang-foundation/xMind/actions/runs/37702741919),
+including the added native discovery and agent-event diagnostic propagation
+assertions. [Exact-source scope](evidence/native-cli-discovery-setup-hosted-provenance.json)
+and [results](evidence/native-cli-discovery-setup-hosted-summary.log) distinguish
+that validation from newer reasoning/Responses routing work still in progress.
+
 Checkpoint `d0a70fef888c3724c2490bcb2cf8ef38d60f08c0` now passed its
 [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37701625318):
 52 native and 66 extension contracts, including bounded native transport
