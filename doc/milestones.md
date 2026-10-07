@@ -2,6 +2,8 @@
 
 The user requested visible milestones. Show a runnable result, validation evidence and remaining scope at each milestone. Prepared source or a diagram alone does not prove a runnable native milestone.
 
+Next coding component: the native foreground process adapter and actual-child contract are prepared, with 32 native contracts expected by isolated CI. Local compilation was deferred by a currently observed xlang3 timing controller; no adapter pass or coding-loop integration is claimed. [Implementation/acceptance contract](native-process-tools.md). The latest verified runnable product remains the 31-native/30-extension creation checkpoint below.
+
 ## M1: persistence through embedded xlang3 — verified
 
 Verified supporting component: native Windows credential protection compiled and passed its synthetic binary/context/tamper/ownership test. It is now connected to SQLite through embedded xlang3; see [credential-storage.md](credential-storage.md). The historical native test log `build/native/evidence/contracts-20261006.log` preserves the passing protection test and the two initial failing SQLite tests; the later passing logs below supersede those failures.
