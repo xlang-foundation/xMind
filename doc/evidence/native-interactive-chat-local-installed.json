@@ -7,5 +7,6 @@
   "emptyChatExit": 0,
   "emptyChatRecords": 0,
   "sessionCountUnchanged": true,
-  "cliSha256": "f263c393de6312729f3f43604ec47720171f33ecae266ba1ef38698d0c941021"
+  "cliSha256": "f263c393de6312729f3f43604ec47720171f33ecae266ba1ef38698d0c941021",
+  "publicChatLauncherExit": 0
 }

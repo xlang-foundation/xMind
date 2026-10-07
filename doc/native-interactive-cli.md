@@ -81,3 +81,12 @@ zero, emitted no fabricated records and left the session count unchanged.
 records the binary hash and scope. This local check submitted no provider request
 and does not validate the newer CLI features or live coding. Other previews and
 their backend processes were left running.
+
+`Tools/agentflow.ps1 -Action Chat -Port PORT` is the public console entry point.
+It accepts `-Session ID` and optional `-Model ID` for an existing session, and
+`-BinaryDirectory DIR` for an installed native distribution. It forwards normal
+native arguments and inherits the existing private authentication environment;
+it does not copy keys or access SQLite. This public launcher also passed the
+empty-chat check above. `-Action Serve -ModelWire responses` now forwards the
+explicit native wire option; that forwarding was checked against the server
+argument contract, not a live Responses request.

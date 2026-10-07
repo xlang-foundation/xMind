@@ -1,6 +1,8 @@
 [CmdletBinding(PositionalBinding = $false)]
 param(
-    [ValidateSet('Build','Serve','Client')][string]$Action='Client',
+    [ValidateSet('Build','Serve','Client','Chat')][string]$Action='Client',
+    [string]$BinaryDirectory,
+    [string]$Session,
     [string]$Database,
     [int]$Port=8765,
     [string]$RuntimeDirectory="$PSScriptRoot\..\..\xlang3\build\Release",
@@ -9,6 +11,7 @@ param(
     [string]$SelectableModels,
     [ValidateSet('unknown','unsupported','supported')][string]$StreamUsage='unknown',
     [string]$ModelEndpoint,
+    [ValidateSet('chat-completions','responses')][string]$ModelWire='chat-completions',
     [string]$Workspace,
     [string]$InspectionWorkspace,
     [switch]$ApprovedEdits,
@@ -25,8 +28,9 @@ if($Action -eq 'Build') {
     & "$PSScriptRoot\native-milestone.ps1" -Action Build -RuntimeDirectory $RuntimeDirectory -PythonLibSource $PythonLibSource
     exit $LASTEXITCODE
 }
-if($Port -lt 0 -or $Port -gt 65535 -or ($Action -eq 'Client' -and $Port -eq 0)) {throw 'Invalid port.'}
-$binary=Join-Path $projectRoot ('build\native\Release\'+$(if($Action -eq 'Serve') {'xmind_server.exe'} else {'xmind_cli.exe'}))
+if($Port -lt 0 -or $Port -gt 65535 -or ($Action -in @('Client','Chat') -and $Port -eq 0)) {throw 'Invalid port.'}
+if(-not $BinaryDirectory){$BinaryDirectory=Join-Path $projectRoot 'build\native\Release'}
+$binary=Join-Path ([System.IO.Path]::GetFullPath($BinaryDirectory)) $(if($Action -eq 'Serve') {'xmind_server.exe'} else {'xmind_cli.exe'})
 if(-not (Test-Path -LiteralPath $binary)) {throw 'Build the native xMind targets first with -Action Build.'}
 if($Action -eq 'Serve') {
     if(-not $Database) {$Database=Join-Path $projectRoot '.agentflow\native\state.sqlite'}
@@ -38,6 +42,7 @@ if($Action -eq 'Serve') {
     if($SelectableModels) {$serverArguments+=@('--models',$SelectableModels)}
     if($Model) {$serverArguments+=@('--model-stream-usage',$StreamUsage)}
     if($ModelEndpoint) {$serverArguments+=@('--model-endpoint',$ModelEndpoint)}
+    if($Model) {$serverArguments+=@('--model-wire',$ModelWire)}
     if($Workspace) {$serverArguments+=@('--workspace',$Workspace)}
     if($InspectionWorkspace) {$serverArguments+=@('--inspection-workspace',$InspectionWorkspace)}
     if($ApprovedEdits) {$serverArguments+=@('--workspace-edits','approved')}
@@ -46,6 +51,13 @@ if($Action -eq 'Serve') {
     if($InstructionsConfig) {$serverArguments+=@('--instructions-config',$InstructionsConfig)}
     if($GraphsConfig) {$serverArguments+=@('--graphs-config',$GraphsConfig)}
     & $binary @serverArguments
+} elseif($Action -eq 'Chat') {
+    if($ClientArguments.Count -gt 0){throw 'Use -Session and -Model for Chat, or -Action Client for raw commands.'}
+    if($Model -and -not $Session){throw 'An initial -Model requires -Session. For a new chat, choose /model after entering chat.'}
+    $chatArguments=@('chat')
+    if($Session){$chatArguments+=$Session}
+    if($Model){$chatArguments+=$Model}
+    & $binary $Port @chatArguments
 } else {
     & $binary $Port @ClientArguments
 }

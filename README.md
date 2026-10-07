@@ -16,6 +16,15 @@ A user-completed live browser response using OpenAI `chat-latest` was observed w
 
 Interactive native `chat [SESSION [MODEL]]` source now supports successive requests through the shared server. Compiled validation is pending; the currently running previews have not been replaced. [Interactive CLI scope](doc/native-interactive-cli.md). The existing one-shot commands remain available.
 
+The initial chat command passed hosted validation; later commands and approval
+controls remain pending as documented in its scope. Use
+`Tools/agentflow.ps1 -Action Chat -Port PORT` with the server token privately
+configured in `XMIND_AUTH_TOKEN`. Add `-Session ID` to resume, and optionally
+`-Model ID` for that existing session. `-BinaryDirectory DIR` selects an installed
+native distribution instead of the default build output. The public Chat entry
+point passed an empty-chat local check using the exact hosted bundle; no provider
+request was made for that check.
+
 Use Windows x64, a C++20 Visual Studio toolchain, Node.js for editor/tests, and a built sibling xlang3 runtime with its supported SDK/modules. From this checkout:
 
 ```powershell
