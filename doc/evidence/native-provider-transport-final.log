@@ -1,0 +1,19 @@
+Start testing: Oct 06 21:52 Pacific Daylight Time
+----------------------------------------------------------
+3/8 Testing: native_http_stream_transport_contract
+3/8 Test: native_http_stream_transport_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/AgentFlow/Native/tests/http_stream_transport_peer.mjs" "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_http_stream_transport_contract.exe" "C:/Program Files/Git/usr/bin/openssl.exe"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"native_http_stream_transport_contract" start time: Oct 06 21:52 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native transport contracts passed against synthetic protocol peer; no live model was called
+<end of output>
+Test time =   4.73 sec
+----------------------------------------------------------
+Test Passed.
+"native_http_stream_transport_contract" end time: Oct 06 21:52 Pacific Daylight Time
+"native_http_stream_transport_contract" time elapsed: 00:00:04
+----------------------------------------------------------
+
+End testing: Oct 06 21:52 Pacific Daylight Time
