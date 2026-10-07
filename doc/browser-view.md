@@ -1,5 +1,13 @@
 # Browser view adapter
 
+The real native browser contract now verifies restarting a disposable C++/xlang3
+backend at the same origin and with the same token while its access adapter stays
+running. The existing opaque browser cookie still authenticates; completed run
+state and durable history survive without replay. This passed locally using the
+exact hosted `51724ab` bundle. [Contract output](evidence/browser-native-restart-contract.log).
+This does not cover restarting the access adapter itself, which still loses its
+in-memory login map. User previews were not restarted for this check.
+
 xMind has a local HTML view using the same sidebar renderer and native API client as the VS Code extension. The desktop layout places the agent sidebar on the right, Settings at its top, and the discovered-model selector beside the composer at the bottom. Drag the divider to resize it; arrow keys, Shift+arrows, Home and End also resize a focused divider. Its width is remembered as a non-secret appearance preference in localStorage. Narrow windows use the available width.
 
 Connect and Disconnect are accessible SVG icon buttons. The connection popup supports Cancel, its close button and Escape. Cancelling keeps an established connection and its session; with no connection it closes the popup and leaves the view disconnected. A rejected replacement token or a late response after Cancel cannot clear the existing conversation.
