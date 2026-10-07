@@ -1,0 +1,15 @@
+{
+  "extension_revision": "2d0efe9e12219570580bd00ccd8fb8086000fe5d",
+  "native_revision": "7b0fe2fca4ada58b8a7184d3be463d59ff9cc796",
+  "origin": "http://127.0.0.1:50657",
+  "ready": {
+    "opened": true,
+    "location": "secondarySidebar",
+    "origin": "http://127.0.0.1:50657",
+    "time": "2026-10-07T09:29:45.489Z",
+    "storage": "Normal development host; no extension test runner",
+    "scope": "Actual sidebar opened; no live inference claimed"
+  },
+  "scope": "Actual unseeded sidebar reopened against existing verified native backend using saved SecretStorage; no populated run history or inference claimed",
+  "model_configured": false
+}
