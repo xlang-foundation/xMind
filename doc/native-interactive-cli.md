@@ -27,7 +27,23 @@ the provider account discovery endpoint; enabling additional providers/models is
 a separate backend configuration action. Integrated console settings and live
 model-selection acceptance remain pending.
 
-Closing or interrupting the CLI leaves backend ownership unchanged. `/exit` is read between completed turns, not during the blocking observer. Explicit cancellation and effect approvals currently use the existing `cancel`, `operations`, `operation` and `decide` commands from another console or an authenticated view. Integrated concurrent input, terminal approval/diff controls, rich TUI rendering, attachment/context controls and full OpenCode CLI parity remain required.
+During chat observation, pending effect proposals are read from the backend and
+shown as escaped NDJSON `operation_review` records, including the exact argument
+bytes, file snapshots or command specification, ownership and expiry. Enter
+`/allow ID` or `/deny ID` using the displayed ID, or `/cancel` to request run
+cancellation. Decisions contain no client-supplied plan or authority; the backend
+revalidates the operation. Rejected/stale decisions cause state to be reread.
+No approval is automatic. EOF or `/exit` at the approval prompt detaches with an
+error status and sends no decision or cancellation. Backend execution continues.
+
+Closing or interrupting the CLI leaves backend ownership unchanged. Input is
+currently read between turns and at an approval prompt, not concurrently during
+model streaming. Existing `cancel`, `operations`, `operation` and `decide`
+commands remain available from another console/view. Concurrent input, rich
+terminal diff/TUI controls, attachment/context controls and full OpenCode CLI
+parity remain required. The edit HTTP contract now drives this approval path
+through the actual CLI for both allow and deny, with synthetic inference and real
+native file effects when compiled validation runs; execution is still pending.
 
 ## Verification status
 

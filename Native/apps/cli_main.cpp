@@ -32,7 +32,7 @@ nlohmann::json provider_key_fields(const std::string& variable,const std::string
 // Observation only: ending this client never grants, cancels or owns execution.
 // Each flushed NDJSON record is an actual persisted backend event. Its seq can
 // be supplied on reconnect; process-output hex is never written as terminal code.
-int watch_run(httplib::Client& client,const httplib::Headers& headers,const std::string& run,std::int64_t cursor,bool graph=false) {
+int watch_run(httplib::Client& client,const httplib::Headers& headers,const std::string& run,std::int64_t cursor,bool graph=false,bool interactive=false) {
     using Json=nlohmann::json;const auto path="/v1/runs/"+run;
     auto read=[&](const std::string& route) {
         auto response=client.Get(route,headers);if(!response)throw std::runtime_error("Cannot reach xMind Server during observation");
@@ -69,6 +69,35 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
             emit();return value=="completed"?0:value=="cancelled"?2:1;
         }
         if(value!="queued" && value!="running" && value!="paused")throw std::runtime_error("Unknown backend run state");
+        if(interactive){
+            const auto operations=read(path+"/operations");
+            if(!operations.is_array())throw std::runtime_error("Invalid backend operation list");
+            for(const auto& operation:operations){
+                if(!operation.is_object() || operation.value("run_id",std::string{})!=run)throw std::runtime_error("Invalid operation ownership");
+                if(operation.value("state",std::string{})!="awaiting_approval")continue;
+                const auto operationId=operation.value("id",std::string{});
+                if(operationId.empty() || operationId.size()>128 || operationId.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid approval identity");
+                // JSON escaping keeps file/process content inert on the terminal.
+                // The native backend retains the exact proposal and revalidates
+                // authority, expiry and effect preconditions on the decision.
+                std::cout<<Json{{"type","operation_review"},{"operation",operation}}.dump()<<'\n'<<std::flush;
+                if(!std::cout)throw std::runtime_error("Approval review output is unavailable");
+                std::cerr<<"Review the exact operation above. Enter /allow "<<operationId<<", /deny "<<operationId<<", /cancel or /exit to detach.\n";
+                std::string decision;
+                if(!std::getline(std::cin,decision))throw std::runtime_error("CLI detached before a decision; backend execution remains owned by the server");
+                if(!decision.empty() && decision.back()=='\r')decision.pop_back();
+                if(decision=="/exit")throw std::runtime_error("CLI detached before a decision; backend execution remains owned by the server");
+                std::string route;Json body;
+                if(decision=="/cancel"){route=path+"/cancel";body=Json::object();}
+                else if(decision=="/allow "+operationId || decision=="/deny "+operationId){route="/v1/operations/"+operationId+"/decision";body={{"decision",decision.starts_with("/allow ")?"allow":"deny"}};}
+                else {std::cerr<<"No decision sent. Use an exact displayed operation ID.\n";break;}
+                const auto response=client.Post(route,headers,body.dump(),"application/json");
+                if(!response)throw std::runtime_error("Cannot reach xMind Server for approval");
+                if(response->status<200 || response->status>=300)std::cerr<<"Backend rejected the decision (HTTP "<<response->status<<"). Refreshing recorded state.\n";
+                else std::cout<<Json{{"type","operation_decision_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;
+                break; // Re-read state before reviewing another operation.
+            }
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
 }
@@ -135,7 +164,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(!run.is_object() || run.value("session_id",std::string{})!=session || run.value("graph_root",false)!=false || !run.contains("id") || !run["id"].is_string())throw std::runtime_error("Invalid chat run admission");const auto id=run["id"].get<std::string>();
         if(id.empty() || id.size()>128 || id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid chat run identity");
         std::cout<<Json{{"type","run"},{"run",run}}.dump()<<'\n'<<std::flush;
-        last_result=watch_run(client,headers,id,0);
+        last_result=watch_run(client,headers,id,0,false,true);
         std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
     }
     if(!std::cin.eof())throw std::runtime_error("Chat input is unavailable");

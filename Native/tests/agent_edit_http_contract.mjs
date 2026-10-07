@@ -64,6 +64,28 @@ async function api(path,body) {
   assert.ok(response.ok,await response.clone().text());return response.json();
 }
 function cli(...args) {const result=spawnSync(cliExe,[String(port),...args],{env,encoding:'utf8',windowsHide:true,timeout:5000});assert.equal(result.status,0,result.stderr);return JSON.parse(result.stdout);}
+async function approvedChat(name,decision){
+  const process=spawn(cliExe,[String(port),'chat'],{env,windowsHide:true});let pending='',stderr='',failure;const records=[];
+  process.stderr.on('data',bytes=>stderr+=bytes);
+  process.stdout.on('data',bytes=>{
+    pending+=bytes;let newline;
+    while((newline=pending.indexOf('\n'))>=0){
+      const line=pending.slice(0,newline);pending=pending.slice(newline+1);
+      try {
+        const record=JSON.parse(line);records.push(record);
+        if(record.type==='operation_review'){
+          assert.equal(JSON.parse(record.operation.arguments_json).before_content,'original\n');
+          assert.equal(record.operation.state,'awaiting_approval');
+          process.stdin.write(`/${decision} ${record.operation.id}\n`);
+        }
+        if(record.type==='turn_finished')process.stdin.end('/exit\n');
+      } catch(error){failure=error;process.kill();}
+    }
+  });
+  const timer=setTimeout(()=>process.kill(),12000);
+  const result=await new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});process.stdin.write((name==='allowed'?'/model synthetic-edit-alternate\n':'')+name+'\n');});
+  if(failure)throw failure;assert.equal(result.signal,null);assert.equal(result.code,0,stderr);assert.ok(records.some(record=>record.type==='operation_review'));assert.ok(records.some(record=>record.kind==='run.completed'));return records;
+}
 async function until(read,predicate) {const deadline=Date.now()+5000;while(Date.now()<deadline){const value=await read();if(predicate(value)) return value;if(peerError) throw peerError;await delay(10);}throw new Error(`State deadline: ${errors}`);}
 async function start() {
   child=spawn(serverExe,['--db',join(folder,'state.sqlite'),'--modules',modules,'--stdlib',stdlib,'--port','0','--model','synthetic-edit-protocol-model','--models','synthetic-edit-alternate','--model-stream-usage','supported','--model-endpoint',`http://127.0.0.1:${peer.address().port}/chat`,'--model-tools','supported','--workspace',workspace,'--workspace-edits','approved'],{env,windowsHide:true});
@@ -77,6 +99,12 @@ try {
   await mkdir(workspace);await Promise.all(['allowed','denied','stale','cancelled','interrupted'].map(name=>writeFile(join(workspace,`${name}.txt`),'original\n')));
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));await start();
   assert.deepEqual(cli('models'),{default_model:'synthetic-edit-protocol-model',models:[{id:'synthetic-edit-protocol-model'},{id:'synthetic-edit-alternate'}]});
+  for(const [name,decision] of [['allowed','allow'],['denied','deny']]){
+    const records=await approvedChat(name,decision),proposal=records.find(record=>record.type==='operation_review').operation;
+    assert.equal((await api(`/v1/operations/${proposal.id}`)).state,decision==='allow'?'succeeded':'denied');
+    assert.equal(await readFile(join(workspace,`${name}.txt`),'utf8'),decision==='allow'?'changed allowed\n':'original\n');
+    await writeFile(join(workspace,`${name}.txt`),'original\n');
+  }
   for(const name of ['allowed','denied','stale','cancelled']) {
     await api('/v1/sessions',{id:name,title:'Synthetic edit protocol fixture'});
     if(name==='allowed') {
@@ -163,7 +191,7 @@ try {
   assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'changed allowed\n');
   const retired=await fetch(`http://127.0.0.1:${port}/v1/operations/${interrupted.id}/decision`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({decision:'allow'}),signal:AbortSignal.timeout(5000)});
   assert.equal(retired.status,409,'Restart must not grant an unused approval to a retired owner');
-  assert.equal(requests,41);if(peerError) throw peerError;
+  assert.equal(requests,45);if(peerError) throw peerError;
   console.log('Compiled native agent edit loop passed: real approved edits, denial, stale content, cancellation, actual tool-result continuation and pending-approval restart recovery. Inference is synthetic.');
 } finally {
   await stop();
