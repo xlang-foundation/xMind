@@ -84,9 +84,14 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
     };
     const auto health=request("/v1/health");if(!health.is_object() || health.value("agent_execution",false)!=true)throw std::runtime_error("Configure a backend model before starting chat");
     // Validate a supplied session without starting work or creating a duplicate.
-    if(!session.empty()){const auto history=request("/v1/sessions/"+session+"/history");if(!history.is_array())throw std::runtime_error("Invalid session history");}
+    Json history;
+    if(!session.empty()){history=request("/v1/sessions/"+session+"/history");if(!history.is_array())throw std::runtime_error("Invalid session history");}
     std::cerr<<"xMind chat: enter a request, /exit to leave. Backend runs survive disconnect.\n";
-    if(!session.empty())std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<std::flush;
+    if(!session.empty()){
+        std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'
+                 <<Json{{"type","history"},{"session_id",session},{"history",history}}.dump()<<'\n'<<std::flush;
+        if(!std::cout)throw std::runtime_error("Chat history output is unavailable");
+    }
     int last_result=0;std::string prompt;
     while(std::cerr<<"xMind > "<<std::flush,std::getline(std::cin,prompt)) {
         if(!prompt.empty() && prompt.back()=='\r')prompt.pop_back();

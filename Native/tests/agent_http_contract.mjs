@@ -94,10 +94,11 @@ async function until(read,predicate,label) {
 const terminal=(id,state)=>until(async()=> (await api(`/v1/runs/${id}`)).data,value=>value.state===state,`${id} ${state}`);
 const streaming=id=>until(async()=> (await api(`/v1/runs/${id}/events`)).data,events=>events.some(event=>event.kind==='model.text'),`${id} stream`);
 async function session(id) {assert.equal((await api('/v1/sessions',{id,title:id})).status,201);}
-async function chat(input,...args){
+async function chatResult(expectedExit,input,...args){
  const process=spawn(cliExe,[String(port),'chat',...args],{env:baseEnv,windowsHide:true});let output='',errors='';process.stdout.on('data',bytes=>output+=bytes);process.stderr.on('data',bytes=>errors+=bytes);const timer=setTimeout(()=>process.kill(),12000);
- const result=await new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});process.stdin.end(input);});assert.equal(result.signal,null,'Interactive CLI must finish without being killed');assert.equal(result.code,0,errors);assert.ok(!output.includes(key));return output.trim()?output.trim().split('\n').map(line=>JSON.parse(line)):[];
+ const result=await new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});process.stdin.end(input);});assert.equal(result.signal,null,'Interactive CLI must finish without being killed');assert.equal(result.code,expectedExit,errors);assert.ok(!output.includes(key));return output.trim()?output.trim().split('\n').map(line=>JSON.parse(line)):[];
 }
+const chat=(input,...args)=>chatResult(0,input,...args);
 try {
   await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual workspace content\n');
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
@@ -120,6 +121,15 @@ try {
   const chatRecords=await chat('Read README from the CLI\nRead README again in the same conversation\n/exit\n'),chatSession=chatRecords.find(record=>record.type==='session').session_id;
   assert.equal(chatRecords.filter(record=>record.type==='session').length,1);const chatRuns=chatRecords.filter(record=>record.type==='run').map(record=>record.run);assert.equal(chatRuns.length,2);assert.ok(chatRuns.every(item=>item.session_id===chatSession));assert.equal(chatRecords.filter(record=>record.type==='turn_finished'&&record.exit_status===0).length,2);assert.equal(cli('history',chatSession).length,8);assert.ok(chatRecords.some(record=>record.kind==='tool.completed'));assert.ok(chatRecords.some(record=>record.kind==='run.completed'));
   const resumedChat=await chat('Read README after reconnect\n/exit\n',chatSession);assert.equal(resumedChat.find(record=>record.type==='session').session_id,chatSession);assert.equal(cli('history',chatSession).length,12);assert.equal(cli('runs',chatSession).length,3,'Reconnect must add only the requested new turn, not replay completed work');
+  assert.equal(resumedChat.find(record=>record.type==='history').history.length,8,'Resuming emits the actual pre-turn durable conversation');
+  assert.deepEqual((await chat('/exit\n',chatSession)).find(record=>record.type==='history').history,cli('history',chatSession),'Viewing history without a request must not start work');
+  const failureChat=await chatResult(1,'provider-error\n/exit\n');
+  assert.equal(failureChat.filter(record=>record.type==='turn_finished'&&record.exit_status===1).length,1);
+  assert.ok(failureChat.some(record=>record.kind==='run.failed'&&record.data.status===429));
+  assert.ok(!JSON.stringify(failureChat).includes('private-provider-error-body'));
+  const recovered=await chat('provider-error\nRead README after the failed turn\n/exit\n');
+  assert.deepEqual(recovered.filter(record=>record.type==='turn_finished').map(record=>record.exit_status),[1,0],'A later explicit request may proceed after a failed turn; there is no automatic retry');
+  assert.equal(recovered.filter(record=>record.type==='run').length,2);
 
   for(const id of ['held','queued','overflow']) await session(id);
   assert.equal((await api('/v1/runs',{id:'held-run',session_id:'held',prompt:'hold-stream'})).status,202);
