@@ -10,6 +10,7 @@
 #include <sstream>
 #if defined(_WIN32)
 #include "agentflow/agent_service.hpp"
+#include "agentflow/edit_executor.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <bcrypt.h>
@@ -71,6 +72,10 @@ int main(int argc,char** argv) {
         const auto workers=capacity("--workers",2,16),queue=capacity("--queue-limit",128,4096);
         agentflow::PersistenceService persistence(options.at("--db"),{options.at("--modules"),options.at("--stdlib")});
         std::unique_ptr<agentflow::RunExecutor> executor;
+#if defined(_WIN32)
+        std::unique_ptr<agentflow::WorkspaceTools> recovery_workspace;
+        std::unique_ptr<agentflow::EditExecutor> recovery;
+#endif
         if(options.contains("--model")) {
 #if defined(_WIN32)
             agentflow::AgentSettings settings;settings.provider.model=options.at("--model");settings.provider.endpoint=options.at("--model-endpoint");
@@ -97,11 +102,19 @@ int main(int argc,char** argv) {
                 settings.credential=agentflow::CredentialReference{"server",id,purpose};
             }
             executor=std::make_unique<agentflow::AgentService>(persistence,std::move(settings),workers,queue);
+            if(options.contains("--workspace")) {
+                recovery_workspace=std::make_unique<agentflow::WorkspaceTools>(options.at("--workspace"));
+                recovery=std::make_unique<agentflow::EditExecutor>(persistence,*recovery_workspace);
+            }
 #else
             throw std::invalid_argument("Native provider execution currently requires Windows");
 #endif
         }
-        agentflow::HttpServer server(persistence,auth,executor.get());const auto bound=server.bind(port);
+        agentflow::HttpServer server(persistence,auth,executor.get()
+#if defined(_WIN32)
+            ,recovery.get()
+#endif
+        );const auto bound=server.bind(port);
 #if defined(_WIN32)
         {std::lock_guard lock(control_mutex);active_server=&server;}
         SetConsoleCtrlHandler(control,TRUE);

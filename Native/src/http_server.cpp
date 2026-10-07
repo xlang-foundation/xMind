@@ -1,4 +1,5 @@
 #include "agentflow/http_server.hpp"
+#include "agentflow/edit_executor.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <charconv>
@@ -69,6 +70,14 @@ Json encode(const Operation& value) {
         {"tool",value.spec.tool},{"arguments_json",value.spec.arguments_json},{"state",to_string(value.state)},
         {"expires_unix_ms",value.expires_unix_ms},{"decision_actor",value.decision_actor},{"result_json",value.result_json}};
 }
+Json encode(const EditRecoveryInspection& value) {
+    const auto& observed=value.observed;
+    const char* match=value.match==EditSnapshotMatch::before?"before":(value.match==EditSnapshotMatch::after?"after":"different");
+    return {{"operation",encode(value.operation)},{"observed",{{"path",observed.path},{"workspace_id",observed.workspace_id},
+        {"file_id",observed.file_id},{"content_sha256",observed.content_sha256},{"size",observed.size}}},
+        {"match",match},{"same_file",value.same_file},{"observed_unix_ms",value.observed_unix_ms},
+        {"quarantine_released",false}};
+}
 template<class Values> Json encode_all(const Values& values) {
     auto result=Json::array();for(const auto& value:values) result.push_back(encode(value));return result;
 }
@@ -89,6 +98,8 @@ template<class Handler> auto guarded(Handler handler) {
         catch(const PersistenceClosed&) {reply(response,{{"detail","Backend shutting down"}},503);}
         catch(const RunBusy&) {reply(response,{{"detail","Agent queue is full"}},503);}
         catch(const RunUnavailable&) {reply(response,{{"detail","Agent executor is unavailable"}},503);}
+        catch(const ToolAccessDenied&) {reply(response,{{"detail","Workspace inspection denied"}},403);}
+        catch(const ToolFileError&) {reply(response,{{"detail","Workspace file unavailable for inspection"}},409);}
         catch(const Json::exception&) {reply(response,{{"detail","Invalid JSON request"}},400);}
         catch(const std::invalid_argument& error) {reply(response,{{"detail",error.what()}},400);}
         catch(...) {reply(response,{{"detail","Backend operation failed"}},500);}
@@ -98,10 +109,11 @@ template<class Handler> auto guarded(Handler handler) {
 struct HttpServer::Impl {
     PersistenceService& persistence;
     RunExecutor* executor;
+    EditRecoveryReader* recovery;
     std::string authorization;
     httplib::Server server;
     int port=-1;
-    Impl(PersistenceService& store,std::string token,RunExecutor* execution):persistence(store),executor(execution),authorization("Bearer "+token) {
+    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection):persistence(store),executor(execution),recovery(inspection),authorization("Bearer "+token) {
         validate_local_auth_token(token);
         server.new_task_queue=[] {return new httplib::ThreadPool(4,4,32);};
         server.set_payload_max_length(1024*1024);
@@ -161,6 +173,12 @@ struct HttpServer::Impl {
         server.Get(R"(/v1/operations/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {
             reply(response,encode(persistence.operation(identifier(request.matches[1])).get()));
         }));
+        if(recovery) {
+            server.Get(R"(/v1/operations/([A-Za-z0-9_-]+)/inspection)",guarded([this](const Request& request,Response& response) {
+                if(!request.params.empty()) throw std::invalid_argument("Inspection accepts only a recorded operation ID");
+                reply(response,encode(recovery->inspect_uncertain(identifier(request.matches[1]))));
+            }));
+        }
         server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/decision)",guarded([this](const Request& request,Response& response) {
             const auto value=body(request,{"decision"});const auto decision=string_field(value,"decision",8);
             if(decision!="allow" && decision!="deny") throw std::invalid_argument("Decision must be allow or deny");
@@ -184,7 +202,7 @@ struct HttpServer::Impl {
         }
     }
 };
-HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor):impl_(std::make_unique<Impl>(store,std::move(token),executor)) {}
+HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery)) {}
 HttpServer::~HttpServer()=default;
 int HttpServer::bind(int port) {
     if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");

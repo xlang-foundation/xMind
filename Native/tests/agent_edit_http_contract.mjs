@@ -68,6 +68,8 @@ try {
     await until(()=>api(`/v1/runs/${run.id}`),value=>value.state===(name==='cancelled'?'cancelled':'completed'));
     const outcome=await api(`/v1/operations/${proposal.id}`);
     assert.equal(outcome.state,{allowed:'succeeded',denied:'denied',stale:'failed',cancelled:'cancelled'}[name]);
+    const inspection=await fetch(`http://127.0.0.1:${port}/v1/operations/${proposal.id}/inspection`,{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(5000)});
+    assert.equal(inspection.status,409,'Product server exposes inspection but rejects edits that are not uncertain');
     const actual=await readFile(join(workspace,`${name}.txt`),'utf8');assert.equal(actual,name==='allowed'?'changed allowed\n':name==='stale'?'outside change\n':'original\n');
     if(name==='allowed') assert.equal(continuations.get(name).content_sha256,createHash('sha256').update(actual).digest('hex'));
     const history=cli('history',name);assert.equal(history.length,name==='cancelled'?1:4);

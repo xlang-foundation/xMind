@@ -9,6 +9,7 @@ import {createRequire} from 'node:module';
 const {BackendClient}=createRequire(import.meta.url)('../../extensions/vscode/client.js');
 const [fixture,cliExe,modules,stdlib]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-approved-http-')),workspace=join(folder,'workspace');
+const recoveryWorkspace=join(folder,'recovery-workspace');
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};
 let child,port,errors='',output='';
 async function request(path,body,headers={}) {
@@ -23,6 +24,7 @@ async function state(id,expected) {
 }
 try {
   await mkdir(workspace);
+  await mkdir(recoveryWorkspace);await writeFile(join(recoveryWorkspace,'recovery.txt'),'original\n');
   await Promise.all(['allowed.txt','denied.txt','stale.txt'].map(path=>writeFile(join(workspace,path),'original\n')));
   child=spawn(fixture,[folder,workspace,modules,stdlib],{env,windowsHide:true});
   child.stderr.on('data',data=>{errors+=data;});
@@ -61,6 +63,33 @@ try {
   await writeFile(join(workspace,'stale.txt'),'external writer\n');
   assert.equal((await request('/v1/operations/stale-edit/decision',{decision:'allow'})).status,200);
   await state('stale-edit','failed');assert.equal(await readFile(join(workspace,'stale.txt'),'utf8'),'external writer\n');
+  const operationBefore=cli('operation','uncertain-edit');
+  const eventsBefore=cli('events','run-recovery');
+  const recoveryPath='/v1/operations/uncertain-edit/inspection';
+  assert.equal((await request(recoveryPath,undefined,{Authorization:'Bearer wrong'})).status,401);
+  assert.equal((await request(recoveryPath+'?path=allowed.txt')).status,400);
+  assert.equal((await request(recoveryPath,{})).status,404,'Inspection has no mutation route');
+  assert.equal((await request('/v1/operations/missing/inspection')).status,404);
+  assert.equal((await request('/v1/operations/allow-edit/inspection')).status,409);
+  const beforeInspection=cli('inspect-edit','uncertain-edit');
+  assert.equal(beforeInspection.match,'before');assert.equal(beforeInspection.same_file,true);
+  assert.equal(beforeInspection.quarantine_released,false);
+  assert.equal(beforeInspection.observed.size,9);
+  assert.equal(beforeInspection.observed.content_sha256,createHash('sha256').update('original\n').digest('hex'));
+  assert.ok(Number.isSafeInteger(beforeInspection.observed_unix_ms));
+  assert.equal(await readFile(join(recoveryWorkspace,'recovery.txt'),'utf8'),'original\n');
+  // Explicit external fixture writes to test observations. Inspection itself
+  // cannot infer attribution or invent a successful effect from matching bytes.
+  await writeFile(join(recoveryWorkspace,'recovery.txt'),'planned change\n');
+  const afterInspection=await request(recoveryPath);assert.equal(afterInspection.status,200);
+  assert.equal(afterInspection.data.match,'after');assert.equal(afterInspection.data.operation.state,'uncertain');
+  const partial=Buffer.from([0,255,17]);await writeFile(join(recoveryWorkspace,'recovery.txt'),partial);
+  const partialInspection=cli('inspect-edit','uncertain-edit');assert.equal(partialInspection.match,'different');
+  assert.equal(partialInspection.observed.content_sha256,createHash('sha256').update(partial).digest('hex'));
+  assert.deepEqual(await readFile(join(recoveryWorkspace,'recovery.txt')),partial);
+  assert.deepEqual(cli('operation','uncertain-edit'),operationBefore);
+  assert.deepEqual(cli('events','run-recovery'),eventsBefore,'Inspection must not change the durable journal');
+  assert.equal((await request('/v1/operations/uncertain-edit/decision',{decision:'allow'})).status,409);
   const exit=new Promise(resolve=>child.once('exit',resolve));child.stdin.end('done\n');assert.equal(await exit,0,errors);
   process.stdout.write(output);
 } finally {
