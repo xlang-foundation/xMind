@@ -7,6 +7,17 @@ namespace agentflow {
 namespace {
 using Json=nlohmann::json;
 constexpr std::size_t max_line=1024*1024,max_event=4*1024*1024,max_stream=64*1024*1024,max_value=4*1024*1024;
+Json protocol_json(const std::string& source) {
+    std::vector<std::set<std::string>> fields;
+    return Json::parse(source,[&](int depth,Json::parse_event_t event,Json& value) {
+        if(depth>64) throw ModelProtocolError("Model JSON nesting exceeds configured limits");
+        if(event==Json::parse_event_t::object_start) fields.emplace_back();
+        else if(event==Json::parse_event_t::object_end) fields.pop_back();
+        else if(event==Json::parse_event_t::key && !fields.back().insert(value.get<std::string>()).second)
+            throw ModelProtocolError("Duplicate model JSON field");
+        return true;
+    });
+}
 void bounded_append(std::string& target,std::string_view value,std::size_t limit) {
     if(value.size()>limit-target.size()) throw ModelProtocolError("Model stream exceeds configured limits");
     target.append(value);
@@ -34,7 +45,7 @@ struct ChatCompletionStream::Impl {
             if(call.id.empty() || call.id.size()>256 || call.name.empty() || call.name.size()>256 || !identities.insert(call.id).second)
                 throw ModelProtocolError("Incomplete or duplicate model tool identity");
             if(completion.finish_reason=="tool_calls") {
-                const auto arguments=Json::parse(call.arguments_json);
+                const auto arguments=protocol_json(call.arguments_json);
                 if(!arguments.is_object()) throw ModelProtocolError("Tool arguments must be a JSON object");
             }
         }
@@ -46,7 +57,7 @@ struct ChatCompletionStream::Impl {
             if(!finished) throw ModelProtocolError("Model end marker without a finish reason");
             validate_calls();done=true;emit("model.done",Json::object());return;
         }
-        const auto object=Json::parse(value);
+        const auto object=protocol_json(value);
         if(!object.is_object() || object.contains("error")) throw ModelProtocolError("Provider returned an invalid or error event");
         for(auto pair:{std::pair{"id",&response_id},std::pair{"model",&model}}) {
             const auto current=optional_string(object,pair.first);

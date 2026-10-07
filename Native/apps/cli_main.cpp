@@ -6,7 +6,7 @@
 
 int main(int argc,char** argv) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, sessions, create-session, history, runs, run, cancel, status, events, operations, operation, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, sessions, create-session, history, runs, run, cancel, status, events, models, operations, operation, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -29,7 +29,8 @@ int main(int argc,char** argv) {
             if(decision!="allow" && decision!="deny") throw std::invalid_argument("Decision must be allow or deny");
             path="/v1/operations/"+id(argv[3])+"/decision";body={{"decision",decision}};post=true;
         }
-        else if(command=="run" && argc==5) {path="/v1/runs";body={{"session_id",id(argv[3])},{"prompt",argv[4]}};post=true;}
+        else if(command=="models" && argc==3) path="/v1/models";
+        else if(command=="run" && (argc==5 || argc==6)) {path="/v1/runs";body={{"session_id",id(argv[3])},{"prompt",argv[4]}};if(argc==6)body["model_id"]=argv[5];post=true;}
         else if(command=="cancel" && argc==4) {path="/v1/runs/"+id(argv[3])+"/cancel";body=Json::object();post=true;}
         else if(command=="events" && (argc==4 || argc==5)) {
             const std::string cursor=argc==5?argv[4]:"0";std::int64_t value=0;

@@ -118,6 +118,11 @@ int main(int argc,char** argv) {
         rejects<ToolFileError>([&]{tools.read_file("missing.txt");});
         rejects<std::invalid_argument>([&]{tools.invoke("read_file",R"({"path":"README.txt","extra":true})");});
         rejects<std::invalid_argument>([&]{tools.invoke("search_files",R"({"query":12})");});
+        rejects<std::invalid_argument>([&]{tools.invoke("read_file",R"({"path":"missing.txt","path":"README.txt"})");});
+        rejects<std::invalid_argument>([&]{tools.invoke("search_files",R"({"query":"first","query":"second"})");});
+        const auto deep_arguments=std::string("{\"path\":")+std::string(10000,'[')+"0"+std::string(10000,']')+"}";
+        try {tools.invoke("read_file",deep_arguments);throw std::runtime_error("Deep tool arguments were accepted");}
+        catch(const std::invalid_argument& error) {require(std::string(error.what())=="Tool argument nesting exceeds limits","Direct callers must use bounded argument parsing before file access");}
         rejects<std::invalid_argument>([&]{tools.invoke("write_file",R"({"path":"README.txt"})");});
         rejects<std::invalid_argument>([&]{tools.read_file(std::string("README.txt\0tail",15));});
         std::stop_source cancelled;cancelled.request_stop();

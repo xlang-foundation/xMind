@@ -1,4 +1,5 @@
 #include "agentflow/model_stream.hpp"
+#include "nlohmann/json.hpp"
 #include <iostream>
 
 using namespace agentflow;
@@ -71,6 +72,30 @@ int main() {
         {
             ChatCompletionStream stream([](const ModelEvent&){});
             rejects([&]{stream.feed(std::string(1024*1024+1,'x'));});
+        }
+        {
+            // Reject before model.done can make any call executable. Exercise
+            // both the outer SSE JSON and the separately encoded arguments.
+            const auto nested=std::string(10000,'[')+"0"+std::string(10000,']');
+            const auto tool_frame=[](const std::string& arguments) {
+                using Json=nlohmann::json;
+                const Json call={{"index",0},{"id","malformed-call"},
+                    {"function",{{"name","edit_file"},{"arguments",arguments}}}};
+                const Json choice={{"index",0},{"delta",{{"tool_calls",Json::array({call})}}},
+                    {"finish_reason","tool_calls"}};
+                return framed(Json{{"choices",Json::array({choice})}}.dump());
+            };
+            for(const auto& malformed:{
+                framed("{\"choices\":[],\"extension\":"+nested+"}"),
+                framed(R"({"choices":[],"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})"),
+                tool_frame("{\"path\":"+nested+"}"),
+                tool_frame(R"({"path":"first","path":"second","old_text":"x","new_text":"y"})")}) {
+                bool done=false;
+                ChatCompletionStream stream([&](const ModelEvent& event){if(event.kind=="model.done") done=true;});
+                rejects([&]{stream.feed(malformed);stream.finish();});
+                require(!done,"Malformed arguments must not reach executable completion");
+                rejects([&]{stream.finish();});
+            }
         }
         {
             ChatCompletionStream stream([](const ModelEvent&){throw std::runtime_error("Consumer stopped");});

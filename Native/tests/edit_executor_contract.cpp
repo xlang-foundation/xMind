@@ -46,6 +46,15 @@ int main(int argc,char** argv) {
         {
             PersistenceService store(database,roots);EditExecutor executor(store,workspace);
             store.create_session("session","edit contract").get();store.start_prompt_run("run","session",R"({"content":"edit contract"})").get();store.transition("run",RunState::queued,RunState::running).get();
+            rejects<std::invalid_argument>([&]{executor.invoke("invalid","run",R"({"path":"actual.txt","old_text":"original","new_text":"changed","actor":"spoofed"})",expiry());});
+            rejects<std::invalid_argument>([&]{executor.invoke("invalid","run",R"({"path":"actual.txt","path":"other.txt","old_text":"original","new_text":"changed"})",expiry());});
+            rejects<std::invalid_argument>([&]{executor.invoke("invalid","run",R"({"path":"actual.txt","old_text":"original","new_text":"changed","expected_occurrences":1.5})",expiry());});
+            rejects<NotFound>([&]{store.operation("invalid").get();});
+            const auto nested=std::string(R"({"path":"actual.txt","old_text":"original","new_text":)")+std::string(10000,'[')+"0"+std::string(10000,']')+"}";
+            try {executor.invoke("invalid-depth","run",nested,expiry());throw std::runtime_error("Deep edit arguments were accepted");}
+            catch(const std::invalid_argument& error) {require(std::string(error.what())=="Edit argument nesting exceeds limits","Deep JSON must be rejected during bounded parsing");}
+            rejects<NotFound>([&]{store.operation("invalid-depth").get();});
+            require(workspace.read_file("actual.txt").content=="original\n","Invalid model edit arguments must not create a proposal or modify bytes");
             const auto plan=workspace.plan_replacement("actual.txt","original","native change");
             Task denied(executor,"denied",plan);proposed(store,"denied");
             require(workspace.read_file("actual.txt").content=="original\n","Proposal must not apply edits");
@@ -89,6 +98,21 @@ int main(int argc,char** argv) {
             require(workspace.read_file("actual.txt").content=="actual effect before journal fault\n","Reopening must not replay an effect");
             require(reopened.operation("journal-fault").get().state==OperationState::uncertain,"Restart must quarantine an effect whose outcome was not durably recorded");
             require(reopened.run("journal-fault-run").get().state==RunState::failed,"Interrupted owner must be recovered without inventing success");
+            EditExecutor recovery(reopened,workspace);
+            rejects<Conflict>([&]{recovery.inspect_uncertain("allowed");});
+            const auto applied=recovery.inspect_uncertain("journal-fault");
+            require(applied.same_file && applied.match==EditSnapshotMatch::after,"Recovery must inspect actual matching after bytes without declaring success");
+            require(applied.observed.content_sha256==workspace.fingerprint_file("actual.txt").content_sha256 && applied.observed_unix_ms>0,"Inspection must retain actual fingerprint and observation time");
+            const auto plan=nlohmann::json::parse(applied.operation.spec.arguments_json);
+            write(plan["before_content"].get<std::string>());
+            require(recovery.inspect_uncertain("journal-fault").match==EditSnapshotMatch::before,"Actual restored before bytes must remain distinct from successful execution");
+            write(std::string("partial\0",8)+std::string(1,static_cast<char>(0xff)));
+            const auto partial=recovery.inspect_uncertain("journal-fault");
+            require(partial.match==EditSnapshotMatch::different && partial.observed.size==9,"Raw partial/binary effects must be inspectable without text decoding");
+            std::filesystem::create_directory(directory.path/"other-workspace");WorkspaceTools other((directory.path/"other-workspace").string());
+            rejects<ToolAccessDenied>([&]{EditExecutor(reopened,other).inspect_uncertain("journal-fault");});
+            require(reopened.operation("journal-fault").get().state==OperationState::uncertain,"Inspection must not consume quarantine or invent an outcome");
+            write(plan["after_content"].get<std::string>());
             reopened.close();
         }
         std::cout<<"Approved native edit executor passed with actual files and embedded xlang3 persistence; no model or public approval route was used\n";return 0;

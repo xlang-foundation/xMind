@@ -6,8 +6,11 @@ param(
     [string]$RuntimeDirectory="$PSScriptRoot\..\..\xlang3\build\Release",
     [string]$PythonLibSource='C:\Python\Python314\Lib',
     [string]$Model,
+    [string]$SelectableModels,
+    [ValidateSet('unknown','unsupported','supported')][string]$StreamUsage='unknown',
     [string]$ModelEndpoint,
     [string]$Workspace,
+    [switch]$ApprovedEdits,
     [string]$CredentialId,
     [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
     [Parameter(ValueFromRemainingArguments=$true)][string[]]$ClientArguments
@@ -27,8 +30,11 @@ if($Action -eq 'Serve') {
     New-Item -ItemType Directory -Force -Path (Split-Path $Database -Parent) | Out-Null
     $serverArguments=@('--db',$Database,'--modules',(Join-Path $RuntimeDirectory 'modules'),'--stdlib',$PythonLibSource,'--port',"$Port")
     if($Model) {$serverArguments+=@('--model',$Model,'--model-tools',$ModelTools)}
+    if($SelectableModels) {$serverArguments+=@('--models',$SelectableModels)}
+    if($Model) {$serverArguments+=@('--model-stream-usage',$StreamUsage)}
     if($ModelEndpoint) {$serverArguments+=@('--model-endpoint',$ModelEndpoint)}
     if($Workspace) {$serverArguments+=@('--workspace',$Workspace)}
+    if($ApprovedEdits) {$serverArguments+=@('--workspace-edits','approved')}
     if($CredentialId) {$serverArguments+=@('--credential-id',$CredentialId)}
     & $binary @serverArguments
 } else {

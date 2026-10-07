@@ -41,8 +41,8 @@ int main(int argc,char** argv) {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-tools" && key!="--workspace" && key!="--credential-id" && key!="--workers" && key!="--queue-limit") || !options.emplace(key,argv[i+1]).second)
-                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--model ID --model-endpoint URL] [--model-tools supported|unsupported|unknown] [--workspace DIR] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096]");
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit") || !options.emplace(key,argv[i+1]).second)
+                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--model ID --model-endpoint URL] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
         int port=8765;
@@ -59,6 +59,9 @@ int main(int argc,char** argv) {
         if(!options.contains("--model") && (options.contains("--workspace") || options.contains("--credential-id") || options.contains("--workers") || options.contains("--queue-limit") || options.contains("--model-tools"))) throw std::invalid_argument("Agent settings require a model configuration");
         if(options.contains("--model-tools") && options.at("--model-tools")!="supported" && options.at("--model-tools")!="unsupported" && options.at("--model-tools")!="unknown") throw std::invalid_argument("Invalid model tool capability declaration");
         if(options.contains("--workspace") && (!options.contains("--model-tools") || options.at("--model-tools")!="supported")) throw std::invalid_argument("Workspace execution requires --model-tools supported");
+        if(options.contains("--workspace-edits") && (options.at("--workspace-edits")!="approved" || !options.contains("--workspace"))) throw std::invalid_argument("Approved edits require a workspace and --workspace-edits approved");
+        if((options.contains("--models") || options.contains("--model-stream-usage")) && !options.contains("--model")) throw std::invalid_argument("Model settings require a configured model");
+        if(options.contains("--model-stream-usage") && options.at("--model-stream-usage")!="supported" && options.at("--model-stream-usage")!="unsupported" && options.at("--model-stream-usage")!="unknown") throw std::invalid_argument("Invalid usage capability declaration");
         auto capacity=[&](const char* key,std::size_t fallback,std::size_t limit) {
             if(!options.contains(key)) return fallback;
             const auto& input=options.at(key);std::size_t result=0;
@@ -73,6 +76,9 @@ int main(int argc,char** argv) {
             agentflow::AgentSettings settings;settings.provider.model=options.at("--model");settings.provider.endpoint=options.at("--model-endpoint");
             if(settings.provider.endpoint.size()>8192) throw std::invalid_argument("Provider endpoint exceeds its limit");
             if(options.contains("--workspace")) settings.workspace=options.at("--workspace");
+            settings.approved_edits=options.contains("--workspace-edits");
+            if(options.contains("--models")) {std::istringstream configured(options.at("--models"));std::string model;while(std::getline(configured,model,',')){if(model.empty())throw std::invalid_argument("Empty configured model");settings.selectable_models.push_back(model);}if(options.at("--models").empty() || options.at("--models").back()==',')throw std::invalid_argument("Empty configured model");}
+            if(options.contains("--model-stream-usage")) settings.provider.stream_usage=options.at("--model-stream-usage")=="supported"?agentflow::Capability::supported:(options.at("--model-stream-usage")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
             if(options.contains("--model-tools")) settings.provider.tools=options.at("--model-tools")=="supported"?agentflow::Capability::supported:(options.at("--model-tools")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
             const auto purpose=provider_purpose(settings.provider.endpoint);
             const auto* key=std::getenv("XMIND_API_KEY");

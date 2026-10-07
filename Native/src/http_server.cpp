@@ -28,7 +28,8 @@ bool equal_token(const std::string& a,const std::string& b) {
 Json body(const Request& request,std::initializer_list<const char*> allowed) {
     if(request.get_header_value("Content-Type")!="application/json") throw std::invalid_argument("Use application/json");
     std::vector<std::set<std::string>> fields;
-    auto value=Json::parse(request.body,[&](int,Json::parse_event_t event,Json& parsed) {
+    auto value=Json::parse(request.body,[&](int depth,Json::parse_event_t event,Json& parsed) {
+        if(depth>64) throw std::invalid_argument("Request JSON nesting exceeds limits");
         if(event==Json::parse_event_t::object_start) fields.emplace_back();
         else if(event==Json::parse_event_t::object_end) fields.pop_back();
         else if(event==Json::parse_event_t::key && !fields.back().insert(parsed.get<std::string>()).second) throw std::invalid_argument("Duplicate request field");
@@ -123,7 +124,13 @@ struct HttpServer::Impl {
         });
         server.set_exception_handler([](const Request&,Response& response,std::exception_ptr) {reply(response,{{"detail","Backend operation failed"}},500);});
         server.Get("/v1/health",guarded([this](const Request&,Response& response) {
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"agent_execution",executor!=nullptr}});
+            const auto models=executor?executor->models():std::vector<std::string>{};
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"agent_execution",executor!=nullptr},{"model",models.empty()?"":models.front()}});
+        }));
+        server.Get("/v1/models",guarded([this](const Request&,Response& response) {
+            const auto models=executor?executor->models():std::vector<std::string>{};
+            auto entries=Json::array();for(const auto& model:models)entries.push_back({{"id",model}});
+            reply(response,{{"default_model",models.empty()?"":models.front()},{"models",entries}});
         }));
         server.Get("/v1/sessions",guarded([this](const Request&,Response& response) {reply(response,encode_all(persistence.sessions().get()));}));
         server.Post("/v1/sessions",guarded([this](const Request& request,Response& response) {
@@ -165,9 +172,10 @@ struct HttpServer::Impl {
         }));
         if(executor) {
             server.Post("/v1/runs",guarded([this](const Request& request,Response& response) {
-                const auto value=body(request,{"id","session_id","prompt"});
+                const auto value=body(request,{"id","session_id","prompt","model_id"});
                 const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
-                reply(response,encode(executor->submit(id,identifier(string_field(value,"session_id",128)),string_field(value,"prompt",1024*1024))),202);
+                const auto model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};
+                reply(response,encode(executor->submit_model(id,identifier(string_field(value,"session_id",128)),string_field(value,"prompt",1024*1024),model)),202);
             }));
             server.Post(R"(/v1/runs/([A-Za-z0-9_-]+)/cancel)",guarded([this](const Request& request,Response& response) {
                 body(request,{});const auto id=identifier(request.matches[1]);executor->cancel(id);

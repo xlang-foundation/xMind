@@ -1,5 +1,6 @@
 #include "agentflow/workspace_tools.hpp"
 #include "nlohmann/json.hpp"
+#include <set>
 
 namespace agentflow {
 namespace {
@@ -7,7 +8,14 @@ using Json=nlohmann::json;
 Json arguments(const std::string& source,const std::string& field) {
     if(source.size()>65536) throw std::invalid_argument("Tool arguments exceed configured limits");
     Json result;
-    try {result=Json::parse(source);} catch(const Json::exception&) {throw std::invalid_argument("Invalid tool argument JSON");}
+    std::vector<std::set<std::string>> fields;
+    try {result=Json::parse(source,[&](int depth,Json::parse_event_t event,Json& value) {
+        if(depth>64) throw std::invalid_argument("Tool argument nesting exceeds limits");
+        if(event==Json::parse_event_t::object_start) fields.emplace_back();
+        else if(event==Json::parse_event_t::object_end) fields.pop_back();
+        else if(event==Json::parse_event_t::key && !fields.back().insert(value.get<std::string>()).second) throw std::invalid_argument("Duplicate tool argument");
+        return true;
+    });} catch(const Json::exception&) {throw std::invalid_argument("Invalid tool argument JSON");}
     if(!result.is_object() || result.size()!=1 || !result.contains(field) || !result[field].is_string()) throw std::invalid_argument("Invalid tool argument fields");
     return result;
 }

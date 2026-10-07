@@ -1,0 +1,64 @@
+name: Native Windows contracts
+on:
+  push:
+    branches: [main, 'checkpoint/**']
+    paths: ['Native/**', 'Tools/**', 'doc/runtime-prerequisites/**', 'extensions/vscode/**', '.github/workflows/native-windows.yml']
+  pull_request:
+    paths: ['Native/**', 'Tools/**', 'doc/runtime-prerequisites/**', 'extensions/vscode/**', '.github/workflows/native-windows.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: native-windows-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  contracts:
+    runs-on: windows-2025
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out xMind
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: xmind
+          persist-credentials: false
+      - name: Check out pinned xlang3 runtime source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: CantorAI/xlang3
+          ref: 914783909835116969aad7c66b210a5ac9a27661
+          path: xlang3
+          persist-credentials: false
+      - name: Check out allowed standard-library source only
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: python/cpython
+          ref: ebf955df7a89ed0c7968f79faec1de49f61ed7cb # v3.14.0
+          path: stdlib-source
+          sparse-checkout: |
+            Lib
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+      - name: Build native xlang3 and xMind; run complete contract set
+        run: ./xmind/Tools/ci-native.ps1 -RuntimeSource ./xlang3 -StdlibSource ./stdlib-source/Lib
+      - name: Run extension contracts without package lifecycle scripts
+        working-directory: xmind/extensions/vscode
+        run: |
+          npm ci --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm test
+          exit $LASTEXITCODE
+      - name: Preserve build and test diagnostics
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: native-windows-evidence-${{ github.sha }}
+          path: |
+            xmind/build/ci-evidence/
+            xmind/build/native/Testing/
+          retention-days: 14

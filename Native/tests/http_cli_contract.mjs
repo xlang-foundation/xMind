@@ -66,6 +66,13 @@ try {
   assert.equal(await raw(`Host: untrusted.example\r\nAuthorization: Bearer ${token}`),400);
   assert.equal(await raw(`Host: 127.0.0.1:${port}\r\nAuthorization: Bearer ${token}\r\nAuthorization: Bearer ${token}`),401);
   assert.deepEqual(cli('sessions'), []);
+  const deepRequest=await fetch(`http://127.0.0.1:${port}/v1/sessions`,{
+    method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+    body:'{"title":'+'['.repeat(10000)+'"nested"'+']'.repeat(10000)+'}',signal:AbortSignal.timeout(5000)
+  });
+  assert.equal(deepRequest.status,400);
+  assert.equal((await deepRequest.json()).detail,'Request JSON nesting exceeds limits','Reject excessive depth during parsing, before shape validation');
+  assert.deepEqual(cli('sessions'),[],'Rejected nested requests must not persist data');
   assert.equal((await request('/v1/sessions', {title: 'unknown', unexpected: 1})).status, 400);
   assert.equal((await request('/v1/sessions', {title: 'media'}, {'Content-Type': 'text/plain'})).status, 400);
   const session = await request('/v1/sessions', {id: 'shared', title: 'HTTP and CLI'});

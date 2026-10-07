@@ -8,7 +8,7 @@
 
 namespace agentflow {
 struct AgentService::Impl {
-    struct Job {std::string id;std::stop_source stop;};
+    struct Job {std::string id,model;std::stop_source stop;};
     PersistenceService& persistence;
     AgentRunner runner;
     mutable std::mutex mutex;
@@ -38,7 +38,7 @@ struct AgentService::Impl {
                 std::unique_lock lock(mutex);changed.wait(lock,[&]{return !pending.empty() || !accepting;});
                 if(pending.empty()) return;job=std::move(pending.front());pending.pop_front();
             }
-            try {runner.execute(job->id,job->stop.get_token());}
+            try {runner.execute(job->id,job->stop.get_token(),job->model);}
             catch(const Conflict&) {
                 // A lost claim does not authorize modifying another worker's run.
             }
@@ -63,7 +63,12 @@ AgentService::AgentService(PersistenceService& store,AgentSettings settings,std:
     :impl_(std::make_unique<Impl>(store,std::move(settings),workers,capacity)) {}
 AgentService::~AgentService()=default;
 Run AgentService::submit(std::string id,std::string session,std::string prompt) {
-    auto job=std::make_shared<Impl::Job>();job->id=id;
+    return submit_model(std::move(id),std::move(session),std::move(prompt),{});
+}
+std::vector<std::string> AgentService::models() const {return impl_->runner.models();}
+Run AgentService::submit_model(std::string id,std::string session,std::string prompt,std::string model) {
+    if(!model.empty()) {const auto configured=models();if(std::find(configured.begin(),configured.end(),model)==configured.end()) throw std::invalid_argument("Model is not configured on this backend");}
+    auto job=std::make_shared<Impl::Job>();job->id=id;job->model=std::move(model);
     std::unique_lock lock(impl_->mutex);
     if(!impl_->accepting || impl_->faulted) throw RunUnavailable("Agent executor is unavailable");
     if(impl_->pending.size()>=impl_->limit) throw RunBusy("Agent queue is full");

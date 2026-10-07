@@ -6,7 +6,7 @@ The latest verified native Release evidence is [eighteen passing contracts](../d
 
 The latest verified VS Code adapter evidence is [nineteen passing client/host/renderer contracts](../doc/evidence/vscode-reconnect.log). The real right-sidebar layout was inspected in a signed official VS Code host. Exact edit snapshot comparison, reconnect and model preference persistence have fixture coverage; live model-driven approval/diff interaction remains unverified.
 
-Native model-invoked writes, per-run model catalogue/selection, persisted response usage/timings, and expanded bounded-parser checks are uncommitted work awaiting build/execution. Observed live xlang3 benchmarks defer the native build gate. MCP/A2A, graphs, complete coding tools, all provider coverage, team authorization/PostgreSQL and Electron remain required. See [milestones](../doc/milestones.md) and [architecture](../doc/architecture.md).
+Native model-invoked writes, per-run model catalogue/selection, persisted response usage/timings, recovery inspection and expanded bounded-parser checks are source awaiting build/execution. Observed live xlang3 benchmarks defer the local native build gate; [isolated Windows CI](../doc/native-ci.md) is prepared to validate them without changing the measured checkout. No new native pass is claimed. MCP/A2A, graphs, complete coding tools, all provider coverage, team authorization/PostgreSQL and Electron remain required. See [milestones](../doc/milestones.md) and [architecture](../doc/architecture.md).
 
 ## Historical validation record
 

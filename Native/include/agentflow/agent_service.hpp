@@ -11,6 +11,8 @@ public:
     AgentService(const AgentService&)=delete;
     AgentService& operator=(const AgentService&)=delete;
     Run submit(std::string id,std::string session_id,std::string prompt) override;
+    Run submit_model(std::string id,std::string session_id,std::string prompt,std::string model_id) override;
+    std::vector<std::string> models() const override;
     void cancel(const std::string& id) override;
     bool healthy() const override;
     void close();

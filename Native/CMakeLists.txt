@@ -55,7 +55,7 @@ if(WIN32)
   target_link_libraries(agentflow_edits PUBLIC agentflow_workspace agentflow_policy)
   add_library(agentflow_agent STATIC src/agent_runner.cpp src/agent_service.cpp)
   target_include_directories(agentflow_agent PUBLIC include PRIVATE third_party)
-  target_link_libraries(agentflow_agent PUBLIC agentflow_core PRIVATE agentflow_chat_provider agentflow_workspace)
+  target_link_libraries(agentflow_agent PUBLIC agentflow_core PRIVATE agentflow_chat_provider agentflow_workspace agentflow_edits)
 endif()
 add_library(agentflow_http STATIC src/http_server.cpp)
 target_include_directories(agentflow_http PUBLIC include PRIVATE third_party/cpp-httplib third_party)
@@ -84,6 +84,7 @@ if(WIN32)
 endif()
 if(BUILD_TESTING)
   add_executable(agentflow_model_stream_contract tests/model_stream_contract.cpp)
+  target_include_directories(agentflow_model_stream_contract PRIVATE third_party)
   target_link_libraries(agentflow_model_stream_contract PRIVATE agentflow_models)
   add_test(NAME model_stream_protocol_contract COMMAND agentflow_model_stream_contract)
   set_tests_properties(model_stream_protocol_contract PROPERTIES TIMEOUT 30)
@@ -180,6 +181,10 @@ if(BUILD_TESTING)
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_http_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
       set_tests_properties(native_agent_http_contract PROPERTIES TIMEOUT 90)
+      add_test(NAME native_agent_edit_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_edit_http_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      set_tests_properties(native_agent_edit_http_contract PROPERTIES TIMEOUT 60)
     endif()
     add_test(NAME native_http_cli_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/http_cli_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>"
