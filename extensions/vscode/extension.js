@@ -185,8 +185,11 @@ async function activate(context) {
     if(!target || target.baseUrl!==origin)throw new Error('Connect to xMind Server before configuring a model.');
     let setup;try{setup=await target.providerConfiguration();}catch(error){if(error.status===404)throw new Error('This backend has no interactive provider setup. Upgrade xMind Server or use its startup model settings.');throw error;}
     if(setup.provider!=='openai' || setup.endpoint!=='https://api.openai.com/v1/chat/completions' || !Number.isSafeInteger(setup.revision) || setup.revision<0)throw new Error('Backend provider setup policy is unsupported.');
-    let key=await vscode.window.showInputBox({title:'xMind: OpenAI API key',prompt:`Store the key encrypted on xMind Server at ${origin}. The backend sends it to https://api.openai.com.`,password:true,ignoreFocusOut:true,validateInput:value=>/^[\x21-\x7e]{1,32768}$/.test(value)?undefined:'Enter your provider API key without spaces.'});
-    if(key===undefined)return false;
+    let key;
+    if(!setup.configured){
+      key=await vscode.window.showInputBox({title:'xMind: OpenAI API key',prompt:`Store the key encrypted on xMind Server at ${origin}. The backend sends it to https://api.openai.com.`,password:true,ignoreFocusOut:true,validateInput:value=>/^[\x21-\x7e]{1,32768}$/.test(value)?undefined:'Enter your provider API key without spaces.'});
+      if(key===undefined)return false;
+    }
     try{
       const current=()=>{if(client!==target || configuredOrigin()!==origin || version!==generation)throw new Error('Backend or conversation changed during provider setup. Try again.');};
       current();

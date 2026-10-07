@@ -152,7 +152,7 @@ struct HttpServer::Impl {
                 if(!request.params.empty() || request.body.size()>65536)throw std::invalid_argument("Model discovery request exceeds limits");
                 const auto value=body(request,{"api_key","expected_revision"});
                 if(!value.contains("expected_revision") || !value["expected_revision"].is_number_integer() || value["expected_revision"]<0 || value["expected_revision"]>9007199254740991)throw std::invalid_argument("Invalid provider revision");
-                const auto key=string_field(value,"api_key",32768);SecretBytes secret({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()});
+                const auto key=value.contains("api_key")?string_field(value,"api_key",32768):std::string{};SecretBytes secret({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()});
                 auto entries=Json::array();for(const auto& id:setup->discover(std::move(secret),value["expected_revision"].get<std::int64_t>()))entries.push_back({{"id",id}});
                 reply(response,{{"models",entries}});
             }));
@@ -161,8 +161,8 @@ struct HttpServer::Impl {
             server.Post("/v1/provider/configuration",guarded([setup,metadata](const Request& request,Response& response){
                 if(!request.params.empty() || request.body.size()>65536)throw std::invalid_argument("Provider setup request exceeds limits");
                 const auto value=body(request,{"model","api_key","expected_revision"});
-                if(!value.contains("api_key") || !value["api_key"].is_string() || !value.contains("expected_revision") || !value["expected_revision"].is_number_integer() || value["expected_revision"]<0 || value["expected_revision"]>9007199254740991)throw std::invalid_argument("Invalid provider setup fields");
-                const auto& key=value["api_key"].get_ref<const std::string&>();if(key.empty() || key.size()>32768)throw std::invalid_argument("Provider key exceeds limits");
+                if(!value.contains("expected_revision") || !value["expected_revision"].is_number_integer() || value["expected_revision"]<0 || value["expected_revision"]>9007199254740991)throw std::invalid_argument("Invalid provider setup fields");
+                const auto key=value.contains("api_key")?string_field(value,"api_key",32768):std::string{};
                 SecretBytes secret({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()});
                 reply(response,metadata(setup->configure(string_field(value,"model",256),std::move(secret),value["expected_revision"].get<std::int64_t>())));
             }));
