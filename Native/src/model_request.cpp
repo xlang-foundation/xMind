@@ -48,9 +48,13 @@ std::string serialize_chat_request(const ChatProviderConfig& config,const ModelR
         }
     }
     for(const auto& message:request.messages) {
-        account(message.content.size());account(message.tool_call_id.size());
+        account(message.content.size());account(message.tool_call_id.size());account(message.refusal.size());
         if(message.content.size()>4*1024*1024 || message.tool_calls.size()>64) throw std::invalid_argument("Model message exceeds configured limits");
         Json item={{"role",role_name(message.role)},{"content",message.content}};
+        if(!message.refusal.empty()) {
+            if(message.role!=MessageRole::assistant) throw std::invalid_argument("Only assistant messages carry refusals");
+            item["refusal"]=message.refusal;
+        }
         if(message.role==MessageRole::tool) {
             require_capability(config.tools,"function calls");
             if(!message.tool_calls.empty() || message.tool_call_id.empty() || pending.erase(message.tool_call_id)!=1) throw std::invalid_argument("Tool response does not match a pending call");

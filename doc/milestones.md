@@ -27,6 +27,8 @@ Delivered evidence: Release build, passing default embedded adapter/repository c
 
 ## Following milestones
 
+Native agent-loop checkpoint: [AgentRunner](native-agent-loop.md) invokes the native provider and actual read tools, with encrypted credential resolution, atomic conversation/state persistence, cancellation and run deadlines. Protocol-peer/real-filesystem tests passed. Live inference and product HTTP/CLI scheduling remain pending; this is not completion of the planned coding agent.
+
 Native workspace tools checkpoint: [actual C++ filesystem tools](native-workspace-tools.md) now read, list and search authorized Windows workspace files, with handle checks, argument validation and bounded results. The tools contract passed on real filesystem fixtures. Agent integration, mutation/process tools, policy and complete coding workflows remain required.
 
 Native HTTP/console checkpoint: [xMind Server](native-server.md) exposes real session and user-message persistence, with authenticated independent HTTP/CLI clients. Product run creation/manual transitions are absent until the real execution engine owns them. This is backend storage delivery, not completion of the planned native agent, cancellation, streaming or coding milestone.

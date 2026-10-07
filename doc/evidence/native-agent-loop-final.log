@@ -1,0 +1,35 @@
+Start testing: Oct 06 22:14 Pacific Daylight Time
+----------------------------------------------------------
+2/12 Testing: model_request_contract
+2/12 Test: model_request_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_model_request_contract.exe"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"model_request_contract" start time: Oct 06 22:14 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native model request contracts passed; no live provider was called
+<end of output>
+Test time =   0.16 sec
+----------------------------------------------------------
+Test Passed.
+"model_request_contract" end time: Oct 06 22:14 Pacific Daylight Time
+"model_request_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/12 Testing: native_agent_runner_contract
+4/12 Test: native_agent_runner_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/AgentFlow/Native/tests/agent_runner_peer.mjs" "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_agent_runner_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"native_agent_runner_contract" start time: Oct 06 22:14 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native agent loop/atomicity contracts passed using a synthetic inference peer and real filesystem tools; no live model was called
+<end of output>
+Test time =   0.70 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_runner_contract" end time: Oct 06 22:14 Pacific Daylight Time
+"native_agent_runner_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 06 22:14 Pacific Daylight Time

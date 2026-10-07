@@ -14,4 +14,4 @@ The native tools contract passed against independently created real filesystem f
 
 The first full run exposed a nested-path separator issue; the corrected implementation passed the targeted tools contract. The other ten native contracts passed during that full run. Current tools evidence: [native-workspace-tools-ctest.log](evidence/native-workspace-tools-ctest.log).
 
-Writes, patch review/recovery, shell/PTY, Git, diagnostics, ignore-file semantics beyond the listed exclusions, paginated listings, other OS implementations, tool permissions/approvals and agent integration remain required. The read-only library does not establish a complete coding agent or OpenCode parity.
+The [native agent loop](native-agent-loop.md) now invokes these read tools and forwards their actual results to the provider. Writes, patch review/recovery, shell/PTY, Git, diagnostics, ignore-file semantics beyond the listed exclusions, paginated listings, other OS implementations and complete tool permissions/approvals remain required. The read-only library does not establish a complete coding agent or OpenCode parity.

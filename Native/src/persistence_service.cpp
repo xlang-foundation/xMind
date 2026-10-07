@@ -89,6 +89,18 @@ std::future<Run> PersistenceService::create_run(std::string id,std::string sessi
 std::future<Run> PersistenceService::run(std::string id) {
     return impl_->submit([id=std::move(id)](Repository& repository){return repository.run(id);});
 }
+std::future<Run> PersistenceService::start_prompt_run(std::string id,std::string session_id,std::string json) {
+    return impl_->submit([id=std::move(id),session_id=std::move(session_id),json=std::move(json)](Repository& repository){return repository.start_prompt_run(id,session_id,json);});
+}
+std::future<void> PersistenceService::append_user_message(std::string id,std::string json) {
+    return impl_->submit([id=std::move(id),json=std::move(json)](Repository& repository){repository.append_user_message(id,json);});
+}
+std::future<void> PersistenceService::record_tool_turn(std::string id,std::string assistant,std::vector<std::string> tools) {
+    return impl_->submit([id=std::move(id),assistant=std::move(assistant),tools=std::move(tools)](Repository& repository){repository.record_tool_turn(id,assistant,tools);});
+}
+std::future<Run> PersistenceService::complete_run(std::string id,std::string assistant) {
+    return impl_->submit([id=std::move(id),assistant=std::move(assistant)](Repository& repository){return repository.complete_run(id,assistant);});
+}
 std::future<std::vector<Run>> PersistenceService::runs(std::string session_id) {
     return impl_->submit([session_id=std::move(session_id)](Repository& repository){return repository.runs(session_id);});
 }

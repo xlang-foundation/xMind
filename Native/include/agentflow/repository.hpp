@@ -21,6 +21,10 @@ public:
     Session session(const std::string& id);
     std::vector<Session> sessions();
     Run create_run(const std::string& id,const std::string& session_id);
+    Run start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json);
+    void append_user_message(const std::string& session_id,const std::string& json);
+    void record_tool_turn(const std::string& run_id,const std::string& assistant_json,const std::vector<std::string>& tool_json);
+    Run complete_run(const std::string& run_id,const std::string& assistant_json);
     Run run(const std::string& id);
     std::vector<Run> runs(const std::string& session_id);
     Run transition(const std::string& id,RunState expected,RunState next,const std::string& json="{}");

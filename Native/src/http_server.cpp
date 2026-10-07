@@ -121,7 +121,7 @@ struct HttpServer::Impl {
             const auto value=body(request,{"role","data"});const auto role=string_field(value,"role",16);
             if(role!="user") throw std::invalid_argument("Client messages must have user role");
             if(!value.contains("data") || !value["data"].is_object()) throw std::invalid_argument("Message data must be an object");
-            persistence.append_message(identifier(request.matches[1]),role,value["data"].dump()).get();reply(response,{{"saved",true}},201);
+            persistence.append_user_message(identifier(request.matches[1]),value["data"].dump()).get();reply(response,{{"saved",true}},201);
         }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/runs)",guarded([this](const Request& request,Response& response) {
             reply(response,encode_all(persistence.runs(identifier(request.matches[1])).get()));

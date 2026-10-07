@@ -23,6 +23,10 @@ public:
     std::future<Session> session(std::string id);
     std::future<std::vector<Session>> sessions();
     std::future<Run> create_run(std::string id,std::string session_id);
+    std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json);
+    std::future<void> append_user_message(std::string session_id,std::string json);
+    std::future<void> record_tool_turn(std::string id,std::string assistant_json,std::vector<std::string> tool_json);
+    std::future<Run> complete_run(std::string id,std::string assistant_json);
     std::future<Run> run(std::string id);
     std::future<std::vector<Run>> runs(std::string session_id);
     std::future<Run> transition(std::string id,RunState expected,RunState next,std::string json="{}");

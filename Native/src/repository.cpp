@@ -122,6 +122,34 @@ Run Repository::create_run(const std::string& id,const std::string& session_id) 
     changed_one(db.execute("INSERT INTO runs(id,session_id,state) VALUES(?,?,'queued')",{id,session_id}));
     impl_->event(id,"run.queued","{}"); transaction.commit(); return {id,session_id,RunState::queued};
 }
+Run Repository::start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json) {
+    identifier(id);auto& db=impl_->database;Transaction transaction(db);session(session_id);
+    if(!db.execute("SELECT id FROM runs WHERE id=?",{id}).rows.empty()) throw Conflict("Run already exists");
+    if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused')",{session_id}).rows.empty()) throw Conflict("Session already has an active root run");
+    changed_one(db.execute("INSERT INTO runs(id,session_id,state) VALUES(?,?,'queued')",{id,session_id}));
+    changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'user',?)",{session_id,prompt_json}));
+    impl_->event(id,"run.queued","{}");transaction.commit();return {id,session_id,RunState::queued};
+}
+void Repository::append_user_message(const std::string& session_id,const std::string& json) {
+    auto& db=impl_->database;Transaction transaction(db);session(session_id);
+    if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused')",{session_id}).rows.empty()) throw Conflict("Session has an active root run");
+    changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'user',?)",{session_id,json}));transaction.commit();
+}
+void Repository::record_tool_turn(const std::string& id,const std::string& assistant_json,const std::vector<std::string>& tool_json) {
+    if(tool_json.empty() || tool_json.size()>64) throw std::invalid_argument("Invalid tool result batch");
+    auto& db=impl_->database;Transaction transaction(db);const auto current=run(id);
+    if(current.state!=RunState::running) throw Conflict("Run is not running");
+    changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'assistant',?)",{current.session_id,assistant_json}));
+    for(const auto& json:tool_json) changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'tool',?)",{current.session_id,json}));
+    impl_->event(id,"conversation.tool_turn","{}");transaction.commit();
+}
+Run Repository::complete_run(const std::string& id,const std::string& assistant_json) {
+    auto& db=impl_->database;Transaction transaction(db);auto current=run(id);
+    if(current.state!=RunState::running) throw Conflict("Run is not running");
+    changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'assistant',?)",{current.session_id,assistant_json}));
+    changed_one(db.execute("UPDATE runs SET state='completed' WHERE id=? AND state='running'",{id}));
+    impl_->event(id,"conversation.assistant",assistant_json);impl_->event(id,"run.completed","{}");transaction.commit();current.state=RunState::completed;return current;
+}
 std::vector<Run> Repository::runs(const std::string& session_id) {
     session(session_id);std::vector<Run> result;
     for(const auto& row:impl_->database.execute("SELECT id,state FROM runs WHERE session_id=? ORDER BY rowid",{session_id}).rows)

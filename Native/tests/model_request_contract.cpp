@@ -52,6 +52,10 @@ int main() {
         }
         auto unsupported=config;unsupported.tools=Capability::unsupported;
         rejects([&]{serialize_chat_request(unsupported,request);});
+        auto refused=request;refused.messages.push_back({MessageRole::assistant,"",{}, {},"Actual refusal text"});
+        require(Json::parse(serialize_chat_request(config,refused))["messages"].back()["refusal"]=="Actual refusal text","Refusal provenance must be preserved");
+        refused.messages.back().role=MessageRole::user;
+        rejects([&]{serialize_chat_request(config,refused);});
         auto oversized=request;
         oversized.messages.clear();
         for(int i=0;i<3;++i) oversized.messages.push_back({MessageRole::user,std::string(4*1024*1024,'x')});

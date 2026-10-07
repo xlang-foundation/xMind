@@ -7,10 +7,11 @@ namespace agentflow {
 enum class Capability {unknown,unsupported,supported};
 enum class MessageRole {system,developer,user,assistant,tool};
 struct ModelMessage {
-    MessageRole role;
+    MessageRole role=MessageRole::user;
     std::string content;
     std::vector<ModelToolCall> tool_calls;
     std::string tool_call_id;
+    std::string refusal;
 };
 struct ModelToolDefinition {std::string name,description,input_schema_json;};
 struct ModelRequest {

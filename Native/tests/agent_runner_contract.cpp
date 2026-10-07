@@ -1,0 +1,92 @@
+#include "agentflow/agent_runner.hpp"
+#include "agentflow/xlang_sqlite.hpp"
+#include "nlohmann/json.hpp"
+#include <iostream>
+#include <thread>
+
+using namespace agentflow;
+using Json=nlohmann::json;
+using namespace std::chrono_literals;
+namespace {
+void require(bool value,const char* message) {if(!value) throw std::runtime_error(message);}
+template<class Error,class Function> void rejects(Function action) {
+    try {action();} catch(const Error&) {return;} throw std::runtime_error("Expected rejection did not occur");
+}
+}
+int main(int argc,char** argv) {
+    if(argc!=6) return 2;
+    try {
+        const std::vector<std::string> roots{argv[2],argv[3]};
+        PersistenceService store(argv[1],roots);
+        const std::string base=argv[5],synthetic="engine-protocol-test-not-a-real-key";
+        SecretBytes secret({reinterpret_cast<const std::uint8_t*>(synthetic.data()),synthetic.size()});
+        store.put_credential("test","provider","provider:chat","Synthetic test credential",std::move(secret),0).get();
+        AgentSettings settings;settings.provider={base+"/main","fixture-deployment",Capability::supported,Capability::supported};
+        settings.workspace=argv[4];settings.credential=CredentialReference{"test","provider","provider:chat"};
+        store.create_session("main","Actual filesystem protocol fixture").get();
+        AgentRunner runner(store,settings);runner.start("main","main","Read README");
+        require(runner.execute("main").state==RunState::completed,"Actual provider/tool loop must complete its protocol turn");
+        const auto history=store.history("main").get();
+        require(history.size()==4 && history[1].role=="assistant" && history[2].role=="tool" && history[3].role=="assistant","Actual tool conversation must be persisted");
+        const auto tool=Json::parse(Json::parse(history[2].json).at("content").get<std::string>());
+        require(tool["content"]=="Actual file content written by fixture\n","Actual filesystem result must reach durable conversation");
+        bool started=false,completed=false;
+        for(const auto& event:store.events("main").get()) {if(event.kind=="tool.started") started=true;if(event.kind=="tool.completed") completed=true;}
+        require(started && completed,"Actual tool execution events must persist");
+        rejects<Conflict>([&]{runner.execute("main");});
+        require(store.history("main").get().size()==4,"Duplicate execute must not damage completed transcript");
+        store.create_session("claim","Concurrent claim").get();auto claimed=settings;
+        claimed.provider.endpoint=base+"/claim";AgentRunner claimant(store,claimed);claimant.start("claim","claim","Concurrent claim protocol case");
+        std::stop_source claim_stop;
+        std::jthread fallback_cancel([&]{std::this_thread::sleep_for(1s);claim_stop.request_stop();});
+        auto owner=std::async(std::launch::async,[&]{return claimant.execute("claim",claim_stop.get_token());});
+        bool progressed=false;
+        for(int attempt=0;attempt<100 && !progressed;++attempt) {
+            for(const auto& event:store.events("claim").get()) if(event.kind=="model.text") progressed=true;
+            if(!progressed) std::this_thread::sleep_for(5ms);
+        }
+        require(progressed,"Owner must enter actual network stream before the competing claim");
+        rejects<Conflict>([&]{claimant.execute("claim");});
+        require(store.run("claim").get().state==RunState::running,"Losing claim must not fail the active owner");
+        claim_stop.request_stop();require(owner.get().state==RunState::cancelled,"Owner must observe its actual cancellation");
+        for(const auto* route:{"error","denied","delay","limit"}) {
+            store.create_session(route,route).get();auto variant=settings;
+            variant.provider.endpoint=base+"/"+route;if(std::string(route)=="limit") variant.max_turns=1;
+            AgentRunner action(store,variant);action.start(route,route,std::string("Protocol case ")+route);
+            std::stop_source cancellation;
+            std::optional<std::jthread> canceller;
+            if(std::string(route)=="delay") canceller.emplace([&]{std::this_thread::sleep_for(150ms);cancellation.request_stop();});
+            const auto final=action.execute(route,cancellation.get_token());
+            require(final.state==(std::string(route)=="delay"?RunState::cancelled:(std::string(route)=="denied"?RunState::completed:RunState::failed)),"Terminal state must reflect actual outcome");
+            if(std::string(route)=="error") require(Json::parse(store.events(route).get().back().json)["status"]==429,"HTTP failure must be recorded without provider body");
+            if(std::string(route)=="denied") {
+                const auto rows=store.history(route).get();const auto denied=Json::parse(Json::parse(rows[2].json).at("content").get<std::string>());
+                require(denied["error"]["code"]=="access_denied","Outside workspace access must become an actual denied result");
+            }
+        }
+        store.create_session("deadline","Deadline").get();auto timed=settings;
+        timed.provider.endpoint=base+"/delay";timed.run_timeout=200ms;
+        AgentRunner deadline(store,timed);deadline.start("deadline","deadline","Protocol deadline case");
+        require(deadline.execute("deadline").state==RunState::failed,"Run deadline must fail rather than simulate a response");
+        require(Json::parse(store.events("deadline").get().back().json)["reason"]=="agent_timeout","Run deadline must have its own reason");
+        store.create_session("atomic","Atomic lifecycle").get();
+        rejects<DatabaseError>([&]{store.start_prompt_run("invalid","atomic","invalid JSON").get();});
+        require(store.history("atomic").get().empty(),"Failed start must not leave a prompt");
+        rejects<NotFound>([&]{store.run("invalid").get();});
+        store.start_prompt_run("atomic","atomic",R"({"content":"Prompt"})").get();
+        rejects<Conflict>([&]{store.append_user_message("atomic",R"({"content":"racing"})").get();});
+        store.transition("atomic",RunState::queued,RunState::running).get();
+        XlangSqlite faults(argv[1],roots);
+        faults.execute("CREATE TRIGGER reject_tool BEFORE INSERT ON messages WHEN NEW.role='tool' BEGIN SELECT RAISE(ABORT,'fault'); END");
+        rejects<DatabaseError>([&]{store.record_tool_turn("atomic",R"({"content":"","tool_calls":[]})",{R"({"content":"Result"})"}).get();});
+        require(store.history("atomic").get().size()==1,"Tool batch fault must not leave dangling assistant calls");
+        faults.execute("DROP TRIGGER reject_tool");
+        faults.execute("CREATE TRIGGER reject_completion BEFORE INSERT ON events WHEN NEW.kind='run.completed' BEGIN SELECT RAISE(ABORT,'fault'); END");
+        rejects<DatabaseError>([&]{store.complete_run("atomic",R"({"content":"Answer"})").get();});
+        require(store.run("atomic").get().state==RunState::running && store.history("atomic").get().size()==1,"Final answer/state must roll back together");
+        faults.execute("DROP TRIGGER reject_completion");store.complete_run("atomic",R"({"content":"Answer"})").get();
+        store.close();
+        {Repository reopened(argv[1],roots);require(reopened.run("main").state==RunState::completed && reopened.history("main").size()==4,"Agent state/conversation must survive reopen");}
+        std::cout<<"Native agent loop/atomicity contracts passed using a synthetic inference peer and real filesystem tools; no live model was called\n";return 0;
+    } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
+}
