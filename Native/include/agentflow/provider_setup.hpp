@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/agent_service.hpp"
+#include "agentflow/graph_service.hpp"
 namespace agentflow {
 struct ProviderSetupMetadata {std::int64_t revision=0;std::string provider,model,endpoint;bool configured=false;};
 // Full-access local-owner setup. The endpoint/workspace remain backend policy;
@@ -11,7 +12,7 @@ public:
     virtual std::vector<std::string> discover(SecretBytes key,std::int64_t expected_revision)=0;
     virtual ProviderSetupMetadata configure(std::string model,SecretBytes key,std::int64_t expected_revision)=0;
 };
-class ProviderRuntime final : public RunExecutor,public ProviderSetup {
+class ProviderRuntime final : public RunExecutor,public ProviderSetup,public GraphExecution {
 public:
     ProviderRuntime(PersistenceService& store,AgentSettings base,std::size_t workers=2,std::size_t capacity=128,
         std::string endpoint="https://api.openai.com/v1/chat/completions",
@@ -26,6 +27,11 @@ public:
     void cancel(const std::string& id) override;
     bool healthy() const override;
     bool available() const override;
+    std::vector<GraphExecutionMetadata> graphs() const override;
+    Run submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,
+        std::string prompt,std::string model={}) override;
+    GraphRootRecord human_input(const std::string& root,const std::string& node,
+        const std::string& input,const std::string& actor,std::int64_t revision) override;
 private:
     struct Impl;std::unique_ptr<Impl> impl_;
 };

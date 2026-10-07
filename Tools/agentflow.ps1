@@ -15,6 +15,7 @@ param(
     [string]$CredentialId,
     [string]$ProcessConfig,
     [string]$InstructionsConfig,
+    [string]$GraphsConfig,
     [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
     [Parameter(ValueFromRemainingArguments=$true)][string[]]$ClientArguments
 )
@@ -43,6 +44,7 @@ if($Action -eq 'Serve') {
     if($CredentialId) {$serverArguments+=@('--credential-id',$CredentialId)}
     if($ProcessConfig) {$serverArguments+=@('--process-config',$ProcessConfig)}
     if($InstructionsConfig) {$serverArguments+=@('--instructions-config',$InstructionsConfig)}
+    if($GraphsConfig) {$serverArguments+=@('--graphs-config',$GraphsConfig)}
     & $binary @serverArguments
 } else {
     & $binary $Port @ClientArguments

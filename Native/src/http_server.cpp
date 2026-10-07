@@ -1,6 +1,7 @@
 #include "agentflow/http_server.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/provider_setup.hpp"
+#include "agentflow/graph_service.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
@@ -56,13 +57,23 @@ std::string identifier(const std::string& value) {
     for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
     return value;
 }
+std::int64_t graph_revision(const Json& value,const char* field) {
+    if(!value.contains(field) || !value[field].is_number_integer() || value[field]<1 || value[field]>9007199254740991)throw std::invalid_argument("Invalid graph revision");
+    return value[field].get<std::int64_t>();
+}
 std::string new_id() {
     std::random_device random;std::ostringstream value;
     value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i) value<<std::setw(8)<<random();
     return value.str();
 }
 Json encode(const Session& value) {return {{"id",value.id},{"title",value.title}};}
-Json encode(const Run& value) {return {{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)}};}
+Json encode(const Run& value) {return {{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)},
+    {"parent_id",value.parent_id},{"node_id",value.node_id},{"graph_root",value.graph_root}};}
+Json graph_record(const GraphRootRecord& root) {
+    return {{"run",encode(root.run)},{"graph_id",root.graph_id},{"graph_revision",root.graph_revision},
+        {"checkpoint_revision",root.checkpoint_revision},{"checkpoint",Json::parse(root.checkpoint_json)},
+        {"spec",Json::parse(root.specification_json)},{"input",root.input_json.empty()?Json(nullptr):Json::parse(root.input_json)}};
+}
 Json encode(const Event& value) {return {{"seq",value.sequence},{"run_id",value.run_id},{"kind",value.kind},{"data",Json::parse(value.json)}};}
 Json encode(const Message& value) {return {{"seq",value.sequence},{"role",value.role},{"data",Json::parse(value.json)}};}
 Json encode(const Operation& value) {
@@ -121,7 +132,7 @@ struct HttpServer::Impl {
     std::string authorization;
     httplib::Server server;
     int port=-1;
-    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup):persistence(store),executor(execution),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
+    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs):persistence(store),executor(execution),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
         validate_local_auth_token(token);
         server.new_task_queue=[] {return new httplib::ThreadPool(4,4,32);};
         server.set_payload_max_length(1024*1024);
@@ -168,6 +179,38 @@ struct HttpServer::Impl {
                 const auto key=value.contains("api_key")?string_field(value,"api_key",32768):std::string{};
                 SecretBytes secret({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()});
                 reply(response,metadata(setup->configure(string_field(value,"model",256),std::move(secret),value["expected_revision"].get<std::int64_t>())));
+            }));
+        }
+        if(graphs){
+            server.Get("/v1/graphs",guarded([graphs](const Request& request,Response& response){
+                if(!request.params.empty())throw std::invalid_argument("Graph catalog does not accept query parameters");
+                auto entries=Json::array();for(const auto& graph:graphs->graphs())entries.push_back({{"id",graph.id},{"revision",graph.revision},{"node_count",graph.node_count},{"executable",graph.executable}});
+                reply(response,{{"graphs",entries}});
+            }));
+            server.Post("/v1/graph-runs",guarded([graphs](const Request& request,Response& response){
+                if(!request.params.empty())throw std::invalid_argument("Graph admission does not accept query parameters");
+                const auto value=body(request,{"id","session_id","graph_id","graph_revision","prompt","model_id"});
+                const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
+                const auto model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};
+                reply(response,encode(graphs->submit_graph(id,identifier(string_field(value,"session_id",128)),string_field(value,"graph_id",64),graph_revision(value,"graph_revision"),string_field(value,"prompt",1024*1024),model)),202);
+            }));
+            server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response){
+                if(!request.params.empty())throw std::invalid_argument("Graph detail does not accept query parameters");
+                reply(response,graph_record(persistence.graph_run(identifier(request.matches[1])).get()));
+            }));
+            server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+)/children)",guarded([this](const Request& request,Response& response){
+                if(!request.params.empty())throw std::invalid_argument("Graph children do not accept query parameters");
+                const auto id=identifier(request.matches[1]);persistence.graph_run(id).get();reply(response,encode_all(persistence.children(id).get()));
+            }));
+            server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+)/events)",guarded([this](const Request& request,Response& response){
+                if(request.params.size()>1 || (!request.params.empty() && !request.has_param("after")))throw std::invalid_argument("Invalid graph event cursor parameters");
+                reply(response,encode_all(persistence.graph_events(identifier(request.matches[1]),cursor(request)).get()));
+            }));
+            server.Post(R"(/v1/graph-runs/([A-Za-z0-9_-]+)/human/([A-Za-z0-9_.-]+))",guarded([graphs](const Request& request,Response& response){
+                if(!request.params.empty() || request.body.size()>131072)throw std::invalid_argument("Graph input exceeds limits");
+                const auto value=body(request,{"input","expected_checkpoint_revision"});
+                if(!value.contains("input") || !value["input"].is_object())throw std::invalid_argument("Human input must be a JSON object");
+                reply(response,graph_record(graphs->human_input(identifier(request.matches[1]),request.matches[2],value["input"].dump(),"local-owner",graph_revision(value,"expected_checkpoint_revision"))));
             }));
         }
         server.Get("/v1/models",guarded([this](const Request&,Response& response) {
@@ -247,7 +290,7 @@ struct HttpServer::Impl {
         }
     }
 };
-HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup)) {}
+HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs)) {}
 HttpServer::~HttpServer()=default;
 int HttpServer::bind(int port) {
     if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");

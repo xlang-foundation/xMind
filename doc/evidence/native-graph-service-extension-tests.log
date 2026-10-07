@@ -1,0 +1,304 @@
+TAP version 13
+# Subtest: session discovery, URL encoding, error handling and origin boundaries
+ok 1 - session discovery, URL encoding, error handling and origin boundaries
+  ---
+  duration_ms: 52.4398
+  type: 'test'
+  ...
+# Subtest: origin-scoped authentication and native request bodies
+ok 2 - origin-scoped authentication and native request bodies
+  ---
+  duration_ms: 1.3617
+  type: 'test'
+  ...
+# Subtest: native terminal state refreshes transcript and stops polling with durable operation inspection
+ok 3 - native terminal state refreshes transcript and stops polling with durable operation inspection
+  ---
+  duration_ms: 12.7824
+  type: 'test'
+  ...
+# Subtest: settings key fetches a sidebar list; only a separate model selection saves encrypted backend settings
+ok 4 - settings key fetches a sidebar list; only a separate model selection saves encrypted backend settings
+  ---
+  duration_ms: 4.0042
+  type: 'test'
+  ...
+# Subtest: sidebar selection rejects an ID outside the actual discovery response
+ok 5 - sidebar selection rejects an ID outside the actual discovery response
+  ---
+  duration_ms: 1.9987
+  type: 'test'
+  ...
+# Subtest: invalid keys and unsupported provider destinations never transmit credentials
+ok 6 - invalid keys and unsupported provider destinations never transmit credentials
+  ---
+  duration_ms: 3.4548
+  type: 'test'
+  ...
+# Subtest: discovery errors and malformed or empty catalogs never save provider settings
+ok 7 - discovery errors and malformed or empty catalogs never save provider settings
+  ---
+  duration_ms: 5.5412
+  type: 'test'
+  ...
+# Subtest: closing during discovery prevents publishing a list or saving a credential
+ok 8 - closing during discovery prevents publishing a list or saving a credential
+  ---
+  duration_ms: 1.8513
+  type: 'test'
+  ...
+# Subtest: saved key populates the sidebar automatically and changes models without a key popup
+ok 9 - saved key populates the sidebar automatically and changes models without a key popup
+  ---
+  duration_ms: 2.0794
+  type: 'test'
+  ...
+# Subtest: rejected saved key shows settings guidance and replacement uses the same sidebar selection
+ok 10 - rejected saved key shows settings guidance and replacement uses the same sidebar selection
+  ---
+  duration_ms: 2.9798
+  type: 'test'
+  ...
+# Subtest: older run inspection remains accessible and selected run persists across view reopening
+ok 11 - older run inspection remains accessible and selected run persists across view reopening
+  ---
+  duration_ms: 3.2967
+  type: 'test'
+  ...
+# Subtest: run selection rejects IDs outside the selected conversation before fetching their details
+ok 12 - run selection rejects IDs outside the selected conversation before fetching their details
+  ---
+  duration_ms: 1.978
+  type: 'test'
+  ...
+# Subtest: older terminal run keeps observing an active conversation and rejects another submission
+ok 13 - older terminal run keeps observing an active conversation and rejects another submission
+  ---
+  duration_ms: 2.8348
+  type: 'test'
+  ...
+# Subtest: uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+ok 14 - uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+  ---
+  duration_ms: 2.0473
+  type: 'test'
+  ...
+# Subtest: inspection rejects a different backend operation and discards observations after selection changes
+ok 15 - inspection rejects a different backend operation and discards observations after selection changes
+  ---
+  duration_ms: 3.2989
+  type: 'test'
+  ...
+# Subtest: only a reviewed pending operation can be decided and payload stays backend-owned
+ok 16 - only a reviewed pending operation can be decided and payload stays backend-owned
+  ---
+  duration_ms: 1.9614
+  type: 'test'
+  ...
+# Subtest: closing the view during proposal revalidation cannot send an approval
+ok 17 - closing the view during proposal revalidation cannot send an approval
+  ---
+  duration_ms: 2.5499
+  type: 'test'
+  ...
+# Subtest: changed proposal bytes invalidate the displayed review
+ok 18 - changed proposal bytes invalidate the displayed review
+  ---
+  duration_ms: 2.7701
+  type: 'test'
+  ...
+# Subtest: session selection intent invalidates an in-flight approval before queued selection runs
+ok 19 - session selection intent invalidates an in-flight approval before queued selection runs
+  ---
+  duration_ms: 1.5159
+  type: 'test'
+  ...
+# Subtest: closing a panel during history loading cannot start a detached poller
+ok 20 - closing a panel during history loading cannot start a detached poller
+  ---
+  duration_ms: 1.2861
+  type: 'test'
+  ...
+# Subtest: older native servers without a catalogue keep default execution without invented model IDs
+ok 21 - older native servers without a catalogue keep default execution without invented model IDs
+  ---
+  duration_ms: 1.9731
+  type: 'test'
+  ...
+# Subtest: edit comparison opens exact revalidated backend snapshots without granting or writing
+ok 22 - edit comparison opens exact revalidated backend snapshots without granting or writing
+  ---
+  duration_ms: 2.2582
+  type: 'test'
+  ...
+# Subtest: creation comparison opens absent-to-proposed snapshots without creating a file or granting
+ok 23 - creation comparison opens absent-to-proposed snapshots without creating a file or granting
+  ---
+  duration_ms: 1.5694
+  type: 'test'
+  ...
+# Subtest: refresh reloads backend execution capabilities and history without submitting a run
+ok 24 - refresh reloads backend execution capabilities and history without submitting a run
+  ---
+  duration_ms: 1.7495
+  type: 'test'
+  ...
+# Subtest: selected configured model survives view reopening and retired models fall back on refresh
+ok 25 - selected configured model survives view reopening and retired models fall back on refresh
+  ---
+  duration_ms: 3.1573
+  type: 'test'
+  ...
+# Subtest: normal development bootstrap completes activation before resolving the sidebar and clears private environment
+ok 26 - normal development bootstrap completes activation before resolving the sidebar and clears private environment
+  ---
+  duration_ms: 2.0273
+  type: 'test'
+  ...
+# Subtest: durable command output renders independent channels without executing markup or controls
+ok 27 - durable command output renders independent channels without executing markup or controls
+  ---
+  duration_ms: 127.268
+  type: 'test'
+  ...
+# Subtest: output replay preserves fragmented Unicode and ignores only exact duplicate bytes
+ok 28 - output replay preserves fragmented Unicode and ignores only exact duplicate bytes
+  ---
+  duration_ms: 24.9597
+  type: 'test'
+  ...
+# Subtest: gaps, malformed bytes and capture overflow never invent output
+ok 29 - gaps, malformed bytes and capture overflow never invent output
+  ---
+  duration_ms: 101.3207
+  type: 'test'
+  ...
+# Subtest: recorded output survives transcript refresh and clears on run or conversation change
+ok 30 - recorded output survives transcript refresh and clears on run or conversation change
+  ---
+  duration_ms: 30.169
+  type: 'test'
+  ...
+# Subtest: the sidebar bounds command stream cards and leaves excess output in recorded activity
+ok 31 - the sidebar bounds command stream cards and leaves excess output in recorded activity
+  ---
+  duration_ms: 35.2025
+  type: 'test'
+  ...
+# Subtest: command approval reviews literal arguments before sending only a decision ID
+ok 32 - command approval reviews literal arguments before sending only a decision ID
+  ---
+  duration_ms: 16.9427
+  type: 'test'
+  ...
+# Subtest: approval displays bound guidance hashes and rejects malformed source metadata
+ok 33 - approval displays bound guidance hashes and rejects malformed source metadata
+  ---
+  duration_ms: 18.7212
+  type: 'test'
+  ...
+# Subtest: malformed or expired command proposals cannot be allowed
+ok 34 - malformed or expired command proposals cannot be allowed
+  ---
+  duration_ms: 18.2804
+  type: 'test'
+  ...
+# Subtest: command results preserve separate escaped output, hex bytes and actual exit metrics
+ok 35 - command results preserve separate escaped output, hex bytes and actual exit metrics
+  ---
+  duration_ms: 19.7783
+  type: 'test'
+  ...
+# Subtest: uncertain commands remain blocked and malformed outcomes retain raw evidence
+ok 36 - uncertain commands remain blocked and malformed outcomes retain raw evidence
+  ---
+  duration_ms: 14.8342
+  type: 'test'
+  ...
+# Subtest: command output metrics require exact encoded retained bytes and safe drained counts
+ok 37 - command output metrics require exact encoded retained bytes and safe drained counts
+  ---
+  duration_ms: 19.6526
+  type: 'test'
+  ...
+# Subtest: new-file review distinguishes absence, previews exact content and never retries uncertainty
+ok 38 - new-file review distinguishes absence, previews exact content and never retries uncertainty
+  ---
+  duration_ms: 13.3782
+  type: 'test'
+  ...
+# Subtest: external MCP approval names the server and tool and uncertainty never offers replay
+ok 39 - external MCP approval names the server and tool and uncertainty never offers replay
+  ---
+  duration_ms: 13.0967
+  type: 'test'
+  ...
+# Subtest: run detail selector preserves conversation history and blocks submission while another run is active
+ok 40 - run detail selector preserves conversation history and blocks submission while another run is active
+  ---
+  duration_ms: 20.9234
+  type: 'test'
+  ...
+# Subtest: uncertain edit inspection renders escaped observations and never offers an effect approval
+ok 41 - uncertain edit inspection renders escaped observations and never offers an effect approval
+  ---
+  duration_ms: 12.5248
+  type: 'test'
+  ...
+# Subtest: history renders Markdown/code, copies plain code and shows exact provider usage
+ok 42 - history renders Markdown/code, copies plain code and shows exact provider usage
+  ---
+  duration_ms: 17.4477
+  type: 'test'
+  ...
+# Subtest: unknown historical usage stays unavailable and malicious Markdown is sanitized
+ok 43 - unknown historical usage stays unavailable and malicious Markdown is sanitized
+  ---
+  duration_ms: 25.343
+  type: 'test'
+  ...
+# Subtest: live token badges use model usage events and reset when the persisted transcript arrives
+ok 44 - live token badges use model usage events and reset when the persisted transcript arrives
+  ---
+  duration_ms: 16.3831
+  type: 'test'
+  ...
+# Subtest: tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
+ok 45 - tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
+  ---
+  duration_ms: 23.2687
+  type: 'test'
+  ...
+# Subtest: bottom model selector exposes only backend-advertised IDs and sends the selected ID
+ok 46 - bottom model selector exposes only backend-advertised IDs and sends the selected ID
+  ---
+  duration_ms: 12.0882
+  type: 'test'
+  ...
+# Subtest: provider cache/reasoning counts and backend first-token time render without derived estimates
+ok 47 - provider cache/reasoning counts and backend first-token time render without derived estimates
+  ---
+  duration_ms: 11.9888
+  type: 'test'
+  ...
+# Subtest: pending file comparison sends only an operation ID and remains separate from approval
+ok 48 - pending file comparison sends only an operation ID and remains separate from approval
+  ---
+  duration_ms: 12.0013
+  type: 'test'
+  ...
+# Subtest: top-right settings dialog clears key input and leaves model selection in the footer
+ok 49 - top-right settings dialog clears key input and leaves model selection in the footer
+  ---
+  duration_ms: 12.4779
+  type: 'test'
+  ...
+1..49
+# tests 49
+# suites 0
+# pass 49
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1380.4129

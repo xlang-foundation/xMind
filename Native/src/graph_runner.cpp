@@ -19,7 +19,9 @@ GraphRunner::GraphRunner(PersistenceService& store,AgentSettings settings,std::s
     if(count<1 || count>8 || settings_.run_timeout.count()<1 || settings_.run_timeout>std::chrono::hours(1))throw std::invalid_argument("Invalid graph execution budget");
     if(!settings_.provider.model.empty())agents_=std::make_unique<AgentRunner>(store_,settings_);
     if(settings_.workspace)workspace_=std::make_unique<WorkspaceTools>(*settings_.workspace);
-    if(!settings_.process_profiles.empty()){if(!workspace_)throw std::invalid_argument("Graph process profiles require a workspace");process_=std::make_unique<ProcessExecutor>(store_,*workspace_,*settings_.workspace,settings_.process_profiles);}
+    // Stored profiles can exist before this owner binds a workspace. Keep them
+    // inactive; validate() still rejects every direct tool without a workspace.
+    if(workspace_ && !settings_.process_profiles.empty())process_=std::make_unique<ProcessExecutor>(store_,*workspace_,*settings_.workspace,settings_.process_profiles);
 }
 GraphRunner::~GraphRunner()=default;
 std::vector<std::string> GraphRunner::models() const{return agents_?agents_->models():std::vector<std::string>{};}

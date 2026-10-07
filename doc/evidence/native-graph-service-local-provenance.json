@@ -1,0 +1,22 @@
+{
+  "source_native_git_tree": "8b46feaa71dee9be32b425e3eaa7b66e95b6b8f1",
+  "runtime_source_checkout": "914783909835116969aad7c66b210a5ac9a27661",
+  "runtime_source_has_local_changes": true,
+  "binary_sha256": {
+    "build/native/Release/xmind_server.exe": "67A8997C89B43403C2795FAB9CA38DD9E631A5D3352E830796007B41FE4275A2",
+    "build/native/Release/xmind_cli.exe": "88CBEA0831571FD3B862C8A749359D25FDD974DB5AFBE05DC8445DF52AFD07E9",
+    "build/native/Release/agentflow_graph_runner_contract.exe": "FE02E80D208BA27B3FD89F7D8D60E54FC578D4C977064A41C60814903D42A334",
+    "build/native/Release/xlang3_runtime.dll": "FB02403BFF1BF9967D5E49CB4F2A5A4F6D13AD139CC02B069E20FC03CC6C4862",
+    "D:/CantorAI2026/xlang3/build/Release/modules/xlang_sqlite3.x3pkg.dll": "FCB0E481352672EB72D86A96E2EF5D9B58939A35AD03A4AC3E32BFE7DC733B8C"
+  },
+  "verification": {
+    "complete_native_suite": "44/44 passed before final additive HTTP run ownership fields",
+    "final_access_regressions": "7/7 passed after final HTTP metadata change; includes graph service HTTP/CLI",
+    "extension": "49/49 passed; no skipped tests",
+    "runtime": "Embedded xlang3; no CPython execution",
+    "provider": "Synthetic protocol replies/counts over actual native HTTP sockets",
+    "effects": "Actual workspace reads, separately approved file creation, SQLite trigger journal fault and restart without replay"
+  },
+  "installed_preview": "Remains verified 5815141 native discovery backend with ec06236 sidebar; this graph backend is not installed",
+  "remaining": "VS Code graph workflows, live-provider graph acceptance, team authorization, PostgreSQL, total graph budget and other active-goal capabilities remain incomplete"
+}

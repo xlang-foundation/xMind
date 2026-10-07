@@ -13,6 +13,7 @@
 #if defined(_WIN32)
 #include "agentflow/agent_service.hpp"
 #include "agentflow/provider_setup.hpp"
+#include "agentflow/execution_platform.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/process_configuration.hpp"
 #define NOMINMAX
@@ -46,8 +47,8 @@ int main(int argc,char** argv) {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config") || !options.emplace(key,argv[i+1]).second)
-                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--model ID --model-endpoint URL] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE]");
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config" && key!="--graphs-config") || !options.emplace(key,argv[i+1]).second)
+                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--model ID --model-endpoint URL] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
         int port=8765;
@@ -61,6 +62,7 @@ int main(int argc,char** argv) {
 #if !defined(_WIN32)
         if(options.contains("--mcp-config"))throw std::invalid_argument("Native MCP configuration currently requires Windows");
         if(options.contains("--process-config"))throw std::invalid_argument("Native process configuration currently requires Windows");
+        if(options.contains("--graphs-config"))throw std::invalid_argument("Native graph execution currently requires Windows");
 #endif
         const std::string auth=token;
         if(port<0 || port>65535) throw std::invalid_argument("Invalid port");
@@ -85,8 +87,16 @@ int main(int argc,char** argv) {
             std::ifstream file(options.at("--instructions-config"),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted instruction configuration file");std::string source;char byte;
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Instruction configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted instruction configuration file");instruction_policy=instruction_configurations.apply(source);
         }else instruction_policy=instruction_configurations.load();
+#if defined(_WIN32)
+        if(options.contains("--graphs-config")) {
+            std::ifstream file(options.at("--graphs-config"),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted graph catalog");
+            std::string source;char byte;while(file.get(byte)){if(source.size()>=262144)throw std::invalid_argument("Graph catalog exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted graph catalog");
+            agentflow::GraphCatalogStore(persistence).apply(source);
+        }
+#endif
         std::unique_ptr<agentflow::RunExecutor> executor;
         agentflow::ProviderSetup* provider_setup=nullptr;
+        agentflow::GraphExecution* graph_execution=nullptr;
         std::vector<agentflow::McpServerMetadata> mcp_metadata;
         std::vector<agentflow::ProcessProfileMetadata> process_metadata;
 #if defined(_WIN32)
@@ -136,7 +146,7 @@ int main(int argc,char** argv) {
                 auto verified=persistence.resolve_credential("server",id,purpose).get();
                 settings.credential=agentflow::CredentialReference{"server",id,purpose};
             }
-            executor=std::make_unique<agentflow::AgentService>(persistence,std::move(settings),workers,queue);
+            auto platform=std::make_unique<agentflow::ExecutionPlatform>(persistence,std::move(settings),workers,queue);graph_execution=platform.get();executor=std::move(platform);
 #else
             throw std::invalid_argument("Native provider execution currently requires Windows");
 #endif
@@ -145,7 +155,7 @@ int main(int argc,char** argv) {
         if(!executor){
             agentflow::AgentSettings settings;settings.mcp_servers=mcp_settings;settings.process_profiles=process_profiles;settings.instruction_policy=instruction_policy;
             if(options.contains("--workspace"))settings.workspace=options.at("--workspace");settings.approved_edits=options.contains("--workspace-edits");
-            auto configurable=std::make_unique<agentflow::ProviderRuntime>(persistence,std::move(settings),workers,queue);provider_setup=configurable.get();executor=std::move(configurable);
+            auto configurable=std::make_unique<agentflow::ProviderRuntime>(persistence,std::move(settings),workers,queue);provider_setup=configurable.get();graph_execution=configurable.get();executor=std::move(configurable);
         }
         if(options.contains("--workspace") || options.contains("--inspection-workspace")) {
             recovery_workspace=std::make_unique<agentflow::WorkspaceTools>(options.at(options.contains("--workspace")?"--workspace":"--inspection-workspace"));
@@ -160,7 +170,7 @@ int main(int argc,char** argv) {
 #else
             ,nullptr,{},{}
 #endif
-            ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()},provider_setup
+            ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()},provider_setup,graph_execution
         );const auto bound=server.bind(port);
 #if defined(_WIN32)
         {std::lock_guard lock(control_mutex);active_server=&server;}

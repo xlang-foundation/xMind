@@ -72,6 +72,7 @@ $ciExpected+='native_graph_contract'
 $ciExpected+='native_graph_children_contract'
 $ciExpected+='native_graph_checkpoint_contract'
 $ciExpected+='native_graph_runner_contract'
+$ciExpected+='native_graph_service_http_contract'
 $ciExpected+='native_provider_setup_contract'
 $ciExpected+='native_provider_cli_contract'
 $ciActual=($ciTests|ConvertFrom-Json).tests.name
