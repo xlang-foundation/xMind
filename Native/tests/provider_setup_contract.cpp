@@ -52,10 +52,16 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
    require(selected.wire==ProviderWire::responses && selected.endpoint==responsesEndpoint && selected.revision==2,"Reasoning model enrollment must use the approved native Responses route");
    require(newRecord["wire"]=="responses" && oldRecord["credential_id"]!=newRecord["credential_id"],"Wire change must persist a newly bound credential identity");
    Access access(store,routed);httplib::Client client("127.0.0.1",access.port);const auto metadata=client.Get("/v1/provider/configuration",httplib::Headers{{"Authorization","Bearer synthetic-provider-setup-server-access-token"}});require(metadata && Json::parse(metadata->body)["wire"]=="responses","Clients must observe the selected wire without receiving the key");
+   store.create_session("wire-session","Synthetic provider enrollment protocol fixture").get();const auto admitted=routed.submit("wire-run","wire-session","Responses enrollment fixture");
+   auto observed=admitted;const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);
+   while(observed.state==RunState::queued||observed.state==RunState::running){require(std::chrono::steady_clock::now()<deadline,"Enrolled Responses request did not settle");std::this_thread::sleep_for(std::chrono::milliseconds(5));observed=store.run(admitted.id).get();}
+   require(observed.state==RunState::completed,"Saved-provider routing must complete through actual native Responses transport");
+   const auto history=store.history("wire-session").get();require(history.size()==2 && Json::parse(history.back().json)["usage"]["prompt_tokens"]==11,"Enrolled Responses output must persist actual supplied usage");
  }
  {
    PersistenceService store(wireDatabase,imports);ProviderRuntime reopened(store,{},2,128,chatEndpoint,chatEndpoint+"/models",responsesEndpoint);
    require(reopened.available() && reopened.configuration().wire==ProviderWire::responses && reopened.configuration().endpoint==responsesEndpoint,"Restart must restore Responses routing and its saved credential");
+   require(store.run("wire-run").get().state==RunState::completed && store.history("wire-session").get().size()==2,"Reopen must retain the real Responses conversation without replay");
    const auto restored=reopened.configure("fixture-model",SecretBytes(std::span<const std::uint8_t>{}),2);require(restored.wire==ProviderWire::chat_completions && restored.endpoint==chatEndpoint,"Legacy selection must rebind the saved credential to the approved Chat route");
  }
  {

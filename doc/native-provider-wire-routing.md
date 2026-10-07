@@ -35,3 +35,11 @@ and [Responses migration guide](https://developers.openai.com/api/docs/guides/mi
 opened on 2026-10-07. Responses supports reasoning with tools for these model
 families; Chat Completions has model-specific restrictions. This routing change
 keeps the selected model identity and does not set its reasoning effort to `none`.
+
+The setup protocol fixture now also submits a real native run after routed
+enrollment. Its independent Node peer accepts only the Responses request shape,
+uses labelled synthetic SSE output/usage, and checks that the credential is only
+in the authorization header. The C++ contract requires completion, persisted
+response usage and retained conversation/run state after reopen. Exact peer
+request counts prevent a skipped transport path from passing. JavaScript syntax
+validation passed; compiled execution and live OpenAI acceptance remain pending.
