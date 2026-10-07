@@ -94,6 +94,10 @@ async function until(read,predicate,label) {
 const terminal=(id,state)=>until(async()=> (await api(`/v1/runs/${id}`)).data,value=>value.state===state,`${id} ${state}`);
 const streaming=id=>until(async()=> (await api(`/v1/runs/${id}/events`)).data,events=>events.some(event=>event.kind==='model.text'),`${id} stream`);
 async function session(id) {assert.equal((await api('/v1/sessions',{id,title:id})).status,201);}
+async function chat(input,...args){
+ const process=spawn(cliExe,[String(port),'chat',...args],{env:baseEnv,windowsHide:true});let output='',errors='';process.stdout.on('data',bytes=>output+=bytes);process.stderr.on('data',bytes=>errors+=bytes);const timer=setTimeout(()=>process.kill(),12000);
+ const result=await new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});process.stdin.end(input);});assert.equal(result.signal,null,'Interactive CLI must finish without being killed');assert.equal(result.code,0,errors);assert.ok(!output.includes(key));return output.trim()?output.trim().split('\n').map(line=>JSON.parse(line)):[];
+}
 try {
   await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual workspace content\n');
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
@@ -112,6 +116,10 @@ try {
   assert.deepEqual(cli('events',run.id,String(last)),[]);
   await until(()=>api(`/v1/runs/${run.id}/cancel`,{}),result=>result.status===409,'completed run release');
   assert.equal((await api(`/v1/runs/${run.id}/transition`,{expected:'completed',next:'running'})).status,404);
+  const beforeChat=cli('sessions').length;assert.deepEqual(await chat('/exit\n'),[]);assert.equal(cli('sessions').length,beforeChat,'Leaving an empty chat must not create a session');
+  const chatRecords=await chat('Read README from the CLI\nRead README again in the same conversation\n/exit\n'),chatSession=chatRecords.find(record=>record.type==='session').session_id;
+  assert.equal(chatRecords.filter(record=>record.type==='session').length,1);const chatRuns=chatRecords.filter(record=>record.type==='run').map(record=>record.run);assert.equal(chatRuns.length,2);assert.ok(chatRuns.every(item=>item.session_id===chatSession));assert.equal(chatRecords.filter(record=>record.type==='turn_finished'&&record.exit_status===0).length,2);assert.equal(cli('history',chatSession).length,8);assert.ok(chatRecords.some(record=>record.kind==='tool.completed'));assert.ok(chatRecords.some(record=>record.kind==='run.completed'));
+  const resumedChat=await chat('Read README after reconnect\n/exit\n',chatSession);assert.equal(resumedChat.find(record=>record.type==='session').session_id,chatSession);assert.equal(cli('history',chatSession).length,12);assert.equal(cli('runs',chatSession).length,3,'Reconnect must add only the requested new turn, not replay completed work');
 
   for(const id of ['held','queued','overflow']) await session(id);
   assert.equal((await api('/v1/runs',{id:'held-run',session_id:'held',prompt:'hold-stream'})).status,202);
@@ -139,6 +147,7 @@ try {
 
   await stop();await start(); // Reuse encrypted stored credential without env key.
   assert.deepEqual(cli('history','coding'),history);
+  assert.equal(cli('history',chatSession).length,12,'Interactive CLI history must survive native restart');
   // Use the actual editor host client against the same native server; no IDE
   // rendering or VS Code SecretStorage behavior is claimed by this wire test.
   const editorClient=new BackendClient(`http://127.0.0.1:${port}`,()=>token);
@@ -154,7 +163,7 @@ try {
   assert.equal(cli('history','crash').length,1);
   assert.equal(cli('health').status,'ok');
   if(peerError) throw peerError;
-  console.log('Native agent HTTP/CLI contract passed: actual read/tool loop, bounded admission, cancellation, encrypted credential reuse, provider failure and crash recovery. Inference peer is synthetic.');
+  console.log('Native agent HTTP/CLI contract passed: actual read/tool loop, interactive shared-session turns/reconnect/restart without replay, bounded admission, cancellation, encrypted credential reuse, provider failure and crash recovery. Inference peer is synthetic.');
 } finally {
   await stop();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));
   await rm(folder,{recursive:true,force:true});

@@ -14,6 +14,8 @@ Model-invoked edits/creation, native model selection/catalogue and stored usage/
 
 ## Native build and local use
 
+Interactive native `chat [SESSION [MODEL]]` source now supports successive requests through the shared server. Compiled validation is pending; the currently running previews have not been replaced. [Interactive CLI scope](doc/native-interactive-cli.md). The existing one-shot commands remain available.
+
 Use Windows x64, a C++20 Visual Studio toolchain, Node.js for editor/tests, and a built sibling xlang3 runtime with its supported SDK/modules. From this checkout:
 
 ```powershell

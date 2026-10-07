@@ -72,11 +72,49 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
 }
+// Interactive access client, not a second agent engine. Every request, tool
+// result, approval and response remains owned by the shared native server.
+int chat_session(httplib::Client& client,const httplib::Headers& headers,std::string session,const std::string& model) {
+    using Json=nlohmann::json;
+    auto request=[&](const std::string& path,const Json* body=nullptr){
+        auto response=body?client.Post(path,headers,body->dump(),"application/json"):client.Get(path,headers);
+        if(!response)throw std::runtime_error("Cannot reach xMind Server during chat");
+        if(response->status<200 || response->status>=300)throw std::runtime_error("Server rejected chat request (HTTP "+std::to_string(response->status)+")");
+        return Json::parse(response->body);
+    };
+    const auto health=request("/v1/health");if(!health.is_object() || health.value("agent_execution",false)!=true)throw std::runtime_error("Configure a backend model before starting chat");
+    // Validate a supplied session without starting work or creating a duplicate.
+    if(!session.empty()){const auto history=request("/v1/sessions/"+session+"/history");if(!history.is_array())throw std::runtime_error("Invalid session history");}
+    std::cerr<<"xMind chat: enter a request, /exit to leave. Backend runs survive disconnect.\n";
+    if(!session.empty())std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<std::flush;
+    int last_result=0;std::string prompt;
+    while(std::cerr<<"xMind > "<<std::flush,std::getline(std::cin,prompt)) {
+        if(!prompt.empty() && prompt.back()=='\r')prompt.pop_back();
+        if(prompt=="/exit")return last_result;
+        if(prompt.empty())continue;
+        if(prompt.size()>1024*1024)throw std::invalid_argument("Prompt exceeds limits");
+        if(session.empty()){
+            const Json body={{"title","CLI conversation"}};const auto created=request("/v1/sessions",&body);
+            if(!created.is_object() || !created.contains("id") || !created["id"].is_string())throw std::runtime_error("Invalid created session");session=created["id"].get<std::string>();
+            if(session.empty() || session.size()>128 || session.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid created session identity");
+            std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<std::flush;
+        }
+        Json body={{"session_id",session},{"prompt",prompt}};if(!model.empty())body["model_id"]=model;
+        const auto run=request("/v1/runs",&body);
+        if(!run.is_object() || run.value("session_id",std::string{})!=session || run.value("graph_root",false)!=false || !run.contains("id") || !run["id"].is_string())throw std::runtime_error("Invalid chat run admission");const auto id=run["id"].get<std::string>();
+        if(id.empty() || id.size()>128 || id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid chat run identity");
+        std::cout<<Json{{"type","run"},{"run",run}}.dump()<<'\n'<<std::flush;
+        last_result=watch_run(client,headers,id,0);
+        std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
+    }
+    if(!std::cin.eof())throw std::runtime_error("Chat input is unavailable");
+    return last_result;
+}
 }
 
 int main(int argc,char** argv) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, sessions, create-session, history, runs, run, cancel, status, events, watch, models, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, history, runs, run, cancel, status, events, watch, models, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -85,8 +123,9 @@ int main(int argc,char** argv) {
             for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
             return value;
         };
-        using Json=nlohmann::json;std::string path;Json body;bool post=false,watch=false,graph_watch=false,saved_provider_key=false;std::int64_t watch_cursor=0;
+        using Json=nlohmann::json;std::string path,chat_model;Json body;bool post=false,watch=false,graph_watch=false,chat=false,saved_provider_key=false;std::int64_t watch_cursor=0;
         if(command=="health" && argc==3) path="/v1/health";
+        else if(command=="chat" && argc>=3 && argc<=5){chat=true;if(argc>=4)path=id(argv[3]);if(argc==5)chat_model=argv[4];}
         else if(command=="sessions" && argc==3) path="/v1/sessions";
         else if(command=="create-session" && argc==4) {path="/v1/sessions";body={{"title",argv[3]}};post=true;}
         else if(command=="history" && argc==4) path="/v1/sessions/"+id(argv[3])+"/history";
@@ -152,6 +191,7 @@ int main(int argc,char** argv) {
         httplib::Client client("127.0.0.1",port);
         client.set_connection_timeout(5,0);client.set_read_timeout(15,0);client.set_write_timeout(5,0);client.set_follow_location(false);
         const httplib::Headers headers{{"Authorization",std::string("Bearer ")+token}};
+        if(chat)return chat_session(client,headers,path,chat_model);
         if(saved_provider_key){
             const auto metadata=client.Get("/v1/provider/configuration",headers);
             if(!metadata)throw std::runtime_error("Cannot reach xMind Server for provider discovery");
