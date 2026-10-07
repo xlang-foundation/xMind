@@ -47,6 +47,12 @@ class BackendClient {
   events(id, after) { return this.request(`/v1/runs/${encodeURIComponent(id)}/events?after=${after}`); }
   status(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}`); }
   cancel(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/cancel`, {}); }
+  operations(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/operations`); }
+  operation(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}`); }
+  decide(id, decision) {
+    if (decision !== 'allow' && decision !== 'deny') throw new Error('Decision must be allow or deny.');
+    return this.request(`/v1/operations/${encodeURIComponent(id)}/decision`, { decision });
+  }
 }
 
 module.exports = { BackendClient, backendOrigin, validateToken };

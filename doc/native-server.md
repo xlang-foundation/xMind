@@ -2,7 +2,7 @@
 
 The C++ server exposes durable sessions and schedules the native model/tool engine through `AgentService`. The console and editor host clients are separate HTTP observers. Runtime objects and database files remain owned by the server, with HTTP transport isolated from the agent core through `RunExecutor`.
 
-The Release build and sixteen native contracts passed, including configured run admission/cancellation through HTTP/CLI, the actual editor host client, the operation journal and permission waits. Inference peers in those contracts are synthetic; filesystem operations and embedded-xlang3 storage are real. Live inference, actual editor UI behavior and complete coding tasks remain unverified.
+The Release build and eighteen native contracts passed, including configured run admission/cancellation through HTTP/CLI, the actual editor host client, the operation journal, permission waits and approved real file edits through the local approval API. Inference peers in those contracts are synthetic; filesystem operations and embedded-xlang3 storage are real. Live inference, actual editor UI behavior and complete coding tasks remain unverified.
 
 ## Current API
 
@@ -15,6 +15,9 @@ The Release build and sixteen native contracts passed, including configured run 
 | GET | /v1/sessions/{id}/runs | Read persisted run history |
 | GET | /v1/runs/{id} | Read persisted run state |
 | GET | /v1/runs/{id}/events?after=N | Read ordered events after a validated cursor |
+| GET | /v1/runs/{id}/operations | Read durable effect proposals/outcomes for this run |
+| GET | /v1/operations/{id} | Read exact proposal argument bytes and durable state/outcome |
+| POST | /v1/operations/{id}/decision | Authenticated local owner allows/denies an immutable proposal using `{decision:"allow"}` or `{decision:"deny"}` |
 | POST | /v1/runs | With a configured engine: admit `{session_id,prompt,id?}` and return 202 with queued admission snapshot |
 | POST | /v1/runs/{id}/cancel | With a configured engine: accept `{}` and request cancellation; inspect state/events for its outcome |
 
@@ -37,6 +40,20 @@ Build using `Tools/native-milestone.ps1 -Action Build`. Set `XMIND_AUTH_TOKEN` p
 ```
 
 Create the database parent directory first. The server binds only to 127.0.0.1; its configured Host header and bearer token are required. Browser Origin requests are denied until an authorized view adapter is configured. Errors are JSON and backend-internal database diagnostics are not returned. Windows Ctrl+C stops HTTP admission and drains the persistence service. Forced termination uses existing startup interruption recovery on next ownership acquisition.
+
+The loopback token authenticates one full-access backend principal, `local-owner`, including inspection and decisions for all locally stored proposals. The server supplies that actor; requests cannot specify one. This is local-owner authorization, not team user identity or project isolation. Shared deployment requires scoped users/controllers/workers before exposing these routes remotely.
+
+For an existing backend-owned proposal, inspect its exact `arguments_json` before deciding:
+
+```powershell
+.\build\native\Release\xmind_cli.exe 8765 operations RUN_ID
+.\build\native\Release\xmind_cli.exe 8765 operation OPERATION_ID
+.\build\native\Release\xmind_cli.exe 8765 decide OPERATION_ID allow
+# Or: decide OPERATION_ID deny
+.\build\native\Release\xmind_cli.exe 8765 operation OPERATION_ID
+```
+
+Operation responses retain argument/result JSON as strings to preserve exact large-number/content bytes. Clients cannot replace a proposal payload or change its actor; duplicate JSON request keys are rejected. IDs are never reused. A decision response records the grant/denial, not effect completion; inspect the later outcome. There are no public proposal creation, effect claim or outcome mutation routes. The native agent still offers only read tools, so it does not yet create coding edit proposals. The approved-effect HTTP contract submits proposals through a test driver using the actual backend executor, not a model or a fabricated product route.
 
 For actual execution, select a chat-completions streaming endpoint/model explicitly:
 
@@ -62,9 +79,9 @@ Live provider/coding validation, mutation/process tools and approvals, reconcili
 
 ## Native effect authorization components
 
-The schema-v3 operation journal is implemented behind the native repository/persistence service. A runtime proposal records its exact run, verified workspace identity, tool, argument bytes and expiry. A decision requires a controller identity derived from backend authentication, retained with its events and later outcomes. Controller decisions are single-use; executor claims must match all recorded fields and the exact JSON payload. Duplicate JSON fields and excessive nesting are rejected. Grants expire before use, and cancellation retires unused grants. Operation changes and their events commit atomically through xlang3. Requiring an actor field is not itself controller authentication; the approval controller service and team authorization remain incomplete.
+The schema-v3 operation journal is implemented behind the native repository/persistence service. A runtime proposal records its exact run, verified workspace identity, tool, argument bytes and expiry. A decision requires a controller identity derived from backend authentication, retained with its events and later outcomes. Controller decisions are single-use; executor claims must match all recorded fields and the exact JSON payload. Duplicate JSON fields and excessive nesting are rejected. Grants expire before use, and cancellation retires unused grants. Operation changes and their events commit atomically through xlang3. The loopback adapter supplies the authenticated `local-owner` identity; team authorization remains incomplete.
 
-The states distinguish waiting for approval, granted, denied, expired, cancelled, executing, succeeded, failed and uncertain. Normal run completion is rejected with unresolved operations. Startup recovery marks interrupted execution claims uncertain and never regrants them. A workspace admits one executing effect at a time, and an uncertain effect blocks further effect claims in that same verified workspace identity, including new run/operation IDs. Backend callers must enforce controller authorization, verified workspace identities and overlapping-root policy before using this repository contract. No product approval routes, write/process tools or uncertainty-reconciliation controls are enabled by this component checkpoint.
+The states distinguish waiting for approval, granted, denied, expired, cancelled, executing, succeeded, failed and uncertain. Normal run completion is rejected with unresolved operations. Startup recovery marks interrupted execution claims uncertain and never regrants them. A workspace admits one executing effect at a time, and an uncertain effect blocks further effect claims in that same verified workspace identity, including new run/operation IDs. Backend callers must enforce controller authorization, verified workspace identities and overlapping-root policy before using this repository contract. Local inspection/decision routes are enabled; model write/process tools and uncertainty-reconciliation controls remain pending.
 
 `PermissionWaiter` uses the same durable repository records to await a decision and return a single claimed operation. It supports stop-token cancellation, server-clock expiry, waitable workspace contention and explicit rejection of uncertain workspace effects. It never executes a tool; the owning runtime must journal the actual result after the claim. It polls durable records with a cancellable wait, so no transport/view callback authorizes an effect by itself. Repository and waiter contracts passed with real persistence and worker waits. They establish these component invariants, not product approval UI or live effect execution.
 
@@ -72,4 +89,6 @@ Public user-message validation requires `{role:"user",data:{content:"nonempty te
 
 Current component evidence: [native-permission-planning-ctest.log](evidence/native-permission-planning-ctest.log), sixteen tests passed. The new contracts cover exact argument binding (including large numeric bytes), duplicate/deep JSON rejection, controller attribution, competing decisions/claims, cancellation/expiry, storage/event fault rollback, atomic schema-v2 migration, uncertain restart recovery, workspace exclusion and cancellable permission waits. The fixture-side file write in the repository contract is explicitly test code, not a production effect adapter.
 
-The backend-only [approved edit executor](native-workspace-tools.md) now uses the real file adapter after a durable exact approval claim. Its separate contract verifies actual file changes and an outcome-storage fault followed by uncertain restart recovery. Current evidence: [native-approved-edit-ctest.log](evidence/native-approved-edit-ctest.log), seventeen native contracts. This library is not yet offered by the server or agent; authenticated approval controllers, model write-tool integration and reconciliation remain required.
+The backend-only [approved edit executor](native-workspace-tools.md) now uses the real file adapter after a durable exact approval claim. Its separate contract verifies actual file changes and an outcome-storage fault followed by uncertain restart recovery. Executor-component evidence: [native-approved-edit-ctest.log](evidence/native-approved-edit-ctest.log), seventeen native contracts. The executor is not yet integrated into model execution; model write-tool integration and reconciliation remain required.
+
+Current approval API evidence: [native-approval-api-ctest.log](evidence/native-approval-api-ctest.log), eighteen contracts. The compiled HTTP server, CLI and actual VS Code host client inspect and decide real native edit proposals. Real files establish approved changes, denial without effects and stale-content rejection. Tests also verify wrong-token rejection, actor/payload spoofing rejection, duplicate decisions/JSON fields and absent proposal/claim/outcome fabrication routes. The test driver owns run/proposal creation; no model, approval UI or live coding completion is claimed.

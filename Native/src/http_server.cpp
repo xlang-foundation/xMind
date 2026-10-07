@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <random>
 #include <sstream>
+#include <set>
 
 namespace agentflow {
 void validate_local_auth_token(std::string_view token) {
@@ -26,7 +27,13 @@ bool equal_token(const std::string& a,const std::string& b) {
 }
 Json body(const Request& request,std::initializer_list<const char*> allowed) {
     if(request.get_header_value("Content-Type")!="application/json") throw std::invalid_argument("Use application/json");
-    auto value=Json::parse(request.body);
+    std::vector<std::set<std::string>> fields;
+    auto value=Json::parse(request.body,[&](int,Json::parse_event_t event,Json& parsed) {
+        if(event==Json::parse_event_t::object_start) fields.emplace_back();
+        else if(event==Json::parse_event_t::object_end) fields.pop_back();
+        else if(event==Json::parse_event_t::key && !fields.back().insert(parsed.get<std::string>()).second) throw std::invalid_argument("Duplicate request field");
+        return true;
+    });
     if(!value.is_object()) throw std::invalid_argument("Expected a JSON object");
     for(auto it=value.begin();it!=value.end();++it) {
         bool known=false;for(const auto* key:allowed) if(it.key()==key) known=true;
@@ -54,6 +61,13 @@ Json encode(const Session& value) {return {{"id",value.id},{"title",value.title}
 Json encode(const Run& value) {return {{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)}};}
 Json encode(const Event& value) {return {{"seq",value.sequence},{"run_id",value.run_id},{"kind",value.kind},{"data",Json::parse(value.json)}};}
 Json encode(const Message& value) {return {{"seq",value.sequence},{"role",value.role},{"data",Json::parse(value.json)}};}
+Json encode(const Operation& value) {
+    // Keep exact argument bytes: clients must not reserialize numeric/content
+    // values and present a different payload as the granted operation.
+    return {{"id",value.id},{"run_id",value.spec.run_id},{"workspace_id",value.spec.workspace},
+        {"tool",value.spec.tool},{"arguments_json",value.spec.arguments_json},{"state",to_string(value.state)},
+        {"expires_unix_ms",value.expires_unix_ms},{"decision_actor",value.decision_actor},{"result_json",value.result_json}};
+}
 template<class Values> Json encode_all(const Values& values) {
     auto result=Json::array();for(const auto& value:values) result.push_back(encode(value));return result;
 }
@@ -134,6 +148,21 @@ struct HttpServer::Impl {
         }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {reply(response,encode(persistence.run(identifier(request.matches[1])).get()));}));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/events)",guarded([this](const Request& request,Response& response) {reply(response,encode_all(persistence.events(identifier(request.matches[1]),cursor(request)).get()));}));
+        server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/operations)",guarded([this](const Request& request,Response& response) {
+            reply(response,encode_all(persistence.operations(identifier(request.matches[1])).get()));
+        }));
+        server.Get(R"(/v1/operations/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {
+            reply(response,encode(persistence.operation(identifier(request.matches[1])).get()));
+        }));
+        server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/decision)",guarded([this](const Request& request,Response& response) {
+            const auto value=body(request,{"decision"});const auto decision=string_field(value,"decision",8);
+            if(decision!="allow" && decision!="deny") throw std::invalid_argument("Decision must be allow or deny");
+            // This loopback adapter has one full-access principal authenticated
+            // by its configured bearer credential. Never accept actor identity
+            // from request JSON. Team principals/scopes require another adapter.
+            reply(response,encode(persistence.decide_operation(identifier(request.matches[1]),
+                decision=="allow"?OperationDecision::allow:OperationDecision::deny,"local-owner").get()));
+        }));
         if(executor) {
             server.Post("/v1/runs",guarded([this](const Request& request,Response& response) {
                 const auto value=body(request,{"id","session_id","prompt"});

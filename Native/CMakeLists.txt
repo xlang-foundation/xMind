@@ -139,6 +139,16 @@ if(BUILD_TESTING)
     add_test(NAME native_edit_executor_contract COMMAND agentflow_edit_executor_contract
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_edit_executor_contract PROPERTIES TIMEOUT 30)
+    add_executable(agentflow_approved_edit_http_fixture tests/approved_edit_http_fixture.cpp)
+    target_link_libraries(agentflow_approved_edit_http_fixture PRIVATE agentflow_edits agentflow_http)
+    add_custom_command(TARGET agentflow_approved_edit_http_fixture POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_approved_edit_http_fixture>")
+    if(AGENTFLOW_NODE_EXECUTABLE)
+      add_test(NAME native_approved_edit_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/approved_edit_http_peer.mjs" "$<TARGET_FILE:agentflow_approved_edit_http_fixture>" "$<TARGET_FILE:xmind_cli>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      set_tests_properties(native_approved_edit_http_contract PROPERTIES TIMEOUT 45)
+    endif()
     target_include_directories(agentflow_workspace_tools_contract PRIVATE third_party)
     target_link_libraries(agentflow_workspace_tools_contract PRIVATE agentflow_workspace)
     if(AGENTFLOW_NODE_EXECUTABLE)
