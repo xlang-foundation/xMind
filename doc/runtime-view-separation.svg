@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1540" height="1000" viewBox="0 0 1540 1000" role="img" aria-labelledby="title desc">
+<title id="title">xMind — one remote runtime, multiple independent views</title>
+<desc id="desc">Node A runs the native coding engine and workspace. Electron, browser, CLI and plugin viewers attach through an access gateway. WebRTC is a gateway and viewer transport with no dependency in the C++ agent core. Storage may be local or on xMind Server.</desc>
+<defs>
+<style>text{font-family:'Segoe UI',Arial,sans-serif;fill:#17293f}.title{font-size:32px;font-weight:700}.heading{font-size:23px;font-weight:700}.label{font-size:20px;font-weight:600}.body{font-size:17px;fill:#405771}.small{font-size:15px;fill:#52667e}.card{fill:white;stroke:#c5d2e2;stroke-width:1.5}.native{fill:#eef4ff;stroke:#6285bd;stroke-width:1.5}.transport{fill:#fff7e7;stroke:#bd974b;stroke-width:1.5}.flow{fill:none;stroke:#476a9e;stroke-width:2.5;marker-end:url(#arrow)}</style>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L10 5L0 10Z" fill="#476a9e"/></marker>
+</defs>
+<rect width="1540" height="1000" fill="#f6f8fc"/>
+<text x="42" y="54" class="title">xMind — execution stays on Node A; views can attach anywhere</text>
+<text x="42" y="87" class="body">Proposed boundary · UI and transport are independent of the agent / coding runtime</text>
+<rect x="42" y="122" width="1456" height="158" rx="17" class="card"/>
+<text x="65" y="159" class="heading">Independent viewers · nodes B, C, D and others</text>
+<rect x="65" y="184" width="323" height="69" rx="12" class="native"/><text x="226" y="225" text-anchor="middle" class="label">Electron standalone IDE</text>
+<rect x="410" y="184" width="323" height="69" rx="12" class="native"/><text x="571" y="225" text-anchor="middle" class="label">Browser / web view</text>
+<rect x="755" y="184" width="323" height="69" rx="12" class="native"/><text x="916" y="225" text-anchor="middle" class="label">VS Code / editor plugin</text>
+<rect x="1100" y="184" width="375" height="69" rx="12" class="native"/><text x="1287" y="225" text-anchor="middle" class="label">Console CLI / other client</text>
+<path d="M770 281V318" class="flow"/>
+<rect x="42" y="321" width="1456" height="147" rx="17" class="transport"/>
+<text x="65" y="359" class="heading">Access gateway / transport adapters · outside the core</text>
+<text x="65" y="392" class="body">Authentication · signaling · WebRTC data channels · HTTPS / WebSocket adapters · subscriptions and reconnect</text>
+<text x="65" y="426" class="body">Existing Electron/WebRTC infrastructure can be reused here; the agent core has no Electron or WebRTC dependency.</text>
+<path d="M770 469V510" class="flow"/>
+<text x="795" y="495" class="small">Typed commands and durable events, independent of the chosen transport</text>
+<rect x="42" y="513" width="940" height="319" rx="17" class="native"/>
+<text x="65" y="554" class="heading">Node A · xMind Runtime · C++ + embedded xlang3</text>
+<text x="65" y="591" class="body">General agents / graphs · coding engine · model adapters · MCP / A2A</text>
+<text x="65" y="628" class="body">Workspace files · shell / PTY · Git · diagnostics · tools / approvals</text>
+<text x="65" y="665" class="body">Run ownership · typed session state · durable events · policy enforcement</text>
+<rect x="65" y="694" width="894" height="109" rx="12" class="card"/>
+<text x="88" y="729" class="label">Runtime does not depend on a view being open</text>
+<text x="88" y="763" class="body">Node B can disconnect; Node C can resume observing the same run by event cursor.</text>
+<text x="88" y="788" class="small">View access and control/approval access are separate permissions.</text>
+<path d="M983 667H1018" class="flow"/>
+<rect x="1021" y="513" width="477" height="319" rx="17" class="card"/>
+<text x="1043" y="554" class="heading">Selected state location</text>
+<text x="1043" y="596" class="label">Local on Node A</text>
+<text x="1043" y="628" class="body">xlang3 → local SQLite</text>
+<text x="1043" y="683" class="label">Shared xMind Server</text>
+<text x="1043" y="715" class="body">Authenticated state service API</text>
+<text x="1043" y="747" class="body">Server xlang3 → server SQLite</text>
+<text x="1043" y="789" class="small">Views consume authorized state through APIs.</text>
+<rect x="42" y="860" width="1456" height="96" rx="14" fill="#e8eef8"/>
+<text x="65" y="894" class="label">WebRTC carries the interaction; it does not own execution or persistence</text>
+<text x="65" y="928" class="body">Common command/event schemas work across transports. Reconnect must not replay non-idempotent tools or restart the runtime.</text>
+</svg>

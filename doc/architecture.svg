@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1640" height="1380" viewBox="0 0 1640 1380" role="img" aria-labelledby="title desc">
+  <title id="title">xMind / AgentFlow — native C++ architecture</title>
+  <desc id="desc">One shared C++ platform for general agents, graph workflows and coding. Existing xMind concepts inform the native core. OpenCode and LiteLLM are reference inputs, not runtime dependencies. CLI and IDE clients use the same service. xlang3 is embedded for scripts and skills. Native MCP and A2A connectors share tools, permissions and persistence.</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, sans-serif; fill: #142439; }
+      .title { font-size: 34px; font-weight: 700; }
+      .subtitle { font-size: 18px; fill: #50637b; }
+      .heading { font-size: 22px; font-weight: 700; }
+      .label { font-size: 19px; font-weight: 600; }
+      .body { font-size: 17px; fill: #344b65; }
+      .small { font-size: 15px; fill: #50637b; }
+      .card { fill: #fff; stroke: #c6d2e1; stroke-width: 1.5; }
+      .native { fill: #eff5ff; stroke: #597fc0; stroke-width: 1.5; }
+      .runtime { fill: #eaf8f1; stroke: #4e9475; stroke-width: 1.5; }
+      .ref { fill: #fff8e9; stroke: #c39b4e; stroke-width: 1.5; }
+      .flow { fill: none; stroke: #476a9e; stroke-width: 2.5; marker-end: url(#arrow); }
+      .reference { fill: none; stroke: #ad873b; stroke-width: 2; stroke-dasharray: 7 6; marker-end: url(#refArrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L10 5L0 10Z" fill="#476a9e"/></marker>
+    <marker id="refArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L10 5L0 10Z" fill="#ad873b"/></marker>
+  </defs>
+  <rect width="1640" height="1380" fill="#f6f8fc"/>
+  <text x="48" y="59" class="title">xMind / AgentFlow</text>
+  <text x="48" y="91" class="subtitle">Proposed architecture • Native C++ core + embedded xlang3 • General agents and a coding workspace</text>
+  <rect x="1265" y="35" width="325" height="52" rx="26" fill="#e8eef8"/>
+  <text x="1427" y="68" text-anchor="middle" class="label">Design • not delivery status</text>
+
+  <!-- Clients all consume the same API. -->
+  <rect x="48" y="126" width="1542" height="139" rx="18" class="card"/>
+  <text x="70" y="159" class="heading">Clients</text>
+  <rect x="70" y="180" width="285" height="62" rx="11" fill="#edf2fb"/>
+  <text x="212" y="218" text-anchor="middle" class="label">Native CLI / interactive UI</text>
+  <rect x="375" y="180" width="320" height="62" rx="11" fill="#edf2fb"/>
+  <text x="535" y="218" text-anchor="middle" class="label">VS Code • thin TS/JS client</text>
+  <rect x="715" y="180" width="285" height="62" rx="11" fill="#edf2fb"/>
+  <text x="857" y="218" text-anchor="middle" class="label">Web / graph editor</text>
+  <rect x="1020" y="180" width="548" height="62" rx="11" fill="#edf2fb"/>
+  <text x="1294" y="218" text-anchor="middle" class="label">Standalone IDE • Electron • same backend</text>
+  <path d="M820 266V296" class="flow"/>
+
+  <rect x="365" y="298" width="1225" height="93" rx="15" class="native"/>
+  <text x="391" y="331" class="heading">xMind Server · local or shared team service · C++</text>
+  <text x="391" y="360" class="body">Versioned HTTP / JSON / SSE · sessions and runs · model discovery · approval and diff APIs · reconnect</text>
+  <text x="70" y="338" class="label">One backend owns execution</text>
+  <text x="70" y="364" class="small">Clients observe the same durable state</text>
+  <path d="M980 392V428" class="flow"/>
+
+  <!-- Reference inputs have dashed arrows, never runtime links. -->
+  <rect x="48" y="433" width="280" height="179" rx="14" class="ref"/>
+  <text x="68" y="468" class="heading">Existing xMind</text>
+  <text x="68" y="502" class="body">Graph / callable concepts</text>
+  <text x="68" y="530" class="body">Agents, sessions, planning</text>
+  <text x="68" y="563" class="small">Port suitable C++ behavior;</text>
+  <text x="68" y="586" class="small">replace legacy xlang bindings.</text>
+  <path d="M328 510H392" class="reference"/>
+  <rect x="48" y="634" width="280" height="177" rx="14" class="ref"/>
+  <text x="68" y="670" class="heading">OpenCode 2 reference</text>
+  <text x="68" y="704" class="body">Coding feature contracts</text>
+  <text x="68" y="732" class="body">CLI / IDE behavior and UX</text>
+  <text x="68" y="765" class="small">Implement in our C++ core;</text>
+  <text x="68" y="788" class="small">no OpenCode runtime or code.</text>
+  <path d="M328 713H392" class="reference"/>
+  <rect x="48" y="833" width="280" height="177" rx="14" class="ref"/>
+  <text x="68" y="870" class="heading">LiteLLM reference</text>
+  <text x="68" y="905" class="body">Provider / model coverage</text>
+  <text x="68" y="933" class="body">Capabilities and API behavior</text>
+  <text x="68" y="965" class="small">Build native provider adapters;</text>
+  <text x="68" y="988" class="small">no LiteLLM SDK dependency.</text>
+  <path d="M328 922H392" class="reference"/>
+
+  <rect x="365" y="429" width="1225" height="598" rx="18" fill="#fff" stroke="#597fc0" stroke-width="2"/>
+  <text x="391" y="464" class="heading">Shared platform core · C++</text>
+  <rect x="395" y="487" width="562" height="108" rx="12" class="native"/>
+  <text x="417" y="520" class="label">General agent and graph orchestration</text>
+  <text x="417" y="550" class="body">Single agent · DAG / bounded loops · parallel branches</text>
+  <text x="417" y="577" class="body">Conditions · joins · human pauses · durable checkpoints</text>
+  <rect x="981" y="487" width="579" height="108" rx="12" class="native"/>
+  <text x="1003" y="520" class="label">Shared model / tool execution loop</text>
+  <text x="1003" y="550" class="body">Streaming · tool calls · reasoning / multimodal context</text>
+  <text x="1003" y="577" class="body">Cancellation · deadlines · retries · usage · compaction</text>
+  <path d="M958 542H979" class="flow"/>
+
+  <rect x="395" y="620" width="1165" height="168" rx="12" class="native"/>
+  <text x="417" y="656" class="label">Coding application + general tool registry</text>
+  <text x="417" y="687" class="body">Repository instructions · agent presets · skills / commands · context and file references</text>
+  <text x="417" y="719" class="body">Read / search / edit / patch · shell / PTY · Git / worktrees · diagnostics / formatters · web search</text>
+  <text x="417" y="751" class="body">Diff review · snapshots / revert · attachments · plugin hooks · remote tools</text>
+  <path d="M1270 596V619" class="flow"/>
+
+  <rect x="395" y="813" width="562" height="186" rx="12" class="native"/>
+  <text x="417" y="847" class="label">Native model gateway</text>
+  <text x="417" y="879" class="body">Provider-specific HTTP / TLS adapters and auth</text>
+  <text x="417" y="909" class="body">Model catalogue · capability checks · routing</text>
+  <text x="417" y="939" class="body">OpenAI · Anthropic · Google · xAI · cloud / local</text>
+  <text x="417" y="974" class="small">Validate each provider / model feature; coverage evolves.</text>
+  <rect x="981" y="813" width="579" height="186" rx="12" class="native"/>
+  <text x="1003" y="847" class="label">Native protocol connectors</text>
+  <text x="1003" y="879" class="body">MCP client + server · tool / resource discovery</text>
+  <text x="1003" y="909" class="body">A2A client + server · task delegation / streaming</text>
+  <text x="1003" y="939" class="body">Shared registry, run lifecycle and authorization</text>
+  <text x="1003" y="974" class="small">Local and remote graph nodes use the same contracts.</text>
+  <path d="M676 789V812" class="flow"/>
+  <path d="M1270 789V812" class="flow"/>
+
+  <!-- Cross-cutting services sit underneath every native component. -->
+  <path d="M980 1028V1057" class="flow"/>
+  <rect x="365" y="1059" width="1225" height="103" rx="15" class="native"/>
+  <text x="391" y="1094" class="heading">Shared state, policy and recovery · C++</text>
+  <text x="391" y="1126" class="body">C++ repository contracts · sessions / events / config / encrypted secrets · SQLite / PostgreSQL I/O via xlang3</text>
+
+  <rect x="48" y="1185" width="772" height="112" rx="15" class="runtime"/>
+  <text x="70" y="1222" class="heading">Embedded xlang3 · supported native SDK</text>
+  <text x="70" y="1254" class="body">Database I/O · user scripts / skills · pure-Python libraries</text>
+  <text x="70" y="1279" class="small">C++ owns orchestration; missing native APIs are discussed before changes.</text>
+  <path d="M580 1163V1184" class="flow"/>
+  <path d="M1225 1163V1184" class="flow"/>
+  <rect x="860" y="1185" width="730" height="112" rx="15" class="card"/>
+  <text x="882" y="1222" class="heading">External systems / native infrastructure</text>
+  <text x="882" y="1254" class="body">Model APIs · MCP servers · A2A peers · workspace / OS / Git</text>
+  <text x="882" y="1279" class="small">Native HTTP / TLS and JSON · database I/O in xlang3 · no CPython</text>
+
+  <path d="M50 1334H90" class="flow"/>
+  <text x="104" y="1340" class="small">Runtime API / data flow</text>
+  <path d="M365 1334H405" class="reference"/>
+  <text x="419" y="1340" class="small">Design / migration reference</text>
+  <text x="1590" y="1340" text-anchor="end" class="small">October 6, 2026 • Proposed design • Feature parity still requires validation</text>
+</svg>

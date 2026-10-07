@@ -1,0 +1,190 @@
+diff --git a/modules/sqlite/sqlite_handles.h b/modules/sqlite/sqlite_handles.h
+index 0d9ac491..e0d4dc02 100644
+--- a/modules/sqlite/sqlite_handles.h
++++ b/modules/sqlite/sqlite_handles.h
+@@ -17,6 +17,7 @@ limitations under the License.
+ #include "xlang3/xlang3.h"
+ 
+ #include "sqlite3.h"
++#include <string>
+ 
+ namespace xlang3_sqlite {
+ 
+@@ -28,6 +29,8 @@ struct ConnectionHandle {
+   sqlite3* db = nullptr;
+   uint32_t refcnt = 1;
+   bool closed = false;
++  bool implicit_transactions = true;
++  std::string isolation_level;
+ };
+ 
+ struct CursorHandle {
+diff --git a/modules/sqlite/sqlite_package.cpp b/modules/sqlite/sqlite_package.cpp
+index c993e8cd..8647867d 100644
+--- a/modules/sqlite/sqlite_package.cpp
++++ b/modules/sqlite/sqlite_package.cpp
+@@ -98,11 +98,12 @@ bool begin_python_transaction(xlang3_sqlite::ConnectionHandle* connection, const
+   if (connection == nullptr || connection->db == nullptr || connection->closed) {
+     return false;
+   }
+-  if (!is_write_sql(sql) || !sqlite3_get_autocommit(connection->db)) {
++  if (!connection->implicit_transactions || !is_write_sql(sql) || !sqlite3_get_autocommit(connection->db)) {
+     return true;
+   }
+   char* message = nullptr;
+-  const int rc = sqlite3_exec(connection->db, "BEGIN", nullptr, nullptr, &message);
++  const std::string begin = connection->isolation_level.empty() ? "BEGIN" : "BEGIN " + connection->isolation_level;
++  const int rc = sqlite3_exec(connection->db, begin.c_str(), nullptr, nullptr, &message);
+   if (message != nullptr) {
+     sqlite3_free(message);
+   }
+@@ -206,6 +207,27 @@ bool set_public_dbapi_module(X3PackageHost* host, X3Value klass) {
+   return ok;
+ }
+ 
++bool parse_isolation_level(PackageState* state, X3CallContext* context, X3Runtime* runtime,
++    X3Value value, bool* implicit, std::string* level) {
++  if (value.tag == X3_TAG_NONE) { *implicit = false; level->clear(); return true; }
++  auto* host = state->host;
++  if (host->value_object_kind(value) != X3_OBJECT_KIND_STRING) {
++    host->raise_class_error(context, "TypeError", "isolation_level must be str or None");
++    return false;
++  }
++  const char* data = nullptr; uint64_t size = 0;
++  if (host->value_string_data(runtime, value, &data, &size) != X3_STATUS_OK) return false;
++  if (size > 9) {
++    host->raise_class_error(context, "ValueError", "invalid isolation_level"); return false;
++  }
++  std::string mode(data, static_cast<size_t>(size));
++  for (auto& character : mode) character = static_cast<char>(std::toupper(static_cast<unsigned char>(character)));
++  if (mode != "" && mode != "DEFERRED" && mode != "IMMEDIATE" && mode != "EXCLUSIVE") {
++    host->raise_class_error(context, "ValueError", "invalid isolation_level"); return false;
++  }
++  *implicit = true; *level = std::move(mode); return true;
++}
++
+ X3Status sqlite3_connect_kw(
+     X3CallContext* context,
+     X3Runtime* runtime,
+@@ -216,8 +238,17 @@ X3Status sqlite3_connect_kw(
+     uint32_t kwargc,
+     X3Value* result) {
+   auto* state = state_from(user_data);
++  bool implicit = true;
++  std::string level;
++  bool isolation_seen = false, thread_seen = false;
+   for (uint32_t index = 0; index < kwargc; ++index) {
+     const char* name = kwargs[index].name;
++    if (name != nullptr && std::string_view(name) == "isolation_level") {
++      if (isolation_seen) { state->host->raise_class_error(context,"TypeError","duplicate isolation_level"); return X3_STATUS_ERROR; }
++      isolation_seen = true;
++      if (!parse_isolation_level(state,context,runtime,kwargs[index].value,&implicit,&level)) return X3_STATUS_ERROR;
++      continue;
++    }
+     if (name == nullptr || std::string_view(name) != "check_same_thread") {
+       const std::string message = std::string("'") +
+           (name == nullptr ? "" : name) +
+@@ -225,13 +256,53 @@ X3Status sqlite3_connect_kw(
+       state->host->raise_class_error(context, "TypeError", message.c_str());
+       return X3_STATUS_ERROR;
+     }
++    if (thread_seen) { state->host->raise_class_error(context,"TypeError","duplicate check_same_thread"); return X3_STATUS_ERROR; }
++    thread_seen = true;
+     if (kwargs[index].value.tag != X3_TAG_BOOL && kwargs[index].value.tag != X3_TAG_INT64) {
+       state->host->raise_class_error(
+           context, "TypeError", "check_same_thread must be a boolean");
+       return X3_STATUS_ERROR;
+     }
+   }
+-  return sqlite3_connect(context, runtime, user_data, args, argc, result);
++  const auto status = sqlite3_connect(context, runtime, user_data, args, argc, result);
++  if (status == X3_STATUS_OK) {
++    auto* connection = xlang3_sqlite::connection_from(state->host,*result);
++    connection->implicit_transactions = implicit;
++    connection->isolation_level = std::move(level);
++  }
++  return status;
++}
++
++X3Status connection_isolation_get(X3CallContext* context, X3Runtime* runtime, void* data,
++    const X3Value* args, uint32_t argc, X3Value* result) {
++  auto* state=state_from(data);
++  if (!check_argc(state->host,context,argc,1,"Connection.isolation_level")) return X3_STATUS_ERROR;
++  auto* connection=xlang3_sqlite::connection_from(state->host,args[0]);
++  if (!connection || connection->closed) {state->host->raise_error(context,state->programming_error_class,"sqlite connection is closed");return X3_STATUS_ERROR;}
++  *result=connection->implicit_transactions ? state->host->value_string_utf8(runtime,connection->isolation_level.data(),connection->isolation_level.size()) : x3_value_none();
++  return result->tag==X3_TAG_INVALID ? X3_STATUS_ERROR : X3_STATUS_OK;
++}
++X3Status connection_isolation_set(X3CallContext* context, X3Runtime* runtime, void* data,
++    const X3Value* args, uint32_t argc, X3Value* result) {
++  auto* state=state_from(data);
++  if (!check_argc(state->host,context,argc,2,"Connection.isolation_level")) return X3_STATUS_ERROR;
++  auto* connection=xlang3_sqlite::connection_from(state->host,args[0]);
++  if (!connection || connection->closed) {state->host->raise_error(context,state->programming_error_class,"sqlite connection is closed");return X3_STATUS_ERROR;}
++  bool implicit=true;std::string level;
++  if (!parse_isolation_level(state,context,runtime,args[1],&implicit,&level)) return X3_STATUS_ERROR;
++  if (!implicit && !sqlite3_get_autocommit(connection->db) && sqlite3_exec(connection->db,"COMMIT",nullptr,nullptr,nullptr)!=SQLITE_OK) {
++    raise_sqlite_error(state,context,connection->db,"isolation_level commit failed");return X3_STATUS_ERROR;
++  }
++  connection->implicit_transactions=implicit;connection->isolation_level=std::move(level);
++  *result=x3_value_none();return X3_STATUS_OK;
++}
++X3Status connection_transaction_get(X3CallContext* context, X3Runtime*, void* data,
++    const X3Value* args, uint32_t argc, X3Value* result) {
++  auto* state=state_from(data);
++  if (!check_argc(state->host,context,argc,1,"Connection.in_transaction")) return X3_STATUS_ERROR;
++  auto* connection=xlang3_sqlite::connection_from(state->host,args[0]);
++  if (!connection || connection->closed) {state->host->raise_error(context,state->programming_error_class,"sqlite connection is closed");return X3_STATUS_ERROR;}
++  *result=x3_value_bool(!sqlite3_get_autocommit(connection->db));return X3_STATUS_OK;
+ }
+ 
+ struct ScalarFunction {
+@@ -635,6 +706,8 @@ X3Status cursor_execute(
+   if (!xlang3_sqlite::require_string(host, context, runtime, args[1], "Cursor.execute() SQL must be a string", &sql)) {
+     return X3_STATUS_ERROR;
+   }
++  const std::string owned_sql(sql);
++  sql = owned_sql.c_str();
+   if (cursor->stmt != nullptr) {
+     sqlite3_finalize(cursor->stmt);
+     cursor->stmt = nullptr;
+@@ -1460,6 +1533,11 @@ X3Status register_sqlite_package(X::Package<xlang_sqlite3>* package) {
+     return X3_STATUS_ERROR;
+   }
+   if (!set_public_dbapi_module(host, state->connection_class)) return X3_STATUS_ERROR;
++  X3Value isolation_property=x3_value_invalid();
++  if (host->property_create(host->runtime,"isolation_level",connection_isolation_get,connection_isolation_set,state,&isolation_property)!=X3_STATUS_OK) return X3_STATUS_ERROR;
++  const bool isolation_registered=host->class_add_value(state->connection_class,"isolation_level",isolation_property)==X3_STATUS_OK;
++  host->value_release(isolation_property);
++  if (!isolation_registered || !add_readonly_property(state,state->connection_class,"in_transaction",connection_transaction_get)) return X3_STATUS_ERROR;
+ 
+   X3NativeFunctionDef cursor_methods[10]{};
+   def_method(cursor_methods[0], "execute", cursor_execute, state);
+diff --git a/modules/sqlite/sqlite_values.cpp b/modules/sqlite/sqlite_values.cpp
+index cb17a282..c6b2e947 100644
+--- a/modules/sqlite/sqlite_values.cpp
++++ b/modules/sqlite/sqlite_values.cpp
+@@ -45,8 +45,10 @@ bool bind_value(const X3PackageHost* host, X3Runtime* runtime, sqlite3_stmt* stm
+       return sqlite3_bind_double(stmt, index, value.as.f64) == SQLITE_OK;
+     case X3_TAG_OBJECT:
+       if (host->value_object_kind(value) == X3_OBJECT_KIND_STRING) {
+-        const char* text = host->value_to_cstr(runtime, value);
+-        return sqlite3_bind_text(stmt, index, text, -1, SQLITE_TRANSIENT) == SQLITE_OK;
++        const char* text = nullptr;
++        uint64_t size = 0;
++        if (host->value_string_data(runtime, value, &text, &size) != X3_STATUS_OK) return false;
++        return sqlite3_bind_text64(stmt, index, text, size, SQLITE_TRANSIENT, SQLITE_UTF8) == SQLITE_OK;
+       }
+       if (host->value_object_kind(value) == X3_OBJECT_KIND_BYTES) {
+         const void* data = nullptr;
+@@ -87,7 +89,9 @@ X3Value column_value(const X3PackageHost* host, X3Runtime* runtime, sqlite3_stmt
+     case SQLITE_FLOAT:
+       return x3_value_double(sqlite3_column_double(stmt, column));
+     case SQLITE_TEXT:
+-      return host->value_string(runtime, reinterpret_cast<const char*>(sqlite3_column_text(stmt, column)));
++      return host->value_string_utf8(runtime,
++          reinterpret_cast<const char*>(sqlite3_column_text(stmt, column)),
++          static_cast<uint64_t>(sqlite3_column_bytes(stmt, column)));
+     case SQLITE_NULL:
+       return x3_value_none();
+     case SQLITE_BLOB:

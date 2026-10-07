@@ -1,0 +1,29 @@
+{
+  "name": "agentflow",
+  "displayName": "AgentFlow",
+  "description": "Shared xlang3 agent sessions and coding workflows in VS Code.",
+  "version": "0.1.0",
+  "publisher": "agentflow-local",
+  "license": "Apache-2.0",
+  "engines": { "vscode": "^1.95.0" },
+  "categories": ["Other"],
+  "main": "./extension.js",
+  "capabilities": { "untrustedWorkspaces": { "supported": false } },
+  "contributes": {
+    "commands": [
+      { "command": "agentflow.open", "title": "AgentFlow: Open Workspace" },
+      { "command": "agentflow.selection", "title": "AgentFlow: Ask About Selection" }
+    ],
+    "configuration": {
+      "title": "AgentFlow",
+      "properties": {
+        "agentflow.backendUrl": {
+          "type": "string", "default": "http://127.0.0.1:8765",
+          "description": "Local AgentFlow backend URL."
+        }
+      }
+    }
+  },
+  "scripts": { "test": "node --test tests/*.test.js", "package": "vsce package --allow-missing-repository" },
+  "devDependencies": { "@vscode/vsce": "^3.6.0" }
+}

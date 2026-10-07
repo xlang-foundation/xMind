@@ -1,0 +1,2262 @@
+{
+  "source": "https://github.com/BerriAI/litellm/tree/e98bbc2f8e035a382044524c73341d8b5800d492",
+  "revision": "e98bbc2f8e035a382044524c73341d8b5800d492",
+  "sdkVersion": "1.106.0",
+  "cataloguePath": "model_prices_and_context_window.json",
+  "catalogueSha256": "17bce2d7987ff08ea3a80b03ce8a2a9529dfed9d2595097993ad63454aa5369e",
+  "modelEntries": 4483,
+  "providerGroups": 136,
+  "metadataEntries": [
+    "fallback_generalizations"
+  ],
+  "unspecifiedModeEntries": [
+    "fireworks-ai-4.1b-to-16b",
+    "fireworks-ai-56b-to-176b",
+    "fireworks-ai-above-16b",
+    "fireworks-ai-default",
+    "fireworks-ai-embedding-150m-to-350m",
+    "fireworks-ai-embedding-up-to-150m",
+    "fireworks-ai-moe-up-to-56b",
+    "fireworks-ai-up-to-4b"
+  ],
+  "caveat": "Pinned upstream metadata is a coverage reference, not tested AgentFlow support, current availability or current pricing. Entries include aliases, regions, pricing buckets and non-chat modes. Missing modes remain unspecified; non-provider metadata is excluded and recorded separately.",
+  "providers": [
+    {
+      "provider": "agentcore",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "ai21",
+      "modelEntries": 12,
+      "modes": {
+        "completion": 3,
+        "chat": 9
+      },
+      "declaredCapabilities": {
+        "supports_tool_choice": 9
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "aihubmix",
+      "modelEntries": 72,
+      "modes": {
+        "chat": 72
+      },
+      "declaredCapabilities": {
+        "supports_reasoning": 69,
+        "supports_vision": 55,
+        "supports_prompt_caching": 58,
+        "supports_function_calling": 62,
+        "supports_response_schema": 60,
+        "supports_adaptive_thinking": 4,
+        "supports_web_search": 32
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "aiml",
+      "modelEntries": 13,
+      "modes": {
+        "image_generation": 13
+      },
+      "declaredCapabilities": {
+        "supports_vision": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "amazon_nova",
+      "modelEntries": 4,
+      "modes": {
+        "chat": 4
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 4,
+        "supports_prompt_caching": 3,
+        "supports_response_schema": 4,
+        "supports_pdf_input": 3,
+        "supports_vision": 3
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "anthropic",
+      "modelEntries": 21,
+      "modes": {
+        "chat": 21
+      },
+      "declaredCapabilities": {
+        "supports_assistant_prefill": 7,
+        "supports_function_calling": 21,
+        "supports_native_structured_output": 21,
+        "supports_computer_use": 21,
+        "supports_pdf_input": 21,
+        "supports_prompt_caching": 21,
+        "supports_reasoning": 21,
+        "supports_response_schema": 21,
+        "supports_tool_choice": 21,
+        "supports_vision": 21,
+        "supports_web_search": 2,
+        "supports_anthropic_compaction": 15,
+        "supports_adaptive_thinking": 15,
+        "supports_mid_conversation_system": 9,
+        "supports_thinking_cache_preservation": 10,
+        "supports_xhigh_reasoning_effort": 12,
+        "supports_max_reasoning_effort": 15,
+        "supports_output_config": 17,
+        "supports_legacy_thinking": 3,
+        "supports_speed": 7,
+        "supports_fast_mode": 3
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "anyscale",
+      "modelEntries": 12,
+      "modes": {
+        "chat": 12
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 3
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "apiserpent",
+      "modelEntries": 2,
+      "modes": {
+        "search": 2
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "assemblyai",
+      "modelEntries": 2,
+      "modes": {
+        "audio_transcription": 2
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "aws_polly",
+      "modelEntries": 4,
+      "modes": {
+        "audio_speech": 4
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "azure",
+      "modelEntries": 310,
+      "modes": {
+        "embedding": 12,
+        "responses": 41,
+        "chat": 187,
+        "realtime": 20,
+        "audio_transcription": 9,
+        "audio_speech": 5,
+        "image_generation": 33,
+        "video_generation": 3
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 188,
+        "supports_parallel_function_calling": 171,
+        "supports_pdf_input": 100,
+        "supports_prompt_caching": 150,
+        "supports_reasoning": 118,
+        "supports_response_schema": 138,
+        "supports_system_messages": 122,
+        "supports_tool_choice": 189,
+        "supports_vision": 144,
+        "supports_audio_input": 23,
+        "supports_audio_output": 20,
+        "supports_native_streaming": 110,
+        "supports_none_reasoning_effort": 53,
+        "supports_minimal_reasoning_effort": 7,
+        "supports_web_search": 54,
+        "supports_xhigh_reasoning_effort": 48,
+        "supports_computer_use": 16,
+        "supports_max_reasoning_effort": 13
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "azure_ai",
+      "modelEntries": 143,
+      "modes": {
+        "chat": 114,
+        "image_generation": 10,
+        "responses": 3,
+        "audio_transcription": 1,
+        "embedding": 3,
+        "ocr": 8,
+        "rerank": 4
+      },
+      "declaredCapabilities": {
+        "supports_assistant_prefill": 7,
+        "supports_computer_use": 17,
+        "supports_function_calling": 91,
+        "supports_pdf_input": 30,
+        "supports_prompt_caching": 66,
+        "supports_reasoning": 69,
+        "supports_response_schema": 40,
+        "supports_tool_choice": 101,
+        "supports_vision": 51,
+        "supports_output_config": 3,
+        "supports_adaptive_thinking": 10,
+        "supports_legacy_thinking": 2,
+        "supports_max_reasoning_effort": 13,
+        "supports_xhigh_reasoning_effort": 23,
+        "supports_mid_conversation_system": 7,
+        "supports_native_structured_output": 2,
+        "supports_parallel_function_calling": 19,
+        "supports_native_streaming": 17,
+        "supports_none_reasoning_effort": 13,
+        "supports_prompt_cache_breakpoint": 4,
+        "supports_system_messages": 17,
+        "supports_web_search": 25,
+        "supports_minimal_reasoning_effort": 4,
+        "supports_embedding_image_input": 3,
+        "supports_audio_input": 1,
+        "supports_video_input": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "azure_text",
+      "modelEntries": 3,
+      "modes": {
+        "completion": 3
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "baseten",
+      "modelEntries": 27,
+      "modes": {
+        "chat": 27
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 18,
+        "supports_prompt_caching": 18,
+        "supports_response_schema": 18,
+        "supports_tool_choice": 18,
+        "supports_reasoning": 17,
+        "supports_vision": 12
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "bedrock",
+      "modelEntries": 293,
+      "modes": {
+        "image_generation": 18,
+        "chat": 236,
+        "embedding": 21,
+        "realtime": 2,
+        "rerank": 2,
+        "guardrail": 1,
+        "image_edit": 13
+      },
+      "declaredCapabilities": {
+        "supports_system_messages": 63,
+        "supports_nova_canvas_image_edit": 2,
+        "supports_embedding_image_input": 14,
+        "supports_image_input": 9,
+        "supports_video_input": 7,
+        "supports_audio_input": 4,
+        "supports_audio_output": 2,
+        "supports_assistant_prefill": 16,
+        "supports_function_calling": 143,
+        "supports_pdf_input": 38,
+        "supports_prompt_caching": 33,
+        "supports_response_schema": 113,
+        "supports_tool_choice": 148,
+        "supports_vision": 50,
+        "supports_computer_use": 24,
+        "supports_reasoning": 58,
+        "supports_output_config": 13,
+        "supports_native_structured_output": 24,
+        "supports_tool_search": 17,
+        "supports_parallel_tool_use_config": 19,
+        "supports_bedrock_runtime_chat_completions_tools_with_reasoning": 4,
+        "supports_adaptive_thinking": 12,
+        "supports_max_reasoning_effort": 12,
+        "supports_mid_conversation_system": 12,
+        "supports_xhigh_reasoning_effort": 12
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "bedrock_converse",
+      "modelEntries": 222,
+      "modes": {
+        "chat": 222
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 217,
+        "supports_pdf_input": 127,
+        "supports_vision": 169,
+        "supports_prompt_caching": 146,
+        "supports_response_schema": 167,
+        "supports_tool_choice": 186,
+        "supports_reasoning": 171,
+        "supports_video_input": 9,
+        "supports_tool_search": 78,
+        "supports_assistant_prefill": 39,
+        "supports_computer_use": 106,
+        "supports_native_structured_output": 64,
+        "supports_parallel_tool_use_config": 93,
+        "supports_native_streaming": 1,
+        "supports_output_config": 80,
+        "supports_adaptive_thinking": 74,
+        "supports_legacy_thinking": 12,
+        "supports_max_reasoning_effort": 91,
+        "supports_xhigh_reasoning_effort": 83,
+        "supports_mid_conversation_system": 55,
+        "supports_minimal_reasoning_effort": 1,
+        "supports_system_messages": 37,
+        "supports_audio_input": 2,
+        "supports_bedrock_runtime_chat_completions_tools_with_reasoning": 7,
+        "supports_bedrock_runtime_chat_completions_response_format": 17
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "bedrock_mantle",
+      "modelEntries": 47,
+      "modes": {
+        "chat": 32,
+        "responses": 15
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 47,
+        "supports_parallel_function_calling": 6,
+        "supports_reasoning": 43,
+        "supports_response_schema": 33,
+        "supports_tool_choice": 47,
+        "supports_max_reasoning_effort": 11,
+        "supports_prompt_caching": 23,
+        "supports_vision": 32,
+        "supports_xhigh_reasoning_effort": 19,
+        "supports_web_search": 5,
+        "supports_tool_search": 5,
+        "supports_assistant_prefill": 1,
+        "supports_computer_use": 5,
+        "supports_pdf_input": 5,
+        "supports_native_structured_output": 1,
+        "supports_parallel_tool_use_config": 5,
+        "supports_adaptive_thinking": 4,
+        "supports_mid_conversation_system": 4,
+        "supports_output_config": 4
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "bespoke",
+      "modelEntries": 3,
+      "modes": {
+        "evaluation": 3
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "bing_grounding",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "black_forest_labs",
+      "modelEntries": 8,
+      "modes": {
+        "image_edit": 4,
+        "image_generation": 4
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "cerebras",
+      "modelEntries": 7,
+      "modes": {
+        "chat": 7
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 7,
+        "supports_tool_choice": 7,
+        "supports_parallel_function_calling": 3,
+        "supports_reasoning": 4,
+        "supports_response_schema": 3,
+        "supports_vision": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "chatgpt",
+      "modelEntries": 18,
+      "modes": {
+        "responses": 18
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 18,
+        "supports_max_reasoning_effort": 4,
+        "supports_none_reasoning_effort": 8,
+        "supports_parallel_function_calling": 18,
+        "supports_reasoning": 16,
+        "supports_response_schema": 18,
+        "supports_vision": 18,
+        "supports_xhigh_reasoning_effort": 11,
+        "supports_minimal_reasoning_effort": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "cloudflare",
+      "modelEntries": 36,
+      "modes": {
+        "evaluation": 4,
+        "chat": 30,
+        "audio_transcription": 2
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 13,
+        "supports_reasoning": 11,
+        "supports_vision": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "codestral",
+      "modelEntries": 2,
+      "modes": {
+        "chat": 2
+      },
+      "declaredCapabilities": {
+        "supports_assistant_prefill": 2,
+        "supports_tool_choice": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "cognition",
+      "modelEntries": 3,
+      "modes": {
+        "chat": 3
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 3,
+        "supports_prompt_caching": 3
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "cohere",
+      "modelEntries": 14,
+      "modes": {
+        "embedding": 7,
+        "ocr": 1,
+        "completion": 1,
+        "rerank": 5
+      },
+      "declaredCapabilities": {
+        "supports_embedding_image_input": 6,
+        "supports_image_input": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "cohere_chat",
+      "modelEntries": 6,
+      "modes": {
+        "chat": 6
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 5,
+        "supports_tool_choice": 5,
+        "supports_reasoning": 1,
+        "supports_response_schema": 1,
+        "supports_vision": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "crusoe",
+      "modelEntries": 7,
+      "modes": {
+        "chat": 7
+      },
+      "declaredCapabilities": {
+        "supports_reasoning": 2,
+        "supports_system_messages": 7,
+        "supports_function_calling": 5,
+        "supports_parallel_function_calling": 5,
+        "supports_tool_choice": 5,
+        "supports_vision": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "darkbloom",
+      "modelEntries": 2,
+      "modes": {
+        "chat": 2
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 2,
+        "supports_native_streaming": 2,
+        "supports_system_messages": 2,
+        "supports_tool_choice": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "dashscope",
+      "modelEntries": 47,
+      "modes": {
+        "chat": 43,
+        "image_generation": 4
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 43,
+        "supports_prompt_caching": 11,
+        "supports_reasoning": 40,
+        "supports_response_schema": 11,
+        "supports_tool_choice": 43,
+        "supports_vision": 11,
+        "supports_video_input": 2,
+        "supports_web_search": 2,
+        "supports_audio_input": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "databricks",
+      "modelEntries": 62,
+      "modes": {
+        "embedding": 3,
+        "chat": 56,
+        "responses": 3
+      },
+      "declaredCapabilities": {
+        "supports_adaptive_thinking": 7,
+        "supports_function_calling": 51,
+        "supports_mid_conversation_system": 5,
+        "supports_prompt_caching": 47,
+        "supports_reasoning": 41,
+        "supports_anthropic_thinking_payload": 18,
+        "supports_tool_choice": 53,
+        "supports_vision": 29,
+        "supports_assistant_prefill": 9,
+        "supports_output_config": 2,
+        "supports_legacy_thinking": 2,
+        "supports_max_reasoning_effort": 1,
+        "supports_xhigh_reasoning_effort": 1,
+        "supports_audio_input": 5,
+        "supports_video_input": 5,
+        "supports_response_schema": 2,
+        "supports_parallel_function_calling": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "dataforseo",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "deepgram",
+      "modelEntries": 42,
+      "modes": {
+        "audio_transcription": 42
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "deepinfra",
+      "modelEntries": 134,
+      "modes": {
+        "chat": 134
+      },
+      "declaredCapabilities": {
+        "supports_tool_choice": 122,
+        "supports_function_calling": 122,
+        "supports_vision": 44,
+        "supports_prompt_caching": 45,
+        "supports_reasoning": 58,
+        "supports_response_schema": 64,
+        "supports_audio_input": 6,
+        "supports_adaptive_thinking": 6
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "deepseek",
+      "modelEntries": 16,
+      "modes": {
+        "chat": 16
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 14,
+        "supports_native_streaming": 12,
+        "supports_parallel_function_calling": 10,
+        "supports_prompt_caching": 16,
+        "supports_response_schema": 12,
+        "supports_system_messages": 12,
+        "supports_tool_choice": 14,
+        "supports_reasoning": 12,
+        "supports_assistant_prefill": 14,
+        "supports_vision": 6
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "duckduckgo",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "elevenlabs",
+      "modelEntries": 5,
+      "modes": {
+        "audio_transcription": 3,
+        "audio_speech": 2
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "exa_ai",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "fal_ai",
+      "modelEntries": 210,
+      "modes": {
+        "image_generation": 201,
+        "video_generation": 8,
+        "chat": 1
+      },
+      "declaredCapabilities": {
+        "supports_vision": 182,
+        "supports_reasoning": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "featherless_ai",
+      "modelEntries": 2,
+      "modes": {
+        "chat": 2
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "firecrawl",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "fireworks_ai",
+      "modelEntries": 334,
+      "modes": {
+        "unspecified": 6,
+        "chat": 311,
+        "image_generation": 9,
+        "audio_transcription": 2,
+        "embedding": 3,
+        "rerank": 3
+      },
+      "declaredCapabilities": {
+        "supports_response_schema": 103,
+        "supports_reasoning": 73,
+        "supports_tool_choice": 87,
+        "supports_function_calling": 85,
+        "supports_web_search": 1,
+        "supports_vision": 34,
+        "supports_prompt_caching": 4
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "fireworks_ai-embedding-models",
+      "modelEntries": 7,
+      "modes": {
+        "unspecified": 2,
+        "embedding": 5
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "friendliai",
+      "modelEntries": 7,
+      "modes": {
+        "chat": 7
+      },
+      "declaredCapabilities": {
+        "supports_prompt_caching": 6,
+        "supports_reasoning": 7,
+        "supports_function_calling": 7,
+        "supports_parallel_function_calling": 7,
+        "supports_response_schema": 7,
+        "supports_native_structured_output": 7,
+        "supports_system_messages": 7,
+        "supports_tool_choice": 7,
+        "supports_vision": 2,
+        "supports_image_input": 2,
+        "supports_video_input": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "gemini",
+      "modelEntries": 84,
+      "modes": {
+        "realtime": 14,
+        "chat": 43,
+        "embedding": 3,
+        "image_generation": 12,
+        "audio_speech": 5,
+        "video_generation": 5,
+        "audio_transcription": 2
+      },
+      "declaredCapabilities": {
+        "supports_audio_input": 41,
+        "supports_audio_output": 18,
+        "supports_function_calling": 40,
+        "supports_parallel_function_calling": 18,
+        "supports_pdf_input": 27,
+        "supports_response_schema": 30,
+        "supports_system_messages": 42,
+        "supports_tool_choice": 33,
+        "supports_url_context": 23,
+        "supports_vision": 57,
+        "supports_web_search": 40,
+        "supports_prompt_caching": 29,
+        "supports_reasoning": 35,
+        "supports_video_input": 20,
+        "supports_multimodal": 2,
+        "supports_native_streaming": 16,
+        "supports_computer_use": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "gigachat",
+      "modelEntries": 7,
+      "modes": {
+        "chat": 3,
+        "embedding": 4
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 3,
+        "supports_system_messages": 3,
+        "supports_vision": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "github_copilot",
+      "modelEntries": 31,
+      "modes": {
+        "chat": 25,
+        "completion": 1,
+        "responses": 2,
+        "embedding": 3
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 26,
+        "supports_parallel_function_calling": 22,
+        "supports_vision": 17,
+        "supports_output_config": 1,
+        "supports_adaptive_thinking": 1,
+        "supports_legacy_thinking": 1,
+        "supports_response_schema": 10
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "gmi",
+      "modelEntries": 16,
+      "modes": {
+        "chat": 16
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 12,
+        "supports_vision": 8,
+        "supports_output_config": 1,
+        "supports_system_messages": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "google_pse",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "gradient_ai",
+      "modelEntries": 13,
+      "modes": {
+        "chat": 13
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "groq",
+      "modelEntries": 11,
+      "modes": {
+        "chat": 7,
+        "audio_speech": 2,
+        "audio_transcription": 2
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 4,
+        "supports_parallel_function_calling": 2,
+        "supports_reasoning": 4,
+        "supports_response_schema": 4,
+        "supports_tool_choice": 4,
+        "supports_web_search": 3,
+        "supports_vision": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "heroku",
+      "modelEntries": 4,
+      "modes": {
+        "chat": 4
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 4,
+        "supports_system_messages": 4,
+        "supports_tool_choice": 4
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "hyperbolic",
+      "modelEntries": 16,
+      "modes": {
+        "chat": 16
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 16,
+        "supports_parallel_function_calling": 16,
+        "supports_system_messages": 16,
+        "supports_tool_choice": 16
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "inception",
+      "modelEntries": 2,
+      "modes": {
+        "chat": 2
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 2,
+        "supports_prompt_caching": 2,
+        "supports_response_schema": 2,
+        "supports_system_messages": 2,
+        "supports_tool_choice": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "jina_ai",
+      "modelEntries": 1,
+      "modes": {
+        "rerank": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "lambda_ai",
+      "modelEntries": 20,
+      "modes": {
+        "chat": 20
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 20,
+        "supports_parallel_function_calling": 20,
+        "supports_reasoning": 4,
+        "supports_system_messages": 20,
+        "supports_tool_choice": 20,
+        "supports_vision": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "laya",
+      "modelEntries": 3,
+      "modes": {
+        "evaluation": 3
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "lemonade",
+      "modelEntries": 5,
+      "modes": {
+        "chat": 5
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 5,
+        "supports_response_schema": 5,
+        "supports_tool_choice": 5
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "libertai",
+      "modelEntries": 12,
+      "modes": {
+        "chat": 11,
+        "embedding": 1
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 11,
+        "supports_tool_choice": 11,
+        "supports_system_messages": 11,
+        "supports_vision": 8,
+        "supports_reasoning": 5
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "linkup",
+      "modelEntries": 2,
+      "modes": {
+        "search": 2
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "llamagate",
+      "modelEntries": 16,
+      "modes": {
+        "chat": 14,
+        "embedding": 2
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 13,
+        "supports_response_schema": 14,
+        "supports_reasoning": 3,
+        "supports_vision": 3
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "meta",
+      "modelEntries": 6,
+      "modes": {
+        "chat": 5,
+        "audio_transcription": 1
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 5,
+        "supports_minimal_reasoning_effort": 5,
+        "supports_parallel_function_calling": 5,
+        "supports_pdf_input": 5,
+        "supports_prompt_caching": 5,
+        "supports_reasoning": 5,
+        "supports_response_schema": 5,
+        "supports_system_messages": 5,
+        "supports_tool_choice": 5,
+        "supports_vision": 5,
+        "supports_web_search": 5,
+        "supports_xhigh_reasoning_effort": 5,
+        "supports_audio_input": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "meta_llama",
+      "modelEntries": 4,
+      "modes": {
+        "chat": 4
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 4,
+        "supports_tool_choice": 4
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "minimax",
+      "modelEntries": 10,
+      "modes": {
+        "audio_speech": 4,
+        "chat": 6
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 6,
+        "supports_tool_choice": 6,
+        "supports_prompt_caching": 6,
+        "supports_reasoning": 6,
+        "supports_system_messages": 6,
+        "supports_vision": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "mistral",
+      "modelEntries": 69,
+      "modes": {
+        "chat": 49,
+        "embedding": 4,
+        "audio_transcription": 6,
+        "audio_speech": 2,
+        "ocr": 7,
+        "moderation": 1
+      },
+      "declaredCapabilities": {
+        "supports_assistant_prefill": 45,
+        "supports_function_calling": 46,
+        "supports_response_schema": 48,
+        "supports_tool_choice": 49,
+        "supports_vision": 28,
+        "supports_reasoning": 20,
+        "supports_audio_input": 8,
+        "supports_audio_output": 2,
+        "supports_prompt_caching": 7
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "moonshot",
+      "modelEntries": 11,
+      "modes": {
+        "chat": 11
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 11,
+        "supports_prompt_caching": 1,
+        "supports_reasoning": 4,
+        "supports_response_schema": 11,
+        "supports_tool_choice": 11,
+        "supports_video_input": 4,
+        "supports_vision": 7
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "morph",
+      "modelEntries": 2,
+      "modes": {
+        "chat": 2
+      },
+      "declaredCapabilities": {
+        "supports_system_messages": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "nebius",
+      "modelEntries": 61,
+      "modes": {
+        "chat": 57,
+        "embedding": 4
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 53,
+        "supports_reasoning": 30,
+        "supports_vision": 13
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "nimble",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "nlp_cloud",
+      "modelEntries": 2,
+      "modes": {
+        "chat": 1,
+        "completion": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "novita",
+      "modelEntries": 135,
+      "modes": {
+        "chat": 130,
+        "embedding": 3,
+        "rerank": 2
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 97,
+        "supports_parallel_function_calling": 46,
+        "supports_tool_choice": 109,
+        "supports_system_messages": 80,
+        "supports_response_schema": 93,
+        "supports_reasoning": 80,
+        "supports_vision": 40,
+        "supports_prompt_caching": 35,
+        "supports_audio_input": 2,
+        "supports_audio_output": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "nscale",
+      "modelEntries": 16,
+      "modes": {
+        "chat": 14,
+        "image_generation": 2
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "nvidia_nim",
+      "modelEntries": 3,
+      "modes": {
+        "rerank": 3
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "oci",
+      "modelEntries": 44,
+      "modes": {
+        "chat": 35,
+        "embedding": 9
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 33,
+        "supports_native_streaming": 23,
+        "supports_vision": 12,
+        "supports_response_schema": 6,
+        "supports_reasoning": 5,
+        "supports_system_messages": 3,
+        "supports_pdf_input": 3,
+        "supports_audio_input": 3,
+        "supports_video_input": 3,
+        "supports_embedding_image_input": 4
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "ollama",
+      "modelEntries": 29,
+      "modes": {
+        "chat": 21,
+        "completion": 8
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 16
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "openai",
+      "modelEntries": 209,
+      "modes": {
+        "audio_transcription": 9,
+        "chat": 92,
+        "realtime": 11,
+        "audio_speech": 7,
+        "image_generation": 56,
+        "responses": 22,
+        "moderation": 2,
+        "embedding": 4,
+        "video_generation": 6
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 113,
+        "supports_parallel_function_calling": 98,
+        "supports_pdf_input": 123,
+        "supports_reasoning": 68,
+        "supports_system_messages": 99,
+        "supports_tool_choice": 117,
+        "supports_vision": 121,
+        "supports_prompt_caching": 93,
+        "supports_response_schema": 81,
+        "supports_native_streaming": 62,
+        "supports_web_search": 57,
+        "supports_audio_input": 22,
+        "supports_audio_output": 19,
+        "supports_minimal_reasoning_effort": 13,
+        "supports_none_reasoning_effort": 18,
+        "supports_xhigh_reasoning_effort": 24,
+        "supports_computer_use": 10,
+        "supports_max_reasoning_effort": 4,
+        "supports_prompt_cache_breakpoint": 8
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "openrouter",
+      "modelEntries": 492,
+      "modes": {
+        "chat": 488,
+        "evaluation": 1,
+        "image_generation": 3
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 417,
+        "supports_tool_choice": 416,
+        "supports_vision": 310,
+        "supports_prompt_caching": 308,
+        "supports_web_search": 189,
+        "supports_assistant_prefill": 15,
+        "supports_computer_use": 11,
+        "supports_reasoning": 353,
+        "supports_pdf_input": 186,
+        "supports_adaptive_thinking": 9,
+        "supports_legacy_thinking": 2,
+        "supports_max_reasoning_effort": 4,
+        "supports_response_schema": 423,
+        "supports_output_config": 1,
+        "supports_xhigh_reasoning_effort": 2,
+        "supports_system_messages": 11,
+        "supports_audio_input": 50,
+        "supports_video_input": 32,
+        "supports_parallel_function_calling": 18,
+        "supports_url_context": 3
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "ovhcloud",
+      "modelEntries": 15,
+      "modes": {
+        "chat": 15
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 7,
+        "supports_reasoning": 4,
+        "supports_response_schema": 14,
+        "supports_tool_choice": 7,
+        "supports_vision": 3
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "parallel_ai",
+      "modelEntries": 4,
+      "modes": {
+        "search": 4
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "perplexity",
+      "modelEntries": 85,
+      "modes": {
+        "search": 1,
+        "chat": 20,
+        "evaluation": 1,
+        "responses": 59,
+        "embedding": 4
+      },
+      "declaredCapabilities": {
+        "supports_web_search": 57,
+        "supports_reasoning": 9,
+        "supports_function_calling": 52,
+        "supports_adaptive_thinking": 7,
+        "supports_legacy_thinking": 1,
+        "supports_output_config": 3
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "pinstripes",
+      "modelEntries": 6,
+      "modes": {
+        "chat": 6
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 6,
+        "supports_assistant_prefill": 6,
+        "supports_reasoning": 4
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "prism",
+      "modelEntries": 2,
+      "modes": {
+        "chat": 2
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 2,
+        "supports_native_streaming": 2,
+        "supports_parallel_function_calling": 2,
+        "supports_prompt_caching": 2,
+        "supports_reasoning": 2,
+        "supports_response_schema": 2,
+        "supports_system_messages": 2,
+        "supports_tool_choice": 2,
+        "supports_vision": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "publicai",
+      "modelEntries": 9,
+      "modes": {
+        "chat": 9
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 7,
+        "supports_tool_choice": 7,
+        "supports_reasoning": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "qwen_ai_platform",
+      "modelEntries": 47,
+      "modes": {
+        "chat": 43,
+        "image_generation": 4
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 43,
+        "supports_prompt_caching": 11,
+        "supports_reasoning": 40,
+        "supports_response_schema": 11,
+        "supports_tool_choice": 43,
+        "supports_vision": 11,
+        "supports_video_input": 2,
+        "supports_web_search": 2,
+        "supports_audio_input": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "qwencloud",
+      "modelEntries": 45,
+      "modes": {
+        "chat": 41,
+        "image_generation": 4
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 41,
+        "supports_prompt_caching": 9,
+        "supports_reasoning": 38,
+        "supports_response_schema": 9,
+        "supports_tool_choice": 41,
+        "supports_vision": 9
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "recraft",
+      "modelEntries": 2,
+      "modes": {
+        "image_generation": 2
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "reducto",
+      "modelEntries": 2,
+      "modes": {
+        "ocr": 2
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "replicate",
+      "modelEntries": 40,
+      "modes": {
+        "chat": 40
+      },
+      "declaredCapabilities": {
+        "supports_tool_choice": 25,
+        "supports_function_calling": 21,
+        "supports_parallel_function_calling": 12,
+        "supports_vision": 14,
+        "supports_system_messages": 27,
+        "supports_response_schema": 12,
+        "supports_prompt_caching": 6,
+        "supports_audio_input": 2,
+        "supports_audio_output": 1,
+        "supports_reasoning": 6,
+        "supports_video_input": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "runwayml",
+      "modelEntries": 14,
+      "modes": {
+        "video_generation": 11,
+        "image_generation": 2,
+        "audio_speech": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "sagemaker",
+      "modelEntries": 6,
+      "modes": {
+        "completion": 3,
+        "chat": 3
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "sail",
+      "modelEntries": 12,
+      "modes": {
+        "chat": 12
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 12,
+        "supports_tool_choice": 12,
+        "supports_prompt_caching": 12,
+        "supports_response_schema": 12,
+        "supports_reasoning": 12,
+        "supports_vision": 4
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "sambanova",
+      "modelEntries": 8,
+      "modes": {
+        "chat": 8
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 6,
+        "supports_reasoning": 3,
+        "supports_tool_choice": 6,
+        "supports_response_schema": 2,
+        "supports_vision": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "sarvam",
+      "modelEntries": 1,
+      "modes": {
+        "chat": 1
+      },
+      "declaredCapabilities": {
+        "supports_reasoning": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "scaleway",
+      "modelEntries": 15,
+      "modes": {
+        "chat": 12,
+        "embedding": 2,
+        "audio_transcription": 1
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 12,
+        "supports_reasoning": 6,
+        "supports_vision": 6,
+        "supports_tool_choice": 1,
+        "supports_prompt_caching": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "scx-ai",
+      "modelEntries": 2,
+      "modes": {
+        "chat": 2
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 2,
+        "supports_prompt_caching": 2,
+        "supports_reasoning": 2,
+        "supports_response_schema": 2,
+        "supports_tool_choice": 2,
+        "supports_vision": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "searxng",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "serper",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "snowflake",
+      "modelEntries": 37,
+      "modes": {
+        "chat": 35,
+        "embedding": 2
+      },
+      "declaredCapabilities": {
+        "supports_computer_use": 1,
+        "supports_function_calling": 17,
+        "supports_vision": 9,
+        "supports_prompt_caching": 9,
+        "supports_system_messages": 19,
+        "supports_response_schema": 12,
+        "supports_reasoning": 4,
+        "supports_adaptive_thinking": 1,
+        "supports_legacy_thinking": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "soniox",
+      "modelEntries": 2,
+      "modes": {
+        "audio_transcription": 2
+      },
+      "declaredCapabilities": {
+        "supports_audio_input": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "stability",
+      "modelEntries": 23,
+      "modes": {
+        "image_generation": 9,
+        "image_edit": 14
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "strands_decider",
+      "modelEntries": 1,
+      "modes": {
+        "evaluation": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "tavily",
+      "modelEntries": 2,
+      "modes": {
+        "search": 2
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "tencent",
+      "modelEntries": 3,
+      "modes": {
+        "chat": 3
+      },
+      "declaredCapabilities": {
+        "supports_assistant_prefill": 2,
+        "supports_function_calling": 3,
+        "supports_native_streaming": 3,
+        "supports_parallel_function_calling": 2,
+        "supports_prompt_caching": 3,
+        "supports_response_schema": 2,
+        "supports_system_messages": 2,
+        "supports_tool_choice": 2,
+        "supports_reasoning": 3,
+        "supports_adaptive_thinking": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "tensormesh",
+      "modelEntries": 10,
+      "modes": {
+        "chat": 10
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 10,
+        "supports_tool_choice": 10,
+        "supports_response_schema": 10,
+        "supports_prompt_caching": 10,
+        "supports_system_messages": 10,
+        "supports_reasoning": 9
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "text-completion-codestral",
+      "modelEntries": 2,
+      "modes": {
+        "completion": 2
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "text-completion-inception",
+      "modelEntries": 1,
+      "modes": {
+        "completion": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "text-completion-openai",
+      "modelEntries": 6,
+      "modes": {
+        "completion": 6
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "tinyfish",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "together_ai",
+      "modelEntries": 89,
+      "modes": {
+        "chat": 84,
+        "embedding": 3,
+        "rerank": 1,
+        "completion": 1
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 17,
+        "supports_parallel_function_calling": 16,
+        "supports_response_schema": 15,
+        "supports_tool_choice": 17,
+        "supports_reasoning": 9,
+        "supports_prompt_caching": 12,
+        "supports_vision": 4
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "transcribe",
+      "modelEntries": 1,
+      "modes": {
+        "audio_transcription": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "typesafe",
+      "modelEntries": 3,
+      "modes": {
+        "evaluation": 3
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "v0",
+      "modelEntries": 3,
+      "modes": {
+        "chat": 3
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 3,
+        "supports_parallel_function_calling": 3,
+        "supports_system_messages": 3,
+        "supports_tool_choice": 3,
+        "supports_vision": 3
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vercel_ai_gateway",
+      "modelEntries": 99,
+      "modes": {
+        "chat": 93,
+        "embedding": 6
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 70,
+        "supports_tool_choice": 68,
+        "supports_vision": 39,
+        "supports_response_schema": 38,
+        "supports_assistant_prefill": 10,
+        "supports_computer_use": 10,
+        "supports_prompt_caching": 12,
+        "supports_reasoning": 10,
+        "supports_output_config": 2,
+        "supports_adaptive_thinking": 1,
+        "supports_legacy_thinking": 1,
+        "supports_pdf_input": 2,
+        "supports_web_search": 2,
+        "supports_parallel_function_calling": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai",
+      "modelEntries": 46,
+      "modes": {
+        "chat": 21,
+        "realtime": 3,
+        "embedding": 2,
+        "audio_speech": 10,
+        "audio_transcription": 6,
+        "ocr": 2,
+        "vector_store": 1,
+        "image_generation": 1
+      },
+      "declaredCapabilities": {
+        "supports_audio_input": 13,
+        "supports_function_calling": 16,
+        "supports_pdf_input": 9,
+        "supports_prompt_caching": 16,
+        "supports_reasoning": 15,
+        "supports_response_schema": 16,
+        "supports_system_messages": 9,
+        "supports_tool_choice": 15,
+        "supports_video_input": 10,
+        "supports_vision": 18,
+        "supports_web_search": 13,
+        "supports_native_streaming": 9,
+        "supports_parallel_function_calling": 4,
+        "supports_url_context": 6,
+        "supports_audio_output": 5,
+        "supports_multimodal": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-ai21_models",
+      "modelEntries": 5,
+      "modes": {
+        "chat": 5
+      },
+      "declaredCapabilities": {
+        "supports_tool_choice": 5
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-anthropic_models",
+      "modelEntries": 36,
+      "modes": {
+        "chat": 36
+      },
+      "declaredCapabilities": {
+        "supports_assistant_prefill": 18,
+        "supports_function_calling": 36,
+        "supports_pdf_input": 30,
+        "supports_tool_choice": 36,
+        "supports_prompt_caching": 26,
+        "supports_reasoning": 26,
+        "supports_response_schema": 26,
+        "supports_native_streaming": 4,
+        "supports_vision": 34,
+        "supports_computer_use": 25,
+        "supports_output_config": 6,
+        "supports_adaptive_thinking": 20,
+        "supports_legacy_thinking": 4,
+        "supports_max_reasoning_effort": 20,
+        "supports_xhigh_reasoning_effort": 16,
+        "supports_mid_conversation_system": 14,
+        "supports_native_structured_output": 4
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-deepseek_models",
+      "modelEntries": 3,
+      "modes": {
+        "chat": 3
+      },
+      "declaredCapabilities": {
+        "supports_assistant_prefill": 3,
+        "supports_function_calling": 3,
+        "supports_prompt_caching": 3,
+        "supports_reasoning": 3,
+        "supports_tool_choice": 3
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-embedding-models",
+      "modelEntries": 10,
+      "modes": {
+        "embedding": 10
+      },
+      "declaredCapabilities": {
+        "supports_multimodal": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-language-models",
+      "modelEntries": 44,
+      "modes": {
+        "chat": 27,
+        "image_generation": 14,
+        "realtime": 2,
+        "embedding": 1
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 25,
+        "supports_parallel_function_calling": 21,
+        "supports_pdf_input": 26,
+        "supports_prompt_caching": 31,
+        "supports_reasoning": 23,
+        "supports_response_schema": 29,
+        "supports_system_messages": 36,
+        "supports_tool_choice": 27,
+        "supports_url_context": 21,
+        "supports_vision": 36,
+        "supports_web_search": 28,
+        "supports_video_input": 19,
+        "supports_audio_input": 17,
+        "supports_native_streaming": 14,
+        "supports_audio_output": 2,
+        "supports_computer_use": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-llama_models",
+      "modelEntries": 12,
+      "modes": {
+        "chat": 12
+      },
+      "declaredCapabilities": {
+        "supports_system_messages": 4,
+        "supports_tool_choice": 12,
+        "supports_vision": 4,
+        "supports_function_calling": 5
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-minimax_models",
+      "modelEntries": 1,
+      "modes": {
+        "chat": 1
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 1,
+        "supports_tool_choice": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-mistral_models",
+      "modelEntries": 19,
+      "modes": {
+        "chat": 19
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 19,
+        "supports_tool_choice": 19,
+        "supports_vision": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-moonshot_models",
+      "modelEntries": 1,
+      "modes": {
+        "chat": 1
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 1,
+        "supports_tool_choice": 1,
+        "supports_web_search": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-openai_models",
+      "modelEntries": 3,
+      "modes": {
+        "chat": 3
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 1,
+        "supports_tool_choice": 1,
+        "supports_vision": 1,
+        "supports_reasoning": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-qwen_models",
+      "modelEntries": 4,
+      "modes": {
+        "chat": 4
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 4,
+        "supports_tool_choice": 4
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-text-models",
+      "modelEntries": 2,
+      "modes": {
+        "completion": 2
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-video-models",
+      "modelEntries": 8,
+      "modes": {
+        "video_generation": 8
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "vertex_ai-zai_models",
+      "modelEntries": 3,
+      "modes": {
+        "chat": 3
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 3,
+        "supports_reasoning": 3,
+        "supports_tool_choice": 3,
+        "supports_prompt_caching": 2,
+        "supports_response_schema": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "volcengine",
+      "modelEntries": 14,
+      "modes": {
+        "chat": 9,
+        "embedding": 5
+      },
+      "declaredCapabilities": {
+        "supports_assistant_prefill": 3,
+        "supports_function_calling": 9,
+        "supports_prompt_caching": 5,
+        "supports_reasoning": 9,
+        "supports_tool_choice": 3,
+        "supports_vision": 6
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "voyage",
+      "modelEntries": 31,
+      "modes": {
+        "rerank": 8,
+        "embedding": 23
+      },
+      "declaredCapabilities": {
+        "supports_embedding_image_input": 1
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "wandb",
+      "modelEntries": 30,
+      "modes": {
+        "chat": 30
+      },
+      "declaredCapabilities": {
+        "supports_reasoning": 23,
+        "supports_function_calling": 3,
+        "supports_response_schema": 2,
+        "supports_vision": 12,
+        "supports_prompt_caching": 16,
+        "supports_tool_choice": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "watsonx",
+      "modelEntries": 31,
+      "modes": {
+        "chat": 30,
+        "audio_transcription": 1
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 14,
+        "supports_prompt_caching": 2,
+        "supports_response_schema": 2,
+        "supports_system_messages": 2,
+        "supports_tool_choice": 2,
+        "supports_parallel_function_calling": 12,
+        "supports_vision": 5
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "xai",
+      "modelEntries": 58,
+      "modes": {
+        "responses": 7,
+        "chat": 36,
+        "image_generation": 8,
+        "video_generation": 5,
+        "audio_transcription": 2
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 37,
+        "supports_prompt_caching": 43,
+        "supports_reasoning": 34,
+        "supports_tool_choice": 37,
+        "supports_vision": 43,
+        "supports_web_search": 39,
+        "supports_response_schema": 43
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "xiaomi_mimo",
+      "modelEntries": 2,
+      "modes": {
+        "chat": 2
+      },
+      "declaredCapabilities": {
+        "supports_audio_input": 2,
+        "supports_function_calling": 2,
+        "supports_prompt_caching": 2,
+        "supports_reasoning": 2,
+        "supports_response_schema": 2,
+        "supports_system_messages": 2,
+        "supports_tool_choice": 2,
+        "supports_video_input": 2,
+        "supports_vision": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "you_com",
+      "modelEntries": 1,
+      "modes": {
+        "search": 1
+      },
+      "declaredCapabilities": {},
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    },
+    {
+      "provider": "zai",
+      "modelEntries": 16,
+      "modes": {
+        "chat": 16
+      },
+      "declaredCapabilities": {
+        "supports_function_calling": 16,
+        "supports_prompt_caching": 9,
+        "supports_reasoning": 9,
+        "supports_tool_choice": 16,
+        "supports_vision": 2
+      },
+      "agentflowStatus": "unverified",
+      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1540" height="1030" viewBox="0 0 1540 1030" role="img" aria-labelledby="title desc">
+<title id="title">xMind live backend and client views through WebRTC</title>
+<desc id="desc">xMind Server authenticates peers and exchanges signaling. A backend-side WebRTC adapter connects the native core to HTML, Electron and later mobile views. Commands and events use a separate WebRTC data path; TURN relay is optional infrastructure.</desc>
+<defs><style>text{font-family:'Segoe UI',Arial,sans-serif;fill:#17293f}.title{font-size:31px;font-weight:700}.heading{font-size:23px;font-weight:700}.label{font-size:20px;font-weight:600}.body{font-size:17px;fill:#405771}.small{font-size:15px;fill:#52667e}.core{fill:#eef4ff;stroke:#6183bb;stroke-width:1.5}.transport{fill:#fff7e7;stroke:#b99445;stroke-width:1.5}.card{fill:white;stroke:#c7d2e2;stroke-width:1.5}.signal{fill:none;stroke:#ae8738;stroke-width:2.5;stroke-dasharray:8 6;marker-end:url(#gold)}.data{fill:none;stroke:#416ea6;stroke-width:3;marker-start:url(#blueStart);marker-end:url(#blue)}</style>
+<marker id="gold" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L10 5L0 10Z" fill="#ae8738"/></marker>
+<marker id="blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L10 5L0 10Z" fill="#416ea6"/></marker>
+<marker id="blueStart" markerWidth="10" markerHeight="10" refX="2" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M10 0L0 5L10 10Z" fill="#416ea6"/></marker></defs>
+<rect width="1540" height="1030" fill="#f6f8fc"/>
+<text x="42" y="54" class="title">Live Backend ↔ WebRTC ↔ Client View</text>
+<text x="42" y="88" class="body">xMind Server exchanges signaling; UI views and WebRTC remain separate from the native agent core.</text>
+
+<rect x="492" y="123" width="557" height="175" rx="17" class="transport"/>
+<text x="516" y="163" class="heading">xMind Server · signaling / access</text>
+<text x="516" y="199" class="body">Peer discovery · authentication · view/control roles</text>
+<text x="516" y="234" class="body">Offer / answer exchange · ICE candidate exchange</text>
+<text x="516" y="273" class="small">Shared state: xlang3 → SQLite / PostgreSQL</text>
+<path d="M492 209H238V411" class="signal"/>
+<path d="M1049 209H1302V411" class="signal"/>
+<text x="56" y="339" class="small">Authenticated signaling channel</text>
+<text x="1195" y="339" class="small">Authenticated signaling channel</text>
+
+<rect x="42" y="414" width="532" height="366" rx="17" class="card"/>
+<text x="65" y="453" class="heading">Node A · Live Backend</text>
+<rect x="65" y="478" width="486" height="137" rx="12" class="core"/>
+<text x="87" y="514" class="label">xMind Core · C++ + xlang3</text>
+<text x="87" y="549" class="body">Agents / graphs · coding engine · workspace</text>
+<text x="87" y="585" class="body">Sessions · tools · policies · durable run events</text>
+<rect x="65" y="637" width="486" height="116" rx="12" class="transport"/>
+<text x="87" y="673" class="label">Backend WebRTC adapter</text>
+<text x="87" y="708" class="body">Separate transport component / process</text>
+<text x="87" y="735" class="small">Core communicates through typed commands and events</text>
+
+<rect x="966" y="414" width="532" height="366" rx="17" class="card"/>
+<text x="989" y="453" class="heading">Client View · anywhere</text>
+<rect x="989" y="478" width="486" height="74" rx="11" class="core"/><text x="1011" y="524" class="label">HTML / browser client</text>
+<rect x="989" y="574" width="486" height="74" rx="11" class="core"/><text x="1011" y="620" class="label">Electron standalone IDE</text>
+<rect x="989" y="670" width="486" height="74" rx="11" class="core"/><text x="1011" y="716" class="label">Mobile application · later</text>
+
+<path d="M575 696H965" class="data"/>
+<text x="770" y="593" text-anchor="middle" class="label">WebRTC data path</text>
+<text x="770" y="626" text-anchor="middle" class="body">Commands / events</text>
+<text x="770" y="655" text-anchor="middle" class="body">Editor / terminal / diffs</text>
+<text x="770" y="732" text-anchor="middle" class="small">Direct peers when possible</text>
+<text x="770" y="757" text-anchor="middle" class="small">TURN relay when needed</text>
+
+<rect x="42" y="817" width="1456" height="100" rx="14" fill="#e8eef8"/>
+<text x="65" y="852" class="label">One runtime can have multiple authorized views</text>
+<text x="65" y="887" class="body">Views attach/reconnect by session, run and event cursor; view access and control/approval access are distinct.</text>
+<path d="M45 964H92" class="signal"/><text x="107" y="970" class="small">Signaling / control plane</text>
+<path d="M428 964H475" class="data"/><text x="491" y="970" class="small">Runtime interaction data plane</text>
+<text x="1498" y="970" text-anchor="end" class="small">Proposed architecture • WebRTC and remote clients not implemented yet</text>
+</svg>
