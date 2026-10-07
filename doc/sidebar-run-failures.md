@@ -22,3 +22,12 @@ This change exposes the outcome; it does not fix the failed model request. The
 current native transport intentionally drops error bodies. Safe native provider
 diagnostics and diagnosis of that HTTP 400 remain outstanding. Full coding
 feature parity and interactive editor acceptance remain separate requirements.
+
+The renderer now accepts the source-prepared native diagnostic fields
+`provider_error_type`, `provider_error_code`, and `provider_error_param` and shows
+known identifiers in an expanded details block. It independently checks the
+allowlists and never renders raw messages or unknown field values. All 66
+extension contracts pass with zero skips, including known/unknown diagnostic
+payloads. This is DOM fixture validation; the running preview's older native
+binary supplies no diagnostic fields, and current C++ compilation/live request
+diagnosis remain pending. See [native diagnostics](native-provider-diagnostics.md).

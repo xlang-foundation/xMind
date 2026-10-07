@@ -93,6 +93,15 @@ function runFailure(data){
   card.append(node('p',data?.reason==='provider_http_error'&&Number.isInteger(status)&&status>=100&&status<=599
     ?'The model provider returned HTTP '+status+'. This run stopped before completing its response.'
     :'Execution failed. Inspect the selected run activity for the recorded reason.'));
+  if(data?.reason==='provider_http_error'){
+    const fields=[
+      ['Type','provider_error_type',['invalid_request_error','authentication_error','permission_error','rate_limit_error','server_error','insufficient_quota']],
+      ['Code','provider_error_code',['unsupported_parameter','unsupported_value','invalid_value','missing_required_parameter','model_not_found','invalid_api_key','insufficient_quota','context_length_exceeded','rate_limit_exceeded']],
+      ['Parameter','provider_error_param',['model','messages','tools','tool_choice','n','stream','stream_options','stream_options.include_usage','max_completion_tokens','max_tokens','temperature','top_p','reasoning_effort','response_format','input','instructions','max_output_tokens']]
+    ],lines=[];
+    for(const [label,key,allowed] of fields)if(allowed.includes(data[key]))lines.push(label+': '+data[key]);
+    if(lines.length){const detail=node('details');detail.open=true;detail.append(node('summary','Recorded provider diagnostics'),node('pre',lines.join('\n')));card.append(detail);}
+  }
   card.append(node('p','This is a backend execution result. Select another run above to inspect its outcome.','inspection-note'));
   if(live)live.classList.remove('streaming');
 }

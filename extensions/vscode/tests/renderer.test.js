@@ -35,6 +35,13 @@ test('unknown failure reasons do not interpolate untrusted payloads or guess pro
   const r=renderer(),doc=r.dom.window.document;r.send({type:'event',event:{kind:'run.failed',data:{reason:'<img onerror=fixtureAttack()>',status:'401'}}});
   const card=doc.getElementById('run-failure');assert.match(card.textContent,/Execution failed/);assert.ok(!card.textContent.includes('401'));assert.equal(card.querySelector('img'),null);
 });
+test('recorded provider identifiers render without raw error messages or unknown fields',()=>{
+  const r=renderer(),doc=r.dom.window.document;
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'provider_http_error',status:400,provider_error_type:'invalid_request_error',provider_error_code:'unsupported_parameter',provider_error_param:'n',message:'private-fixture-key'}}});
+  const card=doc.getElementById('run-failure');assert.match(card.textContent,/Type: invalid_request_error/);assert.match(card.textContent,/Code: unsupported_parameter/);assert.match(card.textContent,/Parameter: n/);assert.ok(!card.textContent.includes('private-fixture-key'));
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'provider_http_error',status:400,provider_error_type:'private-fixture-key',provider_error_code:'<script>fixtureAttack()</script>',provider_error_param:'private-fixture-key'}}});
+  assert.equal(card.querySelector('details'),null);assert.ok(!card.textContent.includes('private-fixture-key'));assert.equal(card.querySelector('script'),null);
+});
 
 test('durable command output renders independent channels without executing markup or controls',()=>{
   const r=renderer(),doc=r.dom.window.document,text='<script>fixtureAttack()</script>\u001b[31m\nfixture output',initialMessages=r.posted.length;
