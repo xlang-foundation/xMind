@@ -1,0 +1,30 @@
+{
+  "host_launcher_pid": 21788,
+  "origin": "http://127.0.0.1:56111",
+  "frontend_extension_sha256": "613BB2D37FC7A35EDE5E69E07FD6A795829EE370991D0072F932B2BC0DEA6B4F",
+  "saved_backend_key_available": true,
+  "draft_preserved": true,
+  "server_sha256": "99F721456C066AB88D2E710AE073847ED3776AEBBE76A3AC8882B0F59B3C23FB",
+  "source_revision": "5815141dcf27652a1af503e39f17127ba189c403",
+  "frontend_host_contract_sha256": "14DEB79DB749A29DA46002BC19F2A98D0518E3960C050B0CF44714DE2389CD2C",
+  "backend_pid": 28288,
+  "opened": {
+    "opened": true,
+    "location": "secondarySidebar",
+    "origin": "http://127.0.0.1:56111",
+    "time": "2026-10-07T18:37:37.038Z",
+    "storage": "Normal development host; no extension test runner",
+    "scope": "Actual sidebar opened; no live inference claimed"
+  },
+  "private_replacement_prompt_opened": true,
+  "frontend_verification": {
+    "command": "npm.cmd test --prefix extensions/vscode",
+    "fail": 0,
+    "pass": 48,
+    "skipped": 0,
+    "scope": "Local host/DOM fixtures including private key replacement; the hosted backend checkpoint had 47 extension tests before this adapter-only change",
+    "tests": 48
+  },
+  "live_discovery": "provider_authentication_or_authorization_rejected",
+  "scope": "Actual verified native backend and right sidebar launched; saved-key account discovery reached OpenAI and was rejected for authentication/authorization; actual private replacement password prompt opened; no account model list or live inference claimed"
+}

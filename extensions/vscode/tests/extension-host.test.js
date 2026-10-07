@@ -29,7 +29,7 @@ function harness(options={}) {
     }
     else if(target.pathname==='/v1/provider/models'){
       discoveryRequests.push(JSON.parse(requestOptions.body));
-      if(options.discoveryError)return {ok:false,status:502,json:async()=>({detail:'Model discovery provider returned HTTP 401'})};
+      if(options.discoveryError || (options.rejectSavedKey && !discoveryRequests.at(-1).api_key))return {ok:false,status:502,json:async()=>({detail:'Model discovery provider returned HTTP 401'})};
       data=await (options.discoveredModels||{models:[{id:'fixture-other'},{id:'fixture-model'}]});
     }
     else if(target.pathname==='/v1/provider/configuration'){
@@ -64,7 +64,7 @@ function harness(options={}) {
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
       executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(['workbench.view.extension.xmind','workbench.view.explorer'].includes(name))return;assert.equal(name,'xmind.workspace.focus');sidebarProvider.resolveWebviewView(makeView());}},
-    window:{showQuickPick:async(items,settings)=>{pickers.push({items,settings});return items.find(item=>item.label===options.modelInput);},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}assert.equal(prompt.password,true);return token;},showErrorMessage:message=>errors.push(message),
+    window:{showQuickPick:async(items,settings)=>{pickers.push({items,settings});return items.find(item=>item.label===options.modelInput);},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}assert.equal(prompt.password,true);return token;},showErrorMessage:message=>{errors.push(message);return options.errorChoice;},
       registerWebviewViewProvider:(id,provider)=>{assert.equal(id,'xmind.workspace');sidebarProvider=provider;return {dispose(){}};}}
   };
   function makeView(){
@@ -140,6 +140,9 @@ test('closing the sidebar during model discovery prevents a stale picker or conf
 });
 test('saved provider setup discovers and chooses with backend-held key without asking for another password',async()=>{
   const h=harness({providerSetup:{...providerFixture,revision:1,configured:true,model:'fixture-other'},modelInput:'fixture-model'});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.providerRequests.length===1);assert.deepEqual(h.discoveryRequests,[{expected_revision:1}]);assert.deepEqual(h.providerRequests,[{model:'fixture-model',expected_revision:1}]);assert.ok(!h.inputPrompts.some(prompt=>prompt.title==='xMind: OpenAI API key'));view.close();
+});
+test('rejected saved key can be replaced through private input before choosing an actual discovered model',async()=>{
+  const h=harness({providerSetup:{...providerFixture,revision:1,configured:true,model:'fixture-other'},modelInput:'fixture-model',rejectSavedKey:true,errorChoice:'Replace API key',keyInput:'synthetic-replacement-key'});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.providerRequests.length===1);assert.deepEqual(h.discoveryRequests,[{expected_revision:1},{api_key:'synthetic-replacement-key',expected_revision:1}]);assert.deepEqual(h.providerRequests,[{model:'fixture-model',api_key:'synthetic-replacement-key',expected_revision:1}]);assert.ok(!JSON.stringify(view.posted).includes('synthetic-replacement-key'));assert.equal(h.inputPrompts.at(-1).password,true);view.close();
 });
 const inspectionFixture={operation:uncertainEdit,observed:{path:'file.cpp',workspace_id:uncertainEdit.workspace_id,file_id:'fixture-file',content_sha256:'a'.repeat(64),size:12},match:'after',same_file:true,observed_unix_ms:Date.now(),quarantine_released:false};
 test('older run inspection remains accessible and selected run persists across view reopening',async()=>{
