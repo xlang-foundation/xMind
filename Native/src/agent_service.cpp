@@ -103,5 +103,6 @@ void AgentService::cancel(const std::string& id) {
     job->stop.request_stop();
 }
 bool AgentService::healthy() const {std::lock_guard lock(impl_->mutex);return impl_->accepting && !impl_->faulted;}
+bool AgentService::idle() const {std::lock_guard lock(impl_->mutex);return impl_->accepting && !impl_->faulted && impl_->active.empty();}
 void AgentService::close() {impl_->close();}
 }

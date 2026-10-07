@@ -15,6 +15,7 @@ public:
     std::vector<std::string> models() const override;
     void cancel(const std::string& id) override;
     bool healthy() const override;
+    bool idle() const;
     void close();
 private:
     struct Impl;

@@ -10,7 +10,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 if([bool]$Model -ne [bool]$ModelEndpoint){throw 'Provide both -Model and -ModelEndpoint.'}
-if(-not $Model -and ($Workspace -or $ApprovedEdits -or $CredentialId -or $SelectableModels)){throw 'Agent settings require -Model and -ModelEndpoint.'}
+if(-not $Model -and ($CredentialId -or $SelectableModels)){throw 'Startup credential references/model lists require -Model and -ModelEndpoint.'}
 if($ApprovedEdits -and -not $Workspace){throw 'Approved file edits require a workspace.'}
 if($Workspace -and $ModelTools -ne 'supported'){throw 'Workspace execution requires -ModelTools supported.'}
 if($ProviderKeyEnvironment -notmatch '^[A-Za-z_][A-Za-z0-9_]*$'){throw 'Invalid provider key environment name.'}
@@ -54,12 +54,13 @@ try {
     $uiErrorLog=Join-Path $uiState 'backend-error.log'
     $uiReady=Join-Path $uiState ('opened-'+[Guid]::NewGuid().ToString('N')+'.json')
     $uiArgs=@('--db',('"'+$uiDatabase+'"'),'--modules',('"'+$uiModules+'"'),'--stdlib',('"'+$StdlibSource+'"'),'--port','0')
+    if($Workspace){$uiArgs+=@('--workspace',('"'+[System.IO.Path]::GetFullPath($Workspace)+'"'))}
+    if($ApprovedEdits){$uiArgs+=@('--workspace-edits','approved')}
+    if(-not $Model -and $Workspace){$uiArgs+=@('--model-tools',$ModelTools)}
     if($Model){
         $uiArgs+=@('--model',('"'+$Model+'"'),'--model-endpoint',('"'+$ModelEndpoint+'"'),'--model-tools',$ModelTools,'--model-stream-usage',$StreamUsage)
         if($SelectableModels){$uiArgs+=@('--models',('"'+$SelectableModels+'"'))}
         if($CredentialId){$uiArgs+=@('--credential-id',('"'+$CredentialId+'"'))}
-        if($Workspace){$uiArgs+=@('--workspace',('"'+[System.IO.Path]::GetFullPath($Workspace)+'"'))}
-        if($ApprovedEdits){$uiArgs+=@('--workspace-edits','approved')}
         $uiProviderKey=[Environment]::GetEnvironmentVariable($ProviderKeyEnvironment,'Process')
         if(-not $uiProviderKey){$uiProviderKey=[Environment]::GetEnvironmentVariable($ProviderKeyEnvironment,'User')}
         if(-not $uiProviderKey){$uiProviderKey=[Environment]::GetEnvironmentVariable($ProviderKeyEnvironment,'Machine')}

@@ -12,6 +12,7 @@
 #include <fstream>
 #if defined(_WIN32)
 #include "agentflow/agent_service.hpp"
+#include "agentflow/provider_setup.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/process_configuration.hpp"
 #define NOMINMAX
@@ -65,7 +66,7 @@ int main(int argc,char** argv) {
         if(port<0 || port>65535) throw std::invalid_argument("Invalid port");
         if(options.contains("--model")!=options.contains("--model-endpoint")) throw std::invalid_argument("Model ID and endpoint must be configured together");
         if(options.contains("--inspection-workspace") && options.contains("--workspace")) throw std::invalid_argument("Select the execution workspace or an inspection-only workspace");
-        if(!options.contains("--model") && (options.contains("--workspace") || options.contains("--credential-id") || options.contains("--workers") || options.contains("--queue-limit") || options.contains("--model-tools"))) throw std::invalid_argument("Agent settings require a model configuration");
+        if(!options.contains("--model") && options.contains("--credential-id")) throw std::invalid_argument("Startup credential references require a model configuration");
         if(options.contains("--model-tools") && options.at("--model-tools")!="supported" && options.at("--model-tools")!="unsupported" && options.at("--model-tools")!="unknown") throw std::invalid_argument("Invalid model tool capability declaration");
         if(options.contains("--workspace") && (!options.contains("--model-tools") || options.at("--model-tools")!="supported")) throw std::invalid_argument("Workspace execution requires --model-tools supported");
         if(options.contains("--workspace-edits") && (options.at("--workspace-edits")!="approved" || !options.contains("--workspace"))) throw std::invalid_argument("Approved edits require a workspace and --workspace-edits approved");
@@ -85,6 +86,7 @@ int main(int argc,char** argv) {
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Instruction configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted instruction configuration file");instruction_policy=instruction_configurations.apply(source);
         }else instruction_policy=instruction_configurations.load();
         std::unique_ptr<agentflow::RunExecutor> executor;
+        agentflow::ProviderSetup* provider_setup=nullptr;
         std::vector<agentflow::McpServerMetadata> mcp_metadata;
         std::vector<agentflow::ProcessProfileMetadata> process_metadata;
 #if defined(_WIN32)
@@ -140,6 +142,11 @@ int main(int argc,char** argv) {
 #endif
         }
 #if defined(_WIN32)
+        if(!executor){
+            agentflow::AgentSettings settings;settings.mcp_servers=mcp_settings;settings.process_profiles=process_profiles;settings.instruction_policy=instruction_policy;
+            if(options.contains("--workspace"))settings.workspace=options.at("--workspace");settings.approved_edits=options.contains("--workspace-edits");
+            auto configurable=std::make_unique<agentflow::ProviderRuntime>(persistence,std::move(settings),workers,queue);provider_setup=configurable.get();executor=std::move(configurable);
+        }
         if(options.contains("--workspace") || options.contains("--inspection-workspace")) {
             recovery_workspace=std::make_unique<agentflow::WorkspaceTools>(options.at(options.contains("--workspace")?"--workspace":"--inspection-workspace"));
             recovery=std::make_unique<agentflow::EditExecutor>(persistence,*recovery_workspace);
@@ -153,7 +160,7 @@ int main(int argc,char** argv) {
 #else
             ,nullptr,{},{}
 #endif
-            ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()}
+            ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()},provider_setup
         );const auto bound=server.bind(port);
 #if defined(_WIN32)
         {std::lock_guard lock(control_mutex);active_server=&server;}

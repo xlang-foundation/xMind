@@ -121,7 +121,7 @@ function operations(items){
   }
 }
 function send(){if(execution&&!activeRun&&!sessionBusy&&byId('prompt').value.trim())api.postMessage({type:'send',prompt:byId('prompt').value});}
-for(const type of ['new','refresh','cancel'])byId(type).onclick=()=>api.postMessage({type});
+for(const type of ['new','refresh','cancel','configureModel'])byId(type).onclick=()=>api.postMessage({type});
 byId('sessions').onchange=()=>api.postMessage({type:'select',id:byId('sessions').value});byId('send').onclick=send;
 byId('runs').onchange=()=>api.postMessage({type:'select-run',id:byId('runs').value});
 byId('model').onchange=()=>api.postMessage({type:'model',id:byId('model').value});

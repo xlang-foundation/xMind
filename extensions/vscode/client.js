@@ -40,6 +40,8 @@ class BackendClient {
   }
   health() { return this.request('/v1/health'); }
   models() { return this.request('/v1/models'); }
+  providerConfiguration() { return this.request('/v1/provider/configuration'); }
+  configureProvider(model,api_key,expected_revision) { return this.request('/v1/provider/configuration',{model,api_key,expected_revision}); }
   sessions() { return this.request('/v1/sessions'); }
   createSession(title) { return this.request('/v1/sessions', { title }); }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }

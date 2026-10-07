@@ -1,5 +1,6 @@
 #include "agentflow/http_server.hpp"
 #include "agentflow/edit_executor.hpp"
+#include "agentflow/provider_setup.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <charconv>
@@ -116,7 +117,7 @@ struct HttpServer::Impl {
     std::string authorization;
     httplib::Server server;
     int port=-1;
-    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy):persistence(store),executor(execution),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
+    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup):persistence(store),executor(execution),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
         validate_local_auth_token(token);
         server.new_task_queue=[] {return new httplib::ThreadPool(4,4,32);};
         server.set_payload_max_length(1024*1024);
@@ -140,8 +141,20 @@ struct HttpServer::Impl {
         server.set_exception_handler([](const Request&,Response& response,std::exception_ptr) {reply(response,{{"detail","Backend operation failed"}},500);});
         server.Get("/v1/health",guarded([this](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"agent_execution",executor!=nullptr},{"model",models.empty()?"":models.front()}});
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()}});
         }));
+        if(setup){
+            const auto metadata=[](const ProviderSetupMetadata& value){return Json{{"revision",value.revision},{"provider",value.provider},{"model",value.model},{"endpoint",value.endpoint},{"configured",value.configured}};};
+            server.Get("/v1/provider/configuration",guarded([setup,metadata](const Request& request,Response& response){if(!request.params.empty())throw std::invalid_argument("Provider metadata does not accept query parameters");reply(response,metadata(setup->configuration()));}));
+            server.Post("/v1/provider/configuration",guarded([setup,metadata](const Request& request,Response& response){
+                if(!request.params.empty() || request.body.size()>65536)throw std::invalid_argument("Provider setup request exceeds limits");
+                const auto value=body(request,{"model","api_key","expected_revision"});
+                if(!value.contains("api_key") || !value["api_key"].is_string() || !value.contains("expected_revision") || !value["expected_revision"].is_number_integer() || value["expected_revision"]<0 || value["expected_revision"]>9007199254740991)throw std::invalid_argument("Invalid provider setup fields");
+                const auto& key=value["api_key"].get_ref<const std::string&>();if(key.empty() || key.size()>32768)throw std::invalid_argument("Provider key exceeds limits");
+                SecretBytes secret({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()});
+                reply(response,metadata(setup->configure(string_field(value,"model",256),std::move(secret),value["expected_revision"].get<std::int64_t>())));
+            }));
+        }
         server.Get("/v1/models",guarded([this](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
             auto entries=Json::array();for(const auto& model:models)entries.push_back({{"id",model}});
@@ -219,7 +232,7 @@ struct HttpServer::Impl {
         }
     }
 };
-HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy)) {}
+HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup)) {}
 HttpServer::~HttpServer()=default;
 int HttpServer::bind(int port) {
     if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");

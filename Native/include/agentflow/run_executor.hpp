@@ -16,5 +16,6 @@ public:
     }
     virtual void cancel(const std::string& id)=0;
     virtual bool healthy() const=0;
+    virtual bool available() const {return true;}
 };
 }

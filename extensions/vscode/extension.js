@@ -179,6 +179,24 @@ async function activate(context) {
     await context.secrets.store(secretKey(origin), validateToken(token));
     return true;
   }
+  async function configureModel() {
+    if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before configuring xMind.');
+    const target=client,origin=configuredOrigin(),version=generation;
+    if(!target || target.baseUrl!==origin)throw new Error('Connect to xMind Server before configuring a model.');
+    let setup;try{setup=await target.providerConfiguration();}catch(error){if(error.status===404)throw new Error('This backend has no interactive provider setup. Upgrade xMind Server or use its startup model settings.');throw error;}
+    if(setup.provider!=='openai' || setup.endpoint!=='https://api.openai.com/v1/chat/completions' || !Number.isSafeInteger(setup.revision) || setup.revision<0)throw new Error('Backend provider setup policy is unsupported.');
+    const model=await vscode.window.showInputBox({title:'xMind: Configure OpenAI model',prompt:'Enter the model ID available to your OpenAI API account.',value:setup.model||'',ignoreFocusOut:true,validateInput:value=>/^[A-Za-z0-9_.:/-]{1,256}$/.test(value)?undefined:'Enter a valid provider model ID.'});
+    if(model===undefined)return false;
+    let key=await vscode.window.showInputBox({title:'xMind: OpenAI API key',prompt:`Store the key encrypted on xMind Server at ${origin}. The backend sends it to https://api.openai.com.`,password:true,ignoreFocusOut:true,validateInput:value=>/^[\x21-\x7e]{1,32768}$/.test(value)?undefined:'Enter your provider API key without spaces.'});
+    if(key===undefined)return false;
+    try{
+      if(client!==target || configuredOrigin()!==origin || version!==generation)throw new Error('Backend or conversation changed during provider setup. Try again.');
+      await target.configureProvider(model,key,setup.revision);
+      // A saved credential establishes configuration, not successful inference.
+      post({type:'status',text:'Model configured · send a message to verify provider access'});
+      return true;
+    }finally{key=undefined;}
+  }
   async function openPanel() {
     if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before using AgentFlow.');
     if (panel) { panel.show(); return; }
@@ -216,6 +234,11 @@ async function activate(context) {
           post({ type: 'capabilities', execution: health.agent_execution, model:selectedModel, models:modelCatalogue.models });
           await refresh();
           if (sessionId) await selectSession(sessionId);
+        } else if (message.type === 'configureModel') {
+          if(await configureModel()){
+            const current=await capabilities();health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue,selectedModel);
+            post({type:'capabilities',execution:health.agent_execution,models:modelCatalogue.models,model:selectedModel});
+          }
         } else if (message.type === 'refresh') {
           const version=generation;
           post({type:'capabilities',execution:false,models:[],model:undefined});

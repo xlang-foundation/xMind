@@ -1,0 +1,31 @@
+#include "agentflow/provider_setup.hpp"
+#include "agentflow/xlang_sqlite.hpp"
+#include "agentflow/http_server.hpp"
+#include "httplib.h"
+#include "nlohmann/json.hpp"
+#include <filesystem>
+#include <iostream>
+#include <thread>
+using namespace agentflow;using Json=nlohmann::json;
+void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
+template<class Error,class Action>void rejects(Action action){try{action();}catch(const Error&){return;}throw std::runtime_error("Expected provider setup rejection");}
+SecretBytes key(){const std::string fixture="synthetic-provider-setup-key";return SecretBytes({reinterpret_cast<const std::uint8_t*>(fixture.data()),fixture.size()});}
+struct Access{HttpServer server;int port;std::thread worker;Access(PersistenceService& store,ProviderRuntime& runtime):server(store,"synthetic-provider-setup-server-access-token",&runtime,nullptr,{}, {},{},&runtime),port(server.bind(0)) {worker=std::thread([this]{server.listen();});}~Access(){server.stop();if(worker.joinable())worker.join();}};
+int main(int argc,char** argv){if(argc!=5)return 2;try{
+ const auto database=(std::filesystem::u8path(argv[1])/"provider.sqlite").string();const std::vector<std::string> imports{argv[2],argv[3]};
+ {PersistenceService store(database,imports);AgentSettings base;ProviderRuntime runtime(store,base,2,128,argv[4]);require(!runtime.available() && runtime.models().empty() && runtime.configuration().revision==0,"Fresh provider must remain unavailable");rejects<RunUnavailable>([&]{runtime.submit("not-admitted","none","fixture");});Access access(store,runtime);httplib::Client client("127.0.0.1",access.port);client.set_connection_timeout(5);client.set_read_timeout(5);const httplib::Headers authorization{{"Authorization","Bearer synthetic-provider-setup-server-access-token"}};
+  const auto unauthorized=client.Get("/v1/provider/configuration");require(unauthorized && unauthorized->status==401,"Provider metadata/setup must require local-owner authentication");const auto initial=client.Get("/v1/provider/configuration",authorization);require(initial && initial->status==200 && Json::parse(initial->body)["configured"]==false,"Actual native setup metadata must remain unconfigured before enrollment");
+  const auto redirect=client.Post("/v1/provider/configuration",authorization,R"({"model":"fixture-model","api_key":"synthetic-provider-setup-key","expected_revision":0,"endpoint":"https://outside.invalid"})","application/json");require(redirect && redirect->status==400,"Client must not replace backend provider destination");
+  const auto setup=client.Post("/v1/provider/configuration",authorization,R"({"model":"fixture-model","api_key":"synthetic-provider-setup-key","expected_revision":0})","application/json");require(setup && setup->status==200 && Json::parse(setup->body)["revision"]==1 && runtime.available(),"Actual authenticated encrypted setup must activate native service");require(setup->body.find("synthetic-provider-setup-key")==std::string::npos,"Setup response must not echo the provider secret");const auto saved=store.information("native-provider","active").get();require(saved.find("synthetic-provider-setup-key")==std::string::npos,"Public configuration must not retain plaintext key");const auto credentials=store.credentials("server").get();require(credentials.size()==1,"Setup must use encrypted backend credential repository");rejects<Conflict>([&]{runtime.configure("fixture-other",key(),0);});
+  store.create_session("session","Actual runtime setup with synthetic inference").get();const auto run=runtime.submit("run","session","Actual provider setup fixture task");rejects<Conflict>([&]{runtime.configure("fixture-other",key(),1);});std::cout<<"fixture-release\n"<<std::flush;
+  const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(10);Run state=run;while(state.state==RunState::queued || state.state==RunState::running){require(std::chrono::steady_clock::now()<deadline,"Configured native run timed out");std::this_thread::sleep_for(std::chrono::milliseconds(5));state=store.run(run.id).get();}require(state.state==RunState::completed,"Actual configured native transport must complete");
+  require(runtime.configuration().configured,"Runtime lost provider configuration");
+  {XlangSqlite inject(database,imports);inject.execute("CREATE TRIGGER reject_provider_setup BEFORE UPDATE ON information WHEN NEW.category='native-provider' BEGIN SELECT RAISE(ABORT,'actual provider setup fixture failure'); END");}
+  // Worker retirement may lag its final ledger row. Wait for a configuration
+  // attempt to cross the idle boundary, without changing the active record.
+  bool fault=false;const auto idleDeadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);while(!fault){try{runtime.configure("fixture-other",key(),1);}catch(const Conflict&){require(std::chrono::steady_clock::now()<idleDeadline,"Worker did not release provider ownership");std::this_thread::sleep_for(std::chrono::milliseconds(5));}catch(const DatabaseError&){fault=true;}}
+  require(store.information("native-provider","active").get()==saved && runtime.configuration().model=="fixture-model","Failed actual configuration transaction must retain old service and credential reference");{XlangSqlite inject(database,imports);inject.execute("DROP TRIGGER reject_provider_setup");}
+ }
+ {PersistenceService store(database,imports);ProviderRuntime reopened(store,{},2,128,argv[4]);require(reopened.available() && reopened.configuration().revision==1 && reopened.models().front()=="fixture-model","Actual reopen must restore model and encrypted credential");}
+ std::cout<<"Provider setup passed actual native transport, encrypted xlang3 storage, stale/active configuration rejection, actual SQL write fault preservation and persisted reopen. Provider response/key are synthetic fixture data.\n";return 0;
+ }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
