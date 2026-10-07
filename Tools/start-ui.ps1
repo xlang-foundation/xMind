@@ -1,4 +1,4 @@
-param([string]$CodeExecutable,[string]$RuntimeDirectory='D:\CantorAI2026\xlang3\build\Release')
+param([string]$CodeExecutable,[string]$RuntimeDirectory,[string]$BundleDirectory,[string]$StdlibSource='C:\Python\Python314\Lib')
 $ErrorActionPreference='Stop'
 $uiProject=Split-Path $PSScriptRoot -Parent
 $uiState=Join-Path $uiProject '.agentflow\ui-host'
@@ -6,6 +6,20 @@ New-Item -ItemType Directory -Force -Path $uiState | Out-Null
 if(-not $CodeExecutable) {$CodeExecutable=Join-Path $uiState 'vscode\Code.exe'}
 if(-not (Test-Path -LiteralPath $CodeExecutable)) {throw 'Select an installed VS Code executable or unpack the official portable ZIP under .agentflow/ui-host/vscode.'}
 $uiServer=Join-Path $uiProject 'build\native\Release\xmind_server.exe'
+$uiBuildProvenance=$null
+if($BundleDirectory){
+    if($RuntimeDirectory){throw 'Select a complete native bundle or a runtime directory, not both.'}
+    $uiBundle=(Resolve-Path -LiteralPath $BundleDirectory).Path
+    $uiServer=Join-Path $uiBundle 'xmind_server.exe'
+    $uiModules=Join-Path $uiBundle 'modules'
+    foreach($uiRequired in @('xmind_server.exe','xmind_cli.exe','xlang3_runtime.dll','modules/xlang_json.x3pkg.dll','modules/xlang_sqlite3.x3pkg.dll','provenance.json')){
+        if(-not(Test-Path -LiteralPath (Join-Path $uiBundle $uiRequired))){throw ('Incomplete native development bundle: '+$uiRequired)}
+    }
+    $uiBuildProvenance=Get-Content -LiteralPath (Join-Path $uiBundle 'provenance.json') -Raw|ConvertFrom-Json
+}else{
+    if(-not $RuntimeDirectory){$RuntimeDirectory=Join-Path (Split-Path $uiProject -Parent) 'xlang3/build/Release'}
+    $uiModules=Join-Path $RuntimeDirectory 'modules'
+}
 if(-not (Test-Path -LiteralPath $uiServer)) {throw 'A verified native server build is required.'}
 $uiAccess=[Convert]::ToHexString([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
 $uiOriginalAuth=$env:XMIND_AUTH_TOKEN
@@ -19,7 +33,7 @@ try {
     $uiLog=Join-Path $uiState 'backend.log'
     $uiErrorLog=Join-Path $uiState 'backend-error.log'
     $uiReady=Join-Path $uiState ('opened-'+[Guid]::NewGuid().ToString('N')+'.json')
-    $uiArgs=@('--db',('"'+$uiDatabase+'"'),'--modules',('"'+(Join-Path $RuntimeDirectory 'modules')+'"'),'--stdlib','C:\Python\Python314\Lib','--port','0')
+    $uiArgs=@('--db',('"'+$uiDatabase+'"'),'--modules',('"'+$uiModules+'"'),'--stdlib',('"'+$StdlibSource+'"'),'--port','0')
     $uiProcess=Start-Process -FilePath $uiServer -ArgumentList $uiArgs -WorkingDirectory $uiProject -WindowStyle Hidden -RedirectStandardOutput $uiLog -RedirectStandardError $uiErrorLog -PassThru
     $uiDeadline=[DateTime]::UtcNow.AddSeconds(20)
     $uiPort=$null
@@ -40,7 +54,7 @@ try {
     # host for this known repository, with its own settings/extensions directory.
     $uiCodeArgs=@('--new-window','--disable-workspace-trust','--skip-welcome','--remote-debugging-port=57217','--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiProject+'"'))
     $uiHost=Start-Process -FilePath $CodeExecutable -ArgumentList $uiCodeArgs -WorkingDirectory $uiProject -WindowStyle Normal -PassThru
-    $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=$false} | ConvertTo-Json
+    $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=$false;server_executable=$uiServer;modules=$uiModules;source_revision=$uiBuildProvenance.xmind} | ConvertTo-Json
     [System.IO.File]::WriteAllText((Join-Path $uiState 'active.json'),$uiMetadata)
     $uiMetadata
 } catch {

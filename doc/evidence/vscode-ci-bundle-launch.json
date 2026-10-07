@@ -1,0 +1,21 @@
+{
+  "source_revision": "7b0fe2fca4ada58b8a7184d3be463d59ff9cc796",
+  "ci_run": "https://github.com/xlang-foundation/xMind/actions/runs/37598517059",
+  "backend_executable": "D:\\CantorAI2026\\AgentFlow\\.agentflow\\ci\\extracted\\runtime-37598517059-462b826e61ca4a1f8e35978c17f59ef5\\xmind_server.exe",
+  "backend_pid": 9576,
+  "origin": "http://127.0.0.1:50657",
+  "ready": {
+    "opened": true,
+    "location": "secondarySidebar",
+    "origin": "http://127.0.0.1:50657",
+    "time": "2026-10-07T09:18:19.259Z",
+    "storage": "Normal development host; no extension test runner",
+    "scope": "Actual sidebar opened; no live inference claimed"
+  },
+  "sidebar_position": "right",
+  "explorer_position": "left",
+  "database": "Existing .agentflow/ui-host/sessions.sqlite",
+  "model_configured": false,
+  "agent_execution": false,
+  "scope": "Actual downloaded CI runtime and normal VS Code development host; no live inference"
+}
