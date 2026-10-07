@@ -25,6 +25,7 @@ struct ProcessConfiguration {
     // Optional enclosing workspace capability, supplied by its owning executor.
     // Held throughout launch/execution in addition to the selected directory.
     std::string workspace_root,workspace_root_id;
+    std::string executable_id;
 };
 struct ProcessResult {
     std::uint32_t pid,exit_code;
@@ -43,6 +44,7 @@ class ForegroundProcess {
 public:
     using OutputObserver=std::function<void(bool stderr_channel,std::string_view bytes)>;
     static std::string directory_identity(const std::string& absolute_directory);
+    static std::string executable_identity(const std::string& absolute_executable);
     // Observer receives at most output_limit retained raw bytes in total. Its
     // failure after dispatch terminates the job and reports effect uncertainty.
     static ProcessResult run(const ProcessConfiguration& configuration,

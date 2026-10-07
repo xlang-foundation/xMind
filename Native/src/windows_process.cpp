@@ -1,6 +1,7 @@
 #include "agentflow/process.hpp"
 #define NOMINMAX
 #include <windows.h>
+#include <bcrypt.h>
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -66,6 +67,28 @@ struct DirectoryLease {
         handles.push_back(std::move(h));
     }
     std::string id() const{return identity(handles.back().value);}
+};
+struct ExecutableLease {
+    DirectoryLease directory;
+    Handle file;
+    std::string bound;
+    explicit ExecutableLease(const std::wstring& path):directory(std::filesystem::path(path).parent_path().native()),
+        file(CreateFileW(path.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_SEQUENTIAL_SCAN,nullptr)) {
+        if(file.value==INVALID_HANDLE_VALUE)fail("Cannot retain process executable");
+        BY_HANDLE_FILE_INFORMATION info{};LARGE_INTEGER size{};
+        if(!GetFileInformationByHandle(file.value,&info) || !GetFileSizeEx(file.value,&size))fail("Cannot inspect process executable");
+        if(GetFileType(file.value)!=FILE_TYPE_DISK || (info.dwFileAttributes&(FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_REPARSE_POINT)) || size.QuadPart<=0 || size.QuadPart>256*1024*1024)throw ProcessBeforeDispatchError("Unsupported process executable identity/size");
+        struct Hash {
+            BCRYPT_ALG_HANDLE algorithm=nullptr;BCRYPT_HASH_HANDLE hash=nullptr;
+            ~Hash(){if(hash)BCryptDestroyHash(hash);if(algorithm)BCryptCloseAlgorithmProvider(algorithm,0);}
+        } digest;
+        if(BCryptOpenAlgorithmProvider(&digest.algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)<0 || BCryptCreateHash(digest.algorithm,&digest.hash,nullptr,0,nullptr,0,0)<0)throw ProcessBeforeDispatchError("Cannot initialize executable binding hash");
+        std::array<UCHAR,65536> bytes{};std::uint64_t total=0;
+        for(;;){DWORD got=0;if(!ReadFile(file.value,bytes.data(),static_cast<DWORD>(bytes.size()),&got,nullptr))fail("Cannot read process executable binding");if(!got)break;total+=got;if(total>256*1024*1024 || BCryptHashData(digest.hash,bytes.data(),got,0)<0)throw ProcessBeforeDispatchError("Cannot hash bounded process executable");}
+        if(total!=static_cast<std::uint64_t>(size.QuadPart))throw ProcessBeforeDispatchError("Process executable size changed while binding");
+        std::array<UCHAR,32> hash{};if(BCryptFinishHash(digest.hash,hash.data(),static_cast<ULONG>(hash.size()),0)<0)throw ProcessBeforeDispatchError("Cannot finalize executable binding hash");
+        std::ostringstream out;out<<"windows-local-executable-v1:"<<identity(file.value)<<":"<<std::hex<<std::setfill('0');for(auto b:hash)out<<std::setw(2)<<static_cast<unsigned>(b);bound=out.str();
+    }
 };
 struct CaseLess {bool operator()(const std::wstring& a,const std::wstring& b) const {return CompareStringOrdinal(a.data(),static_cast<int>(a.size()),b.data(),static_cast<int>(b.size()),TRUE)==CSTR_LESS_THAN;}};
 std::vector<wchar_t> environment(const ProcessConfiguration& config) {
@@ -139,12 +162,15 @@ bool drain(CapturePipe& pipe,bool error,ProcessResult& result,std::size_t limit,
 }
 }
 std::string ForegroundProcess::directory_identity(const std::string& path){return DirectoryLease(wide(path)).id();}
+std::string ForegroundProcess::executable_identity(const std::string& path){return ExecutableLease(wide(path)).bound;}
 ProcessResult ForegroundProcess::run(const ProcessConfiguration& config,std::stop_token cancel,OutputObserver observer) {
     const auto started=Clock::now();
     if(config.timeout<std::chrono::milliseconds(1) || config.timeout>std::chrono::minutes(10) || config.output_limit<8192 || config.output_limit>4*1024*1024 || config.arguments.size()>64 || config.working_directory_id.empty())throw std::invalid_argument("Process configuration exceeds limits or lacks directory identity");
     if(cancel.stop_requested())throw ProcessCancelledBeforeDispatch("Process cancelled before dispatch");
     const auto executable=wide(config.executable),directory=wide(config.working_directory);
     if(!std::filesystem::path(executable).is_absolute() || !std::filesystem::is_regular_file(std::filesystem::path(executable)))throw std::invalid_argument("Process executable must be an explicit existing absolute path");
+    ExecutableLease executable_lease(executable);
+    if(!config.executable_id.empty() && config.executable_id!=executable_lease.bound)throw ProcessBeforeDispatchError("Process executable identity/content changed");
     std::wstring command=quote(executable);for(const auto& arg:config.arguments){command.push_back(L' ');command+=quote(wide(arg));if(command.size()>32766)throw std::invalid_argument("Process command line exceeds limits");}
     std::unique_ptr<DirectoryLease> workspace;
     if(!config.workspace_root.empty() || !config.workspace_root_id.empty()) {

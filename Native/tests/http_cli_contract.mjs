@@ -59,6 +59,9 @@ async function raw(headers) {
 try {
   await start();
   assert.equal((await request('/v1/health')).data.agent_execution, false);
+  assert.deepEqual(cli('process-profiles'),{profiles:[],runtime_state:'per_operation'},'Unconfigured native server must not invent process profiles or running processes');
+  assert.equal((await request('/v1/process/profiles',undefined,{Authorization:''})).status,401);
+  assert.equal((await request('/v1/process/profiles?executable=spoof')).status,400,'Discovery cannot select executable paths');
   assert.equal((await request('/v1/sessions', undefined, {Authorization: ''})).status, 401);
   assert.equal((await request('/v1/sessions', {}, {Authorization: 'Bearer wrong'})).status, 401);
   assert.equal((await request('/v1/health', undefined, {Origin: 'https://untrusted.example'})).status, 403);

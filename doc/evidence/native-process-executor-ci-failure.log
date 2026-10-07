@@ -1,0 +1,102 @@
+Test project D:/a/xMind/xMind/xmind/build/native
+      Start  1: native_json_schema_contract
+ 1/33 Test  #1: native_json_schema_contract ................   Passed    0.02 sec
+      Start  2: native_mcp_wire_contract
+ 2/33 Test  #2: native_mcp_wire_contract ...................   Passed    0.02 sec
+      Start  3: model_stream_protocol_contract
+ 3/33 Test  #3: model_stream_protocol_contract .............   Passed    0.08 sec
+      Start  4: model_request_contract
+ 4/33 Test  #4: model_request_contract .....................   Passed    0.02 sec
+      Start  5: native_secret_protection_contract
+ 5/33 Test  #5: native_secret_protection_contract ..........   Passed    0.02 sec
+      Start  6: native_process_executor_contract
+ 6/33 Test  #6: native_process_executor_contract ...........***Failed    4.16 sec
+Interrupted process must retain actual lifecycle evidence and uncertain effects
+file:///D:/a/xMind/xMind/xmind/Native/tests/process_executor_peer.mjs:11
+  if(result.error)throw result.error;if(result.status!==0)throw new Error('Actual approved native process contract exit '+result.status);
+                                                                ^
+
+Error: Actual approved native process contract exit 1
+    at file:///D:/a/xMind/xMind/xmind/Native/tests/process_executor_peer.mjs:11:65
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.23.3
+
+      Start  7: native_process_adapter_contract
+ 7/33 Test  #7: native_process_adapter_contract ............***Failed    2.04 sec
+Owned process exit is not established
+file:///D:/a/xMind/xMind/xmind/Native/tests/process_contract_peer.mjs:11
+  if(result.error)throw result.error;if(result.status!==0)throw new Error('Native process adapter contract exit '+result.status);
+                                                                ^
+
+Error: Native process adapter contract exit 1
+    at file:///D:/a/xMind/xMind/xmind/Native/tests/process_contract_peer.mjs:11:65
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.23.3
+
+      Start  8: native_mcp_configuration_contract
+ 8/33 Test  #8: native_mcp_configuration_contract ..........   Passed    0.18 sec
+      Start  9: native_schema_worker_contract
+ 9/33 Test  #9: native_schema_worker_contract ..............   Passed    2.39 sec
+      Start 10: native_mcp_stdio_contract
+10/33 Test #10: native_mcp_stdio_contract ..................   Passed    3.14 sec
+      Start 11: native_mcp_handshake_contract
+11/33 Test #11: native_mcp_handshake_contract ..............   Passed    0.89 sec
+      Start 12: native_mcp_client_contract
+12/33 Test #12: native_mcp_client_contract .................   Passed    1.12 sec
+      Start 13: native_mcp_effect_contract
+13/33 Test #13: native_mcp_effect_contract .................   Passed    7.61 sec
+      Start 14: native_agent_service_contract
+14/33 Test #14: native_agent_service_contract ..............   Passed    0.32 sec
+      Start 15: native_agent_runner_contract
+15/33 Test #15: native_agent_runner_contract ...............   Passed    1.34 sec
+      Start 16: native_create_executor_contract
+16/33 Test #16: native_create_executor_contract ............   Passed    1.21 sec
+      Start 17: native_edit_executor_contract
+17/33 Test #17: native_edit_executor_contract ..............   Passed    0.76 sec
+      Start 18: native_approved_edit_http_contract
+18/33 Test #18: native_approved_edit_http_contract .........   Passed    1.09 sec
+      Start 19: native_workspace_tools_contract
+19/33 Test #19: native_workspace_tools_contract ............   Passed    1.09 sec
+      Start 20: native_chat_provider_contract
+20/33 Test #20: native_chat_provider_contract ..............   Passed    0.16 sec
+      Start 21: native_http_stream_transport_contract
+21/33 Test #21: native_http_stream_transport_contract ......   Passed    5.07 sec
+      Start 22: native_agent_http_contract
+22/33 Test #22: native_agent_http_contract .................   Passed    1.30 sec
+      Start 23: native_agent_edit_http_contract
+23/33 Test #23: native_agent_edit_http_contract ............   Passed    2.25 sec
+      Start 24: native_agent_mcp_http_contract
+24/33 Test #24: native_agent_mcp_http_contract .............   Passed    2.45 sec
+      Start 25: native_mcp_sdk_modern_contract
+25/33 Test #25: native_mcp_sdk_modern_contract .............   Passed    3.46 sec
+      Start 26: native_mcp_sdk_legacy_contract
+26/33 Test #26: native_mcp_sdk_legacy_contract .............   Passed   10.56 sec
+      Start 27: native_http_cli_contract
+27/33 Test #27: native_http_cli_contract ...................   Passed   10.14 sec
+      Start 28: embedded_xlang_sqlite_contract
+28/33 Test #28: embedded_xlang_sqlite_contract .............   Passed    0.05 sec
+      Start 29: native_permission_waiter_contract
+29/33 Test #29: native_permission_waiter_contract ..........   Passed    0.84 sec
+      Start 30: native_operation_repository_contract
+30/33 Test #30: native_operation_repository_contract .......   Passed    1.25 sec
+      Start 31: xlang_repository_contract
+31/33 Test #31: xlang_repository_contract ..................   Passed    0.29 sec
+      Start 32: persistence_service_contract
+32/33 Test #32: persistence_service_contract ...............   Passed    0.83 sec
+      Start 33: encrypted_credential_repository_contract
+33/33 Test #33: encrypted_credential_repository_contract ...   Passed    0.46 sec
+
+94% tests passed, 2 tests failed out of 33
+
+Total Test time (real) =  66.62 sec
+
+The following tests FAILED:
+	  6 - native_process_executor_contract (Failed)
+	  7 - native_process_adapter_contract (Failed)
+Errors while running CTest

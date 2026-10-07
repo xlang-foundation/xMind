@@ -10,6 +10,7 @@ struct ProcessProfile {
     std::int64_t revision;
     std::vector<std::string> prefix_arguments;
     std::chrono::milliseconds max_timeout{120000};
+    std::string executable_id;
 };
 // Backend-owned immutable profile snapshot. The model chooses a registered ID
 // and literal arguments, never an executable, environment, identity or grant.

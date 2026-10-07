@@ -13,6 +13,7 @@ param(
     [string]$InspectionWorkspace,
     [switch]$ApprovedEdits,
     [string]$CredentialId,
+    [string]$ProcessConfig,
     [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
     [Parameter(ValueFromRemainingArguments=$true)][string[]]$ClientArguments
 )
@@ -38,6 +39,7 @@ if($Action -eq 'Serve') {
     if($InspectionWorkspace) {$serverArguments+=@('--inspection-workspace',$InspectionWorkspace)}
     if($ApprovedEdits) {$serverArguments+=@('--workspace-edits','approved')}
     if($CredentialId) {$serverArguments+=@('--credential-id',$CredentialId)}
+    if($ProcessConfig) {$serverArguments+=@('--process-config',$ProcessConfig)}
     & $binary @serverArguments
 } else {
     & $binary $Port @ClientArguments

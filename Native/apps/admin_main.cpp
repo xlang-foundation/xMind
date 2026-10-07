@@ -1,4 +1,5 @@
 #include "agentflow/mcp_configuration.hpp"
+#include "agentflow/process_configuration.hpp"
 #include "nlohmann/json.hpp"
 #include <cstdlib>
 #include <fstream>
@@ -11,10 +12,14 @@ int main(int argc,char** argv){
             const std::string key=argv[command];if(command+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib") || !options.emplace(key,argv[command+1]).second)throw std::invalid_argument("Invalid native admin options");command+=2;
         }
         for(const auto* key:{"--db","--modules","--stdlib"})if(!options.contains(key))throw std::invalid_argument("Native admin requires --db FILE --modules DIR --stdlib DIR");
-        if(command>=argc)throw std::invalid_argument("Commands: import-mcp FILE; put-mcp-credential SERVER_ID ENV_NAME SECRET_SOURCE_ENV. Run while the backend is stopped.");
+        if(command>=argc)throw std::invalid_argument("Commands: import-processes FILE; import-mcp FILE; put-mcp-credential SERVER_ID ENV_NAME SECRET_SOURCE_ENV. Run while the backend is stopped.");
         agentflow::PersistenceService store(options.at("--db"),{options.at("--modules"),options.at("--stdlib")});agentflow::McpConfigurationStore configurations(store);
         using Json=nlohmann::json;const std::string action=argv[command];
-        if(action=="import-mcp" && command+2==argc){
+        if(action=="import-processes" && command+2==argc){
+            std::ifstream file(argv[command+1],std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted process configuration");std::string source;char byte;
+            while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Process configuration exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted process configuration");
+            const auto values=agentflow::ProcessConfigurationStore(store).apply(source);Json metadata=Json::array();for(const auto& value:values)metadata.push_back({{"id",value.id},{"revision",value.revision}});std::cout<<Json{{"profiles",metadata}}.dump()<<'\n';
+        }else if(action=="import-mcp" && command+2==argc){
             std::ifstream file(argv[command+1],std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted MCP configuration");std::string source;char byte;
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("MCP configuration exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted MCP configuration");
             const auto values=configurations.apply(source);Json metadata=Json::array();for(const auto& value:values)metadata.push_back({{"id",value.id},{"revision",value.revision},{"enabled",value.enabled}});std::cout<<Json{{"servers",metadata}}.dump()<<'\n';

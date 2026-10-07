@@ -2,7 +2,7 @@
 
 The user requested visible milestones. Show a runnable result, validation evidence and remaining scope at each milestone. Prepared source or a diagram alone does not prove a runnable native milestone.
 
-Next coding component: the native foreground process adapter, durable approval executor and conditional agent-loop source are prepared, with 33 native contracts expected by isolated CI. Local compilation was deferred by a currently observed xlang3 timing controller; no process pass or verified model/server/editor integration is claimed. [Implementation/acceptance contract](native-process-tools.md). The latest verified runnable product remains the 31-native/30-extension creation checkpoint below.
+Next coding component: the native foreground process adapter, durable approval executor, executable binding, persisted profile administration and model/server/CLI source are prepared, with 35 native contracts expected by isolated CI. Local compilation was deferred by a currently observed xlang3 timing controller; no process pass or verified model/server/editor integration is claimed. [Implementation/acceptance contract](native-process-tools.md). The latest verified runnable product remains the 31-native/30-extension creation checkpoint below.
 
 Sidebar command review/output contracts now pass all **34 local extension tests**, including literal argument review, escaped/control/hex output, actual supplied exit/timing/count fields, malformed/expired proposal rejection and uncertain-command handling: [complete output](evidence/vscode-process-review.log). These are labeled DOM/host fixtures, not a populated command run in the interactive preview. Native process profile configuration and end-to-end model/server/editor validation remain required.
 

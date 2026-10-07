@@ -1,0 +1,78 @@
+// Synthetic inference with actual native admin/server/CLI, process/file effects
+// and embedded-xlang3 storage. No live-provider or populated editor claim.
+import assert from 'node:assert/strict';
+import {createServer} from 'node:http';
+import {spawn,spawnSync} from 'node:child_process';
+import {mkdtemp,mkdir,writeFile,readFile,copyFile,appendFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join,resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {randomBytes} from 'node:crypto';
+import {setTimeout as delay} from 'node:timers/promises';
+const [serverExe,cliExe,adminExe,modules,stdlib]=process.argv.slice(2);
+const folder=await mkdtemp(join(tmpdir(),'xmind-agent-process-')),workspace=join(folder,'workspace'),database=join(folder,'state.sqlite'),configFile=join(folder,'profiles.json'),executable=join(folder,'actual-node.exe');
+const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
+let child,port,peerError,requests=0;const continued=new Map(),operationIds=[];
+const peer=createServer((request,response)=>{
+  let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',()=>{
+    try {
+      ++requests;const body=JSON.parse(source),name=body.messages.findLast(message=>message.role==='user').content;
+      assert.equal(body.model,'synthetic-native-process-model');assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_file','list_files','search_files','run_process']);
+      assert.deepEqual(body.tools.at(-1).function.parameters.properties.profile.enum,['fixture']);
+      const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
+      if(tool){const result=JSON.parse(tool.content);continued.set(name,result);assert.equal(tool.tool_call_id,'fixture-'+name);
+        if(name==='allowed'){assert.equal(result.exit_code,0);assert.equal(result.termination,'exited');assert.equal(result.independently_verified,false);assert.equal(JSON.parse(result.stdout.data).inherited,false);}
+        else assert.equal(result.error.code,name==='denied'?'permission_denied':'process_not_dispatched');
+        delta={content:'Synthetic process continuation after the actual backend result'};finish='stop';
+      }else{delta={tool_calls:[{index:0,id:'fixture-'+name,type:'function',function:{name:'run_process',arguments:JSON.stringify({profile:'fixture',arguments:['normal',name+'.txt']})}}]};finish='tool_calls';}
+      response.writeHead(200,{'Content-Type':'text/event-stream'});
+      response.end(`data: ${JSON.stringify({choices:[{index:0,delta,finish_reason:null}]})}\n\ndata: ${JSON.stringify({choices:[{index:0,delta:{},finish_reason:finish}]})}\n\ndata: [DONE]\n\n`);
+    }catch(error){peerError=error;response.writeHead(500);response.end('Synthetic native process peer failed');}
+  });
+});
+function cli(...args){const result=spawnSync(cliExe,[String(port),...args],{env,encoding:'utf8',timeout:10000,windowsHide:true});assert.equal(result.status,0,result.stderr);return JSON.parse(result.stdout);}
+function admin(...args){const result=spawnSync(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,...args],{env,encoding:'utf8',timeout:15000,windowsHide:true});assert.equal(result.status,0,result.stderr);return JSON.parse(result.stdout);}
+async function api(path,body){const response=await fetch(`http://127.0.0.1:${port}${path}`,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+token,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(10000)});assert.ok(response.ok,await response.clone().text());return response.json();}
+async function until(read,predicate){const end=Date.now()+10000;while(Date.now()<end){const value=await read();if(predicate(value))return value;if(peerError)throw peerError;await delay(20);}throw new Error('Actual process contract observation deadline');}
+async function start(model){
+  const args=['--db',database,'--modules',modules,'--stdlib',stdlib,'--port','0'];
+  if(model)args.push('--model','synthetic-native-process-model','--model-endpoint',`http://127.0.0.1:${peer.address().port}/chat`,'--model-tools','supported','--workspace',workspace);
+  child=spawn(serverExe,args,{env,windowsHide:true});let errors='';child.stderr.on('data',data=>errors+=data);
+  port=await new Promise((resolve,reject)=>{let output='';const timer=setTimeout(()=>reject(new Error('Readiness deadline: '+errors)),15000);child.once('error',error=>{clearTimeout(timer);reject(error);});child.once('exit',code=>{clearTimeout(timer);reject(new Error('Native server exited '+code+': '+errors));});child.stdout.on('data',data=>{output+=data;const match=/listening on http:\/\/127\.0\.0\.1:(\d+)/.exec(output);if(match){clearTimeout(timer);resolve(Number(match[1]));}});});
+}
+async function stop(){if(child&&child.exitCode===null){const exited=new Promise(resolve=>child.once('exit',resolve));child.kill();await exited;}child=null;}
+try {
+  await mkdir(workspace);await copyFile(process.execPath,executable);
+  const fixture=fileURLToPath(new URL('./process_peer.mjs',import.meta.url));
+  await writeFile(configFile,JSON.stringify({profiles:[{id:'fixture',executable,prefix_arguments:[fixture],max_timeout_ms:10000}]}));
+  assert.deepEqual(admin('import-processes',configFile),{profiles:[{id:'fixture',revision:1}]});
+  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));await start(true);
+  assert.deepEqual(cli('process-profiles'),{profiles:[{id:'fixture',revision:1,max_timeout_ms:10000}],runtime_state:'per_operation'});
+  const metadata=JSON.stringify(await api('/v1/process/profiles'));assert.ok(!metadata.includes(executable)&&!metadata.includes('executable_id'),'Public registry must not expose command/binding metadata');
+  // An offline importer cannot mutate the running backend's registry lease.
+  const busy=spawnSync(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,'import-processes',configFile],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(busy.error);assert.equal(busy.status,1,'Native owner lease must reject concurrent admin import');
+  for(const name of ['allowed','denied','cancelled','stale-executable']){
+    await api('/v1/sessions',{id:name,title:'Synthetic native process integration fixture'});
+    const run=await api('/v1/runs',{id:'run-'+name,session_id:name,prompt:name});
+    const [proposal]=await until(()=>api(`/v1/runs/${run.id}/operations`),values=>values.some(value=>value.state==='awaiting_approval'));
+    operationIds.push(proposal.id);assert.equal(proposal.tool,'run_process');const planned=JSON.parse(proposal.arguments_json);
+    assert.equal(planned.profile_id,'fixture');assert.equal(planned.profile_revision,1);assert.equal(planned.executable,executable);assert.ok(planned.executable_id.startsWith('windows-local-executable-v1:'));assert.deepEqual(planned.arguments,[fixture,'normal',name+'.txt']);
+    await assert.rejects(readFile(join(workspace,name+'.txt')),{code:'ENOENT'},'Awaiting approval cannot dispatch effect');
+    if(name==='cancelled')cli('cancel',run.id);else{
+      if(name==='stale-executable')await appendFile(executable,'actual fixture executable mutation after proposal');
+      cli('decide',proposal.id,name==='denied'?'deny':'allow');
+    }
+    const terminal=await until(()=>api(`/v1/runs/${run.id}`),value=>['completed','cancelled','failed'].includes(value.state));assert.equal(terminal.state,name==='cancelled'?'cancelled':'completed');
+    const operation=cli('operation',proposal.id);assert.equal(operation.state,{allowed:'succeeded',denied:'denied',cancelled:'cancelled','stale-executable':'failed'}[name]);
+    if(name==='allowed'){assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'actual child effect');assert.equal(JSON.parse(operation.result_json).exit_code,0);}
+    else await assert.rejects(readFile(join(workspace,name+'.txt')),{code:'ENOENT'},'Undispatched commands must preserve absence');
+    const history=cli('history',name);assert.equal(history[0].role,'user');if(name!=='cancelled'){assert.ok(continued.has(name));assert.equal(history.at(-1).role,'assistant');}
+  }
+  if(peerError)throw peerError;assert.equal(requests,7,'Exactly one initial request per run and three real-result continuations');
+  await stop();await start(false);assert.equal((await api('/v1/health')).agent_execution,false);
+  assert.equal(cli('operation',operationIds[0]).state,'succeeded');assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'actual child effect');
+  assert.deepEqual(cli('process-profiles'),{profiles:[{id:'fixture',revision:1,max_timeout_ms:10000}],runtime_state:'per_operation'});
+  console.log('Native process admin/server/model/CLI contract passed actual persisted registry, owner lease, exact approved process/file effects, denial/cancelled approval, changed-executable rejection, real tool-result continuation, metadata privacy and model-free restart. Inference is synthetic; no live-provider/editor/process parity completion claimed.');
+} finally {
+  await stop();await new Promise(resolve=>peer.close(resolve));assert.equal(dirname(resolve(folder)),resolve(tmpdir()));assert.ok(folder.includes('xmind-agent-process-'));await rm(folder,{recursive:true,force:true});
+}
