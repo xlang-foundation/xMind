@@ -26,6 +26,7 @@ public:
     std::future<std::optional<Run>> incoming_message(std::string message,std::string context,std::string identity,std::string content);
     std::future<Run> start_incoming_message(std::string id,std::string context,std::string message,std::string prompt_json,std::string identity);
     std::future<std::optional<std::vector<Message>>> task_history(std::string id);
+    std::future<std::optional<std::string>> incoming_message_payload(std::string run_id);
     std::future<std::vector<Event>> event_batch(std::string id,std::int64_t after,std::size_t count);
     std::future<RootRunPage> list_root_runs(std::string context,std::string state,std::optional<std::int64_t> since,std::size_t count,
         std::int64_t watermark=0,std::optional<std::int64_t> cursor_ms={},std::int64_t cursor_sequence=0);

@@ -1,0 +1,18 @@
+{
+  "native_source_tree": "c18d4a6cb5cdc56ebb25a13764a0339601759bbf",
+  "verification": "50/50 native and 60/60 extension contracts passed, no skips",
+  "server_sha256": "908a59bf981fe99241dbba1c95883c1a421cce4b2721f430cc9d19df428b8aae",
+  "runtime_sha256": "fb02403bff1bf9967d5e49cb4f2a5a4f6d13ad139cc02b069e20fc03cc6c4862",
+  "sqlite_module_sha256": "fcb0e481352672eb72d86a96e2ef5d9b58939a35ad03a4ac3e32bfe7dc733b8c",
+  "scope": "Native C++ A2A text-part and message/part metadata history projection through embedded-xlang3 durable mappings. Real server, persistence, SDK client, synthetic provider replies. Both protocol versions, blocking send, get/list/stream replay, isolation, retry conflicts and reopen without an executor.",
+  "initial_failure": "Older legacy test expected flattened protocol parts. Updated to verify original parts and independently assert the combined provider prompt. Original full build/CTest failure is preserved.",
+  "runtime": "No CPython execution; SQLite I/O through embedded xlang3.",
+  "installed_previews": "Unchanged existing runtimes; this checkpoint not installed.",
+  "hosted_previous_source": {
+    "revision": "d07c61c725c3a1a4bf9ac85a2c6782575e52d8df",
+    "run": 37693026697,
+    "status": "in_progress",
+    "conclusion": null
+  },
+  "remaining": "Task continuation/references, file/data/media-type interoperability, push/extended cards, delegation, team policies and full product parity remain incomplete. Hosted verification of this new source pending."
+}

@@ -287,6 +287,10 @@ std::optional<std::vector<Message>> Repository::task_history(const std::string& 
     run(id);if(impl_->database.execute("SELECT run_id FROM task_history_owners WHERE run_id=?",{id}).rows.empty())return {};
     std::vector<Message> result;for(const auto& row:impl_->database.execute("SELECT m.seq,m.role,m.payload FROM task_messages t JOIN messages m ON m.seq=t.message_seq WHERE t.run_id=? ORDER BY m.seq",{id}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2])});return result;
 }
+std::optional<std::string> Repository::incoming_message_payload(const std::string& id){
+    run(id);const auto rows=impl_->database.execute("SELECT identity FROM incoming_messages WHERE run_id=?",{id}).rows;
+    if(rows.empty())return {};return text(rows[0][0]);
+}
 Run Repository::start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json) {
     identifier(id);auto& db=impl_->database;Transaction transaction(db);session(session_id);
     if(!db.execute("SELECT id FROM runs WHERE id=?",{id}).rows.empty()) throw Conflict("Run already exists");

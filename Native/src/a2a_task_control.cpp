@@ -62,8 +62,18 @@ Json task(PersistenceService& store,const Run& run,std::size_t count=0,A2aVersio
     }
     if(count){
         const auto history=store.task_history(run.id).get();if(!history)throw RpcError{-32004,"Legacy task history is unavailable"};auto messages=Json::array();
+        const auto incoming=store.incoming_message_payload(run.id).get();
+        const auto original=incoming?Json::parse(*incoming):Json{};
         for(const auto& item:*history){if(item.role!="user"&&item.role!="assistant")continue;const auto value=Json::parse(item.json);if(!value.contains("content")||!value["content"].is_string())continue;
-            Json message={{"messageId",value.value("a2a_message_id",run.id+"-message-"+std::to_string(item.sequence))},{"taskId",run.id},{"contextId",run.session_id},{"role",version==A2aVersion::v1?(item.role=="user"?"ROLE_USER":"ROLE_AGENT"):(item.role=="user"?"user":"agent")},{"parts",Json::array({text_part(item.role=="assistant"?assistant_text(value):value["content"].get<std::string>(),version)})}};if(version==A2aVersion::legacy)message["kind"]="message";messages.push_back(std::move(message));
+            Json message={{"messageId",value.value("a2a_message_id",run.id+"-message-"+std::to_string(item.sequence))},{"taskId",run.id},{"contextId",run.session_id},{"role",version==A2aVersion::v1?(item.role=="user"?"ROLE_USER":"ROLE_AGENT"):(item.role=="user"?"user":"agent")},{"parts",Json::array({text_part(item.role=="assistant"?assistant_text(value):value["content"].get<std::string>(),version)})}};
+            // Preserve the admitted protocol message separately from the flattened
+            // model prompt. Match its durable ID; never attach another run's input.
+            if(item.role=="user"&&original.is_object()&&value.contains("a2a_message_id")&&original.value("messageId",Json{})==value["a2a_message_id"]){
+                message["parts"]=original.at("parts");
+                if(version==A2aVersion::v1)for(auto& part:message["parts"])part.erase("kind");
+                if(original.contains("metadata"))message["metadata"]=original["metadata"];
+            }
+            if(version==A2aVersion::legacy)message["kind"]="message";messages.push_back(std::move(message));
         }
         if(messages.size()>count)messages.erase(messages.begin(),messages.end()-static_cast<Json::difference_type>(count));result["history"]=std::move(messages);
     }

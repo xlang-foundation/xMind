@@ -54,7 +54,7 @@ try{
  const second=(await rpc('message/send',next)).result;assert.ok(second);assert.equal(second.contextId,first.contextId);assert.notEqual(second.id,first.id);
  const secondDone=await finished(second.id);assert.equal(requests.length,2);
  assert.ok(requests[1].messages.some(item=>item.role==='assistant'&&item.content==='Synthetic peer reply: first input'),'New task must retain model conversation context');
- assert.equal(secondDone.history.length,2);assert.equal(secondDone.history[0].parts[0].text,'\nsecond input');
+ assert.equal(secondDone.history.length,2);assert.deepEqual(secondDone.history[0].parts,next.message.parts,'Protocol history must preserve original part boundaries, including empty parts');assert.equal(requests[1].messages.findLast(item=>item.role==='user').content,'\nsecond input','The provider still receives the combined model prompt');
  assert.ok(!secondDone.history.some(item=>item.parts[0].text==='first input'),'Task history must exclude earlier context prompts');
  assert.equal((await rpc('tasks/get',{id:first.id,historyLength:1})).result.history.length,1);
  const sessions=await api('/v1/sessions');assert.equal(sessions.length,1);assert.equal((await api('/v1/sessions/'+first.contextId+'/history')).length,4);
