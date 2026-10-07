@@ -115,7 +115,7 @@ try {
   assert.deepEqual(cli('runs','shared'),[]);
   const wrong = spawnSync(cliExe, [String(port), 'sessions'], {env: {...env, XMIND_AUTH_TOKEN: 'wrong'}, encoding: 'utf8', windowsHide: true});
   assert.equal(wrong.status, 1);
-  console.log('Native HTTP/CLI contracts passed: authentication, shared clients, concurrent messages, restart persistence; execution routes absent');
+  console.log('Native HTTP/CLI contracts passed: authentication, shared clients, concurrent messages, restart persistence; unconfigured execution rejects admission without creating a run');
 } finally {
   await stop();await rm(folder, {recursive: true, force: true});
 }

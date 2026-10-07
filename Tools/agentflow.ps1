@@ -32,7 +32,8 @@ if($Action -eq 'Serve') {
     $Database=[System.IO.Path]::GetFullPath($Database)
     New-Item -ItemType Directory -Force -Path (Split-Path $Database -Parent) | Out-Null
     $serverArguments=@('--db',$Database,'--modules',(Join-Path $RuntimeDirectory 'modules'),'--stdlib',$PythonLibSource,'--port',"$Port")
-    if($Model) {$serverArguments+=@('--model',$Model,'--model-tools',$ModelTools)}
+    if($Model) {$serverArguments+=@('--model',$Model)}
+    if($Model -or $Workspace) {$serverArguments+=@('--model-tools',$ModelTools)}
     if($SelectableModels) {$serverArguments+=@('--models',$SelectableModels)}
     if($Model) {$serverArguments+=@('--model-stream-usage',$StreamUsage)}
     if($ModelEndpoint) {$serverArguments+=@('--model-endpoint',$ModelEndpoint)}
