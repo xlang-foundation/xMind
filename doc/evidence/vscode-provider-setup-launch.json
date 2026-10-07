@@ -1,0 +1,16 @@
+{
+  "scope": "Actual installed verified provider-setup backend; own right-sidebar model-ID prompt opened; existing sessions/profile and user draft preserved; no provider key entered by agent and no live inference claimed",
+  "server_sha256": "D8A73BDAB4653288876DD1B9193AD8CB5E431DDA60E2F40171CA26D1CF7ECAC5",
+  "opened": {
+    "opened": true,
+    "location": "secondarySidebar",
+    "origin": "http://127.0.0.1:64118",
+    "time": "2026-10-07T17:34:27.856Z",
+    "storage": "Normal development host; no extension test runner",
+    "scope": "Actual sidebar opened; no live inference claimed"
+  },
+  "origin": "http://127.0.0.1:64118",
+  "backend_pid": 13444,
+  "host_launcher_pid": 14812,
+  "source_revision": "86ff065cafeb0b43f9bc47adb2d16b631dacade3"
+}
