@@ -16,6 +16,8 @@ Coding has three required clients: console CLI, standalone Electron IDE and edit
 
 A coding agent is a configured general agent: repository instructions, coding tools and a selected model. A graph agent node invokes the same engine. Coding and general-agent execution do not develop separate session stores, permission systems or model integrations.
 
+Normal coding defaults to the dynamic agent/tool loop. Registered graphs are optional orchestration around the same engine. Runtime-generated subtasks, plan revisions and A2A delegation belong to the native planner/repository/scheduler and remain incomplete. See [dynamic-agent-execution.md](dynamic-agent-execution.md) for the current implementation and required acceptance boundaries.
+
 ## Runtime components and ownership
 
 The service owns configuration, credentials, workspace registrations, sessions and execution. Clients submit requests and display committed state. A disconnected editor does not own or stop an agent. Client reconnection uses durable event cursors.
