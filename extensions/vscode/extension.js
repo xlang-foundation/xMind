@@ -200,6 +200,7 @@ async function activate(context) {
       catch(error){
         current();
         if(!setup.configured || error.status!==502 || !/provider returned HTTP (401|403)$/.test(error.message))throw error;
+        post({type:'status',text:'OpenAI rejected the saved key · replace it to fetch models'});
         if(await vscode.window.showErrorMessage('OpenAI rejected the saved key for model discovery.','Replace API key')!=='Replace API key')return false;
         current();key=await inputKey();if(key===undefined)return false;
         current();catalogue=await target.discoverProviderModels(key,setup.revision);

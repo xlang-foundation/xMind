@@ -126,6 +126,9 @@ struct HttpServer::Impl {
         server.new_task_queue=[] {return new httplib::ThreadPool(4,4,32);};
         server.set_payload_max_length(1024*1024);
         server.set_read_timeout(5,0);server.set_write_timeout(5,0);server.set_keep_alive_max_count(10);
+        // Each keep-alive socket occupies a bounded worker. Release idle
+        // clients promptly so a burst from other views/CLI clients can run.
+        server.set_keep_alive_timeout(1);
         server.set_pre_routing_handler([this](const Request& request,Response& response) {
             const auto host=request.get_header_value("Host");
             if(request.get_header_value_count("Host")!=1 || (host!="127.0.0.1:"+std::to_string(port) && host!="localhost:"+std::to_string(port))) {

@@ -1,0 +1,13 @@
+file:///D:/CantorAI2026/xMind/Native/tests/http_cli_contract.mjs:52
+    socket.setTimeout(5000,()=>{socket.destroy();reject(new Error('Raw HTTP timeout'));});
+                                                        ^
+
+Error: Raw HTTP timeout
+    at Socket.<anonymous> (file:///D:/CantorAI2026/xMind/Native/tests/http_cli_contract.mjs:52:57)
+    at Object.onceWrapper (node:events:633:28)
+    at Socket.emit (node:events:519:28)
+    at Socket._onTimeout (node:net:604:8)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7)
+
+Node.js v22.19.0

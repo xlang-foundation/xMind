@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {spawn, spawnSync} from 'node:child_process';
 import {mkdtemp, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,resolve,dirname,basename} from 'node:path';
 import {randomBytes} from 'node:crypto';
 import {createConnection} from 'node:net';
 import {fileURLToPath} from 'node:url';
@@ -56,8 +56,32 @@ async function raw(headers) {
     socket.on('end',()=>resolve(Number(/^HTTP\/1\.1 (\d+)/.exec(output)?.[1])));
   });
 }
+async function idleConnectionFairness() {
+  const sockets=[];
+  try {
+    await Promise.all(Array.from({length:4},()=>new Promise((resolve,reject)=>{
+      const socket=createConnection({host:'127.0.0.1',port});sockets.push(socket);let response='',ready=false;
+      socket.setTimeout(5000,()=>{if(!ready)reject(new Error('Idle fairness peer did not receive health response'));});
+      socket.on('error',reject);
+      socket.on('connect',()=>socket.write(`GET /v1/health HTTP/1.1\r\nHost: 127.0.0.1:${port}\r\nAuthorization: Bearer ${token}\r\nConnection: keep-alive\r\n\r\n`));
+      socket.on('data',chunk=>{
+        response+=chunk;const boundary=response.indexOf('\r\n\r\n');if(boundary<0)return;
+        const length=/content-length:\s*(\d+)/i.exec(response.slice(0,boundary));
+        if(length && Buffer.byteLength(response.slice(boundary+4))>=Number(length[1])){assert.match(response,/^HTTP\/1\.1 200/);ready=true;resolve();}
+      });
+      socket.on('end',()=>{if(!ready)reject(new Error('Idle fairness peer closed before its response'));});
+    })));
+    // Keep all four worker connections idle while another authenticated client
+    // requests service. No fixture retries, forced Connection:close or timeout
+    // widening is applied to the production clients under test.
+    const started=performance.now();
+    assert.equal(await raw(`Host: 127.0.0.1:${port}\r\nAuthorization: Bearer ${token}`),200);
+    assert.ok(performance.now()-started<3000,'Idle peers must release the bounded worker pool before the next client deadline');
+  } finally {for(const socket of sockets)socket.destroy();}
+}
 try {
   await start();
+  await idleConnectionFairness();
   assert.equal((await request('/v1/health')).data.agent_execution, false);
   assert.deepEqual(cli('process-profiles'),{profiles:[],runtime_state:'per_operation'},'Unconfigured native server must not invent process profiles or running processes');
   assert.equal((await request('/v1/process/profiles',undefined,{Authorization:''})).status,401);
@@ -117,5 +141,5 @@ try {
   assert.equal(wrong.status, 1);
   console.log('Native HTTP/CLI contracts passed: authentication, shared clients, concurrent messages, restart persistence; unconfigured execution rejects admission without creating a run');
 } finally {
-  await stop();await rm(folder, {recursive: true, force: true});
+  await stop();assert.equal(dirname(resolve(folder)),resolve(tmpdir()));assert.ok(basename(folder).startsWith('xmind-http-'));await rm(folder, {recursive: true, force: true});
 }
