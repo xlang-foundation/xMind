@@ -42,8 +42,8 @@ int main(int argc,char** argv) {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit") || !options.emplace(key,argv[i+1]).second)
-                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--model ID --model-endpoint URL] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096]");
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit") || !options.emplace(key,argv[i+1]).second)
+                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--model ID --model-endpoint URL] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
         int port=8765;
@@ -57,6 +57,7 @@ int main(int argc,char** argv) {
         const std::string auth=token;
         if(port<0 || port>65535) throw std::invalid_argument("Invalid port");
         if(options.contains("--model")!=options.contains("--model-endpoint")) throw std::invalid_argument("Model ID and endpoint must be configured together");
+        if(options.contains("--inspection-workspace") && options.contains("--workspace")) throw std::invalid_argument("Select the execution workspace or an inspection-only workspace");
         if(!options.contains("--model") && (options.contains("--workspace") || options.contains("--credential-id") || options.contains("--workers") || options.contains("--queue-limit") || options.contains("--model-tools"))) throw std::invalid_argument("Agent settings require a model configuration");
         if(options.contains("--model-tools") && options.at("--model-tools")!="supported" && options.at("--model-tools")!="unsupported" && options.at("--model-tools")!="unknown") throw std::invalid_argument("Invalid model tool capability declaration");
         if(options.contains("--workspace") && (!options.contains("--model-tools") || options.at("--model-tools")!="supported")) throw std::invalid_argument("Workspace execution requires --model-tools supported");
@@ -102,14 +103,18 @@ int main(int argc,char** argv) {
                 settings.credential=agentflow::CredentialReference{"server",id,purpose};
             }
             executor=std::make_unique<agentflow::AgentService>(persistence,std::move(settings),workers,queue);
-            if(options.contains("--workspace")) {
-                recovery_workspace=std::make_unique<agentflow::WorkspaceTools>(options.at("--workspace"));
-                recovery=std::make_unique<agentflow::EditExecutor>(persistence,*recovery_workspace);
-            }
 #else
             throw std::invalid_argument("Native provider execution currently requires Windows");
 #endif
         }
+#if defined(_WIN32)
+        if(options.contains("--workspace") || options.contains("--inspection-workspace")) {
+            recovery_workspace=std::make_unique<agentflow::WorkspaceTools>(options.at(options.contains("--workspace")?"--workspace":"--inspection-workspace"));
+            recovery=std::make_unique<agentflow::EditExecutor>(persistence,*recovery_workspace);
+        }
+#else
+        if(options.contains("--inspection-workspace")) throw std::invalid_argument("Native file inspection currently requires Windows");
+#endif
         agentflow::HttpServer server(persistence,auth,executor.get()
 #if defined(_WIN32)
             ,recovery.get()

@@ -7,7 +7,7 @@ import {randomBytes,createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createRequire} from 'node:module';
 const {BackendClient}=createRequire(import.meta.url)('../../extensions/vscode/client.js');
-const [fixture,cliExe,modules,stdlib]=process.argv.slice(2);
+const [fixture,cliExe,modules,stdlib,serverExe]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-approved-http-')),workspace=join(folder,'workspace');
 const recoveryWorkspace=join(folder,'recovery-workspace');
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};
@@ -92,6 +92,30 @@ try {
   assert.equal((await request('/v1/operations/uncertain-edit/decision',{decision:'allow'})).status,409);
   const exit=new Promise(resolve=>child.once('exit',resolve));child.stdin.end('done\n');assert.equal(await exit,0,errors);
   process.stdout.write(output);
+  async function startInspector(root) {
+    errors='';output='';
+    child=spawn(serverExe,['--db',join(folder,'state.sqlite'),'--modules',modules,'--stdlib',stdlib,'--port','0','--inspection-workspace',root],{env,windowsHide:true});
+    child.stderr.on('data',data=>{errors+=data;});
+    port=await new Promise((resolve,reject)=>{
+      const timer=setTimeout(()=>reject(new Error(`Product inspection readiness timeout: ${errors}`)),10000);
+      child.once('error',error=>{clearTimeout(timer);reject(error);});
+      child.once('exit',code=>{clearTimeout(timer);reject(new Error(`Product inspection exited ${code}: ${errors}`));});
+      child.stdout.on('data',data=>{output+=data;const match=/listening on http:\/\/127\.0\.0\.1:(\d+)/.exec(output);if(match){clearTimeout(timer);resolve(Number(match[1]));}});
+    });
+  }
+  async function stopInspector() {const exited=new Promise(resolve=>child.once('exit',resolve));child.kill();await exited;}
+  await startInspector(recoveryWorkspace);
+  assert.equal(cli('health').agent_execution,false,'Recovery must work without provider credentials or model execution');
+  assert.deepEqual(cli('models').models,[]);
+  const productInspection=cli('inspect-edit','uncertain-edit');
+  assert.equal(productInspection.match,'different');assert.equal(productInspection.quarantine_released,false);
+  assert.equal(productInspection.observed.content_sha256,createHash('sha256').update(partial).digest('hex'));
+  assert.deepEqual(cli('operation','uncertain-edit'),operationBefore);
+  assert.deepEqual(cli('events','run-recovery'),eventsBefore);
+  await stopInspector();await startInspector(workspace);
+  assert.equal((await request(recoveryPath)).status,403,'Product inspection must reject another opened workspace');
+  assert.deepEqual(cli('operation','uncertain-edit'),operationBefore);
+  console.log('Product native server/CLI inspected actual raw file bytes after restart without a model; journal and quarantine unchanged. Uncertain state and external writes are labeled fixtures.');
 } finally {
   if(child && child.exitCode===null) {const exit=new Promise(resolve=>child.once('exit',resolve));child.kill();await exit;}
   assert.equal(dirname(resolve(folder)),resolve(tmpdir()));assert.ok(folder.includes('xmind-approved-http-'));

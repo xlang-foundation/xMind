@@ -10,6 +10,7 @@ param(
     [ValidateSet('unknown','unsupported','supported')][string]$StreamUsage='unknown',
     [string]$ModelEndpoint,
     [string]$Workspace,
+    [string]$InspectionWorkspace,
     [switch]$ApprovedEdits,
     [string]$CredentialId,
     [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
@@ -34,6 +35,7 @@ if($Action -eq 'Serve') {
     if($Model) {$serverArguments+=@('--model-stream-usage',$StreamUsage)}
     if($ModelEndpoint) {$serverArguments+=@('--model-endpoint',$ModelEndpoint)}
     if($Workspace) {$serverArguments+=@('--workspace',$Workspace)}
+    if($InspectionWorkspace) {$serverArguments+=@('--inspection-workspace',$InspectionWorkspace)}
     if($ApprovedEdits) {$serverArguments+=@('--workspace-edits','approved')}
     if($CredentialId) {$serverArguments+=@('--credential-id',$CredentialId)}
     & $binary @serverArguments
