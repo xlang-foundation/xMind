@@ -3,8 +3,10 @@ const vscode = require('vscode');
 const crypto = require('node:crypto');
 const { BackendClient, backendOrigin, validateToken } = require('./client');
 const { html } = require('./webview');
+const { editReview } = require('./edit-review');
 
 function activate(context) {
+  const showEditReview=editReview(vscode,context);
   let panel;
   let sidebarView;
   let resolveSidebar;
@@ -205,9 +207,9 @@ function activate(context) {
           const link = new URL(message.url);
           if (!['https:','http:'].includes(link.protocol)) throw new Error('Only HTTP/HTTPS links can be opened.');
           await vscode.env.openExternal(vscode.Uri.parse(link.href));
-        } else if (message.type === 'decide' && typeof message.id === 'string') {
+        } else if (['decide','review'].includes(message.type) && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before deciding an operation.');
-          if (message.decision !== 'allow' && message.decision !== 'deny') throw new Error('Decision must be allow or deny.');
+          if (message.type === 'decide' && message.decision !== 'allow' && message.decision !== 'deny') throw new Error('Decision must be allow or deny.');
           const proposal = reviewed.get(message.id);
           if (!proposal || proposal.run_id !== runId || proposal.state !== 'awaiting_approval') throw new Error('Inspect a pending operation in the selected run before deciding.');
           const version = generation;
@@ -217,6 +219,7 @@ function activate(context) {
             await poll();
             throw new Error('The operation changed since review. Inspect its current state before deciding.');
           }
+          if (message.type === 'review') {await showEditReview(current);return;}
           const decided = await client.decide(message.id, message.decision);
           if (panel !== view || version !== generation) return;
           reviewed.set(decided.id, decided);

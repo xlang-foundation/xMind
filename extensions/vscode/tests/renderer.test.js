@@ -40,3 +40,11 @@ test('provider cache/reasoning counts and backend first-token time render withou
   const r=renderer();r.send({type:'history',history:[{role:'assistant',data:{content:'Synthetic metrics fixture',usage:{prompt_tokens:12,completion_tokens:6,total_tokens:18,prompt_tokens_details:{cached_tokens:4},completion_tokens_details:{reasoning_tokens:2}},first_token_ms:200,elapsed_ms:1250}}]});
   const text=r.dom.window.document.querySelector('.metrics').textContent;assert.match(text,/Cached 4/);assert.match(text,/Reasoning 2/);assert.match(text,/First token 0.20s/);assert.match(text,/1.25s/);r.dom.window.close();
 });
+
+test('pending file comparison sends only an operation ID and remains separate from approval',()=>{
+  const r=renderer();r.send({type:'operations',operations:[{id:'fixture-edit',tool:'replace_file',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'file.cpp',before_content:'old',after_content:'new'})}]});
+  const buttons=[...r.dom.window.document.querySelectorAll('#operations button')];
+  const compare=buttons.find(button=>button.textContent==='Compare changes');assert.ok(compare);compare.click();
+  assert.equal(JSON.stringify(r.posted.at(-1)),JSON.stringify({type:'review',id:'fixture-edit'}));
+  assert.ok(!buttons.find(button=>button.textContent==='Allow edit').disabled);r.dom.window.close();
+});

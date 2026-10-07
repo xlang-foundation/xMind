@@ -33,7 +33,14 @@ window.addEventListener('message',({data:m})=>{
   else if(m.type==='user'){entry('user',{content:m.text});resetLive();byId('prompt').value='';byId('events').textContent='';}
   else if(m.type==='draft')byId('prompt').value=m.text;
   else if(m.type==='event'){const event=m.event;byId('events').textContent+=JSON.stringify(event)+'\n';if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
-  else if(m.type==='operations')operations(m.operations);
+  else if(m.type==='operations'){
+    operations(m.operations);
+    for(const [index,item] of m.operations.entries())if(item.tool==='replace_file'&&item.state==='awaiting_approval'){
+      const button=node('button','Compare changes');button.disabled=Date.now()>=item.expires_unix_ms;
+      button.onclick=()=>api.postMessage({type:'review',id:item.id});
+      byId('operations').children[index].append(button);
+    }
+  }
   else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);byId('send').disabled=!execution||activeRun;byId('cancel').hidden=!activeRun;}
   else if(m.type==='error')byId('status').textContent=m.text;
   if(follow)scroll.scrollTop=scroll.scrollHeight;

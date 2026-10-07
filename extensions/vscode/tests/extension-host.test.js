@@ -11,7 +11,7 @@ const { BackendClient,backendOrigin,validateToken } = require('../client');
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
   const commands=new Map(),secrets=new Map(),requests=[],views=[],intervals=new Map();
-  const state=new Map(),errors=[];
+  const state=new Map(),errors=[],comparisons=[];let documentProvider;
   let pendingHistory;
   let pendingOperation;
   let operations=options.operations||[];
@@ -43,11 +43,11 @@ function harness(options={}) {
   };
   class TestClient extends BackendClient {constructor(url,provider) {super(url,provider,fetchImpl);}}
   const vscode={
-    Uri:{joinPath:(root,...parts)=>[root,...parts].join('/')},
-    workspace:{isTrusted:true,getConfiguration:()=>({get:()=> 'http://localhost:8765'})},
+    Uri:{joinPath:(root,...parts)=>[root,...parts].join('/'),parse:value=>({toString:()=>value})},
+    workspace:{isTrusted:true,getConfiguration:()=>({get:()=> 'http://localhost:8765'}),registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
-      executeCommand:async name=>{if(name==='workbench.view.extension.xmind')return;assert.equal(name,'xmind.workspace.focus');sidebarProvider.resolveWebviewView(makeView());}},
+      executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(name==='workbench.view.extension.xmind')return;assert.equal(name,'xmind.workspace.focus');sidebarProvider.resolveWebviewView(makeView());}},
     window:{showInputBox:async options=>{assert.equal(options.password,true);return token;},showErrorMessage:message=>errors.push(message),
       registerWebviewViewProvider:(id,provider)=>{assert.equal(id,'xmind.workspace');sidebarProvider=provider;return {dispose(){}};}}
   };
@@ -63,9 +63,10 @@ function harness(options={}) {
   let intervalID=0;
   const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken}:name==='./webview'?require('../webview'):require(name),
     setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
+  const originalRequire=sandbox.require;sandbox.require=name=>name==='./edit-review'?require('../edit-review'):originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,state,errors,context,decisions,
+  return {token,commands,secrets,requests,views,intervals,state,errors,context,decisions,comparisons,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     pauseOperation(promise) {pendingOperation=promise;},
     pauseHistory(promise) {pendingHistory=promise;}};
 }
@@ -153,4 +154,16 @@ test('older native servers without a catalogue keep default execution without in
   const h=harness({legacyCatalogue:true});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
   await until(()=>view.posted.some(message=>message.type==='capabilities'));
   const capability=view.posted.find(message=>message.type==='capabilities');assert.equal(capability.execution,true);assert.equal(capability.model,undefined);assert.equal(capability.models.length,0);view.close();
+});
+
+test('edit comparison opens exact revalidated backend snapshots without granting or writing',async()=>{
+  const proposal={...pendingEdit,arguments_json:JSON.stringify({path:'src/example.cpp',before_content:'before\n',after_content:'after\n'})};
+  const h=harness({running:true,operations:[proposal]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.length));
+  view.receive({type:'review',id:'edit',before_content:'forged webview text'});
+  await until(()=>h.comparisons.length===1);
+  const [before,after,title]=h.comparisons[0];assert.equal(h.reviewText(before),'before\n');assert.equal(h.reviewText(after),'after\n');
+  assert.match(before.toString(),/^xmind-review:/);assert.equal(title,'xMind proposed edit: src/example.cpp');assert.equal(h.decisions.length,0);
+  h.pauseOperation(Promise.resolve({...proposal,arguments_json:'{"changed":"proposal"}'}));view.receive({type:'review',id:'edit'});
+  await until(()=>view.posted.some(message=>message.type==='error'));assert.equal(h.comparisons.length,1);view.close();
 });
