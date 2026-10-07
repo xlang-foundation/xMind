@@ -25,12 +25,10 @@ Operation PermissionWaiter::acquire(const std::string& id,const OperationSpec& s
         case OperationState::ready:
             try {
                 auto claimed=persistence_.claim_operation(id,spec).get();
-                if(cancel.stop_requested()) {
-                    // This service has performed no external action, so the
-                    // pre-effect cancellation is known, rather than uncertain.
-                    persistence_.finish_operation(id,OperationState::failed,R"({"reason":"cancelled_before_effect"})").get();
-                    throw PermissionCancelled("Operation cancelled before effect");
-                }
+                // Ownership has transferred. The effect adapter performs its
+                // pre-dispatch cancellation check and journals the outcome;
+                // this permission layer must not hide a claimed operation if
+                // outcome storage fails during a cancellation race.
                 return claimed;
             } catch(const WorkspaceEffectBusy&) {
                 // Retry only the durable permission claim, never a tool effect.

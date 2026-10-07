@@ -73,6 +73,9 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
         {"output_schema_json",entry.description.output_schema_json?Json(*entry.description.output_schema_json):Json(nullptr)},
         {"annotations_json",entry.description.annotations_json},{"arguments_json",approved}}.dump(),{"mcp-server:"+state.config_id}};
     PermissionWaiter(state.store).acquire(id,spec,expiry,cancel);
+    // Once claimed, even result-encoding/allocation failures must leave a
+    // fail-stop recovery signal, never a generic run failure or lost claim.
+    try {
     auto finish=[&](OperationState outcome,const std::string& result) {
         try{state.store.finish_operation(id,outcome,result).get();}
         catch(...){throw McpOutcomeUnrecorded("MCP outcome could not be recorded; stop execution and recover the claim");}
@@ -100,11 +103,17 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
             // independent bounded worker budget. Do not discard or replay it.
             SchemaWorker().evaluate(*entry.description.output_schema_json,*content,std::chrono::steady_clock::now()+std::chrono::seconds(2));
         }
-    }catch(...) {finish(OperationState::uncertain,Json{{"reason","mcp_tool_error_or_invalid_output"},{"request_id",reply.request_id},{"response_json",reply.response_json}}.dump());throw McpEffectUncertain("MCP response does not establish a successful effect; quarantine remains in force");}
+    }catch(const SchemaArgumentsInvalid&) {finish(OperationState::uncertain,Json{{"reason","mcp_output_schema_rejected"},{"request_id",reply.request_id},{"response_json",reply.response_json}}.dump());throw McpEffectUncertain("MCP output was rejected; quarantine remains in force");}
+    catch(const McpEffectUncertain&) {finish(OperationState::uncertain,Json{{"reason","mcp_peer_reported_tool_error"},{"request_id",reply.request_id},{"response_json",reply.response_json}}.dump());throw;}
+    catch(...) {finish(OperationState::uncertain,Json{{"reason","mcp_output_validation_unavailable"},{"request_id",reply.request_id},{"response_json",reply.response_json}}.dump());throw McpEffectUncertain("MCP output validation did not complete; quarantine remains in force");}
     try {
         const auto result=Json{{"operation_id",id},{"request_id",reply.request_id},{"server_config_id",state.config_id},{"config_revision",state.revision},{"acknowledged_by_peer",true},{"independently_verified",false},{"response_json",reply.response_json}}.dump();
         finish(OperationState::succeeded,result);return result;
     }catch(const McpOutcomeUnrecorded&){throw;}
     catch(...){throw McpOutcomeUnrecorded("Acknowledged MCP outcome could not be encoded; recovery is required");}
+    }catch(const McpOutcomeUnrecorded&){throw;}
+    catch(const McpEffectUncertain&){throw;}
+    catch(const McpEffectNotDispatched&){throw;}
+    catch(...){throw McpOutcomeUnrecorded("Claimed MCP outcome could not be encoded or recorded; recovery is required");}
 }
 }

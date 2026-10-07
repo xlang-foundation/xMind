@@ -9,6 +9,8 @@ struct PermissionExpired : std::runtime_error {using std::runtime_error::runtime
 // Transport-neutral effect authorization. This service never invokes a tool or
 // fabricates its result. The caller owns the run and must journal the actual
 // effect outcome after the returned executing claim, including uncertainty.
+// Once claimed, cancellation also belongs to that caller: check immediately
+// before physical dispatch and durably record a known pre-effect stop.
 class PermissionWaiter {
 public:
     explicit PermissionWaiter(PersistenceService& persistence):persistence_(persistence) {}
