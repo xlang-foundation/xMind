@@ -1,0 +1,14 @@
+{
+  "nativeRevision": "d0a70fef888c3724c2490bcb2cf8ef38d60f08c0",
+  "model": "gpt-5.6-sol",
+  "scope": "One live native CLI request in a new conversation after installing the exact tested runtime; saved provider credential stayed on the backend",
+  "terminal": "run.failed",
+  "exitStatus": 1,
+  "diagnostics": {
+    "provider_error_param": "reasoning_effort",
+    "provider_error_type": "invalid_request_error",
+    "reason": "provider_http_error",
+    "status": 400
+  },
+  "compatibilityFixed": false
+}
