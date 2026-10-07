@@ -30,7 +30,7 @@ export async function createBrowserServer({backend,assetRoot}){
      if(!health.ok){reply(health.status===401?401:502,{detail:'Server access token was not accepted'});return;}
      expire();if(sessions.size>=32){reply(429,{detail:'Too many active browser sessions'});return;}
      const previous=sessionFor(request);if(previous)for(const [id,value] of sessions)if(value===previous)sessions.delete(id);
-     const id=randomBytes(32).toString('hex');sessions.set(id,{authorization,expires:Date.now()+sessionLifetime});response.setHeader('Set-Cookie',`${cookieName}=${id}; HttpOnly; SameSite=Strict; Path=/`);reply(200,{connected:true});return;
+     const id=randomBytes(32).toString('hex');sessions.set(id,{authorization,expires:Date.now()+sessionLifetime});response.setHeader('Set-Cookie',`${cookieName}=${id}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${Math.floor(sessionLifetime/1000)}`);reply(200,{connected:true});return;
     }
     const current=sessionFor(request);reply(current?200:401,{connected:!!current});return;
    }
