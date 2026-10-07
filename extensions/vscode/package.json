@@ -5,26 +5,72 @@
   "version": "0.1.0",
   "publisher": "agentflow-local",
   "license": "Apache-2.0",
-  "engines": { "vscode": "^1.95.0" },
-  "categories": ["Other"],
+  "engines": {
+    "vscode": "^1.140.0"
+  },
+  "categories": [
+    "Other"
+  ],
   "main": "./extension.js",
-  "capabilities": { "untrustedWorkspaces": { "supported": false } },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    }
+  },
   "contributes": {
+    "viewsContainers": {
+      "secondarySidebar": [
+        {
+          "id": "xmind",
+          "title": "xMind",
+          "icon": "media/xmind.svg"
+        }
+      ]
+    },
+    "views": {
+      "xmind": [
+        {
+          "id": "xmind.workspace",
+          "name": "xMind",
+          "type": "webview"
+        }
+      ]
+    },
     "commands": [
-      { "command": "agentflow.open", "title": "xMind: Open Workspace" },
-      { "command": "agentflow.selection", "title": "xMind: Ask About Selection" },
-      { "command": "agentflow.configureToken", "title": "xMind: Configure Server Token" }
+      {
+        "command": "agentflow.open",
+        "title": "xMind: Open Workspace"
+      },
+      {
+        "command": "agentflow.selection",
+        "title": "xMind: Ask About Selection"
+      },
+      {
+        "command": "agentflow.configureToken",
+        "title": "xMind: Configure Server Token"
+      }
     ],
     "configuration": {
       "title": "xMind",
       "properties": {
         "agentflow.backendUrl": {
-          "type": "string", "default": "http://127.0.0.1:8765",
+          "type": "string",
+          "default": "http://127.0.0.1:8765",
           "description": "Local native xMind Server origin. Authentication is stored separately in SecretStorage."
         }
       }
     }
   },
-  "scripts": { "test": "node --test tests/*.test.js", "package": "vsce package --allow-missing-repository" },
-  "devDependencies": { "@vscode/vsce": "^3.6.0" }
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "package": "vsce package --allow-missing-repository"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.6.0",
+    "jsdom": "^29.1.1"
+  },
+  "dependencies": {
+    "dompurify": "^3.4.16",
+    "marked": "^18.1.0"
+  }
 }

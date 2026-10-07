@@ -15,6 +15,7 @@ function harness(options={}) {
   let pendingHistory;
   let pendingOperation;
   let operations=options.operations||[];
+  let sidebarProvider;
   const decisions=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const fetchImpl=async (url,requestOptions)=>{
@@ -22,6 +23,10 @@ function harness(options={}) {
     const target=new URL(url);requests.push(target.pathname+target.search);
     let data;
     if(target.pathname==='/v1/health') data={agent_execution:true,status:'ok'};
+    else if(target.pathname==='/v1/models') {
+      if(options.legacyCatalogue) return {ok:false,status:404,json:async()=>({detail:'Resource not found'})};
+      data={default_model:'synthetic-host-default',models:[{id:'synthetic-host-default'},{id:'synthetic-host-alternate'}]};
+    }
     else if(target.pathname==='/v1/sessions') data=[{id:'saved',title:'Saved session'}];
     else if(target.pathname==='/v1/sessions/saved/history') data=pendingHistory?await pendingHistory:transcript;
     else if(target.pathname==='/v1/sessions/saved/runs') data=[{id:'finished',state:'completed'}];
@@ -38,22 +43,25 @@ function harness(options={}) {
   };
   class TestClient extends BackendClient {constructor(url,provider) {super(url,provider,fetchImpl);}}
   const vscode={
+    Uri:{joinPath:(root,...parts)=>[root,...parts].join('/')},
     workspace:{isTrusted:true,getConfiguration:()=>({get:()=> 'http://localhost:8765'})},
     ViewColumn:{Beside:2},
-    commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};}},
+    commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
+      executeCommand:async name=>{if(name==='workbench.view.extension.xmind')return;assert.equal(name,'xmind.workspace.focus');sidebarProvider.resolveWebviewView(makeView());}},
     window:{showInputBox:async options=>{assert.equal(options.password,true);return token;},showErrorMessage:message=>errors.push(message),
-      createWebviewPanel:()=>{
-        const view={posted:[],webview:{html:'',postMessage:message=>{view.posted.push(message);return Promise.resolve(true);},
-          onDidReceiveMessage:callback=>{view.receive=callback;return {dispose(){}};}},
-          onDidDispose:callback=>{view.close=callback;return {dispose(){}};},reveal(){}};
-        views.push(view);return view;
-      }}
+      registerWebviewViewProvider:(id,provider)=>{assert.equal(id,'xmind.workspace');sidebarProvider=provider;return {dispose(){}};}}
   };
-  const context={subscriptions:[],secrets:{get:async key=>secrets.get(key),store:async (key,value)=>{secrets.set(key,value);}},
+  function makeView(){
+        const view={posted:[],webview:{html:'',cspSource:'https://fixture-webview',asWebviewUri:uri=>({toString:()=>uri}),postMessage:message=>{view.posted.push(message);return Promise.resolve(true);},
+          onDidReceiveMessage:callback=>{view.receive=callback;return {dispose(){}};}},
+          onDidDispose:callback=>{view.close=callback;return {dispose(){}};},show(){}};
+        views.push(view);return view;
+      }
+  const context={extensionUri:'https://fixture-extension',subscriptions:[],secrets:{get:async key=>secrets.get(key),store:async (key,value)=>{secrets.set(key,value);}},
     workspaceState:{get:key=>state.get(key),update:async (key,value)=>{state.set(key,value);}}};
   state.set('agentflow.session',{url:'http://127.0.0.1:8765',id:'saved'});
   let intervalID=0;
-  const sandbox={module:{exports:{}},require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken}:require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken}:name==='./webview'?require('../webview'):require(name),
     setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   sandbox.module.exports.activate(context);
@@ -140,4 +148,9 @@ test('closing a panel during history loading cannot start a detached poller',asy
   assert.ok(!h.requests.includes('/v1/sessions/saved/runs'),'Disposed selection must not continue fetching runs');
   assert.equal(h.views[1].posted.length,0,'Old panel response must not reach reopened view');
   h.views[1].close();
+});
+test('older native servers without a catalogue keep default execution without invented model IDs',async()=>{
+  const h=harness({legacyCatalogue:true});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='capabilities'));
+  const capability=view.posted.find(message=>message.type==='capabilities');assert.equal(capability.execution,true);assert.equal(capability.model,undefined);assert.equal(capability.models.length,0);view.close();
 });

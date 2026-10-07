@@ -35,15 +35,16 @@ class BackendClient {
       redirect: 'error'
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : `Backend returned ${response.status}`);
+    if (!response.ok) { const error=new Error(typeof data.detail === 'string' ? data.detail : `Backend returned ${response.status}`);error.status=response.status;throw error; }
     return data;
   }
   health() { return this.request('/v1/health'); }
+  models() { return this.request('/v1/models'); }
   sessions() { return this.request('/v1/sessions'); }
   createSession(title) { return this.request('/v1/sessions', { title }); }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
-  run(session_id, prompt) { return this.request('/v1/runs', { session_id, prompt }); }
+  run(session_id, prompt, model_id) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}) }); }
   events(id, after) { return this.request(`/v1/runs/${encodeURIComponent(id)}/events?after=${after}`); }
   status(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}`); }
   cancel(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/cancel`, {}); }

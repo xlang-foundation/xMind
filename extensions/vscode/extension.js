@@ -2,9 +2,12 @@
 const vscode = require('vscode');
 const crypto = require('node:crypto');
 const { BackendClient, backendOrigin, validateToken } = require('./client');
+const { html } = require('./webview');
 
 function activate(context) {
   let panel;
+  let sidebarView;
+  let resolveSidebar;
   let client;
   let sessionId;
   let runId;
@@ -15,10 +18,26 @@ function activate(context) {
   let opening;
   let messages = Promise.resolve();
   let reviewed = new Map();
+  let modelCatalogue = {models:[],default_model:''};
+  let selectedModel;
   const stateKey = 'agentflow.session';
 
   const post = message => panel?.webview.postMessage(message);
   const stop = () => { clearInterval(timer); timer = undefined; generation++; };
+  context.subscriptions.push(vscode.window.registerWebviewViewProvider('xmind.workspace', {
+    resolveWebviewView(view) {
+      sidebarView = view;
+      if (resolveSidebar) { const resolve = resolveSidebar; resolveSidebar = undefined; resolve(view); }
+      else open().catch(error => vscode.window.showErrorMessage(error.message));
+    }
+  }, { webviewOptions: { retainContextWhenHidden: true } }));
+  async function acquireSidebar() {
+    if (sidebarView) return sidebarView;
+    const available = new Promise(resolve => { resolveSidebar = resolve; });
+    await vscode.commands.executeCommand('workbench.view.extension.xmind');
+    await vscode.commands.executeCommand('xmind.workspace.focus');
+    return available;
+  }
 
   async function poll() {
     if (polling || !runId) return;
@@ -31,6 +50,11 @@ function activate(context) {
       for (const event of events) {
         post({ type: 'event', event });
         cursor = event.seq;
+      }
+      if (events.some(event => ['conversation.assistant','conversation.tool_turn'].includes(event.kind))) {
+        const history = await client.history(sessionId);
+        if (version !== generation) return;
+        post({ type:'transcript',history,preserveLive:true });
       }
       const run = await client.status(id);
       if (version !== generation) return;
@@ -88,10 +112,10 @@ function activate(context) {
     return backendOrigin(vscode.workspace.getConfiguration('agentflow').get('backendUrl'));
   }
   const secretKey = origin => `xmind.auth:${origin}`;
-  async function configureToken() {
+  async function configureToken(initialToken) {
     if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before connecting to xMind Server.');
     const origin = configuredOrigin();
-    const token = await vscode.window.showInputBox({
+    const token = typeof initialToken === 'string' ? validateToken(initialToken) : await vscode.window.showInputBox({
       title: 'xMind Server authentication', password: true, ignoreFocusOut: true,
       prompt: `Enter the XMIND_AUTH_TOKEN for ${origin}. This is the server access token.`,
       validateInput: value => { try { validateToken(value); return undefined; } catch (error) { return error.message; } }
@@ -102,19 +126,35 @@ function activate(context) {
   }
   async function openPanel() {
     if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before using AgentFlow.');
-    if (panel) { panel.reveal(); return; }
+    if (panel) { panel.show(); return; }
     await messages;
     const origin = configuredOrigin();
-    if (!await context.secrets.get(secretKey(origin)) && !await configureToken()) return;
+    const bootstrapToken = typeof process !== 'undefined' ? process.env.XMIND_UI_BOOTSTRAP_TOKEN : undefined;
+    if (!await context.secrets.get(secretKey(origin)) && !await configureToken(bootstrapToken)) return;
     client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
     const health = await client.health();
+    modelCatalogue = {models:[],default_model:''};
+    if (health.agent_execution) {
+      try { modelCatalogue = await client.models(); }
+      catch (error) {
+        if (error.status !== 404) throw error;
+        // Older native servers can still execute their configured default.
+        // Unknown identity stays unknown; never invent selectable models.
+        if (health.model) modelCatalogue = {default_model:health.model,models:[{id:health.model}]};
+      }
+    }
+    selectedModel = modelCatalogue.default_model || undefined;
     const saved = context.workspaceState.get(stateKey);
     sessionId = saved?.url === client.baseUrl ? saved.id : undefined;
-    panel = vscode.window.createWebviewPanel('agentflow', 'xMind', vscode.ViewColumn.Beside,
-      { enableScripts: true, localResourceRoots: [] });
-    panel.webview.html = html(crypto.randomBytes(16).toString('hex'));
+    panel = await acquireSidebar();
+    panel.webview.options = { enableScripts: true, localResourceRoots: [context.extensionUri] };
+    const asset = (...parts) => panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, ...parts)).toString();
+    panel.webview.html = html(crypto.randomBytes(16).toString('hex'), {
+      source:panel.webview.cspSource,css:asset('media','chat.css'),script:asset('media','chat.js'),
+      marked:asset('node_modules','marked','lib','marked.umd.js'),purify:asset('node_modules','dompurify','dist','purify.min.js')
+    });
     const view = panel;
-    panel.onDidDispose(() => { if (panel === view) { stop(); reviewed.clear(); panel = undefined; } }, null, context.subscriptions);
+    panel.onDidDispose(() => { if (panel === view) { stop(); reviewed.clear(); panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
     panel.webview.onDidReceiveMessage(message => {
       // Selection intent invalidates an in-flight approval immediately, before
       // its queued selection handler can run behind that network request.
@@ -127,10 +167,14 @@ function activate(context) {
         if (panel !== view) return;
         if (!message || typeof message.type !== 'string') return;
         if (message.type === 'ready') {
-          post({ type: 'capabilities', execution: health.agent_execution });
+          post({ type: 'capabilities', execution: health.agent_execution, model:selectedModel, models:modelCatalogue.models });
           await refresh();
           if (sessionId) await selectSession(sessionId);
         } else if (message.type === 'refresh') await refresh();
+        else if (message.type === 'model' && typeof message.id === 'string') {
+          if (!modelCatalogue.models.some(model => model.id === message.id)) throw new Error('Model is not configured on this backend.');
+          selectedModel = message.id;
+        }
         else if (message.type === 'new') {
           const session = await client.createSession('VS Code session');
           await selectSession(session.id);
@@ -146,7 +190,7 @@ function activate(context) {
             await refresh();
           }
           if (panel !== view) return;
-          const run = await client.run(sessionId, message.prompt);
+          const run = await client.run(sessionId, message.prompt, selectedModel);
           if (panel !== view) return; // Accepted backend execution survives view closure.
           stop(); runId = run.id; cursor = 0;
           reviewed.clear(); post({ type: 'operations', operations: [] });
@@ -155,6 +199,12 @@ function activate(context) {
           await poll();
         } else if (message.type === 'cancel' && runId) {
           await client.cancel(runId); await poll();
+        } else if (message.type === 'copy' && typeof message.text === 'string' && message.text.length <= 1048576) {
+          await vscode.env.clipboard.writeText(message.text);
+        } else if (message.type === 'openLink' && typeof message.url === 'string') {
+          const link = new URL(message.url);
+          if (!['https:','http:'].includes(link.protocol)) throw new Error('Only HTTP/HTTPS links can be opened.');
+          await vscode.env.openExternal(vscode.Uri.parse(link.href));
         } else if (message.type === 'decide' && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before deciding an operation.');
           if (message.decision !== 'allow' && message.decision !== 'deny') throw new Error('Decision must be allow or deny.');
@@ -184,8 +234,8 @@ function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.open', async () => {
     try { await open(); } catch (error) { vscode.window.showErrorMessage(error.message); }
   }));
-  context.subscriptions.push(vscode.commands.registerCommand('agentflow.configureToken', async () => {
-    try { await configureToken(); } catch (error) { vscode.window.showErrorMessage(error.message); }
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.configureToken', async initialToken => {
+    try { await configureToken(initialToken); } catch (error) { vscode.window.showErrorMessage(error.message); }
   }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.selection', async () => {
     const editor = vscode.window.activeTextEditor;
@@ -199,53 +249,6 @@ function activate(context) {
     } catch (error) { vscode.window.showErrorMessage(error.message); }
   }));
   context.subscriptions.push({ dispose: stop });
-}
-
-function html(nonce) {
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'nonce-${nonce}'; script-src 'nonce-${nonce}';">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style nonce="${nonce}">body{font-family:var(--vscode-font-family);color:var(--vscode-foreground);background:var(--vscode-editor-background);padding:16px}button,select,textarea{font:inherit;color:var(--vscode-input-foreground);background:var(--vscode-input-background);border:1px solid var(--vscode-input-border);padding:8px}textarea{width:95%;min-height:100px}pre{white-space:pre-wrap;overflow-wrap:anywhere}#status{margin:12px 0}button{cursor:pointer;margin:4px}</style></head><body>
-  <h2>xMind</h2><select id="sessions" aria-label="Session"></select><button id="new">New session</button><button id="refresh">Refresh</button>
-  <div id="status" role="status">Connecting…</div><div id="history"></div>
-  <label for="prompt">Prompt</label><textarea id="prompt"></textarea><br><button id="send">Run</button><button id="cancel">Cancel</button>
-  <h3>Operation review</h3><div id="operations"></div>
-  <h3>Run events</h3><pre id="events"></pre>
-  <script nonce="${nonce}">
-  const api=acquireVsCodeApi();const byId=id=>document.getElementById(id);
-  for(const type of ['new','refresh','cancel'])byId(type).onclick=()=>api.postMessage({type});
-  byId('sessions').onchange=()=>api.postMessage({type:'select',id:byId('sessions').value});
-  byId('send').onclick=()=>{api.postMessage({type:'send',prompt:byId('prompt').value});};
-  function entry(role,text){const p=document.createElement('pre');p.textContent=role+': '+text;byId('history').append(p);}
-  function operations(items){
-    byId('operations').replaceChildren();
-    for(const item of items){
-      const section=document.createElement('section');const title=document.createElement('h4');
-      title.textContent=item.tool+' — '+item.state+' ('+item.id+')';section.append(title);
-      const metadata=document.createElement('pre');metadata.textContent='Workspace: '+item.workspace_id+'\\nExpires: '+new Date(item.expires_unix_ms).toISOString()+'\\nController: '+(item.decision_actor||'Awaiting decision');section.append(metadata);
-      // Render every recorded argument byte as text. Never evaluate tool/file
-      // content or rebuild approval arguments from a parsed browser object.
-      const payload=document.createElement('pre');payload.textContent=item.arguments_json;section.append(payload);
-      if(item.tool==='replace_file'){
-        try{const plan=JSON.parse(item.arguments_json);for(const [label,key] of [['Before','before_content'],['After','after_content']]){const heading=document.createElement('strong');heading.textContent=label;const content=document.createElement('pre');content.textContent=plan[key];section.append(heading,content);}}catch{}
-      }
-      if(item.state==='awaiting_approval'){
-        for(const decision of ['allow','deny']){const button=document.createElement('button');button.textContent=decision==='allow'?'Allow this operation':'Deny this operation';button.disabled=Date.now()>=item.expires_unix_ms;button.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision});};section.append(button);}
-      } else {const result=document.createElement('pre');result.textContent=item.result_json;section.append(result);}
-      byId('operations').append(section);
-    }
-  }
-  window.addEventListener('message',({data:m})=>{
-    if(m.type==='sessions'){byId('sessions').replaceChildren();for(const s of m.sessions){const o=document.createElement('option');o.value=s.id;o.textContent=s.title;o.selected=s.id===m.selected;byId('sessions').append(o);}}
-    else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(m.type==='history')byId('events').textContent='';for(const item of m.history)entry(item.role,item.data.content||JSON.stringify(item.data));}
-    else if(m.type==='capabilities'){byId('send').disabled=!m.execution;if(!m.execution)byId('status').textContent='Connect a model on xMind Server to run an agent.';}
-    else if(m.type==='user'){entry('user',m.text);byId('events').textContent='';byId('prompt').value='';}
-    else if(m.type==='draft')byId('prompt').value=m.text;
-    else if(m.type==='event'){byId('events').textContent+=JSON.stringify(m.event)+'\\n';}
-    else if(m.type==='operations')operations(m.operations);
-    else if(m.type==='status'||m.type==='error')byId('status').textContent=m.text;
-  });api.postMessage({type:'ready'});
-  </script></body></html>`;
 }
 
 module.exports = { activate };
