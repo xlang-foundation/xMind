@@ -1,6 +1,8 @@
 # Native xMind Server and console client
 
-The current C++ server exposes durable sessions and user messages through the native persistence worker. The console client is a separate process using HTTP. Runtime objects and database files remain owned by the server. This is part of the final backend architecture, with HTTP transport isolated from the agent core.
+The C++ server exposes durable sessions and schedules the native model/tool engine through `AgentService`. The console and editor host clients are separate HTTP observers. Runtime objects and database files remain owned by the server, with HTTP transport isolated from the agent core through `RunExecutor`.
+
+The Release build and fourteen native contracts passed, including configured run admission/cancellation through HTTP/CLI and the actual editor host client. Inference peers in those contracts are synthetic; filesystem operations and embedded-xlang3 storage are real. Live inference, actual editor UI behavior and complete coding tasks remain unverified.
 
 ## Current API
 
@@ -13,8 +15,12 @@ The current C++ server exposes durable sessions and user messages through the na
 | GET | /v1/sessions/{id}/runs | Read persisted run history |
 | GET | /v1/runs/{id} | Read persisted run state |
 | GET | /v1/runs/{id}/events?after=N | Read ordered events after a validated cursor |
+| POST | /v1/runs | With a configured engine: admit `{session_id,prompt,id?}` and return 202 with queued admission snapshot |
+| POST | /v1/runs/{id}/cancel | With a configured engine: accept `{}` and request cancellation; inspect state/events for its outcome |
 
-There is no product route to fabricate a run or manually advance its state. Creating/running/cancelling agents will be added with the real provider/tool engine. Synthetic run-state fixtures remain in repository tests and the explicitly labeled persistence demo. Health reports `agent_execution: false`; the console currently provides session/message management and run inspection, not a coding assistant.
+No public route manually advances run state or inserts assistant/tool messages. Run lifecycle belongs to the native engine. Without a model configuration, execution routes are absent and health reports `agent_execution: false`. With a model configuration, `agent_execution: true` reports that the engine is installed; it does not certify endpoint reachability or successful inference. An executor fault reports degraded health and rejects new work.
+
+Admission has a bounded pending queue (default 128, maximum 4096), serviced by native workers (default 2, maximum 16). `--workers` and `--queue-limit` select these bounds. Queue saturation returns 503 before persisting a prompt/run; only one active root is allowed per session. Running cancellation interrupts the real engine's stop token; queued cancellation persists its outcome and frees capacity. A 202 cancellation response does not claim that external work has already stopped. Graceful executor shutdown cancels and joins active/queued work before persistence teardown. Crash recovery marks interrupted queued/running records failed; it never creates an answer.
 
 ## Local operation
 
@@ -32,8 +38,24 @@ Build using `Tools/native-milestone.ps1 -Action Build`. Set `XMIND_AUTH_TOKEN` p
 
 Create the database parent directory first. The server binds only to 127.0.0.1; its configured Host header and bearer token are required. Browser Origin requests are denied until an authorized view adapter is configured. Errors are JSON and backend-internal database diagnostics are not returned. Windows Ctrl+C stops HTTP admission and drains the persistence service. Forced termination uses existing startup interruption recovery on next ownership acquisition.
 
+For actual execution, select a chat-completions streaming endpoint/model explicitly:
+
+```powershell
+.\Tools\agentflow.ps1 -Action Serve -Model MODEL_ID -ModelEndpoint CHAT_COMPLETIONS_URL -ModelTools supported -Workspace WORKSPACE_DIR
+.\Tools\agentflow.ps1 -Action Client -Port 8765 run SESSION_ID 'Read the project README'
+.\Tools\agentflow.ps1 -Action Client -Port 8765 status RUN_ID
+.\Tools\agentflow.ps1 -Action Client -Port 8765 events RUN_ID
+.\Tools\agentflow.ps1 -Action Client -Port 8765 cancel RUN_ID
+```
+
+`--model` and `--model-endpoint` are required together. Workspace tools require an explicit `--model-tools supported` declaration; capability defaults to unknown. The three available tools read/list/search within the backend workspace. Omitting the workspace configures a text-only agent. Native provider transport currently requires Windows. HTTPS uses OS certificate validation; plain HTTP is allowed only for loopback endpoints.
+
+Configure a provider key privately with `XMIND_API_KEY` in the server process environment. The backend protects and persists it through the credential repository and clears its inherited environment entry after copying it into owned secret bytes. The printed credential reference contains no key. Pass `-CredentialId ID` to reuse that encrypted credential on later launches without the environment key. The credential purpose binds to a hash of the exact configured endpoint. The user-bound Windows protection currently supports local use, not a company-wide shared vault. An endpoint requiring no key can also run without a credential reference. A real provider error produces a failed run with redacted diagnostics.
+
 ## Evidence and remaining delivery
 
 `native_http_cli_contract` runs independent Node HTTP peers and the compiled C++ console client against the compiled server. It verifies auth/Host/Origin rejection, duplicate Authorization headers, input validation, duplicate-session conflict, concurrent persisted user messages, independent client visibility and session/message survival after process termination/restart. It also checks that product execution/transition routes are absent and clients cannot insert fabricated assistant messages. Evidence: [native-http-cli-ctest.log](evidence/native-http-cli-ctest.log). The subsequent test also invoked the native PowerShell launcher against the same server: [native-launcher-http-ctest.log](evidence/native-launcher-http-ctest.log).
 
-Run-state/event atomicity and interruption recovery are covered by the separate native repository/worker contracts using synthetic fixtures; the HTTP test does not prove an agent has executed. Native provider/tool execution, cancellation of external effects, streamed events, request deduplication, pagination, credential endpoints, team authorization/TLS, PostgreSQL and VS Code authentication integration remain required. Remote views and WebRTC are not implemented by this loopback service.
+Current evidence: [native-execution-server-ctest.log](evidence/native-execution-server-ctest.log). `native_agent_service_contract` verifies two concurrent actual transport streams, bounded admission and joined cancellation. `native_agent_http_contract` verifies real workspace/tool continuation, CLI submission, queued/running cancellation, admission rejection without orphan prompts, encrypted credential reuse, provider HTTP failure and forced-process restart recovery. It also uses the actual VS Code host client against the native server. None of these synthetic inference peers certifies a live model or completed coding task.
+
+Live provider/coding validation, mutation/process tools and approvals, reconciliation of external effects, pushed event subscriptions, pagination, credential management endpoints, team authorization/TLS, PostgreSQL and actual VS Code UI validation remain required. Remote views and WebRTC are not implemented by this loopback service.

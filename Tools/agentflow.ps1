@@ -5,6 +5,11 @@ param(
     [int]$Port=8765,
     [string]$RuntimeDirectory="$PSScriptRoot\..\..\xlang3\build\Release",
     [string]$PythonLibSource='C:\Python\Python314\Lib',
+    [string]$Model,
+    [string]$ModelEndpoint,
+    [string]$Workspace,
+    [string]$CredentialId,
+    [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
     [Parameter(ValueFromRemainingArguments=$true)][string[]]$ClientArguments
 )
 $ErrorActionPreference='Stop'
@@ -17,10 +22,15 @@ if($Port -lt 0 -or $Port -gt 65535 -or ($Action -eq 'Client' -and $Port -eq 0)) 
 $binary=Join-Path $projectRoot ('build\native\Release\'+$(if($Action -eq 'Serve') {'xmind_server.exe'} else {'xmind_cli.exe'}))
 if(-not (Test-Path -LiteralPath $binary)) {throw 'Build the native xMind targets first with -Action Build.'}
 if($Action -eq 'Serve') {
-    if(-not $Database) {$Database=Join-Path $projectRoot '.agentflow\state.sqlite'}
+    if(-not $Database) {$Database=Join-Path $projectRoot '.agentflow\native\state.sqlite'}
     $Database=[System.IO.Path]::GetFullPath($Database)
     New-Item -ItemType Directory -Force -Path (Split-Path $Database -Parent) | Out-Null
-    & $binary --db $Database --modules (Join-Path $RuntimeDirectory 'modules') --stdlib $PythonLibSource --port $Port
+    $serverArguments=@('--db',$Database,'--modules',(Join-Path $RuntimeDirectory 'modules'),'--stdlib',$PythonLibSource,'--port',"$Port")
+    if($Model) {$serverArguments+=@('--model',$Model,'--model-tools',$ModelTools)}
+    if($ModelEndpoint) {$serverArguments+=@('--model-endpoint',$ModelEndpoint)}
+    if($Workspace) {$serverArguments+=@('--workspace',$Workspace)}
+    if($CredentialId) {$serverArguments+=@('--credential-id',$CredentialId)}
+    & $binary @serverArguments
 } else {
     & $binary $Port @ClientArguments
 }

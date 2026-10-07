@@ -72,6 +72,8 @@ template<class Handler> auto guarded(Handler handler) {
         catch(const Conflict& error) {reply(response,{{"detail",error.what()}},409);}
         catch(const PersistenceBusy&) {reply(response,{{"detail","Backend busy; retry later"}},503);}
         catch(const PersistenceClosed&) {reply(response,{{"detail","Backend shutting down"}},503);}
+        catch(const RunBusy&) {reply(response,{{"detail","Agent queue is full"}},503);}
+        catch(const RunUnavailable&) {reply(response,{{"detail","Agent executor is unavailable"}},503);}
         catch(const Json::exception&) {reply(response,{{"detail","Invalid JSON request"}},400);}
         catch(const std::invalid_argument& error) {reply(response,{{"detail",error.what()}},400);}
         catch(...) {reply(response,{{"detail","Backend operation failed"}},500);}
@@ -80,10 +82,11 @@ template<class Handler> auto guarded(Handler handler) {
 }
 struct HttpServer::Impl {
     PersistenceService& persistence;
+    RunExecutor* executor;
     std::string authorization;
     httplib::Server server;
     int port=-1;
-    Impl(PersistenceService& store,std::string token):persistence(store),authorization("Bearer "+token) {
+    Impl(PersistenceService& store,std::string token,RunExecutor* execution):persistence(store),executor(execution),authorization("Bearer "+token) {
         validate_local_auth_token(token);
         server.new_task_queue=[] {return new httplib::ThreadPool(4,4,32);};
         server.set_payload_max_length(1024*1024);
@@ -105,8 +108,8 @@ struct HttpServer::Impl {
             if(response.body.empty()) reply(response,{{"detail","HTTP request rejected"}},response.status);
         });
         server.set_exception_handler([](const Request&,Response& response,std::exception_ptr) {reply(response,{{"detail","Backend operation failed"}},500);});
-        server.Get("/v1/health",guarded([](const Request&,Response& response) {
-            reply(response,{{"status","ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"agent_execution",false}});
+        server.Get("/v1/health",guarded([this](const Request&,Response& response) {
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"agent_execution",executor!=nullptr}});
         }));
         server.Get("/v1/sessions",guarded([this](const Request&,Response& response) {reply(response,encode_all(persistence.sessions().get()));}));
         server.Post("/v1/sessions",guarded([this](const Request& request,Response& response) {
@@ -128,9 +131,20 @@ struct HttpServer::Impl {
         }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {reply(response,encode(persistence.run(identifier(request.matches[1])).get()));}));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/events)",guarded([this](const Request& request,Response& response) {reply(response,encode_all(persistence.events(identifier(request.matches[1]),cursor(request)).get()));}));
+        if(executor) {
+            server.Post("/v1/runs",guarded([this](const Request& request,Response& response) {
+                const auto value=body(request,{"id","session_id","prompt"});
+                const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
+                reply(response,encode(executor->submit(id,identifier(string_field(value,"session_id",128)),string_field(value,"prompt",1024*1024))),202);
+            }));
+            server.Post(R"(/v1/runs/([A-Za-z0-9_-]+)/cancel)",guarded([this](const Request& request,Response& response) {
+                body(request,{});const auto id=identifier(request.matches[1]);executor->cancel(id);
+                reply(response,{{"id",id},{"cancellation_requested",true}},202);
+            }));
+        }
     }
 };
-HttpServer::HttpServer(PersistenceService& store,std::string token):impl_(std::make_unique<Impl>(store,std::move(token))) {}
+HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor):impl_(std::make_unique<Impl>(store,std::move(token),executor)) {}
 HttpServer::~HttpServer()=default;
 int HttpServer::bind(int port) {
     if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");

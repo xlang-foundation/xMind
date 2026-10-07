@@ -1,7 +1,7 @@
 {
   "name": "agentflow",
-  "displayName": "AgentFlow",
-  "description": "Shared xlang3 agent sessions and coding workflows in VS Code.",
+  "displayName": "xMind",
+  "description": "Shared native xMind agent sessions and coding workflows in VS Code.",
   "version": "0.1.0",
   "publisher": "agentflow-local",
   "license": "Apache-2.0",
@@ -11,15 +11,16 @@
   "capabilities": { "untrustedWorkspaces": { "supported": false } },
   "contributes": {
     "commands": [
-      { "command": "agentflow.open", "title": "AgentFlow: Open Workspace" },
-      { "command": "agentflow.selection", "title": "AgentFlow: Ask About Selection" }
+      { "command": "agentflow.open", "title": "xMind: Open Workspace" },
+      { "command": "agentflow.selection", "title": "xMind: Ask About Selection" },
+      { "command": "agentflow.configureToken", "title": "xMind: Configure Server Token" }
     ],
     "configuration": {
-      "title": "AgentFlow",
+      "title": "xMind",
       "properties": {
         "agentflow.backendUrl": {
           "type": "string", "default": "http://127.0.0.1:8765",
-          "description": "Local AgentFlow backend URL."
+          "description": "Local native xMind Server origin. Authentication is stored separately in SecretStorage."
         }
       }
     }

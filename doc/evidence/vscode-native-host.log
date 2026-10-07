@@ -1,0 +1,16 @@
+Verification record from the executed Node.js test command:
+node --test extensions/vscode/tests/client.test.js extensions/vscode/tests/extension-host.test.js
+
+Observed result: exit 0; 4 tests passed, 0 failed, 0 skipped.
+Observed total duration: 260.5301 ms.
+
+Passed tests:
+- session discovery, URL encoding, error handling and origin boundaries
+- origin-scoped authentication and native request bodies
+- native terminal state refreshes transcript and stops polling without absent approval routes
+- closing a panel during history loading cannot start a detached poller
+
+Scope: the client test uses an independent HTTP fixture; the controller test
+uses deterministic VS Code API and HTTP fixtures. Neither is actual VS Code
+rendering or live inference. The separate native CTest log records the compiled
+server's integration with the actual editor host client and synthetic inference.

@@ -6,7 +6,7 @@
 
 int main(int argc,char** argv) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, sessions, create-session, history, runs, status, events, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, sessions, create-session, history, runs, run, cancel, status, events, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -22,6 +22,8 @@ int main(int argc,char** argv) {
         else if(command=="history" && argc==4) path="/v1/sessions/"+id(argv[3])+"/history";
         else if(command=="runs" && argc==4) path="/v1/sessions/"+id(argv[3])+"/runs";
         else if(command=="status" && argc==4) path="/v1/runs/"+id(argv[3]);
+        else if(command=="run" && argc==5) {path="/v1/runs";body={{"session_id",id(argv[3])},{"prompt",argv[4]}};post=true;}
+        else if(command=="cancel" && argc==4) {path="/v1/runs/"+id(argv[3])+"/cancel";body=Json::object();post=true;}
         else if(command=="events" && (argc==4 || argc==5)) {
             const std::string cursor=argc==5?argv[4]:"0";std::int64_t value=0;
             const auto parsed_cursor=std::from_chars(cursor.data(),cursor.data()+cursor.size(),value);
