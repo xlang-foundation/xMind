@@ -15,7 +15,10 @@ if(mode==='normal') {
   writeFileSync(marker,'both channels drained');
 } else if(mode==='tree'||mode==='parent-exit') {
   const code='const fs=require("node:fs");setTimeout(()=>fs.writeFileSync(process.argv[1],"unexpected surviving child"),5000);setInterval(()=>{},1000)';
-  const child=spawn(process.execPath,['-e',code,marker],{stdio:['ignore','inherit','inherit'],windowsHide:true});
+  // On Windows Node/libuv normally owns its own kill-on-parent-exit job.
+  // Detach this fixture's child from that libuv job so parent-exit exercises
+  // xMind's enclosing job ownership, rather than Node killing the child first.
+  const child=spawn(process.execPath,['-e',code,marker],{stdio:['ignore','inherit','inherit'],windowsHide:true,detached:mode==='parent-exit'});
   process.stdout.write(JSON.stringify({descendant:child.pid})+'\n',()=>{
     if(mode==='parent-exit')process.exit(0);
   });
