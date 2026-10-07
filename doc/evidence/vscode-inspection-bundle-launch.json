@@ -1,0 +1,16 @@
+{
+  "extension_revision": "f0e44b029d6a28a57a80f77e921641301105a104",
+  "native_revision": "cbc5f26c3c1842a54013f94cbf3baf303761b568",
+  "origin": "http://127.0.0.1:50958",
+  "ready": {
+    "opened": true,
+    "location": "secondarySidebar",
+    "origin": "http://127.0.0.1:50958",
+    "time": "2026-10-07T09:36:51.348Z",
+    "storage": "Normal development host; no extension test runner",
+    "scope": "Actual sidebar opened; no live inference claimed"
+  },
+  "scope": "Actual unseeded sidebar connected to the inspection-capable CI runtime with existing database; no populated recovery UI or live inference claimed",
+  "model_configured": false,
+  "inspection_workspace_configured": false
+}
