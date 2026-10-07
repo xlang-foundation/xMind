@@ -100,7 +100,9 @@ try {
     assert.equal((await request('/v1/sessions/shared/messages',{role:'user',data})).status,400);
   }
   assert.equal(cli('history','shared').length,12,'Invalid conversation data must not contaminate stored history');
-  assert.equal((await request('/v1/runs', {id: 'not-executed', session_id: 'shared', prompt: 'Do coding'})).status, 404);
+  // A model-free server now has an enrollment-capable executor, but it must
+  // reject work as unavailable and create no run until a provider is enrolled.
+  assert.equal((await request('/v1/runs', {id: 'not-executed', session_id: 'shared', prompt: 'Do coding'})).status, 503);
   assert.equal((await request('/v1/runs/not-executed')).status, 404);
   assert.deepEqual(cli('runs','shared'),[]);
   assert.equal((await request('/v1/runs/run/transition',{expected:'queued',next:'running'})).status,404);
