@@ -27,6 +27,8 @@ Execute all Python probes and pip installations with xlang3. Install pure-Python
 
 ## Current evidence
 
+The [native Responses provider](../doc/native-responses-provider.md) adds an explicit C++ wire selection to the shared agent boundary, stateless output/reasoning continuation and actual provider usage mapping. The final isolated Release run passed **52 native and 60 extension contracts**, including real backend/CLI/file/graph execution with synthetic provider replies. Interactive provider enrollment remains Chat Completions. Hosted validation, live model access and complete provider coverage remain unverified or incomplete.
+
 Latest native execution evidence: [nineteen native contracts passed in isolated Windows CI](../doc/evidence/native-model-edit-ci-ctest.log). The configured model catalogue/selection and recorded model identity, supplied usage and measured timings passed with synthetic inference and actual file edits/restart persistence. Native HTTP/CLI scheduling is delivered at that contract scope. The local preview has no provider configured; no live frontier-model interoperability or complete LiteLLM coverage is claimed. Older pending scheduling/engine paragraphs below record earlier checkpoints.
 
 The native [Chat Completions provider adapter](../doc/native-chat-provider.md) now joins typed request serialization, Windows transport and stream decoding. The [native agent loop](../doc/native-agent-loop.md) invokes it with actual filesystem tools and durable storage. Independent synthetic wire contracts validate mechanics only; no live inference, coding-task success, complete provider coverage or model availability is established by them. Product HTTP/CLI agent scheduling remains pending.

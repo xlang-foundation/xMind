@@ -1,0 +1,20 @@
+{
+  "native_source_tree": "463e859320dc222a4aeaba861e470337765abae7",
+  "verification": "52/52 native and 60/60 extension contracts passed, 0 skipped. Final complete build after graph continuation isolation and authored assistant input correction.",
+  "server_sha256": "ce7b271145fe1792f2d0335a7dc9be113b7a5f749d48a23597fad0e92cf36ecc",
+  "runtime_sha256": "fb02403bff1bf9967d5e49cb4f2a5a4f6d13ad139cc02b069e20fc03cc6c4862",
+  "sqlite_module_sha256": "fcb0e481352672eb72d86a96e2ef5d9b58939a35ad03a4ac3e32bfe7dc733b8c",
+  "scope": "Native C++ Responses SSE/request adapter, shared agent loop and actual two-agent dependent graph, CLI/HTTP admission, real workspace reads, stateless reasoning/tool and restart continuation, usage mapping, cancellation and rejection without retry/effects. Provider replies and opaque reasoning fixtures are synthetic.",
+  "fixture_repair": "Initial compile failed in a nested terminal-event initializer in the new C++ fixture. Corrected the initializer without changing production behavior. Original diagnostic preserved.",
+  "local_guard": "Deferred when active sibling benchmark processes were detected; compilation began only after fresh native-milestone guard checks allowed it. No benchmark stopped.",
+  "runtime": "No CPython execution. SQLite and credential I/O through embedded xlang3.",
+  "previous_hosted": {
+    "revision": "d07c61c725c3a1a4bf9ac85a2c6782575e52d8df",
+    "run": 37693026697,
+    "job": 113037675662,
+    "conclusion": "success",
+    "scope": "50 native,60 extension,0 skips at that previous source only"
+  },
+  "installed_previews": "Existing user model/settings and graph profiles remain on their prior runtimes; no current source installed.",
+  "remaining": "Live OpenAI/IDE acceptance, browser UI, interactive wire enrollment, model-specific reasoning/multimodal/built-in tools, full provider coverage, delegation, team policies and full product parity remain incomplete. Hosted current-source verification pending."
+}

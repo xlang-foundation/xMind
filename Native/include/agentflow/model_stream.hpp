@@ -13,6 +13,7 @@ struct ModelToolCall {std::string id,name,arguments_json;};
 struct ModelCompletion {
     std::string content,refusal,finish_reason,usage_json="null";
     std::vector<ModelToolCall> tool_calls;
+    std::string provider_items_json="[]";
 };
 // Incremental Chat Completions wire adapter. No network or simulated model.
 // feed receives actual SSE bytes from a provider transport. A result is available

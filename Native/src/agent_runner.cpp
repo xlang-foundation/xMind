@@ -35,6 +35,7 @@ ModelMessage message(const Message& stored) {
     if(!data.is_object() || !data.contains("content") || !data["content"].is_string()) throw ModelProtocolError("Unsupported stored conversation content");
     ModelMessage result{role(stored.role),data["content"].get<std::string>()};
     if(data.contains("refusal")) result.refusal=data["refusal"].get<std::string>();
+    if(data.contains("provider_items"))result.provider_items_json=data["provider_items"].dump();
     if(data.contains("tool_call_id")) result.tool_call_id=data["tool_call_id"].get<std::string>();
     if(data.contains("tool_calls")) for(const auto& call:data["tool_calls"]) result.tool_calls.push_back({call.at("id").get<std::string>(),call.at("name").get<std::string>(),call.at("arguments").get<std::string>()});
     return result;
@@ -44,6 +45,7 @@ Json assistant(const ModelCompletion& result,const std::string& model,std::int64
     if(result.usage_json!="null") value["usage"]=Json::parse(result.usage_json);
     if(first_token_ms) value["first_token_ms"]=*first_token_ms;
     if(!result.refusal.empty()) value["refusal"]=result.refusal;
+    if(result.provider_items_json!="[]")value["provider_items"]=Json::parse(result.provider_items_json);
     if(!result.tool_calls.empty()) {
         value["tool_calls"]=Json::array();
         for(const auto& call:result.tool_calls) value["tool_calls"].push_back({{"id",call.id},{"name",call.name},{"arguments",call.arguments_json}});
@@ -156,7 +158,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(settings_.credential) credential.emplace(persistence_.resolve_credential(settings_.credential->scope,settings_.credential->id,settings_.credential->purpose).get());
             const auto response_started=std::chrono::steady_clock::now();
             std::optional<std::int64_t> first_token_ms;
-            const auto response=complete_chat(provider,request,credential?&*credential:nullptr,[&](const ModelEvent& event) {
+            const auto response=complete_model(provider,request,credential?&*credential:nullptr,[&](const ModelEvent& event) {
                 if(!first_token_ms && (event.kind=="model.text" || event.kind=="model.refusal" || event.kind=="model.tool_delta")) first_token_ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-response_started).count();
                 cancelled(token);persistence_.append_event(id,event.kind,event.json).get();
             },token);
@@ -165,7 +167,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(response.finish_reason=="stop") return persistence_.complete_run(id,reply.dump()).get();
             if(response.finish_reason!="tool_calls" || !workspace_) throw ModelProtocolError("Model did not produce a complete supported turn");
             std::vector<std::string> results;std::vector<ModelMessage> continuation;
-            continuation.push_back({MessageRole::assistant,response.content,response.tool_calls,{},response.refusal});
+            continuation.push_back({MessageRole::assistant,response.content,response.tool_calls,{},response.refusal,response.provider_items_json});
             std::size_t index=0;
             for(const auto& call:response.tool_calls) {
                 cancelled(token);

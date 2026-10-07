@@ -2,6 +2,7 @@ param(
     [string]$CodeExecutable,[string]$RuntimeDirectory,[string]$BundleDirectory,
     [string]$StdlibSource='C:\Python\Python314\Lib',
     [string]$Model,[string]$ModelEndpoint,[string]$SelectableModels,
+    [ValidateSet('chat-completions','responses')][string]$ModelWire='chat-completions',
     [string]$ProviderKeyEnvironment='OPENAI_API_KEY',
     [string]$CredentialId,
     [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
@@ -13,6 +14,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 if([bool]$Model -ne [bool]$ModelEndpoint){throw 'Provide both -Model and -ModelEndpoint.'}
+if(-not $Model -and $ModelWire -ne 'chat-completions'){throw 'A Responses startup wire requires -Model and -ModelEndpoint.'}
 if(-not $Model -and ($CredentialId -or $SelectableModels)){throw 'Startup credential references/model lists require -Model and -ModelEndpoint.'}
 if($ApprovedEdits -and -not $Workspace){throw 'Approved file edits require a workspace.'}
 if($Workspace -and $ModelTools -ne 'supported'){throw 'Workspace execution requires -ModelTools supported.'}
@@ -82,6 +84,7 @@ try {
     if(-not $Model -and $Workspace){$uiArgs+=@('--model-tools',$ModelTools)}
     if($Model){
         $uiArgs+=@('--model',('"'+$Model+'"'),'--model-endpoint',('"'+$ModelEndpoint+'"'),'--model-tools',$ModelTools,'--model-stream-usage',$StreamUsage)
+        $uiArgs+=@('--model-wire',$ModelWire)
         if($SelectableModels){$uiArgs+=@('--models',('"'+$SelectableModels+'"'))}
         if($CredentialId){$uiArgs+=@('--credential-id',('"'+$CredentialId+'"'))}
         $uiProviderKey=[Environment]::GetEnvironmentVariable($ProviderKeyEnvironment,'Process')
