@@ -59,7 +59,7 @@ try {
       const invalid=await fetch(`http://127.0.0.1:${port}/v1/runs`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({id:'invalid-model',session_id:name,prompt:name,model_id:'not-configured'}),signal:AbortSignal.timeout(5000)});
       assert.equal(invalid.status,400);assert.deepEqual(cli('history',name),[]);
     }
-    const run=await api('/v1/runs',{id:`run-${name}`,session_id:name,prompt:name,...(name==='allowed'?{model_id:'synthetic-edit-alternate'}:{})});assert.equal(run.state,'queued');
+    const run=name==='allowed'?cli('run',name,name,'synthetic-edit-alternate'):await api('/v1/runs',{id:`run-${name}`,session_id:name,prompt:name});assert.equal(run.state,'queued');
     const [proposal]=await until(()=>api(`/v1/runs/${run.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));
     assert.equal(JSON.parse(proposal.arguments_json).before_content,'original\n');
     assert.equal(await readFile(join(workspace,`${name}.txt`),'utf8'),'original\n');

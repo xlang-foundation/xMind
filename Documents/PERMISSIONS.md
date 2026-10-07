@@ -1,5 +1,17 @@
 # Tool approvals
 
+## Current native approval contract
+
+The C++ backend offers `edit_file` only with `--workspace-edits approved` (`Tools/agentflow.ps1 -ApprovedEdits` with the configured native server). This offers a capability, not a global grant: each exact actual-file proposal requires its own durable controller decision. Approved/stale/denied/cancelled effects, one-use claims, restart retirement and outcome-storage failure passed in [nineteen native contracts](../doc/evidence/native-model-edit-ci-ctest.log). Inference peers are labeled synthetic.
+
+Current routes are `GET /v1/runs/{id}/operations`, `GET /v1/operations/{id}`, and `POST /v1/operations/{id}/decision` with `{ "decision": "allow" }` or `deny`. Native CLI commands are `operations RUN_ID`, `operation OP_ID`, and `decide OP_ID allow|deny`. The authenticated server supplies `local-owner`; views cannot supply an actor, proposal or effect outcome. This is local full-access authentication, not team authorization.
+
+The right VS Code sidebar revalidates the exact reviewed record before a decision. **Compare changes** opens read-only backend snapshots and grants no permission. Unknown effects remain quarantined; inspected matching bytes never invent success. Attributed resolution, process permissions, policy presets, remote tool enforcement and team scopes remain required.
+
+## Historical prototype contract
+
+The startup flags/routes and Python probe below describe the retained prototype. They are not the current native interface or current validation result.
+
 Workspace tools support three startup modes:
 
 - Default: read-only; mutation tools return permission errors.

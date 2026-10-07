@@ -2,6 +2,8 @@
 
 ## Current native checkpoints — October 7, 2026
 
+Latest native verification: [isolated Windows run 37595553681](https://github.com/xlang-foundation/xMind/actions/runs/37595553681), revision `1a3cb44dcbcf91f362c001c9335624d1be80bd3d`, passed Release compilation and all **nineteen** native contracts. Model-selected approved edits, stored usage/request timings, bounded parsing and read-only recovery inspection now have native execution evidence. [CTest log](../doc/evidence/native-model-edit-ci-ctest.log), [provenance](../doc/evidence/native-model-edit-ci-provenance.json). All twenty extension contracts passed in CI too. Inference is synthetic; live-model/coding success is unverified. Earlier eighteen-contract/source-pending statements below describe the preceding checkpoint.
+
 The latest verified native Release evidence is [eighteen passing contracts](../doc/evidence/native-approval-api-ctest.log): embedded-xlang3 SQLite persistence and encrypted credentials, authenticated local server/CLI, scheduling/model streaming/read tools, durable approvals, and actual approved file application. These tests use synthetic inference peers and real filesystem/storage; they do not prove live-provider or end-to-end coding completion.
 
 The latest verified VS Code adapter evidence is [nineteen passing client/host/renderer contracts](../doc/evidence/vscode-reconnect.log). The real right-sidebar layout was inspected in a signed official VS Code host. Exact edit snapshot comparison, reconnect and model preference persistence have fixture coverage; live model-driven approval/diff interaction remains unverified.

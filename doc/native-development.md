@@ -2,6 +2,8 @@
 
 Architecture: [architecture.md](architecture.md) and [architecture.svg](architecture.svg). The user approved continued work on the C++ core with embedded xlang3 for scripts and skills. OpenCode and LiteLLM remain references only.
 
+Latest verified scope: the [isolated Windows CI run](https://github.com/xlang-foundation/xMind/actions/runs/37595553681) passed Release compilation and **nineteen native contracts**, including model-selected approved edits, stored usage/timings and read-only uncertain-file inspection. [Complete log](evidence/native-model-edit-ci-ctest.log), [pinned runtime/toolchain provenance](evidence/native-model-edit-ci-provenance.json). The older eighteen-contract/source-pending statements below preserve earlier checkpoints. Live providers, complete coding tools, protocols/graphs and team/Electron scope remain incomplete.
+
 Current native evidence: the last verified Release run passed [eighteen contracts](evidence/native-approval-api-ctest.log). The HTTP/CLI, encrypted credentials, scheduling/model/read-tool loop and approved edit components are verified at the documented test scopes. Model-invoked edits and new model/response metadata changes await native verification; live providers, full coding workflows, protocols/graphs and team deployment remain incomplete. [Milestones](milestones.md) are the authoritative checkpoint ledger. Earlier component-status paragraphs below are historical.
 
 Use `Tools/agentflow.ps1 -Action Build` from the repository root for the guarded build/test workflow. It does not modify the sibling xlang3 runtime and defers while observed measured benchmark processes are live.

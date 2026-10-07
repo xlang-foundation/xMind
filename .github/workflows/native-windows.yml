@@ -62,3 +62,10 @@ jobs:
             xmind/build/ci-evidence/
             xmind/build/native/Testing/
           retention-days: 14
+      - name: Preserve contract-tested native development bundle
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: native-windows-runtime-${{ github.sha }}
+          path: xmind/build/native-distribution/
+          if-no-files-found: error
+          retention-days: 14

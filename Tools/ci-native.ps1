@@ -46,3 +46,31 @@ $ciExpected=@('model_stream_protocol_contract','model_request_contract','native_
 $ciActual=($ciTests|ConvertFrom-Json).tests.name
 if(@($ciActual).Count -ne $ciExpected.Count -or (Compare-Object ($ciActual|Sort-Object) ($ciExpected|Sort-Object))){throw 'The complete expected native contract set was not registered; refusing a partial green build.'}
 Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error')
+$ciBundle=Join-Path $ciRoot 'build/native-distribution'
+New-Item -ItemType Directory -Force -Path (Join-Path $ciBundle 'modules'),(Join-Path $ciBundle 'licenses')|Out-Null
+foreach($ciBinary in @('xmind_server.exe','xmind_cli.exe','xlang3_runtime.dll')){
+    Copy-Item -LiteralPath (Join-Path $ciNative ('Release/'+$ciBinary)) -Destination $ciBundle
+}
+foreach($ciModule in @('xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll')){
+    Copy-Item -LiteralPath (Join-Path $ciRelease ('modules/'+$ciModule)) -Destination (Join-Path $ciBundle 'modules')
+}
+Copy-Item -LiteralPath (Join-Path $ciRelease 'xlang3.exe') -Destination $ciBundle
+Copy-Item -LiteralPath (Join-Path $ciEvidence 'provenance.json') -Destination $ciBundle
+foreach($ciLicenseRoot in @(@{path=$ciRoot;label='xmind'},@{path=$ciRuntime;label='xlang3'})){
+    foreach($ciLicense in Get-ChildItem -LiteralPath $ciLicenseRoot.path -File|Where-Object {$_.Name -match '^(LICENSE|NOTICE|COPYING)'}){
+        Copy-Item -LiteralPath $ciLicense.FullName -Destination (Join-Path $ciBundle ('licenses/'+$ciLicenseRoot.label+'-'+$ciLicense.Name))
+    }
+}
+foreach($ciThirdParty in @(@{path=(Join-Path $ciRoot 'Native/third_party');label='xmind-native'},@{path=(Join-Path $ciRuntime 'third_party');label='xlang3-third-party'},@{path=(Join-Path $ciRuntime 'modules');label='xlang3-modules'})){
+    foreach($ciLicense in Get-ChildItem -LiteralPath $ciThirdParty.path -File -Recurse|Where-Object {$_.Name -match '^(LICENSE|NOTICE|COPYING)'}){
+        $ciLicenseRelative=[System.IO.Path]::GetRelativePath($ciThirdParty.path,$ciLicense.FullName)
+        $ciLicenseTarget=Join-Path $ciBundle ('licenses/'+$ciThirdParty.label+'/'+$ciLicenseRelative)
+        New-Item -ItemType Directory -Force -Path (Split-Path $ciLicenseTarget -Parent)|Out-Null
+        Copy-Item -LiteralPath $ciLicense.FullName -Destination $ciLicenseTarget
+    }
+}
+@('Native xMind Windows development bundle. See provenance.json for exact source/toolchain.',
+  'Provide allowed Python 3.14 standard-library source to --stdlib; no CPython executable/native extension is required.',
+  'Run xmind_server.exe --db FILE --modules modules --stdlib LIB_SOURCE --port PORT with private XMIND_AUTH_TOKEN.',
+  'Provider credentials belong in private backend configuration. No live provider credentials or conversations are packaged.',
+  'This bundle is contract-tested development output, not evidence of full coding/provider/protocol/team completion.')|Set-Content (Join-Path $ciBundle 'README.txt')
