@@ -1,5 +1,9 @@
 # xMind for VS Code
 
+Use **xMind: Open Browser View (Copy Connection Token)** to open an HTML view of the currently selected native server. Paste the copied connection token into Connect once. The browser then uses that server's model configuration and persistent history; no provider key or database is copied. Its loopback access server is owned by the extension host. Closing the extension ends that view transport while native execution remains independent. Shared-launcher host tests and real native history/catalogue contracts pass; invoking this new command in an actual IDE is still pending.
+
+The packaged extension includes the browser access adapter, renderer assets and vendor license notices. The sidebar's SVG connection controls, cancellable dialog and remembered draggable divider are validated in the actual browser. [Browser view details](../../doc/browser-view.md).
+
 Graph-capable backends expose a footer workflow chooser, durable human-input forms, isolated child transcripts/streams and per-response token metrics. Child effects retain exact proposal review and approvals. **60 local extension contracts** pass. The actual isolated `graph-ui` IDE preview completed a human/tool workflow against the real repository file and retained its root/transcript on reload. Actual IDE agent-node inference/metrics and graph-effect approvals remain unverified. See [workflow behavior, evidence and remaining scope](../../doc/vscode-graph-workflows.md).
 
 Choose models directly from the list in the sidebar footer. The top-right **Settings** button opens an in-sidebar dialog with a password field for the OpenAI key. **Fetch models** uses the native backend to retrieve the account's model IDs; choosing a returned ID in the footer saves the configuration and encrypts the key on the backend. A saved backend key populates the list automatically. There is no separate model picker or manual ID prompt.

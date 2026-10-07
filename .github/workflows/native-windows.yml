@@ -58,10 +58,17 @@ jobs:
         run: |
           node views/browser/build.mjs build/browser-assets
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node --test views/browser/tests/controller.test.cjs > build/ci-evidence/browser-controller.log
+          $env:XMIND_BROWSER_TEST_ASSETS='build/browser-assets'
+          node --test views/browser/tests/*.cjs > build/ci-evidence/browser-controller.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node views/browser/tests/native-contract.mjs build/native/Release/xmind_server.exe ../xlang3/build/Release/modules ../stdlib-source/Lib build/browser-assets > build/ci-evidence/browser-native.log
           exit $LASTEXITCODE
+      - name: Package and verify shared browser assets
+        working-directory: xmind/extensions/vscode
+        run: |
+          npm run package -- --out ../../build/ci-evidence/xmind.vsix > ../../build/ci-evidence/browser-package.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ../../Tools/verify-browser-vsix.ps1 -Path ../../build/ci-evidence/xmind.vsix > ../../build/ci-evidence/browser-package-verification.log
       - name: Preserve build and test diagnostics
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

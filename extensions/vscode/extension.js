@@ -4,8 +4,10 @@ const crypto = require('node:crypto');
 const { BackendClient, backendOrigin, validateToken } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
+const { browserViewLauncher } = require('./browser-view');
 
 async function activate(context) {
+  const browserViews=browserViewLauncher(vscode,context);
   // Interactive preview uses a normal development host. VS Code test hosts
   // deliberately use in-memory storage and cannot verify reconnect persistence.
   let previewReady,previewOrigin;
@@ -421,6 +423,14 @@ async function activate(context) {
   }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.configureToken', async initialToken => {
     try { await configureToken(initialToken); } catch (error) { vscode.window.showErrorMessage(error.message); }
+  }));
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.openBrowser',async()=>{
+    try{
+      if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before connecting a browser view.');
+      const origin=configuredOrigin();if(!await context.secrets.get(secretKey(origin))&&!await configureToken())return;
+      let token=await context.secrets.get(secretKey(origin));
+      try{const target=new BackendClient(origin,()=>token);await target.health();if(origin!==configuredOrigin())throw new Error('Backend changed while opening the browser. Try again.');await browserViews.open(origin,token);vscode.window.showInformationMessage('xMind Browser uses this server’s models and history. Paste the copied server token into Connect once.');}finally{token=undefined;}
+    }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.selection', async () => {
     const editor = vscode.window.activeTextEditor;

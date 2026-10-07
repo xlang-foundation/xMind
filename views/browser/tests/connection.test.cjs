@@ -1,0 +1,27 @@
+'use strict';
+// DOM/access fixtures; native execution and persistence are verified separately.
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {JSDOM}=require('../../../extensions/vscode/node_modules/jsdom');
+const {BackendClient,validateToken}=require('../../../extensions/vscode/client');
+async function fixture(options={}){
+ const page=fs.readFileSync(path.resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets','index.html'),'utf8');
+ const dom=new JSDOM(page,{url:'http://127.0.0.1:60405/ui/',runScripts:'outside-only'}),window=dom.window,posted=[],requests=[];
+ window.XMindBackend={BackendClient,validateToken};window.addEventListener('message',event=>posted.push(event.data));
+ window.fetch=async(url,init)=>{const route=new URL(url,window.location.origin).pathname;requests.push(route);if(route==='/ui/session'&&init.headers.Authorization&&options.enroll)return options.enroll();let data,status=200;if(route==='/ui/session')data={connected:true};else if(route==='/v1/health')data={agent_execution:false};else if(route==='/v1/graphs')data={graphs:[]};else if(route==='/v1/sessions')data=[{id:'existing',title:'Existing session'}];else if(route.endsWith('/history'))data=[{role:'user',data:{content:'Existing conversation'}}];else if(route.endsWith('/runs'))data=[];else if(route==='/v1/provider/configuration')data={provider:'openai',endpoint:'https://api.openai.com/v1/chat/completions',configured:false};else throw new Error('Unexpected fixture route '+route);return {ok:status===200,status,json:async()=>data};};
+ const dialog=window.document.getElementById('connection');dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;};const divider=window.document.getElementById('sidebar-divider');divider.setPointerCapture=()=>{};
+ window.eval(fs.readFileSync(path.resolve('views/browser/browser.js'),'utf8'));window.xMindView.postMessage({type:'ready'});
+ await until(()=>posted.some(m=>m.type==='history'));return {dom,window,dialog,divider,posted,requests,element:id=>window.document.getElementById(id),close:()=>{window.dispatchEvent(new window.Event('pagehide'));window.close();}};
+}
+async function until(predicate){for(let i=0;i<100;i++){if(predicate())return;await new Promise(resolve=>setImmediate(resolve));}throw new Error('Browser connection fixture deadline');}
+test('Cancel and Escape preserve an existing connection and do not logout or cancel execution',async()=>{
+ const f=await fixture();f.element('connect-view').click();assert.equal(f.dialog.open,true);f.element('server-token').value='fixture-unsaved-server-token-123456';f.element('connection-cancel').click();assert.equal(f.dialog.open,false);assert.equal(f.element('server-token').value,'');assert.equal(f.element('disconnect-view').hidden,false);f.element('connect-view').click();f.dialog.dispatchEvent(new f.window.Event('cancel',{cancelable:true}));assert.equal(f.dialog.open,false);assert.ok(!f.requests.some(route=>route.includes('disconnect')||route.includes('cancel')));assert.equal(f.posted.filter(m=>m.type==='history').length,1);f.close();
+});
+test('a failed replacement token keeps the existing conversation connected',async()=>{
+ const f=await fixture({enroll:async()=>({ok:false,status:401})});f.element('connect-view').click();f.element('server-token').value='fixture-rejected-server-token-123456';f.element('connection-form').dispatchEvent(new f.window.Event('submit',{cancelable:true}));await until(()=>f.element('connection-error').textContent.includes('access token'));assert.equal(f.element('disconnect-view').hidden,false);assert.equal(f.posted.filter(m=>m.type==='history').length,1);f.element('connection-cancel').click();assert.equal(f.dialog.open,false);f.close();
+});
+test('cancelling an in-flight reconnect prevents late popup or conversation changes',async()=>{
+ let release;const pending=new Promise(resolve=>release=resolve),f=await fixture({enroll:()=>pending});f.element('connect-view').click();f.element('server-token').value='fixture-pending-server-token-123456';f.element('connection-form').dispatchEvent(new f.window.Event('submit',{cancelable:true}));f.element('connection-cancel').click();release({ok:false,status:401});await new Promise(resolve=>setImmediate(resolve));assert.equal(f.dialog.open,false);assert.equal(f.element('connection-error').textContent,'');assert.equal(f.posted.filter(m=>m.type==='history').length,1);f.close();
+});
+test('sidebar divider supports drag, keyboard bounds and remembered width',async()=>{
+ const f=await fixture(),d=f.divider;const original=Number(d.getAttribute('aria-valuenow'));d.onpointerdown({button:0,pointerId:1,clientX:500,preventDefault(){}});d.onpointermove({pointerId:1,clientX:440});d.onpointerup();assert.equal(Number(d.getAttribute('aria-valuenow')),original+60);d.dispatchEvent(new f.window.KeyboardEvent('keydown',{key:'Home',cancelable:true}));assert.equal(d.getAttribute('aria-valuenow'),'280');d.dispatchEvent(new f.window.KeyboardEvent('keydown',{key:'ArrowLeft',shiftKey:true,cancelable:true}));assert.equal(d.getAttribute('aria-valuenow'),'320');assert.equal(f.window.localStorage.getItem('xmind.view.sidebarWidth'),'320');d.dispatchEvent(new f.window.KeyboardEvent('keydown',{key:'End',cancelable:true}));assert.equal(Number(d.getAttribute('aria-valuenow')),f.window.innerWidth-320);f.close();
+});

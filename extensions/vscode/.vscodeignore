@@ -1,4 +1,9 @@
 node_modules/**
+!node_modules/marked/lib/marked.umd.js
+!node_modules/dompurify/dist/purify.min.js
+!node_modules/marked/LICENSE
+!node_modules/dompurify/LICENSE
+!node_modules/dompurify/LICENSE-MPL
 tests/**
 *.vsix
 package-lock.json

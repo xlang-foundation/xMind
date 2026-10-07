@@ -1,34 +1,58 @@
 TAP version 13
-# Subtest: view catches a completion between event and status reads and drains final events
-ok 1 - view catches a completion between event and status reads and drains final events
+# Subtest: Cancel and Escape preserve an existing connection and do not logout or cancel execution
+ok 1 - Cancel and Escape preserve an existing connection and do not logout or cancel execution
   ---
-  duration_ms: 1.0065
+  duration_ms: 114.0452
+  type: 'test'
+  ...
+# Subtest: a failed replacement token keeps the existing conversation connected
+ok 2 - a failed replacement token keeps the existing conversation connected
+  ---
+  duration_ms: 21.2801
+  type: 'test'
+  ...
+# Subtest: cancelling an in-flight reconnect prevents late popup or conversation changes
+ok 3 - cancelling an in-flight reconnect prevents late popup or conversation changes
+  ---
+  duration_ms: 16.2182
+  type: 'test'
+  ...
+# Subtest: sidebar divider supports drag, keyboard bounds and remembered width
+ok 4 - sidebar divider supports drag, keyboard bounds and remembered width
+  ---
+  duration_ms: 19.3809
+  type: 'test'
+  ...
+# Subtest: view catches a completion between event and status reads and drains final events
+ok 5 - view catches a completion between event and status reads and drains final events
+  ---
+  duration_ms: 1.0508
   type: 'test'
   ...
 # Subtest: an obsolete view response cannot overwrite the next selection
-ok 2 - an obsolete view response cannot overwrite the next selection
+ok 6 - an obsolete view response cannot overwrite the next selection
   ---
-  duration_ms: 0.5074
+  duration_ms: 0.5496
   type: 'test'
   ...
 # Subtest: provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state
-ok 3 - provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state
+ok 7 - provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state
   ---
-  duration_ms: 1.5639
+  duration_ms: 1.7011
   type: 'test'
   ...
 # Subtest: stale operation bytes cannot produce an approval request
-ok 4 - stale operation bytes cannot produce an approval request
+ok 8 - stale operation bytes cannot produce an approval request
   ---
-  duration_ms: 0.2125
+  duration_ms: 0.2275
   type: 'test'
   ...
-1..4
-# tests 4
+1..8
+# tests 8
 # suites 0
-# pass 4
+# pass 8
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 62.5383
+# duration_ms 854.8495

@@ -1,0 +1,38 @@
+
+> agentflow@0.1.0 package
+> vsce package --allow-missing-repository --out ../../.agentflow/xmind-browser-shared.vsix
+
+Executing prepublish script 'npm run vscode:prepublish'...
+
+> agentflow@0.1.0 vscode:prepublish
+> node ../../views/browser/build.mjs browser-runtime/assets browser-runtime/server.mjs
+
+Browser view assets built at D:\CantorAI2026\xMind\extensions\vscode\browser-runtime\assets
+Browser access adapter bundled at D:\CantorAI2026\xMind\extensions\vscode\browser-runtime\server.mjs
+ INFO  Files included in the VSIX:
+xmind-browser-shared.vsix
+├─ [Content_Types].xml 
+├─ extension.vsixmanifest 
+└─ extension/
+   ├─ LICENSE.txt [11.29 KB]
+   ├─ browser-view.js [2.13 KB]
+   ├─ client.js [4.49 KB]
+   ├─ edit-review.js [2.17 KB]
+   ├─ extension.js [30.85 KB]
+   ├─ package.json [2.08 KB]
+   ├─ readme.md [12.66 KB]
+   ├─ webview.js [3.26 KB]
+   ├─ browser-runtime/
+   │  ├─ server.mjs [8.83 KB]
+   │  └─ assets/ (11 files) [172.89 KB]
+   ├─ media/
+   │  ├─ chat.css [6.52 KB]
+   │  ├─ chat.js [28.55 KB]
+   │  └─ xmind.svg [0.37 KB]
+   └─ node_modules/
+      ├─ dompurify/ (3 files) [55.63 KB]
+      └─ marked/ (2 files) [48.99 KB]
+
+=> Run vsce ls --tree to see all included files.
+
+ DONE  Packaged: ../../.agentflow/xmind-browser-shared.vsix (30 files, 132.26 KB)

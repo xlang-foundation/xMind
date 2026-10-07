@@ -6,3 +6,4 @@ build/
 .xlang3/
 node_modules/
 *.vsix
+/extensions/vscode/browser-runtime/
