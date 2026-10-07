@@ -21,6 +21,11 @@ settings. `/history` reads the current durable conversation, and `/help` describ
 the commands. These commands do not create a session or invoke inference.
 Unavailable IDs are rejected without changing selection. Prefix a literal slash
 request with a second slash (`//`); unknown commands are not sent to the model.
+The optional initial model argument is checked against the backend catalogue
+before displaying history or accepting requests. Its regression cases require an
+unavailable ID to leave runs, history and provider request counts unchanged, and
+an enabled ID to retain normal read-only session inspection. These newer cases
+remain pending compiled validation.
 
 The catalogue is `/v1/models`, the executor's currently enabled models. It is not
 the provider account discovery endpoint; enabling additional providers/models is

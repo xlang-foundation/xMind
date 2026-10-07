@@ -112,6 +112,13 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         return Json::parse(response->body);
     };
     const auto health=request("/v1/health");if(!health.is_object() || health.value("agent_execution",false)!=true)throw std::runtime_error("Configure a backend model before starting chat");
+    if(!model.empty()){
+        const auto catalogue=request("/v1/models");
+        if(!catalogue.is_object() || !catalogue.contains("models") || !catalogue["models"].is_array())throw std::runtime_error("Invalid backend model catalogue");
+        bool available=false;
+        for(const auto& item:catalogue["models"])if(item.is_object() && item.value("id",std::string{})==model)available=true;
+        if(!available)throw std::invalid_argument("Initial model is not enabled by this backend");
+    }
     // Validate a supplied session without starting work or creating a duplicate.
     Json history;
     if(!session.empty()){history=request("/v1/sessions/"+session+"/history");if(!history.is_array())throw std::runtime_error("Invalid session history");}

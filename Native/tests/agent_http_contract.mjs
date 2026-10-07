@@ -118,6 +118,10 @@ try {
   await until(()=>api(`/v1/runs/${run.id}/cancel`,{}),result=>result.status===409,'completed run release');
   assert.equal((await api(`/v1/runs/${run.id}/transition`,{expected:'completed',next:'running'})).status,404);
   const beforeChat=cli('sessions').length;assert.deepEqual(await chat('/exit\n'),[]);assert.equal(cli('sessions').length,beforeChat,'Leaving an empty chat must not create a session');
+  const beforeInvalidRequests=requests,beforeInvalidRuns=cli('runs','coding').length;
+  assert.deepEqual(await chatResult(1,'Read README\n/exit\n','coding','unavailable-fixture'),[],'An unavailable initial model must fail before emitting history or admitting work');
+  assert.equal(cli('runs','coding').length,beforeInvalidRuns);assert.equal(requests,beforeInvalidRequests);assert.deepEqual(cli('history','coding'),history);
+  assert.equal((await chat('/exit\n','coding','synthetic-protocol-model')).find(record=>record.type==='history').history.length,history.length,'A backend-enabled initial model preserves normal session inspection');
   const commandRequests=requests,commands=await chat('/help\n/models\n/model unavailable-fixture\n/model synthetic-protocol-model\n/history\n/model\n/unknown\n/exit\n');
   assert.equal(cli('sessions').length,beforeChat,'Read-only chat commands must not create conversations');assert.equal(requests,commandRequests,'Chat commands must not invoke inference');
   assert.equal(commands.filter(record=>record.type==='model').length,2,'Unavailable model must not change selection');
