@@ -39,6 +39,7 @@ The catalog assigns revisions; clients obtain the current revision from `graphs`
 | `graph-children ROOT` | GET `/v1/graph-runs/ROOT/children`: actual owned child runs |
 | `graph-child-history ROOT CHILD` | GET `/v1/graph-runs/ROOT/children/CHILD/history`: isolated child transcript; a foreign child is rejected |
 | `graph-events ROOT [AFTER]` | GET `/v1/graph-runs/ROOT/events?after=CURSOR`: persisted root and child events |
+| `graph-watch ROOT [AFTER]` | Live NDJSON observation of persisted root and owned-child events; source prepared, compiled validation pending |
 | `graph-input ROOT NODE REV JSON_FILE` | POST `/v1/graph-runs/ROOT/human/NODE`: typed input with expected checkpoint revision |
 | `cancel ROOT` | POST `/v1/runs/ROOT/cancel`: cancel through the owning execution service |
 
