@@ -15,6 +15,13 @@ const wire='data: '+JSON.stringify({choices:[{index:0,delta:{content:'transport 
 function handler(request,response) {
   requests++;
   if(request.url==='/redirect-target') {redirected++;response.writeHead(500);response.end();return;}
+  if(request.url.startsWith('/json')){
+    assert.equal(request.method,'GET');assert.equal(request.headers.accept,'application/json');assert.equal(request.headers.authorization,'Bearer transport-test-token-not-a-real-key');
+    if(request.url==='/json-redirect'){response.writeHead(302,{Location:`http://127.0.0.1:${plain.address().port}/redirect-target`});response.end();return;}
+    if(request.url==='/json-delay')return;
+    response.writeHead(200,{'Content-Type':request.url==='/json-wrong-media'?'text/plain':'application/json; charset=utf-8'});
+    response.end(request.url==='/json-oversized'?'x'.repeat(1024*1024+1):'{"object":"list","data":[]}');return;
+  }
   assert.equal(request.method,'POST');assert.equal(request.headers.authorization,'Bearer transport-test-token-not-a-real-key');
   let body='';request.on('data',data=>{body+=data;});
   request.on('end',()=>{

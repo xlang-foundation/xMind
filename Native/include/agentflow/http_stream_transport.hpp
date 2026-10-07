@@ -24,4 +24,6 @@ struct HttpStreamRequest {
 // No redirect, implicit credential forwarding, or automatic retry.
 void post_event_stream(const HttpStreamRequest& request,const SecretBytes* bearer,
     const std::function<void(std::string_view)>& consume,std::stop_token cancel={});
+// Bounded JSON discovery through the same certificate, redirect and deadline policy.
+std::string get_json(const HttpStreamRequest& request,const SecretBytes* bearer,std::stop_token cancel={});
 }

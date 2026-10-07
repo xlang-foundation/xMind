@@ -8,14 +8,17 @@ class ProviderSetup {
 public:
     virtual ~ProviderSetup()=default;
     virtual ProviderSetupMetadata configuration() const=0;
+    virtual std::vector<std::string> discover(SecretBytes key,std::int64_t expected_revision)=0;
     virtual ProviderSetupMetadata configure(std::string model,SecretBytes key,std::int64_t expected_revision)=0;
 };
 class ProviderRuntime final : public RunExecutor,public ProviderSetup {
 public:
     ProviderRuntime(PersistenceService& store,AgentSettings base,std::size_t workers=2,std::size_t capacity=128,
-        std::string endpoint="https://api.openai.com/v1/chat/completions");
+        std::string endpoint="https://api.openai.com/v1/chat/completions",
+        std::string discovery_endpoint="https://api.openai.com/v1/models");
     ~ProviderRuntime();
     ProviderSetupMetadata configuration() const override;
+    std::vector<std::string> discover(SecretBytes key,std::int64_t expected_revision) override;
     ProviderSetupMetadata configure(std::string model,SecretBytes key,std::int64_t expected_revision) override;
     Run submit(std::string id,std::string session,std::string prompt) override;
     Run submit_model(std::string id,std::string session,std::string prompt,std::string model) override;

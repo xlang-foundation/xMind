@@ -1,5 +1,8 @@
 #include "agentflow/provider_setup.hpp"
 #include "agentflow/mcp_wire.hpp"
+#include "agentflow/http_stream_transport.hpp"
+#include <set>
+#include <algorithm>
 #include "nlohmann/json.hpp"
 #include <mutex>
 #include <random>
@@ -17,7 +20,7 @@ std::string identifier(){std::random_device random;std::ostringstream value;valu
 std::string purpose(const std::string& endpoint){BCRYPT_ALG_HANDLE algorithm=nullptr;std::array<UCHAR,32> hash{};if(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)<0)throw DatabaseError("Cannot bind provider setup credential");const auto status=BCryptHash(algorithm,nullptr,0,reinterpret_cast<PUCHAR>(const_cast<char*>(endpoint.data())),static_cast<ULONG>(endpoint.size()),hash.data(),static_cast<ULONG>(hash.size()));BCryptCloseAlgorithmProvider(algorithm,0);if(status<0)throw DatabaseError("Cannot bind provider setup credential");std::ostringstream result;result<<"provider:setup:"<<std::hex<<std::setfill('0');for(auto byte:hash)result<<std::setw(2)<<static_cast<unsigned>(byte);return result.str();}
 }
 struct ProviderRuntime::Impl {
-    PersistenceService& store;AgentSettings base;std::size_t workers,capacity;std::string endpoint,binding;mutable std::mutex mutex;ProviderSetupMetadata metadata;std::unique_ptr<AgentService> service;
+    PersistenceService& store;AgentSettings base;std::size_t workers,capacity;std::string endpoint,binding,discovery_endpoint;mutable std::mutex mutex;ProviderSetupMetadata metadata;std::unique_ptr<AgentService> service;
     Impl(PersistenceService& persistence,AgentSettings settings,std::size_t count,std::size_t limit,std::string destination):store(persistence),base(std::move(settings)),workers(count),capacity(limit),endpoint(std::move(destination)),binding(purpose(endpoint)){
         if(count<1 || count>16 || limit<1 || limit>4096)throw std::invalid_argument("Invalid provider worker capacity");
         if(endpoint.empty() || endpoint.size()>8192)throw std::invalid_argument("Invalid provider setup endpoint");metadata.provider="openai";metadata.endpoint=endpoint;
@@ -28,9 +31,31 @@ struct ProviderRuntime::Impl {
     }
     AgentSettings configuration(const std::string& model,const std::string& id){auto configured=base;configured.provider.model=model;configured.provider.endpoint=endpoint;configured.provider.tools=Capability::supported;configured.provider.stream_usage=Capability::supported;configured.selectable_models.clear();configured.credential=CredentialReference{"server",id,binding};return configured;}
 };
-ProviderRuntime::ProviderRuntime(PersistenceService& store,AgentSettings base,std::size_t count,std::size_t capacity,std::string endpoint):impl_(std::make_unique<Impl>(store,std::move(base),count,capacity,std::move(endpoint))){}
+ProviderRuntime::ProviderRuntime(PersistenceService& store,AgentSettings base,std::size_t count,std::size_t capacity,std::string endpoint,std::string discovery):impl_(std::make_unique<Impl>(store,std::move(base),count,capacity,std::move(endpoint))){impl_->discovery_endpoint=std::move(discovery);}
 ProviderRuntime::~ProviderRuntime()=default;
 ProviderSetupMetadata ProviderRuntime::configuration() const{std::lock_guard lock(impl_->mutex);return impl_->metadata;}
+std::vector<std::string> ProviderRuntime::discover(SecretBytes secret,std::int64_t expected){
+    {std::lock_guard lock(impl_->mutex);if(expected<0 || expected!=impl_->metadata.revision)throw Conflict("Provider configuration revision changed");}
+    HttpStreamRequest request;request.url=impl_->discovery_endpoint;request.deadline=std::chrono::seconds(10);request.idle_timeout=std::chrono::seconds(10);
+    const auto source=get_json(request,&secret);
+    std::vector<std::string> models;
+    try{
+        std::vector<std::set<std::string>> fields;
+        const auto value=Json::parse(source,[&](int depth,Json::parse_event_t event,Json& parsed){
+            if(depth>16)throw TransportError("Invalid provider model catalogue");
+            if(event==Json::parse_event_t::object_start)fields.emplace_back();
+            else if(event==Json::parse_event_t::object_end)fields.pop_back();
+            else if(event==Json::parse_event_t::key && !fields.back().insert(parsed.get<std::string>()).second)throw TransportError("Invalid provider model catalogue");
+            return true;
+        });
+        if(!value.is_object() || value.at("object")!="list" || !value.at("data").is_array() || value.at("data").size()>4096)throw TransportError("Invalid provider model catalogue");
+        std::set<std::string> unique;
+        for(const auto& item:value.at("data")){if(!item.is_object() || item.at("object")!="model")throw TransportError("Invalid provider model catalogue");auto id=item.at("id").get<std::string>();model_id(id);if(unique.insert(id).second)models.push_back(std::move(id));}
+    }catch(...){throw TransportError("Invalid provider model catalogue");}
+    std::sort(models.begin(),models.end());
+    {std::lock_guard lock(impl_->mutex);if(expected!=impl_->metadata.revision)throw Conflict("Provider configuration changed during model discovery");}
+    return models;
+}
 ProviderSetupMetadata ProviderRuntime::configure(std::string model,SecretBytes secret,std::int64_t expected){
     model_id(model);if(secret.view().empty() || secret.view().size()>32768)throw std::invalid_argument("Provider key exceeds limits");for(auto byte:secret.view())if(byte<33 || byte>126)throw std::invalid_argument("Provider key must contain printable bytes without spaces");
     std::unique_lock lock(impl_->mutex);if(expected<0 || expected!=impl_->metadata.revision)throw Conflict("Provider configuration revision changed");if(impl_->metadata.revision>=9007199254740991)throw std::overflow_error("Provider setup revision exhausted");if(impl_->service && !impl_->service->idle())throw Conflict("Wait for active runs before changing provider configuration");

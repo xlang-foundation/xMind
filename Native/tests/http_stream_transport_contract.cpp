@@ -18,6 +18,19 @@ int main(int argc,char** argv) {
         const std::string synthetic="transport-test-token-not-a-real-key";
         SecretBytes secret({reinterpret_cast<const std::uint8_t*>(synthetic.data()),synthetic.size()});
         auto request=[&](const std::string& path) {return HttpStreamRequest{base+path,R"({"fixture":"transport"})",10s,5s};};
+        auto discovery=[&](const std::string& path){return HttpStreamRequest{base+path,"",10s,5s};};
+        require(get_json(discovery("/json"),&secret)==R"({"object":"list","data":[]})","JSON GET must return actual native peer bytes");
+        rejects<ProviderHttpError>([&]{get_json(discovery("/json-redirect"),&secret);});
+        rejects<TransportError>([&]{get_json(discovery("/json-wrong-media"),&secret);});
+        rejects<TransportError>([&]{get_json(discovery("/json-oversized"),&secret);});
+        rejects<TransportError>([&]{get_json({tls+"/json","",10s,5s},nullptr);});
+        rejects<std::invalid_argument>([&]{get_json({"http://example.invalid/models",""},&secret);});
+        {
+            std::stop_source cancellation;
+            std::jthread canceller([&]{std::this_thread::sleep_for(150ms);cancellation.request_stop();});
+            rejects<TransportCancelled>([&]{get_json(discovery("/json-delay"),&secret,cancellation.get_token());});
+        }
+        {auto timed=discovery("/json-delay");timed.deadline=200ms;rejects<TransportTimeout>([&]{get_json(timed,&secret);});}
         {
             ChatCompletionStream decoder([](const ModelEvent&){});
             post_event_stream(request("/ok"),&secret,[&](std::string_view bytes){decoder.feed(bytes);});

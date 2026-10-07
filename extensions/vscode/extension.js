@@ -185,13 +185,22 @@ async function activate(context) {
     if(!target || target.baseUrl!==origin)throw new Error('Connect to xMind Server before configuring a model.');
     let setup;try{setup=await target.providerConfiguration();}catch(error){if(error.status===404)throw new Error('This backend has no interactive provider setup. Upgrade xMind Server or use its startup model settings.');throw error;}
     if(setup.provider!=='openai' || setup.endpoint!=='https://api.openai.com/v1/chat/completions' || !Number.isSafeInteger(setup.revision) || setup.revision<0)throw new Error('Backend provider setup policy is unsupported.');
-    const model=await vscode.window.showInputBox({title:'xMind: Configure OpenAI model',prompt:'Enter the model ID available to your OpenAI API account.',value:setup.model||'',ignoreFocusOut:true,validateInput:value=>/^[A-Za-z0-9_.:/-]{1,256}$/.test(value)?undefined:'Enter a valid provider model ID.'});
-    if(model===undefined)return false;
     let key=await vscode.window.showInputBox({title:'xMind: OpenAI API key',prompt:`Store the key encrypted on xMind Server at ${origin}. The backend sends it to https://api.openai.com.`,password:true,ignoreFocusOut:true,validateInput:value=>/^[\x21-\x7e]{1,32768}$/.test(value)?undefined:'Enter your provider API key without spaces.'});
     if(key===undefined)return false;
     try{
-      if(client!==target || configuredOrigin()!==origin || version!==generation)throw new Error('Backend or conversation changed during provider setup. Try again.');
-      await target.configureProvider(model,key,setup.revision);
+      const current=()=>{if(client!==target || configuredOrigin()!==origin || version!==generation)throw new Error('Backend or conversation changed during provider setup. Try again.');};
+      current();
+      post({type:'status',text:'Fetching models from OpenAI…'});
+      const catalogue=await target.discoverProviderModels(key,setup.revision);
+      current();
+      if(!Array.isArray(catalogue.models) || catalogue.models.length>4096 || catalogue.models.some(item=>!item || typeof item.id!=='string' || !/^[A-Za-z0-9_.:/-]{1,256}$/.test(item.id)))throw new Error('Backend returned an invalid model list.');
+      const ids=[...new Set(catalogue.models.map(item=>item.id))].sort();
+      if(!ids.length)throw new Error('OpenAI returned no models for this key. Check the API project access.');
+      const selected=await vscode.window.showQuickPick(ids.map(id=>({label:id,description:id===setup.model?'Current model':undefined})),{title:'xMind: Choose OpenAI model',placeHolder:'Search models returned by your OpenAI account',ignoreFocusOut:true});
+      if(!selected)return false;
+      current();
+      if(!ids.includes(selected.label))throw new Error('Choose a model returned by OpenAI.');
+      await target.configureProvider(selected.label,key,setup.revision);
       // A saved credential establishes configuration, not successful inference.
       post({type:'status',text:'Model configured · send a message to verify provider access'});
       return true;

@@ -16,7 +16,7 @@ function harness(options={}) {
   let pendingOperation;
   let operations=options.operations||[];
   let sidebarProvider;
-  const decisions=[],providerRequests=[],inputPrompts=[];
+  const decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
@@ -26,6 +26,11 @@ function harness(options={}) {
     else if(target.pathname==='/v1/models') {
       if(options.legacyCatalogue) return {ok:false,status:404,json:async()=>({detail:'Resource not found'})};
       data=options.catalogue||{default_model:'synthetic-host-default',models:[{id:'synthetic-host-default'},{id:'synthetic-host-alternate'}]};
+    }
+    else if(target.pathname==='/v1/provider/models'){
+      discoveryRequests.push(JSON.parse(requestOptions.body));
+      if(options.discoveryError)return {ok:false,status:502,json:async()=>({detail:'Model discovery provider returned HTTP 401'})};
+      data=await (options.discoveredModels||{models:[{id:'fixture-other'},{id:'fixture-model'}]});
     }
     else if(target.pathname==='/v1/provider/configuration'){
       if(requestOptions.method==='POST'){
@@ -59,7 +64,7 @@ function harness(options={}) {
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
       executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(['workbench.view.extension.xmind','workbench.view.explorer'].includes(name))return;assert.equal(name,'xmind.workspace.focus');sidebarProvider.resolveWebviewView(makeView());}},
-    window:{showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: Configure OpenAI model')return options.modelInput;if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}assert.equal(prompt.password,true);return token;},showErrorMessage:message=>errors.push(message),
+    window:{showQuickPick:async(items,settings)=>{pickers.push({items,settings});return items.find(item=>item.label===options.modelInput);},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}assert.equal(prompt.password,true);return token;},showErrorMessage:message=>errors.push(message),
       registerWebviewViewProvider:(id,provider)=>{assert.equal(id,'xmind.workspace');sidebarProvider=provider;return {dispose(){}};}}
   };
   function makeView(){
@@ -78,7 +83,7 @@ function harness(options={}) {
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,state,errors,context,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,inputPrompts,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  return {token,commands,secrets,requests,views,intervals,state,errors,context,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
     pauseOperation(promise) {pendingOperation=promise;},
@@ -113,17 +118,26 @@ test('model setup uses host password input and keeps the provider key outside vi
   const h=harness({health:{agent_execution:false,status:'ok'},providerSetup:providerFixture,modelInput:'fixture-model',keyInput:'synthetic-private-provider-key'});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));
   // Arbitrary view key/endpoint fields are ignored; only host prompts supply setup.
   view.receive({type:'configureModel',api_key:'forged-view-key',endpoint:'https://outside.invalid'});await until(()=>h.providerRequests.length===1);await until(()=>view.posted.some(m=>m.type==='capabilities'&&m.execution&&m.model==='fixture-model'));
-  assert.deepEqual(h.providerRequests,[{model:'fixture-model',api_key:'synthetic-private-provider-key',expected_revision:0}]);assert.ok(!JSON.stringify(view.posted).includes('synthetic-private-provider-key'));assert.ok(!JSON.stringify([...h.state.values(),...h.secrets.values()]).includes('synthetic-private-provider-key'));assert.equal(h.inputPrompts.at(-1).password,true);assert.ok(!h.requests.includes('/v1/runs'),'Setup must not manufacture or submit an inference');view.close();
+  assert.deepEqual(h.providerRequests,[{model:'fixture-model',api_key:'synthetic-private-provider-key',expected_revision:0}]);assert.ok(!JSON.stringify(view.posted).includes('synthetic-private-provider-key'));assert.ok(!JSON.stringify([...h.state.values(),...h.secrets.values()]).includes('synthetic-private-provider-key'));assert.equal(h.inputPrompts.at(-1).password,true);assert.ok(!h.requests.includes('/v1/runs'),'Setup must not manufacture or submit an inference');
+  assert.deepEqual(h.discoveryRequests,[{api_key:'synthetic-private-provider-key',expected_revision:0}]);assert.deepEqual(Array.from(h.pickers[0].items,item=>item.label),['fixture-model','fixture-other']);assert.ok(!h.inputPrompts.some(prompt=>prompt.title==='xMind: Configure OpenAI model'));view.close();
 });
 test('dismissed setup and unsupported provider destinations never transmit a key',async()=>{
   for(const options of [{providerSetup:providerFixture,modelInput:undefined},{providerSetup:{...providerFixture,endpoint:'https://outside.invalid'},modelInput:'fixture-model',keyInput:'synthetic-private-provider-key'}]){
-    const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.requests.includes('/v1/provider/configuration'));await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));assert.equal(h.providerRequests.length,0);assert.ok(!h.inputPrompts.some(prompt=>prompt.title==='xMind: OpenAI API key'));view.close();
+    const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.requests.includes('/v1/provider/configuration'));await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));assert.equal(h.providerRequests.length,0);assert.equal(h.discoveryRequests.length,0);view.close();
   }
 });
 test('closing the sidebar during the password prompt prevents a late provider grant',async()=>{
   let supply;const keyInput=new Promise(resolve=>supply=resolve);const h=harness({providerSetup:providerFixture,modelInput:'fixture-model',keyInput});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.inputPrompts.some(prompt=>prompt.title==='xMind: OpenAI API key'));view.close();supply('synthetic-private-provider-key');await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));assert.equal(h.providerRequests.length,0);assert.ok(!JSON.stringify(view.posted).includes('synthetic-private-provider-key'));
 });
 const uncertainEdit={...pendingEdit,state:'uncertain'};
+test('model discovery errors, empty catalogues and dismissed picker never save provider settings',async()=>{
+  for(const options of [{discoveryError:true},{discoveredModels:{models:[]}},{discoveredModels:{models:[{id:'bad\nmodel'}]}},{modelInput:undefined}]){
+    const h=harness({providerSetup:providerFixture,keyInput:'synthetic-private-provider-key',modelInput:'fixture-model',...options});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.discoveryRequests.length===1);await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));assert.equal(h.providerRequests.length,0);assert.ok(!JSON.stringify(view.posted).includes('synthetic-private-provider-key'));view.close();
+  }
+});
+test('closing the sidebar during model discovery prevents a stale picker or configuration',async()=>{
+  let supply;const discoveredModels=new Promise(resolve=>supply=resolve);const h=harness({providerSetup:providerFixture,keyInput:'synthetic-private-provider-key',modelInput:'fixture-model',discoveredModels});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.discoveryRequests.length===1);view.close();supply({models:[{id:'fixture-model'}]});await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));assert.equal(h.pickers.length,0);assert.equal(h.providerRequests.length,0);
+});
 const inspectionFixture={operation:uncertainEdit,observed:{path:'file.cpp',workspace_id:uncertainEdit.workspace_id,file_id:'fixture-file',content_sha256:'a'.repeat(64),size:12},match:'after',same_file:true,observed_unix_ms:Date.now(),quarantine_released:false};
 test('older run inspection remains accessible and selected run persists across view reopening',async()=>{
   const older={...uncertainEdit,run_id:'older'};

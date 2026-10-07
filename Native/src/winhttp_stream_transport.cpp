@@ -82,8 +82,8 @@ std::wstring wide(const std::string& text) {
 }
 std::wstring lower(std::wstring value) {for(auto& c:value) c=static_cast<wchar_t>(std::towlower(c));return value;}
 }
-void post_event_stream(const HttpStreamRequest& input,const SecretBytes* bearer,
-    const std::function<void(std::string_view)>& consume,std::stop_token cancel) {
+static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
+    const std::function<void(std::string_view)>& consume,std::stop_token cancel,bool json) {
     if(!consume || input.url.empty() || input.url.size()>8192 || input.body.size()>8*1024*1024 ||
         input.deadline.count()<=0 || input.deadline.count()>600000 || input.idle_timeout.count()<=0 || input.idle_timeout.count()>600000)
         throw std::invalid_argument("Invalid provider transport configuration");
@@ -106,10 +106,10 @@ void post_event_stream(const HttpStreamRequest& input,const SecretBytes* bearer,
     checked(WinHttpSetTimeouts(session.value,10000,10000,10000,static_cast<int>(input.idle_timeout.count())));
     Handle connection(WinHttpConnect(session.value,host.c_str(),parts.nPort,0));
     WipedHeaders headers;
-    headers.value=L"Content-Type: application/json\r\nAccept: text/event-stream\r\n";
+    headers.value=json?L"Accept: application/json\r\n":L"Content-Type: application/json\r\nAccept: text/event-stream\r\n";
     if(bearer) {
         const auto bytes=bearer->view();
-        if(bytes.empty() || bytes.size()>16384) throw std::invalid_argument("Invalid provider credential");
+        if(bytes.empty() || bytes.size()>32768) throw std::invalid_argument("Invalid provider credential");
         // Reserve before copying secret bytes so growth cannot leave unwiped
         // credential fragments in abandoned string allocations.
         headers.value.reserve(headers.value.size()+bytes.size()+32);
@@ -121,7 +121,7 @@ void post_event_stream(const HttpStreamRequest& input,const SecretBytes* bearer,
         headers.value+=L"\r\n";
     }
     std::array<char,8192> buffer{};State state;
-    Handle raw(WinHttpOpenRequest(connection.value,L"POST",path.c_str(),nullptr,WINHTTP_NO_REFERER,WINHTTP_DEFAULT_ACCEPT_TYPES,secure?WINHTTP_FLAG_SECURE:0));
+    Handle raw(WinHttpOpenRequest(connection.value,json?L"GET":L"POST",path.c_str(),nullptr,WINHTTP_NO_REFERER,WINHTTP_DEFAULT_ACCEPT_TYPES,secure?WINHTTP_FLAG_SECURE:0));
     DWORD policy=WINHTTP_OPTION_REDIRECT_POLICY_NEVER;checked(WinHttpSetOption(raw.value,WINHTTP_OPTION_REDIRECT_POLICY,&policy,sizeof(policy)));
     // Never ask the OS to send ambient user credentials to a model endpoint.
     DWORD logon=WINHTTP_AUTOLOGON_SECURITY_LEVEL_HIGH;checked(WinHttpSetOption(raw.value,WINHTTP_OPTION_AUTOLOGON_POLICY,&logon,sizeof(logon)));
@@ -142,7 +142,8 @@ void post_event_stream(const HttpStreamRequest& input,const SecretBytes* bearer,
     if(!WinHttpQueryHeaders(request.value,WINHTTP_QUERY_CONTENT_TYPE,WINHTTP_HEADER_NAME_BY_INDEX,content.data(),&size,WINHTTP_NO_HEADER_INDEX)) throw TransportError("Missing or oversized provider content type");
     auto media=lower(std::wstring(content.data()));media=media.substr(0,media.find(L';'));
     while(!media.empty() && (media.back()==L' ' || media.back()==L'\t')) media.pop_back();
-    if(media!=L"text/event-stream") throw TransportError("Provider response is not an event stream");
+    if(media!=(json?L"application/json":L"text/event-stream")) throw TransportError("Unexpected provider response content type");
+    const std::size_t limit=json?1024*1024:64*1024*1024;
     std::size_t received=0;
     for(;;) {
         if(cancel.stop_requested()) throw TransportCancelled("Provider request cancelled");
@@ -150,8 +151,18 @@ void post_event_stream(const HttpStreamRequest& input,const SecretBytes* bearer,
         const auto available=state.wait(WINHTTP_CALLBACK_STATUS_DATA_AVAILABLE,deadline,cancel);if(!available) break;
         state.prepare();checked(WinHttpReadData(request.value,buffer.data(),static_cast<DWORD>(std::min<std::size_t>(available,buffer.size())),nullptr));
         const auto read=state.wait(WINHTTP_CALLBACK_STATUS_READ_COMPLETE,deadline,cancel);if(!read) break;
-        if(read>buffer.size() || read>64*1024*1024-received) throw TransportError("Provider response exceeds configured limit");
+        if(read>buffer.size() || read>limit-received) throw TransportError("Provider response exceeds configured limit");
         received+=read;consume(std::string_view(buffer.data(),read));
     }
+}
+void post_event_stream(const HttpStreamRequest& input,const SecretBytes* bearer,
+    const std::function<void(std::string_view)>& consume,std::stop_token cancel) {
+    transfer(input,bearer,consume,cancel,false);
+}
+std::string get_json(const HttpStreamRequest& input,const SecretBytes* bearer,std::stop_token cancel) {
+    if(!input.body.empty()) throw std::invalid_argument("JSON discovery cannot send a request body");
+    std::string result;
+    transfer(input,bearer,[&](std::string_view chunk){result.append(chunk);},cancel,true);
+    return result;
 }
 }

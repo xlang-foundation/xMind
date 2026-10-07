@@ -1,6 +1,7 @@
 #include "agentflow/http_server.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/provider_setup.hpp"
+#include "agentflow/http_stream_transport.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <charconv>
@@ -99,6 +100,9 @@ template<class Handler> auto guarded(Handler handler) {
         catch(const PersistenceClosed&) {reply(response,{{"detail","Backend shutting down"}},503);}
         catch(const RunBusy&) {reply(response,{{"detail","Agent queue is full"}},503);}
         catch(const RunUnavailable&) {reply(response,{{"detail","Agent executor is unavailable"}},503);}
+        catch(const ProviderHttpError& error) {reply(response,{{"detail","Model discovery provider returned HTTP "+std::to_string(error.status)}},502);}
+        catch(const TransportTimeout&) {reply(response,{{"detail","Model discovery timed out; try again"}},504);}
+        catch(const TransportError&) {reply(response,{{"detail","Model discovery failed; check provider access and try again"}},502);}
         catch(const ToolAccessDenied&) {reply(response,{{"detail","Workspace inspection denied"}},403);}
         catch(const ToolFileError&) {reply(response,{{"detail","Workspace file unavailable for inspection"}},409);}
         catch(const Json::exception&) {reply(response,{{"detail","Invalid JSON request"}},400);}
@@ -144,6 +148,14 @@ struct HttpServer::Impl {
             reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()}});
         }));
         if(setup){
+            server.Post("/v1/provider/models",guarded([setup](const Request& request,Response& response){
+                if(!request.params.empty() || request.body.size()>65536)throw std::invalid_argument("Model discovery request exceeds limits");
+                const auto value=body(request,{"api_key","expected_revision"});
+                if(!value.contains("expected_revision") || !value["expected_revision"].is_number_integer() || value["expected_revision"]<0 || value["expected_revision"]>9007199254740991)throw std::invalid_argument("Invalid provider revision");
+                const auto key=string_field(value,"api_key",32768);SecretBytes secret({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()});
+                auto entries=Json::array();for(const auto& id:setup->discover(std::move(secret),value["expected_revision"].get<std::int64_t>()))entries.push_back({{"id",id}});
+                reply(response,{{"models",entries}});
+            }));
             const auto metadata=[](const ProviderSetupMetadata& value){return Json{{"revision",value.revision},{"provider",value.provider},{"model",value.model},{"endpoint",value.endpoint},{"configured",value.configured}};};
             server.Get("/v1/provider/configuration",guarded([setup,metadata](const Request& request,Response& response){if(!request.params.empty())throw std::invalid_argument("Provider metadata does not accept query parameters");reply(response,metadata(setup->configuration()));}));
             server.Post("/v1/provider/configuration",guarded([setup,metadata](const Request& request,Response& response){
