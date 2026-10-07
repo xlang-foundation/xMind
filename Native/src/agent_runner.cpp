@@ -20,6 +20,7 @@
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
+constexpr std::string_view instruction_prefix="\n\nBackend-configured agent instructions (native permissions and execution evidence remain authoritative):\n";
 std::string operation_id() {std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i) value<<std::setw(8)<<random();return value.str();}
 void cancelled(std::stop_token token) {if(token.stop_requested()) throw TransportCancelled("Agent cancelled");}
 MessageRole role(const std::string& name) {
@@ -49,6 +50,8 @@ Json assistant(const ModelCompletion& result,const std::string& model,std::int64
 }
 }
 AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings):persistence_(persistence),settings_(std::move(settings)) {
+    if(settings_.instruction_policy.instructions.size()>32768 || settings_.instruction_policy.instructions.find('\0')!=std::string::npos || settings_.instruction_policy.revision<0 || settings_.instruction_policy.revision>9007199254740991 || (!settings_.instruction_policy.instructions.empty() && settings_.instruction_policy.revision==0))throw std::invalid_argument("Invalid backend instruction policy");
+    if(!settings_.instruction_policy.instructions.empty() && settings_.instructions.size()+settings_.instruction_policy.instructions.size()+instruction_prefix.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
     if(settings_.provider.model.empty() || settings_.provider.endpoint.empty() || settings_.max_turns==0 || settings_.max_turns>128 || settings_.instructions.size()>65536 || settings_.run_timeout.count()<=0 || settings_.run_timeout.count()>3600000)
         throw std::invalid_argument("Invalid agent configuration");
     if(settings_.workspace) {
@@ -99,7 +102,11 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         });
         ModelRequest request;request.include_usage=settings_.provider.stream_usage==Capability::supported;
         request.max_output_tokens=settings_.max_output_tokens;
-        if(!settings_.instructions.empty()) request.messages.push_back({MessageRole::system,settings_.instructions});
+        auto instructions=settings_.instructions;
+        if(!settings_.instruction_policy.instructions.empty()){instructions.append(instruction_prefix);instructions+=settings_.instruction_policy.instructions;}
+        if(instructions.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
+        if(!instructions.empty()) request.messages.push_back({MessageRole::system,std::move(instructions)});
+        if(settings_.instruction_policy.revision>0)persistence_.append_event(id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
         for(const auto& stored:persistence_.history(owned.session_id).get()) request.messages.push_back(message(stored));
         if(workspace_) request.tools=workspace_->definitions();
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());

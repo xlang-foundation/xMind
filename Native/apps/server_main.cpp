@@ -1,4 +1,5 @@
 #include "agentflow/http_server.hpp"
+#include "agentflow/agent_instructions.hpp"
 #include <charconv>
 #include <cstdlib>
 #include <iostream>
@@ -44,8 +45,8 @@ int main(int argc,char** argv) {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config") || !options.emplace(key,argv[i+1]).second)
-                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--model ID --model-endpoint URL] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096]");
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config") || !options.emplace(key,argv[i+1]).second)
+                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--model ID --model-endpoint URL] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
         int port=8765;
@@ -78,6 +79,11 @@ int main(int argc,char** argv) {
         };
         const auto workers=capacity("--workers",2,16),queue=capacity("--queue-limit",128,4096);
         agentflow::PersistenceService persistence(options.at("--db"),{options.at("--modules"),options.at("--stdlib")});
+        agentflow::AgentInstructionStore instruction_configurations(persistence);agentflow::AgentInstructionPolicy instruction_policy;
+        if(options.contains("--instructions-config")) {
+            std::ifstream file(options.at("--instructions-config"),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted instruction configuration file");std::string source;char byte;
+            while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Instruction configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted instruction configuration file");instruction_policy=instruction_configurations.apply(source);
+        }else instruction_policy=instruction_configurations.load();
         std::unique_ptr<agentflow::RunExecutor> executor;
         std::vector<agentflow::McpServerMetadata> mcp_metadata;
         std::vector<agentflow::ProcessProfileMetadata> process_metadata;
@@ -108,6 +114,7 @@ int main(int argc,char** argv) {
             settings.approved_edits=options.contains("--workspace-edits");
             settings.mcp_servers=mcp_settings;
             settings.process_profiles=process_profiles;
+            settings.instruction_policy=instruction_policy;
             if(options.contains("--models")) {std::istringstream configured(options.at("--models"));std::string model;while(std::getline(configured,model,',')){if(model.empty())throw std::invalid_argument("Empty configured model");settings.selectable_models.push_back(model);}if(options.at("--models").empty() || options.at("--models").back()==',')throw std::invalid_argument("Empty configured model");}
             if(options.contains("--model-stream-usage")) settings.provider.stream_usage=options.at("--model-stream-usage")=="supported"?agentflow::Capability::supported:(options.at("--model-stream-usage")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
             if(options.contains("--model-tools")) settings.provider.tools=options.at("--model-tools")=="supported"?agentflow::Capability::supported:(options.at("--model-tools")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
@@ -143,7 +150,10 @@ int main(int argc,char** argv) {
         agentflow::HttpServer server(persistence,auth,executor.get()
 #if defined(_WIN32)
             ,recovery.get(),std::move(mcp_metadata),std::move(process_metadata)
+#else
+            ,nullptr,{},{}
 #endif
+            ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()}
         );const auto bound=server.bind(port);
 #if defined(_WIN32)
         {std::lock_guard lock(control_mutex);active_server=&server;}

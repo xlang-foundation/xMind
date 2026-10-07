@@ -14,6 +14,7 @@ param(
     [switch]$ApprovedEdits,
     [string]$CredentialId,
     [string]$ProcessConfig,
+    [string]$InstructionsConfig,
     [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
     [Parameter(ValueFromRemainingArguments=$true)][string[]]$ClientArguments
 )
@@ -40,6 +41,7 @@ if($Action -eq 'Serve') {
     if($ApprovedEdits) {$serverArguments+=@('--workspace-edits','approved')}
     if($CredentialId) {$serverArguments+=@('--credential-id',$CredentialId)}
     if($ProcessConfig) {$serverArguments+=@('--process-config',$ProcessConfig)}
+    if($InstructionsConfig) {$serverArguments+=@('--instructions-config',$InstructionsConfig)}
     & $binary @serverArguments
 } else {
     & $binary $Port @ClientArguments

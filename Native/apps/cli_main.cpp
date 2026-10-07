@@ -49,7 +49,7 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
 
 int main(int argc,char** argv) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, sessions, create-session, history, runs, run, cancel, status, events, watch, models, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, sessions, create-session, history, runs, run, cancel, status, events, watch, models, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -76,6 +76,7 @@ int main(int argc,char** argv) {
         else if(command=="models" && argc==3) path="/v1/models";
         else if(command=="mcp-servers" && argc==3) path="/v1/mcp/servers";
         else if(command=="process-profiles" && argc==3) path="/v1/process/profiles";
+        else if(command=="instructions" && argc==3) path="/v1/agent/instructions";
         else if(command=="run" && (argc==5 || argc==6)) {path="/v1/runs";body={{"session_id",id(argv[3])},{"prompt",argv[4]}};if(argc==6)body["model_id"]=argv[5];post=true;}
         else if(command=="cancel" && argc==4) {path="/v1/runs/"+id(argv[3])+"/cancel";body=Json::object();post=true;}
         else if(command=="watch" && (argc==4 || argc==5)) {path=id(argv[3]);watch=true;watch_cursor=event_cursor(argc==5?argv[4]:"0");}

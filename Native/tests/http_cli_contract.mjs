@@ -62,6 +62,9 @@ try {
   assert.deepEqual(cli('process-profiles'),{profiles:[],runtime_state:'per_operation'},'Unconfigured native server must not invent process profiles or running processes');
   assert.equal((await request('/v1/process/profiles',undefined,{Authorization:''})).status,401);
   assert.equal((await request('/v1/process/profiles?executable=spoof')).status,400,'Discovery cannot select executable paths');
+  assert.equal((await request('/v1/agent/instructions',undefined,{Authorization:''})).status,401);
+  assert.equal((await request('/v1/agent/instructions?instructions=spoof')).status,400,'Discovery cannot import instruction text');
+  assert.deepEqual(cli('instructions'),{revision:0,byte_count:0,scope:'server',runtime_state:'startup_snapshot'});
   assert.equal((await request('/v1/sessions', undefined, {Authorization: ''})).status, 401);
   assert.equal((await request('/v1/sessions', {}, {Authorization: 'Bearer wrong'})).status, 401);
   assert.equal((await request('/v1/health', undefined, {Origin: 'https://untrusted.example'})).status, 403);

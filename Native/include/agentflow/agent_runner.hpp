@@ -4,6 +4,7 @@
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/mcp_configuration.hpp"
 #include "agentflow/process_executor.hpp"
+#include "agentflow/agent_instructions.hpp"
 
 namespace agentflow {
 struct CredentialReference {std::string scope,id,purpose;};
@@ -19,6 +20,7 @@ struct AgentSettings {
     std::chrono::milliseconds run_timeout{600000};
     std::vector<McpServerSetting> mcp_servers;
     std::vector<ProcessProfile> process_profiles;
+    AgentInstructionPolicy instruction_policy;
 };
 // Shared native single-agent/model-tool loop, callable by backend workers and
 // future graph nodes. Always invokes the configured real provider transport.

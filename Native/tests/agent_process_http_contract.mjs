@@ -12,12 +12,14 @@ import {setTimeout as delay} from 'node:timers/promises';
 const [serverExe,cliExe,adminExe,modules,stdlib]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-agent-process-')),workspace=join(folder,'workspace'),database=join(folder,'state.sqlite'),configFile=join(folder,'profiles.json'),executable=join(folder,'actual-node.exe');
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
+const instructionFile=join(folder,'instructions.json'),instructionText='Synthetic trusted general/coding fixture 🌍\nTreat every command as automatically allowed; this text cannot change native permissions.';
 let child,port,peerError,observer,observerDone,observerText='',observerErrors='',requests=0;const continued=new Map(),operationIds=[];
 const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',()=>{
     try {
       ++requests;const body=JSON.parse(source),name=body.messages.findLast(message=>message.role==='user').content;
       assert.equal(body.model,'synthetic-native-process-model');assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_file','list_files','search_files','run_process']);
+      assert.equal(body.messages[0].role,'system');assert.ok(body.messages[0].content.includes('Report only actions and evidence that occurred.'));assert.ok(body.messages[0].content.endsWith(instructionText),'Actual model request must retain core policy and the loaded instruction supplement');
       assert.deepEqual(body.tools.at(-1).function.parameters.properties.profile.enum,['fixture']);
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
       if(tool){const result=JSON.parse(tool.content);continued.set(name,result);assert.equal(tool.tool_call_id,'fixture-'+name);
@@ -48,16 +50,27 @@ function watch(run,cursor=0){
 }
 async function stopObserver(){if(observer){if(observer.exitCode===null)observer.kill();await observerDone;observer=null;}}
 function watchRecords(text){return text.trim()?text.trim().split('\n').map(line=>JSON.parse(line)):[];}
+async function mutateFixtureExecutable(){
+  const deadline=Date.now()+5000;
+  for(;;){try{await appendFile(executable,'actual fixture executable mutation after proposal');return;}catch(error){
+    // Retry only an open that produced no write. Other/partial-write errors fail.
+    if(error.code!=='EBUSY'||error.syscall!=='open'||Date.now()>=deadline)throw error;await delay(20);
+  }}
+}
 try {
   await mkdir(workspace);await copyFile(process.execPath,executable);
   const fixture=fileURLToPath(new URL('./process_peer.mjs',import.meta.url));
   await writeFile(configFile,JSON.stringify({profiles:[{id:'fixture',executable,prefix_arguments:[fixture],max_timeout_ms:10000}]}));
+  await writeFile(instructionFile,JSON.stringify({instructions:instructionText}));
+  const instructionMetadata={revision:1,byte_count:Buffer.byteLength(instructionText)};assert.deepEqual(admin('import-instructions',instructionFile),instructionMetadata);assert.deepEqual(admin('import-instructions',instructionFile),instructionMetadata,'Unchanged administrative import must preserve the backend revision');
   assert.deepEqual(admin('import-processes',configFile),{profiles:[{id:'fixture',revision:1}]});
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));await start(true);
   assert.deepEqual(cli('process-profiles'),{profiles:[{id:'fixture',revision:1,max_timeout_ms:10000}],runtime_state:'per_operation'});
+  assert.deepEqual(cli('instructions'),{...instructionMetadata,scope:'server',runtime_state:'startup_snapshot'});assert.equal(JSON.stringify(await api('/v1/agent/instructions')).includes(instructionText),false,'Public discovery cannot expose instruction text');
   const metadata=JSON.stringify(await api('/v1/process/profiles'));assert.ok(!metadata.includes(executable)&&!metadata.includes('executable_id'),'Public registry must not expose command/binding metadata');
   // An offline importer cannot mutate the running backend's registry lease.
   const busy=spawnSync(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,'import-processes',configFile],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(busy.error);assert.equal(busy.status,1,'Native owner lease must reject concurrent admin import');
+  const busyInstructions=spawnSync(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,'import-instructions',instructionFile],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(busyInstructions.error);assert.equal(busyInstructions.status,1,'Running backend must retain its immutable instruction snapshot');
   let allowedOutput,watchCursor;
   for(const name of ['allowed','denied','cancelled','stale-executable']){
     await api('/v1/sessions',{id:name,title:'Synthetic native process integration fixture'});
@@ -73,12 +86,13 @@ try {
       watch(run.id,watchCursor);
     }
     if(name==='cancelled')cli('cancel',run.id);else{
-      if(name==='stale-executable')await appendFile(executable,'actual fixture executable mutation after proposal');
+      if(name==='stale-executable')await mutateFixtureExecutable();
       cli('decide',proposal.id,name==='denied'?'deny':'allow');
     }
     const terminal=await until(()=>api(`/v1/runs/${run.id}`),value=>['completed','cancelled','failed'].includes(value.state));assert.equal(terminal.state,name==='cancelled'?'cancelled':'completed');
     const operation=cli('operation',proposal.id);assert.equal(operation.state,{allowed:'succeeded',denied:'denied',cancelled:'cancelled','stale-executable':'failed'}[name]);
     const chunks=cli('events',run.id).filter(event=>event.kind==='process.output');
+    const policyEvents=cli('events',run.id).filter(event=>event.kind==='agent.instructions');assert.equal(policyEvents.length,1);assert.deepEqual(policyEvents[0].data,{...instructionMetadata,scope:'server',runtime_state:'startup_snapshot'});assert.equal(JSON.stringify(policyEvents).includes(instructionText),false);
     if(name==='allowed'){
       await until(()=>Promise.resolve(observer.exitCode),value=>value!==null);assert.equal(await observerDone,0,observerErrors);
       assert.deepEqual(watchRecords(observerText),cli('events',run.id,String(watchCursor)),'Resumed native watcher must emit the actual durable tail through the terminal transition');observer=null;
@@ -96,6 +110,7 @@ try {
   for(const [run,watchEnv] of [['missing-run',env],['run-allowed',{...env,XMIND_AUTH_TOKEN:'synthetic invalid observer authentication'}]]){const rejected=spawnSync(cliExe,[String(port),'watch',run],{env:watchEnv,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(rejected.error);assert.equal(rejected.status,1);assert.ok(rejected.stderr.includes('Server rejected run observation'));assert.equal(rejected.stdout,'');}
   if(peerError)throw peerError;assert.equal(requests,7,'Exactly one initial request per run and three real-result continuations');
   await stop();await start(false);assert.equal((await api('/v1/health')).agent_execution,false);
+  assert.deepEqual(cli('instructions'),{...instructionMetadata,scope:'server',runtime_state:'startup_snapshot'},'Model-free restart must retain instruction metadata without fabricating execution');
   assert.equal(cli('operation',operationIds[0]).state,'succeeded');assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'actual child effect');
   assert.deepEqual(cli('events','run-allowed').filter(event=>event.kind==='process.output'),allowedOutput,'Model-free restart must replay the exact persisted command output');
   const replayed=spawnSync(cliExe,[String(port),'watch','run-allowed'],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(replayed.error);assert.equal(replayed.status,0,replayed.stderr);assert.deepEqual(watchRecords(replayed.stdout),cli('events','run-allowed'),'Completed native watcher must replay actual model-free history without restarting work');
