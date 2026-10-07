@@ -76,6 +76,7 @@ $ciExpected+='native_graph_service_http_contract'
 $ciExpected+='native_a2a_task_control_http_contract'
 $ciExpected+='native_incoming_repository_contract'
 $ciExpected+='native_a2a_message_http_contract'
+$ciExpected+='native_a2a_stream_http_contract'
 $ciExpected+='native_provider_setup_contract'
 $ciExpected+='native_provider_cli_contract'
 $ciActual=($ciTests|ConvertFrom-Json).tests.name

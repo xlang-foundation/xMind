@@ -4,8 +4,9 @@
   "type": "module",
   "description": "Official SDK peers for native interoperability contracts only; not product dependencies",
   "dependencies": {
-    "@modelcontextprotocol/server": "2.3.1",
+    "@a2a-js/sdk": "1.3.0",
     "@modelcontextprotocol/sdk": "1.32.1",
+    "@modelcontextprotocol/server": "2.3.1",
     "zod": "4.2.0"
   }
 }

@@ -1,0 +1,1 @@
+Native A2A task controls passed authenticated JSON-RPC boundaries, exact IDs, native graph artifacts isolated by run, real paused-root cancellation, repeated finish/cancel scheduling positive task-local history and invalid/unsupported-request rejection. Full A2A compliance is not established.

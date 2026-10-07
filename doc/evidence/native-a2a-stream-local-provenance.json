@@ -1,0 +1,20 @@
+{
+  "native_source_tree": "d84e5b17bab17b0547c0ca51dbbcb2bd0fc0d630",
+  "binary_sha256": {
+    "server": "534eec6ca2f38b89633029e84d402b4eb31e12a7650ad3e7ac2da76599af1dbb",
+    "runtime": "fb02403bff1bf9967d5e49cb4f2a5a4f6d13ad139cc02b069e20fc03cc6c4862",
+    "sqlite_module": "fcb0e481352672eb72d86a96e2ef5d9b58939a35ad03a4ac3e32bfe7dc733b8c"
+  },
+  "sdk": {
+    "package": "@a2a-js/sdk",
+    "version": "1.3.0",
+    "scope": "Test-only official peer with explicit v0.3 compatibility; not a production/core dependency or evidence of native v1 support",
+    "lock_sha256": "2e68bc36059acfcd7216ae9a205bfc4e0aabf2bf5ffa491ec74fa78ed1a1afa2"
+  },
+  "verification": "Final isolated Release:48/48 native,60/60 extension,0 skipped; final direct stream/task-control peers passed after diagnostic label edits",
+  "scope": "Actual C++/xlang3 task streams, bounded event pages, partial output, reconnect, viewer/control isolation, real file-read tool turn, refusal persistence, authenticated discovery and restarted subscriptions. Provider replies are synthetic fixtures.",
+  "graph_shutdown": "24 actual pause/close/adoption repetitions plus 24 explicit paused cancellation repetitions passed; original hosted b99 failure preserved",
+  "runtime": "Embedded xlang3; no CPython execution",
+  "installed_previews": "Existing model/configuration and graph UI previews retained on their previous runtimes",
+  "remaining": "Native A2A v1 wire support, blocking/continuation, file/data/push, remote delegation, team authorization and full platform parity incomplete. Hosted verification of this source pending."
+}

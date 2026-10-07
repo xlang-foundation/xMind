@@ -180,6 +180,9 @@ if(BUILD_TESTING)
     add_test(NAME native_a2a_message_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/a2a_message_http_contract.mjs"
       "$<TARGET_FILE:xmind_server>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_a2a_message_http_contract PROPERTIES TIMEOUT 60)
+    add_test(NAME native_a2a_stream_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/a2a_stream_http_contract.mjs"
+      "$<TARGET_FILE:xmind_server>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+    set_tests_properties(native_a2a_stream_http_contract PROPERTIES TIMEOUT 60)
     add_test(NAME native_graph_service_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/graph_service_http_contract.mjs"
       "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_graph_service_http_contract PROPERTIES TIMEOUT 90)

@@ -44,6 +44,20 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
  AgentSettings serviceSettings;serviceSettings.workspace=argv[1];serviceSettings.approved_edits=true;serviceSettings.run_timeout=std::chrono::seconds(10);
  std::string serviceGrant;
  {PersistenceService persistence(serviceDatabase,imports);GraphCatalogStore(persistence).apply(R"({"graphs":[{"id":"human","spec":{"nodes":[{"id":"answer","type":"human","prompt":"Continue"}]}},{"id":"read","spec":{"nodes":[{"id":"read","type":"tool","tool":"read_file","arguments":{"path":"left.txt"}}]}},{"id":"fault","spec":{"nodes":[{"id":"create","type":"tool","tool":"create_file","arguments":{"path":"service-fault.txt","content":"Actual service bytes before journal fault"}}]}}]})");
+  // Close immediately after the durable pause, before relying on worker retirement.
+  // Repeated real scheduling exercises the shutdown window observed on hosted CI.
+  for(int attempt=0;attempt<24;++attempt){
+   const auto context="pause-close-"+std::to_string(attempt),id=context+"-root";persistence.create_session(context,"Pause/close race").get();
+   {GraphService owner(persistence,serviceSettings,1,2);owner.submit_graph(id,context,"human",1,"Persist human input request");const auto end=std::chrono::steady_clock::now()+std::chrono::seconds(5);
+    while(persistence.run(id).get().state!=RunState::paused){if(std::chrono::steady_clock::now()>=end)throw std::runtime_error("Repeated durable pause deadline");}
+    owner.close();require(persistence.run(id).get().state==RunState::paused,"Shutdown must preserve a committed pause before worker retirement");}
+   {GraphService next(persistence,serviceSettings,1,2);next.cancel(id,"fixture-controller");next.close();require(persistence.run(id).get().state==RunState::cancelled,"Explicit cancellation must still retire an adopted pause");}
+   const auto cancelContext=context+"-cancel",cancelId=cancelContext+"-root";persistence.create_session(cancelContext,"Explicit pause cancellation race").get();
+   {GraphService owner(persistence,serviceSettings,1,2);owner.submit_graph(cancelId,cancelContext,"human",1,"Cancel committed human pause");const auto end=std::chrono::steady_clock::now()+std::chrono::seconds(5);
+    while(persistence.run(cancelId).get().state!=RunState::paused){if(std::chrono::steady_clock::now()>=end)throw std::runtime_error("Explicit pause deadline");}
+    owner.cancel(cancelId,"fixture-controller");owner.close();require(persistence.run(cancelId).get().state==RunState::cancelled,"Explicit cancellation must survive worker pause retirement race");}
+
+  }
   persistence.create_session("service-human","Durable owner handoff").get();
   {GraphService service(persistence,serviceSettings,1,2);service.submit_graph("service-human-root","service-human","human",1,"Wait for input");const auto end=std::chrono::steady_clock::now()+std::chrono::seconds(5);while(persistence.run("service-human-root").get().state!=RunState::paused){if(std::chrono::steady_clock::now()>=end)throw std::runtime_error("Service human pause deadline");std::this_thread::sleep_for(std::chrono::milliseconds(5));}service.close();require(persistence.run("service-human-root").get().state==RunState::paused,"Closing an owner must preserve an already durable human pause");}
   {GraphService service(persistence,serviceSettings,1,2);require(!service.idle(),"Adopted human pauses must retain ownership and block provider replacement");const auto human=persistence.graph_run("service-human-root").get();service.human_input(human.run.id,"answer",R"({"accepted":true})","fixture-controller",human.checkpoint_revision);const auto end=std::chrono::steady_clock::now()+std::chrono::seconds(5);while(!service.idle()){if(std::chrono::steady_clock::now()>=end)throw std::runtime_error("Service resume retirement deadline");std::this_thread::sleep_for(std::chrono::milliseconds(5));}require(persistence.run(human.run.id).get().state==RunState::completed,"Adopted pause must resume through actual scheduler retirement");

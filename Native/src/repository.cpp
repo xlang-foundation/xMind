@@ -381,6 +381,11 @@ Event Repository::append_event(const std::string& id,const std::string& kind,con
     if(terminal(run(id).state)) throw Conflict("Run is terminal");
     auto result=impl_->event(id,kind,json); transaction.commit(); return result;
 }
+std::vector<Event> Repository::event_batch(const std::string& id,std::int64_t after,std::size_t count){
+    if(after<0||count<1||count>256)throw std::invalid_argument("Invalid event batch");run(id);std::vector<Event> result;
+    for(const auto& row:impl_->database.execute("SELECT seq,kind,payload FROM events WHERE run_id=? AND seq>? ORDER BY seq LIMIT ?",{id,after,static_cast<std::int64_t>(count)}).rows)
+        result.push_back({integer(row[0]),id,text(row[1]),text(row[2])});return result;
+}
 std::vector<Event> Repository::events(const std::string& id,std::int64_t after) {
     if(after<0) throw std::invalid_argument("Negative cursor"); run(id); std::vector<Event> result;
     for(const auto& row:impl_->database.execute("SELECT seq,kind,payload FROM events WHERE run_id=? AND seq>? ORDER BY seq",{id,after}).rows)

@@ -64,7 +64,7 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
     catch(const PermissionExpired&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_tool_permission_expired"})").get();}
     catch(const ProcessBeforeDispatchError&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_process_not_dispatched"})").get();}
 }
-Run GraphRunner::execute(const std::string& id,std::stop_token external){
+Run GraphRunner::execute(const std::string& id,std::stop_token external,bool preserve_human_pause){
     auto root=store_.graph_run(id).get();if(root.input_json.empty())throw RunUnavailable("Legacy graph input requires review before execution");const auto input=Json::parse(root.input_json);if(!input.contains("content") || !input["content"].is_string())throw std::invalid_argument("Graph input requires task content");
     const auto model=input.value("model_id",std::string{});const GraphPlan plan(root.specification_json);validate(plan,model);
     if(root.run.state==RunState::queued)root.run=store_.transition(id,RunState::queued,RunState::running).get();else if(root.run.state!=RunState::running)throw Conflict("Graph is not eligible for execution");
@@ -78,6 +78,7 @@ Run GraphRunner::execute(const std::string& id,std::stop_token external){
         }
         if(fault){if(flights.empty())std::rethrow_exception(fault);std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
         root=store_.graph_run(id).get();
+        if(preserve_human_pause&&external.stop_requested()&&root.run.state==RunState::paused&&flights.empty())return root.run;
         if(stop.stop_requested()){
             if(!flights.empty()){std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
             return store_.retire_graph_run(id,external.stop_requested()?RunState::cancelled:RunState::failed,Json{{"reason",external.stop_requested()?"graph_cancelled":timed_out?"graph_active_segment_timeout":resolution_failed?"graph_data_resolution_failed":"graph_child_failed"}}.dump()).get();

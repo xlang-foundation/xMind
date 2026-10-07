@@ -76,7 +76,7 @@ struct GraphService::Impl {
                 job=std::move(pending.front());pending.pop_front();job->phase=Phase::working;
             }
             try {
-                const auto observed=runner.execute(job->id,job->stop.get_token());
+                const auto observed=runner.execute(job->id,job->stop.get_token(),true);
                 std::lock_guard lock(mutex);
                 if(terminal(observed.state)){active.erase(job->id);continue;}
                 if(observed.state!=RunState::paused)throw DatabaseError("Graph worker returned without a terminal outcome or human pause");

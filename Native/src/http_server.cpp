@@ -11,6 +11,9 @@
 #include <random>
 #include <sstream>
 #include <set>
+#include <atomic>
+#include <thread>
+#include <chrono>
 
 namespace agentflow {
 void validate_local_auth_token(std::string_view token) {
@@ -131,6 +134,14 @@ struct HttpServer::Impl {
     std::vector<ProcessProfileMetadata> process_profiles;
     AgentInstructionMetadata instructions;
     std::string authorization;
+    std::atomic<bool> stopping=false;
+    std::atomic<std::size_t> active_streams=0;
+    struct StreamLease {
+        std::atomic<std::size_t>& active;bool acquired=false;
+        explicit StreamLease(std::atomic<std::size_t>& count):active(count){}
+        bool acquire(){auto count=active.load();while(count<2){if(active.compare_exchange_weak(count,count+1)){acquired=true;return true;}}return false;}
+        ~StreamLease(){if(acquired)active.fetch_sub(1);}
+    };
     httplib::Server server;
     int port=-1;
     Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs):persistence(store),executor(execution),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
@@ -150,6 +161,7 @@ struct HttpServer::Impl {
                 reply(response,{{"detail","Browser origins require a configured view adapter"}},403);return httplib::Server::HandlerResponse::Handled;
             }
             if(request.get_header_value_count("Authorization")!=1 || !equal_token(request.get_header_value("Authorization"),authorization)) {
+                response.set_header("WWW-Authenticate","Bearer realm=\"xMind\"");
                 reply(response,{{"detail","Authentication required"}},401);return httplib::Server::HandlerResponse::Handled;
             }
             return httplib::Server::HandlerResponse::Unhandled;
@@ -161,10 +173,42 @@ struct HttpServer::Impl {
         server.Post("/a2a",[this](const Request& request,Response& response){
             if(request.get_header_value("Content-Type")!="application/json"){reply(response,{{"detail","Use application/json"}},415);return;}
             if(!request.params.empty()){reply(response,{{"detail","A2A does not accept query parameters"}},400);return;}
-            const auto result=A2aTaskControl(persistence,executor).dispatch(request.body);
+            A2aStreamStart start;auto lease=std::make_shared<StreamLease>(active_streams);
+            const auto result=A2aTaskControl(persistence,executor).dispatch(request.body,&start,[&]{return !stopping&&lease->acquire();});
             response.set_header("Cache-Control","no-store");response.set_header("X-Content-Type-Options","nosniff");
+            if(start.enabled){
+                auto stream=std::make_shared<A2aTaskStream>(persistence,start);
+                const auto id=start.id_json;
+                response.set_chunked_content_provider("text/event-stream",[this,stream,lease,id](std::size_t,httplib::DataSink& sink){
+                    auto heartbeat=std::chrono::steady_clock::now()+std::chrono::seconds(1);
+                    while(!stopping&&sink.is_writable()){
+                        try{
+                            const auto batch=stream->poll();
+                            for(const auto& item:batch.responses){const auto frame="data: "+item+"\n\n";if(!sink.write(frame.data(),frame.size()))return false;}
+                            if(batch.final){sink.done();return true;}
+                            if(!batch.responses.empty())return true;
+                        }catch(...){
+                            const auto frame="data: "+Json{{"jsonrpc","2.0"},{"id",Json::parse(id)},{"error",{{"code",-32603},{"message","Stream interrupted"}}}}.dump()+"\n\n";
+                            if(!sink.write(frame.data(),frame.size()))return false;sink.done();return true;
+                        }
+                        if(std::chrono::steady_clock::now()>=heartbeat){const std::string frame=": keepalive\n\n";return sink.write(frame.data(),frame.size());}
+                        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                    }
+                    return false;
+                });return;
+            }
             if(result)response.set_content(*result,"application/json");else response.status=204;
         });
+        server.Get("/.well-known/agent-card.json",guarded([this](const Request& request,Response& response){
+            if(!request.params.empty())throw std::invalid_argument("Agent Card does not accept query parameters");
+            auto skills=Json::array();
+            if(executor&&executor->available())skills.push_back({{"id","native.agent"},{"name","Native agent"},{"description","Run text requests using the configured model and native agent executor."},{"tags",Json::array({"general-agent"})}});
+            reply(response,{{"protocolVersion","0.3.0"},{"name","xMind"},{"description","Local native agent tasks with persistent conversations and authenticated task controls."},
+                {"url","http://127.0.0.1:"+std::to_string(port)+"/a2a"},{"preferredTransport","JSONRPC"},{"version","0.1.0"},
+                {"capabilities",{{"streaming",true},{"pushNotifications",false},{"stateTransitionHistory",false}}},
+                {"securitySchemes",{{"ownerToken",{{"type","http"},{"scheme","bearer"}}}}},{"security",Json::array({{{"ownerToken",Json::array()}}})},
+                {"defaultInputModes",Json::array({"text/plain"})},{"defaultOutputModes",Json::array({"text/plain"})},{"skills",std::move(skills)},{"supportsAuthenticatedExtendedCard",false}});
+        }));
         server.Get("/v1/health",guarded([this](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
             reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()}});
@@ -308,12 +352,12 @@ struct HttpServer::Impl {
     }
 };
 HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs)) {}
-HttpServer::~HttpServer()=default;
+HttpServer::~HttpServer(){stop();}
 int HttpServer::bind(int port) {
     if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");
     const auto bound=port==0?impl_->server.bind_to_any_port("127.0.0.1"):(impl_->server.bind_to_port("127.0.0.1",port)?port:-1);
     if(bound<0) throw std::runtime_error("Cannot bind loopback server");impl_->port=bound;return bound;
 }
 bool HttpServer::listen() {if(impl_->port<0) throw std::logic_error("Bind before listen");return impl_->server.listen_after_bind();}
-void HttpServer::stop() {impl_->server.stop();}
+void HttpServer::stop() {impl_->stopping=true;impl_->server.stop();}
 }

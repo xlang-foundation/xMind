@@ -19,6 +19,10 @@ void fields(const Json& value,std::initializer_list<const char*> allowed,int cod
 std::string new_id(){std::random_device random;std::ostringstream text;text<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)text<<std::setw(8)<<random();return text.str();}
 std::size_t history_length(const Json& params){if(!params.contains("historyLength"))return 0;const auto& value=params["historyLength"];if(!value.is_number_integer()||value<0||value>256)throw RpcError{-32602,"Invalid params"};return value.get<std::size_t>();}
 bool terminal(RunState state){return state==RunState::completed||state==RunState::failed||state==RunState::cancelled;}
+std::string assistant_text(const Json& value){
+    auto content=value.value("content",std::string{});const auto refusal=value.value("refusal",std::string{});
+    if(!refusal.empty()){if(!content.empty())content+='\n';content+=refusal;}return content;
+}
 const char* state(RunState value){switch(value){case RunState::queued:return "submitted";case RunState::running:return "working";case RunState::paused:return "input-required";case RunState::completed:return "completed";case RunState::failed:return "failed";case RunState::cancelled:return "canceled";}throw RpcError{-32603,"Internal error"};}
 Json task(PersistenceService& store,const Run& run,std::size_t count=0){
     Json result={{"kind","task"},{"id",run.id},{"contextId",run.session_id},{"status",{{"state",state(run.state)}}}};
@@ -27,21 +31,61 @@ Json task(PersistenceService& store,const Run& run,std::size_t count=0){
         // committed assistant event can become its result artifact.
         std::optional<std::string> content;
         for(const auto& event:store.events(run.id,0).get())if(event.kind=="conversation.assistant"){
-            const auto value=Json::parse(event.json);if(value.contains("content")&&value["content"].is_string())content=value["content"].get<std::string>();
+            const auto value=Json::parse(event.json);if(value.contains("content")&&value["content"].is_string())content=assistant_text(value);
         }
         if(content)result["artifacts"]=Json::array({{{"artifactId",run.id+"-result"},{"parts",Json::array({{{"kind","text"},{"text",*content}}})}}});
     }
     if(count){
         const auto history=store.task_history(run.id).get();if(!history)throw RpcError{-32004,"Legacy task history is unavailable"};auto messages=Json::array();
         for(const auto& item:*history){if(item.role!="user"&&item.role!="assistant")continue;const auto value=Json::parse(item.json);if(!value.contains("content")||!value["content"].is_string())continue;
-            messages.push_back({{"kind","message"},{"messageId",value.value("a2a_message_id",run.id+"-message-"+std::to_string(item.sequence))},{"taskId",run.id},{"contextId",run.session_id},{"role",item.role=="user"?"user":"agent"},{"parts",Json::array({{{"kind","text"},{"text",value["content"]}}})}});
+            messages.push_back({{"kind","message"},{"messageId",value.value("a2a_message_id",run.id+"-message-"+std::to_string(item.sequence))},{"taskId",run.id},{"contextId",run.session_id},{"role",item.role=="user"?"user":"agent"},{"parts",Json::array({{{"kind","text"},{"text",item.role=="assistant"?Json(assistant_text(value)):value["content"]}}})}});
         }
         if(messages.size()>count)messages.erase(messages.begin(),messages.end()-static_cast<Json::difference_type>(count));result["history"]=std::move(messages);
     }
     return result;
 }
 }
-std::optional<std::string> A2aTaskControl::dispatch(const std::string& source){
+struct A2aTaskStream::Impl {
+    PersistenceService& store;A2aStreamStart start;Json id;
+    std::int64_t cursor=0;bool first=true,ended=false,artifact_started=false,suppress_replay=false;
+    std::string observed_state;
+    Impl(PersistenceService& persistence,const A2aStreamStart& initial):store(persistence),start(initial),id(Json::parse(initial.id_json)){
+        const auto task=Json::parse(start.initial_response).at("result");observed_state=task.at("status").at("state").get<std::string>();
+        suppress_replay=task.contains("artifacts");
+    }
+    std::string response(const Json& result){return Json{{"jsonrpc","2.0"},{"id",id},{"result",result}}.dump();}
+    std::string artifact(const std::string& text,bool append,bool last){return response({{"kind","artifact-update"},{"taskId",start.task_id},{"contextId",start.context_id},
+        {"artifact",{{"artifactId",start.task_id+"-result"},{"parts",Json::array({{{"kind","text"},{"text",text}}})}}},{"append",append},{"lastChunk",last}});}
+};
+A2aTaskStream::A2aTaskStream(PersistenceService& store,const A2aStreamStart& start):impl_(std::make_unique<Impl>(store,start)){}
+A2aTaskStream::~A2aTaskStream()=default;
+A2aStreamBatch A2aTaskStream::poll(){
+    auto& value=*impl_;A2aStreamBatch batch;if(value.ended){batch.final=true;return batch;}
+    if(value.first){value.first=false;batch.responses.push_back(value.start.initial_response);return batch;}
+    // Read state before the event batch. A terminal state is committed together
+    // with its final events, so draining those events precedes final:true.
+    const auto run=value.store.run(value.start.task_id).get();
+    const auto events=value.store.event_batch(value.start.task_id,value.cursor,128).get();
+    for(const auto& event:events){
+        value.cursor=event.sequence;
+        if(value.suppress_replay)continue;
+        if(event.kind=="model.text"||event.kind=="model.refusal"){
+            const auto data=Json::parse(event.json);const auto text=data.at("text").get<std::string>();
+            if(!text.empty()){batch.responses.push_back(value.artifact(text,value.artifact_started,false));value.artifact_started=true;}
+        }else if(event.kind=="conversation.tool_turn")value.artifact_started=false;
+        else if(event.kind=="conversation.assistant"){
+            batch.responses.push_back(value.artifact(assistant_text(Json::parse(event.json)),false,true));value.artifact_started=true;
+        }
+    }
+    if(events.size()==128)return batch;
+    const auto current=std::string(state(run.state));const bool final=terminal(run.state)||run.state==RunState::paused;
+    if(current!=value.observed_state||final){
+        batch.responses.push_back(value.response({{"kind","status-update"},{"taskId",run.id},{"contextId",run.session_id},{"status",{{"state",current}}},{"final",final}}));
+        value.observed_state=current;
+    }
+    value.ended=final;batch.final=final;return batch;
+}
+std::optional<std::string> A2aTaskControl::dispatch(const std::string& source,A2aStreamStart* stream,const std::function<bool()>& reserve_stream){
     Json id=nullptr;bool notification=false;
     auto error=[&](int code,const char* message)->std::optional<std::string>{if(notification)return {};return Json{{"jsonrpc","2.0"},{"id",id},{"error",{{"code",code},{"message",message}}}}.dump();};
     try{
@@ -62,12 +106,16 @@ std::optional<std::string> A2aTaskControl::dispatch(const std::string& source){
         }else notification=true;
         const auto method=request["method"].get<std::string>();
         if(method.starts_with("tasks/pushNotificationConfig/"))throw RpcError{-32003,"Push Notification is not supported"};
-        if(method=="message/stream"||method=="tasks/resubscribe"||method=="agent/getAuthenticatedExtendedCard")throw RpcError{-32004,"This operation is not supported"};
-        if(method=="message/send"){
+        if(method=="agent/getAuthenticatedExtendedCard")throw RpcError{-32004,"This operation is not supported"};
+        const bool streaming=method=="message/stream"||method=="tasks/resubscribe";
+        if(streaming&&(notification||!stream))throw RpcError{-32602,"Streaming requires a response ID and transport"};
+        if(streaming&&reserve_stream&&!reserve_stream())throw RpcError{-32004,"Stream capacity is unavailable"};
+        auto response=[&](const Run& run,const Json& value){const auto output=Json{{"jsonrpc","2.0"},{"id",id},{"result",value}}.dump();if(streaming)*stream={true,run.id,run.session_id,id.dump(),output};return output;};
+        if(method=="message/send"||method=="message/stream"){
             if(!request.contains("params"))throw RpcError{-32602,"Invalid params"};const auto& params=request["params"];fields(params,{"message","configuration","metadata"},-32602);
             if(params.contains("metadata")&&!params["metadata"].is_object())throw RpcError{-32602,"Invalid params"};
             Json config=Json::object();if(params.contains("configuration"))config=params["configuration"];fields(config,{"blocking","historyLength","acceptedOutputModes","pushNotificationConfig"},-32602);
-            if(config.contains("blocking")){if(!config["blocking"].is_boolean())throw RpcError{-32602,"Invalid params"};if(config["blocking"]==true)throw RpcError{-32004,"Blocking send is not supported yet"};}
+            if(config.contains("blocking")){if(!config["blocking"].is_boolean())throw RpcError{-32602,"Invalid params"};if(config["blocking"]==true&&!streaming)throw RpcError{-32004,"Blocking send is not supported yet"};}
             if(config.contains("pushNotificationConfig"))throw RpcError{-32003,"Push Notification is not supported"};
             if(config.contains("acceptedOutputModes")){const auto& modes=config["acceptedOutputModes"];if(!modes.is_array()||modes.size()>16)throw RpcError{-32602,"Invalid params"};for(const auto& mode:modes)if(!mode.is_string())throw RpcError{-32602,"Invalid params"};if(!modes.empty()&&std::find(modes.begin(),modes.end(),Json("text/plain"))==modes.end())throw RpcError{-32005,"Incompatible content types"};}
             const auto count=history_length(config);if(!params.contains("message"))throw RpcError{-32602,"Invalid params"};auto message=params["message"];fields(message,{"kind","role","messageId","parts","contextId","taskId","metadata","referenceTaskIds"},-32602);
@@ -80,9 +128,9 @@ std::optional<std::string> A2aTaskControl::dispatch(const std::string& source){
             if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw RpcError{-32602,"Invalid params"};message.erase("contextId");const auto identity=message.dump();
             auto replay=store_.incoming_message(message_id,context,identity,content).get();Run run;
             if(replay)run=*replay;else {if(!executor_)throw RpcError{-32004,"Agent admission is unavailable"};run=executor_->submit_message(new_id(),context,message_id,content,identity);}
-            const auto result=task(store_,run,count);if(notification)return {};return Json{{"jsonrpc","2.0"},{"id",id},{"result",result}}.dump();
+            const auto result=task(store_,run,count);if(notification)return {};return response(run,result);
         }
-        if(method!="tasks/get"&&method!="tasks/cancel")throw RpcError{-32601,"Method not found"};
+        if(method!="tasks/get"&&method!="tasks/cancel"&&method!="tasks/resubscribe")throw RpcError{-32601,"Method not found"};
         if(!request.contains("params"))throw RpcError{-32602,"Invalid params"};const auto& params=request["params"];
         if(method=="tasks/get")fields(params,{"id","historyLength","metadata"},-32602);else fields(params,{"id","metadata"},-32602);
         if(!params.contains("id")||!params["id"].is_string())throw RpcError{-32602,"Invalid params"};const auto task_id=params["id"].get<std::string>();
@@ -101,7 +149,7 @@ std::optional<std::string> A2aTaskControl::dispatch(const std::string& source){
             }
             current=store_.run(task_id).get();
         }
-        const auto result=task(store_,current,count);if(notification)return {};return Json{{"jsonrpc","2.0"},{"id",id},{"result",result}}.dump();
+        const auto result=task(store_,current,count);if(notification)return {};return response(current,result);
     }catch(const RpcError& fault){return error(fault.code,fault.message);}
     catch(const NotFound&){return error(-32001,"Task not found");}
     catch(const Conflict&){return error(-32004,"Operation conflicts with current task or message identity");}
