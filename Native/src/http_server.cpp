@@ -1,4 +1,6 @@
 #include "agentflow/http_server.hpp"
+#include <initializer_list>
+#include <utility>
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/provider_setup.hpp"
 #include "agentflow/graph_service.hpp"
@@ -115,7 +117,15 @@ template<class Handler> auto guarded(Handler handler) {
         catch(const PersistenceClosed&) {reply(response,{{"detail","Backend shutting down"}},503);}
         catch(const RunBusy&) {reply(response,{{"detail","Agent queue is full"}},503);}
         catch(const RunUnavailable&) {reply(response,{{"detail","Agent executor is unavailable"}},503);}
-        catch(const ProviderHttpError& error) {reply(response,{{"detail","Model discovery provider returned HTTP "+std::to_string(error.status)}},502);}
+        catch(const ProviderHttpError& error) {
+            std::string detail="Model discovery provider returned HTTP "+std::to_string(error.status);
+            Json result={{"provider_status",error.status}};
+            for(const auto& [name,value]:std::initializer_list<std::pair<const char*,std::string>>{
+                {"provider_error_type",error.type},{"provider_error_code",error.code},{"provider_error_param",error.param}}){
+                if(!value.empty()){result[name]=value;detail+=" · "+std::string(name)+": "+value;}
+            }
+            result["detail"]=detail;reply(response,result,502);
+        }
         catch(const TransportTimeout&) {reply(response,{{"detail","Model discovery timed out; try again"}},504);}
         catch(const TransportError&) {reply(response,{{"detail","Model discovery failed; check provider access and try again"}},502);}
         catch(const ToolAccessDenied&) {reply(response,{{"detail","Workspace inspection denied"}},403);}

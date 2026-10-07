@@ -33,7 +33,7 @@ const peer=createServer((request,response)=>{
       const prompt=body.messages.findLast(message=>message.role==='user').content;
       if(prompt==='provider-error') {
         response.writeHead(429,{'Content-Type':'application/json'});
-        response.end('{"error":"private-provider-error-body"}');return;
+        response.end(JSON.stringify({error:{type:'rate_limit_error',code:'rate_limit_exceeded',param:'private-provider-error-body',message:'private-provider-error-body'}}));return;
       }
       response.writeHead(200,{'Content-Type':'text/event-stream'});
       const send=value=>response.write(`data: ${JSON.stringify(value)}\n\n`);
@@ -158,6 +158,7 @@ try {
   await terminal('error-run','failed');
   const failed=cli('events','error-run');
   assert.ok(failed.some(event=>event.kind==='run.failed' && event.data.status===429));
+  const terminalFailure=failed.find(event=>event.kind==='run.failed').data;assert.equal(terminalFailure.provider_error_type,'rate_limit_error');assert.equal(terminalFailure.provider_error_code,'rate_limit_exceeded');assert.ok(!Object.hasOwn(terminalFailure,'provider_error_param'));
   assert.ok(!JSON.stringify(failed).includes('private-provider-error-body'));
   assert.equal(cli('history','error').length,1);
 

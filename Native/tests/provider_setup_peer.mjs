@@ -17,7 +17,7 @@ function finish(){if(response&&released){response.writeHead(200,{'Content-Type':
 const peer=createServer((request,reply)=>{let raw='';request.on('data',data=>raw+=data);request.on('end',()=>{try{
   if(request.url==='/chat/models'){
     ++discoveries;assert.equal(request.method,'GET');assert.equal(raw,'');assert.equal(request.headers.accept,'application/json');
-    if(request.headers.authorization==='Bearer fixture-rejected-key'){reply.writeHead(401,{'Content-Type':'application/json'});reply.end('{"error":"fixture-rejected-key"}');return;}
+    if(request.headers.authorization==='Bearer fixture-rejected-key'){reply.writeHead(401,{'Content-Type':'application/json'});reply.end(JSON.stringify({error:{type:'authentication_error',code:'invalid_api_key',param:'fixture-rejected-key',message:'fixture-rejected-key'}}));return;}
     reply.writeHead(200,{'Content-Type':'application/json; charset=utf-8'});
     if(request.headers.authorization==='Bearer fixture-malformed-key'){reply.end('{"object":"list","data":[{"object":"model","id":"fixture-a","id":"fixture-malformed-key"}]}');return;}
     assert.equal(request.headers.authorization,'Bearer synthetic-provider-setup-key');reply.end(JSON.stringify({object:'list',private_field:'synthetic-provider-setup-key',data:[{object:'model',id:'fixture-other'},{object:'model',id:'fixture-model'},{object:'model',id:'fixture-other'}]}));return;

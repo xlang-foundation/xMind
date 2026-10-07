@@ -24,3 +24,13 @@ browser backend has not been replaced and does not yet produce these fields.
 The user's observed HTTP 400 remains undiagnosed. These diagnostics provide
 evidence for a subsequent fix; they are not evidence that model compatibility is
 fixed or that a specific parameter caused the failure.
+
+Provider discovery HTTP errors now retain the same safe identifiers, together
+with `provider_status`, in the authenticated server response. The ordinary
+`detail` includes only these known identifiers so existing Settings clients can
+display them without another model/key input or raw provider body. The server
+still returns HTTP 502 for an upstream HTTP failure. Discovery and agent HTTP
+contracts now check end-to-end propagation of synthetic authentication/rate-limit
+identifiers and omission of private parameter/message values. Their JavaScript
+syntax checks pass; current native compilation/execution remains pending while
+the guarded local build defers for active sibling benchmarks.
