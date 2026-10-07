@@ -4,6 +4,8 @@ Process and shell execution remain unavailable in the current server/preview. Th
 
 Source `6e348ad1b142f44a05b9c03f333c82eb79b474ff` is pushed. [Isolated run 37624585693](https://github.com/xlang-foundation/xMind/actions/runs/37624585693) is currently building the pinned runtime/native contract set; no result is inferred from its live status. The actual editor preview remains on the earlier verified creation bundle.
 
+Executor/conditional-agent source `027f5387cfc4c6c18273ffd45fd20ba622d1dbae` is pushed. Its 33-contract [isolated run 37625495428](https://github.com/xlang-foundation/xMind/actions/runs/37625495428) is queued behind the adapter verification on this branch. Queuing is not a compile or contract result. The exact handle must be observed to terminal status before claiming validation.
+
 The pinned OpenCode reference is `v2.0.16`, commit `3a103fe0aff726a4edc7492f03f7b88195d9e4c9`. Source inspection of `packages/core/src/tool/plugin/shell.ts`, `packages/core/src/shell.ts` and `packages/core/src/session/shell.ts` shows more than a subprocess call: foreground/background commands, working-directory checks after approval, timeouts, retained output, lifecycle observation and completion notifications. The pinned API inventory includes `session.shell` and shell discovery. Implementing a foreground tool alone will not establish parity with these capabilities. No reference implementation is copied or executed.
 
 ## First native component
