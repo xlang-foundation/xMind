@@ -1,0 +1,11 @@
+{
+  "cliRevision": "51724ab8fdda3b9349b18f110a1256ec4f1398eb",
+  "backendRevision": "67de5b16a8732477606957cb52736df06f078f16",
+  "scope": "Installed hosted CLI health and empty interactive chat against existing browser backend; no model request or session mutation",
+  "nativeCore": "C++",
+  "agentExecution": true,
+  "emptyChatExit": 0,
+  "emptyChatRecords": 0,
+  "sessionCountUnchanged": true,
+  "cliSha256": "f263c393de6312729f3f43604ec47720171f33ecae266ba1ef38698d0c941021"
+}

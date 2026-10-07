@@ -66,3 +66,13 @@ interactive approval controls described above are newer source and **remain
 pending compiled validation**. Node syntax/whitespace checks pass. The guarded
 local build still defers while sibling benchmarks are live. No old binary proves
 these newer features. No running preview has been replaced by this checkpoint.
+
+The exact hosted CLI bundle for revision `51724ab` was downloaded and installed
+in this machine's ignored `.agentflow/ci/installed/51724ab8fdda3b9349b18f110a1256ec4f1398eb/`
+folder after archive-path and provenance checks. Its health request and empty
+interactive chat passed against the existing browser native backend. Chat exited
+zero, emitted no fabricated records and left the session count unchanged.
+[Local installed-binary evidence](evidence/native-interactive-chat-local-installed.json)
+records the binary hash and scope. This local check submitted no provider request
+and does not validate the newer CLI features or live coding. Other previews and
+their backend processes were left running.
