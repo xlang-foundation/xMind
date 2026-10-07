@@ -77,6 +77,10 @@ function entry(role,data,parent=byId('history')){
     const detail=node('details',undefined,'tool');detail.append(node('summary',process?'Command result · '+process.profile_id:'Tool result'));
     if(process){renderProcessOutcome(detail,process);const raw=node('details');raw.append(node('summary','Raw result'),node('pre',data.content));detail.append(raw);}else detail.append(node('pre',data.content||JSON.stringify(data,null,2)));card.append(detail);
   }
+  else if(role==='assistant'&&data.source==='graph_join'&&Array.isArray(data.nodes)&&typeof data.graph_id==='string'){
+    card.append(node('p','Completed graph '+data.graph_id+'.'),node('p','Observed node outputs are below. Provider metrics remain on the agent responses.','inspection-note'));
+    const detail=node('details',undefined,'tool');detail.append(node('summary','Observed join outputs · '+data.nodes.length+' nodes'),node('pre',JSON.stringify(data.nodes,null,2)));card.append(detail);
+  }
   else {const content=node('div',undefined,'message-body markdown');markdown(content,data.content||data.refusal||'');card.append(content);if(data.tool_calls?.length){const detail=node('details',undefined,'tool');detail.append(node('summary',data.tool_calls.length+' tool request(s)'),node('pre',JSON.stringify(data.tool_calls,null,2)));card.append(detail);}if(role==='assistant'){const info=node('div',undefined,'metrics');metrics(info,data);card.append(info);}}
   parent.append(card);return card;
 }

@@ -1,0 +1,18 @@
+{
+  "status": "completed",
+  "workflow": "read.repository.file",
+  "historyEntries": 2,
+  "nodeStates": [
+    "choose.file · human · completed",
+    "read.file · tool · completed"
+  ],
+  "humanForms": 0,
+  "graphVisible": true,
+  "rootId": "3998c7d3b3cde9831b85d33511b1d37f",
+  "readOutput": {
+    "path": "README.md",
+    "content_sha256": "40ab7f8b665a587f6f3e2dacd2aa31bce8afabbf93d85a3e7f44a0590a5515a2",
+    "bytes": 9197,
+    "matches_actual_file": true
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "native_source_tree": "d749d9837bef081198290d1a351f9ef1b1738704",
+  "extension_source_tree": "bff4e1b1838f6b25f4bf253438fbc1aaf0a0eb3a",
+  "server_sha256": "5854C910806D972C9FE82F1FB881D66FC5D4AF5464B3FC95DF6F0DDB78889F77",
+  "runtime_sha256": "FB02403BFF1BF9967D5E49CB4F2A5A4F6D13AD139CC02B069E20FC03CC6C4862",
+  "native_scope": "Locally tested f21420d native API binary; no hosted success claimed",
+  "editor_scope": "Actual normal VS Code development host; dedicated graph-ui profile/database; Explorer left and native secondary sidebar right",
+  "observed": "Real catalog selection, task admission, human pause, JSON path input, actual README bytes, root/transcript and workflow restoration after reload",
+  "provider_scope": "Model-free human/tool graph; no synthetic conversations, replies or metrics inserted",
+  "view_files": {
+    "extension": "458C71D8D2B158271F5B68EF971FD7322C92D695471DA2C4BF131C9E292703C4",
+    "html": "75DC077A42313BC22FA4B9072AD0D841740415A9DC5071952EE822D7C4F1E84C",
+    "script": "D2E7FDA7F3360B2331385A6CD49C2C2AE3AF097D8E2C1EA66A3598CFE2EBEDFD",
+    "css": "2EFAD6B02E5A016086E3F7A7BB0174E2F3D8434D1C64E40DDB06A2C4557A27F7"
+  },
+  "tests": "60 extension contracts passed; launcher parsed; named screenshot tool ran against actual graph view",
+  "original_preview": "Existing 5815141 model backend/old adapter and open Settings dialog preserved",
+  "remaining": "Actual IDE agent-node inference/metrics, graph effects, shared server, PostgreSQL, A2A and full product/parity scope remain incomplete"
+}

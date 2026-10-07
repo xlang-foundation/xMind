@@ -6,7 +6,10 @@ param(
     [string]$CredentialId,
     [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
     [ValidateSet('unknown','unsupported','supported')][string]$StreamUsage='unknown',
-    [string]$Workspace,[switch]$ApprovedEdits
+    [string]$Workspace,[switch]$ApprovedEdits,
+    [ValidatePattern('^[A-Za-z0-9_-]{1,64}$')][string]$PreviewName='ui-host',
+    [ValidateRange(1024,65535)][int]$DebugPort=57217,
+    [string]$GraphsConfig
 )
 $ErrorActionPreference='Stop'
 if([bool]$Model -ne [bool]$ModelEndpoint){throw 'Provide both -Model and -ModelEndpoint.'}
@@ -15,13 +18,18 @@ if($ApprovedEdits -and -not $Workspace){throw 'Approved file edits require a wor
 if($Workspace -and $ModelTools -ne 'supported'){throw 'Workspace execution requires -ModelTools supported.'}
 if($ProviderKeyEnvironment -notmatch '^[A-Za-z_][A-Za-z0-9_]*$'){throw 'Invalid provider key environment name.'}
 if($ProviderKeyEnvironment -eq 'XMIND_AUTH_TOKEN' -or $ProviderKeyEnvironment -like 'XMIND_UI_*'){throw 'Select a provider credential variable, not a preview authentication variable.'}
-foreach($uiArgument in @($CodeExecutable,$RuntimeDirectory,$BundleDirectory,$StdlibSource,$Model,$ModelEndpoint,$SelectableModels,$CredentialId,$Workspace)){
+foreach($uiArgument in @($CodeExecutable,$RuntimeDirectory,$BundleDirectory,$StdlibSource,$Model,$ModelEndpoint,$SelectableModels,$CredentialId,$Workspace,$GraphsConfig)){
     if($uiArgument -and $uiArgument.IndexOfAny([char[]]@([char]0,[char]10,[char]13,[char]34)) -ge 0){throw 'Preview arguments cannot contain quotes or control characters.'}
 }
 $uiProject=Split-Path $PSScriptRoot -Parent
-$uiState=Join-Path $uiProject '.agentflow\ui-host'
+$uiState=Join-Path (Join-Path $uiProject '.agentflow') $PreviewName
 New-Item -ItemType Directory -Force -Path $uiState | Out-Null
-if(-not $CodeExecutable) {$CodeExecutable=Join-Path $uiState 'vscode\Code.exe'}
+if(-not $CodeExecutable) {$CodeExecutable=Join-Path $uiProject '.agentflow/ui-host/vscode/Code.exe'}
+if(Test-Path -LiteralPath (Join-Path $uiState 'active.json')){
+    $uiExisting=Get-Content -LiteralPath (Join-Path $uiState 'active.json') -Raw|ConvertFrom-Json
+    if(Get-Process -Id $uiExisting.backend_pid -ErrorAction SilentlyContinue){throw 'This named preview already has a live backend. Reuse it or select another -PreviewName.'}
+}
+if(Get-NetTCPConnection -State Listen -LocalPort $DebugPort -ErrorAction SilentlyContinue){throw 'The selected development-host debug port is already in use.'}
 if(-not (Test-Path -LiteralPath $CodeExecutable)) {throw 'Select an installed VS Code executable or unpack the official portable ZIP under .agentflow/ui-host/vscode.'}
 $uiServer=Join-Path $uiProject 'build\native\Release\xmind_server.exe'
 $uiBuildProvenance=$null
@@ -56,6 +64,7 @@ try {
     $uiArgs=@('--db',('"'+$uiDatabase+'"'),'--modules',('"'+$uiModules+'"'),'--stdlib',('"'+$StdlibSource+'"'),'--port','0')
     if($Workspace){$uiArgs+=@('--workspace',('"'+[System.IO.Path]::GetFullPath($Workspace)+'"'))}
     if($ApprovedEdits){$uiArgs+=@('--workspace-edits','approved')}
+    if($GraphsConfig){$uiArgs+=@('--graphs-config',('"'+[System.IO.Path]::GetFullPath($GraphsConfig)+'"'))}
     if(-not $Model -and $Workspace){$uiArgs+=@('--model-tools',$ModelTools)}
     if($Model){
         $uiArgs+=@('--model',('"'+$Model+'"'),'--model-endpoint',('"'+$ModelEndpoint+'"'),'--model-tools',$ModelTools,'--model-stream-usage',$StreamUsage)
@@ -91,9 +100,9 @@ try {
     $env:XMIND_UI_READY_FILE=$uiReady
     # User explicitly requested a visible UI. This is an isolated development
     # host for this known repository, with its own settings/extensions directory.
-    $uiCodeArgs=@('--new-window','--disable-workspace-trust','--skip-welcome','--remote-debugging-port=57217','--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiProject+'"'))
+    $uiCodeArgs=@('--new-window','--disable-workspace-trust','--skip-welcome',('--remote-debugging-port='+$DebugPort),'--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiProject+'"'))
     $uiHost=Start-Process -FilePath $CodeExecutable -ArgumentList $uiCodeArgs -WorkingDirectory $uiProject -WindowStyle Normal -PassThru
-    $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=[bool]$uiHealth.agent_execution;server_executable=$uiServer;modules=$uiModules;source_revision=$uiBuildProvenance.xmind} | ConvertTo-Json
+    $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=[bool]$uiHealth.agent_execution;server_executable=$uiServer;server_sha256=(Get-FileHash -LiteralPath $uiServer -Algorithm SHA256).Hash;modules=$uiModules;source_revision=$uiBuildProvenance.xmind;preview_name=$PreviewName;debug_port=$DebugPort;graphs_config=$GraphsConfig} | ConvertTo-Json
     [System.IO.File]::WriteAllText((Join-Path $uiState 'active.json'),$uiMetadata)
     $uiMetadata
 } catch {

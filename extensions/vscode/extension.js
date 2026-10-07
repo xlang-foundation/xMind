@@ -40,6 +40,7 @@ async function activate(context) {
   const stateKey = 'agentflow.session';
   const modelStateKey = 'xmind.model';
   const runStateKey = 'xmind.observedRun';
+  const graphStateKey = 'xmind.workflow';
 
   const post = message => panel?.webview.postMessage(message);
   const stop = () => { clearInterval(timer); timer = undefined; generation++; };
@@ -260,6 +261,7 @@ async function activate(context) {
     const initial=await capabilities();let health=initial.health;modelCatalogue=initial.catalogue;
     const savedModel=context.workspaceState.get(modelStateKey);
     selectedModel=chooseModel(modelCatalogue,savedModel?.url===client.baseUrl?savedModel.id:undefined);
+    const savedGraph=context.workspaceState.get(graphStateKey);selectedGraph=savedGraph?.url===client.baseUrl?savedGraph.id:undefined;
     const saved = context.workspaceState.get(stateKey);
     sessionId = saved?.url === client.baseUrl ? saved.id : undefined;
     panel = await acquireSidebar();
@@ -330,6 +332,7 @@ async function activate(context) {
         else if(message.type==='graph-select'){
           if(message.id && !graphCatalogue.some(g=>g.id===message.id&&g.executable))throw new Error('Select an executable graph registered by this backend.');
           selectedGraph=message.id||undefined;post({type:'graphs',graphs:graphCatalogue,selected:selectedGraph});
+          await context.workspaceState.update(graphStateKey,{url:client.baseUrl,id:selectedGraph});
         }else if(message.type==='graph-input'){
           if(!vscode.workspace.isTrusted || !graphSnapshot || graphSnapshot.run.id!==runId || message.root!==runId || !['paused','running'].includes(graphSnapshot.run.state))throw new Error('Select an active graph before providing input.');
           if(message.revision!==graphSnapshot.checkpoint_revision || !graphSnapshot.checkpoint.nodes.some(n=>n.id===message.node&&n.state==='waiting_human'))throw new Error('Human input changed. Refresh the current graph before answering.');

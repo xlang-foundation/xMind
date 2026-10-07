@@ -1,0 +1,25 @@
+{
+  "graphs": [
+    {
+      "id": "read.repository.file",
+      "spec": {
+        "nodes": [
+          {
+            "id": "choose.file",
+            "type": "human",
+            "prompt": "Choose a file in this server's workspace. Submit JSON such as {\"path\":\"README.md\"}."
+          },
+          {
+            "id": "read.file",
+            "type": "tool",
+            "tool": "read_file",
+            "depends_on": ["choose.file"],
+            "arguments": {
+              "path": {"$ref": {"node": "choose.file", "path": ["path"]}}
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
