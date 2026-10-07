@@ -1,9 +1,14 @@
 #pragma once
 #include "agentflow/store.hpp"
+#include "agentflow/secret_protection.hpp"
 #include <memory>
 #include <vector>
 
 namespace agentflow {
+struct CredentialMetadata {
+    std::string scope,id,purpose,label;
+    std::int64_t revision;
+};
 // Target repository: C++ contracts, all database operations through xlang3.
 // Construct/use/destroy on the persistence thread. No direct SQLite linkage.
 class Repository {
@@ -24,6 +29,16 @@ public:
     std::vector<Message> history(const std::string& id);
     void put_information(const std::string& category,const std::string& id,const std::string& json);
     std::string information(const std::string& category,const std::string& id);
+    // Backend-internal operations. Service must authorize scope before calling.
+    // expected_revision=0 creates; positive revisions rotate with stale-write rejection.
+    // Deleted identities are retired permanently to prevent stale-reference reuse.
+    CredentialMetadata put_credential(const std::string& scope,const std::string& id,
+        const std::string& purpose,const std::string& label,const SecretBytes& secret,
+        std::int64_t expected_revision);
+    std::vector<CredentialMetadata> credentials(const std::string& scope);
+    SecretBytes resolve_credential(const std::string& scope,const std::string& id,
+        const std::string& purpose);
+    void delete_credential(const std::string& scope,const std::string& id,std::int64_t expected_revision);
     std::size_t recover_interrupted(const BackendLease& owner);
 private:
     struct Impl;

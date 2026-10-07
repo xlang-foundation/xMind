@@ -74,6 +74,15 @@ if(BUILD_TESTING)
   add_test(NAME xlang_repository_contract COMMAND agentflow_repository_contract
     "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
   set_tests_properties(xlang_repository_contract PROPERTIES TIMEOUT 60)
+  if(WIN32)
+    add_executable(agentflow_credential_repository_contract tests/credential_repository_contract.cpp)
+    target_link_libraries(agentflow_credential_repository_contract PRIVATE agentflow_core)
+    add_custom_command(TARGET agentflow_credential_repository_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_credential_repository_contract>")
+    add_test(NAME encrypted_credential_repository_contract COMMAND agentflow_credential_repository_contract
+      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+    set_tests_properties(encrypted_credential_repository_contract PROPERTIES TIMEOUT 60)
+  endif()
 endif()
 option(AGENTFLOW_BUILD_DIRECT_SQLITE_REFERENCE "Build superseded direct-SQLite reference" OFF)
 if(AGENTFLOW_BUILD_DIRECT_SQLITE_REFERENCE)

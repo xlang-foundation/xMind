@@ -1,6 +1,7 @@
 #include "agentflow/repository.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/backend_lease.hpp"
+#include <limits>
 
 namespace agentflow {
 namespace {
@@ -8,6 +9,17 @@ const std::string& text(const SqlValue& value) { return std::get<std::string>(va
 std::int64_t integer(const SqlValue& value) { return std::get<std::int64_t>(value); }
 void identifier(const std::string& value) {
     if(value.empty() || value.find('\0')!=std::string::npos) throw std::invalid_argument("Invalid identifier");
+}
+std::string credential_context(const std::string& scope,const std::string& id,
+    const std::string& purpose,std::int64_t revision) {
+    // Length prefixes prevent identity collisions when identifiers contain delimiters.
+    std::string context="xMind.credential.v1:";
+    for(const auto* part:{&scope,&id,&purpose}) {
+        identifier(*part);
+        if(part->size()>4096) throw std::invalid_argument("Credential identifier too long");
+        context+=std::to_string(part->size())+":"+*part;
+    }
+    return context+":"+std::to_string(revision);
 }
 std::string state_name(RunState state) {
     switch(state) {
@@ -72,7 +84,12 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version!=1) throw DatabaseError("Unsupported target repository version");
+    } else if(version!=1 && version!=2) throw DatabaseError("Unsupported target repository version");
+    if(version<2) {
+        db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
+        db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
+        db.execute("PRAGMA user_version=2");
+    }
     transaction.commit(); db.execute("PRAGMA journal_mode=WAL"); db.execute("PRAGMA synchronous=FULL");
 }
 Repository::~Repository()=default;
@@ -144,6 +161,56 @@ void Repository::put_information(const std::string& category,const std::string& 
 std::string Repository::information(const std::string& category,const std::string& id) {
     const auto result=impl_->database.execute("SELECT payload FROM information WHERE category=? AND id=?",{category,id});
     if(result.rows.empty()) throw NotFound("Information not found"); return text(result.rows[0][0]);
+}
+CredentialMetadata Repository::put_credential(const std::string& scope,const std::string& id,
+    const std::string& purpose,const std::string& label,const SecretBytes& secret,std::int64_t expected_revision) {
+    if(expected_revision<0 || expected_revision==std::numeric_limits<std::int64_t>::max())
+        throw std::invalid_argument("Invalid credential revision");
+    const auto revision=expected_revision+1;
+    const auto context=credential_context(scope,id,purpose,revision);
+    if(label.size()>4096 || label.find('\0')!=std::string::npos) throw std::invalid_argument("Invalid credential label");
+    const auto protected_value=protect_secret(secret,context);
+    auto& db=impl_->database; Transaction transaction(db);
+    const auto existing=db.execute("SELECT revision FROM credentials WHERE scope=? AND id=?",{scope,id});
+    if(expected_revision==0) {
+        if(!existing.rows.empty()) throw Conflict("Credential already exists");
+        if(!db.execute("SELECT id FROM retired_credentials WHERE scope=? AND id=?",{scope,id}).rows.empty())
+            throw Conflict("Credential identity was retired; use a new ID");
+        changed_one(db.execute("INSERT INTO credentials(scope,id,purpose,label,revision,protection,ciphertext) VALUES(?,?,?,?,?,?,?)",
+            {scope,id,purpose,label,revision,protected_value.protection,protected_value.ciphertext}));
+    } else {
+        if(existing.rows.empty()) throw NotFound("Credential not found");
+        if(integer(existing.rows[0][0])!=expected_revision) throw Conflict("Credential revision changed");
+        changed_one(db.execute("UPDATE credentials SET purpose=?,label=?,revision=?,protection=?,ciphertext=? WHERE scope=? AND id=? AND revision=?",
+            {purpose,label,revision,protected_value.protection,protected_value.ciphertext,scope,id,expected_revision}));
+    }
+    transaction.commit();return {scope,id,purpose,label,revision};
+}
+std::vector<CredentialMetadata> Repository::credentials(const std::string& scope) {
+    identifier(scope);std::vector<CredentialMetadata> result;
+    for(const auto& row:impl_->database.execute("SELECT id,purpose,label,revision FROM credentials WHERE scope=? ORDER BY id",{scope}).rows)
+        result.push_back({scope,text(row[0]),text(row[1]),text(row[2]),integer(row[3])});
+    return result;
+}
+SecretBytes Repository::resolve_credential(const std::string& scope,const std::string& id,const std::string& purpose) {
+    // Purpose is supplied by the calling connector, not accepted from public views.
+    credential_context(scope,id,purpose,1);
+    const auto rows=impl_->database.execute("SELECT purpose,revision,protection,ciphertext FROM credentials WHERE scope=? AND id=?",{scope,id}).rows;
+    if(rows.empty()) throw NotFound("Credential not found");
+    const auto& row=rows[0];
+    if(text(row[0])!=purpose) throw Conflict("Credential purpose differs");
+    return reveal_secret({text(row[2]),std::get<SqlBytes>(row[3])},credential_context(scope,id,purpose,integer(row[1])));
+}
+void Repository::delete_credential(const std::string& scope,const std::string& id,std::int64_t expected_revision) {
+    identifier(scope);identifier(id);
+    if(expected_revision<=0) throw std::invalid_argument("Invalid credential revision");
+    auto& db=impl_->database;Transaction transaction(db);
+    const auto rows=db.execute("SELECT revision FROM credentials WHERE scope=? AND id=?",{scope,id}).rows;
+    if(rows.empty()) throw NotFound("Credential not found");
+    if(integer(rows[0][0])!=expected_revision) throw Conflict("Credential revision changed");
+    changed_one(db.execute("INSERT INTO retired_credentials(scope,id) VALUES(?,?)",{scope,id}));
+    changed_one(db.execute("DELETE FROM credentials WHERE scope=? AND id=? AND revision=?",{scope,id,expected_revision}));
+    transaction.commit();
 }
 std::size_t Repository::recover_interrupted(const BackendLease& owner) {
     if(!owner.covers(impl_->path)) throw Conflict("Recovery requires this database's owner lease");

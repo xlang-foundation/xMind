@@ -4,7 +4,9 @@ The native Windows protection component compiled in Release and passed `native_s
 
 The test uses synthetic binary bytes only. It checks round trip, wrong-context rejection, a modified ciphertext, unknown protection versions, empty input/context and move/clear behavior. It does not test other Windows user identities, host migration, backups or the HTTP credential lifecycle. Other OS protection providers are pending; unsupported OSes fail explicitly rather than store plaintext.
 
-SQLite storage must use the xlang3-backed repository. The credential table and repository/service credential API are not yet implemented. Planned records carry credential ID, provider/type, display label, protection version and encrypted bytes. Public APIs expose metadata and credential references only. The provider/connector resolves a secret inside the backend when needed. Model context, session events and shared configuration must not receive credential plaintext.
+The C++ repository now persists encrypted credentials through xlang3 in a separate SQLite table. Schema version 2 migrates version 1 atomically and retains sessions/messages. Records carry scope, ID, purpose, label, revision, protection version and ciphertext. Metadata listing excludes ciphertext and plaintext. Backend-internal resolution checks purpose and decrypts with context binding to scope, ID, purpose and revision. Rotation and deletion require the current revision; deleted identities are retired so stale references cannot target a replacement credential. Use a new ID when replacing a deleted credential.
+
+`encrypted_credential_repository_contract` verifies binary round trip across connections and reopen, scope/purpose checks, stale updates/deletes, retired identities, failed rotation rollback, ciphertext substitution rejection and migration failure/retry with preserved messages. The service authentication/authorization layer and public HTTP credential endpoints are still pending: repository scope filtering is not user authorization. Callers must authorize scope before invoking these backend-internal methods. Model context, session events and shared configuration must not receive credential plaintext.
 
 Windows DPAPI normally binds decryption to the protecting user's credentials and computer; team deployment uses the server identity. Define credential rotation and portable backup/restore before supporting a different server identity or host. DPAPI is a protection provider, not a reason to put a plaintext encryption key in SQLite.
 
@@ -14,4 +16,4 @@ To inspect the verified component:
 .\build\native\Release\agentflow_secret_contract.exe
 ```
 
-This component test does not establish database credential storage or overall platform readiness. The two SQLite adapter/repository tests still fail on the missing `isolation_level` API; see the complete native test evidence at `build/native/evidence/contracts-20261006.log`.
+The Release build and all four current native contracts passed. This establishes Windows credential persistence through embedded xlang3, not team authorization, portable secrets or overall platform readiness. Initial SQLite failures were resolved by the M1 runtime prerequisite patch; their historical log is retained separately.
