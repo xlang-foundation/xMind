@@ -175,7 +175,7 @@ if(BUILD_TESTING)
     target_include_directories(agentflow_provider_setup_contract PRIVATE third_party third_party/cpp-httplib)
     target_link_libraries(agentflow_provider_setup_contract PRIVATE agentflow_agent agentflow_http)
     add_test(NAME native_provider_setup_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/provider_setup_peer.mjs"
-      "$<TARGET_FILE:agentflow_provider_setup_contract>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      "$<TARGET_FILE:agentflow_provider_setup_contract>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "$<TARGET_FILE:xmind_cli>")
     set_tests_properties(native_provider_setup_contract PROPERTIES TIMEOUT 45)
     add_executable(agentflow_graph_runner_contract tests/graph_runner_contract.cpp)
     target_include_directories(agentflow_graph_runner_contract PRIVATE third_party)

@@ -14,6 +14,17 @@ std::int64_t event_cursor(const std::string& source) {
     if(parsed.ec!=std::errc{} || parsed.ptr!=source.data()+source.size() || value<0)throw std::invalid_argument("Invalid cursor");
     return value;
 }
+nlohmann::json provider_key_fields(const std::string& variable,const std::string& revision_text) {
+    auto normalized=variable;for(auto& character:normalized)if(character>='a' && character<='z')character=static_cast<char>(character-'a'+'A');
+    if(variable.empty() || variable.size()>128 || variable.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")!=std::string::npos || (variable.front()>='0' && variable.front()<='9') || normalized=="XMIND_AUTH_TOKEN" || normalized.starts_with("XMIND_UI_"))throw std::invalid_argument("Select a provider key environment variable");
+    const auto revision=event_cursor(revision_text);if(revision>9007199254740991)throw std::invalid_argument("Invalid provider revision");
+    const auto* secret=std::getenv(variable.c_str());if(!secret || !*secret)throw std::invalid_argument("Provider key environment variable is empty");const auto length=std::strlen(secret);if(length>32768)throw std::invalid_argument("Provider key exceeds limits");
+    nlohmann::json fields={{"api_key",std::string(secret,length)},{"expected_revision",revision}};
+#if defined(_WIN32)
+    _putenv_s(variable.c_str(),""); // Only this client process; preserve parent/user settings.
+#endif
+    return fields;
+}
 // Observation only: ending this client never grants, cancels or owns execution.
 // Each flushed NDJSON record is an actual persisted backend event. Its seq can
 // be supplied on reconnect; process-output hex is never written as terminal code.
@@ -50,7 +61,7 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
 
 int main(int argc,char** argv) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, sessions, create-session, history, runs, run, cancel, status, events, watch, models, provider, configure-provider MODEL KEY_ENV REVISION, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, sessions, create-session, history, runs, run, cancel, status, events, watch, models, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -59,7 +70,7 @@ int main(int argc,char** argv) {
             for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
             return value;
         };
-        using Json=nlohmann::json;std::string path;Json body;bool post=false,watch=false;std::int64_t watch_cursor=0;
+        using Json=nlohmann::json;std::string path;Json body;bool post=false,watch=false,saved_provider_key=false;std::int64_t watch_cursor=0;
         if(command=="health" && argc==3) path="/v1/health";
         else if(command=="sessions" && argc==3) path="/v1/sessions";
         else if(command=="create-session" && argc==4) {path="/v1/sessions";body={{"title",argv[3]}};post=true;}
@@ -76,16 +87,13 @@ int main(int argc,char** argv) {
         }
         else if(command=="models" && argc==3) path="/v1/models";
         else if(command=="provider" && argc==3) path="/v1/provider/configuration";
+        else if(command=="provider-models" && (argc==3 || argc==5)){
+            path="/v1/provider/models";post=true;
+            if(argc==3)saved_provider_key=true;
+            else body=provider_key_fields(argv[3],argv[4]);
+        }
         else if(command=="configure-provider" && argc==6){
-            const std::string variable=argv[4];
-            auto normalized=variable;for(auto& character:normalized)if(character>='a' && character<='z')character=static_cast<char>(character-'a'+'A');
-            if(variable.empty() || variable.size()>128 || variable.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")!=std::string::npos || (variable.front()>='0' && variable.front()<='9') || normalized=="XMIND_AUTH_TOKEN" || normalized.starts_with("XMIND_UI_"))throw std::invalid_argument("Select a provider key environment variable");
-            const auto revision=event_cursor(argv[5]);if(revision>9007199254740991)throw std::invalid_argument("Invalid provider revision");
-            const auto* secret=std::getenv(variable.c_str());if(!secret || !*secret)throw std::invalid_argument("Provider key environment variable is empty");const auto length=std::strlen(secret);if(length>32768)throw std::invalid_argument("Provider key exceeds limits");
-            path="/v1/provider/configuration";body={{"model",argv[3]},{"api_key",std::string(secret,length)},{"expected_revision",revision}};post=true;
-#if defined(_WIN32)
-            _putenv_s(variable.c_str(),""); // This client process only; never registry/user settings.
-#endif
+            path="/v1/provider/configuration";body=provider_key_fields(argv[4],argv[5]);body["model"]=argv[3];post=true;
         }
         else if(command=="mcp-servers" && argc==3) path="/v1/mcp/servers";
         else if(command=="process-profiles" && argc==3) path="/v1/process/profiles";
@@ -104,6 +112,14 @@ int main(int argc,char** argv) {
         httplib::Client client("127.0.0.1",port);
         client.set_connection_timeout(5,0);client.set_read_timeout(15,0);client.set_write_timeout(5,0);client.set_follow_location(false);
         const httplib::Headers headers{{"Authorization",std::string("Bearer ")+token}};
+        if(saved_provider_key){
+            const auto metadata=client.Get("/v1/provider/configuration",headers);
+            if(!metadata)throw std::runtime_error("Cannot reach xMind Server for provider discovery");
+            if(metadata->status<200 || metadata->status>=300)throw std::runtime_error("Server rejected provider metadata (HTTP "+std::to_string(metadata->status)+")");
+            const auto setup=Json::parse(metadata->body);
+            if(!setup.is_object() || !setup.contains("configured") || setup["configured"]!=true || setup.value("provider",std::string{})!="openai" || !setup.contains("revision") || !setup["revision"].is_number_integer() || setup["revision"]<1 || setup["revision"]>9007199254740991)throw std::runtime_error("Configure a provider key before discovering saved-account models");
+            body={{"expected_revision",setup["revision"]}};
+        }
         if(watch)return watch_run(client,headers,path,watch_cursor);
         auto response=post?client.Post(path,headers,body.dump(),"application/json"):client.Get(path,headers);
         if(!response) throw std::runtime_error("Cannot reach xMind Server");
