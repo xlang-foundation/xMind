@@ -22,10 +22,10 @@ function harness(options={}) {
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
     let data;
-    if(target.pathname==='/v1/health') data={agent_execution:true,status:'ok'};
+    if(target.pathname==='/v1/health') data=options.health||{agent_execution:true,status:'ok'};
     else if(target.pathname==='/v1/models') {
       if(options.legacyCatalogue) return {ok:false,status:404,json:async()=>({detail:'Resource not found'})};
-      data={default_model:'synthetic-host-default',models:[{id:'synthetic-host-default'},{id:'synthetic-host-alternate'}]};
+      data=options.catalogue||{default_model:'synthetic-host-default',models:[{id:'synthetic-host-default'},{id:'synthetic-host-alternate'}]};
     }
     else if(target.pathname==='/v1/sessions') data=[{id:'saved',title:'Saved session'}];
     else if(target.pathname==='/v1/sessions/saved/history') data=pendingHistory?await pendingHistory:transcript;
@@ -67,6 +67,7 @@ function harness(options={}) {
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   sandbox.module.exports.activate(context);
   return {token,commands,secrets,requests,views,intervals,state,errors,context,decisions,comparisons,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+    configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     pauseOperation(promise) {pendingOperation=promise;},
     pauseHistory(promise) {pendingHistory=promise;}};
 }
@@ -166,4 +167,30 @@ test('edit comparison opens exact revalidated backend snapshots without granting
   assert.match(before.toString(),/^xmind-review:/);assert.equal(title,'xMind proposed edit: src/example.cpp');assert.equal(h.decisions.length,0);
   h.pauseOperation(Promise.resolve({...proposal,arguments_json:'{"changed":"proposal"}'}));view.receive({type:'review',id:'edit'});
   await until(()=>view.posted.some(message=>message.type==='error'));assert.equal(h.comparisons.length,1);view.close();
+});
+
+test('refresh reloads backend execution capabilities and history without submitting a run',async()=>{
+  const h=harness({health:{agent_execution:false}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='transcript')&&h.intervals.size===0);
+  const histories=h.requests.filter(route=>route==='/v1/sessions/saved/history').length;
+  h.configureBackend({agent_execution:true},{default_model:'configured-after-connect',models:[{id:'configured-after-connect'}]});
+  view.receive({type:'refresh'});
+  await until(()=>h.requests.filter(route=>route==='/v1/sessions/saved/history').length>histories);
+  const latest=view.posted.filter(message=>message.type==='capabilities').at(-1);
+  assert.equal(latest.execution,true);assert.equal(latest.model,'configured-after-connect');
+  assert.equal(h.requests.filter(route=>route==='/v1/health').length,2);
+  assert.ok(!h.requests.includes('/v1/runs'),'Reconnect must never resubmit accepted work');view.close();
+});
+
+test('selected configured model survives view reopening and retired models fall back on refresh',async()=>{
+  const h=harness();await h.commands.get('agentflow.open')();let view=h.views[0];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='transcript'));
+  view.receive({type:'model',id:'synthetic-host-alternate'});
+  await until(()=>h.state.get('xmind.model')?.id==='synthetic-host-alternate');view.close();
+  await h.commands.get('agentflow.open')();view=h.views[1];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='transcript'));
+  assert.equal(view.posted.find(message=>message.type==='capabilities').model,'synthetic-host-alternate');
+  h.configureBackend({agent_execution:true},{default_model:'new-configured-model',models:[{id:'new-configured-model'}]});view.receive({type:'refresh'});
+  await until(()=>view.posted.some(message=>message.type==='capabilities'&&message.model==='new-configured-model'));
+  assert.equal(view.posted.filter(message=>message.type==='capabilities').at(-1).models.length,1);view.close();
 });

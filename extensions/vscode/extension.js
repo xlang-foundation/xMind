@@ -23,6 +23,7 @@ function activate(context) {
   let modelCatalogue = {models:[],default_model:''};
   let selectedModel;
   const stateKey = 'agentflow.session';
+  const modelStateKey = 'xmind.model';
 
   const post = message => panel?.webview.postMessage(message);
   const stop = () => { clearInterval(timer); timer = undefined; generation++; };
@@ -110,6 +111,21 @@ function activate(context) {
     post({ type: 'sessions', sessions, selected: sessionId });
   }
 
+  async function capabilities() {
+    const health=await client.health();let catalogue={models:[],default_model:''};
+    if(health.agent_execution) {
+      try {catalogue=await client.models();}
+      catch(error) {
+        if(error.status!==404) throw error;
+        if(health.model) catalogue={default_model:health.model,models:[{id:health.model}]};
+      }
+    }
+    return {health,catalogue};
+  }
+  function chooseModel(catalogue,preferred) {
+    return catalogue.models.some(model=>model.id===preferred)?preferred:catalogue.default_model||undefined;
+  }
+
   function configuredOrigin() {
     return backendOrigin(vscode.workspace.getConfiguration('agentflow').get('backendUrl'));
   }
@@ -134,18 +150,9 @@ function activate(context) {
     const bootstrapToken = typeof process !== 'undefined' ? process.env.XMIND_UI_BOOTSTRAP_TOKEN : undefined;
     if (!await context.secrets.get(secretKey(origin)) && !await configureToken(bootstrapToken)) return;
     client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
-    const health = await client.health();
-    modelCatalogue = {models:[],default_model:''};
-    if (health.agent_execution) {
-      try { modelCatalogue = await client.models(); }
-      catch (error) {
-        if (error.status !== 404) throw error;
-        // Older native servers can still execute their configured default.
-        // Unknown identity stays unknown; never invent selectable models.
-        if (health.model) modelCatalogue = {default_model:health.model,models:[{id:health.model}]};
-      }
-    }
-    selectedModel = modelCatalogue.default_model || undefined;
+    const initial=await capabilities();let health=initial.health;modelCatalogue=initial.catalogue;
+    const savedModel=context.workspaceState.get(modelStateKey);
+    selectedModel=chooseModel(modelCatalogue,savedModel?.url===client.baseUrl?savedModel.id:undefined);
     const saved = context.workspaceState.get(stateKey);
     sessionId = saved?.url === client.baseUrl ? saved.id : undefined;
     panel = await acquireSidebar();
@@ -160,7 +167,7 @@ function activate(context) {
     panel.webview.onDidReceiveMessage(message => {
       // Selection intent invalidates an in-flight approval immediately, before
       // its queued selection handler can run behind that network request.
-      if (panel === view && (message?.type === 'select' || message?.type === 'new')) {
+      if (panel === view && ['select','new','refresh'].includes(message?.type)) {
         stop(); reviewed.clear(); post({ type: 'operations', operations: [] });
       }
       // Serialize view commands so overlapping selections/submissions cannot
@@ -172,10 +179,24 @@ function activate(context) {
           post({ type: 'capabilities', execution: health.agent_execution, model:selectedModel, models:modelCatalogue.models });
           await refresh();
           if (sessionId) await selectSession(sessionId);
-        } else if (message.type === 'refresh') await refresh();
+        } else if (message.type === 'refresh') {
+          const version=generation;
+          post({type:'capabilities',execution:false,models:[],model:undefined});
+          post({type:'status',text:'Reconnecting to xMind…'});
+          const current=await capabilities();
+          if(panel!==view || version!==generation) return;
+          health=current.health;modelCatalogue=current.catalogue;
+          selectedModel=chooseModel(modelCatalogue,selectedModel);
+          post({type:'capabilities',execution:health.agent_execution,models:modelCatalogue.models,model:selectedModel});
+          await refresh();
+          if(panel!==view || version!==generation) return;
+          if(sessionId) await selectSession(sessionId);
+          else if(health.agent_execution) post({type:'status',text:'Ready'});
+        }
         else if (message.type === 'model' && typeof message.id === 'string') {
           if (!modelCatalogue.models.some(model => model.id === message.id)) throw new Error('Model is not configured on this backend.');
           selectedModel = message.id;
+          await context.workspaceState.update(modelStateKey,{url:client.baseUrl,id:selectedModel});
         }
         else if (message.type === 'new') {
           const session = await client.createSession('VS Code session');
