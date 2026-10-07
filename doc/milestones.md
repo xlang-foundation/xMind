@@ -1,5 +1,7 @@
 # Reviewable milestones
 
+Durable foreground output source checkpoint: the native executor journals a bounded byte-exact output prefix through embedded xlang3; the sidebar reconstructs independent stdout/stderr with explicit missing-sequence/binary handling. All **39 extension contracts passed locally** with labelled fixtures: [complete output](evidence/vscode-process-stream.log). Actual pre-exit output, SQLite replay/write failures and HTTP/CLI restart contracts are expanded in source and await exact-revision CI. The parent-exit cleanup correction remains included. There is no passing expanded process bundle or populated/live-provider editor acceptance yet. [Implementation and limits](native-process-tools.md).
+
 The user requested visible milestones. Show a runnable result, validation evidence and remaining scope at each milestone. Prepared source or a diagram alone does not prove a runnable native milestone.
 
 Next coding component: the native foreground process adapter, durable approval executor, executable binding, persisted profile administration and model/server/CLI source are prepared, with 35 native contracts expected by isolated CI. Local compilation was deferred by a currently observed xlang3 timing controller; no process pass or verified model/server/editor integration is claimed. [Implementation/acceptance contract](native-process-tools.md). The latest verified runnable product remains the 31-native/30-extension creation checkpoint below.

@@ -14,13 +14,43 @@ bool text(const std::string& value,std::size_t limit=4096) {
     return value.size()<=limit && value.find('\0')==std::string::npos && (value.empty() || MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0)>0);
 }
 std::string utf8(const std::filesystem::path& path){const auto value=path.u8string();return {reinterpret_cast<const char*>(value.data()),value.size()};}
+std::string hex_bytes(std::string_view bytes) {
+    constexpr char digits[]="0123456789abcdef";std::string encoded;encoded.reserve(bytes.size()*2);
+    for(unsigned char b:bytes){encoded.push_back(digits[b>>4]);encoded.push_back(digits[b&15]);}
+    return encoded;
+}
 Json captured(const std::string& bytes,std::uint64_t count) {
     if(bytes.empty() || MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,bytes.data(),static_cast<int>(bytes.size()),nullptr,0)>0)
         return {{"encoding","utf-8"},{"data",bytes},{"byte_count",count},{"retained_bytes",bytes.size()}};
-    constexpr char hex[]="0123456789abcdef";std::string encoded;encoded.reserve(bytes.size()*2);
-    for(unsigned char b:bytes){encoded.push_back(hex[b>>4]);encoded.push_back(hex[b&15]);}
-    return {{"encoding","hex"},{"data",encoded},{"byte_count",count},{"retained_bytes",bytes.size()}};
+    return {{"encoding","hex"},{"data",hex_bytes(bytes)},{"byte_count",count},{"retained_bytes",bytes.size()}};
 }
+// Journal retained raw bytes before clients see them. Hex preserves fragments
+// across UTF-8 boundaries. Full 4 KiB chunks plus at most 64 early partial
+// flushes and two final fragments bound one 64 KiB capture to 82 events.
+class OutputJournal {
+public:
+    OutputJournal(PersistenceService& store,const std::string& run,const std::string& operation,const std::string& profile)
+        :store_(store),run_(run),operation_(operation),profile_(profile) {}
+    void append(bool error,std::string_view bytes) {
+        const auto channel=error?1:0;auto& pending=pending_[channel];pending.append(bytes);
+        while(pending.size()>=4096)flush(channel,4096);
+        const auto now=std::chrono::steady_clock::now();
+        if(!pending.empty() && early_<64 && (early_==0 || now-last_>=std::chrono::milliseconds(100))) {
+            flush(channel,pending.size());++early_;last_=now;
+        }
+    }
+    void finish(){for(int channel=0;channel<2;++channel)if(!pending_[channel].empty())flush(channel,pending_[channel].size());}
+private:
+    void flush(int channel,std::size_t size) {
+        const auto json=Json{{"operation_id",operation_},{"profile_id",profile_},{"channel",channel?"stderr":"stdout"},{"encoding","hex"},
+            {"offset",offsets_[channel]},{"retained_bytes",size},{"data",hex_bytes(std::string_view(pending_[channel]).substr(0,size))}}.dump();
+        store_.append_event(run_,"process.output",json).get();
+        offsets_[channel]+=size;pending_[channel].erase(0,size);
+    }
+    PersistenceService& store_;const std::string& run_;const std::string& operation_;const std::string& profile_;
+    std::string pending_[2];std::uint64_t offsets_[2]{};std::size_t early_=0;
+    std::chrono::steady_clock::time_point last_{};
+};
 }
 ProcessExecutor::ProcessExecutor(PersistenceService& store,WorkspaceTools& workspace,std::string root,std::vector<ProcessProfile> profiles)
     :store_(store),workspace_(workspace),root_(std::move(root)),profiles_(std::move(profiles)) {
@@ -68,12 +98,14 @@ std::string ProcessExecutor::invoke(const std::string& id,const std::string& run
     PermissionWaiter(store_).acquire(id,spec,expiry,cancel);
     auto finish=[&](OperationState state,const std::string& result){try{store_.finish_operation(id,state,result).get();}catch(...){throw ProcessOutcomeUnrecorded("Process outcome could not be recorded; claimed-effect recovery is required");}};
     try {
+        OutputJournal output(store_,run,id,found->id);
         ProcessResult result;
-        try {result=ForegroundProcess::run(launch,cancel);}
+        try {result=ForegroundProcess::run(launch,cancel,[&](bool error,std::string_view bytes){output.append(error,bytes);});}
         catch(const ProcessBeforeDispatchError&){finish(OperationState::failed,R"({"reason":"process_not_dispatched"})");throw;}
         catch(const std::invalid_argument&){finish(OperationState::failed,R"({"reason":"invalid_process_before_dispatch"})");throw;}
         catch(const ProcessEffectUncertain&){finish(OperationState::uncertain,R"({"reason":"process_effect_uncertain"})");throw;}
         catch(...){finish(OperationState::uncertain,R"({"reason":"unexpected_process_failure"})");throw ProcessEffectUncertain("Process dispatch outcome is not established");}
+        output.finish();
         const auto termination=result.termination==ProcessTermination::exited?"exited":result.termination==ProcessTermination::cancelled?"cancelled":"timed_out";
         const auto encoded=Json{{"operation_id",id},{"profile_id",found->id},{"pid",result.pid},{"exit_code",result.exit_code},{"termination",termination},{"elapsed_ms",result.elapsed_ms},{"stdout",captured(result.stdout_bytes,result.stdout_count)},{"stderr",captured(result.stderr_bytes,result.stderr_count)},{"truncated",result.truncated},{"process_tree_retired",true},{"independently_verified",false}}.dump();
         if(result.termination!=ProcessTermination::exited){finish(OperationState::uncertain,encoded);throw ProcessEffectUncertain("Interrupted process tree was retired; possible effects remain quarantined");}

@@ -25,6 +25,9 @@ if(mode==='normal') {
   if(mode==='tree')setInterval(()=>{},1000);
 } else if(mode==='cancel-effect') {
   writeFileSync(marker,'actual effect before cancellation');process.stdout.write('ACTUAL EFFECT\n');setInterval(()=>{},1000);
+} else if(mode==='stream-wait') {
+  writeFileSync(marker,'actual effect before streamed output');process.stdout.write('Actual streamed output 🌍\n');
+  const tick=setInterval(()=>{if(existsSync(marker+'.ack')){clearInterval(tick);process.stdout.write('Actual final output\n');}},10);
 } else if(mode==='handle') {
   process.stdout.write('READY\n');
   const tick=setInterval(()=>{

@@ -2,6 +2,7 @@
 const api=acquireVsCodeApi(),byId=id=>document.getElementById(id);
 let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null;
 const operationSections=new Map();
+const processStreams=new Map();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
 function markdown(el,text){
   el.innerHTML=DOMPurify.sanitize(marked.parse(text||'',{gfm:true,breaks:false}),{FORBID_TAGS:['style','iframe','form','input','button'],FORBID_ATTR:['style'],ALLOW_DATA_ATTR:false});
@@ -41,6 +42,26 @@ function renderProcessOutcome(section,result){
   if(result.truncated)view.append(node('p','Output exceeded the retained capture limit. Byte counts include drained output.','inspection-note'));
   view.append(node('p','Exit status and output are observed process results. File or remote effects have not been independently verified.','inspection-note'));
   section.append(view);
+}
+function resetProcessStreams(){processStreams.clear();byId('process-streams').replaceChildren();}
+function processOutput(value){
+  if(!value||typeof value.operation_id!=='string'||!value.operation_id||value.operation_id.length>256||typeof value.profile_id!=='string'||!value.profile_id||value.profile_id.length>64||!['stdout','stderr'].includes(value.channel)||value.encoding!=='hex'||!Number.isSafeInteger(value.offset)||value.offset<0||!Number.isSafeInteger(value.retained_bytes)||value.retained_bytes<1||value.retained_bytes>4096||typeof value.data!=='string'||value.data.length!==value.retained_bytes*2||!/^[0-9a-f]+$/.test(value.data)||value.offset+value.retained_bytes>65536)return;
+  let state=processStreams.get(value.operation_id);
+  if(!state){
+    if(processStreams.size>=64){if(!byId('process-stream-limit')){const note=node('p','Additional command output remains in the selected run activity and recorded command results.','inspection-note');note.id='process-stream-limit';byId('process-streams').append(note);}return;}
+    const card=node('section',undefined,'process-result process-stream');card.append(node('strong','Captured command output · '+value.profile_id),node('p','Operation '+value.operation_id+' · retained bytes; inspect the recorded operation for its outcome.','inspection-note'));
+    state={profile:value.profile_id,card,stdout:{hex:''},stderr:{hex:''}};
+    for(const key of ['stdout','stderr']){const detail=node('details',undefined,'process-output');detail.open=true;const summary=node('summary',key+' · 0 retained bytes'),pre=node('pre','');detail.append(summary,pre);card.append(detail);Object.assign(state[key],{summary,pre});}
+    byId('process-streams').append(card);processStreams.set(value.operation_id,state);byId('empty').hidden=true;
+  }
+  const channel=state[value.channel];
+  if(state.profile!==value.profile_id||channel.incomplete)return;
+  if(value.offset<channel.hex.length/2&&channel.hex.slice(value.offset*2,(value.offset+value.retained_bytes)*2)===value.data)return;
+  if(value.offset!==channel.hex.length/2||state.stdout.hex.length/2+state.stderr.hex.length/2+value.retained_bytes>65536){channel.incomplete=true;state.card.append(node('p','Output sequence incomplete. Refresh the run to replay stored bytes.','inspection-note'));return;}
+  channel.hex+=value.data;
+  const bytes=Uint8Array.from(channel.hex.match(/../g),part=>parseInt(part,16));let text=channel.hex,encoding='hex';
+  try{text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes).replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));encoding='UTF-8; controls escaped';}catch{}
+  channel.pre.textContent=text;channel.summary.textContent=value.channel+' · '+count(bytes.length)+' retained bytes · '+encoding;
 }
 function entry(role,data){
   byId('empty').hidden=true;
@@ -93,12 +114,12 @@ window.addEventListener('message',({data:m})=>{
     for(const run of m.runs){const option=node('option',run.state+' · '+run.id);option.value=run.id;option.selected=run.id===m.selected;byId('runs').append(option);}
     byId('send').disabled=!execution||activeRun||sessionBusy;
   }
-  else if(m.type==='reset-run'){resetLive();byId('events').textContent='';}
-  else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(!m.preserveLive)resetLive();byId('empty').hidden=m.history.length>0||!!live;for(const item of m.history)entry(item.role,item.data);if(m.type==='history')byId('events').textContent='';}
+  else if(m.type==='reset-run'){resetLive();resetProcessStreams();byId('events').textContent='';}
+  else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(!m.preserveLive)resetLive();if(m.type==='history'){resetProcessStreams();byId('events').textContent='';}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0;for(const item of m.history)entry(item.role,item.data);}
   else if(m.type==='capabilities'){execution=m.execution;byId('send').disabled=!execution||activeRun||sessionBusy;byId('model').replaceChildren();for(const model of m.models||[]){const option=node('option',model.id);option.value=model.id;option.selected=model.id===m.model;byId('model').append(option);}if(!byId('model').options.length)byId('model').append(node('option',execution?'Backend model · identity unavailable':'No model configured'));byId('model').disabled=!execution||!(m.models||[]).length;if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
-  else if(m.type==='user'){entry('user',{content:m.text});resetLive();byId('prompt').value='';byId('events').textContent='';}
+  else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetProcessStreams();byId('prompt').value='';byId('events').textContent='';}
   else if(m.type==='draft')byId('prompt').value=m.text;
-  else if(m.type==='event'){const event=m.event;byId('events').textContent+=JSON.stringify(event)+'\n';if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
+  else if(m.type==='event'){const event=m.event;byId('events').textContent+=JSON.stringify(event)+'\n';if(event.kind==='process.output')processOutput(event.data);else if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
   else if(m.type==='operations'){
     operationSections.clear();
     operations(m.operations);

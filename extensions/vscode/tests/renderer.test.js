@@ -6,6 +6,7 @@ const {JSDOM}=require('jsdom');const {html}=require('../webview');
 function renderer(){
   const dom=new JSDOM(html('fixture-nonce',{source:'https://fixture',css:'fixture.css',marked:'marked.js',purify:'purify.js',script:'chat.js'}),{runScripts:'outside-only'}),posted=[];
   dom.window.acquireVsCodeApi=()=>({postMessage:message=>posted.push(message)});
+  dom.window.TextDecoder=TextDecoder;
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
@@ -18,6 +19,36 @@ const processOutcomeFixture=()=>{
     stdout:{encoding:'utf-8',data:output,byte_count:90,retained_bytes:Buffer.byteLength(output)},
     stderr:{encoding:'hex',data:'ff00fe0a',byte_count:4,retained_bytes:4},truncated:true,process_tree_retired:true,independently_verified:false};
 };
+const processOutputFixture=(data,offset=0,channel='stdout',id='fixture-stream')=>({type:'event',event:{kind:'process.output',data:{operation_id:id,profile_id:'fixture-profile',channel,encoding:'hex',offset,retained_bytes:data.length/2,data}}});
+
+test('durable command output renders independent channels without executing markup or controls',()=>{
+  const r=renderer(),doc=r.dom.window.document,text='<script>fixtureAttack()</script>\u001b[31m\nfixture output',initialMessages=r.posted.length;
+  r.send(processOutputFixture(Buffer.from(text).toString('hex')));r.send(processOutputFixture('ff00fe',0,'stderr'));
+  const card=doc.querySelector('.process-stream');assert.ok(card.textContent.includes('Captured command output · fixture-profile'));
+  assert.ok(card.textContent.includes('<script>fixtureAttack()</script>\\u001b[31m'));assert.ok(card.textContent.includes('ff00fe'));assert.equal(card.querySelector('script'),null);assert.equal(r.dom.window.fixtureAttack,undefined);assert.equal(r.posted.length,initialMessages);
+  assert.ok(!card.textContent.includes('Exited'));assert.ok(!card.textContent.includes('PID '));
+});
+test('output replay preserves fragmented Unicode and ignores only exact duplicate bytes',()=>{
+  const r=renderer(),doc=r.dom.window.document;r.send(processOutputFixture('f09f'));assert.equal(doc.querySelector('.process-stream pre').textContent,'f09f');
+  r.send(processOutputFixture('f09f'));r.send(processOutputFixture('8c8d',2));assert.equal(doc.querySelector('.process-stream pre').textContent,'🌍');
+  assert.ok(doc.querySelector('.process-stream summary').textContent.includes('4 retained bytes'));
+  r.send(processOutputFixture('4142',0));assert.ok(doc.querySelector('.process-stream').textContent.includes('Output sequence incomplete'));assert.equal(doc.querySelector('.process-stream pre').textContent,'🌍');
+});
+test('gaps, malformed bytes and capture overflow never invent output',()=>{
+  const r=renderer(),doc=r.dom.window.document;r.send(processOutputFixture('not hex'));assert.equal(doc.querySelector('.process-stream'),null);
+  r.send(processOutputFixture('41',5));assert.equal(doc.querySelector('.process-stream pre').textContent,'');assert.ok(doc.querySelector('.process-stream').textContent.includes('Output sequence incomplete'));
+  r.send({type:'reset-run'});for(let i=0;i<16;i++)r.send(processOutputFixture('41'.repeat(4096),i*4096));
+  assert.equal(doc.querySelector('.process-stream pre').textContent.length,65536);r.send(processOutputFixture('42',0,'stderr'));assert.ok(doc.querySelector('.process-stream').textContent.includes('Output sequence incomplete'));assert.equal(doc.querySelectorAll('.process-stream pre')[1].textContent,'');
+});
+test('recorded output survives transcript refresh and clears on run or conversation change',()=>{
+  const r=renderer(),doc=r.dom.window.document;r.send(processOutputFixture('4142'));r.send({type:'transcript',preserveLive:true,history:[]});assert.equal(doc.querySelector('.process-stream pre').textContent,'AB');assert.equal(doc.getElementById('empty').hidden,true);
+  r.send({type:'reset-run'});assert.equal(doc.querySelector('.process-stream'),null);r.send(processOutputFixture('43'));r.send({type:'history',history:[]});assert.equal(doc.querySelector('.process-stream'),null);assert.equal(doc.getElementById('empty').hidden,false);
+  r.send(processOutputFixture('44'));r.send({type:'user',text:'New fixture request'});assert.equal(doc.querySelector('.process-stream'),null);
+});
+test('the sidebar bounds command stream cards and leaves excess output in recorded activity',()=>{
+  const r=renderer(),doc=r.dom.window.document;for(let i=0;i<65;i++)r.send(processOutputFixture('41',0,'stdout','fixture-stream-'+i));assert.equal(doc.querySelectorAll('.process-stream').length,64);assert.ok(doc.getElementById('process-stream-limit').textContent.includes('recorded command results'));
+  r.send({type:'reset-run'});assert.equal(doc.getElementById('process-stream-limit'),null);
+});
 
 test('command approval reviews literal arguments before sending only a decision ID',()=>{
   const r=renderer(),doc=r.dom.window.document,operation=processProposalFixture();r.send({type:'operations',operations:[operation]});

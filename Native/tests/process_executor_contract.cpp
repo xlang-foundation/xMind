@@ -11,6 +11,22 @@ void require(bool v,const char* reason){if(!v)throw std::runtime_error(reason);}
 template<class E,class F>void rejects(F f){try{f();}catch(const E&){return;}throw std::runtime_error("Expected process executor rejection did not occur");}
 std::int64_t now(){return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();}
 std::string file(const std::filesystem::path& p){std::ifstream in(p,std::ios::binary);return {std::istreambuf_iterator<char>(in),{}};}
+std::string unhex(const std::string& value) {
+    require(value.size()%2==0,"Journal hex must preserve whole bytes");std::string bytes;
+    for(std::size_t i=0;i<value.size();i+=2)bytes.push_back(static_cast<char>(std::stoul(value.substr(i,2),nullptr,16)));
+    return bytes;
+}
+std::pair<std::string,std::string> output(PersistenceService& store,const std::string& operation,const std::string& run="run") {
+    std::string channels[2];std::size_t events=0;
+    for(const auto& event:store.events(run).get())if(event.kind=="process.output") {
+        const auto value=Json::parse(event.json);if(value["operation_id"]!=operation)continue;
+        require(value["encoding"]=="hex" && (value["channel"]=="stdout" || value["channel"]=="stderr"),"Journal must identify raw bytes and their channel");
+        auto& bytes=channels[value["channel"]=="stderr"?1:0];const auto chunk=unhex(value["data"].get<std::string>());
+        require(value["offset"]==bytes.size() && value["retained_bytes"]==chunk.size() && !chunk.empty() && chunk.size()<=4096,"Journal offsets and chunks must be contiguous and bounded");bytes+=chunk;++events;
+    }
+    require(events<=82 && channels[0].size()+channels[1].size()<=65536,"One operation must bound durable retained output and event count");
+    return {channels[0],channels[1]};
+}
 struct Task {
     std::stop_source stop;std::future<std::string> result;
     Task(ProcessExecutor& executor,std::string id,std::string args,std::string run="run",std::int64_t expiry=0)
@@ -48,9 +64,20 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         require(!std::filesystem::exists(root/"sub/allowed.txt"),"Awaiting command must not execute");store.decide_operation("allowed",OperationDecision::allow,"actual-fixture-controller").get();const auto result=Json::parse(allowed.result.get());
         require(result["exit_code"]==0 && result["termination"]=="exited" && result["process_tree_retired"]==true && result["independently_verified"]==false && file(root/"sub/allowed.txt")=="actual child effect","Approved command must return actual result without claiming independent effect verification");
         require(Json::parse(result["stdout"]["data"].get<std::string>())["inherited"]==false && store.operation("allowed").get().state==OperationState::succeeded,"Actual output and successful journal required");
+        require(output(store,"allowed")==std::pair{result["stdout"]["data"].get<std::string>(),result["stderr"]["data"].get<std::string>()},"Durable channels must equal actual observed output bytes");
         rejects<Conflict>([&]{executor.invoke("allowed","run",args("normal","duplicate.txt"),now()+600000);});require(!std::filesystem::exists(root/"duplicate.txt"),"Duplicate operation must not dispatch again");
         Task binary(executor,"binary",args("bytes","unused.txt"));proposed(store,"binary");store.decide_operation("binary",OperationDecision::allow,"actual-fixture-controller").get();const auto bytes=Json::parse(binary.result.get());
         require(bytes["exit_code"]==7 && bytes["stdout"]["encoding"]=="hex" && bytes["stdout"]["data"]=="ff00fe0a" && bytes["stderr"]["data"]=="800d00" && store.operation("binary").get().state==OperationState::succeeded,"Nonzero exit and invalid raw bytes must be explicitly encoded and journalled");
+        require(output(store,"binary")==std::pair{std::string("\xff\0\xfe\n",4),std::string("\x80\r\0",3)},"Durable replay must preserve invalid UTF-8 and NUL bytes");
+        Task streamed(executor,"streamed",args("stream-wait","streamed.txt"));proposed(store,"streamed");store.decide_operation("streamed",OperationDecision::allow,"actual-fixture-controller").get();
+        const auto streaming_deadline=std::chrono::steady_clock::now()+5s;
+        while(output(store,"streamed").first.empty() && std::chrono::steady_clock::now()<streaming_deadline)std::this_thread::sleep_for(10ms);
+        require(output(store,"streamed").first=="Actual streamed output 🌍\n" && streamed.result.wait_for(0ms)==std::future_status::timeout && store.operation("streamed").get().state==OperationState::executing,"Actual output must be journalled while the child remains running");
+        {std::ofstream acknowledge(root/"streamed.txt.ack");acknowledge<<"actual output observed before exit";require(bool(acknowledge),"Actual fixture acknowledgement must be written");}
+        const auto streamed_result=Json::parse(streamed.result.get());require(output(store,"streamed").first==streamed_result["stdout"]["data"],"Final buffered output must be flushed before result acknowledgement");
+        Task flood(executor,"flood",args("flood","flood.txt"));proposed(store,"flood");store.decide_operation("flood",OperationDecision::allow,"actual-fixture-controller").get();const auto flooded=Json::parse(flood.result.get());const auto retained=output(store,"flood");
+        require(flooded["stdout"]["byte_count"]==512*1024 && flooded["stderr"]["byte_count"]==512*1024 && flooded["truncated"]==true && retained.first.size()+retained.second.size()==65536,"Actual high-volume output must drain beyond the bounded durable capture");
+        require(retained==std::pair{flooded["stdout"]["data"].get<std::string>(),flooded["stderr"]["data"].get<std::string>()},"Truncated replay must match the exact retained result channels");
         {
             const auto copy=root/"changed-node.exe";std::filesystem::copy_file(std::filesystem::u8path(argv[1]),copy);
             ProcessExecutor bound(store,workspace,root.string(),{{"changed-fixture",copy.string(),1,{argv[2]},10s}});
@@ -65,8 +92,16 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
     }
     {
         PersistenceService reopened(database,imports);require(reopened.operation("storage-fault").get().state==OperationState::uncertain && reopened.run("fault-run").get().state==RunState::failed && file(root/"fault.txt")=="actual child effect","Restart must quarantine effect and never replay/erase it");
+        require(output(reopened,"binary")==std::pair{std::string("\xff\0\xfe\n",4),std::string("\x80\r\0",3)},"Output journal must survive actual SQLite close/reopen without byte loss");
         const auto other=root.parent_path()/"other-workspace";std::filesystem::create_directory(other);WorkspaceTools second(other.string());ProcessExecutor executor(reopened,second,other.string(),profiles);owner(reopened,"blocked-run","blocked-session");
         Task blocked(executor,"blocked",args("normal","blocked.txt"),"blocked-run");proposed(reopened,"blocked");reopened.decide_operation("blocked",OperationDecision::allow,"actual-fixture-controller").get();rejects<WorkspaceEffectUncertain>([&]{blocked.result.get();});require(!std::filesystem::exists(other/"blocked.txt"),"Stable profile resource must quarantine another workspace after uncertain dispatch");reopened.close();
+    }
+    {
+        const auto directory=root.parent_path()/"output-fault";std::filesystem::create_directory(directory);const auto db=(root.parent_path()/"output-fault.sqlite").string();
+        WorkspaceTools target(directory.string());PersistenceService store(db,imports);owner(store);ProcessExecutor executor(store,target,directory.string(),profiles);
+        {XlangSqlite inject(db,imports);inject.execute("CREATE TRIGGER reject_process_output BEFORE INSERT ON events WHEN NEW.kind='process.output' BEGIN SELECT RAISE(ABORT,'actual fixture output journal fault'); END");}
+        Task fault(executor,"output-fault",args("normal","effect.txt"));proposed(store,"output-fault");store.decide_operation("output-fault",OperationDecision::allow,"actual-fixture-controller").get();rejects<ProcessEffectUncertain>([&]{fault.result.get();});
+        require(file(directory/"effect.txt")=="actual child effect" && store.operation("output-fault").get().state==OperationState::uncertain && output(store,"output-fault").first.empty(),"A real failed output journal must preserve actual effects and quarantine without fabricated output");store.close();
     }
     for(const auto mode:{"timeout","cancel"}) {
         const auto directory=root.parent_path()/mode;std::filesystem::create_directory(directory);WorkspaceTools workspace2(directory.string());PersistenceService store((root.parent_path()/(std::string(mode)+".sqlite")).string(),imports);owner(store);ProcessExecutor executor(store,workspace2,directory.string(),profiles);

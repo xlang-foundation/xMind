@@ -51,6 +51,7 @@ try {
   const metadata=JSON.stringify(await api('/v1/process/profiles'));assert.ok(!metadata.includes(executable)&&!metadata.includes('executable_id'),'Public registry must not expose command/binding metadata');
   // An offline importer cannot mutate the running backend's registry lease.
   const busy=spawnSync(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,'import-processes',configFile],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(busy.error);assert.equal(busy.status,1,'Native owner lease must reject concurrent admin import');
+  let allowedOutput;
   for(const name of ['allowed','denied','cancelled','stale-executable']){
     await api('/v1/sessions',{id:name,title:'Synthetic native process integration fixture'});
     const run=await api('/v1/runs',{id:'run-'+name,session_id:name,prompt:name});
@@ -64,6 +65,13 @@ try {
     }
     const terminal=await until(()=>api(`/v1/runs/${run.id}`),value=>['completed','cancelled','failed'].includes(value.state));assert.equal(terminal.state,name==='cancelled'?'cancelled':'completed');
     const operation=cli('operation',proposal.id);assert.equal(operation.state,{allowed:'succeeded',denied:'denied',cancelled:'cancelled','stale-executable':'failed'}[name]);
+    const chunks=cli('events',run.id).filter(event=>event.kind==='process.output');
+    if(name==='allowed'){
+      assert.ok(chunks.length>0&&chunks.length<=82);const channels={stdout:Buffer.alloc(0),stderr:Buffer.alloc(0)};
+      for(const {data} of chunks){assert.equal(data.operation_id,proposal.id);assert.equal(data.profile_id,'fixture');assert.equal(data.encoding,'hex');assert.equal(data.offset,channels[data.channel].length);const bytes=Buffer.from(data.data,'hex');assert.equal(bytes.length,data.retained_bytes);assert.ok(bytes.length>0&&bytes.length<=4096);channels[data.channel]=Buffer.concat([channels[data.channel],bytes]);}
+      const outcome=JSON.parse(operation.result_json);assert.equal(channels.stdout.toString('utf8'),outcome.stdout.data);assert.equal(channels.stderr.toString('utf8'),outcome.stderr.data);allowedOutput=chunks;
+      assert.deepEqual((await api(`/v1/runs/${run.id}/events?after=${chunks[0].seq-1}`)).filter(event=>event.kind==='process.output'),chunks,'HTTP cursor replay must preserve the same actual persisted output');
+    }else assert.equal(chunks.length,0,'Undispatched commands cannot fabricate output events');
     if(name==='allowed'){assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'actual child effect');assert.equal(JSON.parse(operation.result_json).exit_code,0);}
     else await assert.rejects(readFile(join(workspace,name+'.txt')),{code:'ENOENT'},'Undispatched commands must preserve absence');
     const history=cli('history',name);assert.equal(history[0].role,'user');if(name!=='cancelled'){assert.ok(continued.has(name));assert.equal(history.at(-1).role,'assistant');}
@@ -71,6 +79,7 @@ try {
   if(peerError)throw peerError;assert.equal(requests,7,'Exactly one initial request per run and three real-result continuations');
   await stop();await start(false);assert.equal((await api('/v1/health')).agent_execution,false);
   assert.equal(cli('operation',operationIds[0]).state,'succeeded');assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'actual child effect');
+  assert.deepEqual(cli('events','run-allowed').filter(event=>event.kind==='process.output'),allowedOutput,'Model-free restart must replay the exact persisted command output');
   assert.deepEqual(cli('process-profiles'),{profiles:[{id:'fixture',revision:1,max_timeout_ms:10000}],runtime_state:'per_operation'});
   console.log('Native process admin/server/model/CLI contract passed actual persisted registry, owner lease, exact approved process/file effects, denial/cancelled approval, changed-executable rejection, real tool-result continuation, metadata privacy and model-free restart. Inference is synthetic; no live-provider/editor/process parity completion claimed.');
 } finally {
