@@ -85,6 +85,17 @@ function entry(role,data,parent=byId('history')){
   parent.append(card);return card;
 }
 function resetLive(){byId('live').replaceChildren();live=undefined;streamText='';streamUsage=null;}
+function resetFailure(){byId('run-failure').replaceChildren();byId('run-failure').hidden=true;}
+function runFailure(data){
+  const card=byId('run-failure');card.replaceChildren();card.hidden=false;byId('empty').hidden=true;
+  card.append(node('h4','Selected run failed'));
+  const status=data?.status;
+  card.append(node('p',data?.reason==='provider_http_error'&&Number.isInteger(status)&&status>=100&&status<=599
+    ?'The model provider returned HTTP '+status+'. This run stopped before completing its response.'
+    :'Execution failed. Inspect the selected run activity for the recorded reason.'));
+  card.append(node('p','This is a backend execution result. Select another run above to inspect its outcome.','inspection-note'));
+  if(live)live.classList.remove('streaming');
+}
 function stream(text){if(!live){live=node('article',undefined,'message assistant streaming');live.append(node('h4','xMind · responding'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));byId('live').append(live);byId('empty').hidden=true;}streamText+=text;markdown(live.querySelector('.message-body'),streamText);metrics(live.querySelector('.metrics'),{usage:streamUsage});}
 function operations(items){
   byId('operations').replaceChildren();
@@ -183,14 +194,14 @@ window.addEventListener('message',event=>{
     for(const run of m.runs){const option=node('option',run.state+' · '+run.id);option.value=run.id;option.selected=run.id===m.selected;byId('runs').append(option);}
     byId('send').disabled=!canExecute()||activeRun||sessionBusy;
   }
-  else if(m.type==='reset-run'){resetLive();resetProcessStreams();byId('events').textContent='';}
-  else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(!m.preserveLive)resetLive();if(m.type==='history'){resetProcessStreams();byId('events').textContent='';}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0;for(const item of m.history)entry(item.role,item.data);}
+  else if(m.type==='reset-run'){resetLive();resetFailure();resetProcessStreams();byId('events').textContent='';}
+  else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();byId('events').textContent='';}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data);}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
   else if(m.type==='capabilities'){execution=m.execution;byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
-  else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetProcessStreams();byId('prompt').value='';byId('events').textContent='';}
+  else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';byId('events').textContent='';}
   else if(m.type==='draft')byId('prompt').value=m.text;
-  else if(m.type==='event'){const event=m.event;byId('events').textContent+=JSON.stringify(event)+'\n';if(event.kind==='process.output')processOutput(event.data);else if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
+  else if(m.type==='event'){const event=m.event;byId('events').textContent+=JSON.stringify(event)+'\n';if(event.kind==='run.failed')runFailure(event.data);else if(event.kind==='process.output')processOutput(event.data);else if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
   else if(m.type==='operations'){
     operationSections.clear();
     operations(m.operations);

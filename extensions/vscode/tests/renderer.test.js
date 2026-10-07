@@ -22,6 +22,20 @@ const processOutcomeFixture=()=>{
 };
 const processOutputFixture=(data,offset=0,channel='stdout',id='fixture-stream')=>({type:'event',event:{kind:'process.output',data:{operation_id:id,profile_id:'fixture-profile',channel,encoding:'hex',offset,retained_bytes:data.length/2,data}}});
 
+test('provider failures remain visible through transcript refresh without invented replies or metrics',()=>{
+  const r=renderer(),doc=r.dom.window.document,failure={type:'event',event:{kind:'run.failed',data:{reason:'provider_http_error',status:400,message:'<script>fixtureAttack()</script> private body'}}};
+  r.send(failure);r.send(failure);r.send({type:'transcript',history:[]});
+  const card=doc.getElementById('run-failure');assert.equal(card.hidden,false);assert.match(card.textContent,/HTTP 400/);assert.equal(card.querySelectorAll('h4').length,1);
+  assert.equal(card.querySelector('.metrics'),null);assert.equal(doc.querySelector('#history .assistant'),null);assert.equal(doc.getElementById('empty').hidden,true);
+  assert.ok(!card.textContent.includes('private body'));assert.ok(!card.textContent.includes('API key'));assert.equal(card.querySelector('script'),null);
+  r.send({type:'reset-run'});assert.equal(card.hidden,true);r.send(failure);r.send({type:'history',history:[]});assert.equal(card.hidden,true);
+  r.send(failure);r.send({type:'user',text:'Fixture next request'});assert.equal(card.hidden,true);
+});
+test('unknown failure reasons do not interpolate untrusted payloads or guess provider causes',()=>{
+  const r=renderer(),doc=r.dom.window.document;r.send({type:'event',event:{kind:'run.failed',data:{reason:'<img onerror=fixtureAttack()>',status:'401'}}});
+  const card=doc.getElementById('run-failure');assert.match(card.textContent,/Execution failed/);assert.ok(!card.textContent.includes('401'));assert.equal(card.querySelector('img'),null);
+});
+
 test('durable command output renders independent channels without executing markup or controls',()=>{
   const r=renderer(),doc=r.dom.window.document,text='<script>fixtureAttack()</script>\u001b[31m\nfixture output',initialMessages=r.posted.length;
   r.send(processOutputFixture(Buffer.from(text).toString('hex')));r.send(processOutputFixture('ff00fe',0,'stderr'));
