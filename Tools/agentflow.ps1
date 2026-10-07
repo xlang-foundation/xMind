@@ -1,20 +1,27 @@
 [CmdletBinding(PositionalBinding = $false)]
 param(
-    [string]$Runtime = "$PSScriptRoot\..\..\xlang3\build\Release\xlang3.exe",
-    [string]$PythonLib = 'C:\Python\Python314\Lib',
-    [Parameter(ValueFromRemainingArguments = $true)][string[]]$AgentArguments
+    [ValidateSet('Build','Serve','Client')][string]$Action='Client',
+    [string]$Database,
+    [int]$Port=8765,
+    [string]$RuntimeDirectory="$PSScriptRoot\..\..\xlang3\build\Release",
+    [string]$PythonLibSource='C:\Python\Python314\Lib',
+    [Parameter(ValueFromRemainingArguments=$true)][string[]]$ClientArguments
 )
-$projectRoot = (Resolve-Path "$PSScriptRoot\..").Path
-if (-not (Test-Path -LiteralPath $Runtime)) { throw "Build xlang3 first: $Runtime" }
-$savedPythonPath = $env:PYTHONPATH
-$savedPythonLib = $env:XLANG3_PYTHON_LIB
-try {
-    $env:XLANG3_PYTHON_LIB = $PythonLib
-    $env:PYTHONPATH = "$projectRoot;$projectRoot\.agentflow\site-packages"
-    & $Runtime "$projectRoot\agentflow\main.py" @AgentArguments
-    $result = $LASTEXITCODE
-} finally {
-    $env:PYTHONPATH = $savedPythonPath
-    $env:XLANG3_PYTHON_LIB = $savedPythonLib
+$ErrorActionPreference='Stop'
+$projectRoot=(Resolve-Path "$PSScriptRoot\..").Path
+if($Action -eq 'Build') {
+    & "$PSScriptRoot\native-milestone.ps1" -Action Build -RuntimeDirectory $RuntimeDirectory -PythonLibSource $PythonLibSource
+    exit $LASTEXITCODE
 }
-exit $result
+if($Port -lt 0 -or $Port -gt 65535 -or ($Action -eq 'Client' -and $Port -eq 0)) {throw 'Invalid port.'}
+$binary=Join-Path $projectRoot ('build\native\Release\'+$(if($Action -eq 'Serve') {'xmind_server.exe'} else {'xmind_cli.exe'}))
+if(-not (Test-Path -LiteralPath $binary)) {throw 'Build the native xMind targets first with -Action Build.'}
+if($Action -eq 'Serve') {
+    if(-not $Database) {$Database=Join-Path $projectRoot '.agentflow\state.sqlite'}
+    $Database=[System.IO.Path]::GetFullPath($Database)
+    New-Item -ItemType Directory -Force -Path (Split-Path $Database -Parent) | Out-Null
+    & $binary --db $Database --modules (Join-Path $RuntimeDirectory 'modules') --stdlib $PythonLibSource --port $Port
+} else {
+    & $binary $Port @ClientArguments
+}
+exit $LASTEXITCODE

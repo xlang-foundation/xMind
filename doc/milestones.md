@@ -27,6 +27,8 @@ Delivered evidence: Release build, passing default embedded adapter/repository c
 
 ## Following milestones
 
+Native HTTP/console checkpoint: [xMind Server](native-server.md) exposes real session and user-message persistence, with authenticated independent HTTP/CLI clients. Product run creation/manual transitions are absent until the real execution engine owns them. This is backend storage delivery, not completion of the planned native agent, cancellation, streaming or coding milestone.
+
 Native persistence worker checkpoint: [PersistenceService](persistence-service.md) owns embedded xlang3 and the repository on one thread, serving typed requests from concurrent backend callers. All five native contracts passed, including concurrent writes, queue backpressure, owner recovery, failure cleanup and shutdown draining. It is ready for native HTTP/agent callers; those services and their authentication remain incomplete.
 
 Credential storage checkpoint: the C++ repository now protects and persists credentials through xlang3, with scope/purpose binding, revision-checked rotation/deletion and retired identities. Atomic schema-v1 migration preserves existing messages. All four native contracts passed; the original milestone database also reopened and replayed events after migration. Committed evidence: [credential-repository-ctest.log](evidence/credential-repository-ctest.log). No team authorization or public credential endpoint is claimed.

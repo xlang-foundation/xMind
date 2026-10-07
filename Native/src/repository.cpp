@@ -95,6 +95,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
 Repository::~Repository()=default;
 Session Repository::create_session(const std::string& id,const std::string& title) {
     identifier(id); Transaction transaction(impl_->database);
+    if(!impl_->database.execute("SELECT id FROM sessions WHERE id=?",{id}).rows.empty()) throw Conflict("Session already exists");
     changed_one(impl_->database.execute("INSERT INTO sessions(id,title) VALUES(?,?)",{id,title}));
     transaction.commit(); return {id,title};
 }
@@ -115,10 +116,17 @@ Run Repository::run(const std::string& id) {
 }
 Run Repository::create_run(const std::string& id,const std::string& session_id) {
     identifier(id); auto& db=impl_->database; Transaction transaction(db); session(session_id);
+    if(!db.execute("SELECT id FROM runs WHERE id=?",{id}).rows.empty()) throw Conflict("Run already exists");
     if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused')",{session_id}).rows.empty())
         throw Conflict("Session already has an active root run");
     changed_one(db.execute("INSERT INTO runs(id,session_id,state) VALUES(?,?,'queued')",{id,session_id}));
     impl_->event(id,"run.queued","{}"); transaction.commit(); return {id,session_id,RunState::queued};
+}
+std::vector<Run> Repository::runs(const std::string& session_id) {
+    session(session_id);std::vector<Run> result;
+    for(const auto& row:impl_->database.execute("SELECT id,state FROM runs WHERE session_id=? ORDER BY rowid",{session_id}).rows)
+        result.push_back({text(row[0]),session_id,state_value(text(row[1]))});
+    return result;
 }
 Run Repository::transition(const std::string& id,RunState expected,RunState next,const std::string& json) {
     if(!allowed(expected,next)) throw std::invalid_argument("Invalid run transition");

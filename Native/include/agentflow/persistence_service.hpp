@@ -24,6 +24,7 @@ public:
     std::future<std::vector<Session>> sessions();
     std::future<Run> create_run(std::string id,std::string session_id);
     std::future<Run> run(std::string id);
+    std::future<std::vector<Run>> runs(std::string session_id);
     std::future<Run> transition(std::string id,RunState expected,RunState next,std::string json="{}");
     std::future<Event> append_event(std::string id,std::string kind,std::string json);
     std::future<std::vector<Event>> events(std::string id,std::int64_t after=0);

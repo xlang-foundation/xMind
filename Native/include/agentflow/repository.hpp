@@ -22,6 +22,7 @@ public:
     std::vector<Session> sessions();
     Run create_run(const std::string& id,const std::string& session_id);
     Run run(const std::string& id);
+    std::vector<Run> runs(const std::string& session_id);
     Run transition(const std::string& id,RunState expected,RunState next,const std::string& json="{}");
     Event append_event(const std::string& id,const std::string& kind,const std::string& json);
     std::vector<Event> events(const std::string& id,std::int64_t after=0);

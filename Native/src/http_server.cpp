@@ -1,0 +1,142 @@
+#include "agentflow/http_server.hpp"
+#include "httplib.h"
+#include "nlohmann/json.hpp"
+#include <charconv>
+#include <iomanip>
+#include <random>
+#include <sstream>
+
+namespace agentflow {
+void validate_local_auth_token(std::string_view token) {
+    if(token.size()<32 || token.size()>256) throw std::invalid_argument("Authentication token must contain 32-256 printable bytes");
+    for(unsigned char c:token) if(c<33 || c>126) throw std::invalid_argument("Authentication token must contain printable bytes without spaces");
+}
+namespace {
+using Json=nlohmann::json;
+using Request=httplib::Request;
+using Response=httplib::Response;
+void reply(Response& response,const Json& body,int status=200) {
+    response.status=status;response.set_content(body.dump(),"application/json");
+    response.set_header("Cache-Control","no-store");response.set_header("X-Content-Type-Options","nosniff");
+}
+bool equal_token(const std::string& a,const std::string& b) {
+    std::size_t difference=a.size()^b.size();
+    for(std::size_t i=0;i<b.size();++i) difference|=static_cast<unsigned char>(b[i])^(i<a.size()?static_cast<unsigned char>(a[i]):0);
+    return difference==0;
+}
+Json body(const Request& request,std::initializer_list<const char*> allowed) {
+    if(request.get_header_value("Content-Type")!="application/json") throw std::invalid_argument("Use application/json");
+    auto value=Json::parse(request.body);
+    if(!value.is_object()) throw std::invalid_argument("Expected a JSON object");
+    for(auto it=value.begin();it!=value.end();++it) {
+        bool known=false;for(const auto* key:allowed) if(it.key()==key) known=true;
+        if(!known) throw std::invalid_argument("Unknown request field");
+    }
+    return value;
+}
+std::string string_field(const Json& value,const char* key,std::size_t max=4096) {
+    if(!value.contains(key) || !value[key].is_string()) throw std::invalid_argument("Missing or invalid string field");
+    auto result=value[key].get<std::string>();
+    if(result.empty() || result.size()>max || result.find('\0')!=std::string::npos) throw std::invalid_argument("String field exceeds limits");
+    return result;
+}
+std::string identifier(const std::string& value) {
+    if(value.empty() || value.size()>128) throw std::invalid_argument("Invalid ID");
+    for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
+    return value;
+}
+std::string new_id() {
+    std::random_device random;std::ostringstream value;
+    value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i) value<<std::setw(8)<<random();
+    return value.str();
+}
+Json encode(const Session& value) {return {{"id",value.id},{"title",value.title}};}
+Json encode(const Run& value) {return {{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)}};}
+Json encode(const Event& value) {return {{"seq",value.sequence},{"run_id",value.run_id},{"kind",value.kind},{"data",Json::parse(value.json)}};}
+Json encode(const Message& value) {return {{"seq",value.sequence},{"role",value.role},{"data",Json::parse(value.json)}};}
+template<class Values> Json encode_all(const Values& values) {
+    auto result=Json::array();for(const auto& value:values) result.push_back(encode(value));return result;
+}
+std::int64_t cursor(const Request& request) {
+    if(!request.has_param("after")) return 0;
+    if(request.get_param_value_count("after")!=1) throw std::invalid_argument("Duplicate event cursor");
+    const auto value=request.get_param_value("after");std::int64_t number=0;
+    const auto parsed=std::from_chars(value.data(),value.data()+value.size(),number);
+    if(parsed.ec!=std::errc{} || parsed.ptr!=value.data()+value.size() || number<0) throw std::invalid_argument("Invalid event cursor");
+    return number;
+}
+template<class Handler> auto guarded(Handler handler) {
+    return [handler=std::move(handler)](const Request& request,Response& response) {
+        try {handler(request,response);}
+        catch(const NotFound&) {reply(response,{{"detail","Resource not found"}},404);}
+        catch(const Conflict& error) {reply(response,{{"detail",error.what()}},409);}
+        catch(const PersistenceBusy&) {reply(response,{{"detail","Backend busy; retry later"}},503);}
+        catch(const PersistenceClosed&) {reply(response,{{"detail","Backend shutting down"}},503);}
+        catch(const Json::exception&) {reply(response,{{"detail","Invalid JSON request"}},400);}
+        catch(const std::invalid_argument& error) {reply(response,{{"detail",error.what()}},400);}
+        catch(...) {reply(response,{{"detail","Backend operation failed"}},500);}
+    };
+}
+}
+struct HttpServer::Impl {
+    PersistenceService& persistence;
+    std::string authorization;
+    httplib::Server server;
+    int port=-1;
+    Impl(PersistenceService& store,std::string token):persistence(store),authorization("Bearer "+token) {
+        validate_local_auth_token(token);
+        server.new_task_queue=[] {return new httplib::ThreadPool(4,4,32);};
+        server.set_payload_max_length(1024*1024);
+        server.set_read_timeout(5,0);server.set_write_timeout(5,0);server.set_keep_alive_max_count(10);
+        server.set_pre_routing_handler([this](const Request& request,Response& response) {
+            const auto host=request.get_header_value("Host");
+            if(request.get_header_value_count("Host")!=1 || (host!="127.0.0.1:"+std::to_string(port) && host!="localhost:"+std::to_string(port))) {
+                reply(response,{{"detail","Invalid host"}},400);return httplib::Server::HandlerResponse::Handled;
+            }
+            if(request.has_header("Origin")) {
+                reply(response,{{"detail","Browser origins require a configured view adapter"}},403);return httplib::Server::HandlerResponse::Handled;
+            }
+            if(request.get_header_value_count("Authorization")!=1 || !equal_token(request.get_header_value("Authorization"),authorization)) {
+                reply(response,{{"detail","Authentication required"}},401);return httplib::Server::HandlerResponse::Handled;
+            }
+            return httplib::Server::HandlerResponse::Unhandled;
+        });
+        server.set_error_handler([](const Request&,Response& response) {
+            if(response.body.empty()) reply(response,{{"detail","HTTP request rejected"}},response.status);
+        });
+        server.set_exception_handler([](const Request&,Response& response,std::exception_ptr) {reply(response,{{"detail","Backend operation failed"}},500);});
+        server.Get("/v1/health",guarded([](const Request&,Response& response) {
+            reply(response,{{"status","ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"agent_execution",false}});
+        }));
+        server.Get("/v1/sessions",guarded([this](const Request&,Response& response) {reply(response,encode_all(persistence.sessions().get()));}));
+        server.Post("/v1/sessions",guarded([this](const Request& request,Response& response) {
+            const auto value=body(request,{"id","title"});
+            const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
+            reply(response,encode(persistence.create_session(id,value.contains("title")?string_field(value,"title"):"New session").get()),201);
+        }));
+        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/history)",guarded([this](const Request& request,Response& response) {
+            reply(response,encode_all(persistence.history(identifier(request.matches[1])).get()));
+        }));
+        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/messages)",guarded([this](const Request& request,Response& response) {
+            const auto value=body(request,{"role","data"});const auto role=string_field(value,"role",16);
+            if(role!="user") throw std::invalid_argument("Client messages must have user role");
+            if(!value.contains("data") || !value["data"].is_object()) throw std::invalid_argument("Message data must be an object");
+            persistence.append_message(identifier(request.matches[1]),role,value["data"].dump()).get();reply(response,{{"saved",true}},201);
+        }));
+        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/runs)",guarded([this](const Request& request,Response& response) {
+            reply(response,encode_all(persistence.runs(identifier(request.matches[1])).get()));
+        }));
+        server.Get(R"(/v1/runs/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {reply(response,encode(persistence.run(identifier(request.matches[1])).get()));}));
+        server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/events)",guarded([this](const Request& request,Response& response) {reply(response,encode_all(persistence.events(identifier(request.matches[1]),cursor(request)).get()));}));
+    }
+};
+HttpServer::HttpServer(PersistenceService& store,std::string token):impl_(std::make_unique<Impl>(store,std::move(token))) {}
+HttpServer::~HttpServer()=default;
+int HttpServer::bind(int port) {
+    if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");
+    const auto bound=port==0?impl_->server.bind_to_any_port("127.0.0.1"):(impl_->server.bind_to_port("127.0.0.1",port)?port:-1);
+    if(bound<0) throw std::runtime_error("Cannot bind loopback server");impl_->port=bound;return bound;
+}
+bool HttpServer::listen() {if(impl_->port<0) throw std::logic_error("Bind before listen");return impl_->server.listen_after_bind();}
+void HttpServer::stop() {impl_->server.stop();}
+}

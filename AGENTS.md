@@ -1,5 +1,7 @@
 # AgentFlow development constraints
 
+- Every product change must implement the final architecture. Do not simulate agent/model/tool execution or expose manual state changes as a working agent. Keep synthetic fixtures in tests/demos and label their scope. Product run lifecycle belongs to the real execution engine; unsupported features remain explicitly incomplete. Report only behavior directly verified at the claimed scope.
+
 - xMind Server supports SQLite or PostgreSQL behind a common C++ domain repository contract, with database I/O through embedded xlang3. Keep SQL dialect, schema migrations and concurrency/ownership rules in backend adapters. PostgreSQL is planned, not verified. Follow doc/database-backends.md.
 
 - WebRTC topology: Live Backend ↔ WebRTC ↔ Client View; xMind Server exchanges authenticated signaling. View clients include HTML/browser, Electron and later mobile. Keep signaling and data paths distinct; backend-side RTC adapters remain outside the core. See doc/webrtc-views.svg.

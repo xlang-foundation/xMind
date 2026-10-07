@@ -89,6 +89,9 @@ std::future<Run> PersistenceService::create_run(std::string id,std::string sessi
 std::future<Run> PersistenceService::run(std::string id) {
     return impl_->submit([id=std::move(id)](Repository& repository){return repository.run(id);});
 }
+std::future<std::vector<Run>> PersistenceService::runs(std::string session_id) {
+    return impl_->submit([session_id=std::move(session_id)](Repository& repository){return repository.runs(session_id);});
+}
 std::future<Run> PersistenceService::transition(std::string id,RunState expected,RunState next,std::string json) {
     return impl_->submit([id=std::move(id),expected,next,json=std::move(json)](Repository& repository){return repository.transition(id,expected,next,json);});
 }

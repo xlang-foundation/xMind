@@ -1,0 +1,2 @@
+# Preserve vendored upstream bytes and the documented header hashes.
+Native/third_party/** -text
