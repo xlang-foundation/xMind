@@ -6,6 +6,7 @@
 namespace agentflow {
 enum class Capability {unknown,unsupported,supported};
 enum class ProviderWire {chat_completions,responses};
+enum class ReasoningEffort {none,minimal,low,medium,high,xhigh,max};
 enum class MessageRole {system,developer,user,assistant,tool};
 struct ModelMessage {
     MessageRole role=MessageRole::user;
@@ -27,6 +28,8 @@ struct ChatProviderConfig {
     Capability tools=Capability::unknown,stream_usage=Capability::unknown,output_limit=Capability::unknown;
     std::chrono::milliseconds deadline{120000},idle_timeout{60000};
     ProviderWire wire=ProviderWire::chat_completions;
+    Capability reasoning=Capability::unknown;
+    std::optional<ReasoningEffort> reasoning_effort;
 };
 // Pure native request serialization; no model/provider availability is inferred.
 std::string serialize_chat_request(const ChatProviderConfig& config,const ModelRequest& request);

@@ -10,6 +10,7 @@ std::string serialize_responses_request(const ChatProviderConfig& config,const M
     const auto common=Json::parse(serialize_chat_request(config,validation));
     Json body={{"model",config.model},{"stream",true},{"store",false},{"include",Json::array({"reasoning.encrypted_content"})},{"input",Json::array()}};
     if(request.max_output_tokens)body["max_output_tokens"]=*request.max_output_tokens;
+    if(common.contains("reasoning_effort"))body["reasoning"]={{"effort",common["reasoning_effort"]}};
     if(common.contains("tools")){body["tools"]=Json::array();for(const auto& tool:common["tools"]){auto value=tool.at("function");value["type"]="function";value["strict"]=false;body["tools"].push_back(std::move(value));}}
     std::set<std::string> item_ids;
     for(std::size_t index=0;index<request.messages.size();++index){const auto& message=request.messages[index];const auto& validated=common.at("messages").at(index);

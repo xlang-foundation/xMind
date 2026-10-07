@@ -36,6 +36,21 @@ std::string serialize_chat_request(const ChatProviderConfig& config,const ModelR
         input_bytes+=size;
     };
     Json body={{"model",config.model},{"stream",true},{"n",1},{"messages",Json::array()}};
+    if(config.reasoning_effort){
+        require_capability(config.reasoning,"reasoning effort");
+        const char* effort=nullptr;
+        switch(*config.reasoning_effort){
+        case ReasoningEffort::none:effort="none";break;
+        case ReasoningEffort::minimal:effort="minimal";break;
+        case ReasoningEffort::low:effort="low";break;
+        case ReasoningEffort::medium:effort="medium";break;
+        case ReasoningEffort::high:effort="high";break;
+        case ReasoningEffort::xhigh:effort="xhigh";break;
+        case ReasoningEffort::max:effort="max";break;
+        default:throw std::invalid_argument("Invalid reasoning effort");
+        }
+        body["reasoning_effort"]=effort;
+    }
     std::set<std::string> names,seen_calls,pending;
     if(!request.tools.empty()) {
         require_capability(config.tools,"function calls");body["tools"]=Json::array();

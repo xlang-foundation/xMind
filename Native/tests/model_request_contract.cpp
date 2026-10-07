@@ -1,6 +1,8 @@
 #include "agentflow/model_provider.hpp"
 #include "nlohmann/json.hpp"
 #include <iostream>
+#include <initializer_list>
+#include <utility>
 
 using namespace agentflow;
 using Json=nlohmann::json;
@@ -18,6 +20,12 @@ int main() {
         require(plain["stream"]==true && plain["n"]==1 && plain["model"]==config.model,"Wire request configuration");
         require(plain["messages"][0]["content"]==request.messages[0].content,"Caller content must survive");
         require(!plain.contains("tools") && !plain.contains("stream_options"),"No unrequested feature options");
+        require(!plain.contains("reasoning_effort"),"Omitted reasoning policy must stay omitted");
+        config.reasoning_effort=ReasoningEffort::medium;rejects([&]{serialize_chat_request(config,request);});
+        config.reasoning=Capability::unsupported;rejects([&]{serialize_chat_request(config,request);});
+        config.reasoning=Capability::supported;
+        for(const auto& [effort,name]:std::initializer_list<std::pair<ReasoningEffort,const char*>>{{ReasoningEffort::none,"none"},{ReasoningEffort::minimal,"minimal"},{ReasoningEffort::low,"low"},{ReasoningEffort::medium,"medium"},{ReasoningEffort::high,"high"},{ReasoningEffort::xhigh,"xhigh"},{ReasoningEffort::max,"max"}}){config.reasoning_effort=effort;require(Json::parse(serialize_chat_request(config,request))["reasoning_effort"]==name,"Explicit effort must survive native serialization");}
+        config.reasoning_effort=static_cast<ReasoningEffort>(999);rejects([&]{serialize_chat_request(config,request);});config.reasoning_effort.reset();
         request.tools={{"read_file","Read permitted files",R"({"type":"object","properties":{"path":{"type":"string"}},"required":["path"]})"}};
         rejects([&]{serialize_chat_request(config,request);});
         config.tools=Capability::supported;
