@@ -18,3 +18,12 @@ benchmark was stopped. This hosted result validates graph observation with real
 native execution and labelled synthetic inference, not live coding parity.
 
 The existing webpage remains on its previously verified native snapshot; this CLI source checkpoint does not replace its backend or affect its provider key/session state.
+
+The installed exact hosted CLI was also checked against that existing browser
+backend's completed registered graph. It emitted 16 durable root/owned-child
+events with increasing cursors; reconnecting at the final cursor emitted zero
+records and exited successfully. The recorded root remained completed. This was
+read-only observation of already completed work, not a new run or provider
+request. [Redacted local evidence](evidence/native-graph-watch-installed-shared-backend.json)
+contains only scope and counts; user prompts, file content and credentials were
+not published.

@@ -1,0 +1,11 @@
+{
+  "cliRevision": "51724ab8fdda3b9349b18f110a1256ec4f1398eb",
+  "backendRevision": "67de5b16a8732477606957cb52736df06f078f16",
+  "scope": "Read-only installed CLI observation of an existing user-completed browser graph; no new execution or provider request",
+  "state": "completed",
+  "eventCount": 16,
+  "ownedChildEventObserved": true,
+  "strictlyIncreasingCursor": true,
+  "caughtUpReconnectRecords": 0,
+  "rootStateUnchanged": true
+}
