@@ -13,6 +13,7 @@ struct TransportCancelled : TransportError {using TransportError::TransportError
 struct TransportTimeout : TransportError {using TransportError::TransportError;};
 struct ProviderHttpError : TransportError {
     int status;
+    std::string type,code,param;
     explicit ProviderHttpError(int code):TransportError("Provider returned HTTP "+std::to_string(code)),status(code) {}
 };
 struct HttpStreamRequest {

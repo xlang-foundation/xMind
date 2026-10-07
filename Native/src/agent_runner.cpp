@@ -238,7 +238,13 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
       catch(const McpTransportError&) {return terminate(RunState::failed,{{"reason","mcp_transport_failure"}});}
       catch(const McpProtocolError&) {return terminate(RunState::failed,{{"reason","mcp_protocol_failure"}});}
       catch(const ToolCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
-      catch(const ProviderHttpError& error) {return terminate(RunState::failed,{{"reason","provider_http_error"},{"status",error.status}});}
+      catch(const ProviderHttpError& error) {
+          Json detail={{"reason","provider_http_error"},{"status",error.status}};
+          if(!error.type.empty()) detail["provider_error_type"]=error.type;
+          if(!error.code.empty()) detail["provider_error_code"]=error.code;
+          if(!error.param.empty()) detail["provider_error_param"]=error.param;
+          return terminate(RunState::failed,detail);
+      }
       catch(const TransportTimeout&) {return terminate(RunState::failed,{{"reason","provider_timeout"}});}
       catch(const TransportError&) {return terminate(RunState::failed,{{"reason","provider_transport_error"}});}
       catch(const ModelProtocolError&) {return terminate(RunState::failed,{{"reason","model_protocol_error"}});}

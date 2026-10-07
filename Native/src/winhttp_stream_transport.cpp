@@ -1,4 +1,5 @@
 #include "agentflow/http_stream_transport.hpp"
+#include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <winhttp.h>
@@ -6,6 +7,7 @@
 #include <array>
 #include <condition_variable>
 #include <cwctype>
+#include <initializer_list>
 #include <mutex>
 
 namespace agentflow {
@@ -137,7 +139,51 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     state.prepare();checked(WinHttpReceiveResponse(request.value,nullptr));state.wait(WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE,deadline,cancel);
     DWORD status=0,size=sizeof(status);
     checked(WinHttpQueryHeaders(request.value,WINHTTP_QUERY_STATUS_CODE|WINHTTP_QUERY_FLAG_NUMBER,WINHTTP_HEADER_NAME_BY_INDEX,&status,&size,WINHTTP_NO_HEADER_INDEX));
-    if(status<200 || status>=300) throw ProviderHttpError(static_cast<int>(status));
+    if(status<200 || status>=300) {
+        ProviderHttpError failure(static_cast<int>(status));
+        // Error bodies can contain credentials or user content. Retain only
+        // exact, known protocol identifiers; never retain messages or raw JSON.
+        if(status>=400) try {
+            std::array<wchar_t,256> mime{};DWORD mimeSize=static_cast<DWORD>(sizeof(mime));
+            const bool hasMime=WinHttpQueryHeaders(request.value,WINHTTP_QUERY_CONTENT_TYPE,WINHTTP_HEADER_NAME_BY_INDEX,mime.data(),&mimeSize,WINHTTP_NO_HEADER_INDEX)!=FALSE;
+            auto diagnosticMedia=hasMime?lower(std::wstring(mime.data())):std::wstring{};
+            diagnosticMedia=diagnosticMedia.substr(0,diagnosticMedia.find(L';'));
+            while(!diagnosticMedia.empty() && (diagnosticMedia.back()==L' ' || diagnosticMedia.back()==L'\t')) diagnosticMedia.pop_back();
+            if(diagnosticMedia==L"application/json") {
+                struct Body {std::string value;~Body(){if(!value.empty()) SecureZeroMemory(value.data(),value.size());}} body;
+                body.value.reserve(32768);
+                const auto diagnosticDeadline=std::min(deadline,Clock::now()+std::chrono::seconds(2));
+                for(;;) {
+                    state.prepare();checked(WinHttpQueryDataAvailable(request.value,nullptr));
+                    const auto available=state.wait(WINHTTP_CALLBACK_STATUS_DATA_AVAILABLE,diagnosticDeadline,cancel);
+                    if(!available) break;
+                    if(available>32768-body.value.size()) throw TransportError("Oversized provider diagnostic");
+                    state.prepare();checked(WinHttpReadData(request.value,buffer.data(),static_cast<DWORD>(std::min<std::size_t>(available,buffer.size())),nullptr));
+                    const auto read=state.wait(WINHTTP_CALLBACK_STATUS_READ_COMPLETE,diagnosticDeadline,cancel);
+                    if(!read) break;
+                    if(read>buffer.size() || read>32768-body.value.size()) throw TransportError("Oversized provider diagnostic");
+                    body.value.append(buffer.data(),read);SecureZeroMemory(buffer.data(),read);
+                }
+                auto parsed=nlohmann::json::parse(body.value,nullptr,false);
+                if(parsed.is_object() && parsed.contains("error") && parsed["error"].is_object()) {
+                    const auto& error=parsed["error"];
+                    auto allowed=[&](const char* key,std::initializer_list<std::string_view> values){
+                        if(!error.contains(key)||!error[key].is_string()) return std::string{};
+                        const auto& value=error[key].get_ref<const std::string&>();
+                        for(auto candidate:values) if(value==candidate) return std::string(candidate);
+                        return std::string{};
+                    };
+                    failure.type=allowed("type",{"invalid_request_error","authentication_error","permission_error","rate_limit_error","server_error","insufficient_quota"});
+                    failure.code=allowed("code",{"unsupported_parameter","unsupported_value","invalid_value","missing_required_parameter","model_not_found","invalid_api_key","insufficient_quota","context_length_exceeded","rate_limit_exceeded"});
+                    failure.param=allowed("param",{"model","messages","tools","tool_choice","n","stream","stream_options","stream_options.include_usage","max_completion_tokens","max_tokens","temperature","top_p","reasoning_effort","response_format","input","instructions","max_output_tokens"});
+                }
+            }
+        } catch(const TransportCancelled&) {throw;} catch(const std::exception&) {
+            // Diagnostic failure must not hide the authoritative HTTP status.
+        }
+        if(cancel.stop_requested()) throw TransportCancelled("Provider request cancelled");
+        throw failure;
+    }
     std::array<wchar_t,256> content{};size=static_cast<DWORD>(content.size()*sizeof(wchar_t));
     if(!WinHttpQueryHeaders(request.value,WINHTTP_QUERY_CONTENT_TYPE,WINHTTP_HEADER_NAME_BY_INDEX,content.data(),&size,WINHTTP_NO_HEADER_INDEX)) throw TransportError("Missing or oversized provider content type");
     auto media=lower(std::wstring(content.data()));media=media.substr(0,media.find(L';'));

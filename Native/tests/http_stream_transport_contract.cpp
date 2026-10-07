@@ -46,6 +46,25 @@ int main(int argc,char** argv) {
             require(error,"HTTP error must fail transport");
         }
         rejects<ProviderHttpError>([&]{post_event_stream(request("/redirect"),&secret,[](std::string_view){});});
+        for(const auto* path:{"/diagnostic","/diagnostic-private","/diagnostic-large","/diagnostic-malformed","/diagnostic-stall"}) {
+            bool rejected=false;auto input=request(path);input.deadline=500ms;
+            try {post_event_stream(input,&secret,[](std::string_view){throw std::runtime_error("Error body reached consumer");});}
+            catch(const ProviderHttpError& error) {
+                rejected=true;require(error.status==400,"Diagnostic failures must preserve HTTP status");
+                const auto detail=std::string(error.what())+error.type+error.code+error.param;
+                require(detail.find("private-fixture-key")==std::string::npos && detail.find("do-not-log")==std::string::npos,"Diagnostics cannot expose private or message fields");
+                if(std::string(path)=="/diagnostic" || std::string(path)=="/diagnostic-private") {
+                    require(error.type=="invalid_request_error" && error.code=="unsupported_parameter","Known diagnostic identifiers must survive");
+                    require(error.param==(std::string(path)=="/diagnostic"?"n":""),"Only allowlisted parameters may survive");
+                } else require(error.type.empty()&&error.code.empty()&&error.param.empty(),"Incomplete diagnostics must be omitted");
+            }
+            require(rejected,"HTTP failure must remain an error");
+        }
+        {
+            std::stop_source cancellation;
+            std::jthread canceller([&]{std::this_thread::sleep_for(150ms);cancellation.request_stop();});
+            rejects<TransportCancelled>([&]{post_event_stream(request("/diagnostic-stall"),&secret,[](std::string_view){},cancellation.get_token());});
+        }
         rejects<TransportError>([&]{post_event_stream(request("/wrong-media"),&secret,[](std::string_view){});});
         rejects<TransportError>([&]{post_event_stream({tls+"/ok","{}",10s,5s},nullptr,[](std::string_view){});});
         rejects<std::invalid_argument>([&]{post_event_stream({"http://example.invalid/","{}"},&secret,[](std::string_view){});});

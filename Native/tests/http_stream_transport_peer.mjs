@@ -27,6 +27,11 @@ function handler(request,response) {
   request.on('end',()=>{
     assert.deepEqual(JSON.parse(body),{fixture:'transport'});
     if(request.url==='/error') {response.writeHead(429,{'Content-Type':'application/json'});response.end(JSON.stringify({error:'do-not-log'}));return;}
+    if(request.url.startsWith('/diagnostic')) {
+      response.writeHead(400,{'Content-Type':'application/json'});
+      if(request.url==='/diagnostic-stall'){response.flushHeaders();return;}
+      response.end(request.url==='/diagnostic-large'?'x'.repeat(32769):request.url==='/diagnostic-malformed'?'{':JSON.stringify({error:{type:'invalid_request_error',code:'unsupported_parameter',param:request.url==='/diagnostic-private'?'private-fixture-key':'n',message:'do-not-log private-fixture-key'}}));return;
+    }
     if(request.url==='/redirect') {response.writeHead(302,{Location:`http://127.0.0.1:${plain.address().port}/redirect-target`});response.end();return;}
     if(request.url==='/wrong-media') {response.writeHead(200,{'Content-Type':'application/json'});response.end('{}');return;}
     if(request.url==='/delay') return;
