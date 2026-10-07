@@ -1,5 +1,6 @@
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/backend_lease.hpp"
+#include "agentflow/graph.hpp"
 #include <condition_variable>
 #include <deque>
 #include <functional>
@@ -95,6 +96,12 @@ std::future<Run> PersistenceService::start_prompt_run(std::string id,std::string
 std::future<void> PersistenceService::append_user_message(std::string id,std::string json) {
     return impl_->submit([id=std::move(id),json=std::move(json)](Repository& repository){repository.append_user_message(id,json);});
 }
+std::future<Run> PersistenceService::start_graph_run(std::string id,std::string session,std::string graph,std::int64_t revision,GraphPlan plan,std::string prompt){return impl_->submit([id=std::move(id),session=std::move(session),graph=std::move(graph),revision,plan=std::move(plan),prompt=std::move(prompt)](Repository& repository){return repository.start_graph_run(id,session,graph,revision,plan,prompt);});}
+std::future<GraphRootRecord> PersistenceService::graph_run(std::string id){return impl_->submit([id=std::move(id)](Repository& repository){return repository.graph_run(id);});}
+std::future<Run> PersistenceService::start_graph_child(std::string id,std::string parent,std::string node,std::string prompt){return impl_->submit([id=std::move(id),parent=std::move(parent),node=std::move(node),prompt=std::move(prompt)](Repository& repository){return repository.start_graph_child(id,parent,node,prompt);});}
+std::future<std::vector<Run>> PersistenceService::children(std::string id){return impl_->submit([id=std::move(id)](Repository& repository){return repository.children(id);});}
+std::future<std::vector<Message>> PersistenceService::run_history(std::string id){return impl_->submit([id=std::move(id)](Repository& repository){return repository.run_history(id);});}
+std::future<std::vector<Event>> PersistenceService::graph_events(std::string id,std::int64_t after){return impl_->submit([id=std::move(id),after](Repository& repository){return repository.graph_events(id,after);});}
 std::future<void> PersistenceService::record_tool_turn(std::string id,std::string assistant,std::vector<std::string> tools) {
     return impl_->submit([id=std::move(id),assistant=std::move(assistant),tools=std::move(tools)](Repository& repository){repository.record_tool_turn(id,assistant,tools);});
 }

@@ -1,6 +1,7 @@
 #include "agentflow/repository.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/backend_lease.hpp"
+#include "agentflow/graph.hpp"
 #include <limits>
 #include <chrono>
 #include <set>
@@ -126,6 +127,17 @@ struct Repository::Impl {
         // State list is an internal SQL literal, never caller-provided text.
         return !database.execute("SELECT id FROM operations WHERE run_id=? AND state IN ("+states+") LIMIT 1",{id}).rows.empty();
     }
+    void message(const Run& run,const std::string& role,const std::string& json){changed_one(database.execute("INSERT INTO messages(session_id,execution_run_id,role,payload) VALUES(?,?,?,?)",{run.session_id,run.parent_id.empty()?SqlValue(nullptr):SqlValue(run.id),role,json}));}
+    void root_boundary(const Run& current,RunState next){
+        if(current.graph_root && (next==RunState::paused || terminal(next))){
+            if(!database.execute("SELECT id FROM runs WHERE parent_run_id=? AND state IN ('queued','running','paused') LIMIT 1",{current.id}).rows.empty())throw Conflict("Graph still owns active child executions");
+            if(next==RunState::completed && !database.execute("SELECT id FROM runs WHERE parent_run_id=? AND state!='completed' LIMIT 1",{current.id}).rows.empty())throw Conflict("Graph child did not complete");
+        }
+        if(!current.parent_id.empty() && (next==RunState::running || next==RunState::paused)){
+            if(next==RunState::paused)throw Conflict("Agent graph children cannot own a human pause");
+            if(database.execute("SELECT id FROM runs WHERE id=? AND state='running'",{current.parent_id}).rows.empty())throw Conflict("Graph parent is not running");
+        }
+    }
 };
 Repository::Repository(const std::string& file,const std::vector<std::string>& roots):impl_(std::make_unique<Impl>(file,roots)) {
     auto& db=impl_->database; Transaction transaction(db);
@@ -146,7 +158,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version!=1 && version!=2 && version!=3 && version!=4) throw DatabaseError("Unsupported target repository version");
+    } else if(version!=1 && version!=2 && version!=3 && version!=4 && version!=5) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -165,6 +177,18 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         if(!db.execute("SELECT id FROM operations WHERE tool='mcp_tool' AND (json_type(arguments,'$.server_config_id') IS NOT 'text' OR length(json_extract(arguments,'$.server_config_id')) NOT BETWEEN 1 AND 128 OR instr(json_extract(arguments,'$.server_config_id'),char(0))>0) LIMIT 1").rows.empty())throw DatabaseError("Legacy MCP operation lacks an attributable server resource");
         db.execute("INSERT INTO operation_resources(operation_id,resource,position,state) SELECT id,'mcp-server:'||json_extract(arguments,'$.server_config_id'),0,state FROM operations WHERE tool='mcp_tool'");
         db.execute("PRAGMA user_version=4");
+    }
+    if(version<5){
+        db.execute("ALTER TABLE runs ADD COLUMN parent_run_id TEXT REFERENCES runs(id)");
+        db.execute("ALTER TABLE runs ADD COLUMN node_id TEXT");
+        db.execute("ALTER TABLE messages ADD COLUMN execution_run_id TEXT REFERENCES runs(id)");
+        db.execute("DROP INDEX one_active_run");
+        db.execute("CREATE UNIQUE INDEX one_active_run ON runs(session_id) WHERE parent_run_id IS NULL AND state IN ('queued','running','paused')");
+        db.execute("CREATE UNIQUE INDEX graph_child_identity ON runs(parent_run_id,node_id) WHERE parent_run_id IS NOT NULL");
+        db.execute("CREATE INDEX execution_messages ON messages(execution_run_id,seq)");
+        db.execute("CREATE TABLE graph_roots(run_id TEXT PRIMARY KEY NOT NULL REFERENCES runs(id),graph_id TEXT NOT NULL,graph_revision INTEGER NOT NULL CHECK(graph_revision>0),specification TEXT NOT NULL CHECK(json_valid(specification)))");
+        db.execute("CREATE TRIGGER graph_child_boundary BEFORE INSERT ON runs WHEN NEW.parent_run_id IS NOT NULL BEGIN SELECT CASE WHEN NEW.node_id IS NULL OR NOT EXISTS(SELECT 1 FROM runs r JOIN graph_roots g ON g.run_id=r.id WHERE r.id=NEW.parent_run_id AND r.parent_run_id IS NULL AND r.session_id=NEW.session_id AND r.state='running') THEN RAISE(ABORT,'invalid graph child boundary') END; END");
+        db.execute("PRAGMA user_version=5");
     }
     transaction.commit(); db.execute("PRAGMA journal_mode=WAL"); db.execute("PRAGMA synchronous=FULL");
 }
@@ -186,14 +210,14 @@ std::vector<Session> Repository::sessions() {
     return result;
 }
 Run Repository::run(const std::string& id) {
-    const auto result=impl_->database.execute("SELECT id,session_id,state FROM runs WHERE id=?",{id});
+    const auto result=impl_->database.execute("SELECT id,session_id,state,COALESCE(parent_run_id,''),COALESCE(node_id,''),EXISTS(SELECT 1 FROM graph_roots WHERE run_id=runs.id) FROM runs WHERE id=?",{id});
     if(result.rows.empty()) throw NotFound("Run not found");
-    return {text(result.rows[0][0]),text(result.rows[0][1]),state_value(text(result.rows[0][2]))};
+    return {text(result.rows[0][0]),text(result.rows[0][1]),state_value(text(result.rows[0][2])),text(result.rows[0][3]),text(result.rows[0][4]),integer(result.rows[0][5])!=0};
 }
 Run Repository::create_run(const std::string& id,const std::string& session_id) {
     identifier(id); auto& db=impl_->database; Transaction transaction(db); session(session_id);
     if(!db.execute("SELECT id FROM runs WHERE id=?",{id}).rows.empty()) throw Conflict("Run already exists");
-    if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused')",{session_id}).rows.empty())
+    if(!db.execute("SELECT id FROM runs WHERE session_id=? AND parent_run_id IS NULL AND state IN ('queued','running','paused')",{session_id}).rows.empty())
         throw Conflict("Session already has an active root run");
     changed_one(db.execute("INSERT INTO runs(id,session_id,state) VALUES(?,?,'queued')",{id,session_id}));
     impl_->event(id,"run.queued","{}"); transaction.commit(); return {id,session_id,RunState::queued};
@@ -201,7 +225,7 @@ Run Repository::create_run(const std::string& id,const std::string& session_id) 
 Run Repository::start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json) {
     identifier(id);auto& db=impl_->database;Transaction transaction(db);session(session_id);
     if(!db.execute("SELECT id FROM runs WHERE id=?",{id}).rows.empty()) throw Conflict("Run already exists");
-    if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused')",{session_id}).rows.empty()) throw Conflict("Session already has an active root run");
+    if(!db.execute("SELECT id FROM runs WHERE session_id=? AND parent_run_id IS NULL AND state IN ('queued','running','paused')",{session_id}).rows.empty()) throw Conflict("Session already has an active root run");
     changed_one(db.execute("INSERT INTO runs(id,session_id,state) VALUES(?,?,'queued')",{id,session_id}));
     changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'user',?)",{session_id,prompt_json}));
     impl_->event(id,"run.queued","{}");transaction.commit();return {id,session_id,RunState::queued};
@@ -211,31 +235,57 @@ void Repository::append_user_message(const std::string& session_id,const std::st
     if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused')",{session_id}).rows.empty()) throw Conflict("Session has an active root run");
     changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'user',?)",{session_id,json}));transaction.commit();
 }
+Run Repository::start_graph_run(const std::string& id,const std::string& session_id,const std::string& graph_id,std::int64_t revision,const GraphPlan& plan,const std::string& prompt){
+    identifier(id);identifier(graph_id);if(graph_id.size()>64 || revision<1 || revision>9007199254740991)throw std::invalid_argument("Invalid graph identity or revision");object_json(prompt);
+    auto& db=impl_->database;Transaction transaction(db);session(session_id);
+    if(!db.execute("SELECT id FROM runs WHERE id=?",{id}).rows.empty())throw Conflict("Run already exists");
+    if(!db.execute("SELECT id FROM runs WHERE session_id=? AND parent_run_id IS NULL AND state IN ('queued','running','paused')",{session_id}).rows.empty())throw Conflict("Session already has an active root run");
+    changed_one(db.execute("INSERT INTO runs(id,session_id,state) VALUES(?,?,'queued')",{id,session_id}));
+    changed_one(db.execute("INSERT INTO graph_roots(run_id,graph_id,graph_revision,specification) VALUES(?,?,?,?)",{id,graph_id,revision,plan.json()}));
+    changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'user',?)",{session_id,prompt}));
+    impl_->event(id,"run.queued",Json{{"kind","graph"},{"graph_id",graph_id},{"graph_revision",revision}}.dump());transaction.commit();return {id,session_id,RunState::queued,{},{},true};
+}
+GraphRootRecord Repository::graph_run(const std::string& id){
+    const auto current=run(id);if(!current.graph_root)throw Conflict("Run is not a graph root");const auto row=impl_->database.execute("SELECT graph_id,graph_revision,specification FROM graph_roots WHERE run_id=?",{id}).rows.at(0);return {current,text(row[0]),integer(row[1]),text(row[2])};
+}
+Run Repository::start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt){
+    identifier(id);identifier(node_id);if(node_id.size()>64)throw std::invalid_argument("Graph node ID exceeds limits");object_json(prompt);auto& db=impl_->database;Transaction transaction(db);const auto parent=graph_run(parent_id);
+    if(parent.run.state!=RunState::running)throw Conflict("Graph parent is not running");
+    const auto specification=Json::parse(parent.specification_json);bool agent=false;for(const auto& node:specification.at("nodes"))if(node.at("id")==node_id && node.at("type")=="agent")agent=true;if(!agent)throw std::invalid_argument("Child agent must name a declared agent node");
+    if(!db.execute("SELECT id FROM runs WHERE id=? OR (parent_run_id=? AND node_id=?)",{id,parent_id,node_id}).rows.empty())throw Conflict("Graph child identity already exists");
+    changed_one(db.execute("INSERT INTO runs(id,session_id,state,parent_run_id,node_id) VALUES(?,?,'queued',?,?)",{id,parent.run.session_id,parent_id,node_id}));
+    const Run result{id,parent.run.session_id,RunState::queued,parent_id,node_id,false};impl_->message(result,"user",prompt);
+    impl_->event(id,"run.queued",Json{{"parent_run_id",parent_id},{"node_id",node_id}}.dump());impl_->event(parent_id,"graph.child.queued",Json{{"child_run_id",id},{"node_id",node_id}}.dump());transaction.commit();return result;
+}
+std::vector<Run> Repository::children(const std::string& id){graph_run(id);std::vector<Run> result;for(const auto& row:impl_->database.execute("SELECT id FROM runs WHERE parent_run_id=? ORDER BY rowid",{id}).rows)result.push_back(run(text(row[0])));return result;}
+std::vector<Message> Repository::run_history(const std::string& id){const auto current=run(id);if(current.parent_id.empty())return history(current.session_id);std::vector<Message> result;for(const auto& row:impl_->database.execute("SELECT seq,role,payload FROM messages WHERE execution_run_id=? ORDER BY seq",{id}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2])});return result;}
+std::vector<Event> Repository::graph_events(const std::string& id,std::int64_t after){if(after<0)throw std::invalid_argument("Negative cursor");graph_run(id);std::vector<Event> result;for(const auto& row:impl_->database.execute("SELECT e.seq,e.run_id,e.kind,e.payload FROM events e JOIN runs r ON r.id=e.run_id WHERE (r.id=? OR r.parent_run_id=?) AND e.seq>? ORDER BY e.seq",{id,id,after}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2]),text(row[3])});return result;}
 void Repository::record_tool_turn(const std::string& id,const std::string& assistant_json,const std::vector<std::string>& tool_json) {
     if(tool_json.empty() || tool_json.size()>64) throw std::invalid_argument("Invalid tool result batch");
     auto& db=impl_->database;Transaction transaction(db);const auto current=run(id);
     if(current.state!=RunState::running) throw Conflict("Run is not running");
-    changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'assistant',?)",{current.session_id,assistant_json}));
-    for(const auto& json:tool_json) changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'tool',?)",{current.session_id,json}));
+    impl_->message(current,"assistant",assistant_json);
+    for(const auto& json:tool_json) impl_->message(current,"tool",json);
     impl_->event(id,"conversation.tool_turn","{}");transaction.commit();
 }
 Run Repository::complete_run(const std::string& id,const std::string& assistant_json) {
     auto& db=impl_->database;Transaction transaction(db);auto current=run(id);
     if(current.state!=RunState::running) throw Conflict("Run is not running");
+    impl_->root_boundary(current,RunState::completed);
     if(impl_->has_operations(id,"'awaiting_approval','ready','executing','uncertain'")) throw Conflict("Run has unresolved operations");
-    changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'assistant',?)",{current.session_id,assistant_json}));
+    impl_->message(current,"assistant",assistant_json);
     changed_one(db.execute("UPDATE runs SET state='completed' WHERE id=? AND state='running'",{id}));
     impl_->event(id,"conversation.assistant",assistant_json);impl_->event(id,"run.completed","{}");transaction.commit();current.state=RunState::completed;return current;
 }
 std::vector<Run> Repository::runs(const std::string& session_id) {
     session(session_id);std::vector<Run> result;
-    for(const auto& row:impl_->database.execute("SELECT id,state FROM runs WHERE session_id=? ORDER BY rowid",{session_id}).rows)
-        result.push_back({text(row[0]),session_id,state_value(text(row[1]))});
+    for(const auto& row:impl_->database.execute("SELECT id FROM runs WHERE session_id=? AND parent_run_id IS NULL ORDER BY rowid",{session_id}).rows)result.push_back(run(text(row[0])));
     return result;
 }
 Run Repository::transition(const std::string& id,RunState expected,RunState next,const std::string& json) {
     if(!allowed(expected,next)) throw std::invalid_argument("Invalid run transition");
     auto& db=impl_->database; Transaction transaction(db); auto result=run(id);
+    impl_->root_boundary(result,next);
     if(impl_->has_operations(id,"'executing'")) throw Conflict("Run has an executing operation");
     if(next==RunState::completed && impl_->has_operations(id,"'awaiting_approval','ready','uncertain'")) throw Conflict("Run has unresolved operations");
     const auto changed=db.execute("UPDATE runs SET state=? WHERE id=? AND state=?",{state_name(next),id,state_name(expected)});
@@ -264,7 +314,7 @@ void Repository::append_message(const std::string& id,const std::string& role,co
 }
 std::vector<Message> Repository::history(const std::string& id) {
     session(id); std::vector<Message> result;
-    for(const auto& row:impl_->database.execute("SELECT seq,role,payload FROM messages WHERE session_id=? ORDER BY seq",{id}).rows)
+    for(const auto& row:impl_->database.execute("SELECT seq,role,payload FROM messages WHERE session_id=? AND execution_run_id IS NULL ORDER BY seq",{id}).rows)
         result.push_back({integer(row[0]),text(row[1]),text(row[2])});
     return result;
 }

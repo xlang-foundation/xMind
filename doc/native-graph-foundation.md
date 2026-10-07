@@ -1,5 +1,7 @@
 # Native graph foundation
 
+Subsequent native [child-execution persistence and shared-engine integration](native-graph-children.md) is verified separately. The foundation checkpoint's earlier scope below is retained as historical evidence; the public graph scheduler, coordinator checkpoint transactions and client workflows remain pending.
+
 Release compilation and all **38 native contracts passed locally**: [complete build/CTest output](evidence/native-graph-foundation-local-build-ctest.log), [source-tree/binary provenance](evidence/native-graph-foundation-local-provenance.json). The first complete run passed the C++ domain/storage checks but its server fixture omitted the required authentication token: [original first result](evidence/native-graph-foundation-local-first-result.log). The fixture now supplies a private temporary token and the guarded complete rerun passed. No authentication requirement was relaxed.
 
 This checkpoint implements native planning, coordination/checkpoint rules and stored definitions. Coordinator completion and human-input values in its tests are synthetic. Actual xlang3/SQLite configuration, update faults, reopen, native admin import and backend ownership are verified. Agent/tool graph execution, concurrent worker execution, root/child persistence and graph HTTP/CLI/view workflows remain unimplemented. The existing single-agent engine remains the runnable execution path.

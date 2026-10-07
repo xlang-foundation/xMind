@@ -24,6 +24,12 @@ public:
     std::future<std::vector<Session>> sessions();
     std::future<Run> create_run(std::string id,std::string session_id);
     std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json);
+    std::future<Run> start_graph_run(std::string id,std::string session_id,std::string graph_id,std::int64_t revision,GraphPlan plan,std::string prompt_json);
+    std::future<GraphRootRecord> graph_run(std::string id);
+    std::future<Run> start_graph_child(std::string id,std::string parent_id,std::string node_id,std::string prompt_json);
+    std::future<std::vector<Run>> children(std::string parent_id);
+    std::future<std::vector<Message>> run_history(std::string id);
+    std::future<std::vector<Event>> graph_events(std::string id,std::int64_t after=0);
     std::future<void> append_user_message(std::string session_id,std::string json);
     std::future<void> record_tool_turn(std::string id,std::string assistant_json,std::vector<std::string> tool_json);
     std::future<Run> complete_run(std::string id,std::string assistant_json);

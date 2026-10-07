@@ -1,3 +1,4 @@
+#include "graph_schema_fixture.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/backend_lease.hpp"
 #include "agentflow/xlang_sqlite.hpp"
@@ -163,7 +164,7 @@ int main(int argc,char** argv) {
          const SqlBytes bytes{1,2,3};store.put_credential("local","key","purpose","retained",SecretBytes(bytes),0);
 #endif
         }
-        {XlangSqlite old(legacy,roots);old.execute("DROP TABLE operation_resources");old.execute("DROP TABLE operations");old.execute("PRAGMA user_version=2");old.execute("CREATE INDEX run_operations ON messages(session_id)");}
+        {XlangSqlite old(legacy,roots);remove_graph_schema_fixture(old);old.execute("DROP TABLE operation_resources");old.execute("DROP TABLE operations");old.execute("PRAGMA user_version=2");old.execute("CREATE INDEX run_operations ON messages(session_id)");}
         rejects<DatabaseError>([&]{Repository failed_upgrade(legacy,roots);});
         {XlangSqlite old(legacy,roots);
          require(std::get<std::int64_t>(old.execute("PRAGMA user_version").rows[0][0])==2,"Failed v3 migration must retain the previous version");
@@ -173,7 +174,7 @@ int main(int argc,char** argv) {
 #if defined(_WIN32)
          require(upgraded.credentials("local").size()==1,"v2 migration must preserve encrypted credential metadata");
 #endif
-         XlangSqlite inspect(legacy,roots);require(std::get<std::int64_t>(inspect.execute("PRAGMA user_version").rows[0][0])==4,"Operation schema migration must advance version");}
+         XlangSqlite inspect(legacy,roots);require(std::get<std::int64_t>(inspect.execute("PRAGMA user_version").rows[0][0])==5,"Operation schema migration must advance version");}
         const auto resource_database=(folder.path/"resources.sqlite").string();
         {
             Repository store(resource_database,roots);start(store,"a");start(store,"b");start(store,"c");
@@ -193,7 +194,7 @@ int main(int argc,char** argv) {
             store.request_operation("rotated",rotated,expiry());store.decide_operation("rotated",OperationDecision::allow,"fixture-controller");rejects<WorkspaceEffectUncertain>([&]{store.claim_operation("rotated",rotated);});
             // Reconstruct an actual schema-v3 journal, retaining the old MCP
             // operation payload; v4 must derive its stable server resource.
-            XlangSqlite old(resource_database,roots);old.execute("DROP TABLE operation_resources");old.execute("PRAGMA user_version=3");old.execute("CREATE INDEX resource_operations ON messages(session_id)");
+            XlangSqlite old(resource_database,roots);remove_graph_schema_fixture(old);old.execute("DROP TABLE operation_resources");old.execute("PRAGMA user_version=3");old.execute("CREATE INDEX resource_operations ON messages(session_id)");
         }
         rejects<DatabaseError>([&]{Repository failed_v4(resource_database,roots);});
         {

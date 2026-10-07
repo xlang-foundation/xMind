@@ -1,0 +1,15 @@
+{
+  "repository_schema_version": 5,
+  "runtime_source_checkout": "914783909835116969aad7c66b210a5ac9a27661",
+  "binary_sha256": {
+    "build/native/Release/agentflow_graph_children_contract.exe": "89A9014B7A595EBCC3FA925BFF7B90B6FB55F9057D03943B5FD2C55DEAAD414C",
+    "D:/CantorAI2026/xlang3/build/Release/modules/xlang_sqlite3.x3pkg.dll": "FCB0E481352672EB72D86A96E2EF5D9B58939A35AD03A4AC3E32BFE7DC733B8C",
+    "build/native/Release/xlang3_runtime.dll": "FB02403BFF1BF9967D5E49CB4F2A5A4F6D13AD139CC02B069E20FC03CC6C4862",
+    "build/native/Release/xmind_server.exe": "87DBB15E100B13CE9F85196B533701A3DC99C8D91280436A7ABF7681B86799A6",
+    "build/native/Release/xmind_admin.exe": "D9BF90A4542E350F4F13DEE5F0BA89F7064F9258A4A5F364196339EDE09752F8"
+  },
+  "scope": "Local Release build and all 39 native contracts; actual concurrent native child agent transport/read/storage; inference and interrupted ownership synthetic; public graph scheduling/client integration pending",
+  "runtime": "Embedded xlang3; no CPython execution or bridge",
+  "source_native_git_tree": "995016e842620dd7a39e549b6d77b4dd6a26bfaf",
+  "installed_preview": "Earlier isolated-CI source 3297a4bce2d591c0f1c1dd37ccc18a15297369e7 remains running"
+}

@@ -1,0 +1,200 @@
+Pinned jsoncons native source and license hashes verified: 176 files
+
+added 96 packages in 2s
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.
+-- Configuring done (0.1s)
+-- Generating done (0.3s)
+-- Build files have been written to: D:/CantorAI2026/xMind/build/native
+MSBuild version 18.9.1+a81b43525 for .NET Framework
+
+  agentflow_models.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_models.lib
+  agentflow_secrets.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_secrets.lib
+  agentflow_provider_transport.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_provider_transport.lib
+  agentflow_chat_provider.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_chat_provider.lib
+  backend_lease.cpp
+D:\CantorAI2026\xMind\Native\src\backend_lease.cpp(20,72): warning C4996: 'std::filesystem::u8path': warning STL4021: The std::filesystem::u8path() overloads are deprecated in C++20. The constructors of std::filesystem::path provide equivalent functionality via construction from u8string, u8string_view, or iterators with value_type char8_t. You can define _SILENCE_CXX20_U8PATH_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [D:\CantorAI2026\xMind\build\native\agentflow_core.vcxproj]
+  persistence_service.cpp
+  repository.cpp
+  xlang_sqlite.cpp
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(3997,10): warning C4996: 'std::atomic_store_explicit': warning STL4029: std::atomic_*() overloads for shared_ptr are deprecated in C++20. The shared_ptr specialization of std::atomic provides superior functionality. You can define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [D:\CantorAI2026\xMind\build\native\agentflow_core.vcxproj]
+  (compiling source file '../../Native/src/xlang_sqlite.cpp')
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(3997,10):
+      the template instantiation context (the oldest one first) is
+          D:\CantorAI2026\xlang3\sdk\xlang3\cpp\package.h(49,23):
+          see reference to function template instantiation 'void std::atomic_store<X::detail::InstanceEvents>(std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents>)' being compiled
+  
+  Generating Code...
+  agentflow_core.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_core.lib
+  agentflow_mcp_wire.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_wire.lib
+  permission_waiter.cpp
+  agentflow_policy.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_policy.lib
+  agentflow_workspace.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_workspace.lib
+  create_executor.cpp
+  edit_executor.cpp
+  Generating Code...
+  agentflow_edits.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_edits.lib
+  mcp_configuration.cpp
+  agentflow_mcp_configuration.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_configuration.lib
+  agentflow_mcp_stdio.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_stdio.lib
+  agentflow_json_schema.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_json_schema.lib
+  xmind_schema_worker.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\xmind_schema_worker.exe
+  agentflow_schema_worker.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_schema_worker.lib
+  mcp_tool_registry.cpp
+  agentflow_mcp_effects.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_effects.lib
+  agentflow_process.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_process.lib
+  process_executor.cpp
+  agentflow_process_effects.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_process_effects.lib
+  agent_runner.cpp
+  agent_service.cpp
+  Generating Code...
+  agentflow_agent.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_agent.lib
+  agent_runner_contract.cpp
+  agentflow_agent_runner_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_agent_runner_contract.exe
+  agent_service_contract.cpp
+  agentflow_agent_service_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_agent_service_contract.exe
+  http_server.cpp
+  agentflow_http.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_http.lib
+  approved_edit_http_fixture.cpp
+  agentflow_approved_edit_http_fixture.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_approved_edit_http_fixture.exe
+  agentflow_chat_provider_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_chat_provider_contract.exe
+  create_executor_contract.cpp
+  agentflow_create_executor_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_create_executor_contract.exe
+  credential_repository_contract.cpp
+  agentflow_credential_repository_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_credential_repository_contract.exe
+  edit_executor_contract.cpp
+  agentflow_edit_executor_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_edit_executor_contract.exe
+  graph.cpp
+  graph_catalog.cpp
+  Generating Code...
+  agentflow_graph.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_graph.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  graph_children_contract.cpp
+  agentflow_graph_children_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_graph_children_contract.exe
+  graph_contract.cpp
+  agentflow_graph_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_graph_contract.exe
+  agentflow_http_stream_transport_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_http_stream_transport_contract.exe
+  agent_instructions.cpp
+  agentflow_instruction_configuration.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_instruction_configuration.lib
+  instruction_configuration_contract.cpp
+  agentflow_instruction_configuration_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_instruction_configuration_contract.exe
+  agentflow_json_schema_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_json_schema_contract.exe
+  agentflow_mcp_client_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_client_contract.exe
+  mcp_configuration_contract.cpp
+  agentflow_mcp_configuration_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_configuration_contract.exe
+  mcp_effect_contract.cpp
+  agentflow_mcp_effect_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_effect_contract.exe
+  agentflow_mcp_handshake_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_handshake_contract.exe
+  agentflow_mcp_stdio_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_stdio_contract.exe
+  agentflow_mcp_wire_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_wire_contract.exe
+  agentflow_model_request_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_model_request_contract.exe
+  agentflow_model_stream_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_model_stream_contract.exe
+  operation_repository_contract.cpp
+  agentflow_operation_repository_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_operation_repository_contract.exe
+  permission_waiter_contract.cpp
+  agentflow_permission_waiter_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_permission_waiter_contract.exe
+  persistence_service_contract.cpp
+  agentflow_persistence_service_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_persistence_service_contract.exe
+  process_configuration.cpp
+  agentflow_process_configuration.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_process_configuration.lib
+  process_configuration_contract.cpp
+  agentflow_process_configuration_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_process_configuration_contract.exe
+  agentflow_process_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_process_contract.exe
+  process_executor_contract.cpp
+  agentflow_process_executor_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_process_executor_contract.exe
+  repository_contract.cpp
+  agentflow_repository_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_repository_contract.exe
+  agentflow_schema_budget_fixture.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_schema_budget_fixture.exe
+  agentflow_schema_worker_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_schema_worker_contract.exe
+  agentflow_secret_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_secret_contract.exe
+  agentflow_workspace_tools_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_workspace_tools_contract.exe
+  agentflow_xlang_sqlite_contract.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_xlang_sqlite_contract.exe
+  admin_main.cpp
+  xmind_admin.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\xmind_admin.exe
+  xmind_cli.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\xmind_cli.exe
+  persistence_demo.cpp
+  xmind_persistence_demo.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\xmind_persistence_demo.exe
+  server_main.cpp
+  xmind_server.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\xmind_server.exe
+Test project D:/CantorAI2026/xMind/build/native
+      Start  1: native_json_schema_contract
+ 1/39 Test  #1: native_json_schema_contract .................   Passed    0.03 sec
+      Start  2: native_mcp_wire_contract
+ 2/39 Test  #2: native_mcp_wire_contract ....................   Passed    0.04 sec
+      Start  3: model_stream_protocol_contract
+ 3/39 Test  #3: model_stream_protocol_contract ..............   Passed    0.07 sec
+      Start  4: model_request_contract
+ 4/39 Test  #4: model_request_contract ......................   Passed    0.03 sec
+      Start  5: native_secret_protection_contract
+ 5/39 Test  #5: native_secret_protection_contract ...........   Passed    0.01 sec
+      Start  6: native_graph_children_contract
+ 6/39 Test  #6: native_graph_children_contract ..............   Passed    0.35 sec
+      Start  7: native_graph_contract
+ 7/39 Test  #7: native_graph_contract .......................   Passed    0.39 sec
+      Start  8: native_instruction_configuration_contract
+ 8/39 Test  #8: native_instruction_configuration_contract ...   Passed    0.22 sec
+      Start  9: native_process_configuration_contract
+ 9/39 Test  #9: native_process_configuration_contract .......   Passed    0.27 sec
+      Start 10: native_process_executor_contract
+10/39 Test #10: native_process_executor_contract ............   Passed   10.04 sec
+      Start 11: native_agent_process_http_contract
+11/39 Test #11: native_agent_process_http_contract ..........   Passed    9.07 sec
+      Start 12: native_process_adapter_contract
+12/39 Test #12: native_process_adapter_contract .............   Passed    4.12 sec
+      Start 13: native_mcp_configuration_contract
+13/39 Test #13: native_mcp_configuration_contract ...........   Passed    0.18 sec
+      Start 14: native_schema_worker_contract
+14/39 Test #14: native_schema_worker_contract ...............   Passed    2.45 sec
+      Start 15: native_mcp_stdio_contract
+15/39 Test #15: native_mcp_stdio_contract ...................   Passed    3.09 sec
+      Start 16: native_mcp_handshake_contract
+16/39 Test #16: native_mcp_handshake_contract ...............   Passed    0.76 sec
+      Start 17: native_mcp_client_contract
+17/39 Test #17: native_mcp_client_contract ..................   Passed    0.95 sec
+      Start 18: native_mcp_effect_contract
+18/39 Test #18: native_mcp_effect_contract ..................   Passed    7.19 sec
+      Start 19: native_agent_service_contract
+19/39 Test #19: native_agent_service_contract ...............   Passed    0.28 sec
+      Start 20: native_agent_runner_contract
+20/39 Test #20: native_agent_runner_contract ................   Passed    1.28 sec
+      Start 21: native_create_executor_contract
+21/39 Test #21: native_create_executor_contract .............   Passed    1.07 sec
+      Start 22: native_edit_executor_contract
+22/39 Test #22: native_edit_executor_contract ...............   Passed    0.72 sec
+      Start 23: native_approved_edit_http_contract
+23/39 Test #23: native_approved_edit_http_contract ..........   Passed    0.92 sec
+      Start 24: native_workspace_tools_contract
+24/39 Test #24: native_workspace_tools_contract .............   Passed    0.59 sec
+      Start 25: native_repository_instructions_contract
+25/39 Test #25: native_repository_instructions_contract .....   Passed    0.45 sec
+      Start 26: native_chat_provider_contract
+26/39 Test #26: native_chat_provider_contract ...............   Passed    0.14 sec
+      Start 27: native_http_stream_transport_contract
+27/39 Test #27: native_http_stream_transport_contract .......   Passed    4.56 sec
+      Start 28: native_agent_http_contract
+28/39 Test #28: native_agent_http_contract ..................   Passed    0.95 sec
+      Start 29: native_agent_edit_http_contract
+29/39 Test #29: native_agent_edit_http_contract .............   Passed    3.71 sec
+      Start 30: native_agent_mcp_http_contract
+30/39 Test #30: native_agent_mcp_http_contract ..............   Passed    1.81 sec
+      Start 31: native_mcp_sdk_modern_contract
+31/39 Test #31: native_mcp_sdk_modern_contract ..............   Passed    2.36 sec
+      Start 32: native_mcp_sdk_legacy_contract
+32/39 Test #32: native_mcp_sdk_legacy_contract ..............   Passed    2.41 sec
+      Start 33: native_http_cli_contract
+33/39 Test #33: native_http_cli_contract ....................   Passed    9.88 sec
+      Start 34: embedded_xlang_sqlite_contract
+34/39 Test #34: embedded_xlang_sqlite_contract ..............   Passed    0.13 sec
+      Start 35: native_permission_waiter_contract
+35/39 Test #35: native_permission_waiter_contract ...........   Passed    0.89 sec
+      Start 36: native_operation_repository_contract
+36/39 Test #36: native_operation_repository_contract ........   Passed    0.58 sec
+      Start 37: xlang_repository_contract
+37/39 Test #37: xlang_repository_contract ...................   Passed    0.23 sec
+      Start 38: persistence_service_contract
+38/39 Test #38: persistence_service_contract ................   Passed    0.40 sec
+      Start 39: encrypted_credential_repository_contract
+39/39 Test #39: encrypted_credential_repository_contract ....   Passed    0.32 sec
+
+100% tests passed, 0 tests failed out of 39
+
+Total Test time (real) =  73.01 sec

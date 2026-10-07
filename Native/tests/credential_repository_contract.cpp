@@ -1,3 +1,4 @@
+#include "graph_schema_fixture.hpp"
 #include "agentflow/repository.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include <algorithm>
@@ -79,7 +80,7 @@ int main(int argc,char** argv) {
         // Reconstruct the previous schema, then verify migration to the current schema.
         {
             XlangSqlite previous(path,roots);
-            previous.execute("DROP TABLE operation_resources");previous.execute("DROP TABLE operations");previous.execute("DROP TABLE credentials");previous.execute("DROP TABLE retired_credentials");previous.execute("PRAGMA user_version=1");
+            remove_graph_schema_fixture(previous);previous.execute("DROP TABLE operation_resources");previous.execute("DROP TABLE operations");previous.execute("DROP TABLE credentials");previous.execute("DROP TABLE retired_credentials");previous.execute("PRAGMA user_version=1");
             previous.execute("CREATE TABLE credentials(unexpected TEXT)");
         }
         rejects<DatabaseError>([&]{Repository rejected(path,roots);});

@@ -82,6 +82,7 @@ Run AgentRunner::start(std::string id,std::string session_id,std::string prompt)
     return persistence_.start_prompt_run(std::move(id),std::move(session_id),Json{{"content",std::move(prompt)}}.dump()).get();
 }
 Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id) {
+    if(persistence_.run(id).get().graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
     auto provider=settings_.provider;
     if(!model_id.empty()) {const auto allowed=models();if(std::find(allowed.begin(),allowed.end(),model_id)==allowed.end()) throw std::invalid_argument("Model is not configured on this backend");provider.model=model_id;}
     // Claim outside the failure handler. A duplicate worker losing this update
@@ -118,7 +119,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(instructions.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
         if(!instructions.empty()) request.messages.push_back({MessageRole::system,std::move(instructions)});
         if(settings_.instruction_policy.revision>0)persistence_.append_event(id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
-        for(const auto& stored:persistence_.history(owned.session_id).get()) request.messages.push_back(message(stored));
+        for(const auto& stored:persistence_.run_history(id).get()) request.messages.push_back(message(stored));
         if(workspace_) request.tools=workspace_->definitions();
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());

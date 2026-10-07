@@ -6,6 +6,8 @@
 #include <vector>
 
 namespace agentflow {
+class GraphPlan;
+struct GraphRootRecord {Run run;std::string graph_id;std::int64_t graph_revision;std::string specification_json;};
 struct CredentialMetadata {
     std::string scope,id,purpose,label;
     std::int64_t revision;
@@ -23,6 +25,12 @@ public:
     std::vector<Session> sessions();
     Run create_run(const std::string& id,const std::string& session_id);
     Run start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json);
+    Run start_graph_run(const std::string& id,const std::string& session_id,const std::string& graph_id,std::int64_t revision,const GraphPlan& plan,const std::string& prompt_json);
+    GraphRootRecord graph_run(const std::string& id);
+    Run start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt_json);
+    std::vector<Run> children(const std::string& parent_id);
+    std::vector<Message> run_history(const std::string& id);
+    std::vector<Event> graph_events(const std::string& id,std::int64_t after=0);
     void append_user_message(const std::string& session_id,const std::string& json);
     void record_tool_turn(const std::string& run_id,const std::string& assistant_json,const std::vector<std::string>& tool_json);
     Run complete_run(const std::string& run_id,const std::string& assistant_json);
