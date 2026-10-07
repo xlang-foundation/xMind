@@ -44,6 +44,11 @@ terminal diff/TUI controls, attachment/context controls and full OpenCode CLI
 parity remain required. The edit HTTP contract now drives this approval path
 through the actual CLI for both allow and deny, with synthetic inference and real
 native file effects when compiled validation runs; execution is still pending.
+Additional cases reject an unrelated operation ID before accepting the exact
+displayed ID, and detach while leaving the file unchanged and the backend
+operation awaiting approval. The detached fixture is cancelled separately by
+the authenticated test controller. These are pending contract cases, not observed
+product acceptance results.
 
 ## Verification status
 
