@@ -1,6 +1,7 @@
 // In-memory byte-stream fixtures verify the production wire codec only.
 // No MCP subprocess, provider, remote tool effect or full interoperability claim.
 #include "agentflow/mcp_wire.hpp"
+#include "agentflow/mcp_requests.hpp"
 #include "nlohmann/json.hpp"
 #include <iostream>
 #include <vector>
@@ -61,6 +62,38 @@ int main() {
         McpLineStream sinkFailure([](const auto&){throw std::runtime_error("fixture consumer failure");});
         try {sinkFailure.feed(reply+"\n");throw std::runtime_error("Consumer failure was hidden");}catch(const std::runtime_error& error){require(std::string(error.what())=="fixture consumer failure","Consumer exception must propagate");}
         rejected([&]{sinkFailure.feed(reply+"\n");});
+        McpRequestTracker tracker(2);
+        const auto first=tracker.prepare("server/discover","{}",McpWireEra::modern);
+        const auto second=tracker.prepare("tools/list","{}",McpWireEra::modern);
+        require(first.request.id!=second.request.id && tracker.pending()==2,"Requests must have unique bounded pending identities");
+        rejected([&]{tracker.prepare("tools/list","{}",McpWireEra::modern);});
+        auto response=[&](const std::string& id,bool failure=false) {
+            std::optional<McpWireMessage> decoded;McpLineStream input([&](const auto& value){decoded=value;});
+            Json value{{"jsonrpc","2.0"},{"id",id}};
+            if(failure) value["error"]={{"code",-32601},{"message","Fixture peer error"}};else value["result"]={{"resultType","complete"}};
+            input.feed(value.dump()+"\n");return *decoded;
+        };
+        const auto secondReply=tracker.receive(response(second.request.id));
+        require(secondReply && secondReply->request.method=="tools/list" && tracker.pending()==1,"Out-of-order replies must correlate by exact ID");
+        rejected([&]{tracker.receive(response(second.request.id));});
+        const auto peerError=tracker.receive(response(first.request.id,true));
+        require(peerError && peerError->response.kind==McpMessageKind::error && tracker.pending()==0,"Peer RPC errors must correlate without being turned into success");
+        rejected([&]{tracker.prepare("bad","[]",McpWireEra::modern);});require(tracker.pending()==0,"Invalid arguments cannot consume admission capacity");
+        const auto cancelled=tracker.prepare("tools/call",R"({"name":"fixture","arguments":{}})",McpWireEra::modern);
+        const auto cancel=Json::parse(tracker.cancel(cancelled.request.id));
+        require(cancel["params"]["requestId"]==cancelled.request.id && tracker.pending()==0,"Cancellation must retire exactly its request");
+        require(!tracker.receive(response(cancelled.request.id)),"Late cancelled replies must not reach the result consumer");
+        rejected([&]{tracker.cancel(cancelled.request.id);});
+        const auto initialization=tracker.prepare("initialize","{}",McpWireEra::legacy);
+        rejected([&]{tracker.cancel(initialization.request.id);});require(tracker.pending()==1,"Initialization cannot be cancelled on the wire");
+        const auto effect=tracker.prepare("tools/call",R"({"name":"fixture","arguments":{}})",McpWireEra::legacy);
+        const auto lost=tracker.abandon_all();require(lost.size()==2 && tracker.pending()==0,"Transport loss must preserve the identities requiring owner recovery");
+        require(!tracker.receive(response(effect.request.id)),"Abandoned replies must not complete a new request");
+        const auto fresh=tracker.prepare("tools/list","{}",McpWireEra::legacy);require(fresh.request.id!=effect.request.id,"Abandonment must never recycle an ID");
+        rejected([&]{tracker.receive(response("not-issued"));});require(tracker.pending()==1,"Unknown IDs cannot consume another request");
+        for(int i=0;i<300;++i) {const auto item=tracker.prepare("tools/list","{}",McpWireEra::legacy);tracker.cancel(item.request.id);}
+        rejected([&]{tracker.receive(response(cancelled.request.id));});
+        require(tracker.pending()==1,"Retirement history is bounded without evicting active requests");
         std::cout<<"Native MCP wire codec passed bounded fragmented JSON-RPC fixtures; no subprocess, remote tool or complete MCP support claimed\n";return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }

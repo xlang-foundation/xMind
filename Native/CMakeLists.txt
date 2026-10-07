@@ -40,7 +40,7 @@ endif()
 # Production persistence must call SQLite through embedded xlang3.
 add_library(agentflow_models STATIC src/model_stream.cpp src/model_request.cpp)
 target_include_directories(agentflow_models PUBLIC include PRIVATE third_party)
-add_library(agentflow_mcp_wire STATIC src/mcp_wire.cpp)
+add_library(agentflow_mcp_wire STATIC src/mcp_wire.cpp src/mcp_requests.cpp)
 target_include_directories(agentflow_mcp_wire PUBLIC include PRIVATE third_party)
 if(WIN32)
   add_library(agentflow_provider_transport STATIC src/winhttp_stream_transport.cpp)
