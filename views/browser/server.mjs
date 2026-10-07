@@ -7,8 +7,9 @@ const csp="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 
 function origin(input){const url=new URL(input);if(url.protocol!=='http:'||!['127.0.0.1','localhost'].includes(url.hostname)||url.username||url.password||url.pathname!=='/'||url.search||url.hash)throw new Error('Use a loopback native backend origin');url.hostname='127.0.0.1';return url.origin;}
 function apiPath(path){return /^\/v1\/(?:health|models|graphs|provider\/(?:configuration|models)|sessions(?:\/[A-Za-z0-9_-]+\/(?:history|runs))?|runs(?:\/[A-Za-z0-9_-]+(?:\/(?:events|cancel|operations))?)?|graph-runs(?:\/[A-Za-z0-9_-]+(?:\/(?:children(?:\/[A-Za-z0-9_-]+\/history)?|events|human\/[A-Za-z0-9_.-]+))?)?|operations\/[A-Za-z0-9_-]+(?:\/(?:inspection|decision))?)$/.test(path);}
 export async function createBrowserServer({backend,assetRoot}){
- const destination=origin(backend),directory=await realpath(resolve(assetRoot)),files=new Map();let total=0;
- for(const [route,[name,mime]] of Object.entries(assets)){const file=await realpath(join(directory,name));if(file!==join(directory,name))throw new Error('Browser assets must remain in the configured directory');const bytes=await readFile(file);total+=bytes.length;if(bytes.length>2*1024*1024||total>8*1024*1024)throw new Error('Browser assets exceed limits');files.set(route,{bytes,mime});}
+ const destination=origin(backend),directory=await realpath(resolve(assetRoot));
+ async function readAssets(){const snapshot=new Map();let total=0;for(const [route,[name,mime]] of Object.entries(assets)){const file=await realpath(join(directory,name));if(file!==join(directory,name))throw new Error('Browser assets must remain in the configured directory');const bytes=await readFile(file);total+=bytes.length;if(bytes.length>2*1024*1024||total>8*1024*1024)throw new Error('Browser assets exceed limits');snapshot.set(route,{bytes,mime});}return snapshot;}
+ let files=await readAssets();
  let viewOrigin,cookieName;const sessions=new Map(),sessionLifetime=8*60*60*1000;
  const expire=()=>{for(const [id,value] of sessions)if(value.expires<=Date.now())sessions.delete(id);};
  const sessionFor=request=>{expire();const matches=(request.headers.cookie||'').split(';').map(v=>v.trim()).filter(v=>v.startsWith(cookieName+'='));if(matches.length!==1)return;return sessions.get(matches[0].slice(cookieName.length+1));};
@@ -33,6 +34,9 @@ export async function createBrowserServer({backend,assetRoot}){
     }
     const current=sessionFor(request);reply(current?200:401,{connected:!!current});return;
    }
+   // A new page load picks up a complete validated view snapshot. UI releases
+   // do not restart the access adapter or invalidate its authenticated sessions.
+   if(url.pathname==='/ui/'&&request.method==='GET')files=await readAssets();
    const file=files.get(url.pathname);if(file&&(request.method==='GET'||request.method==='HEAD')){response.writeHead(200,{'Content-Type':file.mime,'Content-Security-Policy':csp,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer'});response.end(request.method==='HEAD'?undefined:file.bytes);return;}
    if(!apiPath(url.pathname)||!['GET','POST'].includes(request.method)){reply(404,{detail:'View route not found'});return;}
    if(request.method==='POST'&&request.headers.origin!==viewOrigin){reply(403,{detail:'Same-origin browser access required'});return;}

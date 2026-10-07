@@ -4,7 +4,7 @@ xMind has a local HTML view using the same sidebar renderer and native API clien
 
 Connect and Disconnect are accessible SVG icon buttons. The connection popup supports Cancel, its close button and Escape. Cancelling keeps an established connection and its session; with no connection it closes the popup and leaves the view disconnected. A rejected replacement token or a late response after Cancel cannot clear the existing conversation.
 
-The C++ server owns execution, tools, graphs, permissions, providers and history. SQLite I/O remains in embedded xlang3. The Node HTTP adapter only serves immutable view assets and forwards a finite allowlist of API requests to a configured loopback native server. Closing the view does not cancel execution. This is a local HTTP transport; authenticated remote/team deployment, WebRTC signaling/data transport and the full standalone IDE remain incomplete.
+The C++ server owns execution, tools, graphs, permissions, providers and history. SQLite I/O remains in embedded xlang3. The Node HTTP adapter serves validated view-asset snapshots and forwards a finite allowlist of API requests to a configured loopback native server. A page reload loads a complete new snapshot from its configured asset directory without restarting the adapter or losing its authenticated sessions. Boundary, route, size and CSP restrictions still apply; a rejected bundle does not revoke backend access. Closing the view does not cancel execution. This is a local HTTP transport; authenticated remote/team deployment, WebRTC signaling/data transport and the full standalone IDE remain incomplete.
 
 ## Start
 
@@ -27,7 +27,7 @@ Settings supports provider enrollment and model discovery through the native API
 
 The real browser completed the trusted `read.repository.file` graph with human input `{"path":"README.md"}`. Reload and reconnect restored completed run `8a164a082bb81d5ecd39853c5f979b0d`, its history and selected workflow. No model response or token usage was fabricated.
 
-- Browser controller and connection/resize tests: 8 passed, zero failures/skips.
+- Browser controller and connection/resize tests: 10 passed, zero failures/skips, including network abort/immediate retry and restoring the view independently of slow provider discovery.
 - Shared extension tests: 63 passed, zero failures/skips.
 - Native browser contract: real native graph/file execution, human pause/input, authentication/origin/route boundaries, disconnect without cancellation, reconnect without replay and two view adapters observing the same history/model catalogue passed. Clipboard/navigation in this contract are explicit host fixtures.
 - VSIX packaging and verification: required access/renderer/license assets and shared-backend command present, private launch state excluded. An initial package attempt failed because repository metadata was missing; the metadata was corrected before successful packaging.
@@ -36,5 +36,7 @@ The real browser completed the trusted `read.repository.file` graph with human i
 Desktop and Settings screenshots: [desktop](evidence/browser-native-desktop.png), [Settings](evidence/browser-native-settings.png). Test output is preserved in `doc/evidence/browser-*.log`. The Windows CI workflow runs browser validation after building the native server.
 
 Actual browser acceptance covered Cancel with and without an existing connection, the SVG controls and pointer dragging from 420 to 572 pixels at a desktop viewport. Temporary viewport testing was reset afterward. Live response output and metrics were observed after the user's own provider enrollment. Private browser screenshots remain in the ignored preview directory rather than the public evidence set.
+
+The repeated development reconnect prompts came from restarting the access adapter to load UI changes, not from ordinary page refresh. The current adapter now reloads validated assets on a page load. An actual UI rebuild followed by refresh restored the connection, selected model and Agent mode without token entry or adapter restart. Login sessions still expire after eight hours, explicit Disconnect, browser-session end or an actual adapter restart. Reconnect cancellation now aborts its in-flight requests and permits an immediate new attempt; stale cleanup cannot unlock or overwrite a newer attempt. Provider model discovery is asynchronous after native state restoration.
 
 The current workspace pane supports operation comparison, not a complete file explorer/editor. Full coding acceptance, actual IDE invocation of the shared browser command, broad frontier-provider coverage and remote/team view policies remain outstanding.
