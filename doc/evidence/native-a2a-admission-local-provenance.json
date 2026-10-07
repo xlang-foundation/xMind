@@ -1,0 +1,13 @@
+{
+  "native_source_tree": "33986dd51479676143e09e85bc1bbed10f00e248",
+  "binary_sha256": {
+    "server": "1824ae14220da741b967e16a924863b3ab358bdbbfaccce59f66c612c268c73b",
+    "runtime": "fb02403bff1bf9967d5e49cb4f2a5a4f6d13ad139cc02b069e20fc03cc6c4862",
+    "sqlite_module": "fcb0e481352672eb72d86a96e2ef5d9b58939a35ad03a4ac3e32bfe7dc733b8c"
+  },
+  "verification": "Isolated Release:47/47 native,60/60 extension,0 skipped; final admission peer rerun passed returned-context retry assertion",
+  "runtime": "Embedded xlang3; no CPython execution",
+  "scope": "Native nonblocking A2A text admission, atomic mapping rollback, concurrent/restarted retries, task-local history and schema7 migration. Provider replies and storage fixture lifecycle writes are explicitly synthetic.",
+  "installed_previews": "Existing model/configuration and graph UI previews preserved; this checkpoint is not installed there.",
+  "remaining": "Full A2A discovery, blocking/streaming/continuation/remote delegation, SDK interoperability, team policies and full platform parity incomplete"
+}

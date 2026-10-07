@@ -177,6 +177,9 @@ if(BUILD_TESTING)
     add_test(NAME native_a2a_task_control_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/a2a_task_control_http_contract.mjs"
       "$<TARGET_FILE:xmind_server>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_a2a_task_control_http_contract PROPERTIES TIMEOUT 45)
+    add_test(NAME native_a2a_message_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/a2a_message_http_contract.mjs"
+      "$<TARGET_FILE:xmind_server>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+    set_tests_properties(native_a2a_message_http_contract PROPERTIES TIMEOUT 60)
     add_test(NAME native_graph_service_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/graph_service_http_contract.mjs"
       "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_graph_service_http_contract PROPERTIES TIMEOUT 90)
@@ -411,6 +414,15 @@ if(BUILD_TESTING)
     "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
   set_tests_properties(embedded_xlang_sqlite_contract PROPERTIES TIMEOUT 30)
   add_executable(agentflow_repository_contract tests/repository_contract.cpp)
+  add_executable(agentflow_incoming_repository_contract tests/incoming_repository_contract.cpp)
+  target_link_libraries(agentflow_incoming_repository_contract PRIVATE agentflow_core)
+  if(WIN32)
+    add_custom_command(TARGET agentflow_incoming_repository_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_incoming_repository_contract>")
+  endif()
+  add_test(NAME native_incoming_repository_contract COMMAND agentflow_incoming_repository_contract
+    "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+  set_tests_properties(native_incoming_repository_contract PROPERTIES TIMEOUT 45)
   add_executable(agentflow_operation_repository_contract tests/operation_repository_contract.cpp)
   add_executable(agentflow_permission_waiter_contract tests/permission_waiter_contract.cpp)
   target_link_libraries(agentflow_permission_waiter_contract PRIVATE agentflow_policy)

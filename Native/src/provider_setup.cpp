@@ -75,6 +75,7 @@ ProviderSetupMetadata ProviderRuntime::configure(std::string model,SecretBytes s
 }
 Run ProviderRuntime::submit(std::string id,std::string session,std::string prompt){return submit_model(std::move(id),std::move(session),std::move(prompt),{});}
 Run ProviderRuntime::submit_model(std::string id,std::string session,std::string prompt,std::string model){std::lock_guard lock(impl_->mutex);if(!impl_->service)throw RunUnavailable("Configure a provider before running an agent");return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));}
+Run ProviderRuntime::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){std::lock_guard lock(impl_->mutex);return impl_->service->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
 std::vector<std::string> ProviderRuntime::models() const{std::lock_guard lock(impl_->mutex);return impl_->service?impl_->service->models():std::vector<std::string>{};}
 void ProviderRuntime::cancel(const std::string& id){std::lock_guard lock(impl_->mutex);if(!impl_->service)throw RunUnavailable("Provider is not configured");impl_->service->cancel(id);}
 bool ProviderRuntime::healthy() const{std::lock_guard lock(impl_->mutex);return !impl_->service || impl_->service->healthy();}

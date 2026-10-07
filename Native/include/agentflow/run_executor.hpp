@@ -14,6 +14,7 @@ public:
         if(!model_id.empty()) throw std::invalid_argument("Model selection is unavailable");
         return submit(std::move(id),std::move(session_id),std::move(prompt));
     }
+    virtual Run submit_message(std::string,std::string,std::string,std::string,std::string){throw RunUnavailable("Incoming message admission is unavailable");}
     virtual void cancel(const std::string& id)=0;
     virtual bool healthy() const=0;
     virtual bool available() const {return true;}

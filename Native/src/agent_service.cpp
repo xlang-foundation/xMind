@@ -5,6 +5,7 @@
 #include <mutex>
 #include <thread>
 #include <algorithm>
+#include "nlohmann/json.hpp"
 
 namespace agentflow {
 struct AgentService::Impl {
@@ -78,6 +79,18 @@ Run AgentService::submit_model(std::string id,std::string session,std::string pr
     Run result;
     try {result=impl_->runner.start(id,std::move(session),std::move(prompt));}
     catch(...) {impl_->pending.pop_back();impl_->active.erase(id);throw;}
+    lock.unlock();impl_->changed.notify_one();return result;
+}
+Run AgentService::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){
+    if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid incoming message content");
+    std::unique_lock lock(impl_->mutex);
+    if(const auto replay=impl_->persistence.incoming_message(message,context,identity,content).get())return *replay;
+    if(!impl_->accepting||impl_->faulted)throw RunUnavailable("Agent executor is unavailable");
+    if(impl_->pending.size()>=impl_->limit)throw RunBusy("Agent queue is full");
+    auto job=std::make_shared<Impl::Job>();job->id=id;if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
+    try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
+    Run result;try{result=impl_->persistence.start_incoming_message(id,context,message,nlohmann::json{{"content",content},{"a2a_message_id",message}}.dump(),identity).get();}catch(...){impl_->pending.pop_back();impl_->active.erase(id);throw;}
+    if(result.id!=id){impl_->pending.pop_back();impl_->active.erase(id);return result;}
     lock.unlock();impl_->changed.notify_one();return result;
 }
 void AgentService::cancel(const std::string& id) {

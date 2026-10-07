@@ -23,6 +23,9 @@ public:
     std::future<Session> session(std::string id);
     std::future<std::vector<Session>> sessions();
     std::future<Run> create_run(std::string id,std::string session_id);
+    std::future<std::optional<Run>> incoming_message(std::string message,std::string context,std::string identity,std::string content);
+    std::future<Run> start_incoming_message(std::string id,std::string context,std::string message,std::string prompt_json,std::string identity);
+    std::future<std::optional<std::vector<Message>>> task_history(std::string id);
     std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json);
     std::future<Run> start_graph_run(std::string id,std::string session_id,std::string graph_id,std::int64_t revision,GraphPlan plan,std::string prompt_json);
     std::future<GraphRootRecord> graph_run(std::string id);

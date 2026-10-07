@@ -1,0 +1,1 @@
+Native A2A message contract passed real admission, concurrent durable retries, default model transport, context reuse, isolated history, rejected requests and restart reuse. Provider replies are synthetic; full A2A compliance is not established.

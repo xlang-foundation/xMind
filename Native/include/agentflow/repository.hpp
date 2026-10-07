@@ -4,6 +4,7 @@
 #include "agentflow/operation.hpp"
 #include <memory>
 #include <vector>
+#include <optional>
 
 namespace agentflow {
 class GraphPlan;
@@ -24,6 +25,9 @@ public:
     Session session(const std::string& id);
     std::vector<Session> sessions();
     Run create_run(const std::string& id,const std::string& session_id);
+    std::optional<Run> incoming_message(const std::string& message,const std::string& context,const std::string& identity,const std::string& content);
+    Run start_incoming_message(const std::string& id,const std::string& context,const std::string& message,const std::string& prompt_json,const std::string& identity);
+    std::optional<std::vector<Message>> task_history(const std::string& id);
     Run start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json);
     Run start_graph_run(const std::string& id,const std::string& session_id,const std::string& graph_id,std::int64_t revision,const GraphPlan& plan,const std::string& prompt_json);
     GraphRootRecord graph_run(const std::string& id);

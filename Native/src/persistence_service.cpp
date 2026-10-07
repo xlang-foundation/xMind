@@ -90,6 +90,9 @@ std::future<Run> PersistenceService::create_run(std::string id,std::string sessi
 std::future<Run> PersistenceService::run(std::string id) {
     return impl_->submit([id=std::move(id)](Repository& repository){return repository.run(id);});
 }
+std::future<std::optional<Run>> PersistenceService::incoming_message(std::string message,std::string context,std::string identity,std::string content){return impl_->submit([message=std::move(message),context=std::move(context),identity=std::move(identity),content=std::move(content)](Repository& repository){return repository.incoming_message(message,context,identity,content);});}
+std::future<Run> PersistenceService::start_incoming_message(std::string id,std::string context,std::string message,std::string prompt,std::string identity){return impl_->submit([id=std::move(id),context=std::move(context),message=std::move(message),prompt=std::move(prompt),identity=std::move(identity)](Repository& repository){return repository.start_incoming_message(id,context,message,prompt,identity);});}
+std::future<std::optional<std::vector<Message>>> PersistenceService::task_history(std::string id){return impl_->submit([id=std::move(id)](Repository& repository){return repository.task_history(id);});}
 std::future<Run> PersistenceService::start_prompt_run(std::string id,std::string session_id,std::string json) {
     return impl_->submit([id=std::move(id),session_id=std::move(session_id),json=std::move(json)](Repository& repository){return repository.start_prompt_run(id,session_id,json);});
 }

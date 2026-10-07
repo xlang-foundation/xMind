@@ -12,6 +12,7 @@ Run ExecutionPlatform::submit_model(std::string id,std::string session,std::stri
     if(!healthy())throw RunUnavailable("Backend execution requires fault reconciliation");
     return agents_->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));
 }
+Run ExecutionPlatform::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){if(const auto replay=store_.incoming_message(message,context,identity,content).get())return *replay;if(!agents_||!healthy())throw RunUnavailable("Incoming agent execution is unavailable");return agents_->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
 std::vector<std::string> ExecutionPlatform::models() const{return agents_?agents_->models():std::vector<std::string>{};}
 void ExecutionPlatform::cancel(const std::string& id){
     const auto run=store_.run(id).get();
