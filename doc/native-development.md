@@ -21,6 +21,7 @@ The guarded launcher checks for live xlang3 benchmark processes, verifies all pi
 For direct toolchain use on an idle machine:
 
 ```powershell
+npm.cmd ci --prefix Native/tests/sdk --ignore-scripts --no-audit --no-fund
 cmake -S Native -B build/native -G 'Visual Studio 18 2026' -A x64
 cmake --build build/native --config Release
 ctest --test-dir build/native -C Release --output-on-failure

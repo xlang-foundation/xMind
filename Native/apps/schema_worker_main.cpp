@@ -22,7 +22,7 @@ int main(int argc,char**) {
         if(!args.contains("schema_json") || !args["schema_json"].is_string() || (args.contains("instance_json") && !args["instance_json"].is_string()) || args.size()!=(args.contains("instance_json")?2:1))return 2;
         Json reply{{"jsonrpc","2.0"},{"id",Json::parse(request->id_json)}};
         try {
-            JsonSchema202012 schema(args["schema_json"].get<std::string>());
+            JsonSchema schema(args["schema_json"].get<std::string>());
             if(args.contains("instance_json"))schema.validate_object(args["instance_json"].get<std::string>());
             reply["result"]={{"schema_valid",true},{"instance_valid",args.contains("instance_json")?Json(true):Json(nullptr)}};
         }catch(const SchemaInvalid&){reply["error"]={{"code",-32602},{"message","Schema document rejected"},{"data",{{"kind","schema_invalid"}}}};}

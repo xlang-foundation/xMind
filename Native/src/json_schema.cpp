@@ -11,9 +11,9 @@ namespace Schema=jsoncons::jsonschema;
 bool resource_failure(const std::regex_error& error) {
     return error.code()==std::regex_constants::error_space || error.code()==std::regex_constants::error_stack || error.code()==std::regex_constants::error_complexity;
 }
-Schema::evaluation_options options() {
+Schema::evaluation_options options(const std::string& version=Schema::schema_version::draft202012()) {
     Schema::evaluation_options result;
-    result.default_version(Schema::schema_version::draft202012());
+    result.default_version(version);
     result.default_base_uri("https://xmind.invalid/mcp/tool-schema");
     return result;
 }
@@ -22,12 +22,18 @@ Schema::json_schema<Json> compile(const std::string& source) {
     try {
         const auto compact=mcp_compact_object(source);
         auto value=Json::parse(compact,jsoncons::json_options{}.max_nesting_depth(64));
-        if(value.contains("$schema") && (!value["$schema"].is_string() || value["$schema"].as<std::string>()!=Schema::schema_version::draft202012()))throw SchemaInvalid("MCP schema must declare JSON Schema 2020-12");
-        static const auto meta=Schema::make_json_schema(Schema::draft202012::schema_draft202012<Json>::get_schema(),options());
-        if(!meta.is_valid(value))throw SchemaInvalid("Invalid JSON Schema 2020-12 document");
+        auto version=Schema::schema_version::draft202012();
+        if(value.contains("$schema")){
+            if(!value["$schema"].is_string())throw SchemaInvalid("Invalid MCP schema dialect");
+            version=value["$schema"].as<std::string>();
+            if(version!=Schema::schema_version::draft202012() && version!=Schema::schema_version::draft7())throw SchemaInvalid("Unsupported MCP schema dialect");
+        }
+        static const auto meta2020=Schema::make_json_schema(Schema::draft202012::schema_draft202012<Json>::get_schema(),options());
+        static const auto meta7=Schema::make_json_schema(Schema::draft7::schema_draft7<Json>::get_schema(),options(Schema::schema_version::draft7()));
+        if(!(version==Schema::schema_version::draft7()?meta7:meta2020).is_valid(value))throw SchemaInvalid("Invalid JSON Schema document for its declared dialect");
         // The default resolver contains only the library's built-in metaschemas.
         // Unresolved application refs fail compilation; no I/O resolver exists.
-        return Schema::make_json_schema(std::move(value),options());
+        return Schema::make_json_schema(std::move(value),options(version));
     }catch(const SchemaInvalid&){throw;}
     catch(const McpProtocolError&){throw SchemaInvalid("Invalid MCP schema JSON");}
     catch(const Schema::schema_error&){throw SchemaInvalid("MCP schema is invalid or has unresolved references");}
@@ -37,14 +43,14 @@ Schema::json_schema<Json> compile(const std::string& source) {
     // failure boundary; they do not prove that a schema is invalid.
 }
 }
-struct JsonSchema202012::Impl {
+struct JsonSchema::Impl {
     std::string source;
     Schema::json_schema<Json> compiled;
     explicit Impl(std::string value):source(std::move(value)),compiled(compile(source)) {}
 };
-JsonSchema202012::JsonSchema202012(std::string source):impl_(std::make_unique<Impl>(std::move(source))) {}
-JsonSchema202012::~JsonSchema202012()=default;
-void JsonSchema202012::validate_object(std::string_view instance) const {
+JsonSchema::JsonSchema(std::string source):impl_(std::make_unique<Impl>(std::move(source))) {}
+JsonSchema::~JsonSchema()=default;
+void JsonSchema::validate_object(std::string_view instance) const {
     if(instance.empty() || instance.size()>65536)throw SchemaArgumentsInvalid("MCP arguments exceed byte limits");
     try {
         const auto compact=mcp_compact_object(instance);
@@ -54,5 +60,5 @@ void JsonSchema202012::validate_object(std::string_view instance) const {
     catch(const McpProtocolError&){throw SchemaArgumentsInvalid("Invalid MCP argument JSON");}
     catch(const jsoncons::ser_error&){throw SchemaArgumentsInvalid("Invalid MCP argument JSON");}
 }
-const std::string& JsonSchema202012::source() const {return impl_->source;}
+const std::string& JsonSchema::source() const {return impl_->source;}
 }

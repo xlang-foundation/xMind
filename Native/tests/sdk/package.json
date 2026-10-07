@@ -1,0 +1,11 @@
+{
+  "name": "xmind-mcp-sdk-interop-fixtures",
+  "private": true,
+  "type": "module",
+  "description": "Official SDK peers for native interoperability contracts only; not product dependencies",
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.3.1",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "zod": "4.2.0"
+  }
+}

@@ -9,10 +9,11 @@ import {join,resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomBytes} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
-const [serverExe,cliExe,adminExe,modules,stdlib]=process.argv.slice(2);
+const [serverExe,cliExe,adminExe,modules,stdlib,sdkEra]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-agent-mcp-')),workspace=join(folder,'workspace');
 const db=join(folder,'state.sqlite'),effect=join(workspace,'effect.txt'),marker=join(folder,'marker');
-const fixture=fileURLToPath(new URL('./mcp_effect_peer.mjs',import.meta.url));
+if(sdkEra&&!['modern','legacy'].includes(sdkEra))throw new Error('Unknown SDK fixture era');
+const fixture=fileURLToPath(new URL(sdkEra?'./sdk/peer.mjs':'./mcp_effect_peer.mjs',import.meta.url));
 const secret='synthetic-mcp-credential-fixture',token=randomBytes(32).toString('hex');
 const env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;delete env.XMIND_SETUP_SECRET;
 let child,port,errors='',peerError,requests=0;const continuations=new Map();
@@ -45,7 +46,8 @@ async function start(model=true){
   port=await new Promise((resolve,reject)=>{let output='';const timer=setTimeout(()=>reject(new Error(`Readiness deadline: ${errors}`)),10000);child.on('error',error=>{clearTimeout(timer);reject(error);});child.once('exit',code=>{clearTimeout(timer);reject(new Error(`Server exited ${code}: ${errors}`));});child.stdout.on('data',data=>{output+=data;const match=/listening on http:\/\/127\.0\.0\.1:(\d+)/.exec(output);if(match){clearTimeout(timer);resolve(Number(match[1]));}});});
 }
 async function stop(){if(child&&child.exitCode===null){const exited=new Promise(resolve=>child.once('exit',resolve));child.kill();await exited;}}
-async function configure(mode){const path=join(folder,'config.json');await writeFile(path,JSON.stringify({servers:[{id:'fixture',transport:'stdio',executable:process.execPath,working_directory:folder,arguments:[fixture,mode,effect,marker,'credential-fixture'],credentials:[{name:'MCP_TEST_KEY',scope:'server',id:`credential-${mode}`}]}]}));return admin(['import-mcp',path]);}
+async function pendingOperations(runId){const items=await api(`/v1/runs/${runId}/operations`);const run=await api(`/v1/runs/${runId}`);if(run.state==='failed')throw new Error(`Native run failed before approval: ${JSON.stringify(run)}; events: ${JSON.stringify(await api(`/v1/runs/${runId}/events?after=0`))}`);return items;}
+async function configure(mode){const path=join(folder,'config.json');await writeFile(path,JSON.stringify({servers:[{id:'fixture',transport:'stdio',executable:process.execPath,working_directory:folder,arguments:[fixture,mode,effect,marker,'credential-fixture',...(sdkEra?[sdkEra]:[])],credentials:[{name:'MCP_TEST_KEY',scope:'server',id:`credential-${mode}`}]}]}));return admin(['import-mcp',path]);}
 try{
   await mkdir(workspace);await writeFile(effect,'');await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
   assert.equal((await configure('normal')).servers[0].revision,1);
@@ -54,7 +56,11 @@ try{
   assert.deepEqual(cli('mcp-servers'),metadata);
   for(const name of ['allowed','denied','cancelled']){
     await api('/v1/sessions',{id:name,title:'Synthetic MCP protocol fixture'});const run=cli('run',name,name);
-    const [operation]=await until(()=>api(`/v1/runs/${run.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));
+    const [operation]=await until(()=>pendingOperations(run.id),items=>items.some(item=>item.state==='awaiting_approval'));
+    const events=await api(`/v1/runs/${run.id}/events?after=0`);
+    const connected=events.filter(event=>event.kind==='mcp.connected');assert.equal(connected.length,1);
+    assert.equal(connected[0].data.protocol_version,sdkEra==='legacy'?'2025-11-25':'2026-07-28');
+    assert.equal(events.find(event=>event.kind==='mcp.discovered').data.tool_count,1);
     assert.equal(await readFile(effect,'utf8'),name==='allowed'?'':'allowed');
     assert.ok(operation.arguments_json.includes('1.00000000000000000001'));
     if(name==='cancelled')cli('cancel',run.id);else cli('decide',operation.id,name==='denied'?'deny':'allow');

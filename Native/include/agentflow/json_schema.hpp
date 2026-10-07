@@ -7,15 +7,16 @@
 namespace agentflow {
 struct SchemaInvalid : std::invalid_argument {using std::invalid_argument::invalid_argument;};
 struct SchemaArgumentsInvalid : std::invalid_argument {using std::invalid_argument::invalid_argument;};
-// Native JSON Schema 2020-12 adapter. No schema network/file fetches, no default
+// Native JSON Schema adapter: 2020-12 default, explicit Draft-07 for legacy
+// peers. Each dialect retains its own semantics. No network/file fetches, default
 // insertion or argument normalization. One owner; execution containment for
 // adversarial schema evaluation remains an access-worker responsibility.
-class JsonSchema202012 {
+class JsonSchema {
 public:
-    explicit JsonSchema202012(std::string source);
-    ~JsonSchema202012();
-    JsonSchema202012(const JsonSchema202012&)=delete;
-    JsonSchema202012& operator=(const JsonSchema202012&)=delete;
+    explicit JsonSchema(std::string source);
+    ~JsonSchema();
+    JsonSchema(const JsonSchema&)=delete;
+    JsonSchema& operator=(const JsonSchema&)=delete;
     void validate_object(std::string_view instance) const;
     const std::string& source() const;
 private:
