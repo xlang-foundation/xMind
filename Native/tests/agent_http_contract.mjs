@@ -118,6 +118,11 @@ try {
   await until(()=>api(`/v1/runs/${run.id}/cancel`,{}),result=>result.status===409,'completed run release');
   assert.equal((await api(`/v1/runs/${run.id}/transition`,{expected:'completed',next:'running'})).status,404);
   const beforeChat=cli('sessions').length;assert.deepEqual(await chat('/exit\n'),[]);assert.equal(cli('sessions').length,beforeChat,'Leaving an empty chat must not create a session');
+  const commandRequests=requests,commands=await chat('/help\n/models\n/model unavailable-fixture\n/model synthetic-protocol-model\n/history\n/model\n/unknown\n/exit\n');
+  assert.equal(cli('sessions').length,beforeChat,'Read-only chat commands must not create conversations');assert.equal(requests,commandRequests,'Chat commands must not invoke inference');
+  assert.equal(commands.filter(record=>record.type==='model').length,2,'Unavailable model must not change selection');
+  assert.equal(commands.find(record=>record.type==='models').catalogue.models[0].id,'synthetic-protocol-model');assert.deepEqual(commands.find(record=>record.type==='history').history,[]);
+  assert.equal(commands.filter(record=>record.type==='model')[1].model_id,'','Reset must follow the backend default');
   const chatRecords=await chat('Read README from the CLI\nRead README again in the same conversation\n/exit\n'),chatSession=chatRecords.find(record=>record.type==='session').session_id;
   assert.equal(chatRecords.filter(record=>record.type==='session').length,1);const chatRuns=chatRecords.filter(record=>record.type==='run').map(record=>record.run);assert.equal(chatRuns.length,2);assert.ok(chatRuns.every(item=>item.session_id===chatSession));assert.equal(chatRecords.filter(record=>record.type==='turn_finished'&&record.exit_status===0).length,2);assert.equal(cli('history',chatSession).length,8);assert.ok(chatRecords.some(record=>record.kind==='tool.completed'));assert.ok(chatRecords.some(record=>record.kind==='run.completed'));
   const resumedChat=await chat('Read README after reconnect\n/exit\n',chatSession);assert.equal(resumedChat.find(record=>record.type==='session').session_id,chatSession);assert.equal(cli('history',chatSession).length,12);assert.equal(cli('runs',chatSession).length,3,'Reconnect must add only the requested new turn, not replay completed work');
@@ -130,6 +135,7 @@ try {
   const recovered=await chat('provider-error\nRead README after the failed turn\n/exit\n');
   assert.deepEqual(recovered.filter(record=>record.type==='turn_finished').map(record=>record.exit_status),[1,0],'A later explicit request may proceed after a failed turn; there is no automatic retry');
   assert.equal(recovered.filter(record=>record.type==='run').length,2);
+  const literal=await chat('//literal fixture request\n/exit\n'),literalSession=literal.find(record=>record.type==='session').session_id;assert.equal(cli('history',literalSession)[0].data.content,'/literal fixture request','Escaped slash requests must persist literally');
 
   for(const id of ['held','queued','overflow']) await session(id);
   assert.equal((await api('/v1/runs',{id:'held-run',session_id:'held',prompt:'hold-stream'})).status,202);

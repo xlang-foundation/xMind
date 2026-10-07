@@ -74,7 +74,7 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
 }
 // Interactive access client, not a second agent engine. Every request, tool
 // result, approval and response remains owned by the shared native server.
-int chat_session(httplib::Client& client,const httplib::Headers& headers,std::string session,const std::string& model) {
+int chat_session(httplib::Client& client,const httplib::Headers& headers,std::string session,std::string model) {
     using Json=nlohmann::json;
     auto request=[&](const std::string& path,const Json* body=nullptr){
         auto response=body?client.Post(path,headers,body->dump(),"application/json"):client.Get(path,headers);
@@ -86,7 +86,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
     // Validate a supplied session without starting work or creating a duplicate.
     Json history;
     if(!session.empty()){history=request("/v1/sessions/"+session+"/history");if(!history.is_array())throw std::runtime_error("Invalid session history");}
-    std::cerr<<"xMind chat: enter a request, /exit to leave. Backend runs survive disconnect.\n";
+    std::cerr<<"xMind chat: enter a request, /help for commands, /exit to leave. Backend runs survive disconnect.\n";
     if(!session.empty()){
         std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'
                  <<Json{{"type","history"},{"session_id",session},{"history",history}}.dump()<<'\n'<<std::flush;
@@ -97,6 +97,32 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(!prompt.empty() && prompt.back()=='\r')prompt.pop_back();
         if(prompt=="/exit")return last_result;
         if(prompt.empty())continue;
+        if(prompt=="/help"){
+            std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/history displays the saved conversation; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+        }
+        if(prompt=="/history"){
+            const auto saved=session.empty()?Json::array():request("/v1/sessions/"+session+"/history");
+            if(!saved.is_array())throw std::runtime_error("Invalid session history");
+            std::cout<<Json{{"type","history"},{"session_id",session},{"history",saved}}.dump()<<'\n'<<std::flush;continue;
+        }
+        if(prompt=="/models" || prompt=="/model" || prompt.starts_with("/model ")){
+            const auto catalogue=request("/v1/models");
+            if(!catalogue.is_object() || !catalogue.contains("models") || !catalogue["models"].is_array() || !catalogue.contains("default_model") || !catalogue["default_model"].is_string())throw std::runtime_error("Invalid backend model catalogue");
+            if(prompt=="/models")std::cout<<Json{{"type","models"},{"catalogue",catalogue},{"selected_model",model}}.dump()<<'\n'<<std::flush;
+            else {
+                const auto selected=prompt=="/model"?std::string{}:prompt.substr(7);
+                bool available=selected.empty();
+                for(const auto& item:catalogue["models"])if(item.is_object() && item.value("id",std::string{})==selected)available=true;
+                if(!available){std::cerr<<"Model is not enabled by this backend. Use /models to see available IDs.\n";continue;}
+                model=selected;
+                std::cout<<Json{{"type","model"},{"model_id",model},{"default_model",catalogue["default_model"]}}.dump()<<'\n'<<std::flush;
+            }
+            continue;
+        }
+        if(prompt.front()=='/'){
+            if(prompt.starts_with("//"))prompt.erase(0,1);
+            else {std::cerr<<"Unknown chat command. Use /help, or // to send a literal slash request.\n";continue;}
+        }
         if(prompt.size()>1024*1024)throw std::invalid_argument("Prompt exceeds limits");
         if(session.empty()){
             const Json body={{"title","CLI conversation"}};const auto created=request("/v1/sessions",&body);

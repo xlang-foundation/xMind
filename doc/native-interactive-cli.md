@@ -14,6 +14,19 @@ request in the same session; the CLI does not automatically retry the failed
 request. Process exit status reflects the last observed turn (or zero if no turn
 was admitted).
 
+Between turns, `/models` displays the backend-enabled model catalogue and
+`/model ID` selects an advertised ID for subsequent requests in this CLI client.
+`/model` returns to the server default. Selection does not rewrite shared provider
+settings. `/history` reads the current durable conversation, and `/help` describes
+the commands. These commands do not create a session or invoke inference.
+Unavailable IDs are rejected without changing selection. Prefix a literal slash
+request with a second slash (`//`); unknown commands are not sent to the model.
+
+The catalogue is `/v1/models`, the executor's currently enabled models. It is not
+the provider account discovery endpoint; enabling additional providers/models is
+a separate backend configuration action. Integrated console settings and live
+model-selection acceptance remain pending.
+
 Closing or interrupting the CLI leaves backend ownership unchanged. `/exit` is read between completed turns, not during the blocking observer. Explicit cancellation and effect approvals currently use the existing `cancel`, `operations`, `operation` and `decide` commands from another console or an authenticated view. Integrated concurrent input, terminal approval/diff controls, rich TUI rendering, attachment/context controls and full OpenCode CLI parity remain required.
 
 ## Verification status
