@@ -6,6 +6,10 @@ Baseline: `anomalyco/opencode` tag `v2.0.16`, commit `3a103fe0aff726a4edc7492f03
 
 This is an initial inventory, not a claim of parity. All unverified features remain incomplete.
 
+## Current native progress
+
+The following historical table records prototype coverage, not native implementation status. Current C++ checkpoints and their exact verification scopes are in [milestones](../doc/milestones.md): eighteen native contracts pass through local approval API/file effects; nineteen extension contracts pass through read-only diff comparison and reconnect/model preferences. Model-invoked edits and new native model/response metadata remain pending compilation. No OpenCode operation or capability is considered fully equivalent merely because a component contract passes. Full API/tool/plugin/context/CLI/editor/provider acceptance remains required against the pinned inventory.
+
 The pinned source is cloned locally under `.agentflow/reference/opencode`. `Tools/audit-opencode.mjs` verifies its commit and maps the actual OpenAPI schema into `Documents/OPENCODE_API_INVENTORY.json`: 136 operations. The historical upstream audit document lists 139; the pinned schema count is authoritative. Every operation includes upstream parameters/body/responses and acceptance requirements. Twelve have partial prototype source equivalents; 124 have no mapped equivalent. None is verified parity. API inventory alone does not cover all UI, plugin, model/provider or tool behavior.
 
 | Capability | AgentFlow status | Required evidence |

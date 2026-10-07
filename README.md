@@ -1,4 +1,52 @@
-# xMind -- AgentFlow Framework
+# xMind
+
+xMind is being built as a general-purpose single-agent and graph platform with a shared coding runtime. The C++ backend owns execution, providers, tools, permissions, sessions and protocols. Embedded xlang3 runs compatible scripts/pure-Python libraries and performs SQLite database I/O. CLI and VS Code clients use the same backend; Electron and remote views follow that contract.
+
+OpenCode 2 is the coding feature reference; LiteLLM is the provider coverage reference. Their implementations are not the engine. See the [architecture](doc/architecture.md), [SVG](doc/architecture.svg), [pinned parity baseline](Documents/PARITY.md) and [provider requirements](Documents/MODEL_SUPPORT.md).
+
+## Current native product scope
+
+The last verified native Release checkpoint passed **18 contracts**: embedded-xlang3 persistence, encrypted local credentials, authenticated loopback server/CLI, model streaming and worker scheduling, actual workspace reads, durable approval records and approved real-file application. Inference tests use labeled synthetic peers; live-provider and coding-task completion remain unverified. [Native evidence](doc/evidence/native-approval-api-ctest.log).
+
+The VS Code adapter uses the right secondary sidebar, with Explorer left and the composer/model selector at the bottom. It renders Markdown/code/history and supplied metrics, compares exact approval snapshots in a read-only diff, and reconnects without resubmitting work. **19 extension contracts** pass. The actual development-host layout was inspected; the preview has no model configured. [Extension evidence](doc/evidence/vscode-reconnect.log), [actual UI](doc/evidence/vscode-right-sidebar.png).
+
+Model-invoked edits, native per-run model selection/catalogue and newly persisted usage/timings await native compilation and execution. Full coding tools, provider coverage, MCP/A2A, graphs, team authorization/PostgreSQL and Electron remain incomplete. [Milestones](doc/milestones.md) distinguish verified components from pending scope.
+
+## Native build and local use
+
+Use Windows x64, a C++20 Visual Studio toolchain, Node.js for editor/tests, and a built sibling xlang3 runtime with its supported SDK/modules. From this checkout:
+
+```powershell
+.\Tools\agentflow.ps1 -Action Build
+```
+
+This builds `Native/CMakeLists.txt` in Release and runs CTest. The root CMake target and `Core` are legacy migration references. The launcher defers builds while observed xlang3 benchmarks are live; deferral is not a test pass. [Native development](doc/native-development.md) describes runtime path overrides and prerequisites.
+
+Configure `XMIND_AUTH_TOKEN` privately in the server/client environment (32–256 printable non-space characters). In one console:
+
+```powershell
+.\Tools\agentflow.ps1 -Action Serve -Port 8765
+```
+
+In another console with the same private token:
+
+```powershell
+.\Tools\agentflow.ps1 -Action Client -Port 8765 -ClientArguments @('health')
+.\Tools\agentflow.ps1 -Action Client -Port 8765 -ClientArguments @('create-session', 'My project')
+.\Tools\agentflow.ps1 -Action Client -Port 8765 -ClientArguments @('sessions')
+```
+
+Without a model, the server supports session inspection but cannot execute an agent. To enable the verified read-tool loop, provide the actual `-Model`, `-ModelEndpoint` Chat Completions URL, `-ModelTools supported`, and `-Workspace`. Configure `XMIND_API_KEY` privately on the backend or use a stored `-CredentialId`. Other provider wire families remain required. The local token represents a full-access `local-owner`, not team authentication; see [deployment](doc/server-deployment.md).
+
+Follow the [VS Code guide](extensions/vscode/README.md). `Tools/start-ui.ps1` starts this machine's isolated development host and persistent native preview without a model or seeded conversations.
+
+No CPython executable or native extension is used. `PythonLibSource` selects allowed standard-library source for xlang3. Pure-Python packages must be installed through xlang3's pip; discuss missing native APIs before changing runtime code or adopting a workaround.
+
+## Historical upstream guide
+
+The original text below describes the old xlang implementation. Preserve it as migration reference; use the native instructions above for current development. Historical Python/FastAPI results likewise do not establish native product acceptance. See [migration history](Documents/MIGRATION.md).
+
+### Original xMind -- AgentFlow Framework
 
 **xMind** is a modular framework built with XLang, designed to implement Large Language Model (LLM) Memory, Planning, and Agent-flow capabilities. This project allows developers to seamlessly integrate advanced AI features like context retention, decision-making, and dynamic dataflows into their applications.
 

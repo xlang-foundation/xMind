@@ -2,6 +2,10 @@
 
 Architecture: [architecture.md](architecture.md) and [architecture.svg](architecture.svg). The user approved continued work on the C++ core with embedded xlang3 for scripts and skills. OpenCode and LiteLLM remain references only.
 
+Current native evidence: the last verified Release run passed [eighteen contracts](evidence/native-approval-api-ctest.log). The HTTP/CLI, encrypted credentials, scheduling/model/read-tool loop and approved edit components are verified at the documented test scopes. Model-invoked edits and new model/response metadata changes await native verification; live providers, full coding workflows, protocols/graphs and team deployment remain incomplete. [Milestones](milestones.md) are the authoritative checkpoint ledger. Earlier component-status paragraphs below are historical.
+
+Use `Tools/agentflow.ps1 -Action Build` from the repository root for the guarded build/test workflow. It does not modify the sibling xlang3 runtime and defers while observed measured benchmark processes are live.
+
 The independent `Native/CMakeLists.txt` builds `agentflow_core`, not the legacy `ThirdParty/xlang` application. The default target contains a backend ownership lease, `XlangSqlite` and `Repository`: C++ session/run/event/message and general JSON information contracts, with all SQLite I/O through embedded xlang3. HTTP service, execution engine, encrypted credential storage, protocols, graph checkpoints and CLI remain to be implemented.
 
 ## Dependencies

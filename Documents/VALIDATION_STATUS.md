@@ -1,5 +1,17 @@
 # Current validation status
 
+## Current native checkpoints — October 7, 2026
+
+The latest verified native Release evidence is [eighteen passing contracts](../doc/evidence/native-approval-api-ctest.log): embedded-xlang3 SQLite persistence and encrypted credentials, authenticated local server/CLI, scheduling/model streaming/read tools, durable approvals, and actual approved file application. These tests use synthetic inference peers and real filesystem/storage; they do not prove live-provider or end-to-end coding completion.
+
+The latest verified VS Code adapter evidence is [nineteen passing client/host/renderer contracts](../doc/evidence/vscode-reconnect.log). The real right-sidebar layout was inspected in a signed official VS Code host. Exact edit snapshot comparison, reconnect and model preference persistence have fixture coverage; live model-driven approval/diff interaction remains unverified.
+
+Native model-invoked writes, per-run model catalogue/selection, persisted response usage/timings, and expanded bounded-parser checks are uncommitted work awaiting build/execution. Observed live xlang3 benchmarks defer the native build gate. MCP/A2A, graphs, complete coding tools, all provider coverage, team authorization/PostgreSQL and Electron remain required. See [milestones](../doc/milestones.md) and [architecture](../doc/architecture.md).
+
+## Historical validation record
+
+The paragraphs below preserve earlier checkpoints and failures. They are not the current native result; use the dated scope above and its evidence links.
+
 Latest verified milestone: native C++ persistence through embedded xlang3. User-authorized SQLite fixes on the isolated native branch rebuilt successfully. All three default native contracts passed ten consecutive runs; independent seed/read processes preserved session/messages/configuration and exact event cursor replay. Legacy SQLite fixtures and the new isolation/binary-text fixture passed. See `../doc/milestones.md`. Earlier failure paragraphs below are historical evidence, not current native-test results. Runtime fixes remain uncommitted; full platform/protocol/UI/parity scope is incomplete.
 
 Native Windows credential protection compiled and passed its component contract. SQLite integration remains pending. Current full native test result: one pass (protection), two failures (`isolation_level` rejection). Evidence: `build/native/evidence/contracts-20261006.log`. This is not a persistence milestone or whole-platform pass.
