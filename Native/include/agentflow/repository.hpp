@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/store.hpp"
 #include "agentflow/secret_protection.hpp"
+#include "agentflow/operation.hpp"
 #include <memory>
 #include <vector>
 
@@ -34,6 +35,17 @@ public:
     std::vector<Message> history(const std::string& id);
     void put_information(const std::string& category,const std::string& id,const std::string& json);
     std::string information(const std::string& category,const std::string& id);
+    // Effect journal and one-operation permissions. Backend callers authorize
+    // controller access before deciding; only an owning executor claims/finishes.
+    Operation request_operation(const std::string& id,const OperationSpec& spec,std::int64_t expires_unix_ms);
+    Operation operation(const std::string& id);
+    std::vector<Operation> operations(const std::string& run_id);
+    // Actor is derived from the backend's authenticated controller context.
+    Operation decide_operation(const std::string& id,OperationDecision decision,const std::string& actor);
+    Operation claim_operation(const std::string& id,const OperationSpec& actual);
+    Operation cancel_operation(const std::string& id,const OperationSpec& actual);
+    Operation expire_operation(const std::string& id);
+    Operation finish_operation(const std::string& id,OperationState outcome,const std::string& result_json);
     // Backend-internal operations. Service must authorize scope before calling.
     // expected_revision=0 creates; positive revisions rotate with stale-write rejection.
     // Deleted identities are retired permanently to prevent stale-reference reuse.

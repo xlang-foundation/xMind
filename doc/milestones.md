@@ -27,6 +27,8 @@ Delivered evidence: Release build, passing default embedded adapter/repository c
 
 ## Following milestones
 
+Native authorization/planning checkpoint: schema-v3 operation records and `PermissionWaiter` now preserve exact approvals, controller attribution, single-use claims, cancellation/expiry, workspace exclusion and uncertain recovery. Workspace identity, same-handle content snapshots and literal edit planning passed against real filesystem fixtures and independent Node hashes. All sixteen native contracts passed: [native-permission-planning-ctest.log](evidence/native-permission-planning-ctest.log). These are library components; public approval controllers, actual file application and reconciliation remain required before exposing a write tool.
+
 Native execution/server checkpoint: [AgentRunner and AgentService](native-agent-loop.md) invoke the native provider and actual read tools, with encrypted credential resolution, atomic conversation/state persistence, bounded native workers, HTTP/CLI scheduling, cancellation and run deadlines. All fourteen native contracts passed, including actual editor host client requests to the compiled server. Evidence: [native-execution-server-ctest.log](evidence/native-execution-server-ctest.log). Live inference, coding-task completion and actual editor UI validation remain pending.
 
 Native workspace tools checkpoint: [actual C++ filesystem tools](native-workspace-tools.md) read, list and search authorized Windows workspace files, with handle checks, argument validation and bounded results. Real filesystem fixtures and native agent integration passed. Mutation/process tools, permission policy and complete coding workflows remain required.

@@ -2,7 +2,7 @@
 
 The C++ server exposes durable sessions and schedules the native model/tool engine through `AgentService`. The console and editor host clients are separate HTTP observers. Runtime objects and database files remain owned by the server, with HTTP transport isolated from the agent core through `RunExecutor`.
 
-The Release build and fourteen native contracts passed, including configured run admission/cancellation through HTTP/CLI and the actual editor host client. Inference peers in those contracts are synthetic; filesystem operations and embedded-xlang3 storage are real. Live inference, actual editor UI behavior and complete coding tasks remain unverified.
+The Release build and sixteen native contracts passed, including configured run admission/cancellation through HTTP/CLI, the actual editor host client, the operation journal and permission waits. Inference peers in those contracts are synthetic; filesystem operations and embedded-xlang3 storage are real. Live inference, actual editor UI behavior and complete coding tasks remain unverified.
 
 ## Current API
 
@@ -11,7 +11,7 @@ The Release build and fourteen native contracts passed, including configured run
 | GET | /v1/health | Reports API, core/storage and execution capability |
 | GET / POST | /v1/sessions | List/create durable sessions |
 | GET | /v1/sessions/{id}/history | Read conversation history |
-| POST | /v1/sessions/{id}/messages | Persist a user message; rejects assistant/system/tool roles |
+| POST | /v1/sessions/{id}/messages | Persist `{role:"user",data:{content:"nonempty text"}}`; rejects other roles, fields, NUL and non-text content |
 | GET | /v1/sessions/{id}/runs | Read persisted run history |
 | GET | /v1/runs/{id} | Read persisted run state |
 | GET | /v1/runs/{id}/events?after=N | Read ordered events after a validated cursor |
@@ -59,3 +59,15 @@ Configure a provider key privately with `XMIND_API_KEY` in the server process en
 Current evidence: [native-execution-server-ctest.log](evidence/native-execution-server-ctest.log). `native_agent_service_contract` verifies two concurrent actual transport streams, bounded admission and joined cancellation. `native_agent_http_contract` verifies real workspace/tool continuation, CLI submission, queued/running cancellation, admission rejection without orphan prompts, encrypted credential reuse, provider HTTP failure and forced-process restart recovery. It also uses the actual VS Code host client against the native server. None of these synthetic inference peers certifies a live model or completed coding task.
 
 Live provider/coding validation, mutation/process tools and approvals, reconciliation of external effects, pushed event subscriptions, pagination, credential management endpoints, team authorization/TLS, PostgreSQL and actual VS Code UI validation remain required. Remote views and WebRTC are not implemented by this loopback service.
+
+## Native effect authorization components
+
+The schema-v3 operation journal is implemented behind the native repository/persistence service. A runtime proposal records its exact run, verified workspace identity, tool, argument bytes and expiry. A decision requires a controller identity derived from backend authentication, retained with its events and later outcomes. Controller decisions are single-use; executor claims must match all recorded fields and the exact JSON payload. Duplicate JSON fields and excessive nesting are rejected. Grants expire before use, and cancellation retires unused grants. Operation changes and their events commit atomically through xlang3. Requiring an actor field is not itself controller authentication; the approval controller service and team authorization remain incomplete.
+
+The states distinguish waiting for approval, granted, denied, expired, cancelled, executing, succeeded, failed and uncertain. Normal run completion is rejected with unresolved operations. Startup recovery marks interrupted execution claims uncertain and never regrants them. A workspace admits one executing effect at a time, and an uncertain effect blocks further effect claims in that same verified workspace identity, including new run/operation IDs. Backend callers must enforce controller authorization, verified workspace identities and overlapping-root policy before using this repository contract. No product approval routes, write/process tools or uncertainty-reconciliation controls are enabled by this component checkpoint.
+
+`PermissionWaiter` uses the same durable repository records to await a decision and return a single claimed operation. It supports stop-token cancellation, server-clock expiry, waitable workspace contention and explicit rejection of uncertain workspace effects. It never executes a tool; the owning runtime must journal the actual result after the claim. It polls durable records with a cancellable wait, so no transport/view callback authorizes an effect by itself. Repository and waiter contracts passed with real persistence and worker waits. They establish these component invariants, not product approval UI or live effect execution.
+
+Public user-message validation requires `{role:"user",data:{content:"nonempty text"}}`, rejecting NUL, unsupported fields and non-text content before storage. The native model loop currently accepts text only; storing other payloads would poison later context construction. Rejection/no-history-change tests passed. Multimodal parts remain required work, not silently accepted data.
+
+Current component evidence: [native-permission-planning-ctest.log](evidence/native-permission-planning-ctest.log), sixteen tests passed. The new contracts cover exact argument binding (including large numeric bytes), duplicate/deep JSON rejection, controller attribution, competing decisions/claims, cancellation/expiry, storage/event fault rollback, atomic schema-v2 migration, uncertain restart recovery, workspace exclusion and cancellable permission waits. The fixture-side file write in the repository contract is explicitly test code, not a production effect adapter.

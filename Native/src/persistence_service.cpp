@@ -131,6 +131,30 @@ std::future<CredentialMetadata> PersistenceService::put_credential(std::string s
         return repository.put_credential(scope,id,purpose,label,secret,revision);
     });
 }
+std::future<Operation> PersistenceService::request_operation(std::string id,OperationSpec spec,std::int64_t expiry) {
+    return impl_->submit([id=std::move(id),spec=std::move(spec),expiry](Repository& repository){return repository.request_operation(id,spec,expiry);});
+}
+std::future<Operation> PersistenceService::operation(std::string id) {
+    return impl_->submit([id=std::move(id)](Repository& repository){return repository.operation(id);});
+}
+std::future<std::vector<Operation>> PersistenceService::operations(std::string id) {
+    return impl_->submit([id=std::move(id)](Repository& repository){return repository.operations(id);});
+}
+std::future<Operation> PersistenceService::decide_operation(std::string id,OperationDecision decision,std::string actor) {
+    return impl_->submit([id=std::move(id),decision,actor=std::move(actor)](Repository& repository){return repository.decide_operation(id,decision,actor);});
+}
+std::future<Operation> PersistenceService::claim_operation(std::string id,OperationSpec spec) {
+    return impl_->submit([id=std::move(id),spec=std::move(spec)](Repository& repository){return repository.claim_operation(id,spec);});
+}
+std::future<Operation> PersistenceService::finish_operation(std::string id,OperationState outcome,std::string result) {
+    return impl_->submit([id=std::move(id),outcome,result=std::move(result)](Repository& repository){return repository.finish_operation(id,outcome,result);});
+}
+std::future<Operation> PersistenceService::cancel_operation(std::string id,OperationSpec spec) {
+    return impl_->submit([id=std::move(id),spec=std::move(spec)](Repository& repository){return repository.cancel_operation(id,spec);});
+}
+std::future<Operation> PersistenceService::expire_operation(std::string id) {
+    return impl_->submit([id=std::move(id)](Repository& repository){return repository.expire_operation(id);});
+}
 std::future<std::vector<CredentialMetadata>> PersistenceService::credentials(std::string scope) {
     return impl_->submit([scope=std::move(scope)](Repository& repository){return repository.credentials(scope);});
 }

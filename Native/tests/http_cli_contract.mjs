@@ -82,6 +82,11 @@ try {
   const writes = await Promise.all(Array.from({length: 12}, (_, i) => request('/v1/sessions/shared/messages', {role: 'user', data: {content: `message ${i}`}})));
   assert.ok(writes.every(result => result.status === 201));
   assert.equal(cli('history', 'shared').length, 12);
+  for(const data of [{},{unknown:'not conversation content'},{content:[]},{content:''},{content:'embedded\0NUL'},
+    {content:'text',tool_calls:[]},{content:'text',refusal:'unsupported user field'}]) {
+    assert.equal((await request('/v1/sessions/shared/messages',{role:'user',data})).status,400);
+  }
+  assert.equal(cli('history','shared').length,12,'Invalid conversation data must not contaminate stored history');
   assert.equal((await request('/v1/runs', {id: 'not-executed', session_id: 'shared', prompt: 'Do coding'})).status, 404);
   assert.equal((await request('/v1/runs/not-executed')).status, 404);
   assert.deepEqual(cli('runs','shared'),[]);

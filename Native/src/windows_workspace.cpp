@@ -1,11 +1,14 @@
 #include "agentflow/workspace_tools.hpp"
 #define NOMINMAX
 #include <windows.h>
+#include <bcrypt.h>
 #include <algorithm>
 #include <array>
 #include <deque>
 #include <filesystem>
 #include <set>
+#include <iomanip>
+#include <sstream>
 
 namespace agentflow {
 namespace {
@@ -52,6 +55,23 @@ std::string prefix(const std::string& value,std::size_t limit) {
     auto size=limit;while(size && (static_cast<unsigned char>(value[size])&0xc0)==0x80) --size;
     return value.substr(0,size);
 }
+std::string file_identity(HANDLE handle) {
+    FILE_ID_INFO info{};
+    if(!GetFileInformationByHandleEx(handle,FileIdInfo,&info,sizeof(info))) throw ToolFileError("Filesystem does not expose a file identity");
+    bool nonzero=false;for(auto byte:info.FileId.Identifier) nonzero|=byte!=0;
+    if(!nonzero) throw ToolFileError("Filesystem returned an unsupported file identity");
+    std::ostringstream identifier;identifier<<"windows-local-file-v1:"<<std::hex<<std::setfill('0')<<std::setw(16)<<info.VolumeSerialNumber<<":";
+    for(auto byte:info.FileId.Identifier) identifier<<std::setw(2)<<static_cast<unsigned>(byte);
+    return identifier.str();
+}
+std::string content_hash(const std::string& content) {
+    BCRYPT_ALG_HANDLE algorithm=nullptr;std::array<UCHAR,32> hash{};
+    if(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)<0) throw ToolFileError("Cannot capture content hash");
+    const auto status=BCryptHash(algorithm,nullptr,0,reinterpret_cast<PUCHAR>(const_cast<char*>(content.data())),static_cast<ULONG>(content.size()),hash.data(),static_cast<ULONG>(hash.size()));
+    BCryptCloseAlgorithmProvider(algorithm,0);
+    if(status<0) throw ToolFileError("Cannot capture content hash");
+    std::ostringstream result;result<<std::hex<<std::setfill('0');for(auto byte:hash) result<<std::setw(2)<<static_cast<unsigned>(byte);return result.str();
+}
 }
 struct WorkspaceTools::Impl {
     Handle root;
@@ -74,8 +94,45 @@ struct WorkspaceTools::Impl {
 };
 WorkspaceTools::WorkspaceTools(const std::string& root):impl_(std::make_unique<Impl>(root)) {}
 WorkspaceTools::~WorkspaceTools()=default;
+std::string WorkspaceTools::identity() const {
+    auto current=final_path(impl_->root.value);
+    while(!current.empty() && current.back()==L'\\') current.pop_back();
+    if(!equal(current,impl_->base)) throw ToolAccessDenied("Workspace root identity changed");
+    return file_identity(impl_->root.value);
+}
 WorkspaceFile WorkspaceTools::read_file(const std::string& input,std::stop_token cancel) const {
+    auto result=read_snapshot(input,false,cancel);return {std::move(result.path),std::move(result.content)};
+}
+WorkspaceSnapshot WorkspaceTools::snapshot_file(const std::string& input,std::stop_token cancel) const {
+    return read_snapshot(input,true,cancel);
+}
+WorkspaceEditPlan WorkspaceTools::plan_replacement(const std::string& path,const std::string& old_text,const std::string& new_text,std::size_t expected,std::stop_token cancel) const {
+    check_cancel(cancel);
+    if(old_text.empty() || old_text.size()>1024*1024 || new_text.size()>1024*1024 || expected==0 || expected>1024 || !valid_text(old_text) || !valid_text(new_text))
+        throw std::invalid_argument("Invalid edit replacement or occurrence count");
+    if(old_text==new_text) throw ToolContentConflict("Replacement makes no change");
+    auto before=snapshot_file(path,cancel);
+    std::vector<std::size_t> matches;std::size_t start=0;
+    for(;;) {
+        check_cancel(cancel);const auto found=before.content.find(old_text,start);if(found==std::string::npos) break;
+        matches.push_back(found);if(matches.size()>expected) throw ToolContentConflict("Replacement occurrence count differs");
+        start=found+old_text.size();
+    }
+    if(matches.size()!=expected) throw ToolContentConflict("Replacement occurrence count differs");
+    const auto removed=matches.size()*old_text.size(),added=matches.size()*new_text.size();
+    const auto size=before.content.size()-removed+added;
+    if(size>1024*1024) throw ToolFileError("Planned edit exceeds the 1 MiB text limit");
+    std::string after;after.reserve(size);start=0;
+    for(const auto found:matches) {
+        check_cancel(cancel);after.append(before.content,start,found-start);after+=new_text;start=found+old_text.size();
+    }
+    after.append(before.content,start,std::string::npos);check_cancel(cancel);
+    const auto hash=content_hash(after);
+    return {std::move(before),std::move(after),hash,matches.size()};
+}
+WorkspaceSnapshot WorkspaceTools::read_snapshot(const std::string& input,bool capture_version,std::stop_token cancel) const {
     check_cancel(cancel);const auto relative=relative_path(input);
+    const auto workspace_id=capture_version?identity():std::string{};
     Handle file(CreateFileW(impl_->path(relative).c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN,nullptr));
     impl_->verify(file.value);
     BY_HANDLE_FILE_INFORMATION info{};
@@ -91,7 +148,13 @@ WorkspaceFile WorkspaceTools::read_file(const std::string& input,std::stop_token
         content.append(buffer.data(),read);
     }
     if(!valid_text(content)) throw ToolFileError("File is binary or not UTF-8 text");
-    return {relative,std::move(content)};
+    if(capture_version) {
+        check_cancel(cancel);impl_->verify(file.value);
+        const auto id=file_identity(file.value),hash=content_hash(content);
+        if(identity()!=workspace_id) throw ToolAccessDenied("Workspace identity changed during snapshot");
+        return {relative,std::move(content),workspace_id,id,hash};
+    }
+    return {relative,std::move(content),{},{},{}};
 }
 WorkspaceListing WorkspaceTools::list_files(const std::string& input,std::stop_token cancel) const {
     check_cancel(cancel);const auto relative=relative_path(input);

@@ -76,10 +76,10 @@ int main(int argc,char** argv) {
             require(reopened.credentials("team-a").empty(),"Deleted credential must leave no metadata");
             rejects<Conflict>([&]{reopened.put_credential("team-a","model","provider:model","reused",SecretBytes(original),0);});
         }
-        // Reconstruct the previous schema, then verify the real v1 -> v2 migration.
+        // Reconstruct the previous schema, then verify migration to the current schema.
         {
             XlangSqlite previous(path,roots);
-            previous.execute("DROP TABLE credentials");previous.execute("DROP TABLE retired_credentials");previous.execute("PRAGMA user_version=1");
+            previous.execute("DROP TABLE operations");previous.execute("DROP TABLE credentials");previous.execute("DROP TABLE retired_credentials");previous.execute("PRAGMA user_version=1");
             previous.execute("CREATE TABLE credentials(unexpected TEXT)");
         }
         rejects<DatabaseError>([&]{Repository rejected(path,roots);});

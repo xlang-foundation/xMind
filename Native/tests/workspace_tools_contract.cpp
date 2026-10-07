@@ -12,10 +12,32 @@ template<class Error,class Function> void rejects(Function action) {
 }
 }
 int main(int argc,char** argv) {
-    if(argc!=3) return 2;
+    if(argc!=3 && argc!=4 && argc!=5) return 2;
     try {
+        if(std::string(argv[1])=="--identity") {WorkspaceTools tools(argv[2]);std::cout<<tools.identity()<<'\n';return 0;}
+        if(argc==4 && std::string(argv[1])=="--snapshot") {
+            WorkspaceTools tools(argv[2]);const auto snapshot=tools.snapshot_file(argv[3]);
+            std::cout<<Json{{"workspace_id",snapshot.workspace_id},{"file_id",snapshot.file_id},{"content_sha256",snapshot.content_sha256},{"content",snapshot.content}}.dump()<<'\n';return 0;
+        }
         WorkspaceTools tools(argv[1]);
+        WorkspaceTools alias(std::string(argv[1])+"/.");
+        require(!tools.identity().empty() && tools.identity()==alias.identity(),"Policy identity must resolve path aliases through actual root handles");
+        WorkspaceTools different(argv[2]);require(tools.identity()!=different.identity(),"Distinct directory objects must have distinct local identities");
         const auto read=tools.read_file("README.txt");
+        const auto snapshot=tools.snapshot_file("README.txt");
+        require(snapshot.content==read.content && snapshot.workspace_id==tools.identity() && !snapshot.file_id.empty(),"Snapshot must capture actual file/root identities with its contents");
+        if(argc>=4) require(snapshot.content_sha256==argv[3],"Native hash must match independent fixture hash");
+        const auto plan=tools.plan_replacement("README.txt","alpha[.]needle","beta-native");
+        require(plan.before.content==read.content && plan.before.file_id==snapshot.file_id && plan.before.workspace_id==snapshot.workspace_id,"Edit plan must bind to the actual file snapshot");
+        require(plan.after_content=="first\r\nbeta-native \xe4\xb8\xad\r\nlast\n" && plan.replaced_occurrences==1,"Literal replacement must preserve other actual bytes and line endings");
+        if(argc==5) require(plan.after_sha256==argv[4],"Planned output hash must match independent fixture computation");
+        require(tools.read_file("README.txt").content==read.content,"Planning must not mutate the file");
+        rejects<ToolContentConflict>([&]{tools.plan_replacement("README.txt","missing","replacement");});
+        rejects<ToolContentConflict>([&]{tools.plan_replacement("README.txt","alpha[.]needle","beta",2);});
+        rejects<ToolContentConflict>([&]{tools.plan_replacement("README.txt","first","first");});
+        rejects<std::invalid_argument>([&]{tools.plan_replacement("README.txt","","new");});
+        rejects<std::invalid_argument>([&]{tools.plan_replacement("README.txt","first",std::string("a\0b",3));});
+        rejects<ToolFileError>([&]{tools.plan_replacement("README.txt","first",std::string(1024*1024,'x'));});
         require(read.content=="first\r\nalpha[.]needle \xe4\xb8\xad\r\nlast\n","Actual UTF-8 file contents must survive");
         require(tools.read_file("README.TXT").content==read.content,"Normal Windows filename lookup must remain usable");
         require(tools.read_file("sub/inside.txt").content=="alpha[.]needle nested\n","Nested file read");
@@ -39,6 +61,8 @@ int main(int argc,char** argv) {
         rejects<ToolAccessDenied>([&]{tools.read_file("../workspace-other/secret.txt");});
         rejects<ToolAccessDenied>([&]{tools.read_file(std::string(argv[2])+"/secret.txt");});
         rejects<ToolAccessDenied>([&]{tools.read_file("outside-link/secret.txt");});
+        rejects<ToolAccessDenied>([&]{tools.snapshot_file("outside-link/secret.txt");});
+        rejects<ToolAccessDenied>([&]{tools.plan_replacement("outside-link/secret.txt","outside","changed");});
         rejects<ToolAccessDenied>([&]{tools.list_files("outside-link");});
         rejects<ToolAccessDenied>([&]{tools.list_files("outside-link/sub");});
         rejects<ToolAccessDenied>([&]{tools.read_file("hard-link.txt");});
@@ -52,6 +76,8 @@ int main(int argc,char** argv) {
         rejects<std::invalid_argument>([&]{tools.read_file(std::string("README.txt\0tail",15));});
         std::stop_source cancelled;cancelled.request_stop();
         rejects<ToolCancelled>([&]{tools.read_file("README.txt",cancelled.get_token());});
+        rejects<ToolCancelled>([&]{tools.snapshot_file("README.txt",cancelled.get_token());});
+        rejects<ToolCancelled>([&]{tools.plan_replacement("README.txt","first","changed",1,cancelled.get_token());});
         rejects<ToolCancelled>([&]{tools.search_files("needle",cancelled.get_token());});
         std::vector<std::future<void>> readers;
         for(int i=0;i<4;++i) readers.push_back(std::async(std::launch::async,[&]{for(int n=0;n<10;++n) require(tools.read_file("README.txt").content==read.content,"Concurrent read isolation");}));

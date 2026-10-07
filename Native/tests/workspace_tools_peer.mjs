@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,symlink,link,rm,readFile} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,symlink,link,rm,readFile,rename} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,resolve,dirname} from 'node:path';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
+import {createHash} from 'node:crypto';
 const execute=promisify(execFile),folder=await mkdtemp(join(tmpdir(),'xmind-workspace-'));
 const root=join(folder,'workspace'),outside=join(folder,'workspace-other');
 try {
@@ -22,7 +23,25 @@ try {
   await symlink(outside,join(root,'outside-link'),'junction');
   await link(join(outside,'secret.txt'),join(root,'hard-link.txt'));
   for(let i=0;i<1001;i++) await writeFile(join(root,'many',`${i}.txt`),'');
-  const result=await execute(process.argv[2],[root,outside],{windowsHide:true,timeout:20000});
+  const expectedHash=createHash('sha256').update(await readFile(join(root,'README.txt'))).digest('hex');
+  const expectedAfterHash=createHash('sha256').update((await readFile(join(root,'README.txt'),'utf8')).replace('alpha[.]needle','beta-native')).digest('hex');
+  const result=await execute(process.argv[2],[root,outside,expectedHash,expectedAfterHash],{windowsHide:true,timeout:20000});
+  const oldVersion=JSON.parse((await execute(process.argv[2],['--snapshot',root,'README.txt'],{windowsHide:true,timeout:5000})).stdout);
+  await writeFile(join(root,'README.txt'),'Actual fixture changed after snapshot\n');
+  const newVersion=JSON.parse((await execute(process.argv[2],['--snapshot',root,'README.txt'],{windowsHide:true,timeout:5000})).stdout);
+  assert.equal(newVersion.file_id,oldVersion.file_id,'An in-place fixture update retains file identity');
+  assert.equal(newVersion.workspace_id,oldVersion.workspace_id);
+  assert.notEqual(newVersion.content_sha256,oldVersion.content_sha256,'Content modification must change the edit precondition');
+  assert.equal(newVersion.content_sha256,createHash('sha256').update(await readFile(join(root,'README.txt'))).digest('hex'));
   assert.equal(await readFile(join(outside,'secret.txt'),'utf8'),'outside marker\n','Outside fixture must remain unchanged');
+  const before=await execute(process.argv[2],['--identity',root],{windowsHide:true,timeout:5000});
+  const moved=join(folder,'moved-workspace');
+  // Both directory-move targets are checked against this task's exact temp
+  // fixture parent before moving the tree. No user workspace is moved.
+  assert.equal(dirname(resolve(root)),resolve(folder));
+  assert.equal(dirname(resolve(moved)),resolve(folder));
+  await rename(root,moved);
+  const after=await execute(process.argv[2],['--identity',moved],{windowsHide:true,timeout:5000});
+  assert.equal(after.stdout,before.stdout,'A directory move/reopen must retain its local policy identity');
   process.stdout.write(result.stdout);
 } finally {await rm(folder,{recursive:true,force:true});}
