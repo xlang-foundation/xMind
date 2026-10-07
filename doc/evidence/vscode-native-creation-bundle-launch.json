@@ -1,0 +1,14 @@
+{
+  "origin": "http://127.0.0.1:62262",
+  "backend_pid": 26944,
+  "model_configured": false,
+  "source_revision": "e93f28c7e6d7c214f1c0d5e049ad9408128b4ad5",
+  "ready_file": "D:\\CantorAI2026\\xMind\\.agentflow\\ui-host\\opened-536d0a2fdff2492aa63555f76b47b879.json",
+  "agent_execution": false,
+  "host_launcher_pid": 27528,
+  "modules": "D:\\CantorAI2026\\xMind\\.agentflow\\ci\\extracted\\runtime-37621404384-de4c5199133c41ce99f4e827fb08aaf4\\modules",
+  "server_executable": "D:\\CantorAI2026\\xMind\\.agentflow\\ci\\extracted\\runtime-37621404384-de4c5199133c41ce99f4e827fb08aaf4\\xmind_server.exe",
+  "checkout": "D:\\CantorAI2026\\xMind",
+  "workflow_run": 37621404384,
+  "scope": "Actual right-sidebar host with the tested 31-contract CI bundle, preserved session/profile, no configured model or populated agent execution."
+}

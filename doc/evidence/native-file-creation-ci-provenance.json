@@ -1,0 +1,15 @@
+{
+  "xmind": "e93f28c7e6d7c214f1c0d5e049ad9408128b4ad5",
+  "sqlite_patch_sha256": "5388CDB3D1946CE48A2416055E27B422A2AA1364271A24DC8EB124C72C2C64B4",
+  "xlang3": "914783909835116969aad7c66b210a5ac9a27661",
+  "toolchain_version": "18.10.12217.157",
+  "runtime": "Native xlang3; no CPython execution or bridge",
+  "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+  "toolchain": "Visual Studio 18 2026",
+  "run_url": "https://github.com/xlang-foundation/xMind/actions/runs/37621404384",
+  "native_result": "31 passed, zero failed",
+  "extension_result": "30 passed, zero failed; successful isolated CI step",
+  "evidence_artifact_id": 11482184744,
+  "runtime_artifact_id": 11482384548,
+  "scope": "Actual native creation/edits, journals/embedded xlang3, model/server/admin/CLI and official modern/legacy MCP SDK peers. File effects actual, inference synthetic. Extension contracts include labeled rendering/host fixtures. No live-provider, populated creation UI, process/shell, full protocol/graph/team/parity completion claim."
+}

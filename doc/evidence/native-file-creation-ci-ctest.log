@@ -1,0 +1,67 @@
+Test project D:/a/xMind/xMind/xmind/build/native
+      Start  1: native_json_schema_contract
+ 1/31 Test  #1: native_json_schema_contract ................   Passed    0.02 sec
+      Start  2: native_mcp_wire_contract
+ 2/31 Test  #2: native_mcp_wire_contract ...................   Passed    0.02 sec
+      Start  3: model_stream_protocol_contract
+ 3/31 Test  #3: model_stream_protocol_contract .............   Passed    0.08 sec
+      Start  4: model_request_contract
+ 4/31 Test  #4: model_request_contract .....................   Passed    0.02 sec
+      Start  5: native_secret_protection_contract
+ 5/31 Test  #5: native_secret_protection_contract ..........   Passed    0.02 sec
+      Start  6: native_mcp_configuration_contract
+ 6/31 Test  #6: native_mcp_configuration_contract ..........   Passed    0.30 sec
+      Start  7: native_schema_worker_contract
+ 7/31 Test  #7: native_schema_worker_contract ..............   Passed    2.41 sec
+      Start  8: native_mcp_stdio_contract
+ 8/31 Test  #8: native_mcp_stdio_contract ..................   Passed    3.22 sec
+      Start  9: native_mcp_handshake_contract
+ 9/31 Test  #9: native_mcp_handshake_contract ..............   Passed    0.93 sec
+      Start 10: native_mcp_client_contract
+10/31 Test #10: native_mcp_client_contract .................   Passed    1.15 sec
+      Start 11: native_mcp_effect_contract
+11/31 Test #11: native_mcp_effect_contract .................   Passed   14.79 sec
+      Start 12: native_agent_service_contract
+12/31 Test #12: native_agent_service_contract ..............   Passed    0.48 sec
+      Start 13: native_agent_runner_contract
+13/31 Test #13: native_agent_runner_contract ...............   Passed    1.41 sec
+      Start 14: native_create_executor_contract
+14/31 Test #14: native_create_executor_contract ............   Passed    1.26 sec
+      Start 15: native_edit_executor_contract
+15/31 Test #15: native_edit_executor_contract ..............   Passed    0.79 sec
+      Start 16: native_approved_edit_http_contract
+16/31 Test #16: native_approved_edit_http_contract .........   Passed    1.15 sec
+      Start 17: native_workspace_tools_contract
+17/31 Test #17: native_workspace_tools_contract ............   Passed    1.11 sec
+      Start 18: native_chat_provider_contract
+18/31 Test #18: native_chat_provider_contract ..............   Passed    0.16 sec
+      Start 19: native_http_stream_transport_contract
+19/31 Test #19: native_http_stream_transport_contract ......   Passed    5.35 sec
+      Start 20: native_agent_http_contract
+20/31 Test #20: native_agent_http_contract .................   Passed    1.17 sec
+      Start 21: native_agent_edit_http_contract
+21/31 Test #21: native_agent_edit_http_contract ............   Passed    2.44 sec
+      Start 22: native_agent_mcp_http_contract
+22/31 Test #22: native_agent_mcp_http_contract .............   Passed    2.40 sec
+      Start 23: native_mcp_sdk_modern_contract
+23/31 Test #23: native_mcp_sdk_modern_contract .............   Passed    3.22 sec
+      Start 24: native_mcp_sdk_legacy_contract
+24/31 Test #24: native_mcp_sdk_legacy_contract .............   Passed    3.21 sec
+      Start 25: native_http_cli_contract
+25/31 Test #25: native_http_cli_contract ...................   Passed   12.17 sec
+      Start 26: embedded_xlang_sqlite_contract
+26/31 Test #26: embedded_xlang_sqlite_contract .............   Passed    0.05 sec
+      Start 27: native_permission_waiter_contract
+27/31 Test #27: native_permission_waiter_contract ..........   Passed    0.88 sec
+      Start 28: native_operation_repository_contract
+28/31 Test #28: native_operation_repository_contract .......   Passed    1.34 sec
+      Start 29: xlang_repository_contract
+29/31 Test #29: xlang_repository_contract ..................   Passed    0.32 sec
+      Start 30: persistence_service_contract
+30/31 Test #30: persistence_service_contract ...............   Passed    0.93 sec
+      Start 31: encrypted_credential_repository_contract
+31/31 Test #31: encrypted_credential_repository_contract ...   Passed    0.53 sec
+
+100% tests passed, 0 tests failed out of 31
+
+Total Test time (real) =  63.36 sec

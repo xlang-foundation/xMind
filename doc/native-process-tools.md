@@ -1,0 +1,44 @@
+# Native coding process tools — implementation contract
+
+Process and shell execution remain unimplemented in the native coding loop. This contract defines the next component; it does not establish an execution milestone.
+
+The pinned OpenCode reference is `v2.0.16`, commit `3a103fe0aff726a4edc7492f03f7b88195d9e4c9`. Source inspection of `packages/core/src/tool/plugin/shell.ts`, `packages/core/src/shell.ts` and `packages/core/src/session/shell.ts` shows more than a subprocess call: foreground/background commands, working-directory checks after approval, timeouts, retained output, lifecycle observation and completion notifications. The pinned API inventory includes `session.shell` and shell discovery. Implementing a foreground tool alone will not establish parity with these capabilities. No reference implementation is copied or executed.
+
+## First native component
+
+The first component runs a foreground command through a trusted, explicitly configured Windows executable. It must support build/test tools with literal argument vectors; a separately configured shell profile can interpret a reviewed command string. Executable/profile lookup belongs to the backend, never the model or editor. Models cannot select an arbitrary executable path, supply environment values, disable ownership, or declare a command safe. All commands require an exact recorded approval, including commands described as read-only.
+
+Use a dedicated C++ process adapter and executor. The existing MCP stdio adapter is a protocol transport: it discards stderr content and requires newline-framed writes. Passing build output through it would lose evidence and mix protocol ownership with coding processes. Common Windows handle/quoting/launch helpers can be factored only with regression coverage for existing MCP and schema workers.
+
+The executor records the selected profile and revision, exact arguments or shell text, workspace/directory identities, resolved working directory, timeout and output budget in the existing operation proposal. Credential references remain server-side. The same approved proposal is rendered by CLI and VS Code. Shell syntax scanning may help review but cannot prove that a command stays within its working directory.
+
+Before dispatch, retain verified directory handles and revalidate the selected directory identity. Windows process creation uses a path for its working directory; the implementation must establish the same directory before and after launch, and fail closed if it cannot. A working directory and a Windows job do not provide filesystem or network isolation. Initial support is therefore restricted to the existing full-access local-owner deployment. Team processes require scoped workers and explicit authority before shared-server readiness.
+
+## Effect and lifecycle ownership
+
+1. Parse and bound the model request; resolve trusted configuration and the actual workspace directory without launching a child.
+2. Record the immutable proposal, await its single-use controller decision, and atomically claim the workspace resource. Denial, expiry and cancellation before launch must produce no process.
+3. Create the child suspended with an explicit executable, literal Windows argument quoting, a closed/EOF input channel, captured stdout/stderr and an explicit inherited-handle allowlist. Start with a minimal trusted environment; never inherit backend model/authentication secrets.
+4. Attach the suspended child to a kill-on-close job before resuming it. Retain child and job ownership in the backend. Any failed setup must terminate and reap the suspended child. Merely disconnecting a view must not cancel execution.
+5. Resume once. After successful resume, filesystem/network side effects may already exist. Stream bounded, channel-labelled output through the owning execution and durable event sequence. Keep byte counts and truncation flags; invalid text bytes need an explicit representation rather than invented Unicode. Never block indefinitely on one pipe while the other fills.
+6. Observe the actual exit status and drain both pipes. Cancellation or timeout must terminate the entire job and wait for its processes before releasing ownership. A failed wait, lost owner, outcome journal failure or interruption after dispatch leaves uncertainty and prevents automatic replay.
+
+An observed nonzero exit is a completed command with a nonzero exit code, not evidence that no side effects occurred. Likewise, exit zero proves the process result only; it cannot independently verify arbitrary file or remote effects. Timeout/cancellation results must retain any observed exit/termination evidence without claiming rollback. Restart quarantines dispatched operations and does not rerun the command. A PID alone is never sufficient to adopt or terminate a recovered process because IDs are reused.
+
+## Reviewable acceptance
+
+Use independent Node fixtures strictly as tests; product execution is native C++. Verify actual child effects, not a synthetic process result:
+
+- Literal Unicode/space/quote/backslash arguments, explicit working directory, distinct stdout/stderr and actual exit zero/nonzero.
+- Real approval/denial/expiry/pre-dispatch cancellation, duplicate invocation and directory replacement while approval is pending. Denied cases leave no child-effect marker.
+- Actual concurrent high-volume stdout/stderr, bounded capture/truncation, invalid UTF-8, EOF without a newline, and descendants holding pipes after the parent exits.
+- Actual timeout and cancellation of a child tree. Confirm that a delayed descendant does not write its marker after termination; do not infer tree death from a parent exit alone.
+- No inherited backend secret sentinel or unrelated inheritable handle. Environment and credential values must not appear in public configuration/proposals.
+- Real outcome-storage failure after a child writes a file, followed by restart. The operation remains quarantined and the effect is not replayed.
+- Native server/model/CLI continuation through the same executor, with explicitly synthetic inference; thin editor proposal/output rendering; eventual live-provider repository build/test task separately.
+
+Register each actual contract in the isolated CI gate. Local heavy builds remain deferred while the independent xlang3 timing controller is live. Use the exact passing source/artifact for any visible preview.
+
+## Following components required for parity
+
+Durable background jobs and completion notification, cursor-based retained output, bounded full-output artifacts with retention, shell discovery/configuration, interactive terminal/PTY support, attributed recovery and platform adapters follow the foreground component. The shared runtime owns these services so CLI, VS Code, Electron and remote views can observe the same process. Remote view transport and WebRTC signaling never become process owners.
