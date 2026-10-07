@@ -37,5 +37,6 @@
   ],
   "native_result": "23 passed, zero failed",
   "inference_scope": "Synthetic inference peers, real native persistence/files/processes; no live provider or MCP tool execution",
-  "observed_utc": "2026-10-07T10:39:40.8720208Z"
+  "observed_utc": "2026-10-07T10:39:40.8720208Z",
+  "evidence_log_source": "Original guarded launcher combined build/CTest output, captured before CTest registration inspection overwrote its temporary LastTest.log."
 }
