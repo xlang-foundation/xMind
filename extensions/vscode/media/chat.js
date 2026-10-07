@@ -206,6 +206,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='reset-run'){resetLive();resetFailure();resetProcessStreams();byId('events').textContent='';}
   else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();byId('events').textContent='';}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data);}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
+  else if(m.type==='provider-wire'){const label=byId('provider-mode');label.textContent=m.wire==='responses'?'Responses':m.wire==='chat-completions'?'Chat Completions':'';label.hidden=!label.textContent;}
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
   else if(m.type==='capabilities'){execution=m.execution;byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
   else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';byId('events').textContent='';}

@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,backendOrigin,validateToken } = require('../client');
+const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire } = require('../client');
 
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
@@ -91,7 +91,7 @@ function harness(options={}) {
     workspaceState:{get:key=>state.get(key),update:async (key,value)=>{state.set(key,value);}}};
   state.set('agentflow.session',{url:'http://127.0.0.1:8765',id:'saved'});
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire}:name==='./webview'?require('../webview'):require(name),
     setTimeout:callback=>{bootstrapTasks.push(callback);return 1;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./browser-view'?require('../browser-view'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
@@ -128,6 +128,9 @@ test('native terminal state refreshes transcript and stops polling with durable 
 
 const pendingEdit={id:'edit',run_id:'finished',workspace_id:'verified-fixture-root',tool:'replace_file',state:'awaiting_approval',expires_unix_ms:Date.now()+600000,decision_actor:'',result_json:'{}',arguments_json:JSON.stringify({before_content:'actual before fixture',after_content:'<script>untrusted file text</script>',before_sha256:'fixture-hash',file_id:'fixture-file'})};
 const providerFixture={revision:0,provider:'openai',model:'',endpoint:'https://api.openai.com/v1/chat/completions',configured:false};
+test('saved Responses enrollment restores discovery and reports the native wire',async()=>{
+  const h=harness({providerSetup:{...providerFixture,revision:1,configured:true,model:'fixture-other',wire:'responses',endpoint:'https://api.openai.com/v1/responses'}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='model-list'));assert.ok(view.posted.some(m=>m.type==='provider-wire'&&m.wire==='responses'));view.receive({type:'model',id:'fixture-model'});await until(()=>h.providerRequests.length===1);assert.ok(!Object.hasOwn(h.providerRequests[0],'api_key'));await until(()=>view.posted.some(m=>m.type==='capabilities'&&m.model==='fixture-model'));view.close();
+});
 async function setupView(options={}){
   const h=harness({health:{agent_execution:false,status:'ok'},providerSetup:providerFixture,...options});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='settings-state'&&!m.busy));return {h,view};
 }

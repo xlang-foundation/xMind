@@ -14,6 +14,9 @@ function renderer(){
 
 const processProposalFixture=()=>({id:'fixture-command',tool:'run_process',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,
   arguments_json:JSON.stringify({profile_id:'fixture-profile',profile_revision:2,executable:'C:/fixture/tool.exe',executable_id:'opaque-fixture-backend-executable-binding',arguments:['space argument','<script>fixtureAttack()</script>','trailing\\'],workdir:'src',directory_id:'fixture-directory',timeout_ms:120000,output_limit:65536}),result_json:'{}'});
+test('footer displays only a recognized backend-reported provider wire',()=>{
+  const r=renderer(),label=r.dom.window.document.getElementById('provider-mode');r.send({type:'provider-wire',wire:'responses'});assert.equal(label.textContent,'Responses');assert.equal(label.hidden,false);r.send({type:'provider-wire',wire:'chat-completions'});assert.equal(label.textContent,'Chat Completions');r.send({type:'provider-wire',wire:'<script>fixtureAttack()</script>'});assert.equal(label.hidden,true);assert.equal(label.textContent,'');
+});
 const processOutcomeFixture=()=>{
   const output='<script>fixtureAttack()</script>\u001b[31m\nfixture stdout';
   return {operation_id:'fixture-command',profile_id:'fixture-profile',pid:123,exit_code:7,termination:'exited',elapsed_ms:1500,

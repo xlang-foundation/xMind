@@ -1,7 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
-const { BackendClient, backendOrigin, validateToken } = require('./client');
+const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const { browserViewLauncher } = require('./browser-view');
@@ -233,7 +233,7 @@ async function activate(context) {
     try{
       const current=()=>{if(!panel || client!==target || configuredOrigin()!==origin || version!==generation)throw new Error('Backend or conversation changed during provider setup. Try again.');};
       const setup=await target.providerConfiguration();current();
-      if(setup.provider!=='openai' || setup.endpoint!=='https://api.openai.com/v1/chat/completions' || !Number.isSafeInteger(setup.revision) || setup.revision<0)throw new Error('Backend provider setup policy is unsupported.');
+      const wire=providerEnrollmentWire(setup);post({type:'provider-wire',wire:setup.configured?wire:undefined});
       if(!setup.configured && key===undefined)throw new Error('Open Settings at the top right and enter your OpenAI API key.');
       post({type:'settings-state',busy:true,text:'Fetching models from OpenAI…'});
       const catalogue=await target.discoverProviderModels(key,setup.revision);current();
@@ -322,6 +322,7 @@ async function activate(context) {
             if(selection.target!==client || selection.origin!==configuredOrigin() || Date.now()>selection.expires){providerSelection=undefined;throw new Error('Model discovery expired. Fetch models again in Settings.');}
             if(!selection.ids.includes(message.id))throw new Error('Choose a model returned by OpenAI.');
             const configured=await client.configureProvider(message.id,selection.key,selection.revision);
+            post({type:'provider-wire',wire:providerEnrollmentWire(configured)});
             selection.key=undefined;selection.revision=configured.revision;selection.expires=Infinity;
             const current=await capabilities();health=current.health;modelCatalogue=current.catalogue;
             post({type:'capabilities',execution:health.agent_execution,models:selection.ids.map(id=>({id})),model:message.id});

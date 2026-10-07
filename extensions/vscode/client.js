@@ -67,5 +67,11 @@ class BackendClient {
   }
 }
 
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken};
-else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken};
+function providerEnrollmentWire(setup){
+  if(!setup||setup.provider!=='openai'||!Number.isSafeInteger(setup.revision)||setup.revision<0)throw new Error('Backend provider setup policy is unsupported.');
+  const wire=setup.wire??'chat-completions';
+  if(!((wire==='chat-completions'&&setup.endpoint==='https://api.openai.com/v1/chat/completions')||(wire==='responses'&&setup.endpoint==='https://api.openai.com/v1/responses')))throw new Error('Backend provider setup policy is unsupported.');
+  return wire;
+}
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken,providerEnrollmentWire};
+else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken,providerEnrollmentWire};

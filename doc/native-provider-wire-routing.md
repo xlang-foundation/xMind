@@ -43,3 +43,16 @@ in the authorization header. The C++ contract requires completion, persisted
 response usage and retained conversation/run state after reopen. Exact peer
 request counts prevent a skipped transport path from passing. JavaScript syntax
 validation passed; compiled execution and live OpenAI acceptance remain pending.
+
+The shared editor/browser adapters now accept only matching official OpenAI
+endpoint/wire metadata: legacy Chat Completions (including older records without
+a wire field) or explicit Responses. Mismatched pairs and arbitrary endpoints
+are rejected before account discovery. Saved-key discovery and sidebar model
+selection support Responses metadata; the footer displays the backend-reported
+wire without inferring it from model names. All 69 extension and 11 browser
+contracts pass locally, using labelled adapter/DOM fixtures. The updated browser
+adapter also passed its actual C++/xlang3 contract against tested revision
+`d0a70fe`, including native restart and retained cookie/history. This verifies
+adapter compatibility with the existing native binary, not the newer enrollment
+routing or a live Responses request. Native routing compilation and actual
+provider acceptance are still pending.
