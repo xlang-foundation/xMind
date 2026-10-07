@@ -9,6 +9,18 @@ function renderer(){
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+test('uncertain edit inspection renders escaped observations and never offers an effect approval',()=>{
+  const r=renderer();const operation={id:'fixture-uncertain',tool:'replace_file',state:'uncertain',workspace_id:'fixture-root',expires_unix_ms:Date.now(),arguments_json:'{}',result_json:'{}'};
+  r.send({type:'operations',operations:[operation]});
+  const doc=r.dom.window.document,buttons=[...doc.querySelectorAll('#operations button')];assert.equal(buttons.length,1);assert.equal(buttons[0].textContent,'Inspect actual file');buttons[0].click();
+  assert.equal(JSON.stringify(r.posted.at(-1)),JSON.stringify({type:'inspect-edit',id:operation.id}));
+  const inspection={match:'after',same_file:true,observed_unix_ms:Date.now(),observed:{path:'<script>fixtureAttack()</script>',size:3,content_sha256:'b'.repeat(64)}};
+  r.send({type:'edit-inspection',id:operation.id,inspection});
+  assert.match(doc.querySelector('.edit-inspection').textContent,/Matches recorded after state/);
+  assert.match(doc.querySelector('.edit-inspection').textContent,/outcome remains uncertain/);
+  assert.match(doc.querySelector('.edit-inspection pre').textContent,/<script>fixtureAttack/);assert.equal(doc.querySelectorAll('#operations script').length,0);
+  r.send({type:'operations',operations:[]});r.send({type:'edit-inspection',id:operation.id,inspection});assert.equal(doc.querySelectorAll('.edit-inspection').length,0);r.dom.window.close();
+});
 test('history renders Markdown/code, copies plain code and shows exact provider usage',()=>{
   const r=renderer();r.send({type:'history',history:[{role:'assistant',data:{content:'## Fixture heading\n\n**Fixture bold**\n\n```js\nx < y\n```',model:'synthetic-renderer-fixture',usage:{prompt_tokens:12,completion_tokens:6,total_tokens:18},elapsed_ms:1500}}]});
   const doc=r.dom.window.document;assert.equal(doc.querySelector('.markdown h2').textContent,'Fixture heading');assert.equal(doc.querySelector('.markdown strong').textContent,'Fixture bold');

@@ -72,6 +72,7 @@ try {
   assert.equal((await request('/v1/operations/missing/inspection')).status,404);
   assert.equal((await request('/v1/operations/allow-edit/inspection')).status,409);
   const beforeInspection=cli('inspect-edit','uncertain-edit');
+  assert.deepEqual(await hostClient.inspectEdit('uncertain-edit').then(value=>({...value,observed_unix_ms:beforeInspection.observed_unix_ms})),beforeInspection,'Actual editor host client uses the compiled native inspection route');
   assert.equal(beforeInspection.match,'before');assert.equal(beforeInspection.same_file,true);
   assert.equal(beforeInspection.quarantine_released,false);
   assert.equal(beforeInspection.observed.size,9);

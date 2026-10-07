@@ -33,6 +33,7 @@ function harness(options={}) {
     else if(target.pathname==='/v1/runs/finished') data={id:'finished',state:options.running?'running':'completed'};
     else if(target.pathname==='/v1/runs/finished/operations') data=operations;
     else if(target.pathname==='/v1/operations/edit') data=pendingOperation?await pendingOperation:operations[0];
+    else if(target.pathname==='/v1/operations/edit/inspection') data=await options.inspection;
     else if(target.pathname==='/v1/operations/edit/decision') {
       const body=JSON.parse(requestOptions.body);decisions.push(body);
       operations=[{...operations[0],state:body.decision==='allow'?'ready':'denied',decision_actor:'fixture-controller'}];data=operations[0];
@@ -97,6 +98,32 @@ test('native terminal state refreshes transcript and stops polling with durable 
 });
 
 const pendingEdit={id:'edit',run_id:'finished',workspace_id:'verified-fixture-root',tool:'replace_file',state:'awaiting_approval',expires_unix_ms:Date.now()+600000,decision_actor:'',result_json:'{}',arguments_json:JSON.stringify({before_content:'actual before fixture',after_content:'<script>untrusted file text</script>',before_sha256:'fixture-hash',file_id:'fixture-file'})};
+const uncertainEdit={...pendingEdit,state:'uncertain'};
+const inspectionFixture={operation:uncertainEdit,observed:{path:'file.cpp',workspace_id:uncertainEdit.workspace_id,file_id:'fixture-file',content_sha256:'a'.repeat(64),size:12},match:'after',same_file:true,observed_unix_ms:Date.now(),quarantine_released:false};
+test('uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths',async()=>{
+  const h=harness({health:{agent_execution:false},operations:[uncertainEdit],inspection:inspectionFixture});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='transcript'));
+  view.receive({type:'inspect-edit',id:'edit',path:'forged-path',match:'before',quarantine_released:true});
+  await until(()=>view.posted.some(message=>message.type==='edit-inspection'));
+  assert.deepEqual(view.posted.find(message=>message.type==='edit-inspection').inspection,inspectionFixture);
+  assert.ok(h.requests.includes('/v1/operations/edit/inspection'));assert.equal(h.decisions.length,0);
+  assert.ok(!h.requests.some(route=>route.includes('forged-path')));
+  view.receive({type:'inspect-edit',id:'unknown'});await until(()=>view.posted.some(message=>message.type==='error'));
+  assert.equal(h.requests.filter(route=>route.endsWith('/inspection')).length,1);view.close();
+});
+test('inspection rejects a different backend operation and discards observations after selection changes',async()=>{
+  const h=harness({operations:[uncertainEdit],inspection:{...inspectionFixture,operation:{...uncertainEdit,arguments_json:'{}'}}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='transcript'));
+  view.receive({type:'inspect-edit',id:'edit'});await until(()=>view.posted.some(message=>message.type==='error'));
+  assert.ok(!view.posted.some(message=>message.type==='edit-inspection'));view.close();
+  let resolveInspection;const deferred=new Promise(resolve=>{resolveInspection=resolve;});
+  const late=harness({operations:[uncertainEdit],inspection:deferred});await late.commands.get('agentflow.open')();const lateView=late.views[0];lateView.receive({type:'ready'});
+  await until(()=>lateView.posted.some(message=>message.type==='transcript'));
+  lateView.receive({type:'inspect-edit',id:'edit'});await until(()=>late.requests.includes('/v1/operations/edit/inspection'));
+  lateView.receive({type:'select',id:'saved'});resolveInspection(inspectionFixture);
+  await until(()=>late.requests.filter(route=>route==='/v1/sessions/saved/history').length>=3);
+  assert.ok(!lateView.posted.some(message=>message.type==='edit-inspection'));assert.equal(late.decisions.length,0);lateView.close();
+});
 test('only a reviewed pending operation can be decided and payload stays backend-owned',async()=>{
   const h=harness({running:true,operations:[pendingEdit]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
   await until(()=>view.posted.some(message=>message.type==='operations' && message.operations.length));

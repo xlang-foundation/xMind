@@ -239,6 +239,18 @@ async function activate(context) {
           const link = new URL(message.url);
           if (!['https:','http:'].includes(link.protocol)) throw new Error('Only HTTP/HTTPS links can be opened.');
           await vscode.env.openExternal(vscode.Uri.parse(link.href));
+        } else if (message.type === 'inspect-edit' && typeof message.id === 'string') {
+          if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before inspecting an edit.');
+          const proposal=reviewed.get(message.id);
+          if(!proposal || proposal.run_id!==runId || proposal.state!=='uncertain' || proposal.tool!=='replace_file') throw new Error('Select a recorded uncertain file edit before inspecting.');
+          const version=generation;
+          const inspection=await client.inspectEdit(proposal.id);
+          if(panel!==view || version!==generation) return;
+          const current=inspection.operation,observed=inspection.observed;
+          if(!current || current.id!==proposal.id || current.state!=='uncertain' || current.run_id!==proposal.run_id || current.workspace_id!==proposal.workspace_id || current.tool!==proposal.tool || current.arguments_json!==proposal.arguments_json || current.expires_unix_ms!==proposal.expires_unix_ms ||
+             !observed || observed.workspace_id!==proposal.workspace_id || typeof observed.path!=='string' || typeof observed.file_id!=='string' || !/^[a-f0-9]{64}$/.test(observed.content_sha256) || !Number.isSafeInteger(observed.size) || observed.size<0 || observed.size>1048576 ||
+             !['before','after','different'].includes(inspection.match) || typeof inspection.same_file!=='boolean' || (!inspection.same_file && inspection.match!=='different') || !Number.isSafeInteger(inspection.observed_unix_ms) || inspection.observed_unix_ms<=0 || inspection.observed_unix_ms>8640000000000000 || inspection.quarantine_released!==false) throw new Error('The inspection does not match the selected uncertain edit. Refresh its current state.');
+          post({type:'edit-inspection',id:proposal.id,inspection});
         } else if (['decide','review'].includes(message.type) && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before deciding an operation.');
           if (message.type === 'decide' && message.decision !== 'allow' && message.decision !== 'deny') throw new Error('Decision must be allow or deny.');

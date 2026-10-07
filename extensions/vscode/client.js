@@ -50,6 +50,7 @@ class BackendClient {
   cancel(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/cancel`, {}); }
   operations(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/operations`); }
   operation(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}`); }
+  inspectEdit(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/inspection`); }
   decide(id, decision) {
     if (decision !== 'allow' && decision !== 'deny') throw new Error('Decision must be allow or deny.');
     return this.request(`/v1/operations/${encodeURIComponent(id)}/decision`, { decision });

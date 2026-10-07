@@ -1,6 +1,7 @@
 'use strict';
 const api=acquireVsCodeApi(),byId=id=>document.getElementById(id);
 let execution=false,activeRun=false,live,streamText='',streamUsage=null;
+const operationSections=new Map();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
 function markdown(el,text){
   el.innerHTML=DOMPurify.sanitize(marked.parse(text||'',{gfm:true,breaks:false}),{FORBID_TAGS:['style','iframe','form','input','button'],FORBID_ATTR:['style'],ALLOW_DATA_ATTR:false});
@@ -34,11 +35,27 @@ window.addEventListener('message',({data:m})=>{
   else if(m.type==='draft')byId('prompt').value=m.text;
   else if(m.type==='event'){const event=m.event;byId('events').textContent+=JSON.stringify(event)+'\n';if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
   else if(m.type==='operations'){
+    operationSections.clear();
     operations(m.operations);
+    for(const [index,item] of m.operations.entries())if(item.tool==='replace_file'&&item.state==='uncertain'){
+      const section=byId('operations').children[index];operationSections.set(item.id,section);
+      section.append(node('p','This edit is uncertain. Further edits in this workspace remain blocked.','inspection-note'));
+      const button=node('button','Inspect actual file');button.onclick=()=>api.postMessage({type:'inspect-edit',id:item.id});section.append(button);
+    }
     for(const [index,item] of m.operations.entries())if(item.tool==='replace_file'&&item.state==='awaiting_approval'){
       const button=node('button','Compare changes');button.disabled=Date.now()>=item.expires_unix_ms;
       button.onclick=()=>api.postMessage({type:'review',id:item.id});
       byId('operations').children[index].append(button);
+    }
+  }
+  else if(m.type==='edit-inspection'){
+    const section=operationSections.get(m.id);if(section){
+      section.querySelector('.edit-inspection')?.remove();
+      const detail=node('div',undefined,'edit-inspection'),value=m.inspection;
+      const labels={before:'Matches recorded before state',after:'Matches recorded after state',different:'Differs from the recorded states'};
+      detail.append(node('strong',labels[value.match]||'Inspection unavailable'),node('p','Observation only. The outcome remains uncertain and the workspace stays blocked.','inspection-note'));
+      detail.append(node('pre','Observed: '+new Date(value.observed_unix_ms).toISOString()+'\nPath: '+value.observed.path+'\nSame file identity: '+(value.same_file?'yes':'no')+'\nSize: '+value.observed.size+' bytes\nSHA-256: '+value.observed.content_sha256));
+      section.append(detail);
     }
   }
   else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);byId('send').disabled=!execution||activeRun;byId('cancel').hidden=!activeRun;}
