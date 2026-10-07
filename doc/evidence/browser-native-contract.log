@@ -1,1 +1,1 @@
-Browser view/native contract passed same-origin/auth/route boundaries, real graph admission and file output, human pause/input, gateway disconnect without runtime cancellation and reconnect without replay. No provider or model was simulated.
+Browser view/native contract passed same-origin/auth/route boundaries, HttpOnly browser-session enrollment/reload/revocation, real graph admission and file output, human pause/input, gateway disconnect without runtime cancellation and reconnect without replay. No provider or model was simulated.

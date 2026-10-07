@@ -13,7 +13,9 @@ node views/browser/build.mjs
 node Tools/start-browser.mjs --port 60405
 ```
 
-The launcher creates a dedicated `.agentflow/browser-ui` profile and runtime snapshot, preserving the existing VS Code previews. Its private `auth.token` authenticates the browser to that native server. Enter that token in Connect; provider API keys belong in the top-right Settings dialog afterward. The server token stays in browser memory, so reloading requires connecting again. Only selected session/run/model/workflow IDs are saved in sessionStorage; keys and conversation content are not stored there.
+The launcher creates a dedicated `.agentflow/browser-ui` profile and runtime snapshot, preserving the existing VS Code previews. Its private `auth.token` authenticates the browser to that native server. Enter that token once in Connect; provider API keys belong in the top-right Settings dialog afterward. The access adapter validates the token against the native server and issues a random HttpOnly, SameSite=Strict browser-session cookie. The native token stays in the adapter's memory; JavaScript does not retain it. Reload automatically reconnects with that session. Sessions expire after eight hours, browser close or adapter restart; Disconnect revokes the session without cancelling native execution. Only selected session/run/model/workflow IDs are saved in sessionStorage; keys and conversation content are not stored there.
+
+Cookie authentication requires browser same-origin fetch metadata, while session enrollment and revocation also require the exact view Origin. Cross-origin requests remain rejected. Session identifiers are not accepted in URLs. There is a 32-session limit and bounded session-request bodies. This cookie is for the loopback HTTP development transport; remote access still requires a separately designed HTTPS/team authentication adapter.
 
 Settings supports provider enrollment and model discovery through the native API. This browser profile starts without a provider key. The existing VS Code preview's saved key is not copied. Live model inference in this browser profile has not been verified.
 
