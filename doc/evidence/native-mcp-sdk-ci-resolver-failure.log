@@ -1,0 +1,12 @@
+2026-10-07T12:17:47.4805624Z [31;1mci-native.ps1: [0mD:\a\_temp\1e965c8e-c0b1-46c2-ba20-f1c1c754b92f.ps1:2[0m
+2026-10-07T12:17:47.4806661Z [31;1m[0m[36;1mLine |[0m
+2026-10-07T12:17:47.4807978Z [31;1m[0m[36;1m[36;1m   2 | [0m [36;1m./xmind/Tools/ci-native.ps1 -RuntimeSource ./xlang3 -StdlibSource ./s[0m …[0m
+2026-10-07T12:17:47.4809061Z [31;1m[0m[36;1m[36;1m[0m[36;1m[0m[36;1m     | [31;1m ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+2026-10-07T12:17:47.4810362Z [31;1m[0m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m     | [31;1mThe term 'C:\hostedtoolcache\windows\node\22.23.3\x64\npm.cmd C:\Program Files\nodejs\npm.cmd' is not recognized[0m
+2026-10-07T12:17:47.4811885Z [31;1m[0m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m[31;1m[36;1m     | [31;1mas a name of a cmdlet, function, script file, or executable program. Check the spelling of the name, or if a[0m
+2026-10-07T12:17:47.4813283Z [31;1m[0m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m[31;1m[36;1m[31;1m[36;1m     | [31;1mpath was included, verify that the path is correct and try again.[0m
+2026-10-07T12:17:47.5051932Z ##[error]Process completed with exit code 1.
+2026-10-07T12:17:47.5330147Z ##[group]Run actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+2026-10-07T12:17:47.5330711Z with:
+2026-10-07T12:17:47.5331112Z   name: native-windows-evidence-bbeb4db077adcb5cbb86c9e91d3d3fe199886e0f
+2026-10-07T12:17:47.5331928Z   path: xmind/build/ci-evidence/
