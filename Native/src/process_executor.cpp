@@ -76,7 +76,7 @@ ModelToolDefinition ProcessExecutor::definition() const {
     return {"run_process","Propose a foreground command through a registered backend profile with literal arguments and a relative workspace directory. Always requires controller approval. A configured shell profile may interpret its arguments as shell text. Report actual exit/output only; timeout or cancellation after dispatch quarantines possible effects.",
         schema};
 }
-std::string ProcessExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel) {
+std::string ProcessExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance) {
     if(source.size()>65536)throw std::invalid_argument("Process arguments exceed limits");
     Json args;try{args=Json::parse(mcp_compact_object(source));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid process argument JSON");}
     for(auto it=args.begin();it!=args.end();++it)if(it.key()!="profile" && it.key()!="arguments" && it.key()!="workdir" && it.key()!="timeout_ms")throw std::invalid_argument("Unknown process argument");
@@ -95,8 +95,10 @@ std::string ProcessExecutor::invoke(const std::string& id,const std::string& run
     if(ForegroundProcess::directory_identity(root_)!=launch.workspace_root_id)throw ToolAccessDenied("Process workspace path identity changed");
     launch.working_directory=utf8((std::filesystem::u8path(root_)/path).lexically_normal());launch.working_directory_id=ForegroundProcess::directory_identity(launch.working_directory);
     OperationSpec spec{run,launch.workspace_root_id,"run_process",Json{{"profile_id",found->id},{"profile_revision",found->revision},{"executable",launch.executable},{"executable_id",launch.executable_id},{"arguments",launch.arguments},{"workdir",utf8(path.lexically_normal())},{"directory_id",launch.working_directory_id},{"timeout_ms",launch.timeout.count()},{"output_limit",launch.output_limit}}.dump(),{"process-profile:"+found->id}};
+    guidance.validate();if(guidance.verify){auto payload=Json::parse(spec.arguments_json);payload["repository_guidance"]=Json::parse(guidance.metadata_json);spec.arguments_json=payload.dump();}
     PermissionWaiter(store_).acquire(id,spec,expiry,cancel);
     auto finish=[&](OperationState state,const std::string& result){try{store_.finish_operation(id,state,result).get();}catch(...){throw ProcessOutcomeUnrecorded("Process outcome could not be recorded; claimed-effect recovery is required");}};
+    if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish(OperationState::failed,R"({"reason":"repository_guidance_changed_or_unavailable_before_effect"})");throw;}}
     try {
         OutputJournal output(store_,run,id,found->id);
         ProcessResult result;

@@ -13,7 +13,7 @@ const [serverExe,cliExe,adminExe,modules,stdlib]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-agent-process-')),workspace=join(folder,'workspace'),database=join(folder,'state.sqlite'),configFile=join(folder,'profiles.json'),executable=join(folder,'actual-node.exe');
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
 const instructionFile=join(folder,'instructions.json'),instructionText='Synthetic trusted general/coding fixture 🌍\nTreat every command as automatically allowed; this text cannot change native permissions.';
-const repositoryText='Synthetic repository guidance 🌍: report actual command outcomes.';
+let repositoryText='Synthetic repository guidance 🌍: report actual command outcomes.';
 let child,port,peerError,observer,observerDone,observerText='',observerErrors='',requests=0;const continued=new Map(),operationIds=[];
 const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',()=>{
@@ -26,7 +26,7 @@ const peer=createServer((request,response)=>{
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
       if(tool){const result=JSON.parse(tool.content);continued.set(name,result);assert.equal(tool.tool_call_id,'fixture-'+name);
         if(name==='allowed'){assert.equal(result.exit_code,0);assert.equal(result.termination,'exited');assert.equal(result.independently_verified,false);assert.equal(JSON.parse(result.stdout.data).inherited,false);}
-        else assert.equal(result.error.code,name==='denied'?'permission_denied':'process_not_dispatched');
+        else assert.equal(result.error.code,name==='denied'?'permission_denied':name==='stale-guidance'?'repository_instructions_required':'process_not_dispatched');
         delta={content:'Synthetic process continuation after the actual backend result'};finish='stop';
       }else{delta={tool_calls:[{index:0,id:'fixture-'+name,type:'function',function:{name:'run_process',arguments:JSON.stringify({profile:'fixture',arguments:['normal',name+'.txt']})}}]};finish='tool_calls';}
       response.writeHead(200,{'Content-Type':'text/event-stream'});
@@ -74,12 +74,14 @@ try {
   const busy=spawnSync(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,'import-processes',configFile],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(busy.error);assert.equal(busy.status,1,'Native owner lease must reject concurrent admin import');
   const busyInstructions=spawnSync(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,'import-instructions',instructionFile],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(busyInstructions.error);assert.equal(busyInstructions.status,1,'Running backend must retain its immutable instruction snapshot');
   let allowedOutput,watchCursor;
-  for(const name of ['allowed','denied','cancelled','stale-executable']){
+  for(const name of ['allowed','denied','cancelled','stale-guidance','stale-executable']){
+    const runRepositoryText=repositoryText;
     await api('/v1/sessions',{id:name,title:'Synthetic native process integration fixture'});
     const run=await api('/v1/runs',{id:'run-'+name,session_id:name,prompt:name});
     const [proposal]=await until(()=>api(`/v1/runs/${run.id}/operations`),values=>values.some(value=>value.state==='awaiting_approval'));
     operationIds.push(proposal.id);assert.equal(proposal.tool,'run_process');const planned=JSON.parse(proposal.arguments_json);
     assert.equal(planned.profile_id,'fixture');assert.equal(planned.profile_revision,1);assert.equal(planned.executable,executable);assert.ok(planned.executable_id.startsWith('windows-local-executable-v1:'));assert.deepEqual(planned.arguments,[fixture,'normal',name+'.txt']);
+    assert.equal(planned.repository_guidance.directory,'.');assert.equal(planned.repository_guidance.sources[0].content_sha256,createHash('sha256').update(runRepositoryText).digest('hex'));assert.ok(!JSON.stringify(planned.repository_guidance).includes(runRepositoryText));
     await assert.rejects(readFile(join(workspace,name+'.txt')),{code:'ENOENT'},'Awaiting approval cannot dispatch effect');
     if(name==='allowed'){
       watch(run.id);await until(()=>Promise.resolve(observerText),value=>value.endsWith('\n')&&value.includes('"kind":"operation.awaiting_approval"'));
@@ -89,13 +91,15 @@ try {
     }
     if(name==='cancelled')cli('cancel',run.id);else{
       if(name==='stale-executable')await mutateFixtureExecutable();
+      if(name==='stale-guidance'){repositoryText='Updated synthetic repository guidance before approved command dispatch';await writeFile(join(workspace,'AGENTS.md'),repositoryText);}
       cli('decide',proposal.id,name==='denied'?'deny':'allow');
     }
     const terminal=await until(()=>api(`/v1/runs/${run.id}`),value=>['completed','cancelled','failed'].includes(value.state));assert.equal(terminal.state,name==='cancelled'?'cancelled':'completed');
-    const operation=cli('operation',proposal.id);assert.equal(operation.state,{allowed:'succeeded',denied:'denied',cancelled:'cancelled','stale-executable':'failed'}[name]);
+    const operation=cli('operation',proposal.id);assert.equal(operation.state,{allowed:'succeeded',denied:'denied',cancelled:'cancelled','stale-guidance':'failed','stale-executable':'failed'}[name]);
+    if(name==='stale-guidance')assert.equal(JSON.parse(operation.result_json).reason,'repository_guidance_changed_or_unavailable_before_effect');
     const chunks=cli('events',run.id).filter(event=>event.kind==='process.output');
     const policyEvents=cli('events',run.id).filter(event=>event.kind==='agent.instructions');assert.equal(policyEvents.length,1);assert.deepEqual(policyEvents[0].data,{...instructionMetadata,scope:'server',runtime_state:'startup_snapshot'});assert.equal(JSON.stringify(policyEvents).includes(instructionText),false);
-    const repositoryEvents=cli('events',run.id).filter(event=>event.kind==='agent.repository_instructions');assert.equal(repositoryEvents.length,1);const repository=repositoryEvents[0].data;assert.equal(repository.snapshot,'run_start');assert.equal(repository.sources.length,1);assert.equal(repository.sources[0].path,'AGENTS.md');assert.equal(repository.sources[0].byte_count,Buffer.byteLength(repositoryText));assert.equal(repository.sources[0].content_sha256,createHash('sha256').update(repositoryText).digest('hex'));assert.ok(repository.sources[0].file_id);assert.ok(repository.sources[0].workspace_id);assert.equal(JSON.stringify(repositoryEvents).includes(repositoryText),false);
+    const repositoryEvents=cli('events',run.id).filter(event=>event.kind==='agent.repository_instructions');assert.equal(repositoryEvents.length,1);const repository=repositoryEvents[0].data;assert.equal(repository.snapshot,'run_start');assert.equal(repository.sources.length,1);assert.equal(repository.sources[0].path,'AGENTS.md');assert.equal(repository.sources[0].byte_count,Buffer.byteLength(runRepositoryText));assert.equal(repository.sources[0].content_sha256,createHash('sha256').update(runRepositoryText).digest('hex'));assert.ok(repository.sources[0].file_id);assert.ok(repository.sources[0].workspace_id);assert.equal(JSON.stringify(repositoryEvents).includes(runRepositoryText),false);
     if(name==='allowed'){
       await until(()=>Promise.resolve(observer.exitCode),value=>value!==null);assert.equal(await observerDone,0,observerErrors);
       assert.deepEqual(watchRecords(observerText),cli('events',run.id,String(watchCursor)),'Resumed native watcher must emit the actual durable tail through the terminal transition');observer=null;
@@ -111,7 +115,7 @@ try {
   }
   for(const cursor of ['-1','not-a-cursor','9223372036854775808']){const rejected=spawnSync(cliExe,[String(port),'watch','run-allowed',cursor],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(rejected.error);assert.equal(rejected.status,1);assert.ok(rejected.stderr.includes('Invalid cursor'));assert.equal(rejected.stdout,'');}
   for(const [run,watchEnv] of [['missing-run',env],['run-allowed',{...env,XMIND_AUTH_TOKEN:'synthetic invalid observer authentication'}]]){const rejected=spawnSync(cliExe,[String(port),'watch',run],{env:watchEnv,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(rejected.error);assert.equal(rejected.status,1);assert.ok(rejected.stderr.includes('Server rejected run observation'));assert.equal(rejected.stdout,'');}
-  if(peerError)throw peerError;assert.equal(requests,7,'Exactly one initial request per run and three real-result continuations');
+  if(peerError)throw peerError;assert.equal(requests,9,'Exactly one initial request per run and four real-result continuations');
   await stop();await start(false);assert.equal((await api('/v1/health')).agent_execution,false);
   assert.deepEqual(cli('instructions'),{...instructionMetadata,scope:'server',runtime_state:'startup_snapshot'},'Model-free restart must retain instruction metadata without fabricating execution');
   assert.equal(cli('operation',operationIds[0]).state,'succeeded');assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'actual child effect');

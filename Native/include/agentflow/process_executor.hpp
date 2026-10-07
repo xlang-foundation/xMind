@@ -2,6 +2,7 @@
 #include "agentflow/process.hpp"
 #include "agentflow/permission_waiter.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include "agentflow/instruction_precondition.hpp"
 
 namespace agentflow {
 struct ProcessOutcomeUnrecorded : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -22,7 +23,7 @@ public:
         std::string workspace_root,std::vector<ProcessProfile> profiles);
     ModelToolDefinition definition() const;
     std::string invoke(const std::string& operation_id,const std::string& run_id,
-        const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={});
+        const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={});
 private:
     PersistenceService& store_;
     WorkspaceTools& workspace_;

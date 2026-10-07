@@ -8,6 +8,7 @@ struct ToolAccessDenied : std::runtime_error {using std::runtime_error::runtime_
 struct ToolFileError : std::runtime_error {using std::runtime_error::runtime_error;};
 struct ToolCancelled : std::runtime_error {using std::runtime_error::runtime_error;};
 struct ToolContentConflict : std::runtime_error {using std::runtime_error::runtime_error;};
+struct ToolGuidanceChanged : ToolContentConflict {using ToolContentConflict::ToolContentConflict;};
 struct ToolMutationUncertain : std::runtime_error {using std::runtime_error::runtime_error;};
 struct WorkspaceFile {std::string path,content;};
 struct WorkspaceSnapshot {

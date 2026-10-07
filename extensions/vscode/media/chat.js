@@ -10,6 +10,7 @@ function markdown(el,text){
   for(const block of el.querySelectorAll('pre')){const button=node('button','Copy code','copy-code');button.onclick=()=>api.postMessage({type:'copy',text:block.querySelector('code')?.textContent||block.textContent});block.after(button);}
 }
 const count=value=>Number.isSafeInteger(value)&&value>=0?value.toLocaleString():'—';
+const guidanceLiteral=value=>value.replace(/[\u0000-\u001f\u007f]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));
 function metrics(el,data={}){const usage=data.usage||{};el.replaceChildren();for(const text of ['Input '+count(usage.prompt_tokens),'Output '+count(usage.completion_tokens),'Total '+count(usage.total_tokens)])el.append(node('span',text));if(Number.isSafeInteger(usage.prompt_tokens_details?.cached_tokens))el.append(node('span','Cached '+count(usage.prompt_tokens_details.cached_tokens)));if(Number.isSafeInteger(usage.completion_tokens_details?.reasoning_tokens))el.append(node('span','Reasoning '+count(usage.completion_tokens_details.reasoning_tokens)));if(data.model)el.append(node('span',data.model));if(Number.isFinite(data.first_token_ms)&&data.first_token_ms>=0)el.append(node('span','First token '+(data.first_token_ms/1000).toFixed(2)+'s'));if(Number.isFinite(data.elapsed_ms)&&data.elapsed_ms>=0)el.append(node('span',(data.elapsed_ms/1000).toFixed(2)+'s'));el.title='Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.';}
 function processProposal(section,item){
   let plan;try{plan=JSON.parse(item.arguments_json);}catch{}
@@ -89,6 +90,21 @@ function operations(items){
     let reviewable=true;
     if(item.tool==='run_process')reviewable=processProposal(section,item);
     if(['replace_file','create_file'].includes(item.tool)){try{const plan=JSON.parse(item.arguments_json);section.append(node('strong',plan.path));for(const [label,key] of [['Before','before_content'],['After','after_content']])section.append(node('div',label),node('pre',plan[key],label.toLowerCase()));}catch{}}
+    if(['replace_file','create_file','run_process'].includes(item.tool)){
+      try{
+        const guidance=JSON.parse(item.arguments_json).repository_guidance;
+        if(guidance!==undefined){
+          if(!guidance || guidance.version!==1 || typeof guidance.directory!=='string' || !guidance.directory || guidance.directory.length>4096 || !Array.isArray(guidance.sources) || guidance.sources.length>33)throw new Error('Malformed guidance binding');
+          const lines=['Directory: '+guidanceLiteral(guidance.directory)];
+          for(const source of guidance.sources){
+            if(!source || typeof source.path!=='string' || !source.path || source.path.length>8192 || typeof source.file_id!=='string' || !source.file_id || typeof source.workspace_id!=='string' || !source.workspace_id || typeof source.content_sha256!=='string' || !/^[a-f0-9]{64}$/.test(source.content_sha256) || !Number.isSafeInteger(source.byte_count) || source.byte_count<0 || source.byte_count>16384)throw new Error('Malformed guidance source');
+            lines.push(guidanceLiteral(source.path)+' · '+source.byte_count+' bytes\nSHA-256: '+source.content_sha256);
+          }
+          if(!guidance.sources.length)lines.push('No AGENTS.md sources in this scope at proposal time.');
+          const detail=node('details',undefined,'guidance-binding');detail.append(node('summary','Repository guidance bound to approval'),node('pre',lines.join('\n\n')),node('p','The backend rechecks after approval. A mismatch retires this proposal without dispatch; a new call requires a new approval.'));section.append(detail);
+        }
+      }catch{reviewable=false;section.append(node('p','Repository guidance binding is malformed. Allow is unavailable; inspect the recorded operation.','inspection-note'));}
+    }
     if(item.state==='awaiting_approval'){
       for(const decision of ['allow','deny']){
         const labels={replace_file:'Allow edit',create_file:'Allow creation',run_process:'Allow command'};

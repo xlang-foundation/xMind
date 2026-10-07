@@ -26,13 +26,16 @@ int main(int argc,char** argv) {
             const auto initial=context.prepare();require(context.ready("."),"Root guidance must be delivered");
             require(!context.ready("src"),"New nested guidance must defer dispatch");require(!context.ready("src"),"Same model-response batch must still defer dispatch");
             const auto updated=context.prepare();require(updated!=initial && context.ready("src"),"Next provider context must contain scoped guidance");
+            const auto guard=context.precondition("src");guard.verify({});require(guard.metadata_json.find("Synthetic src guidance")==std::string::npos,"Proposal metadata must not archive source text");
             require(RepositoryInstructionContext::file_directory("src/deep/file.txt")=="src/deep","File scope must use its parent");
             rejects<ToolAccessDenied>([&]{RepositoryInstructionContext::file_directory("src/../outside.txt");});
             {std::ofstream output(std::filesystem::path(argv[2])/"src"/"AGENTS.md",std::ios::binary|std::ios::trunc);output<<"Changed guidance after provider request";require(bool(output),"Context fixture update failed");}
             require(!context.ready("src"),"Changed guidance must defer dispatch again");require(!context.ready("src"),"Changed guidance cannot become ready in the same batch");
+            rejects<ToolGuidanceChanged>([&]{guard.verify({});});
             require(context.prepare().find("Changed guidance after provider request")!=std::string::npos && context.ready("src"),"Fresh bytes must reach the next provider context");
             std::filesystem::remove(std::filesystem::path(argv[2])/"src"/"AGENTS.md");require(!context.ready("src"),"Deleted guidance must defer dispatch");
             context.prepare();require(context.ready("src"),"Removal must be delivered before proceeding");require(context.metadata().find("Changed guidance")==std::string::npos,"Metadata must not contain source text");
+            const auto absent=context.precondition("src");{std::ofstream output(std::filesystem::path(argv[2])/"src"/"AGENTS.md");output<<"Added guidance after proposal";}rejects<ToolGuidanceChanged>([&]{absent.verify({});});
             std::cout<<"Native scope delivery state passed on actual changed/deleted files; no model or effect invoked\n";return 0;
         }
         if(std::string(argv[1])=="--identity") {WorkspaceTools tools(argv[2]);std::cout<<tools.identity()<<'\n';return 0;}

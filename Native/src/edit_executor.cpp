@@ -27,7 +27,7 @@ EditRecoveryInspection EditExecutor::inspect_uncertain(const std::string& id,std
 ModelToolDefinition EditExecutor::definition() {
     return {"edit_file","Propose an exact literal replacement in a UTF-8 workspace file. Always waits for controller approval; stale files are rejected. Report only the returned actual outcome.",R"({"type":"object","properties":{"path":{"type":"string"},"old_text":{"type":"string","minLength":1},"new_text":{"type":"string"},"expected_occurrences":{"type":"integer","minimum":1,"maximum":1024}},"required":["path","old_text","new_text"],"additionalProperties":false})"};
 }
-std::string EditExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel) {
+std::string EditExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance) {
     using Json=nlohmann::json;
     if(source.size()>65536) throw std::invalid_argument("Edit arguments exceed limits");
     Json args;std::vector<std::set<std::string>> fields;
@@ -46,11 +46,11 @@ std::string EditExecutor::invoke(const std::string& id,const std::string& run,co
         if(!number.is_number_integer() || number<1 || number>1024) throw std::invalid_argument("Invalid edit occurrence count");count=number.get<std::size_t>();
     }
     auto plan=workspace_.plan_replacement(args["path"].get<std::string>(),args["old_text"].get<std::string>(),args["new_text"].get<std::string>(),count,cancel);
-    const auto actual=execute(id,run,std::move(plan),expiry,cancel);
+    const auto actual=execute(id,run,std::move(plan),expiry,cancel,std::move(guidance));
     return Json{{"operation_id",id},{"path",actual.path},{"file_id",actual.file_id},{"content_sha256",actual.content_sha256},{"size",actual.content.size()}}.dump();
 }
 WorkspaceSnapshot EditExecutor::execute(const std::string& id,const std::string& run,
-    WorkspaceEditPlan plan,std::int64_t expiry,std::stop_token cancel) {
+    WorkspaceEditPlan plan,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance) {
     using Json=nlohmann::json;
     const auto workspace=workspace_.identity();
     if(plan.before.workspace_id!=workspace) throw ToolAccessDenied("Edit proposal belongs to another workspace");
@@ -61,12 +61,14 @@ WorkspaceSnapshot EditExecutor::execute(const std::string& id,const std::string&
         {"before_content",plan.before.content},{"before_sha256",plan.before.content_sha256},
         {"after_content",plan.after_content},{"after_sha256",plan.after_sha256},
         {"replaced_occurrences",plan.replaced_occurrences}}.dump()};
+    guidance.validate();if(guidance.verify){auto payload=Json::parse(spec.arguments_json);payload["repository_guidance"]=Json::parse(guidance.metadata_json);spec.arguments_json=payload.dump();}
     PermissionWaiter(store_).acquire(id,spec,expiry,cancel);
     auto finish=[&](OperationState outcome,const std::string& result) {
         try {store_.finish_operation(id,outcome,result).get();}
         catch(...) {throw EditOutcomeUnrecorded("Edit outcome could not be recorded; stop execution and recover the claimed operation");}
     };
     WorkspaceSnapshot actual;
+    if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish(OperationState::failed,R"({"reason":"repository_guidance_changed_or_unavailable_before_effect"})");throw;}}
     try {actual=workspace_.apply_plan(plan,cancel);}
     catch(const ToolMutationUncertain&) {finish(OperationState::uncertain,R"({"reason":"file_effect_uncertain"})");throw;}
     catch(const ToolContentConflict&) {finish(OperationState::failed,R"({"reason":"stale_edit_precondition"})");throw;}

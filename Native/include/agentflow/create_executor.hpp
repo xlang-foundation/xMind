@@ -6,8 +6,8 @@ class CreateExecutor {
 public:
     CreateExecutor(PersistenceService& store,WorkspaceTools& workspace):store_(store),workspace_(workspace){}
     static ModelToolDefinition definition();
-    std::string invoke(const std::string& operation_id,const std::string& run_id,const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={});
-    WorkspaceSnapshot execute(const std::string& operation_id,const std::string& run_id,WorkspaceCreatePlan plan,std::int64_t expires_unix_ms,std::stop_token cancel={});
+    std::string invoke(const std::string& operation_id,const std::string& run_id,const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={});
+    WorkspaceSnapshot execute(const std::string& operation_id,const std::string& run_id,WorkspaceCreatePlan plan,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={});
 private:
     PersistenceService& store_;WorkspaceTools& workspace_;
 };

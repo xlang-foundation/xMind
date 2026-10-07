@@ -47,6 +47,18 @@ bool RepositoryInstructionContext::ready(const std::string& input,std::stop_toke
     if(!delivered_.contains(directory) && delivered_.contains(".") && same(delivered_.at("."),current))return true;
     auto candidate=requested_;candidate[directory]=std::move(current);render(candidate);requested_=std::move(candidate);return false;
 }
+InstructionPrecondition RepositoryInstructionContext::precondition(const std::string& input) {
+    using Json=nlohmann::json;const auto directory=normalized_directory(input);
+    const auto found=delivered_.find(directory);const auto root=delivered_.find(".");
+    if(found==delivered_.end() && root==delivered_.end())throw std::logic_error("No delivered repository guidance");
+    const auto expected=found==delivered_.end()?root->second:found->second;
+    auto sources=Json::array();for(const auto& file:expected)sources.push_back({{"path",file.path},{"workspace_id",file.workspace_id},{"file_id",file.file_id},{"content_sha256",file.content_sha256},{"byte_count",file.content.size()}});
+    auto* workspace=&workspace_;
+    InstructionPrecondition result{Json{{"version",1},{"directory",directory},{"sources",std::move(sources)}}.dump(),[workspace,directory,expected](std::stop_token cancel){
+        if(!same(expected,workspace->repository_instructions(directory,cancel)))throw ToolGuidanceChanged("Repository guidance changed after proposal; effect was not dispatched");
+    }};
+    result.validate();auto candidate=requested_;candidate[directory]=expected;render(candidate);requested_=std::move(candidate);return result;
+}
 std::string RepositoryInstructionContext::file_directory(const std::string& input){
     // Validate the whole spelling before dropping the final component.
     const auto normalized=normalized_directory(input);const auto parent=std::filesystem::u8path(normalized).parent_path().generic_u8string();

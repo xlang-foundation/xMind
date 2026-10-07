@@ -1,0 +1,17 @@
+{
+  "scope": "Local Release build: all 37 actual native contracts; all 41 extension contracts; inference and DOM/host peers synthetic; no live/populated preview acceptance",
+  "runtime_source_checkout": "914783909835116969aad7c66b210a5ac9a27661",
+  "source_native_git_tree": "3dfe9e058821c6f5f9a70585c35f378a8adb8886",
+  "runtime": "Embedded xlang3; no CPython execution or bridge",
+  "source_vscode_git_tree": "d4dc485022c1d2649c75c8088e48c8ef5ce40002",
+  "binary_sha256": {
+    "build/native/Release/agentflow_workspace_tools_contract.exe": "E1F9D8C039AAFBD6C771D58B62C2E6C16EBAFC0BBA81C745BBD52B0D3D6DCC36",
+    "D:/CantorAI2026/xlang3/build/Release/modules/xlang_json.x3pkg.dll": "4ECC67D674BB48D2C9C8A9FBF5A934F66619739F4E8CE3649545078FEE8DEF8A",
+    "build/native/Release/xmind_server.exe": "8AB83EC020A3E3492C469C6C1EC628B7D1D0B9DBD57FB1EB8BCE97351AD37BE6",
+    "build/native/Release/xmind_admin.exe": "D0D867752DA7C1FA6D6AB36CD3C6512D0C0FF616D933C71D9232F97E6AFAD6C5",
+    "build/native/Release/xmind_cli.exe": "17F2322E90639C399DBDDC28A93EE2EE0BB900CA604CC0BE6BCC7E0A90492E04",
+    "build/native/Release/xlang3_runtime.dll": "FB02403BFF1BF9967D5E49CB4F2A5A4F6D13AD139CC02B069E20FC03CC6C4862",
+    "D:/CantorAI2026/xlang3/build/Release/modules/xlang_sqlite3.x3pkg.dll": "FCB0E481352672EB72D86A96E2EF5D9B58939A35AD03A4AC3E32BFE7DC733B8C"
+  },
+  "installed_preview": "Earlier isolated-CI source 3297a4bce2d591c0f1c1dd37ccc18a15297369e7 remains running"
+}

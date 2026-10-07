@@ -61,6 +61,15 @@ test('command approval reviews literal arguments before sending only a decision 
   const allow=[...section.querySelectorAll('button')].find(button=>button.textContent==='Allow command');allow.click();
   assert.equal(JSON.stringify(r.posted.at(-1)),JSON.stringify({type:'decide',id:operation.id,decision:'allow'}));assert.ok([...section.querySelectorAll('button')].every(button=>button.disabled));r.dom.window.close();
 });
+test('approval displays bound guidance hashes and rejects malformed source metadata',()=>{
+  const r=renderer(),doc=r.dom.window.document,operation=processProposalFixture(),plan=JSON.parse(operation.arguments_json);
+  const source={path:'src/<script>fixtureAttack()</script>\u001bAGENTS.md',workspace_id:'fixture-root',file_id:'fixture-file',content_sha256:'a'.repeat(64),byte_count:17};
+  plan.repository_guidance={version:1,directory:'src',sources:[source]};operation.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[operation]});
+  const detail=doc.querySelector('.guidance-binding');assert.ok(detail);assert.ok(detail.textContent.includes(source.content_sha256));assert.ok(detail.textContent.includes('17 bytes'));assert.ok(detail.textContent.includes('\\u001b'));assert.equal(detail.querySelector('script'),null);assert.equal(r.dom.window.fixtureAttack,undefined);
+  let allow=[...doc.querySelectorAll('#operations button')].find(x=>x.textContent==='Allow command');assert.equal(allow.disabled,false);assert.ok(detail.textContent.includes('a new approval'));
+  for(const bad of [{...source,content_sha256:'not-a-hash'},{...source,byte_count:16385},{...source,file_id:''},null]){plan.repository_guidance.sources=[bad];operation.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[operation]});allow=[...doc.querySelectorAll('#operations button')].find(x=>x.textContent==='Allow command');assert.equal(allow.disabled,true);assert.ok(doc.querySelector('#operations').textContent.includes('binding is malformed'));}
+  plan.repository_guidance.sources=[];operation.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[operation]});assert.ok(doc.querySelector('.guidance-binding').textContent.includes('No AGENTS.md sources'));allow=[...doc.querySelectorAll('#operations button')].find(x=>x.textContent==='Allow command');assert.equal(allow.disabled,false);r.dom.window.close();
+});
 
 test('malformed or expired command proposals cannot be allowed',()=>{
   const r=renderer(),doc=r.dom.window.document,operation=processProposalFixture();
