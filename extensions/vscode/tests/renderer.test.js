@@ -9,6 +9,22 @@ function renderer(){
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+test('run detail selector preserves conversation history and blocks submission while another run is active',()=>{
+  const r=renderer(),doc=r.dom.window.document;
+  r.send({type:'capabilities',execution:true,models:[{id:'fixture-model'}],model:'fixture-model'});
+  r.send({type:'history',history:[{role:'assistant',data:{content:'Existing fixture history'}}]});
+  r.send({type:'runs',runs:[{id:'older',state:'failed'},{id:'latest',state:'running'}],selected:'older',busy:true});
+  r.send({type:'status',text:'failed'});
+  r.send({type:'capabilities',execution:true,models:[{id:'fixture-model'}],model:'fixture-model'});
+  assert.equal(doc.querySelector('#run-picker').hidden,false);assert.equal(doc.querySelector('#runs').value,'older');assert.equal(doc.querySelector('#send').disabled,true);
+  doc.querySelector('#prompt').value='Must not submit while another run is active';doc.querySelector('#prompt').dispatchEvent(new r.dom.window.KeyboardEvent('keydown',{key:'Enter'}));assert.ok(!r.posted.some(message=>message.type==='send'));
+  doc.querySelector('#runs').value='latest';doc.querySelector('#runs').dispatchEvent(new r.dom.window.Event('change'));
+  assert.equal(JSON.stringify(r.posted.at(-1)),JSON.stringify({type:'select-run',id:'latest'}));
+  r.send({type:'event',event:{kind:'model.text',data:{text:'Selected fixture stream'}}});r.send({type:'reset-run'});
+  assert.equal(doc.querySelector('#live').childElementCount,0);assert.equal(doc.querySelector('#history .message-body').textContent.trim(),'Existing fixture history');
+  r.send({type:'runs',runs:[{id:'older',state:'failed'},{id:'latest',state:'completed'}],selected:'older',busy:false});assert.equal(doc.querySelector('#send').disabled,false);
+  r.dom.window.close();
+});
 test('uncertain edit inspection renders escaped observations and never offers an effect approval',()=>{
   const r=renderer();const operation={id:'fixture-uncertain',tool:'replace_file',state:'uncertain',workspace_id:'fixture-root',expires_unix_ms:Date.now(),arguments_json:'{}',result_json:'{}'};
   r.send({type:'operations',operations:[operation]});

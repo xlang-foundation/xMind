@@ -29,7 +29,11 @@ function harness(options={}) {
     }
     else if(target.pathname==='/v1/sessions') data=[{id:'saved',title:'Saved session'}];
     else if(target.pathname==='/v1/sessions/saved/history') data=pendingHistory?await pendingHistory:transcript;
-    else if(target.pathname==='/v1/sessions/saved/runs') data=[{id:'finished',state:'completed'}];
+    else if(target.pathname==='/v1/sessions/saved/runs') data=options.runs||[{id:'finished',state:options.running?'running':'completed'}];
+    else if(options.runs && /^\/v1\/runs\/[^/]+(?:\/operations|\/events)?$/.test(target.pathname)) {
+      const id=target.pathname.split('/')[3],run=options.runs.find(item=>item.id===id);assert.ok(run,'Host must request only selected-session runs');
+      data=target.pathname.endsWith('/operations')?(options.operationsByRun?.[id]||[]):target.pathname.endsWith('/events')?(target.search==='?after=0'?[{seq:1,kind:'run.'+run.state,data:{}}]:[]):run;
+    }
     else if(target.pathname==='/v1/runs/finished') data={id:'finished',state:options.running?'running':'completed'};
     else if(target.pathname==='/v1/runs/finished/operations') data=operations;
     else if(target.pathname==='/v1/operations/edit') data=pendingOperation?await pendingOperation:operations[0];
@@ -71,6 +75,7 @@ function harness(options={}) {
   const activation=sandbox.module.exports.activate(context);
   return {token,commands,secrets,requests,views,intervals,state,errors,context,decisions,comparisons,activation,bootstrapTasks,ready,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
+    configureRuns(runs){options.runs=runs;},
     pauseOperation(promise) {pendingOperation=promise;},
     pauseHistory(promise) {pendingHistory=promise;}};
 }
@@ -100,6 +105,37 @@ test('native terminal state refreshes transcript and stops polling with durable 
 const pendingEdit={id:'edit',run_id:'finished',workspace_id:'verified-fixture-root',tool:'replace_file',state:'awaiting_approval',expires_unix_ms:Date.now()+600000,decision_actor:'',result_json:'{}',arguments_json:JSON.stringify({before_content:'actual before fixture',after_content:'<script>untrusted file text</script>',before_sha256:'fixture-hash',file_id:'fixture-file'})};
 const uncertainEdit={...pendingEdit,state:'uncertain'};
 const inspectionFixture={operation:uncertainEdit,observed:{path:'file.cpp',workspace_id:uncertainEdit.workspace_id,file_id:'fixture-file',content_sha256:'a'.repeat(64),size:12},match:'after',same_file:true,observed_unix_ms:Date.now(),quarantine_released:false};
+test('older run inspection remains accessible and selected run persists across view reopening',async()=>{
+  const older={...uncertainEdit,run_id:'older'};
+  const h=harness({runs:[{id:'older',state:'failed'},{id:'latest',state:'completed'}],operationsByRun:{older:[older]},inspection:{...inspectionFixture,operation:older}});
+  await h.commands.get('agentflow.open')();let view=h.views[0];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='transcript'));
+  assert.equal(view.posted.filter(message=>message.type==='runs').at(-1).selected,'latest');
+  view.receive({type:'select-run',id:'older'});
+  await until(()=>view.posted.some(message=>message.type==='operations' && message.operations[0]?.run_id==='older'));
+  view.receive({type:'inspect-edit',id:'edit'});await until(()=>view.posted.some(message=>message.type==='edit-inspection'));
+  assert.equal(h.state.get('xmind.observedRun').id,'older');view.close();
+  await h.commands.get('agentflow.open')();view=h.views[1];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='transcript'));
+  assert.equal(view.posted.filter(message=>message.type==='runs').at(-1).selected,'older');
+  assert.ok(!h.requests.includes('/v1/runs'),'Inspecting history must not submit a run');assert.equal(h.decisions.length,0);view.close();
+});
+test('run selection rejects IDs outside the selected conversation before fetching their details',async()=>{
+  const h=harness({runs:[{id:'latest',state:'completed'}]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='transcript'));
+  view.receive({type:'select-run',id:'another-session-run'});await until(()=>view.posted.some(message=>message.type==='error'));
+  assert.ok(!h.requests.some(route=>route.includes('another-session-run')));assert.equal(h.state.get('xmind.observedRun').id,'latest');view.close();
+});
+test('older terminal run keeps observing an active conversation and rejects another submission',async()=>{
+  const h=harness({runs:[{id:'older',state:'failed'},{id:'latest',state:'running'}]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='status' && message.text==='running'));
+  view.receive({type:'select-run',id:'older'});await until(()=>view.posted.some(message=>message.type==='status' && message.text==='failed'));
+  assert.equal(h.intervals.size,1);assert.equal(view.posted.filter(message=>message.type==='runs').at(-1).busy,true);
+  view.receive({type:'send',prompt:'Must not submit from historical selection'});await until(()=>view.posted.some(message=>message.type==='error'));
+  assert.ok(!h.requests.includes('/v1/runs'));
+  h.configureRuns([{id:'older',state:'failed'},{id:'latest',state:'completed'}]);await [...h.intervals.values()][0]();
+  assert.equal(h.intervals.size,0);assert.equal(view.posted.filter(message=>message.type==='runs').at(-1).busy,false);view.close();
+});
 test('uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths',async()=>{
   const h=harness({health:{agent_execution:false},operations:[uncertainEdit],inspection:inspectionFixture});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
   await until(()=>view.posted.some(message=>message.type==='transcript'));
@@ -120,7 +156,7 @@ test('inspection rejects a different backend operation and discards observations
   const late=harness({operations:[uncertainEdit],inspection:deferred});await late.commands.get('agentflow.open')();const lateView=late.views[0];lateView.receive({type:'ready'});
   await until(()=>lateView.posted.some(message=>message.type==='transcript'));
   lateView.receive({type:'inspect-edit',id:'edit'});await until(()=>late.requests.includes('/v1/operations/edit/inspection'));
-  lateView.receive({type:'select',id:'saved'});resolveInspection(inspectionFixture);
+  lateView.receive({type:'select-run',id:'finished'});resolveInspection(inspectionFixture);
   await until(()=>late.requests.filter(route=>route==='/v1/sessions/saved/history').length>=3);
   assert.ok(!lateView.posted.some(message=>message.type==='edit-inspection'));assert.equal(late.decisions.length,0);lateView.close();
 });

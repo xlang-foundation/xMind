@@ -24,6 +24,7 @@ async function activate(context) {
   let client;
   let sessionId;
   let runId;
+  let sessionRuns=[];
   let cursor = 0;
   let timer;
   let polling = false;
@@ -35,9 +36,12 @@ async function activate(context) {
   let selectedModel;
   const stateKey = 'agentflow.session';
   const modelStateKey = 'xmind.model';
+  const runStateKey = 'xmind.observedRun';
 
   const post = message => panel?.webview.postMessage(message);
   const stop = () => { clearInterval(timer); timer = undefined; generation++; };
+  const busySession=()=>sessionRuns.some(run=>['queued','running','paused'].includes(run.state));
+  const presentRuns=()=>post({type:'runs',runs:sessionRuns,selected:runId,busy:busySession()});
   context.subscriptions.push(vscode.window.registerWebviewViewProvider('xmind.workspace', {
     resolveWebviewView(view) {
       sidebarView = view;
@@ -72,6 +76,9 @@ async function activate(context) {
       }
       const run = await client.status(id);
       if (version !== generation) return;
+      const runs=await client.runs(sessionId);
+      if(version!==generation) return;
+      sessionRuns=runs;presentRuns();
       post({ type: 'status', text: run.state });
       const operations = await client.operations(id);
       if (version !== generation) return;
@@ -85,7 +92,7 @@ async function activate(context) {
         const history = await client.history(sessionId);
         if (version !== generation) return;
         post({ type: 'transcript', history });
-        stop();
+        if(!busySession()) stop();
       }
     } catch (error) { if (version === generation) post({ type: 'error', text: error.message }); }
     finally { polling = false; }
@@ -96,6 +103,7 @@ async function activate(context) {
     const version = generation;
     sessionId = id;
     runId = undefined;
+    sessionRuns=[];presentRuns();
     reviewed.clear();
     post({ type: 'operations', operations: [] });
     cursor = 0;
@@ -106,13 +114,31 @@ async function activate(context) {
     post({ type: 'history', history });
     const runs = await client.runs(id);
     if (version !== generation || !panel) return;
-    const latest = runs.at(-1);
+    sessionRuns=runs;
+    const savedRun=context.workspaceState.get(runStateKey);
+    const selected=savedRun?.url===client.baseUrl && savedRun.session_id===id?sessionRuns.find(run=>run.id===savedRun.id):undefined;
+    const latest = selected||runs.at(-1);
     if (latest) {
-      runId = latest.id;
+      runId = latest.id;presentRuns();
+      await context.workspaceState.update(runStateKey,{url:client.baseUrl,session_id:id,id:runId});
+      if(version!==generation || !panel) return;
       // History already includes completed messages; replay events in a separate log.
       timer = setInterval(poll, 500);
       await poll();
-    } else post({ type: 'status', text: 'Ready' });
+    } else {presentRuns();post({ type: 'status', text: 'Ready' });}
+  }
+
+  async function selectRun(id) {
+    if(!sessionId) throw new Error('Select a conversation before choosing a run.');
+    const version=generation;
+    const runs=await client.runs(sessionId);
+    if(version!==generation || !panel) return;
+    if(!runs.some(run=>run.id===id)) throw new Error('Run does not belong to the selected conversation.');
+    sessionRuns=runs;runId=id;cursor=0;reviewed.clear();presentRuns();
+    post({type:'operations',operations:[]});post({type:'reset-run'});
+    await context.workspaceState.update(runStateKey,{url:client.baseUrl,session_id:sessionId,id});
+    if(version!==generation || !panel) return;
+    timer=setInterval(poll,500);await poll();
   }
 
   async function refresh() {
@@ -178,7 +204,7 @@ async function activate(context) {
     panel.webview.onDidReceiveMessage(message => {
       // Selection intent invalidates an in-flight approval immediately, before
       // its queued selection handler can run behind that network request.
-      if (panel === view && ['select','new','refresh'].includes(message?.type)) {
+      if (panel === view && ['select','select-run','new','refresh'].includes(message?.type)) {
         stop(); reviewed.clear(); post({ type: 'operations', operations: [] });
       }
       // Serialize view commands so overlapping selections/submissions cannot
@@ -215,6 +241,8 @@ async function activate(context) {
           await refresh();
         } else if (message.type === 'select' && typeof message.id === 'string') {
           await selectSession(message.id);
+        } else if (message.type === 'select-run' && typeof message.id === 'string') {
+          await selectRun(message.id);
         } else if (message.type === 'send' && typeof message.prompt === 'string' && message.prompt.trim()) {
           if (!health.agent_execution) throw new Error('Configure a model on xMind Server before submitting an agent run.');
           if (!sessionId) {
@@ -224,9 +252,13 @@ async function activate(context) {
             await refresh();
           }
           if (panel !== view) return;
+          if(busySession()) throw new Error('This conversation still has an active run. Stop or finish it before submitting another prompt.');
           const run = await client.run(sessionId, message.prompt, selectedModel);
           if (panel !== view) return; // Accepted backend execution survives view closure.
           stop(); runId = run.id; cursor = 0;
+          sessionRuns=[...sessionRuns,run];presentRuns();
+          await context.workspaceState.update(runStateKey,{url:client.baseUrl,session_id:sessionId,id:run.id});
+          if(panel!==view) return;
           reviewed.clear(); post({ type: 'operations', operations: [] });
           post({ type: 'user', text: message.prompt });
           timer = setInterval(poll, 500);

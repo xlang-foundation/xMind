@@ -1,0 +1,176 @@
+
+> agentflow@0.1.0 test
+> node --test tests/*.test.js
+
+TAP version 13
+# Subtest: session discovery, URL encoding, error handling and origin boundaries
+ok 1 - session discovery, URL encoding, error handling and origin boundaries
+  ---
+  duration_ms: 54.868
+  type: 'test'
+  ...
+# Subtest: origin-scoped authentication and native request bodies
+ok 2 - origin-scoped authentication and native request bodies
+  ---
+  duration_ms: 1.6355
+  type: 'test'
+  ...
+# Subtest: native terminal state refreshes transcript and stops polling with durable operation inspection
+ok 3 - native terminal state refreshes transcript and stops polling with durable operation inspection
+  ---
+  duration_ms: 12.4874
+  type: 'test'
+  ...
+# Subtest: older run inspection remains accessible and selected run persists across view reopening
+ok 4 - older run inspection remains accessible and selected run persists across view reopening
+  ---
+  duration_ms: 3.8241
+  type: 'test'
+  ...
+# Subtest: run selection rejects IDs outside the selected conversation before fetching their details
+ok 5 - run selection rejects IDs outside the selected conversation before fetching their details
+  ---
+  duration_ms: 2.0456
+  type: 'test'
+  ...
+# Subtest: older terminal run keeps observing an active conversation and rejects another submission
+ok 6 - older terminal run keeps observing an active conversation and rejects another submission
+  ---
+  duration_ms: 2.2879
+  type: 'test'
+  ...
+# Subtest: uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+ok 7 - uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+  ---
+  duration_ms: 2.5861
+  type: 'test'
+  ...
+# Subtest: inspection rejects a different backend operation and discards observations after selection changes
+ok 8 - inspection rejects a different backend operation and discards observations after selection changes
+  ---
+  duration_ms: 5.0949
+  type: 'test'
+  ...
+# Subtest: only a reviewed pending operation can be decided and payload stays backend-owned
+ok 9 - only a reviewed pending operation can be decided and payload stays backend-owned
+  ---
+  duration_ms: 2.4478
+  type: 'test'
+  ...
+# Subtest: closing the view during proposal revalidation cannot send an approval
+ok 10 - closing the view during proposal revalidation cannot send an approval
+  ---
+  duration_ms: 2.2273
+  type: 'test'
+  ...
+# Subtest: changed proposal bytes invalidate the displayed review
+ok 11 - changed proposal bytes invalidate the displayed review
+  ---
+  duration_ms: 2.988
+  type: 'test'
+  ...
+# Subtest: session selection intent invalidates an in-flight approval before queued selection runs
+ok 12 - session selection intent invalidates an in-flight approval before queued selection runs
+  ---
+  duration_ms: 2.3361
+  type: 'test'
+  ...
+# Subtest: closing a panel during history loading cannot start a detached poller
+ok 13 - closing a panel during history loading cannot start a detached poller
+  ---
+  duration_ms: 1.4852
+  type: 'test'
+  ...
+# Subtest: older native servers without a catalogue keep default execution without invented model IDs
+ok 14 - older native servers without a catalogue keep default execution without invented model IDs
+  ---
+  duration_ms: 1.462
+  type: 'test'
+  ...
+# Subtest: edit comparison opens exact revalidated backend snapshots without granting or writing
+ok 15 - edit comparison opens exact revalidated backend snapshots without granting or writing
+  ---
+  duration_ms: 2.8951
+  type: 'test'
+  ...
+# Subtest: refresh reloads backend execution capabilities and history without submitting a run
+ok 16 - refresh reloads backend execution capabilities and history without submitting a run
+  ---
+  duration_ms: 1.9074
+  type: 'test'
+  ...
+# Subtest: selected configured model survives view reopening and retired models fall back on refresh
+ok 17 - selected configured model survives view reopening and retired models fall back on refresh
+  ---
+  duration_ms: 2.4468
+  type: 'test'
+  ...
+# Subtest: normal development bootstrap completes activation before resolving the sidebar and clears private environment
+ok 18 - normal development bootstrap completes activation before resolving the sidebar and clears private environment
+  ---
+  duration_ms: 2.919
+  type: 'test'
+  ...
+# Subtest: run detail selector preserves conversation history and blocks submission while another run is active
+ok 19 - run detail selector preserves conversation history and blocks submission while another run is active
+  ---
+  duration_ms: 140.9066
+  type: 'test'
+  ...
+# Subtest: uncertain edit inspection renders escaped observations and never offers an effect approval
+ok 20 - uncertain edit inspection renders escaped observations and never offers an effect approval
+  ---
+  duration_ms: 29.6601
+  type: 'test'
+  ...
+# Subtest: history renders Markdown/code, copies plain code and shows exact provider usage
+ok 21 - history renders Markdown/code, copies plain code and shows exact provider usage
+  ---
+  duration_ms: 36.8986
+  type: 'test'
+  ...
+# Subtest: unknown historical usage stays unavailable and malicious Markdown is sanitized
+ok 22 - unknown historical usage stays unavailable and malicious Markdown is sanitized
+  ---
+  duration_ms: 17.6702
+  type: 'test'
+  ...
+# Subtest: live token badges use model usage events and reset when the persisted transcript arrives
+ok 23 - live token badges use model usage events and reset when the persisted transcript arrives
+  ---
+  duration_ms: 18.4125
+  type: 'test'
+  ...
+# Subtest: tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
+ok 24 - tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
+  ---
+  duration_ms: 15.9629
+  type: 'test'
+  ...
+# Subtest: bottom model selector exposes only backend-advertised IDs and sends the selected ID
+ok 25 - bottom model selector exposes only backend-advertised IDs and sends the selected ID
+  ---
+  duration_ms: 11.9422
+  type: 'test'
+  ...
+# Subtest: provider cache/reasoning counts and backend first-token time render without derived estimates
+ok 26 - provider cache/reasoning counts and backend first-token time render without derived estimates
+  ---
+  duration_ms: 14.9765
+  type: 'test'
+  ...
+# Subtest: pending file comparison sends only an operation ID and remains separate from approval
+ok 27 - pending file comparison sends only an operation ID and remains separate from approval
+  ---
+  duration_ms: 16.0689
+  type: 'test'
+  ...
+1..27
+# tests 27
+# suites 0
+# pass 27
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1044.8368
