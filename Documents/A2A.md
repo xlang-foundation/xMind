@@ -2,6 +2,10 @@
 
 Protocol baseline: [A2A 0.3.0 JSON-RPC specification](https://a2a-protocol.org/v0.3.0/specification/).
 
+Current native work is the C++ [task-control adapter](../doc/native-a2a-task-control.md) for shared task inspection and cancellation. Native message admission, discovery, streaming and SDK interoperability remain incomplete. The following Python implementation is historical prototype evidence and is not executed as the product backend.
+
+## Historical prototype
+
 The backend exposes `GET /.well-known/agent-card.json` and `POST /a2a`. `agentflow/a2a.py` maps messages and tasks to the shared SQLite sessions and agent runs. The adapter implements text-only message/send, message/stream, tasks/get, tasks/cancel and tasks/resubscribe. Unsupported push notifications and extended cards return the corresponding protocol errors.
 
 Task IDs are backend run IDs and context IDs are session IDs. Input messages and their message IDs are persisted with run creation; duplicate message IDs reuse the same run and reject changed content. Completed output is represented as a text artifact. Blocking sends wait for a terminal state; nonblocking sends allow later polling. SSE maps persisted run progress to artifact/status updates. Canceling observation does not cancel a task; tasks/cancel is explicit.

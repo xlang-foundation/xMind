@@ -2,6 +2,8 @@
 
 The C++ execution platform owns standalone agents and graph roots independently of connected views. A graph is an immutable, revisioned backend catalog entry. HTTP callers select a registered graph; they cannot upload a plan, choose a controller actor, or mutate execution states. Backend and console paths are implemented. The VS Code adapter now includes workflow selection, human input and separate child activity; actual IDE graph acceptance and installation remain pending. See [sidebar workflow scope](vscode-graph-workflows.md).
 
+Checkpoint `bd059a46781292640d95943e00b0d86a4891936c` passed **44 native and 49 extension contracts** in [hosted CI](https://github.com/xlang-foundation/xMind/actions/runs/37682783904): [CTest](evidence/native-graph-service-hosted-ctest.log), [original job/TAP](evidence/native-graph-service-passing-ci-job.log), [provenance](evidence/native-graph-service-hosted-provenance.json). Subsequent sidebar/task-control sources and local IDE observations retain their own separate verification scopes.
+
 Start a Windows native server with the trusted catalog file:
 
 ```powershell

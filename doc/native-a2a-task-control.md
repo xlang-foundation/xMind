@@ -1,0 +1,21 @@
+# Native A2A task controls
+
+The C++ adapter implements JSON-RPC `tasks/get` and `tasks/cancel` at `POST /a2a`, using the existing authenticated local-owner HTTP boundary, shared execution service and xlang3 persistence. Its protocol reference is the pinned [A2A 0.3.0 specification](https://a2a-protocol.org/v0.3.0/specification/). This is a task-control component, not full A2A support. Native message admission, discovery, streaming, task-local history and independent SDK interoperability remain required.
+
+Task IDs are actual root run IDs; context IDs are their actual session IDs. Queued/running/paused states map to `submitted`/`working`/`input-required`, and terminal states map to `completed`/`failed`/`canceled`. Internal graph children are not independent A2A tasks. Cancellation invokes the existing owner service, then returns the observed persisted state. A requested stop is never reported as successful cancellation until the backend has recorded that outcome.
+
+For a completed task, the text artifact comes only from its own committed `conversation.assistant` event. The adapter never uses the latest session reply, which could belong to another task. It omits history by default; `historyLength: 0` is accepted, while positive history requests return an unsupported-operation error until root messages have explicit task-local associations. Legacy session history is not guessed or leaked into an unrelated task.
+
+An authenticated request has this form:
+
+```json
+{"jsonrpc":"2.0","id":"client-request-1","method":"tasks/get","params":{"id":"ACTUAL_ROOT_RUN_ID"}}
+```
+
+Use `tasks/cancel` with the same task-ID params to request owner-controlled cancellation. Terminal tasks return `TaskNotCancelableError`; absent/child IDs return `TaskNotFoundError`. Successful responses contain a Task under `result`; failures contain the protocol error under `error`, exclusively. Valid notifications receive HTTP 204 with no JSON-RPC response. IDs are echoed as parsed strings, null or finite numbers within the supported exact integer range. Oversized requests/IDs, duplicate JSON fields, excessive nesting, unsupported fields, invalid task IDs and malformed input are rejected; errors never include request bodies or persistence/provider diagnostics.
+
+`message/send`, `message/stream`, `tasks/resubscribe` and authenticated extended cards return unsupported-operation errors. Push configuration returns the protocol's unsupported-push error. An Agent Card is deliberately not advertised before admission and the required methods are implemented. Browser origins remain denied, and this does not establish remote/team authorization or production A2A readiness.
+
+The compiled integration contract uses actual graph submission, human pause and cancellation, workspace file reads, C++ HTTP and xlang3 SQLite. It checks two completed tasks in the same context to prove output isolation, JSON-RPC IDs/errors/notifications, authentication, child-task rejection and sixteen repeated finish/cancel schedules. It uses no model peer, invented lifecycle writes or synthetic model replies. The final isolated Release build passed **45/45 native contracts**, and **60/60 extension contracts** passed locally: [native build/CTest](evidence/native-a2a-task-control-local-build-ctest.log), [extension output](evidence/native-a2a-task-control-extension-tests.log), [source/binary provenance](evidence/native-a2a-task-control-local-provenance.json). Hosted verification and installation into the existing previews remain pending.
+
+The [first local build](evidence/native-a2a-task-control-locked-preview-build.log) linked against the running graph preview's executable and failed with a Windows file lock. The preview remained intact. `Tools/native-milestone.ps1 -BuildDirectory D:/CantorAI2026/xMind/build/a2a-native` builds separately. Future local `Tools/start-ui.ps1` launches copy server/client/admin/schema-worker/runtime binaries and modules into a private snapshot, so their loaded executable does not lock mutable build outputs. Snapshot launch itself is not yet separately exercised; the changed launcher parsed successfully. Existing previews keep their original runtime until deliberately upgraded.

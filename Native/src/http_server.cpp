@@ -2,6 +2,7 @@
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/provider_setup.hpp"
 #include "agentflow/graph_service.hpp"
+#include "agentflow/a2a_task_control.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
@@ -157,6 +158,13 @@ struct HttpServer::Impl {
             if(response.body.empty()) reply(response,{{"detail","HTTP request rejected"}},response.status);
         });
         server.set_exception_handler([](const Request&,Response& response,std::exception_ptr) {reply(response,{{"detail","Backend operation failed"}},500);});
+        server.Post("/a2a",[this](const Request& request,Response& response){
+            if(request.get_header_value("Content-Type")!="application/json"){reply(response,{{"detail","Use application/json"}},415);return;}
+            if(!request.params.empty()){reply(response,{{"detail","A2A does not accept query parameters"}},400);return;}
+            const auto result=A2aTaskControl(persistence,executor).dispatch(request.body);
+            response.set_header("Cache-Control","no-store");response.set_header("X-Content-Type-Options","nosniff");
+            if(result)response.set_content(*result,"application/json");else response.status=204;
+        });
         server.Get("/v1/health",guarded([this](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
             reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()}});

@@ -3,11 +3,12 @@ param(
     [string]$Database,
     [string]$RuntimeDirectory='D:\CantorAI2026\xlang3\build\Release',
     [string]$PythonLibSource='C:\Python\Python314\Lib',
+    [string]$BuildDirectory,
     [long]$After=0
 )
 $ErrorActionPreference='Stop'
 $projectRoot=Split-Path $PSScriptRoot -Parent
-$nativeBuild=Join-Path $projectRoot 'build\native'
+$nativeBuild=if($BuildDirectory){[System.IO.Path]::GetFullPath($BuildDirectory)}else{Join-Path $projectRoot 'build\native'}
 if($Action -eq 'Build') {
     $benchmarks=@(Get-CimInstance Win32_Process | Where-Object {
         ($_.Name -eq 'xlang3.exe' -and $_.CommandLine -match 'pyperformance|run_benchmark\.py|benchmarks[\\/]') -or

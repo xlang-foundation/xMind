@@ -47,6 +47,20 @@ if($BundleDirectory){
     $uiModules=Join-Path $RuntimeDirectory 'modules'
 }
 if(-not (Test-Path -LiteralPath $uiServer)) {throw 'A verified native server build is required.'}
+$uiSourceServer=$uiServer
+if(-not $BundleDirectory){
+    # Native development outputs may be rebuilt while this preview is open.
+    # Load a private immutable snapshot instead of locking the build directory.
+    $uiSnapshot=Join-Path $uiState ('runtime-'+[Guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path (Join-Path $uiSnapshot 'modules') -Force|Out-Null
+    foreach($uiBinary in @('xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe','xlang3_runtime.dll')){
+        Copy-Item -LiteralPath (Join-Path (Split-Path $uiServer -Parent) $uiBinary) -Destination (Join-Path $uiSnapshot $uiBinary)
+    }
+    foreach($uiModule in Get-ChildItem -LiteralPath $uiModules -File -Filter '*.dll'){
+        Copy-Item -LiteralPath $uiModule.FullName -Destination (Join-Path $uiSnapshot 'modules')
+    }
+    $uiServer=Join-Path $uiSnapshot 'xmind_server.exe';$uiModules=Join-Path $uiSnapshot 'modules'
+}
 $uiAccess=[Convert]::ToHexString([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
 $uiOriginalAuth=$env:XMIND_AUTH_TOKEN
 $uiOriginalBootstrap=$env:XMIND_UI_BOOTSTRAP_TOKEN
@@ -102,7 +116,7 @@ try {
     # host for this known repository, with its own settings/extensions directory.
     $uiCodeArgs=@('--new-window','--disable-workspace-trust','--skip-welcome',('--remote-debugging-port='+$DebugPort),'--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiProject+'"'))
     $uiHost=Start-Process -FilePath $CodeExecutable -ArgumentList $uiCodeArgs -WorkingDirectory $uiProject -WindowStyle Normal -PassThru
-    $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=[bool]$uiHealth.agent_execution;server_executable=$uiServer;server_sha256=(Get-FileHash -LiteralPath $uiServer -Algorithm SHA256).Hash;modules=$uiModules;source_revision=$uiBuildProvenance.xmind;preview_name=$PreviewName;debug_port=$DebugPort;graphs_config=$GraphsConfig} | ConvertTo-Json
+    $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=[bool]$uiHealth.agent_execution;server_executable=$uiServer;source_server_executable=$uiSourceServer;server_sha256=(Get-FileHash -LiteralPath $uiServer -Algorithm SHA256).Hash;modules=$uiModules;source_revision=$uiBuildProvenance.xmind;preview_name=$PreviewName;debug_port=$DebugPort;graphs_config=$GraphsConfig} | ConvertTo-Json
     [System.IO.File]::WriteAllText((Join-Path $uiState 'active.json'),$uiMetadata)
     $uiMetadata
 } catch {
