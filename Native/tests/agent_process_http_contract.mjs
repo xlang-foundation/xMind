@@ -12,7 +12,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 const [serverExe,cliExe,adminExe,modules,stdlib]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-agent-process-')),workspace=join(folder,'workspace'),database=join(folder,'state.sqlite'),configFile=join(folder,'profiles.json'),executable=join(folder,'actual-node.exe');
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
-let child,port,peerError,requests=0;const continued=new Map(),operationIds=[];
+let child,port,peerError,observer,observerDone,observerText='',observerErrors='',requests=0;const continued=new Map(),operationIds=[];
 const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',()=>{
     try {
@@ -41,6 +41,13 @@ async function start(model){
   port=await new Promise((resolve,reject)=>{let output='';const timer=setTimeout(()=>reject(new Error('Readiness deadline: '+errors)),15000);child.once('error',error=>{clearTimeout(timer);reject(error);});child.once('exit',code=>{clearTimeout(timer);reject(new Error('Native server exited '+code+': '+errors));});child.stdout.on('data',data=>{output+=data;const match=/listening on http:\/\/127\.0\.0\.1:(\d+)/.exec(output);if(match){clearTimeout(timer);resolve(Number(match[1]));}});});
 }
 async function stop(){if(child&&child.exitCode===null){const exited=new Promise(resolve=>child.once('exit',resolve));child.kill();await exited;}child=null;}
+function watch(run,cursor=0){
+  observerText='';observerErrors='';observer=spawn(cliExe,[String(port),'watch',run,String(cursor)],{env,windowsHide:true});
+  observer.stdout.setEncoding('utf8');observer.stderr.setEncoding('utf8');observer.stdout.on('data',text=>observerText+=text);observer.stderr.on('data',text=>observerErrors+=text);
+  observer.on('error',error=>observerErrors+=error.message);observerDone=new Promise(resolve=>observer.once('close',resolve));
+}
+async function stopObserver(){if(observer){if(observer.exitCode===null)observer.kill();await observerDone;observer=null;}}
+function watchRecords(text){return text.trim()?text.trim().split('\n').map(line=>JSON.parse(line)):[];}
 try {
   await mkdir(workspace);await copyFile(process.execPath,executable);
   const fixture=fileURLToPath(new URL('./process_peer.mjs',import.meta.url));
@@ -51,7 +58,7 @@ try {
   const metadata=JSON.stringify(await api('/v1/process/profiles'));assert.ok(!metadata.includes(executable)&&!metadata.includes('executable_id'),'Public registry must not expose command/binding metadata');
   // An offline importer cannot mutate the running backend's registry lease.
   const busy=spawnSync(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,'import-processes',configFile],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(busy.error);assert.equal(busy.status,1,'Native owner lease must reject concurrent admin import');
-  let allowedOutput;
+  let allowedOutput,watchCursor;
   for(const name of ['allowed','denied','cancelled','stale-executable']){
     await api('/v1/sessions',{id:name,title:'Synthetic native process integration fixture'});
     const run=await api('/v1/runs',{id:'run-'+name,session_id:name,prompt:name});
@@ -59,6 +66,12 @@ try {
     operationIds.push(proposal.id);assert.equal(proposal.tool,'run_process');const planned=JSON.parse(proposal.arguments_json);
     assert.equal(planned.profile_id,'fixture');assert.equal(planned.profile_revision,1);assert.equal(planned.executable,executable);assert.ok(planned.executable_id.startsWith('windows-local-executable-v1:'));assert.deepEqual(planned.arguments,[fixture,'normal',name+'.txt']);
     await assert.rejects(readFile(join(workspace,name+'.txt')),{code:'ENOENT'},'Awaiting approval cannot dispatch effect');
+    if(name==='allowed'){
+      watch(run.id);await until(()=>Promise.resolve(observerText),value=>value.endsWith('\n')&&value.includes('"kind":"operation.awaiting_approval"'));
+      assert.equal(observer.exitCode,null,'Actual watcher must remain live while the backend waits for approval');
+      await stopObserver();watchCursor=watchRecords(observerText).at(-1).seq;assert.equal((await api(`/v1/runs/${run.id}`)).state,'running');assert.equal(cli('operation',proposal.id).state,'awaiting_approval','Disconnecting a view cannot approve or cancel backend execution');
+      watch(run.id,watchCursor);
+    }
     if(name==='cancelled')cli('cancel',run.id);else{
       if(name==='stale-executable')await appendFile(executable,'actual fixture executable mutation after proposal');
       cli('decide',proposal.id,name==='denied'?'deny':'allow');
@@ -67,6 +80,8 @@ try {
     const operation=cli('operation',proposal.id);assert.equal(operation.state,{allowed:'succeeded',denied:'denied',cancelled:'cancelled','stale-executable':'failed'}[name]);
     const chunks=cli('events',run.id).filter(event=>event.kind==='process.output');
     if(name==='allowed'){
+      await until(()=>Promise.resolve(observer.exitCode),value=>value!==null);assert.equal(await observerDone,0,observerErrors);
+      assert.deepEqual(watchRecords(observerText),cli('events',run.id,String(watchCursor)),'Resumed native watcher must emit the actual durable tail through the terminal transition');observer=null;
       assert.ok(chunks.length>0&&chunks.length<=82);const channels={stdout:Buffer.alloc(0),stderr:Buffer.alloc(0)};
       for(const {data} of chunks){assert.equal(data.operation_id,proposal.id);assert.equal(data.profile_id,'fixture');assert.equal(data.encoding,'hex');assert.equal(data.offset,channels[data.channel].length);const bytes=Buffer.from(data.data,'hex');assert.equal(bytes.length,data.retained_bytes);assert.ok(bytes.length>0&&bytes.length<=4096);channels[data.channel]=Buffer.concat([channels[data.channel],bytes]);}
       const outcome=JSON.parse(operation.result_json);assert.equal(channels.stdout.toString('utf8'),outcome.stdout.data);assert.equal(channels.stderr.toString('utf8'),outcome.stderr.data);allowedOutput=chunks;
@@ -75,13 +90,17 @@ try {
     if(name==='allowed'){assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'actual child effect');assert.equal(JSON.parse(operation.result_json).exit_code,0);}
     else await assert.rejects(readFile(join(workspace,name+'.txt')),{code:'ENOENT'},'Undispatched commands must preserve absence');
     const history=cli('history',name);assert.equal(history[0].role,'user');if(name!=='cancelled'){assert.ok(continued.has(name));assert.equal(history.at(-1).role,'assistant');}
+    if(name==='cancelled'){const watched=spawnSync(cliExe,[String(port),'watch',run.id],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(watched.error);assert.equal(watched.status,2,watched.stderr);assert.deepEqual(watchRecords(watched.stdout),cli('events',run.id));}
   }
+  for(const cursor of ['-1','not-a-cursor','9223372036854775808']){const rejected=spawnSync(cliExe,[String(port),'watch','run-allowed',cursor],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(rejected.error);assert.equal(rejected.status,1);assert.ok(rejected.stderr.includes('Invalid cursor'));assert.equal(rejected.stdout,'');}
+  for(const [run,watchEnv] of [['missing-run',env],['run-allowed',{...env,XMIND_AUTH_TOKEN:'synthetic invalid observer authentication'}]]){const rejected=spawnSync(cliExe,[String(port),'watch',run],{env:watchEnv,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(rejected.error);assert.equal(rejected.status,1);assert.ok(rejected.stderr.includes('Server rejected run observation'));assert.equal(rejected.stdout,'');}
   if(peerError)throw peerError;assert.equal(requests,7,'Exactly one initial request per run and three real-result continuations');
   await stop();await start(false);assert.equal((await api('/v1/health')).agent_execution,false);
   assert.equal(cli('operation',operationIds[0]).state,'succeeded');assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'actual child effect');
   assert.deepEqual(cli('events','run-allowed').filter(event=>event.kind==='process.output'),allowedOutput,'Model-free restart must replay the exact persisted command output');
+  const replayed=spawnSync(cliExe,[String(port),'watch','run-allowed'],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(replayed.error);assert.equal(replayed.status,0,replayed.stderr);assert.deepEqual(watchRecords(replayed.stdout),cli('events','run-allowed'),'Completed native watcher must replay actual model-free history without restarting work');
   assert.deepEqual(cli('process-profiles'),{profiles:[{id:'fixture',revision:1,max_timeout_ms:10000}],runtime_state:'per_operation'});
   console.log('Native process admin/server/model/CLI contract passed actual persisted registry, owner lease, exact approved process/file effects, denial/cancelled approval, changed-executable rejection, real tool-result continuation, metadata privacy and model-free restart. Inference is synthetic; no live-provider/editor/process parity completion claimed.');
 } finally {
-  await stop();await new Promise(resolve=>peer.close(resolve));assert.equal(dirname(resolve(folder)),resolve(tmpdir()));assert.ok(folder.includes('xmind-agent-process-'));await rm(folder,{recursive:true,force:true});
+  await stopObserver();await stop();await new Promise(resolve=>peer.close(resolve));assert.equal(dirname(resolve(folder)),resolve(tmpdir()));assert.ok(folder.includes('xmind-agent-process-'));await rm(folder,{recursive:true,force:true});
 }
