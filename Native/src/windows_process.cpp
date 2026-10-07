@@ -112,7 +112,12 @@ struct Child {
         if(!TerminateJobObject(job.value,1))fail("Cannot terminate owned process tree");
         const auto until=Clock::now()+std::chrono::seconds(5);
         while(!empty()){if(Clock::now()>=until)throw ProcessEffectUncertain("Owned process tree termination is not established");std::this_thread::sleep_for(std::chrono::milliseconds(10));}
-        if(WaitForSingleObject(process.value,0)!=WAIT_OBJECT_0)throw ProcessEffectUncertain("Owned process exit is not established");retired=true;
+        // Job accounting and the process object's signaled state are separate
+        // observations. Termination is asynchronous: wait for the actual root
+        // handle within the same cleanup budget instead of a zero-time probe.
+        const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(until-Clock::now()).count();
+        const auto waited=WaitForSingleObject(process.value,static_cast<DWORD>(std::clamp<std::int64_t>(remaining,0,5000)));
+        if(waited!=WAIT_OBJECT_0)throw ProcessEffectUncertain("Owned process exit is not established (wait result "+std::to_string(waited)+")");retired=true;
     }
     ~Child(){if(!retired && process.value){if(job.value)TerminateJobObject(job.value,1);TerminateProcess(process.value,1);WaitForSingleObject(process.value,5000);}}
 };

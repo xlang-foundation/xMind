@@ -1,0 +1,9 @@
+{
+  "runtime": "Native xlang3; no CPython execution or bridge",
+  "sqlite_patch_sha256": "5388CDB3D1946CE48A2416055E27B422A2AA1364271A24DC8EB124C72C2C64B4",
+  "toolchain": "Visual Studio 18 2026",
+  "xlang3": "914783909835116969aad7c66b210a5ac9a27661",
+  "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+  "xmind": "6e348ad1b142f44a05b9c03f333c82eb79b474ff",
+  "toolchain_version": "18.10.12217.157"
+}
