@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <optional>
+#include <vector>
 
 namespace agentflow {
 struct McpProtocolError : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -42,4 +44,9 @@ std::string mcp_notification(std::string method,std::string_view params_json="{}
 // result; unimplemented methods return -32601 without invoking model/tool/UI
 // work. Modern peers cannot send requests and must never receive responses.
 std::string mcp_peer_reply(const McpWireMessage& request,McpWireEra era);
+// Strict bounded object validation plus removal of insignificant whitespace.
+// Preserves every string escape and number token; never parse/dump arguments.
+std::string mcp_compact_object(std::string_view json);
+std::optional<std::string> mcp_object_member(std::string_view object,std::string_view key);
+std::vector<std::string> mcp_array_values(std::string_view array);
 }

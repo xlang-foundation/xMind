@@ -16,6 +16,8 @@ if($Action -eq 'Build') {
         Write-Host "Build deferred: live xlang3 benchmark processes $($benchmarks.ProcessId -join ', ')."
         exit 3
     }
+    & node (Join-Path $projectRoot 'Tools/verify-jsoncons.mjs')
+    if($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
     $cmakeExecutable='C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe'
     if(-not (Test-Path -LiteralPath $cmakeExecutable)) { $cmakeExecutable=(Get-Command cmake -ErrorAction Stop).Source }
     & $cmakeExecutable -S (Join-Path $projectRoot 'Native') -B $nativeBuild -G 'Visual Studio 18 2026' -A x64 "-DAGENTFLOW_XLANG3_RUNTIME_DIR=$RuntimeDirectory" "-DAGENTFLOW_PYTHON_LIB_SOURCE=$PythonLibSource"

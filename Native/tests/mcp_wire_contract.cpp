@@ -50,6 +50,18 @@ int main() {
         require(meta["io.modelcontextprotocol/protocolVersion"]=="2026-07-28" && meta["io.modelcontextprotocol/clientCapabilities"].is_object(),"Every modern request needs pinned version and capabilities");
         const auto next=Json::parse(mcp_request("list-1","tools/list","{}",McpWireEra::modern));
         require(next["params"]["_meta"]==meta,"Metadata must be present again, not inferred from initialization");
+        const std::string precise="{\n \"arguments\": { \"decimal\": 1.00000000000000000001, \"text\": \"keep  space\\n\\\"quote\" } }";
+        for(const auto era:{McpWireEra::legacy,McpWireEra::modern}) {
+            const auto actual=mcp_request("precise","tools/call",precise,era);
+            require(actual.find("1.00000000000000000001")!=std::string::npos && actual.find("keep  space\\n\\\"quote")!=std::string::npos,"Request encoding must preserve exact numbers and escaped string bytes");
+            require(actual.find('\n')==actual.size()-1,"Argument formatting cannot inject a second stdio frame");
+        }
+        require(mcp_compact_object(" { \"n\": -0.0000e+12 } ")=="{\"n\":-0.0000e+12}","Lexical compaction cannot normalize numeric tokens");
+        const auto precise_payload=R"({"jsonrpc":"2.0","id":"precise","result":{"value":1.00000000000000000001,"schema":{"const":2.00000000000000000001}}})";
+        McpLineStream precise_stream([&](const auto& value){require(value.payload_json.find("1.00000000000000000001")!=std::string::npos,"Decoded result must preserve exact number tokens");const auto schema=mcp_object_member(value.payload_json,"schema");require(schema && schema->find("2.00000000000000000001")!=std::string::npos,"Extracted nested schema must retain actual source tokens");});precise_stream.feed(std::string(precise_payload)+"\n");
+        const auto raw=mcp_array_values(R"([ {"x":[1,2],"quote":"a,}\\\""}, 1.00000000000000000001 ])");
+        require(raw.size()==2 && raw[1]=="1.00000000000000000001" && mcp_object_member(raw[0],"x")=="[1,2]","Raw extraction must respect quoted delimiters and nested arrays");
+        require(!mcp_object_member("{}","absent") && mcp_array_values("[]").empty(),"Empty members and collections cannot fabricate values");
         const auto legacy=Json::parse(mcp_request("init-1","initialize",R"({"protocolVersion":"2025-11-25","capabilities":{}})",McpWireEra::legacy));
         require(!legacy["params"].contains("_meta"),"Legacy wire encoding must not silently select modern metadata");
         const auto cancellation=Json::parse(mcp_notification("notifications/cancelled",R"({"requestId":"call-1"})"));

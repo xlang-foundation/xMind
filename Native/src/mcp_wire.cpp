@@ -40,20 +40,20 @@ McpWireMessage decode(const std::string& bytes) {
         if(!value["method"].is_string()) throw McpProtocolError("Invalid MCP method");
         message.method=value["method"].get<std::string>();text(message.method,256,"Invalid MCP method");
         if(value.contains("params") && !value["params"].is_object()) throw McpProtocolError("MCP parameters must be an object");
-        message.payload_json=value.contains("params")?value["params"].dump():"{}";
+        message.payload_json=value.contains("params")?*mcp_object_member(bytes,"params"):"{}";
         if(value.contains("id")) {message.kind=McpMessageKind::request;message.id_json=id_json(value["id"]);}
         else message.kind=McpMessageKind::notification;
     } else {
         if(value.contains("params")) throw McpProtocolError("MCP responses cannot contain request parameters");
         if(result) {
             if(!value.contains("id") || !value["result"].is_object()) throw McpProtocolError("Invalid MCP result response");
-            message.kind=McpMessageKind::result;message.id_json=id_json(value["id"]);message.payload_json=value["result"].dump();
+            message.kind=McpMessageKind::result;message.id_json=id_json(value["id"]);message.payload_json=*mcp_object_member(bytes,"result");
         } else {
             const auto& failure=value["error"];
             if(!failure.is_object() || !failure.contains("code") || !failure["code"].is_number_integer() || !failure.contains("message") || !failure["message"].is_string()) throw McpProtocolError("Invalid MCP error response");
             const auto description=failure["message"].get<std::string>();
             if(description.size()>65536 || description.find('\0')!=std::string::npos) throw McpProtocolError("MCP error description exceeds limits");
-            message.kind=McpMessageKind::error;message.payload_json=failure.dump();
+            message.kind=McpMessageKind::error;message.payload_json=*mcp_object_member(bytes,"error");
             if(value.contains("id")) message.id_json=id_json(value["id"],true);
         }
     }
@@ -61,6 +61,22 @@ McpWireMessage decode(const std::string& bytes) {
 }
 Json parameters(std::string_view source) {
     auto value=parse(source);if(!value.is_object()) throw McpProtocolError("MCP parameters must be an object");return value;
+}
+void whitespace(std::string_view source,std::size_t& cursor) {
+    while(cursor<source.size() && (source[cursor]==' ' || source[cursor]=='\t' || source[cursor]=='\r' || source[cursor]=='\n'))++cursor;
+}
+std::string raw_value(std::string_view source,std::size_t& cursor) {
+    whitespace(source,cursor);const auto begin=cursor;std::size_t depth=0;bool quoted=false,escaped=false;
+    for(;cursor<source.size();++cursor) {
+        const auto value=source[cursor];
+        if(quoted){if(escaped)escaped=false;else if(value=='\\')escaped=true;else if(value=='"')quoted=false;continue;}
+        if(value=='"')quoted=true;
+        else if(value=='{' || value=='[')++depth;
+        else if(value=='}' || value==']'){if(!depth)break;--depth;}
+        else if(value==',' && !depth)break;
+    }
+    auto end=cursor;while(end>begin && (source[end-1]==' ' || source[end-1]=='\t' || source[end-1]=='\r' || source[end-1]=='\n'))--end;
+    return std::string(source.substr(begin,end-begin));
 }
 std::string frame(const Json& value) {
     try {
@@ -103,14 +119,22 @@ void McpLineStream::finish() {
 std::string mcp_request(std::string id,std::string method,std::string_view source,McpWireEra era,const McpClientIdentity& identity) {
     text(id,128,"Invalid outgoing MCP request ID");text(method,256,"Invalid outgoing MCP method");
     auto params=parameters(source);
+    auto encoded_params=mcp_compact_object(source);
     if(era==McpWireEra::modern) {
         if(params.contains("_meta")) throw McpProtocolError("Modern MCP metadata is owned by the backend");
         text(identity.name,128,"Invalid MCP client identity");text(identity.version,64,"Invalid MCP client version");
-        params["_meta"]={{"io.modelcontextprotocol/protocolVersion","2026-07-28"},
+        Json metadata={{"io.modelcontextprotocol/protocolVersion","2026-07-28"},
             {"io.modelcontextprotocol/clientInfo",{{"name",identity.name},{"version",identity.version}}},
             {"io.modelcontextprotocol/clientCapabilities",parameters(identity.capabilities_json)}};
+        encoded_params.pop_back();
+        if(!params.empty())encoded_params.push_back(',');
+        try {encoded_params+="\"_meta\":"+metadata.dump()+"}";}
+        catch(const Json::exception&) {throw McpProtocolError("Invalid outgoing MCP UTF-8");}
     }
-    return frame(Json{{"jsonrpc","2.0"},{"id",id},{"method",method},{"params",std::move(params)}});
+    try {
+        auto encoded="{\"jsonrpc\":\"2.0\",\"id\":"+Json(id).dump()+",\"method\":"+Json(method).dump()+",\"params\":"+encoded_params+"}";
+        decode(encoded);encoded.push_back('\n');return encoded;
+    }catch(const Json::exception&) {throw McpProtocolError("Invalid outgoing MCP UTF-8");}
 }
 std::string mcp_notification(std::string method,std::string_view source) {
     text(method,256,"Invalid outgoing MCP notification method");
@@ -128,5 +152,41 @@ std::string mcp_peer_reply(const McpWireMessage& request,McpWireEra era) {
     if(decoded.method=="ping") reply["result"]=Json::object();
     else reply["error"]={{"code",-32601},{"message","Client method is not supported"}};
     return frame(reply);
+}
+std::string mcp_compact_object(std::string_view source) {
+    parameters(source);std::string result;result.reserve(source.size());
+    bool quoted=false,escaped=false;
+    for(const char value:source) {
+        if(quoted) {
+            result.push_back(value);
+            if(escaped)escaped=false;
+            else if(value=='\\')escaped=true;
+            else if(value=='"')quoted=false;
+        }else if(value=='"') {quoted=true;result.push_back(value);}
+        else if(value!=' ' && value!='\t' && value!='\r' && value!='\n')result.push_back(value);
+    }
+    return result;
+}
+std::optional<std::string> mcp_object_member(std::string_view source,std::string_view key) {
+    parameters(source);std::size_t cursor=0;whitespace(source,cursor);++cursor;whitespace(source,cursor);
+    while(source[cursor]!='}') {
+        const auto begin=cursor++;bool escaped=false;
+        while(cursor<source.size()) {const auto value=source[cursor++];if(escaped)escaped=false;else if(value=='\\')escaped=true;else if(value=='"')break;}
+        const auto name=Json::parse(source.substr(begin,cursor-begin)).get<std::string>();
+        whitespace(source,cursor);++cursor;auto value=raw_value(source,cursor);
+        if(name==key)return value;
+        whitespace(source,cursor);if(source[cursor]=='}')break;++cursor;whitespace(source,cursor);
+    }
+    return std::nullopt;
+}
+std::vector<std::string> mcp_array_values(std::string_view source) {
+    if(!parse(source).is_array())throw McpProtocolError("MCP collection must be an array");
+    std::vector<std::string> result;std::size_t cursor=0;whitespace(source,cursor);++cursor;whitespace(source,cursor);
+    while(source[cursor]!=']') {
+        if(result.size()>=128)throw McpProtocolError("MCP collection exceeds limits");
+        result.push_back(raw_value(source,cursor));whitespace(source,cursor);
+        if(source[cursor]==']')break;++cursor;whitespace(source,cursor);
+    }
+    return result;
 }
 }

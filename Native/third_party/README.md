@@ -8,3 +8,7 @@ These independently licensed libraries implement HTTP transport and JSON seriali
 | [nlohmann/json](https://github.com/nlohmann/json/tree/v3.12.0) | v3.12.0 | AAF127C04CB31C406E5B04A63F1AE89369FCCDE6D8FA7CDDA1ED4F32DFC5DE63 | MIT, accompanying LICENSE.MIT |
 
 Headers were downloaded from the tagged upstream source and preserved unchanged. cpp-httplib uses blocking HTTP/1.1 I/O; this adapter configures four workers, a bounded transport task queue, timeouts and a 1 MiB request-body limit. TLS and shared deployment are not enabled in this local adapter. Dependency upgrades require reviewing upstream changes, licenses, header hashes and the independent HTTP contract.
+
+## Native schema validation
+
+[jsoncons v1.9.0](https://github.com/danielaparker/jsoncons/tree/bcb44594c50c495ee1e690602cdd71455942ad0e), commit `bcb44594c50c495ee1e690602cdd71455942ad0e`, provides the native JSON Schema 2020-12 validator. The unmodified include tree and Boost Software License 1.0 are preserved under `jsoncons/`; no scripts/interpreters or network resolver are used. `jsoncons/manifest.json` records LF-normalized SHA-256 hashes for every vendored source/license file. The runtime bundle's existing recursive license collection includes this license.

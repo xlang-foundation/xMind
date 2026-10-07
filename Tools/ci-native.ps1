@@ -36,6 +36,7 @@ Invoke-CiCommand 'runtime-build' $ciCmake @('--build',$ciRuntimeBuild,'--config'
 $ciRelease=Join-Path $ciRuntimeBuild 'Release'
 $ciNative=Join-Path $ciRoot 'build/native'
 $ciNode=(Get-Command node -ErrorAction Stop).Source
+Invoke-CiCommand 'native-schema-source-check' $ciNode @((Join-Path $ciRoot 'Tools/verify-jsoncons.mjs'))
 $ciOpenSsl=(Get-Command openssl -ErrorAction Stop).Source
 Invoke-CiCommand 'native-configure' $ciCmake @('-S',(Join-Path $ciRoot 'Native'),'-B',$ciNative,'-G',$ciGenerator,'-A','x64',('-DAGENTFLOW_XLANG3_SOURCE='+$ciRuntime),('-DAGENTFLOW_XLANG3_RUNTIME_DIR='+$ciRelease),('-DAGENTFLOW_PYTHON_LIB_SOURCE='+$ciStdlib),('-DAGENTFLOW_NODE_EXECUTABLE='+$ciNode),('-DAGENTFLOW_OPENSSL_EXECUTABLE='+$ciOpenSsl))
 Invoke-CiCommand 'native-build' $ciCmake @('--build',$ciNative,'--config','Release','--parallel','2')
@@ -47,6 +48,8 @@ $ciExpected+='native_mcp_wire_contract'
 $ciExpected+='native_mcp_stdio_contract'
 $ciExpected+='native_mcp_handshake_contract'
 $ciExpected+='native_mcp_client_contract'
+$ciExpected+='native_json_schema_contract'
+$ciExpected+='native_mcp_effect_contract'
 $ciActual=($ciTests|ConvertFrom-Json).tests.name
 if(@($ciActual).Count -ne $ciExpected.Count -or (Compare-Object ($ciActual|Sort-Object) ($ciExpected|Sort-Object))){throw 'The complete expected native contract set was not registered; refusing a partial green build.'}
 Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error')

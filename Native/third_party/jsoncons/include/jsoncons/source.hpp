@@ -1,0 +1,833 @@
+// Copyright 2013-2026 Daniel Parker
+// Distributed under the Boost license, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+// See https://github.com/danielaparker/jsoncons for latest version
+
+#ifndef JSONCONS_SOURCE_HPP
+#define JSONCONS_SOURCE_HPP
+
+#include <cstdint>
+#include <cstring> // std::memcpy
+#include <exception>
+#include <functional>
+#include <istream>
+#include <iterator>
+#include <memory> // std::addressof
+#include <string>
+#include <type_traits> // std::enable_if
+#include <vector>
+
+#include <jsoncons/config/compiler_support.hpp>
+#include <jsoncons/utility/byte_string.hpp> // jsoncons::byte_traits
+#include <jsoncons/config/jsoncons_config.hpp>
+#include <jsoncons/utility/more_type_traits.hpp>
+
+namespace jsoncons { 
+
+template <typename Source>
+struct source_reader;
+
+// The source data must be padded by at least `buffer_padding_size` bytes.
+JSONCONS_INLINE_CONSTEXPR uint8_t buffer_padding_size = 4;
+
+template <typename CharT>
+class basic_null_istream : public std::basic_istream<CharT>
+{
+    class null_buffer : public std::basic_streambuf<CharT>
+    {
+    public:
+        using typename std::basic_streambuf<CharT>::int_type;
+        using typename std::basic_streambuf<CharT>::traits_type;
+
+        null_buffer() = default;
+        null_buffer(const null_buffer&) = delete;
+        null_buffer(null_buffer&&) = default;
+
+        null_buffer& operator=(const null_buffer&) = delete;
+        null_buffer& operator=(null_buffer&&) = default;
+
+        int_type overflow( int_type ch = typename std::basic_streambuf<CharT>::traits_type::eof()) override
+        {
+            return ch;
+        }
+    } nb_;
+public:
+    basic_null_istream()
+      : std::basic_istream<CharT>(&nb_)
+    {
+    }
+
+    basic_null_istream(const null_buffer&) = delete;
+    basic_null_istream& operator=(const null_buffer&) = delete;
+    basic_null_istream(basic_null_istream&&) noexcept
+        : std::basic_istream<CharT>(&nb_)
+    {
+    }
+    basic_null_istream& operator=(basic_null_istream&&) noexcept
+    {
+        return *this;
+    }
+};
+
+template <typename CharT>
+struct char_result
+{
+    CharT value;
+    bool eof;
+};
+
+// text sources
+
+template <typename CharT,typename Allocator = std::allocator<CharT>>
+class stream_source
+{
+    friend struct source_reader<stream_source<CharT,Allocator>>;
+public:
+    using value_type = CharT;
+    static constexpr std::size_t default_max_chunk_size = 16384;
+private:
+    using char_type = typename std::conditional<sizeof(CharT) == sizeof(char),char,CharT>::type;
+    using char_allocator_type = typename std::allocator_traits<Allocator>:: template rebind_alloc<value_type>;
+    using stream_source_type = stream_source<CharT,Allocator>;
+
+    Allocator alloc_;
+    basic_null_istream<char_type> null_is_;
+    std::basic_istream<char_type>* stream_ptr_;
+    std::basic_streambuf<char_type>* sbuf_;
+    std::size_t position_{0};
+    value_type* chunk_{nullptr};
+    std::size_t chunk_size_{0};
+    value_type* data_end_{nullptr};
+    std::size_t remaining_{0};
+public:
+
+    const Allocator& get_allocator() const
+    {
+        return alloc_;
+    }
+
+    stream_source(const Allocator& alloc = Allocator())
+        : alloc_(alloc), stream_ptr_(&null_is_), sbuf_(null_is_.rdbuf())
+    {
+    }
+
+    // Noncopyable 
+    stream_source(const stream_source&) = delete;
+
+    stream_source(stream_source&& other) noexcept
+        : alloc_(other.alloc_), stream_ptr_(&null_is_), sbuf_(null_is_.rdbuf())
+    {
+        chunk_ = other.chunk_;
+        data_end_ = other.data_end_;
+        chunk_size_ = other.chunk_size_;
+        remaining_ = other.remaining_;
+        other.chunk_ = nullptr;
+        other.data_end_ = nullptr;
+        other.chunk_size_ = 0;
+        other.remaining_ = 0;
+
+        if (other.stream_ptr_ != &other.null_is_)
+        {
+            stream_ptr_ = other.stream_ptr_;
+            sbuf_ = other.sbuf_;
+            position_ = other.position_;
+            other.stream_ptr_ = &other.null_is_;
+            other.sbuf_ = other.null_is_.rdbuf();
+            other.position_ = 0;
+        }
+    }
+
+    stream_source(stream_source&& other, const Allocator& alloc) noexcept
+        : alloc_(alloc), stream_ptr_(&null_is_), sbuf_(null_is_.rdbuf()),
+          chunk_size_(other.chunk_size_), remaining_(other.remaining_)
+    {
+        if (alloc == other.get_allocator())
+        {
+            chunk_ = other.chunk_;
+            data_end_ = other.data_end_;
+            remaining_ = other.remaining_;
+            other.chunk_ = nullptr;
+            other.data_end_ = nullptr;
+            other.remaining_ = 0;
+        }
+        else if (other.chunk_ != nullptr)
+        {
+            chunk_ = std::allocator_traits<char_allocator_type>::allocate(alloc_, chunk_size_);
+            data_end_ = chunk_ + (other.data_end_ - other.chunk_);
+            std::memcpy(data_end_, other.data_end_, sizeof(value_type)*other.remaining_);
+        }
+        if (other.stream_ptr_ != &other.null_is_)
+        {
+            stream_ptr_ = other.stream_ptr_;
+            sbuf_ = other.sbuf_;
+            position_ = other.position_;
+        }
+        else
+        {
+            stream_ptr_ = &null_is_;
+            sbuf_ = null_is_.rdbuf();
+            position_ = 0;
+        }
+    }
+
+    stream_source(std::basic_istream<char_type>& is,
+        const Allocator& alloc = Allocator())
+        : alloc_(alloc), stream_ptr_(std::addressof(is)), sbuf_(is.rdbuf()),
+          chunk_size_(default_max_chunk_size)
+    {
+        chunk_ = std::allocator_traits<char_allocator_type>::allocate(alloc_, chunk_size_);
+        data_end_ = chunk_;
+    }
+
+    stream_source(std::basic_istream<char_type>& is, std::size_t chunk_size,
+        const Allocator& alloc = Allocator())
+        : alloc_(alloc), stream_ptr_(std::addressof(is)), sbuf_(is.rdbuf()),
+          chunk_size_(chunk_size)
+    {
+        chunk_ = std::allocator_traits<char_allocator_type>::allocate(alloc_, chunk_size_);
+        data_end_ = chunk_;
+    }
+
+    ~stream_source() noexcept
+    {
+        if (chunk_)
+        {
+            std::allocator_traits<char_allocator_type>::deallocate(alloc_, chunk_, chunk_size_);
+        }
+    }
+
+    stream_source& operator=(const stream_source&) = delete;
+  
+    void move_assignment(std::true_type, // propagate_on_container_move_assignment
+        stream_source&& other) noexcept
+    {
+        auto alloc = other.alloc_;
+        other.alloc_ = alloc_;
+        alloc_ = alloc;
+        std::swap(chunk_, other.chunk_);
+        std::swap(chunk_size_, other.chunk_size_);
+        std::swap(data_end_, other.data_end_);
+        std::swap(remaining_, other.remaining_);
+        if (other.stream_ptr_ != &other.null_is_)
+        {
+            stream_ptr_ = other.stream_ptr_;
+            sbuf_ = other.sbuf_;
+            position_ = other.position_;
+        }
+        else
+        {
+            stream_ptr_ = &null_is_;
+            sbuf_ = null_is_.rdbuf();
+            position_ = 0;
+        }
+    }
+
+    void move_assignment(std::false_type, // not propagate_on_container_move_assignment
+        stream_source&& other) noexcept
+    {
+        chunk_size_ = other.chunk_size_;
+        chunk_ = std::allocator_traits<char_allocator_type>::allocate(alloc_, chunk_size_);
+        data_end_ = chunk_ + (other.data_end_ - other.chunk_);
+        remaining_ = other.remaining_;
+        std::memcpy(chunk_, other.chunk_, sizeof(value_type)*other.remaining_);
+        if (other.stream_ptr_ != &other.null_is_)
+        {
+            stream_ptr_ = other.stream_ptr_;
+            sbuf_ = other.sbuf_;
+            position_ = other.position_;
+        }
+        else
+        {
+            stream_ptr_ = &null_is_;
+            sbuf_ = null_is_.rdbuf();
+            position_ = 0;
+        }
+    }
+
+    stream_source& operator=(stream_source&& other) noexcept
+    {
+        move_assignment(typename std::allocator_traits<char_allocator_type>::propagate_on_container_move_assignment(),
+            std::move(other));
+        return *this;
+    }
+
+    const value_type* buffer() const
+    {
+        return chunk_;
+    }
+
+    std::size_t chunk_size() const
+    {
+        return chunk_size_;
+    }
+
+    const value_type* data() const
+    {
+        return data_end_;
+    }
+
+    bool eof() const
+    {
+        return remaining_ == 0 && stream_ptr_->eof();
+    }
+
+    bool is_error() const
+    {
+        return stream_ptr_->bad();  
+    }
+
+    std::size_t position() const
+    {
+        return position_;
+    }
+
+    void ignore(std::size_t length)
+    {
+        std::size_t len = 0;
+        if (remaining_ > 0)
+        {
+            len = (std::min)(remaining_, length);
+            position_ += len;
+            data_end_ += len;
+            remaining_ -= len;
+        }
+        while (len < length)
+        {
+            data_end_ = chunk_;
+            remaining_ = fill_buffer(chunk_, chunk_size_);
+            if (remaining_ == 0)
+            {
+                break;
+            }
+            std::size_t len2 = (std::min)(remaining_, length-len);
+            position_ += len2;
+            data_end_ += len2;
+            remaining_ -= len2;
+            len += len2;
+        }
+    }
+
+    char_result<value_type> peek() 
+    {
+        if (remaining_ == 0)
+        {
+            data_end_ = chunk_;
+            remaining_ = fill_buffer(chunk_, chunk_size_);
+        }
+        if (remaining_ > 0)
+        {
+            value_type c = *data_end_;
+            return char_result<value_type>{c, false};
+        }
+        else
+        {
+            return char_result<value_type>{0, true};
+        }
+    }
+
+    span<const value_type> read_chunk() 
+    {
+        if (remaining_ == 0)
+        {
+            data_end_ = chunk_;
+            remaining_ = fill_buffer(chunk_, chunk_size_);
+        }
+        const value_type* data = data_end_;
+        std::size_t length = remaining_;
+        data_end_ += remaining_;
+        position_ += remaining_;
+        remaining_ = 0;
+
+        return span<const value_type>(data, length);
+    }
+
+    std::size_t remaining() const
+    {
+        return remaining_;
+    }
+
+    template <typename Buffer>
+    span<const value_type> read_span(std::size_t length, Buffer&& buffer)
+    {
+        if (JSONCONS_UNLIKELY(length == 0))
+        {
+            return span<const value_type>{};
+        }
+        if (remaining_ == 0 && length <= chunk_size_)
+        {
+            remaining_ = fill_buffer(chunk_, chunk_size_);
+            data_end_ = chunk_;
+        }
+        if (length > remaining_)
+        {
+            buffer.clear();
+            source_reader<stream_source_type>::read(*this, std::forward<Buffer>(buffer), length);
+            return span<const value_type>(reinterpret_cast<const value_type*>(buffer.data()), buffer.size());
+        }
+
+        const value_type* data = data_end_;
+        data_end_ += length;
+        remaining_ -= length;
+        position_ += length;
+        return span<const value_type>(data, length);
+    }
+
+    std::size_t read(value_type* p, std::size_t length)
+    {
+        std::size_t len = 0;
+        if (remaining_ > 0)
+        {
+            len = (std::min)(remaining_, length);
+            std::memcpy(p, data_end_, len*sizeof(value_type));
+            data_end_ += len;
+            remaining_ -= len;
+            position_ += len;
+        }
+        if (length - len == 0)
+        {
+            return len;
+        }
+        else if (length - len < chunk_size_)
+        {
+            data_end_ = chunk_;
+            remaining_ = fill_buffer(chunk_, chunk_size_);
+            if (remaining_ > 0)
+            {
+                std::size_t len2 = (std::min)(remaining_, length-len);
+                std::memcpy(p+len, data_end_, len2*sizeof(value_type));
+                data_end_ += len2;
+                remaining_ -= len2;
+                position_ += len2;
+                len += len2;
+            }
+            return len;
+        }
+        else
+        {
+            if (stream_ptr_->eof())
+            {
+                remaining_ = 0;
+                return 0;
+            }
+            JSONCONS_TRY
+            {
+                std::streamsize count = sbuf_->sgetn(reinterpret_cast<char_type*>(p+len), length-len);
+                std::size_t len2 = static_cast<std::size_t>(count);
+                if (len2 < length-len)
+                {
+                    stream_ptr_->clear(stream_ptr_->rdstate() | std::ios::eofbit);
+                }
+                len += len2;
+                position_ += len2;
+                return len;
+            }
+            JSONCONS_CATCH(const std::exception&)     
+            {
+                stream_ptr_->clear(stream_ptr_->rdstate() | std::ios::badbit | std::ios::eofbit);
+                return 0;
+            }
+        }
+    }
+private:
+
+    std::size_t read_buffer(value_type* chunk, std::size_t chunk_size)
+    {
+        auto len = fill_buffer(chunk, chunk_size);
+        position_ += len;
+        return len;
+    }
+
+    std::size_t fill_buffer(value_type* chunk, std::size_t chunk_size)
+    {
+        if (stream_ptr_->eof())
+        {
+            return 0;
+        }
+
+        JSONCONS_TRY
+        {
+            std::streamsize count = sbuf_->sgetn(reinterpret_cast<char_type*>(chunk), chunk_size);
+            std::size_t length = static_cast<std::size_t>(count);
+
+            if (length < chunk_size)
+            {
+                stream_ptr_->clear(stream_ptr_->rdstate() | std::ios::eofbit);
+            }
+            return length;
+        }
+        JSONCONS_CATCH(const std::exception&)     
+        {
+            stream_ptr_->clear(stream_ptr_->rdstate() | std::ios::badbit | std::ios::eofbit);
+            return 0;
+        }
+    }
+};
+
+template <typename CharT,typename Allocator>
+constexpr std::size_t stream_source<CharT,Allocator>::default_max_chunk_size;
+
+// chars_source
+
+template <typename CharT>
+class chars_source 
+{
+public:
+    using value_type = CharT;
+private:
+    const value_type* data_end_{nullptr};
+    const value_type* current_{nullptr};
+    const value_type* end_{nullptr};
+public:
+    chars_source() noexcept = default;
+
+    // Noncopyable 
+    chars_source(const chars_source&) = delete;
+
+    chars_source(chars_source&& other) = default;
+
+    template <typename Sourceable,typename ChT=CharT>
+    chars_source(const Sourceable& s,
+        typename std::enable_if<ext_traits::is_byte<ChT>::value && ext_traits::is_byte<typename Sourceable::value_type>::value>::type* = 0)
+        : data_end_(reinterpret_cast<const value_type*>(s.data())), current_(data_end_), end_(data_end_+s.size())
+    {
+    }
+
+    template <typename Sourceable,typename ChT=CharT>
+    chars_source(const Sourceable& s,
+        typename std::enable_if<ext_traits::is_wide_character<ChT>::value && ext_traits::is_wide_character<typename Sourceable::value_type>::value>::type* = 0)
+        : data_end_(s.data()), current_(s.data()), end_(s.data()+s.size())
+    {
+    }
+
+    chars_source& operator=(const chars_source&) = delete;
+    chars_source& operator=(chars_source&& other) = default;
+
+    bool eof() const
+    {
+        return current_ == end_;  
+    }
+
+    bool is_error() const
+    {
+        return false;  
+    }
+
+    std::size_t position() const
+    {
+        return (current_ - data_end_)/sizeof(value_type);
+    }
+
+    void ignore(std::size_t count)
+    {
+        std::size_t len;
+        if (std::size_t(end_ - current_) < count)
+        {
+            len = end_ - current_;
+        }
+        else
+        {
+            len = count;
+        }
+        current_ += len;
+    }
+
+    char_result<value_type> peek() 
+    {
+        return current_ < end_ ? char_result<value_type>{*current_, false} : char_result<value_type>{0, true};
+    }
+
+    std::size_t chunk_size() const
+    {
+        return end_ - current_;
+    }
+
+    span<const value_type> read_chunk() 
+    {
+        const value_type* data = current_;
+        std::size_t length = end_ - current_;
+        current_ = end_;
+
+        return span<const value_type>(data, length);
+    }
+
+
+    std::size_t read_buffer(value_type* chunk, std::size_t chunk_size)
+    {
+        auto len = fill_buffer(chunk, chunk_size);
+        //position_ += len;
+        return len;
+    }
+
+    std::size_t fill_buffer(value_type* chunk, std::size_t chunk_size)
+    {
+        return read(chunk, chunk_size);
+    }
+
+    std::size_t remaining() const
+    {
+        return std::size_t(end_ - current_);
+    }
+
+    template <typename Buffer>
+    span<const value_type> read_span(std::size_t length, Buffer&&)
+    {
+        if (JSONCONS_UNLIKELY(length == 0))
+        {
+            return span<const value_type>{};
+        }
+        std::size_t remaining = std::size_t(end_ - current_);
+        std::size_t len = remaining < length ? remaining : length;
+
+        const value_type* data = current_;
+        current_ += len;
+        return span<const value_type>(data, len);
+    }
+
+    std::size_t read(value_type* p, std::size_t length)
+    {
+        std::size_t len;
+        if (std::size_t(end_ - current_) < length)
+        {
+            len = end_ - current_;
+        }
+        else
+        {
+            len = length;
+        }
+        std::memcpy(p, current_, len*sizeof(value_type));
+        current_  += len;
+        return len;
+    }
+};
+
+// iterator source
+
+template <typename IteratorT>
+class iterator_source
+{
+public:
+    using value_type = typename std::iterator_traits<IteratorT>::value_type;
+private:
+    static constexpr std::size_t default_max_chunk_size = 16384;
+
+    IteratorT current_;
+    IteratorT end_;
+    std::size_t position_{0};
+    std::vector<value_type> chunk_; // used by read_chunk to return a whole chunk, nothing is left in the chunk
+    std::size_t chunk_size_{0};
+
+    using difference_type = typename std::iterator_traits<IteratorT>::difference_type;
+    using iterator_category = typename std::iterator_traits<IteratorT>::iterator_category;
+public:
+
+    // Noncopyable 
+    iterator_source(const iterator_source&) = delete;
+
+    iterator_source(iterator_source&& other) = default;
+
+    iterator_source(const IteratorT& first, const IteratorT& last, std::size_t chunk_size = default_max_chunk_size)
+        : current_(first), end_(last), chunk_(chunk_size)
+    {
+    }
+    
+    ~iterator_source() = default;
+
+    iterator_source& operator=(const iterator_source&) = delete;
+    iterator_source& operator=(iterator_source&& other) = default;
+
+    bool eof() const
+    {
+        return !(current_ != end_);  
+    }
+
+    bool is_error() const
+    {
+        return false;  
+    }
+
+    std::size_t position() const
+    {
+        return position_;
+    }
+
+    void ignore(std::size_t count)
+    {
+        while (count-- > 0 && current_ != end_)
+        {
+            ++position_;
+            ++current_;
+        }
+    }
+
+    char_result<value_type> peek() 
+    {
+        return current_ != end_ ? char_result<value_type>{*current_, false} : char_result<value_type>{0, true};
+    }
+
+    std::size_t chunk_size() const
+    {
+        return chunk_.size();
+    }
+
+    span<const value_type> read_chunk() 
+    {
+        auto len = read(chunk_.data(), chunk_.size());
+        return span<const value_type>(chunk_.data(), len);
+    }
+
+    std::size_t read_buffer(value_type* chunk, std::size_t chunk_size)
+    {
+        auto len = fill_buffer(chunk, chunk_size);
+        position_ += len;
+        return len;
+    }
+
+    std::size_t fill_buffer(value_type* chunk, std::size_t chunk_size)
+    {
+        value_type* p = chunk;
+        value_type* pend = chunk + chunk_size;
+
+        while (p < pend && current_ != end_)
+        {
+            *p = static_cast<value_type>(*current_);
+            ++p;
+            ++current_;
+        }
+
+        return p - chunk;
+    }
+
+    std::size_t remaining() const
+    {
+        return 0;
+    }
+
+    template <typename Buffer>
+    span<const value_type> read_span(std::size_t length, Buffer&& buffer)
+    {
+        if (JSONCONS_UNLIKELY(length == 0))
+        {
+            return span<const value_type>{};
+        }
+
+        if (length <= chunk_.size())
+        {
+            auto len = fill_buffer(chunk_.data(), length);
+            position_ += len;
+            return span<const value_type>(chunk_.data(), len);
+        }
+
+        buffer.clear();
+        source_reader<iterator_source<IteratorT>>::read(*this, buffer, length);
+        return span<const value_type>(reinterpret_cast<const value_type*>(buffer.data()), buffer.size());
+    }
+
+    std::size_t read(value_type* data, std::size_t length)
+    {
+        std::size_t len = fill_buffer(data, length);
+
+        position_ += len;
+
+        return len;
+    }
+};
+
+template <typename Source>
+struct source_reader
+{
+    using value_type = typename Source::value_type;
+
+    template <typename Buffer>
+    static
+    typename std::enable_if<ext_traits::is_byte<value_type>::value &&
+        ext_traits::is_byte<typename Buffer::value_type>::value, std::size_t>::type
+    read(Source& source, Buffer& buffer, std::size_t length)
+    {
+        std::size_t unread = length;
+
+        while (unread > 0 && !source.eof())
+        {
+            if (source.remaining() == 0 && unread >= source.chunk_size())
+            {
+                std::size_t n = source.chunk_size();
+                std::size_t offset = buffer.size();
+                buffer.resize(offset+n);
+                std::size_t actual = source.read_buffer(reinterpret_cast<value_type*>(&buffer[0]) + offset, n);
+                if (JSONCONS_UNLIKELY(actual != n))
+                {
+                    buffer.resize(offset+actual);
+                }
+                unread -= actual;
+            }
+            else
+            {
+                std::size_t n = (std::min)(source.chunk_size(), unread);
+                std::size_t offset = buffer.size();
+                buffer.resize(offset+n);
+                std::size_t actual = source.read(reinterpret_cast<value_type*>(&buffer[0]) + offset, n);
+                if (JSONCONS_UNLIKELY(actual != n))
+                {
+                    buffer.resize(offset + actual);
+                }
+                unread -= actual;
+            }
+        }
+        return length - unread;
+    }
+
+    template <typename Buffer>
+    static
+    typename std::enable_if<!ext_traits::is_byte<value_type>::value &&
+                            ext_traits::has_reserve<Buffer>::value &&
+                            ext_traits::has_data_exact<value_type*,Buffer>::value, std::size_t>::type
+    read(Source& source, Buffer& buffer, std::size_t length)
+    {
+        std::size_t unread = length;
+
+        while (unread > 0 && !source.eof())
+        {
+            if (source.remaining() == 0 && unread >= source.chunk_size())
+            {
+                std::size_t n = source.chunk_size();
+                std::size_t offset = buffer.size();
+                buffer.resize(offset+n);
+                std::size_t actual = source.read_buffer(&buffer[0]+offset, n);
+                if (JSONCONS_UNLIKELY(actual != n))
+                {
+                    buffer.resize(offset + actual);
+                }
+                unread -= actual;
+            }
+            else
+            {
+                std::size_t n = (std::min)(source.chunk_size(), unread);
+                std::size_t offset = buffer.size();
+                buffer.resize(offset+n);
+                std::size_t actual = source.read(&buffer[0]+offset, n);
+                if (JSONCONS_UNLIKELY(actual != n))
+                {
+                    buffer.resize(offset + actual);
+                }
+                unread -= actual;
+            }
+        }
+
+        return length - unread;
+    }
+};
+
+#if !defined(JSONCONS_NO_DEPRECATED)
+
+template <typename CharT>
+using string_source = chars_source<CharT>;
+
+#endif
+
+using binary_stream_source = stream_source<uint8_t>;
+
+using bytes_source = chars_source<uint8_t>;
+
+} // namespace jsoncons
+
+#endif // JSONCONS_SOURCE_HPP

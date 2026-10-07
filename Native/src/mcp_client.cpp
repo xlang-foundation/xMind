@@ -20,13 +20,15 @@ McpToolPage tool_page(const McpWireMessage& message) {
     if(value.contains("resultType") && value["resultType"]!="complete")throw McpProtocolError("MCP tool discovery requires a complete result");
     if(!value.contains("tools") || !value["tools"].is_array() || value["tools"].size()>128)throw McpProtocolError("Invalid or excessive MCP tool page");
     McpToolPage page;std::set<std::string> names;
-    for(const auto& item:value["tools"]) {
+    for(const auto& raw:mcp_array_values(*mcp_object_member(message.payload_json,"tools"))) {
+        const auto item=Json::parse(raw);
         if(!item.is_object())throw McpProtocolError("Invalid MCP tool description");
         auto name=bounded_text(item,"name",128);
         if(!names.insert(name).second)throw McpProtocolError("Duplicate MCP tool name in page");
         if(!item.contains("inputSchema") || !item["inputSchema"].is_object())throw McpProtocolError("Missing MCP input schema");
         if(item.contains("annotations") && !item["annotations"].is_object())throw McpProtocolError("Invalid MCP tool annotations");
-        page.tools.push_back({std::move(name),bounded_text(item,"description",65536,false),item["inputSchema"].dump(),item.contains("annotations")?item["annotations"].dump():"{}"});
+        if(item.contains("outputSchema") && !item["outputSchema"].is_object())throw McpProtocolError("Invalid MCP output schema");
+        page.tools.push_back({std::move(name),bounded_text(item,"description",65536,false),*mcp_object_member(raw,"inputSchema"),mcp_object_member(raw,"annotations").value_or("{}"),mcp_object_member(raw,"outputSchema")});
     }
     if(value.contains("nextCursor"))page.next_cursor=bounded_text(value,"nextCursor",4096);
     return page;
@@ -132,6 +134,42 @@ bool McpStdioClient::ready() const {
     if(!impl_->live || impl_->closed)return false;
     const auto observed=impl_->process.status();
     return !observed.closed && !observed.faulted && !observed.exit_code;
+}
+McpToolReply McpStdioClient::call_tool(const std::string& name,std::string_view arguments,Deadline deadline,std::stop_token cancel) {
+    auto& state=*impl_;bool attempted=false;std::string request_id,response_json;
+    try {
+        if(!ready() || cancel.stop_requested() || std::chrono::steady_clock::now()>=deadline)throw McpTransportError("MCP tool stopped before dispatch");
+        if(name.empty() || name.size()>128 || name.find('\0')!=std::string::npos || arguments.size()>65536)throw McpProtocolError("Invalid MCP tool call");
+        const auto params="{\"name\":"+Json(name).dump()+",\"arguments\":"+mcp_compact_object(arguments)+"}";
+        const auto request=state.requests.prepare("tools/call",params,state.handshake.server().era);request_id=request.request.id;
+        if(cancel.stop_requested() || std::chrono::steady_clock::now()>=deadline)throw McpTransportError("MCP tool stopped before dispatch");
+        state.unsolicited=0;attempted=true;state.process.write(request.frame,deadline,cancel);
+        std::optional<McpToolReply> result;
+        while(!result) {
+            if(state.incoming.empty())state.read(deadline,cancel);
+            while(!state.incoming.empty()) {
+                const auto message=state.pop();if(state.peer_message(message,deadline,cancel))continue;
+                const auto reply=state.requests.receive(message);if(!reply)continue;
+                if(reply->request.id!=request_id)throw McpProtocolError("MCP tool response identity changed");
+                response_json=reply->response.raw_json;
+                if(reply->response.kind!=McpMessageKind::result)throw McpProtocolError("MCP tool returned an RPC error");
+                const auto value=Json::parse(reply->response.payload_json);
+                if(value.contains("resultType") && value["resultType"]!="complete")throw McpProtocolError("MCP interactive result requires an unsupported continuation owner");
+                if(!value.contains("content") || !value["content"].is_array() || value["content"].size()>128 || (value.contains("isError") && !value["isError"].is_boolean()))throw McpProtocolError("Invalid MCP tool result");
+                for(const auto& block:value["content"]) {
+                    if(!block.is_object() || !block.contains("type") || !block["type"].is_string())throw McpProtocolError("Invalid MCP content block");
+                    const auto type=block["type"].get<std::string>();
+                    if(type=="text") {if(!block.contains("text") || !block["text"].is_string())throw McpProtocolError("Invalid MCP text block");}
+                    else if(type=="image" || type=="audio") {if(!block.contains("data") || !block["data"].is_string() || !block.contains("mimeType") || !block["mimeType"].is_string())throw McpProtocolError("Invalid MCP media block");}
+                    else if(type=="resource") {if(!block.contains("resource") || !block["resource"].is_object() || !block["resource"].contains("uri") || !block["resource"]["uri"].is_string())throw McpProtocolError("Invalid MCP resource block");}
+                    else if(type=="resource_link") {if(!block.contains("uri") || !block["uri"].is_string() || !block.contains("name") || !block["name"].is_string())throw McpProtocolError("Invalid MCP resource link");}
+                    else throw McpProtocolError("Unsupported MCP content block");
+                }
+                result=McpToolReply{request_id,response_json,reply->response.payload_json,value.value("isError",false)};
+            }
+        }
+        return std::move(*result);
+    }catch(...) {state.retire();throw McpDispatchFailure(attempted,std::move(request_id),std::move(response_json));}
 }
 const McpServerDescription& McpStdioClient::server() const {if(!ready())throw McpProtocolError("MCP client is not ready");return impl_->handshake.server();}
 McpStdioStatus McpStdioClient::status() const {return impl_->process.status();}
