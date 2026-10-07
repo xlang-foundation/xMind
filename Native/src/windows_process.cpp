@@ -128,11 +128,11 @@ struct Child {
     Handle job,process,thread;bool dispatched=false,retired=false;
     bool empty() const {
         JOBOBJECT_BASIC_ACCOUNTING_INFORMATION info{};
-        if(!QueryInformationJobObject(job.value,JobObjectBasicAccountingInformation,&info,sizeof(info),nullptr))fail("Cannot inspect owned process tree");
+        if(!QueryInformationJobObject(job.value,JobObjectBasicAccountingInformation,&info,sizeof(info),nullptr))throw ProcessEffectUncertain("job_accounting_error:"+std::to_string(GetLastError()));
         return info.ActiveProcesses==0;
     }
     void terminate() {
-        if(!TerminateJobObject(job.value,1))fail("Cannot terminate owned process tree");
+        if(!TerminateJobObject(job.value,1))throw ProcessEffectUncertain("job_termination_error:"+std::to_string(GetLastError()));
         const auto until=Clock::now()+std::chrono::seconds(5);
         while(!empty()){if(Clock::now()>=until)throw ProcessEffectUncertain("Owned process tree termination is not established");std::this_thread::sleep_for(std::chrono::milliseconds(10));}
         // Job accounting and the process object's signaled state are separate
@@ -147,17 +147,19 @@ struct Child {
 bool drain(CapturePipe& pipe,bool error,ProcessResult& result,std::size_t limit,const ForegroundProcess::OutputObserver& observer) {
     if(pipe.eof)return false;DWORD available=0;
     if(!PeekNamedPipe(pipe.reader.value,nullptr,0,nullptr,&available,nullptr)) {
-        if(GetLastError()==ERROR_BROKEN_PIPE){pipe.eof=true;return false;}fail("Cannot inspect process output");
+        const auto error_code=GetLastError();
+        if(error_code==ERROR_BROKEN_PIPE || error_code==ERROR_PIPE_NOT_CONNECTED){pipe.eof=true;return false;}
+        throw ProcessEffectUncertain(std::string(error?"stderr_peek_error:":"stdout_peek_error:")+std::to_string(error_code));
     }
     if(!available)return false;
     std::array<char,8192> bytes{};DWORD read=0;
     // One reader owns this pipe. Read only bytes already reported available;
     // alternate channels each iteration so a full stderr cannot block stdout.
-    if(!ReadFile(pipe.reader.value,bytes.data(),static_cast<DWORD>(std::min<std::size_t>(available,bytes.size())),&read,nullptr))fail("Cannot capture process output");
+    if(!ReadFile(pipe.reader.value,bytes.data(),static_cast<DWORD>(std::min<std::size_t>(available,bytes.size())),&read,nullptr))throw ProcessEffectUncertain(std::string(error?"stderr_read_error:":"stdout_read_error:")+std::to_string(GetLastError()));
     if(!read)throw ProcessEffectUncertain("Available process output could not be captured");
     auto& count=error?result.stderr_count:result.stdout_count;count+=read;
     const auto retained=result.stdout_bytes.size()+result.stderr_bytes.size();const auto keep=std::min<std::size_t>(read,limit-retained);
-    if(keep){auto& output=error?result.stderr_bytes:result.stdout_bytes;output.append(bytes.data(),keep);if(observer)observer(error,std::string_view(bytes.data(),keep));}
+    if(keep){auto& output=error?result.stderr_bytes:result.stdout_bytes;output.append(bytes.data(),keep);if(observer){try{observer(error,std::string_view(bytes.data(),keep));}catch(...){throw ProcessEffectUncertain(error?"stderr_observer_failed":"stdout_observer_failed");}}}
     if(keep<read)result.truncated=true;return true;
 }
 }

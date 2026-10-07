@@ -21,6 +21,7 @@ ProcessConfiguration config(char** argv,const std::string& mode,const std::files
 }
 int main(int argc,char** argv) {
     if(argc!=4)return 2;
+    std::string stage="normal";
     try {
         const auto directory=std::filesystem::u8path(argv[3]);
         _putenv_s("XMIND_AUTH_TOKEN","synthetic private parent access");_putenv_s("XMIND_API_KEY","synthetic private parent model");_putenv_s("XMIND_PARENT_ONLY","synthetic parent sentinel");
@@ -83,25 +84,28 @@ int main(int argc,char** argv) {
             require(!std::filesystem::exists(directory.parent_path()/"outside"/"effect.txt"),"Directory junction must not permit process dispatch");
         }
         for(const auto mode:{"tree","parent-exit"}) {
+            stage=mode;
             const auto marker=directory/(std::string(mode)+".txt");auto c=config(argv,mode,marker);c.timeout=1500ms;
             HANDLE descendant=nullptr;std::string ready;
-            const auto result=ForegroundProcess::run(c,{},[&](bool err,std::string_view bytes){if(err || descendant)return;ready.append(bytes);if(ready.find('\n')!=std::string::npos){const auto pid=nlohmann::json::parse(ready)["descendant"].get<DWORD>();descendant=OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,pid);require(descendant!=nullptr,"Actual descendant must be observable before timeout");}});
+            const auto result=ForegroundProcess::run(c,{},[&](bool err,std::string_view bytes){if(err || descendant)return;ready.append(bytes);try{if(ready.find('\n')!=std::string::npos){const auto pid=nlohmann::json::parse(ready)["descendant"].get<DWORD>();descendant=OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,pid);if(!descendant)throw std::runtime_error("Actual descendant handle unavailable: Windows error "+std::to_string(GetLastError()));}}catch(const std::exception& e){std::cerr<<"Fixture readiness "<<mode<<": "<<e.what()<<" payload="<<ready.substr(0,512)<<'\n';throw;}});
             require(descendant!=nullptr,"Fixture must create a real descendant");const auto waited=WaitForSingleObject(descendant,0);CloseHandle(descendant);
             require(result.termination==ProcessTermination::timed_out && waited==WAIT_OBJECT_0,"Timeout must reap the actual descendant tree");
             require(!std::filesystem::exists(marker),"Terminated tree must not write delayed marker");
             if(std::string(mode)=="parent-exit")require(result.exit_code==0,"Parent zero exit must survive later descendant termination");
         }
         {
+            stage="cancel-tree";
             const auto marker=directory/"cancel-tree.txt";auto c=config(argv,"tree",marker);std::stop_source stop;std::string ready;HANDLE descendant=nullptr;
             const auto result=ForegroundProcess::run(c,stop.get_token(),[&](bool err,std::string_view bytes){if(err || descendant)return;ready.append(bytes);if(ready.find('\n')!=std::string::npos){const auto pid=nlohmann::json::parse(ready)["descendant"].get<DWORD>();descendant=OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,pid);require(descendant!=nullptr,"Actual descendant required before cancellation");stop.request_stop();}});
             require(descendant!=nullptr,"Cancelled fixture must have an actual child");const auto waited=WaitForSingleObject(descendant,0);CloseHandle(descendant);
             require(result.termination==ProcessTermination::cancelled && waited==WAIT_OBJECT_0 && !std::filesystem::exists(marker),"Cancellation must actually stop the whole job");
         }
         {
+            stage="observer-fault";
             auto c=config(argv,"normal",directory/"observer-fault.txt");
             rejects<ProcessEffectUncertain>([&]{ForegroundProcess::run(c,{},[](bool,std::string_view){throw std::runtime_error("Actual output sink fault");});});
             require(file(directory/"observer-fault.txt")=="actual child effect","Output failure must not conceal actual dispatched effect");
         }
         std::cout<<"Native foreground process adapter passed actual Windows child effects, literal arguments, separate/raw/bounded output, environment isolation, input EOF, stale directory/junction rejection, pre-dispatch cancellation, timeout/cancelled descendant trees and output-sink uncertainty. Approval/journal/model integration is not covered by this component.\n";return 0;
-    }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}
+    }catch(const std::exception& e){std::cerr<<"Stage "<<stage<<": "<<e.what()<<'\n';return 1;}
 }
