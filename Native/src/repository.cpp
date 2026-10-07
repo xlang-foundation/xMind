@@ -82,8 +82,20 @@ OperationState operation_state(const std::string& name) {
         if(to_string(value)==name) return value;
     throw DatabaseError("Invalid stored operation state");
 }
-Operation decode_operation(const std::vector<SqlValue>& row) {
-    return {text(row[0]),{text(row[1]),text(row[2]),text(row[3]),text(row[4])},operation_state(text(row[5])),integer(row[6]),text(row[7]),text(row[8])};
+std::vector<std::string> effect_resources(const OperationSpec& spec) {
+    if(spec.resources.size()>16)throw std::invalid_argument("Operation resource count exceeds limits");
+    std::vector<std::string> result{"workspace:"+spec.workspace};std::set<std::string> seen{result[0]};
+    for(const auto& resource:spec.resources) {
+        identifier(resource);if(resource.size()>4096 || !seen.insert(resource).second)throw std::invalid_argument("Invalid or duplicate operation resource");
+        try{(void)Json(resource).dump();}catch(const Json::exception&){throw std::invalid_argument("Invalid operation resource encoding");}
+        result.push_back(resource);
+    }
+    return result;
+}
+Operation decode_operation(const std::vector<SqlValue>& row,XlangSqlite& database) {
+    Operation result{text(row[0]),{text(row[1]),text(row[2]),text(row[3]),text(row[4])},operation_state(text(row[5])),integer(row[6]),text(row[7]),text(row[8])};
+    for(const auto& resource:database.execute("SELECT resource FROM operation_resources WHERE operation_id=? AND position>=0 ORDER BY position",{result.id}).rows)result.spec.resources.push_back(text(resource[0]));
+    return result;
 }
 }
 struct Repository::Impl {
@@ -97,6 +109,7 @@ struct Repository::Impl {
         return {*result.last_insert_id,id,kind,json};
     }
     void operation_state_event(const Operation& operation) {
+        database.execute("UPDATE operation_resources SET state=? WHERE operation_id=?",{to_string(operation.state),operation.id});
         Json record={{"operation_id",operation.id},{"tool",operation.spec.tool}};
         if(!operation.decision_actor.empty()) record["decision_actor"]=operation.decision_actor;
         event(operation.spec.run_id,"operation."+to_string(operation.state),record.dump());
@@ -104,7 +117,7 @@ struct Repository::Impl {
     void cancel_waiting(const std::string& run_id) {
         const auto rows=database.execute("SELECT id,run_id,workspace,tool,arguments,state,expires_ms,result,decision_actor FROM operations WHERE run_id=? AND state IN ('awaiting_approval','ready')",{run_id}).rows;
         for(const auto& row:rows) {
-            auto op=decode_operation(row);
+            auto op=decode_operation(row,database);
             changed_one(database.execute("UPDATE operations SET state='cancelled' WHERE id=? AND state=?",{op.id,to_string(op.state)}));
             op.state=OperationState::cancelled;operation_state_event(op);
         }
@@ -133,7 +146,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version!=1 && version!=2 && version!=3) throw DatabaseError("Unsupported target repository version");
+    } else if(version!=1 && version!=2 && version!=3 && version!=4) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -144,6 +157,14 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE INDEX run_operations ON operations(run_id,state)");
         db.execute("CREATE UNIQUE INDEX one_workspace_effect ON operations(workspace) WHERE state='executing'");
         db.execute("PRAGMA user_version=3");
+    }
+    if(version<4) {
+        db.execute("CREATE TABLE operation_resources(operation_id TEXT NOT NULL REFERENCES operations(id) ON DELETE CASCADE,resource TEXT NOT NULL,position INTEGER NOT NULL,state TEXT NOT NULL CHECK(state IN ('awaiting_approval','ready','denied','expired','cancelled','executing','succeeded','failed','uncertain')),PRIMARY KEY(operation_id,resource),UNIQUE(operation_id,position))");
+        db.execute("CREATE INDEX resource_operations ON operation_resources(resource,state)");
+        db.execute("INSERT INTO operation_resources(operation_id,resource,position,state) SELECT id,'workspace:'||workspace,-1,state FROM operations");
+        if(!db.execute("SELECT id FROM operations WHERE tool='mcp_tool' AND (json_type(arguments,'$.server_config_id') IS NOT 'text' OR length(json_extract(arguments,'$.server_config_id')) NOT BETWEEN 1 AND 128 OR instr(json_extract(arguments,'$.server_config_id'),char(0))>0) LIMIT 1").rows.empty())throw DatabaseError("Legacy MCP operation lacks an attributable server resource");
+        db.execute("INSERT INTO operation_resources(operation_id,resource,position,state) SELECT id,'mcp-server:'||json_extract(arguments,'$.server_config_id'),0,state FROM operations WHERE tool='mcp_tool'");
+        db.execute("PRAGMA user_version=4");
     }
     transaction.commit(); db.execute("PRAGMA journal_mode=WAL"); db.execute("PRAGMA synchronous=FULL");
 }
@@ -313,22 +334,24 @@ Operation Repository::request_operation(const std::string& id,const OperationSpe
     if(id.size()>256 || input.workspace.size()>32768 || input.tool.size()>128) throw std::invalid_argument("Operation identity exceeds its limit");
     const auto now=now_ms();
     if(expiry<=now || expiry>now+3600000) throw std::invalid_argument("Operation approval expiry must be within one hour");
+    const auto resources=effect_resources(input);
     auto spec=input;spec.arguments_json=object_json(spec.arguments_json);
     auto& db=impl_->database;Transaction transaction(db);
     if(run(spec.run_id).state!=RunState::running) throw Conflict("Operation requires a running owner");
     if(!db.execute("SELECT id FROM operations WHERE id=?",{id}).rows.empty()) throw Conflict("Operation already exists");
     changed_one(db.execute("INSERT INTO operations(id,run_id,workspace,tool,arguments,state,expires_ms) VALUES(?,?,?,?,?,'awaiting_approval',?)",{id,spec.run_id,spec.workspace,spec.tool,spec.arguments_json,expiry}));
+    for(std::size_t index=0;index<resources.size();++index)changed_one(db.execute("INSERT INTO operation_resources(operation_id,resource,position,state) VALUES(?,?,?,'awaiting_approval')",{id,resources[index],static_cast<std::int64_t>(index)-1}));
     Operation result{id,std::move(spec),OperationState::awaiting_approval,expiry,"{}",{}};
     impl_->operation_state_event(result);transaction.commit();return result;
 }
 Operation Repository::operation(const std::string& id) {
     const auto rows=impl_->database.execute("SELECT id,run_id,workspace,tool,arguments,state,expires_ms,result,decision_actor FROM operations WHERE id=?",{id}).rows;
-    if(rows.empty()) throw NotFound("Operation not found");return decode_operation(rows[0]);
+    if(rows.empty()) throw NotFound("Operation not found");return decode_operation(rows[0],impl_->database);
 }
 std::vector<Operation> Repository::operations(const std::string& id) {
     run(id);std::vector<Operation> result;
     for(const auto& row:impl_->database.execute("SELECT id,run_id,workspace,tool,arguments,state,expires_ms,result,decision_actor FROM operations WHERE run_id=? ORDER BY rowid",{id}).rows)
-        result.push_back(decode_operation(row));
+        result.push_back(decode_operation(row,impl_->database));
     return result;
 }
 Operation Repository::decide_operation(const std::string& id,OperationDecision decision,const std::string& actor) {
@@ -348,18 +371,26 @@ Operation Repository::decide_operation(const std::string& id,OperationDecision d
 }
 Operation Repository::claim_operation(const std::string& id,const OperationSpec& actual) {
     const auto arguments=object_json(actual.arguments_json);
+    const auto resources=effect_resources(actual);
     auto& db=impl_->database;Transaction transaction(db);auto result=operation(id);
     if(result.state!=OperationState::ready) throw Conflict("Operation has no unconsumed approval");
-    if(result.spec.run_id!=actual.run_id || result.spec.workspace!=actual.workspace || result.spec.tool!=actual.tool || result.spec.arguments_json!=arguments)
+    if(result.spec.run_id!=actual.run_id || result.spec.workspace!=actual.workspace || result.spec.tool!=actual.tool || result.spec.arguments_json!=arguments || result.spec.resources!=actual.resources)
         throw Conflict("Operation differs from its approval");
     if(run(actual.run_id).state!=RunState::running) throw Conflict("Operation owner is not running");
     const bool expired=result.expires_unix_ms<=now_ms();result.state=expired?OperationState::expired:OperationState::executing;
     if(!expired) {
-        const auto blocked=db.execute("SELECT state FROM operations WHERE workspace=? AND state IN ('executing','uncertain') AND id<>? ORDER BY CASE state WHEN 'uncertain' THEN 0 ELSE 1 END LIMIT 1",{actual.workspace,id}).rows;
-        if(!blocked.empty()) {
-            if(text(blocked[0][0])=="uncertain") throw WorkspaceEffectUncertain("Workspace has an uncertain effect");
-            throw WorkspaceEffectBusy("Workspace has an executing effect");
+        // BEGIN IMMEDIATE serializes the complete multi-resource check/claim.
+        // Check every key for uncertainty before considering ordinary busy
+        // claims, so a wait cannot obscure a quarantined remote domain.
+        bool busy=false;
+        for(const auto& resource:resources) {
+            const auto blocked=db.execute("SELECT o.state FROM operation_resources r JOIN operations o ON o.id=r.operation_id WHERE r.resource=? AND o.state IN ('executing','uncertain') AND o.id<>? ORDER BY CASE o.state WHEN 'uncertain' THEN 0 ELSE 1 END LIMIT 1",{resource,id}).rows;
+            if(!blocked.empty()) {
+                if(text(blocked[0][0])=="uncertain")throw WorkspaceEffectUncertain("Effect resource has an uncertain operation");
+                busy=true;
+            }
         }
+        if(busy)throw WorkspaceEffectBusy("Effect resource has an executing operation");
     }
     changed_one(db.execute("UPDATE operations SET state=? WHERE id=? AND state='ready'",{to_string(result.state),id}));
     impl_->operation_state_event(result);transaction.commit();
@@ -367,8 +398,9 @@ Operation Repository::claim_operation(const std::string& id,const OperationSpec&
 }
 Operation Repository::cancel_operation(const std::string& id,const OperationSpec& actual) {
     const auto arguments=object_json(actual.arguments_json);
+    (void)effect_resources(actual);
     auto& db=impl_->database;Transaction transaction(db);auto result=operation(id);
-    if(result.spec.run_id!=actual.run_id || result.spec.workspace!=actual.workspace || result.spec.tool!=actual.tool || result.spec.arguments_json!=arguments)
+    if(result.spec.run_id!=actual.run_id || result.spec.workspace!=actual.workspace || result.spec.tool!=actual.tool || result.spec.arguments_json!=arguments || result.spec.resources!=actual.resources)
         throw Conflict("Operation differs from its cancellation owner");
     if(result.state!=OperationState::awaiting_approval && result.state!=OperationState::ready) throw Conflict("Operation is no longer waiting");
     changed_one(db.execute("UPDATE operations SET state='cancelled' WHERE id=? AND state=?",{id,to_string(result.state)}));
@@ -399,7 +431,7 @@ std::size_t Repository::recover_interrupted(const BackendLease& owner) {
         const auto& id=text(row[0]);
         const auto executing=db.execute("SELECT id,run_id,workspace,tool,arguments,state,expires_ms,result,decision_actor FROM operations WHERE run_id=? AND state='executing'",{id}).rows;
         for(const auto& value:executing) {
-            auto operation=decode_operation(value);
+            auto operation=decode_operation(value,db);
             changed_one(db.execute("UPDATE operations SET state='uncertain',result=? WHERE id=? AND state='executing'",{std::string(R"({"reason":"server_restart"})"),operation.id}));
             operation.state=OperationState::uncertain;impl_->operation_state_event(operation);
         }

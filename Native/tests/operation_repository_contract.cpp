@@ -163,7 +163,7 @@ int main(int argc,char** argv) {
          const SqlBytes bytes{1,2,3};store.put_credential("local","key","purpose","retained",SecretBytes(bytes),0);
 #endif
         }
-        {XlangSqlite old(legacy,roots);old.execute("DROP TABLE operations");old.execute("PRAGMA user_version=2");old.execute("CREATE INDEX run_operations ON messages(session_id)");}
+        {XlangSqlite old(legacy,roots);old.execute("DROP TABLE operation_resources");old.execute("DROP TABLE operations");old.execute("PRAGMA user_version=2");old.execute("CREATE INDEX run_operations ON messages(session_id)");}
         rejects<DatabaseError>([&]{Repository failed_upgrade(legacy,roots);});
         {XlangSqlite old(legacy,roots);
          require(std::get<std::int64_t>(old.execute("PRAGMA user_version").rows[0][0])==2,"Failed v3 migration must retain the previous version");
@@ -173,7 +173,39 @@ int main(int argc,char** argv) {
 #if defined(_WIN32)
          require(upgraded.credentials("local").size()==1,"v2 migration must preserve encrypted credential metadata");
 #endif
-         XlangSqlite inspect(legacy,roots);require(std::get<std::int64_t>(inspect.execute("PRAGMA user_version").rows[0][0])==3,"Operation schema migration must advance version");}
+         XlangSqlite inspect(legacy,roots);require(std::get<std::int64_t>(inspect.execute("PRAGMA user_version").rows[0][0])==4,"Operation schema migration must advance version");}
+        const auto resource_database=(folder.path/"resources.sqlite").string();
+        {
+            Repository store(resource_database,roots);start(store,"a");start(store,"b");start(store,"c");
+            OperationSpec a{"a","workspace-a","mcp_tool",R"({"server_config_id":"shared-server","arguments_json":"{}"})",{"mcp-server:shared-server"}};
+            auto b=a;b.run_id="b";b.workspace="workspace-b";
+            auto bad=a;bad.resources.push_back(bad.resources[0]);rejects<std::invalid_argument>([&]{store.request_operation("duplicate-resource",bad,expiry());});
+            store.request_operation("resource-a",a,expiry());store.decide_operation("resource-a",OperationDecision::allow,"fixture-controller");
+            auto changed=a;changed.resources={"mcp-server:another-server"};rejects<Conflict>([&]{store.claim_operation("resource-a",changed);});
+            store.claim_operation("resource-a",a);store.request_operation("resource-b",b,expiry());store.decide_operation("resource-b",OperationDecision::allow,"fixture-controller");
+            rejects<WorkspaceEffectBusy>([&]{store.claim_operation("resource-b",b);});
+            require(store.operation("resource-b").state==OperationState::ready,"Contending multi-resource claim must remain unconsumed");
+            store.finish_operation("resource-a",OperationState::succeeded,R"({"acknowledged":true})");store.claim_operation("resource-b",b);
+            auto c=a;c.run_id="c";c.workspace="workspace-c";c.resources={"mcp-server:independent-server"};c.arguments_json=R"({"server_config_id":"independent-server"})";
+            store.request_operation("resource-c",c,expiry());store.decide_operation("resource-c",OperationDecision::allow,"fixture-controller");store.claim_operation("resource-c",c);store.finish_operation("resource-c",OperationState::succeeded,"{}");
+            store.finish_operation("resource-b",OperationState::uncertain,R"({"reason":"labeled_resource_uncertainty"})");
+            auto rotated=a;rotated.arguments_json=R"({"server_config_id":"shared-server","config_revision":2})";
+            store.request_operation("rotated",rotated,expiry());store.decide_operation("rotated",OperationDecision::allow,"fixture-controller");rejects<WorkspaceEffectUncertain>([&]{store.claim_operation("rotated",rotated);});
+            // Reconstruct an actual schema-v3 journal, retaining the old MCP
+            // operation payload; v4 must derive its stable server resource.
+            XlangSqlite old(resource_database,roots);old.execute("DROP TABLE operation_resources");old.execute("PRAGMA user_version=3");old.execute("CREATE INDEX resource_operations ON messages(session_id)");
+        }
+        rejects<DatabaseError>([&]{Repository failed_v4(resource_database,roots);});
+        {
+            XlangSqlite old(resource_database,roots);require(std::get<std::int64_t>(old.execute("PRAGMA user_version").rows[0][0])==3,"Failed resource migration must preserve version three");
+            require(old.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='operation_resources'").rows.empty(),"Resource migration failure must roll back the new table");old.execute("DROP INDEX resource_operations");
+        }
+        {
+            Repository migrated(resource_database,roots);require(migrated.operation("resource-b").spec.resources==std::vector<std::string>{"mcp-server:shared-server"},"v3 MCP migration must restore the stable server resource");
+            start(migrated,"after-migration");OperationSpec next{"after-migration","another-workspace","mcp_tool",R"({"server_config_id":"shared-server"})",{"mcp-server:shared-server"}};
+            migrated.request_operation("after-migration",next,expiry());migrated.decide_operation("after-migration",OperationDecision::allow,"fixture-controller");rejects<WorkspaceEffectUncertain>([&]{migrated.claim_operation("after-migration",next);});
+            require(migrated.operation("resource-b").state==OperationState::uncertain,"Migration must not release or resolve an uncertain remote effect");
+        }
         std::cout<<"Native operation journal contracts passed: exact approvals, one-shot claims, expiry, atomic faults, concurrent decisions, real fixture effect and uncertain recovery. Production effect tools are not integrated.\n";
         return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}

@@ -1,5 +1,5 @@
 #include "agentflow/mcp_tool_registry.hpp"
-#include "agentflow/json_schema.hpp"
+#include "agentflow/schema_worker.hpp"
 #include "nlohmann/json.hpp"
 #include <windows.h>
 #include <bcrypt.h>
@@ -24,7 +24,6 @@ struct McpToolRegistry::Impl {
     struct Entry {
         McpToolDescription description;
         std::string alias,fingerprint;
-        std::unique_ptr<JsonSchema202012> input,output;
     };
     McpStdioClient& client;PersistenceService& store;WorkspaceTools& workspace;
     std::string config_id;std::int64_t revision;
@@ -44,8 +43,8 @@ McpToolRegistry::McpToolRegistry(McpStdioClient& client,PersistenceService& stor
             bytes+=description.name.size()+description.description.size()+description.input_schema_json.size()+description.annotations_json.size()+(description.output_schema_json?description.output_schema_json->size():0);
             if(bytes>4*1024*1024)throw McpProtocolError("MCP registry descriptions exceed limits");
             Impl::Entry entry;entry.description=description;
-            entry.input=std::make_unique<JsonSchema202012>(description.input_schema_json);
-            if(description.output_schema_json)entry.output=std::make_unique<JsonSchema202012>(*description.output_schema_json);
+            SchemaWorker().evaluate(description.input_schema_json,{},deadline,cancel);
+            if(description.output_schema_json)SchemaWorker().evaluate(*description.output_schema_json,{},deadline,cancel);
             entry.fingerprint=digest(Json{{"config_id",state.config_id},{"config_revision",revision},{"peer_name",description.name},{"description",description.description},{"input_schema_json",description.input_schema_json},{"annotations_json",description.annotations_json},{"output_schema_json",description.output_schema_json?Json(*description.output_schema_json):Json(nullptr)}}.dump());
             entry.alias="mcp_"+entry.fingerprint.substr(0,48);const auto alias=entry.alias;
             if(!state.entries.emplace(alias,std::move(entry)).second)throw McpProtocolError("MCP alias collision");
@@ -65,14 +64,14 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
     std::int64_t expiry,McpStdioClient::Deadline deadline,std::stop_token cancel) {
     auto& state=*impl_;const auto found=state.entries.find(alias);
     if(found==state.entries.end())throw std::invalid_argument("Tool is not registered on this backend");
-    const auto& entry=found->second;entry.input->validate_object(arguments);
+    const auto& entry=found->second;SchemaWorker().evaluate(entry.description.input_schema_json,arguments,deadline,cancel);
     const auto approved=mcp_compact_object(arguments);
     if(!state.client.ready())throw McpEffectNotDispatched("MCP peer is unavailable before proposal");
     OperationSpec spec{run,state.workspace.identity(),"mcp_tool",Json{{"server_config_id",state.config_id},{"config_revision",state.revision},
         {"peer_tool",entry.description.name},{"alias",alias},{"catalogue_fingerprint",entry.fingerprint},
         {"protocol_version",state.client.server().protocol_version},{"input_schema_json",entry.description.input_schema_json},
         {"output_schema_json",entry.description.output_schema_json?Json(*entry.description.output_schema_json):Json(nullptr)},
-        {"annotations_json",entry.description.annotations_json},{"arguments_json",approved}}.dump()};
+        {"annotations_json",entry.description.annotations_json},{"arguments_json",approved}}.dump(),{"mcp-server:"+state.config_id}};
     PermissionWaiter(state.store).acquire(id,spec,expiry,cancel);
     auto finish=[&](OperationState outcome,const std::string& result) {
         try{state.store.finish_operation(id,outcome,result).get();}
@@ -93,9 +92,13 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
         // A peer error does not establish that no partial external effect took
         // place. Preserve its actual reply and quarantine instead of retrying.
         if(reply.is_error)throw McpEffectUncertain("MCP peer reported a tool error with unknown effects");
-        if(entry.output) {
+        if(entry.description.output_schema_json) {
             const auto content=mcp_object_member(reply.result_json,"structuredContent");
-            if(!content)throw SchemaArgumentsInvalid("MCP output schema requires structured content");entry.output->validate_object(*content);
+            if(!content)throw SchemaArgumentsInvalid("MCP output schema requires structured content");
+            // After a received acknowledgement, finish validating/journaling
+            // its actual outcome despite run cancellation, within a fresh
+            // independent bounded worker budget. Do not discard or replay it.
+            SchemaWorker().evaluate(*entry.description.output_schema_json,*content,std::chrono::steady_clock::now()+std::chrono::seconds(2));
         }
     }catch(...) {finish(OperationState::uncertain,Json{{"reason","mcp_tool_error_or_invalid_output"},{"request_id",reply.request_id},{"response_json",reply.response_json}}.dump());throw McpEffectUncertain("MCP response does not establish a successful effect; quarantine remains in force");}
     try {

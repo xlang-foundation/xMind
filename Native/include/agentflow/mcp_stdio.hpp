@@ -19,6 +19,11 @@ struct McpStdioConfiguration {
     std::vector<std::string> arguments;
     std::vector<std::pair<std::string,std::string>> environment;
     std::size_t stdout_buffer_limit=4*1024*1024;
+    // Optional native child budgets. Zero leaves that budget unset. These
+    // control resource consumption/lifetime, not filesystem/network authority.
+    std::size_t process_memory_limit=0;
+    std::chrono::milliseconds process_cpu_limit{0};
+    std::uint32_t active_process_limit=0;
 };
 struct McpStdioStatus {
     std::uint32_t pid;

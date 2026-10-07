@@ -79,7 +79,7 @@ int main(int argc,char** argv) {
         // Reconstruct the previous schema, then verify migration to the current schema.
         {
             XlangSqlite previous(path,roots);
-            previous.execute("DROP TABLE operations");previous.execute("DROP TABLE credentials");previous.execute("DROP TABLE retired_credentials");previous.execute("PRAGMA user_version=1");
+            previous.execute("DROP TABLE operation_resources");previous.execute("DROP TABLE operations");previous.execute("DROP TABLE credentials");previous.execute("DROP TABLE retired_credentials");previous.execute("PRAGMA user_version=1");
             previous.execute("CREATE TABLE credentials(unexpected TEXT)");
         }
         rejects<DatabaseError>([&]{Repository rejected(path,roots);});

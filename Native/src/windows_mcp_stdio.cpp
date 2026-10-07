@@ -117,12 +117,16 @@ struct McpStdioProcess::Impl {
     std::jthread output_pump,error_pump;
     explicit Impl(const McpStdioConfiguration& config):limit(config.stdout_buffer_limit) {
         if(limit<8192 || limit>4*1024*1024 || config.arguments.size()>64) throw std::invalid_argument("MCP transport configuration exceeds limits");
+        if((config.process_memory_limit && (config.process_memory_limit<16*1024*1024 || config.process_memory_limit>1024*1024*1024)) || config.process_cpu_limit<std::chrono::milliseconds::zero() || config.process_cpu_limit>std::chrono::seconds(60) || config.active_process_limit>64)throw std::invalid_argument("Native child resource budget exceeds limits");
         const auto executable=wide(config.executable),directory=wide(config.working_directory);
         if(!std::filesystem::path(executable).is_absolute() || !std::filesystem::is_regular_file(std::filesystem::path(executable)) || !std::filesystem::path(directory).is_absolute() || !std::filesystem::is_directory(std::filesystem::path(directory))) throw std::invalid_argument("MCP executable and working directory must be explicit existing absolute paths");
         std::wstring command=quote(executable);for(const auto& argument:config.arguments){command.push_back(L' ');command+=quote(wide(argument));if(command.size()>32766)throw std::invalid_argument("MCP command line exceeds limits");}
         auto child_environment=environment(config);auto in=pipe(true),out=pipe(false),err=pipe(false);
         job=Handle(CreateJobObjectW(nullptr,nullptr));if(!job.get())windows_error("Cannot create MCP process job");
         JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+        if(config.process_memory_limit){limits.BasicLimitInformation.LimitFlags|=JOB_OBJECT_LIMIT_PROCESS_MEMORY|JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION;limits.ProcessMemoryLimit=config.process_memory_limit;}
+        if(config.process_cpu_limit.count()){limits.BasicLimitInformation.LimitFlags|=JOB_OBJECT_LIMIT_PROCESS_TIME;limits.BasicLimitInformation.PerProcessUserTimeLimit.QuadPart=config.process_cpu_limit.count()*10000;}
+        if(config.active_process_limit){limits.BasicLimitInformation.LimitFlags|=JOB_OBJECT_LIMIT_ACTIVE_PROCESS;limits.BasicLimitInformation.ActiveProcessLimit=config.active_process_limit;}
         if(!SetInformationJobObject(job.get(),JobObjectExtendedLimitInformation,&limits,sizeof(limits)))windows_error("Cannot configure MCP process ownership");
         HANDLE inherited[]{in.child.get(),out.child.get(),err.child.get()};Attributes attributes(inherited);
         STARTUPINFOEXW startup{};startup.StartupInfo.cb=sizeof(startup);startup.StartupInfo.dwFlags=STARTF_USESTDHANDLES;startup.StartupInfo.hStdInput=inherited[0];startup.StartupInfo.hStdOutput=inherited[1];startup.StartupInfo.hStdError=inherited[2];startup.lpAttributeList=attributes.list;

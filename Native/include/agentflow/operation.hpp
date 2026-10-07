@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <string>
 #include <stdexcept>
+#include <vector>
 #include "agentflow/store.hpp"
 
 namespace agentflow {
@@ -23,7 +24,13 @@ struct WorkspaceEffectUncertain : Conflict {using Conflict::Conflict;};
 // Workspace is the runtime's verified workspace identity. Arguments are an
 // exact JSON object, retained byte for byte. Changing serialization requires a
 // new operation; effect adapters must execute the approved payload unchanged.
-struct OperationSpec {std::string run_id,workspace,tool,arguments_json;};
+struct OperationSpec {
+    std::string run_id,workspace,tool,arguments_json;
+    // Additional trusted effect domains (for example a configured MCP server).
+    // Revision changes do not release an unresolved domain. Views/models never
+    // choose these keys. The verified workspace domain is included implicitly.
+    std::vector<std::string> resources;
+};
 struct Operation {
     std::string id;
     OperationSpec spec;

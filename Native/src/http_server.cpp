@@ -67,7 +67,7 @@ Json encode(const Operation& value) {
     // Keep exact argument bytes: clients must not reserialize numeric/content
     // values and present a different payload as the granted operation.
     return {{"id",value.id},{"run_id",value.spec.run_id},{"workspace_id",value.spec.workspace},
-        {"tool",value.spec.tool},{"arguments_json",value.spec.arguments_json},{"state",to_string(value.state)},
+        {"tool",value.spec.tool},{"arguments_json",value.spec.arguments_json},{"resources",value.spec.resources},{"state",to_string(value.state)},
         {"expires_unix_ms",value.expires_unix_ms},{"decision_actor",value.decision_actor},{"result_json",value.result_json}};
 }
 Json encode(const EditRecoveryInspection& value) {

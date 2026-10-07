@@ -28,15 +28,16 @@ Operation proposed(PersistenceService& store,const std::string& id){
 }
 struct Task {
     std::stop_source cancel;std::future<std::string> result;
-    Task(PersistenceService& store,char** argv,std::filesystem::path root,std::string run,std::string id,std::string mode,std::string arguments=R"({"body":"actual native MCP effect\n","decimal":1.00000000000000000001})"):
-        result(std::async(std::launch::async,[this,&store,argv,root,run,id,mode,arguments]{
-            WorkspaceTools workspace(root.string());McpStdioClient client({argv[1],argv[3],{argv[2],mode,(root/"effect.txt").string(),(root/"effect.marker").string()},{}});
+    Task(PersistenceService& store,char** argv,std::filesystem::path root,std::string run,std::string id,std::string mode,std::string arguments=R"({"body":"actual native MCP effect\n","decimal":1.00000000000000000001})",std::optional<std::filesystem::path> shared_server_root={}):
+        result(std::async(std::launch::async,[this,&store,argv,root,run,id,mode,arguments,shared_server_root]{
+            const auto peer_root=shared_server_root.value_or(root);const auto config_id="fixture-server-"+peer_root.filename().string();
+            WorkspaceTools workspace(root.string());McpStdioClient client({argv[1],argv[3],{argv[2],mode,(peer_root/"effect.txt").string(),(peer_root/"effect.marker").string()},{}});
             try {
                 client.connect(std::chrono::steady_clock::now()+5s,cancel.get_token());
-                McpToolRegistry registry(client,store,workspace,"fixture-server",7,std::chrono::steady_clock::now()+5s,cancel.get_token());
+                McpToolRegistry registry(client,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token());
                 const auto definitions=registry.definitions();require(definitions.size()==1 && definitions[0].name.starts_with("mcp_") && definitions[0].name.size()==52,"Native registry must derive a bounded alias from trusted identity and exact snapshot");
                 const auto alias=mode=="unknown-alias"?"fixture.write":definitions[0].name;
-                const auto deadline=std::chrono::steady_clock::now()+(mode=="stopped-before-dispatch"?-1ms:mode=="timeout"?500ms:5s);
+                const auto deadline=std::chrono::steady_clock::now()+(mode=="stopped-before-dispatch"?1500ms:mode=="timeout"?1500ms:5s);
                 const auto output=registry.invoke(id,run,alias,arguments,expiry(),deadline,cancel.get_token());
                 client.shutdown();require(client.status().exit_code==0,"Actual MCP peer must verify a valid exchange");return output;
             }catch(...){const auto error=std::current_exception();client.shutdown();require(client.status().exit_code==0,"Failure peer must accept the expected wire sequence and shutdown");std::rethrow_exception(error);}
@@ -57,7 +58,7 @@ int main(int argc,char** argv){
                 require(proposal.state==OperationState::awaiting_approval && contents(workspace/"effect.txt").empty(),"Untrusted readOnlyHint must never bypass real controller approval");
                 require(task.result.wait_for(30ms)==std::future_status::timeout,"Waiting must not imply permission");
                 const auto payload=Json::parse(proposal.spec.arguments_json);
-                require(payload["server_config_id"]=="fixture-server" && payload["config_revision"]==7 && payload["peer_tool"]=="fixture.write" && payload["catalogue_fingerprint"].get<std::string>().size()==64,"Approval must bind trusted configuration, peer name and schema snapshot");
+                require(payload["server_config_id"]=="fixture-server-"+std::string(mode) && payload["config_revision"]==7 && payload["peer_tool"]=="fixture.write" && payload["catalogue_fingerprint"].get<std::string>().size()==64,"Approval must bind trusted configuration, peer name and schema snapshot");
                 require(payload["arguments_json"].get<std::string>().find("1.00000000000000000001")!=std::string::npos,"Durable proposal must retain exact approved numeric bytes");
                 store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();const auto actual=Json::parse(task.result.get());
                 require(contents(workspace/"effect.txt")=="actual native MCP effect\n" && actual["acknowledged_by_peer"]==true && actual["independently_verified"]==false,"Real acknowledged tool effect must be distinguished from independent verification");
@@ -69,7 +70,7 @@ int main(int argc,char** argv){
                 const auto workspace=root(mode);start(store,mode);Task task(store,argv,workspace,mode,mode,mode);proposed(store,mode);
                 if(std::string(mode)=="denied"){store.decide_operation(mode,OperationDecision::deny,"fixture-controller").get();rejects<PermissionDenied>([&]{task.result.get();});}
                 else if(std::string(mode)=="cancel-wait"){task.cancel.request_stop();rejects<PermissionCancelled>([&]{task.result.get();});}
-                else{store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();rejects<McpEffectNotDispatched>([&]{task.result.get();});require(store.operation(mode).get().state==OperationState::failed,"Known pre-dispatch stop must not invent uncertainty");}
+                else{std::this_thread::sleep_for(1600ms);store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();rejects<McpEffectNotDispatched>([&]{task.result.get();});require(store.operation(mode).get().state==OperationState::failed,"Known pre-dispatch stop must not invent uncertainty");}
                 require(contents(workspace/"effect.txt").empty(),"Denied/cancelled/stopped proposal must not invoke the external tool");store.transition(mode,RunState::running,RunState::failed).get();
             }
             for(const auto* mode:{"bad-catalog-schema","duplicate-page","cursor-cycle","unknown-alias","invalid-arguments"}){
@@ -86,6 +87,7 @@ int main(int argc,char** argv){
                 rejects<McpEffectUncertain>([&]{task.result.get();});require(contents(workspace/"effect.txt")=="actual native MCP effect\n" && store.operation(mode).get().state==OperationState::uncertain,"Interrupted/error/invalid-result effects must remain actual, uncertain and unreplayed");store.transition(mode,RunState::running,RunState::failed).get();
             }
             start(store,"blocked-run");Task blocked(store,argv,uncertain_root,"blocked-run","blocked-operation","normal");proposed(store,"blocked-operation");store.decide_operation("blocked-operation",OperationDecision::allow,"fixture-controller").get();rejects<WorkspaceEffectUncertain>([&]{blocked.result.get();});require(contents(uncertain_root/"effect.txt")=="actual native MCP effect\n","Workspace quarantine must block another actual MCP dispatch");store.transition("blocked-run",RunState::running,RunState::failed).get();
+            const auto other_workspace=root("other-workspace");start(store,"blocked-other");Task other(store,argv,other_workspace,"blocked-other","blocked-other","normal",R"({"body":"must not run","decimal":1.00000000000000000001})",uncertain_root);proposed(store,"blocked-other");store.decide_operation("blocked-other",OperationDecision::allow,"fixture-controller").get();rejects<WorkspaceEffectUncertain>([&]{other.result.get();});require(contents(uncertain_root/"effect.txt")=="actual native MCP effect\n" && contents(other_workspace/"effect.txt").empty(),"Stable server quarantine must block actual dispatch from another workspace");store.transition("blocked-other",RunState::running,RunState::failed).get();
             fault_root=root("journal-fault");start(store,"journal-fault");
             {XlangSqlite inject(database,imports);inject.execute("CREATE TRIGGER reject_mcp_success BEFORE UPDATE OF state ON operations WHEN NEW.id='journal-fault' AND NEW.state='succeeded' BEGIN SELECT RAISE(ABORT,'fixture MCP outcome storage fault'); END");}
             Task fault(store,argv,fault_root,"journal-fault","journal-fault","normal");proposed(store,"journal-fault");store.decide_operation("journal-fault",OperationDecision::allow,"fixture-controller").get();rejects<McpOutcomeUnrecorded>([&]{fault.result.get();});require(contents(fault_root/"effect.txt")=="actual native MCP effect\n" && store.operation("journal-fault").get().state==OperationState::executing,"Outcome storage failure must preserve the real claimed effect for restart recovery");store.close();
