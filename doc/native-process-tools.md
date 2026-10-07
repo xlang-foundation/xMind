@@ -2,6 +2,8 @@
 
 Process and shell execution remain unimplemented in the native coding loop. The foreground adapter source and independent actual-child contract are now prepared in `Native/include/agentflow/process.hpp`, `Native/src/windows_process.cpp` and `Native/tests/process_contract.cpp`. The contract is registered in CMake and the isolated gate, bringing the expected native set to 32. Node fixture syntax checks passed; local compilation was explicitly deferred by the live xlang3 benchmark controller. No compiled adapter or native contract pass is claimed until exact-source CI establishes it. This contract defines the next component; it does not establish an execution milestone.
 
+Source `6e348ad1b142f44a05b9c03f333c82eb79b474ff` is pushed. [Isolated run 37624585693](https://github.com/xlang-foundation/xMind/actions/runs/37624585693) is currently building the pinned runtime/native contract set; no result is inferred from its live status. The actual editor preview remains on the earlier verified creation bundle.
+
 The pinned OpenCode reference is `v2.0.16`, commit `3a103fe0aff726a4edc7492f03f7b88195d9e4c9`. Source inspection of `packages/core/src/tool/plugin/shell.ts`, `packages/core/src/shell.ts` and `packages/core/src/session/shell.ts` shows more than a subprocess call: foreground/background commands, working-directory checks after approval, timeouts, retained output, lifecycle observation and completion notifications. The pinned API inventory includes `session.shell` and shell discovery. Implementing a foreground tool alone will not establish parity with these capabilities. No reference implementation is copied or executed.
 
 ## First native component
