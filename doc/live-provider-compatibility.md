@@ -31,3 +31,12 @@ under approved backend endpoint policy. Conversation continuation must retain
 its original wire items; an existing Responses history cannot be silently
 converted to Chat Completions. Live acceptance must then prove the selected
 frontier model, real tool effects and actual usage through the shared views.
+
+After the adapter update, actual browser reload retained login, the selected
+model and recorded history. The footer showed the backend's current Chat
+Completions wire. Selecting the separately recorded CLI diagnostic conversation
+displayed HTTP 400, `invalid_request_error` and `reasoning_effort` in the visible
+failure card. No new inference was submitted for this UI check. The screenshot
+remains private in ignored launch-state storage. This confirms the shared view
+renders the live native diagnostic; Responses enrollment is still pending its
+compiled gate and a successful live retry.
