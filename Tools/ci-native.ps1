@@ -41,6 +41,10 @@ $ciNpm=(Get-Command npm.cmd -CommandType Application -ErrorAction Stop | Select-
 Invoke-CiCommand 'native-sdk-peer-install' $ciNpm @('ci','--prefix',(Join-Path $ciRoot 'Native/tests/sdk'),'--ignore-scripts','--no-audit','--no-fund')
 $ciOpenSsl=(Get-Command openssl -ErrorAction Stop).Source
 Invoke-CiCommand 'native-configure' $ciCmake @('-S',(Join-Path $ciRoot 'Native'),'-B',$ciNative,'-G',$ciGenerator,'-A','x64',('-DAGENTFLOW_XLANG3_SOURCE='+$ciRuntime),('-DAGENTFLOW_XLANG3_RUNTIME_DIR='+$ciRelease),('-DAGENTFLOW_PYTHON_LIB_SOURCE='+$ciStdlib),('-DAGENTFLOW_NODE_EXECUTABLE='+$ciNode),('-DAGENTFLOW_OPENSSL_EXECUTABLE='+$ciOpenSsl))
+# Build the actual process contract and its production dependencies first. This
+# catches new executor/test compile errors before unrelated schema/agent targets;
+# the full build and exact complete contract gate below remain unconditional.
+Invoke-CiCommand 'native-process-contract-build' $ciCmake @('--build',$ciNative,'--config','Release','--target','agentflow_process_executor_contract','--parallel','2')
 Invoke-CiCommand 'native-build' $ciCmake @('--build',$ciNative,'--config','Release','--parallel','2')
 $ciTests=& $ciCtest --test-dir $ciNative -C Release --show-only=json-v1
 if($LASTEXITCODE -ne 0){throw 'Could not inspect the configured native contracts.'}
