@@ -183,7 +183,7 @@ test('tool-turn checkpoint starts a new live response and history refresh preser
 });
 test('bottom model selector exposes only backend-advertised IDs and sends the selected ID',()=>{
   const r=renderer();r.send({type:'capabilities',execution:true,model:'synthetic-catalogue-a',models:[{id:'synthetic-catalogue-a'},{id:'synthetic-catalogue-b'}]});
-  const selector=r.dom.window.document.querySelector('footer #model');assert.ok(selector);assert.equal(selector.disabled,false);assert.deepEqual([...selector.options].map(option=>option.value),['synthetic-catalogue-a','synthetic-catalogue-b']);
+  const selector=r.dom.window.document.querySelector('footer #model');assert.ok(selector);assert.equal(selector.disabled,false);assert.deepEqual([...selector.options].map(option=>option.value),['','synthetic-catalogue-a','synthetic-catalogue-b']);
   selector.value='synthetic-catalogue-b';selector.dispatchEvent(new r.dom.window.Event('change'));assert.equal(r.posted.at(-1).type,'model');assert.equal(r.posted.at(-1).id,'synthetic-catalogue-b');r.dom.window.close();
 });
 test('provider cache/reasoning counts and backend first-token time render without derived estimates',()=>{
@@ -197,4 +197,15 @@ test('pending file comparison sends only an operation ID and remains separate fr
   const compare=buttons.find(button=>button.textContent==='Compare changes');assert.ok(compare);compare.click();
   assert.equal(JSON.stringify(r.posted.at(-1)),JSON.stringify({type:'review',id:'fixture-edit'}));
   assert.ok(!buttons.find(button=>button.textContent==='Allow edit').disabled);r.dom.window.close();
+});
+
+test('top-right settings dialog clears key input and leaves model selection in the footer',()=>{
+  const r=renderer(),doc=r.dom.window.document,dialog=doc.getElementById('provider-settings');
+  // jsdom has no dialog implementation; emulate only these native DOM methods.
+  dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;dialog.dispatchEvent(new r.dom.window.Event('close'));};
+  assert.ok(doc.querySelector('header #settings'));assert.equal(doc.querySelector('footer #configureModel'),null);
+  doc.getElementById('settings').click();assert.equal(dialog.open,true);assert.equal(doc.getElementById('provider-key').type,'password');doc.getElementById('provider-key').value='synthetic-ui-key';
+  doc.getElementById('provider-form').dispatchEvent(new r.dom.window.Event('submit',{cancelable:true}));assert.equal(r.posted.at(-1).type,'saveProviderKey');assert.equal(r.posted.at(-1).key,'synthetic-ui-key');assert.equal(doc.getElementById('provider-key').value,'');
+  r.send({type:'model-list',models:[{id:'fixture-returned-model'}]});r.send({type:'settings-state',complete:true,busy:false,text:'Models fetched'});assert.equal(dialog.open,false);assert.equal(doc.getElementById('model').disabled,false);assert.equal(doc.getElementById('send').disabled,true);assert.equal(r.posted.filter(m=>m.type==='model').length,0);
+  const model=doc.getElementById('model');model.value='fixture-returned-model';model.dispatchEvent(new r.dom.window.Event('change'));assert.equal(r.posted.at(-1).id,'fixture-returned-model');r.dom.window.close();
 });

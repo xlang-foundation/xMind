@@ -34,6 +34,7 @@ async function activate(context) {
   let reviewed = new Map();
   let modelCatalogue = {models:[],default_model:''};
   let selectedModel;
+  let providerSelection;
   const stateKey = 'agentflow.session';
   const modelStateKey = 'xmind.model';
   const runStateKey = 'xmind.observedRun';
@@ -179,44 +180,32 @@ async function activate(context) {
     await context.secrets.store(secretKey(origin), validateToken(token));
     return true;
   }
-  async function configureModel() {
+  async function configureModel(key) {
     if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before configuring xMind.');
     const target=client,origin=configuredOrigin(),version=generation;
     if(!target || target.baseUrl!==origin)throw new Error('Connect to xMind Server before configuring a model.');
-    let setup;try{setup=await target.providerConfiguration();}catch(error){if(error.status===404)throw new Error('This backend has no interactive provider setup. Upgrade xMind Server or use its startup model settings.');throw error;}
-    if(setup.provider!=='openai' || setup.endpoint!=='https://api.openai.com/v1/chat/completions' || !Number.isSafeInteger(setup.revision) || setup.revision<0)throw new Error('Backend provider setup policy is unsupported.');
-    const inputKey=()=>vscode.window.showInputBox({title:'xMind: OpenAI API key',prompt:`Store the key encrypted on xMind Server at ${origin}. The backend sends it to https://api.openai.com.`,password:true,ignoreFocusOut:true,validateInput:value=>/^[\x21-\x7e]{1,32768}$/.test(value)?undefined:'Enter your provider API key without spaces.'});
-    let key;
-    if(!setup.configured){
-      key=await inputKey();
-      if(key===undefined)return false;
-    }
+    if(key!==undefined && (typeof key!=='string' || !/^[\x21-\x7e]{1,32768}$/.test(key)))throw new Error('Enter your provider API key without spaces.');
+    providerSelection=undefined;
     try{
-      const current=()=>{if(client!==target || configuredOrigin()!==origin || version!==generation)throw new Error('Backend or conversation changed during provider setup. Try again.');};
-      current();
-      post({type:'status',text:'Fetching models from OpenAI…'});
-      let catalogue;
-      try{catalogue=await target.discoverProviderModels(key,setup.revision);}
-      catch(error){
-        current();
-        if(!setup.configured || error.status!==502 || !/provider returned HTTP (401|403)$/.test(error.message))throw error;
-        post({type:'status',text:'OpenAI rejected the saved key · replace it to fetch models'});
-        if(await vscode.window.showErrorMessage('OpenAI rejected the saved key for model discovery.','Replace API key')!=='Replace API key')return false;
-        current();key=await inputKey();if(key===undefined)return false;
-        current();catalogue=await target.discoverProviderModels(key,setup.revision);
-      }
-      current();
+      const current=()=>{if(!panel || client!==target || configuredOrigin()!==origin || version!==generation)throw new Error('Backend or conversation changed during provider setup. Try again.');};
+      const setup=await target.providerConfiguration();current();
+      if(setup.provider!=='openai' || setup.endpoint!=='https://api.openai.com/v1/chat/completions' || !Number.isSafeInteger(setup.revision) || setup.revision<0)throw new Error('Backend provider setup policy is unsupported.');
+      if(!setup.configured && key===undefined)throw new Error('Open Settings at the top right and enter your OpenAI API key.');
+      post({type:'settings-state',busy:true,text:'Fetching models from OpenAI…'});
+      const catalogue=await target.discoverProviderModels(key,setup.revision);current();
       if(!Array.isArray(catalogue.models) || catalogue.models.length>4096 || catalogue.models.some(item=>!item || typeof item.id!=='string' || !/^[A-Za-z0-9_.:/-]{1,256}$/.test(item.id)))throw new Error('Backend returned an invalid model list.');
       const ids=[...new Set(catalogue.models.map(item=>item.id))].sort();
       if(!ids.length)throw new Error('OpenAI returned no models for this key. Check the API project access.');
-      const selected=await vscode.window.showQuickPick(ids.map(id=>({label:id,description:id===setup.model?'Current model':undefined})),{title:'xMind: Choose OpenAI model',placeHolder:'Search models returned by your OpenAI account',ignoreFocusOut:true});
-      if(!selected)return false;
-      current();
-      if(!ids.includes(selected.label))throw new Error('Choose a model returned by OpenAI.');
-      await target.configureProvider(selected.label,key,setup.revision);
-      // A saved credential establishes configuration, not successful inference.
-      post({type:'status',text:'Model configured · send a message to verify provider access'});
-      return true;
+      // A new key stays in host memory only until a real sidebar selection.
+      providerSelection={target,origin,revision:setup.revision,ids,key,expires:key===undefined?Infinity:Date.now()+300000};key=undefined;
+      const pendingSelection=providerSelection;
+      if(pendingSelection.key!==undefined)setTimeout(()=>{if(providerSelection===pendingSelection && pendingSelection.key!==undefined){pendingSelection.key=undefined;providerSelection=undefined;post({type:'capabilities',execution:false,models:[],model:undefined});post({type:'status',text:'Unsaved provider setup expired · fetch models again in Settings'});}},300000);
+      post({type:'model-list',models:ids.map(id=>({id})),model:pendingSelection.key===undefined?setup.model:undefined});
+      post({type:'settings-state',busy:false,complete:true,text:'Models fetched. Choose a model in the sidebar to save the configuration.'});
+      post({type:'status',text:'Choose a model below · provider access is not yet verified'});
+    }catch(error){
+      const text=error.status===502 && /provider returned HTTP (401|403)$/.test(error.message)?'OpenAI rejected the key. Open Settings and enter a valid API key.':error.message;
+      post({type:'settings-state',busy:false,text});throw new Error(text);
     }finally{key=undefined;}
   }
   async function openPanel() {
@@ -234,13 +223,14 @@ async function activate(context) {
     sessionId = saved?.url === client.baseUrl ? saved.id : undefined;
     panel = await acquireSidebar();
     panel.webview.options = { enableScripts: true, localResourceRoots: [context.extensionUri] };
-    const asset = (...parts) => panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, ...parts)).toString();
-    panel.webview.html = html(crypto.randomBytes(16).toString('hex'), {
+    const assetVersion=crypto.randomBytes(16).toString('hex');
+    const asset = (...parts) => panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, ...parts)).toString()+'?v='+assetVersion;
+    panel.webview.html = html(assetVersion, {
       source:panel.webview.cspSource,css:asset('media','chat.css'),script:asset('media','chat.js'),
       marked:asset('node_modules','marked','lib','marked.umd.js'),purify:asset('node_modules','dompurify','dist','purify.min.js')
     });
     const view = panel;
-    panel.onDidDispose(() => { if (panel === view) { stop(); reviewed.clear(); panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
+    panel.onDidDispose(() => { if (panel === view) { stop(); reviewed.clear(); providerSelection=undefined; panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
     panel.webview.onDidReceiveMessage(message => {
       // Selection intent invalidates an in-flight approval immediately, before
       // its queued selection handler can run behind that network request.
@@ -256,12 +246,15 @@ async function activate(context) {
           post({ type: 'capabilities', execution: health.agent_execution, model:selectedModel, models:modelCatalogue.models });
           await refresh();
           if (sessionId) await selectSession(sessionId);
-        } else if (message.type === 'configureModel') {
-          if(await configureModel()){
-            const current=await capabilities();health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue,selectedModel);
-            post({type:'capabilities',execution:health.agent_execution,models:modelCatalogue.models,model:selectedModel});
-          }
+          // Fetch with the saved backend key; settings handles a rejected key.
+          try{await configureModel();}catch{}
+        } else if (message.type === 'saveProviderKey') {
+          let key=message.key;delete message.key;
+          try{await configureModel(key===''?undefined:key);}finally{key=undefined;}
+        } else if (message.type === 'discardProviderKey') {
+          providerSelection=undefined;
         } else if (message.type === 'refresh') {
+          providerSelection=undefined;
           const version=generation;
           post({type:'capabilities',execution:false,models:[],model:undefined});
           post({type:'status',text:'Reconnecting to xMind…'});
@@ -274,9 +267,19 @@ async function activate(context) {
           if(panel!==view || version!==generation) return;
           if(sessionId) await selectSession(sessionId);
           else if(health.agent_execution) post({type:'status',text:'Ready'});
+          try{await configureModel();}catch{}
         }
         else if (message.type === 'model' && typeof message.id === 'string') {
-          if (!modelCatalogue.models.some(model => model.id === message.id)) throw new Error('Model is not configured on this backend.');
+          if(providerSelection){
+            const selection=providerSelection;
+            if(selection.target!==client || selection.origin!==configuredOrigin() || Date.now()>selection.expires){providerSelection=undefined;throw new Error('Model discovery expired. Fetch models again in Settings.');}
+            if(!selection.ids.includes(message.id))throw new Error('Choose a model returned by OpenAI.');
+            const configured=await client.configureProvider(message.id,selection.key,selection.revision);
+            selection.key=undefined;selection.revision=configured.revision;selection.expires=Infinity;
+            const current=await capabilities();health=current.health;modelCatalogue=current.catalogue;
+            post({type:'capabilities',execution:health.agent_execution,models:selection.ids.map(id=>({id})),model:message.id});
+            post({type:'status',text:'Model configured · send a message to verify provider access'});
+          }else if (!modelCatalogue.models.some(model => model.id === message.id)) throw new Error('Fetch models in Settings before choosing this model.');
           selectedModel = message.id;
           await context.workspaceState.update(modelStateKey,{url:client.baseUrl,id:selectedModel});
         }

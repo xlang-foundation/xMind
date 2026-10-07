@@ -114,36 +114,42 @@ test('native terminal state refreshes transcript and stops polling with durable 
 
 const pendingEdit={id:'edit',run_id:'finished',workspace_id:'verified-fixture-root',tool:'replace_file',state:'awaiting_approval',expires_unix_ms:Date.now()+600000,decision_actor:'',result_json:'{}',arguments_json:JSON.stringify({before_content:'actual before fixture',after_content:'<script>untrusted file text</script>',before_sha256:'fixture-hash',file_id:'fixture-file'})};
 const providerFixture={revision:0,provider:'openai',model:'',endpoint:'https://api.openai.com/v1/chat/completions',configured:false};
-test('model setup uses host password input and keeps the provider key outside view messages and editor state',async()=>{
-  const h=harness({health:{agent_execution:false,status:'ok'},providerSetup:providerFixture,modelInput:'fixture-model',keyInput:'synthetic-private-provider-key'});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));
-  // Arbitrary view key/endpoint fields are ignored; only host prompts supply setup.
-  view.receive({type:'configureModel',api_key:'forged-view-key',endpoint:'https://outside.invalid'});await until(()=>h.providerRequests.length===1);await until(()=>view.posted.some(m=>m.type==='capabilities'&&m.execution&&m.model==='fixture-model'));
-  assert.deepEqual(h.providerRequests,[{model:'fixture-model',api_key:'synthetic-private-provider-key',expected_revision:0}]);assert.ok(!JSON.stringify(view.posted).includes('synthetic-private-provider-key'));assert.ok(!JSON.stringify([...h.state.values(),...h.secrets.values()]).includes('synthetic-private-provider-key'));assert.equal(h.inputPrompts.at(-1).password,true);assert.ok(!h.requests.includes('/v1/runs'),'Setup must not manufacture or submit an inference');
-  assert.deepEqual(h.discoveryRequests,[{api_key:'synthetic-private-provider-key',expected_revision:0}]);assert.deepEqual(Array.from(h.pickers[0].items,item=>item.label),['fixture-model','fixture-other']);assert.ok(!h.inputPrompts.some(prompt=>prompt.title==='xMind: Configure OpenAI model'));view.close();
+async function setupView(options={}){
+  const h=harness({health:{agent_execution:false,status:'ok'},providerSetup:providerFixture,...options});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='settings-state'&&!m.busy));return {h,view};
+}
+test('settings key fetches a sidebar list; only a separate model selection saves encrypted backend settings',async()=>{
+  const {h,view}=await setupView();view.receive({type:'saveProviderKey',key:'synthetic-private-provider-key',endpoint:'https://outside.invalid'});await until(()=>view.posted.some(m=>m.type==='model-list'));
+  assert.equal(h.providerRequests.length,0);assert.equal(h.pickers.length,0);assert.ok(!h.inputPrompts.some(p=>p.title==='xMind: OpenAI API key'));
+  assert.deepEqual(Array.from(view.posted.find(m=>m.type==='model-list').models,m=>m.id),['fixture-model','fixture-other']);
+  view.receive({type:'model',id:'fixture-model'});await until(()=>h.providerRequests.length===1);await until(()=>view.posted.some(m=>m.type==='capabilities'&&m.execution));
+  assert.deepEqual(h.providerRequests,[{model:'fixture-model',api_key:'synthetic-private-provider-key',expected_revision:0}]);
+  assert.ok(!JSON.stringify(view.posted).includes('synthetic-private-provider-key'));assert.ok(!JSON.stringify([...h.state.values(),...h.secrets.values()]).includes('synthetic-private-provider-key'));assert.ok(!h.requests.includes('/v1/runs'));view.close();
 });
-test('dismissed setup and unsupported provider destinations never transmit a key',async()=>{
-  for(const options of [{providerSetup:providerFixture,modelInput:undefined},{providerSetup:{...providerFixture,endpoint:'https://outside.invalid'},modelInput:'fixture-model',keyInput:'synthetic-private-provider-key'}]){
-    const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.requests.includes('/v1/provider/configuration'));await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));assert.equal(h.providerRequests.length,0);assert.equal(h.discoveryRequests.length,0);view.close();
+test('sidebar selection rejects an ID outside the actual discovery response',async()=>{
+  const {h,view}=await setupView();view.receive({type:'saveProviderKey',key:'synthetic-private-provider-key'});await until(()=>view.posted.some(m=>m.type==='model-list'));view.receive({type:'model',id:'forged-model'});await until(()=>view.posted.some(m=>m.type==='error'));assert.equal(h.providerRequests.length,0);assert.match(view.posted.find(m=>m.type==='error').text,/returned by OpenAI/);view.close();
+});
+test('invalid keys and unsupported provider destinations never transmit credentials',async()=>{
+  for(const options of [{key:'bad key'},{key:'synthetic-key',providerSetup:{...providerFixture,endpoint:'https://outside.invalid'}}]){
+    const {h,view}=await setupView(options);view.receive({type:'saveProviderKey',key:options.key});await until(()=>view.posted.some(m=>m.type==='error'));assert.equal(h.discoveryRequests.length,0);assert.equal(h.providerRequests.length,0);view.close();
   }
 });
-test('closing the sidebar during the password prompt prevents a late provider grant',async()=>{
-  let supply;const keyInput=new Promise(resolve=>supply=resolve);const h=harness({providerSetup:providerFixture,modelInput:'fixture-model',keyInput});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.inputPrompts.some(prompt=>prompt.title==='xMind: OpenAI API key'));view.close();supply('synthetic-private-provider-key');await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));assert.equal(h.providerRequests.length,0);assert.ok(!JSON.stringify(view.posted).includes('synthetic-private-provider-key'));
+test('discovery errors and malformed or empty catalogs never save provider settings',async()=>{
+  for(const options of [{discoveryError:true},{discoveredModels:{models:[]}},{discoveredModels:{models:[{id:'bad\nmodel'}]}}]){
+    const {h,view}=await setupView(options);view.receive({type:'saveProviderKey',key:'synthetic-key'});await until(()=>view.posted.some(m=>m.type==='error'));assert.equal(h.providerRequests.length,0);assert.ok(!view.posted.some(m=>m.type==='model-list'));view.close();
+  }
+});
+test('closing during discovery prevents publishing a list or saving a credential',async()=>{
+  let supply;const discoveredModels=new Promise(resolve=>supply=resolve);const {h,view}=await setupView({discoveredModels});view.receive({type:'saveProviderKey',key:'synthetic-key'});await until(()=>h.discoveryRequests.length===1);view.close();supply({models:[{id:'fixture-model'}]});await new Promise(resolve=>setImmediate(resolve));assert.equal(h.providerRequests.length,0);assert.ok(!view.posted.some(m=>m.type==='model-list'));assert.equal(h.pickers.length,0);
+});
+test('saved key populates the sidebar automatically and changes models without a key popup',async()=>{
+  const h=harness({providerSetup:{...providerFixture,revision:1,configured:true,model:'fixture-other'}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='model-list'));view.receive({type:'model',id:'fixture-model'});await until(()=>h.providerRequests.length===1);
+  assert.deepEqual(h.discoveryRequests,[{expected_revision:1}]);assert.deepEqual(h.providerRequests,[{model:'fixture-model',expected_revision:1}]);assert.equal(h.pickers.length,0);assert.ok(!h.inputPrompts.some(p=>p.title==='xMind: OpenAI API key'));view.close();
+});
+test('rejected saved key shows settings guidance and replacement uses the same sidebar selection',async()=>{
+  const h=harness({providerSetup:{...providerFixture,revision:1,configured:true,model:'fixture-other'},rejectSavedKey:true});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='settings-state'&&m.text.includes('OpenAI rejected')));view.receive({type:'saveProviderKey',key:'synthetic-replacement-key'});await until(()=>view.posted.some(m=>m.type==='model-list'));view.receive({type:'model',id:'fixture-model'});await until(()=>h.providerRequests.length===1);
+  assert.deepEqual(h.discoveryRequests,[{expected_revision:1},{api_key:'synthetic-replacement-key',expected_revision:1}]);assert.deepEqual(h.providerRequests,[{model:'fixture-model',api_key:'synthetic-replacement-key',expected_revision:1}]);assert.ok(!JSON.stringify(view.posted).includes('synthetic-replacement-key'));assert.equal(h.pickers.length,0);view.close();
 });
 const uncertainEdit={...pendingEdit,state:'uncertain'};
-test('model discovery errors, empty catalogues and dismissed picker never save provider settings',async()=>{
-  for(const options of [{discoveryError:true},{discoveredModels:{models:[]}},{discoveredModels:{models:[{id:'bad\nmodel'}]}},{modelInput:undefined}]){
-    const h=harness({providerSetup:providerFixture,keyInput:'synthetic-private-provider-key',modelInput:'fixture-model',...options});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.discoveryRequests.length===1);await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));assert.equal(h.providerRequests.length,0);assert.ok(!JSON.stringify(view.posted).includes('synthetic-private-provider-key'));view.close();
-  }
-});
-test('closing the sidebar during model discovery prevents a stale picker or configuration',async()=>{
-  let supply;const discoveredModels=new Promise(resolve=>supply=resolve);const h=harness({providerSetup:providerFixture,keyInput:'synthetic-private-provider-key',modelInput:'fixture-model',discoveredModels});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.discoveryRequests.length===1);view.close();supply({models:[{id:'fixture-model'}]});await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));assert.equal(h.pickers.length,0);assert.equal(h.providerRequests.length,0);
-});
-test('saved provider setup discovers and chooses with backend-held key without asking for another password',async()=>{
-  const h=harness({providerSetup:{...providerFixture,revision:1,configured:true,model:'fixture-other'},modelInput:'fixture-model'});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.providerRequests.length===1);assert.deepEqual(h.discoveryRequests,[{expected_revision:1}]);assert.deepEqual(h.providerRequests,[{model:'fixture-model',expected_revision:1}]);assert.ok(!h.inputPrompts.some(prompt=>prompt.title==='xMind: OpenAI API key'));view.close();
-});
-test('rejected saved key can be replaced through private input before choosing an actual discovered model',async()=>{
-  const h=harness({providerSetup:{...providerFixture,revision:1,configured:true,model:'fixture-other'},modelInput:'fixture-model',rejectSavedKey:true,errorChoice:'Replace API key',keyInput:'synthetic-replacement-key'});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='transcript'));view.receive({type:'configureModel'});await until(()=>h.providerRequests.length===1);assert.deepEqual(h.discoveryRequests,[{expected_revision:1},{api_key:'synthetic-replacement-key',expected_revision:1}]);assert.deepEqual(h.providerRequests,[{model:'fixture-model',api_key:'synthetic-replacement-key',expected_revision:1}]);assert.ok(!JSON.stringify(view.posted).includes('synthetic-replacement-key'));assert.equal(h.inputPrompts.at(-1).password,true);view.close();
-});
 const inspectionFixture={operation:uncertainEdit,observed:{path:'file.cpp',workspace_id:uncertainEdit.workspace_id,file_id:'fixture-file',content_sha256:'a'.repeat(64),size:12},match:'after',same_file:true,observed_unix_ms:Date.now(),quarantine_released:false};
 test('older run inspection remains accessible and selected run persists across view reopening',async()=>{
   const older={...uncertainEdit,run_id:'older'};
