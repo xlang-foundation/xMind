@@ -1,0 +1,11 @@
+{
+  "model_configured": false,
+  "source_revision": "3297a4bce2d591c0f1c1dd37ccc18a15297369e7",
+  "modules": "D:\\CantorAI2026\\xMind\\.agentflow\\ci\\extracted\\runtime-37635775031-8b38c0fcd5b84a8f823176920595785d\\modules",
+  "backend_pid": 27988,
+  "agent_execution": false,
+  "ready_file": "D:\\CantorAI2026\\xMind\\.agentflow\\ui-host\\opened-3640e4f7483a4361804d9c231cb47198.json",
+  "origin": "http://127.0.0.1:56799",
+  "server_executable": "D:\\CantorAI2026\\xMind\\.agentflow\\ci\\extracted\\runtime-37635775031-8b38c0fcd5b84a8f823176920595785d\\xmind_server.exe",
+  "host_launcher_pid": 28604
+}
