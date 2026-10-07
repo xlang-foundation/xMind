@@ -13,15 +13,29 @@ const folder=await mkdtemp(join(tmpdir(),'xmind-agent-edit-')),workspace=join(fo
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
 let child,port,errors='',peerError,requests=0;
 const continuations=new Map();
+const scopeSteps=new Map();
 const peer=createServer((request,response)=>{
-  let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',()=>{
+  let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',async()=>{
     try {
       requests++;const body=JSON.parse(source);
       assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','edit_file','create_file']);
       const prompt=body.messages.findLast(message=>message.role==='user').content;
       assert.equal(body.model,prompt==='allowed'?'synthetic-edit-alternate':'synthetic-edit-protocol-model');assert.equal(body.stream_options.include_usage,true);
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
-      if(tool) {
+      if(prompt.startsWith('scope-')){
+        const step=(scopeSteps.get(prompt)??0)+1;scopeSteps.set(prompt,step);
+        const creation=prompt==='scope-create',path=`${prompt}/target.txt`;
+        const call=index=>({index,id:`${prompt}-${step}-${index}`,type:'function',function:{name:creation?'create_file':'edit_file',arguments:JSON.stringify(creation?{path,content:'scope create applied\n'}:{path,old_text:'original',new_text:'scope edit applied'})}});
+        if(step===1){delta={tool_calls:[call(0),call(1)]};finish='tool_calls';}
+        else if(JSON.parse(tool.content).error?.code==='repository_instructions_required'){
+          const tail=body.messages.slice(-2);assert.equal(tail.length,2);for(const result of tail){assert.equal(result.role,'tool');assert.equal(JSON.parse(result.content).error.code,'repository_instructions_required','Every call in the same batch must remain deferred');}
+          assert.ok(body.messages[0].content.includes(step===3?'Refreshed nested instruction for scope-refresh':`Synthetic nested instruction for ${prompt}`));
+          const [run]=await api(`/v1/sessions/${prompt}/runs`);assert.deepEqual(await api(`/v1/runs/${run.id}/operations`),[],'Guidance discovery must not create any approval proposal');
+          if(creation)await assert.rejects(readFile(join(workspace,path)),{code:'ENOENT'});else assert.equal(await readFile(join(workspace,path),'utf8'),'original\n','Guidance discovery must not perform the requested effect');
+          if(prompt==='scope-refresh' && step===2){await writeFile(join(workspace,prompt,'AGENTS.md'),'Refreshed nested instruction for scope-refresh');delta={tool_calls:[call(0),call(1)]};}
+          else delta={tool_calls:[call(0)]};finish='tool_calls';
+        }else{const outcome=JSON.parse(tool.content);assert.ok(outcome.operation_id && outcome.content_sha256);continuations.set(prompt,outcome);delta={content:'Synthetic scoped continuation after actual effect'};finish='stop';}
+      }else if(tool) {
         const outcome=JSON.parse(tool.content);continuations.set(prompt,outcome);
         assert.equal(tool.tool_call_id,`fixture-${prompt}`);
         if(prompt==='allowed'||prompt==='create-allowed') assert.ok(outcome.operation_id && outcome.content_sha256);
@@ -96,6 +110,16 @@ try {
     else await assert.rejects(readFile(join(workspace,`${name}.txt`)),{code:'ENOENT'});
     const history=cli('history',name);assert.equal(history.length,name==='create-cancelled'?1:4);
   }
+  for(const name of ['scope-edit','scope-create','scope-refresh']){
+    await mkdir(join(workspace,name));await writeFile(join(workspace,name,'AGENTS.md'),`Synthetic nested instruction for ${name}`);
+    if(name!=='scope-create')await writeFile(join(workspace,name,'target.txt'),'original\n');
+    await api('/v1/sessions',{id:name,title:'Synthetic inference, actual scoped delivery and approved effect'});const run=cli('run',name,name);
+    const operations=await until(()=>api(`/v1/runs/${run.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));assert.equal(operations.length,1);const [proposal]=operations;
+    const events=cli('events',run.id);const deferred=events.filter(event=>event.kind==='tool.failed' && event.data.data.error?.code==='repository_instructions_required');assert.equal(deferred.length,name==='scope-refresh'?4:2);
+    const scopes=events.filter(event=>event.kind==='agent.repository_scope');assert.ok(scopes.length>=2);assert.equal(JSON.stringify(scopes).includes('Synthetic nested instruction'),false);assert.equal(JSON.stringify(scopes).includes('Refreshed nested instruction'),false);
+    cli('decide',proposal.id,'allow');await until(()=>api(`/v1/runs/${run.id}`),value=>value.state==='completed');
+    assert.equal(await readFile(join(workspace,name,'target.txt'),'utf8'),name==='scope-create'?'scope create applied\n':'scope edit applied\n');assert.equal((await api(`/v1/operations/${proposal.id}`)).state,'succeeded');assert.equal(scopeSteps.get(name),name==='scope-refresh'?4:3);
+  }
   await api('/v1/sessions',{id:'create-interrupted',title:'Restart pending creation'});cli('run','create-interrupted','create-interrupted');
   const creationRun=(await api('/v1/sessions/create-interrupted/runs'))[0];
   const [creationInterrupted]=await until(()=>api(`/v1/runs/${creationRun.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));
@@ -114,7 +138,7 @@ try {
   assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'changed allowed\n');
   const retired=await fetch(`http://127.0.0.1:${port}/v1/operations/${interrupted.id}/decision`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({decision:'allow'}),signal:AbortSignal.timeout(5000)});
   assert.equal(retired.status,409,'Restart must not grant an unused approval to a retired owner');
-  assert.equal(requests,16);if(peerError) throw peerError;
+  assert.equal(requests,26);if(peerError) throw peerError;
   console.log('Compiled native agent edit loop passed: real approved edits, denial, stale content, cancellation, actual tool-result continuation and pending-approval restart recovery. Inference is synthetic.');
 } finally {
   await stop();

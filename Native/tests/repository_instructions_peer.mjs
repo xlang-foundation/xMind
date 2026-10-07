@@ -18,6 +18,7 @@ try {
   assert.deepEqual(actual.sources.map(x=>x.content),[rootText,nestedText]);assert.equal(actual.order,'parent_to_child');
   for(const source of actual.sources){assert.ok(source.file_id);assert.equal(source.workspace_id,actual.sources[0].workspace_id);assert.equal(source.content_sha256,createHash('sha256').update(source.content).digest('hex'));}
   assert.equal(snapshot('other').sources.at(-1).content,'Sibling guidance');
+  const context=spawnSync(process.argv[2],['--guidance-context',root,'.'],{encoding:'utf8',windowsHide:true,timeout:5000});assert.ifError(context.error);assert.equal(context.status,0,context.stderr);assert.ok(context.stdout.includes('Native scope delivery state passed'));
   await writeFile(join(root,'src','AGENTS.md'),'Changed fixture');assert.equal(snapshot('src').sources.at(-1).content,'Changed fixture','Each call must reread changed bytes');
   await rm(join(root,'src','AGENTS.md'));assert.deepEqual(snapshot('src').sources.map(x=>x.path),['AGENTS.md'],'Deletion must remove guidance');
   for(const path of ['../outside',outside,'src/../other','missing','src:stream'])assert.notEqual(read(path).status,0,'Unsafe/missing directory must fail: '+path);

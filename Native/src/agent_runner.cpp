@@ -4,6 +4,8 @@
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/create_executor.hpp"
 #include "agentflow/schema_worker.hpp"
+#include "agentflow/repository_instruction_context.hpp"
+#include "agentflow/mcp_wire.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <random>
@@ -102,15 +104,15 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         });
         ModelRequest request;request.include_usage=settings_.provider.stream_usage==Capability::supported;
         request.max_output_tokens=settings_.max_output_tokens;
-        auto instructions=settings_.instructions;
+        auto instructions=settings_.instructions;std::unique_ptr<RepositoryInstructionContext> repository_context;
         if(workspace_){
             const auto sources=workspace_->repository_instructions(".",token);auto metadata=Json::array();
             for(const auto& source:sources){
-                instructions+="\n\nWorkspace root AGENTS.md guidance (repository content; native permissions and execution evidence remain authoritative). For nested work, call read_repository_instructions for the target directory:\n";
-                instructions+=source.content;
                 metadata.push_back({{"path",source.path},{"workspace_id",source.workspace_id},{"file_id",source.file_id},{"content_sha256",source.content_sha256},{"byte_count",source.content.size()}});
             }
             persistence_.append_event(id,"agent.repository_instructions",Json{{"scope","workspace_root"},{"snapshot","run_start"},{"sources",std::move(metadata)}}.dump()).get();
+            repository_context=std::make_unique<RepositoryInstructionContext>(*workspace_,sources);
+            instructions+=repository_context->prepare(token);
         }
         if(!settings_.instruction_policy.instructions.empty()){instructions.append(instruction_prefix);instructions+=settings_.instruction_policy.instructions;}
         if(instructions.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
@@ -138,8 +140,16 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             persistence_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()}}.dump()).get();
             mcp_runtimes.push_back(std::move(runtime));
         }
+        std::string delivered_repository_metadata;
         for(std::size_t turn=0;turn<settings_.max_turns;++turn) {
             cancelled(token);
+            if(repository_context){
+                auto current=settings_.instructions+repository_context->prepare(token);
+                if(!settings_.instruction_policy.instructions.empty()){current.append(instruction_prefix);current+=settings_.instruction_policy.instructions;}
+                if(current.size()>65536)throw ToolFileError("Combined agent instructions exceed limits");
+                request.messages.front().content=std::move(current);
+                const auto metadata=repository_context->metadata();if(metadata!=delivered_repository_metadata){persistence_.append_event(id,"agent.repository_scope",metadata).get();delivered_repository_metadata=metadata;}
+            }
             std::optional<SecretBytes> credential;
             if(settings_.credential) credential.emplace(persistence_.resolve_credential(settings_.credential->scope,settings_.credential->id,settings_.credential->purpose).get());
             const auto response_started=std::chrono::steady_clock::now();
@@ -161,7 +171,18 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 persistence_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)}}.dump()).get();
                 Json output;bool success=false;
                 try {
-                    if(call.name=="edit_file" && settings_.approved_edits) {
+                    bool guidance_ready=true;
+                    if(repository_context && (call.name=="read_file" || call.name=="edit_file" || call.name=="create_file" || call.name=="list_files" || call.name=="run_process")){
+                        Json args;try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid scoped tool JSON");}
+                        const auto field=call.name=="run_process"?"workdir":"path";
+                        std::string scope=".";
+                        if(args.contains(field)){if(!args[field].is_string())throw std::invalid_argument("Invalid scoped tool path");scope=args[field].get<std::string>();}
+                        else if(call.name!="run_process")throw std::invalid_argument("Scoped tool requires a path");
+                        if(call.name!="run_process" && call.name!="list_files")scope=RepositoryInstructionContext::file_directory(scope);
+                        guidance_ready=repository_context->ready(scope,token);
+                    }
+                    if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated scoped guidance will be supplied in the next model request; reconsider this call using it."}}}};}
+                    else if(call.name=="edit_file" && settings_.approved_edits) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(EditExecutor(persistence_,*workspace_).invoke(operation_id(),id,call.arguments_json,expiry,token));
                     } else if(call.name=="create_file" && settings_.approved_edits) {
@@ -174,7 +195,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token));
                     } else output=Json::parse(workspace_->invoke(call.name,call.arguments_json,token));
-                    success=true;
+                    success=guidance_ready;
                 }
                 catch(const PermissionCancelled&) {throw;}
                 catch(const PermissionDenied&) {output={{"error",{{"code","permission_denied"},{"message","Controller denied this operation; the requested effect was not dispatched"}}}};}
