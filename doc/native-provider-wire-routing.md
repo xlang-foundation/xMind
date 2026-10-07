@@ -56,3 +56,11 @@ adapter also passed its actual C++/xlang3 contract against tested revision
 adapter compatibility with the existing native binary, not the newer enrollment
 routing or a live Responses request. Native routing compilation and actual
 provider acceptance are still pending.
+
+The routing contract also injects a real xlang3/SQLite trigger failure while
+publishing a return to Chat Completions. It requires the active metadata bytes,
+Responses wire and revision to remain unchanged, then submits another actual
+native Responses request through the preserved service/key. Only after that
+request settles does it retry the explicit legacy selection. The independent
+synthetic peer requires two Responses requests, so metadata checks alone cannot
+satisfy this rollback case. Syntax checks passed; compiled execution is pending.

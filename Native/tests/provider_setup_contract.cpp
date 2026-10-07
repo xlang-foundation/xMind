@@ -62,7 +62,17 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
    PersistenceService store(wireDatabase,imports);ProviderRuntime reopened(store,{},2,128,chatEndpoint,chatEndpoint+"/models",responsesEndpoint);
    require(reopened.available() && reopened.configuration().wire==ProviderWire::responses && reopened.configuration().endpoint==responsesEndpoint,"Restart must restore Responses routing and its saved credential");
    require(store.run("wire-run").get().state==RunState::completed && store.history("wire-session").get().size()==2,"Reopen must retain the real Responses conversation without replay");
-   const auto restored=reopened.configure("fixture-model",SecretBytes(std::span<const std::uint8_t>{}),2);require(restored.wire==ProviderWire::chat_completions && restored.endpoint==chatEndpoint,"Legacy selection must rebind the saved credential to the approved Chat route");
+   const auto savedWire=store.information("native-provider","active").get();
+   {XlangSqlite inject(wireDatabase,imports);inject.execute("CREATE TRIGGER reject_wire_setup BEFORE UPDATE ON information WHEN NEW.category='native-provider' BEGIN SELECT RAISE(ABORT,'actual wire publication failure'); END");}
+   rejects<DatabaseError>([&]{reopened.configure("fixture-model",SecretBytes(std::span<const std::uint8_t>{}),2);});
+   require(store.information("native-provider","active").get()==savedWire && reopened.configuration().wire==ProviderWire::responses && reopened.configuration().revision==2,"Failed wire publication must preserve the previous route and credential reference");
+   {XlangSqlite inject(wireDatabase,imports);inject.execute("DROP TRIGGER reject_wire_setup");}
+   store.create_session("wire-rollback-session","Synthetic rollback transport fixture").get();const auto rollbackRun=reopened.submit("wire-rollback-run","wire-rollback-session","Responses enrollment fixture");auto rollbackState=rollbackRun;const auto rollbackDeadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);
+   while(rollbackState.state==RunState::queued||rollbackState.state==RunState::running){require(std::chrono::steady_clock::now()<rollbackDeadline,"Preserved wire transport did not settle");std::this_thread::sleep_for(std::chrono::milliseconds(5));rollbackState=store.run(rollbackRun.id).get();}
+   require(rollbackState.state==RunState::completed,"Previous Responses service and saved credential must remain usable after publication failure");
+   ProviderSetupMetadata restored;bool changed=false;const auto idleDeadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);
+   while(!changed){try{restored=reopened.configure("fixture-model",SecretBytes(std::span<const std::uint8_t>{}),2);changed=true;}catch(const Conflict&){require(std::chrono::steady_clock::now()<idleDeadline,"Wire worker did not release ownership");std::this_thread::sleep_for(std::chrono::milliseconds(5));}}
+   require(restored.wire==ProviderWire::chat_completions && restored.endpoint==chatEndpoint,"Legacy selection must rebind the saved credential to the approved Chat route");
  }
  {
    PersistenceService store(wireDatabase,imports);auto value=Json::parse(store.information("native-provider","active").get());value["wire"]="responses";value["endpoint"]="https://unapproved.invalid/v1/responses";store.put_information("native-provider","active",value.dump()).get();
