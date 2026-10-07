@@ -1,6 +1,12 @@
 # Native Responses provider
 
-The shared C++ model boundary now includes an explicit Responses wire alongside Chat Completions. `complete_model` chooses the backend-configured adapter; single agents and graph agent nodes use that same boundary. No OpenAI SDK, LiteLLM implementation or CPython execution is added. Local native contracts verify the component scope below; live provider support remains unverified.
+The shared C++ model boundary now includes an explicit Responses wire alongside Chat Completions. `complete_model` chooses the backend-configured adapter; single agents and graph agent nodes use that same boundary. No OpenAI SDK, LiteLLM implementation or CPython execution is added. Local native contracts verify the component scope below; live Responses acceptance remains unverified.
+
+Update: checkpoint `67de5b16a8732477606957cb52736df06f078f16` completed its
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37695836041)
+successfully. The browser now works with the shared backend and a user-completed
+Chat Completions response was observed; this does not validate live Responses.
+The historical verification paragraph below records the initial local checkpoint.
 
 Configure a startup model with `--model-wire responses --model-endpoint https://api.openai.com/v1/responses --model MODEL_ID`, the appropriate backend credential reference, and explicit supported capabilities. The isolated preview launcher accepts `-ModelWire responses` with its startup model/endpoint. Existing saved-key previews and their Settings dialogs remain unchanged. The current interactive Settings enrollment policy still uses Chat Completions; configurable enrollment across wire families remains required.
 

@@ -8,6 +8,18 @@ This is an initial inventory, not a claim of parity. All unverified features rem
 
 ## Current native progress
 
+The newer verified native checkpoint is `67de5b16a8732477606957cb52736df06f078f16`:
+52 native and 60 extension contracts passed locally and its
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37695836041)
+succeeded. Browser checkpoint `e4b7f1f9774cddbe7c430477aadb9be646692eec` also passed
+its hosted gates. Later shared renderer contracts pass locally (65 extension,
+10 browser); newer C++ CLI and diagnostic changes await compiled validation.
+See the [current README scope](../README.md#current-native-product-scope).
+Registered native graphs and a single live OpenAI reply are verified within that
+scope; dynamic multi-agent delegation and complete live coding parity are not.
+The older checkpoint summaries and prototype table below remain historical
+evidence, not the current product status or a claim of full parity.
+
 The current native graph backend checkpoint `bd059a46781292640d95943e00b0d86a4891936c` passed **44 native and 49 extension contracts** in [hosted CI](https://github.com/xlang-foundation/xMind/actions/runs/37682783904). Later sidebar source passed **60 extension contracts locally**, and a real human/tool graph completed and restored its transcript in the actual IDE. [Current graph/editor evidence](../doc/vscode-graph-workflows.md). Native A2A task controls are a new component under verification; message admission, streaming, SDK interoperability, task-local history and remote delegation remain required. These are component milestones, not verified OpenCode parity. The older counts/table below retain their historical prototype/source scope.
 
 The following historical table records prototype coverage, not native implementation status. Current C++ checkpoints and exact verification scopes are in [milestones](../doc/milestones.md): **35 native and 40 extension contracts passed isolated CI**, source `3297a4bce2d591c0f1c1dd37ccc18a15297369e7`, including approved edits/creation, stored response metadata, registered MCP tools with official SDK peers, executable-bound foreground commands, descendant cleanup, durable retained output and native watcher reconnect. Real subprocess/file/database effects are verified with synthetic inference; live coding completion, full shell/background/PTY and broader SDK features remain pending. No OpenCode operation or capability is considered fully equivalent merely because a component contract passes. Full API/tool/plugin/context/CLI/editor/provider acceptance remains required against the pinned inventory.
