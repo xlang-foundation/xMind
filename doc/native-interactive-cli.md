@@ -65,6 +65,17 @@ product acceptance results.
 
 ## Verification status
 
+Update: `d0a70fef888c3724c2490bcb2cf8ef38d60f08c0` passed its
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37701625318)
+with 52 native and 66 extension contracts. This extends the initial chat result
+to resumed-history output, failed-turn recovery, slash/model/history commands
+and interactive approval/denial, unrelated-ID rejection and detachment without
+a decision. [Exact revision/results](evidence/native-cli-approval-diagnostics-hosted-provenance.json).
+Initial model prevalidation and `/provider-models` were added after this tested
+revision and still await compiled validation. Public launcher and installed
+checks retain their separately stated local scope. The historical checkpoint
+notes below describe when each portion was introduced.
+
 The actual-native HTTP/CLI contract is extended to exercise an empty launch, two model/tool turns in one new session, reconnection for a third turn, read-only history on reconnect, failed-turn exit status, a later explicit request after failure, and persisted history after server restart. Its provider replies are labelled synthetic; file reads and backend/CLI/database execution are real when the contract runs.
 
 The initial interactive chat checkpoint `51724ab8fdda3b9349b18f110a1256ec4f1398eb`

@@ -1,5 +1,15 @@
 # Bounded native provider HTTP diagnostics
 
+Checkpoint `d0a70fef888c3724c2490bcb2cf8ef38d60f08c0` now passed its
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37701625318):
+52 native and 66 extension contracts, including bounded native transport
+diagnostic cases. [Results](evidence/native-cli-approval-diagnostics-hosted-summary.log),
+[scope/provenance](evidence/native-cli-approval-diagnostics-hosted-provenance.json).
+Later discovery-HTTP propagation and additional agent-event assertions remain
+newer source pending their own gate. The original source-prepared notes below
+record the earlier local build deferral; they do not override this exact hosted
+result. The live HTTP 400 cause is still unresolved and previews are unchanged.
+
 The Windows transport preserves an unsuccessful HTTP status and, for JSON error
 responses with status 400 or higher, attempts to read a diagnostic body. The read
 is limited to 32 KiB and the lesser of the request deadline or two seconds.

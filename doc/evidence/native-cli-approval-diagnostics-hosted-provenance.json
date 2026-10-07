@@ -1,0 +1,13 @@
+{
+  "xmind": "d0a70fef888c3724c2490bcb2cf8ef38d60f08c0",
+  "workflowRun": 37701625318,
+  "job": 113066567334,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37701625318",
+  "conclusion": "success",
+  "nativeContractsPassed": 52,
+  "extensionContractsPassed": 66,
+  "runtimeArtifact": 11517694137,
+  "scope": "Exact successful job log downloaded and full CTest/TAP results inspected. Native transport diagnostics, resumed CLI history, model/history commands, explicit file approval/denial, unrelated-ID rejection and detached ownership are covered at this source revision. Browser and packaging gates also succeeded.",
+  "providerScope": "Synthetic protocol/inference fixtures; real native networking, CLI, file effects and embedded-xlang3 persistence. No live frontier-model fix or complete coding parity claim.",
+  "newerPending": "Discovery HTTP diagnostic propagation, initial CLI model prevalidation, saved-account discovery inside chat, public launcher changes and browser native-restart contract were added later."
+}
