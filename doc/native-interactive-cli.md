@@ -32,6 +32,14 @@ the provider account discovery endpoint; enabling additional providers/models is
 a separate backend configuration action. Integrated console settings and live
 model-selection acceptance remain pending.
 
+`/provider-models` now requests account discovery through the native backend's
+saved encrypted credential and current provider revision. The CLI sends only
+`expected_revision`, not a provider key. It emits a `provider_models` record and
+does not change shared settings or admit a model run. The provider setup contract
+adds an interactive discovery check with the actual CLI and synthetic provider,
+including omission of fixture keys from output. This source and its compiled
+contract are pending validation.
+
 During chat observation, pending effect proposals are read from the backend and
 shown as escaped NDJSON `operation_review` records, including the exact argument
 bytes, file snapshots or command specification, ownership and expiry. Enter

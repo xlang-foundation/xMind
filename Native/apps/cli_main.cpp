@@ -134,7 +134,17 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(prompt=="/exit")return last_result;
         if(prompt.empty())continue;
         if(prompt=="/help"){
-            std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/history displays the saved conversation; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+            std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/history displays the saved conversation; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+        }
+        if(prompt=="/provider-models"){
+            const auto setup=request("/v1/provider/configuration");
+            if(!setup.is_object() || setup.value("configured",false)!=true || setup.value("provider",std::string{})!="openai" || !setup.contains("revision") || !setup["revision"].is_number_integer() || setup["revision"]<1 || setup["revision"]>9007199254740991){std::cerr<<"Configure a backend provider key before discovering account models.\n";continue;}
+            const Json body={{"expected_revision",setup["revision"]}};
+            const auto catalogue=request("/v1/provider/models",&body);
+            if(!catalogue.is_object() || !catalogue.contains("models") || !catalogue["models"].is_array())throw std::runtime_error("Invalid provider model catalogue");
+            std::cout<<Json{{"type","provider_models"},{"catalogue",catalogue},{"provider_revision",setup["revision"]}}.dump()<<'\n'<<std::flush;
+            std::cerr<<"These are discovered account models. /models shows models currently enabled for execution. Discovery does not change shared provider settings.\n";
+            continue;
         }
         if(prompt=="/history"){
             const auto saved=session.empty()?Json::array():request("/v1/sessions/"+session+"/history");
