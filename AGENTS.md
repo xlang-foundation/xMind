@@ -1,4 +1,4 @@
-# AgentFlow development constraints
+# xMind development constraints
 
 - The VS Code extension must use a dedicated right-hand secondary sidebar like Cursor/Copilot/Codex, with native WebviewView contributions. Keep Explorer on the left. Put the composer and backend model chooser at the bottom, render conversation history and Markdown/code properly, and show actual per-response provider token usage. Do not invent metrics or place the main agent UI in a center editor webview tab. Keep platform logic in the C++ backend and access/authentication in the thin extension host.
 

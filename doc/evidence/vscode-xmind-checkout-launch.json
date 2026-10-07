@@ -1,0 +1,14 @@
+{
+  "server_executable": "D:\\CantorAI2026\\xMind\\.agentflow\\ui-host\\native-1a3d5c1-local\\xmind_server.exe",
+  "model_configured": false,
+  "agent_execution": false,
+  "source_revision": "1a3d5c1d5542cc1ce8eb3db1162063f7e5425b9c",
+  "origin": "http://127.0.0.1:64021",
+  "host_launcher_pid": 21536,
+  "modules": "D:\\CantorAI2026\\xMind\\.agentflow\\ui-host\\native-1a3d5c1-local\\modules",
+  "ready_file": "D:\\CantorAI2026\\xMind\\.agentflow\\ui-host\\opened-24322e2f92c145a398b1dcd6e710411e.json",
+  "backend_pid": 12824,
+  "checkout": "D:\\CantorAI2026\\xMind",
+  "scope": "Actual right-sidebar preview reopened with locally verified 28-contract native MCP build; existing session/profile retained, no model or populated MCP execution",
+  "relocation_note": "Source, Git history, profile and database moved to xMind. Only prior locked build artifacts remain under AgentFlow/build; fresh build uses xMind/build."
+}
