@@ -27,6 +27,8 @@ Execute all Python probes and pip installations with xlang3. Install pure-Python
 
 ## Current evidence
 
+The native [Chat Completions provider adapter](../doc/native-chat-provider.md) now joins typed request serialization, Windows transport and stream decoding. It passed independent synthetic wire contracts for request/capability validation and tool continuation. No live inference, agent execution, complete provider coverage or model availability is established by these contracts.
+
 The native `ChatCompletionStream` decoder passed its synthetic SSE protocol contract, including arbitrary fragmentation, parallel function-call arguments, usage and incomplete-stream rejection. See [native-model-stream.md](../doc/native-model-stream.md). It is connected to the Windows native HTTPS transport, which passed independent socket, cancellation and timeout contracts; see [native-provider-transport.md](../doc/native-provider-transport.md). Neither component establishes live model support or an agent engine. No provider credentials were configured in the current development environment when this check was made; live validation remains pending the selected endpoint.
 
 `agentflow/providers.py` currently implements only OpenAI-compatible Chat Completions streaming. Existing test doubles establish the initial streaming contract; no live frontier provider or LiteLLM SDK integration is verified. Broad provider support, reasoning/multimodal events, model discovery, routing and SDK compatibility remain required work.
