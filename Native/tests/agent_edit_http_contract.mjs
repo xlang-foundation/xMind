@@ -17,18 +17,19 @@ const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',()=>{
     try {
       requests++;const body=JSON.parse(source);
-      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_file','list_files','search_files','edit_file']);
+      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_file','list_files','search_files','edit_file','create_file']);
       const prompt=body.messages.findLast(message=>message.role==='user').content;
       assert.equal(body.model,prompt==='allowed'?'synthetic-edit-alternate':'synthetic-edit-protocol-model');assert.equal(body.stream_options.include_usage,true);
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
       if(tool) {
         const outcome=JSON.parse(tool.content);continuations.set(prompt,outcome);
         assert.equal(tool.tool_call_id,`fixture-${prompt}`);
-        if(prompt==='allowed') assert.ok(outcome.operation_id && outcome.content_sha256);
-        else assert.equal(outcome.error.code,prompt==='denied'?'permission_denied':'content_conflict');
+        if(prompt==='allowed'||prompt==='create-allowed') assert.ok(outcome.operation_id && outcome.content_sha256);
+        else assert.equal(outcome.error.code,prompt==='denied'||prompt==='create-denied'?'permission_denied':'content_conflict');
         delta={content:'Synthetic inference continuation after actual tool outcome'};finish='stop';
       } else {
-        delta={tool_calls:[{index:0,id:`fixture-${prompt}`,type:'function',function:{name:'edit_file',arguments:JSON.stringify({path:`${prompt}.txt`,old_text:'original',new_text:`changed ${prompt}`})}}]};finish='tool_calls';
+        const creation=prompt.startsWith('create-');
+        delta={tool_calls:[{index:0,id:`fixture-${prompt}`,type:'function',function:{name:creation?'create_file':'edit_file',arguments:JSON.stringify(creation?{path:`${prompt}.txt`,content:`created ${prompt}\n`}:{path:`${prompt}.txt`,old_text:'original',new_text:`changed ${prompt}`})}}]};finish='tool_calls';
       }
       response.writeHead(200,{'Content-Type':'text/event-stream'});
       response.end(`data: ${JSON.stringify({choices:[{index:0,delta,finish_reason:null}]})}\n\ndata: ${JSON.stringify({choices:[{index:0,delta:{},finish_reason:finish}]})}\n\ndata: ${JSON.stringify({choices:[],usage:{prompt_tokens:12,completion_tokens:6,total_tokens:18}})}\n\ndata: [DONE]\n\n`);
@@ -82,12 +83,30 @@ try {
       assert.ok(Number.isSafeInteger(response.first_token_ms)&&response.first_token_ms>=0&&response.first_token_ms<=response.elapsed_ms,'First output must be measured within the actual model request interval');
     }
   }
+  for(const name of ['create-allowed','create-denied','create-stale','create-cancelled']){
+    await api('/v1/sessions',{id:name,title:'Actual native creation with synthetic inference'});const run=cli('run',name,name);
+    const [proposal]=await until(()=>api(`/v1/runs/${run.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));
+    assert.equal(proposal.tool,'create_file');const plan=JSON.parse(proposal.arguments_json);assert.equal(plan.before_exists,false);assert.equal(plan.after_content,`created ${name}\n`);assert.ok(plan.parent_id);
+    await assert.rejects(readFile(join(workspace,`${name}.txt`)),{code:'ENOENT'});
+    if(name==='create-stale')await writeFile(join(workspace,`${name}.txt`),'outside creation\n');
+    if(name==='create-cancelled')cli('cancel',run.id);else cli('decide',proposal.id,name==='create-denied'?'deny':'allow');
+    await until(()=>api(`/v1/runs/${run.id}`),value=>value.state===(name==='create-cancelled'?'cancelled':'completed'));
+    assert.equal((await api(`/v1/operations/${proposal.id}`)).state,{'create-allowed':'succeeded','create-denied':'denied','create-stale':'failed','create-cancelled':'cancelled'}[name]);
+    if(name==='create-allowed'||name==='create-stale'){const actual=await readFile(join(workspace,`${name}.txt`),'utf8');assert.equal(actual,name==='create-allowed'?`created ${name}\n`:'outside creation\n');if(name==='create-allowed')assert.equal(continuations.get(name).content_sha256,createHash('sha256').update(actual).digest('hex'));}
+    else await assert.rejects(readFile(join(workspace,`${name}.txt`)),{code:'ENOENT'});
+    const history=cli('history',name);assert.equal(history.length,name==='create-cancelled'?1:4);
+  }
+  await api('/v1/sessions',{id:'create-interrupted',title:'Restart pending creation'});cli('run','create-interrupted','create-interrupted');
+  const creationRun=(await api('/v1/sessions/create-interrupted/runs'))[0];
+  const [creationInterrupted]=await until(()=>api(`/v1/runs/${creationRun.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));
   await api('/v1/sessions',{id:'interrupted',title:'Restart while awaiting approval'});
   await api('/v1/runs',{id:'run-interrupted',session_id:'interrupted',prompt:'interrupted'});
   const [interrupted]=await until(()=>api('/v1/runs/run-interrupted/operations'),items=>items.some(item=>item.state==='awaiting_approval'));
   const savedResponseHistory=cli('history','allowed');
   await stop();await start();
   assert.deepEqual(cli('history','allowed'),savedResponseHistory,'Selected model, provider usage and measured timing metadata must survive restart unchanged');
+  assert.equal((await api(`/v1/runs/${creationRun.id}`)).state,'failed');assert.equal((await api(`/v1/operations/${creationInterrupted.id}`)).state,'cancelled');
+  await assert.rejects(readFile(join(workspace,'create-interrupted.txt')),{code:'ENOENT'});assert.equal(await readFile(join(workspace,'create-allowed.txt'),'utf8'),'created create-allowed\n');
   assert.equal((await api('/v1/runs/run-interrupted')).state,'failed');
   assert.equal((await api(`/v1/operations/${interrupted.id}`)).state,'cancelled');
   assert.equal(await readFile(join(workspace,'interrupted.txt'),'utf8'),'original\n');
@@ -95,7 +114,7 @@ try {
   assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'changed allowed\n');
   const retired=await fetch(`http://127.0.0.1:${port}/v1/operations/${interrupted.id}/decision`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({decision:'allow'}),signal:AbortSignal.timeout(5000)});
   assert.equal(retired.status,409,'Restart must not grant an unused approval to a retired owner');
-  assert.equal(requests,8);if(peerError) throw peerError;
+  assert.equal(requests,16);if(peerError) throw peerError;
   console.log('Compiled native agent edit loop passed: real approved edits, denial, stale content, cancellation, actual tool-result continuation and pending-approval restart recovery. Inference is synthetic.');
 } finally {
   await stop();

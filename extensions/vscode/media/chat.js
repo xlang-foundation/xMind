@@ -19,7 +19,7 @@ function entry(role,data){
 }
 function resetLive(){byId('live').replaceChildren();live=undefined;streamText='';streamUsage=null;}
 function stream(text){if(!live){live=node('article',undefined,'message assistant streaming');live.append(node('h4','xMind · responding'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));byId('live').append(live);byId('empty').hidden=true;}streamText+=text;markdown(live.querySelector('.message-body'),streamText);metrics(live.querySelector('.metrics'),{usage:streamUsage});}
-function operations(items){byId('operations').replaceChildren();for(const item of items){const section=node('section',undefined,'operation');section.append(node('h4',item.tool+' · '+item.state));const meta=node('details');meta.append(node('summary','Operation '+item.id),node('pre','Workspace: '+item.workspace_id+'\nExpires: '+new Date(item.expires_unix_ms).toISOString()+'\nController: '+(item.decision_actor||'Awaiting decision')),node('pre',item.arguments_json));section.append(meta);if(item.tool==='replace_file'){try{const plan=JSON.parse(item.arguments_json);section.append(node('strong',plan.path));for(const [label,key] of [['Before','before_content'],['After','after_content']]){section.append(node('div',label),node('pre',plan[key],label.toLowerCase()));}}catch{}}if(item.state==='awaiting_approval'){for(const decision of ['allow','deny']){const button=node('button',decision==='allow'?(item.tool==='replace_file'?'Allow edit':'Allow tool'):'Deny',decision==='allow'?'primary':'');button.disabled=Date.now()>=item.expires_unix_ms;button.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision});};section.append(button);}}else{const detail=node('details');detail.append(node('summary','Outcome'),node('pre',item.result_json));section.append(detail);}byId('operations').append(section);}}
+function operations(items){byId('operations').replaceChildren();for(const item of items){const section=node('section',undefined,'operation');section.append(node('h4',item.tool+' · '+item.state));const meta=node('details');meta.append(node('summary','Operation '+item.id),node('pre','Workspace: '+item.workspace_id+'\nExpires: '+new Date(item.expires_unix_ms).toISOString()+'\nController: '+(item.decision_actor||'Awaiting decision')),node('pre',item.arguments_json));section.append(meta);if(['replace_file','create_file'].includes(item.tool)){try{const plan=JSON.parse(item.arguments_json);section.append(node('strong',plan.path));for(const [label,key] of [['Before','before_content'],['After','after_content']]){section.append(node('div',label),node('pre',plan[key],label.toLowerCase()));}}catch{}}if(item.state==='awaiting_approval'){for(const decision of ['allow','deny']){const button=node('button',decision==='allow'?(item.tool==='replace_file'?'Allow edit':item.tool==='create_file'?'Allow creation':'Allow tool'):'Deny',decision==='allow'?'primary':'');button.disabled=Date.now()>=item.expires_unix_ms;button.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision});};section.append(button);}}else{const detail=node('details');detail.append(node('summary','Outcome'),node('pre',item.result_json));section.append(detail);}byId('operations').append(section);}}
 function send(){if(execution&&!activeRun&&!sessionBusy&&byId('prompt').value.trim())api.postMessage({type:'send',prompt:byId('prompt').value});}
 for(const type of ['new','refresh','cancel'])byId(type).onclick=()=>api.postMessage({type});
 byId('sessions').onchange=()=>api.postMessage({type:'select',id:byId('sessions').value});byId('send').onclick=send;
@@ -56,10 +56,15 @@ window.addEventListener('message',({data:m})=>{
       section.append(node('p','This edit is uncertain. Further edits in this workspace remain blocked.','inspection-note'));
       const button=node('button','Inspect actual file');button.onclick=()=>api.postMessage({type:'inspect-edit',id:item.id});section.append(button);
     }
-    for(const [index,item] of m.operations.entries())if(item.tool==='replace_file'&&item.state==='awaiting_approval'){
+    for(const [index,item] of m.operations.entries())if(['replace_file','create_file'].includes(item.tool)&&item.state==='awaiting_approval'){
       const button=node('button','Compare changes');button.disabled=Date.now()>=item.expires_unix_ms;
       button.onclick=()=>api.postMessage({type:'review',id:item.id});
       byId('operations').children[index].append(button);
+    }
+    for(const [index,item] of m.operations.entries())if(item.tool==='create_file'){
+      const section=byId('operations').children[index];
+      section.append(node('p','New file. The backend must still verify the recorded parent and absence of this name.'));
+      if(item.state==='uncertain')section.append(node('p','Creation is uncertain. Further effects in this workspace remain blocked; the operation will not replay.','inspection-note'));
     }
   }
   else if(m.type==='edit-inspection'){

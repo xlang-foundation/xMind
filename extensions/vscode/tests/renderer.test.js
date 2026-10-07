@@ -9,6 +9,13 @@ function renderer(){
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+test('new-file review distinguishes absence, previews exact content and never retries uncertainty',()=>{
+  const r=renderer(),doc=r.dom.window.document;const operation={id:'fixture-create',tool:'create_file',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'new.cpp',parent_id:'fixture-parent',before_exists:false,before_content:'',after_content:'actual proposed source\n'}),result_json:'{}'};
+  r.send({type:'operations',operations:[operation]});assert.equal(doc.querySelector('#operations .after').textContent,'actual proposed source\n');assert.match(doc.querySelector('#operations').textContent,/New file/);
+  const controls=[...doc.querySelectorAll('#operations button')];controls.find(button=>button.textContent==='Compare changes').click();assert.equal(r.posted.at(-1).type,'review');assert.equal(r.posted.at(-1).id,operation.id);
+  controls.find(button=>button.textContent==='Allow creation').click();assert.equal(r.posted.at(-1).type,'decide');assert.equal(r.posted.at(-1).decision,'allow');
+  r.send({type:'operations',operations:[{...operation,state:'uncertain'}]});assert.equal(doc.querySelectorAll('#operations button').length,0);assert.match(doc.querySelector('#operations').textContent,/Creation is uncertain/);r.dom.window.close();
+});
 
 test('external MCP approval names the server and tool and uncertainty never offers replay',()=>{
   const r=renderer(),doc=r.dom.window.document;

@@ -233,6 +233,11 @@ test('edit comparison opens exact revalidated backend snapshots without granting
   h.pauseOperation(Promise.resolve({...proposal,arguments_json:'{"changed":"proposal"}'}));view.receive({type:'review',id:'edit'});
   await until(()=>view.posted.some(message=>message.type==='error'));assert.equal(h.comparisons.length,1);view.close();
 });
+test('creation comparison opens absent-to-proposed snapshots without creating a file or granting',async()=>{
+  const proposal={...pendingEdit,tool:'create_file',arguments_json:JSON.stringify({path:'new.cpp',before_exists:false,before_content:'',after_content:'proposed new source\n'})};
+  const h=harness({running:true,operations:[proposal]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.length));
+  view.receive({type:'review',id:'edit'});await until(()=>h.comparisons.length===1);const [before,after,title]=h.comparisons[0];assert.equal(h.reviewText(before),'');assert.equal(h.reviewText(after),'proposed new source\n');assert.equal(title,'xMind proposed new file: new.cpp');assert.equal(h.decisions.length,0);view.close();
+});
 
 test('refresh reloads backend execution capabilities and history without submitting a run',async()=>{
   const h=harness({health:{agent_execution:false}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});

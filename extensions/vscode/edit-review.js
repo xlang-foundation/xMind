@@ -10,8 +10,9 @@ function editReview(vscode,context) {
   }));
   context.subscriptions.push({dispose(){documents.clear();bytes=0;}});
   return async operation=>{
-    if(operation.tool!=='replace_file') throw new Error('This operation does not contain a file edit.');
+    if(!['replace_file','create_file'].includes(operation.tool)) throw new Error('This operation does not contain a file change.');
     const plan=JSON.parse(operation.arguments_json);
+    if(operation.tool==='create_file' && (plan.before_exists!==false || plan.before_content!==''))throw new Error('The creation proposal has no verified absent-file precondition.');
     if(typeof plan.path!=='string' || typeof plan.before_content!=='string' || typeof plan.after_content!=='string')
       throw new Error('The backend edit proposal has no comparable text snapshots.');
     const size=Buffer.byteLength(plan.before_content)+Buffer.byteLength(plan.after_content);
@@ -24,7 +25,7 @@ function editReview(vscode,context) {
       if(documents.size>=64 || bytes+size>33554432) throw new Error('Comparison snapshot limit reached. Reload the xMind extension to release old snapshots.');
       documents.set(before.toString(),plan.before_content);documents.set(after.toString(),plan.after_content);bytes+=size;
     }
-    await vscode.commands.executeCommand('vscode.diff',before,after,`xMind proposed edit: ${plan.path}`,{preview:true});
+    await vscode.commands.executeCommand('vscode.diff',before,after,`xMind proposed ${operation.tool==='create_file'?'new file':'edit'}: ${plan.path}`,{preview:true});
   };
 }
 module.exports={editReview};

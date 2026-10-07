@@ -2,6 +2,7 @@
 #include "nlohmann/json.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
+#include "agentflow/create_executor.hpp"
 #include "agentflow/schema_worker.hpp"
 #define NOMINMAX
 #include <windows.h>
@@ -98,6 +99,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         for(const auto& stored:persistence_.history(owned.session_id).get()) request.messages.push_back(message(stored));
         if(workspace_) request.tools=workspace_->definitions();
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
+        if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
         struct McpRuntime {std::unique_ptr<McpStdioClient> client;std::unique_ptr<McpToolRegistry> registry;};
         std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;
         const auto run_deadline=std::chrono::steady_clock::now()+settings_.run_timeout;
@@ -141,6 +143,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     if(call.name=="edit_file" && settings_.approved_edits) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(EditExecutor(persistence_,*workspace_).invoke(operation_id(),id,call.arguments_json,expiry,token));
+                    } else if(call.name=="create_file" && settings_.approved_edits) {
+                        const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
+                        output=Json::parse(CreateExecutor(persistence_,*workspace_).invoke(operation_id(),id,call.arguments_json,expiry,token));
                     } else if(const auto registered=mcp_tools.find(call.name);registered!=mcp_tools.end()) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token));
@@ -151,7 +156,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const PermissionDenied&) {output={{"error",{{"code","permission_denied"},{"message","Controller denied this operation; the requested effect was not dispatched"}}}};}
                 catch(const PermissionExpired&) {output={{"error",{{"code","permission_expired"},{"message","Approval expired; the requested effect was not dispatched"}}}};}
                 catch(const McpEffectNotDispatched&) {output={{"error",{{"code","mcp_not_dispatched"},{"message","MCP request was not dispatched"}}}};}
-                catch(const ToolContentConflict&) {output={{"error",{{"code","content_conflict"},{"message","Edit does not match the actual file or replacement count"}}}};}
+                catch(const ToolContentConflict&) {output={{"error",{{"code","content_conflict"},{"message","File contents, identity, replacement count or target absence no longer match the operation"}}}};}
                 catch(const ToolCancelled&) {throw;}
                 catch(const ToolAccessDenied&) {output={{"error",{{"code","access_denied"},{"message","Workspace policy denied this operation"}}}};}
                 catch(const ToolFileError&) {output={{"error",{{"code","file_unavailable"},{"message","File is unavailable, binary, outside limits or unreadable"}}}};}

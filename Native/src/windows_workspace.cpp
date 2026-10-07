@@ -2,6 +2,7 @@
 #define NOMINMAX
 #include <windows.h>
 #include <bcrypt.h>
+#include <winternl.h>
 #include <algorithm>
 #include <array>
 #include <deque>
@@ -72,6 +73,40 @@ std::string content_hash(const std::string& content) {
     if(status<0) throw ToolFileError("Cannot capture content hash");
     std::ostringstream result;result<<std::hex<<std::setfill('0');for(auto byte:hash) result<<std::setw(2)<<static_cast<unsigned>(byte);return result.str();
 }
+using NativeCreate=decltype(&NtCreateFile);
+using NativeError=ULONG(NTAPI*)(NTSTATUS);
+struct NativeFiles {
+    NativeCreate create;
+    NativeError error;
+    NativeFiles(){const auto module=GetModuleHandleW(L"ntdll.dll");create=reinterpret_cast<NativeCreate>(GetProcAddress(module,"NtCreateFile"));error=reinterpret_cast<NativeError>(GetProcAddress(module,"RtlNtStatusToDosError"));if(!create || !error)throw ToolFileError("Handle-relative file operations are unavailable");}
+};
+// One literal component relative to the already opened parent. Never parses a
+// model-supplied absolute NT/DOS namespace and never follows final reparses.
+HANDLE relative_file(HANDLE parent,std::wstring name,bool directory,bool creating,bool absent_ok=false){
+    static const NativeFiles api;
+    if(name.empty() || name.size()>32767 || name.find_first_of(L"\\/:")!=std::wstring::npos)throw std::invalid_argument("Invalid relative file component");
+    UNICODE_STRING text{};text.Buffer=name.data();text.Length=static_cast<USHORT>(name.size()*sizeof(wchar_t));text.MaximumLength=text.Length;
+    OBJECT_ATTRIBUTES attributes{};attributes.Length=sizeof(attributes);attributes.RootDirectory=parent;attributes.ObjectName=&text;attributes.Attributes=OBJ_CASE_INSENSITIVE;
+    IO_STATUS_BLOCK outcome{};HANDLE file=nullptr;
+    const auto access=creating?(GENERIC_READ|GENERIC_WRITE|SYNCHRONIZE):(FILE_READ_ATTRIBUTES|SYNCHRONIZE|(directory?FILE_LIST_DIRECTORY|FILE_TRAVERSE:0));
+    const auto flags=FILE_SYNCHRONOUS_IO_NONALERT|FILE_OPEN_REPARSE_POINT|(directory?FILE_DIRECTORY_FILE:0)|(creating?FILE_NON_DIRECTORY_FILE|FILE_WRITE_THROUGH:0);
+    const auto status=api.create(&file,access,&attributes,&outcome,nullptr,FILE_ATTRIBUTE_NORMAL,creating?0:FILE_SHARE_READ,creating?FILE_CREATE:FILE_OPEN,flags,nullptr,0);
+    if(status<0){const auto code=api.error(status);if(file && file!=INVALID_HANDLE_VALUE)CloseHandle(file);
+        if(!creating && absent_ok && code==ERROR_FILE_NOT_FOUND)return nullptr;
+        if(creating && (code==ERROR_FILE_EXISTS || code==ERROR_ALREADY_EXISTS))throw ToolContentConflict("Creation target already exists");
+        if(creating)throw ToolMutationUncertain("File creation outcome was not established");
+        throw ToolFileError("Cannot open verified creation parent or inspect target");
+    }
+    if(!file || file==INVALID_HANDLE_VALUE){if(creating)throw ToolMutationUncertain("Native creation returned no verified handle");throw ToolFileError("Native inspection returned no verified handle");}
+    if(creating && outcome.Information!=FILE_CREATED){CloseHandle(file);throw ToolMutationUncertain("Native creation did not report a newly created file");}
+    return file;
+}
+void creation_component(const std::wstring& name){
+    if(name.empty() || name==L"." || name==L".." || name.back()==L'.' || name.back()==L' ')throw ToolAccessDenied("Use an unambiguous file component");
+    for(const auto character:name)if(character<32 || std::wstring_view(L"<>:\"/\\|?*").find(character)!=std::wstring_view::npos)throw ToolAccessDenied("Invalid creation file component");
+    auto stem=name.substr(0,name.find(L'.'));for(auto& character:stem)if(character>=L'a' && character<=L'z')character-=L'a'-L'A';
+    if(stem==L"CON" || stem==L"PRN" || stem==L"AUX" || stem==L"NUL" || (stem.size()==4 && (stem.starts_with(L"COM") || stem.starts_with(L"LPT")) && stem[3]>=L'1' && stem[3]<=L'9'))throw ToolAccessDenied("Device names are not creation targets");
+}
 }
 struct WorkspaceTools::Impl {
     Handle root;
@@ -91,9 +126,46 @@ struct WorkspaceTools::Impl {
         auto suffix=wide(relative);std::replace(suffix.begin(),suffix.end(),L'/',L'\\');
         return base+L"\\"+suffix;
     }
+    struct CreationParent {std::vector<std::unique_ptr<Handle>> directories;std::wstring leaf;std::string relative;};
+    CreationParent creation_parent(const std::string& input,std::stop_token cancel) const {
+        check_cancel(cancel);CreationParent result;result.relative=relative_path(input);
+        std::vector<std::wstring> components;for(const auto& part:std::filesystem::u8path(result.relative)){const auto name=part.wstring();creation_component(name);components.push_back(name);}
+        if(components.empty())throw ToolAccessDenied("A creation target must name a file");result.leaf=components.back();
+        result.directories.push_back(std::make_unique<Handle>(CreateFileW(base.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr)));
+        if(file_identity(result.directories.back()->value)!=file_identity(root.value))throw ToolAccessDenied("Creation root identity changed");
+        auto verify_directory=[&](HANDLE directory){verify(directory);BY_HANDLE_FILE_INFORMATION info{};if(!GetFileInformationByHandle(directory,&info) || !(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Creation parent is not a directory");if(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)throw ToolAccessDenied("Creation does not traverse directory links");};
+        verify_directory(result.directories.back()->value);
+        for(std::size_t i=0;i+1<components.size();++i){check_cancel(cancel);result.directories.push_back(std::make_unique<Handle>(relative_file(result.directories.back()->value,components[i],true,false)));verify_directory(result.directories.back()->value);}
+        return result;
+    }
 };
 WorkspaceTools::WorkspaceTools(const std::string& root):impl_(std::make_unique<Impl>(root)) {}
 WorkspaceTools::~WorkspaceTools()=default;
+WorkspaceCreatePlan WorkspaceTools::plan_creation(const std::string& path,const std::string& content,std::stop_token cancel) const {
+    check_cancel(cancel);if(content.size()>1024*1024 || !valid_text(content))throw std::invalid_argument("Creation content must be bounded UTF-8 text");
+    const auto workspace=identity();auto parent=impl_->creation_parent(path,cancel);const auto directory=parent.directories.back()->value;
+    const auto existing=relative_file(directory,parent.leaf,false,false,true);if(existing){Handle owned(existing);throw ToolContentConflict("Creation target already exists");}
+    check_cancel(cancel);if(identity()!=workspace)throw ToolAccessDenied("Workspace changed while planning creation");
+    return {parent.relative,workspace,file_identity(directory),content,content_hash(content)};
+}
+WorkspaceSnapshot WorkspaceTools::apply_creation(const WorkspaceCreatePlan& plan,std::stop_token cancel) const {
+    check_cancel(cancel);if(plan.content.size()>1024*1024 || !valid_text(plan.content) || content_hash(plan.content)!=plan.content_sha256)throw std::invalid_argument("Invalid creation plan content or hash");
+    if(identity()!=plan.workspace_id)throw ToolAccessDenied("Creation belongs to another workspace");
+    auto parent=impl_->creation_parent(plan.path,cancel);const auto directory=parent.directories.back()->value;
+    if(file_identity(directory)!=plan.parent_id)throw ToolContentConflict("Creation parent identity changed");
+    check_cancel(cancel);
+    Handle file(relative_file(directory,parent.leaf,false,true)); // Atomic create-new; never open/overwrite.
+    try {
+        impl_->verify(file.value);BY_HANDLE_FILE_INFORMATION info{};
+        if(!GetFileInformationByHandle(file.value,&info) || GetFileType(file.value)!=FILE_TYPE_DISK || (info.dwFileAttributes&(FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_REPARSE_POINT)) || info.nNumberOfLinks!=1)throw ToolFileError("Created file identity is not regular and exclusive");
+        std::size_t offset=0;while(offset<plan.content.size()){check_cancel(cancel);DWORD count=0;const auto amount=static_cast<DWORD>(std::min<std::size_t>(8192,plan.content.size()-offset));if(!WriteFile(file.value,plan.content.data()+offset,amount,&count,nullptr) || !count || count>amount)throw ToolFileError("Cannot write created file");offset+=count;}
+        check_cancel(cancel);if(!FlushFileBuffers(file.value))throw ToolFileError("Cannot finalize created file");
+        LARGE_INTEGER zero{};if(!SetFilePointerEx(file.value,zero,nullptr,FILE_BEGIN))throw ToolFileError("Cannot inspect created file");
+        std::string actual;std::array<char,8192> buffer{};for(;;){DWORD count=0;if(!ReadFile(file.value,buffer.data(),static_cast<DWORD>(buffer.size()),&count,nullptr))throw ToolFileError("Cannot read created file");if(!count)break;if(count>1024*1024-actual.size())throw ToolFileError("Created file exceeds limits");actual.append(buffer.data(),count);}
+        impl_->verify(file.value);const auto hash=content_hash(actual),id=file_identity(file.value);if(actual!=plan.content || hash!=plan.content_sha256 || identity()!=plan.workspace_id || file_identity(directory)!=plan.parent_id)throw ToolFileError("Created file readback differs from plan");
+        return {parent.relative,std::move(actual),plan.workspace_id,id,hash};
+    }catch(...){throw ToolMutationUncertain("Creation occurred; its final file state requires reconciliation");}
+}
 std::string WorkspaceTools::identity() const {
     auto current=final_path(impl_->root.value);
     while(!current.empty() && current.back()==L'\\') current.pop_back();

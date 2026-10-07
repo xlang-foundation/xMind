@@ -17,6 +17,7 @@ struct WorkspaceEditPlan {
     std::string after_content,after_sha256;
     std::size_t replaced_occurrences;
 };
+struct WorkspaceCreatePlan {std::string path,workspace_id,parent_id,content,content_sha256;};
 struct WorkspaceFingerprint {std::string path,workspace_id,file_id,content_sha256;std::size_t size;};
 struct WorkspaceEntry {std::string name,kind;};
 struct WorkspaceListing {std::vector<WorkspaceEntry> entries;bool truncated=false;};
@@ -52,6 +53,12 @@ public:
     // In-place application is not atomic replacement. After writes begin, any
     // failure/cancellation is uncertain and must not be retried blindly.
     WorkspaceSnapshot apply_plan(const WorkspaceEditPlan& plan,std::stop_token cancel={}) const;
+    // Existing parent, absent final entry. Captures identity/bytes only; no file
+    // is created until the owning executor has a matching durable claim.
+    WorkspaceCreatePlan plan_creation(const std::string& path,const std::string& content,std::stop_token cancel={}) const;
+    // Handle-relative create-new never overwrites an existing entry. Creation
+    // itself is an effect, including an empty file; subsequent failures are uncertain.
+    WorkspaceSnapshot apply_creation(const WorkspaceCreatePlan& plan,std::stop_token cancel={}) const;
     // Reconciliation inspection hashes bounded raw bytes, including a partial
     // write that is no longer valid UTF-8. It never exposes those bytes to models.
     WorkspaceFingerprint fingerprint_file(const std::string& path,std::stop_token cancel={}) const;
