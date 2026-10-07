@@ -1,0 +1,15 @@
+{
+  "binary_sha256": {
+    "build/native/Release/agentflow_graph_contract.exe": "D43915B64CD05463734C21CECBF9F983CF1EE7611E04CD3CDD1FD1843B69E8E7",
+    "build/native/Release/xmind_server.exe": "8AB83EC020A3E3492C469C6C1EC628B7D1D0B9DBD57FB1EB8BCE97351AD37BE6",
+    "D:/CantorAI2026/xlang3/build/Release/modules/xlang_sqlite3.x3pkg.dll": "FCB0E481352672EB72D86A96E2EF5D9B58939A35AD03A4AC3E32BFE7DC733B8C",
+    "build/native/Release/xmind_admin.exe": "2A96C42581844805E7EC6F809360E7F7AAA9919CBDE2BF1E89D6A1794E5ABA61",
+    "build/native/Release/xlang3_runtime.dll": "FB02403BFF1BF9967D5E49CB4F2A5A4F6D13AD139CC02B069E20FC03CC6C4862"
+  },
+  "graph_execution_available": false,
+  "installed_preview": "Earlier isolated-CI source 3297a4bce2d591c0f1c1dd37ccc18a15297369e7 remains running",
+  "runtime": "Embedded xlang3; no CPython execution or bridge",
+  "source_native_git_tree": "a2407f6f90c9fa15c913a2284ca2351fb76fe471",
+  "runtime_source_checkout": "914783909835116969aad7c66b210a5ac9a27661",
+  "scope": "Local Release build and all 38 native contracts. Graph domain completion/input values synthetic; actual graph catalog storage/admin/lease verified; no agent/tool graph execution acceptance"
+}

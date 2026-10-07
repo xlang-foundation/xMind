@@ -68,6 +68,7 @@ $ciExpected+='native_process_configuration_contract'
 $ciExpected+='native_agent_process_http_contract'
 $ciExpected+='native_instruction_configuration_contract'
 $ciExpected+='native_repository_instructions_contract'
+$ciExpected+='native_graph_contract'
 $ciActual=($ciTests|ConvertFrom-Json).tests.name
 if(@($ciActual).Count -ne $ciExpected.Count -or (Compare-Object ($ciActual|Sort-Object) ($ciExpected|Sort-Object))){throw 'The complete expected native contract set was not registered; refusing a partial green build.'}
 Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error')

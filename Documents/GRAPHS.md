@@ -1,5 +1,7 @@
 # Agent graphs
 
+The Python implementation described below is historical prototype material. The native C++ [graph foundation](../doc/native-graph-foundation.md) now passes planning, coordination/checkpoint and actual xlang3-backed configuration contracts. Native agent/tool graph execution and graph HTTP/CLI/view workflows remain pending; the prototype endpoints below are not delivered native APIs.
+
 Graph orchestration source is implemented in `agentflow/graph.py` and exposed through the shared backend. Graph nodes reuse the same `Engine` for model/tool turns as standalone agents. Tool nodes use the same workspace permissions and optional MCP allowlists. Human nodes pause execution for explicit client input.
 
 ## API
