@@ -4,6 +4,11 @@ const assert = require('node:assert/strict');
 const http = require('node:http');
 const { BackendClient } = require('../client');
 const token = 'native-client-contract-token-32-bytes';
+test('graph access adapter preserves backend identity, revision and raw human JSON',async()=>{
+ const requests=[];const client=new BackendClient('http://127.0.0.1:8765',()=>token,async(url,options)=>{requests.push({url,body:options.body?JSON.parse(options.body):undefined});return {ok:true,json:async()=>({})};});
+ await client.graphRun('session','workflow',3,'Task');await client.graphInput('root','answer.step','{"answer":1,"answer":2}',7);await client.graphChildHistory('root','child/opaque');
+ assert.deepEqual(requests[0].body,{session_id:'session',graph_id:'workflow',graph_revision:3,prompt:'Task'});assert.deepEqual(requests[1].body,{input_json:'{"answer":1,"answer":2}',expected_checkpoint_revision:7});assert.ok(requests[2].url.endsWith('/v1/graph-runs/root/children/child%2Fopaque/history'));
+});
 
 test('session discovery, URL encoding, error handling and origin boundaries', async () => {
   const server = http.createServer((req, res) => {

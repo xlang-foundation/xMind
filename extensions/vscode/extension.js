@@ -35,6 +35,8 @@ async function activate(context) {
   let modelCatalogue = {models:[],default_model:''};
   let selectedModel;
   let providerSelection;
+  let graphCatalogue=[],selectedGraph,graphSnapshot;
+  let graphChildren=new Map(),childHistory=new Map();
   const stateKey = 'agentflow.session';
   const modelStateKey = 'xmind.model';
   const runStateKey = 'xmind.observedRun';
@@ -42,6 +44,8 @@ async function activate(context) {
   const post = message => panel?.webview.postMessage(message);
   const stop = () => { clearInterval(timer); timer = undefined; generation++; };
   const busySession=()=>sessionRuns.some(run=>['queued','running','paused'].includes(run.state));
+  const observedOperation=id=>id===runId || graphChildren.has(id);
+  const clearGraph=()=>{graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});};
   const presentRuns=()=>post({type:'runs',runs:sessionRuns,selected:runId,busy:busySession()});
   context.subscriptions.push(vscode.window.registerWebviewViewProvider('xmind.workspace', {
     resolveWebviewView(view) {
@@ -58,12 +62,48 @@ async function activate(context) {
     return available;
   }
 
+  async function refreshGraphs(){
+    const target=client,version=generation;let catalogue;
+    try{catalogue=await target.graphs();}catch(error){if(error.status!==404)throw error;catalogue={graphs:[]};}
+    if(client!==target || version!==generation || !panel)return;
+    if(!Array.isArray(catalogue.graphs) || catalogue.graphs.length>256 || catalogue.graphs.some(g=>!g || typeof g.id!=='string' || !/^[A-Za-z0-9_.-]{1,64}$/.test(g.id) || !Number.isSafeInteger(g.revision) || g.revision<1 || typeof g.executable!=='boolean'))throw new Error('Invalid backend graph catalogue.');
+    graphCatalogue=catalogue.graphs;if(!graphCatalogue.some(g=>g.id===selectedGraph&&g.executable))selectedGraph=undefined;
+    post({type:'graphs',graphs:graphCatalogue,selected:selectedGraph});
+  }
+  async function pollGraph(id,version){
+    const events=await client.graphEvents(id,cursor);
+    const root=await client.graph(id),children=await client.graphChildren(id);
+    if(version!==generation || !panel)return;
+    if(root.run.id!==id || root.run.session_id!==sessionId || !root.run.graph_root || !Array.isArray(children) || children.some(c=>c.parent_id!==id || c.session_id!==sessionId || typeof c.node_id!=='string'))throw new Error('Graph observation identity changed.');
+    const owned=new Map(children.map(c=>[c.id,c]));
+    for(const event of events)if(event.run_id!==id && !owned.has(event.run_id))throw new Error('Event does not belong to the observed graph.');
+    const definitions=new Map(root.spec.nodes.map(n=>[n.id,n]));
+    for(const child of children){
+      if(definitions.get(child.node_id)?.type!=='agent')continue;
+      const previous=childHistory.get(child.id);
+      if(!previous || previous.state!==child.state || events.some(e=>e.run_id===child.id&&['conversation.assistant','conversation.tool_turn','model.done'].includes(e.kind))){
+        const history=await client.graphChildHistory(id,child.id);if(version!==generation || !panel)return;childHistory.set(child.id,{state:child.state,history});
+      }
+    }
+    const operations=[];for(const child of children){operations.push(...await client.operations(child.id));if(version!==generation || !panel)return;}
+    graphSnapshot=root;graphChildren=owned;reviewed=new Map(operations.map(o=>[o.id,o]));
+    post({type:'graph',record:root,children,histories:Object.fromEntries([...childHistory].filter(([child])=>owned.has(child)).map(([child,value])=>[child,value.history]))});
+    for(const event of events){post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
+    post({type:'operations',operations:operations.map(operation=>({...operation,node_id:owned.get(operation.run_id)?.node_id}))});post({type:'status',text:root.run.state});
+    sessionRuns=await client.runs(sessionId);if(version!==generation || !panel)return;presentRuns();
+    if(['completed','failed','cancelled'].includes(root.run.state)){
+      const finalEvents=await client.graphEvents(id,cursor);if(version!==generation || !panel)return;
+      for(const event of finalEvents){if(event.run_id!==id&&!owned.has(event.run_id))throw new Error('Final event does not belong to the observed graph.');post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
+      const history=await client.history(sessionId);if(version!==generation || !panel)return;post({type:'transcript',history});if(!busySession())stop();
+    }
+  }
   async function poll() {
     if (polling || !runId) return;
     polling = true;
     const id = runId;
     const version = generation;
     try {
+      if(sessionRuns.find(run=>run.id===id)?.graph_root){await pollGraph(id,version);return;}
       const events = await client.events(id, cursor);
       if (version !== generation) return;
       for (const event of events) {
@@ -102,6 +142,7 @@ async function activate(context) {
   async function selectSession(id) {
     stop();
     const version = generation;
+    clearGraph();
     sessionId = id;
     runId = undefined;
     sessionRuns=[];presentRuns();
@@ -135,7 +176,7 @@ async function activate(context) {
     const runs=await client.runs(sessionId);
     if(version!==generation || !panel) return;
     if(!runs.some(run=>run.id===id)) throw new Error('Run does not belong to the selected conversation.');
-    sessionRuns=runs;runId=id;cursor=0;reviewed.clear();presentRuns();
+    clearGraph();sessionRuns=runs;runId=id;cursor=0;reviewed.clear();presentRuns();
     post({type:'operations',operations:[]});post({type:'reset-run'});
     await context.workspaceState.update(runStateKey,{url:client.baseUrl,session_id:sessionId,id});
     if(version!==generation || !panel) return;
@@ -235,7 +276,7 @@ async function activate(context) {
       // Selection intent invalidates an in-flight approval immediately, before
       // its queued selection handler can run behind that network request.
       if (panel === view && ['select','select-run','new','refresh'].includes(message?.type)) {
-        stop(); reviewed.clear(); post({ type: 'operations', operations: [] });
+        stop(); reviewed.clear();clearGraph();post({ type: 'operations', operations: [] });
       }
       // Serialize view commands so overlapping selections/submissions cannot
       // overwrite the observed session or display one session's response in another.
@@ -246,6 +287,7 @@ async function activate(context) {
           post({ type: 'capabilities', execution: health.agent_execution, model:selectedModel, models:modelCatalogue.models });
           await refresh();
           if (sessionId) await selectSession(sessionId);
+          await refreshGraphs();
           // Fetch with the saved backend key; settings handles a rejected key.
           try{await configureModel();}catch{}
         } else if (message.type === 'saveProviderKey') {
@@ -268,6 +310,7 @@ async function activate(context) {
           if(sessionId) await selectSession(sessionId);
           else if(health.agent_execution) post({type:'status',text:'Ready'});
           try{await configureModel();}catch{}
+          await refreshGraphs();
         }
         else if (message.type === 'model' && typeof message.id === 'string') {
           if(providerSelection){
@@ -282,6 +325,16 @@ async function activate(context) {
           }else if (!modelCatalogue.models.some(model => model.id === message.id)) throw new Error('Fetch models in Settings before choosing this model.');
           selectedModel = message.id;
           await context.workspaceState.update(modelStateKey,{url:client.baseUrl,id:selectedModel});
+          await refreshGraphs();
+        }
+        else if(message.type==='graph-select'){
+          if(message.id && !graphCatalogue.some(g=>g.id===message.id&&g.executable))throw new Error('Select an executable graph registered by this backend.');
+          selectedGraph=message.id||undefined;post({type:'graphs',graphs:graphCatalogue,selected:selectedGraph});
+        }else if(message.type==='graph-input'){
+          if(!vscode.workspace.isTrusted || !graphSnapshot || graphSnapshot.run.id!==runId || message.root!==runId || !['paused','running'].includes(graphSnapshot.run.state))throw new Error('Select an active graph before providing input.');
+          if(message.revision!==graphSnapshot.checkpoint_revision || !graphSnapshot.checkpoint.nodes.some(n=>n.id===message.node&&n.state==='waiting_human'))throw new Error('Human input changed. Refresh the current graph before answering.');
+          if(typeof message.input_json!=='string' || message.input_json.length>65536)throw new Error('Human input must be bounded JSON.');
+          await client.graphInput(runId,message.node,message.input_json,message.revision);await poll();
         }
         else if (message.type === 'new') {
           const session = await client.createSession('VS Code session');
@@ -292,7 +345,9 @@ async function activate(context) {
         } else if (message.type === 'select-run' && typeof message.id === 'string') {
           await selectRun(message.id);
         } else if (message.type === 'send' && typeof message.prompt === 'string' && message.prompt.trim()) {
-          if (!health.agent_execution) throw new Error('Configure a model on xMind Server before submitting an agent run.');
+          const graph=selectedGraph?graphCatalogue.find(g=>g.id===selectedGraph&&g.executable):undefined;
+          if(selectedGraph&&!graph)throw new Error('Graph is not executable on this backend.');
+          if (!graph&&!health.agent_execution) throw new Error('Configure a model on xMind Server before submitting an agent run.');
           if (!sessionId) {
             const session = await client.createSession(message.prompt.slice(0, 80));
             if (panel !== view) return;
@@ -301,9 +356,9 @@ async function activate(context) {
           }
           if (panel !== view) return;
           if(busySession()) throw new Error('This conversation still has an active run. Stop or finish it before submitting another prompt.');
-          const run = await client.run(sessionId, message.prompt, selectedModel);
+          const run = graph?await client.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel):await client.run(sessionId,message.prompt,selectedModel);
           if (panel !== view) return; // Accepted backend execution survives view closure.
-          stop(); runId = run.id; cursor = 0;
+          stop();clearGraph();runId = run.id; cursor = 0;
           sessionRuns=[...sessionRuns,run];presentRuns();
           await context.workspaceState.update(runStateKey,{url:client.baseUrl,session_id:sessionId,id:run.id});
           if(panel!==view) return;
@@ -322,7 +377,7 @@ async function activate(context) {
         } else if (message.type === 'inspect-edit' && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before inspecting an edit.');
           const proposal=reviewed.get(message.id);
-          if(!proposal || proposal.run_id!==runId || proposal.state!=='uncertain' || proposal.tool!=='replace_file') throw new Error('Select a recorded uncertain file edit before inspecting.');
+          if(!proposal || !observedOperation(proposal.run_id) || proposal.state!=='uncertain' || proposal.tool!=='replace_file') throw new Error('Select a recorded uncertain file edit before inspecting.');
           const version=generation;
           const inspection=await client.inspectEdit(proposal.id);
           if(panel!==view || version!==generation) return;
@@ -335,7 +390,7 @@ async function activate(context) {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before deciding an operation.');
           if (message.type === 'decide' && message.decision !== 'allow' && message.decision !== 'deny') throw new Error('Decision must be allow or deny.');
           const proposal = reviewed.get(message.id);
-          if (!proposal || proposal.run_id !== runId || proposal.state !== 'awaiting_approval') throw new Error('Inspect a pending operation in the selected run before deciding.');
+          if (!proposal || !observedOperation(proposal.run_id) || proposal.state !== 'awaiting_approval') throw new Error('Inspect a pending operation in the selected run before deciding.');
           const version = generation;
           const current = await client.operation(message.id);
           if (panel !== view || version !== generation) return;
@@ -347,7 +402,7 @@ async function activate(context) {
           const decided = await client.decide(message.id, message.decision);
           if (panel !== view || version !== generation) return;
           reviewed.set(decided.id, decided);
-          post({ type: 'operations', operations: [...reviewed.values()] });
+          post({ type: 'operations', operations: [...reviewed.values()].map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id})) });
           await poll();
         }
       } catch (error) { if (panel === view) post({ type: 'error', text: error.message }); } });

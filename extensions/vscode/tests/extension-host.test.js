@@ -16,13 +16,25 @@ function harness(options={}) {
   let pendingOperation;
   let operations=options.operations||[];
   let sidebarProvider;
-  const decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[];
+  const decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
     let data;
     if(target.pathname==='/v1/health') data=options.health||{agent_execution:true,status:'ok'};
+    else if(target.pathname==='/v1/graphs')data={graphs:options.graphs||[]};
+    else if(target.pathname==='/v1/graph-runs'){
+      graphRequests.push(JSON.parse(requestOptions.body));data=options.graphRoot.run;
+    }
+    else if(target.pathname.startsWith('/v1/graph-runs/')){
+      const root=options.graphRoot;assert.ok(root,'Graph fixture must be explicit');assert.equal(target.pathname.split('/')[3],root.run.id);
+      if(target.pathname.endsWith('/events'))data=target.search==='?after=0'?(options.graphEvents||[]):[];
+      else if(target.pathname.endsWith('/history'))data=options.childHistory||[];
+      else if(target.pathname.endsWith('/children'))data=options.graphChildren||[];
+      else if(target.pathname.includes('/human/')){humanInputs.push(JSON.parse(requestOptions.body));data=options.graphInputResult||root;}
+      else data=root;
+    }
     else if(target.pathname==='/v1/models') {
       if(options.legacyCatalogue) return {ok:false,status:404,json:async()=>({detail:'Resource not found'})};
       data=options.catalogue||{default_model:'synthetic-host-default',models:[{id:'synthetic-host-default'},{id:'synthetic-host-alternate'}]};
@@ -40,11 +52,13 @@ function harness(options={}) {
     else if(target.pathname==='/v1/sessions') data=[{id:'saved',title:'Saved session'}];
     else if(target.pathname==='/v1/sessions/saved/history') data=pendingHistory?await pendingHistory:transcript;
     else if(target.pathname==='/v1/sessions/saved/runs') data=options.runs||[{id:'finished',state:options.running?'running':'completed'}];
+    else if(options.graphChildren?.some(child=>target.pathname==='/v1/runs/'+child.id+'/operations'))data=operations;
     else if(options.runs && /^\/v1\/runs\/[^/]+(?:\/operations|\/events)?$/.test(target.pathname)) {
       const id=target.pathname.split('/')[3],run=options.runs.find(item=>item.id===id);assert.ok(run,'Host must request only selected-session runs');
       data=target.pathname.endsWith('/operations')?(options.operationsByRun?.[id]||[]):target.pathname.endsWith('/events')?(target.search==='?after=0'?[{seq:1,kind:'run.'+run.state,data:{}}]:[]):run;
     }
     else if(target.pathname==='/v1/runs/finished') data={id:'finished',state:options.running?'running':'completed'};
+    else if(options.graphChildren?.some(child=>target.pathname==='/v1/runs/'+child.id+'/operations'))data=operations;
     else if(target.pathname==='/v1/runs/finished/operations') data=operations;
     else if(target.pathname==='/v1/operations/edit') data=pendingOperation?await pendingOperation:operations[0];
     else if(target.pathname==='/v1/operations/edit/inspection') data=await options.inspection;
@@ -83,7 +97,7 @@ function harness(options={}) {
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,state,errors,context,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  return {token,commands,secrets,requests,views,intervals,state,errors,context,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
     pauseOperation(promise) {pendingOperation=promise;},
@@ -150,6 +164,26 @@ test('rejected saved key shows settings guidance and replacement uses the same s
   assert.deepEqual(h.discoveryRequests,[{expected_revision:1},{api_key:'synthetic-replacement-key',expected_revision:1}]);assert.deepEqual(h.providerRequests,[{model:'fixture-model',api_key:'synthetic-replacement-key',expected_revision:1}]);assert.ok(!JSON.stringify(view.posted).includes('synthetic-replacement-key'));assert.equal(h.pickers.length,0);view.close();
 });
 const uncertainEdit={...pendingEdit,state:'uncertain'};
+function graphFixture(){const run={id:'graph-root',session_id:'saved',state:'paused',graph_root:true};return {runs:[run],graphRoot:{run,graph_id:'fixture.flow',graph_revision:2,checkpoint_revision:4,spec:{nodes:[{id:'worker',type:'agent'},{id:'answer',type:'human',prompt:'Supply actual data'}]},checkpoint:{nodes:[{id:'worker',state:'completed'},{id:'answer',state:'waiting_human'}]}},graphs:[{id:'fixture.flow',revision:2,node_count:2,executable:true}],graphChildren:[{id:'child-a',session_id:'saved',parent_id:'graph-root',node_id:'worker',state:'completed',graph_root:false}],childHistory:[{seq:1,role:'assistant',data:{content:'Synthetic child response',usage:{prompt_tokens:12,completion_tokens:7,total_tokens:19}}}],graphEvents:[{seq:1,run_id:'child-a',kind:'conversation.assistant',data:{content:'Synthetic child response'}}]};}
+test('graph observation keeps child transcript and usage out of the root stream',async()=>{
+ const h=harness(graphFixture());await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graph'));const snapshot=view.posted.find(m=>m.type==='graph');assert.equal(snapshot.histories['child-a'][0].data.usage.prompt_tokens,12);assert.equal(snapshot.record.checkpoint_revision,4);assert.ok(view.posted.some(m=>m.type==='graph-event'&&m.node_id==='worker'));assert.ok(!view.posted.some(m=>m.type==='event'&&m.event.run_id==='child-a'));view.close();
+});
+test('human input binds observed root, waiting node and exact checkpoint; raw JSON reaches the backend',async()=>{
+ const h=harness(graphFixture());await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graph'));
+ for(const value of [{root:'foreign-root',node:'answer',revision:4},{root:'graph-root',node:'worker',revision:4},{root:'graph-root',node:'answer',revision:3}]){const count=view.posted.filter(m=>m.type==='error').length;view.receive({type:'graph-input',...value,input_json:'{}'});await until(()=>view.posted.filter(m=>m.type==='error').length>count);assert.equal(h.humanInputs.length,0);}
+ view.receive({type:'graph-input',root:'graph-root',node:'answer',revision:4,input_json:'{"answer":1,"answer":2}'});await until(()=>h.humanInputs.length===1);assert.deepEqual(h.humanInputs,[{input_json:'{"answer":1,"answer":2}',expected_checkpoint_revision:4}],'Adapter must not erase duplicate keys before native validation');view.close();
+});
+test('selection intent invalidates queued human input before another conversation is displayed',async()=>{
+ const h=harness(graphFixture());await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graph'));view.receive({type:'graph-input',root:'graph-root',node:'answer',revision:4,input_json:'{}'});view.receive({type:'refresh'});await until(()=>view.posted.some(m=>m.type==='error'));assert.equal(h.humanInputs.length,0);view.close();
+});
+test('graph child approval retains exact current operation review and uses the shared decision endpoint',async()=>{
+ const options=graphFixture();options.graphRoot.run.state='running';options.graphChildren[0].state='running';options.graphRoot.checkpoint.nodes[0].state='running';options.operations=[{...pendingEdit,run_id:'child-a',arguments_json:JSON.stringify({...JSON.parse(pendingEdit.arguments_json),path:'file.cpp'})}];const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graph'));
+ view.receive({type:'review',id:'edit'});await until(()=>h.comparisons.length===1);assert.equal(h.decisions.length,0);view.receive({type:'decide',id:'edit',decision:'allow'});await until(()=>h.decisions.length===1);assert.deepEqual(h.decisions,[{decision:'allow'}]);view.close();
+});
+test('graph catalog allows model-free tool graphs and rejects arbitrary view plans or graph IDs',async()=>{
+ const options=graphFixture();options.runs=[];options.health={agent_execution:false,status:'ok'};const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graphs'));
+ view.receive({type:'graph-select',id:'forged'});await until(()=>view.posted.some(m=>m.type==='error'));assert.equal(h.graphRequests.length,0);view.receive({type:'graph-select',id:'fixture.flow'});view.receive({type:'send',prompt:'Actual requested task',spec:{nodes:[]},graph_revision:99});await until(()=>h.graphRequests.length===1);assert.deepEqual(h.graphRequests,[{session_id:'saved',graph_id:'fixture.flow',graph_revision:2,prompt:'Actual requested task'}]);view.close();
+});
 const inspectionFixture={operation:uncertainEdit,observed:{path:'file.cpp',workspace_id:uncertainEdit.workspace_id,file_id:'fixture-file',content_sha256:'a'.repeat(64),size:12},match:'after',same_file:true,observed_unix_ms:Date.now(),quarantine_released:false};
 test('older run inspection remains accessible and selected run persists across view reopening',async()=>{
   const older={...uncertainEdit,run_id:'older'};

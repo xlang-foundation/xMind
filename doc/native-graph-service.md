@@ -1,6 +1,6 @@
 # Native graph service and client controls
 
-The C++ execution platform owns standalone agents and graph roots independently of connected views. A graph is an immutable, revisioned backend catalog entry. HTTP callers select a registered graph; they cannot upload a plan, choose a controller actor, or mutate execution states. This checkpoint implements the backend and console paths. Graph selection, human input and child activity in the VS Code sidebar remain pending.
+The C++ execution platform owns standalone agents and graph roots independently of connected views. A graph is an immutable, revisioned backend catalog entry. HTTP callers select a registered graph; they cannot upload a plan, choose a controller actor, or mutate execution states. Backend and console paths are implemented. The VS Code adapter now includes workflow selection, human input and separate child activity; actual IDE graph acceptance and installation remain pending. See [sidebar workflow scope](vscode-graph-workflows.md).
 
 Start a Windows native server with the trusted catalog file:
 
@@ -35,11 +35,12 @@ The catalog assigns revisions; clients obtain the current revision from `graphs`
 | `graph-run SESSION GRAPH REV PROMPT [MODEL]` | POST `/v1/graph-runs`: admit a registered graph; return the actual queued root |
 | `graph ROOT` | GET `/v1/graph-runs/ROOT`: actual run, immutable specification/input and checkpoint revision |
 | `graph-children ROOT` | GET `/v1/graph-runs/ROOT/children`: actual owned child runs |
+| `graph-child-history ROOT CHILD` | GET `/v1/graph-runs/ROOT/children/CHILD/history`: isolated child transcript; a foreign child is rejected |
 | `graph-events ROOT [AFTER]` | GET `/v1/graph-runs/ROOT/events?after=CURSOR`: persisted root and child events |
 | `graph-input ROOT NODE REV JSON_FILE` | POST `/v1/graph-runs/ROOT/human/NODE`: typed input with expected checkpoint revision |
 | `cancel ROOT` | POST `/v1/runs/ROOT/cancel`: cancel through the owning execution service |
 
-For a waiting `choose` node, write `{"path":"src/main.cpp"}` to a JSON file and pass its path and the latest checkpoint revision to `graph-input`. Duplicate keys, excessive nesting, oversized input, stale revisions and caller-supplied actors are rejected. Human input is data; it does not grant file or command effects. A partial answer retains a durable pause when no executable branch becomes ready. An answer that releases a ready branch resumes that work while retaining other pending human decisions.
+For a waiting `choose` node, write `{"path":"src/main.cpp"}` to a JSON file and pass its path and the latest checkpoint revision to `graph-input`. HTTP clients can provide an `input` object or an `input_json` string, exclusively. The sidebar sends the original JSON text, preserving duplicate keys for native rejection rather than silently collapsing them in JavaScript. Duplicate keys, excessive nesting, oversized input, stale revisions and caller-supplied actors are rejected. Human input is data; it does not grant file or command effects. A partial answer retains a durable pause when no executable branch becomes ready. An answer that releases a ready branch resumes that work while retaining other pending human decisions.
 
 The root ownership pool counts queued, running and paused roots toward `--queue-limit`. Standalone-agent and graph pools each use bounded workers/capacity; this is not yet one combined scheduling budget. Paused graph ownership blocks provider replacement, preserving the model/credential context required by its remaining nodes. Closing a service preserves an already durable human pause, cancels accepted but undispatched roots, stops active children and joins workers. On startup, repository recovery quarantines interrupted executable work; the service adopts only consistent human pauses and never replays queued/running effects.
 

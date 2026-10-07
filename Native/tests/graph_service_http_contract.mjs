@@ -1,6 +1,8 @@
 // Actual native server/CLI/controller/xlang3 storage and workspace effects.
 // Model replies and human answers are explicitly synthetic protocol fixtures.
 import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const {BackendClient}=createRequire(import.meta.url)('../../extensions/vscode/client.js');
 import {spawn,execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {createServer} from 'node:http';
@@ -48,6 +50,7 @@ try {
  await new Promise(resolve=>model.listen(0,'127.0.0.1',resolve));await start();
  assert.equal((await request('/v1/graphs',undefined,{Authorization:''})).status,401);
  const catalogue=await cli('graphs');assert.equal(catalogue.graphs.length,4);assert.equal(catalogue.graphs.find(graph=>graph.id==='model.flow').executable,false);assert.equal(catalogue.graphs.find(graph=>graph.id==='plain.read').executable,true);
+ const viewClient=new BackendClient(`http://127.0.0.1:${port}`,()=>token);assert.deepEqual((await viewClient.graphs()).graphs,catalogue.graphs,'Actual extension client must receive the native graph catalogue');
  await session('first');await session('second');await session('third');
  assert.equal((await request('/v1/graph-runs',{id:'spoof',session_id:'first',graph_id:'wait.read',graph_revision:1,prompt:'fixture',spec:definitions.graphs[0].spec})).status,400);
  assert.equal((await request('/v1/graph-runs',{id:'stale',session_id:'first',graph_id:'wait.read',graph_revision:99,prompt:'fixture'})).status,409);
@@ -60,12 +63,15 @@ try {
  assert.equal((await submit('not-admitted','third','plain.read')).status,503);assert.deepEqual(await cli('runs','third'),[],'Paused ownership must count toward capacity');
  assert.equal((await request('/v1/provider/configuration',{model:'fixture-model',api_key:modelKey,expected_revision:0})).status,409,'Provider generation cannot change while a graph is owned');assert.equal((await request('/v1/provider/configuration')).data.revision,0);
  assert.equal((await request('/v1/graph-runs/first-root/human/first.answer',{input:{accepted:true},expected_checkpoint_revision:first.checkpoint_revision,actor:'spoof'})).status,400);
- const partial=await request('/v1/graph-runs/first-root/human/first.answer',{input:{accepted:true},expected_checkpoint_revision:first.checkpoint_revision});assert.equal(partial.status,200);assert.equal(partial.data.run.state,'paused');first=partial.data;
+ for(const input_json of ['{"accepted":true,"accepted":false}','[]','not JSON']){await assert.rejects(viewClient.graphInput('first-root','first.answer',input_json,first.checkpoint_revision),error=>error.status===400);assert.equal((await cli('graph','first-root')).checkpoint_revision,first.checkpoint_revision);}
+ assert.equal((await request('/v1/graph-runs/first-root/human/first.answer',{input:{accepted:true},input_json:'{}',expected_checkpoint_revision:first.checkpoint_revision})).status,400);
+ const partial=await viewClient.graphInput('first-root','first.answer','{"accepted":true}',first.checkpoint_revision);assert.equal(partial.run.state,'paused');first=partial;
  assert.equal((await request('/v1/graph-runs/first-root/human/second.answer',{input:{path:'right.txt'},expected_checkpoint_revision:first.checkpoint_revision-1})).status,409);
  await stop();await start();first=await state('first-root','paused');assert.equal(first.checkpoint.nodes[0].state,'completed');assert.equal(first.checkpoint.nodes[1].state,'waiting_human');
  await writeFile(join(root,'answer.json'),JSON.stringify({path:'right.txt'}));await cli('graph-input','first-root','second.answer',String(first.checkpoint_revision),join(root,'answer.json'));
  first=await state('first-root','completed');assert.equal(first.checkpoint.nodes[2].output.content,'Actual right bytes\n');const actualChildren=await cli('graph-children','first-root');assert.equal(actualChildren.length,1);assert.equal(first.run.graph_root,true);assert.equal(first.run.parent_id,'');assert.equal(actualChildren[0].graph_root,false);assert.equal(actualChildren[0].parent_id,'first-root');assert.equal(actualChildren[0].node_id,'read');assert.equal((await cli('status',actualChildren[0].id)).node_id,'read');
  const history=await cli('history','first');assert.equal(history.length,2);assert.equal(history[1].data.source,'graph_join');assert.ok(!('usage' in history[1].data));
+ const childHistory=await cli('graph-child-history','first-root',actualChildren[0].id);assert.equal(childHistory.at(-1).data.content,'Actual right bytes\n');assert.ok(!childHistory.some(item=>item.data.source==='graph_join'));assert.equal((await request('/v1/graph-runs/second-root/children/'+actualChildren[0].id+'/history')).status,404);
  const events=await cli('graph-events','first-root');assert.ok(events.some(event=>event.kind==='graph.human.input'&&event.data.actor==='local-owner'));assert.ok(events.some(event=>event.run_id!=='first-root'));assert.ok(!events.some(event=>event.run_id==='second-root'));
  await cli('cancel','second-root');await state('second-root','cancelled');assert.equal((await request('/v1/graph-runs/second-root/human/first.answer',{input:{accepted:true},expected_checkpoint_revision:3})).status,404);
  const plain=await cli('graph-run','third','plain.read','1','Read actual workspace data');const plainDone=await state(plain.id,'completed');assert.equal(plainDone.checkpoint.nodes[0].output.content,'Actual left bytes\n');
@@ -77,5 +83,6 @@ try {
  // A configured graph agent uses actual native provider sockets and retains
  // child usage separately; only this protocol peer's reply/counts are synthetic.
  await stop();await start(true);await session('model');const agent=await cli('graph-run','model','model.flow','1','Observe an actual dependency');await state(agent.id,'completed');if(modelFailure)throw modelFailure;assert.equal(modelRequests,1);const branches=await cli('graph-children',agent.id);assert.equal(branches.length,2);assert.ok((await cli('graph-events',agent.id)).some(event=>event.kind==='model.usage'));const modelHistory=await cli('history','model');assert.ok(!('usage' in modelHistory[1].data));
+ const agentHistory=await cli('graph-child-history',agent.id,branches.find(child=>child.node_id==='agent').id);assert.equal(agentHistory.at(-1).data.usage.prompt_tokens,12);assert.equal(agentHistory.at(-1).data.usage.completion_tokens,5);assert.equal(agentHistory.at(-1).data.content,'Synthetic provider reply after actual dependency execution');
  console.log('Native graph service HTTP/CLI passed actual catalog admission, actor/stale rejection, paused capacity/provider ownership, restart, human resume, real dependency reads, repeated scheduling, root cancellation, separately approved creation and configured agent transport with synthetic provider data.');
 } finally {await stop();model.closeAllConnections();await new Promise(resolve=>model.close(resolve));assert.equal(dirname(resolve(root)),resolve(tmpdir()));assert.ok(basename(root).startsWith('xmind-graph-service-'));await rm(root,{recursive:true,force:true});}

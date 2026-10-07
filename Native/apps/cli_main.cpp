@@ -105,6 +105,7 @@ int main(int argc,char** argv) {
         else if(command=="graphs" && argc==3)path="/v1/graphs";
         else if(command=="graph" && argc==4)path="/v1/graph-runs/"+id(argv[3]);
         else if(command=="graph-children" && argc==4)path="/v1/graph-runs/"+id(argv[3])+"/children";
+        else if(command=="graph-child-history" && argc==5)path="/v1/graph-runs/"+id(argv[3])+"/children/"+id(argv[4])+"/history";
         else if(command=="graph-events" && (argc==4 || argc==5)){const auto after=event_cursor(argc==5?argv[4]:"0");path="/v1/graph-runs/"+id(argv[3])+"/events?after="+std::to_string(after);}
         else if(command=="graph-run" && (argc==7 || argc==8)){
             const auto revision=event_cursor(argv[5]);if(revision<1 || revision>9007199254740991)throw std::invalid_argument("Invalid graph revision");

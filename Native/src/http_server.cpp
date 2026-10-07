@@ -202,15 +202,24 @@ struct HttpServer::Impl {
                 if(!request.params.empty())throw std::invalid_argument("Graph children do not accept query parameters");
                 const auto id=identifier(request.matches[1]);persistence.graph_run(id).get();reply(response,encode_all(persistence.children(id).get()));
             }));
+            server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+)/children/([A-Za-z0-9_-]+)/history)",guarded([this](const Request& request,Response& response){
+                if(!request.params.empty())throw std::invalid_argument("Graph child history does not accept query parameters");
+                const auto root=identifier(request.matches[1]),child=identifier(request.matches[2]);
+                persistence.graph_run(root).get();if(persistence.run(child).get().parent_id!=root)throw NotFound("Child does not belong to this graph");
+                reply(response,encode_all(persistence.run_history(child).get()));
+            }));
             server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+)/events)",guarded([this](const Request& request,Response& response){
                 if(request.params.size()>1 || (!request.params.empty() && !request.has_param("after")))throw std::invalid_argument("Invalid graph event cursor parameters");
                 reply(response,encode_all(persistence.graph_events(identifier(request.matches[1]),cursor(request)).get()));
             }));
             server.Post(R"(/v1/graph-runs/([A-Za-z0-9_-]+)/human/([A-Za-z0-9_.-]+))",guarded([graphs](const Request& request,Response& response){
                 if(!request.params.empty() || request.body.size()>131072)throw std::invalid_argument("Graph input exceeds limits");
-                const auto value=body(request,{"input","expected_checkpoint_revision"});
-                if(!value.contains("input") || !value["input"].is_object())throw std::invalid_argument("Human input must be a JSON object");
-                reply(response,graph_record(graphs->human_input(identifier(request.matches[1]),request.matches[2],value["input"].dump(),"local-owner",graph_revision(value,"expected_checkpoint_revision"))));
+                const auto value=body(request,{"input","input_json","expected_checkpoint_revision"});
+                if(value.contains("input")==value.contains("input_json"))throw std::invalid_argument("Supply one graph human input representation");
+                std::string input;
+                if(value.contains("input_json"))input=string_field(value,"input_json",65536);
+                else {if(!value["input"].is_object())throw std::invalid_argument("Human input must be a JSON object");input=value["input"].dump();}
+                reply(response,graph_record(graphs->human_input(identifier(request.matches[1]),request.matches[2],input,"local-owner",graph_revision(value,"expected_checkpoint_revision"))));
             }));
         }
         server.Get("/v1/models",guarded([this](const Request&,Response& response) {

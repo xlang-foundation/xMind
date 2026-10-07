@@ -1,0 +1,51 @@
+MSBuild version 18.9.1+a81b43525 for .NET Framework
+
+  agentflow_models.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_models.lib
+  agentflow_secrets.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_secrets.lib
+  agentflow_provider_transport.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_provider_transport.lib
+  agentflow_chat_provider.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_chat_provider.lib
+  agentflow_mcp_wire.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_wire.lib
+  agentflow_core.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_core.lib
+  agentflow_policy.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_policy.lib
+  agentflow_workspace.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_workspace.lib
+  agentflow_edits.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_edits.lib
+  agentflow_mcp_configuration.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_configuration.lib
+  agentflow_mcp_stdio.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_stdio.lib
+  agentflow_json_schema.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_json_schema.lib
+  xmind_schema_worker.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\xmind_schema_worker.exe
+  agentflow_schema_worker.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_schema_worker.lib
+  agentflow_mcp_effects.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_mcp_effects.lib
+  agentflow_process.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_process.lib
+  agentflow_process_effects.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_process_effects.lib
+  agentflow_agent.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_agent.lib
+  agentflow_graph.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_graph.lib
+  agentflow_graph_execution.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_graph_execution.lib
+  http_server.cpp
+  agentflow_http.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_http.lib
+  agentflow_instruction_configuration.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_instruction_configuration.lib
+  agentflow_process_configuration.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_process_configuration.lib
+  agentflow_runtime.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\agentflow_runtime.lib
+  xmind_server.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\xmind_server.exe
+MSBuild version 18.9.1+a81b43525 for .NET Framework
+
+  cli_main.cpp
+  xmind_cli.vcxproj -> D:\CantorAI2026\xMind\build\native\Release\xmind_cli.exe
+Test project D:/CantorAI2026/xMind/build/native
+    Start  6: native_graph_service_http_contract
+1/7 Test  #6: native_graph_service_http_contract ...   Passed    2.55 sec
+    Start  8: native_provider_setup_contract
+2/7 Test  #8: native_provider_setup_contract .......   Passed    0.65 sec
+    Start 28: native_approved_edit_http_contract
+3/7 Test #28: native_approved_edit_http_contract ...   Passed    0.93 sec
+    Start 33: native_agent_http_contract
+4/7 Test #33: native_agent_http_contract ...........   Passed    0.99 sec
+    Start 34: native_agent_edit_http_contract
+5/7 Test #34: native_agent_edit_http_contract ......   Passed    3.86 sec
+    Start 35: native_agent_mcp_http_contract
+6/7 Test #35: native_agent_mcp_http_contract .......   Passed    1.93 sec
+    Start 38: native_http_cli_contract
+7/7 Test #38: native_http_cli_contract .............   Passed    1.95 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =  12.87 sec

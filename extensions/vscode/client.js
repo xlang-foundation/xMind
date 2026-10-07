@@ -40,6 +40,13 @@ class BackendClient {
   }
   health() { return this.request('/v1/health'); }
   models() { return this.request('/v1/models'); }
+  graphs() { return this.request('/v1/graphs'); }
+  graphRun(session_id,graph_id,graph_revision,prompt,model_id) { return this.request('/v1/graph-runs',{session_id,graph_id,graph_revision,prompt,...(model_id?{model_id}:{})}); }
+  graph(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}`); }
+  graphChildren(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/children`); }
+  graphEvents(id,after) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/events?after=${after}`); }
+  graphChildHistory(root,child) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/children/${encodeURIComponent(child)}/history`); }
+  graphInput(root,node,input_json,expected_checkpoint_revision) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision}); }
   providerConfiguration() { return this.request('/v1/provider/configuration'); }
   discoverProviderModels(api_key,expected_revision) { return this.request('/v1/provider/models',{api_key,expected_revision}); }
   configureProvider(model,api_key,expected_revision) { return this.request('/v1/provider/configuration',{model,api_key,expected_revision}); }
