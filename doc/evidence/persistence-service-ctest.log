@@ -1,0 +1,83 @@
+Start testing: Oct 06 21:36 Pacific Daylight Time
+----------------------------------------------------------
+1/5 Testing: native_secret_protection_contract
+1/5 Test: native_secret_protection_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_secret_contract.exe"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"native_secret_protection_contract" start time: Oct 06 21:36 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Windows native secret-protection contracts passed
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"native_secret_protection_contract" end time: Oct 06 21:36 Pacific Daylight Time
+"native_secret_protection_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/5 Testing: embedded_xlang_sqlite_contract
+2/5 Test: embedded_xlang_sqlite_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_xlang_sqlite_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"embedded_xlang_sqlite_contract" start time: Oct 06 21:36 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Embedded xlang3 SQLite contracts passed
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"embedded_xlang_sqlite_contract" end time: Oct 06 21:36 Pacific Daylight Time
+"embedded_xlang_sqlite_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/5 Testing: xlang_repository_contract
+3/5 Test: xlang_repository_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_repository_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"xlang_repository_contract" start time: Oct 06 21:36 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+xlang3-backed repository contracts passed
+<end of output>
+Test time =   0.13 sec
+----------------------------------------------------------
+Test Passed.
+"xlang_repository_contract" end time: Oct 06 21:36 Pacific Daylight Time
+"xlang_repository_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/5 Testing: persistence_service_contract
+4/5 Test: persistence_service_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_persistence_service_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"persistence_service_contract" start time: Oct 06 21:36 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Persistence service ownership/concurrency contracts passed
+<end of output>
+Test time =   0.39 sec
+----------------------------------------------------------
+Test Passed.
+"persistence_service_contract" end time: Oct 06 21:36 Pacific Daylight Time
+"persistence_service_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/5 Testing: encrypted_credential_repository_contract
+5/5 Test: encrypted_credential_repository_contract
+Command: "D:/CantorAI2026/AgentFlow/build/native/Release/agentflow_credential_repository_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/AgentFlow/build/native
+"encrypted_credential_repository_contract" start time: Oct 06 21:36 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Encrypted credential repository contracts passed
+<end of output>
+Test time =   0.22 sec
+----------------------------------------------------------
+Test Passed.
+"encrypted_credential_repository_contract" end time: Oct 06 21:36 Pacific Daylight Time
+"encrypted_credential_repository_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 06 21:36 Pacific Daylight Time
