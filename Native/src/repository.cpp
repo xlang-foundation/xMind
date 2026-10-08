@@ -41,7 +41,13 @@ std::string provider_context(const Json& value){
     if(value["wire"]!="chat-completions"&&value["wire"]!="responses"&&value["wire"]!="anthropic-messages")throw DatabaseError("Invalid saved provider wire");
     return value.dump();
 }
-std::string prompt_context(const std::string& prompt){const auto value=Json::parse(prompt);return value.contains("provider_context")?provider_context(value["provider_context"]):std::string{};}
+std::string prompt_context(const std::string& prompt){
+    try{
+        const auto value=Json::parse(prompt);
+        if(!value.is_object())throw DatabaseError("Invalid saved prompt JSON");
+        return value.contains("provider_context")?provider_context(value["provider_context"]):std::string{};
+    }catch(const Json::exception&){throw DatabaseError("Invalid saved prompt JSON");}
+}
 std::int64_t integer(const SqlValue& value) { return std::get<std::int64_t>(value); }
 void identifier(const std::string& value) {
     if(value.empty() || value.find('\0')!=std::string::npos) throw std::invalid_argument("Invalid identifier");
