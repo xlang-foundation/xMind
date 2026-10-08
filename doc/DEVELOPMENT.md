@@ -4,7 +4,7 @@ Current scope: the [xMind OSS specification](../doc/architecture.md) excludes te
 
 The product launcher uses native C++ targets with embedded xlang3. See [native-server.md](../doc/native-server.md) for the currently verified API and its exact limits. The full target remains the real agent/coding backend, CLI, VS Code, graphs, MCP/A2A and provider support; session persistence is a component, not product completion.
 
-Native Responses diagnostics retain strict terminal rejection and add bounded, value-free evidence. The complete local gate passed **71 contracts in 130.49 seconds**. Exact `7fe7ec9bd37c34863efc9f74e6508f0aba643d61` then passed **71 native in 188.04 seconds**, **103 extension in 2.9270174 seconds** and **20 browser in 1.6413315 seconds**, browser/native integration and all 18 VSIX assets, with zero failures/skips and all 16 authentic job steps successful. Archive/source/pin verification matched 229 normalized compiled-source hashes and 247 exact Git hashes including 18 additional UI/build/package sources; the 29-file runtime was downloaded, not installed. The installed backend remains e353 with its separate browser repair. The live differing field is unconfirmed; reviewed v10→v10 upgrade/rollback and a new live probe remain pending. [Diagnostic scope](native-responses-diagnostics.md), [exact hosted evidence](evidence/native-responses-diagnostic-hosted-provenance.json).
+The native Responses reasoning continuation fix is independently reviewed and source-frozen. It preserves completed reasoning items and permits only a nonempty encrypted-content string difference on otherwise equal reasoning snapshots. The local build guard deferred while a sibling benchmark runs; exact hosted validation and installation of this patch are pending. The installed verified 7fe backend has an actual encrypted-content-only failure recorded before tools or children. [Compatibility scope](native-responses-reasoning.md), [actual live diagnostic](evidence/native-responses-diagnostic-live-7fe7.json).
 
 ```powershell
 .\Tools\agentflow.ps1 -Action Build
@@ -23,7 +23,7 @@ For the preceding delegation checkpoint, the final guarded local **71-contract n
 
 Exact revision `e353a37799530a234a6fa13e51f61a5c52d3ae6a` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37765666399): **71 native contracts in 175.51 seconds**, **103 extension tests in 2.9668103 seconds** and **19 browser tests in 1.426115 seconds**, plus native/browser integration and verification of all 18 required VSIX assets. The delegation engine took **4.88 seconds** and its HTTP/CLI contract **1.22 seconds**. All 16 job steps succeeded, with zero failures/skips and the exact complete native manifest. Downloaded artifact digests, exact source and runtime/stdlib pins were verified. [Exact hosted71 provenance](evidence/native-delegation-hosted-provenance.json), [raw hosted CTest](evidence/native-delegation-hosted-ctest.log), [original hosted job](evidence/native-delegation-passing-ci-job.log).
 
-The managed backend now runs the exact hosted e353 bundle with schema v10. The actual upgrade preserved existing records, settings and browser access; its disposable schema 9→10→9 rollback fixture passed separately. The original e353 webpage exposed a classic-script name collision. A separate local browser repair passed **103 extension tests in 1.6557025 seconds**, **20 browser tests in 0.9090882 seconds**, native/browser integration and all 18 VSIX assets. The repaired page reused its cookie without key entry and restored prior history/metrics, the selected model and Agent mode. These frontend results are separate from the unchanged hosted 71/103/19 gate. [Upgrade evidence](evidence/native-delegation-upgrade-provenance.json), [acceptance scopes](native-delegation-acceptance.md).
+The preceding managed backend upgrade installed the exact hosted e353 bundle with schema v10; the later 7fe upgrade is recorded in the diagnostic scope. The actual upgrade preserved existing records, settings and browser access; its disposable schema 9→10→9 rollback fixture passed separately. The original e353 webpage exposed a classic-script name collision. A separate local browser repair passed **103 extension tests in 1.6557025 seconds**, **20 browser tests in 0.9090882 seconds**, native/browser integration and all 18 VSIX assets. The repaired page reused its cookie without key entry and restored prior history/metrics, the selected model and Agent mode. These frontend results are separate from the unchanged hosted 71/103/19 gate. [Upgrade evidence](evidence/native-delegation-upgrade-provenance.json), [acceptance scopes](native-delegation-acceptance.md).
 
 The first live `delegate_tasks` request then failed with `responses_terminal_mismatch` before child admission: zero children, only the user history row and one parent model-budget attempt. Successful live delegation/join and installed VS Code acceptance remain unverified. Mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [next native planning design](native-dynamic-plan-design.md).
 
@@ -61,13 +61,14 @@ Live direct-MCP graph and rendered IDE acceptance remain separate requirements.
 The [delegation design](native-delegation-design.md) retains the broader target
 beyond the initial locally and hosted-verified read-only leaves. A new v10 native
 bundle requires its complete native gate and source/artifact verification;
-the managed preview uses the exact hosted e353 bundle.
+the managed preview uses the later verified 7fe diagnostic bundle.
+[Current installation](native-responses-diagnostics.md).
 
 The preceding c4 managed preview preserved prior records/configuration and an actual read-only
 OpenAI Agent request displayed retained token/timing metrics after refresh.
 The original browser session required a reconnect; its precise cause remains
 unresolved. [Historical scope and screenshot](preview-checkpoint-c4ec09fc.md).
-The current e353 backend upgrade, separate browser repair and first failed live
+The preceding e353 backend upgrade, separate browser repair and first failed live
 delegation request are recorded in [current acceptance](native-delegation-acceptance.md).
 
 The preceding `fceb50b` source passed the complete local **67 native contracts in 117.65

@@ -58,15 +58,15 @@ Json mismatch_diagnostic(std::vector<Json> values,std::size_t fragment=1){
 const Json& diagnostic_field(const Json& diagnostic,const std::string& name){for(const auto& field:diagnostic.at("fields"))if(field.at("field")==name)return field;throw std::runtime_error("Missing fixed diagnostic field");}
 void terminal_diagnostics_contract(const std::vector<Json>& fixture){
     std::vector<ModelEvent> unchanged;decode(wire(fixture),7,&unchanged);for(const auto& event:unchanged)require(event.kind!="model.protocol_diagnostic");
-    // Build separate completed-item and terminal snapshots. Even benign-looking
-    // metadata or opaque changes remain rejected; diagnosis is not normalization.
+    // Build separate completed-item and terminal snapshots. Metadata changes
+    // remain rejected, including after an allowed reasoning opaque difference.
     auto optional=fixture;optional[7]["item"].erase("status");const auto optional_diagnostic=mismatch_diagnostic(optional,7);
     require(optional_diagnostic["output_index"]==1&&optional_diagnostic["item_present"]==true&&optional_diagnostic["item_done"]==true&&optional_diagnostic["changed_fields"]==Json::array({"status"})&&optional_diagnostic["unlisted_fields_equal"]==true);
     const auto& status=diagnostic_field(optional_diagnostic,"status");require(status["completed_present"]==false&&status["completed_type"]=="absent"&&status["terminal_present"]==true&&status["terminal_type"]=="string"&&status["equal"]==false);
     require(diagnostic_field(optional_diagnostic,"id")["equal"]==true&&diagnostic_field(optional_diagnostic,"name")["equal"]==true&&diagnostic_field(optional_diagnostic,"arguments")["equal"]==true);
     auto opaque=fixture;opaque[2]["item"]["encrypted_content"]="SYNTHETIC_OPAQUE_ITEM_SECRET";opaque.back()["response"]["output"][0]["encrypted_content"]="SYNTHETIC_OPAQUE_TERMINAL_SECRET";
     opaque.back()["response"]["output"][1]["arguments"]="{\"private\":\"SYNTHETIC_TERMINAL_ARGUMENT_SECRET\"}";
-    const auto opaque_diagnostic=mismatch_diagnostic(opaque,129);require(opaque_diagnostic["output_index"]==0&&opaque_diagnostic["changed_fields"]==Json::array({"encrypted_content"}));
+    const auto opaque_diagnostic=mismatch_diagnostic(opaque,129);require(opaque_diagnostic["output_index"]==1&&opaque_diagnostic["changed_fields"]==Json::array({"arguments"}));
     for(const auto* marker:{"SYNTHETIC_OPAQUE_ITEM_SECRET","SYNTHETIC_OPAQUE_TERMINAL_SECRET","SYNTHETIC_TERMINAL_ARGUMENT_SECRET","rs_test","call_test","read_file"})require(opaque_diagnostic.dump().find(marker)==std::string::npos);
     auto unlisted=fixture;unlisted[7]["item"]["SYNTHETIC_PRIVATE_MEMBER_NAME"]="SYNTHETIC_UNLISTED_ITEM_VALUE";unlisted.back()["response"]["output"][1]["SYNTHETIC_PRIVATE_MEMBER_NAME"]="SYNTHETIC_UNLISTED_TERMINAL_VALUE";
     const auto unlisted_diagnostic=mismatch_diagnostic(unlisted);require(unlisted_diagnostic["output_index"]==1&&unlisted_diagnostic["changed_fields"]==Json::array()&&unlisted_diagnostic["unlisted_fields_equal"]==false);
@@ -86,17 +86,84 @@ void terminal_diagnostics_contract(const std::vector<Json>& fixture){
     auto scalar=fixture;scalar.back()["response"]["output"][1]=nullptr;const auto scalar_diagnostic=mismatch_diagnostic(scalar);
     require(scalar_diagnostic["output_index"]==1&&scalar_diagnostic["completed_snapshot_type"]=="object"&&scalar_diagnostic["terminal_snapshot_type"]=="null"&&scalar_diagnostic["unlisted_fields_equal"]==false);
 }
+void reasoning_continuation_contract(const std::vector<Json>& fixture){
+    // These snapshots are independently authored, with unchanged known and
+    // unlisted members. The opaque strings are explicitly synthetic and have
+    // unrelated bytes; no normalization or terminal replacement is permitted.
+    std::string done_cipher="SYNTHETIC_DONE_CIPHER_\"\\\n\t\xf0\x9f\x8c\x8d";done_cipher.push_back('\0');done_cipher+="tail";
+    const Json completed={{"id","rs_test"},{"type","reasoning"},{"status","completed"},{"summary",Json::array()},{"content",Json::array()},
+        {"encrypted_content",done_cipher},{"channel","analysis"},{"phase","commentary"},{"SYNTHETIC_RECEIPT_METADATA",{{"flag",true},{"values",Json::array({nullptr,7,"synthetic"})}}}};
+    const Json terminal={{"id","rs_test"},{"type","reasoning"},{"status","completed"},{"summary",Json::array()},{"content",Json::array()},
+        {"encrypted_content","SYNTHETIC_TERMINAL_CIPHER_UNRELATED"},{"channel","analysis"},{"phase","commentary"},{"SYNTHETIC_RECEIPT_METADATA",{{"flag",true},{"values",Json::array({nullptr,7,"synthetic"})}}}};
+    auto variation=fixture;variation[2]["item"]=completed;variation.back()["response"]["output"][0]=terminal;
+    const Json expected=Json::array({completed,fixture[7]["item"],fixture[14]["item"]});
+    for(std::size_t fragment:{1,2,7,129,4096}){
+        std::vector<ModelEvent> observed;const auto result=decode(wire(variation),fragment,&observed);
+        require(result.content=="Hello \xf0\x9f\x8c\x8d"&&result.tool_calls.size()==1&&result.tool_calls[0].arguments_json==fixture[7]["item"]["arguments"].get<std::string>()&&result.finish_reason=="tool_calls");
+        require(result.provider_items_json==expected.dump());const auto receipt=Json::parse(result.provider_items_json);
+        require(receipt[0].dump()==completed.dump()&&receipt[0]["encrypted_content"].get<std::string>()==done_cipher&&receipt[0]!=terminal);
+        require(result.provider_items_json.find("SYNTHETIC_TERMINAL_CIPHER_UNRELATED")==std::string::npos);
+        std::size_t usage=0,finish=0,done=0;for(const auto& event:observed){require(event.kind!="model.protocol_diagnostic");usage+=event.kind=="model.usage";finish+=event.kind=="model.finish";done+=event.kind=="model.done";}require(usage==1&&finish==1&&done==1);
+        // A serialized JSON roundtrip and the next request retain the entire
+        // completed receipt, including escaped opaque bytes and unknown metadata.
+        ChatProviderConfig config{"https://api.openai.com/v1/responses","synthetic",Capability::supported,Capability::supported,Capability::supported};config.wire=ProviderWire::responses;
+        ModelRequest request;request.messages.push_back({MessageRole::user,"Read"});request.messages.push_back({MessageRole::assistant,result.content,result.tool_calls,{},result.refusal,receipt.dump()});request.messages.push_back({MessageRole::tool,"Actual result",{},"call_test"});
+        const auto request_body=Json::parse(serialize_responses_request(config,request));require(request_body["store"]==false&&request_body["include"]==Json::array({"reasoning.encrypted_content"}));
+        for(std::size_t i=0;i<expected.size();++i)require(request_body["input"][i+1].dump()==expected[i].dump());
+    }
+    // The allowed opaque difference cannot hide any other field change.
+    for(const auto& [field,value]:std::vector<std::pair<const char*,Json>>{{"id","SYNTHETIC_CHANGED_ID"},{"type","message"},{"status","in_progress"},{"summary",Json::array({"SYNTHETIC_CHANGED_SUMMARY"})},{"content",Json::array({"SYNTHETIC_CHANGED_CONTENT"})},{"channel","final"},{"phase","final"}}){
+        auto altered=variation;altered.back()["response"]["output"][0][field]=value;const auto diagnostic=mismatch_diagnostic(altered,7);
+        require(diagnostic["output_index"]==0&&diagnostic["changed_fields"].size()==2&&diagnostic_field(diagnostic,field)["equal"]==false&&diagnostic_field(diagnostic,"encrypted_content")["equal"]==false);
+        require(diagnostic.dump().find("SYNTHETIC_")==std::string::npos);
+    }
+    for(const auto& invalid:std::vector<Json>{nullptr,"",false,7,1.25,Json::array(),Json::object()}){
+        auto altered=variation;altered.back()["response"]["output"][0]["encrypted_content"]=invalid;
+        const auto diagnostic=mismatch_diagnostic(altered);require(diagnostic["output_index"]==0&&diagnostic["changed_fields"]==Json::array({"encrypted_content"}));
+        altered=variation;altered[2]["item"]["encrypted_content"]=invalid;std::vector<ModelEvent> observed;bool failed=false;
+        try{decode(wire(altered),7,&observed);}catch(const ModelProtocolError& error){require(std::string(error.what())=="Responses reasoning lacks stateless continuation");failed=true;}require(failed);
+        for(const auto& event:observed)require(event.kind!="model.protocol_diagnostic"&&event.kind!="model.usage"&&event.kind!="model.finish"&&event.kind!="model.done");
+    }
+    auto missing=variation;missing.back()["response"]["output"][0].erase("encrypted_content");require(mismatch_diagnostic(missing)["changed_fields"]==Json::array({"encrypted_content"}));
+    for(const auto* field:{"status","summary","content","channel","phase","SYNTHETIC_RECEIPT_METADATA"}){
+        auto removed=variation;removed.back()["response"]["output"][0].erase(field);const auto diagnostic=mismatch_diagnostic(removed);require(diagnostic["output_index"]==0&&diagnostic_field(diagnostic,"encrypted_content")["equal"]==false);
+    }
+    for(int change=0;change<3;++change){
+        auto altered=variation;auto& reasoning=altered.back()["response"]["output"][0];
+        if(change==0)reasoning["SYNTHETIC_RECEIPT_METADATA"]["flag"]=false;
+        else if(change==1)reasoning["SYNTHETIC_EXTRA_FIELD"]="SYNTHETIC_EXTRA_VALUE";
+        else {reasoning.erase("SYNTHETIC_RECEIPT_METADATA");reasoning["SYNTHETIC_REPLACEMENT_FIELD"]="SYNTHETIC_REPLACEMENT_VALUE";}
+        const auto diagnostic=mismatch_diagnostic(altered);require(diagnostic["changed_fields"]==Json::array({"encrypted_content"})&&diagnostic["unlisted_fields_equal"]==false&&diagnostic.dump().find("SYNTHETIC_")==std::string::npos);
+    }
+    for(const auto& [done_index,output_index]:std::vector<std::pair<int,int>>{{7,1},{14,2}}){
+        auto altered=fixture;altered[done_index]["item"]["encrypted_content"]="SYNTHETIC_NON_REASONING_DONE";altered.back()["response"]["output"][output_index]["encrypted_content"]="SYNTHETIC_NON_REASONING_TERMINAL";
+        const auto diagnostic=mismatch_diagnostic(altered);require(diagnostic["output_index"]==output_index&&diagnostic["changed_fields"]==Json::array({"encrypted_content"})&&diagnostic.dump().find("SYNTHETIC_")==std::string::npos);
+        altered=fixture;altered.back()["response"]["output"][output_index]["encrypted_content"]="SYNTHETIC_NON_REASONING_EXTRA";require(mismatch_diagnostic(altered)["changed_fields"]==Json::array({"encrypted_content"}));
+    }
+    // Each done event fits existing SSE limits, but their ordered receipt is
+    // over 4MiB while the terminal receipt is small. It must still fail closed.
+    std::vector<Json> oversized={fixture[0]};Json terminal_items=Json::array();
+    for(int i=0;i<6;++i){
+        const auto id="rs_synthetic_large_"+std::to_string(i);const Json added={{"id",id},{"type","reasoning"},{"summary",Json::array()}};
+        auto completed_large=added;completed_large["encrypted_content"]=std::string(700*1024,'x');auto terminal_small=added;terminal_small["encrypted_content"]="synthetic-small";
+        oversized.push_back({{"type","response.output_item.added"},{"output_index",i},{"item",added}});oversized.push_back({{"type","response.output_item.done"},{"output_index",i},{"item",completed_large}});terminal_items.push_back(terminal_small);
+    }
+    oversized.push_back({{"type","response.completed"},{"response",{{"id","resp_test"},{"model","synthetic"},{"status","completed"},{"output",terminal_items},{"usage",fixture.back()["response"]["usage"]}}}});
+    std::vector<ModelEvent> oversize_observed;bool exceeded=false;try{decode(wire(oversized),4096,&oversize_observed);}catch(const ModelProtocolError& error){require(std::string(error.what())=="Responses continuation exceeds limits");exceeded=true;}require(exceeded);
+    for(const auto& event:oversize_observed)require(event.kind!="model.protocol_diagnostic"&&event.kind!="model.usage"&&event.kind!="model.finish"&&event.kind!="model.done");
+}
 int main(){try{
     const auto fixture=events();const auto bytes=wire(fixture);const auto result=decode(bytes);require(result.content=="Hello \xf0\x9f\x8c\x8d"&&result.tool_calls.size()==1&&result.finish_reason=="tool_calls");require(result.tool_calls[0].id=="call_test");const auto usage=Json::parse(result.usage_json);require(usage["prompt_tokens"]==12&&usage["completion_tokens"]==7&&usage["prompt_tokens_details"]["cached_tokens"]==4&&usage["completion_tokens_details"]["reasoning_tokens"]==3);
     for(std::size_t size:{2,7,129,4096})require(decode(bytes,size).provider_items_json==result.provider_items_json);
     terminal_diagnostics_contract(fixture);
+    reasoning_continuation_contract(fixture);
     auto summarized=fixture;const Json summary={{"type","summary_text"},{"text","Synthetic reasoning summary"}};
     summarized.insert(summarized.begin()+2,{
         {{"type","response.reasoning_summary_part.added"},{"output_index",0},{"item_id","rs_test"},{"summary_index",0},{"part",{{"type","summary_text"},{"text",""}}}},
         {{"type","response.reasoning_summary_text.delta"},{"output_index",0},{"item_id","rs_test"},{"summary_index",0},{"delta","Synthetic reasoning summary"}},
         {{"type","response.reasoning_summary_text.done"},{"output_index",0},{"item_id","rs_test"},{"summary_index",0},{"text","Synthetic reasoning summary"}},
         {{"type","response.reasoning_summary_part.done"},{"output_index",0},{"item_id","rs_test"},{"summary_index",0},{"part",summary}}
-    });summarized[6]["item"]["summary"]=Json::array({summary});summarized.back()["response"]["output"][0]["summary"]=Json::array({summary});require(decode(wire(summarized)).content=="Hello \xf0\x9f\x8c\x8d");
+    });summarized[6]["item"]["summary"]=Json::array({summary});summarized.back()["response"]["output"][0]["summary"]=Json::array({summary});summarized.back()["response"]["output"][0]["encrypted_content"]="synthetic-different-terminal-with-summary";const auto summarized_result=decode(wire(summarized));require(summarized_result.content=="Hello \xf0\x9f\x8c\x8d"&&Json::parse(summarized_result.provider_items_json)[0].dump()==summarized[6]["item"].dump());
     auto parallel=fixture;auto second_added=fixture[3],second_delta=fixture[4],second_done=fixture[6],second_item=fixture[7];const std::string second_args="{}";
     for(auto* value:{&second_added,&second_delta,&second_done,&second_item})(*value)["output_index"]=3;
     second_added["item"]["id"]="fc_parallel";second_added["item"]["call_id"]="call_parallel";second_delta["item_id"]="fc_parallel";second_delta["delta"]=second_args;second_done["item_id"]="fc_parallel";second_done["arguments"]=second_args;second_item["item"]["id"]="fc_parallel";second_item["item"]["call_id"]="call_parallel";second_item["item"]["arguments"]=second_args;
@@ -123,5 +190,5 @@ int main(){try{
     require(model_protocol_diagnostic(ModelProtocolError("Provider response failed or was incomplete"))=="responses_provider_incomplete");
     require(model_protocol_diagnostic(ModelProtocolError("Invalid Responses JSON event"))=="responses_json_invalid");
     require(model_protocol_diagnostic(ModelProtocolError("private synthetic provider payload"))=="");
-    std::cout<<"Native Responses request and SSE contract passed byte fragmentation, output identity/lifecycle validation, strict terminal consistency, bounded value-free first-mismatch structural diagnostics, usage normalization, stateless reasoning/tool continuation, safe invariant diagnostics and malformed/incomplete rejection. All model output is synthetic.\n";
+    std::cout<<"Native Responses request and SSE contract passed byte fragmentation, output identity/lifecycle validation, reasoning-only nonempty encrypted-content variation with exact bounded done-source continuation, strict other-field rejection, bounded value-free first-mismatch structural diagnostics, usage normalization, stateless reasoning/tool continuation, safe invariant diagnostics and malformed/incomplete rejection. All model output is synthetic.\n";
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

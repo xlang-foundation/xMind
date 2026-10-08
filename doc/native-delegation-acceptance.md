@@ -1,6 +1,12 @@
 # Native delegation acceptance scopes
 
-The managed preview now runs the exact hosted e353 native backend and schema
+The current managed preview uses the later verified 7fe diagnostic backend with
+the same repaired browser view. Its new public failure identifies only an
+encrypted-content difference. [Current installation and diagnostic scope](native-responses-diagnostics.md).
+Successful live delegation remains unverified; the compatibility source is
+[under validation](native-responses-reasoning.md).
+
+The historical acceptance below used the exact hosted e353 backend and schema
 v10. Its browser view contains a separate local source repair. Successful live
 delegation is still unverified: the first real `delegate_tasks` response failed
 terminal consistency validation before any child was admitted.

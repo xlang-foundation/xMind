@@ -44,8 +44,9 @@ copies and the emitted production HTML match the exact commit, while copied
 renderer libraries/licenses match their packaged dependency bytes. The
 **29 runtime / 12 view / 30 VSIX file maps** are verified. The original job
 log's 172,607 bytes, UTF-8 BOM and emitted whitespace are preserved. Artifacts
-were downloaded and safely extracted into fresh owned directories, with no
-installation or live/private preview access.
+were downloaded and safely extracted into fresh owned directories. That
+collection performed no installation or live/private preview access; later
+installation and live observations are recorded separately below.
 
 ## Event boundary
 
@@ -102,16 +103,50 @@ change must respect the documented completed-item continuation source.
 
 ## Installed and live scope
 
-The installed backend remains the verified e353 bundle with its separately
-repaired browser view. Historical live root
-`20349b91c30e11b54f90902e137899da` failed before children and has no new structural
-diagnostic. Its differing field remains unconfirmed; the existing failure,
-rendered screenshot and preserved-history evidence remain scoped to that run.
-[Installed browser and live-failure record](native-delegation-acceptance.md).
+The verified **7fe7 diagnostic native bundle is installed**, retaining the
+separately repaired browser view: 29 native files, 12 view files and 10 view
+source bindings. At upgrade observation, saved native API records and typed
+owned-attempt audit preserved **12 sessions, 16 roots, 38 history records,
+3 operations, 2 graphs and 2 graph children**, with no delegated children or
+active runs/claims. Configuration, journal observations, authentication,
+cookie, origins and view were retained. This managed comparison used APIs and
+audit events; it makes no direct live SQL-row or database-byte identity claim.
 
-The exact hosted/artifact gate is passed. Reviewed schema v10→v10
-upgrade/rollback acceptance, installation and a new explicit public live probe
-remain pending. Successful live children/join, installed
-VS Code delegation, broader planning, skills, compaction, outbound A2A and full
-coding/provider parity remain required. The local passing gate is not evidence
-that the historical live failure was repaired or replayed.
+Separate disposable fixtures passed schema **v10→v10 upgrade and idle rollback**
+using exact hosted xlang3 `query_only` queries on copied closed databases.
+They compared all table rows, nonempty delegation ledgers and synthetic
+encrypted credential purpose/ciphertext privately. Real native fixture work
+included two read-only leaves, one joined batch, a failed predispatch root,
+a graph read and an approved create; provider replies were synthetic.
+An owner-loss fixture rejected rollback after newly accepted work and loss
+of the replacement owner, preserving the accepted database. The initial
+synthetic peer tool-order timeout remains recorded as a failed attempt;
+the corrected fixture's pass does not overwrite it.
+[Upgrade/rollback and installation provenance](evidence/native-responses-diagnostic-upgrade-provenance.json).
+[Initial failed fixture log](evidence/native-responses-diagnostic-upgrade-initial-failure.log),
+[corrected upgrade/rollback log](evidence/native-responses-diagnostic-upgrade-positive-attempt-2.log),
+[owner-loss rollback log](evidence/native-responses-diagnostic-upgrade-owner-loss.log)
+retain the authentic failed and passed attempts separately.
+
+The new public live root `8dc406dca1efce9a8cb1dffc4454fa9a` on saved OpenAI
+Responses `gpt-5.6-sol` failed with `responses_terminal_mismatch` after 150
+delegation deltas. Its bounded diagnostic identifies **only `encrypted_content`**
+as different, with both values strings and every other known/unlisted field
+equal. It retained one finished model-budget attempt, user-only history,
+zero accepted tool calls, children and operations; no validated usage exists.
+Opaque values were withheld. [Actual live structural proof](evidence/native-responses-diagnostic-live-7fe7.json),
+[rendered browser failure](evidence/native-responses-diagnostic-live-7fe7.jpg).
+
+Historical root `20349b91c30e11b54f90902e137899da` has no structural diagnostic;
+the new observation does not establish that earlier run's differing field.
+[Earlier installed browser and live-failure record](native-delegation-acceptance.md).
+
+A narrow native compatibility patch is reviewed and frozen: reasoning-only
+nonempty encrypted-content differences may be accepted while all other
+members remain equal, and continuation uses completed-item snapshots.
+Its local guard exited **3** because a sibling benchmark was active, so the
+build was deferred with all 229 frozen source hashes unchanged. The exact
+hosted gate, installation and new live acceptance remain pending; the installed
+7fe7 bundle still rejects this shape. [Reasoning compatibility patch and source scope](native-responses-reasoning.md).
+Successful live children/join, installed VS Code delegation, broader planning,
+skills, compaction, outbound A2A and full coding/provider parity remain required.

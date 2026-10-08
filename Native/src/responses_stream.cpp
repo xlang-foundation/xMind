@@ -81,13 +81,35 @@ struct ResponsesStream::Impl {
         }
         current.final=value;current.done=true;
     }
+    bool terminal_matches(const Item& current,const Json& terminal){
+        if(current.final==terminal)return true;
+        // The reasoning receipt used for subsequent input is output_item.done:
+        // https://developers.openai.com/api/reference/resources/responses/streaming-events
+        // Permit only a nonempty encrypted-content string to differ. Compare
+        // every other member in place, retaining all existing JSON equality.
+        if(current.type!="reasoning"||!current.final.is_object()||!terminal.is_object()||current.final.size()!=terminal.size())return false;
+        const auto before=current.final.find("encrypted_content"),after=terminal.find("encrypted_content");
+        if(before==current.final.end()||after==terminal.end()||!before->is_string()||!after->is_string()||before->get_ref<const std::string&>().empty()||after->get_ref<const std::string&>().empty())return false;
+        for(auto it=current.final.begin();it!=current.final.end();++it)if(it.key()!="encrypted_content"){const auto found=terminal.find(it.key());if(found==terminal.end()||*it!=*found)return false;}
+        return true;
+    }
+    std::string completed_items(){
+        std::string result="[";bool separator=false;
+        const auto bounded_append=[&](std::string_view value){if(value.size()>max_value-result.size())throw ModelProtocolError("Responses continuation exceeds limits");result.append(value);};
+        // All items are completed and validated before this ordered receipt is
+        // constructed. Incremental serialization also bounds done-source data
+        // when its encrypted strings are larger than the terminal snapshot.
+        for(const auto& [position,current]:items){(void)position;if(separator)bounded_append(",");separator=true;bounded_append(current.final.dump());}
+        bounded_append("]");return result;
+    }
     void terminal(const Json& event){
         const auto& response=event.at("response");response_identity(response);
         if(response.value("status",Json{})!="completed"||(response.contains("error")&&!response["error"].is_null())||!response.contains("output")||!response["output"].is_array()||response["output"].size()!=items.size())throw ModelProtocolError("Responses turn did not complete");
-        for(std::size_t i=0;i<response["output"].size();++i){const auto found=items.find(static_cast<int>(i));if(found==items.end()||!found->second.done||found->second.final!=response["output"][i]){terminal_diagnostic(i,found==items.end()?nullptr:&found->second,response["output"][i]);throw ModelProtocolError("Responses terminal output differs from completed items");}const auto& current=found->second;
+        for(std::size_t i=0;i<response["output"].size();++i){const auto found=items.find(static_cast<int>(i));if(found==items.end()||!found->second.done||!terminal_matches(found->second,response["output"][i])){terminal_diagnostic(i,found==items.end()?nullptr:&found->second,response["output"][i]);throw ModelProtocolError("Responses terminal output differs from completed items");}const auto& current=found->second;
             if(current.type=="message")for(const auto& [pos,part]:current.parts){(void)pos;append(part.type=="output_text"?completion.content:completion.refusal,part.value);}
             else if(current.type=="function_call")completion.tool_calls.push_back({current.call_id,current.name,current.arguments});
         }
+        completion.provider_items_json=completed_items();
         if(response.contains("usage")&&!response["usage"].is_null()){
             auto usage=response["usage"];if(!usage.is_object())throw ModelProtocolError("Invalid Responses usage");
             for(const auto* key:{"input_tokens","output_tokens","total_tokens"})if(!usage.contains(key)||!usage[key].is_number_integer()||usage[key]<0)throw ModelProtocolError("Invalid Responses token count");
@@ -97,7 +119,6 @@ struct ResponsesStream::Impl {
             if(usage.contains("output_tokens_details"))usage["completion_tokens_details"]=usage["output_tokens_details"];
             completion.usage_json=usage.dump();emit("model.usage",usage);
         }
-        completion.provider_items_json=response["output"].dump();if(completion.provider_items_json.size()>max_value)throw ModelProtocolError("Responses continuation exceeds limits");
         completion.finish_reason=completion.tool_calls.empty()?"stop":"tool_calls";emit("model.finish",{{"reason",completion.finish_reason}});done=true;emit("model.done",Json::object());
     }
     void chunk(){
