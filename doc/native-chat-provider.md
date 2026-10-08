@@ -42,9 +42,13 @@ developer-role authority mapping, refusal metadata, late system instructions and
 foreign provider continuation data are rejected rather than silently discarded.
 
 Its new C++ contract has exact wire-shape cases and rejection cases for pending
-or foreign call results, ambiguous JSON and incompatible history. Local
-compilation was deferred by newly active sibling benchmark process 8576, so
-these additions remain uncompiled/unexecuted source. Existing product routing
+or foreign call results, ambiguous JSON and incompatible history. Compilation
+was initially deferred by sibling benchmark process 8576. After the guard
+cleared, all 53 native contracts passed locally, including the new request
+component: [component log](evidence/native-anthropic-request-local.log),
+[source/runtime provenance](evidence/native-anthropic-request-local-provenance.json).
+This is local component validation; exact hosted validation remains pending.
+Existing product routing
 still has only Chat Completions and Responses; Claude stream decoding, version
 headers, native backend enrollment/capability policy and actual provider
 acceptance are still required. The LiteLLM inventory therefore does not count

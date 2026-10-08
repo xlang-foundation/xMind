@@ -1,5 +1,27 @@
 # Interactive native CLI sessions
 
+The browser preview now runs exact hosted revision `5cf3c79`, which passed all
+52 native, 73 extension and 14 browser contracts plus asset packaging.
+[Hosted provenance](evidence/native-cli-recovery-provider-headers-hosted-provenance.json)
+and [unaltered test/TAP summary](evidence/native-cli-recovery-provider-headers-hosted-summary.log)
+record that complete gate. The process executor passed this run; its earlier
+45-second timeout's cause remains unproven. Native restart preserved all nine
+conversations, 13 root runs and 31 history records by exact hashes, with unchanged
+provider configuration. The browser adapter/view source is unchanged across
+the upgrade and remained running; its existing cookie still refreshed history
+without login. Other IDE previews were left untouched.
+
+A live console acceptance then launched `/graph read.repository.file ...`,
+submitted `/input choose.file {"path":"README.md"}`, and completed the native
+read child. The recorded 11,810-byte content equals the repository file exactly;
+the graph's revision, history and root-only run list match native inspection.
+The browser renders that same completed graph and both observed nodes.
+[Live read evidence](evidence/live-console-registered-graph-read.json) distinguishes
+this actual execution from synthetic protocol fixtures. No inference occurred,
+so no provider tokens were fabricated. Full TUI/OpenCode parity, broader provider
+adapters and team deployment remain required. The newer Claude request component
+is locally validated separately and is absent from this installed revision.
+
 The C++ CLI now has source for `xmind_cli PORT chat [SESSION [MODEL]]`. It uses the same authenticated xMind Server, persistent conversations and dynamic native agent/tool loop as the editor and browser. It does not execute a separate agent or access SQLite directly.
 
 With a configured backend and `XMIND_AUTH_TOKEN` privately set, enter requests at `xMind >`. A new conversation is created only after the first non-empty request; opening chat and immediately leaving does not create placeholder history. A supplied session is validated and reused. A supplied model is sent through normal native model-selection validation; otherwise the server's configured default is used. Enter `/exit` between turns to leave.

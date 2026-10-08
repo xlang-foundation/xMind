@@ -1,0 +1,16 @@
+5/53 Testing: native_anthropic_request_contract
+5/53 Test: native_anthropic_request_contract
+Command: "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_anthropic_request_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_anthropic_request_contract" start time: Oct 07 18:59 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Claude request component passed explicit limits/capabilities, ordered text and parallel tool identity, schema preservation, duplicate-key rejection and incompatible-history refusal. No transport, provider enrollment or live inference was executed.
+<end of output>
+Test time =   0.22 sec
+----------------------------------------------------------
+Test Passed.
+"native_anthropic_request_contract" end time: Oct 07 18:59 Pacific Daylight Time
+"native_anthropic_request_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+

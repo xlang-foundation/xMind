@@ -1,5 +1,13 @@
 # Native provider transport
 
+Revision `5cf3c79` passed the complete hosted gate (52 native, 73 extension and
+14 browser contracts): [provenance](evidence/native-cli-recovery-provider-headers-hosted-provenance.json),
+[test/TAP summary](evidence/native-cli-recovery-provider-headers-hosted-summary.log).
+Its exact CI bundle is installed in the browser preview. Credential-header
+fixtures use independent synthetic peers; this gate does not establish live
+Claude/Gemini provider support. The later Claude request component remains
+separately scoped in [native provider development](native-chat-provider.md).
+
 Backend-selected credential placement now has source for bearer, `x-api-key`
 and `x-goog-api-key` headers. The request contract uses an enum rather than
 client-supplied header names; unsupported values and missing API-key credentials

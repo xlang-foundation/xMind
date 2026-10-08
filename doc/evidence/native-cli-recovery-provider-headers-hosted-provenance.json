@@ -1,0 +1,23 @@
+{
+  "xmind": "5cf3c7909e2381e6b10e33612a1bd88a9edb6668",
+  "workflowRun": 37714457073,
+  "job": 113108102226,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37714457073",
+  "conclusion": "success",
+  "nativePassed": 52,
+  "extensionPassed": 73,
+  "browserPassed": 14,
+  "failed": 0,
+  "evidenceArtifact": 11523378822,
+  "runtimeArtifact": 11523751279,
+  "runtimeProvenance": {
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "sqlite_patch_sha256": "5388CDB3D1946CE48A2416055E27B422A2AA1364271A24DC8EB124C72C2C64B4",
+    "toolchain": "Visual Studio 18 2026",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "toolchain_version": "18.10.12217.157",
+    "xlang3": "914783909835116969aad7c66b210a5ac9a27661",
+    "xmind": "5cf3c7909e2381e6b10e33612a1bd88a9edb6668"
+  },
+  "scope": "Exact complete hosted gate. Process executor passed this run; previous timeout cause remains unproven. Claude request component is later source and excluded from this revision."
+}

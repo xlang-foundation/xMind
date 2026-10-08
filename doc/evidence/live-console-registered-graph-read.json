@@ -1,0 +1,30 @@
+{
+  "revision": "5cf3c7909e2381e6b10e33612a1bd88a9edb6668",
+  "graph_id": "read.repository.file",
+  "graph_revision": 1,
+  "state": "completed",
+  "file": "README.md",
+  "contentSha256": "ebfcc519524ee40c52219b932a8852d59df2841d14c1f5380d9a37a20a7b010a",
+  "contentBytes": 11810,
+  "historySha256": "3d639ff4f3ee837c01d1289bb3558687827e0f079f705317f4e60d93b7918855",
+  "runsSha256": "2ce7fccde0841b3f23795252c50f16d4371f2bb8a6e8287ec8fc5b04565b1268",
+  "eventsSha256": "daec1d31f42a9bd0ce929a7054c1aec8e3abc35ce2dbf1477ab09fbd277fe988",
+  "providerUnchanged": true,
+  "inferenceEvents": 0,
+  "scope": "Actual native console graph admission, actual human input command, repository file read, persisted root/child state and console history/run navigation; no model inference or full CLI parity claim.",
+  "browser": {
+    "url": "http://127.0.0.1:60405/ui/",
+    "connectedAfterNativeRestart": true,
+    "actualCompletedGraphRendered": true,
+    "viewRevision": "46262d6ef7949a9caf778ccb6cf74733ef28b5ac",
+    "viewSourceUnchangedAgainstNativeRevision": true
+  },
+  "upgrade": {
+    "previousRevision": "46262d6ef7949a9caf778ccb6cf74733ef28b5ac",
+    "preservedSessions": 9,
+    "preservedRootRuns": 13,
+    "preservedHistoryRecords": 31,
+    "metadataHistoryAndRunsHashesIdentical": true,
+    "providerUnchanged": true
+  }
+}

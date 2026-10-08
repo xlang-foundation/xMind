@@ -1,0 +1,14 @@
+{
+  "xmind": "112a5f4302ac37ccd0ce3d0c05631744bb4e15c2",
+  "nativePassed": 53,
+  "nativeFailed": 0,
+  "exitCode": 0,
+  "testTimeSeconds": 89.76,
+  "sourceSha256": "f0e535f93b308ca96a2742381119b507ec78af681c44c519248b1cef3cfdb419",
+  "contractSourceSha256": "91d4d14b97e1edb54c9c25999f3a8411125135c5754185ab658381d922c334bd",
+  "contractBinarySha256": "1322754f1ff39a93dc813d4ff933e2f724ae8050f1b0dbe882c785d0d29c3c7e",
+  "runtimeSha256": "fb02403bff1bf9967d5e49cb4f2a5a4f6d13ad139cc02b069e20fc03cc6c4862",
+  "sqliteModuleSha256": "fcb0e481352672eb72d86a96e2ef5d9b58939a35ad03a4ac3e32bfe7dc733b8c",
+  "fullPrivateLastTestSha256": "07180a88ed0728f80274a0701a18626d0f6529dbebe260cf4ec9df366e32c2d0",
+  "scope": "Local C++ request serialization component and full native suite passed using local xlang3 compatibility-branch runtime. No Claude transport, stream decode, routing/enrollment or live inference was executed; this component is not in the installed 5cf3c79 preview."
+}
