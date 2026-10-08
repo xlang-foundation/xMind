@@ -4,7 +4,39 @@
 
 The platform combines xMind's general-agent and graph concepts with coding capabilities referenced from OpenCode and model coverage referenced from LiteLLM. We implement the shared core in C++. xlang3 runs scripts, skills and compatible pure-Python libraries. The CLI and IDE use the same backend. This is the proposed design; it does not claim that the native implementation is complete.
 
-Coding has three required clients: console CLI, standalone Electron IDE and editor plugins (VS Code first). All use the same backend API and session/event contracts in local or remote xMind Server mode. Electron owns desktop windows and a thin renderer/main-process bridge; orchestration, tools, permissions and persistence remain in the C++ core. Use the existing CantorAI/WorkSense Electron runtime on this development PC where compatible. See [electron-reference.md](electron-reference.md) for the current source/runtime investigation.
+Coding has three OSS clients: native console CLI, HTML/browser UI and the VS Code extension. They use the same local xMind Server API and durable session/event contracts. Views render backend state; execution, tools, permissions, model routing and persistence remain in C++ with embedded xlang3.
+
+## xMind OSS specification — revised 2026-10-07
+
+xMind is an open-source general-purpose agent platform with a native coding
+engine. A single agent and graph agent nodes share execution, tools, permissions,
+models and persistence. Coding is a first-class use of that engine. The repository
+remains xMind; AgentFlow describes its single-agent and graph capability.
+
+| Required OSS capability | Completion boundary |
+| --- | --- |
+| Native C++ core with embedded xlang3 | Actual execution through supported native SDK ownership rules; no CPython runtime or native-extension fallback |
+| Local xMind Server and SQLite | Durable sessions/history/events, encrypted credentials, recovery and concurrent client inspection; database I/O through xlang3 |
+| Single and graph agents | Shared real model/tool engine, dynamic delegation/replanning, dependencies, branching, human input, cancellation and checkpoints |
+| Coding engine and CLI | Relevant pinned OpenCode core coding behavior, real workspace/Git/process tools, approvals, context management, reviewable changes and interactive console workflows |
+| Browser and VS Code | Right-side agent UI, resizable layout, bottom model chooser, Settings, durable connection, rendered history/code and actual response metrics |
+| Native providers | Broad frontier-model support guided by pinned LiteLLM inventory, provider-specific wire/authentication, account model discovery and separate encrypted keys; per-model capability and live acceptance evidence |
+| MCP and A2A | Native interoperability over in-scope transports, shared permissions/execution, independent peers and actual protocol acceptance |
+
+Team-server features (organizations, shared company sessions, multi-user/tenant
+authorization and distributed workers), PostgreSQL, WebRTC/signaling and a
+standalone Electron IDE are **excluded from xMind OSS**, reserved for CantorAI's
+closed-source **Cantor Nexus** project. They are not deferred OSS milestones or
+OSS completion blockers. Backend/view separation and repository/API contracts
+remain extensible; private product modules are not bundled into OSS. Local
+authentication, credential protection, workspace boundaries and tool approval
+remain required. Browser UI and VS Code remain OSS deliverables.
+
+OpenCode parity applies to relevant core coding, CLI and editor behavior; it does
+not reintroduce excluded desktop/deployment products. Preserve the pinned inventory
+and identify exclusions rather than counting them as implemented. Historical
+checkpoints prove only their recorded scope. This revision changes requirements,
+not measured implementation status.
 
 ## How the three inputs combine
 
@@ -26,7 +58,7 @@ The C++ scheduler owns root runs and graph-node executions. A session permits on
 
 The native engine owns the model/tool loop. It consumes a provider stream and produces normalized events, requests tool actions through the tool registry, and records resulting conversation parts. Providers, tools and script callbacks do not directly transition root runs or publish durable completion events.
 
-The C++ repository owns contracts, transactions and durable sequence numbers. xMind Server selects SQLite or PostgreSQL, with database I/O through embedded xlang3. See [database-backends.md](database-backends.md) for adapter and ownership rules. State changes and their corresponding events commit together. An event publisher exposes committed events only. A dedicated persistence runtime/thread owns database handles and performs parameterized operations. Scheduler and HTTP threads submit owned requests; they do not share runtime values. The service must obtain a backend-appropriate ownership lease before startup recovery; opening another API/CLI process must not mark live runs interrupted.
+The C++ repository owns contracts, transactions and durable sequence numbers. xMind OSS uses local SQLite, with database I/O through embedded xlang3. PostgreSQL belongs to the separate Cantor Nexus project. See [database-backends.md](database-backends.md) for adapter and ownership rules. State changes and their corresponding events commit together. An event publisher exposes committed events only. A dedicated persistence runtime/thread owns database handles and performs parameterized operations. Scheduler and HTTP threads submit owned requests; they do not share runtime values. The service must obtain a backend-appropriate ownership lease before startup recovery; opening another API/CLI process must not mark live runs interrupted.
 
 SQLite stores sessions, conversations, events, agent/graph definitions, model/provider configuration, workspace/tool settings, approvals, checkpoints and other backend information. Credentials use a separate encrypted-blob table with public metadata and credential references. On Windows, propose C++ DPAPI protection before sending blobs to xlang3 for insertion, and decryption only for the provider/connector that needs the secret. OS-specific protection and credential migrations require native tests; they are not implemented yet. Secret values never enter public model/configuration discovery, events or conversation context.
 
@@ -79,4 +111,4 @@ Keep the new native target independent of the legacy `ThirdParty/xlang` build. P
 
 First establish native persistence and event contracts, then the service/CLI, engine/provider/tools, protocol interoperability, graph execution and editor workflows. The pinned OpenCode API inventory and LiteLLM provider inventory guide coverage. Source presence and catalogue entries alone do not prove parity. The requested platform remains incomplete until native behavior, live peers/providers and actual IDE interaction have been validated.
 
-The direct-SQLite store source was started before the user specified database operations through xlang3. It is disabled in the default build; its transaction/concurrency scenarios are retained as migration reference. The embedded-xlang3 SQLite repository passed the M1 contracts and separate-process persistence demo. PostgreSQL and the native agent/backend services remain to be implemented. The backend lease source is independent of SQLite access and remains applicable to the SQLite deployment.
+The direct-SQLite store source was started before the user specified database operations through xlang3. It is disabled in the default build; its transaction/concurrency scenarios are retained as migration reference. The embedded-xlang3 SQLite repository passed the M1 contracts and separate-process persistence demo. PostgreSQL is excluded from OSS. Later native backend/agent checkpoints are recorded in milestones.md; full in-scope coding/provider/protocol acceptance remains required. The backend lease source is independent of SQLite access and remains applicable to the SQLite deployment.

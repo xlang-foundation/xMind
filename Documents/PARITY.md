@@ -1,5 +1,7 @@
 # OpenCode 2 feature baseline
 
+Current scope: the [xMind OSS specification](../doc/architecture.md) excludes team-server features, PostgreSQL, WebRTC and the standalone Electron IDE. Those belong to Cantor Nexus; earlier roadmap language does not make them OSS completion requirements.
+
 The user now requires native C++ implementation. OpenCode is a reference only. Existing Python source equivalents are historical prototypes and do not count as delivered native capabilities; the status table below records prototype evidence. See `NATIVE_ARCHITECTURE.md`.
 
 Baseline: `anomalyco/opencode` tag `v2.0.16`, commit `3a103fe0aff726a4edc7492f03f7b88195d9e4c9`, verified with `git ls-remote`. Source: https://github.com/anomalyco/opencode/tree/v2.0.16 . Documentation discovery: https://opencode.ai/v2/docs . Current documentation may differ from this pinned release; source inspection is required before finalizing each acceptance criterion.

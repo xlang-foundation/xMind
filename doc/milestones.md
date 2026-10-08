@@ -1,5 +1,7 @@
 # Reviewable milestones
 
+Current completion scope is the [revised xMind OSS specification](architecture.md). Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE are excluded and reserved for Cantor Nexus. Historical checkpoint paragraphs below preserve their original source/time scope and do not reinstate those requirements.
+
 Native Responses provider checkpoint: explicit C++ wire selection now reaches the shared single-agent and graph engine, preserving stateless reasoning/tool continuation, actual supplied token metrics and persisted conversation replay. Two dependent agents perform actual file reads; provider-native items stay in child conversations rather than graph dependency/join outputs. Final local Release validation passed **52 native and 60 extension contracts**, no skips. [Scope and evidence](native-responses-provider.md). Inference/opaque reasoning are synthetic; live provider/IDE acceptance, interactive wire enrollment, standalone browser UI, broader provider coverage and full product parity remain pending.
 
 The earlier native A2A v1 source `d07c61c725c3a1a4bf9ac85a2c6782575e52d8df` passed hosted **50 native and 60 extension contracts**, no skips, in [run 37693026697](https://github.com/xlang-foundation/xMind/actions/runs/37693026697). [Original full hosted job](evidence/native-a2a-v1-hosted-job.log). This result applies to that source, not the newer history/Responses changes or installed UI runtimes.
@@ -150,7 +152,7 @@ Credential storage checkpoint: the C++ repository now protects and persists cred
 - Native xMind Server + CLI: shared sessions/run events, lifecycle, authentication and reconnection.
 - Coding engine: real model/tool task with explicit approvals, verification and reviewable changes.
 - Protocols and graphs: independent MCP/A2A peers, graph branching/pauses/checkpoint recovery.
-- Clients: VS Code and Electron workflows over the shared backend, with actual UI validation.
-- Team deployment: authenticated users/workers, project isolation and shared-session behavior.
+- Clients: browser UI and VS Code workflows over the local backend, with actual UI validation.
+- OSS release: reproducible native builds, scoped parity evidence, documented limitations and end-to-end local coding/protocol/provider acceptance.
 
-These milestones retain the full product scope; none substitutes for full OpenCode parity or all agreed model/provider support.
+These milestones retain the revised xMind OSS scope. Team-server features, PostgreSQL, WebRTC and Electron belong to Cantor Nexus and are excluded. Relevant OpenCode coding parity and agreed broad model/provider support remain required.

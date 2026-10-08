@@ -22,7 +22,7 @@
   </defs>
   <rect width="1640" height="1380" fill="#f6f8fc"/>
   <text x="48" y="59" class="title">xMind / AgentFlow</text>
-  <text x="48" y="91" class="subtitle">Proposed architecture • Native C++ core + embedded xlang3 • General agents and a coding workspace</text>
+  <text x="48" y="91" class="subtitle">xMind OSS architecture • Native C++ + embedded xlang3 • General agents and coding</text>
   <rect x="1265" y="35" width="325" height="52" rx="26" fill="#e8eef8"/>
   <text x="1427" y="68" text-anchor="middle" class="label">Design • not delivery status</text>
 
@@ -36,11 +36,11 @@
   <rect x="715" y="180" width="285" height="62" rx="11" fill="#edf2fb"/>
   <text x="857" y="218" text-anchor="middle" class="label">Web / graph editor</text>
   <rect x="1020" y="180" width="548" height="62" rx="11" fill="#edf2fb"/>
-  <text x="1294" y="218" text-anchor="middle" class="label">Standalone IDE • Electron • same backend</text>
+  <text x="1294" y="218" text-anchor="middle" class="label">All views • shared history, runs and approvals</text>
   <path d="M820 266V296" class="flow"/>
 
   <rect x="365" y="298" width="1225" height="93" rx="15" class="native"/>
-  <text x="391" y="331" class="heading">xMind Server · local or shared team service · C++</text>
+  <text x="391" y="331" class="heading">xMind Server · local OSS backend · C++</text>
   <text x="391" y="360" class="body">Versioned HTTP / JSON / SSE · sessions and runs · model discovery · approval and diff APIs · reconnect</text>
   <text x="70" y="338" class="label">One backend owns execution</text>
   <text x="70" y="364" class="small">Clients observe the same durable state</text>
@@ -107,7 +107,7 @@
   <path d="M980 1028V1057" class="flow"/>
   <rect x="365" y="1059" width="1225" height="103" rx="15" class="native"/>
   <text x="391" y="1094" class="heading">Shared state, policy and recovery · C++</text>
-  <text x="391" y="1126" class="body">C++ repository contracts · sessions / events / config / encrypted secrets · SQLite / PostgreSQL I/O via xlang3</text>
+  <text x="391" y="1126" class="body">C++ repository contracts · sessions / events / config / encrypted secrets · local SQLite I/O via xlang3</text>
 
   <rect x="48" y="1185" width="772" height="112" rx="15" class="runtime"/>
   <text x="70" y="1222" class="heading">Embedded xlang3 · supported native SDK</text>
