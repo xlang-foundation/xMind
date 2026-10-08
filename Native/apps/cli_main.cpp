@@ -166,6 +166,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(prompt=="/exit")return last_result;
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
+            std::cerr<<"/runs lists recorded root runs in the selected conversation; use /watch or /graph-watch to attach one.\n";
             std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
             std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
@@ -189,6 +190,11 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             last_result=watch_run(client,headers,id,0,graphAttachment,true);
             std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
             continue;
+        }
+        if(prompt=="/runs"){
+            const auto saved=session.empty()?Json::array():request("/v1/sessions/"+session+"/runs");
+            if(!saved.is_array())throw std::runtime_error("Invalid backend run catalogue");
+            std::cout<<Json{{"type","runs"},{"session_id",session},{"runs",saved}}.dump()<<'\n'<<std::flush;continue;
         }
         if(prompt=="/sessions"){
             const auto saved=request("/v1/sessions");if(!saved.is_array())throw std::runtime_error("Invalid backend session catalogue");

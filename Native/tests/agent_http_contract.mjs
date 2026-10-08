@@ -135,7 +135,8 @@ try {
   assert.equal(resumedChat.find(record=>record.type==='history').history.length,8,'Resuming emits the actual pre-turn durable conversation');
   assert.deepEqual((await chat('/exit\n',chatSession)).find(record=>record.type==='history').history,cli('history',chatSession),'Viewing history without a request must not start work');
   const attachmentRequests=requests,attachmentRuns=cli('runs','coding');
-  const attached=await chat('/watch '+run.id+'\n/exit\n');
+  const attached=await chat('/runs\n/watch '+run.id+'\n/runs\n/exit\n');
+  const listedRuns=attached.filter(record=>record.type==='runs');assert.deepEqual(listedRuns[0],{type:'runs',session_id:'',runs:[]});assert.equal(listedRuns[1].session_id,'coding');assert.deepEqual(listedRuns[1].runs,attachmentRuns);
   assert.equal(attached.find(record=>record.type==='run_attached').run.id,run.id);assert.ok(!attached.some(record=>record.type==='run'));assert.equal(attached.find(record=>record.type==='turn_finished').exit_status,0);assert.deepEqual(attached.find(record=>record.type==='history').history,history);
   const rejectedAttachments=await chat('/watch ../invalid\n/watch absent-fixture\n/watch '+run.id+'\n/history\n/exit\n',chatSession);
   assert.ok(!rejectedAttachments.some(record=>record.type==='run_attached'||record.type==='turn_finished'));assert.ok(rejectedAttachments.every(record=>record.type!=='session'||record.session_id===chatSession));assert.deepEqual(cli('runs','coding'),attachmentRuns);assert.equal(requests,attachmentRequests,'Attaching completed runs and rejecting foreign/absent runs cannot invoke inference');

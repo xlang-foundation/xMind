@@ -139,10 +139,11 @@ try {
   assert.deepEqual(cli('runs','shared'),[]);
   const wrong = spawnSync(cliExe, [String(port), 'sessions'], {env: {...env, XMIND_AUTH_TOKEN: 'wrong'}, encoding: 'utf8', windowsHide: true});
   const savedSessions=cli('sessions'),savedHistory=cli('history','shared');
-  const readOnlyChat=spawnSync(cliExe,[String(port),'chat'],{env,input:'/sessions\n/session shared\n/history\nDo not admit this unconfigured request\n/exit\n',encoding:'utf8',timeout:15000,windowsHide:true});
+  const readOnlyChat=spawnSync(cliExe,[String(port),'chat'],{env,input:'/sessions\n/session shared\n/runs\n/history\nDo not admit this unconfigured request\n/exit\n',encoding:'utf8',timeout:15000,windowsHide:true});
   assert.equal(readOnlyChat.status,0,readOnlyChat.stderr);assert.match(readOnlyChat.stderr,/Configure a backend model before submitting/);
   const inspected=readOnlyChat.stdout.trim().split(/\r?\n/).map(line=>JSON.parse(line));assert.ok(inspected.some(record=>record.type==='history'&&record.session_id==='shared'&&JSON.stringify(record.history)===JSON.stringify(savedHistory)));assert.ok(!inspected.some(record=>record.type==='run'));assert.deepEqual(cli('sessions'),savedSessions);assert.deepEqual(cli('history','shared'),savedHistory);assert.deepEqual(cli('runs','shared'),[]);
   const emptyUnconfiguredChat=spawnSync(cliExe,[String(port),'chat'],{env,input:'No configured model\n/exit\n',encoding:'utf8',timeout:15000,windowsHide:true});assert.equal(emptyUnconfiguredChat.status,0,emptyUnconfiguredChat.stderr);assert.equal(emptyUnconfiguredChat.stdout,'');assert.deepEqual(cli('sessions'),savedSessions,'Unavailable inference cannot create a placeholder conversation');
+  assert.deepEqual(inspected.find(record=>record.type==='runs'),{type:'runs',session_id:'shared',runs:[]},'Saved run inspection is available without a provider');
   assert.equal(wrong.status, 1);
   console.log('Native HTTP/CLI contracts passed: authentication, shared clients, concurrent messages, restart persistence; unconfigured execution rejects admission without creating a run');
 } finally {

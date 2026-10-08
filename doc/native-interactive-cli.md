@@ -187,6 +187,19 @@ by live sibling benchmark process 17832; hosted execution of this addition is
 pending. This is registered graph execution, not dynamic graph generation or a
 completed console/TUI parity claim.
 
+`/runs` now lists the selected conversation's recorded root runs in source,
+including their actual backend state and graph-root identity. An empty selection
+returns an empty catalogue without creating a conversation. This closes the
+console navigation path `/sessions` → `/session ID` → `/runs` → `/watch ID` or
+`/graph-watch ID`. Graph children remain available through the existing separate
+graph-child commands. The graph-launch fixture was corrected to check this
+repository contract: one root in the session catalogue and one actual read child
+under that root, rather than expecting children in the root catalogue.
+
+Native fixtures require exact saved run records after single-agent attachment,
+graph completion and provider-free conversation inspection, with no additional
+inference or admission. Syntax checks passed; compiled execution is pending.
+
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
 52 native and 66 extension contracts. This verifies initial-model prevalidation
