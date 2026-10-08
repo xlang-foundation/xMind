@@ -449,6 +449,16 @@ void Repository::put_information(const std::string& category,const std::string& 
     changed_one(impl_->database.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO UPDATE SET payload=excluded.payload",{category,id,json}));
     transaction.commit();
 }
+void Repository::compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected) {
+    identifier(category);identifier(id);
+    if(category=="secrets"||category=="credentials")throw std::invalid_argument("Use the encrypted credential repository");
+    Transaction transaction(impl_->database);
+    const auto result=expected
+        ?impl_->database.execute("UPDATE information SET payload=? WHERE category=? AND id=? AND payload=?",{json,category,id,*expected})
+        :impl_->database.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO NOTHING",{category,id,json});
+    if(result.affected_rows!=1)throw Conflict("Information changed before publication");
+    transaction.commit();
+}
 std::string Repository::information(const std::string& category,const std::string& id) {
     const auto result=impl_->database.execute("SELECT payload FROM information WHERE category=? AND id=?",{category,id});
     if(result.rows.empty()) throw NotFound("Information not found"); return text(result.rows[0][0]);

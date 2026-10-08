@@ -59,6 +59,8 @@ public:
     void append_message(const std::string& id,const std::string& role,const std::string& json);
     std::vector<Message> history(const std::string& id);
     void put_information(const std::string& category,const std::string& id,const std::string& json);
+    // Exact durable compare-and-swap; null expected means create only if absent.
+    void compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected);
     std::string information(const std::string& category,const std::string& id);
     // Effect journal and one-operation permissions. Backend callers authorize
     // controller access before deciding; only an owning executor claims/finishes.

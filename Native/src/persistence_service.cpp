@@ -146,6 +146,9 @@ std::future<void> PersistenceService::put_information(std::string category,std::
 std::future<std::string> PersistenceService::information(std::string category,std::string id) {
     return impl_->submit([category=std::move(category),id=std::move(id)](Repository& repository){return repository.information(category,id);});
 }
+std::future<void> PersistenceService::compare_information(std::string category,std::string id,std::string json,std::optional<std::string> expected) {
+    return impl_->submit([category=std::move(category),id=std::move(id),json=std::move(json),expected=std::move(expected)](Repository& repository){repository.compare_information(category,id,json,expected);});
+}
 std::future<CredentialMetadata> PersistenceService::put_credential(std::string scope,std::string id,
     std::string purpose,std::string label,SecretBytes secret,std::int64_t revision) {
     return impl_->submit([scope=std::move(scope),id=std::move(id),purpose=std::move(purpose),label=std::move(label),secret=std::move(secret),revision](Repository& repository){

@@ -2,6 +2,25 @@
 
 ## Multiple provider enrollment boundary
 
+The native model-profile registry now has source for independently encrypted
+provider keys, explicit backend-owned route/family policy, profile and registry
+revisions, saved-key rebinding within one provider family, and independent active
+selection. It writes a single registry snapshot through a new exact-payload
+SQLite compare-and-swap operation on the embedded xlang3 persistence worker.
+Concurrent writers cannot publish over a changed snapshot. Candidate credential
+encryption precedes publication; a failed CAS/transaction can retain an encrypted
+orphan candidate but preserves all published keys and profile references.
+
+The new native contract uses actual encrypted SQLite storage and restart, key
+purpose mismatch, concurrent publication, an actual SQLite trigger failure and
+legacy-record preservation. Compilation/test execution is pending because the
+local build guard detected live sibling benchmark processes 22988, 8276 and
+28456. These source additions do not change the existing provider HTTP API,
+activate an execution service, migrate the existing OpenAI record or make Claude
+available in Settings. Runtime/service publication, migration, discovery and both
+client adapters still need integration and acceptance. The hosted native gate's
+exact expected set includes the new profile contract (56 total).
+
 Current setup is one saved OpenAI configuration. Claude request/stream/transport
 source additions do not change that API or make Claude selectable in Settings.
 The next enrollment change must retain the existing encrypted OpenAI key and

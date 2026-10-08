@@ -54,6 +54,7 @@ public:
     std::future<void> append_message(std::string id,std::string role,std::string json);
     std::future<std::vector<Message>> history(std::string id);
     std::future<void> put_information(std::string category,std::string id,std::string json);
+    std::future<void> compare_information(std::string category,std::string id,std::string json,std::optional<std::string> expected);
     std::future<std::string> information(std::string category,std::string id);
     std::future<Operation> request_operation(std::string id,OperationSpec spec,std::int64_t expires_unix_ms);
     std::future<Operation> operation(std::string id);
