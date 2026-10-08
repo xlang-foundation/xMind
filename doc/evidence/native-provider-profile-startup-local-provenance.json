@@ -1,0 +1,29 @@
+{
+  "revision": "336f40cc4d8918614e8d31c2ef772c627e04707d",
+  "runtimeRevision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "environment": "Local Windows Release build; native xlang3, source-only standard library; no CPython execution",
+  "nativePassed": 57,
+  "nativeFailed": 0,
+  "skipped": 0,
+  "nativeTestTimeSeconds": 95.1,
+  "ctestLogSha256": "e0df1a50a5db45d425ea8d68cce13f718fed22240045da0d79ba20306abfbdb4",
+  "sourceSha256NormalizedLF": {
+    "Native/apps/server_main.cpp": "ec08bf8cecd1134560497d4efe6d76c1b03b779b1ec1cfd324060e4fc722d5bb",
+    "Native/src/provider_profile_legacy_setup.cpp": "6fa571b24cf92c869ffde9da3edf643b9021c1f4ae58b97c91e7b7fba6315eff",
+    "Native/include/agentflow/provider_profile_legacy_setup.hpp": "b975d5d25e0e9881f604cb91d2bde9e963673590c760a77e535d3f60c9f61d8d",
+    "Native/src/provider_profiles.cpp": "888f4697d3dcb1b6bffdc2c05eac1ea85114d6be0f0bd8e465c180372b5eb6df",
+    "Native/include/agentflow/provider_profile_runtime.hpp": "31644bd24222b8d3749ab3a655560bf00f837b4a5f2cb211f95da92c00fc37e4",
+    "Native/include/agentflow/provider_profile_setup.hpp": "e2ea6128ef971a90de63e7ebf2880457f31b8410208abed249d5550cb0ea7df8",
+    "Native/src/provider_profile_runtime.cpp": "9ab91b6da92ed2032bc8dcd5835a45f492ecf9b5d28b703987ec205bde94c216",
+    "Native/src/provider_catalogue.cpp": "8ddc366954bde57ecdb11a461f8e6ebbdb937876f09b6cb8a5f3209d9d3ccd86",
+    "Native/src/http_server.cpp": "634873a2f1e87f17488d72f782480097b12d699311cbc47e7b4bbae79663c4ce",
+    "Native/tests/provider_profile_runtime_contract.cpp": "0e56531c63ec253396bc4ba655dd4d0c506d3b8efe5706022ce43413ed93ed2e",
+    "Native/tests/provider_profile_runtime_peer.mjs": "b105a51e94926f03b1e85310410106750ab2d45bf960ab73a0ddf677d41e8f49"
+  },
+  "releaseBinarySha256": {
+    "xmind_server.exe": "87d80fbfab55edf2d14dc8fcc017d0b7299e53d29ee3f1b52d118361a15ba864",
+    "agentflow_provider_profile_runtime_contract.exe": "87d04fbf07b2fe2802c83b552909be434229da3d964d97cddd66f59860ead79d",
+    "xlang3_runtime.dll": "166e8d96bd3b3a886fadfb7482374d7512a2dad7b389ca5d907a4b581f18a3a5"
+  },
+  "scope": "Complete native suite, including real synthetic HTTP peers for profile account discovery/API, revision race, OpenAI/Claude routing and validated legacy-reader import preserving encrypted credentials/revision. Actual compiled server startup/legacy repair and CLI compatibility included; no multi-provider profile UI, live Claude or Nexus enrollment acceptance."
+}

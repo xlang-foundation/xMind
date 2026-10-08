@@ -1,0 +1,22 @@
+{
+  "revision": "336f40cc4d8918614e8d31c2ef772c627e04707d",
+  "runtimeRevision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "nativePassed": 57,
+  "extensionPassed": 73,
+  "browserPassed": 14,
+  "browserNativeGraphContractPassed": true,
+  "sessionCount": 10,
+  "runCount": 14,
+  "historyCount": 33,
+  "allRunsTerminalBeforeUpgrade": true,
+  "privateSessionRunHistoryFingerprintUnchanged": true,
+  "providerRevisionBefore": 3,
+  "providerRevisionAfter": 3,
+  "providerModelUnchanged": true,
+  "providerProfileCountAfter": 1,
+  "browserViewProcessRetained": true,
+  "backendOriginRetained": true,
+  "closedDatabaseBackupCreated": true,
+  "durableBrowserCookieAcrossNativeUpgradePassed": true,
+  "scope": "Actual local preview native-backend upgrade and metadata/history preservation. Cookie acceptance used a separate private test view login at the existing browser origin. No new inference, live Claude, rendered multi-provider Settings or Nexus enrollment acceptance. Private conversation records, fingerprints, keys, credentials and backups are excluded."
+}

@@ -26,9 +26,19 @@ Local checks passed for the compiled server/CLI profile enrollment, selection,
 restart and conversation preservation, and the native profile runtime contract
 now starts the actual server on valid and repairable legacy databases. The
 existing **73 extension and 14 browser tests** and actual browser/native graph
-contract passed against the new compiled backend. The complete corrected native
-suite is being revalidated. A multi-provider client Settings selector and live
-Claude acceptance remain pending; the running preview has not been upgraded.
+contract passed against the new compiled backend. Source
+`336f40cc4d8918614e8d31c2ef772c627e04707d` passed the complete **57 native
+contracts** in **95.10 seconds**, without failures or skips
+([CTest](evidence/native-provider-profile-startup-local-ctest.log),
+[source/binary provenance](evidence/native-provider-profile-startup-local-provenance.json)).
+The actual preview backend was upgraded at its existing origin with a closed
+database backup. Its 10 sessions, 14 terminal runs and 33 history entries matched
+the private pre-upgrade fingerprint; provider identity and revision 3 were
+preserved. The view process stayed running, and a private test cookie remained
+authorized across the native upgrade
+([metadata-only evidence](evidence/live-provider-profile-upgrade.json)).
+A multi-provider client Settings selector and live Claude acceptance remain
+pending. No new inference or rendered profile UI is claimed.
 
 ## Multiple provider enrollment boundary
 
