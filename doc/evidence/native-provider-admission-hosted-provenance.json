@@ -1,0 +1,25 @@
+{
+  "revision": "19d69dd0876e0a01accb444e06924f36008f8ee6",
+  "runtimeRevision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "stdlibSourceRevision": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+  "environment": "Hosted Windows Release; native xlang3, source-only standard library; no CPython execution",
+  "nativePassed": 57,
+  "nativeFailed": 0,
+  "skipped": 0,
+  "nativeTestTimeSeconds": 121.5,
+  "runId": 37730034170,
+  "jobId": 113157818810,
+  "evidenceArtifactId": 11529990824,
+  "runtimeArtifactId": 11529990830,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37730034170",
+  "nativeManifestMatched": true,
+  "releaseBinarySha256": {
+    "xmind_server.exe": "d13bac3302a6ae1406363f58b29a4f17e3287fb467e9d1dd8e62699be91642a1",
+    "xmind_cli.exe": "d1ad9b26f11eabce928f589366966d4f311178bbad1f247f66df8de0304225fe",
+    "xmind_admin.exe": "953ef17d8e663128a0cf7cf8d259dfd10369df70d1e040aa7631216449b011b8",
+    "xmind_schema_worker.exe": "77797ac29eaf533774a96afeb79e7d8c6f1a7dd3b1b67c5537d613161e966c84",
+    "xlang3_runtime.dll": "1d95c67375d4baa9f81c5a8d2f619ce7abfa98cafbcf13bbc87c668f8b2f8ddc"
+  },
+  "ctestLogSha256": "dcfd5399e94b77304f3c55600cbb6d37dbe28e1d3ba3ced2d00f27af7872c3c3",
+  "scope": "Atomic provider admission and compiled CLI race checkpoint only; later provider history context and reconciliation are excluded"
+}

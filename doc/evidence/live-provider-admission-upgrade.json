@@ -1,0 +1,19 @@
+{
+  "native_source": "19d69dd0876e0a01accb444e06924f36008f8ee6",
+  "view_source": "6f32d215493122b433d6e20ff65bfce6c9120c27",
+  "native_pid": 5892,
+  "view_pid": 17460,
+  "url": "http://127.0.0.1:60405/ui/",
+  "backend": "http://127.0.0.1:57447",
+  "session_count": 10,
+  "run_count": 14,
+  "history_count": 33,
+  "conversation_fingerprint_unchanged": true,
+  "provider_revision": 3,
+  "profile_count": 1,
+  "durable_browser_cookie_preserved": true,
+  "actual_browser_reload": "Saved conversation/run restored without reconnect prompt; footer gpt-5.6-sol, Agent default, saved OpenAI Responses Settings observed",
+  "new_credentials_submitted": false,
+  "inference_submitted": false,
+  "scope": "Actual native admission checkpoint upgrade and source-only latest view acceptance. History provenance native implementation is not installed; no stale-profile UI task or live Claude inference acceptance claimed."
+}

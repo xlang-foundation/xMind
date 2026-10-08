@@ -63,10 +63,26 @@ Local client validation passed **82 extension and 16 browser tests**, without
 skips. New native contracts cover stale, malformed and current HTTP bindings,
 model-free graph admission, and a compiled CLI race through a loopback proxy
 which switches the actual native profile before forwarding the request. These
-native additions await compilation and full hosted verification. A sibling
-xlang3 performance run currently prevents local C++ builds. The installed
-preview remains on its previously verified native/view checkpoints. Durable
-profile attribution in run records, live Claude acceptance and actual VS Code
+contracts passed in the full hosted gate at exact source
+`19d69dd0876e0a01accb444e06924f36008f8ee6`: **57 native, 82 extension and
+16 browser contracts**, actual browser/native integration and VSIX verification.
+[Hosted run](https://github.com/xlang-foundation/xMind/actions/runs/37730034170),
+[original native output](evidence/native-provider-admission-hosted-ctest.log),
+[job/TAP output](evidence/native-provider-admission-passing-ci-job.log) and
+[provenance with bundle hashes](evidence/native-provider-admission-hosted-provenance.json).
+
+That exact native bundle is installed at the existing webpage/backend origins.
+The view uses source `6f32d21`, separately passing 86 extension and 17 browser
+tests plus actual integration against the hosted native bundle
+([integration output](evidence/provider-admission-latest-view-integration.log)).
+The closed-database backup and upgrade preserved all 10 sessions, 14 terminal
+runs and 33 history messages by exact fingerprint, provider revision 3 and the
+durable browser cookie. Actual browser reload restored saved history, the
+OpenAI Responses profile, Agent default and the gpt-5.6-sol footer chooser
+([metadata-only live record](evidence/live-provider-admission-upgrade.json)).
+No new key or inference was submitted. Later native history attribution is
+awaiting its own hosted gate and remains absent from the installed binary.
+Public run-descriptor attribution, live Claude acceptance and actual VS Code
 profile UI acceptance remain outstanding.
 
 ## Shared profile Settings controls
