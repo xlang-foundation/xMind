@@ -20,6 +20,7 @@ public:
     // Safe for concurrent callers; the object must outlive all callers.
     void close();
     std::future<Session> create_session(std::string id,std::string title);
+    std::future<Session> rename_session(std::string id,std::string title,std::string expected_title);
     std::future<Session> session(std::string id);
     std::future<std::vector<Session>> sessions();
     std::future<Run> create_run(std::string id,std::string session_id);

@@ -25,6 +25,7 @@ public:
     Repository(const Repository&)=delete;
     Repository& operator=(const Repository&)=delete;
     Session create_session(const std::string& id,const std::string& title);
+    Session rename_session(const std::string& id,const std::string& title,const std::string& expected_title);
     Session session(const std::string& id);
     std::vector<Session> sessions();
     Run create_run(const std::string& id,const std::string& session_id);

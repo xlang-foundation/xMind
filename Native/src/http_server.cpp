@@ -183,7 +183,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|models|graphs|provider/(configuration|models)|sessions(/[A-Za-z0-9_-]+/(history|runs))?|runs(/[A-Za-z0-9_-]+(/(events|cancel|operations))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|models|graphs|provider/(configuration|models)|sessions(/[A-Za-z0-9_-]+/(history|runs|title))?|runs(/[A-Za-z0-9_-]+(/(events|cancel|operations))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
             if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && std::regex_match(request.path,view_route) && (request.method=="GET"||request.method=="POST")){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
@@ -370,6 +370,12 @@ struct HttpServer::Impl {
             const auto value=body(request,{"id","title"});
             const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
             reply(response,encode(persistence.create_session(id,value.contains("title")?string_field(value,"title"):"New session").get()),201);
+        }));
+        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/title)",guarded([this](const Request& request,Response& response) {
+            if(!request.params.empty())throw std::invalid_argument("Session rename does not accept query parameters");
+            const auto value=body(request,{"title","expected_title"});
+            if(!value.contains("expected_title")||!value["expected_title"].is_string())throw std::invalid_argument("Expected title is required");
+            reply(response,encode(persistence.rename_session(identifier(request.matches[1]),string_field(value,"title"),value["expected_title"].get<std::string>()).get()));
         }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/history)",guarded([this](const Request& request,Response& response) {
             reply(response,encode_all(persistence.history(identifier(request.matches[1])).get()));

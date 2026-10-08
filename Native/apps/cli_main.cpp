@@ -135,7 +135,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(prompt=="/exit")return last_result;
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
-            std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/history displays the saved conversation; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+            std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
         }
         if(prompt=="/sessions"){
             const auto saved=request("/v1/sessions");if(!saved.is_array())throw std::runtime_error("Invalid backend session catalogue");
@@ -143,6 +143,19 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         }
         if(prompt=="/new"){
             session.clear();std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",Json::array()}}.dump()<<'\n'<<std::flush;continue;
+        }
+        if(prompt.starts_with("/title ")){
+            if(session.empty()){std::cerr<<"Select a saved conversation before renaming it.\n";continue;}
+            const auto saved=request("/v1/sessions");if(!saved.is_array())throw std::runtime_error("Invalid backend session catalogue");
+            const auto selected=std::find_if(saved.begin(),saved.end(),[&](const Json& item){return item.is_object()&&item.value("id",std::string{})==session;});
+            if(selected==saved.end()||!selected->contains("title")||!(*selected)["title"].is_string())throw std::runtime_error("Selected conversation is unavailable");
+            const Json body={{"title",prompt.substr(7)},{"expected_title",(*selected)["title"]}};
+            const auto renamed=client.Post("/v1/sessions/"+session+"/title",headers,body.dump(),"application/json");
+            if(!renamed)throw std::runtime_error("Cannot reach xMind Server during rename");
+            if(renamed->status==409){std::cerr<<"Conversation title changed. Use /sessions and retry.\n";continue;}
+            if(renamed->status==400){std::cerr<<"Use a nonempty, single-line conversation title within 4096 bytes.\n";continue;}
+            if(renamed->status!=200)throw std::runtime_error("Server rejected conversation rename");
+            std::cout<<Json{{"type","session_renamed"},{"session",Json::parse(renamed->body)}}.dump()<<'\n'<<std::flush;continue;
         }
         if(prompt.starts_with("/session ")){
             const auto selected=prompt.substr(9);
@@ -212,7 +225,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
 
 int main(int argc,char** argv) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, history, runs, run, cancel, status, events, watch, models, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -226,6 +239,7 @@ int main(int argc,char** argv) {
         else if(command=="chat" && argc>=3 && argc<=5){chat=true;if(argc>=4)path=id(argv[3]);if(argc==5)chat_model=argv[4];}
         else if(command=="sessions" && argc==3) path="/v1/sessions";
         else if(command=="create-session" && argc==4) {path="/v1/sessions";body={{"title",argv[3]}};post=true;}
+        else if(command=="rename-session" && argc==6) {path="/v1/sessions/"+id(argv[3])+"/title";body={{"title",argv[4]},{"expected_title",argv[5]}};post=true;}
         else if(command=="history" && argc==4) path="/v1/sessions/"+id(argv[3])+"/history";
         else if(command=="runs" && argc==4) path="/v1/sessions/"+id(argv[3])+"/runs";
         else if(command=="status" && argc==4) path="/v1/runs/"+id(argv[3]);

@@ -81,6 +81,9 @@ std::future<Session> PersistenceService::create_session(std::string id,std::stri
 std::future<Session> PersistenceService::session(std::string id) {
     return impl_->submit([id=std::move(id)](Repository& repository){return repository.session(id);});
 }
+std::future<Session> PersistenceService::rename_session(std::string id,std::string title,std::string expected_title) {
+    return impl_->submit([id=std::move(id),title=std::move(title),expected_title=std::move(expected_title)](Repository& repository){return repository.rename_session(id,title,expected_title);});
+}
 std::future<std::vector<Session>> PersistenceService::sessions() {
     return impl_->submit([](Repository& repository){return repository.sessions();});
 }

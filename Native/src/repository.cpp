@@ -243,6 +243,15 @@ Session Repository::create_session(const std::string& id,const std::string& titl
     changed_one(impl_->database.execute("INSERT INTO sessions(id,title) VALUES(?,?)",{id,title}));
     transaction.commit(); return {id,title};
 }
+Session Repository::rename_session(const std::string& id,const std::string& title,const std::string& expected_title) {
+    identifier(id);
+    if(title.empty()||title.size()>4096||title.find_first_not_of(" \t\r\n")==std::string::npos||expected_title.size()>4096||expected_title.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid session title");
+    for(unsigned char byte:title)if(byte<32)throw std::invalid_argument("Use a single-line session title");
+    Transaction transaction(impl_->database);const auto previous=session(id);
+    if(previous.title!=expected_title)throw Conflict("Session title changed; refresh before renaming");
+    changed_one(impl_->database.execute("UPDATE sessions SET title=? WHERE id=? AND title=?",{title,id,expected_title}));
+    transaction.commit();return {id,title};
+}
 Session Repository::session(const std::string& id) {
     const auto result=impl_->database.execute("SELECT id,title FROM sessions WHERE id=?",{id});
     if(result.rows.empty()) throw NotFound("Session not found");

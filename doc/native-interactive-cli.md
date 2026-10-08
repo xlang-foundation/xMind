@@ -139,3 +139,19 @@ prompt remains unchanged. Whitespace-only console input creates no conversation
 or run. Existing saved titles are preserved. This source change awaits native
 compilation; the installed browser preview still runs the earlier verified CLI
 and retains its original conversation titles.
+
+Native conversation renaming is now implemented in source through the C++
+repository/persistence service and `POST /v1/sessions/ID/title`. Clients supply
+`title` and `expected_title`; a mismatched current title returns conflict before
+mutation. SQLite I/O uses embedded xlang3 and changes only the selected session's
+title. The CLI exposes `/title NAME` for the selected conversation and
+`rename-session ID TITLE EXPECTED_TITLE` for one-shot use. Invalid titles and
+conflicts leave the selection intact. The shared backend client has the same
+typed request, and local browser/native view allowlists include the route.
+The sidebar does not yet expose a rename control.
+
+The native provider CLI contract now requires rename, stale-title and empty-title
+rejection, identical saved messages/runs and persisted rename after backend
+reopen without inference. JavaScript syntax checks, 70 extension tests and 12
+browser tests passed locally. Native execution of the rename addition is
+pending; the local build guard again deferred for active sibling benchmarks.

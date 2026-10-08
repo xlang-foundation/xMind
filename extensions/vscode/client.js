@@ -52,6 +52,7 @@ class BackendClient {
   configureProvider(model,api_key,expected_revision) { return this.request('/v1/provider/configuration',{model,api_key,expected_revision}); }
   sessions() { return this.request('/v1/sessions'); }
   createSession(title) { return this.request('/v1/sessions', { title }); }
+  renameSession(id,title,expectedTitle) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/title`,{title,expected_title:expectedTitle}); }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
   run(session_id, prompt, model_id) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}) }); }
