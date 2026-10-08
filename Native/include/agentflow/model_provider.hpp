@@ -39,6 +39,8 @@ struct ChatProviderConfig {
 // Pure native request serialization; no model/provider availability is inferred.
 std::string serialize_chat_request(const ChatProviderConfig& config,const ModelRequest& request);
 std::string serialize_responses_request(const ChatProviderConfig& config,const ModelRequest& request);
+// Claude Messages request component; transport/routing enrollment is separate.
+std::string serialize_anthropic_request(const ChatProviderConfig& config,const ModelRequest& request);
 // Transport-backed provider adapter. Credentials remain caller/backend owned.
 // Available on Windows until other native transport implementations are added.
 ModelCompletion complete_chat(const ChatProviderConfig& config,const ModelRequest& request,

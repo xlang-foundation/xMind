@@ -31,3 +31,24 @@ regenerates the inventory without importing or executing LiteLLM. Native provide
 implementation and per-model acceptance remain required for the requested broad
 coverage; xlang3 owns embedded scripts and database I/O, while C++ owns provider
 networking, wire adapters and model orchestration.
+
+The native model library now has source for a separate Claude Messages request
+component, `serialize_anthropic_request`. It reuses our common native validation
+and writes Claude text/system, tool-use and tool-result blocks with original
+content and call ownership. Consecutive same-role blocks retain their order;
+tool schemas and arguments reject duplicate keys and excessive nesting. An
+explicit supported output limit is required. Unsupported reasoning controls,
+developer-role authority mapping, refusal metadata, late system instructions and
+foreign provider continuation data are rejected rather than silently discarded.
+
+Its new C++ contract has exact wire-shape cases and rejection cases for pending
+or foreign call results, ambiguous JSON and incompatible history. Local
+compilation was deferred by newly active sibling benchmark process 8576, so
+these additions remain uncompiled/unexecuted source. Existing product routing
+still has only Chat Completions and Responses; Claude stream decoding, version
+headers, native backend enrollment/capability policy and actual provider
+acceptance are still required. The LiteLLM inventory therefore does not count
+this request component as an implemented Claude provider.
+
+The request structure follows the official [Claude Messages reference](https://platform.claude.com/docs/en/api/messages/create),
+checked on 2026-10-07. This component implements no SDK or LiteLLM execution.
