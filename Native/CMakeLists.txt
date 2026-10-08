@@ -97,7 +97,7 @@ if(WIN32)
   add_library(agentflow_graph_execution STATIC src/graph_runner.cpp src/graph_service.cpp)
   target_include_directories(agentflow_graph_execution PUBLIC include PRIVATE third_party)
   target_link_libraries(agentflow_graph_execution PUBLIC agentflow_graph agentflow_agent PRIVATE agentflow_workspace agentflow_edits agentflow_process_effects)
-  add_library(agentflow_runtime STATIC src/provider_setup.cpp src/provider_profiles.cpp src/execution_platform.cpp)
+  add_library(agentflow_runtime STATIC src/provider_setup.cpp src/provider_profiles.cpp src/provider_profile_runtime.cpp src/execution_platform.cpp)
   target_include_directories(agentflow_runtime PUBLIC include PRIVATE third_party)
   target_link_libraries(agentflow_runtime PUBLIC agentflow_agent agentflow_graph_execution PRIVATE agentflow_provider_transport bcrypt)
   target_include_directories(agentflow_agent PUBLIC include PRIVATE third_party)
@@ -514,6 +514,15 @@ if(BUILD_TESTING)
     add_test(NAME native_provider_profiles_contract COMMAND agentflow_provider_profiles_contract
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_provider_profiles_contract PROPERTIES TIMEOUT 60)
+    add_executable(agentflow_provider_profile_runtime_contract tests/provider_profile_runtime_contract.cpp)
+    target_include_directories(agentflow_provider_profile_runtime_contract PRIVATE third_party)
+    target_link_libraries(agentflow_provider_profile_runtime_contract PRIVATE agentflow_runtime)
+    add_custom_command(TARGET agentflow_provider_profile_runtime_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_provider_profile_runtime_contract>")
+    add_test(NAME native_provider_profile_runtime_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/provider_profile_runtime_peer.mjs" "$<TARGET_FILE:agentflow_provider_profile_runtime_contract>"
+      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+    set_tests_properties(native_provider_profile_runtime_contract PROPERTIES TIMEOUT 45)
     target_link_libraries(agentflow_credential_repository_contract PRIVATE agentflow_core)
     add_custom_command(TARGET agentflow_credential_repository_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_credential_repository_contract>")
