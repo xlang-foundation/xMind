@@ -49,10 +49,28 @@ component: [component log](evidence/native-anthropic-request-local.log),
 [source/runtime provenance](evidence/native-anthropic-request-local-provenance.json).
 This is local component validation; exact hosted validation remains pending.
 Existing product routing
-still has only Chat Completions and Responses; Claude stream decoding, version
+still has only Chat Completions and Responses; Claude transport routing, version
 headers, native backend enrollment/capability policy and actual provider
 acceptance are still required. The LiteLLM inventory therefore does not count
 this request component as an implemented Claude provider.
 
 The request structure follows the official [Claude Messages reference](https://platform.claude.com/docs/en/api/messages/create),
 checked on 2026-10-07. This component implements no SDK or LiteLLM execution.
+
+The separate native `AnthropicStream` decoder now reconstructs Claude text and
+tool-use blocks from incremental SSE bytes, preserving call identities and actual
+reported input/output/cache token counters. It validates block ownership,
+duplicate JSON keys, cumulative usage and terminal lifecycle. Truncated messages
+never publish `model.done`; length-limited tool blocks never become executable
+calls. Provider error payloads are not exposed in protocol diagnostics. Thinking,
+redacted thinking, server tools and other unsupported content/stop variants fail
+explicitly; this is not complete Claude feature parity.
+
+All 54 native contracts passed locally in 102.90 seconds. The new decoder contract
+uses synthetic text/tool events, fragmented Unicode, every truncated prefix,
+multiple calls, usage-only updates and invalid lifecycle/JSON cases. Evidence:
+[decoder log](evidence/native-anthropic-stream-local.log) and
+[source/runtime provenance](evidence/native-anthropic-stream-local-provenance.json).
+The decoder is not yet connected to product provider routing or the installed
+preview. Native version headers, enrollment/capability policy and live Claude
+acceptance remain required before claiming an available Claude provider.

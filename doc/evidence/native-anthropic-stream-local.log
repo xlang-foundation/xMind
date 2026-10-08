@@ -1,0 +1,17 @@
+6/54 Testing: native_anthropic_stream_contract
+6/54 Test: native_anthropic_stream_contract
+Command: "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_anthropic_stream_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_anthropic_stream_contract" start time: Oct 07 19:06 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Claude SSE component passed chunked Unicode text, cumulative actual usage, parallel tool JSON/identity, truncated-call exclusion and incomplete/malformed/unsupported lifecycle rejection without completion acknowledgement. Wire fixtures are synthetic; no network, enrollment or live inference occurred.
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"native_anthropic_stream_contract" end time: Oct 07 19:06 Pacific Daylight Time
+"native_anthropic_stream_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+

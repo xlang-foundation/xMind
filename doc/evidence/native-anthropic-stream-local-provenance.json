@@ -1,0 +1,14 @@
+{
+  "base": "06718d8e4a809e7abe4ab02df3cd3517bd0a143e",
+  "sourceState": "Working-tree decoder addition on recorded base",
+  "nativePassed": 54,
+  "nativeFailed": 0,
+  "exitCode": 0,
+  "testTimeSeconds": 102.9,
+  "sourceSha256": "7336e01e6af02704a77b17cc03d98b903df593d1b9ad7f8a7c72f87f630f6641",
+  "contractSourceSha256": "cf1790ef9549a72b12fd303f1d55895436df002f7f178b78f6ad4702f392badc",
+  "contractBinarySha256": "5da5616bd7a5bcda217b249eec09b1c059b5c4c4254da0890a987ee04fa0fee0",
+  "runtimeSha256": "fb02403bff1bf9967d5e49cb4f2a5a4f6d13ad139cc02b069e20fc03cc6c4862",
+  "fullPrivateLastTestSha256": "4d58eabf23dd01d8aabc8c97c17224b8d28e898b7be6ddd2aaa2c5cfe702038f",
+  "scope": "Local C++ Claude text/tool stream component and 54 native contracts. Synthetic stream fixtures only; no Claude enrollment, network request or live inference. Installed preview unchanged."
+}

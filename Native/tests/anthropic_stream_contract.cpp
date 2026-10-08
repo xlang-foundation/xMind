@@ -1,0 +1,31 @@
+// Synthetic wire data validates a real native decoder; no model or network.
+#include "agentflow/anthropic_stream.hpp"
+#include "nlohmann/json.hpp"
+#include <iostream>
+using namespace agentflow;using Json=nlohmann::json;
+namespace {
+void require(bool value,const char* reason){if(!value)throw std::runtime_error(reason);}
+std::string event(const Json& value){return "event: "+value.at("type").get<std::string>()+"\ndata: "+value.dump()+"\n\n";}
+Json start(){return {{"type","message_start"},{"message",{{"id","msg_fixture"},{"type","message"},{"role","assistant"},{"model","fixture-model"},{"content",Json::array()},{"stop_reason",nullptr},{"stop_sequence",nullptr},{"usage",{{"input_tokens",12},{"output_tokens",0},{"cache_read_input_tokens",7}}}}}};}
+Json update(const std::string& reason="end_turn",int tokens=8){return {{"type","message_delta"},{"delta",{{"stop_reason",reason},{"stop_sequence",nullptr}}},{"usage",{{"output_tokens",tokens}}}};}
+std::string stop(){return event({{"type","message_stop"}});}
+std::string text(){return event({{"type","content_block_start"},{"index",0},{"content_block",{{"type","text"},{"text",""}}}})+event({{"type","content_block_delta"},{"index",0},{"delta",{{"type","text_delta"},{"text","Exact text 🌍"}}}})+event({{"type","content_block_stop"},{"index",0}});}
+std::string tool(int index,const std::string& id){return event({{"type","content_block_start"},{"index",index},{"content_block",{{"type","tool_use"},{"id",id},{"name","read_file"},{"input",Json::object()}}}})+event({{"type","content_block_delta"},{"index",index},{"delta",{{"type","input_json_delta"},{"partial_json","{\"path\":"}}}})+event({{"type","content_block_delta"},{"index",index},{"delta",{{"type","input_json_delta"},{"partial_json","\"README.md\"}"}}}})+event({{"type","content_block_stop"},{"index",index}});}
+void rejects(const std::string& wire){bool failed=false;std::size_t acknowledgements=0;AnthropicStream decoder([&](const ModelEvent& value){if(value.kind=="model.done")++acknowledgements;});try{decoder.feed(wire);decoder.finish();}catch(const ModelProtocolError&){failed=true;}require(failed&&acknowledgements==0,"Invalid Claude stream cannot acknowledge completion");}
+}
+int main(){try{
+    const auto wire=event(start())+event({{"type","ping"}})+text()+event(update())+stop();
+    for(const std::size_t width:{1,2,7,37,4096}){
+        std::vector<ModelEvent> events;AnthropicStream decoder([&](const ModelEvent& value){events.push_back(value);});for(std::size_t offset=0;offset<wire.size();offset+=width)decoder.feed(std::string_view(wire).substr(offset,width));require(std::none_of(events.begin(),events.end(),[](const auto& value){return value.kind=="model.done";}),"Terminal acknowledgement waits for validated EOF");const auto result=decoder.finish();require(result.content=="Exact text 🌍"&&result.finish_reason=="stop"&&result.tool_calls.empty(),"Chunking must preserve observed content and terminal state");require(Json::parse(result.usage_json)==Json{{"input_tokens",12},{"output_tokens",8},{"cache_read_input_tokens",7}},"Reported token counters remain exact without invented totals");decoder.finish();require(std::count_if(events.begin(),events.end(),[](const auto& value){return value.kind=="model.done";})==1,"Repeated finish cannot duplicate completion acknowledgement");
+    }
+    const auto calls=event(start())+tool(0,"call-left")+tool(1,"call-right")+event(update("tool_use"))+stop();AnthropicStream decoder([](const auto&){});decoder.feed(calls);const auto result=decoder.finish();require(result.tool_calls.size()==2&&result.tool_calls[0].id=="call-left"&&result.tool_calls[1].id=="call-right"&&result.tool_calls[0].name=="read_file"&&Json::parse(result.tool_calls[0].arguments_json)==Json{{"path","README.md"}},"Parallel tool deltas retain real call IDs and parsed object arguments");
+    AnthropicStream truncated([](const auto&){});truncated.feed(event(start())+tool(0,"fragment")+event(update("max_tokens"))+stop());require(truncated.finish().finish_reason=="length"&&truncated.finish().tool_calls.empty(),"Truncated turns cannot expose executable tool calls");
+    auto incremental=update();incremental["delta"]["stop_reason"]=nullptr;incremental["usage"]["output_tokens"]=3;AnthropicStream cumulative([](const auto&){});cumulative.feed(event(start())+event(incremental)+text()+event(update())+stop());require(Json::parse(cumulative.finish().usage_json)["output_tokens"]==8,"Usage-only updates retain the eventual terminal count");
+    for(std::size_t length=0;length<wire.size();++length)rejects(wire.substr(0,length));
+    rejects(event(start())+text()+stop());rejects(event(start())+event(start()));rejects(event(start())+tool(0,"same")+tool(1,"same")+event(update("tool_use"))+stop());rejects(event(start())+tool(1,"wrong-index"));
+    rejects(event(start())+event({{"type","content_block_stop"},{"index",0}}));rejects(event(start())+event({{"type","content_block_start"},{"index",0},{"content_block",{{"type","thinking"},{"thinking","private"}}}}));
+    rejects(event(start())+text()+event(update("unsupported"))+stop());rejects(wire+event({{"type","ping"}}));rejects("event: ping\ndata: {\"type\":\"message_stop\"}\n\n");rejects("event: ping\ndata: {\"type\":\"ping\",\"type\":\"ping\"}\n\n");
+    rejects(event(start())+event({{"type","error"},{"error",{{"message","private-provider-error"}}}}));auto decreasing=update();decreasing["usage"]["input_tokens"]=1;rejects(event(start())+text()+event(decreasing)+stop());
+    const auto bad=event(start())+event({{"type","content_block_start"},{"index",0},{"content_block",{{"type","tool_use"},{"id","bad-json"},{"name","read_file"},{"input",Json::object()}}}})+event({{"type","content_block_delta"},{"index",0},{"delta",{{"type","input_json_delta"},{"partial_json","{\"path\":1,\"path\":2}"}}}})+event({{"type","content_block_stop"},{"index",0}});rejects(bad);
+    std::cout<<"Native Claude SSE component passed chunked Unicode text, cumulative actual usage, parallel tool JSON/identity, truncated-call exclusion and incomplete/malformed/unsupported lifecycle rejection without completion acknowledgement. Wire fixtures are synthetic; no network, enrollment or live inference occurred.\n";return 0;
+}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
