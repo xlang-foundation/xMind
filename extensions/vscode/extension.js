@@ -372,6 +372,9 @@ async function activate(context) {
           const graph=selectedGraph?graphCatalogue.find(g=>g.id===selectedGraph&&g.executable):undefined;
           if(selectedGraph&&!graph)throw new Error('Graph is not executable on this backend.');
           if (!graph&&!health.agent_execution) throw new Error('Configure a model on xMind Server before submitting an agent run.');
+          const admissionVersion=generation;
+          const binding=(graph?health.graph_provider_profile_admission:health.provider_profile_admission)===true?await profileController.admission():undefined;
+          if(panel!==view||admissionVersion!==generation||configuredOrigin()!==client.baseUrl)return;
           if (!sessionId) {
             const session = await client.createSession(message.prompt.slice(0, 80));
             if (panel !== view) return;
@@ -380,7 +383,7 @@ async function activate(context) {
           }
           if (panel !== view) return;
           if(busySession()) throw new Error('This conversation still has an active run. Stop or finish it before submitting another prompt.');
-          const run = graph?await client.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel):await client.run(sessionId,message.prompt,selectedModel);
+          const run = graph?await client.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel,binding):await client.run(sessionId,message.prompt,selectedModel,binding);
           if (panel !== view) return; // Accepted backend execution survives view closure.
           stop();clearGraph();runId = run.id; cursor = 0;
           sessionRuns=[...sessionRuns,run];presentRuns();

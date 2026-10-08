@@ -53,6 +53,9 @@ struct ProviderProfileRuntime::Impl {
         if(!service->healthy())throw RunUnavailable("Reconcile execution faults before changing provider profiles");
         if(!service->idle())throw Conflict("Wait for active runs before changing provider profiles");
     }
+    void admission(const ProviderProfileAdmission& expected)const{
+        if(expected.revision<0||expected.revision>9007199254740991||expected.revision!=state.revision||expected.id!=state.active)throw Conflict("Provider profile changed before run admission");
+    }
     ProviderProfileRuntimeMetadata metadata()const{
         ProviderProfileRuntimeMetadata result{state.revision,state.active,{}};
         for(const auto& value:state.profiles)result.profiles.push_back({value.id,value.route_id,route(value.route_id).route.provider,value.model,value.revision});
@@ -153,6 +156,8 @@ bool ProviderProfileRuntime::import_legacy_configuration(std::string id){
 }
 Run ProviderProfileRuntime::submit(std::string id,std::string session,std::string prompt){return submit_model(std::move(id),std::move(session),std::move(prompt),{});}
 Run ProviderProfileRuntime::submit_model(std::string id,std::string session,std::string prompt,std::string model){std::lock_guard lock(impl_->mutex);return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));}
+Run ProviderProfileRuntime::submit_profile(std::string id,std::string session,std::string prompt,std::string model,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));}
+Run ProviderProfileRuntime::submit_graph_profile(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
 Run ProviderProfileRuntime::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){std::lock_guard lock(impl_->mutex);return impl_->service->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
 std::vector<std::string> ProviderProfileRuntime::models()const{std::lock_guard lock(impl_->mutex);return impl_->service->models();}
 void ProviderProfileRuntime::cancel(const std::string& id){std::lock_guard lock(impl_->mutex);impl_->service->cancel(id);}

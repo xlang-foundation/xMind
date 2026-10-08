@@ -18,6 +18,7 @@
 #include <thread>
 #include <chrono>
 #include <regex>
+#include <optional>
 #if defined(_WIN32)
 #include "agentflow/view_sessions.hpp"
 #endif
@@ -62,6 +63,15 @@ std::string string_field(const Json& value,const char* key,std::size_t max=4096)
     auto result=value[key].get<std::string>();
     if(result.empty() || result.size()>max || result.find('\0')!=std::string::npos) throw std::invalid_argument("String field exceeds limits");
     return result;
+}
+std::optional<ProviderProfileAdmission> profile_admission(const Json& value){
+    const bool named=value.contains("provider_profile_id"),versioned=value.contains("expected_provider_revision");
+    if(named!=versioned)throw std::invalid_argument("Provider profile and revision must be supplied together");
+    if(!named)return {};
+    if(!value["provider_profile_id"].is_string()||!value["expected_provider_revision"].is_number_integer()||value["expected_provider_revision"]<0||value["expected_provider_revision"]>9007199254740991)throw std::invalid_argument("Invalid provider profile admission binding");
+    const auto id=value["provider_profile_id"].get<std::string>();
+    if(id.size()>256||id.starts_with("sk-")||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)throw std::invalid_argument("Invalid provider profile admission identity");
+    return ProviderProfileAdmission{id,value["expected_provider_revision"].get<std::int64_t>()};
 }
 std::string identifier(const std::string& value) {
     if(value.empty() || value.size()>128) throw std::invalid_argument("Invalid ID");
@@ -282,9 +292,9 @@ struct HttpServer::Impl {
                 {"securitySchemes",{{"ownerToken",{{"type","http"},{"scheme","bearer"}}}}},{"security",Json::array({{{"ownerToken",Json::array()}}})},
                 {"defaultInputModes",Json::array({"text/plain"})},{"defaultOutputModes",Json::array({"text/plain"})},{"skills",std::move(skills)},{"supportsAuthenticatedExtendedCard",false}});
         }));
-        server.Get("/v1/health",guarded([this](const Request&,Response& response) {
+        server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()}});
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()}});
         }));
         if(setup){
             server.Post("/v1/provider/models",guarded([setup](const Request& request,Response& response){
@@ -348,10 +358,12 @@ struct HttpServer::Impl {
             }));
             server.Post("/v1/graph-runs",guarded([graphs](const Request& request,Response& response){
                 if(!request.params.empty())throw std::invalid_argument("Graph admission does not accept query parameters");
-                const auto value=body(request,{"id","session_id","graph_id","graph_revision","prompt","model_id"});
+                const auto value=body(request,{"id","session_id","graph_id","graph_revision","prompt","model_id","provider_profile_id","expected_provider_revision"});
                 const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
                 const auto model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};
-                reply(response,encode(graphs->submit_graph(id,identifier(string_field(value,"session_id",128)),string_field(value,"graph_id",64),graph_revision(value,"graph_revision"),string_field(value,"prompt",1024*1024),model)),202);
+                const auto binding=profile_admission(value);
+                const auto session=identifier(string_field(value,"session_id",128)),graph=string_field(value,"graph_id",64),prompt=string_field(value,"prompt",1024*1024);const auto revision=graph_revision(value,"graph_revision");
+                reply(response,encode(binding?graphs->submit_graph_profile(id,session,graph,revision,prompt,model,*binding):graphs->submit_graph(id,session,graph,revision,prompt,model)),202);
             }));
             server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response){
                 if(!request.params.empty())throw std::invalid_argument("Graph detail does not accept query parameters");
@@ -452,10 +464,11 @@ struct HttpServer::Impl {
         }));
         if(executor) {
             server.Post("/v1/runs",guarded([this](const Request& request,Response& response) {
-                const auto value=body(request,{"id","session_id","prompt","model_id"});
+                const auto value=body(request,{"id","session_id","prompt","model_id","provider_profile_id","expected_provider_revision"});
                 const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
                 const auto model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};
-                reply(response,encode(executor->submit_model(id,identifier(string_field(value,"session_id",128)),string_field(value,"prompt",1024*1024),model)),202);
+                const auto binding=profile_admission(value);const auto session=identifier(string_field(value,"session_id",128)),prompt=string_field(value,"prompt",1024*1024);
+                reply(response,encode(binding?executor->submit_profile(id,session,prompt,model,*binding):executor->submit_model(id,session,prompt,model)),202);
             }));
             server.Post(R"(/v1/runs/([A-Za-z0-9_-]+)/cancel)",guarded([this](const Request& request,Response& response) {
                 body(request,{});const auto id=identifier(request.matches[1]);executor->cancel(id);

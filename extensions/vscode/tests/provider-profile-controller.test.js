@@ -4,6 +4,10 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const {ProviderProfileController}=require('../client');
 const registry=()=>({revision:4,active:'openai',profiles:[{id:'openai',route_id:'openai.responses',provider:'openai',model:'fixture-openai',revision:4}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'openai.chat',provider:'openai',wire:'chat-completions',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]});
+test('admission uses the profile snapshot already shown in this view and does not refresh past an external change',async()=>{
+ let reads=0;const controller=new ProviderProfileController({providerProfiles:async()=>{reads++;return registry();}},()=>{});
+ try{await controller.refresh();const binding=await controller.admission();assert.deepEqual(binding,{provider_profile_id:'openai',expected_provider_revision:4});assert.equal(reads,1);controller.invalidate();assert.deepEqual(await controller.admission(),binding);assert.equal(reads,1);}finally{controller.dispose();}
+});
 test('profile setup discovers privately, rejects forged models and enrolls only on footer selection',async()=>{
  const posted=[],calls=[],state=registry(),key='synthetic-profile-controller-key';
  const controller=new ProviderProfileController({providerProfiles:async()=>state,discoverProfileModels:async(...args)=>{calls.push(['discover',...args]);return {models:[{id:'fixture-claude'}]};},saveProviderProfile:async(...args)=>{calls.push(['save',...args]);return {...state,revision:5,active:args[0],profiles:[...state.profiles,{id:args[0],route_id:args[1],provider:'anthropic',model:args[2],revision:1}]};}},value=>posted.push(value));

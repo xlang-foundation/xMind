@@ -41,7 +41,7 @@ class BackendClient {
   health() { return this.request('/v1/health'); }
   models() { return this.request('/v1/models'); }
   graphs() { return this.request('/v1/graphs'); }
-  graphRun(session_id,graph_id,graph_revision,prompt,model_id) { return this.request('/v1/graph-runs',{session_id,graph_id,graph_revision,prompt,...(model_id?{model_id}:{})}); }
+  graphRun(session_id,graph_id,graph_revision,prompt,model_id,binding) { return this.request('/v1/graph-runs',{session_id,graph_id,graph_revision,prompt,...(model_id?{model_id}:{}),...profileBindingFields(binding)}); }
   graph(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}`); }
   graphChildren(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/children`); }
   graphEvents(id,after) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/events?after=${after}`); }
@@ -73,7 +73,7 @@ class BackendClient {
   renameSession(id,title,expectedTitle) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/title`,{title,expected_title:expectedTitle}); }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
-  run(session_id, prompt, model_id) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}) }); }
+  run(session_id, prompt, model_id,binding) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}),...profileBindingFields(binding) }); }
   events(id, after) { return this.request(`/v1/runs/${encodeURIComponent(id)}/events?after=${after}`); }
   status(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}`); }
   cancel(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/cancel`, {}); }
@@ -90,6 +90,7 @@ function exactFields(value,fields){if(!value||typeof value!=='object'||Array.isA
 function profileIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.:/-]{1,256}$/.test(value)||value.startsWith('sk-'))throw new Error('Invalid provider profile identity');return value;}
 function profileRevision(value){if(!Number.isSafeInteger(value)||value<0)throw new Error('Invalid provider profile revision');}
 function profileKey(value){if(value!==undefined&&(typeof value!=='string'||!/^[\x21-\x7e]{1,32768}$/.test(value)))throw new Error('Enter a provider API key without spaces');}
+function profileBindingFields(binding){if(binding===undefined)return {};exactFields(binding,['provider_profile_id','expected_provider_revision']);if(binding.provider_profile_id!=='')profileIdentity(binding.provider_profile_id);profileRevision(binding.expected_provider_revision);return {...binding};}
 function validateProviderProfiles(value,withRoutes=true){
   exactFields(value,withRoutes?['revision','active','profiles','routes']:['revision','active','profiles']);profileRevision(value.revision);
   if(typeof value.active!=='string'||!Array.isArray(value.profiles)||value.profiles.length>32)throw new Error('Invalid provider profile metadata');
@@ -125,6 +126,7 @@ class ProviderProfileController {
   }
   wire(id){const profile=this.state?.profiles.find(value=>value.id===id);return this.state?.routes.find(value=>value.id===profile?.route_id)?.wire;}
   models(selected){if(this.draft)this.post({type:'model-list',models:this.draft.ids.map(id=>({id})),model:selected});}
+  async admission(){if(!this.state&&!await this.refresh())throw new Error('Provider profile admission requires profile metadata');if(this.disposed||!this.state||!this.guard())throw new Error('Backend changed before run admission');return {provider_profile_id:this.state.active,expected_provider_revision:this.state.revision};}
   async discover(key,id,route_id){
     if(!this.state&&!await this.refresh())return false;
     if(this.disposed||!this.state)return true;

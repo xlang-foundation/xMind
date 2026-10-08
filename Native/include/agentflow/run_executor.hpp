@@ -4,12 +4,15 @@
 namespace agentflow {
 struct RunBusy : std::runtime_error {using std::runtime_error::runtime_error;};
 struct RunUnavailable : std::runtime_error {using std::runtime_error::runtime_error;};
+struct ProviderProfileAdmission {std::string id;std::int64_t revision=0;};
 // Transport-neutral backend execution boundary; HTTP/CLI do not own run state.
 class RunExecutor {
 public:
     virtual ~RunExecutor()=default;
     virtual Run submit(std::string id,std::string session_id,std::string prompt)=0;
     virtual std::vector<std::string> models() const {return {};}
+    virtual bool supports_profile_admission()const{return false;}
+    virtual Run submit_profile(std::string,std::string,std::string,std::string,ProviderProfileAdmission){throw RunUnavailable("Provider profile admission is unavailable");}
     virtual Run submit_model(std::string id,std::string session_id,std::string prompt,std::string model_id) {
         if(!model_id.empty()) throw std::invalid_argument("Model selection is unavailable");
         return submit(std::move(id),std::move(session_id),std::move(prompt));

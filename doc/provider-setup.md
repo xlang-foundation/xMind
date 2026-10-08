@@ -1,5 +1,31 @@
 # Provider setup in the sidebar
 
+## Profile binding at task admission
+
+New source adds optional `provider_profile_id` and
+`expected_provider_revision` fields to agent and graph admission. Both must be
+present together. The native profile runtime checks them under the same lock
+used to change profiles and admit work; a stale binding returns HTTP 409 before
+creating a run or appending its prompt. An empty active profile remains valid
+for model-free graphs. Health advertises agent and graph support separately;
+implementations without support refuse explicitly bound requests.
+
+Browser and VS Code tasks carry the profile snapshot already shown in their
+view. Interactive CLI captures its snapshot when chat starts; one-shot CLI
+reads metadata before submission. Updated clients send bindings only when
+the native backend advertises support. Older unbound clients retain their
+existing behavior; this is not universal enforcement for every caller.
+
+Local client validation passed **82 extension and 16 browser tests**, without
+skips. New native contracts cover stale, malformed and current HTTP bindings,
+model-free graph admission, and a compiled CLI race through a loopback proxy
+which switches the actual native profile before forwarding the request. These
+native additions await compilation and full hosted verification. A sibling
+xlang3 performance run currently prevents local C++ builds. The installed
+preview remains on its previously verified native/view checkpoints. Durable
+profile attribution in run records, live Claude acceptance and actual VS Code
+profile UI acceptance remain outstanding.
+
 ## Shared profile Settings controls
 
 Settings now has a saved-profile selector, an Add profile choice, a provider API

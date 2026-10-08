@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/graph_runner.hpp"
+#include "agentflow/run_executor.hpp"
 
 namespace agentflow {
 struct GraphExecutionMetadata {
@@ -14,6 +15,8 @@ class GraphExecution {
 public:
     virtual ~GraphExecution()=default;
     virtual std::vector<GraphExecutionMetadata> graphs() const=0;
+    virtual bool supports_graph_profile_admission()const{return false;}
+    virtual Run submit_graph_profile(std::string,std::string,std::string,std::int64_t,std::string,std::string,ProviderProfileAdmission){throw RunUnavailable("Graph provider profile admission is unavailable");}
     virtual Run submit_graph(std::string id,std::string session,std::string graph,
         std::int64_t revision,std::string prompt,std::string model={})=0;
     virtual GraphRootRecord human_input(const std::string& root,const std::string& node,

@@ -9,6 +9,11 @@ test('provider enrollment accepts only matching approved OpenAI wire and endpoin
   for(const changed of [{wire:'responses'},{endpoint:'https://api.openai.com/v1/responses'},{wire:'unknown'},{endpoint:'https://unapproved.invalid/v1/responses',wire:'responses'},{revision:-1}])assert.throws(()=>providerEnrollmentWire({...base,...changed}),/policy/);
 });
 const token = 'native-client-contract-token-32-bytes';
+test('agent and graph requests preserve the observed profile binding without silently acquiring a newer revision',async()=>{
+ const sent=[],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{sent.push(JSON.parse(options.body));return {ok:true,json:async()=>({})};});
+ const binding={provider_profile_id:'openai-account',expected_provider_revision:7};await client.run('session','Task','same-model',binding);await client.graphRun('session','review',2,'Review','same-model',binding);assert.equal(sent[0].provider_profile_id,'openai-account');assert.equal(sent[0].expected_provider_revision,7);assert.equal(sent[1].expected_provider_revision,7);assert.throws(()=>client.run('session','Task','same-model',{provider_profile_id:'openai-account'}));assert.equal(sent.length,2);
+ await client.graphRun('session','review',2,'Model-free',undefined,{provider_profile_id:'',expected_provider_revision:0});assert.equal(sent[2].provider_profile_id,'');
+});
 const profileState=()=>({revision:1,active:'openai',profiles:[{id:'openai',route_id:'openai.responses',provider:'openai',model:'fixture-model',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]});
 test('native provider profile client preserves route, key omission, activation and revision at its authenticated origin',async()=>{
  const requests=[];const client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{requests.push({url,options,body:options.body?JSON.parse(options.body):undefined});return {ok:true,json:async()=>url.endsWith('/models')?{models:[{id:'fixture-model'}]}:profileState()};});

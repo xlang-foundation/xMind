@@ -14,6 +14,13 @@
 #include <algorithm>
 
 namespace {
+ nlohmann::json provider_admission_binding(const nlohmann::json& metadata){
+    using Json=nlohmann::json;
+    if(!metadata.is_object()||!metadata.contains("revision")||!metadata["revision"].is_number_integer()||metadata["revision"]<0||metadata["revision"]>9007199254740991||!metadata.contains("active")||!metadata["active"].is_string()||!metadata.contains("profiles")||!metadata["profiles"].is_array())throw std::runtime_error("Invalid backend provider admission metadata");
+    const auto id=metadata["active"].get<std::string>();if(id.size()>256||id.starts_with("sk-")||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)throw std::runtime_error("Invalid backend provider profile identity");
+    bool exists=id.empty();for(const auto& profile:metadata["profiles"])if(profile.is_object()&&profile.value("id",std::string{})==id)exists=true;if(!exists)throw std::runtime_error("Active backend provider profile is missing");
+    return Json{{"provider_profile_id",id},{"expected_provider_revision",metadata["revision"]}};
+ }
 std::int64_t event_cursor(const std::string& source) {
     std::int64_t value=0;const auto parsed=std::from_chars(source.data(),source.data()+source.size(),value);
     if(parsed.ec!=std::errc{} || parsed.ptr!=source.data()+source.size() || value<0)throw std::invalid_argument("Invalid cursor");
@@ -144,6 +151,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         return Json::parse(response->body);
     };
     const auto health=request("/v1/health");if(!health.is_object() || !health.contains("agent_execution") || !health["agent_execution"].is_boolean())throw std::runtime_error("Invalid backend chat capabilities");
+    const auto provider_binding=(health.value("provider_profile_admission",false)||health.value("graph_provider_profile_admission",false))?provider_admission_binding(request("/v1/provider/profiles")):Json::object();
     if(!model.empty()){
         const auto catalogue=request("/v1/models");
         if(!catalogue.is_object() || !catalogue.contains("models") || !catalogue["models"].is_array())throw std::runtime_error("Invalid backend model catalogue");
@@ -288,6 +296,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         }
         Json body={{"session_id",session},{"prompt",prompt}};if(!model.empty())body["model_id"]=model;
         if(graphSubmission){body["graph_id"]=graphId;body["graph_revision"]=graphRevision;}
+        if(health.value(graphSubmission?"graph_provider_profile_admission":"provider_profile_admission",false))body.update(provider_binding);
         const auto admitted=client.Post(graphSubmission?"/v1/graph-runs":"/v1/runs",headers,body.dump(),"application/json");
         if(!admitted)throw std::runtime_error("Cannot reach xMind Server during run admission; admission outcome is unknown. Inspect /runs before resubmitting.");
         if(admitted->status==400||admitted->status==404||admitted->status==409||admitted->status==429||admitted->status==503){
@@ -398,6 +407,12 @@ int main(int argc,char** argv) {
             body={{"expected_revision",setup["revision"]}};
         }
         if(watch)return watch_run(client,headers,path,watch_cursor,graph_watch);
+        if(post&&(path=="/v1/runs"||path=="/v1/graph-runs")){
+            const auto current=client.Get("/v1/health",headers);if(!current||current->status!=200)throw std::runtime_error("Cannot inspect backend admission capabilities");
+            const auto capability=Json::parse(current->body);if(capability.value(path=="/v1/graph-runs"?"graph_provider_profile_admission":"provider_profile_admission",false)){
+                const auto metadata=client.Get("/v1/provider/profiles",headers);if(!metadata||metadata->status!=200)throw std::runtime_error("Cannot inspect backend provider profile");body.update(provider_admission_binding(Json::parse(metadata->body)));
+            }
+        }
         auto response=post?client.Post(path,headers,body.dump(),"application/json"):client.Get(path,headers);
         if(!response) throw std::runtime_error("Cannot reach xMind Server");
         const auto result=Json::parse(response->body);

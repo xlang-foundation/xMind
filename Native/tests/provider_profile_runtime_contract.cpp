@@ -71,7 +71,15 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         for(const auto* failed:{"runtime-malformed-catalogue-key","runtime-loop-catalogue-key","runtime-reflected-catalogue-key","runtime-prefixed-reflection-key","runtime-redirect-catalogue-key","runtime-page-limit-key","runtime-entry-limit-key"})rejects<TransportError>([&]{runtime.discover_models("claude","anthropic.messages",key(failed),2);});
         std::stop_source cancelled;cancelled.request_stop();rejects<TransportCancelled>([&]{runtime.discover_models("claude","anthropic.messages",key(""),2,cancelled.get_token());});
         require(runtime.configuration().revision==2&&runtime.configuration().active=="openai"&&store.credentials("server").get().size()==2,"Saved-key or failed discovery cannot change registry, selection or credentials");
-        store.create_session("openai-first","Profile OpenAI fixture").get();runtime.submit("openai-first-run","openai-first","OpenAI profile fixture");
+        store.create_session("openai-first","Profile OpenAI fixture").get();
+        const auto admission=Json{{"id","openai-first-run"},{"session_id","openai-first"},{"prompt","OpenAI profile fixture"},{"model_id","fixture-openai"},{"provider_profile_id","openai"},{"expected_provider_revision",2}};
+        auto outdated=admission;outdated["id"]="stale-profile-run";outdated["expected_provider_revision"]=1;
+        const auto denied=client.Post("/v1/runs",authorized,outdated.dump(),"application/json");require(denied&&denied->status==409,"Stale profile revision must be rejected before native admission");
+        outdated=admission;outdated["provider_profile_id"]="claude";const auto wrong_profile=client.Post("/v1/runs",authorized,outdated.dump(),"application/json");require(wrong_profile&&wrong_profile->status==409,"Matching model/revision cannot authorize another active profile");
+        outdated=admission;outdated.erase("expected_provider_revision");const auto missing_binding=client.Post("/v1/runs",authorized,outdated.dump(),"application/json");require(missing_binding&&missing_binding->status==400,"Profile identity and revision must be supplied as a complete pair");
+        outdated=admission;outdated["expected_provider_revision"]=2.5;const auto malformed_binding=client.Post("/v1/runs",authorized,outdated.dump(),"application/json");require(malformed_binding&&malformed_binding->status==400,"Profile admission must reject fractional revisions");
+        require(store.runs("openai-first").get().empty()&&store.history("openai-first").get().empty(),"Rejected profile admission cannot create a run or prompt history");
+        const auto admitted=client.Post("/v1/runs",authorized,admission.dump(),"application/json");require(admitted&&admitted->status==202,"Current bound profile must admit the real native model run");
         rejects<Conflict>([&]{runtime.select_profile("claude",2);});wait(store,"openai-first-run",RunState::completed);reply(store,"openai-first","Actual OpenAI fixture reply");
         require(select(runtime,"claude",2).revision==3&&runtime.models()[0]=="fixture-claude","Selection must publish independently credentialed Claude execution");
         store.create_session("claude-first","Profile Claude fixture").get();runtime.submit("claude-first-run","claude-first","Claude profile fixture");wait(store,"claude-first-run",RunState::completed);reply(store,"claude-first","Actual Claude fixture reply");
@@ -81,7 +89,10 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         while(!rejected){try{runtime.select_profile("openai",3);}catch(const Conflict&){require(std::chrono::steady_clock::now()<deadline,"Profile runtime did not become idle");std::this_thread::sleep_for(std::chrono::milliseconds(5));}catch(const DatabaseError&){rejected=true;}}
         require(runtime.configuration().revision==3&&runtime.models()[0]=="fixture-claude"&&store.information("native-provider-profiles","registry").get()==preserved,"Actual SQL failure must retain previous service, selection and profile keys");
         {XlangSqlite inject(database,imports);inject.execute("DROP TRIGGER reject_profile_runtime");}
-        store.create_session("graph-session","Profile graph fixture").get();runtime.submit_graph("graph-run","graph-session","review",1,"Review fixture");wait(store,"graph-run",RunState::paused);
+        store.create_session("graph-session","Profile graph fixture").get();
+        const auto graph_admission=Json{{"id","graph-run"},{"session_id","graph-session"},{"graph_id","review"},{"graph_revision",1},{"prompt","Review fixture"},{"provider_profile_id","claude"},{"expected_provider_revision",3}};
+        auto stale_graph=graph_admission;stale_graph["expected_provider_revision"]=2;const auto denied_graph=client.Post("/v1/graph-runs",authorized,stale_graph.dump(),"application/json");require(denied_graph&&denied_graph->status==409&&store.runs("graph-session").get().empty(),"Graph profile conflicts must precede root persistence");
+        const auto admitted_graph=client.Post("/v1/graph-runs",authorized,graph_admission.dump(),"application/json");require(admitted_graph&&admitted_graph->status==202,"Current bound graph must use the same native ownership lock");wait(store,"graph-run",RunState::paused);
         rejects<Conflict>([&]{runtime.select_profile("openai",3);});const auto graph=store.graph_run("graph-run").get();runtime.human_input("graph-run","review",R"({"approved":true})","fixture-controller",graph.checkpoint_revision);wait(store,"graph-run",RunState::completed);
         require(select(runtime,"openai",3).revision==4,"Completed graph must release profile ownership");
         configured=runtime.save_profile("openai","openai.chat","fixture-openai-updated",key(""),4);
@@ -141,6 +152,13 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         PersistenceService store((std::filesystem::u8path(argv[1])/(std::string(name)+".sqlite")).string(),imports);
         ProviderRuntime legacy(store,base,1,8);legacy.configure("fixture-startup",key("runtime-openai-fixture-key"),0);
         if(std::string(name)=="startup-repair"){auto record=Json::parse(store.information("native-provider","active").get());record["model"]="sk-invalid-legacy-model";store.put_information("native-provider","active",record.dump()).get();}
+    }
+    {
+        PersistenceService store((std::filesystem::u8path(argv[1])/"model-free-bound-graph.sqlite").string(),imports);
+        GraphCatalogStore(store).apply(R"({"graphs":[{"id":"review","spec":{"nodes":[{"id":"review","type":"human","prompt":"Review fixture"}]}}]})");
+        ProviderProfileRuntime runtime(store,base,policy(origin),1,8);Access access(store,runtime);httplib::Client client("127.0.0.1",access.port);const httplib::Headers auth{{"Authorization","Bearer synthetic-profile-runtime-server-access-token"}};
+        const auto health=client.Get("/v1/health",auth);require(health&&health->status==200&&Json::parse(health->body).at("provider_profile_admission")==true&&Json::parse(health->body).at("graph_provider_profile_admission")==true,"Backend must advertise its actual profile admission support");
+        store.create_session("bound-review","Model-free bound graph fixture").get();const auto accepted=client.Post("/v1/graph-runs",auth,R"({"id":"bound-review-run","session_id":"bound-review","graph_id":"review","graph_revision":1,"prompt":"Review","provider_profile_id":"","expected_provider_revision":0})","application/json");require(accepted&&accepted->status==202,"Empty active-profile binding must preserve real model-free graph execution");wait(store,"bound-review-run",RunState::paused);const auto graph=store.graph_run("bound-review-run").get();runtime.human_input("bound-review-run","review",R"({"approved":true})","fixture-controller",graph.checkpoint_revision);wait(store,"bound-review-run",RunState::completed);
     }
     std::cout<<"Native profile runtime passed actual OpenAI/Claude wire and key isolation, SQL failure preservation, active/paused-graph ownership, active-profile update, restart and encrypted-reference migration; peers are synthetic, no live account or UI enrollment tested\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
