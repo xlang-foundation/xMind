@@ -96,8 +96,20 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
     }
     {
         PersistenceService store((std::filesystem::u8path(argv[1])/"profile-migration.sqlite").string(),imports);store.put_credential("server","legacy-owned-key","fixture:openai","Legacy fixture",key("runtime-openai-fixture-key"),0).get();
-        ProviderProfileRuntime runtime(store,base,policy(origin),1,8);const auto migrated=runtime.import_existing_profile("openai","openai.chat","fixture-openai","legacy-owned-key",9);
+        ProviderProfileRuntime runtime(store,base,policy(origin),1,8);
+        require(!runtime.import_legacy_configuration(),"Missing legacy record must leave an unconfigured runtime unchanged");
+        const auto legacy=Json{{"provider","openai"},{"endpoint",origin+"/chat"},{"model","fixture-openai"},{"credential_id","legacy-owned-key"},{"revision",9},{"wire","chat-completions"}};
+        auto invalid=legacy;invalid["endpoint"]="https://unapproved.invalid/chat";store.put_information("native-provider","active",invalid.dump()).get();
+        rejects<DatabaseError>([&]{runtime.import_legacy_configuration();});require(runtime.configuration().revision==0&&store.credentials("server").get().size()==1,"Rejected legacy destination must preserve key and unconfigured runtime");
+        invalid=legacy;invalid["wire"]="responses";store.put_information("native-provider","active",invalid.dump()).get();rejects<DatabaseError>([&]{runtime.import_legacy_configuration();});
+        invalid=legacy;invalid["extra"]=true;store.put_information("native-provider","active",invalid.dump()).get();rejects<DatabaseError>([&]{runtime.import_legacy_configuration();});
+        store.put_information("native-provider","active",std::string("{\"provider\":\"openai\",")+legacy.dump().substr(1)).get();rejects<DatabaseError>([&]{runtime.import_legacy_configuration();});
+        invalid=legacy;invalid["model"]="runtime-openai-fixture-key";store.put_information("native-provider","active",invalid.dump()).get();rejects<std::invalid_argument>([&]{runtime.import_legacy_configuration();});
+        require(runtime.configuration().revision==0&&store.credentials("server").get().size()==1,"Malformed and credential-shaped legacy models cannot publish or rotate keys");
+        store.put_information("native-provider","active",legacy.dump()).get();require(runtime.import_legacy_configuration(),"Native startup reader must import the validated legacy configuration");const auto migrated=runtime.configuration();
         require(migrated.revision==9&&runtime.available()&&store.credentials("server").get().size()==1,"Native profile migration must activate the original encrypted key without rotation");
+        require(store.information("native-provider","active").get()==legacy.dump(),"Migration must preserve the original legacy source record");
+        store.put_information("native-provider","active",R"({"invalid":"legacy fixture"})").get();require(!runtime.import_legacy_configuration(),"Existing registry must take precedence over stale legacy configuration");
         rejects<Conflict>([&]{runtime.import_existing_profile("other","openai.chat","fixture-openai","legacy-owned-key",9);});
     }
     {

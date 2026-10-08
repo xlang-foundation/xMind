@@ -1,6 +1,8 @@
 #include "agentflow/provider_profile_runtime.hpp"
 #include <algorithm>
 #include <mutex>
+#include <set>
+#include "nlohmann/json.hpp"
 namespace agentflow {
 namespace {
 std::vector<ProviderProfileRoute> routes(const std::vector<ProviderProfileExecutionPolicy>& policy){
@@ -102,6 +104,44 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_existing_profile(s
         [&](const auto& profile,const auto&){candidate=impl_->prepare(profile);});
     impl_->state=std::move(next);auto previous=std::move(impl_->service);impl_->service=std::move(candidate);
     const auto result=impl_->metadata();lock.unlock();previous.reset();return result;
+}
+bool ProviderProfileRuntime::import_legacy_configuration(std::string id){
+    {std::lock_guard lock(impl_->mutex);if(impl_->state.revision!=0)return false;}
+    std::string source;
+    try{source=impl_->store.information("native-provider","active").get();}catch(const NotFound&){return false;}
+    std::string route_id,model,credential;std::int64_t revision=0;
+    try{
+        using Json=nlohmann::json;
+        if(source.size()>65536)throw DatabaseError("Legacy provider configuration exceeds limits");
+        std::vector<std::set<std::string>> fields;
+        const auto record=Json::parse(source,[&](int depth,Json::parse_event_t event,Json& value){
+            if(depth>16)throw DatabaseError("Invalid legacy provider configuration");
+            if(event==Json::parse_event_t::object_start)fields.emplace_back();
+            else if(event==Json::parse_event_t::object_end)fields.pop_back();
+            else if(event==Json::parse_event_t::key&&!fields.back().insert(value.get<std::string>()).second)throw DatabaseError("Duplicate legacy provider field");
+            return true;
+        });
+        if(!record.is_object()||(record.size()!=5&&record.size()!=6)||record.at("provider")!="openai"||
+            !record.at("revision").is_number_integer()|| (record.size()==6&&!record.contains("wire")))throw DatabaseError("Invalid legacy provider configuration");
+        revision=record.at("revision").get<std::int64_t>();
+        if(revision<1||revision>9007199254740991)throw DatabaseError("Invalid legacy provider revision");
+        const auto endpoint=record.at("endpoint").get<std::string>();
+        model=record.at("model").get<std::string>();credential=record.at("credential_id").get<std::string>();
+        for(const auto& allowed:impl_->policy){
+            const auto& route=allowed.route;
+            if(route.provider!="openai"||route.credential_scope!="server"||route.endpoint!=endpoint)continue;
+            if(route.wire!=ProviderWire::chat_completions&&route.wire!=ProviderWire::responses)continue;
+            const auto wire=route.wire==ProviderWire::responses?"responses":"chat-completions";
+            if(record.contains("wire")&&record.at("wire")!=wire)continue;
+            if(!route_id.empty())throw DatabaseError("Ambiguous legacy provider route");
+            route_id=route.id;
+        }
+        if(route_id.empty())throw DatabaseError("Legacy provider configuration differs from backend policy");
+    }catch(const DatabaseError&){throw;}catch(...){throw DatabaseError("Legacy provider configuration is invalid");}
+    // Import validates identity, resolves the exact owned encrypted credential,
+    // prepares execution and publishes with absent-registry CAS. No rotation.
+    import_existing_profile(std::move(id),std::move(route_id),std::move(model),std::move(credential),revision);
+    return true;
 }
 Run ProviderProfileRuntime::submit(std::string id,std::string session,std::string prompt){return submit_model(std::move(id),std::move(session),std::move(prompt),{});}
 Run ProviderProfileRuntime::submit_model(std::string id,std::string session,std::string prompt,std::string model){std::lock_guard lock(impl_->mutex);return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));}

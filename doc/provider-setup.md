@@ -32,9 +32,8 @@ profile unchanged. Service publication remains the owning runtime's responsibili
 after successful CAS. Initial migration cannot replace an existing registry or
 rewrite the legacy source record. Actual SQLite/key/restart contracts now include
 native service-construction rejection and two concurrent migration candidates;
-these additions passed the local 57-contract native gate recorded below. Hosted
-execution remains pending. Automatic legacy
-record loading, runtime activation and client enrollment remain pending.
+these additions passed the local and hosted 57-contract native gates recorded
+below. Product startup and client enrollment remain pending.
 
 New `ProviderProfileRuntime` source now connects the registry to the same native
 single-agent/graph execution platform. It validates candidate services, commits
@@ -50,8 +49,13 @@ locally in 91.31 seconds, with no failures or skips
 ([CTest](evidence/native-provider-profile-runtime-local-ctest.log),
 [provenance](evidence/native-provider-profile-runtime-local-provenance.json)).
 The build uses the correctness/performance-validated xlang3 buffer-fix pin
-`4aea7d8fb24da9ba86f9d7eeb92820794f213d29`; hosted validation remains pending. The server's existing Settings API, automatic legacy-record
-reader, model discovery and client adapters still need integration. This source
+`4aea7d8fb24da9ba86f9d7eeb92820794f213d29`. The same source passed the hosted gate:
+**57 native, 73 extension and 14 browser contracts**, without skips
+([CI](https://github.com/xlang-foundation/xMind/actions/runs/37724610441),
+[CTest](evidence/native-provider-profile-runtime-hosted-ctest.log),
+[job](evidence/native-provider-profile-runtime-hosted-job.log),
+[provenance](evidence/native-provider-profile-runtime-hosted-provenance.json)).
+The server's startup and client adapters still need integration. This source
 does not upgrade the running preview or establish live Claude account support.
 
 Profile-specific account discovery is now implemented in source for OpenAI and
@@ -66,9 +70,10 @@ JSON fields, repeated cursors, reflected keys, incomplete oversized catalogues
 and redirects fail rather than returning an incomplete list. The expanded native
 peer contract includes actual saved-key requests, pagination, URI encoding,
 cancelled discovery and a profile change during an in-flight request. These new
-additions await compilation/execution while a sibling benchmark is live. Listing
-account identities does not establish model/adapter capability; HTTP/Settings
-integration and per-model compatibility remain pending.
+additions passed the complete local 57-contract gate at source `3e2198a` in
+94.71 seconds, without failures or skips. Listing account identities does not
+establish model/adapter capability; product Settings integration and per-model
+compatibility remain pending.
 
 The native HTTP adapter now has source for authenticated profile operations:
 `GET /v1/provider/profiles`, `POST /v1/provider/profiles`,
@@ -79,9 +84,22 @@ network destinations. Mutations reject unknown fields, malformed revisions and
 non-boolean activation flags. Existing origin-bound view authentication covers
 the new paths using the same owner permissions as provider setup. The expanded
 native contract exercises actual HTTP authentication, enrollment, saved-key
-discovery, destination spoof rejection and stale selection. Compilation and
-execution are pending. Server startup/legacy-record migration and CLI/browser/
+discovery, destination spoof rejection and stale selection. These additions
+passed that local 57-contract gate. Server startup and CLI/browser/
 VS Code client integration remain required before these become product Settings.
+
+`ProviderProfileRuntime::import_legacy_configuration` adds the trusted native
+reader for the existing `native-provider/active` record. It validates bounded
+JSON, duplicate/unknown fields, provider, endpoint/wire and revision against
+backend policy, then imports using the existing credential-ownership and
+candidate-service/CAS checks. It preserves the original encrypted reference,
+revision and legacy source record. Missing legacy state is a no-op; an existing
+registry wins over stale legacy state. Invalid legacy models are rejected;
+credential-shaped legacy-model repair still needs a product compatibility path.
+This reader is not yet called by server startup. Its expanded native runtime
+contract passed locally after correcting a test fixture to respect the database's
+JSON constraint; the complete suite is being revalidated. No preview upgrade is
+claimed.
 
 Current setup is one saved OpenAI configuration. Claude request/stream/transport
 source additions do not change that API or make Claude selectable in Settings.

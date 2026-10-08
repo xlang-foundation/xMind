@@ -1,0 +1,15 @@
+{
+  "revision": "62a5cb901485b4b7335ad6cc9d72194d21b42789",
+  "runtimeRevision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "run": 37724610441,
+  "job": 113139822092,
+  "artifact": 11527344643,
+  "conclusion": "success",
+  "nativePassed": 57,
+  "extensionPassed": 73,
+  "browserControllerPassed": 14,
+  "skipped": 0,
+  "ctestLogSha256": "e8809a4199b1e3326e2f75b822a5b48e36a2fa19bbd096c5f1041aeeeebacbe5",
+  "jobLogSha256": "1db131786d6a798251c2ab54c25c3cd0ac23b40107a65aabf5dab8c372f3b522",
+  "scope": "Hosted native runtime/profile execution contracts plus extension and browser gates. Discovery/API changes after this revision, automatic legacy reader, live Claude, Nexus enrollment and UI profile integration are not covered."
+}

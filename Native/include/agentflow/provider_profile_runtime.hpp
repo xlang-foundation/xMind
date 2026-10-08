@@ -29,6 +29,9 @@ public:
     // backend policy. This preserves its owned encrypted reference and revision.
     ProviderProfileRuntimeMetadata import_existing_profile(std::string id,std::string route,std::string model,
         std::string credential_id,std::int64_t initial_revision);
+    // Backend startup migration. Existing profile registries take precedence;
+    // absent legacy records are a no-op. Invalid legacy state fails closed.
+    bool import_legacy_configuration(std::string id="openai");
     Run submit(std::string id,std::string session,std::string prompt) override;
     Run submit_model(std::string id,std::string session,std::string prompt,std::string model) override;
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
