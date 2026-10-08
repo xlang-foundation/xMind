@@ -1,0 +1,100 @@
+TAP version 13
+# Subtest: native session protocol mismatch explains the required update and preserves the existing connection
+ok 1 - native session protocol mismatch explains the required update and preserves the existing connection
+  ---
+  duration_ms: 149.6849
+  type: 'test'
+  ...
+# Subtest: Cancel and Escape preserve an existing connection and do not logout or cancel execution
+ok 2 - Cancel and Escape preserve an existing connection and do not logout or cancel execution
+  ---
+  duration_ms: 32.678
+  type: 'test'
+  ...
+# Subtest: a failed replacement token keeps the existing conversation connected
+ok 3 - a failed replacement token keeps the existing conversation connected
+  ---
+  duration_ms: 24.7574
+  type: 'test'
+  ...
+# Subtest: cancelling an in-flight reconnect prevents late popup or conversation changes
+ok 4 - cancelling an in-flight reconnect prevents late popup or conversation changes
+  ---
+  duration_ms: 23.5788
+  type: 'test'
+  ...
+# Subtest: Cancel aborts pending network work and immediate retry stays owned by the new attempt
+ok 5 - Cancel aborts pending network work and immediate retry stays owned by the new attempt
+  ---
+  duration_ms: 25.4492
+  type: 'test'
+  ...
+# Subtest: sidebar divider supports drag, keyboard bounds and remembered width
+ok 6 - sidebar divider supports drag, keyboard bounds and remembered width
+  ---
+  duration_ms: 21.4974
+  type: 'test'
+  ...
+# Subtest: browser Settings preserves the selected profile route through private discovery and footer enrollment
+ok 7 - browser Settings preserves the selected profile route through private discovery and footer enrollment
+  ---
+  duration_ms: 7.0783
+  type: 'test'
+  ...
+# Subtest: rename sends the displayed expected title only for the selected supported conversation and retains conflicts
+ok 8 - rename sends the displayed expected title only for the selected supported conversation and retains conflicts
+  ---
+  duration_ms: 2.0937
+  type: 'test'
+  ...
+# Subtest: Responses saved-key discovery and model selection preserve backend-reported wire
+ok 9 - Responses saved-key discovery and model selection preserve backend-reported wire
+  ---
+  duration_ms: 0.9946
+  type: 'test'
+  ...
+# Subtest: restoring the native view does not wait for provider catalogue discovery
+ok 10 - restoring the native view does not wait for provider catalogue discovery
+  ---
+  duration_ms: 11.493
+  type: 'test'
+  ...
+# Subtest: view catches a completion between event and status reads and drains final events
+ok 11 - view catches a completion between event and status reads and drains final events
+  ---
+  duration_ms: 1.1226
+  type: 'test'
+  ...
+# Subtest: an obsolete view response cannot overwrite the next selection
+ok 12 - an obsolete view response cannot overwrite the next selection
+  ---
+  duration_ms: 0.2625
+  type: 'test'
+  ...
+# Subtest: provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state
+ok 13 - provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state
+  ---
+  duration_ms: 0.7946
+  type: 'test'
+  ...
+# Subtest: stale operation bytes cannot produce an approval request
+ok 14 - stale operation bytes cannot produce an approval request
+  ---
+  duration_ms: 7.992
+  type: 'test'
+  ...
+# Subtest: browser adapter forwards durable native view credentials across restart without retaining the master token
+ok 15 - browser adapter forwards durable native view credentials across restart without retaining the master token
+  ---
+  duration_ms: 181.9856
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1252.2147

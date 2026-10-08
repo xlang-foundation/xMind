@@ -56,6 +56,15 @@ profile UI acceptance remain outstanding.
 
 ## Shared profile Settings controls
 
+Exact source `58a7595ce24a6b5015a9bb7be9698105910a8c48` passed the complete
+hosted gate: **57 native, 80 extension and 15 browser contracts**, actual
+browser/native integration and VSIX asset verification, with no test skips.
+[Hosted run](https://github.com/xlang-foundation/xMind/actions/runs/37728813956),
+[native output](evidence/native-shared-profile-ui-hosted-ctest.log),
+[original job/TAP output](evidence/native-shared-profile-ui-passing-ci-job.log)
+and [exact provenance](evidence/native-shared-profile-ui-hosted-provenance.json)
+retain that scope. These results do not cover the later admission/context source.
+
 Settings now has a saved-profile selector, an Add profile choice, a provider API
 selector and a Use saved profile action. OpenAI Chat/Responses and Claude
 Messages routes come from validated native metadata. New profiles receive an

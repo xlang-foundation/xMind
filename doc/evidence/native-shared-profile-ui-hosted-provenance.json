@@ -1,0 +1,19 @@
+{
+  "source_revision": "58a7595ce24a6b5015a9bb7be9698105910a8c48",
+  "runtime_revision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "stdlib_source_revision": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+  "runtime": "Native xlang3; no CPython execution or bridge",
+  "run_id": 37728813956,
+  "job_id": 113154459944,
+  "artifact_id": 11528584432,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37728813956",
+  "conclusion": "success",
+  "native_contracts": 57,
+  "extension_contracts": 80,
+  "browser_contracts": 15,
+  "native_seconds": 104.93,
+  "native_manifest_matches_passed_tests": true,
+  "browser_native_integration": "passed",
+  "vsix_verification": "passed; 18 required assets",
+  "scope": "Shared profile UI and underlying native checkpoint only. Later atomic admission and history provenance source are excluded. No live Claude or actual VS Code profile UI acceptance claimed."
+}
