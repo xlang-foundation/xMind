@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="650" viewBox="0 0 1120 650" role="img" aria-labelledby="title desc">
+  <title id="title">xMind Local and Nexus connection profiles</title>
+  <desc id="desc">Clients select Local or Nexus through a native connection service. Local uses xMind and SQLite. Nexus authenticates team coordination and enrolls authorized local workers. Cantor Cluster is a future private scheduler integration. Design only, not implementation evidence.</desc>
+  <defs>
+    <style>text{font-family:Segoe UI,Arial,sans-serif;fill:#203047} .title{font-size:28px;font-weight:700} .head{font-size:21px;font-weight:600} .body{font-size:17px} .small{font-size:15px;fill:#52627a} .box{fill:white;stroke:#b8c6d9;stroke-width:2} .flow{fill:none;stroke:#4774ac;stroke-width:2;marker-end:url(#arrow)}</style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#4774ac"/></marker>
+  </defs>
+  <rect width="1120" height="650" fill="#f4f7fb"/>
+  <text x="36" y="48" class="title">xMind connection profiles</text>
+  <text x="36" y="77" class="small">Target design · enrollment and distributed execution remain pending</text>
+  <rect x="36" y="105" width="1048" height="75" rx="12" class="box"/>
+  <text x="560" y="137" text-anchor="middle" class="head">CLI · browser · VS Code right sidebar</text>
+  <text x="560" y="163" text-anchor="middle" class="body">Connection selector: Local / named Nexus profile</text>
+  <path d="M560 180V210" class="flow"/>
+  <rect x="36" y="210" width="1048" height="90" rx="12" fill="#eaf1ff" stroke="#4774ac" stroke-width="2"/>
+  <text x="560" y="245" text-anchor="middle" class="head">Native connection service · shared versioned command / event contract</text>
+  <text x="560" y="275" text-anchor="middle" class="body">Scoped identities · authentication · negotiated capabilities · encrypted references</text>
+  <path d="M285 300V338" class="flow"/><path d="M830 300V338" class="flow"/>
+  <rect x="36" y="338" width="500" height="130" rx="12" class="box"/>
+  <text x="60" y="371" class="head">Local binding · xMind OSS</text>
+  <text x="60" y="402" class="body">C++ agent / coding engine + embedded xlang3</text>
+  <text x="60" y="431" class="body">Local workspace · local sessions · SQLite</text>
+  <rect x="584" y="338" width="500" height="130" rx="12" fill="#eef7f2" stroke="#54876c" stroke-width="2"/>
+  <text x="608" y="371" class="head">Nexus binding · private team server</text>
+  <text x="608" y="402" class="body">Authorized shared sessions · PostgreSQL</text>
+  <text x="608" y="431" class="body">Team policy · scheduler · worker leases</text>
+  <path d="M536 448H584" class="flow"/>
+  <text x="36" y="493" class="small">Local agent enrollment: explicit workspace permissions + fenced leases + effect receipts</text>
+  <path d="M830 468V515" class="flow"/>
+  <rect x="584" y="515" width="500" height="65" rx="12" class="box"/>
+  <text x="834" y="544" text-anchor="middle" class="head">Later: Cantor Cluster adapter</text>
+  <text x="834" y="565" text-anchor="middle" class="small">Behind Nexus scheduling; preserves worker ownership</text>
+  <text x="36" y="613" class="body">Connection profiles select execution context. Provider profiles select model routes.</text>
+  <text x="36" y="637" class="small">Changing the view keeps existing runs on their original backend. Server loss never replays tasks locally.</text>
+</svg>

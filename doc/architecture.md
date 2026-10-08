@@ -34,6 +34,10 @@ remain required. Browser UI and VS Code remain OSS deliverables.
 
 ### Local and Nexus connection profiles
 
+The [connection-profile contract](connection-profiles.md) specifies the selector,
+authentication/enrollment distinction, shared binding and acceptance sequence.
+Its [diagram](connection-profiles.svg) shows the public/private boundary.
+
 xMind supports both single-user local execution and an optional connection to a
 Nexus team server. A **Local profile** uses the local agent runtime, authorized
 workspace and SQLite state. A **Nexus profile** binds the local xMind agent and
