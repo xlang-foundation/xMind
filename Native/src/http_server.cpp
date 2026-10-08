@@ -5,6 +5,7 @@
 #include "agentflow/provider_setup.hpp"
 #include "agentflow/provider_profile_setup.hpp"
 #include "agentflow/graph_service.hpp"
+#include "agentflow/dynamic_plan.hpp"
 #include "agentflow/a2a_task_control.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #include "httplib.h"
@@ -82,6 +83,18 @@ std::int64_t graph_revision(const Json& value,const char* field) {
     if(!value.contains(field) || !value[field].is_number_integer() || value[field]<1 || value[field]>9007199254740991)throw std::invalid_argument("Invalid graph revision");
     return value[field].get<std::int64_t>();
 }
+void plan_input_json(const std::string& source){
+    if(source.size()>16384)throw std::invalid_argument("Plan human input exceeds limits");
+    std::vector<std::set<std::string>> fields;
+    const auto value=Json::parse(source,[&](int depth,Json::parse_event_t event,Json& parsed){
+        if(depth>64)throw std::invalid_argument("Plan human input nesting exceeds limits");
+        if(event==Json::parse_event_t::object_start)fields.emplace_back();
+        else if(event==Json::parse_event_t::object_end)fields.pop_back();
+        else if(event==Json::parse_event_t::key&&!fields.back().insert(parsed.get<std::string>()).second)throw std::invalid_argument("Duplicate plan human input field");
+        return true;
+    });
+    if(!value.is_object())throw std::invalid_argument("Plan human input must be a JSON object");
+}
 std::string new_id() {
     std::random_device random;std::ostringstream value;
     value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i) value<<std::setw(8)<<random();
@@ -90,7 +103,35 @@ std::string new_id() {
 Json encode(const Session& value) {return {{"id",value.id},{"title",value.title}};}
 Json encode(const Run& value) {Json result={{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)},
     {"parent_id",value.parent_id},{"node_id",value.node_id},{"graph_root",value.graph_root}};if(!value.provider_context_json.empty())result["provider_context"]=Json::parse(value.provider_context_json);return result;}
-Json encode(const OwnedChildRecord& value){return {{"run",encode(value.run)},{"kind",value.kind},{"batch_id",value.batch_id},{"task_id",value.task_id},{"preset_id",value.preset_id},{"preset_revision",value.preset_revision}};}
+Json encode(const OwnedChildRecord& value){Json result={{"run",encode(value.run)},{"kind",value.kind},{"batch_id",value.batch_id},{"task_id",value.task_id},{"preset_id",value.preset_id},{"preset_revision",value.preset_revision}};if(value.kind=="dynamic_agent"){result["plan_id"]=value.plan_id;result["node_label"]=value.node_label;result["claim_id"]=value.claim_id;result["definition_revision"]=value.definition_revision;result["claim_revision"]=value.claim_revision;}return result;}
+Json public_usage(const Json& value){
+    Json result=Json::object();if(!value.is_object())return result;
+    for(const auto* field:{"input_tokens","output_tokens","total_tokens","prompt_tokens","completion_tokens","cached_tokens","reasoning_tokens","cache_read_input_tokens","cache_creation_input_tokens","promptTokenCount","candidatesTokenCount","totalTokenCount","thoughtsTokenCount","cachedContentTokenCount"})if(value.contains(field)&&value[field].is_number_integer()&&value[field]>=0&&value[field]<=9007199254740991)result[field]=value[field];
+    for(const auto* field:{"input_tokens_details","output_tokens_details","prompt_tokens_details","completion_tokens_details"})if(value.contains(field)&&value[field].is_object()){
+        auto details=Json::object();for(const auto* key:{"cached_tokens","reasoning_tokens","audio_tokens","accepted_prediction_tokens","rejected_prediction_tokens"})if(value[field].contains(key)&&value[field][key].is_number_integer()&&value[field][key]>=0&&value[field][key]<=9007199254740991)details[key]=value[field][key];if(!details.empty())result[field]=std::move(details);
+    }return result;
+}
+Json public_response(const std::string& actual){
+    const auto source=Json::parse(actual);Json result=Json::object();
+    if(source.contains("model")&&source["model"].is_string()&&source["model"].get_ref<const std::string&>().size()<=256)result["model"]=source["model"];
+    if(source.contains("usage")){auto usage=public_usage(source["usage"]);if(!usage.empty())result["usage"]=std::move(usage);}
+    for(const auto* field:{"elapsed_ms","first_token_ms"})if(source.contains(field)&&source[field].is_number_integer()&&source[field]>=0&&source[field]<=9007199254740991)result[field]=source[field];
+    return result;
+}
+Json public_plan(const DynamicPlanRecord& value){
+    const auto decision=inspect_dynamic_plan(value);Json result={{"id",value.id},{"root_run_id",value.root_run_id},{"revision",value.revision},{"state_sequence",value.state_sequence},{"state",value.state},{"ready",decision.ready},{"blocked",decision.blocked},{"claimed",decision.claimed},{"waiting_human",decision.waiting_human},{"finished",decision.finished},{"report_ready",decision.report_ready},{"halted",decision.halted},{"retired_labels",value.retired_labels},{"planned_children_reserved",value.planned_children_reserved},{"planned_humans_reserved",value.planned_humans_reserved},{"humans_published",value.humans_published},{"nodes",Json::array()}};
+    auto state=[](DynamicNodeState value){switch(value){case DynamicNodeState::pending:return "pending";case DynamicNodeState::blocked:return "blocked";case DynamicNodeState::claimed:return "claimed";case DynamicNodeState::waiting_human:return "waiting_human";case DynamicNodeState::settled:return "settled";case DynamicNodeState::skipped:return "skipped";case DynamicNodeState::cancelled:return "cancelled";case DynamicNodeState::uncertain:return "uncertain";}throw DatabaseError("Invalid actual plan node state");};
+    for(const auto& n:value.nodes){Json node={{"id",n.definition.label},{"type",n.definition.kind==DynamicNodeKind::agent?"agent":"human"},{"backend_node_id",n.backend_node_id},{"definition_revision",n.definition_revision},{"state",state(n.state)},{"protected",n.protected_definition||n.claim_revision>0||n.state==DynamicNodeState::skipped||n.state==DynamicNodeState::cancelled},{"depends_on",Json::array()},{"effect_state",n.effect_state}};
+        if(n.definition.kind==DynamicNodeKind::agent){node["objective"]=n.definition.objective;node["preset"]=n.definition.preset_id;node["preset_revision"]=n.definition.preset_revision;}else node["question"]=n.definition.question;
+        for(const auto& edge:n.definition.dependencies)node["depends_on"].push_back({{"task",edge.task},{"require",edge.require==DynamicDependencyRequirement::success?"success":"observed"}});
+        if(n.claim_revision){node["claim_revision"]=n.claim_revision;node["claim_id"]=n.claim_id;}if(!n.child_run_id.empty())node["child_run_id"]=n.child_run_id;if(!n.child_state.empty())node["child_state"]=n.child_state;if(!n.human_request_id.empty())node["human_request_id"]=n.human_request_id;if(!n.outcome_json.empty())node["outcome_json"]=n.outcome_json;if(n.settled_event_seq)node["settled_event_seq"]=*n.settled_event_seq;result["nodes"].push_back(std::move(node));
+    }return result;
+}
+Json public_plan_policy(const DynamicPlanCapabilities& c){
+    auto presets=Json::array();for(const auto& p:c.presets)presets.push_back({{"id",p.id},{"revision",p.revision},{"readonly",p.readonly},{"turn_limit",p.turn_limit}});
+    return {{"revision",c.revision},{"catalogue_finalized",c.catalogue_finalized},{"limits",{{"max_nodes",c.max_nodes},{"max_revisions",c.max_revisions},{"max_humans",c.max_humans},{"change_bytes",c.change_bytes},{"human_expiry_ms",c.human_expiry_ms},{"max_parent_turns",c.max_parent_turns}}},{"presets",std::move(presets)}};
+}
+Json public_plan_budget(const RootBudgetRecord& b){return {{"policy_id",b.spec.policy_id},{"policy_revision",b.spec.policy_revision},{"revision",b.revision},{"max_children",b.spec.max_children},{"max_parallel",b.spec.max_parallel},{"max_model_calls",b.spec.max_model_calls},{"wall_limit_ms",b.spec.wall_limit_ms},{"children_admitted",b.children_admitted},{"planned_children_reserved",b.planned_children_reserved},{"model_calls_reserved",b.model_calls_reserved},{"parent_calls_held",b.parent_calls_held},{"parent_model_calls_reserved",b.parent_model_calls_reserved}};}
 Json graph_record(const GraphRootRecord& root) {
     return {{"run",encode(root.run)},{"graph_id",root.graph_id},{"graph_revision",root.graph_revision},
         {"checkpoint_revision",root.checkpoint_revision},{"checkpoint",Json::parse(root.checkpoint_json)},
@@ -195,9 +236,10 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|models|graphs|agent/delegation|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
-            static const std::regex owned_read_route(R"(^/v1/(agent/delegation|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?))$)");
-            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && std::regex_match(request.path,view_route) && (request.method=="GET"||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))){
+            static const std::regex view_route(R"(^/v1/(health|models|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
+            static const std::regex owned_read_route(R"(^/v1/(agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan))$)");
+            static const std::regex plan_write_route(R"(^/v1/runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)$)");
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && std::regex_match(request.path,view_route) && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
                 catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
@@ -296,7 +338,12 @@ struct HttpServer::Impl {
         }));
         server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()}});
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()}});
+        }));
+        server.Get("/v1/agent/planning",guarded([this](const Request& request,Response& response){
+            if(!request.params.empty())throw std::invalid_argument("Planning metadata does not accept query parameters");
+            const bool enabled=executor&&executor->supports_dynamic_planning();
+            reply(response,{{"enabled",enabled},{"tools",enabled?Json::array({"inspect_plan","plan_tasks","revise_plan"}):Json::array()}});
         }));
         server.Get("/v1/agent/delegation",guarded([this](const Request& request,Response& response){
             if(!request.params.empty())throw std::invalid_argument("Delegation metadata does not accept query parameters");
@@ -448,6 +495,36 @@ struct HttpServer::Impl {
             reply(response,encode_all(persistence.runs(identifier(request.matches[1])).get()));
         }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {reply(response,encode(persistence.run(identifier(request.matches[1])).get()));}));
+        server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/plan)",guarded([this](const Request& request,Response& response){
+            if(!request.params.empty())throw std::invalid_argument("Plan detail does not accept query parameters");
+            const auto root=identifier(request.matches[1]);const auto run=persistence.run(root).get();
+            if(!run.parent_id.empty()||run.graph_root)throw NotFound("Select an ordinary owning root");
+            Json result={{"run",encode(run)},{"enabled",executor&&executor->supports_dynamic_planning()},{"plan",nullptr},{"questions",Json::array()},{"revisions",Json::array()},{"calls",Json::array()},{"policy",nullptr},{"budget",nullptr}};
+            std::optional<RootBudgetRecord> budget;std::optional<DynamicPlanCapabilities> captured;
+            try{captured=persistence.dynamic_capabilities(root).get();}catch(const NotFound&){}
+            if(captured){result["policy"]=public_plan_policy(*captured);budget=persistence.root_budget(root).get();result["budget"]=public_plan_budget(*budget);}
+            const auto plan=persistence.dynamic_plan_for_root(root).get();
+            if(plan){
+                result["plan"]=public_plan(*plan);
+                for(const auto& h:persistence.dynamic_human_requests(plan->id).get()){
+                    Json question={{"id",h.id},{"plan_id",h.plan_id},{"root_run_id",h.root_run_id},{"label",h.label},{"backend_node_id",h.backend_node_id},{"question",h.question},{"state",h.state},{"definition_revision",h.definition_revision},{"published_event_seq",h.published_event_seq},{"expires_unix_ms",h.expires_unix_ms},{"input_json",h.input_json},{"input_event_seq",h.input_event_seq?Json(*h.input_event_seq):Json(nullptr)}};
+                    result["questions"].push_back(std::move(question));
+                }
+                for(const auto& revision:persistence.dynamic_plan_revisions(plan->id).get())result["revisions"].push_back({{"plan_id",revision.plan_id},{"revision",revision.revision},{"accepted_event_seq",revision.accepted_event_seq},{"call_id",revision.call_id},{"spec",Json::parse(revision.canonical_spec_json)}});
+                for(const auto& call:persistence.dynamic_plan_calls(root).get()){
+                    const bool pending=!call.conversation_commit_seq&&(call.state=="accepted"||call.state=="report_ready");
+                    const auto actual=Json::parse(call.parent_assistant_json);
+                    Json value={{"id",call.id},{"plan_id",call.plan_id},{"root_run_id",call.root_run_id},{"provider_tool_call_id",call.provider_tool_call_id},{"origin_attempt_id",call.origin_attempt_id},{"name",actual.at("tool_calls").at(0).at("name")},{"state",call.state},{"accepted_revision",call.accepted_revision},{"accepted_event_seq",call.accepted_event_seq},{"result_event_seq",call.result_event_seq?Json(*call.result_event_seq):Json(nullptr)},{"conversation_commit_seq",call.conversation_commit_seq?Json(*call.conversation_commit_seq):Json(nullptr)},{"continuation_attempt_id",call.continuation_attempt_id},{"pending",pending}};
+                    if(pending)value["response"]=public_response(call.parent_assistant_json);
+                    result["calls"].push_back(std::move(value));
+                }
+            }
+            // Separate typed reads are never presented as one revision when an
+            // owner concurrently changes topology, questions, budget or state.
+            const auto fresh=persistence.dynamic_plan_for_root(root).get();
+            if(plan.has_value()!=fresh.has_value()||(plan&&(plan->id!=fresh->id||plan->revision!=fresh->revision||plan->state_sequence!=fresh->state_sequence||plan->state!=fresh->state))||persistence.run(root).get().state!=run.state||(budget&&persistence.root_budget(root).get().revision!=budget->revision)||(captured&&persistence.dynamic_capabilities(root).get().catalogue_finalized!=captured->catalogue_finalized))throw Conflict("Plan changed during inspection; refresh recorded state");
+            reply(response,result);
+        }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/events)",guarded([this](const Request& request,Response& response) {reply(response,encode_all(persistence.events(identifier(request.matches[1]),cursor(request)).get()));}));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/children)",guarded([this](const Request& request,Response& response){
             if(!request.params.empty())throw std::invalid_argument("Owned children do not accept query parameters");
@@ -483,6 +560,23 @@ struct HttpServer::Impl {
                 decision=="allow"?OperationDecision::allow:OperationDecision::deny,"local-owner").get()));
         }));
         if(executor) {
+            server.Post(R"(/v1/runs/([A-Za-z0-9_-]+)/plan/human/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response){
+                if(!request.params.empty()||request.body.size()>131072)throw std::invalid_argument("Plan input request exceeds limits");
+                const auto value=body(request,{"input_json","expected_revision","expected_state_sequence"});
+                const auto input=string_field(value,"input_json",16384);plan_input_json(input);
+                const auto revision=graph_revision(value,"expected_revision"),sequence=graph_revision(value,"expected_state_sequence");
+                const auto root=identifier(request.matches[1]),question=identifier(request.matches[2]);const auto run=persistence.run(root).get();
+                if(!run.parent_id.empty()||run.graph_root)throw NotFound("Select an ordinary owning root");
+                const auto plan=persistence.dynamic_plan_for_root(root).get();if(!plan)throw NotFound("Root has no accepted plan");
+                const auto actual=persistence.dynamic_human_request(plan->id,question).get();if(actual.root_run_id!=root)throw NotFound("Question does not belong to this root");
+                reply(response,encode(executor->plan_input(root,question,input,"local-owner",revision,sequence)));
+            }));
+            server.Post(R"(/v1/runs/([A-Za-z0-9_-]+)/plan/resume)",guarded([this](const Request& request,Response& response){
+                if(!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("Plan resume request exceeds limits");
+                const auto value=body(request,{"expected_revision","expected_state_sequence"});const auto revision=graph_revision(value,"expected_revision"),sequence=graph_revision(value,"expected_state_sequence");
+                const auto root=identifier(request.matches[1]);const auto run=persistence.run(root).get();if(!run.parent_id.empty()||run.graph_root||!persistence.dynamic_plan_for_root(root).get())throw NotFound("Select an ordinary root with an accepted plan");
+                reply(response,encode(executor->resume_plan(root,"local-owner",revision,sequence)),202);
+            }));
             server.Post("/v1/runs",guarded([this](const Request& request,Response& response) {
                 const auto value=body(request,{"id","session_id","prompt","model_id","provider_profile_id","expected_provider_revision"});
                 const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();

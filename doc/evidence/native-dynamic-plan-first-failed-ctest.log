@@ -1,0 +1,304 @@
+Test project D:/CantorAI2026/xMind/build/native-dynamic-plan
+      Start  1: native_json_schema_contract
+ 1/77 Test  #1: native_json_schema_contract .................   Passed    0.20 sec
+      Start  2: native_mcp_wire_contract
+ 2/77 Test  #2: native_mcp_wire_contract ....................   Passed    0.23 sec
+      Start  3: model_stream_protocol_contract
+ 3/77 Test  #3: model_stream_protocol_contract ..............   Passed    0.25 sec
+      Start  4: model_request_contract
+ 4/77 Test  #4: model_request_contract ......................   Passed    0.17 sec
+      Start  5: native_gemini_request_contract
+ 5/77 Test  #5: native_gemini_request_contract ..............   Passed    0.31 sec
+      Start  6: native_gemini_stream_contract
+ 6/77 Test  #6: native_gemini_stream_contract ...............   Passed    0.24 sec
+      Start  7: native_gemini_history_contract
+ 7/77 Test  #7: native_gemini_history_contract ..............   Passed    0.29 sec
+      Start  8: native_anthropic_request_contract
+ 8/77 Test  #8: native_anthropic_request_contract ...........   Passed    0.37 sec
+      Start  9: native_anthropic_stream_contract
+ 9/77 Test  #9: native_anthropic_stream_contract ............   Passed    0.19 sec
+      Start 10: native_anthropic_history_contract
+10/77 Test #10: native_anthropic_history_contract ...........   Passed    0.51 sec
+      Start 11: native_responses_protocol_contract
+11/77 Test #11: native_responses_protocol_contract ..........   Passed    0.71 sec
+      Start 12: native_dynamic_plan_contract
+12/77 Test #12: native_dynamic_plan_contract ................   Passed    0.36 sec
+      Start 13: native_agent_authority_contract
+13/77 Test #13: native_agent_authority_contract .............   Passed    0.15 sec
+      Start 14: native_dynamic_plan_repository_contract
+14/77 Test #14: native_dynamic_plan_repository_contract .....   Passed    2.24 sec
+      Start 15: native_planning_http_contract
+15/77 Test #15: native_planning_http_contract ...............***Failed    0.18 sec
+execute failed: invalid dynamic capability admission
+
+      Start 16: native_child_executor_contract
+16/77 Test #16: native_child_executor_contract ..............   Passed    0.23 sec
+      Start 17: native_dynamic_plan_engine_contract
+17/77 Test #17: native_dynamic_plan_engine_contract .........***Failed   12.44 sec
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+false !== true
+
+    at IncomingMessage.<anonymous> (file:///D:/CantorAI2026/xMind/Native/tests/dynamic_plan_engine_peer.mjs:57:185)
+    at IncomingMessage.emit (node:events:519:28)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+      Start 18: native_secret_protection_contract
+18/77 Test #18: native_secret_protection_contract ...........   Passed    0.13 sec
+      Start 19: native_a2a_task_control_http_contract
+19/77 Test #19: native_a2a_task_control_http_contract .......   Passed    1.15 sec
+      Start 20: native_a2a_message_http_contract
+20/77 Test #20: native_a2a_message_http_contract ............***Failed   10.22 sec
+file:///D:/CantorAI2026/xMind/Native/tests/a2a_message_http_contract.mjs:32
+async function finished(id){const deadline=Date.now()+10000;while(Date.now()<deadline){if(peerError)throw peerError;const value=await rpc('tasks/get',{id,historyLength:8});assert.ok(value.result,JSON.stringify(value));if(value.result.status.state==='completed')return value.result;if(value.result.status.state==='failed')throw new Error(JSON.stringify(value));await delay(10);}throw new Error('Native task completion deadline');}
+                                                                                                                                                                                                                                                                                                                                                                                               ^
+
+Error: Native task completion deadline
+    at finished (file:///D:/CantorAI2026/xMind/Native/tests/a2a_message_http_contract.mjs:32:384)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/a2a_message_http_contract.mjs:46:18
+
+Node.js v22.19.0
+
+      Start 21: native_a2a_stream_http_contract
+21/77 Test #21: native_a2a_stream_http_contract .............   Passed    1.56 sec
+      Start 22: native_a2a_v1_http_contract
+22/77 Test #22: native_a2a_v1_http_contract .................***Failed   10.28 sec
+file:///D:/CantorAI2026/xMind/Native/tests/a2a_v1_http_contract.mjs:28
+async function until(read,predicate){const deadline=Date.now()+10000;while(Date.now()<deadline){if(peerError)throw peerError;const value=await read();if(predicate(value))return value;await delay(10);}throw new Error('Native v1 observation deadline');}
+                                                                                                                                                                                                              ^
+
+Error: Native v1 observation deadline
+    at until (file:///D:/CantorAI2026/xMind/Native/tests/a2a_v1_http_contract.mjs:28:207)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/a2a_v1_http_contract.mjs:47:158
+
+Node.js v22.19.0
+
+      Start 23: native_responses_agent_http_contract
+23/77 Test #23: native_responses_agent_http_contract ........***Failed   15.59 sec
+file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:73
+async function until(read,predicate){const deadline=Date.now()+15000;while(Date.now()<deadline){if(peerError)throw peerError;const value=await read();if(predicate(value))return value;await delay(15);}throw new Error('Responses observation deadline');}
+                                                                                                                                                                                                              ^
+
+Error: Responses observation deadline
+    at until (file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:73:207)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processTimers (node:internal/timers:520:9)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:95:166
+
+Node.js v22.19.0
+
+      Start 24: native_graph_service_http_contract
+24/77 Test #24: native_graph_service_http_contract ..........   Passed    7.07 sec
+      Start 25: native_provider_cli_contract
+25/77 Test #25: native_provider_cli_contract ................   Passed    2.03 sec
+      Start 26: native_provider_setup_contract
+26/77 Test #26: native_provider_setup_contract ..............   Passed    1.22 sec
+      Start 27: native_graph_runner_contract
+27/77 Test #27: native_graph_runner_contract ................   Passed    1.69 sec
+      Start 28: native_graph_mcp_contract
+28/77 Test #28: native_graph_mcp_contract ...................   Passed    5.85 sec
+      Start 29: native_graph_mcp_http_contract
+29/77 Test #29: native_graph_mcp_http_contract ..............   Passed    2.36 sec
+      Start 30: native_delegation_contract
+30/77 Test #30: native_delegation_contract ..................   Passed    2.12 sec
+      Start 31: native_delegation_http_contract
+31/77 Test #31: native_delegation_http_contract .............   Passed    1.05 sec
+      Start 32: native_graph_checkpoint_contract
+32/77 Test #32: native_graph_checkpoint_contract ............   Passed    0.52 sec
+      Start 33: native_graph_children_contract
+33/77 Test #33: native_graph_children_contract ..............   Passed    0.32 sec
+      Start 34: native_graph_contract
+34/77 Test #34: native_graph_contract .......................   Passed    0.40 sec
+      Start 35: native_instruction_configuration_contract
+35/77 Test #35: native_instruction_configuration_contract ...   Passed    0.23 sec
+      Start 36: native_process_configuration_contract
+36/77 Test #36: native_process_configuration_contract .......   Passed    0.31 sec
+      Start 37: native_process_executor_contract
+37/77 Test #37: native_process_executor_contract ............   Passed   10.42 sec
+      Start 38: native_agent_process_http_contract
+38/77 Test #38: native_agent_process_http_contract ..........***Failed   10.39 sec
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'failed'
+- 'completed'
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/agent_process_http_contract.mjs:97:134
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'failed',
+  expected: 'completed',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+      Start 39: native_process_adapter_contract
+39/77 Test #39: native_process_adapter_contract .............   Passed    4.18 sec
+      Start 40: native_mcp_configuration_contract
+40/77 Test #40: native_mcp_configuration_contract ...........   Passed    0.21 sec
+      Start 41: native_schema_worker_contract
+41/77 Test #41: native_schema_worker_contract ...............   Passed    2.63 sec
+      Start 42: native_mcp_stdio_contract
+42/77 Test #42: native_mcp_stdio_contract ...................   Passed    3.13 sec
+      Start 43: native_mcp_handshake_contract
+43/77 Test #43: native_mcp_handshake_contract ...............   Passed    0.87 sec
+      Start 44: native_mcp_client_contract
+44/77 Test #44: native_mcp_client_contract ..................   Passed    1.36 sec
+      Start 45: native_mcp_effect_contract
+45/77 Test #45: native_mcp_effect_contract ..................   Passed    7.32 sec
+      Start 46: native_agent_service_contract
+46/77 Test #46: native_agent_service_contract ...............***Failed    5.27 sec
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: D:/CantorAI2026/xMind/build/native-dynamic-plan/Release/agentflow_agent_service_contract.exe C:\Users\shaw9\AppData\Local\Temp\xmind-service-kyDrDg\state.sqlite D:/CantorAI2026/.worktrees/xlang3-nexus-buffer/build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:60217/chat
+Actual provider stream did not start
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'D:/CantorAI2026/xMind/build/native-dynamic-plan/Release/agentflow_agent_service_contract.exe C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-service-kyDrDg\\state.sqlite D:/CantorAI2026/.worktrees/xlang3-nexus-buffer/build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:60217/chat',
+  stdout: '',
+  stderr: 'Actual provider stream did not start\r\n'
+}
+
+Node.js v22.19.0
+
+      Start 47: native_agent_runner_contract
+47/77 Test #47: native_agent_runner_contract ................   Passed    5.44 sec
+      Start 48: native_gemini_agent_contract
+48/77 Test #48: native_gemini_agent_contract ................   Passed    0.39 sec
+      Start 49: native_anthropic_agent_contract
+49/77 Test #49: native_anthropic_agent_contract .............   Passed    0.56 sec
+      Start 50: native_create_executor_contract
+50/77 Test #50: native_create_executor_contract .............   Passed    1.16 sec
+      Start 51: native_edit_executor_contract
+51/77 Test #51: native_edit_executor_contract ...............   Passed    0.81 sec
+      Start 52: native_approved_edit_http_contract
+52/77 Test #52: native_approved_edit_http_contract ..........   Passed    1.08 sec
+      Start 53: native_workspace_tools_contract
+53/77 Test #53: native_workspace_tools_contract .............   Passed    0.64 sec
+      Start 54: native_repository_instructions_contract
+54/77 Test #54: native_repository_instructions_contract .....   Passed    0.54 sec
+      Start 55: native_chat_provider_contract
+55/77 Test #55: native_chat_provider_contract ...............   Passed    0.21 sec
+      Start 56: native_gemini_provider_contract
+56/77 Test #56: native_gemini_provider_contract .............   Passed    0.25 sec
+      Start 57: native_anthropic_provider_contract
+57/77 Test #57: native_anthropic_provider_contract ..........   Passed    0.25 sec
+      Start 58: native_http_stream_transport_contract
+58/77 Test #58: native_http_stream_transport_contract .......   Passed    4.93 sec
+      Start 59: native_agent_http_contract
+59/77 Test #59: native_agent_http_contract ..................***Failed   13.83 sec
+file:///D:/CantorAI2026/xMind/Native/tests/agent_http_contract.mjs:94
+  throw new Error(`Timed out waiting for ${label}`);
+        ^
+
+Error: Timed out waiting for error-run failed
+    at until (file:///D:/CantorAI2026/xMind/Native/tests/agent_http_contract.mjs:94:9)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/agent_http_contract.mjs:173:3
+
+Node.js v22.19.0
+
+      Start 60: native_agent_edit_http_contract
+60/77 Test #60: native_agent_edit_http_contract .............   Passed    8.06 sec
+      Start 61: native_agent_mcp_http_contract
+61/77 Test #61: native_agent_mcp_http_contract ..............   Passed    2.16 sec
+      Start 62: native_mcp_sdk_modern_contract
+62/77 Test #62: native_mcp_sdk_modern_contract ..............   Passed    2.64 sec
+      Start 63: native_mcp_sdk_legacy_contract
+63/77 Test #63: native_mcp_sdk_legacy_contract ..............   Passed    2.86 sec
+      Start 64: native_http_cli_contract
+64/77 Test #64: native_http_cli_contract ....................   Passed    2.63 sec
+      Start 65: embedded_xlang_sqlite_contract
+65/77 Test #65: embedded_xlang_sqlite_contract ..............   Passed    0.15 sec
+      Start 66: native_incoming_repository_contract
+66/77 Test #66: native_incoming_repository_contract .........   Passed    0.31 sec
+      Start 67: native_task_list_repository_contract
+67/77 Test #67: native_task_list_repository_contract ........   Passed    0.41 sec
+      Start 68: native_permission_waiter_contract
+68/77 Test #68: native_permission_waiter_contract ...........   Passed    0.94 sec
+      Start 69: native_operation_repository_contract
+69/77 Test #69: native_operation_repository_contract ........   Passed    0.73 sec
+      Start 70: xlang_repository_contract
+70/77 Test #70: xlang_repository_contract ...................   Passed    0.28 sec
+      Start 71: persistence_service_contract
+71/77 Test #71: persistence_service_contract ................   Passed    1.75 sec
+      Start 72: native_provider_profiles_contract
+72/77 Test #72: native_provider_profiles_contract ...........   Passed    0.40 sec
+      Start 73: native_provider_profile_runtime_contract
+73/77 Test #73: native_provider_profile_runtime_contract ....   Passed    1.82 sec
+      Start 74: native_provider_profile_cli_contract
+74/77 Test #74: native_provider_profile_cli_contract ........   Passed    3.82 sec
+      Start 75: native_gemini_catalogue_contract
+75/77 Test #75: native_gemini_catalogue_contract ............   Passed   10.94 sec
+      Start 76: native_gemini_profile_runtime_contract
+76/77 Test #76: native_gemini_profile_runtime_contract ......***Failed   40.19 sec
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: D:/CantorAI2026/xMind/build/native-dynamic-plan/Release/agentflow_gemini_profile_runtime_contract.exe C:\Users\shaw9\AppData\Local\Temp\xmind-gemini-profile-Vc15CR D:/CantorAI2026/.worktrees/xlang3-nexus-buffer/build/Release/modules C:/Python/Python314/Lib C:\Users\shaw9\AppData\Local\Temp\xmind-gemini-profile-Vc15CR\workspace http://127.0.0.1:51266
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: null,
+  killed: true,
+  signal: 'SIGTERM',
+  cmd: 'D:/CantorAI2026/xMind/build/native-dynamic-plan/Release/agentflow_gemini_profile_runtime_contract.exe C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-gemini-profile-Vc15CR D:/CantorAI2026/.worktrees/xlang3-nexus-buffer/build/Release/modules C:/Python/Python314/Lib C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-gemini-profile-Vc15CR\\workspace http://127.0.0.1:51266',
+  stdout: '',
+  stderr: ''
+}
+
+Node.js v22.19.0
+
+      Start 77: encrypted_credential_repository_contract
+77/77 Test #77: encrypted_credential_repository_contract ....   Passed    0.34 sec
+
+88% tests passed, 9 tests failed out of 77
+
+Total Test time (real) = 239.52 sec
+
+The following tests FAILED:
+	 15 - native_planning_http_contract (Failed)
+	 17 - native_dynamic_plan_engine_contract (Failed)
+	 20 - native_a2a_message_http_contract (Failed)
+	 22 - native_a2a_v1_http_contract (Failed)
+	 23 - native_responses_agent_http_contract (Failed)
+	 38 - native_agent_process_http_contract (Failed)
+	 46 - native_agent_service_contract (Failed)
+	 59 - native_agent_http_contract (Failed)
+	 76 - native_gemini_profile_runtime_contract (Failed)
+Errors while running CTest

@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/agent_runner.hpp"
 #include "agentflow/root_execution_budget.hpp"
+#include "agentflow/native_child_executor.hpp"
 
 namespace agentflow {
 struct DelegationCapacityUnavailable : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -10,6 +11,7 @@ struct DelegationOutcomeUnrecorded : std::runtime_error {using std::runtime_erro
 class DelegationExecutor {
 public:
     DelegationExecutor(PersistenceService& store,std::size_t workers=4,std::size_t capacity=64);
+    DelegationExecutor(PersistenceService& store,std::shared_ptr<NativeChildExecutor> children);
     ~DelegationExecutor();
     DelegationExecutor(const DelegationExecutor&)=delete;
     DelegationExecutor& operator=(const DelegationExecutor&)=delete;

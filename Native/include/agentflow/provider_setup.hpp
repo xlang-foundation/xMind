@@ -25,6 +25,12 @@ public:
     Run submit_model(std::string id,std::string session,std::string prompt,std::string model) override;
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
     std::vector<std::string> models() const override;
+    bool supports_delegation() const override;
+    bool supports_dynamic_planning() const override;
+    Run plan_input(const std::string& root,const std::string& request,std::string input_json,
+        const std::string& actor,std::int64_t revision,std::int64_t state_sequence) override;
+    Run resume_plan(const std::string& root,const std::string& actor,
+        std::int64_t revision,std::int64_t state_sequence) override;
     void cancel(const std::string& id) override;
     bool healthy() const override;
     bool available() const override;

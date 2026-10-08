@@ -17,6 +17,14 @@ void streaming(PersistenceService& store,const std::string& id) {
     }
     throw std::runtime_error("Actual provider stream did not start");
 }
+void cancelled(PersistenceService& store,const std::string& id) {
+    const auto deadline=std::chrono::steady_clock::now()+5s;
+    while(std::chrono::steady_clock::now()<deadline) {
+        if(store.run(id).get().state==RunState::cancelled)return;
+        std::this_thread::sleep_for(10ms);
+    }
+    throw std::runtime_error("Actual held provider stream did not retire after controller cancellation");
+}
 }
 int main(int argc,char** argv) {
     if(argc!=5) return 2;
@@ -38,8 +46,24 @@ int main(int argc,char** argv) {
         for(const auto* id:{"a","b","queued"}) require(store.run(id).get().state==RunState::cancelled,"Shutdown must cancel actual workers and queued jobs before returning");
         rejects<RunUnavailable>([&]{service.submit("rejected","rejected","must not persist");});
         service.close(); // Idempotent joined shutdown, before persistence teardown.
+        {
+            AgentService repeated(store,settings,1,1);
+            for(int cycle=0;cycle<4;++cycle) {
+                const auto id="notifier_"+std::to_string(cycle);store.create_session(id,id).get();
+                // Exercise ordinary submissions while the independent expiry
+                // loop has crossed a tick. Actual model.text and cancellation,
+                // rather than elapsed time alone, establish dispatch/retirement.
+                std::this_thread::sleep_for(120ms);
+                repeated.submit(id,id,"hold-stream");streaming(store,id);
+                require(store.run(id).get().state==RunState::running,"Repeated notifier wake must start its actual provider stream");
+                repeated.cancel(id);cancelled(store,id);
+                const auto rows=store.run_history(id).get();
+                require(rows.size()==1&&rows[0].role=="user","Cancelled held stream must not acquire a fabricated final response");
+            }
+            repeated.close();require(!repeated.healthy(),"Repeated notifier service must join both worker and expiry waiters");
+        }
         store.close();
-        std::cout<<"Native agent service contract passed: parallel native streams, bounded admission and joined cancellation. Inference peer is synthetic.\n";
+        std::cout<<"Native agent service contract passed: parallel native streams, bounded admission, four repeated actual dispatch/cancel cycles across expiry ticks and joined cancellation. Inference peer is synthetic.\n";
         return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }

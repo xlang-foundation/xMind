@@ -27,9 +27,10 @@ Operation proposed(PersistenceService& store,const std::string& id){
     throw std::runtime_error("MCP proposal timed out");
 }
 struct Task {
-    std::stop_source cancel;std::future<std::string> result;
+    std::stop_source cancel;std::promise<std::string> discovered_bindings;
+    std::shared_future<std::string> bindings;std::future<std::string> result;
     Task(PersistenceService& store,char** argv,std::filesystem::path root,std::string run,std::string id,std::string mode,std::string arguments=R"({"body":"actual native MCP effect\n","decimal":1.00000000000000000001})",std::optional<std::filesystem::path> shared_server_root={}):
-        result(std::async(std::launch::async,[this,&store,argv,root,run,id,mode,arguments,shared_server_root]{
+        bindings(discovered_bindings.get_future().share()),result(std::async(std::launch::async,[this,&store,argv,root,run,id,mode,arguments,shared_server_root]{
             const auto peer_root=shared_server_root.value_or(root);const auto config_id="fixture-server-"+peer_root.filename().string();
             WorkspaceTools workspace(root.string());McpStdioClient client({argv[1],argv[3],{argv[2],mode,(peer_root/"effect.txt").string(),(peer_root/"effect.marker").string()},{}});
             try {
@@ -37,10 +38,16 @@ struct Task {
                 McpToolRegistry registry(client,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token());
                 const auto definitions=registry.definitions();require(definitions.size()==1 && definitions[0].name.starts_with("mcp_") && definitions[0].name.size()==52,"Native registry must derive a bounded alias from trusted identity and exact snapshot");
                 require(definitions[0].description.find("Peer tool name (untrusted metadata): \"fixture.write\"")!=std::string::npos,"Model catalogue must expose the original peer tool identity as quoted untrusted metadata");
+                const auto snapshot=registry.approval_bindings_json();const auto metadata=Json::parse(snapshot);
+                require(metadata.is_array()&&metadata.size()==1&&metadata[0].is_object()&&metadata[0].size()==9,"Private approval snapshot must contain one exact bounded metadata object per actual alias");
+                for(const auto* field:{"server_config_id","config_revision","peer_tool","alias","catalogue_fingerprint","protocol_version","input_schema_json","output_schema_json","annotations_json"})require(metadata[0].contains(field),"Approval metadata must contain only the immutable registered binding fields");
+                require(metadata[0]["alias"]==definitions[0].name&&metadata[0]["input_schema_json"]==definitions[0].input_schema_json&&metadata[0]["protocol_version"]==(mode=="legacy"?"2025-11-25":"2026-07-28"),"Private binding must preserve the actual alias, exact schema text and negotiated protocol");
+                discovered_bindings.set_value(snapshot);
                 const auto alias=mode=="unknown-alias"?"fixture.write":definitions[0].name;
                 const auto deadline=std::chrono::steady_clock::now()+(mode=="stopped-before-dispatch"?1500ms:mode=="timeout"?1500ms:5s);
                 const auto output=registry.invoke(id,run,alias,arguments,expiry(),deadline,cancel.get_token());
-                client.shutdown();require(client.status().exit_code==0,"Actual MCP peer must verify a valid exchange");return output;
+                client.shutdown();require(client.status().exit_code==0,"Actual MCP peer must verify a valid exchange");
+                require(registry.approval_bindings_json()==snapshot,"Immutable approval metadata must remain inspectable without ready peer access after actual shutdown");return output;
             }catch(...){const auto error=std::current_exception();client.shutdown();require(client.status().exit_code==0,"Failure peer must accept the expected wire sequence and shutdown");std::rethrow_exception(error);}
         })){}
     ~Task(){cancel.request_stop();if(result.valid())result.wait();}
@@ -61,6 +68,8 @@ int main(int argc,char** argv){
                 const auto payload=Json::parse(proposal.spec.arguments_json);
                 require(payload["server_config_id"]=="fixture-server-"+std::string(mode) && payload["config_revision"]==7 && payload["peer_tool"]=="fixture.write" && payload["catalogue_fingerprint"].get<std::string>().size()==64,"Approval must bind trusted configuration, peer name and schema snapshot");
                 require(payload["arguments_json"].get<std::string>().find("1.00000000000000000001")!=std::string::npos,"Durable proposal must retain exact approved numeric bytes");
+                auto actual_binding=payload;require(actual_binding.erase("arguments_json")==1,"Operation must retain its exact approved arguments separately from private authority metadata");
+                require(actual_binding==Json::parse(task.bindings.get()).at(0),"Actual durable MCP proposal must use exactly the same discovered binding as the sealed private snapshot");
                 store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();const auto actual=Json::parse(task.result.get());
                 require(contents(workspace/"effect.txt")=="actual native MCP effect\n" && actual["acknowledged_by_peer"]==true && actual["independently_verified"]==false,"Real acknowledged tool effect must be distinguished from independent verification");
                 const auto complete=store.operation(mode).get();require(complete.state==OperationState::succeeded && complete.decision_actor=="fixture-controller","Acknowledged effect must be durably attributed");

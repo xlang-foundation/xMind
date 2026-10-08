@@ -19,12 +19,12 @@ const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',()=>{
     try {
       ++requests;const body=JSON.parse(source),name=body.messages.findLast(message=>message.role==='user').content;
-      assert.equal(body.model,'synthetic-native-process-model');assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','run_process','delegate_tasks']);
+      assert.equal(body.model,'synthetic-native-process-model');assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','run_process','delegate_tasks','plan_tasks','revise_plan','inspect_plan']);
       assert.equal(body.messages[0].role,'system');assert.ok(body.messages[0].content.includes('Report only actions and evidence that occurred.'));assert.ok(body.messages[0].content.endsWith(instructionText),'Actual model request must retain core policy and the loaded instruction supplement');
       assert.ok(body.messages[0].content.includes(repositoryText),'Actual native provider request must include the root guidance read from disk');
       assert.deepEqual(body.tools.find(tool=>tool.function.name==='run_process').function.parameters.properties.profile.enum,['fixture']);
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
-      if(tool){const result=JSON.parse(tool.content);continued.set(name,result);assert.equal(tool.tool_call_id,'fixture-'+name);
+      if(tool){assert.notEqual(name,'stale-executable','A changed sealed executable must reject before another provider request');const result=JSON.parse(tool.content);continued.set(name,result);assert.equal(tool.tool_call_id,'fixture-'+name);
         if(name==='allowed'){assert.equal(result.exit_code,0);assert.equal(result.termination,'exited');assert.equal(result.independently_verified,false);assert.equal(JSON.parse(result.stdout.data).inherited,false);}
         else assert.equal(result.error.code,name==='denied'?'permission_denied':name==='stale-guidance'?'repository_instructions_required':'process_not_dispatched');
         delta={content:'Synthetic process continuation after the actual backend result'};finish='stop';
@@ -94,9 +94,10 @@ try {
       if(name==='stale-guidance'){repositoryText='Updated synthetic repository guidance before approved command dispatch';await writeFile(join(workspace,'AGENTS.md'),repositoryText);}
       cli('decide',proposal.id,name==='denied'?'deny':'allow');
     }
-    const terminal=await until(()=>api(`/v1/runs/${run.id}`),value=>['completed','cancelled','failed'].includes(value.state));assert.equal(terminal.state,name==='cancelled'?'cancelled':'completed');
+    const terminal=await until(()=>api(`/v1/runs/${run.id}`),value=>['completed','cancelled','failed'].includes(value.state));assert.equal(terminal.state,name==='cancelled'?'cancelled':name==='stale-executable'?'failed':'completed',name+' must retain its actual native terminal outcome');
     const operation=cli('operation',proposal.id);assert.equal(operation.state,{allowed:'succeeded',denied:'denied',cancelled:'cancelled','stale-guidance':'failed','stale-executable':'failed'}[name]);
     if(name==='stale-guidance')assert.equal(JSON.parse(operation.result_json).reason,'repository_guidance_changed_or_unavailable_before_effect');
+    if(name==='stale-executable')assert.equal(cli('events',run.id).find(event=>event.kind==='run.failed')?.data.reason,'dynamic_configuration_changed','The failed dynamic root must report its sealed binding drift');
     const chunks=cli('events',run.id).filter(event=>event.kind==='process.output');
     const policyEvents=cli('events',run.id).filter(event=>event.kind==='agent.instructions');assert.equal(policyEvents.length,1);assert.deepEqual(policyEvents[0].data,{...instructionMetadata,scope:'server',runtime_state:'startup_snapshot'});assert.equal(JSON.stringify(policyEvents).includes(instructionText),false);
     const repositoryEvents=cli('events',run.id).filter(event=>event.kind==='agent.repository_instructions');assert.equal(repositoryEvents.length,1);const repository=repositoryEvents[0].data;assert.equal(repository.snapshot,'run_start');assert.equal(repository.sources.length,1);assert.equal(repository.sources[0].path,'AGENTS.md');assert.equal(repository.sources[0].byte_count,Buffer.byteLength(runRepositoryText));assert.equal(repository.sources[0].content_sha256,createHash('sha256').update(runRepositoryText).digest('hex'));assert.ok(repository.sources[0].file_id);assert.ok(repository.sources[0].workspace_id);assert.equal(JSON.stringify(repositoryEvents).includes(runRepositoryText),false);
@@ -110,12 +111,12 @@ try {
     }else assert.equal(chunks.length,0,'Undispatched commands cannot fabricate output events');
     if(name==='allowed'){assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'actual child effect');assert.equal(JSON.parse(operation.result_json).exit_code,0);}
     else await assert.rejects(readFile(join(workspace,name+'.txt')),{code:'ENOENT'},'Undispatched commands must preserve absence');
-    const history=cli('history',name);assert.equal(history[0].role,'user');if(name!=='cancelled'){assert.ok(continued.has(name));assert.equal(history.at(-1).role,'assistant');}
+    const history=cli('history',name);assert.equal(history[0].role,'user');if(name==='stale-executable'){assert.equal(continued.has(name),false);assert.deepEqual(history.map(item=>item.role),['user','assistant','tool'],'The actual original response and undispatched tool result remain committed without a new assistant');assert.equal(JSON.parse(history.at(-1).data.content).error.code,'process_not_dispatched');}else if(name!=='cancelled'){assert.ok(continued.has(name));assert.equal(history.at(-1).role,'assistant');}
     if(name==='cancelled'){const watched=spawnSync(cliExe,[String(port),'watch',run.id],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(watched.error);assert.equal(watched.status,2,watched.stderr);assert.deepEqual(watchRecords(watched.stdout),cli('events',run.id));}
   }
   for(const cursor of ['-1','not-a-cursor','9223372036854775808']){const rejected=spawnSync(cliExe,[String(port),'watch','run-allowed',cursor],{env,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(rejected.error);assert.equal(rejected.status,1);assert.ok(rejected.stderr.includes('Invalid cursor'));assert.equal(rejected.stdout,'');}
   for(const [run,watchEnv] of [['missing-run',env],['run-allowed',{...env,XMIND_AUTH_TOKEN:'synthetic invalid observer authentication'}]]){const rejected=spawnSync(cliExe,[String(port),'watch',run],{env:watchEnv,encoding:'utf8',timeout:5000,windowsHide:true});assert.ifError(rejected.error);assert.equal(rejected.status,1);assert.ok(rejected.stderr.includes('Server rejected run observation'));assert.equal(rejected.stdout,'');}
-  if(peerError)throw peerError;assert.equal(requests,9,'Exactly one initial request per run and four real-result continuations');
+  if(peerError)throw peerError;assert.equal(requests,8,'Exactly five initial requests and three actual result continuations; cancellation and sealed executable drift admit no continuation');
   await stop();await start(false);assert.equal((await api('/v1/health')).agent_execution,false);
   assert.deepEqual(cli('instructions'),{...instructionMetadata,scope:'server',runtime_state:'startup_snapshot'},'Model-free restart must retain instruction metadata without fabricating execution');
   assert.equal(cli('operation',operationIds[0]).state,'succeeded');assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'actual child effect');

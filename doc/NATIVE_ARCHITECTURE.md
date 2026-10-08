@@ -37,6 +37,17 @@ the superseded direct-SQLite implementation was removed. See
 
 ## Current source and verification
 
+The initial schema-v11 dependency-plan source passed all 77 native contracts,
+119 extension tests and 26 browser tests. Ordinary Agent mode can select and
+revise agent/human dependencies, including approval-controlled coding children.
+Native C++ owns the plan ledger, shared limits and clean pause/resume behavior;
+embedded xlang3 performs SQLite transactions. Browser/native adapter integration
+and 18 required VSIX assets passed separately. These results use labelled
+synthetic provider peers and do not establish live-provider or installed editor
+planning acceptance. The installed preview remains the ace/schema-v10 backend.
+[Implementation and limits](native-dynamic-plan.md),
+[local source evidence](evidence/native-dynamic-plan-local-provenance.json).
+
 Native Responses reasoning continuation passed the exact ace2460 hosted gate: **71 native contracts in 171.52 seconds, 103 extension and 20 browser contracts**, with all 16 job steps, native/browser integration and 18 VSIX assets passing. Verified sources and artifact maps bind the completed-item continuation fix and its real native two-child read/join with synthetic provider replies. The local build was deferred by the benchmark guard. The exact native bundle is installed. One real OpenAI browser prompt completed two read-only native children and a joined parent response, with six owned model attempts, separate per-response metrics and zero effect operations. Immediate refresh retained the connection and selection. Upgrade and rollback checks passed at their separately documented scopes. [Compatibility and scope](native-responses-reasoning.md), [exact hosted evidence](evidence/native-responses-reasoning-hosted-provenance.json).
 
 Ordinary Agent mode now offers native `delegate_tasks` for model-selected read-only workspace investigations. Actual child AgentRunners keep separate conversations and measured response usage/timing, share their parent's call/deadline limits, and return observed results before the parent continues or requests an approval-controlled effect. Schema v10 durably binds tasks, immutable presets, budgets and once-only settlements; recovery never replays children. CLI, browser and VS Code observe the same owned child histories and committed tree cursors.
@@ -47,7 +58,7 @@ Exact revision `e353a37799530a234a6fa13e51f61a5c52d3ae6a` subsequently passed it
 
 The preceding managed backend upgrade installed the exact hosted e353 bundle with schema v10; the later 7fe upgrade is recorded in the diagnostic scope. The actual upgrade preserved existing records, settings and browser access; its disposable schema 9→10→9 rollback fixture passed separately. The original e353 webpage exposed a classic-script name collision. A separate local browser repair passed **103 extension tests in 1.6557025 seconds**, **20 browser tests in 0.9090882 seconds**, native/browser integration and all 18 VSIX assets. The repaired page reused its cookie without key entry and restored prior history/metrics, the selected model and Agent mode. These frontend results are separate from the unchanged hosted 71/103/19 gate. [Upgrade evidence](evidence/native-delegation-upgrade-provenance.json), [acceptance scopes](native-delegation-acceptance.md).
 
-The first e353 live `delegate_tasks` request failed with `responses_terminal_mismatch` before child admission: zero children, only the user history row and one parent model-budget attempt. That historical failure remains recorded; the later ace browser two-child join passed the separate acceptance above. Installed VS Code delegation acceptance remains unverified. Mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [next native planning design](native-dynamic-plan-design.md).
+The first e353 live `delegate_tasks` request failed with `responses_terminal_mismatch` before child admission: zero children, only the user history row and one parent model-budget attempt. That historical failure remains recorded; the later ace browser two-child join passed the separate acceptance above. Installed VS Code delegation acceptance remains unverified. Broader dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Delegation limits](native-delegation.md), [initial dependency plans](native-dynamic-plan.md), [broader planning design](native-dynamic-plan-design.md).
 
 New source connects pinned MCP tools directly to registered graph tool nodes,
 including graphs with no configured model. A node binds its opaque alias to an

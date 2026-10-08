@@ -22,6 +22,10 @@ public:
     McpToolRegistry(const McpToolRegistry&)=delete;
     McpToolRegistry& operator=(const McpToolRegistry&)=delete;
     std::vector<ModelToolDefinition> definitions() const;
+    // Backend-private immutable approval metadata for each actual discovered
+    // alias, as a JSON array. No arguments, credentials or peer access. This
+    // snapshot belongs in sealed native authority, never model/public DTOs.
+    std::string approval_bindings_json() const;
     std::string invoke(const std::string& operation_id,const std::string& run_id,
         const std::string& alias,const std::string& arguments,std::int64_t approval_expiry,
         McpStdioClient::Deadline deadline,std::stop_token cancel={});

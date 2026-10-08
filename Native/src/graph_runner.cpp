@@ -29,7 +29,10 @@ GraphRunner::GraphRunner(PersistenceService& store,AgentSettings settings,std::s
     if(settings_.mcp_servers.size()>16)throw std::invalid_argument("MCP server count exceeds limits");
     std::set<std::string> servers;
     for(const auto& server:settings_.mcp_servers)if(!configuration_id(server.id) || server.revision<1 || server.revision>9007199254740991LL || !servers.insert(server.id).second)throw std::invalid_argument("Invalid registered MCP graph configuration");
-    if(!settings_.provider.model.empty())agents_=std::make_unique<AgentRunner>(store_,settings_);
+    if(!settings_.provider.model.empty()){
+        auto graph_agent=settings_;graph_agent.delegation.reset();graph_agent.planning.reset();
+        agents_=std::make_unique<AgentRunner>(store_,std::move(graph_agent));
+    }
     if(settings_.workspace)workspace_=std::make_unique<WorkspaceTools>(*settings_.workspace);
     // Stored profiles can exist before this owner binds a workspace. Keep them
     // inactive; validate() still rejects every direct tool without a workspace.

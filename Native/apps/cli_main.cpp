@@ -35,6 +35,27 @@ std::int64_t event_cursor(const std::string& source) {
 std::int64_t provider_revision(const std::string& source){
     const auto value=event_cursor(source);if(value>9007199254740991)throw std::invalid_argument("Invalid provider revision");return value;
 }
+std::int64_t plan_revision(const std::string& source){const auto value=provider_revision(source);if(value<1)throw std::invalid_argument("Plan revision and state sequence must be positive");return value;}
+void validate_plan_input(const std::string& source){
+    if(source.empty()||source.size()>16384)throw std::invalid_argument("Plan input must contain at most 16384 bytes");
+    using Json=nlohmann::json;std::vector<std::set<std::string>> objects;
+    const auto parsed=Json::parse(source,[&](int depth,Json::parse_event_t event,Json& value){
+        if(depth>64)throw std::invalid_argument("Plan input nesting exceeds limits");
+        if(event==Json::parse_event_t::object_start)objects.emplace_back();
+        else if(event==Json::parse_event_t::object_end)objects.pop_back();
+        else if(event==Json::parse_event_t::key&&!objects.back().insert(value.get<std::string>()).second)throw std::invalid_argument("Duplicate plan input field");return true;
+    });if(!parsed.is_object())throw std::invalid_argument("Plan input must be a JSON object");
+}
+void observed_dynamic_child(const nlohmann::json& record){
+    const auto kind=record.value("kind",std::string{});
+    if(kind=="delegated_leaf"){if(record.value("batch_id",std::string{}).empty()||record.value("task_id",std::string{}).empty()||record.value("preset_id",std::string{})!="workspace.inspect")throw std::runtime_error("Invalid delegated child metadata");}
+    else if(kind=="dynamic_agent"){
+        for(const auto* key:{"plan_id","claim_id"}){const auto value=record.value(key,std::string{});if(value.empty()||value.size()>128||value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid dynamic child identity");}
+        const auto label=record.value("node_label",std::string{}),preset=record.value("preset_id",std::string{});
+        if(label.empty()||label.size()>32||label.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||(preset!="workspace.inspect"&&preset!="workspace.coding")||!record.contains("definition_revision")||!record["definition_revision"].is_number_integer()||record["definition_revision"]<1||record["definition_revision"]>9007199254740991||!record.contains("claim_revision")||record["claim_revision"]!=record["definition_revision"]||record.value("batch_id",std::string{})!=""||record.value("task_id",std::string{})!=""||record.at("run").value("node_id",std::string{}).empty())throw std::runtime_error("Invalid dynamic child claim");
+    }else throw std::runtime_error("Invalid owned child kind");
+    if(!record.contains("preset_revision")||!record["preset_revision"].is_number_integer()||record["preset_revision"]<1||record["preset_revision"]>9007199254740991)throw std::runtime_error("Invalid child preset revision");
+}
 nlohmann::json active_profile_discovery(const nlohmann::json& metadata){
     using Json=nlohmann::json;const auto binding=provider_admission_binding(metadata);const auto id=binding.at("provider_profile_id").get<std::string>();
     if(id.empty())throw std::runtime_error("Select a saved provider profile before discovering account models");
@@ -102,10 +123,10 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
         if(response->status<200 || response->status>=300)throw std::runtime_error("Server rejected run observation (HTTP "+std::to_string(response->status)+")");
         return Json::parse(response->body);
     };
-    std::string session;bool tree=false;
+    std::string session;bool tree=false,plan_observation=false;
     const auto initial=read(path);if(!initial.is_object()||initial.value("id",std::string{})!=run||!initial.contains("session_id")||!initial["session_id"].is_string()||initial["session_id"].get<std::string>().empty())throw std::runtime_error("Invalid observed run identity");session=initial["session_id"].get<std::string>();
     if(graph&&initial.value("graph_root",false)!=true)throw std::runtime_error("Select a graph root for graph observation");
-    if(!graph&&initial.value("parent_id",std::string{}).empty()&&!initial.value("graph_root",false))tree=read("/v1/health").value("owned_child_observation",false);
+    if(!graph&&initial.value("parent_id",std::string{}).empty()&&!initial.value("graph_root",false)){const auto health=read("/v1/health");tree=health.value("owned_child_observation",false);plan_observation=health.contains("agent_planning")&&health["agent_planning"].is_boolean();}
     auto owners=[&] {
         std::set<std::string> owned{run};
         if(graph){
@@ -113,7 +134,7 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
             if(!children.is_array())throw std::runtime_error("Invalid graph child batch");
             for(const auto& child:children){const auto id=child.value("id",std::string{});if(!child.is_object() || child.value("parent_id",std::string{})!=run || child.value("session_id",std::string{})!=session || id.empty() || id.size()>128 || id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos || !owned.insert(id).second)throw std::runtime_error("Invalid graph child ownership");}
         }
-        if(tree){const auto children=read(path+"/children");if(!children.is_array()||children.size()>8)throw std::runtime_error("Invalid owned child batch");for(const auto& record:children){if(!record.is_object()||record.value("kind",std::string{})!="delegated_leaf"||!record.contains("run")||!record["run"].is_object())throw std::runtime_error("Invalid owned child metadata");const auto& child=record["run"];const auto id=child.value("id",std::string{});if(child.value("parent_id",std::string{})!=run||child.value("session_id",std::string{})!=session||id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos||!owned.insert(id).second)throw std::runtime_error("Invalid owned child identity");}}
+        if(tree){const auto children=read(path+"/children");if(!children.is_array()||children.size()>8)throw std::runtime_error("Invalid owned child batch");for(const auto& record:children){if(!record.is_object()||!record.contains("run")||!record["run"].is_object())throw std::runtime_error("Invalid owned child metadata");observed_dynamic_child(record);const auto& child=record["run"];const auto id=child.value("id",std::string{});if(child.value("parent_id",std::string{})!=run||child.value("session_id",std::string{})!=session||child.value("graph_root",false)||id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos||!owned.insert(id).second)throw std::runtime_error("Invalid owned child identity");}}
         return owned;
     };
     auto emit=[&] {
@@ -171,6 +192,34 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
                 break; // Re-read state before reviewing another operation.
             }
             if(interacted)continue;
+            if(plan_observation){
+                const auto response=client.Get(path+"/plan",headers);if(!response)throw std::runtime_error("Cannot inspect the current native plan");
+                if(response->status==409){std::this_thread::sleep_for(std::chrono::milliseconds(250));continue;}
+                if(response->status!=200)throw std::runtime_error("Server rejected plan inspection");
+                const auto snapshot=Json::parse(response->body);
+                if(!snapshot.is_object()||snapshot.at("run").value("id",std::string{})!=run||snapshot.at("run").value("session_id",std::string{})!=session||snapshot.at("run").value("parent_id",std::string{})!=""||snapshot.at("run").value("graph_root",false)||!snapshot.at("questions").is_array())throw std::runtime_error("Plan observation ownership changed");
+                if(!snapshot.at("plan").is_null()){
+                    const auto& plan=snapshot.at("plan");const auto revision=plan_revision(plan.at("revision").dump()),sequence=plan_revision(plan.at("state_sequence").dump());
+                    if(plan.value("root_run_id",std::string{})!=run||!plan.at("ready").is_array()||!plan.at("claimed").is_array()||!plan.at("waiting_human").is_array()||!plan.at("report_ready").is_boolean()||!plan.at("halted").is_boolean()||snapshot["questions"].size()>8)throw std::runtime_error("Invalid current plan readiness");
+                    auto questions=Json::array();std::set<std::string> waiting;
+                    for(const auto& question:snapshot["questions"]){if(question.value("state",std::string{})!="waiting")continue;const auto id=question.value("id",std::string{});
+                        if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos||question.value("root_run_id",std::string{})!=run||question.value("plan_id",std::string{})!=plan.value("id",std::string{})||!question.contains("question")||!question["question"].is_string()||!waiting.insert(id).second)throw std::runtime_error("Invalid plan human ownership");questions.push_back(question);
+                    }
+                    const bool resume=snapshot["run"].value("state",std::string{})=="paused"&&waiting.empty()&&plan["claimed"].empty()&&plan["waiting_human"].empty()&&!plan["halted"].get<bool>()&&(!plan["ready"].empty()||plan["report_ready"].get<bool>());
+                    if(!questions.empty()||resume){
+                        std::cout<<Json{{"type","plan_human_review"},{"snapshot",snapshot}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Plan review output is unavailable");
+                        std::cerr<<"Enter /input REQUEST_ID JSON for a displayed question"<<(resume?", /resume":"")<<", /cancel or /exit to detach.\n";
+                        std::string answer;if(!std::getline(std::cin,answer))throw std::runtime_error("CLI detached before plan input; backend execution remains owned by the server");if(!answer.empty()&&answer.back()=='\r')answer.pop_back();if(answer=="/exit")throw std::runtime_error("CLI detached before plan input; backend execution remains owned by the server");
+                        std::string route;Json input;
+                        if(answer=="/cancel"){route=path+"/cancel";input=Json::object();}
+                        else if(answer=="/resume"&&resume){route=path+"/plan/resume";input={{"expected_revision",revision},{"expected_state_sequence",sequence}};}
+                        else if(answer.starts_with("/input ")){const auto split=answer.find(' ',7);const auto request=split==std::string::npos?std::string{}:answer.substr(7,split-7),raw=split==std::string::npos?std::string{}:answer.substr(split+1);if(!waiting.contains(request)){std::cerr<<"No input sent. Use an exact displayed question ID.\n";continue;}try{validate_plan_input(raw);}catch(...){std::cerr<<"No input sent. Use a bounded strict JSON object.\n";continue;}route=path+"/plan/human/"+request;input={{"input_json",raw},{"expected_revision",revision},{"expected_state_sequence",sequence}};}
+                        else {std::cerr<<"No input sent. Use a displayed question, /resume when offered, /cancel or /exit.\n";continue;}
+                        const auto result=client.Post(route,headers,input.dump(),"application/json");if(!result)throw std::runtime_error("Cannot reach xMind Server for plan input");if(result->status<200||result->status>=300)std::cerr<<"Backend rejected plan input (HTTP "<<result->status<<"). Refreshing the recorded head; no automatic retry.\n";else std::cout<<Json{{"type",answer=="/cancel"?"run_cancel_result":answer=="/resume"?"plan_resume_result":"plan_input_result"},{"result",Json::parse(result->body)}}.dump()<<'\n'<<std::flush;
+                        continue;
+                    }
+                }
+            }
             if(graph){
                 const auto snapshot=read("/v1/graph-runs/"+run);
                 if(!snapshot.is_object()||snapshot.at("run").value("id",std::string{})!=run||snapshot.at("run").value("session_id",std::string{})!=session||!snapshot.contains("checkpoint_revision")||!snapshot["checkpoint_revision"].is_number_integer()||snapshot["checkpoint_revision"]<1||snapshot["checkpoint_revision"]>9007199254740991||!snapshot.at("checkpoint").at("nodes").is_array()||!snapshot.at("spec").at("nodes").is_array())throw std::runtime_error("Invalid graph input snapshot");
@@ -237,7 +286,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
             std::cerr<<"/runs lists recorded root runs in the selected conversation; use /watch or /graph-watch to attach one.\n";
-            std::cerr<<"Agent /watch includes owned investigations when supported. Direct commands: children RUN, child-history PARENT CHILD, tree-events RUN [CURSOR], delegation.\n";
+            std::cerr<<"Agent /watch includes actual owned inspection or coding children and native plan questions when supported. Direct commands: children RUN, child-history PARENT CHILD, tree-events RUN [CURSOR], delegation, planning, inspect-plan RUN.\n";
             std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
             std::cerr<<"/profiles lists saved provider metadata without changing this chat's admission binding; /profile ID REVISION explicitly selects a shared profile and clears this chat's model override.\n";
@@ -421,7 +470,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
 
 int main(int argc,char** argv) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, inspect-plan ROOT, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -483,6 +532,14 @@ int main(int argc,char** argv) {
         else if(command=="process-profiles" && argc==3) path="/v1/process/profiles";
         else if(command=="instructions" && argc==3) path="/v1/agent/instructions";
         else if(command=="delegation"&&argc==3)path="/v1/agent/delegation";
+        else if(command=="planning"&&argc==3)path="/v1/agent/planning";
+        else if(command=="inspect-plan"&&argc==4)path="/v1/runs/"+id(argv[3])+"/plan";
+        else if(command=="resume-plan"&&argc==6){path="/v1/runs/"+id(argv[3])+"/plan/resume";body={{"expected_revision",plan_revision(argv[4])},{"expected_state_sequence",plan_revision(argv[5])}};post=true;}
+        else if(command=="plan-input"&&argc==8){
+            const auto root=id(argv[3]),request=id(argv[4]);const auto revision=plan_revision(argv[5]),sequence=plan_revision(argv[6]);
+            std::ifstream file(std::filesystem::u8path(argv[7]),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read plan input file");std::string source;char byte;while(file.get(byte)){if(source.size()>=16384)throw std::invalid_argument("Plan input file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read plan input file");validate_plan_input(source);
+            path="/v1/runs/"+root+"/plan/human/"+request;body={{"input_json",source},{"expected_revision",revision},{"expected_state_sequence",sequence}};post=true;
+        }
         else if(command=="graphs" && argc==3)path="/v1/graphs";
         else if(command=="graph" && argc==4)path="/v1/graph-runs/"+id(argv[3]);
         else if(command=="graph-children" && argc==4)path="/v1/graph-runs/"+id(argv[3])+"/children";

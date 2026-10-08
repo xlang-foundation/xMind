@@ -15,6 +15,9 @@ public:
     virtual std::vector<std::string> models() const {return {};}
     virtual bool supports_profile_admission()const{return false;}
     virtual bool supports_delegation()const{return false;}
+    virtual bool supports_dynamic_planning()const{return false;}
+    virtual Run plan_input(const std::string&,const std::string&,std::string,const std::string&,std::int64_t,std::int64_t){throw RunUnavailable("Dynamic plan input is unavailable");}
+    virtual Run resume_plan(const std::string&,const std::string&,std::int64_t,std::int64_t){throw RunUnavailable("Dynamic plan resume is unavailable");}
     virtual Run submit_profile(std::string,std::string,std::string,std::string,ProviderProfileAdmission){throw RunUnavailable("Provider profile admission is unavailable");}
     virtual Run submit_model(std::string id,std::string session_id,std::string prompt,std::string model_id) {
         if(!model_id.empty()) throw std::invalid_argument("Model selection is unavailable");

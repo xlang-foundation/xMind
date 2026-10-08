@@ -42,6 +42,11 @@ public:
     std::vector<std::string> models() const override;
     bool supports_profile_admission()const override{return true;}
     bool supports_delegation()const override;
+    bool supports_dynamic_planning()const override;
+    Run plan_input(const std::string& root,const std::string& request,std::string input_json,
+        const std::string& actor,std::int64_t revision,std::int64_t state_sequence) override;
+    Run resume_plan(const std::string& root,const std::string& actor,
+        std::int64_t revision,std::int64_t state_sequence) override;
     bool supports_graph_profile_admission()const override{return true;}
     Run submit_profile(std::string id,std::string session,std::string prompt,std::string model,ProviderProfileAdmission expected)override;
     Run submit_graph_profile(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,ProviderProfileAdmission expected)override;

@@ -6,7 +6,8 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun } = require('../client');
+const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText } = require('../client');
+const {planFixture,inputMessage}=require('./plan-fixture');
 
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
@@ -16,13 +17,18 @@ function harness(options={}) {
   let pendingOperation;
   let operations=options.operations||[];
   let sidebarProvider;
-  const renameRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[];
+  const renameRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
     let data;
-    if(target.pathname==='/v1/provider/profiles')return options.profileRegistry?{ok:true,json:async()=>options.profileRegistry()}:{ok:false,status:404,json:async()=>({detail:'Legacy backend has no profile API'})};
+    if(target.pathname==='/v1/agent/planning')data={enabled:true,tools:['inspect_plan','plan_tasks','revise_plan']};
+    else if(options.plan&&target.pathname===`/v1/runs/${options.plan.run.id}/plan`)data=options.planRead?await options.planRead():options.plan;
+    else if(options.plan&&target.pathname===`/v1/runs/${options.plan.run.id}/plan/human/${options.plan.questions[0].id}`){planInputs.push(JSON.parse(requestOptions.body));data={...options.plan.run,state:'running'};}
+    else if(options.plan&&target.pathname===`/v1/runs/${options.plan.run.id}/plan/resume`){planResumes.push(JSON.parse(requestOptions.body));data={...options.plan.run,state:'running'};}
+    else if(target.pathname==='/v1/provider/profiles')return options.profileRegistry?{ok:true,json:async()=>options.profileRegistry()}:{ok:false,status:404,json:async()=>({detail:'Legacy backend has no profile API'})};
+    if(data!==undefined)return {ok:true,json:async()=>data};
     if(target.pathname==='/v1/provider/profiles/models')return {ok:true,json:async()=>({models:options.catalogue.models})};
     if(target.pathname==='/v1/runs'&&options.onAdmission)return options.onAdmission(JSON.parse(requestOptions.body));
     if(target.pathname==='/v1/health') data=options.health||{agent_execution:true,status:'ok'};
@@ -99,13 +105,13 @@ function harness(options={}) {
     workspaceState:{get:key=>state.get(key),update:async (key,value)=>{state.set(key,value);}}};
   state.set('agentflow.session',{url:'http://127.0.0.1:8765',id:'saved'});
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText}:name==='./webview'?require('../webview'):require(name),
     setTimeout:callback=>{bootstrapTasks.push(callback);return 1;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./browser-view'?require('../browser-view'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,state,errors,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  return {token,commands,secrets,requests,views,intervals,state,errors,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
     pauseOperation(promise) {pendingOperation=promise;},
@@ -158,6 +164,29 @@ test('saved Responses enrollment restores discovery and reports the native wire'
 async function setupView(options={}){
   const h=harness({health:{agent_execution:false,status:'ok'},providerSetup:providerFixture,...options});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='settings-state'&&!m.busy));return {h,view};
 }
+test('extension answers only a displayed and freshly owned question with exact raw input/CAS, without changing approval authority',async()=>{
+ const record=planFixture({root:'finished',session:'saved'}),options={health:{agent_execution:false,agent_planning:true,owned_child_observation:true},plan:record,runs:[record.run],ownedChildren:[]};const {h,view}=await setupView(options);
+ try{await until(()=>view.posted.some(message=>message.type==='plan'));const raw='{"quantity":1.00000000000000000001,"answer":true}';view.receive(inputMessage(record,raw));await until(()=>h.planInputs.length===1);assert.deepEqual(h.planInputs,[{input_json:raw,expected_revision:2,expected_state_sequence:17}]);assert.equal(h.decisions.length,0);assert.equal(h.graphRequests.length,0);assert.ok(!JSON.stringify(view.posted).includes(h.token));}finally{view.close();}
+});
+test('extension rejects forged question fields, duplicate input keys and stale fresh-head observations before POST',async()=>{
+ const record=planFixture({root:'finished',session:'saved'});let stale=false;const options={health:{agent_execution:false,agent_planning:true,owned_child_observation:true},plan:record,planRead:async()=>stale?{...record,plan:{...record.plan,state_sequence:18}}:record,runs:[record.run],ownedChildren:[]};const {h,view}=await setupView(options);
+ try{await until(()=>view.posted.some(message=>message.type==='plan'));view.receive({...inputMessage(record),backend_node_id:'foreign-node'});await until(()=>view.posted.some(message=>message.type==='error'));assert.equal(h.planInputs.length,0);
+  const errors=view.posted.filter(message=>message.type==='error').length;view.receive(inputMessage(record,'{"x":1,"\\u0078":2}'));await until(()=>view.posted.filter(message=>message.type==='error').length>errors);assert.equal(h.planInputs.length,0);
+  stale=true;const before=view.posted.filter(message=>message.type==='error').length;view.receive(inputMessage(record));await until(()=>view.posted.filter(message=>message.type==='error').length>before);assert.equal(h.planInputs.length,0);assert.ok(view.posted.some(message=>message.type==='plan'&&message.record.plan.state_sequence===18));
+ }finally{view.close();}
+});
+test('extension final-human-only ready paused owner exposes authenticated explicit resume with the observed preconditions',async()=>{
+ const record=planFixture({root:'finished',session:'saved',answer:true}),{h,view}=await setupView({health:{agent_execution:false,agent_planning:true,owned_child_observation:true},plan:record,runs:[record.run],ownedChildren:[]});
+ try{await until(()=>view.posted.some(message=>message.type==='plan'));view.receive({type:'plan-resume',root:record.run.id,plan_id:record.plan.id,expected_revision:2,expected_state_sequence:18});await until(()=>h.planResumes.length===1);assert.deepEqual(h.planResumes,[{expected_revision:2,expected_state_sequence:18}]);assert.equal(h.planInputs.length,0);assert.equal(h.decisions.length,0);}finally{view.close();}
+});
+test('extension close during fresh plan revalidation cannot post an answer or publish its obsolete observation',async()=>{
+ const record=planFixture({root:'finished',session:'saved'});let hold=false,release;const options={health:{agent_execution:false,agent_planning:true,owned_child_observation:true},plan:record,planRead:async()=>hold?new Promise(yes=>release=yes):record,runs:[record.run],ownedChildren:[]};const {h,view}=await setupView(options);
+ await until(()=>view.posted.some(message=>message.type==='plan'));hold=true;view.receive(inputMessage(record));await until(()=>release);const count=view.posted.length;view.close();release(record);await new Promise(resolve=>setImmediate(resolve));await new Promise(resolve=>setImmediate(resolve));assert.equal(h.planInputs.length,0);assert.equal(view.posted.length,count);assert.equal(h.intervals.size,0);
+});
+test('extension plan-read conflict clears the old action projection and never retries its input mutation',async()=>{
+ const record=planFixture({root:'finished',session:'saved'});let conflict=false;const options={health:{agent_execution:false,agent_planning:true,owned_child_observation:true},plan:record,planRead:async()=>{if(conflict)throw Object.assign(new Error('Actual synthetic observation conflict'),{status:409});return record;},runs:[record.run],ownedChildren:[]};const {h,view}=await setupView(options);
+ try{await until(()=>view.posted.some(message=>message.type==='plan'));const before=view.posted.filter(message=>message.type==='plan-clear').length;conflict=true;view.receive(inputMessage(record));await until(()=>view.posted.some(message=>message.type==='error'&&message.text.includes('observation conflict')));assert.equal(h.planInputs.length,0);assert.ok(view.posted.filter(message=>message.type==='plan-clear').length>before);assert.ok(!view.posted.some(message=>message.type==='event'&&message.event.kind==='run.failed'));}finally{view.close();}
+});
 test('settings key fetches a sidebar list; only a separate model selection saves encrypted backend settings',async()=>{
   const {h,view}=await setupView();view.receive({type:'saveProviderKey',key:'synthetic-private-provider-key',endpoint:'https://outside.invalid'});await until(()=>view.posted.some(m=>m.type==='model-list'));
   assert.equal(h.providerRequests.length,0);assert.equal(h.pickers.length,0);assert.ok(!h.inputPrompts.some(p=>p.title==='xMind: OpenAI API key'));

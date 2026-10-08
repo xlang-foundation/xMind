@@ -5,9 +5,11 @@
 #include "agentflow/mcp_configuration.hpp"
 #include "agentflow/process_executor.hpp"
 #include "agentflow/agent_instructions.hpp"
+#include "agentflow/dynamic_plan_records.hpp"
 
 namespace agentflow {
 class DelegationExecutor;
+class DynamicPlanExecutor;
 class RootExecutionBudget;
 struct CredentialReference {std::string scope,id,purpose;};
 // Public, immutable profile identity; never contains credentials or destinations.
@@ -33,6 +35,9 @@ struct AgentSettings {
     std::optional<ProviderExecutionIdentity> provider_identity;
     // Explicit registered read-only leaf policy; the parent keeps its own tools.
     std::optional<AgentDelegationPolicy> delegation;
+    // Native ordinary-root planning policy; graph nodes and depth-one children
+    // must explicitly clear it rather than acquiring another root allowance.
+    std::optional<DynamicPlanningPolicy> planning;
 };
 std::string provider_context_json(const AgentSettings& settings,const std::string& model_id={});
 // Shared native single-agent/model-tool loop, callable by backend workers and
@@ -41,12 +46,16 @@ std::string provider_context_json(const AgentSettings& settings,const std::strin
 class AgentRunner {
 public:
     AgentRunner(PersistenceService& persistence,AgentSettings settings,
-        std::shared_ptr<DelegationExecutor> delegation={});
+        std::shared_ptr<DelegationExecutor> delegation={},std::shared_ptr<DynamicPlanExecutor> planning={});
     ~AgentRunner();
     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={});
     Run execute(const std::string& run_id,std::stop_token cancel={},const std::string& model_id={},
         std::shared_ptr<RootExecutionBudget> budget={});
     std::optional<RootBudgetSpec> execution_budget(const std::string& model_id={}) const;
+    std::optional<DynamicPlanCapabilities> execution_capabilities(const std::string& model_id={}) const;
+    // Metadata-only controller preflight; neither method launches MCP or models.
+    void validate_dynamic_owner(const std::string& root_id,const std::string& model_id={}) const;
+    std::string admitted_dynamic_model(const std::string& root_id) const;
     std::vector<std::string> models() const;
 private:
     PersistenceService& persistence_;
@@ -54,5 +63,6 @@ private:
     std::unique_ptr<WorkspaceTools> workspace_;
     std::unique_ptr<ProcessExecutor> process_;
     std::shared_ptr<DelegationExecutor> delegation_;
+    std::shared_ptr<DynamicPlanExecutor> planning_;
 };
 }

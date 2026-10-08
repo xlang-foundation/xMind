@@ -249,6 +249,9 @@ std::vector<std::string> ProviderProfileRuntime::models()const{std::lock_guard l
 void ProviderProfileRuntime::cancel(const std::string& id){std::lock_guard lock(impl_->mutex);impl_->service->cancel(id);}
 bool ProviderProfileRuntime::healthy()const{std::lock_guard lock(impl_->mutex);return impl_->service->healthy();}
 bool ProviderProfileRuntime::supports_delegation()const{std::lock_guard lock(impl_->mutex);return impl_->service->supports_delegation();}
+bool ProviderProfileRuntime::supports_dynamic_planning()const{std::lock_guard lock(impl_->mutex);return impl_->service->supports_dynamic_planning();}
+Run ProviderProfileRuntime::plan_input(const std::string& root,const std::string& request,std::string input,const std::string& actor,std::int64_t revision,std::int64_t sequence){std::lock_guard lock(impl_->mutex);return impl_->service->plan_input(root,request,std::move(input),actor,revision,sequence);}
+Run ProviderProfileRuntime::resume_plan(const std::string& root,const std::string& actor,std::int64_t revision,std::int64_t sequence){std::lock_guard lock(impl_->mutex);return impl_->service->resume_plan(root,actor,revision,sequence);}
 bool ProviderProfileRuntime::available()const{std::lock_guard lock(impl_->mutex);return impl_->service->available();}
 std::vector<GraphExecutionMetadata> ProviderProfileRuntime::graphs()const{std::lock_guard lock(impl_->mutex);return impl_->service->graphs();}
 Run ProviderProfileRuntime::submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model){std::lock_guard lock(impl_->mutex);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}

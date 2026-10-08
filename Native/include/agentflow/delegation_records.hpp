@@ -17,6 +17,7 @@ struct RootBudgetRecord {
     std::string root_run_id;
     RootBudgetSpec spec;
     std::int64_t children_admitted=0,model_calls_reserved=0,parent_calls_held=0,revision=1;
+    std::int64_t planned_children_reserved=0,parent_model_calls_reserved=0;
 };
 enum class ModelCallRole {parent,leaf};
 struct ModelCallReservation {
@@ -46,15 +47,20 @@ struct DelegationBatchRecord {
     std::vector<DelegationTaskRecord> tasks;
     bool created=false;
 };
-enum class ChildAdmissionKind {graph_agent,graph_tool,delegated_leaf};
+enum class ChildAdmissionKind {graph_agent,graph_tool,delegated_leaf,dynamic_agent};
 struct ChildAdmissionRecord {
     ChildAdmissionKind kind=ChildAdmissionKind::graph_tool;
     std::string root_run_id,batch_id,preset_id;
     std::int64_t preset_revision=0;
+    std::string plan_id,node_label,claim_id;
+    std::int64_t definition_revision=0,claim_revision=0;
+    std::string backend_identity; // Private; never a public observation DTO field.
 };
 struct OwnedChildRecord {
     Run run;
     std::string kind,batch_id,task_id,preset_id;
     std::int64_t preset_revision=0;
+    std::string plan_id,node_label,claim_id;
+    std::int64_t definition_revision=0,claim_revision=0;
 };
 }

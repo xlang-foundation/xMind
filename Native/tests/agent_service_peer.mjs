@@ -23,5 +23,5 @@ const peer=createServer((request,response)=>{
 try {
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
   const result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,`http://127.0.0.1:${peer.address().port}/chat`],{windowsHide:true,timeout:15000});
-  if(failure) throw failure;assert.equal(requests,2);process.stdout.write(result.stdout);
+  if(failure) throw failure;assert.equal(requests,6,'Two concurrent held streams and four actual notifier dispatch/cancel cycles');process.stdout.write(result.stdout);
 } finally {peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));await rm(folder,{recursive:true,force:true});}

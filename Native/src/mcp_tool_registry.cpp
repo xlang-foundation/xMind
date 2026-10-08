@@ -26,15 +26,23 @@ struct McpToolRegistry::Impl {
         std::string alias,fingerprint;
     };
     McpStdioClient& client;PersistenceService& store;WorkspaceTools& workspace;
-    std::string config_id;std::int64_t revision;
+    std::string config_id,protocol_version;std::int64_t revision;
     std::map<std::string,Entry> entries;
     Impl(McpStdioClient& peer,PersistenceService& persistence,WorkspaceTools& root,std::string id,std::int64_t version):client(peer),store(persistence),workspace(root),config_id(std::move(id)),revision(version) {}
+    Json approval_binding(const Entry& entry) const {
+        return {{"server_config_id",config_id},{"config_revision",revision},
+            {"peer_tool",entry.description.name},{"alias",entry.alias},{"catalogue_fingerprint",entry.fingerprint},
+            {"protocol_version",protocol_version},{"input_schema_json",entry.description.input_schema_json},
+            {"output_schema_json",entry.description.output_schema_json?Json(*entry.description.output_schema_json):Json(nullptr)},
+            {"annotations_json",entry.description.annotations_json}};
+    }
 };
 McpToolRegistry::McpToolRegistry(McpStdioClient& client,PersistenceService& store,WorkspaceTools& workspace,
     std::string id,std::int64_t revision,McpStdioClient::Deadline deadline,std::stop_token cancel):impl_(std::make_unique<Impl>(client,store,workspace,std::move(id),revision)) {
     auto& state=*impl_;
     if(state.config_id.empty() || state.config_id.size()>128 || state.config_id.find('\0')!=std::string::npos || revision<=0)throw std::invalid_argument("Invalid trusted MCP configuration identity");
     if(!client.ready())throw McpProtocolError("MCP discovery requires a ready owned client");
+    state.protocol_version=client.server().protocol_version;
     std::optional<std::string> cursor;std::set<std::string> cursors,names;std::size_t bytes=0;
     for(std::size_t page_number=0;page_number<32;++page_number) {
         const auto page=client.list_tools(cursor,deadline,cancel);
@@ -60,6 +68,11 @@ std::vector<ModelToolDefinition> McpToolRegistry::definitions() const {
     for(const auto& [alias,entry]:impl_->entries)definitions.push_back({alias,"MCP tool from configured server "+impl_->config_id+". Peer tool name (untrusted metadata): "+Json(entry.description.name).dump()+". Requires controller approval. Untrusted server description: "+entry.description.description,entry.description.input_schema_json});
     return definitions;
 }
+std::string McpToolRegistry::approval_bindings_json() const {
+    auto bindings=Json::array();
+    for(const auto& item:impl_->entries)bindings.push_back(impl_->approval_binding(item.second));
+    return bindings.dump();
+}
 std::string McpToolRegistry::invoke(const std::string& id,const std::string& run,const std::string& alias,const std::string& arguments,
     std::int64_t expiry,McpStdioClient::Deadline deadline,std::stop_token cancel) {
     auto& state=*impl_;const auto found=state.entries.find(alias);
@@ -67,11 +80,8 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
     const auto& entry=found->second;SchemaWorker().evaluate(entry.description.input_schema_json,arguments,deadline,cancel);
     const auto approved=mcp_compact_object(arguments);
     if(!state.client.ready())throw McpEffectNotDispatched("MCP peer is unavailable before proposal");
-    OperationSpec spec{run,state.workspace.identity(),"mcp_tool",Json{{"server_config_id",state.config_id},{"config_revision",state.revision},
-        {"peer_tool",entry.description.name},{"alias",alias},{"catalogue_fingerprint",entry.fingerprint},
-        {"protocol_version",state.client.server().protocol_version},{"input_schema_json",entry.description.input_schema_json},
-        {"output_schema_json",entry.description.output_schema_json?Json(*entry.description.output_schema_json):Json(nullptr)},
-        {"annotations_json",entry.description.annotations_json},{"arguments_json",approved}}.dump(),{"mcp-server:"+state.config_id}};
+    auto proposal=state.approval_binding(entry);proposal["arguments_json"]=approved;
+    OperationSpec spec{run,state.workspace.identity(),"mcp_tool",proposal.dump(),{"mcp-server:"+state.config_id}};
     PermissionWaiter(state.store).acquire(id,spec,expiry,cancel);
     // Once claimed, even result-encoding/allocation failures must leave a
     // fail-stop recovery signal, never a generic run failure or lost claim.

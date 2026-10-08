@@ -1,6 +1,24 @@
 # Native dynamic plans and revisioned replanning
 
-Status: proposed next implementation, not implemented or validated.
+Status: the initial agent/human planning slice is implemented and locally
+validated. The complete guarded **77-contract native gate passed in 153.88
+seconds**, with its exact manifest and all **421 frozen source hashes** verified;
+shared-view source gates passed **119 extension and 26 browser contracts**.
+Actual engines perform dependency work, same-plan revision, authenticated human
+pause/reopen and a separately approved coding-child edit with verification;
+provider replies/signatures/keys are synthetic. Model-free browser/native
+graph/human/auth/cookie/reconnect integration and packaging of all **18 required
+VSIX assets** also passed, without rendered dynamic-planning or installed-editor
+acceptance. [Initial implemented boundary](native-dynamic-plan.md),
+[local source and gate evidence](evidence/native-dynamic-plan-local-provenance.json).
+
+This document retains the broader design. Only agent and human nodes are
+accepted in the initial model-selected schema; deterministic tool/MCP/process
+nodes, recursive planning, skills, compaction and outbound A2A remain future
+work. Hosted planning validation, schema-v11 installation, live planning and
+installed VS Code acceptance remain pending. The installed ace/schema-v10
+scope below is separate from the new local planning result.
+
 [Bounded native delegation](native-delegation.md) was introduced at historical
 revision `e353a37799530a234a6fa13e51f61a5c52d3ae6a`, with scoped local and exact
 hosted 71/103/19 gates and
@@ -12,7 +30,7 @@ The later 7fe7 diagnostic request isolated encrypted-content-only variation in
 that specific request, without establishing the cause of the earlier failure.
 [Historical diagnostic evidence](native-responses-diagnostics.md).
 
-The current native checkpoint is
+The installed native checkpoint is
 `ace246094f6c1fc8cf61c146cfe001c63f1bbc8f`: its narrow reasoning continuation
 change passed the exact hosted **71 native / 103 extension / 20 browser** gates.
 The verified native bundle is installed with schema v10 and the retained
@@ -30,19 +48,24 @@ the model request.
 [managed upgrade scope](evidence/native-responses-reasoning-upgrade-provenance.json),
 [current reasoning checkpoint and acceptance scope](native-responses-reasoning.md).
 
-These observations do not implement mutable plans, dependency scheduling,
-human nodes or replanning. Installed VS Code delegation remains unverified.
-This document adds no planning completion claim and does not redefine the
+Those ace observations do not establish the newer schema-v11 planning result
+or installed planning acceptance. Installed VS Code delegation remains
+unverified. The initial local planning milestone above does not redefine the
 broader [dynamic Agent target](dynamic-agent-execution.md).
 
-The next product behavior is a normal Agent selecting a dependency plan,
-observing actual child work and human input, then revising undispatched tasks.
-It must support authorized coding work as well as investigation. The native
-backend owns the plan, execution capabilities, budgets and effect journals;
-CLI, the webpage and VS Code observe those records and submit authenticated
-controller input.
+The initial implemented behavior is a normal Agent selecting a dependency
+plan, observing child work and human input, then revising undispatched tasks,
+with authorized coding work as well as investigation. The native backend owns
+the plan, capabilities, budgets and effect journals; thin clients observe those
+records and submit authenticated input. Later node kinds and recursion must
+preserve these same boundaries.
 
 ## Existing foundations and missing boundaries
+
+The table preserves the original delivery boundaries. The initial v11 slice
+now implements their agent/human subset; the implementation guide describes
+its actual classes and APIs. Direct deterministic nodes and broader graph
+integration remain design requirements.
 
 | Existing contract | Reuse | Required addition |
 | --- | --- | --- |
@@ -249,9 +272,15 @@ SQL boundaries must preserve:
 
 ## Native transactions and proposed API surface
 
-All signatures below are proposed additions, not available APIs. Repository
-methods remain confined to PersistenceService's worker; model/view callers do
-not call them directly.
+The signatures below retain the original proposed shapes rather than current
+callable declarations. Initial v11 implements typed equivalents in the
+[repository header](../Native/include/agentflow/repository.hpp) and
+[persistence service](../Native/include/agentflow/persistence_service.hpp).
+Repository methods remain confined to PersistenceService's worker; model/view
+callers do not call them directly. The initial schema combines current node
+definition and execution state in `dynamic_plan_nodes`, with immutable revision
+copies, rather than adding the separate `dynamic_node_executions` relation in
+the broader relational sketch above.
 
 ```cpp
 DynamicPlanRecord accept_dynamic_plan_change(
@@ -519,14 +548,13 @@ clearly labelled synthetic provider replies and real storage/tools/effects:
    continuation. An expiry/failure path likewise wakes typed retirement rather
    than leaving a root paused merely because no child frontier exists.
 
-Implement shared topology helpers and v11 ownership/revision transactions
-first, then the ordinary-Agent owner/scheduler, pause/continuation protocol and
-thin interfaces. This delivery order is not acceptance for the whole target.
-The next end-to-end cut should include a dependency DAG, a real replanning
-revision, a human check and at least one exact approved coding-child effect;
-investigation-only DAGs do not finish that milestone.
+The initial agent/human implementation now includes v11 ownership/revision
+transactions, the ordinary-Agent scheduler, pause/continuation protocol and
+thin interfaces. Its local native contract includes a dependency DAG, actual
+replanning after failure, a human check and an exact approved coding-child
+effect. This scoped result does not establish acceptance for the whole target.
 
-The proposed production ownership split is concrete:
+The original proposed production ownership split is retained for comparison:
 
 | Files/boundary | Next change |
 | --- | --- |
@@ -540,8 +568,10 @@ The proposed production ownership split is concrete:
 | HTTP/CLI, shared client/controller/renderer | Owned plan and human interfaces, child effects, cursor-safe revision presentation and exact controller review |
 | New native repository/engine/HTTP contracts | The DAG/replanning/human/coding-effect and failure/recovery acceptance above |
 
-These are proposed edits for a later implementation task. This design change
-does not modify any of those files, run a gate or authorize a completion claim.
+The [initial implementation guide](native-dynamic-plan.md) identifies the subset
+now implemented and its verification limits. Broader agent/tool scheduling,
+reference helpers and further node kinds in this table still require their own
+implementation and acceptance; the design itself supplies no execution evidence.
 
 Native skills, authority-preserving context compaction, registered-graph budget
 integration, broader bounded recursion, outbound A2A peer/task ownership and

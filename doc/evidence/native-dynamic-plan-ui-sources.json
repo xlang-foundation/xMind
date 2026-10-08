@@ -1,0 +1,130 @@
+[
+  {
+    "path": "extensions/vscode/.vscodeignore",
+    "sha256": "fe8a6e48beb48a2c4be33c9dbcbc750a8369b7079a5bae5debdb55575f6d8ea3"
+  },
+  {
+    "path": "extensions/vscode/browser-view.js",
+    "sha256": "f5e47b3b60530b4ed1b98ff3254eb0debbb49c5fde860912abd09d4a1d05a1ea"
+  },
+  {
+    "path": "extensions/vscode/client.js",
+    "sha256": "61047317402c7653b5071b76265e7ea7ec0e3d501e7241f48e2e3c229c1146f1"
+  },
+  {
+    "path": "extensions/vscode/edit-review.js",
+    "sha256": "8afc5443fc2f7aedb5af57f2add361519b381b9c14baefaabf5c39702ad2c06e"
+  },
+  {
+    "path": "extensions/vscode/extension.js",
+    "sha256": "1d7d030040ead3fb6c95ac50d552fa1cf87fe55956c2dbfdc7afdcdb8d427087"
+  },
+  {
+    "path": "extensions/vscode/LICENSE",
+    "sha256": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6"
+  },
+  {
+    "path": "extensions/vscode/media/chat.css",
+    "sha256": "16d31370a0900de50c23bffa7004b9831b1b8e08f78d674075889e93315771da"
+  },
+  {
+    "path": "extensions/vscode/media/chat.js",
+    "sha256": "aa7e852463a2096e25399477a145676646e7b3a8edbc5cb98e59bebff38c0e75"
+  },
+  {
+    "path": "extensions/vscode/media/xmind.svg",
+    "sha256": "45123fe1e365d6ca284a245029b4a3de12f511fdc42945bf6fe15c9f3cf18b7b"
+  },
+  {
+    "path": "extensions/vscode/package-lock.json",
+    "sha256": "c24f907b381145cd1de6fd64ce86515f5e1879189216ceb1390498c49407b661"
+  },
+  {
+    "path": "extensions/vscode/package.json",
+    "sha256": "8df7f81df26412d5ac78c46bad13099e9535993d674758eabee1a3f8daee1bac"
+  },
+  {
+    "path": "extensions/vscode/README.md",
+    "sha256": "6145da7cb4021d0e8eff8953312cf329a14d73027cd7427af04587f2144948f6"
+  },
+  {
+    "path": "extensions/vscode/tests/backend-smoke.js",
+    "sha256": "3c662b35158f596342c5bbf05a84377f8e25091e43eb8f9ede13957f254ceb0d"
+  },
+  {
+    "path": "extensions/vscode/tests/browser-view.test.js",
+    "sha256": "21e89ece7e270a55719e40e8973b612afa3ca7facb66abf2d3031dd0fa93dbb4"
+  },
+  {
+    "path": "extensions/vscode/tests/client-planning.test.js",
+    "sha256": "68dc4ea1ef5389aa78eb9bff0757d9ea6effa59b651d54260ea2322359922fc8"
+  },
+  {
+    "path": "extensions/vscode/tests/client.test.js",
+    "sha256": "4b7dbd7118fd6e5a2f837318668de7c381db3b3719f73ebf7dbbbb16e8998e06"
+  },
+  {
+    "path": "extensions/vscode/tests/extension-host.test.js",
+    "sha256": "2139bce30af30490d5e7688c6c38ef7cf65369d3ea3fb615ab829bb4bdd13311"
+  },
+  {
+    "path": "extensions/vscode/tests/plan-fixture.js",
+    "sha256": "89e8149512ae818236b1411078d2a86d704bdcbc109e6278bbc9c68705e3a3a4"
+  },
+  {
+    "path": "extensions/vscode/tests/provider-profile-controller.test.js",
+    "sha256": "6a0b1b08e3c739e283a481cca009fe96384b6a5079102b5dfa68a51b189bdf03"
+  },
+  {
+    "path": "extensions/vscode/tests/renderer.test.js",
+    "sha256": "0c605f73c2b68eae0aaaabb59f0b2c6e47a4660b4267b3682314486d9a474d44"
+  },
+  {
+    "path": "extensions/vscode/webview.js",
+    "sha256": "90226553060a1a33acf86d590d64f4ec368eab546d081b84c1778c80d1686a78"
+  },
+  {
+    "path": "views/browser/browser.css",
+    "sha256": "50d6a5758dfa255fc8ade9c1c9826e8c0633831a2f03deded0dbaca5a0e3f459"
+  },
+  {
+    "path": "views/browser/browser.js",
+    "sha256": "4d760c1fb813aaa00ead9c8047eb8356732e2fac6754b9c342bb7243f8001a52"
+  },
+  {
+    "path": "views/browser/build.mjs",
+    "sha256": "dfe1470c5510607a3fbaffcca873f5f8b91c41d1339cfb978232acefc9ca0326"
+  },
+  {
+    "path": "views/browser/page.cjs",
+    "sha256": "8042acc2d6ca6bc80ac58fb05e721e3b85c5db37bf0e6adc90bd9f8f7eaa2f28"
+  },
+  {
+    "path": "views/browser/server.mjs",
+    "sha256": "0f638899a7c136c48c12d6f80115fc30026c72b4f983bca97e303e710d90d6b4"
+  },
+  {
+    "path": "views/browser/tests/classic-script.test.cjs",
+    "sha256": "dbe22a3bb8b6ac1bc035dbc01be99c4697468264b1c04c7c4d7a14f9ae1014ed"
+  },
+  {
+    "path": "views/browser/tests/connection.test.cjs",
+    "sha256": "804bede20c1cb12cb1c59188464f20f8e1e662a403e238e8594c4c5db0aa8444"
+  },
+  {
+    "path": "views/browser/tests/controller.test.cjs",
+    "sha256": "560974f168317740f503bfc4def52e42337ed18d2b1b9f6b9cb869a223abf411"
+  },
+  {
+    "path": "views/browser/tests/native-contract.mjs",
+    "sha256": "4d1952f0a96ba089f6d8c832cae5eeffcfe7bba2115a1c776e8d4966d66a857c"
+  },
+  {
+    "path": "views/browser/tests/planning-routes.test.cjs",
+    "sha256": "9f33883160610ad3cac9380baa8fe48e45717a24820312384279c2f8844c7af8"
+  },
+  {
+    "path": "views/browser/tests/server.test.cjs",
+    "sha256": "e014f463a82dd6ff1902edd235087e47f7ef0ed9ebee7e3cbf80be363f196d29"
+  }
+]

@@ -11,6 +11,37 @@ function renderer(){
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+const {planFixture,inputMessage}=require('./plan-fixture');
+test('Agent plan renders actual dependencies/correlations/held response metrics safely inside the existing sidebar',()=>{
+ const r=renderer(),doc=r.dom.window.document,record=planFixture();try{
+  r.send({type:'runs',runs:[record.run],selected:record.run.id,busy:true});r.send({type:'plan',record});
+  const area=doc.getElementById('plan-view');assert.equal(area.hidden,false);assert.match(area.textContent,/revision 2/);assert.match(area.textContent,/read → gate · success/);assert.match(area.textContent,/call-second/);assert.match(area.textContent,/attempt-second/);assert.match(area.textContent,/held parent continuations 1/);
+  assert.equal(area.querySelectorAll('script').length,0);assert.ok(area.textContent.includes('<script>fixtureAttack()</script>'));assert.equal(area.querySelectorAll('.metrics').length,2);assert.match(area.querySelector('.plan-call .metrics').textContent,/Input tokens 7Output tokens 3/);assert.ok(!area.querySelector('.plan-call .metrics').textContent.includes('Total'),'Missing held-response total is not inferred');assert.ok(doc.querySelector('footer #model'));assert.equal(doc.querySelector('#plan-view #model'),null);assert.equal(doc.getElementById('plan-resume').hidden,true);assert.equal(r.posted.length,1,'Plan observation cannot submit actions');
+  const child={run:{id:'coding-child',parent_id:record.run.id,state:'completed'},kind:'dynamic_agent',node_label:'code',preset_id:'workspace.coding',preset_revision:1};r.send({type:'owned-children',parent:record.run,children:[child],histories:{'coding-child':[{role:'assistant',data:{content:'Synthetic observed coding response',usage:{prompt_tokens:19,completion_tokens:5}}}]}});
+  const owned=doc.getElementById('owned-view');assert.match(owned.textContent,/Coding agent · effects require their own approval/);assert.ok(!owned.textContent.includes('Read-only investigation'));assert.match(owned.querySelector('.metrics').textContent,/Input 19Output 5Total —/);
+ }finally{r.dom.window.close();}
+});
+test('human answer keeps raw numeric lexemes and draft across observations, binds current identities/CAS and rejects detached form sends',()=>{
+ const r=renderer(),doc=r.dom.window.document,record=planFixture();try{
+  r.send({type:'runs',runs:[record.run],selected:record.run.id,busy:true});r.send({type:'plan',record});const form=doc.querySelector('.plan-input'),input=form.querySelector('textarea'),raw='{"quantity":1.00000000000000000001,"answer":"<img src=x onerror=fixtureAttack()>"}';form.querySelector('select').value='json';input.value=raw;
+  record.plan.state_sequence++;r.send({type:'plan',record});assert.equal(doc.querySelector('.plan-input'),form);assert.equal(input.value,raw);
+  form.dispatchEvent(new r.dom.window.Event('submit',{cancelable:true}));assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),inputMessage(record,raw));assert.equal(form.querySelector('button').disabled,true);
+  r.send({type:'error',text:'Strict backend rejected this input'});assert.equal(input.value,raw);input.value='[]';const count=r.posted.length;form.dispatchEvent(new r.dom.window.Event('submit',{cancelable:true}));assert.equal(r.posted.length,count);assert.match(form.textContent,/JSON object/);
+  r.send({type:'reset-run'});input.value=raw;form.dispatchEvent(new r.dom.window.Event('submit',{cancelable:true}));assert.equal(r.posted.length,count);assert.equal(doc.getElementById('plan-view').hidden,true);
+ }finally{r.dom.window.close();}
+});
+test('dynamic human questions use written answers by default and safely encode actual characters without granting operation approval',()=>{
+ const r=renderer(),doc=r.dom.window.document,record=planFixture();try{
+  r.send({type:'runs',runs:[record.run],selected:record.run.id,busy:true});r.send({type:'plan',record});const form=doc.querySelector('.plan-input'),format=form.querySelector('select'),input=form.querySelector('textarea');assert.equal(format.value,'text');assert.equal(input.placeholder,'Write your answer…');
+  const written='Please use "the reviewed change".\n雪 <script>fixtureAttack()</script> \\ keep the exact answer.';input.value=written;form.dispatchEvent(new r.dom.window.Event('submit',{cancelable:true}));const sent=JSON.parse(JSON.stringify(r.posted.at(-1)));assert.deepEqual(sent,inputMessage(record,JSON.stringify({answer:written})));assert.equal(JSON.parse(sent.input_json).answer,written);assert.equal(doc.querySelector('#plan-view script'),null);assert.ok(!r.posted.some(message=>message.type==='decide'));assert.equal(input.value,written);
+ }finally{r.dom.window.close();}
+});
+test('human-only completed frontier exposes explicit resume only for an enabled ready paused owner and preserves unanswered controls separately',()=>{
+ const r=renderer(),doc=r.dom.window.document,record=planFixture({answer:true});try{
+  r.send({type:'runs',runs:[record.run],selected:record.run.id,busy:true});r.send({type:'plan',record});assert.equal(doc.querySelector('.plan-input'),null);const resume=doc.getElementById('plan-resume');assert.equal(resume.hidden,false);assert.equal(resume.disabled,false);resume.click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'plan-resume',root:record.run.id,plan_id:record.plan.id,expected_revision:2,expected_state_sequence:18});
+  record.enabled=false;r.send({type:'plan',record});assert.equal(resume.hidden,true);const count=r.posted.length;resume.click();assert.equal(r.posted.length,count);assert.match(doc.getElementById('plan-view').textContent,/retained for inspection/);
+ }finally{r.dom.window.close();}
+});
 test('Agent investigations retain independent metrics and terminal replay does not synthesize a graph or another answer',()=>{
  const r=renderer(),doc=r.dom.window.document,parent={id:'parent',state:'completed'},children=['left','right'].map((id,index)=>({run:{id,parent_id:'parent',state:index?'failed':'completed'},kind:'delegated_leaf',batch_id:'batch',task_id:id,preset_id:'workspace.inspect',preset_revision:1}));
  try{r.send({type:'owned-children',parent,children,histories:{left:[{role:'assistant',data:{content:'Synthetic left response',usage:{prompt_tokens:12,completion_tokens:5}}}],right:[{role:'assistant',data:{content:'Synthetic right failure response',usage:{prompt_tokens:4,completion_tokens:2,total_tokens:6}}}]}});

@@ -6,6 +6,7 @@
 #include "agentflow/root_execution_budget.hpp"
 #include "agentflow/schema_worker.hpp"
 #include "agentflow/xlang_sqlite.hpp"
+#include "graph_schema_fixture.hpp"
 #include "nlohmann/json.hpp"
 #include <chrono>
 #include <filesystem>
@@ -235,6 +236,7 @@ void migration_contract(const std::filesystem::path& database,const std::vector<
     }
     {
         XlangSqlite sql(path,imports);sql.begin();
+        remove_dynamic_schema_fixture(sql);
         for(const auto* trigger:{"owned_child_boundary","delegation_task_initial_outcome","delegation_task_identity_immutable","delegation_task_settlement_boundary","delegation_batch_identity_immutable","agent_budget_identity_immutable","model_call_identity_immutable"})sql.execute(std::string("DROP TRIGGER ")+trigger);
         for(const auto* table:{"agent_model_call_reservations","delegation_tasks","delegation_batches","agent_execution_budgets"})sql.execute(std::string("DROP TABLE ")+table);
         sql.execute("CREATE TRIGGER graph_child_boundary BEFORE INSERT ON runs WHEN NEW.parent_run_id IS NOT NULL BEGIN SELECT CASE WHEN NEW.node_id IS NULL OR NOT EXISTS(SELECT 1 FROM runs r JOIN graph_roots g ON g.run_id=r.id WHERE r.id=NEW.parent_run_id AND r.parent_run_id IS NULL AND r.session_id=NEW.session_id AND r.state='running') THEN RAISE(ABORT,'invalid graph child boundary') END; END");
@@ -250,7 +252,7 @@ void migration_contract(const std::filesystem::path& database,const std::vector<
         PersistenceService migrated(path,imports);same_history(original,migrated.history("legacy-session").get());require(migrated.run("legacy-run").get().state==RunState::completed&&migrated.information("fixture","legacy").get()==R"({"retained":true})","Actual v9-to-v10 migration must retain existing terminal execution and information");
         const auto secret=migrated.resolve_credential("fixture","legacy-key","fixture:migration").get();const auto bytes=secret.view();require(std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size())==fixture_key,"Existing encrypted legacy credential must remain resolvable after migration");
         rejects<NotFound>([&]{migrated.root_budget("legacy-run").get();},"Migration must not backfill fictional historical budgets or model usage");
-        {XlangSqlite sql(path,imports);require(std::get<std::int64_t>(sql.execute("PRAGMA user_version").rows.at(0).at(0))==10,"Corrected exact legacy schema must migrate to version10");require(std::get<std::int64_t>(sql.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name='owned_child_boundary'").rows.at(0).at(0))==1,"Successful migration must install the strict generic owned-child boundary");}migrated.close();
+        {XlangSqlite sql(path,imports);require(std::get<std::int64_t>(sql.execute("PRAGMA user_version").rows.at(0).at(0))==11,"Corrected exact legacy schema must migrate through version10 to version11");require(std::get<std::int64_t>(sql.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name='owned_child_boundary'").rows.at(0).at(0))==1,"Successful migration must install the strict generic owned-child boundary");}migrated.close();
     }
 }
 }

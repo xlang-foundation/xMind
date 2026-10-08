@@ -1,4 +1,23 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController}=require('../browser.js');
+const {planFixture,inputMessage}=require('../../../extensions/vscode/tests/plan-fixture');
+function planController(record,planRead=async()=>record){const posted=[],calls=[];const client={plan:planRead,planInput:async(...args)=>{calls.push(['input',...args]);return {...record.run,state:'running'};},resumePlan:async(...args)=>{calls.push(['resume',...args]);return {...record.run,state:'running'};}};const view=new BrowserController(client,value=>posted.push(value));view.session=record.run.session_id;view.runId=record.run.id;view.health={agent_planning:true};view.planObservation=JSON.parse(JSON.stringify(record));view.poll=async()=>{};view.watch=()=>{};return {view,posted,calls};}
+test('browser binds raw human input and explicit final-human resume to actual displayed and freshly observed plan identities',async()=>{
+ const record=planFixture(),h=planController(record);try{const raw='{"quantity":1.00000000000000000001,"answer":true}';await h.view.handle(inputMessage(record,raw));assert.deepEqual(h.calls,[['input',record.run.id,record.questions[0].id,raw,2,17]]);assert.ok(h.posted.some(message=>message.type==='plan'));}finally{h.view.dispose();}
+ const ready=planFixture({answer:true}),resume=planController(ready);try{await resume.view.handle({type:'plan-resume',root:ready.run.id,plan_id:ready.plan.id,expected_revision:2,expected_state_sequence:18});assert.deepEqual(resume.calls,[['resume',ready.run.id,2,18]]);}finally{resume.view.dispose();}
+});
+test('browser rejects stale CAS, changed question identity, duplicate keys, foreign roots and observation conflicts before any controller mutation',async()=>{
+ for(const change of [record=>record.plan.state_sequence++,record=>record.questions[0].expires_unix_ms++,record=>record.run.session_id='foreign-session']){
+  const original=planFixture(),fresh=JSON.parse(JSON.stringify(original));change(fresh);const h=planController(original,async()=>fresh);try{await h.view.handle(inputMessage(original));assert.equal(h.calls.length,0);assert.ok(h.posted.some(message=>message.type==='error'));}finally{h.view.dispose();}
+ }
+ const original=planFixture(),h=planController(original);try{await h.view.handle(inputMessage(original,'{"x":1,"\\u0078":2}'));assert.equal(h.calls.length,0);assert.ok(h.posted.some(message=>message.type==='error'));await h.view.handle({...inputMessage(original),root:'foreign-root'});assert.equal(h.calls.length,0);}finally{h.view.dispose();}
+ const conflict=planController(original,async()=>{throw Object.assign(new Error('Plan reads conflicted'),{status:409});});try{await conflict.view.handle(inputMessage(original));assert.equal(conflict.calls.length,0);assert.equal(conflict.view.planObservation,undefined);assert.ok(conflict.posted.some(message=>message.type==='plan-clear'));}finally{conflict.view.dispose();}
+});
+test('browser generation change during a fresh plan check discards response and cannot answer the prior selected owner',async()=>{
+ const record=planFixture();let resolve,entered;const started=new Promise(yes=>entered=yes),h=planController(record,()=>{entered();return new Promise(yes=>resolve=yes);});try{const action=h.view.handle(inputMessage(record));await started;h.view.stop();h.view.session='another-session';h.view.runId='another-root';resolve(record);await action;assert.equal(h.calls.length,0);assert.ok(!h.posted.some(message=>message.type==='plan'));}finally{h.view.dispose();}
+});
+test('browser transient plan GET conflicts discard actions and retry only bounded read observation',async()=>{
+ const record=planFixture();let reads=0;const h=planController(record,async()=>{reads++;throw Object.assign(new Error('Changing topology'),{status:409});});try{for(let i=0;i<3;i++)await h.view.readPlan(record.run.id,h.view.generation);assert.equal(reads,3);assert.equal(h.calls.length,0);assert.equal(h.view.planObservation,undefined);assert.equal(h.view.pendingPlanObservation,false);assert.match(h.posted.at(-1).text,/Refresh/);}finally{h.view.dispose();}
+});
 test('owned observation rejects a same-session status for another root and selection resets cursor backlog',async()=>{
  const posted=[];let trees=0;const client={status:async()=>({id:'foreign-root',session_id:'session',state:'completed',parent_id:'',graph_root:false}),treeEvents:async()=>{trees++;return [];}};
  const view=new BrowserController(client,value=>posted.push(value));view.session='session';view.runId='selected-root';view.health={owned_child_observation:true};view.pendingTreeEvents=true;

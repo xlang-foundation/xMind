@@ -4,7 +4,13 @@ import {pathToFileURL} from 'node:url';
 const assets={'/ui/':['index.html','text/html; charset=utf-8'],'/ui/browser.js':['browser.js','text/javascript; charset=utf-8'],'/ui/browser.css':['browser.css','text/css; charset=utf-8'],'/ui/chat.js':['chat.js','text/javascript; charset=utf-8'],'/ui/chat.css':['chat.css','text/css; charset=utf-8'],'/ui/client.js':['client.js','text/javascript; charset=utf-8'],'/ui/marked.js':['marked.js','text/javascript; charset=utf-8'],'/ui/purify.js':['purify.js','text/javascript; charset=utf-8']};
 const csp="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'";
 function origin(input){const url=new URL(input);if(url.protocol!=='http:'||!['127.0.0.1','localhost'].includes(url.hostname)||url.username||url.password||url.pathname!=='/'||url.search||url.hash)throw new Error('Use a loopback native backend origin');url.hostname='127.0.0.1';return url.origin;}
-function apiPath(path){return /^\/v1\/(?:health|models|graphs|agent\/delegation|provider\/(?:configuration|models|profiles(?:\/(?:select|models))?)|sessions(?:\/[A-Za-z0-9_-]+\/(?:history|runs|title))?|runs(?:\/[A-Za-z0-9_-]+(?:\/(?:events|tree-events|children(?:\/[A-Za-z0-9_-]+\/history)?|cancel|operations))?)?|graph-runs(?:\/[A-Za-z0-9_-]+(?:\/(?:children(?:\/[A-Za-z0-9_-]+\/history)?|events|human\/[A-Za-z0-9_.-]+))?)?|operations\/[A-Za-z0-9_-]+(?:\/(?:inspection|decision))?)$/.test(path);}
+function apiPath(path){return /^\/v1\/(?:health|models|graphs|agent\/(?:delegation|planning)|provider\/(?:configuration|models|profiles(?:\/(?:select|models))?)|sessions(?:\/[A-Za-z0-9_-]+\/(?:history|runs|title))?|runs(?:\/[A-Za-z0-9_-]+(?:\/(?:events|tree-events|children(?:\/[A-Za-z0-9_-]+\/history)?|cancel|operations|plan(?:\/(?:human\/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(?:\/[A-Za-z0-9_-]+(?:\/(?:children(?:\/[A-Za-z0-9_-]+\/history)?|events|human\/[A-Za-z0-9_.-]+))?)?|operations\/[A-Za-z0-9_-]+(?:\/(?:inspection|decision))?)$/.test(path);}
+export function allowedApiRoute(path,method){
+ if(!apiPath(path)||!['GET','POST'].includes(method))return false;
+ if(/^\/v1\/runs\/[A-Za-z0-9_-]+\/plan\/(?:human\/[A-Za-z0-9_-]+|resume)$/.test(path))return method==='POST';
+ if(/^\/v1\/agent\/(?:delegation|planning)$/.test(path)||/^\/v1\/runs\/[A-Za-z0-9_-]+\/(?:tree-events|children(?:\/[A-Za-z0-9_-]+\/history)?|plan)$/.test(path))return method==='GET';
+ return true;
+}
 export async function createBrowserServer({backend,assetRoot}){
  const destination=origin(backend),directory=await realpath(resolve(assetRoot));
  async function readAssets(){const snapshot=new Map();let total=0;for(const [route,[name,mime]] of Object.entries(assets)){const file=await realpath(join(directory,name));if(file!==join(directory,name))throw new Error('Browser assets must remain in the configured directory');const bytes=await readFile(file);total+=bytes.length;if(bytes.length>2*1024*1024||total>8*1024*1024)throw new Error('Browser assets exceed limits');snapshot.set(route,{bytes,mime});}return snapshot;}
@@ -41,14 +47,13 @@ export async function createBrowserServer({backend,assetRoot}){
    // do not restart the access adapter or invalidate its authenticated sessions.
    if(url.pathname==='/ui/'&&request.method==='GET')files=await readAssets();
    const file=files.get(url.pathname);if(file&&(request.method==='GET'||request.method==='HEAD')){response.writeHead(200,{'Content-Type':file.mime,'Content-Security-Policy':csp,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer'});response.end(request.method==='HEAD'?undefined:file.bytes);return;}
-   if(!apiPath(url.pathname)||!['GET','POST'].includes(request.method)){reply(404,{detail:'View route not found'});return;}
-   if((url.pathname==='/v1/agent/delegation'||/^\/v1\/runs\/[A-Za-z0-9_-]+\/(?:tree-events|children(?:\/[A-Za-z0-9_-]+\/history)?)$/.test(url.pathname))&&request.method!=='GET'){reply(404,{detail:'View route is read-only'});return;}
+   if(!allowedApiRoute(url.pathname,request.method)){reply(404,{detail:'View route not found'});return;}
    if(request.method==='POST'&&request.headers.origin!==viewOrigin){reply(403,{detail:'Same-origin browser access required'});return;}
    let access;const authorization=request.headers.authorization;
    if(/^Bearer [\x21-\x7e]{32,256}$/.test(authorization||''))access={Authorization:authorization};
    else if(!authorization&&request.headers['sec-fetch-site']==='same-origin'){const credential=sessionFor(request);if(credential)access=viewHeaders(credential);}
    if(!access){reply(401,{detail:'Enter the native server access token to connect'});return;}
-   if([...url.searchParams.keys()].some(key=>key!=='after')||url.searchParams.getAll('after').length>1||url.searchParams.has('after')&&!/^\d+$/.test(url.searchParams.get('after'))){reply(400,{detail:'Invalid view cursor'});return;}
+   if((url.pathname==='/v1/agent/planning'||/^\/v1\/runs\/[A-Za-z0-9_-]+\/plan(?:\/.*)?$/.test(url.pathname))&&url.search||[...url.searchParams.keys()].some(key=>key!=='after')||url.searchParams.getAll('after').length>1||url.searchParams.has('after')&&!/^\d+$/.test(url.searchParams.get('after'))){reply(400,{detail:'Invalid view cursor'});return;}
    if(request.method==='POST'&&request.headers['content-type']!=='application/json'){reply(400,{detail:'Use application/json'});return;}
    const chunks=[];let size=0;for await(const chunk of request){size+=chunk.length;if(size>1024*1024){reply(413,{detail:'Request exceeds limits'});return;}chunks.push(chunk);}
    const controller=new AbortController();response.on('close',()=>{if(!response.writableEnded)controller.abort();});

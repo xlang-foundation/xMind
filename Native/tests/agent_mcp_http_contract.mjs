@@ -22,7 +22,7 @@ const peer=createServer((request,response)=>{
     try {
       requests++;const body=JSON.parse(source),prompt=body.messages.findLast(message=>message.role==='user').content;
       const names=body.tools.map(tool=>tool.function.name);assert.deepEqual(names.slice(0,4),['read_repository_instructions','read_file','list_files','search_files']);
-      assert.equal(names.length,6);assert.match(names[4],/^mcp_[a-f0-9]{48}$/);assert.equal(names[5],'delegate_tasks');assert.equal(body.stream_options.include_usage,true);
+      assert.equal(names.length,9);assert.match(names[4],/^mcp_[a-f0-9]{48}$/);assert.deepEqual(names.slice(5),['delegate_tasks','plan_tasks','revise_plan','inspect_plan']);assert.equal(body.stream_options.include_usage,true);
       assert.equal(source.includes(secret),false);const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
       if(tool){
         const outcome=JSON.parse(tool.content);continuations.set(prompt,outcome);

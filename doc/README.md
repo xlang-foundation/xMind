@@ -17,6 +17,9 @@ WebRTC and Electron IDE.
 | Coverage and verification | [Validation status](VALIDATION_STATUS.md), [parity baseline](PARITY.md), [model coverage](MODEL_SUPPORT.md), [milestones](milestones.md) |
 | Source layout | [Cleanup](cleanup.md) |
 
+The [native dependency-plan increment](native-dynamic-plan.md) documents current
+source work, its passing local 77/119/26 gates and remaining acceptance boundaries.
+
 Each verification record identifies its source revision and scope. Historical
 checkpoints and `evidence/` preserve actual results; they do not establish that
 unfinished source or later changes have passed. The [dynamic planning

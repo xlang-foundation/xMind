@@ -3,6 +3,7 @@
 #include "agentflow/secret_protection.hpp"
 #include "agentflow/operation.hpp"
 #include "agentflow/delegation_records.hpp"
+#include "agentflow/dynamic_plan_records.hpp"
 #include <memory>
 #include <vector>
 #include <optional>
@@ -32,14 +33,42 @@ public:
     std::vector<Session> sessions();
     Run create_run(const std::string& id,const std::string& session_id);
     std::optional<Run> incoming_message(const std::string& message,const std::string& context,const std::string& identity,const std::string& content);
-    Run start_incoming_message(const std::string& id,const std::string& context,const std::string& message,const std::string& prompt_json,const std::string& identity,std::optional<RootBudgetSpec> budget={});
+    Run start_incoming_message(const std::string& id,const std::string& context,const std::string& message,const std::string& prompt_json,const std::string& identity,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={});
     std::optional<std::vector<Message>> task_history(const std::string& id);
     std::optional<std::string> incoming_message_payload(const std::string& run_id);
-    Run start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json,std::optional<RootBudgetSpec> budget={});
+    Run start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={});
+    DynamicPlanCapabilities dynamic_capabilities(const std::string& root);
+    DynamicPlanCapabilities finalize_dynamic_capabilities(const std::string& root,const std::string& backend_identity,const std::string& catalogue_json,const std::vector<DynamicPresetCapability>& presets);
+    DynamicPlanRecord dynamic_plan(const std::string& plan);
+    std::optional<DynamicPlanRecord> dynamic_plan_for_root(const std::string& root);
+    DynamicPlanCallRecord dynamic_plan_call(const std::string& call);
+    // Backend-only call records contain exact private provider receipts.
+    // HTTP/CLI observation must project a fixed public field whitelist.
+    std::vector<DynamicPlanCallRecord> dynamic_plan_calls(const std::string& root);
+    std::vector<DynamicPlanRevisionRecord> dynamic_plan_revisions(const std::string& plan);
+    DynamicPlanRevisionRecord dynamic_plan_revision(const std::string& plan,std::int64_t revision);
+    DynamicPlanCallRecord accept_dynamic_plan_change(const DynamicPlanChangeSpec& spec);
+    DynamicFrontierClaim admit_dynamic_frontier(const DynamicFrontierSpec& spec);
+    DynamicNodeRecord settle_dynamic_child(const std::string& child);
+    DynamicPlanStepResult settle_dynamic_plan_step(const std::string& call);
+    DynamicHumanRequest publish_dynamic_human(const DynamicHumanRequestSpec& spec);
+    DynamicHumanRequest dynamic_human_request(const std::string& plan,const std::string& request);
+    std::vector<DynamicHumanRequest> dynamic_human_requests(const std::string& plan);
+    DynamicHumanRequest input_dynamic_human(const DynamicHumanInputSpec& spec);
+    DynamicHumanRequest expire_dynamic_human(const std::string& plan,const std::string& request);
+    DynamicBudgetSegment open_dynamic_budget_segment(const DynamicSegmentSpec& spec);
+    DynamicBudgetSegment dynamic_budget_segment(const std::string& root);
+    Run suspend_dynamic_owner(const DynamicPauseSpec& spec);
+    DynamicResumeRecord resume_dynamic_owner(const DynamicResumeSpec& spec);
+    void commit_dynamic_tool_turn(const std::string& root,const std::string& call);
+    void record_rejected_dynamic_tool_turn(const std::string& root,const std::string& origin_attempt_id,const std::string& actual_assistant_json,const std::string& safe_code);
+    ModelCallReservation reserve_dynamic_continuation(const std::string& call,const std::string& attempt);
+    Run retire_dynamic_owner(const std::string& root,RunState terminal_state,const std::string& reason_json,const std::string& segment_id={},std::int64_t measured_active_elapsed_ms=0);
+    Run complete_dynamic_owner(const std::string& root,const std::string& assistant_json,const std::string& segment_id,std::int64_t measured_active_elapsed_ms);
     RootBudgetRecord root_budget(const std::string& id);
     ModelCallReservation reserve_model_call(const std::string& root,const std::string& owner,const std::string& attempt,ModelCallRole role);
     ModelCallReservation start_model_call(const std::string& root,const std::string& owner,const std::string& attempt);
-    ModelCallReservation finish_model_call(const std::string& root,const std::string& owner,const std::string& attempt);
+    ModelCallReservation finish_model_call(const std::string& root,const std::string& owner,const std::string& attempt,std::optional<std::string> actual_assistant_json={});
     DelegationBatchRecord accept_delegation_batch(const DelegationBatchSpec& spec);
     DelegationBatchRecord delegation_batch(const std::string& id);
     std::vector<DelegationBatchRecord> delegation_batches(const std::string& parent);

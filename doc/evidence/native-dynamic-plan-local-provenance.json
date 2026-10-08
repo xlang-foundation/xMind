@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "scope": "Local source checkpoint: native agent/human dependency planning with real native execution and synthetic provider peers.",
+  "source": {
+    "source_base": "d8ab870b8ee9cc09ea3cee2833ff3eebaba3603b",
+    "runtime_source": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+    "runtime_files": [
+      {
+        "path": "D:/CantorAI2026/.worktrees/xlang3-nexus-buffer/build/Release/xlang3.exe",
+        "sha256": "f9b05a315111053fd5d51c42a2a635fc07e501d9b12bc6b0253aa8e778eb150d"
+      },
+      {
+        "path": "D:/CantorAI2026/.worktrees/xlang3-nexus-buffer/build/Release/xlang3_runtime.dll",
+        "sha256": "166e8d96bd3b3a886fadfb7482374d7512a2dad7b389ca5d907a4b581f18a3a5"
+      },
+      {
+        "path": "D:/CantorAI2026/.worktrees/xlang3-nexus-buffer/build/Release/xlang3_runtime.lib",
+        "sha256": "960600524e0c85750f7e72a8983e919370abcfd05c44de4f4d4cb905b5eac76e"
+      },
+      {
+        "path": "D:/CantorAI2026/.worktrees/xlang3-nexus-buffer/build/Release/modules/xlang_json.x3pkg.dll",
+        "sha256": "4ecc67d674bb48d2c9c8a9fbf5a934f66619739f4e8ce3649545078fee8def8a"
+      },
+      {
+        "path": "D:/CantorAI2026/.worktrees/xlang3-nexus-buffer/build/Release/modules/xlang_sqlite3.x3pkg.dll",
+        "sha256": "fcb0e481352672eb72d86a96e2ef5d9b58939a35ad03a4ac3e32bfe7dc733b8c"
+      }
+    ],
+    "stdlib_source": "C:/Python/Python314/Lib",
+    "cpython_bridge": "OFF",
+    "scope": "Third reviewed frozen full local native gate; original first and second failures retained",
+    "frozen_utc": "2026-10-08T16:09:43.3924268Z",
+    "source_files": 421,
+    "note": "Reviewed uncommitted source over the recorded base; worktree byte hashes identify the executed source. This record is not a hosted or installed acceptance claim."
+  },
+  "native": {
+    "expected": 77,
+    "registered": 77,
+    "passed": 77,
+    "failed": 0,
+    "skipped": 0,
+    "test_seconds": 153.88,
+    "exit_code": 0,
+    "source_hashes_verified": 421,
+    "excluded_tests": [],
+    "scope": "Third full guarded native gate passed; original two failures retained separately"
+  },
+  "original_failures": [
+    {
+      "expected": 77,
+      "registered": 77,
+      "passed": 68,
+      "failed": 9,
+      "test_seconds": 239.52,
+      "exit_code": 8,
+      "source_hashes_verified": 421,
+      "excluded_tests": [],
+      "scope": "First full guarded local native gate; failed, source unchanged; browser/native and packaging not run for planning",
+      "phase": "dynamic-plan-first-gate",
+      "note": "Original failed complete gate; retained and never counted as a pass."
+    },
+    {
+      "expected": 77,
+      "registered": 77,
+      "passed": 76,
+      "failed": 1,
+      "test_seconds": 154.28,
+      "exit_code": 8,
+      "source_hashes_verified": 421,
+      "excluded_tests": [],
+      "scope": "Second full guarded native gate failed only dynamic engine; other76passed; no source drift",
+      "phase": "dynamic-plan-second-gate",
+      "note": "Original failed complete gate; retained and never counted as a pass."
+    }
+  ],
+  "extension": {
+    "passed": 119,
+    "failed": 0,
+    "skipped": 0,
+    "milliseconds": 1897.1636,
+    "source_hashes_verified": 32,
+    "scope": "Node adapter/controller/renderer fixtures; no installed editor acceptance."
+  },
+  "browser": {
+    "passed": 26,
+    "failed": 0,
+    "skipped": 0,
+    "milliseconds": 1034.4653,
+    "scope": "Node browser adapter/controller fixtures; no live model execution."
+  },
+  "browser_native_integration": {
+    "exit_code": 0,
+    "scope": "Rebuilt server and matching assets; disposable model-free graph/human/auth/cookie/reconnect checks. Not end-to-end dynamic planning UI acceptance."
+  },
+  "vsix": {
+    "exit_code": 0,
+    "required_assets": 18,
+    "archive_sha256": "47ebcc72b5db3a71d4515421a55a41699502cf5fb29c978d2166d1d08393b00e",
+    "scope": "Packaged required assets and shared-backend command verified; no installed editor acceptance."
+  },
+  "engine_contract": {
+    "seconds": 1.56,
+    "scope": "Synthetic Anthropic responses/signatures; actual parallel child Agents, observed failure/revision, approved coding file effect, dependent verification read, clean human pause/reopen/final-only continuation, cancellation and expiry."
+  },
+  "mcp_contract_scope": "Actual modern/legacy MCP discovery/proposal binding checks and SQLite authorization negatives; no real dynamic coding-child MCP peer effect acceptance.",
+  "excluded_claims": [
+    "live-provider dependency planning",
+    "installed schema-v11 preview",
+    "installed VS Code planning acceptance",
+    "direct dynamic tool/MCP/process nodes",
+    "recursive planning",
+    "full provider/coding parity",
+    "private Nexus execution"
+  ],
+  "installed_preview": {
+    "native_source": "ace246094f6c1fc8cf61c146cfe001c63f1bbc8f",
+    "schema_version": 10,
+    "note": "Unchanged by this local validation."
+  },
+  "evidence": [
+    {
+      "path": "doc/evidence/native-dynamic-plan-first-failed-ctest.log",
+      "bytes": 17875,
+      "sha256": "2bc6613ff72d958ed8f2adaf38b7fdbbc8457f966aac701a76a5e575edc4c35d"
+    },
+    {
+      "path": "doc/evidence/native-dynamic-plan-second-failed-ctest.log",
+      "bytes": 11992,
+      "sha256": "eeca695dad827cd7fb578c37b423e992a45b6ae6e78746158869e49772116bb4"
+    },
+    {
+      "path": "doc/evidence/native-dynamic-plan-final-ctest.log",
+      "bytes": 10396,
+      "sha256": "86f7ad8aad13560ef4905580823322339d1890d91497e66088f0891debea2693"
+    },
+    {
+      "path": "doc/evidence/native-dynamic-plan-extension.log",
+      "bytes": 30411,
+      "sha256": "a47c0644e3a9532d1fb533db13713ef14cd6065896950ba4b4a309ffff659f05"
+    },
+    {
+      "path": "doc/evidence/native-dynamic-plan-browser.log",
+      "bytes": 6955,
+      "sha256": "4682f6df152d710b7892a0107a38a1375d7c82fa9d7b7a870ed9577109dfad7c"
+    },
+    {
+      "path": "doc/evidence/native-dynamic-plan-integration.log",
+      "bytes": 680,
+      "sha256": "ffa8a56eeb33ceb7dc064c220c2fff5c93805595cb78a3f52cb677f765a71f56"
+    },
+    {
+      "path": "doc/evidence/native-dynamic-plan-vsix.log",
+      "bytes": 113,
+      "sha256": "015afec5ba4dd4f9c6bac772f2f03403d661d769b75174aecc164b2dcabb7be9"
+    },
+    {
+      "path": "doc/evidence/native-dynamic-plan-native-sources.json",
+      "bytes": 68066,
+      "sha256": "08c265bd217e0d9d707b871cd5345a7c03bb0f04c3c5f3db6aa2ad085e888fde"
+    },
+    {
+      "path": "doc/evidence/native-dynamic-plan-ui-sources.json",
+      "bytes": 4629,
+      "sha256": "421d4844f00cd6fa5be61276aab8cb969ae24a2572b7f883ee203f4183af1b71"
+    },
+    {
+      "path": "doc/evidence/native-dynamic-plan-manifest.json",
+      "bytes": 6338,
+      "sha256": "c43e5cca43725a7ccd6c5f75e6a190069bfebad9f7435b419953a71bb5b9b4af"
+    }
+  ]
+}

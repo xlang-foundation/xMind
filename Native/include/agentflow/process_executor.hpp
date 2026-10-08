@@ -22,6 +22,8 @@ public:
     ProcessExecutor(PersistenceService& store,WorkspaceTools& workspace,
         std::string workspace_root,std::vector<ProcessProfile> profiles);
     ModelToolDefinition definition() const;
+    // Backend-private immutable bindings, including resolved executable IDs.
+    const std::vector<ProcessProfile>& profiles() const noexcept{return profiles_;}
     std::string invoke(const std::string& operation_id,const std::string& run_id,
         const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={});
 private:

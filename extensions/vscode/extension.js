@@ -1,7 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
-const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun } = require('./client');
+const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const { browserViewLauncher } = require('./browser-view');
@@ -41,6 +41,7 @@ async function activate(context) {
   let graphCatalogue=[],selectedGraph,graphSnapshot;
   let graphChildren=new Map(),childHistory=new Map();
   let ownedObservation=false;
+  let planningObservation=false,planSnapshot,pendingPlanRead=false,planReadConflicts=0;
   const stateKey = 'agentflow.session';
   const modelStateKey = 'xmind.model';
   const runStateKey = 'xmind.observedRun';
@@ -50,7 +51,7 @@ async function activate(context) {
   const stop = () => { clearInterval(timer); timer = undefined; generation++;profileController?.invalidate(); };
   const busySession=()=>sessionRuns.some(run=>['queued','running','paused'].includes(run.state));
   const observedOperation=id=>id===runId || graphChildren.has(id);
-  const clearGraph=()=>{graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
+  const clearGraph=()=>{planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
   const presentRuns=()=>post({type:'runs',runs:sessionRuns,selected:runId,busy:busySession()});
   context.subscriptions.push(vscode.window.registerWebviewViewProvider('xmind.workspace', {
     resolveWebviewView(view) {
@@ -159,9 +160,37 @@ async function activate(context) {
     run=await client.status(id);if(version!==generation||!panel)return;
     validRoot(run);
     if(['completed','failed','cancelled'].includes(run.state)){snapshot=await observeOwnedRun(client,run,sessionId,cursor);if(version!==generation||!panel)return;publish(snapshot);}
+    await readPlan(id,version);if(version!==generation||!panel)return;
     const history=await client.history(sessionId),runs=await client.runs(sessionId);if(version!==generation||!panel)return;
     sessionRuns=runs;presentRuns();post({type:'transcript',history,preserveLive:['queued','running','paused'].includes(run.state)});post({type:'status',text:run.state});
-    if(!busySession()&&snapshot.caughtUp)stop();
+    if(!busySession()&&snapshot.caughtUp&&!pendingPlanRead)stop();
+  }
+
+  async function readPlan(root,version){
+    if(!planningObservation)return;const target=client;let record;try{record=validatePlanObservation(await target.plan(root),root);}catch(error){
+      if(error.status!==409)throw error;if(version!==generation||!panel||target!==client||runId!==root||configuredOrigin()!==target.baseUrl)return;
+      planSnapshot=undefined;post({type:'plan-clear'});pendingPlanRead=++planReadConflicts<3;if(!pendingPlanRead)post({type:'error',text:'Plan is changing. Refresh its observation before answering or resuming.'});return;
+    }
+    if(version!==generation||!panel||target!==client||runId!==root||configuredOrigin()!==target.baseUrl)return;
+    if(record.run.session_id!==sessionId)throw new Error('Plan conversation identity changed');
+    planReadConflicts=0;pendingPlanRead=false;planSnapshot=JSON.parse(JSON.stringify(record));post({type:'plan',record:planSnapshot});return planSnapshot;
+  }
+  function readyPlan(record){return record?.enabled&&record.run.state==='paused'&&record.plan&&!record.plan.halted&&record.plan.claimed.length===0&&!record.questions.some(question=>question.state==='waiting')&&(record.plan.ready.length>0||record.plan.report_ready)&&record.calls.some(call=>call.pending);}
+  async function controlPlan(message){
+    const version=generation,target=client,view=panel,root=runId,session=sessionId,observed=planSnapshot;
+    const current=()=>panel===view&&version===generation&&client===target&&runId===root&&sessionId===session&&configuredOrigin()===target.baseUrl;
+    if(!vscode.workspace.isTrusted||!observed?.plan||!observed.enabled||message.root!==root||observed.run.id!==root||observed.run.session_id!==session||message.plan_id!==observed.plan.id||message.expected_revision!==observed.plan.revision||message.expected_state_sequence!==observed.plan.state_sequence)throw new Error('Refresh the selected plan before providing input or resuming.');
+    const answer=message.type==='plan-input';let question;
+    if(answer){question=observed.questions.find(value=>value.id===message.request);if(!['paused','running'].includes(observed.run.state)||!question||question.state!=='waiting'||question.backend_node_id!==message.backend_node_id||question.definition_revision!==message.definition_revision||question.published_event_seq!==message.published_event_seq||Date.now()>=question.expires_unix_ms)throw new Error('Refresh the current owned human question.');validatePlanInputText(message.input_json);}
+    else if(!readyPlan(observed))throw new Error('The selected owner has no ready paused plan.');
+    let fresh;try{fresh=validatePlanObservation(await target.plan(root),root);}catch(error){if(error.status===409&&current()){planSnapshot=undefined;post({type:'plan-clear'});}throw error;}if(!current())return;
+    if(fresh.run.session_id!==session)throw new Error('Plan conversation identity changed');planSnapshot=JSON.parse(JSON.stringify(fresh));post({type:'plan',record:planSnapshot});
+    if(!fresh.enabled||fresh.plan?.id!==observed.plan.id||fresh.plan.revision!==message.expected_revision||fresh.plan.state_sequence!==message.expected_state_sequence)throw new Error('Plan changed. Review the refreshed plan before submitting again.');
+    if(answer){const actual=fresh.questions.find(value=>value.id===question.id);for(const field of ['id','plan_id','root_run_id','backend_node_id','definition_revision','published_event_seq','question','state','expires_unix_ms'])if(!actual||actual[field]!==question[field])throw new Error('Human question changed. Review the refreshed plan.');if(!['paused','running'].includes(fresh.run.state)||Date.now()>=actual.expires_unix_ms)throw new Error('Human question is no longer awaiting input.');}
+    else if(!readyPlan(fresh))throw new Error('The selected owner is no longer ready to resume.');
+    const result=answer?await target.planInput(root,question.id,message.input_json,message.expected_revision,message.expected_state_sequence):await target.resumePlan(root,message.expected_revision,message.expected_state_sequence);
+    if(!current())return;if(result.id!==root||result.session_id!==session||result.parent_id||result.graph_root)throw new Error('Plan controller result identity changed');await poll();
+    if(!timer&&busySession())timer=setInterval(poll,500);
   }
 
   async function selectSession(id) {
@@ -218,6 +247,7 @@ async function activate(context) {
   async function capabilities() {
     const health=await client.health();let catalogue={models:[],default_model:''};
     ownedObservation=health.owned_child_observation===true;
+    planningObservation=Object.hasOwn(health,'agent_planning');if(planningObservation)await client.planning();
     if(health.agent_execution) {
       try {catalogue=await client.models();}
       catch(error) {
@@ -378,6 +408,7 @@ async function activate(context) {
           if(typeof message.input_json!=='string' || message.input_json.length>65536)throw new Error('Human input must be bounded JSON.');
           await client.graphInput(runId,message.node,message.input_json,message.revision);await poll();
         }
+        else if(message.type==='plan-input'||message.type==='plan-resume'){await controlPlan(message);}
         else if (message.type === 'new') {
           const session = await client.createSession('VS Code session');
           await selectSession(session.id);
