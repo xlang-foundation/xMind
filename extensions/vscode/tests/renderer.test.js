@@ -11,6 +11,20 @@ function renderer(){
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+test('run inspector uses selected historical provider context independently of the current model',()=>{
+  const r=renderer(),context={profile_id:'historical-profile',profile_revision:1,route_id:'openai.responses',provider:'openai',wire:'responses',model_id:'historical-model'};
+  r.send({type:'runs',runs:[{id:'failed-run',state:'failed',provider_context:context}],selected:'failed-run',busy:false});const area=r.dom.window.document.getElementById('run-context');
+  assert.equal(area.hidden,false);assert.match(area.textContent,/Admitted profile:OpenAI · Responseshistorical-model/);assert.match(area.querySelector('.provider-context').title,/historical-profile\nProfile version: 1/);
+  r.send({type:'capabilities',execution:true,models:[{id:'current-model'}],model:'current-model'});assert.ok(!area.textContent.includes('current-model'));assert.equal(area.querySelector('.metrics'),null,'Admission context must not invent response metrics');
+  r.send({type:'runs',runs:[{id:'legacy-run',state:'completed'},{id:'failed-run',state:'failed',provider_context:context}],selected:'legacy-run',busy:false});assert.equal(area.hidden,true);assert.equal(area.textContent,'');
+  r.send({type:'runs',runs:[{id:'failed-run',state:'failed',provider_context:context}],selected:'failed-run',busy:false});r.send({type:'reset-run'});assert.equal(area.hidden,true);assert.equal(area.textContent,'');r.dom.window.close();
+});
+test('run inspector suppresses malformed or secret-bearing provider metadata',()=>{
+  const r=renderer(),context={profile_id:'fixture',profile_revision:1,route_id:'openai.responses',provider:'openai',wire:'responses',model_id:'fixture-model'};
+  for(const invalid of [{...context,api_key:'synthetic-private-key'},{...context,profile_revision:0},{...context,model_id:'<script>fixtureAttack()</script>'}]){
+    r.send({type:'runs',runs:[{id:'fixture-run',state:'cancelled',provider_context:invalid}],selected:'fixture-run',busy:false});const area=r.dom.window.document.getElementById('run-context');assert.equal(area.hidden,true);assert.equal(area.textContent,'');
+  }r.dom.window.close();
+});
 test('profile Settings offers saved and new providers and keeps discovered models in the footer',()=>{
  const r=renderer(),doc=r.dom.window.document;try{
   r.send({type:'provider-profiles',active:'saved-openai',profiles:[{id:'saved-openai',provider:'openai',model:'fixture-openai',route_id:'openai.responses'}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]});

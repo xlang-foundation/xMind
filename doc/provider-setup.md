@@ -2,6 +2,18 @@
 
 ## Run-descriptor attribution
 
+The shared browser/VS Code renderer now has an admitted-profile row beneath the
+recorded-run selector. It uses only the selected descriptor's saved context and
+keeps historical attribution independent of today's model selector. Its tooltip
+shows the profile ID/version and route; the row displays provider/wire and model.
+Failed and cancelled runs can expose admission identity without an assistant
+response or invented usage. Missing/malformed context hides the row; changing
+conversation or resetting run observation clears it. Local verification passed
+**88 extension and 17 browser tests**, plus actual native/browser integration
+against the existing hosted `19d69dd` binary. That integration proves backward
+compatibility, not the pending native descriptor projection. This view source
+has not replaced the installed preview.
+
 New native source projects `provider_context` into admitted, inspected and listed
 run descriptors, including graph roots and agent children. Repository reads use
 the first user message owned by that exact run, through xlang3 SQLite. They do

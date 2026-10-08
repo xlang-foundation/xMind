@@ -20,6 +20,11 @@ function profileBadge(value){
   const badge=node('span',label+' · '+wires[value.wire],'provider-context');badge.title='Provider profile: '+value.profile_id+'\nProfile version: '+value.profile_revision+'\nRoute: '+value.route_id+'\nModel: '+value.model_id;return badge;
 }
 const guidanceLiteral=value=>value.replace(/[\u0000-\u001f\u007f]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));
+function renderRunContext(run){
+  const area=byId('run-context');area.replaceChildren();area.hidden=true;
+  const badge=profileBadge(run?.provider_context);if(!badge)return;
+  area.append(node('span','Admitted profile:'),badge,node('span',run.provider_context.model_id));area.hidden=false;
+}
 function metrics(el,data={}){const usage=data.usage||{};el.replaceChildren();for(const text of ['Input '+count(usage.prompt_tokens),'Output '+count(usage.completion_tokens),'Total '+count(usage.total_tokens)])el.append(node('span',text));if(Number.isSafeInteger(usage.prompt_tokens_details?.cached_tokens))el.append(node('span','Cached '+count(usage.prompt_tokens_details.cached_tokens)));if(Number.isSafeInteger(usage.completion_tokens_details?.reasoning_tokens))el.append(node('span','Reasoning '+count(usage.completion_tokens_details.reasoning_tokens)));if(data.model)el.append(node('span',data.model));const profile=profileBadge(data.provider_context);if(profile)el.append(profile);if(Number.isFinite(data.first_token_ms)&&data.first_token_ms>=0)el.append(node('span','First token '+(data.first_token_ms/1000).toFixed(2)+'s'));if(Number.isFinite(data.elapsed_ms)&&data.elapsed_ms>=0)el.append(node('span',(data.elapsed_ms/1000).toFixed(2)+'s'));el.title='Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.';}
 function processProposal(section,item){
   let plan;try{plan=JSON.parse(item.arguments_json);}catch{}
@@ -246,9 +251,10 @@ window.addEventListener('message',event=>{
   else if(m.type==='runs'){
     sessionBusy=m.busy;byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
     for(const run of m.runs){const option=node('option',run.state+' · '+run.id);option.value=run.id;option.selected=run.id===m.selected;byId('runs').append(option);}
+    renderRunContext(m.runs.find(run=>run.id===m.selected));
     byId('send').disabled=!canExecute()||activeRun||sessionBusy;
   }
-  else if(m.type==='reset-run'){resetLive();resetFailure();resetProcessStreams();byId('events').textContent='';}
+  else if(m.type==='reset-run'){resetLive();resetFailure();resetProcessStreams();byId('events').textContent='';renderRunContext();}
   else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();byId('events').textContent='';}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data);}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-profiles'){profileState=m;byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',(profile.provider==='anthropic'?'Claude':'OpenAI')+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);profiles.value=m.active;profileRoutes();}
