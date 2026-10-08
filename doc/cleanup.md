@@ -1,5 +1,11 @@
 # Native source-tree cleanup
 
+The active checkout is `D:\CantorAI2026\xMind`; its maintained sources and
+documentation use the native layout below. The separate
+`D:\CantorAI2026\AgentFlow` directory was inspected and is empty. Automatic
+approval review blocked its nonrecursive removal with the reason "blocked by
+policy", so the empty directory remains; it is not another source checkout.
+
 Removed the earlier Python AgentFlow implementation, its dependent probes and launcher, and the original xlang-based Core/CLI/service/debug plugins, configuration, examples, schemas and Docker setup. Original programming guides, legacy dependency lock and migration instructions were also removed. Git history retains the code and its license provenance.
 
 Root CMake delegates to Native/. Cleanup revision `dea5888` passed its complete hosted gate: 58 native, 88 extension and 17 browser contracts, native/browser integration and VSIX verification, with no failures/skips. [Exact evidence](evidence/native-cleanup-hosted-provenance.json). Later Gemini agent/SQLite acceptance increased the manifest to 62; its full local gate passed in 100.44 seconds. Its [separate validation scope](VALIDATION_STATUS.md) does not change the cleanup evidence. The OpenCode inventory was regenerated with 136 upstream operations, zero removed-prototype mappings and 23 native source candidates; none is claimed verified parity.

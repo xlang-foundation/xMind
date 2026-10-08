@@ -47,7 +47,13 @@ struct GraphService::Impl {
             if(root.input_json.empty())throw RunUnavailable("Paused legacy graph input requires review");
             const auto input=Json::parse(root.input_json);
             if(!input.contains("content") || !input["content"].is_string())throw DatabaseError("Paused graph has invalid task input");
-            const GraphPlan plan(root.specification_json);runner.validate(plan,input.value("model_id",std::string{}));
+            const GraphPlan plan(root.specification_json);
+            try {runner.validate(plan,input.value("model_id",std::string{}));}
+            catch(const GraphMcpUnavailable&) {
+                // Retain inspection and cancellation of an already committed
+                // human pause. A changed connector cannot resume or rebind it;
+                // human_input checks the immutable plan before any mutation.
+            }
             const auto decision=GraphCoordinator(plan,root.checkpoint_json,GraphRestoreMode::live).inspect();
             if(decision.halted || decision.waiting_human.empty() || !decision.ready.empty() ||
                 !decision.running.empty() || !decision.skippable.empty())throw DatabaseError("Paused graph has executable or inconsistent work");
@@ -158,6 +164,9 @@ GraphRootRecord GraphService::human_input(const std::string& id,const std::strin
     const auto owned=impl_->active.find(id);if(owned==impl_->active.end())throw NotFound("Graph is not owned by this service");
     const auto job=owned->second;const bool waiting=job->phase==Impl::Phase::waiting;
     if(job->cancelled)throw Conflict("Graph cancellation is pending");
+    const auto root=impl_->store.graph_run(id).get();
+    const auto task=Json::parse(root.input_json);
+    impl_->runner.validate(GraphPlan(root.specification_json),task.value("model_id",std::string{}));
     // Reserve a possible wakeup before the transaction. Allocation failure
     // cannot leave committed runnable work without its scheduler entry.
     if(waiting)impl_->pending.push_back(job);

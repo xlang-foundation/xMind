@@ -1,6 +1,45 @@
 # Current native validation
 
-Current source passed the complete local **67 native contracts in 117.65
+Current source passed the complete local **69 native contracts in 121.22
+seconds**, with the exact expected/registered/passed manifest, zero
+failures/skips and no post-build exclusions. All **14 frozen source hashes**
+match the final pre-build state. The direct MCP graph contract passed in **5.59
+seconds**, and actual administrator/server/CLI/shared-view-adapter integration
+in **2.31 seconds**. Fresh browser/native integration passed the rebuilt server
+and source-matched assets. An initial HTTP startup failure exposed an obsolete
+model-only guard; the corrected final source and expanded model-configuration
+negatives passed the full gate. Its [failed interim log](evidence/native-graph-mcp-initial-ctest.log)
+is retained separately and is not counted as a pass. Exact hosted69 validation
+remains pending.
+[Local69 source/runtime/log evidence](evidence/native-graph-mcp-local-provenance.json).
+
+MCP nodes exclusively use an exact alias, a pinned enabled server revision and
+a strict `arguments_json` object string. Native execution rediscovery precedes
+approval, then the shared registry owns schema validation, exact controller
+authorization, operation claims and outcomes. Root deadlines cover discovery,
+permission waits and dispatch. Unknown/drifted aliases and invalid inputs
+reject before `tools/call`; uncertain/unrecorded outcomes preserve quarantine or
+fail-stop ownership without replay. Acknowledged output above 64 KiB fails the
+graph child while retaining its succeeded operation and actual request IDs.
+Literal number tokens and escaped keys remain exact. Referenced typed graph
+values reject floats or integers outside ±9,007,199,254,740,991 before child
+admission. Metadata/admission do not launch peers. Stale durable human pauses
+remain inspectable/cancellable but resume rejects before input commit. The
+stopped-backend administrator adds private credential resolution and catalogue
+reflection rejection. Actual owned peers write real disposable files after
+approval; dependent native reads, human pause/reopen, denied/cancelled/invalid/
+drift/stale paths, shared-server claim serialization, lost replies, acknowledged
+output bounds and injected outcome-journal failures/recovery passed through the
+native graph/permission engines and embedded-xlang3 SQLite.
+[Implementation and acceptance scope](native-graph-mcp.md).
+
+Frontend sources remain unchanged from the prior verified `ae7c4ba`/`fceb50b`
+checkpoints, retaining **98 extension and 17 browser tests**; those suites have not been rerun for the
+direct-MCP graph change. Installed native/view snapshots remain unchanged.
+Synthetic peer protocol fixtures do not establish live direct-MCP graph or
+rendered IDE acceptance, or complete MCP/graph parity.
+
+The preceding `fceb50b` source passed the complete local **67 native contracts in 117.65
 seconds**, with the exact expected manifest, zero failures/skips and no
 post-build exclusions. The new Claude history helper passed in **0.50 seconds**;
 the expanded actual Claude AgentRunner contract passed in **0.57 seconds**.
@@ -33,9 +72,17 @@ verified; its prior local **98 extension and 17 browser tests** are retained,
 without rerunning those suites for this native change. Provider replies, keys
 and signatures are synthetic. Thinking/reasoning request controls, live Claude
 acceptance, foreign signed/tool conversion, actual rendered IDE acceptance and
-installed-preview upgrades remain incomplete. Exact hosted verification of this
-newer 67-contract source remains pending.
+installed-preview upgrades remain incomplete. Exact revision
+`fceb50ba0493f645ee5f0a00d5400e0f103df231` subsequently passed its
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37752689263):
+**67 native contracts in 120.18 seconds**, **98 extension tests in 2.0700124
+seconds** and **17 browser tests in 0.9230928 seconds**, native/browser integration
+and verification of an 18-asset VSIX, with zero failures/skips and the exact
+manifest. Hosted history/agent contracts took **0.31/1.03 seconds**. This
+separate gate excludes the current direct MCP graph, administrator and server
+startup changes.
 [Local67 source/runtime/log evidence](evidence/native-anthropic-history-local-provenance.json),
+[exact hosted67 evidence](evidence/native-anthropic-history-hosted-provenance.json),
 [Claude receipt scope](native-claude-history.md).
 
 The preceding `ae7c4ba` source passed the complete local **66 native contracts in 114.49
@@ -177,7 +224,7 @@ discovery/enrollment source in the local/hosted 64-contract gates and the generi
 CLI boundary in the separately verified local/hosted 65-contract gates. The
 prior local 66-contract gate verifies actual Claude AgentRunner/file/SQLite
 acceptance and its shared metrics renderer at the scoped synthetic-provider/DOM
-boundary; the current local 67-contract gate additionally verifies ordered
+boundary; the separate local/hosted `fceb50b` 67-contract gates additionally verify ordered
 raw/signed/redacted receipts and same-wire replay without repeated effects.
 Live Gemini and Claude inference remain
 unverified.

@@ -10,3 +10,4 @@ doc/evidence/native-gemini-agent-*.log -text
 doc/evidence/native-gemini-transport-*.log -text
 doc/evidence/native-anthropic-agent-*.log -text
 doc/evidence/native-anthropic-history-*.log -text
+doc/evidence/native-graph-mcp-*.log -text

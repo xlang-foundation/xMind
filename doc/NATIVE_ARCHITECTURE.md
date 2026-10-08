@@ -37,7 +37,38 @@ the superseded direct-SQLite implementation was removed. See
 
 ## Current source and verification
 
-The current ordered-Claude-history checkpoint passed all **67 native contracts
+New source connects pinned MCP tools directly to registered graph tool nodes,
+including graphs with no configured model. A node binds its opaque alias to an
+enabled server ID/revision and keeps literal arguments in an `arguments_json`
+string; runtime rediscovery must contain that exact alias before a durable
+approval can be proposed. Metadata and admission do not launch peers. Explicit
+offline `discover-mcp SERVER_ID WORKSPACE` uses the native administrator's
+stopped-backend lease to obtain aliases, schemas and untrusted descriptions,
+rejecting credential reflection before public output. Actual tool dispatch
+uses the existing approval, shared-resource claim and outcome journal.
+
+The final guarded **69-contract native gate passed in 121.22 seconds**, with
+the exact expected/registered/passed manifest, zero failures/skips and no
+post-build exclusions. Fourteen frozen source hashes match the pre-build
+capture. The new graph MCP contract took **5.59 seconds** and actual
+HTTP/admin/CLI/view-adapter contract **2.31 seconds**. They verify raw
+argument/reference preservation, no-model execution,
+actual external writes/dependent reads, xlang3 SQLite reopen, stale paused
+binding inspection/cancellation, reply-loss uncertainty and unrecorded-outcome
+fail-stop. An acknowledged result over the graph's 64 KiB output limit fails
+the child while retaining the succeeded operation; it cannot undo or replay
+the external effect. This scope is separate from the completed Claude67 gate
+below and adds no provider-parity claim. Fresh browser/native integration
+passed against the rebuilt server and source-matched assets. Unchanged frontend
+sources retain the exact fceb hosted **98 extension and 17 browser tests**;
+those suites were not rerun for this native change. Hosted69 validation, live
+MCP interoperability and rendered IDE acceptance remain pending; installed
+previews are unchanged. The initial HTTP start-guard failure is retained
+separately from the final passing gate.
+[Local69 provenance](evidence/native-graph-mcp-local-provenance.json),
+[Direct MCP graph contract](native-graph-mcp.md).
+
+The ordered-Claude-history checkpoint passed all **67 native contracts
 locally in 117.65 seconds**, with an exact manifest, zero failures/skips and no
 post-build exclusions. Ordered `anthropic_content` receipts preserve raw content
 as a JSON string, accepted tool-input tokens/escaped keys, block interleaving and
@@ -49,8 +80,15 @@ with unsigned-block rejection before effects.
 
 Fresh browser/native integration passed against the rebuilt server. Frontend
 sources match `ae7c4ba` and retain its recorded **98 extension and 17 browser
-tests**; those suites were not rerun for this native change. Current hosted67
-validation remains pending. Thinking request controls, local cryptographic
+tests**; those suites were not rerun for that local native change. Exact source
+`fceb50ba0493f645ee5f0a00d5400e0f103df231` also passed its hosted **67 native
+contracts in 120.18 seconds**, **98 extension and 17 browser tests**,
+native/browser integration and VSIX verification, with zero failures/skips and
+all 16 job steps successful. Its history helper took **0.31 seconds** and
+actual Claude agent contract **1.03 seconds**. This hosted result excludes the
+new direct-MCP-graph source and its 69-contract gate above.
+[Exact hosted67 scope](evidence/native-anthropic-history-hosted-provenance.json).
+Thinking request controls, local cryptographic
 verification, model/account acceptance, cross-wire signed conversion and full
 parity remain incomplete; installed previews are unchanged.
 [Local67 scope](evidence/native-anthropic-history-local-provenance.json),

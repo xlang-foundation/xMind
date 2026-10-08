@@ -4,7 +4,39 @@ Current completion scope is the [revised xMind OSS specification](architecture.m
 
 ## Current checkpoint scope
 
-The current Claude receipt checkpoint passed the full local **67-contract native
+The current direct MCP graph checkpoint adds model-free registered tool nodes
+using the real native schema, controller approval and operation journal. Each
+node pins a server revision and registry alias; fresh discovery must match before
+proposal or dispatch. Exact raw literals survive inside `arguments_json`
+strings, while inexact typed dependency numbers reject before child admission.
+Root deadlines bound discovery/waits/dispatch. Actual acknowledged oversized
+outputs retain succeeded operations; uncertain or unrecorded effects preserve
+quarantine/fail-stop ownership without replay. Metadata/admission never start
+peers, and stale human pauses remain inspectable/cancellable with resume rejected
+before input commit. The stopped-backend native administrator supports private
+credential discovery and catalogue reflection rejection.
+[Direct MCP graph scope](native-graph-mcp.md).
+
+The final complete local **69-contract native gate passed in 121.22 seconds**,
+with the exact expected/registered/passed manifest, zero failures/skips and no
+post-build exclusions. All **14 frozen source hashes** match the final pre-build
+state. The new native graph/permission contract passed in **5.59 seconds**;
+actual administrator/server/CLI/shared-view-adapter integration in **2.31
+seconds**. Owned peers perform real approved file effects, with dependent native
+reads, human pause/reopen, denied/cancelled/invalid/drift/stale paths, serialized
+shared-server claims, lost replies, acknowledged output limits and injected
+journal fail-stop/recovery. Peer metadata/protocol replies are synthetic. Fresh
+browser/native integration passed the rebuilt server and source-matched assets.
+Its first HTTP launch failure exposed an obsolete model-only guard; the [failed
+interim log](evidence/native-graph-mcp-initial-ctest.log) is retained separately
+from the final passing corrected-source gate and additional invalid model
+configuration cases. Hosted69 remains pending. Unchanged frontend sources
+retain the prior **98 extension and 17 browser tests**, without rerunning those
+suites for this native change. Installed previews remain unchanged; live
+direct-MCP graph, rendered IDE and complete parity acceptance remain incomplete.
+[Exact local69 evidence](evidence/native-graph-mcp-local-provenance.json).
+
+The preceding `fceb50b` Claude receipt checkpoint passed the full local **67-contract native
 gate in 117.65 seconds**, with an exact manifest, zero failures/skips and no
 post-build exclusions. The new history helper passed in **0.50 seconds**; the
 expanded actual AgentRunner contract passed in **0.57 seconds**. Ordered
@@ -26,9 +58,17 @@ retains its prior **98 extension and 17 browser tests**, without a new frontend
 rerun. Provider replies/keys/signatures are synthetic; local cryptographic
 verification is not performed. Thinking/reasoning request controls, live Claude
 acceptance, foreign signed/tool conversion, rendered IDE acceptance, preview
-upgrades and complete parity remain incomplete. Exact hosted67 verification
-remains pending.
+upgrades and complete parity remain incomplete. Exact revision
+`fceb50ba0493f645ee5f0a00d5400e0f103df231` subsequently passed its
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37752689263):
+**67 native contracts in 120.18 seconds**, **98 extension tests in 2.0700124
+seconds** and **17 browser tests in 0.9230928 seconds**, native/browser integration
+and verification of an 18-asset VSIX, with zero failures/skips and the exact
+manifest. Hosted history/agent contracts took **0.31/1.03 seconds**. The hosted67
+gate excludes the current direct MCP graph, administrator and server startup
+changes.
 [Local67 evidence](evidence/native-anthropic-history-local-provenance.json),
+[exact hosted67 evidence](evidence/native-anthropic-history-hosted-provenance.json),
 [receipt scope and bounds](native-claude-history.md).
 
 The preceding `ae7c4ba` Claude checkpoint passed the full local **66-contract native gate

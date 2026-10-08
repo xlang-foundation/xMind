@@ -1,5 +1,18 @@
 # Native Claude content history
 
+Exact source `fceb50ba0493f645ee5f0a00d5400e0f103df231` passed its hosted
+**67 native contracts in 120.18 seconds**, **98 extension and 17 browser tests**,
+native/browser integration and VSIX verification, with zero failures/skips and
+all 16 job steps successful. The history helper took **0.31 seconds** and
+actual Claude agent contract **1.03 seconds**. Runtime/stdlib/patch pins, the
+immutable 67-contract manifest and original raw logs were verified separately
+from the earlier local gate.
+[Exact hosted67 evidence](evidence/native-anthropic-history-hosted-provenance.json).
+This scope excludes later [direct MCP graph source](native-graph-mcp.md), its
+separate local 69-contract gate and all
+subsequent changes. No live-provider, rendered-IDE or installed-preview
+acceptance is claimed.
+
 The complete local **67-contract native gate passed in 117.65 seconds**, with
 an exact manifest, zero failures/skips and no post-build exclusions. The new
 receipt helper contract took **0.50 seconds** and the expanded actual Claude
@@ -17,8 +30,8 @@ contracts in 131.92 seconds**, **98 extension and 17 browser tests**,
 native/browser integration and VSIX verification, with zero failures/skips. Its
 Claude agent contract took **1.41 seconds**.
 [Exact hosted66 evidence](evidence/native-anthropic-agent-hosted-provenance.json).
-That gate excludes the current67 signed/interleaved receipts, history helper and
-raw replay changes. Current hosted67 validation remains pending. No live
+That gate excludes the fceb67 signed/interleaved receipts, history helper and
+raw replay changes; its success is separate from the hosted67 gate above. No live
 provider, model availability or installed-preview acceptance is claimed.
 
 The native implementation retains the ordered Claude assistant content needed
@@ -110,7 +123,7 @@ Same-role merging and final-body limits apply before oversized concatenation.
 An incoming empty natural-stop receipt can be retained; outgoing zero-block
 assistant replay is explicitly incompatible and is not silently skipped.
 
-## Verified local acceptance
+## Verified local and hosted acceptance
 
 The [compiled helper contract](../Native/tests/anthropic_history_contract.cpp)
 passed exact numeric tokens and escaped argument keys across agent-shaped receipt
@@ -128,7 +141,8 @@ cancellation/recovery and SQL-rollback cases also passed.
 Provider replies and signature/data values in these tests are labelled synthetic;
 they cannot establish cryptographic authenticity or live inference.
 
-Exact hosted evidence and any later UI/live scope must be recorded separately.
+The exact hosted67 evidence above verifies these contracts at fceb50ba. Later
+direct MCP graph work, UI/live scope and installed bundles remain separate.
 Thinking controls, broader Messages variants,
 cross-wire receipt conversion, model/account binding, all 21 pinned Anthropic
 models and full provider/coding/protocol parity remain incomplete.

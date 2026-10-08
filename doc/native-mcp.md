@@ -1,5 +1,19 @@
 # Native MCP implementation boundary
 
+Direct MCP graph tool nodes now share the existing native registry, exact
+controller approval and durable operation journal. A model-free registered
+graph can invoke a pinned server revision/fingerprint alias, then feed its
+observed output to a dependent node. The stopped native administrator's
+`discover-mcp SERVER_ID WORKSPACE` returns actual aliases/schemas without
+`tools/call`, with private-credential reflection guards. The current local69
+gate verifies real owned peer file effects, paused SQLite reopen, raw literal
+arguments, denial/cancellation, catalogue drift, same-workspace/server
+contention, lost-reply quarantine, outcome-write fail-stop, output bounds and
+stale-pause inspection/cancellation without resume. Native HTTP/CLI/shared view
+adapter acceptance passed too. Exact hosted69 and rendered IDE acceptance
+remain pending. [Setup and scope](native-graph-mcp.md),
+[local69 evidence](evidence/native-graph-mcp-local-provenance.json).
+
 The public PowerShell launcher accepts
 `Tools/agentflow.ps1 -Action Serve -McpConfig CONFIG_FILE` and forwards the file
 to the native server's `--mcp-config` contract. Loading, validation, credential
@@ -85,7 +99,7 @@ Import and provision through the compiled native administrator while xMind Serve
 
 `PRIVATE_SOURCE_ENV` names an environment variable privately provisioned in the administrator process. The secret itself is never a command argument or printed output. The administrator derives scope/ID from the registered reference and purpose from the exact configured command, directory, server ID and normalized environment name. Command changes require a credential provisioned for the new purpose. Existing credential IDs cannot silently change purpose; assign a new reference when changing the command. Storage uses the existing user-bound Windows DPAPI protection and embedded xlang3 SQLite adapter. There is no CPython executable/bridge.
 
-The native server also accepts `--mcp-config CONFIG_FILE` before creating workers; omitting it restores saved settings. Enabled MCP execution requires the trusted execution workspace and explicit supported model-tool capability. A model-free server can list saved metadata without executing tools. Authenticated `GET /v1/mcp/servers` and `xmind_cli PORT mcp-servers` expose only ID, revision, enabled flag and transport, with `runtime_state:"per_run"`; they do not expose command paths, arguments or credential references/values. The existing sidebar presents exact proposals, names the external server/tool, and uses “Allow tool”. An uncertain MCP operation offers no retry or file-inspection inference; a succeeded operation is labeled peer-acknowledged, without independent verification.
+The native server also accepts `--mcp-config CONFIG_FILE` before creating workers; omitting it restores saved settings. MCP agent execution requires the trusted execution workspace and supported model-tool capability. Model-free registered MCP graphs require the verified workspace and exact connector binding, with separate controller approval for each call. Metadata listing never executes a tool. Authenticated `GET /v1/mcp/servers` and `xmind_cli PORT mcp-servers` expose only ID, revision, enabled flag and transport, with `runtime_state:"per_run"`; they do not expose command paths, arguments or credential references/values. The existing sidebar presents exact proposals, names the external server/tool, and uses “Allow tool”. An uncertain MCP operation offers no retry or file-inspection inference; a succeeded operation is labeled peer-acknowledged, without independent verification.
 
 Local Release compilation and all twenty-eight native contracts passed, including `native_mcp_configuration_contract` and `native_agent_mcp_http_contract`. The latter uses the actual compiled administrator, server and CLI, DPAPI credentials, embedded xlang3 persistence, independent MCP subprocesses and real files. It verifies restored configuration, restricted environment, exact numeric argument bytes, approval/denial/cancellation, peer-result model continuation and lost-reply uncertainty after restart without replay. Inference is explicitly synthetic. All twenty-eight extension contracts passed, including external-tool approval and uncertainty rendering. Actual populated editor MCP execution, live inference, SDK interoperability, Streamable HTTP/OAuth, resources/prompts/subscriptions, modern interactive continuations, shared-account mapping and full upstream schema conformance remain required.
 

@@ -14,7 +14,33 @@ The product launcher uses native C++ targets with embedded xlang3. See [native-s
 
 Use -RuntimeDirectory for the built sibling xlang3 runtime and -PythonLibSource for allowed standard-library source. No CPython interpreter is launched. The xlang3 SQLite prerequisite is recorded in [checkpoint-m1.md](../doc/checkpoint-m1.md).
 
-Current source passed the complete local **67 native contracts in 117.65
+Current source adds direct MCP nodes to model-free registered graphs. Enroll a
+trusted stdio configuration while the backend is stopped, use native
+`discover-mcp` to discover its public alias and revision, then pin both in the
+catalogue. MCP nodes use a strict `arguments_json` string so literal numeric
+tokens and escaped keys survive catalogue/checkpoint storage. Execution uses
+fresh discovery, the shared native schema/approval/journal path and the root
+segment deadline. Metadata and admission never launch peers. Stale paused
+graphs remain inspectable/cancellable, with resume rejected before input commit.
+[Configuration, arguments and limits](native-graph-mcp.md).
+
+The final complete local **69-contract native gate passed in 121.22 seconds**,
+with the exact expected/registered/passed manifest, zero failures/skips and no
+post-build exclusions. All **14 frozen source hashes** match the final pre-build
+state. The new native graph/permission contract took **5.59 seconds**; actual
+administrator/server/CLI/shared-view-adapter integration took **2.31 seconds**.
+Real approved file effects, pause/reopen, native dependent reads, rejected and
+uncertain paths, serialized shared-server claims and journal fail-stop/recovery
+passed using synthetic peer protocol replies. Fresh browser/native integration
+also passed against the rebuilt server and source-matched assets. The first
+HTTP startup guard failure is retained in a [separate interim log](evidence/native-graph-mcp-initial-ctest.log);
+the final gate includes the corrected guard and expanded invalid model settings.
+Hosted69 remains pending. Unchanged frontend source retains the prior **98
+extension and 17 browser tests**, without a new frontend rerun. Installed
+previews remain unchanged; live direct-MCP graph and rendered IDE acceptance
+remain separate requirements. [Exact local69 scope](evidence/native-graph-mcp-local-provenance.json).
+
+The preceding `fceb50b` source passed the complete local **67 native contracts in 117.65
 seconds**, with the exact native manifest, zero failures/skips and no post-build
 exclusions. The new Claude history contract passed in **0.50 seconds**, and the
 expanded actual AgentRunner contract in **0.57 seconds**. Ordered signed and
@@ -35,8 +61,16 @@ Frontend sources remain unchanged from `ae7c4ba`, retaining its prior **98
 extension and 17 browser tests**; these suites were not repeated for the native
 receipt change. [Exact local67 scope](evidence/native-anthropic-history-local-provenance.json),
 [receipt implementation and bounds](native-claude-history.md).
-Provider replies/keys/signatures are synthetic. Hosted67 verification,
-thinking/reasoning request controls, live Claude acceptance, foreign signed/tool
+Exact revision `fceb50ba0493f645ee5f0a00d5400e0f103df231` subsequently passed
+its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37752689263):
+**67 native contracts in 120.18 seconds**, **98 extension tests in 2.0700124
+seconds** and **17 browser tests in 0.9230928 seconds**, native/browser integration
+and verification of an 18-asset VSIX, with zero failures/skips and the exact
+manifest. Hosted history/agent contracts took **0.31/1.03 seconds**. This result
+excludes the newer direct MCP graph, administrator and server startup changes.
+[Exact hosted67 scope](evidence/native-anthropic-history-hosted-provenance.json).
+Provider replies/keys/signatures are synthetic. Thinking/reasoning request
+controls, live Claude acceptance, foreign signed/tool
 history conversion, actual rendered IDE acceptance and preview upgrades remain
 incomplete.
 

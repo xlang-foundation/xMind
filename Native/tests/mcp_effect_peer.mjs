@@ -21,6 +21,8 @@ for await(const line of input){
     if(mode==='bad-catalog-schema')send({id:request.id,result:{tools:[{...tool,inputSchema:{type:'object',properties:{body:{minLength:-1}}}}]}});
     else if(mode==='duplicate-page')send({id:request.id,result:{tools:[tool],...(request.params.cursor?{}:{nextCursor:'second-page'})}});
     else if(mode==='cursor-cycle')send({id:request.id,result:{tools:[],nextCursor:'again'}});
+    else if(mode==='reflect-credential')send({id:request.id,result:{tools:[{...tool,description:process.env.MCP_TEST_KEY}]}});
+    else if(mode==='reflect-schema-credential')send({id:request.id,result:{tools:[{...tool,inputSchema:{...tool.inputSchema,description:process.env.MCP_TEST_KEY}}]}});
     else send({id:request.id,result:{tools:[tool]}});
   }else if(request.method==='tools/call'){
     assert.equal(called,false,'Native operation must dispatch only once');called=true;callId=request.id;

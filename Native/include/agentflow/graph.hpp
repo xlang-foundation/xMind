@@ -5,12 +5,18 @@ namespace agentflow {
 enum class GraphNodeKind {agent,tool,human};
 enum class GraphNodeState {pending,running,waiting_human,completed,skipped,failed,uncertain,cancelled};
 enum class GraphRestoreMode {recover,live};
+// Trusted catalogue pins a registry alias to one immutable server revision.
+// It carries no executable, environment, credential value or approval authority.
+struct GraphMcpBinding {std::string server_id;std::int64_t config_revision=0;};
 struct GraphNodeDefinition {
     std::string id;
     GraphNodeKind kind;
     std::vector<std::string> dependencies;
+    // MCP specs require an arguments_json string so catalogue/checkpoint JSON
+    // round trips retain literal number tokens and escaped property spellings.
     std::string prompt,model_id,tool,arguments_json;
     std::string condition_json;
+    std::optional<GraphMcpBinding> mcp;
 };
 // Immutable validated specification, independent of model/provider/runtime values.
 class GraphPlan {

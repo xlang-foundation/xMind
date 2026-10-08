@@ -2,11 +2,25 @@
 #include "agentflow/process_configuration.hpp"
 #include "agentflow/agent_instructions.hpp"
 #include "agentflow/graph.hpp"
+#include "agentflow/mcp_tool_registry.hpp"
 #include "nlohmann/json.hpp"
+#define NOMINMAX
+#include <windows.h>
+#include <chrono>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <map>
+namespace {
+bool reflected(const nlohmann::json& value,const std::string& secret){
+    const auto encoded=nlohmann::json(secret).dump();
+    const auto contains=[&](const std::string& text){return text.find(secret)!=std::string::npos || text.find(encoded.substr(1,encoded.size()-2))!=std::string::npos;};
+    if(value.is_string())return contains(value.get_ref<const std::string&>());
+    if(value.is_object()){for(auto item=value.begin();item!=value.end();++item)if(contains(item.key()) || reflected(item.value(),secret))return true;}
+    else if(value.is_array())for(const auto& item:value)if(reflected(item,secret))return true;
+    return false;
+}
+}
 int main(int argc,char** argv){
     try {
         std::map<std::string,std::string> options;int command=1;
@@ -14,7 +28,7 @@ int main(int argc,char** argv){
             const std::string key=argv[command];if(command+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib") || !options.emplace(key,argv[command+1]).second)throw std::invalid_argument("Invalid native admin options");command+=2;
         }
         for(const auto* key:{"--db","--modules","--stdlib"})if(!options.contains(key))throw std::invalid_argument("Native admin requires --db FILE --modules DIR --stdlib DIR");
-        if(command>=argc)throw std::invalid_argument("Commands: import-graphs FILE; import-instructions FILE; import-processes FILE; import-mcp FILE; put-mcp-credential SERVER_ID ENV_NAME SECRET_SOURCE_ENV. Run while the backend is stopped.");
+        if(command>=argc)throw std::invalid_argument("Commands: import-graphs FILE; import-instructions FILE; import-processes FILE; import-mcp FILE; discover-mcp SERVER_ID WORKSPACE; put-mcp-credential SERVER_ID ENV_NAME SECRET_SOURCE_ENV. Run while the backend is stopped.");
         agentflow::PersistenceService store(options.at("--db"),{options.at("--modules"),options.at("--stdlib")});agentflow::McpConfigurationStore configurations(store);
         using Json=nlohmann::json;const std::string action=argv[command];
         if(action=="import-graphs" && command+2==argc){
@@ -34,6 +48,32 @@ int main(int argc,char** argv){
             std::ifstream file(argv[command+1],std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted MCP configuration");std::string source;char byte;
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("MCP configuration exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted MCP configuration");
             const auto values=configurations.apply(source);Json metadata=Json::array();for(const auto& value:values)metadata.push_back({{"id",value.id},{"revision",value.revision},{"enabled",value.enabled}});std::cout<<Json{{"servers",metadata}}.dump()<<'\n';
+        }else if(action=="discover-mcp" && command+3==argc){
+            const auto settings=configurations.load();const agentflow::McpServerSetting* server=nullptr;
+            for(const auto& value:settings)if(value.id==argv[command+1])server=&value;
+            if(!server || !server->enabled)throw std::invalid_argument("MCP discovery requires an enabled registered server");
+            try {
+                agentflow::WorkspaceTools workspace(argv[command+2]);
+                const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(30);
+                agentflow::McpStdioConfiguration config{server->executable,server->working_directory,server->arguments,{}};
+                struct ClearEnvironment {agentflow::McpStdioConfiguration& config;~ClearEnvironment(){for(auto& entry:config.environment)if(!entry.second.empty())SecureZeroMemory(entry.second.data(),entry.second.size());}} clear{config};
+                for(const auto& reference:server->credentials){
+                    auto secret=store.resolve_credential(reference.scope,reference.id,agentflow::mcp_credential_purpose(*server,reference.name)).get();
+                    const auto bytes=secret.view();config.environment.emplace_back(reference.name,std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size()));
+                }
+                if(std::chrono::steady_clock::now()>=deadline)throw std::runtime_error("MCP discovery deadline exceeded");
+                agentflow::McpStdioClient client(config);client.connect(deadline);
+                agentflow::McpToolRegistry registry(client,store,workspace,server->id,server->revision,deadline);
+                auto tools=Json::array();for(const auto& tool:registry.definitions()){
+                    // Peer descriptions/schemas remain untrusted public
+                    // metadata. Never print an injected credential reflected
+                    // in a string, object key or JSON-escaped peer name.
+                    const auto description=Json(tool.description),schema=Json::parse(tool.input_schema_json);
+                    for(const auto& entry:config.environment)if(reflected(description,entry.second) || reflected(schema,entry.second) || reflected(Json(tool.input_schema_json),entry.second))throw std::runtime_error("MCP public catalogue reflected a private credential");
+                    tools.push_back({{"alias",tool.name},{"description",tool.description},{"input_schema_json",tool.input_schema_json}});
+                }
+                std::cout<<Json{{"server_id",server->id},{"config_revision",server->revision},{"protocol_version",client.server().protocol_version},{"tools",std::move(tools)},{"tool_dispatch_performed",false}}.dump()<<'\n';
+            }catch(...){throw std::runtime_error("MCP tool discovery did not complete");}
         }else if(action=="put-mcp-credential" && command+4==argc){
             const std::string id=argv[command+1],name=argv[command+2],source=argv[command+3];
             const auto settings=configurations.load();const agentflow::McpServerSetting* server=nullptr;for(const auto& value:settings)if(value.id==id)server=&value;

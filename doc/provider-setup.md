@@ -1,8 +1,51 @@
 # Native provider setup
 
+## Direct MCP graphs and provider independence
+
+New source allows a registered graph to invoke a configured MCP tool without
+an active provider/model. Each MCP node carries a strict opaque tool alias,
+`mcp: {server_id, config_revision}` binding and an `arguments_json` string
+containing a strict JSON object. Plain literal tokens and escapes survive
+catalogue/checkpoint storage;
+references use committed dependency data. Referenced floating-point values and
+integers outside the safe range of ±9,007,199,254,740,991 are rejected rather
+than converted into potentially rounded wire arguments.
+
+With the backend stopped, `xmind_admin --db FILE --modules DIR --stdlib DIR
+discover-mcp SERVER_ID WORKSPACE` explicitly discovers that trusted server's
+aliases/schemas under the native database lease. Private environment credentials
+come from native encrypted storage; reflected credentials cause discovery to
+fail before public output. Discovery sends no `tools/call` or approval. Normal
+graph metadata/admission never starts a peer; execution rediscovers the pinned
+alias before requesting the existing controller approval.
+
+Disabled/changed paused bindings remain inspectable and cancellable; human
+input cannot rebind or resume them. An acknowledged result that exceeds the
+64 KiB graph output limit fails the child while preserving its succeeded MCP
+operation. The final guarded **69-contract native gate passed in 121.22 seconds**,
+with the exact expected/registered/passed manifest, zero failures/skips and no
+post-build exclusions. Its graph MCP contract took **5.59 seconds** and actual
+HTTP/admin/CLI/view-adapter contract **2.31 seconds**. Actual native alias
+discovery, encrypted credential reflection rejection, controller-approved
+external writes/dependent reads, no-model admission, pause/reopen, denial/cancel
+and stale binding rejection passed with labelled synthetic MCP peers. The
+component fixture also covers precise literal/reference arguments, descriptor
+drift, shared claims, lost replies, output bounds and unrecorded-outcome
+fail-stop without replay. Fourteen frozen source hashes match the pre-build
+capture; the initial HTTP start-guard failure is retained separately.
+
+Fresh browser/native integration passed against the rebuilt server and matching
+assets. Frontend sources are unchanged from exact fceb hosted **98 extension
+and 17 browser tests**; those suites were not rerun for this native change.
+Hosted69, live MCP interoperability, rendered IDE acceptance and installed
+preview upgrades remain pending. Provider profiles and provider coverage counts
+are unchanged.
+[Local69 source/runtime/log evidence](evidence/native-graph-mcp-local-provenance.json),
+[Configuration and execution contract](native-graph-mcp.md).
+
 ## Native Claude ordered history checkpoint
 
-The latest local **67-contract native gate passed in 117.65 seconds**, with an
+The ordered-history local **67-contract native gate passed in 117.65 seconds**, with an
 exact manifest, zero failures/skips and no post-build exclusions. It verifies
 ordered `anthropic_content` receipts with string-valued `content_json`, exact
 tool-argument tokens and escaped keys, opaque signed/redacted blocks and strict
@@ -13,7 +56,14 @@ as opaque provider material; no local cryptographic verification is performed.
 
 Fresh browser/native integration passed. Frontend sources match `ae7c4ba` and
 retain its recorded **98 extension and 17 browser tests**, without rerunning
-those suites for this native change. Current hosted67 validation remains pending.
+those suites for that local native change. Exact source
+`fceb50ba0493f645ee5f0a00d5400e0f103df231` passed its hosted **67 native
+contracts in 120.18 seconds**, **98 extension and 17 browser tests**,
+native/browser integration and VSIX verification, with zero failures/skips and
+all 16 job steps successful. Its history helper took **0.31 seconds** and
+actual Claude agent contract **1.03 seconds**. This hosted67 gate excludes the
+new direct-MCP-graph source and separate local 69-contract gate above.
+[Exact hosted67 evidence](evidence/native-anthropic-history-hosted-provenance.json).
 Thinking request controls, `reasoning_effort` mapping, live models, rendered IDE
 acceptance and cross-wire signed conversion remain incomplete; installed
 previews are unchanged.

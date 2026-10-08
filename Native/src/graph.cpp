@@ -20,6 +20,7 @@ std::string text(const Json& value,const char* key,std::size_t max,bool empty=fa
     auto result=value[key].get<std::string>();if((!empty && result.empty()) || result.size()>max || result.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid graph text field");return result;
 }
 bool identifier(const std::string& id){return !id.empty() && id.size()<=64 && id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")==std::string::npos;}
+bool mcp_alias(const std::string& name){return name.size()==52 && name.starts_with("mcp_") && name.find_first_not_of("0123456789abcdef",4)==std::string::npos;}
 void path(const Json& value){
     if(!value.is_array() || value.size()>32)throw std::invalid_argument("Invalid graph value path");
     for(const auto& item:value)if(!((item.is_string() && item.get_ref<const std::string&>().size()<=256 && item.get_ref<const std::string&>().find('\0')==std::string::npos) || (item.is_number_integer() && item>=0 && item<=65535)))throw std::invalid_argument("Invalid graph path component");
@@ -44,6 +45,46 @@ Json resolve(const Json& value,const Json& outputs){
     if(value.is_array()){auto result=Json::array();for(const auto& item:value)result.push_back(resolve(item,outputs));return result;}
     if(value.is_object()){auto result=Json::object();for(auto it=value.begin();it!=value.end();++it)result[it.key()]=resolve(it.value(),outputs);return result;}return value;
 }
+void exact_reference_value(const Json& value){
+    // Graph outputs have the existing typed checkpoint representation. Do not
+    // convert a possibly rounded dependency number into an MCP wire argument.
+    if(value.is_number_float() || (value.is_number_unsigned() && value.get<std::uint64_t>()>9007199254740991ULL) ||
+        (value.is_number_integer() && !value.is_number_unsigned() && (value.get<std::int64_t>()>9007199254740991LL || value.get<std::int64_t>()<-9007199254740991LL)))
+        throw std::invalid_argument("MCP graph references require exactly representable dependency numbers");
+    if(value.is_structured())for(const auto& item:value)exact_reference_value(item);
+}
+void whitespace(std::string_view source,std::size_t& offset){while(offset<source.size() && (source[offset]==' ' || source[offset]=='\t' || source[offset]=='\r' || source[offset]=='\n'))++offset;}
+// Used only after strict mcp_wire object validation. Retain original slices,
+// including escaped keys, whitespace and arbitrary finite JSON number tokens.
+std::size_t value_end(std::string_view source,std::size_t offset){
+    std::size_t depth=0;bool quoted=false,escaped=false;
+    for(;offset<source.size();++offset){const auto byte=source[offset];
+        if(quoted){if(escaped)escaped=false;else if(byte=='\\')escaped=true;else if(byte=='"'){quoted=false;if(!depth)return offset+1;}continue;}
+        if(byte=='"')quoted=true;else if(byte=='{' || byte=='[')++depth;
+        else if(byte=='}' || byte==']'){if(!depth)return offset;if(!--depth)return offset+1;}
+        else if(!depth && (byte==',' || byte==' ' || byte=='\t' || byte=='\r' || byte=='\n'))return offset;
+    }return offset;
+}
+std::string resolve_mcp(const std::string& source,const Json& outputs){
+    const auto value=Json::parse(source);
+    if(value.is_object() && value.contains("$ref")){
+        const auto& ref=value.at("$ref");const auto id=ref.at("node").get<std::string>();
+        if(!outputs.contains(id))throw std::invalid_argument("Graph dependency output is unavailable");
+        const auto actual=at_path(outputs.at(id),ref.value("path",Json::array()));exact_reference_value(actual);return actual.dump();
+    }
+    if(!value.is_structured())return source;
+    std::size_t offset=0;whitespace(source,offset);++offset;whitespace(source,offset);
+    std::size_t retained=0;std::string result;result.reserve(source.size());
+    const auto append=[&](std::string_view bytes){if(bytes.size()>65536-result.size())throw std::invalid_argument("Resolved MCP graph arguments exceed limits");result.append(bytes);};
+    const auto end=value.is_object()?'}':']';
+    while(source[offset]!=end){
+        if(value.is_object()){offset=value_end(source,offset);whitespace(source,offset);++offset;whitespace(source,offset);}
+        const auto begin=offset;const auto finish=value_end(source,begin);
+        append(std::string_view(source).substr(retained,begin-retained));append(resolve_mcp(source.substr(begin,finish-begin),outputs));
+        retained=offset=finish;whitespace(source,offset);if(source[offset]==end)break;++offset;whitespace(source,offset);
+    }
+    append(std::string_view(source).substr(retained));return result;
+}
 std::string name(GraphNodeState state){switch(state){case GraphNodeState::pending:return "pending";case GraphNodeState::running:return "running";case GraphNodeState::waiting_human:return "waiting_human";case GraphNodeState::completed:return "completed";case GraphNodeState::skipped:return "skipped";case GraphNodeState::failed:return "failed";case GraphNodeState::uncertain:return "uncertain";case GraphNodeState::cancelled:return "cancelled";}throw std::logic_error("Invalid graph state");}
 GraphNodeState state_name(const std::string& value){for(const auto state:{GraphNodeState::pending,GraphNodeState::running,GraphNodeState::waiting_human,GraphNodeState::completed,GraphNodeState::skipped,GraphNodeState::failed,GraphNodeState::uncertain,GraphNodeState::cancelled})if(name(state)==value)return state;throw std::invalid_argument("Unknown graph node state");}
 Json output_value(const std::string& source){
@@ -60,12 +101,26 @@ GraphPlan::GraphPlan(const std::string& source){
         const auto kind=text(value,"type",16);GraphNodeDefinition node;node.id=text(value,"id",64);
         if(!identifier(node.id) || !ids.emplace(node.id,nodes_.size()).second)throw std::invalid_argument("Invalid or duplicate graph node ID");
         if(kind=="agent"){node.kind=GraphNodeKind::agent;fields(value,{"id","type","depends_on","prompt","model_id","when"});node.prompt=text(value,"prompt",32768);if(value.contains("model_id"))node.model_id=text(value,"model_id",256);}
-        else if(kind=="tool"){node.kind=GraphNodeKind::tool;fields(value,{"id","type","depends_on","tool","arguments","when"});node.tool=text(value,"tool",128);if(!value.contains("arguments") || !value["arguments"].is_object())throw std::invalid_argument("Graph tool arguments must be an object");node.arguments_json=value["arguments"].dump();if(node.arguments_json.size()>65536)throw std::invalid_argument("Graph tool arguments exceed limits");}
+        else if(kind=="tool"){
+            node.kind=GraphNodeKind::tool;node.tool=text(value,"tool",128);
+            if(mcp_alias(node.tool)){
+                fields(value,{"id","type","depends_on","tool","arguments_json","mcp","when"});
+                node.arguments_json=text(value,"arguments_json",65536);object(node.arguments_json,65536);
+                if(!value.contains("mcp"))throw std::invalid_argument("MCP graph tool requires a pinned server binding");
+                const auto& binding=value.at("mcp");fields(binding,{"server_id","config_revision"});
+                const auto server=text(binding,"server_id",64);if(!identifier(server) || !binding.contains("config_revision") || !binding["config_revision"].is_number_integer() || binding["config_revision"]<1 || binding["config_revision"]>9007199254740991LL)throw std::invalid_argument("Invalid MCP graph server binding");
+                node.mcp=GraphMcpBinding{server,binding["config_revision"].get<std::int64_t>()};
+            }else{
+                fields(value,{"id","type","depends_on","tool","arguments","when"});
+                if(node.tool.starts_with("mcp_"))throw std::invalid_argument("Invalid MCP graph tool alias");
+                if(!value.contains("arguments") || !value["arguments"].is_object())throw std::invalid_argument("Graph tool arguments must be an object");node.arguments_json=value["arguments"].dump();if(node.arguments_json.size()>65536)throw std::invalid_argument("Graph tool arguments exceed limits");
+            }
+        }
         else if(kind=="human"){node.kind=GraphNodeKind::human;fields(value,{"id","type","depends_on","prompt","when"});node.prompt=text(value,"prompt",32768);}
         else throw std::invalid_argument("Unsupported graph node type");
         if(value.contains("depends_on")){const auto& dependencies=value["depends_on"];if(!dependencies.is_array() || dependencies.size()>100)throw std::invalid_argument("Invalid graph dependencies");std::set<std::string> unique;for(const auto& dependency:dependencies){if(!dependency.is_string())throw std::invalid_argument("Graph dependency must be an ID");auto id=dependency.get<std::string>();if(!identifier(id) || id==node.id || !unique.insert(id).second)throw std::invalid_argument("Invalid graph dependency");node.dependencies.push_back(std::move(id));}}
         if(value.contains("when")){reference(value["when"],node.dependencies,true);node.condition_json=value["when"].dump();}
-        if(node.kind==GraphNodeKind::tool)references(value["arguments"],node.dependencies);nodes_.push_back(std::move(node));
+        if(node.kind==GraphNodeKind::tool)references(node.mcp?object(node.arguments_json,65536):value["arguments"],node.dependencies);nodes_.push_back(std::move(node));
     }
     for(const auto& node:nodes_)for(const auto& dependency:node.dependencies)if(!ids.contains(dependency))throw std::invalid_argument("Unknown graph dependency");
     std::set<std::string> visited;
@@ -102,7 +157,10 @@ GraphDecision GraphCoordinator::inspect() const {
 GraphPreparedNode GraphCoordinator::start(const std::string& id){
     const auto decisions=inspect();if(std::find(decisions.ready.begin(),decisions.ready.end(),id)==decisions.ready.end())throw Conflict("Graph node is not ready");
     const auto i=index(id);auto node=plan_.nodes()[i];auto outputs=Json::object();for(const auto& dependency:node.dependencies)outputs[dependency]=output_value(states_[index(dependency)].output);
-    if(node.kind==GraphNodeKind::tool){const auto args=resolve(Json::parse(node.arguments_json),outputs);if(!args.is_object())throw std::invalid_argument("Resolved graph arguments must be an object");node.arguments_json=args.dump();if(node.arguments_json.size()>65536)throw std::invalid_argument("Resolved graph tool arguments exceed limits");}
+    if(node.kind==GraphNodeKind::tool){
+        if(node.mcp){node.arguments_json=resolve_mcp(node.arguments_json,outputs);object(node.arguments_json,65536);}
+        else{const auto args=resolve(Json::parse(node.arguments_json),outputs);if(!args.is_object())throw std::invalid_argument("Resolved graph arguments must be an object");node.arguments_json=args.dump();if(node.arguments_json.size()>65536)throw std::invalid_argument("Resolved graph tool arguments exceed limits");}
+    }
     states_[i].state=node.kind==GraphNodeKind::human?GraphNodeState::waiting_human:GraphNodeState::running;return {std::move(node),outputs.dump()};
 }
 void GraphCoordinator::skip(const std::string& id){const auto decisions=inspect();if(std::find(decisions.skippable.begin(),decisions.skippable.end(),id)==decisions.skippable.end())throw Conflict("Graph node is not skippable");states_[index(id)].state=GraphNodeState::skipped;}

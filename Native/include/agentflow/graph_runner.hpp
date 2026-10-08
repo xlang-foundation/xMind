@@ -3,6 +3,7 @@
 #include "agentflow/agent_runner.hpp"
 #include "agentflow/run_executor.hpp"
 namespace agentflow {
+struct GraphMcpUnavailable : RunUnavailable {using RunUnavailable::RunUnavailable;};
 // Executes only backend-registered graph plans, using the shared agent engine
 // and native tool/effect handlers. Persistence must outlive workers.
 class GraphRunner {
@@ -16,7 +17,8 @@ public:
     // Explicit cancellation is still retired by that service's controller.
     Run execute(const std::string& root_id,std::stop_token cancel={},bool preserve_human_pause=false);
 private:
-    Run tool(const std::string& child_id,GraphPreparedNode node,std::stop_token cancel);
+    Run tool(const std::string& child_id,GraphPreparedNode node,std::stop_token cancel,
+        std::chrono::steady_clock::time_point deadline);
     PersistenceService& store_;
     AgentSettings settings_;
     std::size_t limit_;
