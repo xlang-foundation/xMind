@@ -1,0 +1,49 @@
+2026-10-08T00:01:24.5814452Z 10/52 Test #10: native_a2a_v1_http_contract .................   Passed    1.14 sec
+2026-10-08T00:01:25.9749756Z 11/52 Test #11: native_responses_agent_http_contract ........   Passed    1.39 sec
+2026-10-08T00:01:29.1332117Z 12/52 Test #12: native_graph_service_http_contract ..........   Passed    3.16 sec
+2026-10-08T00:01:29.6517709Z 13/52 Test #13: native_provider_cli_contract ................   Passed    0.52 sec
+2026-10-08T00:01:30.8730365Z 14/52 Test #14: native_provider_setup_contract ..............   Passed    1.22 sec
+2026-10-08T00:01:34.3540157Z 15/52 Test #15: native_graph_runner_contract ................   Passed    3.48 sec
+2026-10-08T00:01:35.0810153Z 16/52 Test #16: native_graph_checkpoint_contract ............   Passed    0.73 sec
+2026-10-08T00:01:35.6566522Z 17/52 Test #17: native_graph_children_contract ..............   Passed    0.57 sec
+2026-10-08T00:01:36.2068492Z 18/52 Test #18: native_graph_contract .......................   Passed    0.55 sec
+2026-10-08T00:01:36.5477923Z 19/52 Test #19: native_instruction_configuration_contract ...   Passed    0.34 sec
+2026-10-08T00:01:36.7298166Z 20/52 Test #20: native_process_configuration_contract .......   Passed    0.18 sec
+2026-10-08T00:01:44.4553073Z 21/52 Test #21: native_process_executor_contract ............   Passed    7.72 sec
+2026-10-08T00:01:56.0907649Z 22/52 Test #22: native_agent_process_http_contract ..........   Passed   11.63 sec
+2026-10-08T00:02:00.4280417Z 23/52 Test #23: native_process_adapter_contract .............   Passed    4.34 sec
+2026-10-08T00:02:00.6212035Z 24/52 Test #24: native_mcp_configuration_contract ...........   Passed    0.19 sec
+2026-10-08T00:02:03.0117186Z 25/52 Test #25: native_schema_worker_contract ...............   Passed    2.39 sec
+2026-10-08T00:02:06.1804517Z 26/52 Test #26: native_mcp_stdio_contract ...................   Passed    3.17 sec
+2026-10-08T00:02:07.0950466Z 27/52 Test #27: native_mcp_handshake_contract ...............   Passed    0.91 sec
+2026-10-08T00:02:08.2495389Z 28/52 Test #28: native_mcp_client_contract ..................   Passed    1.15 sec
+2026-10-08T00:02:16.1394756Z 29/52 Test #29: native_mcp_effect_contract ..................   Passed    7.89 sec
+2026-10-08T00:02:16.4770557Z 30/52 Test #30: native_agent_service_contract ...............   Passed    0.34 sec
+2026-10-08T00:02:17.8335755Z 31/52 Test #31: native_agent_runner_contract ................   Passed    1.36 sec
+2026-10-08T00:02:19.0549428Z 32/52 Test #32: native_create_executor_contract .............   Passed    1.22 sec
+2026-10-08T00:02:19.8315950Z 33/52 Test #33: native_edit_executor_contract ...............   Passed    0.78 sec
+2026-10-08T00:02:20.8721429Z 34/52 Test #34: native_approved_edit_http_contract ..........   Passed    1.04 sec
+2026-10-08T00:02:21.8953915Z 35/52 Test #35: native_workspace_tools_contract .............   Passed    1.02 sec
+2026-10-08T00:02:22.3783045Z 36/52 Test #36: native_repository_instructions_contract .....   Passed    0.48 sec
+2026-10-08T00:02:22.5460584Z 37/52 Test #37: native_chat_provider_contract ...............   Passed    0.17 sec
+2026-10-08T00:02:27.6111188Z 38/52 Test #38: native_http_stream_transport_contract .......   Passed    5.06 sec
+2026-10-08T00:02:31.4158650Z 39/52 Test #39: native_agent_http_contract ..................   Passed    3.80 sec
+2026-10-08T00:02:39.7723152Z 40/52 Test #40: native_agent_edit_http_contract .............   Passed    8.36 sec
+2026-10-08T00:02:42.3951391Z 41/52 Test #41: native_agent_mcp_http_contract ..............   Passed    2.62 sec
+2026-10-08T00:02:57.0068316Z 42/52 Test #42: native_mcp_sdk_modern_contract ..............   Passed   14.61 sec
+2026-10-08T00:03:03.1239652Z 43/52 Test #43: native_mcp_sdk_legacy_contract ..............   Passed    6.12 sec
+2026-10-08T00:03:05.4683013Z 44/52 Test #44: native_http_cli_contract ....................   Passed    2.34 sec
+2026-10-08T00:03:05.5228203Z 45/52 Test #45: embedded_xlang_sqlite_contract ..............   Passed    0.05 sec
+2026-10-08T00:03:06.1032771Z 46/52 Test #46: native_incoming_repository_contract .........   Passed    0.58 sec
+2026-10-08T00:03:06.7170452Z 47/52 Test #47: native_task_list_repository_contract ........   Passed    0.61 sec
+2026-10-08T00:03:07.7174410Z 48/52 Test #48: native_permission_waiter_contract ...........   Passed    1.00 sec
+2026-10-08T00:03:10.3396485Z 49/52 Test #49: native_operation_repository_contract ........   Passed    2.62 sec
+2026-10-08T00:03:10.7675600Z 50/52 Test #50: xlang_repository_contract ...................   Passed    0.43 sec
+2026-10-08T00:03:12.3525839Z 51/52 Test #51: persistence_service_contract ................   Passed    1.58 sec
+2026-10-08T00:03:13.2137762Z 52/52 Test #52: encrypted_credential_repository_contract ....   Passed    0.86 sec
+2026-10-08T00:03:13.2148793Z 100% tests passed, 0 tests failed out of 52
+2026-10-08T00:03:13.2151415Z Total Test time (real) = 114.62 sec
+2026-10-08T00:03:28.2548247Z # tests 69
+2026-10-08T00:03:28.2549183Z # pass 69
+2026-10-08T00:03:28.2550299Z # fail 0
+2026-10-08T00:03:28.2551893Z # skipped 0

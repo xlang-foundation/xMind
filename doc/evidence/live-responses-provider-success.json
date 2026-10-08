@@ -1,0 +1,31 @@
+{
+  "revision": "4fc1148239c66db59634039defa68b7b61e8ef01",
+  "model": "gpt-5.6-sol",
+  "wire": "responses",
+  "scope": "One live minimal native CLI request, displayed in the shared browser; not a full coding acceptance test",
+  "prompt": "Reply with exactly XMIND_PROVIDER_CHECK.",
+  "response": "XMIND_PROVIDER_CHECK",
+  "terminal": "run.completed",
+  "exitStatus": 0,
+  "usage": {
+    "completion_tokens": 8,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "input_tokens": 1382,
+    "input_tokens_details": {
+      "cache_write_tokens": 1379,
+      "cached_tokens": 0
+    },
+    "output_tokens": 8,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 1382,
+    "prompt_tokens_details": {
+      "cache_write_tokens": 1379,
+      "cached_tokens": 0
+    },
+    "total_tokens": 1390
+  }
+}

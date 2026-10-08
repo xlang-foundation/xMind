@@ -119,3 +119,15 @@ it does not copy keys or access SQLite. This public launcher also passed the
 empty-chat check above. `-Action Serve -ModelWire responses` now forwards the
 explicit native wire option; that forwarding was checked against the server
 argument contract, not a live Responses request.
+
+Interactive chat now has `/sessions`, `/session ID` and `/new` in source.
+Listing and resuming use the selected server's actual catalogue/history. Invalid
+or missing IDs preserve the current selection. `/new` clears the console's
+selection and displays empty history, creating no database session until the
+next real request. These commands preserve model selection and the last actual
+turn's exit status. The native provider CLI contract now navigates a labelled
+persisted user-message fixture, checks exact history and verifies no runs,
+duplicate sessions or provider configuration changes. Syntax checks passed;
+compiled execution of these additions is pending because local compilation was
+deferred by active sibling xlang3 benchmarks. This does not claim a complete TUI
+or full OpenCode CLI parity.

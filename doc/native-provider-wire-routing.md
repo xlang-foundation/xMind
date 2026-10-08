@@ -76,3 +76,13 @@ of this addition remains pending: the local build guard observed active sibling
 xlang3 benchmark processes and deferred compilation. All 70 extension and 11
 browser adapter/DOM contracts pass locally. These checks do not establish live
 OpenAI compatibility or completed native execution for this addition.
+
+The earlier routing/rollback revision `4fc1148` has now passed its exact hosted
+gate: 52 native contracts and 69 extension contracts, plus the browser separation
+and packaging steps. [Provenance](evidence/native-provider-wire-routing-hosted-provenance.json)
+and the associated filtered summary record that tested scope. The exact runtime
+was installed for the browser preview, the saved `gpt-5.6-sol` reselected through
+the native configuration route, and a minimal live Responses check completed
+with actual usage shown in the sidebar. The incompatible-history diagnostic,
+durable browser sessions and later CLI navigation are newer changes and are
+not covered by that successful native revision.

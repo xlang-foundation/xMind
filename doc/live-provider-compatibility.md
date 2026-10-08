@@ -22,9 +22,9 @@ were opened on 2026-10-07. The recorded parameter and this restriction identify
 the relevant compatibility boundary; the raw provider message was intentionally
 discarded, so it is not independently quoted or inferred as an exact message.
 
-The native serializers do not yet expose reasoning controls. Interactive model
-enrollment still fixes the Chat Completions endpoint, although the native
-Responses adapter itself is contract-tested. Required next implementation is
+At revision `d0a70fe`, the serializers did not expose reasoning controls.
+Interactive model enrollment fixed the Chat Completions endpoint, although the
+native Responses adapter itself was contract-tested. The required implementation was
 explicit native model/wire capability routing, reasoning settings, persisted
 wire enrollment and secure reuse/rebinding of encrypted provider credentials
 under approved backend endpoint policy. Conversation continuation must retain
@@ -38,5 +38,22 @@ Completions wire. Selecting the separately recorded CLI diagnostic conversation
 displayed HTTP 400, `invalid_request_error` and `reasoning_effort` in the visible
 failure card. No new inference was submitted for this UI check. The screenshot
 remains private in ignored launch-state storage. This confirms the shared view
-renders the live native diagnostic; Responses enrollment is still pending its
+renders the live native diagnostic; Responses enrollment was then pending its
 compiled gate and a successful live retry.
+
+Revision `4fc1148` subsequently passed all 52 native and 69 extension contracts,
+including Responses enrollment, encrypted saved-key endpoint rebinding, reopen
+and real SQLite publication rollback against independent synthetic peers. The
+exact verified runtime is installed in the browser preview. Its original model,
+conversations, runs and history survived the update. Reselecting the same
+`gpt-5.6-sol` through native configuration reused its encrypted key and chose
+the Responses wire, without reducing reasoning or selecting another model.
+
+One actual minimal CLI request then completed with `XMIND_PROVIDER_CHECK`:
+provider usage was 1,382 input, 8 output and 1,390 total tokens. The browser
+refreshed without login and displayed that completed conversation, usage and
+Responses footer. [Live evidence](evidence/live-responses-provider-success.json)
+records only the public check and sanitized metrics. This proves that specific
+model and minimal request through the installed wire, not full coding/tool
+acceptance or compatibility for every discovered model. Durable adapter-restart
+sessions are newer source and remain pending their compiled gate.

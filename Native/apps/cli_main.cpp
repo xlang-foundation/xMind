@@ -134,7 +134,23 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(prompt=="/exit")return last_result;
         if(prompt.empty())continue;
         if(prompt=="/help"){
-            std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/history displays the saved conversation; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+            std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/history displays the saved conversation; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+        }
+        if(prompt=="/sessions"){
+            const auto saved=request("/v1/sessions");if(!saved.is_array())throw std::runtime_error("Invalid backend session catalogue");
+            std::cout<<Json{{"type","sessions"},{"sessions",saved},{"selected_session",session}}.dump()<<'\n'<<std::flush;continue;
+        }
+        if(prompt=="/new"){
+            session.clear();std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",Json::array()}}.dump()<<'\n'<<std::flush;continue;
+        }
+        if(prompt.starts_with("/session ")){
+            const auto selected=prompt.substr(9);
+            if(selected.empty()||selected.size()>128||selected.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos){std::cerr<<"Invalid session ID. Use /sessions to see saved conversations.\n";continue;}
+            const auto saved=request("/v1/sessions");if(!saved.is_array())throw std::runtime_error("Invalid backend session catalogue");bool found=false;
+            for(const auto& item:saved)if(item.is_object()&&item.value("id",std::string{})==selected)found=true;
+            if(!found){std::cerr<<"Session was not found. Use /sessions to see saved conversations.\n";continue;}
+            const auto selectedHistory=request("/v1/sessions/"+selected+"/history");if(!selectedHistory.is_array())throw std::runtime_error("Invalid session history");
+            session=selected;std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",selectedHistory}}.dump()<<'\n'<<std::flush;continue;
         }
         if(prompt=="/provider-models"){
             const auto setup=request("/v1/provider/configuration");

@@ -1,0 +1,12 @@
+{
+  "xmind": "4fc1148239c66db59634039defa68b7b61e8ef01",
+  "workflowRun": 37704186734,
+  "job": 113074990946,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37704186734",
+  "conclusion": "success",
+  "nativeContractsPassed": 52,
+  "extensionContractsPassed": 69,
+  "scope": "Exact successful job metadata and full CTest/TAP logs inspected. Responses enrollment, saved-key endpoint rebinding, reopen and actual SQLite publication rollback passed against synthetic protocol peers. Browser separation and package gates passed.",
+  "liveScope": "The installed exact runtime also completed one minimal gpt-5.6-sol Responses request using the existing encrypted key; browser refresh retained login and showed the response and actual usage. Full live coding acceptance remains incomplete.",
+  "newerPending": "Typed incompatible-history errors, durable native browser sessions and interactive conversation navigation are newer source additions awaiting native execution."
+}
