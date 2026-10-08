@@ -11,7 +11,7 @@ function Invoke-CiCommand([string]$Name,[string]$Executable,[string[]]$Arguments
     if($LASTEXITCODE -ne 0){throw ($Name+' failed with exit code '+$LASTEXITCODE)}
 }
 $ciRevision=(& git -C $ciRuntime rev-parse HEAD).Trim()
-if($LASTEXITCODE -ne 0 -or $ciRevision -ne '914783909835116969aad7c66b210a5ac9a27661'){throw 'xlang3 source does not match the pinned runtime.'}
+if($LASTEXITCODE -ne 0 -or $ciRevision -ne '4aea7d8fb24da9ba86f9d7eeb92820794f213d29'){throw 'xlang3 source does not match the pinned runtime.'}
 if((& git -C $ciRuntime status --porcelain)){throw 'Runtime checkout must be clean before applying the reviewed SQLite prerequisite.'}
 $ciStdlibRevision=(& git -C (Split-Path $ciStdlib -Parent) rev-parse HEAD).Trim()
 if($LASTEXITCODE -ne 0 -or $ciStdlibRevision -ne 'ebf955df7a89ed0c7968f79faec1de49f61ed7cb'){throw 'Standard-library source differs from the pinned CPython 3.14.0 source.'}
