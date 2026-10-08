@@ -1,5 +1,32 @@
 # Provider setup in the sidebar
 
+## Multiple provider enrollment boundary
+
+Current setup is one saved OpenAI configuration. Claude request/stream/transport
+source additions do not change that API or make Claude selectable in Settings.
+The next enrollment change must retain the existing encrypted OpenAI key and
+model while adding an independently identified provider profile. C++ owns the
+allowed endpoint/wire/header policy and per-model capabilities; a client selects
+a provider/profile and discovered model, never an arbitrary credential
+destination. Model-name prefixes alone must not choose a provider or key.
+
+Each profile needs its own credential binding, configuration revision and model
+catalogue. Discovery with a supplied key has no enrollment side effects. Discovery
+with an omitted key resolves only that profile's encrypted credential. Updating
+one profile must preserve every other profile and fail on stale revisions or
+active work before publication. Existing single-provider records must migrate
+without changing their encrypted credential binding or routing. Each admitted
+run must snapshot provider/profile/model identity so later Settings changes cannot
+redirect its continuation or replay opaque history through another wire.
+
+Browser and VS Code Settings will offer provider-specific key configuration, with
+account models in the existing bottom composer chooser. Native CLI uses a private
+environment source for key enrollment. No key is placed in the sidebar, command
+arguments, public metadata or model context. Backend storage remains SQLite I/O
+through embedded xlang3; C++ owns credential encryption and routing. Migration,
+restart, cross-profile key isolation, revision races and actual live inference
+are required acceptance boundaries; this section specifies pending work.
+
 Private key replacement source `6c423c57d0f0ac16678b8b85c8ae95779ed11360` subsequently passed **43 native and 48 extension contracts** in [CI](https://github.com/xlang-foundation/xMind/actions/runs/37669285942); [original job/TAP](evidence/native-private-key-replacement-passing-ci-job.log). This verifies the adapter's replacement flow separately from successful real-account acceptance, which is still waiting for the private key prompt.
 
 Next CLI source adds `xmind_cli PORT provider-models` to discover account IDs with the encrypted backend key. `provider-models KEY_ENV REVISION` discovers using a privately named environment source for new setup. Keys never belong in command arguments; both discovery and configuration share the reserved-variable/revision validation and clear the source only inside the client process. An actual native CLI/HTTP/WinHTTP interoperability fixture is prepared for both paths, stale rejection and attempted authentication-token substitution. This addition is not yet compiled or installed.

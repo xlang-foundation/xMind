@@ -14,6 +14,7 @@ let redirected=0,requests=0,plain,tls;const credentialRequests=new Map();
 const wire='data: '+JSON.stringify({choices:[{index:0,delta:{content:'transport fixture'},finish_reason:'stop'}]})+'\n\ndata: [DONE]\n\n';
 function handler(request,response) {
   requests++;
+  assert.equal(request.headers['anthropic-version'],undefined,'Generic transport must not add Claude protocol headers');
   if(request.url==='/redirect-target') {redirected++;response.writeHead(500);response.end();return;}
   if(request.url.startsWith('/auth/')||request.url.startsWith('/json-auth/')){
     credentialRequests.set(request.url,(credentialRequests.get(request.url)??0)+1);

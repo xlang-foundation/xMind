@@ -97,6 +97,8 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         default:throw std::invalid_argument("Unsupported provider credential header");
     }
     if(!bearer&&input.credential_header!=CredentialHeader::bearer)throw std::invalid_argument("Provider API-key header requires a credential");
+    if(input.protocol!=ProviderHttpProtocol::generic&&input.protocol!=ProviderHttpProtocol::anthropic)
+        throw std::invalid_argument("Unsupported provider HTTP protocol");
     for(unsigned char c:input.url) if(c<=32 || c==127 || c=='#') throw std::invalid_argument("Invalid endpoint URL");
     if(cancel.stop_requested()) throw TransportCancelled("Provider request cancelled");
     const auto deadline=Clock::now()+input.deadline;
@@ -117,6 +119,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     Handle connection(WinHttpConnect(session.value,host.c_str(),parts.nPort,0));
     WipedHeaders headers;
     headers.value=json?L"Accept: application/json\r\n":L"Content-Type: application/json\r\nAccept: text/event-stream\r\n";
+    if(input.protocol==ProviderHttpProtocol::anthropic)headers.value+=L"anthropic-version: 2023-06-01\r\n";
     if(bearer) {
         const auto bytes=bearer->view();
         if(bytes.empty() || bytes.size()>32768) throw std::invalid_argument("Invalid provider credential");

@@ -10,7 +10,7 @@ public:
     using std::invalid_argument::invalid_argument;
 };
 enum class Capability {unknown,unsupported,supported};
-enum class ProviderWire {chat_completions,responses};
+enum class ProviderWire {chat_completions,responses,anthropic_messages};
 enum class ReasoningEffort {none,minimal,low,medium,high,xhigh,max};
 enum class MessageRole {system,developer,user,assistant,tool};
 struct ModelMessage {

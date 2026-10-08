@@ -74,3 +74,25 @@ multiple calls, usage-only updates and invalid lifecycle/JSON cases. Evidence:
 The decoder is not yet connected to product provider routing or the installed
 preview. Native version headers, enrollment/capability policy and live Claude
 acceptance remain required before claiming an available Claude provider.
+
+The next source checkpoint connects `ProviderWire::anthropic_messages` to
+`complete_model`: it serializes our native request, sends a backend-owned API key
+through the native transport and feeds actual response bytes to `AnthropicStream`.
+The transport's closed protocol enum adds only the fixed
+`anthropic-version: 2023-06-01` header for Claude. Generic/OpenAI requests retain
+their existing headers; unknown protocol enum values are rejected. The header
+policy follows the official [Claude authentication reference](https://platform.claude.com/docs/en/manage-claude/authentication),
+checked on 2026-10-07; workspace selection and federation credentials remain
+outside this initial workspace-key adapter.
+
+An independent Node HTTP peer and native adapter contract are added for exact
+request/authentication/version headers, text/tool-result continuation, unoffered
+tools, truncated streams, post-terminal errors, HTTP failures and forbidden
+redirects. The generic transport contract also checks that Claude headers are
+absent and unknown protocol values never reach the peer. These new adapter
+contracts have not yet executed: the local build guard found active sibling
+benchmark processes 26056, 24540 and 26516. Peer JavaScript syntax validation and
+source whitespace checks passed. The existing 54-test decoder result predates
+this transport change and does not establish adapter validation. Hosted build
+validation is the next gate; product enrollment and live Claude inference are
+still pending. The running preview retains its previously verified bundle.

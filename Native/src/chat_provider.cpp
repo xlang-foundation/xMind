@@ -1,5 +1,6 @@
 #include "agentflow/model_provider.hpp"
 #include "agentflow/responses_stream.hpp"
+#include "agentflow/anthropic_stream.hpp"
 #include <set>
 
 namespace agentflow {
@@ -20,6 +21,17 @@ ModelCompletion complete_chat(const ChatProviderConfig& config,const ModelReques
 }
 ModelCompletion complete_model(const ChatProviderConfig& config,const ModelRequest& request,const SecretBytes* bearer,ChatCompletionStream::Sink sink,std::stop_token cancel){
     if(config.wire==ProviderWire::chat_completions)return complete_chat(config,request,bearer,std::move(sink),cancel);
+    if(config.wire==ProviderWire::anthropic_messages){
+        const auto body=serialize_anthropic_request(config,request);
+        if(!sink)throw std::invalid_argument("Model event sink is required");
+        if(!bearer)throw std::invalid_argument("Claude requires a backend credential");
+        AnthropicStream stream([&](const ModelEvent& event){if(event.kind!="model.done")sink(event);});
+        post_event_stream({config.endpoint,body,config.deadline,config.idle_timeout,CredentialHeader::x_api_key,ProviderHttpProtocol::anthropic},bearer,[&](std::string_view bytes){stream.feed(bytes);},cancel);
+        auto result=stream.finish();
+        std::set<std::string> names;for(const auto& tool:request.tools)names.insert(tool.name);
+        for(const auto& call:result.tool_calls)if(!names.contains(call.name))throw ModelProtocolError("Provider requested a tool outside this request");
+        sink({"model.done","{}"});return result;
+    }
     if(config.wire!=ProviderWire::responses)throw std::invalid_argument("Unsupported provider wire");
     const auto body=serialize_responses_request(config,request);if(!sink)throw std::invalid_argument("Model event sink is required");
     ResponsesStream stream([&](const ModelEvent& event){if(event.kind!="model.done")sink(event);});

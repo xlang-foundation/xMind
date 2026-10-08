@@ -30,6 +30,7 @@ int main(int argc,char** argv) {
             rejects<std::invalid_argument>([&]{post_event_stream(input,&invalid,[](std::string_view){});});
         }
         {auto invalid=request("/ok");invalid.credential_header=static_cast<CredentialHeader>(999);rejects<std::invalid_argument>([&]{post_event_stream(invalid,&secret,[](std::string_view){});});}
+        {auto invalid=request("/ok");invalid.protocol=static_cast<ProviderHttpProtocol>(999);rejects<std::invalid_argument>([&]{post_event_stream(invalid,&secret,[](std::string_view){});});}
         require(get_json(discovery("/json"),&secret)==R"({"object":"list","data":[]})","JSON GET must return actual native peer bytes");
         rejects<ProviderHttpError>([&]{get_json(discovery("/json-redirect"),&secret);});
         rejects<TransportError>([&]{get_json(discovery("/json-wrong-media"),&secret);});
