@@ -1,0 +1,15 @@
+{
+  "connected": true,
+  "connectionDialogOpen": false,
+  "draftLength": 0,
+  "model": "gpt-5.6-sol",
+  "observedAt": "2026-10-08T11:27:38.465Z",
+  "renderedNewRunMetricsCount": 0,
+  "runId": "20349b91c30e11b54f90902e137899da",
+  "scope": "Actual rendered source-repaired browser after submitting the public task and an immediate refresh; no successful delegation claimed",
+  "sessionId": "33b0cae2051699d925364ce1e986c55c",
+  "sidebar": "ASIDE",
+  "status": "failed",
+  "url": "http://127.0.0.1:60405/ui/",
+  "workflow": "Agent (default)"
+}

@@ -1,0 +1,19 @@
+{
+  "observedAt": "2026-10-08T11:18:32.278Z",
+  "url": "http://127.0.0.1:60405/ui/",
+  "scope": "Actual e353 browser startup before source repair",
+  "errors": [
+    {
+      "level": "error",
+      "message": "SyntaxError: Identifier 'observeOwnedRun' has already been declared",
+      "timestamp": "2026-10-08T11:13:24.090Z",
+      "url": "http://127.0.0.1:60405/ui/browser.js"
+    },
+    {
+      "level": "error",
+      "message": "ReferenceError: acquireVsCodeApi is not defined\n    at http://127.0.0.1:60405/ui/chat.js:2:22",
+      "timestamp": "2026-10-08T11:13:24.101Z",
+      "url": "http://127.0.0.1:60405/ui/chat.js"
+    }
+  ]
+}

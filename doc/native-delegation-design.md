@@ -1,11 +1,17 @@
 # Native dynamic delegation design
 
 Status: the initial ordinary-Agent, read-only leaf delegation path is
-implemented and passed the complete local 71/71 native gate, 103 extension
-contracts and 19 browser contracts. The
-[source-bound evidence](evidence/native-delegation-local-provenance.json) records
-the exact local scope; hosted, live-provider, rendered UI and installed-product
-acceptance for this new checkpoint remain pending. Its concrete behavior,
+implemented and passed complete local and exact hosted gates at
+`e353a37799530a234a6fa13e51f61a5c52d3ae6a`: 71/71 native, 103 extension and
+19 browser contracts. The
+[local evidence](evidence/native-delegation-local-provenance.json) and
+[exact hosted evidence](evidence/native-delegation-hosted-provenance.json)
+record their scopes. The exact backend is now installed with schema v10;
+a separate browser repair passed local 103/20 gates and restored the rendered
+prior conversation without key entry. The first live delegation request failed
+Responses terminal consistency before admitting children. Successful live
+delegation/join and installed VS Code acceptance remain unverified; see the
+[separate acceptance record](native-delegation-acceptance.md). Its concrete behavior,
 durable v10 ownership/budgets and thin observation interfaces are documented in
 [native-delegation.md](native-delegation.md). This design remains the broader
 target: model-selected dependency graphs, human checks, revisioned replanning,

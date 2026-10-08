@@ -1,11 +1,20 @@
 # Native Agent delegation
 
-Status: implemented source checkpoint with a passing local guarded gate:
-71/71 native contracts, 103 extension contracts and 19 browser contracts.
-[Recorded provenance](evidence/native-delegation-local-provenance.json) binds
-these results to 45 frozen source hashes. Exact hosted validation,
-live-provider delegation, rendered UI and installed VS Code acceptance for
-this new checkpoint remain pending.
+Status: implemented checkpoint `e353a37799530a234a6fa13e51f61a5c52d3ae6a`
+passed both complete local and exact hosted gates: 71/71 native contracts,
+103 extension contracts and 19 browser contracts. The
+[local provenance](evidence/native-delegation-local-provenance.json) binds its
+gate to 45 frozen source hashes; the
+[hosted provenance](evidence/native-delegation-hosted-provenance.json) verifies
+the exact revision, downloaded artifact digests and runtime/stdlib pins.
+The exact hosted backend is now installed with schema v10 and preserved prior
+records/settings. Its original webpage exposed a classic-script collision;
+a separate local browser repair passed 103 extension and 20 browser contracts,
+native/browser integration and all 18 VSIX assets. The repaired page restored
+prior history/metrics and selection without re-entering a key. The first live
+delegation request failed with `responses_terminal_mismatch` before admitting
+children. Successful live delegation/join and installed VS Code acceptance
+remain unverified. [Separate acceptance scopes](native-delegation-acceptance.md).
 
 Ordinary **Agent** mode can offer `delegate_tasks` to the configured model. The
 model selects bounded, independent workspace investigations. Each accepted task
@@ -266,6 +275,24 @@ evidence-log hashes.
 | [Browser/native integration](evidence/native-delegation-local-browser-native.log) | Passed with matching sources, rebuilt native backend and shared assets |
 | [Packaged VSIX verification](evidence/native-delegation-local-package.log) | Passed; all 18 required assets verified |
 
+Exact revision `e353a37799530a234a6fa13e51f61a5c52d3ae6a` also passed
+[hosted run 37765666399](https://github.com/xlang-foundation/xMind/actions/runs/37765666399),
+job `113272591389`. All 16 job steps succeeded; native, extension and browser
+suites had zero failures/skips and the complete native manifest matched the
+exact revision. [Hosted provenance](evidence/native-delegation-hosted-provenance.json),
+[raw CTest](evidence/native-delegation-hosted-ctest.log) and
+[original job log](evidence/native-delegation-passing-ci-job.log) retain the
+actual results and source/artifact/pin verification.
+
+| Exact hosted validation | Recorded result |
+| --- | --- |
+| Complete native gate | 71/71; 175.51 s |
+| `native_delegation_contract` | Passed; 4.88 s |
+| `native_delegation_http_contract` | Passed; 1.22 s |
+| Extension contracts | 103 passed; 2.9668103 s |
+| Browser contracts | 19 passed; 1.426115 s |
+| Browser/native integration and packaged VSIX | Passed; all 18 required assets verified |
+
 The [initial gate log](evidence/native-delegation-initial-ctest.log) retains its
 70/71 result and the process peer's obsolete positional schema assertion after
 the delegation tool was appended. The fixture now locates `run_process` by its
@@ -280,13 +307,28 @@ faults. It also covers follow-up investigations, two occupied root workers,
 held continuation races, atomic admission, exact deduplication, settlement and
 v9 migration/recovery. `native_delegation_http_contract` exercises the actual
 server, CLI, thin controllers and approval/effect path with a synthetic local
-provider. These passing controlled contracts establish the local implementation
+provider. These passing controlled contracts establish the local/hosted implementation
 boundary; their supplied provider replies, signatures and keys are fixtures.
 
-Exact hosted validation and live-provider delegation remain pending. The
-adapter/DOM checks and packaged assets do not establish rendered webpage or
-installed VS Code acceptance for v10. The earlier c4 installed preview remains
-unchanged; upgrade and installed-product acceptance are separate work.
+Actual managed-preview installation of the hosted e353 backend and schema v10
+passed after a disposable schema 9→10→9 rollback fixture. Existing records,
+configuration and access remained preserved; that upgrade contained no prior
+delegated leaves. The original frontend then failed classic-script startup.
+The separately tested browser repair restored the existing rendered history
+and model/Agent selection without key entry; it passed 103 extension tests in
+1.6557025 seconds, 20 browser tests in 0.9090882 seconds, native/browser
+integration and 18-asset VSIX verification. This is local repair evidence,
+separate from hosted e353's original 19 browser contracts.
+
+The subsequent first live `delegate_tasks` request streamed arguments but
+failed terminal Responses consistency validation with
+`responses_terminal_mismatch`. No children were admitted or joined; only the
+user history row and one parent model-budget attempt were recorded. The field
+that differs between completed items and terminal output remains unconfirmed.
+Successful live delegation and actual installed VS Code acceptance remain
+unverified. [Upgrade and preserved-state evidence](evidence/native-delegation-upgrade-provenance.json),
+[rendered repair and live-failure scopes](native-delegation-acceptance.md).
+The earlier c4 acceptance remains historical evidence for its own bundle.
 
 Full planning still requires model-selected dependency DAGs, human checks,
 accepted plan revisions and mutations of undispatched work after observations.

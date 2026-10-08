@@ -24,7 +24,11 @@ Ordinary Agent mode now offers native `delegate_tasks` for model-selected read-o
 
 The final guarded local **71-contract native gate passed in 142.36 seconds**, with an exact expected/registered/passed manifest, **45 frozen source hashes**, zero failures/skips and no exclusions. The delegation engine contract took **1.96 seconds**, actual HTTP/CLI/shared-controller acceptance **1.03 seconds**. **103 extension tests** and **19 browser tests**, fresh source-matched browser/native integration and 18-asset VSIX verification also passed. Provider replies, signatures and keys are explicitly synthetic; native agents, filesystem effects, permissions, xlang3 SQLite and transport are real. The [initial process-fixture positional-schema failure](evidence/native-delegation-initial-ctest.log) is retained separately; the corrected frozen source passed all 71 contracts.
 
-The new v10 bundle still needs its exact hosted gate and reviewed upgrade acceptance. The installed preview remains the independently accepted c4 bundle. Live delegation, installed/rendered client acceptance, mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [exact local71 evidence](evidence/native-delegation-local-provenance.json).
+Exact revision `e353a37799530a234a6fa13e51f61a5c52d3ae6a` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37765666399): **71 native contracts in 175.51 seconds**, **103 extension tests in 2.9668103 seconds** and **19 browser tests in 1.426115 seconds**, plus native/browser integration and verification of all 18 required VSIX assets. The delegation engine took **4.88 seconds** and its HTTP/CLI contract **1.22 seconds**. All 16 job steps succeeded, with zero failures/skips and the exact complete native manifest. Downloaded artifact digests, exact source and runtime/stdlib pins were verified. [Exact hosted71 provenance](evidence/native-delegation-hosted-provenance.json), [raw hosted CTest](evidence/native-delegation-hosted-ctest.log), [original hosted job](evidence/native-delegation-passing-ci-job.log).
+
+The managed backend now runs the exact hosted e353 bundle with schema v10. The actual upgrade preserved existing records, settings and browser access; its disposable schema 9→10→9 rollback fixture passed separately. The original e353 webpage exposed a classic-script name collision. A separate local browser repair passed **103 extension tests in 1.6557025 seconds**, **20 browser tests in 0.9090882 seconds**, native/browser integration and all 18 VSIX assets. The repaired page reused its cookie without key entry and restored prior history/metrics, the selected model and Agent mode. These frontend results are separate from the unchanged hosted 71/103/19 gate. [Upgrade evidence](evidence/native-delegation-upgrade-provenance.json), [acceptance scopes](native-delegation-acceptance.md).
+
+The first live `delegate_tasks` request then failed with `responses_terminal_mismatch` before child admission: zero children, only the user history row and one parent model-budget attempt. Successful live delegation/join and installed VS Code acceptance remain unverified. Mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [next native planning design](native-dynamic-plan-design.md).
 
 New source adds direct MCP graph tool nodes and explicit offline native alias
 discovery. Nodes bind an opaque alias to trusted server ID/revision, preserve
@@ -54,7 +58,7 @@ The initial HTTP start-guard failure remains separate historical evidence.
 [Direct MCP graph scope](native-graph-mcp.md).
 
 The [native delegation design](native-delegation-design.md) now has a bounded
-local implementation and scoped71 acceptance above. It does not establish
+implementation and exact local/hosted71 acceptance above. It does not establish
 runtime replanning, live multi-agent acceptance or verified OpenCode parity.
 
 The ordered-Claude-history local checkpoint passed **67 native contracts in 117.65 seconds**,
@@ -170,9 +174,13 @@ Gemini inference and actual Gemini IDE acceptance remain unverified. See
 [provider setup](provider-setup.md), [current validation](VALIDATION_STATUS.md)
 and [milestones](milestones.md).
 
-The installed browser preview is a separate native `19d69dd` and view `6f32d215`
-pair. Current source or CI success does not establish a preview upgrade.
-[Installed scope](provider-setup.md).
+An earlier installed browser preview used native `19d69dd` and view `6f32d215`;
+its [historical scope](provider-setup.md) is preserved. The independently
+accepted c4 installed preview has its own
+[historical evidence](preview-checkpoint-c4ec09fc.md). The current exact e353
+backend upgrade, separately repaired rendered browser and failed first live
+delegation request are recorded in [current acceptance](native-delegation-acceptance.md).
+They do not establish successful live delegation or installed VS Code acceptance.
 
 Test counts describe verification scope, not a parity percentage. No OpenCode
 operation is declared equivalent merely because a component contract passes.
@@ -203,7 +211,7 @@ removed Python prototype's status table; it is not a completion score.
 | Capability | Native component scope | Remaining acceptance |
 | --- | --- | --- |
 | Persistent sessions and run events | C++ repositories, ownership, transactions, replay and recovery use SQLite through embedded xlang3 | Complete concurrent-client conversations, failure/recovery and release acceptance |
-| Agent/model/tool loop | Shared C++ single-agent/graph execution and locally verified ordinary-Agent read-only delegation, durable budgets/settlement and tool continuation | Broad live coding tasks, mutable dependency planning/replanning, context bounds and production recovery |
+| Agent/model/tool loop | Shared C++ single-agent/graph execution and exact hosted71 ordinary-Agent read-only delegation, durable budgets/settlement and signed tool continuation | Broad live coding tasks, mutable dependency planning/replanning, context bounds and production recovery |
 | Models and providers | Native Chat Completions and Responses; Gemini catalogue/enrollment/owned-key execution is hosted-verified at 64, profile CLI controls at hosted65, Claude tools/metrics at hosted66 and ordered opaque signed receipts/actual SQLite replay at hosted67 | Thinking request controls and live Claude/Gemini acceptance, model/account binding, pinned-model and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
 | File/search/edit/process tools | Native workspace reads/search, approval-backed edits/creation and foreground process effects have scoped contracts | General patch review, background/PTY execution and complete repository coding tasks |
 | Instructions and agent presets | Native repository guidance discovery, source binding, durable approval checks and explicit workspace.inspect revision1 leaf policy | Full instruction scoping/configuration and broader reproducible presets |
@@ -219,7 +227,7 @@ removed Python prototype's status table; it is not a completion score.
 | Session sharing | Local backend sessions are shared across authorized views | Explicit export/sharing behavior and access-controlled output; team sharing belongs to Nexus |
 | CLI/TUI | Native client supports authenticated conversation/run/approval/inspection flows plus profile catalogue/setup/selection, revision-bound admission and signed native history in the exact hosted65 scope | Complete interactive coding/terminal UX acceptance and execution of newer source at its own scope |
 | Browser and VS Code | Thin browser and right-sidebar clients display native history, models, approvals and actual metrics within recorded scopes | Complete populated coding, diff/recovery/context and editor acceptance |
-| A2A and agent graphs | Native shared-executor task controls, admission, discovery/stream/history and durable graph components have scoped contracts; local69 verifies direct MCP graph tools through the shared approval/effect journal | Exact hosted/new-client delegation acceptance, outbound remote delegation, remaining protocol interoperability and live multi-agent acceptance |
+| A2A and agent graphs | Native shared-executor task controls, admission, discovery/stream/history and durable graphs have scoped contracts; hosted69 verifies direct MCP graph effects, hosted71 ordinary-Agent read-only delegation; exact e353 backend is installed and its browser repair is rendered | Successful live delegation/join after the first Responses terminal-validation failure, installed VS Code delegation acceptance, dynamic dependency planning/replanning, outbound remote delegation and remaining protocol interoperability |
 | Local/Nexus profiles | Shared protocol and ownership boundaries are specified | Profile isolation, authenticated enrollment and reconnect/lease/recovery acceptance; Nexus implements private coordination |
 
 Themes, warming and additional build/API surfaces need comparison against the

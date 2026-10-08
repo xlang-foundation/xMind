@@ -8,9 +8,13 @@ Ordinary Agent mode now offers native `delegate_tasks` for model-selected read-o
 
 The final guarded local **71-contract native gate passed in 142.36 seconds**, with an exact expected/registered/passed manifest, **45 frozen source hashes**, zero failures/skips and no exclusions. The delegation engine contract took **1.96 seconds**, actual HTTP/CLI/shared-controller acceptance **1.03 seconds**. **103 extension tests** and **19 browser tests**, fresh source-matched browser/native integration and 18-asset VSIX verification also passed. Provider replies, signatures and keys are explicitly synthetic; native agents, filesystem effects, permissions, xlang3 SQLite and transport are real. The [initial process-fixture positional-schema failure](evidence/native-delegation-initial-ctest.log) is retained separately; the corrected frozen source passed all 71 contracts.
 
-The new v10 bundle still needs its exact hosted gate and reviewed upgrade acceptance. The installed preview remains the independently accepted c4 bundle. Live delegation, installed/rendered client acceptance, mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [exact local71 evidence](evidence/native-delegation-local-provenance.json).
+Exact revision `e353a37799530a234a6fa13e51f61a5c52d3ae6a` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37765666399): **71 native contracts in 175.51 seconds**, **103 extension tests in 2.9668103 seconds** and **19 browser tests in 1.426115 seconds**, plus native/browser integration and verification of all 18 required VSIX assets. The delegation engine took **4.88 seconds** and its HTTP/CLI contract **1.22 seconds**. All 16 job steps succeeded, with zero failures/skips and the exact complete native manifest. Downloaded artifact digests, exact source and runtime/stdlib pins were verified. [Exact hosted71 provenance](evidence/native-delegation-hosted-provenance.json), [raw hosted CTest](evidence/native-delegation-hosted-ctest.log), [original hosted job](evidence/native-delegation-passing-ci-job.log).
 
-The current direct MCP graph checkpoint adds model-free registered tool nodes
+The managed backend now runs the exact hosted e353 bundle with schema v10. The actual upgrade preserved existing records, settings and browser access; its disposable schema 9→10→9 rollback fixture passed separately. The original e353 webpage exposed a classic-script name collision. A separate local browser repair passed **103 extension tests in 1.6557025 seconds**, **20 browser tests in 0.9090882 seconds**, native/browser integration and all 18 VSIX assets. The repaired page reused its cookie without key entry and restored prior history/metrics, the selected model and Agent mode. These frontend results are separate from the unchanged hosted 71/103/19 gate. [Upgrade evidence](evidence/native-delegation-upgrade-provenance.json), [acceptance scopes](native-delegation-acceptance.md).
+
+The first live `delegate_tasks` request then failed with `responses_terminal_mismatch` before child admission: zero children, only the user history row and one parent model-budget attempt. Successful live delegation/join and installed VS Code acceptance remain unverified. Mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [next native planning design](native-dynamic-plan-design.md).
+
+The preceding direct MCP graph checkpoint adds model-free registered tool nodes
 using the real native schema, controller approval and operation journal. Each
 node pins a server revision and registry alias; fresh discovery must match before
 proposal or dispatch. Exact raw literals survive inside `arguments_json`
@@ -47,7 +51,7 @@ complete parity acceptance remain incomplete.
 [Exact local69 evidence](evidence/native-graph-mcp-local-provenance.json),
 [exact hosted69 evidence](evidence/native-graph-mcp-hosted-provenance.json).
 
-The [delegation design](native-delegation-design.md) now has the initial local
+The [delegation design](native-delegation-design.md) now has the initial local/hosted-verified
 implementation and transactional v10 migration described above. Broader dynamic
 plans and live/client release acceptance remain required.
 
@@ -182,14 +186,15 @@ previews are unchanged; live Gemini inference, actual Gemini IDE acceptance and
 full provider/coding/protocol parity remain incomplete.
 [Provider setup](provider-setup.md), [CLI scope](native-interactive-cli.md).
 
-The installed browser preview now uses the verified `c4ec09fc` native bundle
-and packaged shared view, with all 29/12 file hashes matched. Prior records and
+The preceding `c4ec09fc` installed browser preview matched all 29/12 bundle/view hashes. Prior records and
 settings were preserved; an actual read-only OpenAI Agent request, visible
 metrics and subsequent refresh passed. Its original browser session needed one
 reconnect; the exact cause remains unresolved. The disposable actual upgrade
 and explicit rollback passed separately before installation.
-[Installed acceptance](preview-checkpoint-c4ec09fc.md),
-[current validation](VALIDATION_STATUS.md).
+[Historical installed acceptance](preview-checkpoint-c4ec09fc.md).
+The current e353 backend upgrade, separate browser repair and first failed live
+delegation request are recorded in [current acceptance](native-delegation-acceptance.md)
+and [current validation](VALIDATION_STATUS.md).
 
 All counts describe bounded verification, not product or OpenCode parity
 percentages. Broad native providers, full coding workflows, remaining MCP/A2A,

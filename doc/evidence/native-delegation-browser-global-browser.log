@@ -1,0 +1,130 @@
+TAP version 13
+# Subtest: production classic scripts share a realm without collisions and restore owned history through the browser bridge
+ok 1 - production classic scripts share a realm without collisions and restore owned history through the browser bridge
+  ---
+  duration_ms: 166.8852
+  type: 'test'
+  ...
+# Subtest: native session protocol mismatch explains the required update and preserves the existing connection
+ok 2 - native session protocol mismatch explains the required update and preserves the existing connection
+  ---
+  duration_ms: 105.7834
+  type: 'test'
+  ...
+# Subtest: Cancel and Escape preserve an existing connection and do not logout or cancel execution
+ok 3 - Cancel and Escape preserve an existing connection and do not logout or cancel execution
+  ---
+  duration_ms: 20.0824
+  type: 'test'
+  ...
+# Subtest: a failed replacement token keeps the existing conversation connected
+ok 4 - a failed replacement token keeps the existing conversation connected
+  ---
+  duration_ms: 19.2993
+  type: 'test'
+  ...
+# Subtest: cancelling an in-flight reconnect prevents late popup or conversation changes
+ok 5 - cancelling an in-flight reconnect prevents late popup or conversation changes
+  ---
+  duration_ms: 19.2057
+  type: 'test'
+  ...
+# Subtest: Cancel aborts pending network work and immediate retry stays owned by the new attempt
+ok 6 - Cancel aborts pending network work and immediate retry stays owned by the new attempt
+  ---
+  duration_ms: 17.0086
+  type: 'test'
+  ...
+# Subtest: sidebar divider supports drag, keyboard bounds and remembered width
+ok 7 - sidebar divider supports drag, keyboard bounds and remembered width
+  ---
+  duration_ms: 14.7637
+  type: 'test'
+  ...
+# Subtest: owned observation rejects a same-session status for another root and selection resets cursor backlog
+ok 8 - owned observation rejects a same-session status for another root and selection resets cursor backlog
+  ---
+  duration_ms: 2.0947
+  type: 'test'
+  ...
+# Subtest: normal Agent shows native-owned investigations and drains terminal child history without a graph selection
+ok 9 - normal Agent shows native-owned investigations and drains terminal child history without a graph selection
+  ---
+  duration_ms: 0.6591
+  type: 'test'
+  ...
+# Subtest: profile conflicts refresh the displayed account and model without replaying the retained task
+ok 10 - profile conflicts refresh the displayed account and model without replaying the retained task
+  ---
+  duration_ms: 1.7495
+  type: 'test'
+  ...
+# Subtest: browser sends its known profile revision and retains the prompt when native admission rejects a stale view
+ok 11 - browser sends its known profile revision and retains the prompt when native admission rejects a stale view
+  ---
+  duration_ms: 0.7828
+  type: 'test'
+  ...
+# Subtest: browser Settings preserves the selected profile route through private discovery and footer enrollment
+ok 12 - browser Settings preserves the selected profile route through private discovery and footer enrollment
+  ---
+  duration_ms: 2.0758
+  type: 'test'
+  ...
+# Subtest: rename sends the displayed expected title only for the selected supported conversation and retains conflicts
+ok 13 - rename sends the displayed expected title only for the selected supported conversation and retains conflicts
+  ---
+  duration_ms: 1.0588
+  type: 'test'
+  ...
+# Subtest: Responses saved-key discovery and model selection preserve backend-reported wire
+ok 14 - Responses saved-key discovery and model selection preserve backend-reported wire
+  ---
+  duration_ms: 0.5041
+  type: 'test'
+  ...
+# Subtest: restoring the native view does not wait for provider catalogue discovery
+ok 15 - restoring the native view does not wait for provider catalogue discovery
+  ---
+  duration_ms: 3.8567
+  type: 'test'
+  ...
+# Subtest: view catches a completion between event and status reads and drains final events
+ok 16 - view catches a completion between event and status reads and drains final events
+  ---
+  duration_ms: 0.5359
+  type: 'test'
+  ...
+# Subtest: an obsolete view response cannot overwrite the next selection
+ok 17 - an obsolete view response cannot overwrite the next selection
+  ---
+  duration_ms: 0.3776
+  type: 'test'
+  ...
+# Subtest: provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state
+ok 18 - provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state
+  ---
+  duration_ms: 0.5294
+  type: 'test'
+  ...
+# Subtest: stale operation bytes cannot produce an approval request
+ok 19 - stale operation bytes cannot produce an approval request
+  ---
+  duration_ms: 0.2917
+  type: 'test'
+  ...
+# Subtest: browser adapter forwards durable native view credentials across restart without retaining the master token
+ok 20 - browser adapter forwards durable native view credentials across restart without retaining the master token
+  ---
+  duration_ms: 143.5551
+  type: 'test'
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 909.0882

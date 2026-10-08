@@ -1,4 +1,5 @@
 'use strict';
+(() => {
 const viewEnrollmentWire=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').providerEnrollmentWire:globalThis.XMindBackend.providerEnrollmentWire;
 const ProfileController=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').ProviderProfileController:globalThis.XMindBackend.ProviderProfileController;
 const observeOwnedRun=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').observeOwnedRun:globalThis.XMindBackend.observeOwnedRun;
@@ -122,3 +123,4 @@ else {
   element('connection-form').onsubmit=event=>{event.preventDefault();if(connectionAttempt)return;const entered=element('server-token').value;element('server-token').value='';connect(entered);};
   window.addEventListener('pagehide',()=>{abortConnection();controller?.dispose();});
 }
+})();

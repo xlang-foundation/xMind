@@ -1,0 +1,70 @@
+{
+  "status": "verified",
+  "nativeRevision": "e353a37799530a234a6fa13e51f61a5c52d3ae6a",
+  "baseViewRevision": "e353a37799530a234a6fa13e51f61a5c52d3ae6a",
+  "sourceSha256": {
+    "views/browser/browser.js": "ead6f66ce1f4b43b73c07f05d57ba352ee4822699c2ea1da7dd18f62dd3b2871",
+    "views/browser/build.mjs": "dfe1470c5510607a3fbaffcca873f5f8b91c41d1339cfb978232acefc9ca0326",
+    "views/browser/page.cjs": "8042acc2d6ca6bc80ac58fb05e721e3b85c5db37bf0e6adc90bd9f8f7eaa2f28",
+    "views/browser/tests/classic-script.test.cjs": "dbe22a3bb8b6ac1bc035dbc01be99c4697468264b1c04c7c4d7a14f9ae1014ed",
+    "views/browser/server.mjs": "2384b9b72295784721a4861beaff41099f4e6ab22922aa3a5745a1814011d50b",
+    "views/browser/browser.css": "50d6a5758dfa255fc8ade9c1c9826e8c0633831a2f03deded0dbaca5a0e3f459",
+    "extensions/vscode/client.js": "98bc7bc3dd6be04b7b4dff52c995e8b62e8696970fc9feae03046ab97bd8af58",
+    "extensions/vscode/media/chat.js": "e5cee7e972d46dd8ba151a3f94dec21395cb0f9505ceae7e3ccf8b711bd71a02",
+    "extensions/vscode/media/chat.css": "5ebb8c3fd5d627c6efb855be86aa3f90c123ee8985fb7016edbde56ceeca866a",
+    "extensions/vscode/webview.js": "74e707a5d7184e04b5f711275d31a6a770b3b3be7f2992441b7d1c05c525f8f9"
+  },
+  "viewFiles": {
+    "assets/browser.css": "50d6a5758dfa255fc8ade9c1c9826e8c0633831a2f03deded0dbaca5a0e3f459",
+    "assets/browser.js": "ead6f66ce1f4b43b73c07f05d57ba352ee4822699c2ea1da7dd18f62dd3b2871",
+    "assets/chat.css": "5ebb8c3fd5d627c6efb855be86aa3f90c123ee8985fb7016edbde56ceeca866a",
+    "assets/chat.js": "e5cee7e972d46dd8ba151a3f94dec21395cb0f9505ceae7e3ccf8b711bd71a02",
+    "assets/client.js": "98bc7bc3dd6be04b7b4dff52c995e8b62e8696970fc9feae03046ab97bd8af58",
+    "assets/index.html": "209506e6cfa13936f22d168794f8f6b7a789946134eea6077c4f792a3f9a4b64",
+    "assets/licenses/dompurify-MPL.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+    "assets/licenses/dompurify.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "assets/licenses/marked.txt": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+    "assets/marked.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+    "assets/purify.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+    "server.mjs": "2384b9b72295784721a4861beaff41099f4e6ab22922aa3a5745a1814011d50b"
+  },
+  "tests": {
+    "extensionPassed": 103,
+    "browserPassed": 20,
+    "failed": 0,
+    "skipped": 0,
+    "classicGlobalRegression": "passed",
+    "browserNativeIntegration": "passed",
+    "vsixRequiredAssets": 18,
+    "extensionDurationMilliseconds": 1655.7025,
+    "browserDurationMilliseconds": 909.0882
+  },
+  "logSha256": {
+    "extension": "60ce0d58aa23190905d824828791935f9eac2ef9ef79e7507e6e43c0e50e14d7",
+    "browser": "175793c5d012b5b3b733c6d747f0294c008ac2a5990bd54e1d31bb22fc90b0bd",
+    "native": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693",
+    "package": "8e240f2031862a2bd128703d40cab8c9eae8144cb61fe027d3fe6e44d00b1ca5"
+  },
+  "vsixSha256": "df5e48815f85d793f6a8083b354115e989f0a521dff261cc84060dcc866f9595",
+  "scope": "Local source browser-global repair, separate from exact e353 hosted native/view evidence. Native compiled source unchanged; existing e353 native bundle used by actual model-free browser/native contract. Classic script/renderer regression uses real product HTML/scripts with explicitly synthetic same-origin backend replies; rendered live acceptance recorded separately.",
+  "observedAt": "2026-10-08T11:22:03.588Z",
+  "nativeProcessUnchanged": true,
+  "privateStatePreserved": true,
+  "oldViewRetained": true,
+  "originsPreserved": true,
+  "viewRepairHelperSha256": "0ad51f4757108d44155ae15e024bdb6670e1d03bff02fb7ecae709eee26f1ec3",
+  "nativeSourceScope": "No Native/ or Tools/ci-native.ps1 changes after e353; exact hosted e353 native binaries retained; no new local native build claimed.",
+  "sourceHashEncoding": "Actual frozen local checkout bytes, including local line endings; separate from e353 Git-blob hosted source hashes",
+  "actualRenderedRefresh": {
+    "connected": true,
+    "connectionDialogOpen": false,
+    "sameSavedModel": true,
+    "sameSubmittedRunRestored": true,
+    "draftLength": 0,
+    "scope": "Immediate actual browser reloads; no long-duration session-expiry proof"
+  },
+  "browserDomSha256": "c234d75eede3516600d2f890cbf1fb7da86588efba1e9006fa549b63f2139f91",
+  "browserScreenshotSha256": "d395338f82b571ccb5be1a31fb1e8242a4a87e071699ae0823dc7d4d9635a099",
+  "actualLiveExecution": "Failed Responses terminal validation before child admission; separate failure evidence retained",
+  "installedVsCodeAcceptance": "pending"
+}

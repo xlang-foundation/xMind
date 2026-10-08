@@ -12,3 +12,6 @@ doc/evidence/native-anthropic-agent-*.log -text
 doc/evidence/native-anthropic-history-*.log -text
 doc/evidence/native-graph-mcp-*.log -text
 doc/evidence/native-delegation-*.log -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Preserve original hosted/VSIX output bytes, including emitted trailing spaces.
+doc/evidence/native-delegation-passing-ci-job.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-delegation-browser-global-package.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

@@ -41,7 +41,11 @@ Ordinary Agent mode now offers native `delegate_tasks` for model-selected read-o
 
 The final guarded local **71-contract native gate passed in 142.36 seconds**, with an exact expected/registered/passed manifest, **45 frozen source hashes**, zero failures/skips and no exclusions. The delegation engine contract took **1.96 seconds**, actual HTTP/CLI/shared-controller acceptance **1.03 seconds**. **103 extension tests** and **19 browser tests**, fresh source-matched browser/native integration and 18-asset VSIX verification also passed. Provider replies, signatures and keys are explicitly synthetic; native agents, filesystem effects, permissions, xlang3 SQLite and transport are real. The [initial process-fixture positional-schema failure](evidence/native-delegation-initial-ctest.log) is retained separately; the corrected frozen source passed all 71 contracts.
 
-The new v10 bundle still needs its exact hosted gate and reviewed upgrade acceptance. The installed preview remains the independently accepted c4 bundle. Live delegation, installed/rendered client acceptance, mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [exact local71 evidence](evidence/native-delegation-local-provenance.json).
+Exact revision `e353a37799530a234a6fa13e51f61a5c52d3ae6a` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37765666399): **71 native contracts in 175.51 seconds**, **103 extension tests in 2.9668103 seconds** and **19 browser tests in 1.426115 seconds**, plus native/browser integration and verification of all 18 required VSIX assets. The delegation engine took **4.88 seconds** and its HTTP/CLI contract **1.22 seconds**. All 16 job steps succeeded, with zero failures/skips and the exact complete native manifest. Downloaded artifact digests, exact source and runtime/stdlib pins were verified. [Exact hosted71 provenance](evidence/native-delegation-hosted-provenance.json), [raw hosted CTest](evidence/native-delegation-hosted-ctest.log), [original hosted job](evidence/native-delegation-passing-ci-job.log).
+
+The managed backend now runs the exact hosted e353 bundle with schema v10. The actual upgrade preserved existing records, settings and browser access; its disposable schema 9→10→9 rollback fixture passed separately. The original e353 webpage exposed a classic-script name collision. A separate local browser repair passed **103 extension tests in 1.6557025 seconds**, **20 browser tests in 0.9090882 seconds**, native/browser integration and all 18 VSIX assets. The repaired page reused its cookie without key entry and restored prior history/metrics, the selected model and Agent mode. These frontend results are separate from the unchanged hosted 71/103/19 gate. [Upgrade evidence](evidence/native-delegation-upgrade-provenance.json), [acceptance scopes](native-delegation-acceptance.md).
+
+The first live `delegate_tasks` request then failed with `responses_terminal_mismatch` before child admission: zero children, only the user history row and one parent model-budget attempt. Successful live delegation/join and installed VS Code acceptance remain unverified. Mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [next native planning design](native-dynamic-plan-design.md).
 
 New source connects pinned MCP tools directly to registered graph tool nodes,
 including graphs with no configured model. A node binds its opaque alias to an
@@ -207,12 +211,13 @@ This hosted65 result excludes newer Claude66 agent/metrics and Claude67 history
 source. Live Gemini
 inference and actual Gemini IDE interaction remain unverified.
 [Provider setup](provider-setup.md).
-The installed browser preview now uses the verified `c4ec09fc` native bundle
-and packaged shared view. Installation preserved prior records and settings;
+The preceding `c4ec09fc` installed browser preview preserved prior records and settings;
 one actual read-only OpenAI Agent task rendered history/metrics and survived
 refresh. The original browser session required reconnect and its exact cause
-remains unresolved. [Installed scope](preview-checkpoint-c4ec09fc.md),
-[current validation](VALIDATION_STATUS.md).
+remains unresolved. [Historical installed scope](preview-checkpoint-c4ec09fc.md).
+The current exact e353 backend, separate local browser repair and failed first
+live delegation attempt have their own [acceptance scopes](native-delegation-acceptance.md)
+and [current validation](VALIDATION_STATUS.md).
 
 [OPENCODE_API_INVENTORY.json](OPENCODE_API_INVENTORY.json) records **136** pinned
 operations with acceptance requirements, **zero** removed-prototype mappings,

@@ -1,0 +1,56 @@
+{
+  "observedAt": "2026-10-08T11:27:38.465Z",
+  "sourceNativeRevision": "e353a37799530a234a6fa13e51f61a5c52d3ae6a",
+  "localFrontendRepairSourceSha256": {
+    "views/browser/browser.js": "ead6f66ce1f4b43b73c07f05d57ba352ee4822699c2ea1da7dd18f62dd3b2871",
+    "views/browser/build.mjs": "dfe1470c5510607a3fbaffcca873f5f8b91c41d1339cfb978232acefc9ca0326",
+    "views/browser/page.cjs": "8042acc2d6ca6bc80ac58fb05e721e3b85c5db37bf0e6adc90bd9f8f7eaa2f28",
+    "views/browser/tests/classic-script.test.cjs": "dbe22a3bb8b6ac1bc035dbc01be99c4697468264b1c04c7c4d7a14f9ae1014ed",
+    "views/browser/server.mjs": "2384b9b72295784721a4861beaff41099f4e6ab22922aa3a5745a1814011d50b",
+    "views/browser/browser.css": "50d6a5758dfa255fc8ade9c1c9826e8c0633831a2f03deded0dbaca5a0e3f459",
+    "extensions/vscode/client.js": "98bc7bc3dd6be04b7b4dff52c995e8b62e8696970fc9feae03046ab97bd8af58",
+    "extensions/vscode/media/chat.js": "e5cee7e972d46dd8ba151a3f94dec21395cb0f9505ceae7e3ccf8b711bd71a02",
+    "extensions/vscode/media/chat.css": "5ebb8c3fd5d627c6efb855be86aa3f90c123ee8985fb7016edbde56ceeca866a",
+    "extensions/vscode/webview.js": "74e707a5d7184e04b5f711275d31a6a770b3b3be7f2992441b7d1c05c525f8f9"
+  },
+  "sessionId": "33b0cae2051699d925364ce1e986c55c",
+  "runId": "20349b91c30e11b54f90902e137899da",
+  "actualUiSubmission": true,
+  "provider": "openai",
+  "wire": "responses",
+  "model": "gpt-5.6-sol",
+  "state": "failed",
+  "historyRoles": [
+    "user"
+  ],
+  "ownedChildCount": 0,
+  "eventKindCounts": {
+    "run.queued": 1,
+    "run.running": 1,
+    "agent.repository_instructions": 1,
+    "mcp.connecting": 1,
+    "mcp.connected": 1,
+    "mcp.discovered": 1,
+    "agent.repository_scope": 1,
+    "budget.model_call.reserved": 1,
+    "budget.model_call.started": 1,
+    "model.tool_delta": 109,
+    "budget.model_call.finished": 1,
+    "run.failed": 1
+  },
+  "streamedToolNames": [
+    "delegate_tasks"
+  ],
+  "acceptedToolCalls": 0,
+  "terminalReason": "model_protocol_error",
+  "protocolErrorCode": "responses_terminal_mismatch",
+  "budgetModelAttempts": {
+    "reserved": 1,
+    "started": 1,
+    "finished": 1,
+    "finishedWasStarted": true
+  },
+  "validatedProviderUsageAvailable": false,
+  "liveDelegationJoined": false,
+  "scope": "Actual OpenAI Responses request from the rendered product UI using the saved configured model. The provider streamed delegate_tasks; native final-output validation rejected it before any tool admission, child creation or assistant/tool conversation commit. Metrics were not invented from the rejected completion. Public evidence includes only safe event names/counters, protocol code and the new public acceptance identities; no provider key, opaque wire items, prior conversations or private fingerprints. Exact structural cause remains unconfirmed and needs bounded native diagnostics."
+}

@@ -1,0 +1,628 @@
+TAP version 13
+# Subtest: browser view reuses the selected backend without exposing credentials in navigation
+ok 1 - browser view reuses the selected backend without exposing credentials in navigation
+  ---
+  duration_ms: 1.6696
+  type: 'test'
+  ...
+# Subtest: changing servers retires only the old view and disposal prevents reopening
+ok 2 - changing servers retires only the old view and disposal prevents reopening
+  ---
+  duration_ms: 1.3407
+  type: 'test'
+  ...
+# Subtest: invalid origins and tokens do not create access views or copy credentials
+ok 3 - invalid origins and tokens do not create access views or copy credentials
+  ---
+  duration_ms: 0.2791
+  type: 'test'
+  ...
+# Subtest: provider enrollment accepts only matching approved OpenAI wire and endpoint pairs
+ok 4 - provider enrollment accepts only matching approved OpenAI wire and endpoint pairs
+  ---
+  duration_ms: 1.6402
+  type: 'test'
+  ...
+# Subtest: owned-child client keeps parent scope and validates the committed tree cursor
+ok 5 - owned-child client keeps parent scope and validates the committed tree cursor
+  ---
+  duration_ms: 1.9378
+  type: 'test'
+  ...
+# Subtest: owned observation covers concurrent admission and paged events without inventing aggregate usage
+ok 6 - owned observation covers concurrent admission and paged events without inventing aggregate usage
+  ---
+  duration_ms: 4.6702
+  type: 'test'
+  ...
+# Subtest: owned observation rejects foreign children and events before requesting private child history
+ok 7 - owned observation rejects foreign children and events before requesting private child history
+  ---
+  duration_ms: 0.4114
+  type: 'test'
+  ...
+# Subtest: agent and graph requests preserve the observed profile binding without silently acquiring a newer revision
+ok 8 - agent and graph requests preserve the observed profile binding without silently acquiring a newer revision
+  ---
+  duration_ms: 0.5188
+  type: 'test'
+  ...
+# Subtest: client accepts only an advertised GenerateContent route and carries its native wire through profile admission
+ok 9 - client accepts only an advertised GenerateContent route and carries its native wire through profile admission
+  ---
+  duration_ms: 1.1751
+  type: 'test'
+  ...
+# Subtest: native provider profile client preserves route, key omission, activation and revision at its authenticated origin
+ok 10 - native provider profile client preserves route, key omission, activation and revision at its authenticated origin
+  ---
+  duration_ms: 0.7331
+  type: 'test'
+  ...
+# Subtest: advertised Gemini Settings discovery keeps full model resources and publishes a profile only after footer selection
+ok 11 - advertised Gemini Settings discovery keeps full model resources and publishes a profile only after footer selection
+  ---
+  duration_ms: 2.4562
+  type: 'test'
+  ...
+# Subtest: Gemini Settings cannot discover through absent, disabled or foreign advertised routes
+ok 12 - Gemini Settings cannot discover through absent, disabled or foreign advertised routes
+  ---
+  duration_ms: 0.8518
+  type: 'test'
+  ...
+# Subtest: profile metadata rejects secret references, duplicate identities and inconsistent backend route families
+ok 13 - profile metadata rejects secret references, duplicate identities and inconsistent backend route families
+  ---
+  duration_ms: 0.9645
+  type: 'test'
+  ...
+# Subtest: invalid profile mutations never leave the client and discovery rejects key reflection
+ok 14 - invalid profile mutations never leave the client and discovery rejects key reflection
+  ---
+  duration_ms: 0.3588
+  type: 'test'
+  ...
+# Subtest: graph access adapter preserves backend identity, revision and raw human JSON
+ok 15 - graph access adapter preserves backend identity, revision and raw human JSON
+  ---
+  duration_ms: 0.2601
+  type: 'test'
+  ...
+# Subtest: session discovery, URL encoding, error handling and origin boundaries
+ok 16 - session discovery, URL encoding, error handling and origin boundaries
+  ---
+  duration_ms: 54.0038
+  type: 'test'
+  ...
+# Subtest: origin-scoped authentication and native request bodies
+ok 17 - origin-scoped authentication and native request bodies
+  ---
+  duration_ms: 0.4896
+  type: 'test'
+  ...
+# Subtest: VS Code Agent observes scoped leaf histories and tree events without inventing a graph or resubmitting work
+ok 18 - VS Code Agent observes scoped leaf histories and tree events without inventing a graph or resubmitting work
+  ---
+  duration_ms: 24.5819
+  type: 'test'
+  ...
+# Subtest: native admission profile conflict updates the sidebar account/model without task replay
+ok 19 - native admission profile conflict updates the sidebar account/model without task replay
+  ---
+  duration_ms: 3.2349
+  type: 'test'
+  ...
+# Subtest: native terminal state refreshes transcript and stops polling with durable operation inspection
+ok 20 - native terminal state refreshes transcript and stops polling with durable operation inspection
+  ---
+  duration_ms: 1.9081
+  type: 'test'
+  ...
+# Subtest: saved Responses enrollment restores discovery and reports the native wire
+ok 21 - saved Responses enrollment restores discovery and reports the native wire
+  ---
+  duration_ms: 2.5949
+  type: 'test'
+  ...
+# Subtest: settings key fetches a sidebar list; only a separate model selection saves encrypted backend settings
+ok 22 - settings key fetches a sidebar list; only a separate model selection saves encrypted backend settings
+  ---
+  duration_ms: 6.473
+  type: 'test'
+  ...
+# Subtest: sidebar selection rejects an ID outside the actual discovery response
+ok 23 - sidebar selection rejects an ID outside the actual discovery response
+  ---
+  duration_ms: 2.0963
+  type: 'test'
+  ...
+# Subtest: sidebar rename binds selected session and original title, refreshes metadata and reports conflicts without inference
+ok 24 - sidebar rename binds selected session and original title, refreshes metadata and reports conflicts without inference
+  ---
+  duration_ms: 3.832
+  type: 'test'
+  ...
+# Subtest: invalid keys and unsupported provider destinations never transmit credentials
+ok 25 - invalid keys and unsupported provider destinations never transmit credentials
+  ---
+  duration_ms: 5.9743
+  type: 'test'
+  ...
+# Subtest: discovery errors and malformed or empty catalogs never save provider settings
+ok 26 - discovery errors and malformed or empty catalogs never save provider settings
+  ---
+  duration_ms: 4.5301
+  type: 'test'
+  ...
+# Subtest: closing during discovery prevents publishing a list or saving a credential
+ok 27 - closing during discovery prevents publishing a list or saving a credential
+  ---
+  duration_ms: 3.0663
+  type: 'test'
+  ...
+# Subtest: saved key populates the sidebar automatically and changes models without a key popup
+ok 28 - saved key populates the sidebar automatically and changes models without a key popup
+  ---
+  duration_ms: 3.5694
+  type: 'test'
+  ...
+# Subtest: rejected saved key shows settings guidance and replacement uses the same sidebar selection
+ok 29 - rejected saved key shows settings guidance and replacement uses the same sidebar selection
+  ---
+  duration_ms: 2.5402
+  type: 'test'
+  ...
+# Subtest: graph observation keeps child transcript and usage out of the root stream
+ok 30 - graph observation keeps child transcript and usage out of the root stream
+  ---
+  duration_ms: 2.6724
+  type: 'test'
+  ...
+# Subtest: human input binds observed root, waiting node and exact checkpoint; raw JSON reaches the backend
+ok 31 - human input binds observed root, waiting node and exact checkpoint; raw JSON reaches the backend
+  ---
+  duration_ms: 2.8884
+  type: 'test'
+  ...
+# Subtest: selection intent invalidates queued human input before another conversation is displayed
+ok 32 - selection intent invalidates queued human input before another conversation is displayed
+  ---
+  duration_ms: 1.8722
+  type: 'test'
+  ...
+# Subtest: graph child approval retains exact current operation review and uses the shared decision endpoint
+ok 33 - graph child approval retains exact current operation review and uses the shared decision endpoint
+  ---
+  duration_ms: 2.3738
+  type: 'test'
+  ...
+# Subtest: graph catalog allows model-free tool graphs and rejects arbitrary view plans or graph IDs
+ok 34 - graph catalog allows model-free tool graphs and rejects arbitrary view plans or graph IDs
+  ---
+  duration_ms: 1.7588
+  type: 'test'
+  ...
+# Subtest: workflow choice persists for the same backend and restores only an advertised executable graph
+ok 35 - workflow choice persists for the same backend and restores only an advertised executable graph
+  ---
+  duration_ms: 3.2354
+  type: 'test'
+  ...
+# Subtest: older run inspection remains accessible and selected run persists across view reopening
+ok 36 - older run inspection remains accessible and selected run persists across view reopening
+  ---
+  duration_ms: 4.8755
+  type: 'test'
+  ...
+# Subtest: run selection rejects IDs outside the selected conversation before fetching their details
+ok 37 - run selection rejects IDs outside the selected conversation before fetching their details
+  ---
+  duration_ms: 1.6486
+  type: 'test'
+  ...
+# Subtest: older terminal run keeps observing an active conversation and rejects another submission
+ok 38 - older terminal run keeps observing an active conversation and rejects another submission
+  ---
+  duration_ms: 1.9466
+  type: 'test'
+  ...
+# Subtest: uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+ok 39 - uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+  ---
+  duration_ms: 2.7192
+  type: 'test'
+  ...
+# Subtest: inspection rejects a different backend operation and discards observations after selection changes
+ok 40 - inspection rejects a different backend operation and discards observations after selection changes
+  ---
+  duration_ms: 2.8882
+  type: 'test'
+  ...
+# Subtest: only a reviewed pending operation can be decided and payload stays backend-owned
+ok 41 - only a reviewed pending operation can be decided and payload stays backend-owned
+  ---
+  duration_ms: 1.9799
+  type: 'test'
+  ...
+# Subtest: closing the view during proposal revalidation cannot send an approval
+ok 42 - closing the view during proposal revalidation cannot send an approval
+  ---
+  duration_ms: 1.6532
+  type: 'test'
+  ...
+# Subtest: changed proposal bytes invalidate the displayed review
+ok 43 - changed proposal bytes invalidate the displayed review
+  ---
+  duration_ms: 4.1382
+  type: 'test'
+  ...
+# Subtest: session selection intent invalidates an in-flight approval before queued selection runs
+ok 44 - session selection intent invalidates an in-flight approval before queued selection runs
+  ---
+  duration_ms: 4.4671
+  type: 'test'
+  ...
+# Subtest: closing a panel during history loading cannot start a detached poller
+ok 45 - closing a panel during history loading cannot start a detached poller
+  ---
+  duration_ms: 1.4289
+  type: 'test'
+  ...
+# Subtest: older native servers without a catalogue keep default execution without invented model IDs
+ok 46 - older native servers without a catalogue keep default execution without invented model IDs
+  ---
+  duration_ms: 1.6637
+  type: 'test'
+  ...
+# Subtest: edit comparison opens exact revalidated backend snapshots without granting or writing
+ok 47 - edit comparison opens exact revalidated backend snapshots without granting or writing
+  ---
+  duration_ms: 1.8991
+  type: 'test'
+  ...
+# Subtest: creation comparison opens absent-to-proposed snapshots without creating a file or granting
+ok 48 - creation comparison opens absent-to-proposed snapshots without creating a file or granting
+  ---
+  duration_ms: 1.6708
+  type: 'test'
+  ...
+# Subtest: refresh reloads backend execution capabilities and history without submitting a run
+ok 49 - refresh reloads backend execution capabilities and history without submitting a run
+  ---
+  duration_ms: 2.0381
+  type: 'test'
+  ...
+# Subtest: selected configured model survives view reopening and retired models fall back on refresh
+ok 50 - selected configured model survives view reopening and retired models fall back on refresh
+  ---
+  duration_ms: 4.8304
+  type: 'test'
+  ...
+# Subtest: normal development bootstrap completes activation before resolving the sidebar and clears private environment
+ok 51 - normal development bootstrap completes activation before resolving the sidebar and clears private environment
+  ---
+  duration_ms: 2.4981
+  type: 'test'
+  ...
+# Subtest: admission reconciliation refreshes changed metadata and discards pending keys without replay
+ok 52 - admission reconciliation refreshes changed metadata and discards pending keys without replay
+  ---
+  duration_ms: 1.4368
+  type: 'test'
+  ...
+# Subtest: retired admission reconciliation cannot publish a late metadata response
+ok 53 - retired admission reconciliation cannot publish a late metadata response
+  ---
+  duration_ms: 0.1645
+  type: 'test'
+  ...
+# Subtest: admission uses the profile snapshot already shown in this view and does not refresh past an external change
+ok 54 - admission uses the profile snapshot already shown in this view and does not refresh past an external change
+  ---
+  duration_ms: 0.7665
+  type: 'test'
+  ...
+# Subtest: profile setup discovers privately, rejects forged models and enrolls only on footer selection
+ok 55 - profile setup discovers privately, rejects forged models and enrolls only on footer selection
+  ---
+  duration_ms: 2.1375
+  type: 'test'
+  ...
+# Subtest: saved-key discovery stays on its owned route while native save can rebind within the family
+ok 56 - saved-key discovery stays on its owned route while native save can rebind within the family
+  ---
+  duration_ms: 0.284
+  type: 'test'
+  ...
+# Subtest: disposing or changing backend cannot publish late discovery or send a pending key in enrollment
+ok 57 - disposing or changing backend cannot publish late discovery or send a pending key in enrollment
+  ---
+  duration_ms: 3.6409
+  type: 'test'
+  ...
+# Subtest: Agent investigations retain independent metrics and terminal replay does not synthesize a graph or another answer
+ok 58 - Agent investigations retain independent metrics and terminal replay does not synthesize a graph or another answer
+  ---
+  duration_ms: 138.8124
+  type: 'test'
+  ...
+# Subtest: run inspector uses selected historical provider context independently of the current model
+ok 59 - run inspector uses selected historical provider context independently of the current model
+  ---
+  duration_ms: 27.5002
+  type: 'test'
+  ...
+# Subtest: run inspector suppresses malformed or secret-bearing provider metadata
+ok 60 - run inspector suppresses malformed or secret-bearing provider metadata
+  ---
+  duration_ms: 14.8008
+  type: 'test'
+  ...
+# Subtest: profile Settings offers saved and new providers and keeps discovered models in the footer
+ok 61 - profile Settings offers saved and new providers and keeps discovered models in the footer
+  ---
+  duration_ms: 15.6646
+  type: 'test'
+  ...
+# Subtest: GenerateContent labels depend on advertised routes and keep model choice in the footer
+ok 62 - GenerateContent labels depend on advertised routes and keep model choice in the footer
+  ---
+  duration_ms: 17.2315
+  type: 'test'
+  ...
+# Subtest: advertised Gemini Settings clears the draft key and uses the footer for full discovered model resources
+ok 63 - advertised Gemini Settings clears the draft key and uses the footer for full discovered model resources
+  ---
+  duration_ms: 24.3512
+  type: 'test'
+  ...
+# Subtest: recorded GenerateContent response and run context retain their native identity and supplied metrics
+ok 64 - recorded GenerateContent response and run context retain their native identity and supplied metrics
+  ---
+  duration_ms: 25.9286
+  type: 'test'
+  ...
+# Subtest: conversation rename keeps expected title and draft through conflicts, and cancels when selection changes
+ok 65 - conversation rename keeps expected title and draft through conflicts, and cancels when selection changes
+  ---
+  duration_ms: 15.0135
+  type: 'test'
+  ...
+# Subtest: footer displays only a recognized backend-reported provider wire
+ok 66 - footer displays only a recognized backend-reported provider wire
+  ---
+  duration_ms: 15.7992
+  type: 'test'
+  ...
+# Subtest: model protocol failure shows only recognized diagnostics and preserves conversation context
+ok 67 - model protocol failure shows only recognized diagnostics and preserves conversation context
+  ---
+  duration_ms: 17.4497
+  type: 'test'
+  ...
+# Subtest: provider failures remain visible through transcript refresh without invented replies or metrics
+ok 68 - provider failures remain visible through transcript refresh without invented replies or metrics
+  ---
+  duration_ms: 13.5448
+  type: 'test'
+  ...
+# Subtest: incompatible provider history explains recovery without fabricating a reply
+ok 69 - incompatible provider history explains recovery without fabricating a reply
+  ---
+  duration_ms: 10.5802
+  type: 'test'
+  ...
+# Subtest: unknown failure reasons do not interpolate untrusted payloads or guess provider causes
+ok 70 - unknown failure reasons do not interpolate untrusted payloads or guess provider causes
+  ---
+  duration_ms: 12.5301
+  type: 'test'
+  ...
+# Subtest: recorded provider identifiers render without raw error messages or unknown fields
+ok 71 - recorded provider identifiers render without raw error messages or unknown fields
+  ---
+  duration_ms: 10.0616
+  type: 'test'
+  ...
+# Subtest: durable command output renders independent channels without executing markup or controls
+ok 72 - durable command output renders independent channels without executing markup or controls
+  ---
+  duration_ms: 10.4132
+  type: 'test'
+  ...
+# Subtest: output replay preserves fragmented Unicode and ignores only exact duplicate bytes
+ok 73 - output replay preserves fragmented Unicode and ignores only exact duplicate bytes
+  ---
+  duration_ms: 13.3636
+  type: 'test'
+  ...
+# Subtest: gaps, malformed bytes and capture overflow never invent output
+ok 74 - gaps, malformed bytes and capture overflow never invent output
+  ---
+  duration_ms: 87.4339
+  type: 'test'
+  ...
+# Subtest: recorded output survives transcript refresh and clears on run or conversation change
+ok 75 - recorded output survives transcript refresh and clears on run or conversation change
+  ---
+  duration_ms: 15.76
+  type: 'test'
+  ...
+# Subtest: the sidebar bounds command stream cards and leaves excess output in recorded activity
+ok 76 - the sidebar bounds command stream cards and leaves excess output in recorded activity
+  ---
+  duration_ms: 28.5953
+  type: 'test'
+  ...
+# Subtest: command approval reviews literal arguments before sending only a decision ID
+ok 77 - command approval reviews literal arguments before sending only a decision ID
+  ---
+  duration_ms: 22.581
+  type: 'test'
+  ...
+# Subtest: approval displays bound guidance hashes and rejects malformed source metadata
+ok 78 - approval displays bound guidance hashes and rejects malformed source metadata
+  ---
+  duration_ms: 14.8338
+  type: 'test'
+  ...
+# Subtest: malformed or expired command proposals cannot be allowed
+ok 79 - malformed or expired command proposals cannot be allowed
+  ---
+  duration_ms: 18.2091
+  type: 'test'
+  ...
+# Subtest: command results preserve separate escaped output, hex bytes and actual exit metrics
+ok 80 - command results preserve separate escaped output, hex bytes and actual exit metrics
+  ---
+  duration_ms: 14.5204
+  type: 'test'
+  ...
+# Subtest: uncertain commands remain blocked and malformed outcomes retain raw evidence
+ok 81 - uncertain commands remain blocked and malformed outcomes retain raw evidence
+  ---
+  duration_ms: 10.8883
+  type: 'test'
+  ...
+# Subtest: command output metrics require exact encoded retained bytes and safe drained counts
+ok 82 - command output metrics require exact encoded retained bytes and safe drained counts
+  ---
+  duration_ms: 16.1939
+  type: 'test'
+  ...
+# Subtest: new-file review distinguishes absence, previews exact content and never retries uncertainty
+ok 83 - new-file review distinguishes absence, previews exact content and never retries uncertainty
+  ---
+  duration_ms: 10.6279
+  type: 'test'
+  ...
+# Subtest: external MCP approval names the server and tool and uncertainty never offers replay
+ok 84 - external MCP approval names the server and tool and uncertainty never offers replay
+  ---
+  duration_ms: 10.8281
+  type: 'test'
+  ...
+# Subtest: run detail selector preserves conversation history and blocks submission while another run is active
+ok 85 - run detail selector preserves conversation history and blocks submission while another run is active
+  ---
+  duration_ms: 18.5444
+  type: 'test'
+  ...
+# Subtest: uncertain edit inspection renders escaped observations and never offers an effect approval
+ok 86 - uncertain edit inspection renders escaped observations and never offers an effect approval
+  ---
+  duration_ms: 11.7207
+  type: 'test'
+  ...
+# Subtest: durable response profile badges use recorded identities and reject malformed metadata
+ok 87 - durable response profile badges use recorded identities and reject malformed metadata
+  ---
+  duration_ms: 19.7042
+  type: 'test'
+  ...
+# Subtest: history renders Markdown/code, copies plain code and shows exact provider usage
+ok 88 - history renders Markdown/code, copies plain code and shows exact provider usage
+  ---
+  duration_ms: 15.4129
+  type: 'test'
+  ...
+# Subtest: unknown historical usage stays unavailable and malicious Markdown is sanitized
+ok 89 - unknown historical usage stays unavailable and malicious Markdown is sanitized
+  ---
+  duration_ms: 14.4752
+  type: 'test'
+  ...
+# Subtest: live token badges use model usage events and reset when the persisted transcript arrives
+ok 90 - live token badges use model usage events and reset when the persisted transcript arrives
+  ---
+  duration_ms: 15.9881
+  type: 'test'
+  ...
+# Subtest: tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
+ok 91 - tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
+  ---
+  duration_ms: 12.4454
+  type: 'test'
+  ...
+# Subtest: bottom model selector exposes only backend-advertised IDs and sends the selected ID
+ok 92 - bottom model selector exposes only backend-advertised IDs and sends the selected ID
+  ---
+  duration_ms: 9.5098
+  type: 'test'
+  ...
+# Subtest: provider cache/reasoning counts and backend first-token time render without derived estimates
+ok 93 - provider cache/reasoning counts and backend first-token time render without derived estimates
+  ---
+  duration_ms: 13.3571
+  type: 'test'
+  ...
+# Subtest: Claude usage events and persisted metadata keep uncached input, cache writes and reads distinct
+ok 94 - Claude usage events and persisted metadata keep uncached input, cache writes and reads distinct
+  ---
+  duration_ms: 11.9778
+  type: 'test'
+  ...
+# Subtest: zero Claude counters remain visible while absent input and output stay unavailable
+ok 95 - zero Claude counters remain visible while absent input and output stay unavailable
+  ---
+  duration_ms: 15.5478
+  type: 'test'
+  ...
+# Subtest: cache-write badges require supplied safe nonnegative integer counts
+ok 96 - cache-write badges require supplied safe nonnegative integer counts
+  ---
+  duration_ms: 28.5635
+  type: 'test'
+  ...
+# Subtest: common provider metrics keep their original label unless native usage marks uncached input
+ok 97 - common provider metrics keep their original label unless native usage marks uncached input
+  ---
+  duration_ms: 26.4144
+  type: 'test'
+  ...
+# Subtest: pending file comparison sends only an operation ID and remains separate from approval
+ok 98 - pending file comparison sends only an operation ID and remains separate from approval
+  ---
+  duration_ms: 10.1352
+  type: 'test'
+  ...
+# Subtest: top-right settings dialog clears key input and leaves model selection in the footer
+ok 99 - top-right settings dialog clears key input and leaves model selection in the footer
+  ---
+  duration_ms: 10.871
+  type: 'test'
+  ...
+# Subtest: graph human form preserves a draft across checkpoints and sends raw input with the displayed revision
+ok 100 - graph human form preserves a draft across checkpoints and sends raw input with the displayed revision
+  ---
+  duration_ms: 16.5575
+  type: 'test'
+  ...
+# Subtest: graph child responses retain actual supplied per-response metrics independently of the root transcript
+ok 101 - graph child responses retain actual supplied per-response metrics independently of the root transcript
+  ---
+  duration_ms: 13.9538
+  type: 'test'
+  ...
+# Subtest: footer workflow chooser enables a real advertised tool graph on a model-free backend
+ok 102 - footer workflow chooser enables a real advertised tool graph on a model-free backend
+  ---
+  duration_ms: 13.5432
+  type: 'test'
+  ...
+# Subtest: graph join summary keeps full observed outputs expandable without fabricated aggregate metrics
+ok 103 - graph join summary keeps full observed outputs expandable without fabricated aggregate metrics
+  ---
+  duration_ms: 9.9582
+  type: 'test'
+  ...
+1..103
+# tests 103
+# suites 0
+# pass 103
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1655.7025

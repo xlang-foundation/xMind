@@ -1,0 +1,261 @@
+{
+  "observedAt": "2026-10-08T11:13:19.302Z",
+  "sourceRevision": "e353a37799530a234a6fa13e51f61a5c52d3ae6a",
+  "previousNativeRevision": "c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616",
+  "ci": {
+    "runId": 37765666399,
+    "jobId": 113272591389,
+    "status": "completed",
+    "conclusion": "success",
+    "nativePassed": 71,
+    "nativeFailed": 0,
+    "nativeSkipped": 0,
+    "extensionPassed": 103,
+    "extensionFailed": 0,
+    "extensionSkipped": 0,
+    "browserPassed": 19,
+    "browserFailed": 0,
+    "browserSkipped": 0,
+    "jobSteps": [
+      {
+        "number": 1,
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 2,
+        "name": "Check out xMind",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 3,
+        "name": "Check out pinned xlang3 runtime source",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 4,
+        "name": "Check out allowed standard-library source only",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 5,
+        "name": "Set up Node.js",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 6,
+        "name": "Build native xlang3 and xMind; run complete contract set",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 7,
+        "name": "Run extension contracts without package lifecycle scripts",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 8,
+        "name": "Verify browser view and native runtime separation",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 9,
+        "name": "Package and verify shared browser assets",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 10,
+        "name": "Preserve build and test diagnostics",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 11,
+        "name": "Preserve contract-tested native development bundle",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 19,
+        "name": "Post Set up Node.js",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 20,
+        "name": "Post Check out allowed standard-library source only",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 21,
+        "name": "Post Check out pinned xlang3 runtime source",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 22,
+        "name": "Post Check out xMind",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "number": 23,
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "allStepsSucceeded": 16,
+    "nativeSeconds": 175.51,
+    "browserNativeIntegration": "passed",
+    "vsixVerification": "passed",
+    "vsixRequiredAssets": 18,
+    "evidenceArtifactId": 11545841557,
+    "runtimeArtifactId": 11545761541
+  },
+  "backend": "http://127.0.0.1:57447",
+  "view": "http://127.0.0.1:60405/ui/",
+  "counts": {
+    "sessionCount": 11,
+    "runCount": 15,
+    "historyCount": 37,
+    "operationsCount": 3,
+    "graphsCount": 2,
+    "graphChildrenCount": 2
+  },
+  "preserved": {
+    "recordedSessionsRunsHistory": true,
+    "graphChildrenAndHistory": true,
+    "delegatedChildrenAndHistory": true,
+    "operationJournals": true,
+    "providerSelectionAndConfiguration": true,
+    "registeredConfigurations": true,
+    "durableFreshTestCookie": true,
+    "authenticationToken": true,
+    "origins": true,
+    "closedDatabaseBackup": true
+  },
+  "nativeFiles": {
+    "README.txt": "bb7fe3bdcc78f892bc84887b1574aa981a9ed9511b863bfe66f3ec5ec014e3c8",
+    "licenses/xlang3-LICENSE": "54a4b957dae6a8a5de150c49d9ab74c35d1ff10f7a4206e9d5b92474524e8c80",
+    "licenses/xlang3-NOTICE": "eed657c00c9b299cee02952e09fac855287ce981c91ec8648792891ea1d2eba9",
+    "licenses/xlang3-modules/cffi/libffi/LICENSE": "0ff971b6b04d61754994a25d6fba23d5e5fe35993d82abf5008d78ace0a521bd",
+    "licenses/xlang3-modules/httptools/vendor/http-parser/LICENSE-MIT": "5cd1b682c0ccbac0cb31b86a9a1104c3e2e7b1377a282b8169d2694b400db7c2",
+    "licenses/xlang3-modules/httptools/vendor/llhttp/LICENSE": "279012e02a10acfd59a3f2d8f13a497332535d871c2b27c89988985b06a3a438",
+    "licenses/xlang3-modules/httptools/vendor/llhttp/LICENSE-MIT": "6ddfa628db76d2d87b8968bafbad60f51c4ec88100dd7bb96f97216d88af0808",
+    "licenses/xlang3-third-party/argon2/LICENSE": "e01fc30f00792a2bb95136ebe7dd7d01baab62e719ed26ae1b08a3b6b114fdad",
+    "licenses/xlang3-third-party/brotli-1.2.0/LICENSE": "60ae0f13e76cc2eaaa108677eefa4ce16b647f6bbe8cf0a1ac9429d82eca7248",
+    "licenses/xlang3-third-party/bzip2/LICENSE": "9102b70091e84168c468d57dcca64ec1f60c76cefbc83b66e1754725b9dd90cf",
+    "licenses/xlang3-third-party/nlohmann_json/LICENSE.MIT": "b9715282b2f1db1359a919bb3a542dd4362fd9e38ae72d421367eb11abe62eec",
+    "licenses/xlang3-third-party/yaml-cpp/LICENSE": "c06fd4ee9241e3b6841fcee5d471475be412c822ddf2876af17127acd426c011",
+    "licenses/xlang3-third-party/zlib/LICENSE": "439c75ab12b340c5362b9d4b08ff05ec3a4d0eb7667a6fff49a9b16d8795c78e",
+    "licenses/xlang3-third-party/zlib/contrib/dotzlib/LICENSE_1_0.txt": "36266a8fd073568394cb81cdb2b124f7fdae2c64c1a7ed09db34b4d22efa2951",
+    "licenses/xlang3-third-party/zlib/contrib/minizip/LICENSE.Info-Zip": "a6b3dd98c9eee4c6213ffcdbbe5fb782815d0f701059e6c9f2af18740ce6ab98",
+    "licenses/xlang3-third-party/zstd-1.5.7/LICENSE": "d3baadc2e1dd7a7e0b483633e6b39743c16a16f28d696baff507fcd451f3d4ad",
+    "licenses/xmind-LICENSE": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
+    "licenses/xmind-native/cpp-httplib/LICENSE": "4b45cbe16d7b71b89ae6127e26e0d90a029198ca5e958ad8e3d0b8bbed364d8b",
+    "licenses/xmind-native/jsoncons/LICENSE": "88790a489250911e98b3a0059842886846758b45cde330949d0afc8a97d75a42",
+    "licenses/xmind-native/nlohmann/LICENSE.MIT": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603",
+    "modules/xlang_json.x3pkg.dll": "2b21225b7058e70180ee43c1591aa5d28faf041ab9189c11a016e7127202d43a",
+    "modules/xlang_sqlite3.x3pkg.dll": "33d30d7bf7a3bf8ecbdc0c82dc264662d28113c97075b0209ac55b501d0de3cb",
+    "provenance.json": "c77ebc5463b64c5081192d2ff15495c147e34ead9aa984dddbbdc27381c0b8e3",
+    "xlang3.exe": "9dd176d4e2ae4dfd55d0eab11e1712e7e1e902b9b16397e01dcfed153a6303d7",
+    "xlang3_runtime.dll": "b880bb227d24e3909d17a90577f1606aa7b154b15625ee4df69161e18c8d8893",
+    "xmind_admin.exe": "8636e64014bea8f512fb35cf896fe6bdacf5c8749e026e44d829841b080e69da",
+    "xmind_cli.exe": "151ee3b3e875d9cbfdb64ab766bb80ba8add4ca55ecee2e968d052082d30baf2",
+    "xmind_schema_worker.exe": "4ef0f2adaf4426e1b83d04f0d80de046517b6e9b51045e8658761fe2b008f428",
+    "xmind_server.exe": "da3d2038b52a8a465d233a184d3e19e4cabbc636a8627698ca1f70beccb55978"
+  },
+  "viewFiles": {
+    "assets/browser.css": "c91bcdd5cba2f65bfab7cb0b20697b3d75c1d82ce53a8d057aa40a83969fff06",
+    "assets/browser.js": "8b5c5d3e10bfa21e7bed7e684cfaf915d87496e809a491eb387cfe0f05e1004c",
+    "assets/chat.css": "631e259fce1dfeafe3338737a32b5ca48563c177a29a1edbcd9c9d23470c2601",
+    "assets/chat.js": "52704c6177200c047a89bc712d93f0741d9955b6807e2e0df213ca06dc0a437d",
+    "assets/client.js": "b949fe8a46a0d6405961ce2285e8bd513145a695fb4c3f9520d0152a66de0607",
+    "assets/index.html": "209506e6cfa13936f22d168794f8f6b7a789946134eea6077c4f792a3f9a4b64",
+    "assets/licenses/dompurify-MPL.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+    "assets/licenses/dompurify.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "assets/licenses/marked.txt": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+    "assets/marked.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+    "assets/purify.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+    "server.mjs": "9aa75ecfe0dbd4fbe208aa772ad9a38ef1c5401109b21a53f52189c6c0ac086f"
+  },
+  "upgradeHelperSha256": "4c778fdb1e5f5f35647504aadd584f14c07834ad8d199bf87f87d925a64854d9",
+  "processOwnershipVerified": true,
+  "activeRuns": 0,
+  "activeClaims": 0,
+  "gracefulShutdownClaimed": false,
+  "sqliteAccess": "Embedded xlang3 only; exclusive filesystem backup before migration",
+  "stdlibScope": "Existing local pure standard-library source reused; not claimed Git-pinned",
+  "renderedBrowserAcceptance": "pending",
+  "liveProviderDelegation": "not performed",
+  "actualIdeAcceptance": "pending",
+  "privateCredentialsContentOrFingerprintsPublished": false,
+  "fixture": {
+    "execution": {
+      "oldNative": "c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616",
+      "oldView": "c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616",
+      "revision": "e353a37799530a234a6fa13e51f61a5c52d3ae6a",
+      "oldSchema": 9,
+      "upgradedSchema": 10,
+      "backedUpSchema": 9,
+      "restoredSchema": 9,
+      "retainedSchema": 10,
+      "schemaProbeRuntime": "Actual hosted xlang3; connection query_only; no CPython",
+      "actualNativeGraphRead": true,
+      "actualControllerApprovedCreate": true,
+      "actualXlang3SQLite": true,
+      "savedEncryptedSyntheticCredentialResolved": true,
+      "providerCiphertextAndPurposePreserved": true,
+      "providerInferenceRequested": false,
+      "providerDiscoveryRequested": false,
+      "noPersistedWorkReplayObserved": true,
+      "privateRecordsPreserved": true,
+      "configurationPreserved": true,
+      "existingRouteDescriptorsPreserved": true,
+      "delegationCapabilityObserved": true,
+      "oldCookieAcrossUpgradeAndRollback": true,
+      "explicitIdleRollback": true,
+      "startupImportsOmitted": true,
+      "retainedBackup": true,
+      "retainedUpgradedDatabase": true,
+      "retainedFixture": true,
+      "privateFingerprintPrinted": false,
+      "sessionCount": 2,
+      "runCount": 2,
+      "historyCount": 4,
+      "operationsCount": 1,
+      "graphsCount": 2,
+      "graphChildrenCount": 3,
+      "delegatedChildrenCount": 0,
+      "knownOwnedProcessesStopped": true
+    },
+    "prechecks": {
+      "fixedParserCases": 5,
+      "rejectedParserCases": 4,
+      "roundTripParserCases": 100,
+      "unknownProviderEnvironmentRemoved": true,
+      "releaseGateRejectCases": 14,
+      "authenticNoncontiguousStepOrderPinned": true,
+      "capabilityEnabledAndDisabledChecked": true,
+      "capabilityRejectCases": 2,
+      "legacyEmptyChildrenNormalized": true,
+      "delegatedChildClaimsAndHistoryObserved": true,
+      "paginatedTreeEventsObserved": 257,
+      "changedStateRollbackRejected": true
+    },
+    "originalStaticFlagScope": "The runner merged its static precheck flag into the final actual-fixture output. Here prechecks and actual native execution are separated explicitly.",
+    "originalPublicReportSha256": "1ed1a733afbc0bc6e14c1763c825fd45c887844d970d59f6bfe78410477bb0e7",
+    "fixtureHelperSha256": "af809851a72bd6e8b95ef7aaee6d20be9a3d4d38c83472bb04cf5ee54a112af1"
+  },
+  "scope": "Actual disposable c4-to-e353 upgrade/rollback used real native read and controller-approved write, encrypted synthetic provider credential, xlang3 schema9->10->9 and retained10. No provider inference/discovery was requested by that fixture. Actual managed preview then upgraded while preserving existing11 sessions15 root runs37 root history rows3 operation journals2 graphs2 graph children, configuration and private records. Prior state contained no delegated leaves. Database/schema/helper checks do not prove rendered frontend, installed VS Code or live provider delegation. Actual e353 webpage startup exposed duplicate classic-script observeOwnedRun; frontend acceptance is separately recorded after source repair. Closed backups and private content/fingerprints were retained locally and are not published."
+}
