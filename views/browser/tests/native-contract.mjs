@@ -18,7 +18,12 @@ try{
  assert.equal((await fetch(viewOrigin+'/ui/session',{method:'POST',headers:sessionHeaders,body:'{}'})).status,401);
  assert.equal((await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...sessionHeaders,Authorization:'Bearer '+ 'x'.repeat(64)},body:'{}'})).status,401);
  const authenticated=await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...sessionHeaders,Authorization:'Bearer '+token},body:'{}'});assert.equal(authenticated.status,200);const cookieHeader=authenticated.headers.get('set-cookie');assert.match(cookieHeader,/HttpOnly; SameSite=Strict; Path=\//);assert.ok(!cookieHeader.includes(token));const cookie=cookieHeader.split(';')[0];
- assert.match(cookieHeader,/Max-Age=28800(?:;|$)/,'Browser-session persistence must be bounded by the server-side eight-hour expiry');
+ const maxAge=/Max-Age=(\d+)(?:;|$)/.exec(cookieHeader);assert.ok(maxAge&&Number(maxAge[1])>0&&Number(maxAge[1])<=28800,'Browser-session persistence must be bounded by the server-side eight-hour expiry');
+ const viewCredential=cookie.slice(cookie.indexOf('=')+1),nativeViewHeaders={Authorization:'View '+viewCredential,'X-XMind-View-Origin':viewOrigin,'Content-Type':'application/json'};
+ assert.equal((await fetch(nativeOrigin+'/v1/view-sessions',{method:'POST',headers:nativeViewHeaders,body:JSON.stringify({origin:viewOrigin})})).status,401,'A view credential cannot enroll additional sessions');
+ assert.equal((await fetch(nativeOrigin+'/a2a',{method:'POST',headers:nativeViewHeaders,body:'{}'})).status,401,'Local view credentials cannot grant A2A access');
+ assert.equal((await fetch(nativeOrigin+'/v1/health',{headers:{...nativeViewHeaders,'X-XMind-View-Origin':'http://127.0.0.1:1'}})).status,401,'Native session validation must bind the adapter origin');
+ assert.equal((await fetch(viewOrigin+'/v1/health',{headers:{Cookie:cookie+'; '+cookie,'Sec-Fetch-Site':'same-origin'}})).status,401,'Duplicate session cookies must not authenticate');
  assert.equal((await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...sessionHeaders,Cookie:cookie},body:'{}'})).status,200,'Reload can reuse the browser session without exposing the native token');
  assert.equal((await fetch(viewOrigin+'/v1/health',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,200);
  const oldPage=await readFile(join(assets,'index.html'),'utf8');await writeFile(join(assets,'index.html'),oldPage+'\n<!-- updated view bundle contract -->\n');const refreshed=await fetch(viewOrigin+'/ui/');assert.equal(refreshed.status,200);assert.match(await refreshed.text(),/updated view bundle contract/);assert.equal((await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...sessionHeaders,Cookie:cookie},body:'{}'})).status,200,'Updating UI assets must preserve the authenticated view session');
@@ -41,6 +46,9 @@ try{
  // Restart only this disposable native backend at its existing origin. Keep
  // the browser access adapter and its opaque login session alive throughout.
  const restartHeaders={Origin:viewOrigin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'},login=await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...restartHeaders,Authorization:'Bearer '+token},body:'{}'});assert.equal(login.status,200);const retainedCookie=login.headers.get('set-cookie').split(';')[0];
+ const stableViewOrigin=viewOrigin,stableViewPort=Number(new URL(viewOrigin).port);await view.close();view=null;
+ view=await createBrowserServer({backend:nativeOrigin,assetRoot:assets});viewOrigin=await view.listen(stableViewPort);assert.equal(viewOrigin,stableViewOrigin);
+ assert.equal((await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...restartHeaders,Cookie:retainedCookie},body:'{}'})).status,200,'Access adapter restart must restore its cookie from native xlang3 persistence');
  const persistedHistory=await direct.history(controller.session),restartArguments=child.spawnargs.slice(1);restartArguments[restartArguments.indexOf('--port')+1]=new URL(nativeOrigin).port;
  const stopped=new Promise(resolve=>child.once('close',resolve));child.kill();await stopped;
  child=spawn(server,restartArguments,{env,windowsHide:true});let restartError='';child.stderr.on('data',bytes=>restartError+=bytes);child.stdout.on('data',()=>{});
@@ -48,6 +56,6 @@ try{
  const restoredLogin=await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...restartHeaders,Cookie:retainedCookie},body:'{}'});assert.equal(restoredLogin.status,200,'Backend restart must preserve the running access adapter login');
  const restoredRun=await fetch(viewOrigin+'/v1/runs/'+id,{headers:{Cookie:retainedCookie,'Sec-Fetch-Site':'same-origin'}});assert.equal(restoredRun.status,200);assert.equal((await restoredRun.json()).state,'completed');
  assert.deepEqual(await direct.history(controller.session),persistedHistory,'Native restart must preserve durable history without replay');assert.equal((await direct.runs(controller.session)).length,1);
- console.log('Native backend restart at the same origin preserved the live browser adapter cookie, completed run and durable history without replay. Only disposable contract processes were restarted.');
+ console.log('Access adapter and native backend restarts at their existing origins preserved the durable browser cookie, completed run and history without replay. Only disposable contract processes were restarted.');
  assert.ok(!JSON.stringify([...posted,...restored]).includes(token));console.log('Browser view/native contract passed same-origin/auth/route boundaries, HttpOnly browser-session enrollment/reload/revocation and validated UI bundle refresh without session loss, shared-launcher native history/model catalogue without database or provider-key copies, real graph admission and file output, human pause/input, gateway disconnect without runtime cancellation and reconnect without replay. Navigation/clipboard use host fixtures; no provider or model was simulated.');
 }finally{launcher?.dispose();if(view)await view.close();if(child&&child.exitCode===null){const exited=new Promise(resolve=>child.once('exit',resolve));child.kill();await exited;}assert.equal(dirname(resolve(root)),resolve(tmpdir()));assert.ok(basename(root).startsWith('xmind-browser-contract-'));await rm(root,{recursive:true,force:true});}

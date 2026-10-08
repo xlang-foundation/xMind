@@ -16,6 +16,7 @@ std::string hex(std::span<const unsigned char> bytes){constexpr char digits[]="0
 std::string random_token(){std::array<unsigned char,32> bytes{};if(BCryptGenRandom(nullptr,bytes.data(),static_cast<ULONG>(bytes.size()),BCRYPT_USE_SYSTEM_PREFERRED_RNG)<0)throw DatabaseError("Cannot create view credential");return hex(bytes);}
 std::string binding(std::string_view authority){
     if(authority.size()<32||authority.size()>256)throw std::invalid_argument("Invalid view authority");
+    for(unsigned char byte:authority)if(byte<33||byte>126)throw std::invalid_argument("Invalid view authority bytes");
     BCRYPT_ALG_HANDLE algorithm=nullptr;std::array<unsigned char,32> hash{};
     if(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)<0)throw DatabaseError("Cannot bind view authority");
     const auto status=BCryptHash(algorithm,nullptr,0,reinterpret_cast<PUCHAR>(const_cast<char*>(authority.data())),static_cast<ULONG>(authority.size()),hash.data(),static_cast<ULONG>(hash.size()));BCryptCloseAlgorithmProvider(algorithm,0);
@@ -48,7 +49,8 @@ ViewSession ViewSessions::issue(const std::string& origin){
         if(keep)++active;else store_.delete_credential(scope,metadata.id,metadata.revision).get();
     }
     if(active>=32)throw Conflict("Too many active view sessions");
-    const auto id=random_token(),token=random_token();const auto expires=now()+std::chrono::duration_cast<std::chrono::milliseconds>(lifetime_).count();
+    const auto id=random_token();auto token=random_token();struct Wipe {std::string& text;~Wipe(){SecureZeroMemory(text.data(),text.size());}} wipe{token};
+    const auto expires=now()+std::chrono::duration_cast<std::chrono::milliseconds>(lifetime_).count();
     store_.put_credential(scope,id,binding_,"Browser access session",SecretBytes(std::span(reinterpret_cast<const std::uint8_t*>(token.data()),token.size())),0).get();
     store_.put_information(scope,id,Json{{"origin",origin},{"binding",binding_},{"expires_unix_ms",expires}}.dump()).get();
     return {id+"."+token,expires};

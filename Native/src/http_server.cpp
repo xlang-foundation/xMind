@@ -16,6 +16,10 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
+#include <regex>
+#if defined(_WIN32)
+#include "agentflow/view_sessions.hpp"
+#endif
 
 namespace agentflow {
 void validate_local_auth_token(std::string_view token) {
@@ -137,6 +141,9 @@ template<class Handler> auto guarded(Handler handler) {
 }
 }
 struct HttpServer::Impl {
+#if defined(_WIN32)
+    std::unique_ptr<ViewSessions> view_sessions;
+#endif
     PersistenceService& persistence;
     RunExecutor* executor;
     EditRecoveryReader* recovery;
@@ -156,6 +163,9 @@ struct HttpServer::Impl {
     int port=-1;
     Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs):persistence(store),executor(execution),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
         validate_local_auth_token(token);
+#if defined(_WIN32)
+        view_sessions=std::make_unique<ViewSessions>(store,token);
+#endif
         server.new_task_queue=[] {return new httplib::ThreadPool(4,4,32);};
         server.set_payload_max_length(1024*1024);
         server.set_read_timeout(5,0);server.set_write_timeout(5,0);server.set_keep_alive_max_count(10);
@@ -170,7 +180,17 @@ struct HttpServer::Impl {
             if(request.has_header("Origin")) {
                 reply(response,{{"detail","Browser origins require a configured view adapter"}},403);return httplib::Server::HandlerResponse::Handled;
             }
-            if(request.get_header_value_count("Authorization")!=1 || !equal_token(request.get_header_value("Authorization"),authorization)) {
+            bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
+#if defined(_WIN32)
+            const auto supplied=request.get_header_value("Authorization");
+            static const std::regex view_route(R"(^/v1/(health|models|graphs|provider/(configuration|models)|sessions(/[A-Za-z0-9_-]+/(history|runs))?|runs(/[A-Za-z0-9_-]+(/(events|cancel|operations))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && std::regex_match(request.path,view_route) && (request.method=="GET"||request.method=="POST")){
+                try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
+                catch(const std::invalid_argument&){}
+                catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
+            }
+#endif
+            if(!authenticated) {
                 response.set_header("WWW-Authenticate","Bearer realm=\"xMind\"");
                 reply(response,{{"detail","Authentication required"}},401);return httplib::Server::HandlerResponse::Handled;
             }
@@ -180,6 +200,22 @@ struct HttpServer::Impl {
             if(response.body.empty()) reply(response,{{"detail","HTTP request rejected"}},response.status);
         });
         server.set_exception_handler([](const Request&,Response& response,std::exception_ptr) {reply(response,{{"detail","Backend operation failed"}},500);});
+#if defined(_WIN32)
+        server.Post("/v1/view-sessions",guarded([this](const Request& request,Response& response){
+            const auto input=body(request,{"origin"});const auto session=view_sessions->issue(string_field(input,"origin",256));
+            reply(response,{{"credential",session.credential},{"expires_unix_ms",session.expires_unix_ms}});
+        }));
+        server.Post("/v1/view-sessions/current",guarded([this](const Request& request,Response& response){
+            body(request,{});const auto supplied=request.get_header_value("Authorization");
+            if(!supplied.starts_with("View ")){reply(response,{{"detail","View credential required"}},401);return;}
+            reply(response,{{"connected",true}});
+        }));
+        server.Post("/v1/view-sessions/revoke",guarded([this](const Request& request,Response& response){
+            body(request,{});const auto supplied=request.get_header_value("Authorization");
+            if(!supplied.starts_with("View ")){reply(response,{{"detail","View credential required"}},401);return;}
+            view_sessions->revoke(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));reply(response,{{"connected",false}});
+        }));
+#endif
         server.Post("/a2a",[this](const Request& request,Response& response){
             if(request.get_header_value("Content-Type")!="application/json"&&request.get_header_value("Content-Type")!="application/a2a+json"){reply(response,{{"detail","Use application/json"}},415);return;}
             if(!request.params.empty()){reply(response,{{"detail","A2A does not accept query parameters"}},400);return;}
