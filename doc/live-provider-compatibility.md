@@ -68,3 +68,20 @@ records the repository content hash, equality checks and final usage without
 private keys, session IDs or provider continuation items. This proves one real
 read-tool cycle and its Responses continuation, not live approved edits,
 process execution, MCP, A2A or full coding acceptance.
+
+The same verified runtime is now configured with native approved file-edit
+tools. A dedicated ignored validation file was initialized with a public marker;
+the live `gpt-5.6-sol` agent read it and proposed one literal replacement. The
+authorized validation controller checked the exact path, before/after bytes,
+content hashes, occurrence count, owning run and expiry before submitting the
+native CLI's `/allow` command. The operation recorded `succeeded`, the tool
+returned its actual outcome, and an independent disk read matched the expected
+final bytes. The provider continued with `XMIND_EDIT_COMPLETED`; the shared
+browser displayed all three responses' usage and the successful operation.
+[Approved-edit evidence](evidence/live-responses-approved-edit.json) records
+sanitized checks and final usage. This was a real model/native-file operation,
+not synthetic inference or a manually written final result. Approval was sent
+by the authorized validation controller, not claimed as a human button click.
+Existing conversations and provider configuration survived the configuration
+restart. Other previews were not restarted. Process profiles, MCP/A2A live
+acceptance and complete coding parity remain unfinished.

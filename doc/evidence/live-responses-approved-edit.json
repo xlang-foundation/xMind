@@ -1,0 +1,36 @@
+{
+  "revision": "4fc1148239c66db59634039defa68b7b61e8ef01",
+  "model": "gpt-5.6-sol",
+  "wire": "responses",
+  "scope": "One real model-proposed edit of a dedicated ignored validation file, approved by the authorized validation controller through native CLI; not general coding parity",
+  "terminal": "run.completed",
+  "exitStatus": 0,
+  "proposalReviewed": true,
+  "operationState": "succeeded",
+  "toolCompleted": true,
+  "fileBytesMatch": true,
+  "beforeSha256": "4e117877be2f53c25ba3566455d0a29a4d36acdf779523a26f833c606bc9a46a",
+  "afterSha256": "52cc2feff1d9593e2f577fd94284d6095f6f0377353c2a743364b845521003b0",
+  "responseMatches": true,
+  "usage": {
+    "completion_tokens": 9,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "input_tokens": 1833,
+    "input_tokens_details": {
+      "cache_write_tokens": 1830,
+      "cached_tokens": 0
+    },
+    "output_tokens": 9,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 1833,
+    "prompt_tokens_details": {
+      "cache_write_tokens": 1830,
+      "cached_tokens": 0
+    },
+    "total_tokens": 1842
+  }
+}
