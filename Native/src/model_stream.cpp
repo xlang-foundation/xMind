@@ -2,8 +2,47 @@
 #include "nlohmann/json.hpp"
 #include <map>
 #include <set>
+#include <initializer_list>
+#include <utility>
 
 namespace agentflow {
+std::string_view model_protocol_diagnostic(const ModelProtocolError& error) {
+    const std::string_view message=error.what();
+    for(const auto& [text,code]:std::initializer_list<std::pair<std::string_view,std::string_view>>{
+        {"Responses final function differs from stream","responses_function_final_mismatch"},
+        {"Responses final arguments differ from deltas","responses_arguments_mismatch"},
+        {"Responses terminal output differs from completed items","responses_terminal_mismatch"},
+        {"Unsupported Responses event","responses_event_unsupported"},
+        {"Unsupported Responses output item","responses_item_unsupported"},
+        {"Responses reasoning lacks stateless continuation","responses_reasoning_continuation_missing"},
+        {"Unsupported or incomplete Responses reasoning","responses_reasoning_incomplete"},
+        {"Responses item did not complete","responses_item_incomplete"},
+        {"Responses turn did not complete","responses_turn_incomplete"},
+        {"Responses event has no active item","responses_item_lifecycle_invalid"},
+        {"Invalid Responses function lifecycle","responses_function_lifecycle_invalid"},
+        {"Responses function starts with unexpected arguments","responses_function_start_invalid"},
+        {"Invalid provider JSON event","provider_json_invalid"},
+        {"Invalid Responses JSON event","responses_json_invalid"},
+        {"Incomplete Responses stream","responses_stream_incomplete"},
+        {"Provider response failed or was incomplete","responses_provider_incomplete"},
+        {"Invalid Responses event sequence","responses_sequence_invalid"},
+        {"Responses SSE event type differs from payload","responses_event_type_mismatch"},
+        {"Responses item identity changed","responses_item_identity_mismatch"},
+        {"Responses response identity changed","responses_identity_mismatch"},
+        {"Responses model identity changed","responses_model_identity_mismatch"},
+        {"Responses final item identity changed","responses_final_identity_mismatch"},
+        {"Responses final message differs from stream","responses_message_mismatch"},
+        {"Responses final text differs from stream","responses_text_mismatch"},
+        {"Responses summary differs from stream","responses_summary_mismatch"},
+        {"Invalid Responses usage","responses_usage_invalid"},
+        {"Invalid Responses token count","responses_usage_invalid"},
+        {"Invalid Responses token details","responses_usage_invalid"},
+        {"Responses stream exceeds limits","responses_limit_exceeded"},
+        {"Responses continuation exceeds limits","responses_limit_exceeded"},
+        {"Incomplete or invalid model stream","chat_stream_incomplete"}})
+        if(message==text)return code;
+    return {};
+}
 namespace {
 using Json=nlohmann::json;
 constexpr std::size_t max_line=1024*1024,max_event=4*1024*1024,max_stream=64*1024*1024,max_value=4*1024*1024;

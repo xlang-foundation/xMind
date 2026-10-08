@@ -1,0 +1,23 @@
+{
+  "revision": "626363026e49d97599be102d2d30f6c10333ca87",
+  "model": "gpt-5.6-sol",
+  "wire": "responses",
+  "scope": "Attempted live Responses read through the official external filesystem MCP peer. Native connection and discovery passed; model protocol validation failed before approval or tool dispatch. No completed MCP read or continuation is claimed.",
+  "peerPackage": "@modelcontextprotocol/server-filesystem",
+  "peerVersion": "2026.8.31",
+  "terminal": "run.failed",
+  "exitStatus": 1,
+  "connected": true,
+  "discovered": true,
+  "protocolVersion": "2025-11-25",
+  "proposalReviewed": false,
+  "operationCount": 0,
+  "toolArgumentDeltaCount": 17,
+  "toolArgumentBytes": 52,
+  "toolArgumentsValidJson": true,
+  "toolPathMatchesRequestedPublicDocument": true,
+  "returnedContentMatchesRepository": false,
+  "responseMatchesHeading": false,
+  "contentSha256": "37121c2fc1847b145f4c428908e7d9afdbffb0729471d05fbb5d325c59b647c4",
+  "failureReason": "model_protocol_error"
+}

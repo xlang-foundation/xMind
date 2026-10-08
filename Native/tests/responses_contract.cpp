@@ -67,5 +67,10 @@ int main(){try{
     const auto reasoningBody=Json::parse(serialize_responses_request(config,request));require(reasoningBody["reasoning"]["effort"]=="high"&&!reasoningBody.contains("reasoning_effort"));config.reasoning_effort.reset();
     rejected([&]{serialize_chat_request(config,request);});auto changed=request;changed.messages[1].content="changed";rejected([&]{serialize_responses_request(config,changed);});changed=request;changed.messages.pop_back();rejected([&]{serialize_responses_request(config,changed);});
     ModelRequest authored;authored.messages={{MessageRole::user,"Question"},{MessageRole::assistant,"Previous plain text"},{MessageRole::user,"Next"}};const auto authored_body=Json::parse(serialize_responses_request(config,authored));require(authored_body["input"][1]["role"]=="assistant"&&authored_body["input"][1]["content"][0]["type"]=="input_text");authored.messages[1].refusal="Refusal without provider items";rejected([&]{serialize_responses_request(config,authored);});
-    std::cout<<"Native Responses request and SSE contract passed byte fragmentation, output identity/lifecycle validation, terminal consistency, usage normalization, stateless reasoning/tool continuation and malformed/incomplete rejection. All model output is synthetic.\n";
+    require(model_protocol_diagnostic(ModelProtocolError("Responses final arguments differ from deltas"))=="responses_arguments_mismatch");
+    require(model_protocol_diagnostic(ModelProtocolError("Incomplete Responses stream"))=="responses_stream_incomplete");
+    require(model_protocol_diagnostic(ModelProtocolError("Provider response failed or was incomplete"))=="responses_provider_incomplete");
+    require(model_protocol_diagnostic(ModelProtocolError("Invalid Responses JSON event"))=="responses_json_invalid");
+    require(model_protocol_diagnostic(ModelProtocolError("private synthetic provider payload"))=="");
+    std::cout<<"Native Responses request and SSE contract passed byte fragmentation, output identity/lifecycle validation, terminal consistency, usage normalization, stateless reasoning/tool continuation, safe invariant diagnostics and malformed/incomplete rejection. All model output is synthetic.\n";
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

@@ -1,0 +1,12 @@
+{
+  "xmind": "4203b84678b51b2ae7c6ee47fccfa14b684680ae",
+  "workflowRun": 37707042113,
+  "job": 113083858859,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37707042113",
+  "conclusion": "success",
+  "nativeContractsPassed": 52,
+  "extensionContractsPassed": 72,
+  "browserTestsPassed": 13,
+  "evidenceArtifact": 11520816860,
+  "scope": "Exact completed successful job log and evidence artifact inspected. Includes native session rename conflict handling and CLI conversation navigation, shared capability-gated rename dialog, and browser/native restart contract. This is hosted contract evidence, not a live preview rollout or MCP model/tool acceptance."
+}

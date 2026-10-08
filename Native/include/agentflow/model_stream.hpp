@@ -8,6 +8,8 @@
 
 namespace agentflow {
 struct ModelProtocolError : std::runtime_error {using std::runtime_error::runtime_error;};
+// Only known native invariant codes; never reflect provider payloads/messages.
+std::string_view model_protocol_diagnostic(const ModelProtocolError& error);
 struct ModelEvent {std::string kind,json;};
 struct ModelToolCall {std::string id,name,arguments_json;};
 struct ModelCompletion {
