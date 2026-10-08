@@ -37,6 +37,8 @@ the superseded direct-SQLite implementation was removed. See
 
 ## Current source and verification
 
+The initial `3fc4204` planning source also passed its [exact hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37808089507): **77 native / 119 extension / 26 browser** tests, all 16 successful steps, model-free integration and 18 verified VSIX assets. Downloaded archives and original logs match their recorded digests. Installation, rendered/live planning and editor acceptance remain separate. [Hosted source and scope evidence](evidence/native-dynamic-plan-hosted-provenance.json).
+
 The initial schema-v11 dependency-plan source passed all 77 native contracts,
 119 extension tests and 26 browser tests. Ordinary Agent mode can select and
 revise agent/human dependencies, including approval-controlled coding children.

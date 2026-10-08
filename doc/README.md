@@ -18,7 +18,7 @@ WebRTC and Electron IDE.
 | Source layout | [Cleanup](cleanup.md) |
 
 The [native dependency-plan increment](native-dynamic-plan.md) documents current
-source work, its passing local 77/119/26 gates and remaining acceptance boundaries.
+source work, its passing local and exact hosted 77/119/26 gates, and remaining acceptance boundaries.
 
 Each verification record identifies its source revision and scope. Historical
 checkpoints and `evidence/` preserve actual results; they do not establish that

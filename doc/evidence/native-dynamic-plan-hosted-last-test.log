@@ -1,0 +1,1266 @@
+Start testing: Oct 08 16:33 Coordinated Universal Time
+----------------------------------------------------------
+1/77 Testing: native_json_schema_contract
+1/77 Test: native_json_schema_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_json_schema_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_json_schema_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native JSON Schema 2020-12 adapter passed actual validator/metaschema fixtures: refs, dynamic refs, prefixItems, dependencies, conditional and unevaluated properties, invalid schemas, unchanged arguments and no external fetch/default insertion. Not a complete upstream conformance or adversarial resource-containment pass
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"native_json_schema_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_json_schema_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/77 Testing: native_mcp_wire_contract
+2/77 Test: native_mcp_wire_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_wire_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_mcp_wire_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native MCP wire codec passed bounded fragmented JSON-RPC fixtures; no subprocess, remote tool or complete MCP support claimed
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_wire_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_mcp_wire_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/77 Testing: model_stream_protocol_contract
+3/77 Test: model_stream_protocol_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_model_stream_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"model_stream_protocol_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Synthetic model-stream protocol contracts passed; no live provider was called
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"model_stream_protocol_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"model_stream_protocol_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/77 Testing: model_request_contract
+4/77 Test: model_request_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_model_request_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"model_request_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native model request contracts passed; no live provider was called
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"model_request_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"model_request_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/77 Testing: native_gemini_request_contract
+5/77 Test: native_gemini_request_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_request_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_gemini_request_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Gemini body component passed synthetic text/system/schema/function correlation, exact numeric/signature replay and malformed/unsupported request rejection. No provider transport, stream or live model acceptance tested.
+<end of output>
+Test time =   0.16 sec
+----------------------------------------------------------
+Test Passed.
+"native_gemini_request_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_gemini_request_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/77 Testing: native_gemini_stream_contract
+6/77 Test: native_gemini_stream_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_stream_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_gemini_stream_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Gemini SSE component passed synthetic fragmented Unicode, thought/signature history, precise optional function identity/arguments, actual cumulative usage, EOF/truncation and malformed/unsupported lifecycle checks. No transport, agent integration or live inference tested.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"native_gemini_stream_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_gemini_stream_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/77 Testing: native_gemini_history_contract
+7/77 Test: native_gemini_history_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_history_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_gemini_history_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Gemini history bridge passed synthetic precise signed parts, AgentRunner-shaped parse/dump replay, native/provider identity separation, out-of-order anonymous results, supplied usage, empty STOP, truncation and malformed/corrupt/foreign history checks. No agent execution, live model inference or enrollment tested.
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"native_gemini_history_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_gemini_history_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/77 Testing: native_anthropic_request_contract
+8/77 Test: native_anthropic_request_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_anthropic_request_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_anthropic_request_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Claude request component passed explicit limits/capabilities, ordered text and parallel tool identity, schema preservation, duplicate-key rejection and incompatible-history refusal. No transport, provider enrollment or live inference was executed.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"native_anthropic_request_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_anthropic_request_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/77 Testing: native_anthropic_stream_contract
+9/77 Test: native_anthropic_stream_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_anthropic_stream_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_anthropic_stream_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Claude SSE component passed fragmented Unicode text and ordered text/tool/signed-thinking/redacted receipts, exact initial/delta tool JSON precision and escaped keys, hidden-content exclusion, supplied raw zero/cumulative counters, signature ordering/bounds, truncated-call/receipt exclusion and malformed/duplicate/incomplete/late-event rejection without completion acknowledgement. Wire fixtures are synthetic; no network, cryptographic signature verification, enrollment or live inference occurred.
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Passed.
+"native_anthropic_stream_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_anthropic_stream_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/77 Testing: native_anthropic_history_contract
+10/77 Test: native_anthropic_history_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_anthropic_history_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_anthropic_history_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Claude history component passed ordered signed/redacted/text/tool receipts, precise escaped numeric input through agent-shaped JSON round trips, native DTO/identity/role/foreign mismatch rejection, legacy compatibility and bounded raw wire serialization. No network, SQLite, thinking control, signature cryptography, model availability or live inference claimed.
+<end of output>
+Test time =   0.41 sec
+----------------------------------------------------------
+Test Passed.
+"native_anthropic_history_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_anthropic_history_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+11/77 Testing: native_responses_protocol_contract
+11/77 Test: native_responses_protocol_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_responses_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_responses_protocol_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Responses request and SSE contract passed byte fragmentation, output identity/lifecycle validation, reasoning-only nonempty encrypted-content variation with exact bounded done-source continuation, strict other-field rejection, bounded value-free first-mismatch structural diagnostics, usage normalization, stateless reasoning/tool continuation, safe invariant diagnostics and malformed/incomplete rejection. All model output is synthetic.
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_protocol_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_responses_protocol_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+12/77 Testing: native_dynamic_plan_contract
+12/77 Test: native_dynamic_plan_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_dynamic_plan_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_dynamic_plan_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native pure dynamic-plan contracts passed strict UTF-8/duplicate/authority schemas, dependency joins, success/observed failure semantics, immutable same-plan replanning, stale state and protected-work rejection, exact data-string observations, private-field exclusion, escaped byte limits and final-human report readiness. Snapshot values are synthetic; runtime/SQLite/execution acceptance is separate.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"native_dynamic_plan_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_dynamic_plan_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/77 Testing: native_agent_authority_contract
+13/77 Test: native_agent_authority_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_agent_authority_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_agent_authority_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native private agent authority bindings passed (synthetic settings and credential metadata; no key resolution, peer or provider execution).
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_authority_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_agent_authority_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+14/77 Testing: native_dynamic_plan_repository_contract
+14/77 Test: native_dynamic_plan_repository_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_dynamic_plan_repository_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_dynamic_plan_repository_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Dynamic plan repository contract passed: real xlang3 SQLite signed-call ownership, shared budget, exact human pause/recovery/continuation, revision, native effect mapping/registry binding, SQL-fault rollback and migration; synthetic repository DTOs only
+<end of output>
+Test time =   8.15 sec
+----------------------------------------------------------
+Test Passed.
+"native_dynamic_plan_repository_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_dynamic_plan_repository_contract" time elapsed: 00:00:08
+----------------------------------------------------------
+
+15/77 Testing: native_planning_http_contract
+15/77 Test: native_planning_http_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_planning_http_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_planning_http_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Actual native planning HTTP and xlang3 SQLite ownership/projection/CAS passed; synthetic DTO/controller only, no provider or agent execution
+<end of output>
+Test time =   1.17 sec
+----------------------------------------------------------
+Test Passed.
+"native_planning_http_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_planning_http_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+16/77 Testing: native_child_executor_contract
+16/77 Test: native_child_executor_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_native_child_executor_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_child_executor_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native child pool contract passed: staged close/fault, synchronous stop callback re-entry, concurrent fail/dispatch ownership, stopped/deadline retirement without a leaf slot, actual SQLite cancellation/recovery. No provider was used.
+<end of output>
+Test time =   0.59 sec
+----------------------------------------------------------
+Test Passed.
+"native_child_executor_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_child_executor_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+17/77 Testing: native_dynamic_plan_engine_contract
+17/77 Test: native_dynamic_plan_engine_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/dynamic_plan_engine_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_dynamic_plan_engine_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_dynamic_plan_engine_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native dynamic engine contract passed: actual dependency children/failure, same-plan revision, closed-pause reopen, same-owner human wake, child edit approval/effect, dependent read, independent signed histories/usage, human-only duplicate wake, paused cancel and native expiry. Provider replies/key are synthetic.
+<end of output>
+Test time =   5.26 sec
+----------------------------------------------------------
+Test Passed.
+"native_dynamic_plan_engine_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_dynamic_plan_engine_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+18/77 Testing: native_secret_protection_contract
+18/77 Test: native_secret_protection_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_secret_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_secret_protection_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Windows native secret-protection contracts passed
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"native_secret_protection_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_secret_protection_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+19/77 Testing: native_a2a_task_control_http_contract
+19/77 Test: native_a2a_task_control_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/a2a_task_control_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_a2a_task_control_http_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native A2A task controls passed authenticated JSON-RPC boundaries, exact IDs, native graph artifacts isolated by run, real paused-root cancellation, repeated finish/cancel scheduling positive task-local history and invalid/unsupported-request rejection. Full A2A compliance is not established.
+<end of output>
+Test time =   2.28 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_task_control_http_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_a2a_task_control_http_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+20/77 Testing: native_a2a_message_http_contract
+20/77 Test: native_a2a_message_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/a2a_message_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_a2a_message_http_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native A2A message contract passed real admission, concurrent durable retries, default model transport, context reuse, isolated history, rejected requests and restart reuse. Provider replies are synthetic; full A2A compliance is not established.
+<end of output>
+Test time =   0.42 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_message_http_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_a2a_message_http_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+21/77 Testing: native_a2a_stream_http_contract
+21/77 Test: native_a2a_stream_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/a2a_stream_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_a2a_stream_http_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native A2A streaming passed actual persisted partial output, Task-first JSON-RPC SSE, reconnect/backfill without reexecution, bounded stream capacity and control fairness, disconnect isolation, terminal/failure/cancel/input-required closure, authenticated discovery, real file-tool turn replacement, multi-page event draining, refusal preservation and restart. Official SDK 1.3.0 passed explicit v0.3 discovery/stream/get interoperability. Provider replies are synthetic; full A2A compliance and native v1 wire support remain unproven.
+<end of output>
+Test time =   4.22 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_stream_http_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_a2a_stream_http_contract" time elapsed: 00:00:04
+----------------------------------------------------------
+
+22/77 Testing: native_a2a_v1_http_contract
+22/77 Test: native_a2a_v1_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/a2a_v1_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_a2a_v1_http_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native A2A 1.0 passed official SDK discovery/send/get/list/cancel/stream/subscribe without compatibility translation, default and legacy blocking, version/shape rejection, control capacity, disconnect isolation, actual status times and scoped cursor pagination, cross-version durable retries, multipart/metadata history fidelity and restart. Provider replies are synthetic. Continuation, files/push/delegation/team scope and full compliance remain incomplete.
+<end of output>
+Test time =   1.33 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_v1_http_contract" end time: Oct 08 16:33 Coordinated Universal Time
+"native_a2a_v1_http_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+23/77 Testing: native_responses_agent_http_contract
+23/77 Test: native_responses_agent_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/responses_agent_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_responses_agent_http_contract" start time: Oct 08 16:33 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, encrypted history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =  16.40 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 08 16:34 Coordinated Universal Time
+"native_responses_agent_http_contract" time elapsed: 00:00:16
+----------------------------------------------------------
+
+24/77 Testing: native_graph_service_http_contract
+24/77 Test: native_graph_service_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/graph_service_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_graph_service_http_contract" start time: Oct 08 16:34 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native graph service HTTP/CLI passed actual catalog admission, actor/stale rejection, paused capacity/provider ownership, restart, human resume, real dependency reads, repeated scheduling, root cancellation, separately approved creation, graph-watch child ownership/cursor reconnect/terminal drain/disconnect without cancellation, and configured agent transport with synthetic provider data.
+<end of output>
+Test time =   8.08 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_service_http_contract" end time: Oct 08 16:34 Coordinated Universal Time
+"native_graph_service_http_contract" time elapsed: 00:00:08
+----------------------------------------------------------
+
+25/77 Testing: native_provider_cli_contract
+25/77 Test: native_provider_cli_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/provider_cli_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_provider_cli_contract" start time: Oct 08 16:34 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native provider CLI passed authenticated compatibility/profile enrollment and selection, private environment input, actual encrypted DB storage, model restore and conversation navigation with preserved history. Key/model/history are labelled fixtures; no inference or live provider acceptance claimed.
+<end of output>
+Test time =   1.32 sec
+----------------------------------------------------------
+Test Passed.
+"native_provider_cli_contract" end time: Oct 08 16:34 Coordinated Universal Time
+"native_provider_cli_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+26/77 Testing: native_provider_setup_contract
+26/77 Test: native_provider_setup_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/provider_setup_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_provider_setup_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_provider_setup_contract" start time: Oct 08 16:34 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+fixture-release
+fixture-cli-port:59856
+Provider setup passed actual native discovery/transport, encrypted xlang3 storage, saved-key reuse, native wire routing/rebinding/reopen, unapproved endpoint rejection, legacy selection repair, stale/active configuration rejection, actual SQL write fault preservation and persisted reopen. Provider response/key are synthetic fixture data.
+<end of output>
+Test time =   1.19 sec
+----------------------------------------------------------
+Test Passed.
+"native_provider_setup_contract" end time: Oct 08 16:34 Coordinated Universal Time
+"native_provider_setup_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+27/77 Testing: native_graph_runner_contract
+27/77 Test: native_graph_runner_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/graph_runner_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_graph_runner_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_graph_runner_contract" start time: Oct 08 16:34 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native graph runner/service passed actual workspace reads, concurrent agent transport, durable human pause/resume, typed references, conditional skip, observed joins, failure/cancellation, separately approved creation, approval cancellation, owner handoff, queued shutdown and actual effect journal fault/recovery without replay. Provider replies are synthetic fixture data.
+<end of output>
+Test time =   7.51 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_runner_contract" end time: Oct 08 16:34 Coordinated Universal Time
+"native_graph_runner_contract" time elapsed: 00:00:07
+----------------------------------------------------------
+
+28/77 Testing: native_graph_mcp_contract
+28/77 Test: native_graph_mcp_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/graph_mcp_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_graph_mcp_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_graph_mcp_contract" start time: Oct 08 16:34 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native graph MCP contract passed actual owned peer file writes, real GraphRunner/GraphService and embedded-xlang3 SQLite: exact enrollment/approval, raw literal precision, typed human references and pause/reopen, dependent native read, denied/cancelled/invalid/drift/stale paths, serialized root claims, lost-reply uncertainty, acknowledged output bounds, journal fail-stop and quarantine without replay. Peer descriptors/replies are synthetic; no live model, UI or independent peer acknowledgement verification claimed.
+<end of output>
+Test time =  16.31 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_mcp_contract" end time: Oct 08 16:34 Coordinated Universal Time
+"native_graph_mcp_contract" time elapsed: 00:00:16
+----------------------------------------------------------
+
+29/77 Testing: native_graph_mcp_http_contract
+29/77 Test: native_graph_mcp_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/graph_mcp_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_graph_mcp_http_contract" start time: Oct 08 16:34 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native graph MCP HTTP/CLI passed offline alias discovery, no-model graph admission, paused SQLite reopen, exact decimal proposal/wire, controller-approved actual external write/dependent read, view history/events/cursor replay, denial/cancellation without tool dispatch, and stale connector inspection/input rejection/cancellation. MCP protocol replies are synthetic; no live model or rendered IDE acceptance.
+<end of output>
+Test time =   3.71 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_mcp_http_contract" end time: Oct 08 16:34 Coordinated Universal Time
+"native_graph_mcp_http_contract" time elapsed: 00:00:03
+----------------------------------------------------------
+
+30/77 Testing: native_delegation_contract
+30/77 Test: native_delegation_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/delegation_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_native_delegation_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_delegation_contract" start time: Oct 08 16:34 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native delegation contract passed real signed parent/leaf provider transport, independent filesystem reads/history/metrics, one controller-approved parent edit, observed failure follow-up, cancellation/draining, atomic admission rollback, coupled conversation/settlement fail-stop, encoded output bounds, shared call allowances, exact deduplication/ownership and xlang3 SQLite recovery without replay. Provider replies/signatures/key and direct repository lifecycle inputs are synthetic; no live provider or rendered UI acceptance claimed.
+<end of output>
+Test time =   8.56 sec
+----------------------------------------------------------
+Test Passed.
+"native_delegation_contract" end time: Oct 08 16:34 Coordinated Universal Time
+"native_delegation_contract" time elapsed: 00:00:08
+----------------------------------------------------------
+
+31/77 Testing: native_delegation_http_contract
+31/77 Test: native_delegation_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/delegation_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_delegation_http_contract" start time: Oct 08 16:34 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native delegation HTTP/CLI/shared-browser contract passed actual parent/leaf tool loop, independent real file reads, observed join, controller-approved native create, read-only child authority, private metrics/history, scoped native/view child reads, tree cursor replay and model-free reopen without child replay. Provider replies are synthetic; no live provider or rendered IDE claim.
+<end of output>
+Test time =   1.46 sec
+----------------------------------------------------------
+Test Passed.
+"native_delegation_http_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_delegation_http_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+32/77 Testing: native_graph_checkpoint_contract
+32/77 Test: native_graph_checkpoint_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/graph_checkpoint_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_graph_checkpoint_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_graph_checkpoint_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native durable graph checkpoint passed actual SQLite CAS, dependency admission, settlement/input event rollback, multiple human waits, partial-input restart/resume and conditional skips. Completion/input values are synthetic; public graph execution remains pending.
+<end of output>
+Test time =   0.98 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_checkpoint_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_graph_checkpoint_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+33/77 Testing: native_graph_children_contract
+33/77 Test: native_graph_children_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/graph_children_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_graph_children_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_graph_children_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native graph children passed actual concurrent agent transport/tool reads, isolated conversations, atomic admission rollback, root boundaries, identified cursor/reopen and owner recovery. Inference and interrupted ownership fixture are synthetic; no public graph service claimed.
+<end of output>
+Test time =   0.60 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_children_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_graph_children_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+34/77 Testing: native_graph_contract
+34/77 Test: native_graph_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/graph_contract_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_graph_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_graph_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native graph contracts passed planning, joins, conditions, references, human checkpoint restore, uncertain non-replay and actual xlang3/SQLite configuration revisions/fault/reopen. Coordinator outputs are synthetic; no agent/tool graph execution claimed.
+Actual native graph catalog admin import and server ownership passed; execution_available remains false
+<end of output>
+Test time =   0.78 sec
+----------------------------------------------------------
+Test Passed.
+"native_graph_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_graph_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+35/77 Testing: native_instruction_configuration_contract
+35/77 Test: native_instruction_configuration_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/instruction_configuration_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_instruction_configuration_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_instruction_configuration_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native instruction configuration passed actual embedded-xlang3 Unicode persistence, backend revisions, malformed/spoofed/oversized imports, SQLite update failure preservation, empty supplement, reopen and corrupt/exhausted revision rejection. Model delivery is a separate integration contract.
+<end of output>
+Test time =   0.43 sec
+----------------------------------------------------------
+Test Passed.
+"native_instruction_configuration_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_instruction_configuration_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+36/77 Testing: native_process_configuration_contract
+36/77 Test: native_process_configuration_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_process_configuration_contract.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_schema_worker.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_process_configuration_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native process configuration passed actual executable binding/hash changes, embedded-xlang3 storage/reopen, backend revisions, rejected replacement preservation, spoof/plain environment/credential/duplicate rejection and permanent profile retirement. No child/model/UI activation claimed.
+<end of output>
+Test time =   0.43 sec
+----------------------------------------------------------
+Test Passed.
+"native_process_configuration_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_process_configuration_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+37/77 Testing: native_process_executor_contract
+37/77 Test: native_process_executor_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/process_executor_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_process_executor_contract.exe" "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/process_peer.mjs" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_process_executor_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native process executor passed actual approved child effects, deny/cancel/expiry, exact profiles/arguments/workdir, stale directory, explicit binary output/nonzero exit, duplicate rejection, real result-storage fault, uncertain restart and cross-workspace profile quarantine, timeout and post-effect cancellation. Model/server/editor integration remains separate.
+[process-contract] phase=workspace-setup elapsed_ms=0
+[process-contract] phase=repository-open elapsed_ms=0
+[process-contract] phase=request-validation elapsed_ms=179
+[process-contract] phase=approval-denial elapsed_ms=179
+[process-contract] phase=approval-cancellation elapsed_ms=287
+[process-contract] phase=approval-expiry elapsed_ms=388
+[process-contract] phase=stale-directory elapsed_ms=1424
+[process-contract] phase=approved-dispatch elapsed_ms=1606
+[process-contract] phase=binary-output elapsed_ms=1903
+[process-contract] phase=streamed-output elapsed_ms=2246
+[process-contract] phase=output-flood elapsed_ms=2669
+[process-contract] phase=changed-executable elapsed_ms=2987
+[process-contract] phase=result-journal-fault elapsed_ms=3252
+[process-contract] phase=result-fault-close elapsed_ms=3541
+[process-contract] phase=restart-recovery elapsed_ms=3567
+[process-contract] phase=cross-workspace-quarantine elapsed_ms=3611
+[process-contract] phase=recovery-close elapsed_ms=3815
+[process-contract] phase=output-journal-fault elapsed_ms=3934
+[process-contract] phase=output-fault-close elapsed_ms=5159
+[process-contract] phase=timeout elapsed_ms=5318
+[process-contract] phase=interruption-close elapsed_ms=7388
+[process-contract] phase=cancel elapsed_ms=7405
+[process-contract] phase=interruption-close elapsed_ms=7835
+[process-contract] phase=complete elapsed_ms=7852
+<end of output>
+Test time =   7.94 sec
+----------------------------------------------------------
+Test Passed.
+"native_process_executor_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_process_executor_contract" time elapsed: 00:00:07
+----------------------------------------------------------
+
+38/77 Testing: native_agent_process_http_contract
+38/77 Test: native_agent_process_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/agent_process_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_agent_process_http_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native process admin/server/model/CLI contract passed actual persisted registry, owner lease, exact approved process/file effects, denial/cancelled approval, changed-executable rejection, real tool-result continuation, metadata privacy and model-free restart. Inference is synthetic; no live-provider/editor/process parity completion claimed.
+<end of output>
+Test time =   6.39 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_process_http_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_agent_process_http_contract" time elapsed: 00:00:06
+----------------------------------------------------------
+
+39/77 Testing: native_process_adapter_contract
+39/77 Test: native_process_adapter_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/process_contract_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_process_contract.exe" "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/process_peer.mjs"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_process_adapter_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native foreground process adapter passed actual Windows child effects, literal arguments, separate/raw/bounded output, environment isolation, input EOF, stale directory/junction rejection, pre-dispatch cancellation, timeout/cancelled descendant trees and output-sink uncertainty. Approval/journal/model integration is not covered by this component.
+<end of output>
+Test time =   4.13 sec
+----------------------------------------------------------
+Test Passed.
+"native_process_adapter_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_process_adapter_contract" time elapsed: 00:00:04
+----------------------------------------------------------
+
+40/77 Testing: native_mcp_configuration_contract
+40/77 Test: native_mcp_configuration_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_configuration_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_mcp_configuration_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native MCP configuration passed embedded-xlang3 persistence, backend revisions, encrypted purpose-bound credential references, invalid/duplicate/plain-env/scope rejection, exact replacement preservation, reopen and retired identities. No peer/model/UI activation claimed
+<end of output>
+Test time =   0.20 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_configuration_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_mcp_configuration_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+41/77 Testing: native_schema_worker_contract
+41/77 Test: native_schema_worker_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_schema_worker_contract.exe" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_schema_budget_fixture.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_schema_worker_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native schema isolation passed actual worker validation, invalid schemas/arguments/no fetch, expensive regex rejection/containment, OS job budget queries, actual committed-memory refusal, stalled child timeout/cancellation and subsequent healthy evaluation. CPU flags are queried; no exact CPU timer scheduling or full schema conformance claim
+<end of output>
+Test time =   2.33 sec
+----------------------------------------------------------
+Test Passed.
+"native_schema_worker_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_schema_worker_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+42/77 Testing: native_mcp_stdio_contract
+42/77 Test: native_mcp_stdio_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_stdio_contract.exe" "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/mcp_stdio_peer.mjs" "D:/a/xMind/xMind/xmind/Native"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_mcp_stdio_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native MCP stdio transport passed actual independent Node pipe/process fixtures, environment isolation, quoting, stderr draining, EOF, stalled-write timeout/cancellation, output bounds and owned descendant cleanup. No model/tool effect or full MCP integration claimed
+<end of output>
+Test time =   3.05 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_stdio_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_mcp_stdio_contract" time elapsed: 00:00:03
+----------------------------------------------------------
+
+43/77 Testing: native_mcp_handshake_contract
+43/77 Test: native_mcp_handshake_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_handshake_contract.exe" "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/mcp_handshake_peer.mjs" "D:/a/xMind/xMind/xmind/Native"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_mcp_handshake_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native MCP negotiation passed actual independent stdio peers: modern discovery, legacy error/timeout fallback, retired late probe, acknowledgement ordering, post-connect metadata and unsupported/error rejection. No model/tool effect or full MCP integration claimed
+<end of output>
+Test time =   0.78 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_handshake_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_mcp_handshake_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+44/77 Testing: native_mcp_client_contract
+44/77 Test: native_mcp_client_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_client_contract.exe" "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/mcp_client_peer.mjs" "D:/a/xMind/xMind/xmind/Native"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_mcp_client_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native MCP stdio owner passed independent real subprocess catalogues, pagination, legacy ping/unsupported-method handling, bounded notifications, malformed results, cancellation/timeout/EOF and no reconnect/replay. No tool execution, schema validation or full MCP integration claimed
+<end of output>
+Test time =   0.98 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_client_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_mcp_client_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+45/77 Testing: native_mcp_effect_contract
+45/77 Test: native_mcp_effect_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_effect_contract.exe" "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/mcp_effect_peer.mjs" "D:/a/xMind/xMind/xmind/Native" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_mcp_effect_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native approval-backed MCP registry passed actual subprocess file effects and embedded-xlang3 journal: exact approvals, untrusted hints, aliases/schema binding, denial/cancellation, duplicate rejection, malformed catalogs/arguments, post-effect lost/error replies, quarantine and journal-fault restart. No live model/UI/SDK interoperability or independent peer-result verification claimed
+<end of output>
+Test time =   7.45 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_effect_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_mcp_effect_contract" time elapsed: 00:00:07
+----------------------------------------------------------
+
+46/77 Testing: native_agent_service_contract
+46/77 Test: native_agent_service_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/agent_service_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_agent_service_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_agent_service_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native agent service contract passed: parallel native streams, bounded admission, four repeated actual dispatch/cancel cycles across expiry ticks and joined cancellation. Inference peer is synthetic.
+<end of output>
+Test time =   0.97 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_service_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_agent_service_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+47/77 Testing: native_agent_runner_contract
+47/77 Test: native_agent_runner_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/agent_runner_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_agent_runner_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_agent_runner_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native agent loop/atomicity contracts passed using a synthetic inference peer and real filesystem tools; no live model was called
+<end of output>
+Test time =   7.84 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_runner_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_agent_runner_contract" time elapsed: 00:00:07
+----------------------------------------------------------
+
+48/77 Testing: native_gemini_agent_contract
+48/77 Test: native_gemini_agent_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/gemini_agent_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_agent_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_gemini_agent_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Gemini AgentRunner contract passed real two-file execution, encrypted credential reuse, actual xlang3 SQLite persistence/reopen, signed precise receipt/result replay, native/provider ID separation, supplied usage and malformed/truncated/unoffered failure without tool execution. Socket model replies are synthetic; no product enrollment or live Gemini inference tested.
+<end of output>
+Test time =   1.36 sec
+----------------------------------------------------------
+Test Passed.
+"native_gemini_agent_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_gemini_agent_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+49/77 Testing: native_anthropic_agent_contract
+49/77 Test: native_anthropic_agent_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/anthropic_agent_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_anthropic_agent_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_anthropic_agent_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Actual native Claude agent contract passed two filesystem reads, ordered text/tool/signed-redacted thinking receipts, exact escaped arguments, correlated provider IDs/results, encrypted xlang3 SQLite close/reopen and exact signed history replay without tool repetition, supplied uncached/cache/zero usage and timings, protocol/signature failure before effects, held-stream cancellation/recovery and actual SQL tool-row rollback. Provider socket replies/credentials/signatures are synthetic; no thinking request controls, cryptographic signature verification, live account or UI acceptance claimed.
+<end of output>
+Test time =   1.25 sec
+----------------------------------------------------------
+Test Passed.
+"native_anthropic_agent_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_anthropic_agent_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+50/77 Testing: native_create_executor_contract
+50/77 Test: native_create_executor_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/create_executor_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_create_executor_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_create_executor_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native approved creation passed: actual files including empty content, exact approval, no overwrite, parent identity, denial/cancellation, storage fault and uncertain restart without replay
+<end of output>
+Test time =   1.71 sec
+----------------------------------------------------------
+Test Passed.
+"native_create_executor_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_create_executor_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+51/77 Testing: native_edit_executor_contract
+51/77 Test: native_edit_executor_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_edit_executor_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_edit_executor_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Approved native edit executor passed with actual files and embedded xlang3 persistence; no model or public approval route was used
+<end of output>
+Test time =   1.06 sec
+----------------------------------------------------------
+Test Passed.
+"native_edit_executor_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_edit_executor_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+52/77 Testing: native_approved_edit_http_contract
+52/77 Test: native_approved_edit_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/approved_edit_http_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_approved_edit_http_fixture.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_approved_edit_http_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+fixture-port 60355
+Real native approved edits verified through HTTP and CLI; no model was called
+Product native server/CLI inspected actual raw file bytes after restart without a model; journal and quarantine unchanged. Uncertain state and external writes are labeled fixtures.
+<end of output>
+Test time =   1.10 sec
+----------------------------------------------------------
+Test Passed.
+"native_approved_edit_http_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_approved_edit_http_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+53/77 Testing: native_workspace_tools_contract
+53/77 Test: native_workspace_tools_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/workspace_tools_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_workspace_tools_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_workspace_tools_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native workspace tools passed on real filesystem fixtures; no model was called
+<end of output>
+Test time =   0.77 sec
+----------------------------------------------------------
+Test Passed.
+"native_workspace_tools_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_workspace_tools_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+54/77 Testing: native_repository_instructions_contract
+54/77 Test: native_repository_instructions_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/repository_instructions_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_workspace_tools_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_repository_instructions_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native repository guidance passed: actual scope, hashes, refresh, absence, boundaries and limits; no model called
+<end of output>
+Test time =   0.39 sec
+----------------------------------------------------------
+Test Passed.
+"native_repository_instructions_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_repository_instructions_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+55/77 Testing: native_chat_provider_contract
+55/77 Test: native_chat_provider_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/chat_provider_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_chat_provider_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_chat_provider_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native chat adapter wire contracts passed against a synthetic peer; no live model was called
+<end of output>
+Test time =   0.13 sec
+----------------------------------------------------------
+Test Passed.
+"native_chat_provider_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_chat_provider_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+56/77 Testing: native_gemini_provider_contract
+56/77 Test: native_gemini_provider_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/gemini_provider_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_provider_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_gemini_provider_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Gemini request/HTTP/SSE boundary passed against an independent synthetic peer, including exact signed continuation, header-only key, offered-call validation, failure/cancellation and no redirect/retry. No agent enrollment or live inference tested.
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"native_gemini_provider_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_gemini_provider_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+57/77 Testing: native_anthropic_provider_contract
+57/77 Test: native_anthropic_provider_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/anthropic_provider_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_anthropic_provider_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_anthropic_provider_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Claude request/transport/stream adapter passed supplied uncached input/output/cache normalization, event/completion consistency, zero/missing cache preservation and malformed usage rejection against an independent synthetic peer; no live inference or enrollment tested
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"native_anthropic_provider_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_anthropic_provider_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+58/77 Testing: native_http_stream_transport_contract
+58/77 Test: native_http_stream_transport_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/http_stream_transport_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_http_stream_transport_contract.exe" "C:/Program Files/OpenSSL/bin/openssl.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_http_stream_transport_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native transport contracts passed against synthetic protocol peer; no live model was called
+<end of output>
+Test time =   5.10 sec
+----------------------------------------------------------
+Test Passed.
+"native_http_stream_transport_contract" end time: Oct 08 16:35 Coordinated Universal Time
+"native_http_stream_transport_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+59/77 Testing: native_agent_http_contract
+59/77 Test: native_agent_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/agent_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_agent_http_contract" start time: Oct 08 16:35 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native agent HTTP/CLI contract passed: actual read/tool loop, interactive shared-session turns/reconnect/restart without replay, bounded admission, cancellation, encrypted credential reuse, provider failure and crash recovery. Inference peer is synthetic.
+<end of output>
+Test time =   4.24 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_http_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_agent_http_contract" time elapsed: 00:00:04
+----------------------------------------------------------
+
+60/77 Testing: native_agent_edit_http_contract
+60/77 Test: native_agent_edit_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/agent_edit_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_agent_edit_http_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Compiled native agent edit loop passed: real approved edits, denial, stale content, cancellation, actual tool-result continuation and pending-approval restart recovery. Inference is synthetic.
+<end of output>
+Test time =   9.81 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_edit_http_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_agent_edit_http_contract" time elapsed: 00:00:09
+----------------------------------------------------------
+
+61/77 Testing: native_agent_mcp_http_contract
+61/77 Test: native_agent_mcp_http_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/agent_mcp_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_agent_mcp_http_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native MCP agent/server/admin/CLI contract passed: encrypted configured environment, exact arguments, actual approved file effect, denial/cancellation, result continuation and persisted uncertainty without replay. Inference is synthetic.
+<end of output>
+Test time =   2.30 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_mcp_http_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_agent_mcp_http_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+62/77 Testing: native_mcp_sdk_modern_contract
+62/77 Test: native_mcp_sdk_modern_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/agent_mcp_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib" "modern"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_mcp_sdk_modern_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native MCP agent/server/admin/CLI contract passed: encrypted configured environment, exact arguments, actual approved file effect, denial/cancellation, result continuation and persisted uncertainty without replay. Inference is synthetic.
+<end of output>
+Test time =   3.19 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_sdk_modern_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_mcp_sdk_modern_contract" time elapsed: 00:00:03
+----------------------------------------------------------
+
+63/77 Testing: native_mcp_sdk_legacy_contract
+63/77 Test: native_mcp_sdk_legacy_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/agent_mcp_http_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib" "legacy"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_mcp_sdk_legacy_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native MCP agent/server/admin/CLI contract passed: encrypted configured environment, exact arguments, actual approved file effect, denial/cancellation, result continuation and persisted uncertainty without replay. Inference is synthetic.
+<end of output>
+Test time =   2.94 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_sdk_legacy_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_mcp_sdk_legacy_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+64/77 Testing: native_http_cli_contract
+64/77 Test: native_http_cli_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/http_cli_contract.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_http_cli_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native HTTP/CLI contracts passed: authentication, shared clients, concurrent messages, restart persistence; unconfigured execution rejects admission without creating a run
+<end of output>
+Test time =   2.11 sec
+----------------------------------------------------------
+Test Passed.
+"native_http_cli_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_http_cli_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+65/77 Testing: embedded_xlang_sqlite_contract
+65/77 Test: embedded_xlang_sqlite_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_xlang_sqlite_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"embedded_xlang_sqlite_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Embedded xlang3 SQLite contracts passed
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"embedded_xlang_sqlite_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"embedded_xlang_sqlite_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+66/77 Testing: native_incoming_repository_contract
+66/77 Test: native_incoming_repository_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_incoming_repository_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_incoming_repository_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native incoming storage contract passed atomic rollback, durable retries, changed-input rejection, task isolation and legacy migration. Lifecycle replies are synthetic storage fixtures.
+<end of output>
+Test time =   0.61 sec
+----------------------------------------------------------
+Test Passed.
+"native_incoming_repository_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_incoming_repository_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+67/77 Testing: native_task_list_repository_contract
+67/77 Test: native_task_list_repository_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_task_list_repository_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_task_list_repository_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native task listing storage passed actual status times, atomic clock faults, context/state/time filtering, cursor watermark, root-only visibility, restart and schema8 migration without fictional historical timestamps. Lifecycle replies are synthetic storage fixtures.
+<end of output>
+Test time =   0.70 sec
+----------------------------------------------------------
+Test Passed.
+"native_task_list_repository_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_task_list_repository_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+68/77 Testing: native_permission_waiter_contract
+68/77 Test: native_permission_waiter_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_permission_waiter_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_permission_waiter_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native permission wait contracts passed: persisted decisions, denial, cancellation, expiry, one-shot claims and workspace exclusion. No product effect tool was executed.
+<end of output>
+Test time =   0.86 sec
+----------------------------------------------------------
+Test Passed.
+"native_permission_waiter_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_permission_waiter_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+69/77 Testing: native_operation_repository_contract
+69/77 Test: native_operation_repository_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_operation_repository_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_operation_repository_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native operation journal contracts passed: exact approvals, one-shot claims, expiry, atomic faults, concurrent decisions, real fixture effect and uncertain recovery. Production effect tools are not integrated.
+<end of output>
+Test time =   2.00 sec
+----------------------------------------------------------
+Test Passed.
+"native_operation_repository_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_operation_repository_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+70/77 Testing: xlang_repository_contract
+70/77 Test: xlang_repository_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_repository_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"xlang_repository_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+xlang3-backed repository contracts passed
+<end of output>
+Test time =   0.29 sec
+----------------------------------------------------------
+Test Passed.
+"xlang_repository_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"xlang_repository_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+71/77 Testing: persistence_service_contract
+71/77 Test: persistence_service_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_persistence_service_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"persistence_service_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Persistence service ownership/concurrency contracts passed
+<end of output>
+Test time =   6.23 sec
+----------------------------------------------------------
+Test Passed.
+"persistence_service_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"persistence_service_contract" time elapsed: 00:00:06
+----------------------------------------------------------
+
+72/77 Testing: native_provider_profiles_contract
+72/77 Test: native_provider_profiles_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_provider_profiles_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_provider_profiles_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native provider profiles passed encrypted key isolation, restart, route binding, concurrent CAS, actual SQLite rollback, candidate service validation and original credential migration through xlang3; no provider inference or product enrollment tested
+<end of output>
+Test time =   1.25 sec
+----------------------------------------------------------
+Test Passed.
+"native_provider_profiles_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_provider_profiles_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+73/77 Testing: native_provider_profile_runtime_contract
+73/77 Test: native_provider_profile_runtime_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/provider_profile_runtime_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_provider_profile_runtime_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_provider_profile_runtime_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+fixture-discovery-committed
+Native profile runtime passed actual OpenAI/Claude wire and key isolation, SQL failure preservation, active/paused-graph ownership, active-profile update, restart and encrypted-reference migration; peers are synthetic, no live account or UI enrollment tested
+<end of output>
+Test time =   5.54 sec
+----------------------------------------------------------
+Test Passed.
+"native_provider_profile_runtime_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_provider_profile_runtime_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+74/77 Testing: native_provider_profile_cli_contract
+74/77 Test: native_provider_profile_cli_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/provider_profile_cli_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_provider_profile_cli_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib" "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_provider_profile_cli_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Actual native CLI profile acceptance passed three native catalogue authentication formats, encoded pagination/full Gemini resources, private environment input, inactive/active CAS and encrypted SQLite reopen, committed interactive profile/model binding, signed native Gemini history/usage, stale admission without retry and failed-turn status preserved through settings then actual recovery. Provider sockets and credentials are synthetic; no live account, UI or cross-provider history conversion claimed.
+<end of output>
+Test time =   3.05 sec
+----------------------------------------------------------
+Test Passed.
+"native_provider_profile_cli_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_provider_profile_cli_contract" time elapsed: 00:00:03
+----------------------------------------------------------
+
+75/77 Testing: native_gemini_catalogue_contract
+75/77 Test: native_gemini_catalogue_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/gemini_catalogue_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_catalogue_contract.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_gemini_catalogue_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Native Gemini catalogue contract passed header-authenticated real socket discovery, opaque escaped pagination, GenerateContent method filtering, exact full resources, malformed/reflected/duplicate identity rejection, empty catalogues, page/entry/JSON bounds and HTTP/cancellation/deadline handling. Provider replies are synthetic; listing does not prove tools capability, enrollment or live model acceptance.
+<end of output>
+Test time =  10.76 sec
+----------------------------------------------------------
+Test Passed.
+"native_gemini_catalogue_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_gemini_catalogue_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+76/77 Testing: native_gemini_profile_runtime_contract
+76/77 Test: native_gemini_profile_runtime_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/gemini_profile_runtime_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_profile_runtime_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_gemini_profile_runtime_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+fixture-discovery-committed
+Native Gemini profile runtime contract passed authenticated paginated draft/saved-key discovery, native model/capability validation before key persistence, selection/CAS and cancellation ownership, actual file-tool execution, encrypted xlang3 SQLite restart, key-only migration, text-only enrollment and stale discovery rejection. Provider socket replies and keys are synthetic; no live account inference or UI enrollment tested.
+<end of output>
+Test time =   2.15 sec
+----------------------------------------------------------
+Test Passed.
+"native_gemini_profile_runtime_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"native_gemini_profile_runtime_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+77/77 Testing: encrypted_credential_repository_contract
+77/77 Test: encrypted_credential_repository_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_credential_repository_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"encrypted_credential_repository_contract" start time: Oct 08 16:36 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Encrypted credential repository contracts passed
+<end of output>
+Test time =   1.18 sec
+----------------------------------------------------------
+Test Passed.
+"encrypted_credential_repository_contract" end time: Oct 08 16:36 Coordinated Universal Time
+"encrypted_credential_repository_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Oct 08 16:36 Coordinated Universal Time

@@ -1,5 +1,7 @@
 # Native dynamic plans and revisioned replanning
 
+The initial `3fc4204` planning source also passed its [exact hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37808089507): **77 native / 119 extension / 26 browser** tests, all 16 successful steps, model-free integration and 18 verified VSIX assets. Downloaded archives and original logs match their recorded digests. Installation, rendered/live planning and editor acceptance remain separate. [Hosted source and scope evidence](evidence/native-dynamic-plan-hosted-provenance.json).
+
 Status: the initial agent/human planning slice is implemented and locally
 validated. The complete guarded **77-contract native gate passed in 153.88
 seconds**, with its exact manifest and all **421 frozen source hashes** verified;
@@ -15,8 +17,7 @@ acceptance. [Initial implemented boundary](native-dynamic-plan.md),
 This document retains the broader design. Only agent and human nodes are
 accepted in the initial model-selected schema; deterministic tool/MCP/process
 nodes, recursive planning, skills, compaction and outbound A2A remain future
-work. Hosted planning validation, schema-v11 installation, live planning and
-installed VS Code acceptance remain pending. The installed ace/schema-v10
+work. Schema-v11 installation, live planning and installed VS Code acceptance remain pending. The installed ace/schema-v10
 scope below is separate from the new local planning result.
 
 [Bounded native delegation](native-delegation.md) was introduced at historical

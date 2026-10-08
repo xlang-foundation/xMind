@@ -1,5 +1,7 @@
 # Native dependency plans in ordinary Agent mode
 
+Exact source `3fc420480f61db75d3efaf4bda77fbefd8246166` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37808089507): **77 native contracts in 206.89 seconds**, **119 extension tests in 2.4612639 seconds** and **26 browser tests in 1.3989153 seconds**. All 16 job steps passed, with the exact complete native manifest, zero failures/skips, model-free browser/native integration and 18 verified VSIX assets. Original logs, advertised archive digests and exact source/runtime maps were verified. Provider replies remain synthetic; this establishes the source checkpoint rather than installed or live planning acceptance. The installed preview remains ace/schema v10. [Artifact-bound hosted evidence](evidence/native-dynamic-plan-hosted-provenance.json).
+
 The initial schema-v11 source increment passed the complete guarded local gate:
 **77 native contracts in 153.88 seconds**, **119 extension tests** and **26 browser
 tests**, with zero failures/skips and no exclusions. The exact registered and
