@@ -20,8 +20,8 @@
     "fireworks-ai-up-to-4b"
   ],
   "nativeCoverage": {
-    "partialProviderGroups": 1,
-    "unmappedProviderGroups": 135,
+    "partialProviderGroups": 3,
+    "unmappedProviderGroups": 133,
     "verifiedProviderParity": 0,
     "caveat": "Source anchors and selected recorded live checks are partial evidence. No complete provider-group or model-entry parity is verified."
   },
@@ -132,7 +132,34 @@
       },
       "agentflowStatus": "unverified",
       "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
-      "nativeStatus": "unmapped"
+      "nativeStatus": "partial",
+      "nativeEvidence": {
+        "sources": [
+          {
+            "path": "Native/src/anthropic_request.cpp",
+            "anchor": "serialize_anthropic_request",
+            "sha256": "f0e535f93b308ca96a2742381119b507ec78af681c44c519248b1cef3cfdb419"
+          },
+          {
+            "path": "Native/src/anthropic_stream.cpp",
+            "anchor": "AnthropicStream::feed",
+            "sha256": "7336e01e6af02704a77b17cc03d98b903df593d1b9ad7f8a7c72f87f630f6641"
+          },
+          {
+            "path": "Native/src/chat_provider.cpp",
+            "anchor": "ProviderWire::anthropic_messages",
+            "sha256": "eb13aaed6371b4bd701b044e03ef43292f67f4eef1234950dff6ad5309973f78"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "doc/evidence/native-cleanup-hosted-provenance.json",
+            "sha256": "a9e652fc78a486f735b6b9967eb4a7ee66251e1ac14472c2649c2d3c0b7aead3"
+          }
+        ],
+        "scope": "Native Claude Messages request, SSE and header-authenticated HTTP boundaries passed the exact cleanup58 hosted gate, including synthetic socket tool/signature continuation. This is component evidence; default provider-profile routes exist but no live Anthropic inference or complete agent/model acceptance is established.",
+        "gaps": "The 21 pinned Anthropic entries are not individually accepted. Live model discovery/enrollment/inference, actual Claude agent effects, broader media/cache/thinking controls, non-chat modes and complete per-model capability/error behavior remain incomplete or require their own evidence."
+      }
     },
     {
       "provider": "anyscale",
@@ -869,7 +896,48 @@
       },
       "agentflowStatus": "unverified",
       "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
-      "nativeStatus": "unmapped"
+      "nativeStatus": "partial",
+      "nativeEvidence": {
+        "sources": [
+          {
+            "path": "Native/src/gemini_request.cpp",
+            "anchor": "serialize_gemini_request",
+            "sha256": "0067513ce04b5cafd98d2e5c35368ea1069aafa6868e2a1c88b01552dbc2efc3"
+          },
+          {
+            "path": "Native/src/gemini_stream.cpp",
+            "anchor": "GeminiStream::feed",
+            "sha256": "ff1e4167ccfd2d8ffce2586d105b3d28200a78daf7b6fcb00293403e8341e84a"
+          },
+          {
+            "path": "Native/src/gemini_provider.cpp",
+            "anchor": "complete_gemini",
+            "sha256": "c0d3d08c4a91e69ec0dcdcdf9fa230ed2df1ea4fca4b4b73bd7aa624ab6b2279"
+          },
+          {
+            "path": "Native/src/gemini_history.cpp",
+            "anchor": "gemini_model_request",
+            "sha256": "abf5eaa961c24b87cc371b141b8e59707ebec41e996e17127ed1a6d211f4e66a"
+          },
+          {
+            "path": "Native/src/agent_runner.cpp",
+            "anchor": "AgentRunner::execute",
+            "sha256": "7dcbe7bd664712178d4246713b52bcfc08867688fa701dcfb460f1c3645f90c9"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "doc/evidence/native-gemini-transport-hosted-provenance.json",
+            "sha256": "02fc401d9c00b5f0b0be65008b27a8f87b1ac54f935d6008b4deb953cfd489d5"
+          },
+          {
+            "path": "doc/evidence/native-gemini-agent-local-provenance.json",
+            "sha256": "228e4056f11ccf3c4276963ce65ecfab363b49403b2fe0511619f897e8e72696"
+          }
+        ],
+        "scope": "Native GenerateContent request/SSE/header-authenticated transport and signed DTO replay passed the exact ddd1d3d hosted60 gate with synthetic peers. The newer working-tree local62 gate verifies common gateway/history, exact callbacks, escaped large results and actual AgentRunner two-file execution with xlang3 SQLite reopen/signed replay, using synthetic provider replies. No full provider-group or individual model acceptance is established.",
+        "gaps": "The 84 pinned Gemini entries are not individually accepted. Default Settings enrollment/catalogue discovery, live inference and actual Gemini IDE/graph acceptance remain pending. Vertex AI/OAuth, media, caching/thinking controls, Interactions and complete per-model behavior remain unimplemented or unverified. The newer exact checkpoint still requires hosted validation."
+      }
     },
     {
       "provider": "gigachat",
@@ -1415,7 +1483,7 @@
           {
             "path": "Native/src/chat_provider.cpp",
             "anchor": "complete_model",
-            "sha256": "7d56c5efab4085c5f6ff3a4b6f57b5d0a2f3301aeb7be59f35e7fae58cbb5436"
+            "sha256": "eb13aaed6371b4bd701b044e03ef43292f67f4eef1234950dff6ad5309973f78"
           },
           {
             "path": "Native/src/provider_setup.cpp",

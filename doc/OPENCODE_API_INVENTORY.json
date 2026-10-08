@@ -814,7 +814,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "Native per-run durable event observation",
         "sourceAnchor": "persistence.events",
         "gap": "Per-run event reads support client polling; upstream global/location subscription semantics remain incomplete.",
@@ -977,7 +977,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "POST /v1/provider/configuration",
         "sourceAnchor": "\"/v1/provider/configuration\"",
         "gap": "Optimistic provider enrollment exists; general effective configuration precedence and reload remain incomplete.",
@@ -1042,7 +1042,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/agent_runner.cpp",
-        "sourceSha256": "f02611d952733bbd6fbc066367200b90f1959b357f22aa62b439486d19a96a0c",
+        "sourceSha256": "7dcbe7bd664712178d4246713b52bcfc08867688fa701dcfb460f1c3645f90c9",
         "surface": "Reviewed native edit_file/create_file tools",
         "sourceAnchor": "CreateExecutor",
         "gap": "Approved exact edits and creation exist; general upstream filesystem write API and its full semantics remain incomplete.",
@@ -3079,7 +3079,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "GET /v1/runs/{id}/events",
         "sourceAnchor": "persistence.events",
         "gap": "Run events are not a complete upstream session log with its filtering and response contract.",
@@ -4536,7 +4536,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "GET /v1/health",
         "sourceAnchor": "\"/v1/health\"",
         "gap": "Native health/capabilities exist; the full pinned identity/version response remains incomplete.",
@@ -6010,7 +6010,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "GET /v1/mcp/servers",
         "sourceAnchor": "\"/v1/mcp/servers\"",
         "gap": "Saved stdio server metadata exists; upstream connection lifecycle fields, HTTP/OAuth and live model/tool acceptance remain incomplete.",
@@ -6219,7 +6219,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "GET /v1/models; POST /v1/provider/models",
         "sourceAnchor": "\"/v1/models\"",
         "gap": "Enabled models and OpenAI account discovery exist; broad provider capabilities and upstream catalogue fields remain incomplete.",
@@ -6463,7 +6463,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "GET /v1/runs/{id}/operations",
         "sourceAnchor": "persistence.operations",
         "gap": "Only run-scoped operations exist; a global/location pending permission catalogue is absent.",
@@ -7219,7 +7219,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "GET /v1/provider/configuration",
         "sourceAnchor": "\"/v1/provider/configuration\"",
         "gap": "Single OpenAI-compatible configuration exists; a multi-provider registry is absent.",
@@ -7339,7 +7339,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "GET /v1/provider/configuration",
         "sourceAnchor": "\"/v1/provider/configuration\"",
         "gap": "Single configured provider metadata exists; provider-by-ID contracts and broader native providers remain incomplete.",
@@ -8554,7 +8554,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "GET /v1/sessions",
         "sourceAnchor": "\"/v1/sessions\"",
         "gap": "Location/project scoping, filters and pagination remain to be compared.",
@@ -8767,7 +8767,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "POST /v1/sessions",
         "sourceAnchor": "persistence.create_session",
         "gap": "The upstream session fields, agent/environment configuration and full creation lifecycle remain incomplete.",
@@ -9074,7 +9074,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "POST /v1/sessions/{id}/title",
         "sourceAnchor": "persistence.rename_session",
         "gap": "Only optimistic title updates exist; other upstream session metadata changes remain incomplete.",
@@ -11008,7 +11008,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "POST /v1/runs/{id}/cancel",
         "sourceAnchor": "executor->cancel",
         "gap": "Run cancellation exists; session-level interruption and resumable upstream semantics remain incomplete.",
@@ -11117,7 +11117,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "GET /v1/sessions/{id}/history",
         "sourceAnchor": "persistence.history",
         "gap": "Durable role/data history exists; upstream message IDs, typed parts and pagination need comparison.",
@@ -11397,7 +11397,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "Native per-run model override",
         "sourceAnchor": "executor->submit_model",
         "gap": "A per-run override is not persistent session model switching; upstream behavior remains incomplete.",
@@ -11601,7 +11601,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "GET /v1/runs/{id}/operations",
         "sourceAnchor": "persistence.operations",
         "gap": "Run-scoped effect proposals exist; full session permission categories and lifecycle remain incomplete.",
@@ -11962,7 +11962,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "POST /v1/operations/{id}/decision",
         "sourceAnchor": "persistence.decide_operation",
         "gap": "Single-use allow/deny exists; upstream saved rules and permission category behavior remain incomplete.",
@@ -12085,7 +12085,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "cbca3e438066c9ead41ff5bb99f9a0ee905e4924eea2ccce7ecab3ef91fa725e",
+        "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
         "surface": "POST /v1/runs",
         "sourceAnchor": "executor->submit_model",
         "gap": "Native model/tool admission exists; attachments, queued input and upstream session input ordering remain incomplete.",

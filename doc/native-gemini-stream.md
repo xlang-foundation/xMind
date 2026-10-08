@@ -19,8 +19,8 @@ The implementation follows Google's
 Its synthetic native contract covers fragmented Unicode/SSE framing, EOF,
 signed history, precise arguments, optional identities, supplied usage and
 malformed/unsupported response rejection. It passed in the local complete
-**61-contract native gate**; see
-[local evidence](evidence/native-gemini-history-local-provenance.json).
+**62-contract native gate**; see
+[local evidence](evidence/native-gemini-agent-local-provenance.json).
 The earlier transport/replay revision `ddd1d3d` passed its full hosted
 **60-contract gate**, with **88 extension and 17 browser checks**, no
 failures/skips, native/browser integration and VSIX verification.

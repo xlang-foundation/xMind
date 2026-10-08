@@ -1,0 +1,61 @@
+{
+  "baseRevision": "75f45f0a036f1ffbab8c4b157df364f3697b52a0",
+  "sourceState": "Local working-tree source based on75f45f0 plus the new native Gemini agent contract and62-contract registration. All source cases described below compiled and passed; no post-build exclusions.",
+  "nativePassed": 62,
+  "nativeFailed": 0,
+  "nativeSkipped": 0,
+  "nativeSeconds": 100.44,
+  "nativeManifestMatched": true,
+  "runtimeRevision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "runtimeSource": "Isolated xlang3-nexus-buffer worktree",
+  "stdlibSource": "C:/Python/Python314/Lib source only; no CPython execution",
+  "sourceSha256": {
+    "Native/CMakeLists.txt": "1d89871716a44a19a7335d91c653b5526e0394da744f7398f3bbb63eba1c47f2",
+    "Tools/ci-native.ps1": "1ec42122bd3aec23c57ba446ed187e333bcf7933251f8fb015ba72d5e9864b16",
+    "Native/tests/gemini_agent_contract.cpp": "3330207b150bdcba02d7c31c64e5b8d3b20c0669d5f78bb1cae936e639672ed9",
+    "Native/tests/gemini_agent_peer.mjs": "d8a1ea8494460a3e53335dc3da23f421f26c8b05b1ddcc7fd064af88dfc21cad",
+    "Native/src/agent_runner.cpp": "7dcbe7bd664712178d4246713b52bcfc08867688fa701dcfb460f1c3645f90c9",
+    "Native/src/repository.cpp": "cfb4126542b5d53e95c641079e7cbfe5d5cde1019985a60ce9467b694f8ac00d",
+    "Native/src/chat_provider.cpp": "eb13aaed6371b4bd701b044e03ef43292f67f4eef1234950dff6ad5309973f78",
+    "Native/src/gemini_request.cpp": "0067513ce04b5cafd98d2e5c35368ea1069aafa6868e2a1c88b01552dbc2efc3",
+    "Native/src/gemini_stream.cpp": "ff1e4167ccfd2d8ffce2586d105b3d28200a78daf7b6fcb00293403e8341e84a",
+    "Native/src/gemini_provider.cpp": "c0d3d08c4a91e69ec0dcdcdf9fa230ed2df1ea4fca4b4b73bd7aa624ab6b2279",
+    "Native/src/gemini_history.cpp": "abf5eaa961c24b87cc371b141b8e59707ebec41e996e17127ed1a6d211f4e66a",
+    "Native/tests/gemini_request_contract.cpp": "a10a758f405df64cf04dba3a525d4cee8e2df093d09fd2525b2d963f2f428733",
+    "Native/tests/gemini_stream_contract.cpp": "83825395f339684046f44570e485938cd9748770ea3610f5fc7b3a959b3d71a9",
+    "Native/tests/gemini_provider_contract.cpp": "fa31891d785e892feebcf7776237f2f6989fbaa6a6432092b5ce3b70f9d568e5",
+    "Native/tests/gemini_provider_peer.mjs": "6d17eda6cd1deb1d120ccae03a34d0a121ea70e8c1789cad87721cd27d1ca29b",
+    "Native/tests/gemini_history_contract.cpp": "24728728265d5febbb461e0247c70768d9d0532123188792c7a4f2786b8e64a6"
+  },
+  "compiledBinarySha256": {
+    "xmind_server.exe": "d60e385ebe942d4c90a61c0dd4b13912e8b626242132982d8dc3608f3d16105c",
+    "agentflow_gemini_agent_contract.exe": "d648a601447dccc532a314fc4e12d63fef9f952284ef131c8629fa6f758aa7e9",
+    "agentflow_gemini_provider_contract.exe": "95c7b55ed6515f9b9b56f74cc5d2958513cbe66425da7a72f62845ee1df68958",
+    "agentflow_gemini_history_contract.exe": "163e26812f93b1e4416a94b1b2b928b578724aea70d7100070ee94e21c3842b1",
+    "agentflow_gemini_request_contract.exe": "8af2fbfe252b31b6adeae0fbc26568e37bca8992ce8392284b93c650219aaee1"
+  },
+  "logSha256": {
+    "native-gemini-agent-local-ctest.log": "1a01e246ddc9b16c4ad34b9e54af3ef39c702f85773a2907e77c5c772a98fb3c",
+    "native-gemini-agent-local-browser-native.log": "ffa8a56eeb33ceb7dc064c220c2fff5c93805595cb78a3f52cb677f765a71f56"
+  },
+  "priorFrontendGate": {
+    "extensionPassed": 91,
+    "browserPassed": 17,
+    "failed": 0,
+    "skipped": 0,
+    "provenance": "native-gemini-history-local-provenance.json",
+    "sourceEqualityVerified": true,
+    "scope": "Previously run thin-client tests; their current sources are unchanged. These are not repeated or counted as extra tests."
+  },
+  "browserNativeIntegration": "Passed again against the freshly compiled server with current shared assets and disposable database/processes; live preview unchanged",
+  "verifiedNewCases": [
+    "Independent Gemini socket peer and actual AgentRunner two-file reads",
+    "Encrypted credential reuse through xlang3 SQLite close/reopen",
+    "Exact signed receipts, opaque metadata/numeric tokens and escaped argument replay from real persisted history",
+    "Separate native IDs for identified and anonymous provider calls, supplied usage and measured timing",
+    "New run after reopen continues history without re-executing prior tools",
+    "Malformed, incomplete, truncated and unoffered provider calls fail with no executable effects/successful assistant",
+    "Prior callback ordering/exact-argument/usage assertions and escaped large-read response-limit correction now compiled and passed"
+  ],
+  "scope": "Actual native agent/file/persistence acceptance using labelled synthetic provider replies; no Gemini Settings enrollment, catalogue discovery, live inference, actual Gemini IDE interaction or full provider/coding/protocol parity claimed. Hosted validation of this exact newer checkpoint remains required. No installed-preview upgrade."
+}

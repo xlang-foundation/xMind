@@ -19,10 +19,11 @@ Request serialization is now connected to the native
 [HTTP/SSE adapter](native-gemini-provider.md) and
 [common agent-history bridge](native-gemini-history.md).
 
-The local working source passed the complete **61-contract native gate**,
-including expanded replay cases. A later function-response bound correction
-and escaped large-read regressions await compilation/execution. See
-[local scope and remaining assertions](evidence/native-gemini-history-local-provenance.json).
+The local working source passed the complete **62-contract native gate**,
+including expanded replay and escaped large-read cases. Function-response
+objects may use the 8 MiB body budget; arguments, schemas and replay metadata
+retain 1 MiB/depth-16 limits. The complete serialized request remains bounded to
+8 MiB. See [local scope](evidence/native-gemini-agent-local-provenance.json).
 The original request component and repository error-boundary correction also
 passed the hosted cleanup gate at `dea5888`: **58 native, 88 extension and 17
 browser contracts**, with zero failures or skips.

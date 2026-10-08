@@ -26,12 +26,11 @@ unoffered calls, incomplete/late-error/blocked responses, HTTP errors,
 cancellation and no redirect/retry. The common gateway also resumes a signed
 tool turn through the persisted JSON envelope used by agent history.
 
-The local complete **61-contract native gate** passed the transport and gateway
-checks. Additional callback ordering/usage assertions were added after that
-target compiled and await a rebuild/hosted execution; they are not included in
-the local pass claim. The later function-response bound correction and its
-large-read regressions also await compilation/execution. See
-[exact scope](evidence/native-gemini-history-local-provenance.json).
+The local complete **62-contract native gate** passed transport, gateway,
+callback ordering/native-ID/exact-argument/usage and escaped large-read checks.
+It also exercised actual native AgentRunner file execution and signed history
+replay after xlang3 SQLite reopen, with an independent synthetic provider peer.
+[Exact local scope](evidence/native-gemini-agent-local-provenance.json).
 
 The earlier transport/replay revision `ddd1d3d` passed the complete hosted
 **60-contract gate**, with **88 extension and 17 browser checks**, native/browser
@@ -43,6 +42,7 @@ corrections; it establishes the typed request/HTTP/SSE component scope only.
 Default product discovery/enrollment routes still expose OpenAI Chat/Responses
 and Claude. Gemini discovery is explicitly rejected until its own catalogue
 adapter exists; it does not reuse OpenAI model-list parsing. Thin clients can
-render an advertised Gemini wire, but Settings does not yet enroll it. No actual
-AgentRunner Gemini execution or live Gemini inference is claimed by these
-component/socket checks. Vertex AI/OAuth and Interactions remain unimplemented.
+render an advertised Gemini wire, but Settings does not yet enroll it. The local
+native agent contract verifies execution/persistence with synthetic socket
+replies; live Gemini inference remains unverified. Vertex AI/OAuth and
+Interactions remain unimplemented.

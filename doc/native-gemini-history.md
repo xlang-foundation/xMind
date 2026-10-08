@@ -27,7 +27,7 @@ enforces 4096 model parts, 64 calls, 8 MiB input limits and bounded JSON objects
 The newer serializer separates function-response objects (up to the 8 MiB body
 bound) from 1 MiB arguments/schemas/metadata, so escaping an allowed large native
 file-read result does not inherit the smaller argument bound. Its regression
-checks were added after the local gate compiled and still require execution.
+checks compiled and passed in the newer 62-contract gate.
 
 Usage normalization retains supplied Gemini counters and maps actual prompt,
 candidate, total, cached and thought counts to common fields. It neither estimates
@@ -38,8 +38,13 @@ JSON persistence round trip. It covers precision, signatures, absent arguments,
 metadata, provider/native identity separation, reverse tool-result arrival,
 hidden thoughts, empty STOP, truncation, corrupt receipts, failing ID factories
 and limits. The independent socket contract exercises the common gateway's
-signed continuation. Both passed in the local **61-contract gate**.
-[Evidence and post-build assertion scope](evidence/native-gemini-history-local-provenance.json).
-This verifies the native bridge and transport, not actual Gemini AgentRunner
-execution, Settings enrollment, model discovery or live inference. Those remain
+signed continuation. Both passed in the local **62-contract gate**.
+[Current evidence](evidence/native-gemini-agent-local-provenance.json).
+
+The new independent agent contract also executes actual native file reads,
+records their tool results through xlang3 SQLite, closes/reopens the database and
+starts a new run whose real AgentRunner loads and replays the saved receipts.
+It verifies native/provider ID separation, exact signatures/metadata, supplied
+usage, measured timings and failure without effects. Provider replies are
+synthetic; Settings enrollment, model discovery and live inference remain
 required acceptance work.

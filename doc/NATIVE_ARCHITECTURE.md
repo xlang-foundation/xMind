@@ -1,44 +1,101 @@
 # Native implementation direction
 
-Current scope: the [xMind OSS specification](../doc/architecture.md) excludes team-server features, PostgreSQL, WebRTC and the standalone Electron IDE. Those belong to Nexus; earlier roadmap language does not make them OSS completion requirements.
+The [xMind OSS specification](architecture.md) covers the local C++/xlang3
+runtime, SQLite, single and graph agents, native provider adapters, MCP/A2A,
+CLI, browser UI and VS Code. Local/Nexus connection profiles share a versioned
+command/event protocol. Nexus owns the private team server, PostgreSQL,
+WebRTC/signaling and standalone Electron IDE; these are excluded from OSS delivery.
 
-The user requires the core platform to be implemented in C++. OpenCode is a feature reference only; LiteLLM is a provider/model capability reference only. Neither implementation is embedded or executed as AgentFlow. This supersedes the earlier Python/FastAPI implementation plan.
-
-The user confirmed the mixed design: C++ core with embedded xlang3 for scripts, skills and pure-Python libraries, and authorized continued work after the diagram and companion design were produced. The architecture diagram is `../doc/architecture.svg`.
-
-The companion design in `../doc/architecture.md` specifies component ownership, shared execution contracts, graph/root-run relationships, scripting value lifetimes and trust boundaries, cancellation and recovery semantics. Read it with the diagram before implementing the native components.
+C++ owns the platform. Embedded xlang3 runs scripts, skills and compatible
+pure-Python source libraries; CPython execution is prohibited. OpenCode and
+LiteLLM are behavior/capability references only. Their implementations and SDKs
+are not the platform. The user confirmed this design after the
+[architecture diagram](architecture.svg) and companion
+[ownership/contracts specification](architecture.md) were produced.
 
 ## Platform ownership
 
 | Component | Implementation and responsibility |
 | --- | --- |
-| Native execution engine | C++ model/tool loop, cancellation, deadlines, bounded retry and context management; reused by single agents and graph agent nodes |
-| Session/event repository | C++ contracts performing all SQLite operations through embedded xlang3, with owned buffers, explicit transactions, run ownership, monotonic events, checkpoints and restart recovery |
+| Native execution engine | C++ model/tool loop, cancellation, deadlines, retry and context management; reused by single agents and graph agent nodes |
+| Session/event repository | C++ contracts performing all SQLite I/O through embedded xlang3, with owned buffers, transactions, run ownership, monotonic events, checkpoints and recovery |
 | Graph scheduler | C++ validation, dependencies, conditions, parallel branches, bounded loops, human pauses and durable effect/checkpoint handling |
-| Tools and permissions | C++ workspace tools, search/edit/patch, process/PTY, Git, snapshots and explicit policy/approval enforcement |
-| Models/providers | C++ adapters for provider-specific authentication, wire protocols, streaming, tool calls, reasoning and multimodal inputs; LiteLLM coverage reference |
-| Shared service | Native HTTP/JSON/SSE transport with versioned endpoints, authentication, event replay and graceful shutdown |
-| MCP/A2A | C++ clients and servers over approved native transports, sharing execution, tool permissions and persistence |
+| Tools and permissions | C++ workspace tools, search/edit/patch, process/PTY, Git, snapshots and policy/approval enforcement |
+| Models/providers | C++ provider authentication, wire serialization, HTTP/SSE, tool calls, reasoning and multimodal adaptation; LiteLLM is the coverage reference |
+| Local service | Native HTTP/JSON/SSE with versioned endpoints, authentication, event replay and graceful shutdown |
+| MCP/A2A | C++ clients/servers sharing execution, tool permissions and persistence |
 | CLI | Native C++ client and interactive interface over the same backend |
-| VS Code | Thin JavaScript/TypeScript extension required by the editor host; displays native-backend state, context, diffs and approvals |
-| xlang3 | Embedded through its supported native SDK for user scripts, skills and pure-Python libraries. No CPython execution |
+| Browser and VS Code | Thin view/host adapters display backend-owned sessions, models, context, metrics, diffs and approvals |
+| Connection profiles | OSS Local/Nexus protocol and local worker binding; private Nexus owns team policy, shared storage and distributed scheduling |
+| xlang3 | Supported embedding/native SDK for database I/O, scripts, skills and pure-Python libraries; no CPython interpreter or native extension fallback |
 
-Native infrastructure libraries such as a JSON parser, SQLite and HTTP/TLS libraries are allowed. Select and pin their versions and licenses after checking existing dependencies and Windows build support. Do not rewrite cryptography or a database engine as application code. No native dependency selection has been finalized by this document.
+Native infrastructure dependencies are pinned by the current build and license
+inventory. C++ uses native HTTP/TLS and credential protection rather than
+reimplementing cryptography. Production SQLite I/O still goes through xlang3;
+the direct-SQLite reference is not production persistence. See
+[native development](native-development.md) for build selection and prerequisites.
 
-## Existing source and migration
+## Current source and verification
 
-The original `Core` used the old xlang package/embedding ABI. That source, its CLI/service/plugin assets and the old dependency instructions have been removed from the working tree; Git history preserves them. Root CMake now delegates to `Native/`, which uses xlang3’s supported SDK with explicit ownership/lifetime contracts.
+The original `Core` used the old xlang package/embedding ABI. That source and
+its CLI, configuration, service, debug-plugin and legacy dependency assets were
+removed. The Python/FastAPI `agentflow` prototype, dependent launcher/probes and
+their status mappings were removed too. Git history retains their license and
+source provenance. The user explicitly authorized this cleanup. Root CMake now
+delegates to `Native/`, which uses xlang3's supported SDK and explicit lifetime
+contracts. Maintained documents and inventories live in `doc/`.
+[Cleanup scope](cleanup.md).
 
-The `agentflow` Python package, Python launch/setup scripts and their checks remain historical prototype evidence. Do not continue adding production functionality there or count their passing checks toward C++ delivery. Retain them until native contracts replace their useful scenarios; no destructive cleanup is authorized by the architecture change.
+The exact cleanup source `dea588874e5a8c8e40bf1a158fa925520443c8a0` passed its
+hosted **58 native, 88 extension and 17 browser contracts**, native/browser
+integration and VSIX verification, with no failures/skips.
+[Evidence](evidence/native-cleanup-hosted-provenance.json).
+The later Gemini transport/replay source
+`ddd1d3da087f9ca7f8b0b8d81705c82632e15094` passed its separate hosted **60
+native, 88 extension and 17 browser contracts**, with the same integration and
+package checks. [Evidence](evidence/native-gemini-transport-hosted-provenance.json).
 
-`doc/OPENCODE_API_INVENTORY.json` maps all 136 pinned API operations to required behavior and source contracts. Twelve partial equivalents point at the historical prototype, not native completion. The inventory is only the API portion: tools, plugins, context management and editor workflows require additional source-level comparison. Do not transplant OpenCode code.
+The committed common Gemini gateway/history source
+`75f45f0a036f1ffbab8c4b157df364f3697b52a0` awaits hosted validation. Its local
+compiled baseline passed **61 native, 91 extension and 17 browser contracts**
+and native/browser integration. Callback assertions and a large function-response
+correction added after compilation remain excluded from that pass claim.
+[Exact local scope](evidence/native-gemini-history-local-provenance.json).
+The newer Gemini AgentRunner contract increased the native manifest to **62**;
+all 62 passed locally in **100.44 seconds**, including those earlier exclusions.
+Actual native file reads and signed history continuation after xlang3 SQLite
+reopen passed with independent synthetic provider replies. Browser/native
+integration passed again against the rebuilt backend; current thin-client
+sources retain their 91/17 pass. [Current evidence](evidence/native-gemini-agent-local-provenance.json).
+Live Gemini inference and product enrollment remain incomplete.
+The installed browser preview retains its separately verified native `19d69dd`
+and view `6f32d215` snapshots. [Current validation](VALIDATION_STATUS.md).
 
-## Implementation sequence
+[OPENCODE_API_INVENTORY.json](OPENCODE_API_INVENTORY.json) records **136** pinned
+operations with acceptance requirements, **zero** removed-prototype mappings,
+**23** partial native source candidates and **113** unmapped operations. No
+operation is claimed as verified parity. Tools, plugins, context management,
+providers and editor workflows require additional source/behavior comparison.
+[Parity scope](PARITY.md).
 
-1. Establish an independent native CMake target and contract tests, keeping the old runtime build out of the new target. Fix supported xlang3 SDK selection and Windows native dependency linking without modifying the other xlang3 checkout.
-2. Implement the native session/run/event repository with transactional state transitions, atomic event publication, restart recovery and concurrent-client tests. Add typed execution and provider/tool contracts.
-3. Implement native HTTP service and CLI for the same versioned session/run contract. Validate cross-client state and reconnect before migrating the extension connection.
-4. Implement the model/tool engine and native provider adapters, then permissions, coding tools, snapshots and diff review. Validate real provider and coding tasks, not only test doubles.
-5. Add native protocol interoperability and graph execution with durable checkpoints, then complete CLI/editor and the pinned parity requirements.
+## Remaining delivery work
 
-Full C++ implementation remains outstanding. The native SQLite store, independent CMake target and transaction/concurrency contract tests are prepared but uncompiled and unverified. Build and test instructions are in `../doc/native-development.md`. Existing xlang3 benchmarks in the other checkout are live; defer competing resource-heavy builds until they finish. Native AES-GCM work remains separate and unverified. SDK-specific compatibility work no longer gates the C++ core, but confirmed missing APIs must still be discussed before changing xlang3 native capabilities.
+1. Complete broad provider and model capability/authentication coverage through
+   the shared native gateway, with actual agent/tool continuation, enrollment,
+   discovery, persisted replay and live-provider acceptance.
+2. Complete native coding workflows, including context compaction, instructions,
+   skills/plugins, patch/diff review, snapshots, diagnostics and terminal behavior.
+3. Finish MCP/A2A interoperability and remote delegation, graph behavior and
+   recovery against independent peers and actual coding tasks.
+4. Complete CLI, browser and right-sidebar acceptance over the common backend,
+   preserving backend-owned permissions, history, metrics and recovery.
+5. Implement the OSS Local/Nexus connection and local-worker contracts without
+   moving private team services or PostgreSQL into this repository.
+6. Establish release acceptance against the pinned parity inventory, reproducible
+   builds and accurately scoped evidence. Contract counts are not completion
+   percentages.
+
+Recheck the sibling xlang3 benchmark guard before competing native builds.
+Execute allowed Python sources with xlang3. Discuss exact missing native APIs
+before changing xlang3 or selecting a workaround; isolate authorized fixes in
+branches and preserve the sibling checkout/goal.

@@ -18,19 +18,25 @@ failures/skips. [Hosted run](https://github.com/xlang-foundation/xMind/actions/r
 This verifies native request/SSE/HTTP components and expanded replay data;
 it excludes the newer common gateway, history bridge and limit fixes below.
 
-Newer working source passed **61 native contracts** locally in **103.05 seconds**,
-**91 extension and 17 browser checks**, plus actual browser/native integration.
-This includes Gemini SSE, native HTTP transport, expanded replay data, common
-model gateway and the agent-history bridge. Additional callback ordering/usage
-assertions and a function-response bound correction with escaped large-read
-regressions were added after compilation; those changes await execution and are
-excluded from the pass claim. A sibling runtime benchmark
-prevents a local C++ rebuild. Hosted execution of this checkpoint is still
-required. [Local log/provenance](evidence/native-gemini-history-local-provenance.json).
+Newer working source passed **62 native contracts** locally in **100.44 seconds**.
+It includes Gemini SSE/HTTP, expanded replay data, common model gateway, history
+bridge, stronger callback ordering/usage assertions and escaped large-read
+response-limit regressions. The new native agent contract executes two actual
+file reads, closes/reopens xlang3 SQLite, replays exact signed receipts/results
+through a new run, and rejects malformed/truncated/unoffered calls without effects.
+All cases compiled and passed; there are no post-build exclusions in this gate.
+The earlier 61-contract log retains its historical exclusions.
+[Current local log/provenance](evidence/native-gemini-agent-local-provenance.json).
+
+Current thin-client sources are unchanged from the **91 extension and 17 browser**
+pass; source equality is recorded. Actual browser/native integration passed again
+against the newly compiled server with disposable processes/database. Hosted
+execution of this exact newer checkpoint remains required.
 
 The [Gemini bridge](native-gemini-history.md) uses labelled synthetic component
-and socket fixtures. No live Gemini inference, product enrollment or actual
-Gemini AgentRunner execution is claimed. Thin clients can display the new wire;
+and socket fixtures. Actual native AgentRunner/file/SQLite acceptance is now
+verified with synthetic provider replies; live Gemini inference and product
+enrollment remain unverified. Thin clients can display the new wire;
 default discovery/enrollment remains unchanged.
 
 The installed browser preview retains its separate verified native `19d69dd`

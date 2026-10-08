@@ -2,6 +2,55 @@
 
 Current completion scope is the [revised xMind OSS specification](architecture.md). Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE are excluded and reserved for Nexus. Historical checkpoint paragraphs below preserve their original source/time scope and do not reinstate those requirements.
 
+## Current checkpoint scope
+
+The user-requested native-only cleanup was committed and pushed as
+`dea588874e5a8c8e40bf1a158fa925520443c8a0`. The Python agent prototype and
+old xlang Core/service/plugin assets are removed, root CMake delegates to
+`Native/`, and maintained documentation is merged into `doc/`. Its hosted gate
+passed **58 native, 88 extension and 17 browser contracts**, native/browser
+integration and VSIX verification, with no failures/skips.
+[Exact cleanup evidence](evidence/native-cleanup-hosted-provenance.json).
+
+Gemini transport/replay source
+`ddd1d3da087f9ca7f8b0b8d81705c82632e15094` passed a separate hosted gate:
+**60 native, 88 extension and 17 browser contracts**, native/browser integration
+and VSIX verification, with no failures/skips. This verifies native request,
+SSE/HTTP transport and signed replay DTOs with synthetic socket fixtures.
+[Exact transport evidence](evidence/native-gemini-transport-hosted-provenance.json).
+
+The committed common gateway/history source
+`75f45f0a036f1ffbab8c4b157df364f3697b52a0` awaits its own hosted result. Its
+compiled local baseline passed **61 native, 91 extension and 17 browser
+contracts**, plus native/browser integration. Callback assertions and the
+large function-response bound correction were added after compilation and are
+excluded from that result. [Local scope and exclusions](evidence/native-gemini-history-local-provenance.json).
+The newer Gemini AgentRunner contract increased the manifest to **62 native
+contracts**; all 62 passed locally in **100.44 seconds**, including the earlier
+callback and large-result exclusions. The native agent executed real file reads,
+reopened xlang3 SQLite and replayed signed history without repeating tools.
+Provider replies are synthetic; Settings enrollment, discovery and live Gemini
+inference remain incomplete. Current thin-client sources retain the 91/17 pass,
+and browser/native integration passed again against the rebuilt server.
+[Current local evidence](evidence/native-gemini-agent-local-provenance.json).
+
+The installed browser preview is still the separately verified native
+`19d69dd` and view `6f32d215` pair. These source checkpoints do not imply a
+preview upgrade. [Current validation](VALIDATION_STATUS.md),
+[installed provider scope](provider-setup.md).
+
+All counts describe bounded verification, not product or OpenCode parity
+percentages. Broad native providers, full coding workflows, remaining MCP/A2A,
+graph behavior and Local/Nexus connection contracts remain active work.
+
+## Historical native milestone records
+
+The records below retain their original revision/time and fixture scope. Words
+such as "current", "now", "pending" and installed-preview descriptions inside
+these records apply to that historical checkpoint; the summary above is the
+current source/verification status. No removed prototype is a supported runtime
+or delivery requirement.
+
 Native Responses provider checkpoint: explicit C++ wire selection now reaches the shared single-agent and graph engine, preserving stateless reasoning/tool continuation, actual supplied token metrics and persisted conversation replay. Two dependent agents perform actual file reads; provider-native items stay in child conversations rather than graph dependency/join outputs. Final local Release validation passed **52 native and 60 extension contracts**, no skips. [Scope and evidence](native-responses-provider.md). Inference/opaque reasoning are synthetic; live provider/IDE acceptance, interactive wire enrollment, standalone browser UI, broader provider coverage and full product parity remain pending.
 
 The earlier native A2A v1 source `d07c61c725c3a1a4bf9ac85a2c6782575e52d8df` passed hosted **50 native and 60 extension contracts**, no skips, in [run 37693026697](https://github.com/xlang-foundation/xMind/actions/runs/37693026697). [Original full hosted job](evidence/native-a2a-v1-hosted-job.log). This result applies to that source, not the newer history/Responses changes or installed UI runtimes.

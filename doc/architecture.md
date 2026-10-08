@@ -166,7 +166,7 @@ Retry transient provider failures only within explicit limits and before externa
 
 ## Build and migration boundaries
 
-Keep the new native target independent of the legacy `ThirdParty/xlang` build. Pin native infrastructure dependencies and licenses. Port useful xMind behaviors through tests rather than assume the old package ABI is compatible. The earlier Python/FastAPI prototype and its dependent probes/launcher were removed at the user's request. Git history preserves that material; it is not production implementation evidence. Generic xlang3 dependency and native-runtime probes remain separate from the agent backend.
+The legacy `ThirdParty/xlang` build, Core/services/plugins and Python/FastAPI prototype were removed at the user's request. Root CMake delegates to `Native/` and uses the supported xlang3 SDK. Native infrastructure dependencies and licenses remain pinned. Useful xMind behaviors require native acceptance tests; the old package ABI does not establish compatibility. Git history preserves the removed material, which is not production implementation evidence. Generic xlang3 dependency and native-runtime probes remain separate from the agent backend.
 
 First establish native persistence and event contracts, then the service/CLI, engine/provider/tools, protocol interoperability, graph execution and editor workflows. The pinned OpenCode API inventory and LiteLLM provider inventory guide coverage. Source presence and catalogue entries alone do not prove parity. The requested platform remains incomplete until native behavior, live peers/providers and actual IDE interaction have been validated.
 
