@@ -9,7 +9,7 @@ bool identity(const std::string& id,const SecretBytes& key){
     if(id.empty()||id.size()>256||id.starts_with("sk-")||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)return false;
     const auto bytes=key.view();std::size_t difference=id.size()^bytes.size();
     for(std::size_t i=0;i<bytes.size();++i)difference|=bytes[i]^(i<id.size()?static_cast<unsigned char>(id[i]):0);
-    return difference!=0;
+    return difference!=0&&std::search(id.begin(),id.end(),bytes.begin(),bytes.end())==id.end();
 }
 std::string encode(const std::string& value){const char* hex="0123456789ABCDEF";std::string result;for(unsigned char ch:value){if((ch>='a'&&ch<='z')||(ch>='A'&&ch<='Z')||(ch>='0'&&ch<='9')||ch=='-'||ch=='_'||ch=='.'||ch=='~')result+=ch;else{result+='%';result+=hex[ch>>4];result+=hex[ch&15];}}return result;}
 Json parse(const std::string& source){

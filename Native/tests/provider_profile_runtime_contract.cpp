@@ -51,7 +51,7 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         rejects<Conflict>([&]{runtime.discover_models("claude","anthropic.messages",key(""),1);});
         rejects<std::invalid_argument>([&]{runtime.discover_models("openai","anthropic.messages",key("runtime-claude-fixture-key"),2);});
         rejects<std::invalid_argument>([&]{runtime.discover_models("unknown","anthropic.messages",key(""),2);});
-        for(const auto* failed:{"runtime-malformed-catalogue-key","runtime-loop-catalogue-key","runtime-reflected-catalogue-key","runtime-redirect-catalogue-key","runtime-page-limit-key","runtime-entry-limit-key"})rejects<TransportError>([&]{runtime.discover_models("claude","anthropic.messages",key(failed),2);});
+        for(const auto* failed:{"runtime-malformed-catalogue-key","runtime-loop-catalogue-key","runtime-reflected-catalogue-key","runtime-prefixed-reflection-key","runtime-redirect-catalogue-key","runtime-page-limit-key","runtime-entry-limit-key"})rejects<TransportError>([&]{runtime.discover_models("claude","anthropic.messages",key(failed),2);});
         std::stop_source cancelled;cancelled.request_stop();rejects<TransportCancelled>([&]{runtime.discover_models("claude","anthropic.messages",key(""),2,cancelled.get_token());});
         require(runtime.configuration().revision==2&&runtime.configuration().active=="openai"&&store.credentials("server").get().size()==2,"Saved-key or failed discovery cannot change registry, selection or credentials");
         store.create_session("openai-first","Profile OpenAI fixture").get();runtime.submit("openai-first-run","openai-first","OpenAI profile fixture");

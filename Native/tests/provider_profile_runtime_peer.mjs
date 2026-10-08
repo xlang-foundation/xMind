@@ -30,6 +30,7 @@ const server=createServer((request,response)=>{
       response.writeHead(200,{'Content-Type':'application/json'});
       if(key==='runtime-malformed-catalogue-key'){response.end('{"data":[],"has_more":false,"has_more":true,"last_id":null}');return;}
       if(key==='runtime-reflected-catalogue-key'){response.end(JSON.stringify({data:[{type:'model',id:key}],has_more:false,last_id:key}));return;}
+      if(key==='runtime-prefixed-reflection-key'){const id='model-'+key;response.end(JSON.stringify({data:[{type:'model',id}],has_more:false,last_id:id}));return;}
       if(key==='runtime-loop-catalogue-key'){response.end(JSON.stringify({data:[{type:'model',id:'fixture-claude'}],has_more:true,last_id:'fixture-claude'}));return;}
       if(key==='runtime-entry-limit-key'){response.end(JSON.stringify({data:Array.from({length:4097},(_,i)=>({type:'model',id:'fixture-entry-'+i})),has_more:false,last_id:null}));return;}
       if(key==='runtime-page-limit-key'){const id='fixture-page-'+(++pageLimitPages);response.end(JSON.stringify({data:[{type:'model',id}],has_more:true,last_id:id}));return;}
