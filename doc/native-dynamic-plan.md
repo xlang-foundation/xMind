@@ -12,6 +12,15 @@ were verified. Rebuilt server/browser adapter integration and verification of
 The installed preview remains the separately verified `ace2460` schema-v10
 backend. Live-provider planning and installed VS Code acceptance remain pending.
 
+The disposable preview migration acceptance has not passed. A separate file-only
+comparison using the exact hosted xlang3 runtime reproduced a Windows file-open
+gap: identical bytes read successfully at a 226-character path and fail with
+`FileNotFoundError` at 288 characters. The closed-ledger reproduction fails while
+opening the generated schema file, before connecting SQLite. Both failed fixture
+attempts and the new raw diagnostics are retained privately; no installed preview
+or native SDK source changed. The [derived probe summary](evidence/native-dynamic-plan-preview-probe.json)
+records exact hashes, scope and remaining upgrade checks.
+
 An eligible ordinary Agent receives `plan_tasks`, `revise_plan` and
 `inspect_plan`. The model can select agent tasks and human questions, then
 revise work that has never been claimed. A plan belongs to the same ordinary

@@ -1,5 +1,15 @@
 # Current native validation
 
+The schema-v11 preview upgrade remains **uninstalled**. Two disposable migration
+attempts failed and are retained. A separately guarded diagnostic confirmed that
+the exact xlang3 runtime reads an identical schema file at a 226-character Windows
+path but fails to open its existing 288-character copy with `FileNotFoundError`,
+before the ledger probe connects SQLite. No managed database, provider or SDK
+source was changed. This is a native file-access compatibility finding, not a
+passing migration/rollback result. The proposed branch fix is being discussed
+under the user's requirement to discuss new native gaps first.
+[Derived diagnostic summary and exact acceptance limits](evidence/native-dynamic-plan-preview-probe.json).
+
 Exact source `3fc420480f61db75d3efaf4bda77fbefd8246166` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37808089507): **77 native contracts in 206.89 seconds**, **119 extension tests in 2.4612639 seconds** and **26 browser tests in 1.3989153 seconds**. All 16 job steps passed, with the exact complete native manifest, zero failures/skips, model-free browser/native integration and 18 verified VSIX assets. Original logs, advertised archive digests and exact source/runtime maps were verified. Provider replies remain synthetic; this establishes the source checkpoint rather than installed or live planning acceptance. The installed preview remains ace/schema v10. [Artifact-bound hosted evidence](evidence/native-dynamic-plan-hosted-provenance.json).
 
 The initial native dependency-planning checkpoint (schema v11) passed the complete guarded local **77-contract gate in 153.88 seconds**, with the exact expected/registered/passed manifest and all **421 frozen native source hashes** verified. Native contracts cover model-selected agent/human dependencies, an actual failed investigation, same-plan revision, clean pause/reopen, authenticated same-owner input, a separately approved coding-child edit and a dependent verification read. Provider replies, signatures and keys are synthetic; execution, files, permissions, transport and embedded-xlang3 SQLite are real. **119 extension and 26 browser contracts** passed at their separate renderer/controller scope. The earlier **68/77** and **76/77** gate failures remain separate retained attempts. [Initial implementation and limits](native-dynamic-plan.md), [local source and gate evidence](evidence/native-dynamic-plan-local-provenance.json).

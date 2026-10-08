@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "derived scalar summary of retained private diagnostics",
+  "dateUtc": "2026-10-08",
+  "sourceRevision": "3fc420480f61db75d3efaf4bda77fbefd8246166",
+  "hostedRun": "https://github.com/xlang-foundation/xMind/actions/runs/37808089507",
+  "runtimeSourceRevision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "runtimeExecutableSha256": "273af7f4464665982dbd5866f2707d15485b672444ef6e17b1da02e46034f5f1",
+  "runtimeFilesVerified": 29,
+  "installedPreviewChanged": false,
+  "installedNativeRevision": "ace246094f6c1fc8cf61c146cfe001c63f1bbc8f",
+  "installedSchemaVersion": 10,
+  "disposableMigrationAttempts": [
+    {
+      "attempt": 1,
+      "passed": false,
+      "failureCode": "fixture_v10_v11_preservation_failed",
+      "fixtureHelperSha256": "cbe78289df17cb86426a184bc1717d151434b923930137b53f5c01637678a45b",
+      "finding": "Fixture compared native SQLite row-list slices directly with tuple literals. The fixture-only repair normalizes sequence type while retaining every expected value and preservation predicate.",
+      "nativeProductSourceChanged": false,
+      "originalPrivateSourceAndLogRetained": true
+    },
+    {
+      "attempt": 2,
+      "passed": false,
+      "failureCode": "fixture_native_closed_ledger_probe_failed",
+      "fixtureHelperSha256": "c7ff19ff10387e0d7e715c62302946c35513751afb36db52f5d9affbf9aeae57",
+      "originalProbeStderrAndStatusRetained": false,
+      "originalPrivateSourceLogAndClosedCopiesRetained": true,
+      "finding": "The original helper discarded subprocess stderr and status. A separate guarded reproduction below identifies a file-open failure; it does not recover the discarded output or establish that the complete migration fixture passed."
+    }
+  ],
+  "closedCopyReproduction": {
+    "benchmarkGuardUtc": "2026-10-08T17:25:44.6100172Z",
+    "matchingBenchmarkProcesses": 0,
+    "fixtureHelperSha256": "16ef5bc071586bd9a09fe2608ff7b7819467b7438edb0930c26e21b4cc40e137",
+    "runnerSha256": "84738009f0b1d04547019aeb21e6bed129e543f146f6114efdafd1c1d7ecedce",
+    "assertionsAndNativeQueryCodeUnchanged": true,
+    "source": "Closed synthetic migrated fixture; copied complete database/WAL/SHM set",
+    "status": 1,
+    "spawnError": false,
+    "stdoutBytes": 0,
+    "stderrBytes": 244,
+    "exceptionClass": "FileNotFoundError",
+    "exceptionMessage": "No such file or directory",
+    "generatedProbeLine": 7,
+    "failedStage": "open generated expected-schema.json before SQLite connection",
+    "schemaFileExists": true,
+    "schemaPathCharacters": 288,
+    "schemaBytes": 24042,
+    "rawStreamsAndExitMetadataRetainedPrivately": true,
+    "managedStateAccessed": false,
+    "providerUsed": false
+  },
+  "schemaFileOnlyComparison": {
+    "benchmarkGuardUtc": "2026-10-08T17:28:23.8883538Z",
+    "matchingBenchmarkProcesses": 0,
+    "runnerSha256": "cf3157efea06192f6472ae0882f46e996fe08283e6db6eb0d88d4a9038897992",
+    "identicalFileBytes": true,
+    "fileSha256": "7df0efab7510ac5f7d6250118756b76dcea52ce7416ac01bfc52f52a91372067",
+    "fileBytes": 24042,
+    "records": [
+      {
+        "pathCharacters": 226,
+        "status": 0,
+        "exactReadSizeMatched": true,
+        "exceptionClass": null
+      },
+      {
+        "pathCharacters": 288,
+        "status": 1,
+        "exactReadSizeMatched": false,
+        "exceptionClass": "FileNotFoundError"
+      }
+    ],
+    "sqliteInvoked": false,
+    "managedStateAccessed": false,
+    "providerUsed": false,
+    "rawStreamsRetainedPrivately": true
+  },
+  "scope": {
+    "observed": "Exact Windows xlang3 runtime reads the bound schema file at a 226-character path and fails to open the identical existing file at a 288-character path.",
+    "notEstablished": [
+      "Specific native implementation cause or complete Windows path compatibility",
+      "Passing complete schema 10-to-11 migration and rollback fixture",
+      "Old native binary rejection of schema 11 without logical mutation",
+      "Post-upgrade new-work or owner-loss rollback refusal acceptance",
+      "Installed schema 11 preview, live-provider planning or installed VS Code acceptance"
+    ],
+    "proposedResolution": "Discuss the new native gap with the user, implement Windows long-path support on a separate xlang3 branch if selected, then complete runtime correctness/performance and xMind upgrade acceptance gates.",
+    "nativeSdkFixImplemented": false,
+    "cpythonExecuted": false,
+    "rawPrivateOutputPublished": false
+  }
+}
