@@ -8,6 +8,8 @@ struct GeminiPart {
     GeminiPartKind kind=GeminiPartKind::text;
     std::string text,name,object_json="{}";
     std::optional<std::string> call_id,thought_signature;
+    // Preserve absent/false/true independently when replaying model parts.
+    std::optional<bool> thought;
 };
 struct GeminiContent {GeminiRole role=GeminiRole::user;std::vector<GeminiPart> parts;};
 struct GeminiRequest {

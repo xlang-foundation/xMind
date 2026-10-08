@@ -64,6 +64,10 @@ std::string serialize_gemini_request(const GeminiRequest& request){
                 if(content.role!=GeminiRole::model||part.thought_signature->empty()||part.thought_signature->size()>65536||part.thought_signature->find('\0')!=std::string::npos)throw std::invalid_argument("Invalid Gemini thought signature");
                 account(part.thought_signature->size());encoded+=",\"thoughtSignature\":"+quoted(*part.thought_signature);
             }
+            if(part.thought){
+                if(content.role!=GeminiRole::model)throw std::invalid_argument("Thought metadata requires a model part");
+                encoded+=*part.thought?",\"thought\":true":",\"thought\":false";
+            }
             encoded+='}';body+=encoded;
         }
         if(answering&&!pending.empty())throw std::invalid_argument("Gemini continuation requires all function results in one user turn");

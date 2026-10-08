@@ -7,6 +7,12 @@ opaque thought signatures. Provider call IDs remain optional and are never
 invented. Unknown function capability, mismatched or incomplete results,
 duplicates, malformed JSON and excessive input are rejected.
 
+Model parts retain the optional `thought` flag, including the distinction
+between absent and explicitly false. Signed thought summaries remain separate
+from visible answer parts; the serializer preserves their order and signature
+attachment. User/tool-result thought metadata is rejected. This is history
+serialization only, not a reasoning display or streaming implementation.
+
 The wire-specific DTO keeps model endpoint selection and credentials outside
 the request body. It is not connected to the execution platform or provider
 selector. Native transport, streaming/event translation, engine-history

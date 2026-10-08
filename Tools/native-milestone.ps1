@@ -4,6 +4,7 @@ param(
     [string]$RuntimeDirectory='D:\CantorAI2026\xlang3\build\Release',
     [string]$PythonLibSource='C:\Python\Python314\Lib',
     [string]$BuildDirectory,
+    [string]$RuntimeSource='D:\CantorAI2026\xlang3',
     [long]$After=0
 )
 $ErrorActionPreference='Stop'
@@ -25,7 +26,7 @@ if($Action -eq 'Build') {
     if($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
     $cmakeExecutable='C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe'
     if(-not (Test-Path -LiteralPath $cmakeExecutable)) { $cmakeExecutable=(Get-Command cmake -ErrorAction Stop).Source }
-    & $cmakeExecutable -S (Join-Path $projectRoot 'Native') -B $nativeBuild -G 'Visual Studio 18 2026' -A x64 "-DAGENTFLOW_XLANG3_RUNTIME_DIR=$RuntimeDirectory" "-DAGENTFLOW_PYTHON_LIB_SOURCE=$PythonLibSource"
+    & $cmakeExecutable -S (Join-Path $projectRoot 'Native') -B $nativeBuild -G 'Visual Studio 18 2026' -A x64 "-DAGENTFLOW_XLANG3_SOURCE=$RuntimeSource" "-DAGENTFLOW_XLANG3_RUNTIME_DIR=$RuntimeDirectory" "-DAGENTFLOW_PYTHON_LIB_SOURCE=$PythonLibSource"
     if($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
     & $cmakeExecutable --build $nativeBuild --config Release --parallel 1
     if($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
