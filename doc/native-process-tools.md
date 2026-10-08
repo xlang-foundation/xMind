@@ -1,5 +1,20 @@
 # Native coding process tools — implementation contract
 
+The installed verified runtime `4fc1148` has now completed one live
+`gpt-5.6-sol` Responses command cycle through the native CLI and shared browser.
+A trusted `git-status` profile binds the installed Git executable, read-only
+status arguments and a three-second budget. The authorized validation controller
+checked the exact executable/profile revision, native binding, arguments,
+directory and expiry before sending `/allow`. Native execution recorded exit
+zero, retired its process tree and persisted stdout/stderr plus an output event.
+Both streams matched an independent Git invocation. The browser displayed the
+actual command, retained output, outcome and both responses' supplied metrics.
+[Live evidence](evidence/live-responses-git-status.json) records sanitized
+results. This verifies that one registered foreground command, not shell,
+background/PTY, build/test automation or complete coding parity. Older milestone
+statements below retain their original scope; the primary VS Code preview was
+not replaced or populated for this check.
+
 The foreground process milestone passed at source `3297a4bce2d591c0f1c1dd37ccc18a15297369e7`: **35 native and 40 extension contracts passed** in [run 37635775031](https://github.com/xlang-foundation/xMind/actions/runs/37635775031). [Original complete CTest output](evidence/native-process-passing-ci-ctest.log), [original job log including extension TAP](evidence/native-process-passing-ci-job.log), [provenance](evidence/native-process-passing-ci-provenance.json). Actual Windows child/file effects verify tree cleanup, exact approvals/executable bindings, xlang3-backed profile/output persistence, storage failures/quarantine, model/admin/server/CLI continuation and watcher reconnect. Inference is synthetic; renderer/host fixtures are labelled. The [actual unseeded right-sidebar preview](evidence/vscode-native-process-bundle-sidebar.png) now uses this tested bundle with its existing database/profile preserved. No model or process profile is seeded; live coding and populated editor process execution remain unverified. Shell parsing/discovery, background jobs, PTY, full-output artifacts and broader parity remain required. Earlier failures/pending statements below retain their historical source scope and are superseded only by this exact passing result.
 
 Adapter source `6e348ad1b142f44a05b9c03f333c82eb79b474ff` built in Release, but [isolated run 37624585693](https://github.com/xlang-foundation/xMind/actions/runs/37624585693) failed one of 32 native contracts: `native_process_adapter_contract` reported `Owned process exit is not established`. The other 31 native contracts passed. [Original complete CTest log](evidence/native-process-adapter-ci-failure.log), [original provenance](evidence/native-process-adapter-ci-failure-provenance.json). Extension tests were skipped and no runtime bundle was published. This is not a process milestone pass. The actual editor preview remains on the earlier verified creation bundle.

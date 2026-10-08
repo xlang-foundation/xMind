@@ -85,3 +85,13 @@ by the authorized validation controller, not claimed as a human button click.
 Existing conversations and provider configuration survived the configuration
 restart. Other previews were not restarted. Process profiles, MCP/A2A live
 acceptance and complete coding parity remain unfinished.
+
+One registered foreground command has now also passed live acceptance:
+`gpt-5.6-sol` selected the backend's `git-status` profile with no extra arguments.
+After exact native CLI proposal review and approval by the authorized validation
+controller, Git exited zero. The operation recorded `succeeded`, its owned
+process tree was retired, and retained stdout/stderr matched an independent Git
+status invocation. An actual output event, command outcome and per-response
+usage rendered in the browser. [Process evidence](evidence/live-responses-git-status.json)
+contains sanitized checks. This extends acceptance to one registered foreground
+process; shell/background/PTY and broader workflow parity remain incomplete.

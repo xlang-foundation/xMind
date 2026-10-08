@@ -1,0 +1,40 @@
+{
+  "revision": "4fc1148239c66db59634039defa68b7b61e8ef01",
+  "model": "gpt-5.6-sol",
+  "wire": "responses",
+  "scope": "One real model-selected registered Git status command approved through native CLI; not shell/background/PTY or general coding parity",
+  "terminal": "run.completed",
+  "exitStatus": 0,
+  "proposalReviewed": true,
+  "operationState": "succeeded",
+  "processExitCode": 0,
+  "processTermination": "exited",
+  "processTreeRetired": true,
+  "stdoutMatchesIndependentGit": true,
+  "stderrMatchesIndependentGit": true,
+  "stdoutBytes": 78,
+  "stderrBytes": 0,
+  "outputEvents": 1,
+  "responseMatches": true,
+  "usage": {
+    "completion_tokens": 9,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "input_tokens": 1851,
+    "input_tokens_details": {
+      "cache_write_tokens": 169,
+      "cached_tokens": 1679
+    },
+    "output_tokens": 9,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 1851,
+    "prompt_tokens_details": {
+      "cache_write_tokens": 169,
+      "cached_tokens": 1679
+    },
+    "total_tokens": 1860
+  }
+}
