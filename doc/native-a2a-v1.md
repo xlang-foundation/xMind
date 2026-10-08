@@ -1,5 +1,20 @@
 # Native A2A 1.0 core operations
 
+Live acceptance on installed checkpoint `4203b84678b51b2ae7c6ee47fccfa14b684680ae`:
+the official SDK **1.3.0** discovered the native interface and submitted one real
+minimal text request over A2A 1.0. The shared C++ executor used the saved encrypted
+OpenAI credential and `gpt-5.6-sol` Responses adapter. The task completed with the
+expected text, and `GetTask` returned its durable input history and artifact.
+Repeating the same message ID returned the same completed task, including after
+a native backend restart. History, run records and events were unchanged, with
+one recorded model completion. The browser displayed the same conversation and
+actual supplied usage: 1,651 input, 13 output and 1,664 total tokens. Its saved
+connection survived reopening. [Bounded live evidence](evidence/live-a2a-responses.json).
+This verifies one local-owner text task and durable retry through an independent
+SDK client; it does not establish team authorization, remote delegation,
+all streaming/media operations or full protocol/product parity. The historical
+synthetic contract notes below retain their original checkpoint scope.
+
 The C++ adapter now implements the A2A 1.0 JSON-RPC wire for `SendMessage`, `SendStreamingMessage`, `GetTask`, `ListTasks`, `CancelTask` and `SubscribeToTask`. It shares the native executor, retry mappings and xlang3 persistence with the existing v0.3 interface. The protocol reference is the [A2A specification](https://a2a-protocol.org/latest/specification/), audited on 2026-10-07; the independent official SDK peer remains pinned at **1.3.0**. No JavaScript SDK is part of the production core.
 
 Send `A2A-Version: 1.0` to `/a2a` and to `/.well-known/agent-card.json`. Missing/empty version headers select v0.3; `0.3` explicitly selects the same legacy wire. Other versions fail before admission. The version-1 card exposes JSON-RPC interfaces for both versions with bearer security and the actual executable skills. A version-1 request uses its own operation names, enum strings, text parts and response envelopes, rather than accepting the legacy wire under a newer label.

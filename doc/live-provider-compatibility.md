@@ -95,3 +95,12 @@ status invocation. An actual output event, command outcome and per-response
 usage rendered in the browser. [Process evidence](evidence/live-responses-git-status.json)
 contains sanitized checks. This extends acceptance to one registered foreground
 process; shell/background/PTY and broader workflow parity remain incomplete.
+
+The installed native `4203b84` runtime also completed one live Responses request
+admitted by the independent official A2A SDK 1.3.0 over A2A 1.0. Task inspection
+and retries before/after native restart returned the same durable task without
+changing its history, runs or event journal. The shared browser displays its
+actual response and supplied usage. [A2A evidence](evidence/live-a2a-responses.json).
+This adds one local-owner external-client text flow; remote delegation, team
+authorization, broader live A2A coverage and full frontier-provider support
+remain incomplete.
