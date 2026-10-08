@@ -1,0 +1,19 @@
+{
+  "viewRevision": "58a7595ce24a6b5015a9bb7be9698105910a8c48",
+  "nativeRevision": "336f40cc4d8918614e8d31c2ef772c627e04707d",
+  "extensionTestsPassed": 80,
+  "browserTestsPassed": 15,
+  "actualBrowserNativeContractPassed": true,
+  "liveBrowserReloadRetainedAuthentication": true,
+  "nativeProcessRetained": true,
+  "providerRevisionBefore": 3,
+  "providerRevisionAfter": 3,
+  "profileCount": 1,
+  "savedOpenAIProfileVisible": true,
+  "addProfileChoiceVisible": true,
+  "claudeMessagesRouteVisibleAndSelectedAsDraft": true,
+  "providerKeyInputEmpty": true,
+  "modelChooserRemainsInFooter": true,
+  "newCredentialsSubmitted": false,
+  "scope": "Actual installed webpage Settings inspection through browser accessibility state and screenshot, with profile/API draft selection only. No Claude key entered, no new profile enrolled, no new inference or actual VS Code profile UI acceptance. Private screenshot and conversation records excluded from repository evidence."
+}

@@ -18,12 +18,17 @@ owned route; a later native save can rebind a model within that provider family.
 The prior single-OpenAI setup path remains for an explicitly missing profile API.
 
 Local validation passed **80 extension tests**, including profile controller,
-renderer and legacy host contracts, the existing 14 browser tests, an additional
-browser Settings/controller contract and the actual browser/native integration.
+renderer and legacy host contracts, **15 browser tests**, including the new
+Settings/controller contract, and the actual browser/native integration.
 Synthetic controller/DOM fixtures do not prove live account inference. Live
 Claude, actual VS Code profile UI acceptance, and atomic provider-profile revision
-binding on run admission remain required. The browser view upgrade and visual
-inspection are the next acceptance step.
+binding on run admission remain required. View source `58a7595` was installed at
+the existing webpage origin, retaining the native process and durable cookie.
+Actual browser inspection after reload confirmed saved OpenAI configuration,
+Add profile and Claude Messages setup with an empty key field, while the model
+chooser stayed in the footer. Provider revision 3 and the original profile were
+preserved. No new credential or inference was submitted
+([metadata-only acceptance](evidence/browser-provider-profile-settings.json)).
 
 ## Profile runtime in server startup
 
