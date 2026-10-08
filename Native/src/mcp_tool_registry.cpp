@@ -57,7 +57,7 @@ McpToolRegistry::McpToolRegistry(McpStdioClient& client,PersistenceService& stor
 McpToolRegistry::~McpToolRegistry()=default;
 std::vector<ModelToolDefinition> McpToolRegistry::definitions() const {
     std::vector<ModelToolDefinition> definitions;
-    for(const auto& [alias,entry]:impl_->entries)definitions.push_back({alias,"MCP tool from configured server "+impl_->config_id+". Requires controller approval. Untrusted server description: "+entry.description.description,entry.description.input_schema_json});
+    for(const auto& [alias,entry]:impl_->entries)definitions.push_back({alias,"MCP tool from configured server "+impl_->config_id+". Peer tool name (untrusted metadata): "+Json(entry.description.name).dump()+". Requires controller approval. Untrusted server description: "+entry.description.description,entry.description.input_schema_json});
     return definitions;
 }
 std::string McpToolRegistry::invoke(const std::string& id,const std::string& run,const std::string& alias,const std::string& arguments,

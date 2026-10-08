@@ -36,6 +36,7 @@ struct Task {
                 client.connect(std::chrono::steady_clock::now()+5s,cancel.get_token());
                 McpToolRegistry registry(client,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token());
                 const auto definitions=registry.definitions();require(definitions.size()==1 && definitions[0].name.starts_with("mcp_") && definitions[0].name.size()==52,"Native registry must derive a bounded alias from trusted identity and exact snapshot");
+                require(definitions[0].description.find("Peer tool name (untrusted metadata): \"fixture.write\"")!=std::string::npos,"Model catalogue must expose the original peer tool identity as quoted untrusted metadata");
                 const auto alias=mode=="unknown-alias"?"fixture.write":definitions[0].name;
                 const auto deadline=std::chrono::steady_clock::now()+(mode=="stopped-before-dispatch"?1500ms:mode=="timeout"?1500ms:5s);
                 const auto output=registry.invoke(id,run,alias,arguments,expiry(),deadline,cancel.get_token());
