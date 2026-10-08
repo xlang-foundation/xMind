@@ -90,9 +90,18 @@ request/authentication/version headers, text/tool-result continuation, unoffered
 tools, truncated streams, post-terminal errors, HTTP failures and forbidden
 redirects. The generic transport contract also checks that Claude headers are
 absent and unknown protocol values never reach the peer. These new adapter
-contracts have not yet executed: the local build guard found active sibling
-benchmark processes 26056, 24540 and 26516. Peer JavaScript syntax validation and
-source whitespace checks passed. The existing 54-test decoder result predates
-this transport change and does not establish adapter validation. Hosted build
-validation is the next gate; product enrollment and live Claude inference are
-still pending. The running preview retains its previously verified bundle.
+contracts initially waited for the local build guard to clear sibling benchmark
+processes 26056, 24540 and 26516. The subsequent build passed all **55 native
+contracts** in **92.54 seconds**, including the independent Claude adapter peer:
+[adapter log](evidence/native-anthropic-provider-local.log),
+[source/runtime provenance](evidence/native-anthropic-provider-local-provenance.json).
+This validates local request/HTTP/stream interoperability against synthetic wire
+events, not real Claude inference or product enrollment.
+
+The earlier hosted request checkpoint built successfully but its exact test-set
+guard rejected 53 registered contracts against an outdated 52-entry list, before
+CTest executed. [Failure provenance](evidence/native-anthropic-initial-ci-registration-failure.json).
+The guard now explicitly includes all three new Claude contracts and locally
+matches the full 55-entry configured set; its exact-set comparison is retained.
+Corrected hosted validation, product enrollment and live Claude inference remain
+pending. The running preview retains its previously verified bundle.

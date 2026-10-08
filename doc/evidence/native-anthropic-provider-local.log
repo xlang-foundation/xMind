@@ -1,0 +1,17 @@
+40/55 Testing: native_anthropic_provider_contract
+40/55 Test: native_anthropic_provider_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/anthropic_provider_peer.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_anthropic_provider_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_anthropic_provider_contract" start time: Oct 07 19:18 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Claude request/transport/stream adapter passed against an independent synthetic peer; no live inference or enrollment tested
+<end of output>
+Test time =   0.22 sec
+----------------------------------------------------------
+Test Passed.
+"native_anthropic_provider_contract" end time: Oct 07 19:18 Pacific Daylight Time
+"native_anthropic_provider_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+

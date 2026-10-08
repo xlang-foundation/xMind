@@ -1,0 +1,14 @@
+{
+  "nativeSource": "830e669f9295af9fa3b11e8c92acd57e8c7ab48f",
+  "currentRevision": "0a502b14c059abf301165061867d744049350219",
+  "nativePassed": 55,
+  "nativeFailed": 0,
+  "exitCode": 0,
+  "testTimeSeconds": 92.54,
+  "adapterSourceSha256": "7d56c5efab4085c5f6ff3a4b6f57b5d0a2f3301aeb7be59f35e7fae58cbb5436",
+  "transportSourceSha256": "34cc6d838ed1f869306042dfc431315458c994bb809e4cf79315beff4e83844d",
+  "contractBinarySha256": "64ee8ab8c77cc2ec46d222728536dbb9275436fa381e117d2a2baf54dba7f881",
+  "runtimeSha256": "fb02403bff1bf9967d5e49cb4f2a5a4f6d13ad139cc02b069e20fc03cc6c4862",
+  "fullPrivateLastTestSha256": "470a4c054069d3edeb88e1a263b805a9fdd5fbda52653c04053620a33fb0a659",
+  "scope": "Local native Claude request/HTTP/stream adapter with independent synthetic HTTP peer; all 55 native contracts passed. No enrollment, actual Claude inference or preview upgrade. Later docs/CI registration changes do not change compiled C++ sources."
+}
