@@ -16,3 +16,4 @@ doc/evidence/native-delegation-*.log -text whitespace=blank-at-eol,blank-at-eof,
 doc/evidence/native-delegation-passing-ci-job.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-delegation-browser-global-package.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-responses-diagnostic-*.log -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+doc/evidence/native-responses-diagnostic-hosted-ci-job.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

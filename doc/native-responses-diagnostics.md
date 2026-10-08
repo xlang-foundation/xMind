@@ -1,7 +1,8 @@
 # Native Responses mismatch diagnostics
 
-Status: implemented and locally validated, with terminal equality and rejection
-unchanged. This checkpoint adds evidence for a rejected Responses completion;
+Status: implementation checkpoint `7fe7ec9bd37c34863efc9f74e6508f0aba643d61`
+passed complete local and exact hosted gates, with terminal equality and
+rejection unchanged. It adds evidence for a rejected Responses completion;
 it does not fix live protocol compatibility or establish successful delegation.
 
 The full guarded local gate passed **71/71 native contracts in 130.49 seconds**,
@@ -14,15 +15,37 @@ the rebuilt server and unchanged source-repaired browser assets.
 [raw CTest](evidence/native-responses-diagnostic-local-ctest.log),
 [native/browser integration](evidence/native-responses-diagnostic-local-browser-native.log).
 
-The candidate changes three native source/test files over base
+That implementation changes three native source/test files over base
 `0c2624531011c9da70a8bb5c5bb2afee160ed199`; the provenance binds their exact
 tested contents instead of claiming the base commit contains the patch. The
 imported xlang3 SDK's two runtime binaries and 23 modules remained unchanged at
 runtime revision `4aea7d8fb24da9ba86f9d7eeb92820794f213d29`, with its CPython
 bridge disabled. Local standard-library source is allowed pure source, with no
 Git pin claimed. Frontend sources retain the prior **103 extension / 20 browser**
-results and 18-asset VSIX verification; those suites were not rerun for this
-native-only change.
+results and 18-asset VSIX verification; those suites were not rerun in the local
+native-only gate. The separate exact hosted gate did rerun them below.
+
+Exact [hosted run 37773043445](https://github.com/xlang-foundation/xMind/actions/runs/37773043445),
+job `113297055266`, passed all **71 native contracts in 188.04 seconds**,
+**103 extension contracts in 2.9270174 seconds**, **20 browser contracts in
+1.6413315 seconds**, native/browser integration and all **18 required VSIX
+assets**, with zero failures/skips and the exact complete native manifest.
+Its Responses unit/HTTP contracts took **0.03/2.79 seconds**. All 16 authentic
+API job steps succeeded at numbers 1–11 and 19–23.
+[Exact hosted provenance](evidence/native-responses-diagnostic-hosted-provenance.json),
+[raw CTest](evidence/native-responses-diagnostic-hosted-ctest.log),
+[raw job log](evidence/native-responses-diagnostic-hosted-ci-job.log).
+
+Both artifact archive digests, exact source, runtime/stdlib/SQLite pins and
+toolchain were verified. All **229 normalized compiled/gate/vendor hashes**
+match committed local evidence; **247 exact Git-blob hashes** also cover 18
+additional UI/build/package sources. Thirteen directly packaged UI source
+copies and the emitted production HTML match the exact commit, while copied
+renderer libraries/licenses match their packaged dependency bytes. The
+**29 runtime / 12 view / 30 VSIX file maps** are verified. The original job
+log's 172,607 bytes, UTF-8 BOM and emitted whitespace are preserved. Artifacts
+were downloaded and safely extracted into fresh owned directories, with no
+installation or live/private preview access.
 
 ## Event boundary
 
@@ -86,8 +109,9 @@ diagnostic. Its differing field remains unconfirmed; the existing failure,
 rendered screenshot and preserved-history evidence remain scoped to that run.
 [Installed browser and live-failure record](native-delegation-acceptance.md).
 
-The exact hosted gate, reviewed schema v10→v10 installation and a new explicit
-public live probe remain pending. Successful live children/join, installed
+The exact hosted/artifact gate is passed. Reviewed schema v10→v10
+upgrade/rollback acceptance, installation and a new explicit public live probe
+remain pending. Successful live children/join, installed
 VS Code delegation, broader planning, skills, compaction, outbound A2A and full
 coding/provider parity remain required. The local passing gate is not evidence
 that the historical live failure was repaired or replayed.
