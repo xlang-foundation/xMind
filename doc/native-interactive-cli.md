@@ -131,3 +131,11 @@ duplicate sessions or provider configuration changes. Syntax checks passed;
 compiled execution of these additions is pending because local compilation was
 deferred by active sibling xlang3 benchmarks. This does not claim a complete TUI
 or full OpenCode CLI parity.
+
+New console conversations now use the first request as their title, bounded to
+80 UTF-8 bytes without splitting a character. Leading whitespace is omitted
+from the title, and control bytes are rendered as spaces. The original submitted
+prompt remains unchanged. Whitespace-only console input creates no conversation
+or run. Existing saved titles are preserved. This source change awaits native
+compilation; the installed browser preview still runs the earlier verified CLI
+and retains its original conversation titles.

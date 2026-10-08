@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <set>
 #include <vector>
+#include <algorithm>
 
 namespace {
 std::int64_t event_cursor(const std::string& source) {
@@ -132,7 +133,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
     while(std::cerr<<"xMind > "<<std::flush,std::getline(std::cin,prompt)) {
         if(!prompt.empty() && prompt.back()=='\r')prompt.pop_back();
         if(prompt=="/exit")return last_result;
-        if(prompt.empty())continue;
+        if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
             std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/history displays the saved conversation; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
         }
@@ -187,7 +188,11 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         }
         if(prompt.size()>1024*1024)throw std::invalid_argument("Prompt exceeds limits");
         if(session.empty()){
-            const Json body={{"title","CLI conversation"}};const auto created=request("/v1/sessions",&body);
+            const auto first=prompt.find_first_not_of(" \t\r\n");auto end=std::min(prompt.size(),first+80);
+            // Truncate only at a UTF-8 boundary, preserving the original prompt.
+            while(end<prompt.size()&&end>first&&(static_cast<unsigned char>(prompt[end])&0xc0)==0x80)--end;
+            auto title=prompt.substr(first,end-first);for(auto& byte:title)if(static_cast<unsigned char>(byte)<32)byte=' ';
+            const Json body={{"title",title}};const auto created=request("/v1/sessions",&body);
             if(!created.is_object() || !created.contains("id") || !created["id"].is_string())throw std::runtime_error("Invalid created session");session=created["id"].get<std::string>();
             if(session.empty() || session.size()>128 || session.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid created session identity");
             std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<std::flush;
