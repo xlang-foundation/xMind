@@ -13,6 +13,13 @@ from visible answer parts; the serializer preserves their order and signature
 attachment. User/tool-result thought metadata is rejected. This is history
 serialization only, not a reasoning display or streaming implementation.
 
+The newer replay DTO source also represents signature-only parts, signed empty
+text, absent function arguments and original `partMetadata` JSON. It preserves
+data-field presence and metadata numeric tokens rather than inventing text or
+an empty argument object. Conflicting omitted arguments and misplaced metadata
+are rejected. These additions await recompilation; the earlier 58-contract
+gate below excludes them.
+
 The wire-specific DTO keeps model endpoint selection and credentials outside
 the request body. It is not connected to the execution platform or provider
 selector. Native transport, streaming/event translation, engine-history

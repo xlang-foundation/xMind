@@ -41,17 +41,22 @@ std::string serialize_gemini_request(const GeminiRequest& request){
         body+="{\"role\":"+quoted(content.role==GeminiRole::user?"user":"model")+",\"parts\":[";bool first_part=true;
         for(const auto& part:content.parts){
             if(!first_part)body+=',';first_part=false;std::string encoded;
+            auto field=[&](const char* key,const std::string& value){if(encoded.size()>1)encoded+=',';encoded+=quoted(key)+':'+value;};
             if(part.kind==GeminiPartKind::text){
-                if(answering||!part.name.empty()||part.call_id||part.object_json!="{}")throw std::invalid_argument("Invalid Gemini text part");
-                encoded="{\"text\":"+text(part.text);
+                if(answering||!part.name.empty()||part.call_id||part.object_json!="{}"||part.arguments_omitted)throw std::invalid_argument("Invalid Gemini text part");
+                const bool signed_empty=part.text.empty()&&content.role==GeminiRole::model&&part.thought_signature;
+                encoded="{\"text\":"+(signed_empty?quoted(part.text):text(part.text));
+            }else if(part.kind==GeminiPartKind::signature){
+                if(answering||content.role!=GeminiRole::model||!part.thought_signature||!part.text.empty()||!part.name.empty()||part.call_id||part.object_json!="{}"||part.arguments_omitted)throw std::invalid_argument("Invalid Gemini signature-only part");
+                encoded="{";
             }else{
-                functions();name(part.name);account(part.name.size());account(part.object_json.size());const auto payload=object(part.object_json);
+                functions();name(part.name);account(part.name.size());account(part.object_json.size());if(part.arguments_omitted&&(part.kind!=GeminiPartKind::function_call||part.object_json!="{}"))throw std::invalid_argument("Conflicting omitted Gemini arguments");const auto payload=object(part.object_json);
                 if(!part.text.empty())throw std::invalid_argument("Function part cannot also carry text");
                 if(part.call_id){identity(*part.call_id);account(part.call_id->size());}
                 if(part.kind==GeminiPartKind::function_call){
                     if(content.role!=GeminiRole::model||answering)throw std::invalid_argument("Gemini function call requires a model turn");
                     if(part.call_id&&!seen_ids.insert(*part.call_id).second)throw std::invalid_argument("Duplicate Gemini call identity");
-                    pending.push_back({part.name,part.call_id});encoded="{\"functionCall\":{\"name\":"+quoted(part.name)+",\"args\":"+payload;
+                    pending.push_back({part.name,part.call_id});encoded="{\"functionCall\":{\"name\":"+quoted(part.name);if(!part.arguments_omitted)encoded+=",\"args\":"+payload;
                 }else if(part.kind==GeminiPartKind::function_response){
                     if(content.role!=GeminiRole::user||!answering||part.thought_signature)throw std::invalid_argument("Gemini function response requires a pending user turn");
                     const auto found=std::find_if(pending.begin(),pending.end(),[&](const auto& call){return call.name==part.name&&call.id==part.call_id;});
@@ -62,12 +67,13 @@ std::string serialize_gemini_request(const GeminiRequest& request){
             }
             if(part.thought_signature){
                 if(content.role!=GeminiRole::model||part.thought_signature->empty()||part.thought_signature->size()>65536||part.thought_signature->find('\0')!=std::string::npos)throw std::invalid_argument("Invalid Gemini thought signature");
-                account(part.thought_signature->size());encoded+=",\"thoughtSignature\":"+quoted(*part.thought_signature);
+                account(part.thought_signature->size());field("thoughtSignature",quoted(*part.thought_signature));
             }
             if(part.thought){
                 if(content.role!=GeminiRole::model)throw std::invalid_argument("Thought metadata requires a model part");
-                encoded+=*part.thought?",\"thought\":true":",\"thought\":false";
+                field("thought",*part.thought?"true":"false");
             }
+            if(part.part_metadata_json){if(content.role!=GeminiRole::model)throw std::invalid_argument("Gemini replay metadata requires a model part");account(part.part_metadata_json->size());field("partMetadata",object(*part.part_metadata_json));}
             encoded+='}';body+=encoded;
         }
         if(answering&&!pending.empty())throw std::invalid_argument("Gemini continuation requires all function results in one user turn");

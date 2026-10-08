@@ -6,6 +6,10 @@ the 58-contract evidence below excludes them. See
 [stream scope](native-gemini-stream.md) and
 [transport scope](native-gemini-provider.md).
 
+The latest request DTO replay additions (signature-only/empty signed parts,
+absent arguments and part metadata) also await recompilation. Earlier request
+component evidence does not verify those new cases.
+
 The local native source `9e3a104b27414fc61c6e346c75e41cf630c21991` passed all **58 contracts** in 98.49 seconds, with **88 extension and 17 browser checks**, no skips, and the native/browser integration contract passing. See [provenance](../doc/evidence/native-gemini-local-provenance.json) and [CTest output](../doc/evidence/native-gemini-local-ctest.log). Synthetic peers verify mechanics; this gate does not establish new live provider coverage.
 
 The installed browser preview retains its separately verified backend/view versions. See [provider setup](../doc/provider-setup.md) for hosted and installed scope. The new Gemini component handles request serialization and history metadata; transport, engine integration and live acceptance remain incomplete.

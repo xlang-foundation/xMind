@@ -3,13 +3,16 @@
 
 namespace agentflow {
 enum class GeminiRole {user,model};
-enum class GeminiPartKind {text,function_call,function_response};
+enum class GeminiPartKind {text,function_call,function_response,signature};
 struct GeminiPart {
     GeminiPartKind kind=GeminiPartKind::text;
     std::string text,name,object_json="{}";
     std::optional<std::string> call_id,thought_signature;
     // Preserve absent/false/true independently when replaying model parts.
     std::optional<bool> thought;
+    // Provider replay must distinguish absent args from an explicit empty object.
+    bool arguments_omitted=false;
+    std::optional<std::string> part_metadata_json;
 };
 struct GeminiContent {GeminiRole role=GeminiRole::user;std::vector<GeminiPart> parts;};
 struct GeminiRequest {
