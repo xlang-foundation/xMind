@@ -1,0 +1,20 @@
+{
+  "xmind": "37e153b1aca88045b6cd918251201ecc6b826952",
+  "workflowRun": 37713082833,
+  "job": 113104530953,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37713082833",
+  "conclusion": "failure",
+  "evidenceArtifact": 11523028916,
+  "nativeBuildSucceeded": true,
+  "nativeContractsPassed": 51,
+  "nativeContractsFailed": 1,
+  "failedContracts": [
+    "native_process_executor_contract"
+  ],
+  "observedFailure": "Node spawnSync ETIMEDOUT at 45000 ms",
+  "cause": "Unproven: the failed artifact has no fixture progress output identifying its stalled phase.",
+  "cliGraphAndRecoveryContracts": "passed",
+  "extensionAndBrowserGatesSkipped": true,
+  "runtimeArtifactPublished": false,
+  "scope": "Exact failed gate inspected. Corrected recovery assertions, interactive graph launch/navigation/rejection and cancellation record fixtures passed. Approved process executor fixture exceeded its outer timeout. All 52 contracts passed locally with recorded compatibility-branch runtime at the later header checkpoint; local success does not override this failed pinned hosted result. No preview upgrade or live acceptance was performed."
+}

@@ -226,6 +226,19 @@ was published. The corrected full gate `37713082833` at `37e153b` is now running
 later console changes and live acceptance remain pending. The preview stays on
 verified `46262d6`.
 
+The corrected `37e153b` hosted gate then built and passed 51 of 52 native
+contracts, including the CLI recovery, graph launch/navigation/rejection and
+cancellation receipt cases. It failed `native_process_executor_contract` when
+the Node wrapper timed out its compiled child at 45 seconds. The artifact has
+no phase trace identifying where that child stalled, so the cause is unproven.
+[Exact failed gate provenance](evidence/native-cli-recovery-corrected-gate-failure-provenance.json)
+and [unaltered excerpts](evidence/native-cli-recovery-corrected-gate-failure.log)
+record the result. No runtime bundle was published; extension/browser gates were
+skipped and the preview was not upgraded. The complete local 52-contract pass at
+the later credential-header checkpoint is recorded separately with its local
+compatibility-branch runtime provenance. Neither local success nor the CLI
+contracts' hosted passes establish a successful overall hosted release gate.
+
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
 52 native and 66 extension contracts. This verifies initial-model prevalidation
