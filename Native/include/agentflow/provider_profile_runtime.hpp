@@ -3,6 +3,7 @@
 #include "agentflow/provider_profiles.hpp"
 #include "agentflow/provider_catalogue.hpp"
 #include "agentflow/provider_profile_setup.hpp"
+#include <map>
 namespace agentflow {
 // Native backend policy. Capabilities and credential destinations never come
 // from a view; the selected model identity is supplied by its saved profile.
@@ -10,6 +11,9 @@ struct ProviderProfileExecutionPolicy {
     ProviderProfileRoute route;
     ChatProviderConfig provider;
     std::optional<ProviderCataloguePolicy> catalogue;
+    // Optional per-model tool policy supplied by the backend, never by views or
+    // account catalogue metadata. Unknown models retain provider.tools.
+    std::map<std::string,Capability> model_tools;
 };
 // Shared single/graph execution platform with backend-owned model profiles.
 // Connection profiles (Local/Nexus) belong to a separate transport boundary.

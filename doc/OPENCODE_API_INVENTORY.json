@@ -6220,9 +6220,9 @@
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
         "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
-        "surface": "GET /v1/models; POST /v1/provider/models",
+        "surface": "GET /v1/models; POST /v1/provider/profiles/models",
         "sourceAnchor": "\"/v1/models\"",
-        "gap": "Enabled models and OpenAI account discovery exist; broad provider capabilities and upstream catalogue fields remain incomplete.",
+        "gap": "Enabled models and native OpenAI/Claude/Gemini profile discovery exist; broad provider capabilities and upstream catalogue fields remain incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
@@ -7220,9 +7220,9 @@
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
         "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
-        "surface": "GET /v1/provider/configuration",
-        "sourceAnchor": "\"/v1/provider/configuration\"",
-        "gap": "Single OpenAI-compatible configuration exists; a multi-provider registry is absent.",
+        "surface": "GET /v1/provider/profiles",
+        "sourceAnchor": "\"/v1/provider/profiles\"",
+        "gap": "An encrypted multi-provider profile registry exists; upstream provider fields, broad provider coverage and per-model acceptance remain incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },
@@ -7340,9 +7340,9 @@
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
         "sourceSha256": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
-        "surface": "GET /v1/provider/configuration",
-        "sourceAnchor": "\"/v1/provider/configuration\"",
-        "gap": "Single configured provider metadata exists; provider-by-ID contracts and broader native providers remain incomplete.",
+        "surface": "GET /v1/provider/profiles",
+        "sourceAnchor": "\"/v1/provider/profiles\"",
+        "gap": "Public saved profile metadata exists; the upstream provider-by-ID response and broader native provider behavior remain incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },

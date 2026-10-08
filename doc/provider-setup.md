@@ -1,5 +1,81 @@
 # Provider setup in the sidebar
 
+## Native Gemini discovery and enrollment
+
+New source adds `gemini.generate-content` to the backend-owned provider routes,
+using Google's versioned GenerateContent base and its separate models-list
+endpoint. Authenticated `/v1/provider/profiles` metadata advertises the actual
+route and discovery capability. The existing Settings dialog obtains the key;
+returned models stay in the footer chooser. Views submit a route/profile/model
+identity and expected registry revision, and cannot replace the endpoint,
+authentication header or native capability policy.
+
+Catalogue discovery sends a read-only native GET with `x-goog-api-key`, fixed
+`pageSize=1000` and encoded opaque `pageToken` values. It follows at most eight
+pages and counts at most 4096 raw entries, with bounded JSON, duplicate-key,
+resource, cursor, credential-reflection, deadline and redirect checks. Only full
+`models/<id>` resources advertising `generateContent` are returned; embeddings
+and undeclared generation methods do not become agent models. Discovery retains
+the returned resource name rather than deriving an identity from display labels
+or `baseModelId`. It does not publish a profile or persist a draft key.
+
+Generation-method eligibility is separate from function-call capability. Native
+backend `model_tools` policy declares exact model capabilities; the default
+Gemini policy uses the dated [official-reference record](evidence/google-gemini-tool-policy-reference.json),
+with no wildcard inference for new names or aliases. A workspace agent sees only
+models with declared tool support and rejects unknown-tool enrollment before
+candidate credential persistence. A text-only agent can use an eligible model
+whose tool capability is unknown, sending no tool declarations. Canonical
+`models/<id>` and valid bare identities resolve the same native capability policy.
+
+Enrollment saves the key through encrypted backend credentials and xlang3
+SQLite, then publishes the validated execution service with a registry revision
+check. Selection resolves the saved credential and applies the same native model
+policy before publication. Saved-key discovery resolves that profile's owned
+credential privately; public metadata excludes keys, credential references and
+endpoint URLs. Stale
+discovery, selection or admission fails without task replay or partial publication.
+Gemini profile and model identities containing the provider key are rejected
+before draft discovery, saved/imported persistence or metadata publication.
+Reopen validates inactive profiles' resource grammar and public identities;
+workspace tool capability is required when an active profile is prepared or an
+inactive profile is selected. A valid inactive text-only model can remain saved
+while a different coding profile runs.
+
+The new native acceptance sources exercise authenticated API boundaries, actual
+SQLite publication rollback, key reuse/reopen, native file-tool continuation,
+cancellation ownership and discovery/selection races with independent synthetic
+catalogue/model peers. Current local source passed **64 native contracts in
+120.98 seconds**, with an exact expected manifest and no post-build exclusions.
+The same milestone passed **94 extension and 17 browser tests**, with zero
+failures/skips across all three suites.
+[Current local evidence](evidence/native-gemini-enrollment-local-provenance.json).
+Hosted validation of this newer checkpoint remains pending. No live Gemini key,
+external account acceptance or installed-preview upgrade is claimed.
+The actual browser/native integration passed the four default routes and an
+inactive Gemini profile save against the rebuilt server, together with durable
+refresh, adapter/backend restarts and the existing real graph/file/history flow.
+It uses synthetic provider fixtures and does not establish live Gemini inference
+or rendered IDE enrollment.
+
+The earlier gateway/history source `75f45f0` passed its exact hosted gate:
+**61 native, 91 extension and 17 browser contracts**, native/browser integration
+and VSIX verification, with no failures or skips.
+[Hosted provenance](evidence/native-gemini-history-hosted-provenance.json).
+The subsequent `c9591fe` agent milestone passed **62 native contracts locally in
+100.44 seconds**, verifying real AgentRunner/file/SQLite execution with synthetic
+provider replies. [Local scope](evidence/native-gemini-agent-local-provenance.json).
+Exact revision `c9591fe79cad9a4253ac8088933f0c8a2848ded1` also passed its hosted
+**62 native, 91 extension and 17 browser contracts**, native/browser integration
+and VSIX verification, with zero failures/skips. Its native gate took **128.80
+seconds**. [Hosted scope](evidence/native-gemini-agent-hosted-provenance.json).
+These earlier gates exclude the new catalogue/profile enrollment source. See
+[validation status](VALIDATION_STATUS.md) for the remaining acceptance boundary.
+
+The sections below preserve earlier provider-setup checkpoints and their limits.
+Their pending statements describe those revisions; current Gemini source and
+verification are summarized above.
+
 ## Run-descriptor attribution
 
 The shared browser/VS Code renderer now has an admitted-profile row beneath the
@@ -339,8 +415,9 @@ The full gate covers discovery, authenticated profile APIs and this reader.
 The test fixture was corrected to respect the database's JSON constraint before
 that complete passing run. No preview upgrade or product profile UI is claimed.
 
-Current setup is one saved OpenAI configuration. Claude request/stream/transport
-source additions do not change that API or make Claude selectable in Settings.
+At the early single-provider checkpoint, setup was one saved OpenAI configuration.
+Claude request/stream/transport additions had not yet changed that API or made
+Claude selectable in Settings.
 The next enrollment change must retain the existing encrypted OpenAI key and
 model while adding an independently identified provider profile. C++ owns the
 allowed endpoint/wire/header policy and per-model capabilities; a client selects
@@ -378,7 +455,7 @@ Discovery and enrollment may omit `api_key` only to use the existing credential 
 
 Source `86ff065cafeb0b43f9bc47adb2d16b631dacade3` passed **42 native and 44 extension contracts** in [isolated CI](https://github.com/xlang-foundation/xMind/actions/runs/37657184396): [hosted CTest](evidence/native-provider-setup-hosted-ctest.log), [original job/TAP](evidence/native-provider-setup-passing-ci-job.log), [hosted provenance](evidence/native-provider-setup-hosted-provenance.json). At that earlier checkpoint the contract-tested bundle was installed in the actual right-sidebar preview, and its model-ID input prompt opened against the authenticated native backend. Existing sessions/profile and the user's unsent draft were preserved, with a closed-database backup before migration. [Launch/provenance record](evidence/vscode-provider-setup-launch.json). No provider key was supplied by the agent and no live-provider response is claimed. Earlier [local adapter output](evidence/vscode-provider-setup-local.log) remains preserved.
 
-A model-free native server owns a `ProviderRuntime`. Authenticated full-access local owners can inspect `/v1/provider/configuration` and submit a model ID, API key and expected configuration revision. The backend fixes the destination to OpenAI's Chat Completions endpoint; the request cannot replace the endpoint, workspace or effect policy. Existing startup-configured services continue using their explicit backend configuration. Provider enrollment currently exposes one model; broader provider catalogs, wire families and account lifecycles remain required by the project goal.
+At the initial enrollment checkpoint, a model-free native server owned a `ProviderRuntime`. Authenticated full-access local owners could inspect `/v1/provider/configuration` and submit a model ID, API key and expected configuration revision. The backend fixed the destination to OpenAI's Chat Completions endpoint; the request could not replace the endpoint, workspace or effect policy. Existing startup-configured services continued using their explicit backend configuration. Enrollment exposed one model at that checkpoint; broader provider catalogs, wire families and account lifecycles remained required by the project goal.
 
 The VS Code host obtains the key through a password input and models through the backend discovery response. A view message can request setup but cannot supply its own key or destination. The host rechecks backend origin, controller generation and the supported endpoint across discovery and selection before enrollment. The provider key is not put in webview messages, editor state or extension SecretStorage. Backend authentication remains a separate origin-scoped SecretStorage token. OpenAI's list gives account model identities, not endpoint or tool capabilities. The current inference adapter uses text Chat Completions; listing a model does not establish compatibility with that adapter. An actual submitted response remains required to verify inference.
 

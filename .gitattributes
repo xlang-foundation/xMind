@@ -3,6 +3,7 @@ Native/third_party/** -text
 
 # Keep new verification logs byte-for-byte, matching their provenance hashes.
 doc/evidence/native-cleanup-*.log -text
-doc/evidence/native-gemini-history-local-*.log -text
-doc/evidence/native-gemini-agent-local-*.log -text
+doc/evidence/native-gemini-history-*.log -text
+doc/evidence/native-gemini-enrollment-*.log -text
+doc/evidence/native-gemini-agent-*.log -text
 doc/evidence/native-gemini-transport-*.log -text

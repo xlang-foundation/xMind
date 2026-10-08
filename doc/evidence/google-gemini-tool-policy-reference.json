@@ -1,0 +1,19 @@
+{
+  "observedDate": "2026-10-08",
+  "claim": "Provider documentation declares function calling for these exact model resources. This is a backend capability policy, not account availability or live/native per-model acceptance.",
+  "catalogueSource": "https://ai.google.dev/api/models",
+  "models": [
+    {"resource":"models/gemini-3.8-flash","tools":"supported","source":"https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash"},
+    {"resource":"models/gemini-3.7-flash","tools":"supported","source":"https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash"},
+    {"resource":"models/gemini-3.6-flash","tools":"supported","source":"https://ai.google.dev/gemini-api/docs/models/gemini-3.6-flash"},
+    {"resource":"models/gemini-3.5-flash","tools":"supported","source":"https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash"},
+    {"resource":"models/gemini-3.5-flash-lite","tools":"supported","source":"https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite"},
+    {"resource":"models/gemini-3.1-pro-preview","tools":"supported","source":"https://ai.google.dev/gemini-api/docs/models/gemini-3.1-pro-preview"},
+    {"resource":"models/gemini-3.1-pro-preview-customtools","tools":"supported","source":"https://ai.google.dev/gemini-api/docs/models/gemini-3.1-pro-preview"},
+    {"resource":"models/gemini-3-flash-preview","tools":"supported","source":"https://ai.google.dev/gemini-api/docs/models/gemini-3-flash-preview"},
+    {"resource":"models/gemini-2.5-pro","tools":"supported","source":"https://ai.google.dev/gemini-api/docs/models/gemini-2.5-pro"},
+    {"resource":"models/gemini-2.5-flash","tools":"supported","source":"https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash"},
+    {"resource":"models/gemini-2.5-flash-lite","tools":"supported","source":"https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash-lite"}
+  ],
+  "scope": "Discovery must still authenticate and return these resources before they are offered by Settings. Workspace mode filters unknown/unsupported tool declarations; text-only discovery may expose other generateContent identities. No wildcard aliases, fabricated model IDs, prices, account access, media/thinking/Interactions support or inference success is inferred. Future versions require an explicit policy/reference update."
+}

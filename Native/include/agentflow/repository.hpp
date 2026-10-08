@@ -1,5 +1,5 @@
 #pragma once
-#include "agentflow/store.hpp"
+#include "agentflow/records.hpp"
 #include "agentflow/secret_protection.hpp"
 #include "agentflow/operation.hpp"
 #include <memory>
@@ -7,6 +7,7 @@
 #include <optional>
 
 namespace agentflow {
+class BackendLease;
 class GraphPlan;
 struct GraphRootRecord {Run run;std::string graph_id;std::int64_t graph_revision;std::string specification_json;std::int64_t checkpoint_revision;std::string checkpoint_json;std::string input_json;};
 struct RootRunRecord {Run run;std::optional<std::int64_t> status_ms;std::int64_t status_sequence;};

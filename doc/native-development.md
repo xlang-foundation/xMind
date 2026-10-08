@@ -27,7 +27,7 @@ cmake --build build/native --config Release
 ctest --test-dir build/native -C Release --output-on-failure
 ```
 
-`AGENTFLOW_XLANG3_SOURCE`, `AGENTFLOW_XLANG3_RUNTIME_DIR`, `AGENTFLOW_XLANG3_SHARED`, `AGENTFLOW_XLANG3_LIBRARY` and `AGENTFLOW_PYTHON_LIB_SOURCE` select explicit SDK/runtime/source paths. `BUILD_TESTING` requires the independent Node fixtures; the isolated gate additionally verifies the complete named contract set. Production persistence does not link the disabled direct-SQLite reference or historical root `Core` target.
+`AGENTFLOW_XLANG3_SOURCE`, `AGENTFLOW_XLANG3_RUNTIME_DIR`, `AGENTFLOW_XLANG3_SHARED`, `AGENTFLOW_XLANG3_LIBRARY` and `AGENTFLOW_PYTHON_LIB_SOURCE` select explicit SDK/runtime/source paths. `BUILD_TESTING` requires the independent Node fixtures; the isolated gate additionally verifies the complete named contract set. The superseded direct-SQLite implementation and historical root `Core` target were removed. Database operations use embedded xlang3.
 
 See [server/CLI](native-server.md), [trusted MCP configuration and credentials](native-mcp.md), and [editor setup](../extensions/vscode/README.md). `Tools/start-ui.ps1` opens this machine's normal development host with its persistent profile and database. Its current isolated tested bundle has no model or seeded conversations; the actual [preview](evidence/vscode-native-creation-bundle-sidebar.png) has Explorer left and the xMind sidebar/composer/model chooser right.
 

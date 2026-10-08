@@ -3,7 +3,7 @@
 #include <string>
 #include <stdexcept>
 #include <vector>
-#include "agentflow/store.hpp"
+#include "agentflow/records.hpp"
 
 namespace agentflow {
 enum class OperationState {awaiting_approval,ready,denied,expired,cancelled,executing,succeeded,failed,uncertain};

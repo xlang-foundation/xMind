@@ -923,6 +923,16 @@
             "path": "Native/src/agent_runner.cpp",
             "anchor": "AgentRunner::execute",
             "sha256": "7dcbe7bd664712178d4246713b52bcfc08867688fa701dcfb460f1c3645f90c9"
+          },
+          {
+            "path": "Native/src/provider_catalogue.cpp",
+            "anchor": "ProviderCatalogueFormat::gemini",
+            "sha256": "764013d6293f1ad676da27e8e6eff905890e7f6d2472c2d28ce1e6e9fa658199"
+          },
+          {
+            "path": "Native/src/provider_profile_runtime.cpp",
+            "anchor": "validate_execution",
+            "sha256": "3f6fa2b10c9434e89934d3489c9e18678dfcf32b652fc16e685ee39ef5d59a25"
           }
         ],
         "artifacts": [
@@ -933,10 +943,22 @@
           {
             "path": "doc/evidence/native-gemini-agent-local-provenance.json",
             "sha256": "228e4056f11ccf3c4276963ce65ecfab363b49403b2fe0511619f897e8e72696"
+          },
+          {
+            "path": "doc/evidence/native-gemini-agent-hosted-provenance.json",
+            "sha256": "13fb2e27106dd7ebdf5af278121ef2709280e0f0b763d6635fe14c4e0c421b9c"
+          },
+          {
+            "path": "doc/evidence/native-gemini-history-hosted-provenance.json",
+            "sha256": "552eb1bb4cafc8f2ea757b5ca13d88e508ebc960dcbf76f7f2934c7bd2d61f42"
+          },
+          {
+            "path": "doc/evidence/native-gemini-enrollment-local-provenance.json",
+            "sha256": "715c565966925cd95441a4ddaeb8f55acaf17c753151229efe7659e974574311"
           }
         ],
-        "scope": "Native GenerateContent request/SSE/header-authenticated transport and signed DTO replay passed the exact ddd1d3d hosted60 gate with synthetic peers. The newer working-tree local62 gate verifies common gateway/history, exact callbacks, escaped large results and actual AgentRunner two-file execution with xlang3 SQLite reopen/signed replay, using synthetic provider replies. No full provider-group or individual model acceptance is established.",
-        "gaps": "The 84 pinned Gemini entries are not individually accepted. Default Settings enrollment/catalogue discovery, live inference and actual Gemini IDE/graph acceptance remain pending. Vertex AI/OAuth, media, caching/thinking controls, Interactions and complete per-model behavior remain unimplemented or unverified. The newer exact checkpoint still requires hosted validation."
+        "scope": "Native GenerateContent request/SSE/header-authenticated transport and signed DTO replay passed the exact ddd1d3d hosted60 gate; common gateway/history and escaped large results passed75f45f0 hosted61. Exact c9591fe hosted62 and local62 verify actual AgentRunner two-file execution and xlang3 SQLite signed replay. Newer local64 verifies native authenticated catalogue/profile enrollment, separate model tool policy, encrypted-key reuse, actual enrolled agent/file execution/cancellation/reopen and thin Settings fixtures using labelled synthetic provider replies. No full provider-group or individual model acceptance is established.",
+        "gaps": "The 84 pinned Gemini entries are not individually accepted. Live authenticated account discovery/enrollment/inference and actual Gemini IDE/graph acceptance remain pending. Vertex AI/OAuth, media, caching/thinking controls, Interactions and complete per-model behavior remain unimplemented or unverified. The new catalogue/enrollment checkpoint still requires exact hosted validation; documentation-based tool declarations do not establish account access or per-model execution."
       }
     },
     {

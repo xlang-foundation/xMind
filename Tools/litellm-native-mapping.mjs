@@ -17,13 +17,18 @@ export const nativePartial = {
       ['Native/src/gemini_provider.cpp', 'complete_gemini'],
       ['Native/src/gemini_history.cpp', 'gemini_model_request'],
       ['Native/src/agent_runner.cpp', 'AgentRunner::execute'],
+      ['Native/src/provider_catalogue.cpp', 'ProviderCatalogueFormat::gemini'],
+      ['Native/src/provider_profile_runtime.cpp', 'validate_execution'],
     ],
     evidenceFiles: [
       'doc/evidence/native-gemini-transport-hosted-provenance.json',
       'doc/evidence/native-gemini-agent-local-provenance.json',
+      'doc/evidence/native-gemini-agent-hosted-provenance.json',
+      'doc/evidence/native-gemini-history-hosted-provenance.json',
+      'doc/evidence/native-gemini-enrollment-local-provenance.json',
     ],
-    scope: 'Native GenerateContent request/SSE/header-authenticated transport and signed DTO replay passed the exact ddd1d3d hosted60 gate with synthetic peers. The newer working-tree local62 gate verifies common gateway/history, exact callbacks, escaped large results and actual AgentRunner two-file execution with xlang3 SQLite reopen/signed replay, using synthetic provider replies. No full provider-group or individual model acceptance is established.',
-    gaps: 'The 84 pinned Gemini entries are not individually accepted. Default Settings enrollment/catalogue discovery, live inference and actual Gemini IDE/graph acceptance remain pending. Vertex AI/OAuth, media, caching/thinking controls, Interactions and complete per-model behavior remain unimplemented or unverified. The newer exact checkpoint still requires hosted validation.',
+    scope: 'Native GenerateContent request/SSE/header-authenticated transport and signed DTO replay passed the exact ddd1d3d hosted60 gate; common gateway/history and escaped large results passed75f45f0 hosted61. Exact c9591fe hosted62 and local62 verify actual AgentRunner two-file execution and xlang3 SQLite signed replay. Newer local64 verifies native authenticated catalogue/profile enrollment, separate model tool policy, encrypted-key reuse, actual enrolled agent/file execution/cancellation/reopen and thin Settings fixtures using labelled synthetic provider replies. No full provider-group or individual model acceptance is established.',
+    gaps: 'The 84 pinned Gemini entries are not individually accepted. Live authenticated account discovery/enrollment/inference and actual Gemini IDE/graph acceptance remain pending. Vertex AI/OAuth, media, caching/thinking controls, Interactions and complete per-model behavior remain unimplemented or unverified. The new catalogue/enrollment checkpoint still requires exact hosted validation; documentation-based tool declarations do not establish account access or per-model execution.',
   },
   openai: {
     sources: [

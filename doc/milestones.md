@@ -19,20 +19,41 @@ and VSIX verification, with no failures/skips. This verifies native request,
 SSE/HTTP transport and signed replay DTOs with synthetic socket fixtures.
 [Exact transport evidence](evidence/native-gemini-transport-hosted-provenance.json).
 
-The committed common gateway/history source
-`75f45f0a036f1ffbab8c4b157df364f3697b52a0` awaits its own hosted result. Its
-compiled local baseline passed **61 native, 91 extension and 17 browser
-contracts**, plus native/browser integration. Callback assertions and the
-large function-response bound correction were added after compilation and are
-excluded from that result. [Local scope and exclusions](evidence/native-gemini-history-local-provenance.json).
-The newer Gemini AgentRunner contract increased the manifest to **62 native
-contracts**; all 62 passed locally in **100.44 seconds**, including the earlier
-callback and large-result exclusions. The native agent executed real file reads,
-reopened xlang3 SQLite and replayed signed history without repeating tools.
-Provider replies are synthetic; Settings enrollment, discovery and live Gemini
-inference remain incomplete. Current thin-client sources retain the 91/17 pass,
-and browser/native integration passed again against the rebuilt server.
-[Current local evidence](evidence/native-gemini-agent-local-provenance.json).
+The common gateway/history source
+`75f45f0a036f1ffbab8c4b157df364f3697b52a0` passed its exact hosted gate:
+**61 native, 91 extension and 17 browser contracts**, native/browser integration
+and VSIX verification, with zero failures/skips. Its native gate took **121.84
+seconds** and includes the stronger callbacks and escaped large-response cases
+excluded from the earlier historical local 61 result.
+[Exact hosted evidence](evidence/native-gemini-history-hosted-provenance.json).
+
+The agent source `c9591fe79cad9a4253ac8088933f0c8a2848ded1` passed **62 native
+contracts locally in 100.44 seconds**. Its real native agent/file reads,
+xlang3 SQLite reopen and signed replay do not repeat prior tools. Provider
+replies are synthetic. Browser/native integration passed again against its
+compiled server, and its unchanged thin clients matched the earlier 91/17 pass.
+[Local agent evidence](evidence/native-gemini-agent-local-provenance.json).
+The exact hosted gate also passed **62 native, 91 extension and 17 browser
+contracts**, native/browser integration and VSIX verification, with zero
+failures/skips. Its native gate took **128.80 seconds** and excludes newer
+catalogue/enrollment source.
+[Exact hosted agent evidence](evidence/native-gemini-agent-hosted-provenance.json).
+
+New native source adds authenticated paginated Gemini discovery, full resources,
+encrypted profile enrollment, owned-key reuse/reopen and backend per-model tool
+policy. Its final working-tree gate passed all **64 native contracts locally in
+120.98 seconds**, with the exact manifest matched, zero failures/skips and no
+post-build exclusions. Actual enrolled file execution, CAS/publication failure,
+cancellation, stale discovery and signed replay after encrypted xlang3 SQLite
+reopen passed with synthetic provider replies, without treating catalogue methods
+as tool capability. The final disabled direct-SQLite implementation/test/build
+removal and shared `records.hpp` cleanup were included. Current thin-client
+checks passed **94 extension and 17 browser tests**; actual browser/native
+integration passed against the fresh four-route backend and source-matched
+assets. [Exact local enrollment evidence](evidence/native-gemini-enrollment-local-provenance.json).
+Hosted verification of this new checkpoint remains pending. Installed previews
+are unchanged; live Gemini inference, actual Gemini IDE acceptance and full
+provider/coding/protocol parity remain incomplete. [Provider setup](provider-setup.md).
 
 The installed browser preview is still the separately verified native
 `19d69dd` and view `6f32d215` pair. These source checkpoints do not imply a

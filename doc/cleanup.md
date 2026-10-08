@@ -11,3 +11,9 @@ All maintained documentation and provider/parity inventories are now under
 The remaining generic dependency probe lives under `Tools/probes/`, leaving
 native product contracts under `Native/tests/` and client checks with their
 respective clients.
+
+The disabled direct-SQLite implementation, optional CMake build and obsolete
+contract were also removed. Its shared session/run/event/error records remain
+in `Native/include/agentflow/records.hpp`, used by the current xlang3-backed
+repository. The old license-insertion script targeting `D:/source/xMind` was
+unused and removed; existing license notices and dependency licenses remain.

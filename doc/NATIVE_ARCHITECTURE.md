@@ -31,8 +31,8 @@ are not the platform. The user confirmed this design after the
 
 Native infrastructure dependencies are pinned by the current build and license
 inventory. C++ uses native HTTP/TLS and credential protection rather than
-reimplementing cryptography. Production SQLite I/O still goes through xlang3;
-the direct-SQLite reference is not production persistence. See
+reimplementing cryptography. Production SQLite I/O goes through xlang3;
+the superseded direct-SQLite implementation was removed. See
 [native development](native-development.md) for build selection and prerequisites.
 
 ## Current source and verification
@@ -55,19 +55,42 @@ The later Gemini transport/replay source
 native, 88 extension and 17 browser contracts**, with the same integration and
 package checks. [Evidence](evidence/native-gemini-transport-hosted-provenance.json).
 
-The committed common Gemini gateway/history source
-`75f45f0a036f1ffbab8c4b157df364f3697b52a0` awaits hosted validation. Its local
-compiled baseline passed **61 native, 91 extension and 17 browser contracts**
-and native/browser integration. Callback assertions and a large function-response
-correction added after compilation remain excluded from that pass claim.
-[Exact local scope](evidence/native-gemini-history-local-provenance.json).
-The newer Gemini AgentRunner contract increased the native manifest to **62**;
-all 62 passed locally in **100.44 seconds**, including those earlier exclusions.
-Actual native file reads and signed history continuation after xlang3 SQLite
-reopen passed with independent synthetic provider replies. Browser/native
-integration passed again against the rebuilt backend; current thin-client
-sources retain their 91/17 pass. [Current evidence](evidence/native-gemini-agent-local-provenance.json).
-Live Gemini inference and product enrollment remain incomplete.
+The common Gemini gateway/history source
+`75f45f0a036f1ffbab8c4b157df364f3697b52a0` passed its exact hosted **61 native,
+91 extension and 17 browser contracts**, native/browser integration and VSIX
+verification, with zero failures/skips. Its native gate took **121.84 seconds**.
+The gateway/history receipts, native tool identities, supplied usage, stronger
+callbacks and escaped large-response cases all compiled and passed there.
+[Exact hosted scope](evidence/native-gemini-history-hosted-provenance.json).
+
+The subsequent agent source `c9591fe79cad9a4253ac8088933f0c8a2848ded1` passed
+all **62 native contracts locally in 100.44 seconds**. Actual native file reads
+and signed history continuation after xlang3 SQLite reopen passed with
+independent synthetic provider replies. Browser/native integration passed again
+against its rebuilt backend; its unchanged thin clients matched the earlier
+91/17 pass. [Local evidence](evidence/native-gemini-agent-local-provenance.json).
+Its exact hosted gate passed **62 native, 91 extension and 17 browser contracts**,
+native/browser integration and VSIX verification, with zero failures/skips. The
+native gate took **128.80 seconds** and excludes newer catalogue/enrollment work.
+[Hosted agent evidence](evidence/native-gemini-agent-hosted-provenance.json).
+
+New source adds native Gemini catalogue discovery, authenticated encrypted
+profile enrollment and per-model tool policy. GenerateContent discovery does
+not imply function-call capability: workspace mode requires backend-supported
+tool declarations, while text-only mode can retain unknown-tool models. The
+working-tree checkpoint passed all **64 native contracts locally in 120.98
+seconds**, with the exact manifest matched, zero failures/skips and no post-build
+exclusions. It verifies actual enrolled file execution, signed conversation
+continuation after encrypted xlang3 SQLite reopen, cancellation, publication/CAS
+failure and stale discovery using synthetic provider replies. Final removal of
+the disabled direct-SQLite source/build and migration of shared domain types to
+`records.hpp` compiled and passed in that gate. Current thin-client checks passed
+**94 extension and 17 browser tests**, and actual browser/native integration
+passed against the fresh four-route backend and source-matched assets.
+[Exact local enrollment scope](evidence/native-gemini-enrollment-local-provenance.json).
+This newer checkpoint still requires its own hosted verification. Live Gemini
+inference and actual Gemini IDE interaction remain unverified.
+[Provider setup](provider-setup.md).
 The installed browser preview retains its separately verified native `19d69dd`
 and view `6f32d215` snapshots. [Current validation](VALIDATION_STATUS.md).
 

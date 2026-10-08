@@ -1,19 +1,71 @@
 #include "agentflow/provider_profile_runtime.hpp"
+#include "agentflow/gemini_provider.hpp"
 #include <algorithm>
 #include <mutex>
 #include <set>
 #include "nlohmann/json.hpp"
 namespace agentflow {
 namespace {
+ProviderCatalogueFormat catalogue_format(ProviderWire wire){
+    switch(wire){
+        case ProviderWire::chat_completions:
+        case ProviderWire::responses:return ProviderCatalogueFormat::openai;
+        case ProviderWire::anthropic_messages:return ProviderCatalogueFormat::anthropic;
+        case ProviderWire::gemini_generate_content:return ProviderCatalogueFormat::gemini;
+    }
+    throw std::invalid_argument("Invalid provider execution wire");
+}
+void validate_model(const ProviderProfileRoute& route,const std::string& model,bool allow_empty=false){
+    if(route.wire!=ProviderWire::gemini_generate_content)return;
+    // Key-only imports remain unconfigured. Every executable Gemini identity
+    // goes through the same resource binder used by the native transport.
+    if(allow_empty&&model.empty())return;
+    (void)gemini_stream_endpoint(GeminiProviderConfig{route.endpoint,model});
+}
+std::string model_identity(const ProviderProfileRoute& route,const std::string& model){
+    if(route.wire==ProviderWire::gemini_generate_content)return model.starts_with("models/")?model:"models/"+model;
+    return model;
+}
+Capability model_tools(const ProviderProfileExecutionPolicy& policy,const std::string& model){
+    const auto canonical=model_identity(policy.route,model);
+    if(const auto found=policy.model_tools.find(canonical);found!=policy.model_tools.end())return found->second;
+    if(policy.route.wire==ProviderWire::gemini_generate_content){
+        if(const auto found=policy.model_tools.find(canonical.substr(7));found!=policy.model_tools.end())return found->second;
+    }
+    return policy.provider.tools;
+}
+void validate_execution(const ProviderProfileExecutionPolicy& policy,const AgentSettings& base,const std::string& model,bool allow_empty=false){
+    validate_model(policy.route,model,allow_empty);
+    if(policy.route.wire==ProviderWire::gemini_generate_content&&!model.empty()&&base.workspace&&model_tools(policy,model)!=Capability::supported)
+        throw std::invalid_argument("Workspace agent requires declared model tool capability");
+}
+void validate_public_identity(const ProviderProfileRoute& route,const std::string& id,const std::string& model,const SecretBytes& secret){
+    if(route.wire!=ProviderWire::gemini_generate_content)return;
+    const auto bytes=secret.view();if(bytes.empty())return;
+    if(std::search(id.begin(),id.end(),bytes.begin(),bytes.end())!=id.end()||std::search(model.begin(),model.end(),bytes.begin(),bytes.end())!=model.end())
+        throw std::invalid_argument("Provider credentials are not public profile identities");
+}
 std::vector<ProviderProfileRoute> routes(const std::vector<ProviderProfileExecutionPolicy>& policy){
     std::vector<ProviderProfileRoute> result;
     for(const auto& value:policy){
-        if(value.route.wire==ProviderWire::gemini_generate_content&&value.catalogue)throw std::invalid_argument("Gemini catalogue integration is not implemented");
+        const auto format=catalogue_format(value.route.wire);
         if(value.provider.endpoint!=value.route.endpoint||value.provider.wire!=value.route.wire||
             !value.provider.model.empty()||value.provider.deadline.count()<=0||value.provider.idle_timeout.count()<=0)
             throw std::invalid_argument("Provider execution policy differs from profile route");
-        if(value.catalogue&&value.catalogue->format!=(value.route.wire==ProviderWire::anthropic_messages?ProviderCatalogueFormat::anthropic:ProviderCatalogueFormat::openai))
+        if(value.catalogue&&value.catalogue->format!=format)
             throw std::invalid_argument("Provider catalogue policy differs from route wire");
+        // Validate the backend-owned base even before a key-only import or
+        // empty registry, without selecting an executable model.
+        validate_model(value.route,"xmind-policy-validation");
+        if(value.model_tools.size()>256)throw std::invalid_argument("Provider model tool policy exceeds limits");
+        std::set<std::string> model_ids;
+        for(const auto& [model,capability]:value.model_tools){
+            if(model.empty()||model.size()>256||model.starts_with("sk-")||model.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos||
+                (capability!=Capability::unknown&&capability!=Capability::unsupported&&capability!=Capability::supported))
+                throw std::invalid_argument("Invalid provider model tool policy");
+            validate_model(value.route,model);
+            if(!model_ids.insert(model_identity(value.route,model)).second)throw std::invalid_argument("Duplicate provider model tool policy");
+        }
         result.push_back(value.route);
     }
     return result;
@@ -27,10 +79,19 @@ struct ProviderProfileRuntime::Impl {
         :store(persistence),base(std::move(settings)),policy(std::move(allowed)),workers(count),capacity(limit),profiles(store,routes(policy)){
         if(count<1||count>16||limit<1||limit>4096)throw std::invalid_argument("Invalid provider execution capacity");
         state=profiles.snapshot();
+        try{
+            for(const auto& profile:state.profiles){
+                const auto& allowed=route(profile.route_id);validate_model(allowed.route,profile.model,true);
+                if(allowed.route.wire==ProviderWire::gemini_generate_content){
+                    auto owned=store.resolve_credential(allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose).get();
+                    validate_public_identity(allowed.route,profile.id,profile.model,owned);
+                }
+            }
+        }catch(const std::invalid_argument&){throw DatabaseError("Stored Gemini profile has an invalid public identity");}
         if(!state.active.empty()){
             auto owned=profiles.credential(state.active);
             const auto selected=std::find_if(state.profiles.begin(),state.profiles.end(),[&](const auto& value){return value.id==state.active;});
-            service=prepare(*selected);
+            try{service=prepare(*selected);}catch(const std::invalid_argument&){throw DatabaseError("Stored active provider profile is incompatible with native execution policy");}
         }else{
             auto unconfigured=base;unconfigured.provider.model.clear();unconfigured.selectable_models.clear();unconfigured.credential.reset();unconfigured.provider_identity.reset();
             service=std::make_unique<ExecutionPlatform>(store,std::move(unconfigured),workers,capacity);
@@ -41,11 +102,17 @@ struct ProviderProfileRuntime::Impl {
         if(found==policy.end())throw std::invalid_argument("Provider execution route is not allowed");return *found;
     }
     std::unique_ptr<ExecutionPlatform> prepare(const SavedProviderProfile& profile){
+        const auto& allowed=route(profile.route_id);validate_execution(allowed,base,profile.model,true);
+        if(allowed.route.wire==ProviderWire::gemini_generate_content){
+            auto owned=store.resolve_credential(allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose).get();
+            validate_public_identity(allowed.route,profile.id,profile.model,owned);
+        }
         if(profile.model.empty()){
             auto settings=base;settings.provider.model.clear();settings.selectable_models.clear();settings.credential.reset();settings.provider_identity.reset();
             return std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
         }
-        const auto& allowed=route(profile.route_id);auto settings=base;settings.provider=allowed.provider;settings.provider.model=profile.model;
+        auto settings=base;settings.provider=allowed.provider;settings.provider.model=profile.model;
+        settings.provider.tools=model_tools(allowed,profile.model);
         settings.selectable_models.clear();settings.credential=CredentialReference{allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose};
         settings.provider_identity=ProviderExecutionIdentity{profile.id,profile.route_id,allowed.route.provider,profile.revision};
         return std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
@@ -89,11 +156,28 @@ std::vector<std::string> ProviderProfileRuntime::discover_models(std::string id,
         }
     }
     auto result=discover_provider_models(catalogue,key,cancel);
-    {std::lock_guard lock(impl_->mutex);if(expected!=impl_->state.revision||impl_->profiles.snapshot().revision!=expected)throw Conflict("Provider profile changed during model discovery");}
+    {
+        std::lock_guard lock(impl_->mutex);if(expected!=impl_->state.revision||impl_->profiles.snapshot().revision!=expected)throw Conflict("Provider profile changed during model discovery");
+        const auto& allowed=impl_->route(route_id);
+        if(impl_->base.workspace&&allowed.route.wire==ProviderWire::gemini_generate_content)
+            std::erase_if(result,[&](const auto& model){return model_tools(allowed,model)!=Capability::supported;});
+    }
     return result;
 }
 ProviderProfileRuntimeMetadata ProviderProfileRuntime::save_profile(std::string id,std::string route,std::string model,SecretBytes key,std::int64_t expected,bool activate){
     std::unique_lock lock(impl_->mutex);impl_->mutable_state(expected);
+    // ProviderProfiles encrypts a candidate before its validation callback.
+    // Reject invalid Gemini resource paths before even candidate persistence.
+    const auto& allowed=impl_->route(route);validate_execution(allowed,impl_->base,model);
+    if(!key.view().empty())validate_public_identity(allowed.route,id,model,key);
+    else if(allowed.route.wire==ProviderWire::gemini_generate_content){
+        const auto saved=std::find_if(impl_->state.profiles.begin(),impl_->state.profiles.end(),[&](const auto& profile){return profile.id==id;});
+        if(saved!=impl_->state.profiles.end()){
+            const auto& old=impl_->route(saved->route_id).route;
+            auto owned=impl_->store.resolve_credential(old.credential_scope,saved->credential_id,old.credential_purpose).get();
+            validate_public_identity(allowed.route,id,model,owned);
+        }
+    }
     const bool replace=activate||impl_->state.active==id;std::unique_ptr<ExecutionPlatform> candidate;
     auto next=impl_->profiles.save(std::move(id),std::move(route),std::move(model),std::move(key),expected,activate,
         [&](const auto& profile,const auto&){candidate=impl_->prepare(profile);});
@@ -109,6 +193,11 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::select_profile(std::strin
 }
 ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_existing_profile(std::string id,std::string route,std::string model,std::string credential,std::int64_t revision){
     std::unique_lock lock(impl_->mutex);impl_->mutable_state(0);std::unique_ptr<ExecutionPlatform> candidate;
+    const auto& allowed=impl_->route(route);validate_execution(allowed,impl_->base,model,true);
+    if(allowed.route.wire==ProviderWire::gemini_generate_content){
+        auto owned=impl_->store.resolve_credential(allowed.route.credential_scope,credential,allowed.route.credential_purpose).get();
+        validate_public_identity(allowed.route,id,model,owned);
+    }
     auto next=impl_->profiles.import_existing(std::move(id),std::move(route),std::move(model),std::move(credential),revision,
         [&](const auto& profile,const auto&){candidate=impl_->prepare(profile);});
     impl_->state=std::move(next);auto previous=std::move(impl_->service);impl_->service=std::move(candidate);

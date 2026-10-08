@@ -32,21 +32,43 @@ Gemini request/SSE/HTTP transport and signed replay data, using labelled
 synthetic socket fixtures. It excludes the later common gateway/history bridge.
 [Exact transport evidence](evidence/native-gemini-transport-hosted-provenance.json).
 
-The committed history/gateway source `75f45f0a036f1ffbab8c4b157df364f3697b52a0`
-awaits its own hosted result. Its compiled local baseline passed **61 native,
-91 extension and 17 browser contracts**, plus native/browser integration.
-Stronger callback assertions and the large function-response bound correction
-were added after compilation and are explicitly excluded from that pass claim.
-[Local baseline and exclusions](evidence/native-gemini-history-local-provenance.json).
-The newer Gemini AgentRunner contract increased the native manifest to **62**;
-all 62 passed locally in **100.44 seconds**, including the callback/large-result
-cases excluded above. Actual native file execution and signed replay after
-xlang3 SQLite reopen passed with synthetic provider replies. Current thin-client
-sources retain their 91/17 pass, and native/browser integration passed again
-against the rebuilt server. [Current local evidence](evidence/native-gemini-agent-local-provenance.json).
-Live Gemini inference and product discovery/enrollment remain incomplete.
-See [current validation](VALIDATION_STATUS.md) and
-[milestones](milestones.md).
+The gateway/history source `75f45f0a036f1ffbab8c4b157df364f3697b52a0` passed
+its exact hosted gate: **61 native, 91 extension and 17 browser contracts**,
+native/browser integration and VSIX verification, with zero failures/skips.
+Its native gate took **121.84 seconds**. This includes common gateway/history
+receipts, separate tool identities, supplied usage, strengthened callback
+assertions and escaped large-response regressions. The earlier local 61 result's
+post-build exclusions remain historical; this hosted gate executes those cases.
+[Exact hosted evidence](evidence/native-gemini-history-hosted-provenance.json).
+
+The subsequent agent source `c9591fe79cad9a4253ac8088933f0c8a2848ded1` passed
+**62 native contracts locally in 100.44 seconds**, including actual native file
+execution and signed replay after xlang3 SQLite reopen with synthetic provider
+replies. Native/browser integration passed again against that compiled server;
+its unchanged thin-client sources matched the earlier 91/17 pass.
+[Local agent evidence](evidence/native-gemini-agent-local-provenance.json).
+Its exact hosted gate also passed **62 native, 91 extension and 17 browser
+contracts**, native/browser integration and VSIX verification, with zero
+failures/skips. Its native gate took **128.80 seconds**.
+[Exact hosted agent evidence](evidence/native-gemini-agent-hosted-provenance.json).
+That hosted result excludes the new catalogue/enrollment source below.
+
+New source adds authenticated Gemini models-list discovery, opaque pagination,
+full resource identities, encrypted profile enrollment and backend-owned
+per-model tool policy. This working-tree checkpoint passed all **64 native
+contracts locally in 120.98 seconds**, with its exact manifest matched, zero
+failures/skips and no post-build exclusions. Actual enrolled file execution,
+encrypted xlang3 SQLite reopen, signed replay, cancellation, publication/CAS
+failure and stale discovery were exercised with synthetic provider replies.
+The final direct-SQLite removal and shared `records.hpp` cleanup were included
+in this compiled gate. Current thin-client checks passed **94 extension and 17
+browser tests**, and actual browser/native integration passed against the fresh
+four-route backend and source-matched assets. [Exact local enrollment scope](evidence/native-gemini-enrollment-local-provenance.json).
+Hosted verification of this new checkpoint remains pending; earlier hosted
+results do not cover its source. GenerateContent eligibility alone does not
+establish tool capability or live model acceptance. Live Gemini inference and
+actual Gemini IDE acceptance remain unverified. See [provider setup](provider-setup.md),
+[current validation](VALIDATION_STATUS.md) and [milestones](milestones.md).
 
 The installed browser preview is a separate native `19d69dd` and view `6f32d215`
 pair. Current source or CI success does not establish a preview upgrade.
@@ -82,7 +104,7 @@ removed Python prototype's status table; it is not a completion score.
 | --- | --- | --- |
 | Persistent sessions and run events | C++ repositories, ownership, transactions, replay and recovery use SQLite through embedded xlang3 | Complete concurrent-client conversations, failure/recovery and release acceptance |
 | Agent/model/tool loop | Shared C++ single-agent and graph execution with durable admission, cancellation and tool continuation | Broad live coding tasks, dynamic delegation, context bounds and production recovery |
-| Models and providers | Native Chat Completions, Responses and Anthropic Messages components; Gemini transport is hosted-verified, newer gateway/history source is pending as scoped above | Gemini agent/enrollment/discovery acceptance and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
+| Models and providers | Native Chat Completions, Responses and Anthropic Messages components; Gemini agent/history is hosted-verified, catalogue/enrollment/owned-key file execution has the local 64-contract acceptance above | Hosted verification of the new checkpoint, live Gemini and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
 | File/search/edit/process tools | Native workspace reads/search, approval-backed edits/creation and foreground process effects have scoped contracts | General patch review, background/PTY execution and complete repository coding tasks |
 | Instructions and agent presets | Native repository guidance discovery, source binding and durable approval checks | Full instruction scoping/configuration and reproducible presets |
 | Skills and commands | Native ownership is specified | Discovery, execution, lifecycle and CLI/editor acceptance |

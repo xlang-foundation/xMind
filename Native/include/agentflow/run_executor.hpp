@@ -1,5 +1,7 @@
 #pragma once
-#include "agentflow/store.hpp"
+#include "agentflow/records.hpp"
+#include <utility>
+#include <vector>
 
 namespace agentflow {
 struct RunBusy : std::runtime_error {using std::runtime_error::runtime_error;};

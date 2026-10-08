@@ -30,6 +30,42 @@ test('native provider profile client preserves route, key omission, activation a
  assert.deepEqual(requests[1].body,{id:'openai',route_id:'openai.responses',expected_revision:1});assert.deepEqual(requests[2].body,{id:'claude',route_id:'anthropic.messages',model:'fixture-claude',api_key:'synthetic-claude-key',expected_revision:1,activate:true});assert.deepEqual(requests[3].body,{id:'openai',expected_revision:2});
  assert.ok(requests.every(request=>request.options.headers.Authorization==='Bearer '+token&&request.options.redirect==='error'));assert.ok(!requests.some(request=>request.url.includes('synthetic-claude-key')));
 });
+
+test('advertised Gemini Settings discovery keeps full model resources and publishes a profile only after footer selection',async()=>{
+ // Host/API fixtures verify the thin adapter. The native backend owns encrypted
+ // credential storage; this fixture does not claim encryption or live inference.
+ const {ProviderProfileController}=require('../client'),key='synthetic-gemini-settings-key',model='models/fixture-gemini',alternate='models/fixture-gemini-next',requests=[],posted=[];
+ let state=profileState();state.routes.push({id:'gemini.generate-content',provider:'gemini',wire:'gemini-generate-content',discovery:true});
+ const client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{
+  const body=options.body?JSON.parse(options.body):undefined;requests.push({url,options,body});
+  if(url.endsWith('/profiles/models'))return {ok:true,json:async()=>({models:[{id:model},{id:alternate}]})};
+  if(body){assert.equal(body.route_id,'gemini.generate-content');assert.ok([model,alternate].includes(body.model));assert.equal(body.expected_revision,state.revision);state={...state,revision:state.revision+1,active:body.id,profiles:[state.profiles[0],{id:body.id,route_id:body.route_id,provider:'gemini',model:body.model,revision:state.revision+1}]};}
+  return {ok:true,json:async()=>structuredClone(state)};
+ }),controller=new ProviderProfileController(client,value=>posted.push(value));
+ try{
+  await controller.refresh();await controller.discover(key,'','gemini.generate-content');
+  assert.equal(requests.length,2,'Discovery cannot save or activate a draft profile');assert.equal(controller.state.active,'openai');
+  const discovery=requests[1];assert.equal(discovery.url,'http://127.0.0.1:8765/v1/provider/profiles/models');assert.match(discovery.body.id,/^gemini-[0-9a-f-]{36}$/);assert.deepEqual(discovery.body,{id:discovery.body.id,route_id:'gemini.generate-content',api_key:key,expected_revision:1});
+  assert.deepEqual(posted.findLast(value=>value.type==='model-list').models,[{id:model},{id:alternate}]);assert.equal(controller.draft.key,key);assert.ok(Number.isFinite(controller.draft.expires));assert.ok(!JSON.stringify(posted).includes(key),'The renderer receives model metadata without the private draft key');
+  await assert.rejects(controller.save('fixture-gemini'),/returned model/);assert.equal(requests.length,2,'A shortened or invented alias cannot replace the discovered resource');
+  await controller.save(model);const saved=requests[2];assert.deepEqual(saved.body,{id:discovery.body.id,route_id:'gemini.generate-content',model,api_key:key,expected_revision:1,activate:true});assert.equal(controller.draft.key,undefined);assert.equal(controller.draft.expires,Infinity);
+  assert.equal(controller.state.profiles[1].model,model);assert.deepEqual(await controller.admission(),{provider_profile_id:discovery.body.id,expected_provider_revision:2});assert.equal(controller.wire(discovery.body.id),'gemini-generate-content');assert.deepEqual(posted.findLast(value=>value.type==='model-list'),{type:'model-list',models:[{id:model},{id:alternate}],model});assert.deepEqual(posted.findLast(value=>value.type==='provider-wire'),{type:'provider-wire',wire:'gemini-generate-content'});
+  await controller.save(alternate);assert.deepEqual(requests[3].body,{id:discovery.body.id,route_id:'gemini.generate-content',model:alternate,expected_revision:2,activate:true});assert.equal(controller.state.profiles[1].model,alternate);assert.equal(controller.state.profiles[0].model,'fixture-model');
+  assert.ok(requests.every(request=>request.options.headers.Authorization==='Bearer '+token&&request.options.redirect==='error'));assert.ok(!requests.some(request=>request.url.includes(key)));assert.ok(!JSON.stringify(posted).includes(key));assert.ok(!JSON.stringify(controller.state).includes(key));
+ }finally{controller.dispose();}
+});
+
+test('Gemini Settings cannot discover through absent, disabled or foreign advertised routes',async()=>{
+ const {ProviderProfileController}=require('../client'),key='synthetic-unavailable-gemini-key';
+ for(const variant of ['absent','disabled','foreign']){
+  const state=profileState(),requests=[],posted=[];let profile='';
+  if(variant!=='absent')state.routes.push({id:'gemini.generate-content',provider:'gemini',wire:'gemini-generate-content',discovery:variant!=='disabled'});
+  if(variant==='foreign'){profile='saved-gemini';state.profiles.push({id:profile,route_id:'gemini.generate-content',provider:'gemini',model:'models/fixture-gemini',revision:1});}
+  const client=new BackendClient('http://localhost:8765',()=>token,async(url)=>{requests.push(url);return {ok:true,json:async()=>structuredClone(state)};}),controller=new ProviderProfileController(client,value=>posted.push(value));
+  try{await assert.rejects(controller.discover(key,profile,variant==='foreign'?'openai.responses':'gemini.generate-content'),/available route/);assert.deepEqual(requests,['http://127.0.0.1:8765/v1/provider/profiles']);assert.equal(controller.draft,undefined);assert.ok(!posted.some(value=>value.type==='model-list'));assert.ok(!JSON.stringify(posted).includes(key));}
+  finally{controller.dispose();}
+ }
+});
 test('profile metadata rejects secret references, duplicate identities and inconsistent backend route families',async()=>{
  const variants=[state=>{state.credential_id='private';},state=>{state.profiles[0].api_key='private';},state=>{state.profiles.push({...state.profiles[0]});},state=>{state.routes[0].provider='anthropic';},state=>{state.active='unknown';},state=>{state.revision=0;},state=>{state.routes[0].wire='unrecognized';},state=>{state.profiles[0].model='sk-private';},state=>{state.profiles[0].revision=2;}];
  for(const modify of variants){const state=profileState();modify(state);const client=new BackendClient('http://localhost:8765',()=>token,async()=>({ok:true,json:async()=>state}));await assert.rejects(client.providerProfiles());}

@@ -14,6 +14,7 @@
 #include "agentflow/agent_service.hpp"
 #include "agentflow/provider_setup.hpp"
 #include "agentflow/provider_profile_legacy_setup.hpp"
+#include "agentflow/gemini_model_policy.hpp"
 #include "agentflow/execution_platform.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/process_configuration.hpp"
@@ -165,13 +166,15 @@ int main(int argc,char** argv) {
             const auto add=[&](std::string id,std::string provider,std::string endpoint,agentflow::ProviderWire wire,std::string catalogue,agentflow::ProviderCatalogueFormat format){
                 agentflow::ProviderProfileRoute route{std::move(id),std::move(provider),endpoint,"server",provider_purpose(endpoint,"provider:setup:"),wire};
                 agentflow::ChatProviderConfig configuration;configuration.endpoint=std::move(endpoint);configuration.wire=wire;
-                configuration.tools=agentflow::Capability::supported;configuration.stream_usage=agentflow::Capability::supported;
-                if(wire==agentflow::ProviderWire::anthropic_messages)configuration.output_limit=agentflow::Capability::supported;
-                routes.push_back(route);policies.push_back({std::move(route),std::move(configuration),agentflow::ProviderCataloguePolicy{std::move(catalogue),format}});
+                configuration.tools=wire==agentflow::ProviderWire::gemini_generate_content?agentflow::Capability::unknown:agentflow::Capability::supported;configuration.stream_usage=agentflow::Capability::supported;
+                if(wire==agentflow::ProviderWire::anthropic_messages||wire==agentflow::ProviderWire::gemini_generate_content)configuration.output_limit=agentflow::Capability::supported;
+                auto tools=wire==agentflow::ProviderWire::gemini_generate_content?agentflow::gemini_documented_tool_policy():std::map<std::string,agentflow::Capability>{};
+                routes.push_back(route);policies.push_back({std::move(route),std::move(configuration),agentflow::ProviderCataloguePolicy{std::move(catalogue),format},std::move(tools)});
             };
             add("openai.chat","openai","https://api.openai.com/v1/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.openai.com/v1/models",agentflow::ProviderCatalogueFormat::openai);
             add("openai.responses","openai","https://api.openai.com/v1/responses",agentflow::ProviderWire::responses,"https://api.openai.com/v1/models",agentflow::ProviderCatalogueFormat::openai);
             add("anthropic.messages","anthropic","https://api.anthropic.com/v1/messages",agentflow::ProviderWire::anthropic_messages,"https://api.anthropic.com/v1/models",agentflow::ProviderCatalogueFormat::anthropic);
+            add("gemini.generate-content","gemini","https://generativelanguage.googleapis.com/v1beta",agentflow::ProviderWire::gemini_generate_content,"https://generativelanguage.googleapis.com/v1beta/models",agentflow::ProviderCatalogueFormat::gemini);
             auto configurable=std::make_unique<agentflow::ProviderProfileRuntime>(persistence,std::move(settings),std::move(policies),workers,queue);
             configurable->import_legacy_configuration();
             legacy_provider_setup=std::make_unique<agentflow::ProviderProfileLegacySetup>(*configurable,std::move(routes));
