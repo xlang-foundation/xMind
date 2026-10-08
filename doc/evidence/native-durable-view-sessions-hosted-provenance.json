@@ -1,0 +1,12 @@
+{
+  "xmind": "626363026e49d97599be102d2d30f6c10333ca87",
+  "workflowRun": 37705662926,
+  "job": 113079461036,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37705662926",
+  "conclusion": "success",
+  "nativeContractsPassed": 52,
+  "extensionContractsPassed": 70,
+  "browserTestsPassed": 12,
+  "scope": "Exact successful job and evidence artifact inspected. Native encrypted view session issuance, origin binding, authority rotation, expiry, revoke/reopen, SQL faults/capacity and actual adapter/native restart gates passed. Browser/VSIX packaging passed.",
+  "newerPending": "CLI conversation navigation/titles/rename and the capability-gated shared rename dialog were added after this tested revision."
+}

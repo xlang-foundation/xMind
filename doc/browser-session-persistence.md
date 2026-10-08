@@ -1,9 +1,10 @@
 # Durable local browser access sessions
 
-The live preview's tested browser adapter keeps its eight-hour sessions in memory. A UI
-refresh and a native restart at the same origin preserve access while that
-adapter remains alive; restarting the adapter currently requires login again.
-Provider keys remain in the native encrypted credential repository.
+The live preview now uses the tested durable native access-session service.
+Its HttpOnly cookie survives refresh and access-adapter/native backend restarts
+at the same addresses within the eight-hour native expiry. Provider keys remain
+in the backend encrypted credential repository. The earlier adapter held its
+session map in memory and required login after an adapter restart.
 
 The `ViewSessions` C++ service implements durable access sessions for that
 remaining restart case. Windows BCrypt generates independent 256-bit identifiers
@@ -64,3 +65,25 @@ rejection, failed replacement login, malformed enrollment replies and backend
 unavailability. The adapter never sends the master token outside explicit
 enrollment or in JSON. All 12 browser tests pass locally. This peer verifies
 adapter behavior only; the C++/xlang3 restart and SQL fault tests remain pending.
+
+The pending statements above describe earlier source checkpoints. Revision
+`6263630` has now passed its full hosted gate: 52 native contracts, 70 extension
+tests, 12 browser tests and packaging. The actual native/browser contract
+restarted both components and restored the retained cookie, graph state and
+history without replay. [Hosted provenance](evidence/native-durable-view-sessions-hosted-provenance.json)
+and [restart contract output](evidence/native-durable-view-sessions-browser-contract.log)
+record the exact scope.
+
+The live browser was upgraded to that exact native binary and adapter source,
+then signed in once to replace its earlier in-memory cookie. Initial migration
+sign-in attempts returned adapter HTTP 502; direct native enrollment and later
+retries succeeded. The cause was not established. Temporary secret-free
+diagnostics were removed, restoring the exact tested adapter before final
+checks. The access adapter and then native backend were restarted at their
+existing addresses. Browser refresh reused the cookie with no login prompt,
+showing the selected `gpt-5.6-sol` Responses model and completed command history.
+All six conversations, ten runs and 24 history records, plus the saved provider
+configuration, survived without inference replay.
+[Live restart evidence](evidence/browser-durable-session-live-restarts.json)
+records sanitized results and the unresolved initial enrollment issue. This
+does not establish remote/team authentication or eliminate that known issue.

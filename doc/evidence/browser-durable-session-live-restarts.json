@@ -1,0 +1,18 @@
+{
+  "revision": "626363026e49d97599be102d2d30f6c10333ca87",
+  "scope": "Actual browser preview at its existing addresses with the exact tested native binary and access-adapter source. Original encrypted provider key and workspace/profile configuration retained.",
+  "accessAdapterRestarted": true,
+  "nativeBackendRestarted": true,
+  "browserRefreshed": true,
+  "loginPromptAfterRestarts": false,
+  "selectedModel": "gpt-5.6-sol",
+  "wire": "responses",
+  "completedHistoryVisible": true,
+  "sessionCount": 6,
+  "runCount": 10,
+  "historyCount": 24,
+  "countsPreserved": true,
+  "providerConfigurationPreserved": true,
+  "inferenceReplayed": false,
+  "knownIssue": "Initial live migration sign-in attempts returned adapter HTTP 502. Direct native enrollment and later retries succeeded; cause was not established. Temporary secret-free diagnostics were removed and exact verified adapter source restored before the final restart checks."
+}
