@@ -16,9 +16,12 @@ struct ProviderHttpError : TransportError {
     std::string type,code,param;
     explicit ProviderHttpError(int code):TransportError("Provider returned HTTP "+std::to_string(code)),status(code) {}
 };
+// Backend-selected credential placement; callers cannot supply arbitrary headers.
+enum class CredentialHeader {bearer,x_api_key,x_goog_api_key};
 struct HttpStreamRequest {
     std::string url,body;
     std::chrono::milliseconds deadline{120000},idle_timeout{60000};
+    CredentialHeader credential_header=CredentialHeader::bearer;
 };
 // Platform transport, outside the core. HTTPS uses OS certificate verification;
 // unencrypted HTTP is accepted only for explicitly configured loopback endpoints.

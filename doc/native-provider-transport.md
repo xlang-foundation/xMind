@@ -1,5 +1,31 @@
 # Native provider transport
 
+Backend-selected credential placement now has source for bearer, `x-api-key`
+and `x-goog-api-key` headers. The request contract uses an enum rather than
+client-supplied header names; unsupported values and missing API-key credentials
+are rejected. Credentials remain separate from request bodies and URLs, require
+bounded printable bytes and are copied into wiped native header storage. The
+existing certificate verification, redirect rejection, deadlines and cancellation
+policy apply to all three placements.
+
+The independent transport peer now requires each API-key placement on actual
+native POST/SSE and GET/JSON requests, absence of the other credential headers,
+no injected header and no followed redirect. Missing credentials, CRLF injection
+and unsupported enum values must fail before sending. All 52 native contracts
+passed locally, including these actual socket checks and the accumulated CLI
+graph/recovery changes: [CTest log](evidence/native-provider-credential-headers-local-ctest.log),
+[source/runtime provenance](evidence/native-provider-credential-headers-local-provenance.json).
+The local xlang3 compatibility-branch changes and binary hashes are recorded;
+this is separate from exact pinned hosted validation. Existing
+model adapters continue selecting bearer by default; this infrastructure does
+not implement or claim Claude/Gemini request, stream or live-model support.
+
+The official [Claude authentication documentation](https://platform.claude.com/docs/en/manage-claude/authentication)
+allows bearer authentication and the legacy `x-api-key` header; version/workspace
+headers and native Claude wire support remain separate work. The
+[Gemini API reference](https://ai.google.dev/api) documents `x-goog-api-key` for
+API-key authentication. These sources were checked on 2026-10-07.
+
 The Windows provider transport posts actual HTTP/HTTPS requests and delivers incremental SSE bytes to the native model decoder. It uses WinHTTP directly, outside the C++ core. No Python, OpenCode or LiteLLM implementation is invoked.
 
 The request supplies an explicitly configured endpoint/body, whole-request deadline and idle timeout. Provider credentials are supplied as backend-owned `SecretBytes`; a temporary header buffer reserves before copying and wipes its owned credential bytes on release. WinHTTP's own internal buffers remain OS-managed. Error messages contain status/error codes and do not echo provider error bodies, URLs, request bodies or credential values.

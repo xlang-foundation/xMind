@@ -89,6 +89,14 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     if(!consume || input.url.empty() || input.url.size()>8192 || input.body.size()>8*1024*1024 ||
         input.deadline.count()<=0 || input.deadline.count()>600000 || input.idle_timeout.count()<=0 || input.idle_timeout.count()>600000)
         throw std::invalid_argument("Invalid provider transport configuration");
+    std::wstring_view credentialPrefix;
+    switch(input.credential_header){
+        case CredentialHeader::bearer:credentialPrefix=L"Authorization: Bearer ";break;
+        case CredentialHeader::x_api_key:credentialPrefix=L"x-api-key: ";break;
+        case CredentialHeader::x_goog_api_key:credentialPrefix=L"x-goog-api-key: ";break;
+        default:throw std::invalid_argument("Unsupported provider credential header");
+    }
+    if(!bearer&&input.credential_header!=CredentialHeader::bearer)throw std::invalid_argument("Provider API-key header requires a credential");
     for(unsigned char c:input.url) if(c<=32 || c==127 || c=='#') throw std::invalid_argument("Invalid endpoint URL");
     if(cancel.stop_requested()) throw TransportCancelled("Provider request cancelled");
     const auto deadline=Clock::now()+input.deadline;
@@ -115,7 +123,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         // Reserve before copying secret bytes so growth cannot leave unwiped
         // credential fragments in abandoned string allocations.
         headers.value.reserve(headers.value.size()+bytes.size()+32);
-        headers.value+=L"Authorization: Bearer ";
+        headers.value+=credentialPrefix;
         for(auto byte:bytes) {
             if(byte<33 || byte>126) throw std::invalid_argument("Invalid provider credential");
             headers.value.push_back(static_cast<wchar_t>(byte));

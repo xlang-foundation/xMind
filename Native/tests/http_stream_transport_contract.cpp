@@ -19,6 +19,17 @@ int main(int argc,char** argv) {
         SecretBytes secret({reinterpret_cast<const std::uint8_t*>(synthetic.data()),synthetic.size()});
         auto request=[&](const std::string& path) {return HttpStreamRequest{base+path,R"({"fixture":"transport"})",10s,5s};};
         auto discovery=[&](const std::string& path){return HttpStreamRequest{base+path,"",10s,5s};};
+        for(const auto mode:{CredentialHeader::x_api_key,CredentialHeader::x_goog_api_key}){
+            const std::string name=mode==CredentialHeader::x_api_key?"api-key":"google-key";
+            auto input=request("/auth/"+name);input.credential_header=mode;
+            ChatCompletionStream decoder([](const ModelEvent&){});post_event_stream(input,&secret,[&](std::string_view bytes){decoder.feed(bytes);});require(decoder.finish().content=="transport fixture","API-key header must retain actual streaming bytes");
+            auto json=discovery("/json-auth/"+name);json.credential_header=mode;require(get_json(json,&secret)==R"({"object":"list","data":[]})","API-key JSON discovery must use the selected header");
+            input.url+="/redirect";rejects<ProviderHttpError>([&]{post_event_stream(input,&secret,[](std::string_view){});});
+            rejects<std::invalid_argument>([&]{post_event_stream(input,nullptr,[](std::string_view){});});
+            const std::string injected="transport-fixture\r\nx-extra: injected";SecretBytes invalid({reinterpret_cast<const std::uint8_t*>(injected.data()),injected.size()});
+            rejects<std::invalid_argument>([&]{post_event_stream(input,&invalid,[](std::string_view){});});
+        }
+        {auto invalid=request("/ok");invalid.credential_header=static_cast<CredentialHeader>(999);rejects<std::invalid_argument>([&]{post_event_stream(invalid,&secret,[](std::string_view){});});}
         require(get_json(discovery("/json"),&secret)==R"({"object":"list","data":[]})","JSON GET must return actual native peer bytes");
         rejects<ProviderHttpError>([&]{get_json(discovery("/json-redirect"),&secret);});
         rejects<TransportError>([&]{get_json(discovery("/json-wrong-media"),&secret);});

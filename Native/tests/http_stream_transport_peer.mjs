@@ -10,11 +10,17 @@ import {join} from 'node:path';
 const execute=promisify(execFile);
 const [executable,openssl]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-transport-'));
-let redirected=0,requests=0,plain,tls;
+let redirected=0,requests=0,plain,tls;const credentialRequests=new Map();
 const wire='data: '+JSON.stringify({choices:[{index:0,delta:{content:'transport fixture'},finish_reason:'stop'}]})+'\n\ndata: [DONE]\n\n';
 function handler(request,response) {
   requests++;
   if(request.url==='/redirect-target') {redirected++;response.writeHead(500);response.end();return;}
+  if(request.url.startsWith('/auth/')||request.url.startsWith('/json-auth/')){
+    credentialRequests.set(request.url,(credentialRequests.get(request.url)??0)+1);
+    const google=request.url.includes('/google-key'),selected=google?'x-goog-api-key':'x-api-key';assert.equal(request.headers[selected],'transport-test-token-not-a-real-key');assert.equal(request.headers[google?'x-api-key':'x-goog-api-key'],undefined);assert.equal(request.headers.authorization,undefined);assert.equal(request.headers['x-extra'],undefined);
+    if(request.url.startsWith('/json-auth/')){assert.equal(request.method,'GET');assert.equal(request.headers.accept,'application/json');response.writeHead(200,{'Content-Type':'application/json'});response.end('{"object":"list","data":[]}');return;}
+    assert.equal(request.method,'POST');let body='';request.on('data',bytes=>body+=bytes);request.on('end',()=>{assert.deepEqual(JSON.parse(body),{fixture:'transport'});if(request.url.endsWith('/redirect')){response.writeHead(302,{Location:`http://127.0.0.1:${plain.address().port}/redirect-target`});response.end();return;}response.writeHead(200,{'Content-Type':'text/event-stream'});response.end(wire);});return;
+  }
   if(request.url.startsWith('/json')){
     assert.equal(request.method,'GET');assert.equal(request.headers.accept,'application/json');assert.equal(request.headers.authorization,'Bearer transport-test-token-not-a-real-key');
     if(request.url==='/json-redirect'){response.writeHead(302,{Location:`http://127.0.0.1:${plain.address().port}/redirect-target`});response.end();return;}
@@ -52,6 +58,7 @@ try {
   await Promise.all([new Promise(resolve=>plain.listen(0,'127.0.0.1',resolve)),new Promise(resolve=>tls.listen(0,'127.0.0.1',resolve))]);
   const result=await execute(executable,[`http://127.0.0.1:${plain.address().port}`,`https://127.0.0.1:${tls.address().port}`],{timeout:20000,windowsHide:true});
   assert.equal(redirected,0,'Credentials must not be forwarded by a followed redirect');
+  assert.deepEqual(Object.fromEntries(credentialRequests),{'/auth/api-key':1,'/json-auth/api-key':1,'/auth/api-key/redirect':1,'/auth/google-key':1,'/json-auth/google-key':1,'/auth/google-key/redirect':1},'Only selected-header requests reach the wire; missing/injected credentials are rejected before sending');
   assert.ok(requests>=9,'Protocol cases must reach real native sockets');
   process.stdout.write(result.stdout);
 } finally {
