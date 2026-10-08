@@ -32,7 +32,8 @@ profile unchanged. Service publication remains the owning runtime's responsibili
 after successful CAS. Initial migration cannot replace an existing registry or
 rewrite the legacy source record. Actual SQLite/key/restart contracts now include
 native service-construction rejection and two concurrent migration candidates;
-these new additions await compilation and hosted execution. Automatic legacy
+these additions passed the local 57-contract native gate recorded below. Hosted
+execution remains pending. Automatic legacy
 record loading, runtime activation and client enrollment remain pending.
 
 New `ProviderProfileRuntime` source now connects the registry to the same native
@@ -43,9 +44,13 @@ updating the active profile rebuilds its service. Healthy idle ownership is
 required, including for paused graph roots. Startup restores the selected profile
 and its backend-bound encrypted key. The native contract uses independent OpenAI
 and Claude HTTP peers, actual xlang3/SQLite storage, an SQL publication fault,
-paused-graph input, restart and migration of an existing key reference. Compilation
-and execution of these new additions are pending; the full expected native gate
-is now 57 contracts. The server's existing Settings API, automatic legacy-record
+paused-graph input, restart and migration of an existing key reference. Source
+`62a5cb901485b4b7335ad6cc9d72194d21b42789` passed all **57 native contracts**
+locally in 91.31 seconds, with no failures or skips
+([CTest](evidence/native-provider-profile-runtime-local-ctest.log),
+[provenance](evidence/native-provider-profile-runtime-local-provenance.json)).
+The build uses the correctness/performance-validated xlang3 buffer-fix pin
+`4aea7d8fb24da9ba86f9d7eeb92820794f213d29`; hosted validation remains pending. The server's existing Settings API, automatic legacy-record
 reader, model discovery and client adapters still need integration. This source
 does not upgrade the running preview or establish live Claude account support.
 

@@ -1,0 +1,26 @@
+{
+  "revision": "62a5cb901485b4b7335ad6cc9d72194d21b42789",
+  "runtimeRevision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "environment": "Local Windows Release build; native xlang3 and xlang3-compatible modules; CPython standard-library source only",
+  "nativePassed": 57,
+  "nativeFailed": 0,
+  "skipped": 0,
+  "nativeTestTimeSeconds": 91.31,
+  "ctestLogSha256": "1ca6cd47fbf3fa9b74af1d38c0ca79d15aba57701288f34d77fcffe6b0c57e2d",
+  "sourceSha256NormalizedLF": {
+    "Native/include/agentflow/provider_profiles.hpp": "70e4ab0fa644c43fa7c4b2066cc00a33c666e0eb4e59036c5ae938ef34b6bcc2",
+    "Native/src/provider_profiles.cpp": "79c86bfa4627637dd245689f921aad6dc2888b6a7bc60e2352789bda76fc73f5",
+    "Native/include/agentflow/provider_profile_runtime.hpp": "3c4af82757b4b5774486d1c50b0d6ae31eb60010fa985e11eb01504f99ae169d",
+    "Native/src/provider_profile_runtime.cpp": "7b0958d316c38242516c7a96a7d1f2970cca1f7e927ed5a868928aef03490842",
+    "Native/tests/provider_profiles_contract.cpp": "8407536f031f860024d60092a4f643b6b4fb670643f10a16bfe0f4e1842014e8",
+    "Native/tests/provider_profile_runtime_contract.cpp": "625df7fac48ae1ccf6629fb1a44e53ea80cd059d7e1b57cdf6154cc965d50b61",
+    "Native/tests/provider_profile_runtime_peer.mjs": "7f7970ebae340bc3d2c6b99669cd4f9ab8235648ee17cd5aa85c5e00de9a4495"
+  },
+  "releaseBinarySha256": {
+    "xmind_server.exe": "17b269dbeafef1faa7a5ae892f5a3cef6965c642a5cca6b3c1a5c6eb80ed6cbb",
+    "agentflow_provider_profiles_contract.exe": "1ed0ce9ef4b070514ae97dc8a281b4abfe95ce1e3db9950424412513ea73501c",
+    "agentflow_provider_profile_runtime_contract.exe": "efa7e47bb806be06fb50baf46017640d90d2a2b6b598cb21e7f6406ae7bccb12",
+    "xlang3_runtime.dll": "166e8d96bd3b3a886fadfb7482374d7512a2dad7b389ca5d907a4b581f18a3a5"
+  },
+  "scope": "Complete local native contract set, including actual independent OpenAI/Claude HTTP peers, encrypted SQLite I/O through xlang3, safe profile publication, active and paused-graph ownership, restart and original encrypted-reference migration. No live Claude, Settings/API enrollment, automatic legacy reader, or preview upgrade claimed. Hosted extension/browser gate remains pending."
+}
