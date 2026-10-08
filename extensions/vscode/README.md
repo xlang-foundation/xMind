@@ -1,5 +1,14 @@
 # xMind for VS Code
 
+Use the [provider setup](../../doc/provider-setup.md) and
+[development guide](../../doc/DEVELOPMENT.md) for current configuration.
+The [validation status](../../doc/VALIDATION_STATUS.md) distinguishes hosted
+adapter tests, actual browser acceptance and rendered IDE acceptance. Test
+counts, earlier Chat-only enrollment and preview descriptions below retain
+their original checkpoint scope; they are not the current release summary.
+The latest published adapter gate passed 103 extension contracts, while installed
+VS Code delegation acceptance remains unverified.
+
 Use **xMind: Open Browser View (Copy Connection Token)** to open an HTML view of the currently selected native server. Paste the copied connection token into Connect once. The browser then uses that server's model configuration and persistent history; no provider key or database is copied. Its loopback access server is owned by the extension host. Closing the extension ends that view transport while native execution remains independent. Shared-launcher host tests and real native history/catalogue contracts pass; invoking this new command in an actual IDE is still pending.
 
 The packaged extension includes the browser access adapter, renderer assets and vendor license notices. The sidebar's SVG connection controls, cancellable dialog and remembered draggable divider are validated in the actual browser. [Browser view details](../../doc/browser-view.md).

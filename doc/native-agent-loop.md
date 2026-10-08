@@ -1,5 +1,11 @@
 # Native model/tool agent loop
 
+This guide retains the original agent-loop and approved-edit checkpoints.
+Descriptions of pending capabilities below apply to those historical revisions.
+For shipped delegation, registered graphs, native process/MCP tools and A2A,
+see [current validation](VALIDATION_STATUS.md), [delegation](native-delegation.md)
+and the [documentation index](README.md). Mutable dynamic plans remain unfinished.
+
 `AgentRunner` is the shared C++ model/tool loop for backend execution workers and future graph nodes. It invokes the configured provider through the native transport, forwards streamed model events to durable storage, executes offered workspace tools and sends their actual results in the next model request. There is no built-in response generator or substitute provider. `AgentService` schedules it through a bounded native worker queue, with HTTP/CLI submission and cancellation when the server has a model configuration.
 
 The settings select an endpoint/model, optional read workspace, optional encrypted credential reference, instructions, turn bound and run deadline. A workspace requires declared model function-call capability. Without a workspace, the same loop handles text-only single-agent requests. Credentials are resolved through the persistence worker into backend-owned secret bytes for each provider request, separate from model messages. `AgentRunner` and its persistence service must outlive their execution calls.

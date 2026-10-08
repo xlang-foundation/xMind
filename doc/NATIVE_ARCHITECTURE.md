@@ -33,7 +33,7 @@ Native infrastructure dependencies are pinned by the current build and license
 inventory. C++ uses native HTTP/TLS and credential protection rather than
 reimplementing cryptography. Production SQLite I/O goes through xlang3;
 the superseded direct-SQLite implementation was removed. See
-[native development](native-development.md) for build selection and prerequisites.
+[development](DEVELOPMENT.md) for build selection and prerequisites.
 
 ## Current source and verification
 

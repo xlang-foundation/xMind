@@ -1,5 +1,10 @@
 # Native file creation — verified component
 
+Preview and test-count statements below belong to the original creation
+checkpoint. Current live provider acceptance and installed bundle scope are
+recorded in [validation status](VALIDATION_STATUS.md) and
+[provider compatibility](live-provider-compatibility.md).
+
 The native coding implementation includes `create_file` alongside `edit_file` when the trusted server is configured with `--workspace-edits approved`. Each operation requires its own controller decision. Source `e93f28c7e6d7c214f1c0d5e049ad9408128b4ad5` compiled in Release and passed all **31 native and 30 extension contracts** in [isolated CI run 37621404384](https://github.com/xlang-foundation/xMind/actions/runs/37621404384): [complete CTest output](evidence/native-file-creation-ci-ctest.log), [source/runtime provenance](evidence/native-file-creation-ci-provenance.json). The runtime is native xlang3 with the reviewed SQLite prerequisite; no CPython process or bridge is used. Local compilation remains deferred during the independent xlang3 full timing suite; its deferral is not evidence of a local pass.
 
 The model supplies only relative path and UTF-8 content. Planning opens the workspace and existing parent directories, rejects traversal/device/ambiguous names and directory reparses, verifies absence of the final entry, and captures workspace/parent identity and content/hash. It does not create parent directories or the file. The durable proposal records absence, the exact destination/content and parent identity. Models/views cannot supply a grant, parent identity or successful outcome.

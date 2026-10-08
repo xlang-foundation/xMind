@@ -1,21 +1,56 @@
 # Isolated native verification
 
-Latest verified run: [37621404384](https://github.com/xlang-foundation/xMind/actions/runs/37621404384), source `e93f28c7e6d7c214f1c0d5e049ad9408128b4ad5`, passed Release compilation, all **31 native and 30 extension contracts**, including actual native file creation and official modern/legacy SDK stdio peers. [Full CTest output](evidence/native-file-creation-ci-ctest.log), [provenance](evidence/native-file-creation-ci-provenance.json). Its tested development bundle is running in the actual local sidebar preview without a model or seeded conversations. This supersedes the pending status below for that exact source; it does not prove full coding/provider/protocol/graph/team readiness or an unrun local compile.
+The latest published native gate and installed acceptance are recorded in
+[validation status](VALIDATION_STATUS.md) and
+[Responses continuation](native-responses-reasoning.md). Exact source
+`ace246094f6c1fc8cf61c146cfe001c63f1bbc8f` passed 71 native, 103 extension and
+20 browser contracts, native/browser integration and VSIX verification.
+[Exact hosted provenance](evidence/native-responses-reasoning-hosted-provenance.json).
+These results do not validate uncommitted dynamic-plan work.
 
-The thirty-contract SDK revision `bbeb4db077adcb5cbb86c9e91d3d3fe199886e0f` passed locally, but [isolated run 37619215608](https://github.com/xlang-foundation/xMind/actions/runs/37619215608) failed **before native configuration**: the Windows runner had two `npm.cmd` applications, and PowerShell converted both paths into one invalid executable string. [Actual job-log excerpt](evidence/native-mcp-sdk-ci-resolver-failure.log). This is not an isolated SDK/native contract pass. Corrected source `e93f28c7e6d7c214f1c0d5e049ad9408128b4ad5` selects the first matching application and schedules [run 37621404384](https://github.com/xlang-foundation/xMind/actions/runs/37621404384). It includes the pending native creation source and expects **31 named native contracts**. The superseded creation run 37620966307 reached terminal cancellation; it establishes no native pass. Local native creation validation remains deferred during the separate xlang3 full timing suite. The previous 28-contract configured-agent isolated pass remains verified.
+## Current isolated workflow
 
-`.github/workflows/native-windows.yml` builds the native runtime and xMind contracts on a separate Windows runner. It does not rebuild the measured runtime on this development machine. CI presence is not completion evidence; exact source results are recorded below and in [milestones](milestones.md).
+[Native Windows workflow](../.github/workflows/native-windows.yml) runs on a
+separate GitHub Windows runner. It builds its own runtime and never rebuilds the
+benchmark checkout on this development machine. Actions and source inputs are
+pinned; workflow permissions are read-only.
 
-Current isolated resource/schema-worker result: [run 37614949089](https://github.com/xlang-foundation/xMind/actions/runs/37614949089), revision `9582dee1e17f37fe5e00220dda4c1a63f53188fe`, passed all **26 native and 27 extension contracts**. [CTest evidence](evidence/native-mcp-resources-schema-ci-ctest.log), [provenance](evidence/native-mcp-resources-schema-ci-provenance.json). The newer configured-agent revision `1a3d5c1d5542cc1ce8eb3db1162063f7e5425b9c` has passed **28 native and 28 extension contracts locally**; its [isolated CI](https://github.com/xlang-foundation/xMind/actions/runs/37617251064) is pending. The current gate requires all **28 named native contracts** and bundles the native schema worker and offline administrator alongside server/client/runtime/modules. Historical counts below belong to their earlier revisions.
+The current inputs are:
 
-Verified run: [37598517059](https://github.com/xlang-foundation/xMind/actions/runs/37598517059), revision `7b0fe2fca4ada58b8a7184d3be463d59ff9cc796`, passed Release compilation, all nineteen native contracts and twenty extension contracts. The allowed model-invoked edit now starts through the native CLI with an explicitly selected alternate model. [CTest log](evidence/native-model-edit-cli-ci-ctest.log), [provenance](evidence/native-model-edit-cli-ci-provenance.json). This run also produced the native server/client/runtime/modules bundle with upstream license records. No live provider is used. The earlier [37595553681](https://github.com/xlang-foundation/xMind/actions/runs/37595553681) run remains recorded separately.
+- xlang3 source `4aea7d8fb24da9ba86f9d7eeb92820794f213d29`, checked clean.
+- Reviewed SQLite patch `runtime-prerequisites/sqlite-xlang3.patch`, checked
+  before application on an isolated branch.
+- Standard-library source `ebf955df7a89ed0c7968f79faec1de49f61ed7cb`
+  (CPython 3.14.0 `Lib/` sources only).
 
-The downloaded development bundle was launched on this machine with `Tools/start-ui.ps1 -BundleDirectory <extracted-runtime-directory>`. The launcher validates required files, uses the bundle's module directory and records its source revision. Standard-library source remains supplied separately; the bundle is not a complete installer. The actual normal VS Code host opened the right sidebar and connected to that native server using its existing persistent session database. [Launch evidence](evidence/vscode-ci-bundle-launch.json), [actual screenshot](evidence/vscode-ci-bundle-sidebar.png). No model or agent run was supplied to the preview.
+The job builds native xlang3 with `XLANG3_BUILD_CPYTHON_BRIDGE=OFF`, including
+its JSON and SQLite modules. It never executes CPython or installs CPython
+native extension binaries.
 
-Inputs are pinned: xlang3 `914783909835116969aad7c66b210a5ac9a27661`, the previously reviewed SQLite prerequisite patch in `runtime-prerequisites`, and CPython 3.14.0 commit `ebf955df7a89ed0c7968f79faec1de49f61ed7cb` for **standard-library source only**. The job never executes CPython, builds its bridge, or installs its native extension binaries. It builds the stock native xlang3 executable/shared runtime and JSON/SQLite packages in an isolated temporary branch. No benchmark checkout or local xlang3 branch is modified.
+`Tools/ci-native.ps1` records source/patch/toolchain provenance, discovers the
+runner's supported Visual Studio installation, verifies vendored schema sources,
+installs pinned Node SDK fixtures with `--ignore-scripts`, builds all native
+targets and runs CTest. The registered tests must exactly match its expected
+manifest before execution; missing Node/OpenSSL-dependent contracts fail the
+gate rather than silently reduce coverage.
 
-The runner's actual Visual Studio installation is detected with `vswhere`; the job selects its 2022 or 2026 generator and matching CMake/CTest. The first hosted attempt received the VS2026 Windows image, so a fixed 2022 generator failed before native compilation. `Tools/ci-native.ps1` verifies input revisions and patch hash, records the actual toolchain provenance, builds the native targets, and verifies **all nineteen named contracts** are registered before running CTest. Missing conditional Node/OpenSSL tests fail the gate instead of silently reducing coverage. Inference peers remain labeled synthetic; no live model credential is supplied. Runtime performance and live-provider validation are separate requirements, not established by these contracts.
+The workflow then runs extension and browser contracts, actual browser/native
+integration, and packages/verifies the VSIX. Test providers are labelled
+synthetic; native filesystem, HTTP and xlang3 SQLite operations are real.
+Headless contracts do not establish rendered IDE or live-provider acceptance.
 
-Extension contracts use `npm ci --ignore-scripts` and Node.js; dependency install hooks cannot launch an interpreter. The separate actual VS Code diff/interactive persistence tests remain recorded local evidence, not hosted headless UI claims. Action implementations are pinned by full commit IDs. Workflow permissions are read-only; build/test diagnostics are retained as artifacts even on failure.
+Diagnostics are retained even after failure. The development bundle is uploaded
+only after its required build/contract steps succeed. Original failed logs and
+later passing results retain their respective source identities.
 
-Only the isolated GitHub job may invoke `ci-native.ps1`. Local builds continue using `native-milestone.ps1` and its observed-benchmark guard. A remote build failure must be investigated; never copy an old local pass log or remove a required test to mark CI green.
+## Local verification and historical evidence
+
+Only isolated GitHub runners may invoke `ci-native.ps1`. Local native builds
+use `Tools/native-milestone.ps1` and its observed-benchmark guard. Exit 3 is
+deferral, not a test pass. [Development instructions](DEVELOPMENT.md).
+
+Earlier 19-, 26-, 28-, 30- and 31-contract gates and their initial failures remain
+in the [milestone ledger](milestones.md) and `evidence/`. Their older runtime
+pins, test counts and unconfigured preview descriptions are historical; they
+are not the current workflow configuration. Source-matched artifact verification,
+live model acceptance and runtime performance have separate evidence scopes.

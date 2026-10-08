@@ -1,25 +1,54 @@
 # Native source-tree cleanup
 
-The active checkout is `D:\CantorAI2026\xMind`; its maintained sources and
-documentation use the native layout below. The separate
-`D:\CantorAI2026\AgentFlow` directory was inspected and is empty. Automatic
-approval review blocked its nonrecursive removal with the reason "blocked by
-policy", so the empty directory remains; it is not another source checkout.
+The maintained repository is `D:\CantorAI2026\xMind`. Its source layout is:
 
-Removed the earlier Python AgentFlow implementation, its dependent probes and launcher, and the original xlang-based Core/CLI/service/debug plugins, configuration, examples, schemas and Docker setup. Original programming guides, legacy dependency lock and migration instructions were also removed. Git history retains the code and its license provenance.
+| Path | Purpose |
+| --- | --- |
+| `Native/` | C++ backend, CLI, xlang3 SQLite integration and native contracts |
+| `extensions/vscode/` | Thin VS Code host and shared conversation renderer |
+| `views/browser/` | Browser view and its access adapter |
+| `Tools/` | Current launchers, build helpers and reference/verification tools |
+| `doc/` | Architecture, setup, capability references and verification records |
 
-Root CMake delegates to Native/. Cleanup revision `dea5888` passed its complete hosted gate: 58 native, 88 extension and 17 browser contracts, native/browser integration and VSIX verification, with no failures/skips. [Exact evidence](evidence/native-cleanup-hosted-provenance.json). Later Gemini agent/SQLite acceptance increased the manifest to 62; its full local gate passed in 100.44 seconds. Its [separate validation scope](VALIDATION_STATUS.md) does not change the cleanup evidence. The OpenCode inventory was regenerated with 136 upstream operations, zero removed-prototype mappings and 23 native source candidates; none is claimed verified parity.
+The earlier Python agent prototype and original xlang Core, CLI, services,
+`DevSrv_Plugins`, configuration, examples, schemas and Docker setup were removed.
+The unsupported direct-SQLite store and its optional build were removed too.
+Root CMake delegates to `Native/`; product database I/O uses embedded xlang3.
+Git history and applicable license notices preserve upstream provenance.
 
-The current clients, native dependencies/licenses, runtime prerequisites, verification evidence and generic xlang3 dependency setup remain. Running backend/view snapshots, SQLite state and encrypted credentials were preserved. Old bytecode was moved out of the importable root package into ignored local history; the unused virtual environment was moved outside the xMind checkout.
+All maintained documentation is under `doc/`; `Documents/` is absent.
+The two development guides were consolidated into [DEVELOPMENT.md](DEVELOPMENT.md),
+with a [documentation index](README.md) for current entry points.
 
-All maintained documentation and provider/parity inventories are now under
-`doc/`; `Documents/` was removed. Audit tools write to that same directory.
-The remaining generic dependency probe lives under `Tools/probes/`, leaving
-native product contracts under `Native/tests/` and client checks with their
-respective clients.
+The final cleanup pass removes the unused FastAPI bootstrap `Tools/setup.ps1`,
+`requirements-pure.lock` and `Tools/probes/xlang3_dependencies.py`. It also
+removes the old `Tools/mcp-peer` HTTP peer for the retired Python backend.
+None was referenced by the native build, CI or current clients. Official SDK
+stdio contracts under `Native/tests/sdk` remain supported test inputs.
+Future pure-Python libraries may still be installed and executed under xlang3
+when required by the final architecture.
 
-The disabled direct-SQLite implementation, optional CMake build and obsolete
-contract were also removed. Its shared session/run/event/error records remain
-in `Native/include/agentflow/records.hpp`, used by the current xlang3-backed
-repository. The old license-insertion script targeting `D:/source/xMind` was
-unused and removed; existing license notices and dependency licenses remain.
+Automatic approval review rejected removal of the ignored
+`Tools/mcp-peer/node_modules` cache with "blocked by policy". The obsolete
+tracked peer files are removed; that dependency cache remains on disk.
+
+Current native dependencies/licenses, meaningful fixtures, historical evidence,
+provider/parity inventories and the SQLite runtime prerequisite are retained.
+Running backend/view snapshots, SQLite sessions, encrypted credentials and
+uncommitted native feature work are preserved. Ignored build/runtime caches
+are not product source.
+
+The separate `D:\CantorAI2026\AgentFlow` folder contains stale generated build
+artifacts, not a second source checkout. It is not empty. An earlier automatic
+approval review rejected its removal with "blocked by policy"; no deletion
+workaround was used. Current source, builds and launchers use xMind.
+
+Team-server, PostgreSQL, WebRTC and Electron implementation belongs to the
+sibling private Nexus repository. OSS retains the generic Local/Nexus protocol
+boundary and does not package those private components.
+
+Earlier cleanup revision `dea5888` passed its hosted 58-native/88-extension/
+17-browser gate; [exact historical evidence](evidence/native-cleanup-hosted-provenance.json)
+retains that result. This later cleanup changes unused tooling and documentation,
+not the native runtime. Its validation consists of tracked-reference, layout,
+documentation-link and Git diff checks; it does not claim a new native test pass.

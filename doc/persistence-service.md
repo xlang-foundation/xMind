@@ -8,8 +8,8 @@ Requests execute in FIFO admission order. Repository failures propagate through 
 
 The credential methods are internal backend operations. Scope authorization must be enforced by the calling service; returning a move-only secret to a provider worker does not authorize exposing it through HTTP or events. Input/request copies remain their owner's responsibility.
 
-## Verified behavior
+## Historical component verification
 
 The Release build and all five native contracts passed. `persistence_service_contract` exercised four concurrent callers writing 100 messages, owned argument copies, request failure isolation, competing transitions, exclusive ownership, restart recovery, preserved paused runs, move-only Windows credentials, concurrent close/draining, bounded admission under a held write transaction and lease cleanup after failed initialization. Evidence: [persistence-service-ctest.log](evidence/persistence-service-ctest.log).
 
-This is an in-process backend component. Native HTTP/CLI transport, authentication, provider/tool execution, database-independent repository selection and PostgreSQL remain incomplete. SQLite startup marks queued/running roots failed; reconciling possibly completed external effects remains required before resuming agent work automatically.
+This five-contract checkpoint verified the in-process component. Native HTTP/CLI, local-owner authentication and provider/tool execution were added in later checkpoints; see [current validation](VALIDATION_STATUS.md). PostgreSQL belongs to private Nexus. Recovery preserves recorded effect uncertainty and does not automatically replay interrupted model/tool work.

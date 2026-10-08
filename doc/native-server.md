@@ -1,6 +1,14 @@
 # Native xMind Server and console client
 
-Current complete verified baseline: source `3297a4bce2d591c0f1c1dd37ccc18a15297369e7`, [35 native contracts](evidence/native-process-passing-ci-ctest.log) and [40 extension contracts in hosted TAP](evidence/native-process-passing-ci-job.log). Approved actual edits/creation, registered MCP tools, executable-bound foreground commands, durable retained output and native watcher reconnect passed with synthetic inference and actual independent child/file/database effects. The actual unseeded sidebar now runs this tested bundle without a configured model. See [process scope and remaining limits](native-process-tools.md). Earlier component descriptions below retain their original verification scope.
+This guide retains historical server, watcher and approval component checkpoints.
+Their test counts, preview descriptions and pending capabilities apply to their
+recorded revisions. Current provider enrollment, interactive CLI, graphs,
+delegation, live browser acceptance and remaining limits are recorded in
+[validation status](VALIDATION_STATUS.md), [interactive CLI](native-interactive-cli.md)
+and [Responses continuation](native-responses-reasoning.md). Team authorization,
+PostgreSQL, WebRTC and Electron belong to private Nexus.
+
+Historical complete baseline: source `3297a4bce2d591c0f1c1dd37ccc18a15297369e7`, [35 native contracts](evidence/native-process-passing-ci-ctest.log) and [40 extension contracts in hosted TAP](evidence/native-process-passing-ci-job.log). Approved actual edits/creation, registered MCP tools, executable-bound foreground commands, durable retained output and native watcher reconnect passed with synthetic inference and actual independent child/file/database effects. That checkpoint's unseeded sidebar used the tested bundle without a configured model. See [process scope and remaining limits](native-process-tools.md).
 
 The native CLI now prepares `xmind_cli PORT watch RUN_ID [AFTER]` for continuous observation through the same authenticated backend. It prints one persisted event per line as NDJSON, flushes each record, advances only to its actual `seq`, and polls every 250 ms. Reconnect with the last emitted sequence; `process.output` fragments retain their exact hexadecimal bytes and channel offsets. JSON escapes control characters instead of executing terminal output. The watcher reads a final event tail after observing an actual terminal state, exits 0 for completed, 2 for cancelled and 1 for failure/observation error. It does not launch, approve or cancel work; closing this client leaves execution owned by the backend. Transport errors stop observation rather than restarting a run.
 

@@ -1,5 +1,12 @@
 # Native graph child executions
 
+This guide records the schema-v5 child-ledger checkpoint. Statements about
+future scheduling, HTTP/CLI and views refer to that revision. Later registered
+graph execution, human pauses and client observation are documented in
+[graph service](native-graph-service.md), [graph checkpoints](native-graph-checkpoints.md)
+and [current validation](VALIDATION_STATUS.md). Private team capabilities are
+outside OSS scope.
+
 Source `fbf2cfe9962c6d364893090e4590f765f92b61a3` also passed isolated [CI run 37651959372](https://github.com/xlang-foundation/xMind/actions/runs/37651959372): **39 native and 41 extension contracts**, with no skipped extension tests. [Hosted CTest](evidence/native-graph-children-hosted-ctest.log), [original job/TAP output](evidence/native-graph-children-passing-ci-job.log), [hosted provenance](evidence/native-graph-children-hosted-provenance.json). Subsequent [durable coordinator checkpoint integration](native-graph-checkpoints.md) has separate evidence and verification scope.
 
 Release compilation and all **39 native contracts passed locally**: [complete build/CTest output](evidence/native-graph-children-local-build-ctest.log), [source-tree/binary provenance](evidence/native-graph-children-local-provenance.json). The new contract invokes the shared native agent engine concurrently for two graph children. Inference is synthetic; transport, workspace reads, transactions, conversations and reopen are actual. Public graph scheduling/client and live-provider acceptance remain pending.

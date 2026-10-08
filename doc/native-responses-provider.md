@@ -1,5 +1,12 @@
 # Native Responses provider
 
+This guide records the original Responses component checkpoint. Its pending
+live/enrollment/browser statements below describe that historical revision.
+Later native enrollment, live OpenAI tool/edit execution and the browser
+two-child join have separate [provider acceptance](live-provider-compatibility.md)
+and [reasoning continuation evidence](native-responses-reasoning.md).
+Use [provider setup](provider-setup.md) for current configuration.
+
 The shared C++ model boundary now includes an explicit Responses wire alongside Chat Completions. `complete_model` chooses the backend-configured adapter; single agents and graph agent nodes use that same boundary. No OpenAI SDK, LiteLLM implementation or CPython execution is added. Local native contracts verify the component scope below; live Responses acceptance remains unverified.
 
 Update: checkpoint `67de5b16a8732477606957cb52736df06f078f16` completed its

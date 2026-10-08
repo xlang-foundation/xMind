@@ -274,8 +274,8 @@ recorded in [current acceptance](native-delegation-acceptance.md).
 
 The Python prototype and original xlang runtime/service/plugin assets, launchers
 and dependent probes are removed. Both root and Native CMake entry points use
-the current native contracts. Generic xlang3 dependency setup remains separate
-from the native agent engine. [Cleanup](cleanup.md).
+the current native contracts. The unused FastAPI setup, lockfile, dependency
+probe and prototype HTTP MCP peer were also removed. [Cleanup](cleanup.md).
 The final 64-contract build also removes the unused direct-SQLite store and
 contract; shared record types now live in `records.hpp`. Production database I/O
 continues through embedded xlang3.
