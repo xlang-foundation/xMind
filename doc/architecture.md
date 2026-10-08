@@ -66,6 +66,27 @@ recovery checks before being advertised. Current native APIs do not yet implemen
 Nexus profile enrollment or team-worker scheduling; this is the revised target
 architecture, not a new integration acceptance claim.
 
+The backend owns connection profiles; views receive public labels and connection
+status only. A profile has a stable local ID, kind (`local` or `nexus`), display
+name and configuration revision. Nexus profiles additionally bind a validated
+HTTPS origin, negotiated protocol version, authenticated server identity and an
+encrypted authentication reference. Server-issued organization/project/workspace
+IDs are resolved after authentication; entering those IDs in a client grants no
+authority. Selecting a profile changes the view and admission context, while
+already admitted runs retain their original connection identity. It does not
+cancel, transfer or replay those runs. Event cursors are scoped to the connection
+and session, so changing servers cannot reuse another server's event history.
+
+Local worker enrollment is separate from viewing shared sessions. Nexus issues
+an expiring lease bound to an authorized workspace and task; the local agent
+checks workspace access and effect permissions before running tools. Durable
+fencing and idempotent effect receipts prevent duplicate owners after reconnect
+or reassignment. Expired or revoked leases stop new effects; recovery must
+reconcile existing receipts before retrying. Cantor Cluster will implement the
+same scheduler/worker boundary in Nexus, without changing the UI or duplicating
+the xMind agent engine. These are required acceptance contracts, not implemented
+distributed behavior.
+
 OpenCode parity applies to relevant core coding, CLI and editor behavior; it does
 not reintroduce excluded desktop/deployment products. Preserve the pinned inventory
 and identify exclusions rather than counting them as implemented. Historical

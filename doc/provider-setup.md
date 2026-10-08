@@ -13,9 +13,12 @@ orphan candidate but preserves all published keys and profile references.
 
 The new native contract uses actual encrypted SQLite storage and restart, key
 purpose mismatch, concurrent publication, an actual SQLite trigger failure and
-legacy-record preservation. Compilation/test execution is pending because the
-local build guard detected live sibling benchmark processes 22988, 8276 and
-28456. These source additions do not change the existing provider HTTP API,
+legacy-record preservation. Source `1cc3ee7bfddce9bb963c71031db87859b9c943bf`
+passed the full hosted gate: **56 native, 73 extension and 14 browser contracts**,
+with no failures or skips ([CI](https://github.com/xlang-foundation/xMind/actions/runs/37717927955),
+[CTest](evidence/native-provider-profiles-hosted-ctest.log),
+[provenance](evidence/native-provider-profiles-hosted-provenance.json)).
+These verified backend components do not change the existing provider HTTP API,
 activate an execution service, migrate the existing OpenAI record or make Claude
 available in Settings. Runtime/service publication, migration, discovery and both
 client adapters still need integration and acceptance. The hosted native gate's

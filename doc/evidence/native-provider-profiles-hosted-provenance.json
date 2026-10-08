@@ -1,0 +1,24 @@
+{
+  "run": 37717927955,
+  "job": 113120377074,
+  "revision": "1cc3ee7bfddce9bb963c71031db87859b9c943bf",
+  "conclusion": "success",
+  "nativePassed": 56,
+  "extensionPassed": 73,
+  "browserPassed": 14,
+  "failed": 0,
+  "skipped": 0,
+  "evidenceArtifact": 11525153406,
+  "runtimeSource": {
+    "xlang3": "914783909835116969aad7c66b210a5ac9a27661",
+    "toolchain_version": "18.10.12217.157",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "xmind": "1cc3ee7bfddce9bb963c71031db87859b9c943bf",
+    "toolchain": "Visual Studio 18 2026",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "sqlite_patch_sha256": "5388CDB3D1946CE48A2416055E27B422A2AA1364271A24DC8EB124C72C2C64B4"
+  },
+  "nativeCtestSha256": "0e283c4b2435844da30220a8340395226fdbf0d0269f0750dfc2b28a1e1f9eae",
+  "jobLogSha256": "60dedd684b66b106c5ea3e14113358b22a702c7a80cc64478c266f0bf253aaff",
+  "scope": "Full hosted native, extension and browser gate, including actual encrypted xlang3/SQLite provider-profile persistence, restart and concurrent publication contract. Provider HTTP/service/UI integration, live Claude and Local/Nexus connection-profile enrollment remain pending. Existing preview was not upgraded."
+}
