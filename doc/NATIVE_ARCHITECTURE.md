@@ -37,7 +37,26 @@ the superseded direct-SQLite implementation was removed. See
 
 ## Current source and verification
 
-The current Claude checkpoint passed the complete local **66-contract native
+The current ordered-Claude-history checkpoint passed all **67 native contracts
+locally in 117.65 seconds**, with an exact manifest, zero failures/skips and no
+post-build exclusions. Ordered `anthropic_content` receipts preserve raw content
+as a JSON string, accepted tool-input tokens/escaped keys, block interleaving and
+opaque thinking/signature/redacted material. Strict receipt/DTO matching and
+aggregate request bounds passed. The new helper contract took **0.50 seconds**;
+the expanded actual AgentRunner contract took **0.57 seconds**, performing two
+file reads and signed/interleaved xlang3 SQLite replay without repeated tools,
+with unsigned-block rejection before effects.
+
+Fresh browser/native integration passed against the rebuilt server. Frontend
+sources match `ae7c4ba` and retain its recorded **98 extension and 17 browser
+tests**; those suites were not rerun for this native change. Current hosted67
+validation remains pending. Thinking request controls, local cryptographic
+verification, model/account acceptance, cross-wire signed conversion and full
+parity remain incomplete; installed previews are unchanged.
+[Local67 scope](evidence/native-anthropic-history-local-provenance.json),
+[Ordered Claude history](native-claude-history.md).
+
+The preceding Claude checkpoint passed the complete local **66-contract native
 gate in 114.49 seconds**, with an exact manifest, zero failures/skips and no
 post-build exclusions. Actual AgentRunner two-file execution, provider call/result
 correlation, encrypted credential reuse, xlang3 SQLite history/reopen without
@@ -50,9 +69,15 @@ took **0.56 seconds** and the gateway adapter contract **0.23 seconds**.
 The updated frontend suites passed **98 extension and 17 browser tests**, with
 zero failures/skips; actual shared DOM fixtures cover live and saved metrics.
 Fresh browser/native integration passed against the rebuilt server and matching
-assets. Exact hosted66 validation is pending. Thinking/signatures, live Claude
-inference, rendered Claude IDE acceptance, all 21 pinned Anthropic models and full
-parity remain incomplete. Installed previews are unchanged.
+assets. Exact source `ae7c4ba07d59f57cbe393eff5a01b7d5186dfbc5` also passed
+its hosted **66 native contracts in 131.92 seconds**, **98 extension and 17
+browser tests**, native/browser integration and VSIX verification, with zero
+failures/skips. Its Claude agent contract took **1.41 seconds**.
+[Exact hosted66 provenance](evidence/native-anthropic-agent-hosted-provenance.json).
+That gate excludes the newer ordered thinking/signature receipts, history helper
+and raw replay source above. Live Claude inference, rendered
+Claude IDE acceptance, all 21 pinned Anthropic models and full parity remain
+incomplete. Installed previews are unchanged.
 [Local66 provenance](evidence/native-anthropic-agent-local-provenance.json),
 [Claude scope](native-claude-agent.md).
 
@@ -119,8 +144,14 @@ integration passed again against the rebuilt server. Its unchanged frontend
 sources retained the earlier verified **94 extension and 17 browser tests**;
 those suites were not rerun for that CLI change.
 [Local CLI scope](evidence/native-provider-profile-cli-local-provenance.json).
-Hosted verification of that 65-contract source is pending; it excludes the newer
-Claude agent/metrics changes. Live Gemini
+Exact committed CLI source `ac69c1f2a2c4a757b23d0d9da8b98d6188fab3a8` then
+passed its hosted **65 native contracts in 149.37 seconds**, **94 extension and
+17 browser tests**, native/browser integration and VSIX verification, with zero
+failures/skips. Its CLI contract took **4.16 seconds**. The exact ac69 manifest,
+runtime/stdlib/patch provenance and original log bytes are verified.
+[Exact hosted CLI scope](evidence/native-provider-profile-cli-hosted-provenance.json).
+This hosted65 result excludes newer Claude66 agent/metrics and Claude67 history
+source. Live Gemini
 inference and actual Gemini IDE interaction remain unverified.
 [Provider setup](provider-setup.md).
 The installed browser preview retains its separately verified native `19d69dd`

@@ -1,5 +1,9 @@
 # Native Claude agent acceptance
 
+This records the earlier `ae7c4ba` text/tool/metrics checkpoint. The subsequent
+[Claude history checkpoint](native-claude-history.md) adds ordered raw receipts
+and signature-bearing thinking replay with its own exact validation scope.
+
 The Claude checkpoint passed its complete local **66-contract native gate in
 114.49 seconds**, with an exact manifest and no post-build exclusions. The actual
 Claude AgentRunner contract passed in **0.56 seconds** and its gateway/transport
@@ -90,7 +94,7 @@ by the backend.
 
 ## Remaining acceptance
 
-Thinking and redacted-thinking blocks, signed Claude continuation, broader media,
+At this earlier checkpoint, thinking and redacted-thinking blocks, signed Claude continuation, broader media,
 server tools, caching controls and complete per-model behavior remain incomplete.
 Unsupported blocks fail explicitly. This checkpoint does not add cross-wire
 conversion of foreign provider receipts, establish live Claude discovery or

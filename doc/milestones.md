@@ -4,7 +4,34 @@ Current completion scope is the [revised xMind OSS specification](architecture.m
 
 ## Current checkpoint scope
 
-The current Claude checkpoint passed the full local **66-contract native gate
+The current Claude receipt checkpoint passed the full local **67-contract native
+gate in 117.65 seconds**, with an exact manifest, zero failures/skips and no
+post-build exclusions. The new history helper passed in **0.50 seconds**; the
+expanded actual AgentRunner contract passed in **0.57 seconds**. Ordered
+text/tool/thinking/redacted blocks, exact initial/fragmented tool-input JSON,
+precise number tokens and escaped keys survive validated receipt persistence
+and raw outgoing Messages replay. Two real file reads execute through
+interleaved signature-bearing blocks; encrypted credentials and ordered history
+survive xlang3 SQLite close/reopen without repeating tools. Unsigned blocks fail
+before effects, while previous protocol failure, cancellation/recovery and SQL
+conversation rollback cases still pass.
+
+Hidden thinking/signatures/redacted data remain continuation material rather
+than ordinary text output. Native matching/provenance checks and request,
+receipt, message-count, depth and aggregate/role-merge bounds passed: 8 MiB
+content/envelope and final request limits, 64 content blocks, 1 MiB/depth16 tool
+input and 65,536-byte signatures. Fresh browser/native integration passed the
+rebuilt server and matching assets. Frontend source equality with `ae7c4ba`
+retains its prior **98 extension and 17 browser tests**, without a new frontend
+rerun. Provider replies/keys/signatures are synthetic; local cryptographic
+verification is not performed. Thinking/reasoning request controls, live Claude
+acceptance, foreign signed/tool conversion, rendered IDE acceptance, preview
+upgrades and complete parity remain incomplete. Exact hosted67 verification
+remains pending.
+[Local67 evidence](evidence/native-anthropic-history-local-provenance.json),
+[receipt scope and bounds](native-claude-history.md).
+
+The preceding `ae7c4ba` Claude checkpoint passed the full local **66-contract native gate
 in 114.49 seconds**, with an exact manifest, zero failures/skips and no post-build
 exclusions. Its new actual AgentRunner contract took **0.56 seconds**, verifying
 two native file reads, correlated tool-use/results, encrypted credential reuse,
@@ -16,12 +43,18 @@ invented totals.
 
 Frontend suites passed **98 extension and 17 browser tests**, with zero
 failures/skips and actual shared-renderer DOM metric fixtures. Fresh browser/native
-integration passed against the rebuilt server and matching assets. Exact hosted66
-validation remains pending; this current working-tree checkpoint is separate from
-the preceding CLI65 and hosted enrollment64 scopes below. Thinking/signatures,
-live Claude inference, rendered Claude IDE acceptance, the 21 pinned models and
+integration passed against that rebuilt server and matching assets. Exact
+revision `ae7c4ba07d59f57cbe393eff5a01b7d5186dfbc5` subsequently passed its
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37748603655):
+**66 native contracts in 131.92 seconds**, **98 extension and 17 browser tests**,
+native/browser integration and VSIX verification, with zero failures/skips and
+an exact manifest. Its Claude agent contract passed in **1.41 seconds**.
+Both prior gates exclude the newer ordered signed/redacted receipt work above;
+this is separate from hosted67 verification, CLI65 and hosted enrollment64.
+Live Claude inference, rendered Claude IDE acceptance, the 21 pinned models and
 full parity remain incomplete. Installed previews are unchanged.
 [Local66 source/runtime/log evidence](evidence/native-anthropic-agent-local-provenance.json),
+[exact hosted66 evidence](evidence/native-anthropic-agent-hosted-provenance.json),
 [Claude scope](native-claude-agent.md).
 
 The user-requested native-only cleanup was committed and pushed as
@@ -82,8 +115,14 @@ Fresh browser/native integration passed again against the rebuilt server and
 source-matched assets. That checkpoint's unchanged frontend sources retained the earlier verified
 **94 extension and 17 browser tests**, without rerunning those suites for the
 CLI change. [Local CLI evidence](evidence/native-provider-profile-cli-local-provenance.json).
-Hosted validation of that 65-contract source remains pending; it excludes the
-newer Claude agent/metrics changes. Installed
+Exact revision `ac69c1f2a2c4a757b23d0d9da8b98d6188fab3a8` subsequently passed
+its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37746664258):
+**65 native contracts in 149.37 seconds**, **94 extension and 17 browser tests**,
+native/browser integration and VSIX verification, with zero failures/skips and
+the exact expected manifest.
+[Hosted CLI evidence](evidence/native-provider-profile-cli-hosted-provenance.json).
+That hosted result excludes the newer Claude agent/metrics and ordered-receipt
+milestones. Installed
 previews are unchanged; live Gemini inference, actual Gemini IDE acceptance and
 full provider/coding/protocol parity remain incomplete.
 [Provider setup](provider-setup.md), [CLI scope](native-interactive-cli.md).

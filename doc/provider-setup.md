@@ -1,5 +1,25 @@
 # Native provider setup
 
+## Native Claude ordered history checkpoint
+
+The latest local **67-contract native gate passed in 117.65 seconds**, with an
+exact manifest, zero failures/skips and no post-build exclusions. It verifies
+ordered `anthropic_content` receipts with string-valued `content_json`, exact
+tool-argument tokens and escaped keys, opaque signed/redacted blocks and strict
+receipt/DTO matching. The expanded actual AgentRunner fixture reads two files,
+replays signed/interleaved history after xlang3 SQLite reopen without repeating
+tools, and rejects unsigned blocks before effects. Signatures/data are retained
+as opaque provider material; no local cryptographic verification is performed.
+
+Fresh browser/native integration passed. Frontend sources match `ae7c4ba` and
+retain its recorded **98 extension and 17 browser tests**, without rerunning
+those suites for this native change. Current hosted67 validation remains pending.
+Thinking request controls, `reasoning_effort` mapping, live models, rendered IDE
+acceptance and cross-wire signed conversion remain incomplete; installed
+previews are unchanged.
+[Local67 evidence](evidence/native-anthropic-history-local-provenance.json),
+[Claude history scope](native-claude-history.md).
+
 ## Native Claude agent and metrics checkpoint
 
 Claude uses the existing `anthropic.messages` profile route and backend-owned
@@ -9,16 +29,22 @@ labelled **Input (uncached)**; cache writes and reads remain separate, supplied
 zeros survive, and missing totals are not calculated. The semantics follow the
 dated [official usage reference](evidence/anthropic-usage-reference.json).
 
-The complete local **66-contract native gate passed in 114.49 seconds**, with
+The preceding local **66-contract native gate passed in 114.49 seconds**, with
 an exact manifest, zero failures/skips and no post-build exclusions. It verifies
 actual two-file AgentRunner execution, xlang3
 SQLite close/reopen and tool-history replay, held-stream cancellation/recovery
 and second-tool-row SQL rollback. Frontend suites passed **98 extension and 17
 browser tests**, with zero failures/skips, including actual shared-renderer DOM
 fixtures. Fresh browser/native integration passed against the rebuilt server;
-installed previews are unchanged. Exact hosted66 validation remains pending.
-Thinking/signatures, live Claude inference, rendered Claude IDE acceptance and
-the 21 pinned models remain incomplete.
+installed previews are unchanged. Exact source
+`ae7c4ba07d59f57cbe393eff5a01b7d5186dfbc5` also passed its hosted **66 native
+contracts in 131.92 seconds**, **98 extension and 17 browser tests**,
+native/browser integration and VSIX verification, with zero failures/skips. Its
+Claude agent contract took **1.41 seconds**.
+[Exact hosted66 evidence](evidence/native-anthropic-agent-hosted-provenance.json).
+That gate excludes the newer ordered thinking/signature history source above.
+Thinking controls, live Claude inference, rendered Claude IDE acceptance and the
+21 pinned models remain incomplete.
 [Local evidence](evidence/native-anthropic-agent-local-provenance.json),
 [Claude acceptance scope](native-claude-agent.md).
 
@@ -89,8 +115,12 @@ passed again against the fresh native server. At that CLI checkpoint, frontend
 sources were unchanged from `2f5e0f0`; the prior hosted frontend results were not
 repeated or counted as new tests.
 [CLI local evidence](evidence/native-provider-profile-cli-local-provenance.json).
-Hosted verification of that CLI source remains pending and excludes the newer
-Claude agent/metrics changes. No live Gemini
+Exact CLI source `ac69c1f2a2c4a757b23d0d9da8b98d6188fab3a8` subsequently
+passed its hosted **65 native contracts in 149.37 seconds**, **94 extension and
+17 browser tests**, native/browser integration and VSIX verification, with zero
+failures/skips. [Hosted CLI evidence](evidence/native-provider-profile-cli-hosted-provenance.json).
+That hosted gate excludes the newer Claude66 agent/metrics and Claude67 history
+source. No live Gemini
 key, external account acceptance or installed-preview upgrade is claimed.
 The actual browser/native integration passed the four default routes and an
 inactive Gemini profile save against the rebuilt server, together with durable
@@ -177,8 +207,9 @@ private key input/reuse, full resources, inactive save/selection, registry races
 encrypted reopen/rollback, bounded safe diagnostics and failed-turn status
 through successful settings commands. All new source cases were compiled and
 passed; the preceding hosted 64-contract gate excludes these additions.
-Hosted verification of the newer checkpoint, live account and new
-installed-preview acceptance remain pending.
+The exact hosted CLI65 result is recorded above; it excludes the later Claude66
+and Claude67 source. Live account and new installed-preview acceptance remain
+pending.
 [CLI syntax, behavior and historical evidence](native-interactive-cli.md).
 
 The sections below preserve earlier provider-setup checkpoints and their limits.

@@ -1,0 +1,62 @@
+{
+  "baseRevision": "ae7c4ba07d59f57cbe393eff5a01b7d5186dfbc5",
+  "sourceState": "Working-tree source adds strict ordered native Claude receipts, signed/redacted thinking ingestion and raw argument/history replay. New helper and expanded stream/actual AgentRunner cases all compiled and passed, including aggregate request bounds; no post-build exclusions.",
+  "nativePassed": 67,
+  "nativeFailed": 0,
+  "nativeSkipped": 0,
+  "nativeSeconds": 117.65,
+  "nativeManifestMatched": true,
+  "runtimeRevision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "runtimeSource": "Isolated xlang3-nexus-buffer worktree; tracked sources verified unchanged",
+  "stdlibSource": "C:/Python/Python314/Lib source only; no CPython interpreter execution",
+  "sourceSha256": {
+    "Native/CMakeLists.txt": "50868dc6cbd33708ad020f6b7985a251fe1c83064956a3207a7997121757e7c4",
+    "Tools/ci-native.ps1": "8ba73f7fc11ced9d3f87d1b4cd2afa4881dab4a3d4b8289360990fe86e1c063f",
+    "Native/include/agentflow/anthropic_history.hpp": "98cf539f7481e41357b989b07a1801000fd29bc0101bf30c0f49a8367b127b16",
+    "Native/src/anthropic_request.cpp": "57652eecd8c36a0f129b412c38539907e2e756a02169f1b0588be869cf764067",
+    "Native/src/anthropic_stream.cpp": "97477c08ca39b5cfce406bf66578b66db9d17dd67c7a668dc32c7c78ab58c283",
+    "Native/src/anthropic_history.cpp": "3957ffb24f1249c97a6225e05fa707974d4bf6b9b67ef21b2ff2f14d250f9501",
+    "Native/src/chat_provider.cpp": "339a45a94dae4bc084e54c4e699ac99ab7fd959d0068f8eebcef20229a467cc7",
+    "Native/src/agent_runner.cpp": "7dcbe7bd664712178d4246713b52bcfc08867688fa701dcfb460f1c3645f90c9",
+    "Native/src/repository.cpp": "cfb4126542b5d53e95c641079e7cbfe5d5cde1019985a60ce9467b694f8ac00d",
+    "Native/tests/anthropic_history_contract.cpp": "436265e98ba99339f14574e31a50b08aa1172370dfac57beb301ea3657c1e6e7",
+    "Native/tests/anthropic_stream_contract.cpp": "f7e413004621fce47a562b6a5870ec9e6d04e36def30af399ee7fe0c6f708cc5",
+    "Native/tests/anthropic_agent_contract.cpp": "0926965c8eaa473393f29745d2b6d190c58a2b6697308fff2f513fda5d2ea1fc",
+    "Native/tests/anthropic_agent_peer.mjs": "da44fac6d5905223000e8a3e7df0f787b93f617ae9a57b4e1d03ca8714a95a52",
+    "extensions/vscode/media/chat.js": "661f4fc05f40c0c5652f03dfc6676d927f114ef00cfc2ea4a05fd75bfe8ea97b",
+    "extensions/vscode/tests/renderer.test.js": "db9c744635870c348895043f9bb435d805307717d2656a3e2962ba5c5b768be8"
+  },
+  "compiledBinarySha256": {
+    "xmind_server.exe": "5e1fdc05da18d4e4afffdd20f327c9cdaf60aad08c2f8aaf599fbc0c0777cc9e",
+    "xmind_cli.exe": "6293b91db269a15de5994a13e80692c0abcd7b3f608365eab6fa3eddbbe297a8",
+    "agentflow_anthropic_history_contract.exe": "7e5831c4f1cd2e4c8784a2b099ee275585b92e4b4aba35766a3c98c7a16b16da",
+    "agentflow_anthropic_agent_contract.exe": "6f2517e5057df0e4e4f091492a950ab4467c7955a272476f623bfe18c049a807",
+    "xlang3_runtime.dll": "166e8d96bd3b3a886fadfb7482374d7512a2dad7b389ca5d907a4b581f18a3a5"
+  },
+  "logSha256": {
+    "native-anthropic-history-local-ctest.log": "9e4909a651a1124baa82211973305caa199536b3be8a46ed4b09dca1bf5b7204",
+    "native-anthropic-history-local-browser-native.log": "ffa8a56eeb33ceb7dc064c220c2fff5c93805595cb78a3f52cb677f765a71f56"
+  },
+  "priorFrontendGate": {
+    "revision": "ae7c4ba07d59f57cbe393eff5a01b7d5186dfbc5",
+    "extensionPassed": 98,
+    "browserPassed": 17,
+    "failed": 0,
+    "skipped": 0,
+    "provenance": "native-anthropic-agent-local-provenance.json",
+    "sourceEqualityVerified": true,
+    "scope": "Unchanged frontend sources retain their recorded prior local98/17 gate; these suites were not repeated for the native receipt change."
+  },
+  "browserNativeIntegration": "Fresh rebuilt native server with unchanged source-matched assets passed in disposable processes/database; installed previews untouched.",
+  "verifiedNewCases": [
+    "Native SSE preserves exact ordered text/tool/thinking/redacted blocks and raw initial/fragmented tool arguments across chunk boundaries",
+    "Signatures and redacted data remain opaque; required signature lifecycle, bounded content, unknown fields and malformed/duplicate/incomplete replies reject without completion acknowledgement",
+    "Strict receipt helper validates visible text, ordered IDs/names/raw arguments, native/provider finish mapping, supported roles and same-wire provenance",
+    "Agent-shaped JSON round trips and raw outgoing Messages preserve decimal and integer precision, whitespace and escaped input keys",
+    "Request count, aggregate receipt, role-merge and final-body bounds apply before large allocation/concatenation; foreign/mismatched/empty outgoing receipts fail before transport",
+    "Actual AgentRunner performs two file reads through interleaved signature-bearing blocks and encrypted xlang3 SQLite closes/reopens/replays them without repeated effects",
+    "Signature-only final thought retains its original signature alongside visible answer; hidden/redacted data do not become ordinary model.text",
+    "Unsigned provider block fails before actual tools; existing malformed/unoffered/unfinished/late-error/truncated/cancellation/recovery/SQL-rollback cases also pass"
+  ],
+  "scope": "Independent provider replies/keys/signatures are explicitly synthetic. This verifies real native transport/request/history/agent/filesystem/persistence mechanics, not local cryptographic verification, thinking request controls, live Claude models, rendered IDE acceptance, generic foreign signed/tool history conversion or full provider/coding/protocol parity. Legacy plain Claude history remains compatible. No installed-preview upgrade; exact current hosted verification remains required."
+}

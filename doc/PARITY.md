@@ -20,7 +20,24 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
-The current local checkpoint passed **66 native contracts in 114.49 seconds**,
+The current local checkpoint passed **67 native contracts in 117.65 seconds**,
+with an exact manifest, zero failures/skips and no post-build exclusions. Strict
+ordered Claude receipts preserve accepted raw tool inputs, escaped keys and
+signed/interleaved blocks through actual AgentRunner file execution and xlang3
+SQLite replay. The helper contract took **0.50 seconds** and expanded agent
+contract **0.57 seconds**; unsigned-block rejection, receipt/DTO mismatch and
+aggregate bounds also passed. Signatures/redacted data remain opaque, without
+local cryptographic verification.
+
+Fresh browser/native integration passed against the rebuilt server. Unchanged
+frontend sources match `ae7c4ba` and retain its recorded **98 extension and 17
+browser tests**, without rerunning those suites for this native change. Current
+hosted67 validation is pending. Thinking request controls, live models, rendered
+IDE acceptance, account/model binding and foreign signed-history conversion
+remain incomplete. [Local67 evidence](evidence/native-anthropic-history-local-provenance.json),
+[Claude history scope](native-claude-history.md).
+
+The preceding local Claude checkpoint passed **66 native contracts in 114.49 seconds**,
 **98 extension and 17 browser tests**, with zero failures/skips, an exact native
 manifest and no post-build exclusions. Actual Claude AgentRunner file reads,
 matching tool results, xlang3 SQLite history/reopen, cancellation/recovery and
@@ -29,12 +46,18 @@ usage events and persisted responses retain supplied uncached input/output/cache
 counts and zeros without sums or invented totals; actual DOM fixtures verify
 their live/history labels. Fresh browser/native integration passed against the
 rebuilt server. The new agent contract took **0.56 seconds** and adapter contract
-**0.23 seconds**. Exact hosted66 validation remains pending.
+**0.23 seconds**. Exact source
+`ae7c4ba07d59f57cbe393eff5a01b7d5186dfbc5` also passed its hosted **66 native
+contracts in 131.92 seconds**, **98 extension and 17 browser tests**,
+native/browser integration and VSIX verification, with zero failures/skips. Its
+Claude agent contract took **1.41 seconds**.
+[Exact hosted66 evidence](evidence/native-anthropic-agent-hosted-provenance.json).
 [Local66 evidence](evidence/native-anthropic-agent-local-provenance.json),
 [Claude scope](native-claude-agent.md).
 
-This does not establish Claude thinking/signatures, live inference, rendered
-Claude IDE acceptance or acceptance of the 21 pinned Anthropic models. Provider
+That66 result excludes the newer ordered thinking/signature receipt source above.
+It does not establish live inference, rendered Claude IDE acceptance or
+acceptance of the 21 pinned Anthropic models. Provider
 and OpenCode parity counts are unchanged; installed previews are unchanged.
 
 The cleanup source `dea588874e5a8c8e40bf1a158fa925520443c8a0` passed its hosted
@@ -90,8 +113,14 @@ browser/native integration passed again; that checkpoint's unchanged frontend
 sources retained the earlier verified **94 extension and 17 browser tests**,
 without rerunning those suites for the CLI change.
 [Local CLI scope](evidence/native-provider-profile-cli-local-provenance.json).
-Hosted verification of that 65-contract source is pending; it excludes the newer
-Claude agent/metrics changes. GenerateContent
+Exact CLI source `ac69c1f2a2c4a757b23d0d9da8b98d6188fab3a8` subsequently
+passed its hosted **65 native contracts in 149.37 seconds**, **94 extension and
+17 browser tests**, native/browser integration and VSIX verification, with zero
+failures/skips. The CLI contract took **4.16 seconds**; the exact ac69 manifest,
+pinned runtime/stdlib/patch and original logs were verified.
+[Exact hosted CLI evidence](evidence/native-provider-profile-cli-hosted-provenance.json).
+This hosted65 result excludes newer Claude66 agent/metrics and Claude67 history
+source. GenerateContent
 eligibility alone does not establish tool capability or live acceptance. Live
 Gemini inference and actual Gemini IDE acceptance remain unverified. See
 [provider setup](provider-setup.md), [current validation](VALIDATION_STATUS.md)
@@ -131,7 +160,7 @@ removed Python prototype's status table; it is not a completion score.
 | --- | --- | --- |
 | Persistent sessions and run events | C++ repositories, ownership, transactions, replay and recovery use SQLite through embedded xlang3 | Complete concurrent-client conversations, failure/recovery and release acceptance |
 | Agent/model/tool loop | Shared C++ single-agent and graph execution with durable admission, cancellation and tool continuation | Broad live coding tasks, dynamic delegation, context bounds and production recovery |
-| Models and providers | Native Chat Completions and Responses; Gemini catalogue/enrollment/owned-key execution is hosted-verified at 64, profile CLI controls passed locally at 65, and actual Claude tools/history/cancellation/rollback plus normalized metrics passed locally at 66 | Exact hosted verification of newer source, Claude thinking/signatures and live Claude/Gemini acceptance, pinned-model and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
+| Models and providers | Native Chat Completions and Responses; Gemini catalogue/enrollment/owned-key execution is hosted-verified at 64, profile CLI controls at hosted65, Claude tools/metrics at hosted66 and ordered opaque signed receipts/actual SQLite replay at local67 | Exact hosted verification of newer Claude source, thinking request controls and live Claude/Gemini acceptance, model/account binding, pinned-model and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
 | File/search/edit/process tools | Native workspace reads/search, approval-backed edits/creation and foreground process effects have scoped contracts | General patch review, background/PTY execution and complete repository coding tasks |
 | Instructions and agent presets | Native repository guidance discovery, source binding and durable approval checks | Full instruction scoping/configuration and reproducible presets |
 | Skills and commands | Native ownership is specified | Discovery, execution, lifecycle and CLI/editor acceptance |
@@ -144,7 +173,7 @@ removed Python prototype's status table; it is not a completion score.
 | Formatters and diagnostics | Required by the native coding goal | Real project integrations and end-to-end verification |
 | Search and network configuration | Native HTTP/TLS and workspace search components exist | Configured network/search behavior across coding workflows |
 | Session sharing | Local backend sessions are shared across authorized views | Explicit export/sharing behavior and access-controlled output; team sharing belongs to Nexus |
-| CLI/TUI | Native client supports authenticated conversation/run/approval/inspection flows plus profile catalogue/setup/selection, revision-bound admission and signed native history in the local 65-contract scope | Hosted verification of the new CLI source and complete interactive coding/terminal UX acceptance |
+| CLI/TUI | Native client supports authenticated conversation/run/approval/inspection flows plus profile catalogue/setup/selection, revision-bound admission and signed native history in the exact hosted65 scope | Complete interactive coding/terminal UX acceptance and execution of newer source at its own scope |
 | Browser and VS Code | Thin browser and right-sidebar clients display native history, models, approvals and actual metrics within recorded scopes | Complete populated coding, diff/recovery/context and editor acceptance |
 | A2A and agent graphs | Native shared-executor task controls, admission, discovery/stream/history and durable graph components have scoped contracts | Remote delegation, remaining protocol interoperability and live multi-agent acceptance |
 | Local/Nexus profiles | Shared protocol and ownership boundaries are specified | Profile isolation, authenticated enrollment and reconnect/lease/recovery acceptance; Nexus implements private coordination |

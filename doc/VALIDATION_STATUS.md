@@ -1,6 +1,44 @@
 # Current native validation
 
-Current source passed the complete local **66 native contracts in 114.49
+Current source passed the complete local **67 native contracts in 117.65
+seconds**, with the exact expected manifest, zero failures/skips and no
+post-build exclusions. The new Claude history helper passed in **0.50 seconds**;
+the expanded actual Claude AgentRunner contract passed in **0.57 seconds**.
+Ordered text/tool/thinking/redacted receipts keep raw input objects inside
+`content_json` strings, retaining precise number tokens, whitespace and escaped
+keys through agent-shaped JSON round trips and outgoing Messages replay.
+Receipt validation checks visible text, ordered tool IDs/names/raw arguments,
+native/provider finish mapping and same-wire assistant provenance.
+
+Two real file reads run through interleaved signature-bearing blocks. The
+encrypted provider credential and exact ordered receipt/history survive
+xlang3 SQLite close/reopen and a new native run without repeating tools. A
+signature-only final thought retains its signature alongside the visible answer;
+hidden thinking, signatures and redacted data never become ordinary `model.text`.
+Unsigned blocks fail before tools, while the prior malformed/unoffered/
+incomplete/late-error/truncated turns, cancellation/recovery and SQL
+conversation-batch rollback still pass.
+
+Native content/envelope and final request bounds are **8 MiB** each; content is
+limited to **64 blocks**, aggregate visible text to **4 MiB**, tool input to
+**1 MiB/depth 16** and each signature to **65,536 bytes**. Request message/tool
+counts, aggregate receipt budget and role merges are bounded before large
+allocation or concatenation. Foreign, mismatched and empty outgoing receipts
+fail before transport; signatures/redacted data remain structurally checked
+opaque strings without local cryptographic verification.
+
+Fresh browser/native integration passed the rebuilt server and matching assets
+in disposable processes/database. Frontend source equality with `ae7c4ba` is
+verified; its prior local **98 extension and 17 browser tests** are retained,
+without rerunning those suites for this native change. Provider replies, keys
+and signatures are synthetic. Thinking/reasoning request controls, live Claude
+acceptance, foreign signed/tool conversion, actual rendered IDE acceptance and
+installed-preview upgrades remain incomplete. Exact hosted verification of this
+newer 67-contract source remains pending.
+[Local67 source/runtime/log evidence](evidence/native-anthropic-history-local-provenance.json),
+[Claude receipt scope](native-claude-history.md).
+
+The preceding `ae7c4ba` source passed the complete local **66 native contracts in 114.49
 seconds**, **98 extension and 17 browser tests**, with the exact expected native
 manifest, zero failures/skips and no post-build exclusions. The new actual
 Claude AgentRunner contract passed in **0.56 seconds**; its native provider
@@ -20,10 +58,18 @@ metadata, separate cache writes/reads, safe zero counters, missing counts,
 provider/model identity and backend-measured timing. Fresh browser/native
 integration passed against the rebuilt server and source-matched assets using
 disposable processes/database. The independent provider socket replies and
-credentials are synthetic; these checks do not establish Claude
-thinking/signatures, live Claude account acceptance, actual rendered IDE
-acceptance or an installed-preview upgrade. Hosted validation of this newer
-66-contract source remains pending.
+credentials are synthetic. This prior gate excludes the newer ordered
+signed/redacted Claude receipt work above. Exact revision
+`ae7c4ba07d59f57cbe393eff5a01b7d5186dfbc5` subsequently passed its
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37748603655):
+**66 native contracts in 131.92 seconds**, **98 extension and 17 browser tests**,
+native/browser integration and VSIX verification, with zero failures/skips and
+the exact expected manifest. Its Claude agent contract passed in **1.41 seconds**.
+This hosted result also excludes the newer ordered signed/redacted receipt work;
+it is not hosted67 verification.
+[Exact hosted66 provenance](evidence/native-anthropic-agent-hosted-provenance.json).
+Live account, actual
+rendered IDE and installed-preview acceptance are separate requirements.
 [Exact local provenance](evidence/native-anthropic-agent-local-provenance.json),
 [Claude agent scope](native-claude-agent.md).
 
@@ -39,9 +85,13 @@ through settings until a later actual successful turn also passed. Public
 profile/model key reflection is rejected across all three provider families.
 Provider sockets and credentials are synthetic.
 [Local CLI provenance](evidence/native-provider-profile-cli-local-provenance.json).
-Its [hosted run](https://github.com/xlang-foundation/xMind/actions/runs/37746664258)
-was last observed running; no hosted success is claimed here. This prior gate
-excludes the newer Claude agent and renderer work above.
+Exact revision `ac69c1f2a2c4a757b23d0d9da8b98d6188fab3a8` subsequently passed
+its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37746664258):
+**65 native contracts in 149.37 seconds**, **94 extension and 17 browser tests**,
+native/browser integration and VSIX verification, with zero failures/skips and
+the exact expected manifest. This hosted result excludes the newer Claude
+agent/metrics and receipt milestones above.
+[Hosted CLI provenance](evidence/native-provider-profile-cli-hosted-provenance.json).
 
 At that CLI checkpoint, unchanged thin-client sources retained the earlier
 verified **94 extension and 17 browser tests**, with zero failures/skips; those
@@ -124,9 +174,11 @@ The [Gemini bridge](native-gemini-history.md) uses labelled synthetic component
 and socket fixtures. Actual native AgentRunner/file/SQLite acceptance is now
 verified with synthetic provider replies, including the new native
 discovery/enrollment source in the local/hosted 64-contract gates and the generic
-CLI boundary in the prior local 65-contract gate. The current local 66-contract
-gate additionally verifies actual Claude AgentRunner/file/SQLite acceptance and
-its shared metrics renderer at the scoped synthetic-provider/DOM boundary.
+CLI boundary in the separately verified local/hosted 65-contract gates. The
+prior local 66-contract gate verifies actual Claude AgentRunner/file/SQLite
+acceptance and its shared metrics renderer at the scoped synthetic-provider/DOM
+boundary; the current local 67-contract gate additionally verifies ordered
+raw/signed/redacted receipts and same-wire replay without repeated effects.
 Live Gemini and Claude inference remain
 unverified.
 

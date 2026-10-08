@@ -1,0 +1,75 @@
+{
+  "observedDate": "2026-10-08",
+  "scope": "Primary Claude protocol references and inspected native67 source interpretation. This is not compilation, execution, model availability, live-provider or cryptographic-verification evidence.",
+  "sources": [
+    {
+      "url": "https://platform.claude.com/docs/en/build-with-claude/streaming",
+      "sections": ["Event types", "Input JSON delta", "Thinking delta"],
+      "interpretation": "Content indexes identify final block order. Tool input arrives as partial JSON strings and completes as an object. Thinking text and signature use distinct deltas; the signature arrives before that block closes. Native replay therefore retains ordered blocks and accepted raw input tokens rather than reconstructing history from visible text alone."
+    },
+    {
+      "url": "https://platform.claude.com/docs/en/build-with-claude/thinking",
+      "sections": ["Preserving thinking blocks", "Thinking encryption", "Redacted thinking blocks"],
+      "interpretation": "Thinking/redacted blocks must remain unchanged during tool continuation. Signature and redacted data fields are opaque provider material; retaining them is different from validating their authenticity. The native checkpoint checks structure and DTO consistency without interpreting, decrypting or locally verifying those fields."
+    },
+    {
+      "url": "https://platform.claude.com/docs/en/build-with-claude/extended-thinking",
+      "sections": ["Shared mechanics"],
+      "interpretation": "The observed legacy page delegates response, streaming, preservation and encryption mechanics to the Thinking overview. No blanket HTTP redirect, model support or native thinking-configuration support is inferred."
+    }
+  ],
+  "nativeSourceInterpretation": {
+    "status": "Implementation in progress; native67 compilation and acceptance pending",
+    "sources": [
+      "Native/include/agentflow/anthropic_history.hpp",
+      "Native/src/anthropic_history.cpp",
+      "Native/src/anthropic_stream.cpp",
+      "Native/src/anthropic_request.cpp"
+    ],
+    "receipt": {
+      "container": "One item in assistant provider_items",
+      "type": "anthropic_content",
+      "fields": ["type", "content_json", "finish_reason", "provider_finish_reason"],
+      "content_json": "JSON string containing a reconstructed ordered content array; raw HTTP/SSE framing is not retained",
+      "supportedBlockTypes": ["text", "tool_use", "thinking", "redacted_thinking"],
+      "dtoMatch": "Concatenated text equals visible assistant content. Ordered tool IDs, names and exact raw argument strings equal the native tool_calls. Foreign, empty and mismatched receipts fail before outgoing transport.",
+      "finishPairs": {
+        "tool_use": "tool_calls with one or more matched calls",
+        "end_turn": "stop with no calls",
+        "stop_sequence": "stop with no calls",
+        "max_tokens": "length with no executable or replayable tool calls"
+      }
+    },
+    "visibility": "Only text blocks produce ordinary assistant content/model.text. Thinking, signatures and redacted data remain provider continuation material.",
+    "opaqueHandling": "Nonempty signature/data strings are retained unchanged as decoded values. No base64 interpretation, decryption or local cryptographic verification; no authenticity, account/model compatibility or live replay acceptance inferred.",
+    "toolArguments": "Preserve accepted original input JSON token slices and escaped keys through content_json string persistence and outgoing serialization; object/depth/duplicate checks still apply.",
+    "unsupportedRequestControls": ["thinking enablement", "thinking budget/display", "reasoning_effort mapping"],
+    "boundsAre": "Native implementation byte limits, not provider API limits; currently inspected source, pending compiled acceptance",
+    "bounds": {
+      "contentSourceBytes": 8388608,
+      "serializedReceiptBytes": 8388608,
+      "serializedReceiptNote": "Escaping and envelope overhead count; source content can reach the serialized limit earlier",
+      "contentBlocks": 64,
+      "aggregateVisibleTextBytes": 4194304,
+      "thinkingTextBytesPerBlock": 4194304,
+      "redactedDataBytesPerBlock": 4194304,
+      "signatureBytesPerBlock": 65536,
+      "signatureAndRedactedDataRequire": "Nonempty valid UTF-8 strings with no NUL; empty thinking text is allowed with a nonempty supplied signature",
+      "toolInputBytes": 1048576,
+      "toolInputParserDepth": 16,
+      "toolInputRequires": "JSON object without duplicate keys",
+      "contentParserDepth": 32,
+      "receiptEnvelopeParserDepth": 4,
+      "toolIdBytes": 256,
+      "toolNameBytes": 64,
+      "toolNameGrammar": "ASCII letters, digits, underscore and hyphen",
+      "serializedRequestBytes": 8388608,
+      "sseTotalBytes": 67108864,
+      "sseEventDataBytes": 4194304,
+      "sseLineBytes": 1048576,
+      "sseEventNameBytes": 256,
+      "sseEventParserDepth": 64
+    }
+  },
+  "remainingAcceptance": "Compile and execute the new helper and extended actual AgentRunner/SQLite contracts; preserve their synthetic-provider scope. Native/hosted/live outcomes must be recorded separately. Thinking controls, broader Messages variants, foreign-wire conversion, account/model binding, all 21 pinned Anthropic models and full product parity remain incomplete. Existing CLI65/Claude66 results do not verify this newer source."
+}

@@ -12,19 +12,30 @@ assert.ok(executable&&modules&&stdlib,'Pass actual native agent fixture and embe
 const execute=promisify(execFile),root=await mkdtemp(join(tmpdir(),'xmind-anthropic-agent-')),workspace=join(root,'workspace');
 const key='synthetic-anthropic-agent-key-not-live',firstFile='Actual Claude native file bytes: "quoted" and Unicode 雪\n',secondFile='Second actual Claude native file bytes\n';
 const finalAnswer='Synthetic Claude peer checked both real native reads 🌍.',reopenedAnswer='Synthetic Claude peer accepted the SQLite-restored conversation.',recoveredAnswer='Synthetic Claude peer accepted recovery after actual cancellation.';
+const batchText='Synthetic visible text between the two actual reads.',hiddenThought='Synthetic hidden Claude thought';
+const escapedArguments='{"pa\\u0074h":"README.md"}';
 let child,failure,heldClosed=false,mainRequests=0,cancelRequests=0,continuationPrefix;const routes=[];
 const event=value=>'event: '+value.type+'\ndata: '+JSON.stringify(value)+'\n\n';
 const start=usage=>({type:'message_start',message:{id:'synthetic-claude-message',type:'message',role:'assistant',model:'fixture-claude',content:[],stop_reason:null,stop_sequence:null,usage}});
-function tool(index,id,path,name='read_file',malformed=false){
- const argumentsText=malformed?'{"path":"README.md","path":"second.txt"}':JSON.stringify({path});
+function tool(index,id,path,name='read_file',malformed=false,rawArguments){
+ const argumentsText=rawArguments??(malformed?'{"path":"README.md","path":"second.txt"}':JSON.stringify({path}));
  return event({type:'content_block_start',index,content_block:{type:'tool_use',id,name,input:{}}})+
   event({type:'content_block_delta',index,delta:{type:'input_json_delta',partial_json:argumentsText.slice(0,7)}})+
   event({type:'content_block_delta',index,delta:{type:'input_json_delta',partial_json:argumentsText.slice(7)}})+
   event({type:'content_block_stop',index});
 }
-function text(content){
- return event({type:'content_block_start',index:0,content_block:{type:'text',text:''}})+
-  event({type:'content_block_delta',index:0,delta:{type:'text_delta',text:content}})+event({type:'content_block_stop',index:0});
+function text(content,index=0){
+ return event({type:'content_block_start',index,content_block:{type:'text',text:''}})+
+  event({type:'content_block_delta',index,delta:{type:'text_delta',text:content}})+event({type:'content_block_stop',index});
+}
+function thinking(index,thought=hiddenThought,signature='opaque-claude-fixture-signature',unsigned=false){
+ return event({type:'content_block_start',index,content_block:{type:'thinking',thinking:'',signature:''}})+
+  event({type:'content_block_delta',index,delta:{type:'thinking_delta',thinking:thought}})+
+  (unsigned?'':event({type:'content_block_delta',index,delta:{type:'signature_delta',signature:signature.slice(0,7)}})+event({type:'content_block_delta',index,delta:{type:'signature_delta',signature:signature.slice(7)}}))+
+  event({type:'content_block_stop',index});
+}
+function redacted(index){
+ return event({type:'content_block_start',index,content_block:{type:'redacted_thinking',data:'opaque-redacted-claude-fixture'}})+event({type:'content_block_stop',index});
 }
 function terminal(reason,output){
  return event({type:'message_delta',delta:{stop_reason:reason,stop_sequence:null},usage:{output_tokens:output}})+event({type:'message_stop'});
@@ -36,7 +47,7 @@ function write(response,wire,end=true){
 }
 function assertResults(messages,left='toolu-native-left',right='toolu-native-right'){
  assert.deepEqual(messages[0],{role:'user',content:[{type:'text',text:'Read the actual Claude fixture files'}]});
- assert.deepEqual(messages[1],{role:'assistant',content:[{type:'tool_use',id:left,name:'read_file',input:{path:'README.md'}},{type:'tool_use',id:right,name:'read_file',input:{path:'second.txt'}}]});
+ assert.deepEqual(messages[1],{role:'assistant',content:[{type:'thinking',thinking:hiddenThought,signature:'opaque-claude-fixture-signature'},{type:'tool_use',id:left,name:'read_file',input:{path:'README.md'}},{type:'text',text:batchText},{type:'redacted_thinking',data:'opaque-redacted-claude-fixture'},{type:'tool_use',id:right,name:'read_file',input:{path:'second.txt'}}]});
  assert.equal(messages[2].role,'user');assert.equal(messages[2].content.length,2);
  for(const [index,id,path,content] of [[0,left,'README.md',firstFile],[1,right,'second.txt',secondFile]]){
   const result=messages[2].content[index];assert.equal(result.type,'tool_result');assert.equal(result.tool_use_id,id);assert.equal(typeof result.content,'string');
@@ -55,15 +66,16 @@ const peer=createServer((request,response)=>{
    ++mainRequests;
    if(mainRequests===1){
     assert.deepEqual(body.messages,[{role:'user',content:[{type:'text',text:'Read the actual Claude fixture files'}]}]);
-    write(response,event(start({input_tokens:11,output_tokens:0,cache_creation_input_tokens:0,cache_read_input_tokens:7}))+tool(0,'toolu-native-left','README.md')+tool(1,'toolu-native-right','second.txt')+terminal('tool_use',4));return;
+    write(response,event(start({input_tokens:11,output_tokens:0,cache_creation_input_tokens:0,cache_read_input_tokens:7}))+thinking(0)+tool(1,'toolu-native-left','README.md','read_file',false,escapedArguments)+text(batchText,2)+redacted(3)+tool(4,'toolu-native-right','second.txt')+terminal('tool_use',4));return;
    }
    assertResults(body.messages);
+   assert.ok(source.includes(escapedArguments),'Original escaped argument keys must survive native receipt continuation and SQLite replay');
    if(mainRequests===2){
     assert.equal(body.messages.length,3);continuationPrefix=JSON.stringify(body.messages);
-    write(response,event(start({input_tokens:19,output_tokens:0,cache_creation_input_tokens:5,cache_read_input_tokens:0}))+text(finalAnswer)+terminal('end_turn',6));return;
+    write(response,event(start({input_tokens:19,output_tokens:0,cache_creation_input_tokens:5,cache_read_input_tokens:0}))+thinking(0,'','opaque-final-claude-fixture')+text(finalAnswer,1)+terminal('end_turn',6));return;
    }
    assert.equal(mainRequests,3);assert.equal(body.messages.length,5);assert.equal(JSON.stringify(body.messages.slice(0,3)),continuationPrefix,'Actual SQLite reload must preserve exact provider call/result continuation prefix');
-   assert.deepEqual(body.messages[3],{role:'assistant',content:[{type:'text',text:finalAnswer}]});assert.deepEqual(body.messages[4],{role:'user',content:[{type:'text',text:'Continue Claude after SQLite reopen'}]});
+   assert.deepEqual(body.messages[3],{role:'assistant',content:[{type:'thinking',thinking:'',signature:'opaque-final-claude-fixture'},{type:'text',text:finalAnswer}]});assert.deepEqual(body.messages[4],{role:'user',content:[{type:'text',text:'Continue Claude after SQLite reopen'}]});
    write(response,event(start({input_tokens:0,output_tokens:0}))+text(reopenedAnswer)+terminal('end_turn',0));return;
   }
   if(request.url==='/cancel'){
@@ -81,8 +93,9 @@ const peer=createServer((request,response)=>{
    assert.deepEqual(body.messages,[{role:'user',content:[{type:'text',text:'Rollback actual Claude tool history'}]}]);
    write(response,event(start({input_tokens:5,output_tokens:0}))+tool(0,'toolu-rollback-left','README.md')+tool(1,'toolu-rollback-right','second.txt')+terminal('tool_use',2));return;
   }
-  const route=request.url.slice(1);assert.ok(['malformed','unknown','incomplete','late-error','truncated'].includes(route));assert.deepEqual(body.messages,[{role:'user',content:[{type:'text',text:'Reject Claude '+route}]}]);
+  const route=request.url.slice(1);assert.ok(['malformed','unknown','incomplete','late-error','truncated','unsigned'].includes(route));assert.deepEqual(body.messages,[{role:'user',content:[{type:'text',text:'Reject Claude '+route}]}]);
   let wire=event(start({input_tokens:1,output_tokens:0}));
+  if(route==='unsigned'){write(response,wire+thinking(0,hiddenThought,'',true)+tool(1,'toolu-unsigned','README.md')+terminal('tool_use',1));return;}
   wire+=tool(0,'toolu-rejected-'+route,'README.md',route==='unknown'?'unoffered_function':'read_file',route==='malformed');
   if(route==='incomplete'){write(response,wire);return;}
   wire+=terminal(route==='truncated'?'max_tokens':'tool_use',1);
@@ -95,7 +108,7 @@ try{
  const running=execute(executable,[join(root,'state.sqlite'),modules,stdlib,workspace,'http://127.0.0.1:'+peer.address().port],{windowsHide:true,timeout:40000,maxBuffer:2*1024*1024});child=running.child;
  let result;try{result=await running;}catch(error){if(failure)throw failure;throw error;}if(failure)throw failure;
  assert.equal(mainRequests,3);assert.equal(cancelRequests,2);assert.equal(heldClosed,true,'Actual cancellation must close the held native transport socket');
- assert.deepEqual(routes,['/main','/main','/main','/malformed','/unknown','/incomplete','/late-error','/truncated','/cancel','/cancel','/rollback'],'Rejected/cancelled/rolled-back native runs must not automatically retry providers or tools');
+ assert.deepEqual(routes,['/main','/main','/main','/malformed','/unknown','/incomplete','/late-error','/truncated','/unsigned','/cancel','/cancel','/rollback'],'Rejected/cancelled/rolled-back native runs must not automatically retry providers or tools');
  assert.equal(await readFile(join(workspace,'README.md'),'utf8'),firstFile);assert.equal(await readFile(join(workspace,'second.txt'),'utf8'),secondFile);
  for(const entry of await readdir(root,{withFileTypes:true}))if(entry.isFile()&&/\.sqlite(?:-wal|-shm)?$/.test(entry.name))assert.equal((await readFile(join(root,entry.name))).includes(Buffer.from(key)),false,'Actual closed native credential SQLite files must not contain plaintext provider key');
  assert.equal(result.stdout.includes(key)||result.stderr.includes(key),false);process.stdout.write(result.stdout);

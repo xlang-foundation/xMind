@@ -138,12 +138,17 @@
           {
             "path": "Native/src/anthropic_request.cpp",
             "anchor": "serialize_anthropic_request",
-            "sha256": "f0e535f93b308ca96a2742381119b507ec78af681c44c519248b1cef3cfdb419"
+            "sha256": "57652eecd8c36a0f129b412c38539907e2e756a02169f1b0588be869cf764067"
           },
           {
             "path": "Native/src/anthropic_stream.cpp",
             "anchor": "AnthropicStream::feed",
-            "sha256": "7336e01e6af02704a77b17cc03d98b903df593d1b9ad7f8a7c72f87f630f6641"
+            "sha256": "97477c08ca39b5cfce406bf66578b66db9d17dd67c7a668dc32c7c78ab58c283"
+          },
+          {
+            "path": "Native/src/anthropic_history.cpp",
+            "anchor": "anthropic_history_content",
+            "sha256": "3957ffb24f1249c97a6225e05fa707974d4bf6b9b67ef21b2ff2f14d250f9501"
           },
           {
             "path": "Native/src/chat_provider.cpp",
@@ -162,16 +167,20 @@
             "sha256": "a9e652fc78a486f735b6b9967eb4a7ee66251e1ac14472c2649c2d3c0b7aead3"
           },
           {
-            "path": "doc/evidence/native-provider-profile-cli-local-provenance.json",
-            "sha256": "19ff138983b32220573c3c523e24e73b121f2f0a2756ec09cf63e571bb0cc753"
+            "path": "doc/evidence/native-provider-profile-cli-hosted-provenance.json",
+            "sha256": "4d90302db12de8c22d667f61f94a05a714dfff838ca22313ef6dcf23194924a8"
           },
           {
-            "path": "doc/evidence/native-anthropic-agent-local-provenance.json",
-            "sha256": "0c0e8d0dbf1aedd0b04732f991ba666c0386f1daf082da362823ae39bf3c28bc"
+            "path": "doc/evidence/native-anthropic-agent-hosted-provenance.json",
+            "sha256": "698253c5fae0ac9da11a54e417e7107522c91c536ef621cbfd23ba43600bcca4"
+          },
+          {
+            "path": "doc/evidence/native-anthropic-history-local-provenance.json",
+            "sha256": "3bd9ace0b1ab47f5f13870908bf8bc10e9862fa1c4c50c15dac21a23c418cc03"
           }
         ],
-        "scope": "Native Claude Messages request, SSE and header-authenticated HTTP boundaries passed the exact cleanup58 hosted gate with synthetic socket text/tool continuation. Local65 verifies authenticated paginated catalogue discovery, real CLI encrypted profile enrollment/selection and shared public-identity guards. Local66 additionally passed actual AgentRunner two-file execution, encrypted xlang3 SQLite reopen and exact tool-history replay without repeated effects, held-stream cancellation/recovery, second-tool-row SQL rollback and common usage event/completion consistency. The shared renderer passed live/persisted uncached input and cache-write/read metrics fixtures. Provider replies are synthetic; no thinking/signature continuation, live account or complete model acceptance is established.",
-        "gaps": "The 21 pinned Anthropic entries are not individually accepted. Live discovery/enrollment/inference, broader media/cache/thinking controls, signed continuation, non-chat modes and complete per-model capability/error behavior remain incomplete or require their own evidence. Exact hosted validation of the new local66 source and actual rendered IDE acceptance remain pending."
+        "scope": "Native Claude Messages request/SSE/HTTP boundaries passed cleanup58 hosted text/tool fixtures. Exact ac69 hosted65 verifies paginated catalogue discovery, real CLI encrypted profile setup/selection and identity guards. Exact ae7c4ba hosted66 passed actual AgentRunner file effects, encrypted xlang3 SQLite reopen/tool-history replay, cancellation/recovery, SQL rollback and native/common-renderer usage metrics. Local67 additionally preserves ordered text/tool/thinking/redacted blocks and exact argument JSON, validates native receipt/DTO/finish provenance, enforces aggregate history/wire bounds and replays signature-bearing content through actual file execution and SQLite reopen without repeated effects. Provider replies, keys and signatures are synthetic; opaque replay does not establish local cryptographic verification, thinking request controls, live account or complete model acceptance.",
+        "gaps": "The 21 pinned Anthropic entries are not individually accepted. Live discovery/enrollment/inference, broader media/cache/thinking request controls, server tools/refusals, non-chat modes and complete per-model capability/error behavior remain incomplete or require their own evidence. Exact hosted validation of the new local67 source, foreign signed/tool history conversion and actual rendered IDE acceptance remain pending."
       }
     },
     {
