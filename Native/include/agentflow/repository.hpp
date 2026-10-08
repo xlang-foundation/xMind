@@ -2,6 +2,7 @@
 #include "agentflow/records.hpp"
 #include "agentflow/secret_protection.hpp"
 #include "agentflow/operation.hpp"
+#include "agentflow/delegation_records.hpp"
 #include <memory>
 #include <vector>
 #include <optional>
@@ -31,10 +32,23 @@ public:
     std::vector<Session> sessions();
     Run create_run(const std::string& id,const std::string& session_id);
     std::optional<Run> incoming_message(const std::string& message,const std::string& context,const std::string& identity,const std::string& content);
-    Run start_incoming_message(const std::string& id,const std::string& context,const std::string& message,const std::string& prompt_json,const std::string& identity);
+    Run start_incoming_message(const std::string& id,const std::string& context,const std::string& message,const std::string& prompt_json,const std::string& identity,std::optional<RootBudgetSpec> budget={});
     std::optional<std::vector<Message>> task_history(const std::string& id);
     std::optional<std::string> incoming_message_payload(const std::string& run_id);
-    Run start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json);
+    Run start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json,std::optional<RootBudgetSpec> budget={});
+    RootBudgetRecord root_budget(const std::string& id);
+    ModelCallReservation reserve_model_call(const std::string& root,const std::string& owner,const std::string& attempt,ModelCallRole role);
+    ModelCallReservation start_model_call(const std::string& root,const std::string& owner,const std::string& attempt);
+    ModelCallReservation finish_model_call(const std::string& root,const std::string& owner,const std::string& attempt);
+    DelegationBatchRecord accept_delegation_batch(const DelegationBatchSpec& spec);
+    DelegationBatchRecord delegation_batch(const std::string& id);
+    std::vector<DelegationBatchRecord> delegation_batches(const std::string& parent);
+    DelegationTaskRecord settle_delegation_child(const std::string& child);
+    DelegationBatchRecord settle_delegation_batch(const std::string& id);
+    ChildAdmissionRecord child_admission(const std::string& child);
+    std::vector<OwnedChildRecord> owned_children(const std::string& parent);
+    std::vector<Message> owned_child_history(const std::string& parent,const std::string& child);
+    std::vector<Event> tree_events(const std::string& parent,std::int64_t after=0,std::size_t count=256);
     Run start_graph_run(const std::string& id,const std::string& session_id,const std::string& graph_id,std::int64_t revision,const GraphPlan& plan,const std::string& prompt_json);
     GraphRootRecord graph_run(const std::string& id);
     Run start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt_json,std::int64_t expected_checkpoint_revision=0);

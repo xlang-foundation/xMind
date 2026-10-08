@@ -11,6 +11,13 @@ function renderer(){
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+test('Agent investigations retain independent metrics and terminal replay does not synthesize a graph or another answer',()=>{
+ const r=renderer(),doc=r.dom.window.document,parent={id:'parent',state:'completed'},children=['left','right'].map((id,index)=>({run:{id,parent_id:'parent',state:index?'failed':'completed'},kind:'delegated_leaf',batch_id:'batch',task_id:id,preset_id:'workspace.inspect',preset_revision:1}));
+ try{r.send({type:'owned-children',parent,children,histories:{left:[{role:'assistant',data:{content:'Synthetic left response',usage:{prompt_tokens:12,completion_tokens:5}}}],right:[{role:'assistant',data:{content:'Synthetic right failure response',usage:{prompt_tokens:4,completion_tokens:2,total_tokens:6}}}]}});
+ const area=doc.getElementById('owned-view');assert.equal(area.hidden,false);assert.match(area.textContent,/left · completed/);assert.match(area.textContent,/right · failed/);assert.equal(area.querySelectorAll('.metrics').length,2);assert.match(area.querySelectorAll('.metrics')[0].textContent,/Input 12Output 5Total —/);assert.match(area.querySelectorAll('.metrics')[1].textContent,/Input 4Output 2Total 6/);assert.ok(!area.textContent.includes('Input 16'),'Child usage must not become an invented aggregate');assert.equal(doc.getElementById('graph-view').hidden,true);assert.equal(doc.getElementById('workflow').value,'');
+ r.send({type:'owned-event',child_id:'left',event:{seq:1,run_id:'left',kind:'model.text',data:{text:'Synthetic replay text'}}});assert.equal(area.querySelectorAll('.streaming').length,0);assert.ok(!area.textContent.includes('Synthetic replay text'));
+ r.send({type:'owned-clear'});assert.equal(area.hidden,true);assert.equal(area.textContent,'');}finally{r.dom.window.close();}
+});
 test('run inspector uses selected historical provider context independently of the current model',()=>{
   const r=renderer(),context={profile_id:'historical-profile',profile_revision:1,route_id:'openai.responses',provider:'openai',wire:'responses',model_id:'historical-model'};
   r.send({type:'runs',runs:[{id:'failed-run',state:'failed',provider_context:context}],selected:'failed-run',busy:false});const area=r.dom.window.document.getElementById('run-context');

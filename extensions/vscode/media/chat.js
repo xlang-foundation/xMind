@@ -189,8 +189,33 @@ function operations(items){
   }
 }
 const graphRows=new Map();let observedGraph,workflowExecutable=false;
+const ownedRows=new Map();let observedParent;
+function clearOwned(){ownedRows.clear();observedParent=undefined;byId('owned-view').replaceChildren();byId('owned-view').hidden=true;}
+function ownedView(parent,children,histories){
+  if(observedParent!==parent.id){clearOwned();observedParent=parent.id;byId('owned-view').append(node('h3','Delegated investigations'));}
+  byId('owned-view').hidden=children.length===0;if(children.length)byId('empty').hidden=true;
+  for(const child of children){
+    const run=child.run;let row=ownedRows.get(run.id);
+    if(!row){const card=node('details',undefined,'graph-node');card.open=true;const heading=node('summary'),body=node('div',undefined,'graph-output'),responses=node('div',undefined,'graph-responses'),stream=node('div',undefined,'graph-live');card.append(heading,body,responses,stream);row={card,heading,body,responses,stream,text:'',usage:undefined};ownedRows.set(run.id,row);byId('owned-view').append(card);}
+    row.state=run.state;row.heading.textContent=child.task_id+' · '+run.state;
+    row.body.replaceChildren(node('p','Read-only investigation','inspection-note'));
+    const identity=node('details');identity.append(node('summary','Run details'),node('p',run.id+' · '+child.preset_id+' · version '+child.preset_revision));row.body.append(identity);
+    const history=histories[run.id]||[],signature=JSON.stringify(history);
+    if(row.historySignature!==signature){row.responses.replaceChildren();for(const item of history)if(item.role!=='user')entry(item.role,item.data,row.responses);row.historySignature=signature;row.stream.replaceChildren();row.text='';row.usage=undefined;}
+    if(['completed','failed','cancelled'].includes(run.state))row.stream.replaceChildren();
+  }
+}
+function ownedEvent(message){
+  const event=message.event;byId('events').textContent+=JSON.stringify(event)+'\n';const row=ownedRows.get(message.child_id);if(!row)return;
+  if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn'){row.stream.replaceChildren();row.text='';row.usage=undefined;return;}
+  // Replayed events of a retired child never synthesize a second live answer.
+  if(row.state!=='running'||!['model.text','model.refusal','model.usage','model.done'].includes(event.kind))return;
+  if(event.kind==='model.text'||event.kind==='model.refusal')row.text+=event.data.text;if(event.kind==='model.usage')row.usage=event.data;
+  if(!row.stream.children.length){const article=node('article',undefined,'message assistant streaming');article.append(node('h4','xMind · investigation'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));row.stream.append(article);}
+  markdown(row.stream.querySelector('.message-body'),row.text);metrics(row.stream.querySelector('.metrics'),{usage:row.usage});if(event.kind==='model.done')row.stream.firstChild.classList.remove('streaming');
+}
 const canExecute=()=>byId('workflow').value?workflowExecutable:execution;
-function clearGraph(){graphRows.clear();observedGraph=undefined;byId('graph-view').replaceChildren();byId('graph-view').hidden=true;}
+function clearGraph(){clearOwned();graphRows.clear();observedGraph=undefined;byId('graph-view').replaceChildren();byId('graph-view').hidden=true;}
 function graphView(record,children,histories){
   const root=record.run.id;if(observedGraph!==root){clearGraph();observedGraph=root;const heading=node('h3',record.graph_id+' · revision '+record.graph_revision);byId('graph-view').append(heading);}
   byId('graph-view').hidden=false;const definitions=new Map(record.spec.nodes.map(n=>[n.id,n]));
@@ -256,6 +281,9 @@ window.addEventListener('message',event=>{
   const scroll=byId('scroll'),follow=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<80;
   if(m.type==='graphs'){const select=byId('workflow');select.replaceChildren();const single=node('option','Agent (default)');single.value='';select.append(single);for(const graph of m.graphs){const option=node('option',graph.id+' · '+graph.node_count+' nodes'+(graph.executable?'':' · unavailable'));option.value=graph.id;option.disabled=!graph.executable;option.dataset.executable=graph.executable?'true':'';option.selected=graph.id===m.selected;select.append(option);}if(!m.selected)select.value='';workflowExecutable=!!m.graphs.find(g=>g.id===m.selected&&g.executable);byId('workflow-picker').hidden=!m.graphs.length;byId('send').disabled=!canExecute()||activeRun||sessionBusy;}
   else if(m.type==='graph-clear')clearGraph();
+  else if(m.type==='owned-clear')clearOwned();
+  else if(m.type==='owned-children')ownedView(m.parent,m.children,m.histories);
+  else if(m.type==='owned-event')ownedEvent(m);
   else if(m.type==='graph')graphView(m.record,m.children,m.histories);
   else if(m.type==='graph-event')graphEvent(m);
   else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.title);option.value=session.id;option.dataset.sessionId=session.id;option.selected=session.id===m.selected;byId('sessions').append(option);}refreshRename();}

@@ -1,10 +1,11 @@
 'use strict';
 const viewEnrollmentWire=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').providerEnrollmentWire:globalThis.XMindBackend.providerEnrollmentWire;
 const ProfileController=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').ProviderProfileController:globalThis.XMindBackend.ProviderProfileController;
+const observeOwnedRun=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').observeOwnedRun:globalThis.XMindBackend.observeOwnedRun;
 // Thin view controller. All execution, permissions and persistence stay native.
 class BrowserController {
   constructor(client,post,{save=()=>{},review=()=>{},copy=()=>{},link=()=>{}}={}){this.client=client;this.post=post;this.save=save;this.review=review;this.copy=copy;this.link=link;this.generation=0;this.cursor=0;this.runs=[];this.graphs=[];this.children=new Map();this.operations=new Map();this.models={models:[]};this.queue=Promise.resolve();}
-  stop(){clearInterval(this.timer);this.timer=undefined;this.generation++;this.profileController?.invalidate();}
+  stop(){clearInterval(this.timer);this.timer=undefined;this.pendingTreeEvents=false;this.generation++;this.profileController?.invalidate();}
   dispose(){this.disposed=true;this.stop();this.profileController?.dispose();clearTimeout(this.keyTimer);this.selection=undefined;}
   current(version){return !this.disposed&&version===this.generation;}
   busy(){return this.runs.some(run=>['queued','running','paused'].includes(run.state));}
@@ -13,10 +14,11 @@ class BrowserController {
   async refreshCapabilities(){const version=this.generation,health=await this.client.health();let catalogue={models:[]};if(health.agent_execution)catalogue=await this.client.models();let graphs={graphs:[]};try{graphs=await this.client.graphs();}catch(error){if(error.status!==404)throw error;}if(!this.current(version))return;if(!Array.isArray(catalogue.models)||!Array.isArray(graphs.graphs)||graphs.graphs.some(g=>typeof g.id!=='string'||!Number.isSafeInteger(g.revision)||g.revision<1||typeof g.executable!=='boolean'))throw new Error('Invalid backend capabilities');this.health=health;this.models=catalogue;this.model=catalogue.models.some(m=>m.id===this.model)?this.model:catalogue.default_model;this.graphs=graphs.graphs;if(!this.graphs.some(g=>g.id===this.graphId&&g.executable))this.graphId=undefined;this.post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:catalogue.models,model:this.model});this.post({type:'graphs',graphs:this.graphs,selected:this.graphId});}
   async initialize(saved){this.model=saved?.model;this.graphId=saved?.graph;await this.refreshCapabilities();if(this.disposed)return;const version=this.generation,sessions=await this.client.sessions();if(!this.current(version))return;if(saved?.session&&sessions.some(s=>s.id===saved.session))await this.select(saved.session,saved.run);else if(sessions.length)await this.select(sessions.at(-1).id);if(this.disposed)return;this.post({type:'sessions',sessions,selected:this.session});if(!this.session)this.post({type:'status',text:this.health.agent_execution?'Ready':'Backend connected · open Settings to configure a model'});this.discover().catch(()=>{}); }
   async select(id,preferred){this.stop();const version=this.generation;this.session=id;this.runId=undefined;this.children.clear();this.graph=undefined;this.operations.clear();this.post({type:'graph-clear'});this.post({type:'operations',operations:[]});this.post({type:'reset-run'});const history=await this.client.history(id),runs=await this.client.runs(id);if(!this.current(version))return;this.runs=runs;this.post({type:'history',history});const selected=runs.find(run=>run.id===preferred)||runs.at(-1);this.runId=selected?.id;this.cursor=0;this.present();this.remember();await this.refreshSessions();if(this.runId){await this.poll();this.watch();}else this.post({type:'status',text:'Ready'});}
-  watch(){clearInterval(this.timer);if(this.busy())this.timer=setInterval(()=>this.poll(),500);}
+  watch(){clearInterval(this.timer);if(this.busy()||this.pendingTreeEvents)this.timer=setInterval(()=>this.poll(),500);}
   async refreshSessions(){const version=this.generation,sessions=await this.client.sessions();if(this.current(version))this.post({type:'sessions',sessions,selected:this.session});}
   async poll(){if(this.polling||!this.runId)return;this.polling=true;const version=this.generation,id=this.runId;try{
     const run=await this.client.status(id);if(!this.current(version))return;
+    if(!run.graph_root&&this.health?.owned_child_observation===true){await this.pollOwned(run,version);return;}
     if(run.graph_root){const root=await this.client.graph(id),children=await this.client.graphChildren(id),events=await this.client.graphEvents(id,this.cursor);if(!this.current(version))return;if(root.run.id!==id||root.run.session_id!==this.session||children.some(child=>child.parent_id!==id||child.session_id!==this.session))throw new Error('Graph observation changed');this.children=new Map(children.map(child=>[child.id,child]));this.graph=root;const histories={},operations=[];
       for(const child of children){if(root.spec.nodes.find(node=>node.id===child.node_id)?.type==='agent')histories[child.id]=await this.client.graphChildHistory(id,child.id);operations.push(...await this.client.operations(child.id));if(!this.current(version))return;}
       this.post({type:'graph',record:root,children,histories});for(const event of events){if(event.run_id!==id&&!this.children.has(event.run_id))throw new Error('Unowned graph event');this.post({type:event.run_id===id?'event':'graph-event',event,node_id:this.children.get(event.run_id)?.node_id});this.cursor=event.seq;}this.operations=new Map(operations.map(item=>[item.id,item]));this.post({type:'operations',operations:operations.map(item=>({...item,node_id:this.children.get(item.run_id)?.node_id}))});
@@ -28,6 +30,22 @@ class BrowserController {
     }
     const history=await this.client.history(this.session),runs=await this.client.runs(this.session);if(!this.current(version))return;this.runs=runs;this.present();this.post({type:'transcript',history,preserveLive:['queued','running','paused'].includes(latest.state)});this.post({type:'status',text:latest.state});if(!this.busy())clearInterval(this.timer);
   }catch(error){if(this.current(version))this.post({type:'error',text:error.message});}finally{this.polling=false;}}
+  async pollOwned(run,version){
+    const id=this.runId,validRoot=value=>{if(value.id!==id||value.session_id!==this.session||value.parent_id||value.graph_root)throw new Error('Owned run observation identity changed');};validRoot(run);
+    const publish=snapshot=>{
+      this.children=new Map(snapshot.children.map(child=>[child.run.id,child.run]));this.operations=new Map(snapshot.operations.map(operation=>[operation.id,operation]));
+      this.post({type:'owned-children',parent:run,children:snapshot.children,histories:snapshot.histories});
+      for(const event of snapshot.events){this.post({type:event.run_id===id?'event':'owned-event',event,child_id:event.run_id});this.cursor=event.seq;}
+      this.post({type:'operations',operations:snapshot.operations.map(operation=>({...operation,node_id:this.children.get(operation.run_id)?.node_id}))});
+    };
+    let snapshot=await observeOwnedRun(this.client,run,this.session,this.cursor);if(!this.current(version))return;publish(snapshot);
+    run=await this.client.status(id);if(!this.current(version))return;
+    validRoot(run);
+    if(['completed','failed','cancelled'].includes(run.state)){snapshot=await observeOwnedRun(this.client,run,this.session,this.cursor);if(!this.current(version))return;publish(snapshot);}
+    const history=await this.client.history(this.session),runs=await this.client.runs(this.session);if(!this.current(version))return;
+    this.runs=runs;this.pendingTreeEvents=!snapshot.caughtUp;this.present();this.post({type:'transcript',history,preserveLive:['queued','running','paused'].includes(run.state)});this.post({type:'status',text:run.state});
+    if(!this.busy()&&!this.pendingTreeEvents)clearInterval(this.timer);else if(!this.timer)this.watch();
+  }
   async discover(key,id,route){const version=this.generation;clearTimeout(this.keyTimer);this.selection=undefined;try{
     this.profileController??=new ProfileController(this.client,this.post);
     if(await this.profileController.discover(key,id,route))return;

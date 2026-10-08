@@ -102,8 +102,10 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
         if(response->status<200 || response->status>=300)throw std::runtime_error("Server rejected run observation (HTTP "+std::to_string(response->status)+")");
         return Json::parse(response->body);
     };
-    std::string session;
-    if(graph){const auto root=read(path);if(!root.is_object() || root.value("id",std::string{})!=run || root.value("graph_root",false)!=true || !root.contains("session_id") || !root["session_id"].is_string() || root["session_id"].get<std::string>().empty())throw std::runtime_error("Select a graph root for graph observation");session=root["session_id"].get<std::string>();}
+    std::string session;bool tree=false;
+    const auto initial=read(path);if(!initial.is_object()||initial.value("id",std::string{})!=run||!initial.contains("session_id")||!initial["session_id"].is_string()||initial["session_id"].get<std::string>().empty())throw std::runtime_error("Invalid observed run identity");session=initial["session_id"].get<std::string>();
+    if(graph&&initial.value("graph_root",false)!=true)throw std::runtime_error("Select a graph root for graph observation");
+    if(!graph&&initial.value("parent_id",std::string{}).empty()&&!initial.value("graph_root",false))tree=read("/v1/health").value("owned_child_observation",false);
     auto owners=[&] {
         std::set<std::string> owned{run};
         if(graph){
@@ -111,11 +113,13 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
             if(!children.is_array())throw std::runtime_error("Invalid graph child batch");
             for(const auto& child:children){const auto id=child.value("id",std::string{});if(!child.is_object() || child.value("parent_id",std::string{})!=run || child.value("session_id",std::string{})!=session || id.empty() || id.size()>128 || id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos || !owned.insert(id).second)throw std::runtime_error("Invalid graph child ownership");}
         }
+        if(tree){const auto children=read(path+"/children");if(!children.is_array()||children.size()>8)throw std::runtime_error("Invalid owned child batch");for(const auto& record:children){if(!record.is_object()||record.value("kind",std::string{})!="delegated_leaf"||!record.contains("run")||!record["run"].is_object())throw std::runtime_error("Invalid owned child metadata");const auto& child=record["run"];const auto id=child.value("id",std::string{});if(child.value("parent_id",std::string{})!=run||child.value("session_id",std::string{})!=session||id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos||!owned.insert(id).second)throw std::runtime_error("Invalid owned child identity");}}
         return owned;
     };
     auto emit=[&] {
-        const auto events=read((graph?"/v1/graph-runs/"+run:path)+"/events?after="+std::to_string(cursor));
+        for(;;){const auto events=read((graph?"/v1/graph-runs/"+run:path)+(tree?"/tree-events?after=":"/events?after=")+std::to_string(cursor));
         if(!events.is_array())throw std::runtime_error("Invalid backend event batch");
+        if(tree&&events.size()>256)throw std::runtime_error("Invalid tree event page");
         // Ownership is read after events so newly admitted children are covered.
         const auto owned=owners();
         for(const auto& event:events) {
@@ -124,6 +128,7 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
             if(!std::cout)throw std::runtime_error("Run observation output is unavailable");
             cursor=event["seq"].get<std::int64_t>();
         }
+        if(!tree||events.size()<256)break;}
     };
     for(;;) {
         emit();const auto state=read(path);
@@ -232,6 +237,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
             std::cerr<<"/runs lists recorded root runs in the selected conversation; use /watch or /graph-watch to attach one.\n";
+            std::cerr<<"Agent /watch includes owned investigations when supported. Direct commands: children RUN, child-history PARENT CHILD, tree-events RUN [CURSOR], delegation.\n";
             std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
             std::cerr<<"/profiles lists saved provider metadata without changing this chat's admission binding; /profile ID REVISION explicitly selects a shared profile and clears this chat's model override.\n";
@@ -434,6 +440,9 @@ int main(int argc,char** argv) {
         else if(command=="runs" && argc==4) path="/v1/sessions/"+id(argv[3])+"/runs";
         else if(command=="status" && argc==4) path="/v1/runs/"+id(argv[3]);
         else if(command=="operations" && argc==4) path="/v1/runs/"+id(argv[3])+"/operations";
+        else if(command=="children"&&argc==4)path="/v1/runs/"+id(argv[3])+"/children";
+        else if(command=="child-history"&&argc==5)path="/v1/runs/"+id(argv[3])+"/children/"+id(argv[4])+"/history";
+        else if(command=="tree-events"&&(argc==4||argc==5)){const auto after=event_cursor(argc==5?argv[4]:"0");path="/v1/runs/"+id(argv[3])+"/tree-events?after="+std::to_string(after);}
         else if(command=="operation" && argc==4) path="/v1/operations/"+id(argv[3]);
         else if(command=="inspect-edit" && argc==4) path="/v1/operations/"+id(argv[3])+"/inspection";
         else if(command=="decide" && argc==5) {
@@ -473,6 +482,7 @@ int main(int argc,char** argv) {
         else if(command=="mcp-servers" && argc==3) path="/v1/mcp/servers";
         else if(command=="process-profiles" && argc==3) path="/v1/process/profiles";
         else if(command=="instructions" && argc==3) path="/v1/agent/instructions";
+        else if(command=="delegation"&&argc==3)path="/v1/agent/delegation";
         else if(command=="graphs" && argc==3)path="/v1/graphs";
         else if(command=="graph" && argc==4)path="/v1/graph-runs/"+id(argv[3]);
         else if(command=="graph-children" && argc==4)path="/v1/graph-runs/"+id(argv[3])+"/children";

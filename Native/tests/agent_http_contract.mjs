@@ -30,7 +30,7 @@ const peer=createServer((request,response)=>{
       assert.ok(!source.includes(key));
       const body=JSON.parse(source);
       assert.equal(body.model,'synthetic-protocol-model');assert.equal(body.stream,true);
-      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files']);
+      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','delegate_tasks']);
       const prompt=body.messages.findLast(message=>message.role==='user').content;
       requestsByPrompt.set(prompt,(requestsByPrompt.get(prompt)??0)+1);
       if(prompt==='provider-error') {

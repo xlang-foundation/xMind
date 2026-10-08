@@ -41,6 +41,7 @@ class BackendClient {
   health() { return this.request('/v1/health'); }
   models() { return this.request('/v1/models'); }
   graphs() { return this.request('/v1/graphs'); }
+  delegation() { return this.request('/v1/agent/delegation'); }
   graphRun(session_id,graph_id,graph_revision,prompt,model_id,binding) { return this.request('/v1/graph-runs',{session_id,graph_id,graph_revision,prompt,...(model_id?{model_id}:{}),...profileBindingFields(binding)}); }
   graph(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}`); }
   graphChildren(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/children`); }
@@ -75,6 +76,9 @@ class BackendClient {
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
   run(session_id, prompt, model_id,binding) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}),...profileBindingFields(binding) }); }
   events(id, after) { return this.request(`/v1/runs/${encodeURIComponent(id)}/events?after=${after}`); }
+  ownedChildren(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/children`); }
+  ownedChildHistory(parent,child) { return this.request(`/v1/runs/${encodeURIComponent(parent)}/children/${encodeURIComponent(child)}/history`); }
+  treeEvents(id,after=0) { if(!Number.isSafeInteger(after)||after<0)throw new Error('Invalid tree event cursor');return this.request(`/v1/runs/${encodeURIComponent(id)}/tree-events?after=${after}`); }
   status(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}`); }
   cancel(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/cancel`, {}); }
   operations(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/operations`); }
@@ -84,6 +88,28 @@ class BackendClient {
     if (decision !== 'allow' && decision !== 'deny') throw new Error('Decision must be allow or deny.');
     return this.request(`/v1/operations/${encodeURIComponent(id)}/decision`, { decision });
   }
+}
+
+// Observation only. Events are read before owners so concurrent admission is
+// covered; bounded pages preserve the exact committed cursor without replaying
+// execution. Both hosts share the same identity and operation checks.
+async function observeOwnedRun(client,run,session,after){
+  if(!run||run.session_id!==session||run.parent_id||run.graph_root||!Number.isSafeInteger(after)||after<0)throw new Error('Owned run observation changed');
+  const events=[];let cursor=after,caughtUp=false;
+  for(let page=0;page<16;++page){
+    const batch=await client.treeEvents(run.id,cursor);
+    if(!Array.isArray(batch)||batch.length>256)throw new Error('Invalid tree event page');
+    for(const event of batch){if(!event||!Number.isSafeInteger(event.seq)||event.seq<=cursor||typeof event.run_id!=='string'||typeof event.kind!=='string')throw new Error('Invalid tree event identity or cursor');events.push(event);cursor=event.seq;}
+    if(batch.length<256){caughtUp=true;break;}
+  }
+  const children=await client.ownedChildren(run.id),owned=new Set([run.id]);
+  if(!Array.isArray(children)||children.length>8)throw new Error('Invalid owned child batch');
+  for(const child of children){const value=child?.run;if(!value||value.parent_id!==run.id||value.session_id!==session||value.graph_root||typeof value.id!=='string'||owned.has(value.id)||child.kind!=='delegated_leaf'||typeof child.batch_id!=='string'||typeof child.task_id!=='string'||typeof child.preset_id!=='string'||!Number.isSafeInteger(child.preset_revision)||child.preset_revision<1)throw new Error('Owned child identity changed');owned.add(value.id);}
+  for(const event of events)if(!owned.has(event.run_id))throw new Error('Unowned tree event');
+  const histories={},operations=[];
+  for(const child of children){const history=await client.ownedChildHistory(run.id,child.run.id);if(!Array.isArray(history))throw new Error('Invalid owned child history');histories[child.run.id]=history;}
+  for(const id of owned){const batch=await client.operations(id);if(!Array.isArray(batch)||batch.some(value=>!value||value.run_id!==id))throw new Error('Owned operation identity changed');operations.push(...batch);}
+  return {children,histories,events,operations,cursor,caughtUp};
 }
 
 function exactFields(value,fields){if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field)))throw new Error('Invalid provider profile metadata');}
@@ -176,5 +202,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController};
-else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun};
+else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun};

@@ -3,6 +3,7 @@
 #include "agentflow/repository.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/graph.hpp"
+#include "graph_schema_fixture.hpp"
 #include <filesystem>
 #include <chrono>
 #include <random>
@@ -39,7 +40,7 @@ int main(int argc,char** argv){if(argc!=3)return 2;try{
   store.transition("internal-child",RunState::queued,RunState::cancelled);store.settle_graph_child("internal-child");store.retire_graph_run("graph",RunState::cancelled,"{}");
  }
  {
-  XlangSqlite old(database,roots);old.execute("DROP TABLE run_status_clock");old.execute("PRAGMA user_version=8");
+  XlangSqlite old(database,roots);remove_delegation_schema_fixture(old);old.execute("DROP TABLE run_status_clock");old.execute("PRAGMA user_version=8");
  }
  {
   Repository migrated(database,roots);auto page=migrated.list_root_runs("","",{},100);require(page.total==4,"Migration must retain historical task visibility");

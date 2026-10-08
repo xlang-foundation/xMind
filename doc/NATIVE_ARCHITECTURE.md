@@ -37,6 +37,12 @@ the superseded direct-SQLite implementation was removed. See
 
 ## Current source and verification
 
+Ordinary Agent mode now offers native `delegate_tasks` for model-selected read-only workspace investigations. Actual child AgentRunners keep separate conversations and measured response usage/timing, share their parent's call/deadline limits, and return observed results before the parent continues or requests an approval-controlled effect. Schema v10 durably binds tasks, immutable presets, budgets and once-only settlements; recovery never replays children. CLI, browser and VS Code observe the same owned child histories and committed tree cursors.
+
+The final guarded local **71-contract native gate passed in 142.36 seconds**, with an exact expected/registered/passed manifest, **45 frozen source hashes**, zero failures/skips and no exclusions. The delegation engine contract took **1.96 seconds**, actual HTTP/CLI/shared-controller acceptance **1.03 seconds**. **103 extension tests** and **19 browser tests**, fresh source-matched browser/native integration and 18-asset VSIX verification also passed. Provider replies, signatures and keys are explicitly synthetic; native agents, filesystem effects, permissions, xlang3 SQLite and transport are real. The [initial process-fixture positional-schema failure](evidence/native-delegation-initial-ctest.log) is retained separately; the corrected frozen source passed all 71 contracts.
+
+The new v10 bundle still needs its exact hosted gate and reviewed upgrade acceptance. The installed preview remains the independently accepted c4 bundle. Live delegation, installed/rendered client acceptance, mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [exact local71 evidence](evidence/native-delegation-local-provenance.json).
+
 New source connects pinned MCP tools directly to registered graph tool nodes,
 including graphs with no configured model. A node binds its opaque alias to an
 enabled server ID/revision and keeps literal arguments in an `arguments_json`
@@ -72,11 +78,10 @@ separately from the final passing gate.
 [exact hosted69 provenance](evidence/native-graph-mcp-hosted-provenance.json),
 [Direct MCP graph contract](native-graph-mcp.md).
 
-The [next native delegation design](native-delegation-design.md) proposes
-model-selected leaf investigations in normal Agent mode. Child AgentRunners
-retain separate histories and shared execution budgets; approved effects stay
-with the native controller. This is unimplemented design, not graph or parity
-acceptance and not an applied v10 migration.
+The [delegation implementation](native-delegation.md) now applies transactional
+v10 ownership/budgets for actual ordinary-Agent read-only leaves. Approved
+parent effects remain controller-owned. The broader [design](native-delegation-design.md)
+still requires dependency plans, revisioned replanning and remote acceptance.
 
 The ordered-Claude-history checkpoint passed all **67 native contracts
 locally in 117.65 seconds**, with an exact manifest, zero failures/skips and no

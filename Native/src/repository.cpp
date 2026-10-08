@@ -2,6 +2,7 @@
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/backend_lease.hpp"
 #include "agentflow/graph.hpp"
+#include <algorithm>
 #include <limits>
 #include <chrono>
 #include <set>
@@ -52,6 +53,22 @@ std::int64_t integer(const SqlValue& value) { return std::get<std::int64_t>(valu
 void identifier(const std::string& value) {
     if(value.empty() || value.find('\0')!=std::string::npos) throw std::invalid_argument("Invalid identifier");
 }
+void bounded_identity(const std::string& value,std::size_t limit=128){
+    identifier(value);if(value.size()>limit || value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)
+        throw std::invalid_argument("Invalid execution identity");
+}
+Json budget_provider_identity(const RootBudgetSpec& spec){
+    if(spec.policy_id!="native.delegation" || spec.policy_revision!=1 || spec.workspace_identity.empty() || spec.workspace_identity.size()>4096 || spec.workspace_identity.find('\0')!=std::string::npos ||
+        spec.max_children<1 || spec.max_children>8 || spec.max_parallel<1 || spec.max_parallel>2 || spec.max_model_calls<1 || spec.max_model_calls>32 || spec.wall_limit_ms<1 || spec.wall_limit_ms>3600000 || spec.provider_identity_json.size()>4096)
+        throw std::invalid_argument("Invalid native execution budget policy");
+    const auto identity=Json::parse(object_json(spec.provider_identity_json));
+    if(identity.size()==6){(void)provider_context(identity);return identity;}
+    if(identity.size()!=2 || !identity.contains("wire") || !identity["wire"].is_string() || !identity.contains("model_id") || !identity["model_id"].is_string())throw std::invalid_argument("Invalid public execution provider identity");
+    const auto model=identity.at("model_id").get<std::string>();if(model.empty()||model.size()>256||model.starts_with("sk-")||model.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)throw std::invalid_argument("Invalid execution model identity");
+    const auto wire=identity.at("wire").get<std::string>();if(wire!="chat-completions"&&wire!="responses"&&wire!="anthropic-messages"&&wire!="gemini-generate-content")throw std::invalid_argument("Invalid execution provider wire");
+    return identity;
+}
+const char* call_role(ModelCallRole role){switch(role){case ModelCallRole::parent:return "parent";case ModelCallRole::leaf:return "leaf";}throw std::invalid_argument("Invalid model attempt role");}
 std::string credential_context(const std::string& scope,const std::string& id,
     const std::string& purpose,std::int64_t revision) {
     // Length prefixes prevent identity collisions when identifiers contain delimiters.
@@ -120,6 +137,12 @@ struct Repository::Impl {
     std::string path;
     XlangSqlite database;
     Impl(const std::string& file,const std::vector<std::string>& roots):path(file),database(file,roots) {}
+    void initialize_budget(const std::string& id,const std::string& prompt,const RootBudgetSpec& spec){
+        const auto provider=budget_provider_identity(spec);const auto input=Json::parse(object_json(prompt));
+        if(provider.size()==6){if(!input.contains("provider_context") || input["provider_context"]!=provider)throw std::invalid_argument("Root prompt provider does not match its immutable budget");}
+        else if(input.contains("provider_context"))throw std::invalid_argument("Unexpected root provider context");
+        changed_one(database.execute("INSERT INTO agent_execution_budgets(root_run_id,policy_id,policy_revision,workspace_identity,provider_identity_json,max_children,max_parallel,max_model_calls,wall_limit_ms) VALUES(?,?,?,?,?,?,?,?,?)",{id,spec.policy_id,spec.policy_revision,spec.workspace_identity,provider.dump(),spec.max_children,spec.max_parallel,spec.max_model_calls,spec.wall_limit_ms}));
+    }
     Event event(const std::string& id,const std::string& kind,const std::string& json) {
         const auto result=database.execute("INSERT INTO events(run_id,kind,payload) VALUES(?,?,?)",{id,kind,json});
         changed_one(result);
@@ -148,14 +171,22 @@ struct Repository::Impl {
     }
     void message(const Run& run,const std::string& role,const std::string& json){changed_one(database.execute("INSERT INTO messages(session_id,execution_run_id,role,payload) VALUES(?,?,?,?)",{run.session_id,run.parent_id.empty()?SqlValue(nullptr):SqlValue(run.id),role,json}));changed_one(database.execute("INSERT INTO task_messages(message_seq,run_id) VALUES(last_insert_rowid(),?)",{run.id}));}
     void root_boundary(const Run& current,RunState next){
+        if(current.parent_id.empty() && !current.graph_root && (next==RunState::paused || terminal(next)) &&
+            !database.execute("SELECT id FROM delegation_batches WHERE parent_run_id=? AND state IN ('accepted','working') LIMIT 1",{current.id}).rows.empty())
+            throw Conflict("Parent still owns unsettled delegation outcomes");
+        if(current.parent_id.empty() && (next==RunState::paused || terminal(next)) &&
+            !database.execute("SELECT id FROM runs WHERE parent_run_id=? AND state IN ('queued','running','paused') LIMIT 1",{current.id}).rows.empty())
+            throw Conflict("Parent still owns active child executions");
         if(current.graph_root && (next==RunState::paused || terminal(next))){
             if(!database.execute("SELECT id FROM runs WHERE parent_run_id=? AND state IN ('queued','running','paused') LIMIT 1",{current.id}).rows.empty())throw Conflict("Graph still owns active child executions");
             if(next==RunState::completed && !database.execute("SELECT id FROM runs WHERE parent_run_id=? AND state!='completed' LIMIT 1",{current.id}).rows.empty())throw Conflict("Graph child did not complete");
             if(next==RunState::completed){const auto row=database.execute("SELECT specification,checkpoint FROM graph_roots WHERE run_id=?",{current.id}).rows.at(0);if(!GraphCoordinator(GraphPlan(text(row[0])),text(row[1]),GraphRestoreMode::live).inspect().finished)throw Conflict("Graph coordinator has unfinished nodes");}
         }
         if(!current.parent_id.empty() && (next==RunState::running || next==RunState::paused)){
-            if(next==RunState::paused)throw Conflict("Agent graph children cannot own a human pause");
+            if(next==RunState::paused)throw Conflict("Owned children cannot own a human pause");
             if(database.execute("SELECT id FROM runs WHERE id=? AND state='running'",{current.parent_id}).rows.empty())throw Conflict("Graph parent is not running");
+            const auto delegation=database.execute("SELECT b.state FROM delegation_tasks t JOIN delegation_batches b ON b.id=t.batch_id WHERE t.child_run_id=?",{current.id}).rows;
+            if(!delegation.empty()&&text(delegation[0][0])!="accepted"&&text(delegation[0][0])!="working")throw Conflict("Delegated admission is already retired");
         }
     }
     void graph_checkpoint(GraphRootRecord& root,const GraphCoordinator& coordinator,std::int64_t expected=0){
@@ -192,7 +223,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>9) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>10) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -251,6 +282,22 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE TABLE run_status_clock(run_id TEXT PRIMARY KEY NOT NULL REFERENCES runs(id),updated_ms INTEGER NOT NULL,status_seq INTEGER NOT NULL UNIQUE REFERENCES events(seq))");
         db.execute("CREATE INDEX root_status_order ON run_status_clock(updated_ms DESC,status_seq DESC)");db.execute("PRAGMA user_version=9");
     }
+    if(version<10){
+        db.execute("CREATE TABLE agent_execution_budgets(root_run_id TEXT PRIMARY KEY NOT NULL REFERENCES runs(id),policy_id TEXT NOT NULL,policy_revision INTEGER NOT NULL CHECK(policy_revision>0),workspace_identity TEXT NOT NULL,provider_identity_json TEXT NOT NULL CHECK(json_valid(provider_identity_json) AND json_type(provider_identity_json)='object'),max_children INTEGER NOT NULL CHECK(max_children BETWEEN 1 AND 8),max_parallel INTEGER NOT NULL CHECK(max_parallel BETWEEN 1 AND 2),max_model_calls INTEGER NOT NULL CHECK(max_model_calls BETWEEN 1 AND 32),wall_limit_ms INTEGER NOT NULL CHECK(wall_limit_ms BETWEEN 1 AND 3600000),children_admitted INTEGER NOT NULL DEFAULT 0 CHECK(children_admitted BETWEEN 0 AND max_children),model_calls_reserved INTEGER NOT NULL DEFAULT 0 CHECK(model_calls_reserved BETWEEN 0 AND max_model_calls),parent_calls_held INTEGER NOT NULL DEFAULT 0 CHECK(parent_calls_held>=0),revision INTEGER NOT NULL DEFAULT 1 CHECK(revision>0),CHECK(model_calls_reserved+parent_calls_held<=max_model_calls))");
+        db.execute("CREATE TABLE agent_model_call_reservations(root_run_id TEXT NOT NULL REFERENCES agent_execution_budgets(root_run_id),attempt_id TEXT NOT NULL,owner_run_id TEXT NOT NULL REFERENCES runs(id),role TEXT NOT NULL CHECK(role IN ('parent','leaf')),state TEXT NOT NULL CHECK(state IN ('reserved','started','finished','interrupted')),PRIMARY KEY(root_run_id,attempt_id))");
+        db.execute("CREATE TABLE delegation_batches(id TEXT PRIMARY KEY NOT NULL,parent_run_id TEXT NOT NULL REFERENCES runs(id),root_run_id TEXT NOT NULL REFERENCES agent_execution_budgets(root_run_id),provider_tool_call_id TEXT NOT NULL,arguments_json TEXT NOT NULL CHECK(json_valid(arguments_json) AND json_type(arguments_json)='object'),parent_assistant_json TEXT NOT NULL CHECK(json_valid(parent_assistant_json) AND json_type(parent_assistant_json)='object'),preset_id TEXT NOT NULL,preset_revision INTEGER NOT NULL CHECK(preset_revision>0),state TEXT NOT NULL CHECK(state IN ('accepted','working','completed','failed','cancelled','interrupted')),result_json TEXT CHECK(result_json IS NULL OR (json_valid(result_json) AND json_type(result_json)='object')),UNIQUE(parent_run_id,provider_tool_call_id))");
+        db.execute("CREATE TABLE delegation_tasks(batch_id TEXT NOT NULL REFERENCES delegation_batches(id),task_id TEXT NOT NULL,node_id TEXT NOT NULL,child_run_id TEXT NOT NULL UNIQUE REFERENCES runs(id) DEFERRABLE INITIALLY DEFERRED,objective TEXT NOT NULL,outcome_json TEXT CHECK(outcome_json IS NULL OR (json_valid(outcome_json) AND json_type(outcome_json)='object')),settled_event_seq INTEGER REFERENCES events(seq),CHECK((outcome_json IS NULL AND settled_event_seq IS NULL) OR (outcome_json IS NOT NULL AND settled_event_seq IS NOT NULL)),PRIMARY KEY(batch_id,task_id),UNIQUE(batch_id,node_id))");
+        db.execute("CREATE INDEX delegation_parent_order ON delegation_batches(parent_run_id)");
+        db.execute("DROP TRIGGER graph_child_boundary");
+        db.execute("CREATE TRIGGER owned_child_boundary BEFORE INSERT ON runs WHEN NEW.parent_run_id IS NOT NULL BEGIN SELECT CASE WHEN NEW.node_id IS NULL OR NOT (EXISTS(SELECT 1 FROM runs p JOIN graph_roots g ON g.run_id=p.id WHERE p.id=NEW.parent_run_id AND p.parent_run_id IS NULL AND p.session_id=NEW.session_id AND p.state='running') OR EXISTS(SELECT 1 FROM delegation_tasks t JOIN delegation_batches b ON b.id=t.batch_id JOIN agent_execution_budgets e ON e.root_run_id=b.root_run_id JOIN runs p ON p.id=b.parent_run_id WHERE t.child_run_id=NEW.id AND t.node_id=NEW.node_id AND b.parent_run_id=NEW.parent_run_id AND b.root_run_id=b.parent_run_id AND b.state IN ('accepted','working') AND p.parent_run_id IS NULL AND p.state='running' AND p.session_id=NEW.session_id AND NEW.state='queued' AND NOT EXISTS(SELECT 1 FROM graph_roots g WHERE g.run_id=p.id))) THEN RAISE(ABORT,'invalid owned child boundary') END; END");
+        db.execute("CREATE TRIGGER delegation_task_initial_outcome BEFORE INSERT ON delegation_tasks WHEN NEW.outcome_json IS NOT NULL OR NEW.settled_event_seq IS NOT NULL BEGIN SELECT RAISE(ABORT,'new delegation task must be unsettled'); END");
+        db.execute("CREATE TRIGGER delegation_task_identity_immutable BEFORE UPDATE OF batch_id,task_id,node_id,child_run_id,objective ON delegation_tasks BEGIN SELECT RAISE(ABORT,'accepted delegation task identity is immutable'); END");
+        db.execute("CREATE TRIGGER delegation_task_settlement_boundary BEFORE UPDATE OF outcome_json,settled_event_seq ON delegation_tasks BEGIN SELECT CASE WHEN OLD.outcome_json IS NOT NULL OR OLD.settled_event_seq IS NOT NULL OR NOT EXISTS(SELECT 1 FROM events e JOIN runs c ON c.id=OLD.child_run_id WHERE e.seq=NEW.settled_event_seq AND e.run_id=c.id AND e.kind='delegation.child.settled' AND e.payload=NEW.outcome_json AND c.state IN ('completed','failed','cancelled') AND json_extract(NEW.outcome_json,'$.child_run_id')=c.id AND json_extract(NEW.outcome_json,'$.child_state')=c.state) THEN RAISE(ABORT,'invalid delegation settlement boundary') END; END");
+        db.execute("CREATE TRIGGER delegation_batch_identity_immutable BEFORE UPDATE OF id,parent_run_id,root_run_id,provider_tool_call_id,arguments_json,parent_assistant_json,preset_id,preset_revision ON delegation_batches BEGIN SELECT RAISE(ABORT,'accepted delegation batch identity is immutable'); END");
+        db.execute("CREATE TRIGGER agent_budget_identity_immutable BEFORE UPDATE OF root_run_id,policy_id,policy_revision,workspace_identity,provider_identity_json,max_children,max_parallel,max_model_calls,wall_limit_ms ON agent_execution_budgets BEGIN SELECT RAISE(ABORT,'admitted execution policy is immutable'); END");
+        db.execute("CREATE TRIGGER model_call_identity_immutable BEFORE UPDATE OF root_run_id,attempt_id,owner_run_id,role ON agent_model_call_reservations BEGIN SELECT RAISE(ABORT,'model attempt identity is immutable'); END");
+        db.execute("PRAGMA user_version=10");
+    }
     transaction.commit(); db.execute("PRAGMA journal_mode=WAL"); db.execute("PRAGMA synchronous=FULL");
 }
 Repository::~Repository()=default;
@@ -297,7 +344,7 @@ std::optional<Run> Repository::incoming_message(const std::string& message,const
     const auto rows=impl_->database.execute("SELECT run_id,context_id,identity,content FROM incoming_messages WHERE message_id=?",{message}).rows;if(rows.empty())return {};
     if((!context.empty()&&text(rows[0][1])!=context)||text(rows[0][2])!=Json::parse(identity).dump()||text(rows[0][3])!=content)throw Conflict("Incoming message identity was reused with changed input");return run(text(rows[0][0]));
 }
-Run Repository::start_incoming_message(const std::string& id,const std::string& context,const std::string& message,const std::string& prompt,const std::string& identity){
+Run Repository::start_incoming_message(const std::string& id,const std::string& context,const std::string& message,const std::string& prompt,const std::string& identity,std::optional<RootBudgetSpec> budget){
     identifier(id);object_json(prompt);const auto provider=prompt_context(prompt);const auto data=Json::parse(prompt);if(!data.contains("content")||!data["content"].is_string())throw std::invalid_argument("Incoming prompt must contain text");const auto content=data["content"].get<std::string>();if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid incoming text");Transaction transaction(impl_->database);if(const auto replay=incoming_message(message,context,identity,content)){transaction.commit();return *replay;}
     const auto session_id=context.empty()?"ctx_"+id:context;identifier(session_id);auto& db=impl_->database;
     if(context.empty())changed_one(db.execute("INSERT INTO sessions(id,title) VALUES(?,'Inbound agent conversation')",{session_id}));else session(session_id);
@@ -307,6 +354,7 @@ Run Repository::start_incoming_message(const std::string& id,const std::string& 
     changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'user',?)",{session_id,prompt}));
     changed_one(db.execute("INSERT INTO task_messages(message_seq,run_id) VALUES(last_insert_rowid(),?)",{id}));
     changed_one(db.execute("INSERT INTO incoming_messages(message_id,run_id,context_id,identity,content) VALUES(?,?,?,?,?)",{message,id,session_id,Json::parse(identity).dump(),content}));
+    if(budget)impl_->initialize_budget(id,prompt,*budget);
     impl_->event(id,"run.queued","{}");transaction.commit();return {id,session_id,RunState::queued,{},{},false,provider};
 }
 std::optional<std::vector<Message>> Repository::task_history(const std::string& id){
@@ -317,14 +365,185 @@ std::optional<std::string> Repository::incoming_message_payload(const std::strin
     run(id);const auto rows=impl_->database.execute("SELECT identity FROM incoming_messages WHERE run_id=?",{id}).rows;
     if(rows.empty())return {};return text(rows[0][0]);
 }
-Run Repository::start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json) {
+Run Repository::start_prompt_run(const std::string& id,const std::string& session_id,const std::string& prompt_json,std::optional<RootBudgetSpec> budget) {
     identifier(id);const auto provider=prompt_context(prompt_json);auto& db=impl_->database;Transaction transaction(db);session(session_id);
     if(!db.execute("SELECT id FROM runs WHERE id=?",{id}).rows.empty()) throw Conflict("Run already exists");
     if(!db.execute("SELECT id FROM runs WHERE session_id=? AND parent_run_id IS NULL AND state IN ('queued','running','paused')",{session_id}).rows.empty()) throw Conflict("Session already has an active root run");
     changed_one(db.execute("INSERT INTO runs(id,session_id,state) VALUES(?,?,'queued')",{id,session_id}));
     changed_one(db.execute("INSERT INTO messages(session_id,role,payload) VALUES(?,'user',?)",{session_id,prompt_json}));
     changed_one(db.execute("INSERT INTO task_messages(message_seq,run_id) VALUES(last_insert_rowid(),?)",{id}));
-    changed_one(db.execute("INSERT INTO task_history_owners(run_id) VALUES(?)",{id}));impl_->event(id,"run.queued","{}");transaction.commit();return {id,session_id,RunState::queued,{},{},false,provider};
+    changed_one(db.execute("INSERT INTO task_history_owners(run_id) VALUES(?)",{id}));if(budget)impl_->initialize_budget(id,prompt_json,*budget);impl_->event(id,"run.queued","{}");transaction.commit();return {id,session_id,RunState::queued,{},{},false,provider};
+}
+RootBudgetRecord Repository::root_budget(const std::string& id){
+    const auto current=run(id);if(!current.parent_id.empty()||current.graph_root)throw std::invalid_argument("Native delegation budget requires an ordinary root");
+    const auto rows=impl_->database.execute("SELECT policy_id,policy_revision,workspace_identity,provider_identity_json,max_children,max_parallel,max_model_calls,wall_limit_ms,children_admitted,model_calls_reserved,parent_calls_held,revision FROM agent_execution_budgets WHERE root_run_id=?",{id}).rows;
+    if(rows.empty())throw NotFound("Execution budget not found");const auto& r=rows[0];
+    RootBudgetRecord result{id,{text(r[0]),integer(r[1]),text(r[2]),text(r[3]),integer(r[4]),integer(r[5]),integer(r[6]),integer(r[7])},integer(r[8]),integer(r[9]),integer(r[10]),integer(r[11])};
+    (void)budget_provider_identity(result.spec);return result;
+}
+ModelCallReservation Repository::reserve_model_call(const std::string& root,const std::string& owner,const std::string& attempt,ModelCallRole role){
+    bounded_identity(attempt);const auto role_name=std::string(call_role(role));auto& db=impl_->database;Transaction transaction(db);
+    const auto budget=root_budget(root);const auto parent=run(root),actor=run(owner);
+    if(parent.state!=RunState::running || actor.state!=RunState::running)throw Conflict("Model attempt requires its running execution owners");
+    if(role==ModelCallRole::parent){if(owner!=root)throw Conflict("Parent model attempt owner differs");}
+    else {const auto admitted=child_admission(owner);if(admitted.kind!=ChildAdmissionKind::delegated_leaf||admitted.root_run_id!=root)throw Conflict("Leaf model attempt is not owned by this root");}
+    const auto previous=db.execute("SELECT owner_run_id,role,state FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=?",{root,attempt}).rows;
+    if(!previous.empty()){if(text(previous[0][0])!=owner||text(previous[0][1])!=role_name)throw Conflict("Model attempt identity changed");transaction.commit();return {root,attempt,owner,role,text(previous[0][2])};}
+    const auto held=role==ModelCallRole::parent&&budget.parent_calls_held>0?1:0;
+    if(budget.model_calls_reserved+budget.parent_calls_held-held>=budget.spec.max_model_calls)throw RootBudgetExhausted("Root model-call allowance exhausted");
+    if(budget.revision>=9007199254740991)throw std::overflow_error("Root budget revision exhausted");
+    changed_one(db.execute("UPDATE agent_execution_budgets SET model_calls_reserved=model_calls_reserved+1,parent_calls_held=parent_calls_held-?,revision=revision+1 WHERE root_run_id=? AND revision=?",{static_cast<std::int64_t>(held),root,budget.revision}));
+    changed_one(db.execute("INSERT INTO agent_model_call_reservations(root_run_id,attempt_id,owner_run_id,role,state) VALUES(?,?,?,?,'reserved')",{root,attempt,owner,role_name}));
+    impl_->event(owner,"budget.model_call.reserved",Json{{"root_run_id",root},{"attempt_id",attempt},{"role",role_name}}.dump());transaction.commit();return {root,attempt,owner,role,"reserved"};
+}
+ModelCallReservation Repository::start_model_call(const std::string& root,const std::string& owner,const std::string& attempt){
+    auto& db=impl_->database;Transaction transaction(db);(void)root_budget(root);const auto parent=run(root),actor=run(owner);
+    if(parent.state!=RunState::running||actor.state!=RunState::running)throw Conflict("Model attempt owners are not running");
+    const auto rows=db.execute("SELECT role,state FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=?",{root,attempt,owner}).rows;
+    if(rows.empty())throw NotFound("Owned model attempt not found");if(text(rows[0][1])!="reserved")throw Conflict("Model attempt has already started or retired");
+    const auto role=text(rows[0][0])=="parent"?ModelCallRole::parent:ModelCallRole::leaf;
+    if(role==ModelCallRole::parent){if(root!=owner)throw Conflict("Invalid parent attempt owner");}else {const auto admitted=child_admission(owner);if(admitted.kind!=ChildAdmissionKind::delegated_leaf||admitted.root_run_id!=root)throw Conflict("Invalid leaf attempt owner");}
+    changed_one(db.execute("UPDATE agent_model_call_reservations SET state='started' WHERE root_run_id=? AND attempt_id=? AND owner_run_id=? AND state='reserved'",{root,attempt,owner}));
+    impl_->event(owner,"budget.model_call.started",Json{{"root_run_id",root},{"attempt_id",attempt},{"role",call_role(role)}}.dump());transaction.commit();return {root,attempt,owner,role,"started"};
+}
+ModelCallReservation Repository::finish_model_call(const std::string& root,const std::string& owner,const std::string& attempt){
+    auto& db=impl_->database;Transaction transaction(db);const auto rows=db.execute("SELECT role,state FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=?",{root,attempt,owner}).rows;
+    if(rows.empty())throw NotFound("Owned model attempt not found");const auto role=text(rows[0][0])=="parent"?ModelCallRole::parent:ModelCallRole::leaf;const auto state=text(rows[0][1]);
+    if(state=="finished"){transaction.commit();return {root,attempt,owner,role,state};}
+    if(state!="reserved"&&state!="started")throw Conflict("Interrupted attempt cannot be adopted");
+    changed_one(db.execute("UPDATE agent_model_call_reservations SET state='finished' WHERE root_run_id=? AND attempt_id=? AND owner_run_id=? AND state=?",{root,attempt,owner,state}));
+    impl_->event(owner,"budget.model_call.finished",Json{{"root_run_id",root},{"attempt_id",attempt},{"role",call_role(role)},{"was_started",state=="started"}}.dump());transaction.commit();return {root,attempt,owner,role,"finished"};
+}
+DelegationBatchRecord Repository::delegation_batch(const std::string& id){
+    const auto rows=impl_->database.execute("SELECT parent_run_id,root_run_id,provider_tool_call_id,arguments_json,parent_assistant_json,preset_id,preset_revision,state,COALESCE(result_json,'') FROM delegation_batches WHERE id=?",{id}).rows;
+    if(rows.empty())throw NotFound("Delegation batch not found");const auto& r=rows[0];
+    DelegationBatchRecord result{id,text(r[0]),text(r[1]),text(r[2]),text(r[3]),text(r[4]),text(r[5]),integer(r[6]),text(r[7]),text(r[8]),{},false};
+    for(const auto& t:impl_->database.execute("SELECT child_run_id,task_id,COALESCE(outcome_json,''),settled_event_seq FROM delegation_tasks WHERE batch_id=? ORDER BY rowid",{id}).rows)
+        result.tasks.push_back({run(text(t[0])),id,text(t[1]),result.preset_id,result.preset_revision,text(t[2]),std::holds_alternative<std::nullptr_t>(t[3])?std::optional<std::int64_t>{}:std::optional<std::int64_t>{integer(t[3])}});
+    return result;
+}
+std::vector<DelegationBatchRecord> Repository::delegation_batches(const std::string& parent){
+    const auto current=run(parent);if(!current.parent_id.empty())throw std::invalid_argument("Delegation batches require their root parent");
+    std::vector<DelegationBatchRecord> result;for(const auto& row:impl_->database.execute("SELECT id FROM delegation_batches WHERE parent_run_id=? ORDER BY rowid",{parent}).rows)result.push_back(delegation_batch(text(row[0])));return result;
+}
+DelegationBatchRecord Repository::accept_delegation_batch(const DelegationBatchSpec& spec){
+    bounded_identity(spec.id);bounded_identity(spec.provider_tool_call_id,256);
+    if(spec.preset_id!="workspace.inspect"||spec.preset_revision!=1||spec.expected_budget_revision<1||spec.arguments_json.size()>65536||spec.tasks.empty()||spec.tasks.size()>4)throw std::invalid_argument("Invalid registered delegation request");
+    const auto arguments=Json::parse(object_json(spec.arguments_json)),assistant=Json::parse(object_json(spec.parent_assistant_json));
+    if(arguments.size()!=1||!arguments.contains("tasks")||!arguments["tasks"].is_array()||arguments["tasks"].size()!=spec.tasks.size())throw std::invalid_argument("Invalid delegation task arguments");
+    bool matched_call=false;std::set<std::string> call_ids;
+    if(!assistant.contains("tool_calls")||!assistant["tool_calls"].is_array())throw std::invalid_argument("Delegation requires its real assistant tool call");
+    for(const auto& call:assistant["tool_calls"]){
+        if(!call.is_object()||!call.contains("id")||!call["id"].is_string()||!call_ids.insert(call["id"].get<std::string>()).second)throw std::invalid_argument("Invalid assistant tool-call identity");
+        if(call["id"]==spec.provider_tool_call_id){if(!call.contains("name")||call["name"]!="delegate_tasks"||!call.contains("arguments")||!call["arguments"].is_string()||call["arguments"].get<std::string>()!=spec.arguments_json)throw std::invalid_argument("Delegation call does not match its actual assistant turn");matched_call=true;}
+    }
+    if(!matched_call)throw std::invalid_argument("Delegation call is absent from its assistant turn");
+    auto& db=impl_->database;Transaction transaction(db);const auto parent=run(spec.parent_run_id);const auto budget=root_budget(parent.id);
+    if(parent.state!=RunState::running)throw Conflict("Delegation parent is not running");
+    const auto provider=Json::parse(budget.spec.provider_identity_json);std::set<std::string> labels,nodes,children;
+    std::size_t position=0;
+    for(const auto& task:spec.tasks){
+        bounded_identity(task.task_id,32);bounded_identity(task.node_id,128);bounded_identity(task.child_run_id,128);
+        if(task.task_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos)throw std::invalid_argument("Invalid delegation task label");
+        if(task.objective.empty()||task.objective.size()>8192||task.objective.find('\0')!=std::string::npos||!labels.insert(task.task_id).second||!nodes.insert(task.node_id).second||!children.insert(task.child_run_id).second)throw std::invalid_argument("Invalid or duplicated delegated task");
+        const auto& requested=arguments["tasks"][position++];
+        if(!requested.is_object()||requested.size()!=3||!requested.contains("id")||requested["id"]!=task.task_id||!requested.contains("objective")||requested["objective"]!=task.objective||!requested.contains("preset")||requested["preset"]!=spec.preset_id)throw std::invalid_argument("Delegated child does not match the requested preset and objective");
+        const auto prompt=Json::parse(object_json(task.prompt_json));
+        if(!prompt.contains("content")||prompt["content"]!=task.objective||prompt.size()!=(provider.size()==6?2:1))throw std::invalid_argument("Delegated child prompt is not its bounded objective");
+        if(provider.size()==6){if(!prompt.contains("provider_context")||prompt["provider_context"]!=provider)throw std::invalid_argument("Delegated child provider identity differs");}
+        else if(prompt.contains("provider_context"))throw std::invalid_argument("Unexpected delegated provider context");
+    }
+    const auto previous=db.execute("SELECT id FROM delegation_batches WHERE parent_run_id=? AND provider_tool_call_id=?",{parent.id,spec.provider_tool_call_id}).rows;
+    if(!previous.empty()){
+        auto result=delegation_batch(text(previous[0][0]));
+        if(result.arguments_json!=spec.arguments_json||result.parent_assistant_json!=spec.parent_assistant_json||result.preset_id!=spec.preset_id||result.preset_revision!=spec.preset_revision)throw Conflict("Delegation tool-call identity changed");
+        if(result.state=="interrupted")throw Conflict("Interrupted delegation cannot be adopted");transaction.commit();return result;
+    }
+    if(budget.revision!=spec.expected_budget_revision)throw Conflict("Execution budget changed before child admission");
+    if(budget.children_admitted+static_cast<std::int64_t>(spec.tasks.size())>budget.spec.max_children || budget.model_calls_reserved+budget.parent_calls_held>=budget.spec.max_model_calls)throw RootBudgetExhausted("Delegation cannot preserve its child and parent allowances");
+    if(budget.revision>=9007199254740991)throw std::overflow_error("Root budget revision exhausted");
+    for(const auto& task:spec.tasks){
+        if(!db.execute("SELECT id FROM runs WHERE id=? OR (parent_run_id=? AND node_id=?)",{task.child_run_id,parent.id,task.node_id}).rows.empty())throw Conflict("Delegated child identity already exists");
+    }
+    changed_one(db.execute("INSERT INTO delegation_batches(id,parent_run_id,root_run_id,provider_tool_call_id,arguments_json,parent_assistant_json,preset_id,preset_revision,state) VALUES(?,?,?,?,?,?,?,?,'accepted')",{spec.id,parent.id,parent.id,spec.provider_tool_call_id,spec.arguments_json,spec.parent_assistant_json,spec.preset_id,spec.preset_revision}));
+    changed_one(db.execute("UPDATE agent_execution_budgets SET children_admitted=children_admitted+?,parent_calls_held=parent_calls_held+1,revision=revision+1 WHERE root_run_id=? AND revision=?",{static_cast<std::int64_t>(spec.tasks.size()),parent.id,budget.revision}));
+    auto identities=Json::array();
+    for(const auto& task:spec.tasks){
+        changed_one(db.execute("INSERT INTO delegation_tasks(batch_id,task_id,node_id,child_run_id,objective) VALUES(?,?,?,?,?)",{spec.id,task.task_id,task.node_id,task.child_run_id,task.objective}));
+        changed_one(db.execute("INSERT INTO runs(id,session_id,state,parent_run_id,node_id) VALUES(?,?,'queued',?,?)",{task.child_run_id,parent.session_id,parent.id,task.node_id}));
+        changed_one(db.execute("INSERT INTO task_history_owners(run_id) VALUES(?)",{task.child_run_id}));
+        const Run child{task.child_run_id,parent.session_id,RunState::queued,parent.id,task.node_id,false,parent.provider_context_json};impl_->message(child,"user",task.prompt_json);impl_->event(child.id,"run.queued","{}");
+        const Json admitted={{"batch_id",spec.id},{"parent_run_id",parent.id},{"task_id",task.task_id},{"child_run_id",child.id},{"preset_id",spec.preset_id},{"preset_revision",spec.preset_revision}};
+        impl_->event(child.id,"delegation.child.admitted",admitted.dump());identities.push_back(admitted);
+    }
+    impl_->event(parent.id,"delegation.batch.accepted",Json{{"batch_id",spec.id},{"provider_tool_call_id",spec.provider_tool_call_id},{"preset_id",spec.preset_id},{"preset_revision",spec.preset_revision},{"children",identities}}.dump());
+    auto result=delegation_batch(spec.id);result.created=true;transaction.commit();return result;
+}
+ChildAdmissionRecord Repository::child_admission(const std::string& id){
+    const auto child=run(id);if(child.parent_id.empty())throw std::invalid_argument("Child admission requires a child run");
+    const auto parent=run(child.parent_id);if(!parent.parent_id.empty()||parent.session_id!=child.session_id)throw Conflict("Owned child boundary differs");
+    if(parent.graph_root){
+        const auto graph=Json::parse(graph_run(parent.id).specification_json);for(const auto& node:graph["nodes"])if(node["id"]==child.node_id){
+            if(node["type"]=="agent")return {ChildAdmissionKind::graph_agent,parent.id,{},{},0};
+            if(node["type"]=="tool")return {ChildAdmissionKind::graph_tool,parent.id,{},{},0};
+        }throw Conflict("Graph child is not its declared executable node");
+    }
+    const auto rows=impl_->database.execute("SELECT b.id,b.root_run_id,b.preset_id,b.preset_revision,b.state,t.node_id FROM delegation_tasks t JOIN delegation_batches b ON b.id=t.batch_id WHERE t.child_run_id=? AND b.parent_run_id=?",{id,parent.id}).rows;
+    if(rows.empty())throw Conflict("Child has no accepted native delegation");const auto& r=rows[0];
+    if(text(r[1])!=parent.id||text(r[5])!=child.node_id||text(r[2])!="workspace.inspect"||integer(r[3])!=1)throw Conflict("Delegated child ownership or preset differs");
+    (void)root_budget(parent.id);return {ChildAdmissionKind::delegated_leaf,parent.id,text(r[0]),text(r[2]),integer(r[3])};
+}
+std::vector<OwnedChildRecord> Repository::owned_children(const std::string& id){
+    const auto parent=run(id);if(!parent.parent_id.empty())throw std::invalid_argument("Owned child observation requires a root parent");std::vector<OwnedChildRecord> result;
+    for(const auto& row:impl_->database.execute("SELECT id FROM runs WHERE parent_run_id=? ORDER BY rowid",{id}).rows){const auto child=run(text(row[0]));const auto admission=child_admission(child.id);std::string label;
+        if(admission.kind==ChildAdmissionKind::delegated_leaf){const auto task=impl_->database.execute("SELECT task_id FROM delegation_tasks WHERE child_run_id=?",{child.id}).rows;label=text(task.at(0).at(0));}
+        result.push_back({child,admission.kind==ChildAdmissionKind::delegated_leaf?"delegated_leaf":admission.kind==ChildAdmissionKind::graph_agent?"graph_agent":"graph_tool",admission.batch_id,label,admission.preset_id,admission.preset_revision});
+    }return result;
+}
+std::vector<Message> Repository::owned_child_history(const std::string& parent,const std::string& child){
+    const auto root=run(parent),owned=run(child);if(!root.parent_id.empty()||owned.parent_id!=parent||owned.session_id!=root.session_id)throw NotFound("Child does not belong to this root");(void)child_admission(child);return run_history(child);
+}
+std::vector<Event> Repository::tree_events(const std::string& id,std::int64_t after,std::size_t count){
+    if(after<0||count<1||count>256)throw std::invalid_argument("Invalid execution tree cursor");const auto parent=run(id);if(!parent.parent_id.empty())throw std::invalid_argument("Tree events require a root parent");std::vector<Event> result;
+    for(const auto& row:impl_->database.execute("SELECT e.seq,e.run_id,e.kind,e.payload FROM events e JOIN runs r ON r.id=e.run_id WHERE (r.id=? OR r.parent_run_id=?) AND r.session_id=? AND e.seq>? ORDER BY e.seq LIMIT ?",{id,id,parent.session_id,after,static_cast<std::int64_t>(count)}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2]),text(row[3])});return result;
+}
+DelegationTaskRecord Repository::settle_delegation_child(const std::string& id){
+    auto& db=impl_->database;Transaction transaction(db);const auto rows=db.execute("SELECT batch_id FROM delegation_tasks WHERE child_run_id=?",{id}).rows;
+    if(rows.empty())throw NotFound("Delegated child not found");const auto batch=delegation_batch(text(rows[0][0]));
+    auto found=std::find_if(batch.tasks.begin(),batch.tasks.end(),[&](const auto& task){return task.run.id==id;});if(found==batch.tasks.end())throw DatabaseError("Delegation ownership differs");auto task=*found;
+    if(!task.outcome_json.empty()){transaction.commit();return task;}
+    if(batch.state!="accepted"&&batch.state!="working")throw Conflict("Retired delegation cannot acquire another outcome");
+    const auto current=run(id);if(!terminal(current.state))throw Conflict("Delegated child has not retired");
+    Json output={{"child_run_id",id},{"task_id",task.task_id},{"child_state",state_name(current.state)},{"preset_id",task.preset_id},{"preset_revision",task.preset_revision}};
+    const auto history_ref="/v1/runs/"+batch.parent_run_id+"/children/"+id+"/history";
+    if(current.state==RunState::completed){
+        const auto history=run_history(id);if(history.empty()||history.back().role!="assistant")throw DatabaseError("Completed delegated child has no assistant output");
+        const auto answer=Json::parse(history.back().json);if(!answer.contains("content")||!answer["content"].is_string())throw DatabaseError("Delegated child has invalid result text");
+        for(const auto* name:{"content","model","usage","elapsed_ms","first_token_ms"})if(answer.contains(name))output[name]=answer[name];
+    }else {
+        const auto failure=db.execute("SELECT payload FROM events WHERE run_id=? AND kind=? ORDER BY seq DESC LIMIT 1",{id,"run."+state_name(current.state)}).rows;
+        output["error"]=failure.empty()?Json{{"code","child_outcome_unavailable"}}:Json::parse(text(failure[0][0]));
+    }
+    if(output.dump().size()>32768){output={{"child_run_id",id},{"task_id",task.task_id},{"child_state",state_name(current.state)},{"preset_id",task.preset_id},{"preset_revision",task.preset_revision},{"history_ref",history_ref},{"error",{{"code","result_limit_exceeded"}}}};}
+    task.outcome_json=output.dump();const auto event=impl_->event(id,"delegation.child.settled",task.outcome_json);task.settled_event_seq=event.sequence;
+    changed_one(db.execute("UPDATE delegation_tasks SET outcome_json=?,settled_event_seq=? WHERE child_run_id=? AND outcome_json IS NULL AND settled_event_seq IS NULL",{task.outcome_json,event.sequence,id}));transaction.commit();return task;
+}
+DelegationBatchRecord Repository::settle_delegation_batch(const std::string& id){
+    auto& db=impl_->database;Transaction transaction(db);auto batch=delegation_batch(id);
+    if(!batch.result_json.empty()){transaction.commit();return batch;}
+    if(batch.state!="accepted"&&batch.state!="working")throw Conflict("Interrupted delegation cannot be adopted");
+    auto output=Json{{"batch_id",id},{"source","native_delegation"},{"children",Json::array()}};bool failed=false,cancelled=false;
+    for(const auto& task:batch.tasks){
+        if(!terminal(task.run.state)||task.outcome_json.empty()||!task.settled_event_seq)throw Conflict("Delegation still owns unfinished outcomes");
+        const auto child=Json::parse(task.outcome_json);output["children"].push_back(child);failed|=task.run.state==RunState::failed||child.contains("error");cancelled|=task.run.state==RunState::cancelled;
+    }
+    if(output.dump().size()>65536){
+        output={{"batch_id",id},{"source","native_delegation"},{"error",{{"code","result_limit_exceeded"}}},{"children",Json::array()}};failed=true;
+        for(const auto& task:batch.tasks)output["children"].push_back({{"child_run_id",task.run.id},{"task_id",task.task_id},{"child_state",state_name(task.run.state)},{"preset_id",task.preset_id},{"preset_revision",task.preset_revision},{"history_ref","/v1/runs/"+batch.parent_run_id+"/children/"+task.run.id+"/history"}});
+    }
+    batch.result_json=output.dump();if(batch.result_json.size()>65536)throw DatabaseError("Bounded delegation identity envelope exceeds its limit");batch.state=cancelled?"cancelled":failed?"failed":"completed";
+    changed_one(db.execute("UPDATE delegation_batches SET state=?,result_json=? WHERE id=? AND state IN ('accepted','working') AND result_json IS NULL",{batch.state,batch.result_json,id}));
+    impl_->event(batch.parent_run_id,"delegation.batch.settled",Json{{"batch_id",id},{"state",batch.state},{"result",output}}.dump());transaction.commit();return batch;
 }
 void Repository::append_user_message(const std::string& session_id,const std::string& json) {
     auto& db=impl_->database;Transaction transaction(db);session(session_id);
@@ -432,7 +651,7 @@ Run Repository::transition(const std::string& id,RunState expected,RunState next
     transaction.commit(); result.state=next; return result;
 }
 Event Repository::append_event(const std::string& id,const std::string& kind,const std::string& json) {
-    identifier(kind); if(kind.rfind("run.",0)==0 || kind.rfind("operation.",0)==0) throw std::invalid_argument("Lifecycle events require their owning repository operation");
+    identifier(kind); if(kind.rfind("run.",0)==0 || kind.rfind("operation.",0)==0 || kind.rfind("delegation.",0)==0 || kind.rfind("budget.",0)==0) throw std::invalid_argument("Lifecycle events require their owning repository operation");
     Transaction transaction(impl_->database);
     if(terminal(run(id).state)) throw Conflict("Run is terminal");
     auto result=impl_->event(id,kind,json); transaction.commit(); return result;
@@ -641,6 +860,11 @@ std::size_t Repository::recover_interrupted(const BackendLease& owner) {
     const auto changed=db.execute("UPDATE runs SET state='failed' WHERE state IN ('queued','running')");
     if(changed.affected_rows!=static_cast<std::int64_t>(roots.size())) throw DatabaseError("Recovery affected-row count differs");
     for(const auto& row:roots) impl_->event(text(row[0]),"run.failed",R"({"reason":"server_restart"})");
+    for(const auto& row:db.execute("SELECT id,parent_run_id FROM delegation_batches WHERE state IN ('accepted','working')").rows){
+        changed_one(db.execute("UPDATE delegation_batches SET state='interrupted' WHERE id=? AND state IN ('accepted','working')",{text(row[0])}));
+        impl_->event(text(row[1]),"delegation.batch.interrupted",Json{{"batch_id",text(row[0])},{"reason","server_restart"},{"children_replayed",false}}.dump());
+    }
+    db.execute("UPDATE agent_model_call_reservations SET state='interrupted' WHERE state IN ('reserved','started')");
     for(const auto& row:db.execute("SELECT run_id FROM graph_roots").rows){auto root=graph_run(text(row[0]));const GraphCoordinator recovered(GraphPlan(root.specification_json),root.checkpoint_json);if(recovered.checkpoint()!=root.checkpoint_json){impl_->graph_checkpoint(root,recovered);impl_->event(root.run.id,"graph.recovered",Json{{"checkpoint_revision",root.checkpoint_revision},{"reason","interrupted_nodes_not_replayed"}}.dump());}}
     transaction.commit(); return roots.size();
 }

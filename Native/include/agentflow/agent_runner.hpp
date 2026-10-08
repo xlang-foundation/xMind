@@ -7,9 +7,16 @@
 #include "agentflow/agent_instructions.hpp"
 
 namespace agentflow {
+class DelegationExecutor;
+class RootExecutionBudget;
 struct CredentialReference {std::string scope,id,purpose;};
 // Public, immutable profile identity; never contains credentials or destinations.
 struct ProviderExecutionIdentity {std::string profile_id,route_id,provider;std::int64_t profile_revision=0;};
+struct AgentDelegationPolicy {
+    std::string preset_id="workspace.inspect";
+    std::int64_t preset_revision=1;
+    std::size_t max_children=8,max_parallel=2,max_model_calls=32,max_leaf_turns=4;
+};
 struct AgentSettings {
     ChatProviderConfig provider;
     std::optional<std::string> workspace;
@@ -24,6 +31,8 @@ struct AgentSettings {
     std::vector<ProcessProfile> process_profiles;
     AgentInstructionPolicy instruction_policy;
     std::optional<ProviderExecutionIdentity> provider_identity;
+    // Explicit registered read-only leaf policy; the parent keeps its own tools.
+    std::optional<AgentDelegationPolicy> delegation;
 };
 std::string provider_context_json(const AgentSettings& settings,const std::string& model_id={});
 // Shared native single-agent/model-tool loop, callable by backend workers and
@@ -31,15 +40,19 @@ std::string provider_context_json(const AgentSettings& settings,const std::strin
 // PersistenceService must outlive this runner and all execute calls.
 class AgentRunner {
 public:
-    AgentRunner(PersistenceService& persistence,AgentSettings settings);
+    AgentRunner(PersistenceService& persistence,AgentSettings settings,
+        std::shared_ptr<DelegationExecutor> delegation={});
     ~AgentRunner();
     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={});
-    Run execute(const std::string& run_id,std::stop_token cancel={},const std::string& model_id={});
+    Run execute(const std::string& run_id,std::stop_token cancel={},const std::string& model_id={},
+        std::shared_ptr<RootExecutionBudget> budget={});
+    std::optional<RootBudgetSpec> execution_budget(const std::string& model_id={}) const;
     std::vector<std::string> models() const;
 private:
     PersistenceService& persistence_;
     AgentSettings settings_;
     std::unique_ptr<WorkspaceTools> workspace_;
     std::unique_ptr<ProcessExecutor> process_;
+    std::shared_ptr<DelegationExecutor> delegation_;
 };
 }

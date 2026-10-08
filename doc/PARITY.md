@@ -20,6 +20,12 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+Ordinary Agent mode now offers native `delegate_tasks` for model-selected read-only workspace investigations. Actual child AgentRunners keep separate conversations and measured response usage/timing, share their parent's call/deadline limits, and return observed results before the parent continues or requests an approval-controlled effect. Schema v10 durably binds tasks, immutable presets, budgets and once-only settlements; recovery never replays children. CLI, browser and VS Code observe the same owned child histories and committed tree cursors.
+
+The final guarded local **71-contract native gate passed in 142.36 seconds**, with an exact expected/registered/passed manifest, **45 frozen source hashes**, zero failures/skips and no exclusions. The delegation engine contract took **1.96 seconds**, actual HTTP/CLI/shared-controller acceptance **1.03 seconds**. **103 extension tests** and **19 browser tests**, fresh source-matched browser/native integration and 18-asset VSIX verification also passed. Provider replies, signatures and keys are explicitly synthetic; native agents, filesystem effects, permissions, xlang3 SQLite and transport are real. The [initial process-fixture positional-schema failure](evidence/native-delegation-initial-ctest.log) is retained separately; the corrected frozen source passed all 71 contracts.
+
+The new v10 bundle still needs its exact hosted gate and reviewed upgrade acceptance. The installed preview remains the independently accepted c4 bundle. Live delegation, installed/rendered client acceptance, mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [exact local71 evidence](evidence/native-delegation-local-provenance.json).
+
 New source adds direct MCP graph tool nodes and explicit offline native alias
 discovery. Nodes bind an opaque alias to trusted server ID/revision, preserve
 raw literal arguments inside a string, and rediscover that exact alias before
@@ -47,9 +53,9 @@ The initial HTTP start-guard failure remains separate historical evidence.
 [exact hosted69 evidence](evidence/native-graph-mcp-hosted-provenance.json),
 [Direct MCP graph scope](native-graph-mcp.md).
 
-[Native dynamic delegation](native-delegation-design.md) is the next design,
-covering real model-selected children under ordinary Agent mode. It does not
-count as implemented delegation, runtime replanning or verified OpenCode parity.
+The [native delegation design](native-delegation-design.md) now has a bounded
+local implementation and scoped71 acceptance above. It does not establish
+runtime replanning, live multi-agent acceptance or verified OpenCode parity.
 
 The ordered-Claude-history local checkpoint passed **67 native contracts in 117.65 seconds**,
 with an exact manifest, zero failures/skips and no post-build exclusions. Strict
@@ -197,13 +203,13 @@ removed Python prototype's status table; it is not a completion score.
 | Capability | Native component scope | Remaining acceptance |
 | --- | --- | --- |
 | Persistent sessions and run events | C++ repositories, ownership, transactions, replay and recovery use SQLite through embedded xlang3 | Complete concurrent-client conversations, failure/recovery and release acceptance |
-| Agent/model/tool loop | Shared C++ single-agent and graph execution with durable admission, cancellation and tool continuation | Broad live coding tasks, dynamic delegation, context bounds and production recovery |
+| Agent/model/tool loop | Shared C++ single-agent/graph execution and locally verified ordinary-Agent read-only delegation, durable budgets/settlement and tool continuation | Broad live coding tasks, mutable dependency planning/replanning, context bounds and production recovery |
 | Models and providers | Native Chat Completions and Responses; Gemini catalogue/enrollment/owned-key execution is hosted-verified at 64, profile CLI controls at hosted65, Claude tools/metrics at hosted66 and ordered opaque signed receipts/actual SQLite replay at hosted67 | Thinking request controls and live Claude/Gemini acceptance, model/account binding, pinned-model and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
 | File/search/edit/process tools | Native workspace reads/search, approval-backed edits/creation and foreground process effects have scoped contracts | General patch review, background/PTY execution and complete repository coding tasks |
-| Instructions and agent presets | Native repository guidance discovery, source binding and durable approval checks | Full instruction scoping/configuration and reproducible presets |
+| Instructions and agent presets | Native repository guidance discovery, source binding, durable approval checks and explicit workspace.inspect revision1 leaf policy | Full instruction scoping/configuration and broader reproducible presets |
 | Skills and commands | Native ownership is specified | Discovery, execution, lifecycle and CLI/editor acceptance |
 | Plugins | Native ownership is specified | Lifecycle, hooks, isolation and compatibility acceptance |
-| MCP | Native configured stdio tools, schema worker, approvals and modern/legacy official SDK peers have scoped contracts; direct graph nodes/offline alias discovery and actual local graph effects passed the scoped 69-contract gate | Hosted verification of new graph source, Streamable HTTP/OAuth, resources/prompts, broader SDK features and full live coding interoperability |
+| MCP | Native configured stdio tools, schema worker, approvals and modern/legacy official SDK peers have scoped contracts; direct graph nodes/offline alias discovery and actual local graph effects passed the scoped 69-contract gate | Streamable HTTP/OAuth, resources/prompts, broader SDK features and full live coding interoperability |
 | Permissions and policies | Backend-owned durable grant/deny/cancel and effect ownership have actual file/process/peer fixtures | Complete policy rules, recovery and consistent enforcement across exposed tools/protocols |
 | Context compaction | Required by the native coding goal | Bounded context with preserved instructions, provider state and continuation |
 | Snapshots and recovery | Durable uncertainty inspection and non-replay safeguards cover selected effects | General reviewable snapshots, restoration and attributed reconciliation |
@@ -213,7 +219,7 @@ removed Python prototype's status table; it is not a completion score.
 | Session sharing | Local backend sessions are shared across authorized views | Explicit export/sharing behavior and access-controlled output; team sharing belongs to Nexus |
 | CLI/TUI | Native client supports authenticated conversation/run/approval/inspection flows plus profile catalogue/setup/selection, revision-bound admission and signed native history in the exact hosted65 scope | Complete interactive coding/terminal UX acceptance and execution of newer source at its own scope |
 | Browser and VS Code | Thin browser and right-sidebar clients display native history, models, approvals and actual metrics within recorded scopes | Complete populated coding, diff/recovery/context and editor acceptance |
-| A2A and agent graphs | Native shared-executor task controls, admission, discovery/stream/history and durable graph components have scoped contracts; local69 verifies direct MCP graph tools through the shared approval/effect journal | Hosted new graph verification, remote delegation, remaining protocol interoperability and live multi-agent acceptance |
+| A2A and agent graphs | Native shared-executor task controls, admission, discovery/stream/history and durable graph components have scoped contracts; local69 verifies direct MCP graph tools through the shared approval/effect journal | Exact hosted/new-client delegation acceptance, outbound remote delegation, remaining protocol interoperability and live multi-agent acceptance |
 | Local/Nexus profiles | Shared protocol and ownership boundaries are specified | Profile isolation, authenticated enrollment and reconnect/lease/recovery acceptance; Nexus implements private coordination |
 
 Themes, warming and additional build/API surfaces need comparison against the

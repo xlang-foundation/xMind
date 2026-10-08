@@ -19,10 +19,10 @@ const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',()=>{
     try {
       ++requests;const body=JSON.parse(source),name=body.messages.findLast(message=>message.role==='user').content;
-      assert.equal(body.model,'synthetic-native-process-model');assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','run_process']);
+      assert.equal(body.model,'synthetic-native-process-model');assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','run_process','delegate_tasks']);
       assert.equal(body.messages[0].role,'system');assert.ok(body.messages[0].content.includes('Report only actions and evidence that occurred.'));assert.ok(body.messages[0].content.endsWith(instructionText),'Actual model request must retain core policy and the loaded instruction supplement');
       assert.ok(body.messages[0].content.includes(repositoryText),'Actual native provider request must include the root guidance read from disk');
-      assert.deepEqual(body.tools.at(-1).function.parameters.properties.profile.enum,['fixture']);
+      assert.deepEqual(body.tools.find(tool=>tool.function.name==='run_process').function.parameters.properties.profile.enum,['fixture']);
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
       if(tool){const result=JSON.parse(tool.content);continued.set(name,result);assert.equal(tool.tool_call_id,'fixture-'+name);
         if(name==='allowed'){assert.equal(result.exit_code,0);assert.equal(result.termination,'exited');assert.equal(result.independently_verified,false);assert.equal(JSON.parse(result.stdout.data).inherited,false);}

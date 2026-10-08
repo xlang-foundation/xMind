@@ -13,6 +13,7 @@ public:
     Run submit_model(std::string id,std::string session,std::string prompt,std::string model) override;
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
     std::vector<std::string> models() const override;
+    bool supports_delegation() const override;
     void cancel(const std::string& id) override;
     bool healthy() const override;
     bool available() const override;

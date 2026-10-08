@@ -9,6 +9,25 @@ test('provider enrollment accepts only matching approved OpenAI wire and endpoin
   for(const changed of [{wire:'responses'},{endpoint:'https://api.openai.com/v1/responses'},{wire:'unknown'},{endpoint:'https://unapproved.invalid/v1/responses',wire:'responses'},{revision:-1}])assert.throws(()=>providerEnrollmentWire({...base,...changed}),/policy/);
 });
 const token = 'native-client-contract-token-32-bytes';
+test('owned-child client keeps parent scope and validates the committed tree cursor',async()=>{
+ const sent=[],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{sent.push({url,options});return {ok:true,json:async()=>[]};});
+ await client.ownedChildren('parent');await client.ownedChildHistory('parent','opaque/child');await client.treeEvents('parent',12);await client.delegation();
+ assert.deepEqual(sent.map(value=>value.url),['/v1/runs/parent/children','/v1/runs/parent/children/opaque%2Fchild/history','/v1/runs/parent/tree-events?after=12','/v1/agent/delegation'].map(path=>'http://127.0.0.1:8765'+path));
+ assert.ok(sent.every(value=>value.options.method==='GET'&&value.options.headers.Authorization==='Bearer '+token));for(const cursor of [-1,1.5,NaN,Number.MAX_SAFE_INTEGER+1])assert.throws(()=>client.treeEvents('parent',cursor));assert.equal(sent.length,4);
+});
+test('owned observation covers concurrent admission and paged events without inventing aggregate usage',async()=>{
+ const {observeOwnedRun}=require('../client'),run={id:'parent',session_id:'session',parent_id:'',graph_root:false,state:'completed'},child={run:{id:'leaf',parent_id:'parent',session_id:'session',state:'completed',graph_root:false},kind:'delegated_leaf',batch_id:'batch',task_id:'inspect',preset_id:'workspace.inspect',preset_revision:1},calls=[];
+ const history=[{role:'assistant',data:{content:'Synthetic observed leaf fixture',usage:{prompt_tokens:4,completion_tokens:2}}}];
+ const client={treeEvents:async(id,after)=>{calls.push(['events',after]);return Array.from({length:after===0?256:2},(_,index)=>({seq:after+index+1,run_id:index%2?'leaf':'parent',kind:'model.usage',data:{prompt_tokens:4}}));},ownedChildren:async()=>{calls.push(['children']);return [child];},ownedChildHistory:async(parent,id)=>{calls.push(['history',parent,id]);return history;},operations:async()=>[]};
+ const result=await observeOwnedRun(client,run,'session',0);assert.deepEqual(calls.slice(0,3),[['events',0],['events',256],['children']]);assert.equal(result.cursor,258);assert.equal(result.caughtUp,true);assert.deepEqual(result.histories.leaf,history);assert.equal(result.usage,undefined);assert.equal(history[0].data.usage.total_tokens,undefined);
+ const bounded=await observeOwnedRun({...client,treeEvents:async(id,after)=>Array.from({length:256},(_,index)=>({seq:after+index+1,run_id:'parent',kind:'model.text',data:{text:'synthetic'}}))},run,'session',0);assert.equal(bounded.cursor,4096);assert.equal(bounded.caughtUp,false,'A full bounded page cannot be mistaken for a caught-up terminal cursor');
+});
+test('owned observation rejects foreign children and events before requesting private child history',async()=>{
+ const {observeOwnedRun}=require('../client'),run={id:'parent',session_id:'session'},child={run:{id:'leaf',parent_id:'parent',session_id:'session'},kind:'delegated_leaf',batch_id:'batch',task_id:'inspect',preset_id:'workspace.inspect',preset_revision:1};let histories=0;
+ const base={treeEvents:async()=>[],ownedChildren:async()=>[child],ownedChildHistory:async()=>{histories++;return [];},operations:async()=>[]};
+ await assert.rejects(observeOwnedRun({...base,ownedChildren:async()=>[{...child,run:{...child.run,session_id:'foreign'}}]},run,'session',0),/identity/);
+ await assert.rejects(observeOwnedRun({...base,treeEvents:async()=>[{seq:1,run_id:'foreign',kind:'model.text'}]},run,'session',0),/Unowned/);assert.equal(histories,0);
+});
 test('agent and graph requests preserve the observed profile binding without silently acquiring a newer revision',async()=>{
  const sent=[],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{sent.push(JSON.parse(options.body));return {ok:true,json:async()=>({})};});
  const binding={provider_profile_id:'openai-account',expected_provider_revision:7};await client.run('session','Task','same-model',binding);await client.graphRun('session','review',2,'Review','same-model',binding);assert.equal(sent[0].provider_profile_id,'openai-account');assert.equal(sent[0].expected_provider_revision,7);assert.equal(sent[1].expected_provider_revision,7);assert.throws(()=>client.run('session','Task','same-model',{provider_profile_id:'openai-account'}));assert.equal(sent.length,2);

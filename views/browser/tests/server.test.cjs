@@ -20,7 +20,8 @@ test('browser adapter forwards durable native view credentials across restart wi
     if(request.headers.authorization!=='View '+credential||request.headers['x-xmind-view-origin']!==boundOrigin||!active){reply(401,{});return;}
     if(request.url==='/v1/view-sessions/current'){reply(mode==='unavailable'?503:200,{connected:true});return;}
     if(request.url==='/v1/view-sessions/revoke'){active=false;reply(200,{connected:false});return;}
-    if(request.url==='/v1/health'){reply(200,{status:'ok'});return;}reply(404,{});
+    if(request.url==='/v1/health'){reply(200,{status:'ok'});return;}
+    if(['/v1/agent/delegation','/v1/runs/parent/children','/v1/runs/parent/children/leaf/history','/v1/runs/parent/tree-events?after=12'].includes(request.url)){assert.equal(request.method,'GET');reply(200,[]);return;}reply(404,{});
   });
   try{
     await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));const backend='http://127.0.0.1:'+peer.address().port;
@@ -30,6 +31,8 @@ test('browser adapter forwards durable native view credentials across restart wi
     const cookie=login.headers.get('set-cookie').split(';')[0];assert.ok(!cookie.includes(master));assert.match(login.headers.get('set-cookie'),/HttpOnly; SameSite=Strict/);
     assert.equal((await fetch(origin+'/v1/health',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,200);
     assert.equal(observed.at(-1).authorization,'View '+credential);assert.equal(observed.at(-1).origin,origin);
+    for(const path of ['/v1/agent/delegation','/v1/runs/parent/children','/v1/runs/parent/children/leaf/history','/v1/runs/parent/tree-events?after=12']){const result=await fetch(origin+path,{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}});assert.equal(result.status,200);assert.equal(observed.at(-1).path,path);assert.equal(observed.at(-1).authorization,'View '+credential);}
+    const beforeReadOnly=observed.length;assert.equal((await fetch(origin+'/v1/runs/parent/children',{method:'POST',headers:{...headers,Cookie:cookie},body:'{}'})).status,404);assert.equal((await fetch(origin+'/v1/runs/parent/tree-events?after=12&after=13',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,400);assert.equal(observed.length,beforeReadOnly,'Read-only child metadata cannot spawn children or forward an ambiguous cursor');
     const count=observed.length;
     assert.equal((await fetch(origin+'/v1/health',{headers:{Cookie:cookie+'; '+cookie,'Sec-Fetch-Site':'same-origin'}})).status,401);
     assert.equal((await fetch(origin+'/ui/session',{method:'POST',headers:{...headers,Cookie:cookie,Origin:'https://untrusted.invalid'},body:'{}'})).status,403);assert.equal(observed.length,count);

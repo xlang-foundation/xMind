@@ -1,7 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
-const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController } = require('./client');
+const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const { browserViewLauncher } = require('./browser-view');
@@ -40,6 +40,7 @@ async function activate(context) {
   let profileController;
   let graphCatalogue=[],selectedGraph,graphSnapshot;
   let graphChildren=new Map(),childHistory=new Map();
+  let ownedObservation=false;
   const stateKey = 'agentflow.session';
   const modelStateKey = 'xmind.model';
   const runStateKey = 'xmind.observedRun';
@@ -49,7 +50,7 @@ async function activate(context) {
   const stop = () => { clearInterval(timer); timer = undefined; generation++;profileController?.invalidate(); };
   const busySession=()=>sessionRuns.some(run=>['queued','running','paused'].includes(run.state));
   const observedOperation=id=>id===runId || graphChildren.has(id);
-  const clearGraph=()=>{graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});};
+  const clearGraph=()=>{graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
   const presentRuns=()=>post({type:'runs',runs:sessionRuns,selected:runId,busy:busySession()});
   context.subscriptions.push(vscode.window.registerWebviewViewProvider('xmind.workspace', {
     resolveWebviewView(view) {
@@ -108,6 +109,7 @@ async function activate(context) {
     const version = generation;
     try {
       if(sessionRuns.find(run=>run.id===id)?.graph_root){await pollGraph(id,version);return;}
+      if(ownedObservation){await pollOwned(id,version);return;}
       const events = await client.events(id, cursor);
       if (version !== generation) return;
       for (const event of events) {
@@ -141,6 +143,25 @@ async function activate(context) {
       }
     } catch (error) { if (version === generation) post({ type: 'error', text: error.message }); }
     finally { polling = false; }
+  }
+
+  async function pollOwned(id,version){
+    let run=await client.status(id);if(version!==generation||!panel)return;
+    const validRoot=value=>{if(value.id!==id||value.session_id!==sessionId||value.parent_id||value.graph_root)throw new Error('Owned run observation identity changed');};validRoot(run);
+    const publish=snapshot=>{
+      graphChildren=new Map(snapshot.children.map(child=>[child.run.id,child.run]));
+      reviewed=new Map(snapshot.operations.map(operation=>[operation.id,operation]));
+      post({type:'owned-children',parent:run,children:snapshot.children,histories:snapshot.histories});
+      for(const event of snapshot.events){post({type:event.run_id===id?'event':'owned-event',event,child_id:event.run_id});cursor=event.seq;}
+      post({type:'operations',operations:snapshot.operations.map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id}))});
+    };
+    let snapshot=await observeOwnedRun(client,run,sessionId,cursor);if(version!==generation||!panel)return;publish(snapshot);
+    run=await client.status(id);if(version!==generation||!panel)return;
+    validRoot(run);
+    if(['completed','failed','cancelled'].includes(run.state)){snapshot=await observeOwnedRun(client,run,sessionId,cursor);if(version!==generation||!panel)return;publish(snapshot);}
+    const history=await client.history(sessionId),runs=await client.runs(sessionId);if(version!==generation||!panel)return;
+    sessionRuns=runs;presentRuns();post({type:'transcript',history,preserveLive:['queued','running','paused'].includes(run.state)});post({type:'status',text:run.state});
+    if(!busySession()&&snapshot.caughtUp)stop();
   }
 
   async function selectSession(id) {
@@ -196,6 +217,7 @@ async function activate(context) {
 
   async function capabilities() {
     const health=await client.health();let catalogue={models:[],default_model:''};
+    ownedObservation=health.owned_child_observation===true;
     if(health.agent_execution) {
       try {catalogue=await client.models();}
       catch(error) {

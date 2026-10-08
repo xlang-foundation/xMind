@@ -1,5 +1,6 @@
 #include "agentflow/repository.hpp"
 #include "agentflow/xlang_sqlite.hpp"
+#include "graph_schema_fixture.hpp"
 #include <filesystem>
 #include <iostream>
 #include <random>
@@ -49,7 +50,7 @@ int main(int argc,char** argv){
             require(restarted.task_history("second")->size()==2,"Restart must retain task history ownership");
         }
         {
-            XlangSqlite old(db,roots);old.execute("DROP TABLE run_status_clock");old.execute("DROP TABLE incoming_messages");old.execute("DROP TABLE task_messages");old.execute("DROP TABLE task_history_owners");old.execute("PRAGMA user_version=7");
+            XlangSqlite old(db,roots);remove_delegation_schema_fixture(old);old.execute("DROP TABLE run_status_clock");old.execute("DROP TABLE incoming_messages");old.execute("DROP TABLE task_messages");old.execute("DROP TABLE task_history_owners");old.execute("PRAGMA user_version=7");
         }
         {
             Repository migrated(db,roots);require(!migrated.task_history("first"),"Migration must not guess legacy message attribution");

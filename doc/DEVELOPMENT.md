@@ -14,7 +14,14 @@ The product launcher uses native C++ targets with embedded xlang3. See [native-s
 
 Use -RuntimeDirectory for the built sibling xlang3 runtime and -PythonLibSource for allowed standard-library source. No CPython interpreter is launched. The xlang3 SQLite prerequisite is recorded in [checkpoint-m1.md](../doc/checkpoint-m1.md).
 
-Current source adds direct MCP nodes to model-free registered graphs. Enroll a
+Current source also adds [ordinary-Agent delegation](native-delegation.md).
+Ordinary Agent mode now offers native `delegate_tasks` for model-selected read-only workspace investigations. Actual child AgentRunners keep separate conversations and measured response usage/timing, share their parent's call/deadline limits, and return observed results before the parent continues or requests an approval-controlled effect. Schema v10 durably binds tasks, immutable presets, budgets and once-only settlements; recovery never replays children. CLI, browser and VS Code observe the same owned child histories and committed tree cursors.
+
+The final guarded local **71-contract native gate passed in 142.36 seconds**, with an exact expected/registered/passed manifest, **45 frozen source hashes**, zero failures/skips and no exclusions. The delegation engine contract took **1.96 seconds**, actual HTTP/CLI/shared-controller acceptance **1.03 seconds**. **103 extension tests** and **19 browser tests**, fresh source-matched browser/native integration and 18-asset VSIX verification also passed. Provider replies, signatures and keys are explicitly synthetic; native agents, filesystem effects, permissions, xlang3 SQLite and transport are real. The [initial process-fixture positional-schema failure](evidence/native-delegation-initial-ctest.log) is retained separately; the corrected frozen source passed all 71 contracts.
+
+The new v10 bundle still needs its exact hosted gate and reviewed upgrade acceptance. The installed preview remains the independently accepted c4 bundle. Live delegation, installed/rendered client acceptance, mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [exact local71 evidence](evidence/native-delegation-local-provenance.json).
+
+The preceding direct-MCP checkpoint adds direct MCP nodes to model-free registered graphs. Enroll a
 trusted stdio configuration while the backend is stopped, use native
 `discover-mcp` to discover its public alias and revision, then pin both in the
 catalogue. MCP nodes use a strict `arguments_json` string so literal numeric
@@ -45,10 +52,9 @@ Live direct-MCP graph and rendered IDE acceptance remain separate requirements.
 [Exact local69 scope](evidence/native-graph-mcp-local-provenance.json),
 [exact hosted69 scope](evidence/native-graph-mcp-hosted-provenance.json).
 
-The next [native delegation design](native-delegation-design.md) describes
-model-selected leaf investigations in ordinary Agent mode, with actual child
-AgentRunners, shared budgets, owned histories and controller-approved parent
-effects. It is a design; delegation is not implemented by this checkpoint.
+The [delegation design](native-delegation-design.md) retains the broader target
+beyond the initial locally verified read-only leaves. Run the complete71 native
+gate before using a new v10 bundle; existing v9 previews are separate installations.
 
 The managed browser preview now runs the verified c4 native bundle and packaged
 view. Prior records/configuration were preserved and an actual read-only

@@ -14,6 +14,7 @@ Run ExecutionPlatform::submit_model(std::string id,std::string session,std::stri
 }
 Run ExecutionPlatform::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){if(const auto replay=store_.incoming_message(message,context,identity,content).get())return *replay;if(!agents_||!healthy())throw RunUnavailable("Incoming agent execution is unavailable");return agents_->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
 std::vector<std::string> ExecutionPlatform::models() const{return agents_?agents_->models():std::vector<std::string>{};}
+bool ExecutionPlatform::supports_delegation()const{return agents_&&healthy()&&agents_->supports_delegation();}
 void ExecutionPlatform::cancel(const std::string& id){
     const auto run=store_.run(id).get();
     if(run.graph_root){graphs_->cancel(id,"local-owner");return;}

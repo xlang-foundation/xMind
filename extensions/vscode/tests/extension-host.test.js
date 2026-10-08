@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController } = require('../client');
+const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun } = require('../client');
 
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
@@ -56,6 +56,10 @@ function harness(options={}) {
     else if(target.pathname==='/v1/sessions/saved/title'){const value=JSON.parse(requestOptions.body);renameRequests.push(value);if(options.renameConflict)return {ok:false,status:409,json:async()=>({detail:'Title changed'})};options.savedTitle=value.title;data={id:'saved',title:value.title};}
     else if(target.pathname==='/v1/sessions/saved/history') data=pendingHistory?await pendingHistory:transcript;
     else if(target.pathname==='/v1/sessions/saved/runs') data=options.runs||[{id:'finished',state:options.running?'running':'completed'}];
+    else if(options.ownedChildren&&target.pathname.endsWith('/children'))data=options.ownedChildren;
+    else if(options.ownedChildren&&target.pathname.includes('/children/')&&target.pathname.endsWith('/history')){const child=options.ownedChildren.find(value=>value.run.id===target.pathname.split('/')[5]);assert.ok(child);assert.equal(target.pathname.split('/')[3],child.run.parent_id);data=options.ownedHistories?.[child.run.id]||[];}
+    else if(options.ownedChildren&&target.pathname.endsWith('/tree-events'))data=target.search==='?after=0'?(options.treeEvents||[]):[];
+    else if(options.ownedChildren?.some(child=>target.pathname==='/v1/runs/'+child.run.id+'/operations'))data=[];
     else if(options.graphChildren?.some(child=>target.pathname==='/v1/runs/'+child.id+'/operations'))data=operations;
     else if(options.runs && /^\/v1\/runs\/[^/]+(?:\/operations|\/events)?$/.test(target.pathname)) {
       const id=target.pathname.split('/')[3],run=options.runs.find(item=>item.id===id);assert.ok(run,'Host must request only selected-session runs');
@@ -95,7 +99,7 @@ function harness(options={}) {
     workspaceState:{get:key=>state.get(key),update:async (key,value)=>{state.set(key,value);}}};
   state.set('agentflow.session',{url:'http://127.0.0.1:8765',id:'saved'});
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun}:name==='./webview'?require('../webview'):require(name),
     setTimeout:callback=>{bootstrapTasks.push(callback);return 1;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./browser-view'?require('../browser-view'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
@@ -112,6 +116,11 @@ async function until(predicate) {
   while(Date.now()<deadline) {if(predicate()) return;await new Promise(resolve=>setImmediate(resolve));}
   throw new Error('Extension host fixture timed out');
 }
+test('VS Code Agent observes scoped leaf histories and tree events without inventing a graph or resubmitting work',async()=>{
+ const parent={id:'finished',session_id:'saved',state:'completed',parent_id:'',graph_root:false},leaf={run:{id:'leaf',session_id:'saved',parent_id:'finished',state:'completed',graph_root:false},kind:'delegated_leaf',batch_id:'batch',task_id:'inspect',preset_id:'workspace.inspect',preset_revision:1};
+ const h=harness({health:{agent_execution:true,owned_child_observation:true},runs:[parent],ownedChildren:[leaf],ownedHistories:{leaf:[{seq:3,role:'assistant',data:{content:'Synthetic leaf response',usage:{prompt_tokens:4,completion_tokens:2}}}]},treeEvents:[{seq:1,run_id:'leaf',kind:'conversation.assistant',data:{}},{seq:2,run_id:'finished',kind:'run.completed',data:{}}]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+ await until(()=>view.posted.some(message=>message.type==='transcript')&&h.intervals.size===0);const observation=view.posted.findLast(message=>message.type==='owned-children');assert.equal(observation.parent.id,'finished');assert.equal(observation.children[0].run.id,'leaf');assert.equal(observation.histories.leaf[0].data.usage.prompt_tokens,4);assert.ok(view.posted.some(message=>message.type==='owned-event'&&message.child_id==='leaf'));assert.ok(!view.posted.some(message=>message.type==='graph'));assert.ok(!h.requests.includes('/v1/runs'));assert.ok(h.requests.includes('/v1/runs/finished/children/leaf/history'));assert.equal(h.errors.length,0);view.close();
+});
 test('native admission profile conflict updates the sidebar account/model without task replay',async()=>{
   let registry={revision:4,active:'first',profiles:[{id:'first',route_id:'openai.responses',provider:'openai',model:'fixture-first',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};const bodies=[];
   const options={health:{agent_execution:true,provider_profile_admission:true},catalogue:{default_model:'fixture-first',models:[{id:'fixture-first'}]},profileRegistry:()=>registry,onAdmission:body=>{

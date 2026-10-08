@@ -90,6 +90,7 @@ std::string new_id() {
 Json encode(const Session& value) {return {{"id",value.id},{"title",value.title}};}
 Json encode(const Run& value) {Json result={{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)},
     {"parent_id",value.parent_id},{"node_id",value.node_id},{"graph_root",value.graph_root}};if(!value.provider_context_json.empty())result["provider_context"]=Json::parse(value.provider_context_json);return result;}
+Json encode(const OwnedChildRecord& value){return {{"run",encode(value.run)},{"kind",value.kind},{"batch_id",value.batch_id},{"task_id",value.task_id},{"preset_id",value.preset_id},{"preset_revision",value.preset_revision}};}
 Json graph_record(const GraphRootRecord& root) {
     return {{"run",encode(root.run)},{"graph_id",root.graph_id},{"graph_revision",root.graph_revision},
         {"checkpoint_revision",root.checkpoint_revision},{"checkpoint",Json::parse(root.checkpoint_json)},
@@ -194,8 +195,9 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|models|graphs|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title))?|runs(/[A-Za-z0-9_-]+(/(events|cancel|operations))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
-            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && std::regex_match(request.path,view_route) && (request.method=="GET"||request.method=="POST")){
+            static const std::regex view_route(R"(^/v1/(health|models|graphs|agent/delegation|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
+            static const std::regex owned_read_route(R"(^/v1/(agent/delegation|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?))$)");
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && std::regex_match(request.path,view_route) && (request.method=="GET"||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
                 catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
@@ -294,7 +296,13 @@ struct HttpServer::Impl {
         }));
         server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()}});
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()}});
+        }));
+        server.Get("/v1/agent/delegation",guarded([this](const Request& request,Response& response){
+            if(!request.params.empty())throw std::invalid_argument("Delegation metadata does not accept query parameters");
+            const bool enabled=executor&&executor->supports_delegation();
+            auto presets=Json::array();if(enabled)presets.push_back({{"id","workspace.inspect"},{"revision",1},{"readonly",true},{"tools",{"read_file","list_files","search_files","read_repository_instructions"}}});
+            reply(response,{{"enabled",enabled},{"presets",std::move(presets)},{"limits",enabled?Json{{"tasks_per_batch",4},{"parallel_children",2},{"total_children",8},{"depth",1},{"model_calls",32},{"leaf_turns",4},{"child_result_bytes",32768},{"tool_result_bytes",65536}}:Json(nullptr)}});
         }));
         if(setup){
             server.Post("/v1/provider/models",guarded([setup](const Request& request,Response& response){
@@ -441,6 +449,18 @@ struct HttpServer::Impl {
         }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {reply(response,encode(persistence.run(identifier(request.matches[1])).get()));}));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/events)",guarded([this](const Request& request,Response& response) {reply(response,encode_all(persistence.events(identifier(request.matches[1]),cursor(request)).get()));}));
+        server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/children)",guarded([this](const Request& request,Response& response){
+            if(!request.params.empty())throw std::invalid_argument("Owned children do not accept query parameters");
+            reply(response,encode_all(persistence.owned_children(identifier(request.matches[1])).get()));
+        }));
+        server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/children/([A-Za-z0-9_-]+)/history)",guarded([this](const Request& request,Response& response){
+            if(!request.params.empty())throw std::invalid_argument("Owned child history does not accept query parameters");
+            reply(response,encode_all(persistence.owned_child_history(identifier(request.matches[1]),identifier(request.matches[2])).get()));
+        }));
+        server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/tree-events)",guarded([this](const Request& request,Response& response){
+            if(request.params.size()>1||(!request.params.empty()&&!request.has_param("after")))throw std::invalid_argument("Invalid tree event cursor parameters");
+            reply(response,encode_all(persistence.tree_events(identifier(request.matches[1]),cursor(request),256).get()));
+        }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/operations)",guarded([this](const Request& request,Response& response) {
             reply(response,encode_all(persistence.operations(identifier(request.matches[1])).get()));
         }));

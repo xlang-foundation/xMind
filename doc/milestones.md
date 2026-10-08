@@ -4,6 +4,12 @@ Current completion scope is the [revised xMind OSS specification](architecture.m
 
 ## Current checkpoint scope
 
+Ordinary Agent mode now offers native `delegate_tasks` for model-selected read-only workspace investigations. Actual child AgentRunners keep separate conversations and measured response usage/timing, share their parent's call/deadline limits, and return observed results before the parent continues or requests an approval-controlled effect. Schema v10 durably binds tasks, immutable presets, budgets and once-only settlements; recovery never replays children. CLI, browser and VS Code observe the same owned child histories and committed tree cursors.
+
+The final guarded local **71-contract native gate passed in 142.36 seconds**, with an exact expected/registered/passed manifest, **45 frozen source hashes**, zero failures/skips and no exclusions. The delegation engine contract took **1.96 seconds**, actual HTTP/CLI/shared-controller acceptance **1.03 seconds**. **103 extension tests** and **19 browser tests**, fresh source-matched browser/native integration and 18-asset VSIX verification also passed. Provider replies, signatures and keys are explicitly synthetic; native agents, filesystem effects, permissions, xlang3 SQLite and transport are real. The [initial process-fixture positional-schema failure](evidence/native-delegation-initial-ctest.log) is retained separately; the corrected frozen source passed all 71 contracts.
+
+The new v10 bundle still needs its exact hosted gate and reviewed upgrade acceptance. The installed preview remains the independently accepted c4 bundle. Live delegation, installed/rendered client acceptance, mutable dependency planning, skills, compaction, outbound A2A and full provider/coding parity remain incomplete. [Implementation and limits](native-delegation.md), [exact local71 evidence](evidence/native-delegation-local-provenance.json).
+
 The current direct MCP graph checkpoint adds model-free registered tool nodes
 using the real native schema, controller approval and operation journal. Each
 node pins a server revision and registry alias; fresh discovery must match before
@@ -41,10 +47,9 @@ complete parity acceptance remain incomplete.
 [Exact local69 evidence](evidence/native-graph-mcp-local-provenance.json),
 [exact hosted69 evidence](evidence/native-graph-mcp-hosted-provenance.json).
 
-The [next native delegation design](native-delegation-design.md) defines
-model-selected leaf investigations in ordinary Agent mode, actual child
-AgentRunners, owned histories, shared execution budgets and approved parent
-effects. Its proposed v10 schema is not a migration in this checkpoint.
+The [delegation design](native-delegation-design.md) now has the initial local
+implementation and transactional v10 migration described above. Broader dynamic
+plans and live/client release acceptance remain required.
 
 The preceding `fceb50b` Claude receipt checkpoint passed the full local **67-contract native
 gate in 117.65 seconds**, with an exact manifest, zero failures/skips and no

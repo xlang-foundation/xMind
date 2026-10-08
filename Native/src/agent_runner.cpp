@@ -6,6 +6,7 @@
 #include "agentflow/schema_worker.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/mcp_wire.hpp"
+#include "agentflow/delegation_executor.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <random>
@@ -52,8 +53,13 @@ Json assistant(const ModelCompletion& result,const std::string& model,std::int64
     }
     return value;
 }
+std::string execution_identity(const AgentSettings& settings,const std::string& model){
+    auto context=provider_context_json(settings,model);if(!context.empty())return context;
+    const char* wire=settings.provider.wire==ProviderWire::responses?"responses":settings.provider.wire==ProviderWire::anthropic_messages?"anthropic-messages":settings.provider.wire==ProviderWire::gemini_generate_content?"gemini-generate-content":"chat-completions";
+    return Json{{"wire",wire},{"model_id",model.empty()?settings.provider.model:model}}.dump();
 }
-AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings):persistence_(persistence),settings_(std::move(settings)) {
+}
+AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,std::shared_ptr<DelegationExecutor> delegation):persistence_(persistence),settings_(std::move(settings)),delegation_(std::move(delegation)) {
     if(settings_.instruction_policy.instructions.size()>32768 || settings_.instruction_policy.instructions.find('\0')!=std::string::npos || settings_.instruction_policy.revision<0 || settings_.instruction_policy.revision>9007199254740991 || (!settings_.instruction_policy.instructions.empty() && settings_.instruction_policy.revision==0))throw std::invalid_argument("Invalid backend instruction policy");
     if(!settings_.instruction_policy.instructions.empty() && settings_.instructions.size()+settings_.instruction_policy.instructions.size()+instruction_prefix.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
     if(settings_.provider.model.empty() || settings_.provider.endpoint.empty() || settings_.max_turns==0 || settings_.max_turns>128 || settings_.instructions.size()>65536 || settings_.run_timeout.count()<=0 || settings_.run_timeout.count()>3600000)
@@ -72,6 +78,7 @@ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings)
     for(const auto& server:settings_.mcp_servers){if(server.id.empty() || server.revision<=0 || !mcp_ids.insert(server.id).second)throw std::invalid_argument("Invalid registered MCP configuration");if(server.enabled && !workspace_)throw std::invalid_argument("MCP execution requires a verified workspace and model tool capability");}
     if(settings_.selectable_models.size()>64) throw std::invalid_argument("Model catalogue exceeds limits");
     for(const auto& model:models()) if(model.empty() || model.size()>256 || model.find('\0')!=std::string::npos) throw std::invalid_argument("Invalid configured model ID");
+    if(settings_.delegation){const auto& policy=*settings_.delegation;if(!workspace_||policy.preset_id!="workspace.inspect"||policy.preset_revision!=1||policy.max_children<1||policy.max_children>8||policy.max_parallel<1||policy.max_parallel>2||policy.max_model_calls<1||policy.max_model_calls>32||policy.max_leaf_turns<1||policy.max_leaf_turns>4)throw std::invalid_argument("Invalid registered agent delegation policy");}
 }
 AgentRunner::~AgentRunner()=default;
 std::vector<std::string> AgentRunner::models() const {
@@ -85,14 +92,25 @@ std::string provider_context_json(const AgentSettings& settings,const std::strin
     const auto wire=settings.provider.wire==ProviderWire::responses?"responses":settings.provider.wire==ProviderWire::anthropic_messages?"anthropic-messages":settings.provider.wire==ProviderWire::gemini_generate_content?"gemini-generate-content":"chat-completions";
     return nlohmann::json{{"profile_id",identity.profile_id},{"profile_revision",identity.profile_revision},{"route_id",identity.route_id},{"provider",identity.provider},{"wire",wire},{"model_id",model_id.empty()?settings.provider.model:model_id}}.dump();
 }
+std::optional<RootBudgetSpec> AgentRunner::execution_budget(const std::string& model_id)const{
+    if(!settings_.delegation||!delegation_)return {};
+    const auto& policy=*settings_.delegation;const auto context=execution_identity(settings_,model_id);
+    return RootBudgetSpec{"native.delegation",1,workspace_->identity(),context,static_cast<std::int64_t>(policy.max_children),static_cast<std::int64_t>(policy.max_parallel),static_cast<std::int64_t>(policy.max_model_calls),settings_.run_timeout.count()};
+}
 Run AgentRunner::start(std::string id,std::string session_id,std::string prompt,const std::string& model_id) {
     if(prompt.empty() || prompt.size()>1024*1024) throw std::invalid_argument("Prompt must contain 1-1048576 UTF-8 bytes");
     auto input=Json{{"content",std::move(prompt)}};const auto context=provider_context_json(settings_,model_id);if(!context.empty())input["provider_context"]=Json::parse(context);
-    return persistence_.start_prompt_run(std::move(id),std::move(session_id),input.dump()).get();
+    return persistence_.start_prompt_run(std::move(id),std::move(session_id),input.dump(),execution_budget(model_id)).get();
 }
-Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id) {
+Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id,std::shared_ptr<RootExecutionBudget> budget) {
     const auto admitted=persistence_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
-    if(!admitted.parent_id.empty()){const auto graph=Json::parse(persistence_.graph_run(admitted.parent_id).get().specification_json);bool agent=false;for(const auto& node:graph.at("nodes"))if(node.at("id")==admitted.node_id && node.at("type")=="agent")agent=true;if(!agent)throw std::invalid_argument("Only agent graph children can invoke the model engine");}
+    bool leaf=false;
+    if(!admitted.parent_id.empty()){
+        const auto admission=persistence_.child_admission(id).get();leaf=admission.kind==ChildAdmissionKind::delegated_leaf;
+        if(admission.kind!=ChildAdmissionKind::graph_agent&&!leaf)throw std::invalid_argument("Only admitted agent children can invoke the model engine");
+        if(leaf&&(!budget||budget->root_id()!=admission.root_run_id||admission.preset_id!="workspace.inspect"||admission.preset_revision!=1||settings_.delegation||settings_.approved_edits||!settings_.process_profiles.empty()||!settings_.mcp_servers.empty()||settings_.max_turns>4||!settings_.selectable_models.empty()))throw std::invalid_argument("Delegated leaf requires its exact bounded read-only owner");
+        if(!leaf&&budget)throw std::invalid_argument("Registered graph agent cannot acquire a separate delegation budget");
+    }else if(budget)throw std::invalid_argument("Normal agent root must acquire its own durable budget");
     auto provider=settings_.provider;
     if(!model_id.empty()) {const auto allowed=models();if(std::find(allowed.begin(),allowed.end(),model_id)==allowed.end()) throw std::invalid_argument("Model is not configured on this backend");provider.model=model_id;}
     // Claim outside the failure handler. A duplicate worker losing this update
@@ -108,9 +126,19 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         return persistence_.transition(id,RunState::running,state,reason.dump()).get();
     };
     try {
-        timer=std::jthread([&](std::stop_token ending) {
+        const auto local_deadline=std::chrono::steady_clock::now()+settings_.run_timeout;
+        if(!leaf&&admitted.parent_id.empty()&&execution_budget(provider.model)){
+            const auto saved=persistence_.root_budget(id).get();const auto expected=execution_budget(provider.model);
+            if(saved.spec.workspace_identity!=expected->workspace_identity||saved.spec.policy_id!=expected->policy_id||saved.spec.policy_revision!=expected->policy_revision||saved.spec.provider_identity_json!=expected->provider_identity_json||saved.spec.max_children!=expected->max_children||saved.spec.max_parallel!=expected->max_parallel||saved.spec.max_model_calls!=expected->max_model_calls||saved.spec.wall_limit_ms!=expected->wall_limit_ms)throw Conflict("Root execution no longer matches its admitted immutable policy");
+            budget=std::make_shared<RootExecutionBudget>(persistence_,saved,local_deadline,token);
+        }
+        if(leaf){const auto saved=budget->snapshot();if(!workspace_||workspace_->identity()!=saved.spec.workspace_identity)throw std::invalid_argument("Delegated leaf workspace identity changed");
+            if(execution_identity(settings_,provider.model)!=saved.spec.provider_identity_json)throw std::invalid_argument("Delegated leaf provider identity changed");
+            persistence_.append_event(id,"agent.delegation.preset",Json{{"preset_id","workspace.inspect"},{"preset_revision",1},{"root_run_id",budget->root_id()},{"tool_policy","read_only"}}.dump()).get();}
+        const auto run_deadline=budget?budget->deadline():local_deadline;
+        timer=std::jthread([&,run_deadline](std::stop_token ending) {
             std::mutex mutex;std::condition_variable_any changed;std::unique_lock lock(mutex);
-            changed.wait_for(lock,ending,settings_.run_timeout,[]{return false;});
+            changed.wait_until(lock,ending,run_deadline,[]{return false;});
             if(!ending.stop_requested()) {timed_out=true;linked.request_stop();}
         });
         ModelRequest request;request.include_usage=settings_.provider.stream_usage==Capability::supported;
@@ -136,13 +164,13 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(process_)request.tools.push_back(process_->definition());
         struct McpRuntime {std::unique_ptr<McpStdioClient> client;std::unique_ptr<McpToolRegistry> registry;};
         std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;
-        const auto run_deadline=std::chrono::steady_clock::now()+settings_.run_timeout;
         for(const auto& server:settings_.mcp_servers) {
             if(!server.enabled)continue;cancelled(token);
             persistence_.append_event(id,"mcp.connecting",Json{{"server_id",server.id},{"config_revision",server.revision}}.dump()).get();
             McpStdioConfiguration configuration{server.executable,server.working_directory,server.arguments,{}};
             struct ClearEnvironment {McpStdioConfiguration& config;~ClearEnvironment(){for(auto& entry:config.environment)if(!entry.second.empty())SecureZeroMemory(entry.second.data(),entry.second.size());}} clear{configuration};
             for(const auto& reference:server.credentials){auto secret=persistence_.resolve_credential(reference.scope,reference.id,mcp_credential_purpose(server,reference.name)).get();const auto bytes=secret.view();configuration.environment.emplace_back(reference.name,std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size()));}
+            cancelled(token);if(std::chrono::steady_clock::now()>=run_deadline)throw RootBudgetDeadlineExceeded("Root execution deadline elapsed before MCP launch");
             McpRuntime runtime;runtime.client=std::make_unique<McpStdioClient>(configuration);runtime.client->connect(run_deadline,token);
             persistence_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",runtime.client->server().protocol_version}}.dump()).get();
             runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,run_deadline,token);
@@ -151,9 +179,11 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             persistence_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()}}.dump()).get();
             mcp_runtimes.push_back(std::move(runtime));
         }
+        if(budget&&!leaf&&delegation_&&settings_.delegation){if(request.tools.size()>=64)throw std::invalid_argument("Model tool catalogue exceeds limits");request.tools.push_back(DelegationExecutor::definition());}
         std::string delivered_repository_metadata;
         for(std::size_t turn=0;turn<settings_.max_turns;++turn) {
             cancelled(token);
+            if(!leaf&&budget&&delegation_&&!delegation_->healthy())throw DelegationOutcomeUnrecorded("Native delegation owner is faulted");
             if(repository_context){
                 auto current=settings_.instructions+repository_context->prepare(token);
                 if(!settings_.instruction_policy.instructions.empty()){current.append(instruction_prefix);current+=settings_.instruction_policy.instructions;}
@@ -165,10 +195,17 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(settings_.credential) credential.emplace(persistence_.resolve_credential(settings_.credential->scope,settings_.credential->id,settings_.credential->purpose).get());
             const auto response_started=std::chrono::steady_clock::now();
             std::optional<std::int64_t> first_token_ms;
-            const auto response=complete_model(provider,request,credential?&*credential:nullptr,[&](const ModelEvent& event) {
+            std::optional<ModelCallReservation> reservation;
+            if(budget)reservation=budget->reserve(id,leaf?ModelCallRole::leaf:ModelCallRole::parent,token);
+            ModelCompletion response;
+            try{
+            if(reservation)budget->start(*reservation,token);
+            response=complete_model(provider,request,credential?&*credential:nullptr,[&](const ModelEvent& event) {
                 if(!first_token_ms && (event.kind=="model.text" || event.kind=="model.refusal" || event.kind=="model.tool_delta")) first_token_ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-response_started).count();
                 cancelled(token);persistence_.append_event(id,event.kind,event.json).get();
             },token);
+            }catch(...){const auto failure=std::current_exception();if(reservation)budget->finish(*reservation);std::rethrow_exception(failure);}
+            if(reservation)budget->finish(*reservation);
             const auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-response_started).count();
             cancelled(token);auto reply=assistant(response,provider.model,elapsed,first_token_ms);
             const auto context=provider_context_json(settings_,provider.model);if(!context.empty())reply["provider_context"]=Json::parse(context);
@@ -204,6 +241,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     } else if(call.name=="run_process" && process_) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(process_->invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance)));
+                    } else if(call.name=="delegate_tasks"&&budget&&!leaf&&delegation_&&settings_.delegation){
+                        auto frozen=settings_;frozen.provider=provider;
+                        output=Json::parse(delegation_->invoke(id,call,reply.dump(),frozen,budget,token));
                     } else if(const auto registered=mcp_tools.find(call.name);registered!=mcp_tools.end()) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token));
@@ -211,6 +251,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     success=guidance_ready;
                 }
                 catch(const PermissionCancelled&) {throw;}
+                catch(const RootBudgetExhausted&){output={{"error",{{"code","delegation_budget_exhausted"},{"message","No additional children were admitted; the root execution allowance is exhausted"}}}};}
+                catch(const DelegationCapacityUnavailable&){output={{"error",{{"code","delegation_capacity_unavailable"},{"message","No children were admitted; the native leaf queue is full"}}}};}
                 catch(const PermissionDenied&) {output={{"error",{{"code","permission_denied"},{"message","Controller denied this operation; the requested effect was not dispatched"}}}};}
                 catch(const PermissionExpired&) {output={{"error",{{"code","permission_expired"},{"message","Approval expired; the requested effect was not dispatched"}}}};}
                 catch(const McpEffectNotDispatched&) {output={{"error",{{"code","mcp_not_dispatched"},{"message","MCP request was not dispatched"}}}};}
@@ -228,11 +270,17 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             }
             // The assistant call and all matching results commit together; a
             // cancelled/crashed read batch cannot leave dangling call messages.
-            persistence_.record_tool_turn(id,reply.dump(),std::move(results)).get();
+            const bool delegated=std::any_of(response.tool_calls.begin(),response.tool_calls.end(),[](const auto& call){return call.name=="delegate_tasks";});
+            try{persistence_.record_tool_turn(id,reply.dump(),std::move(results)).get();}
+            catch(...){if(delegated)throw DelegationOutcomeUnrecorded("Delegation parent conversation could not be committed; recovery is required");throw;}
             for(auto& next:continuation) request.messages.push_back(std::move(next));
         }
         return terminate(RunState::failed,{{"reason","model_turn_limit"}});
     } catch(const TransportCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
+      catch(const RootBudgetDeadlineExceeded&){return terminate(RunState::failed,{{"reason","agent_timeout"}});}
+      catch(const RootBudgetExhausted&){return terminate(RunState::failed,{{"reason","execution_budget_exhausted"}});}
+      catch(const BudgetOutcomeUnrecorded&){throw;}
+      catch(const DelegationOutcomeUnrecorded&){throw;}
       catch(const PermissionCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
       catch(const ToolMutationUncertain&) {return terminate(RunState::failed,{{"reason","file_effect_uncertain"}});}
       catch(const EditOutcomeUnrecorded&) {throw;} // Leave claim for recovery; AgentService degrades admission.

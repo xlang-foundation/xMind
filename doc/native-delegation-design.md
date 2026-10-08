@@ -1,9 +1,17 @@
 # Native dynamic delegation design
 
-Status: design for the next native implementation milestone. This document does
-not claim that delegation, mutable runtime plans, skills or context compaction
-are implemented. The existing registered graph and direct MCP graph contracts
-remain separate acceptance evidence.
+Status: the initial ordinary-Agent, read-only leaf delegation path is
+implemented and passed the complete local 71/71 native gate, 103 extension
+contracts and 19 browser contracts. The
+[source-bound evidence](evidence/native-delegation-local-provenance.json) records
+the exact local scope; hosted, live-provider, rendered UI and installed-product
+acceptance for this new checkpoint remain pending. Its concrete behavior,
+durable v10 ownership/budgets and thin observation interfaces are documented in
+[native-delegation.md](native-delegation.md). This design remains the broader
+target: model-selected dependency graphs, human checks, revisioned replanning,
+skills, context compaction and outbound A2A are not completed by that initial
+cut. Earlier registered graph and direct MCP graph evidence remain separate
+from this delegation checkpoint.
 
 Normal **Agent** mode should let the model delegate concrete investigations,
 observe their actual results, and continue coding through the same native

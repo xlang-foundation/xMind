@@ -25,13 +25,26 @@ public:
     std::future<std::vector<Session>> sessions();
     std::future<Run> create_run(std::string id,std::string session_id);
     std::future<std::optional<Run>> incoming_message(std::string message,std::string context,std::string identity,std::string content);
-    std::future<Run> start_incoming_message(std::string id,std::string context,std::string message,std::string prompt_json,std::string identity);
+    std::future<Run> start_incoming_message(std::string id,std::string context,std::string message,std::string prompt_json,std::string identity,std::optional<RootBudgetSpec> budget={});
     std::future<std::optional<std::vector<Message>>> task_history(std::string id);
     std::future<std::optional<std::string>> incoming_message_payload(std::string run_id);
     std::future<std::vector<Event>> event_batch(std::string id,std::int64_t after,std::size_t count);
     std::future<RootRunPage> list_root_runs(std::string context,std::string state,std::optional<std::int64_t> since,std::size_t count,
         std::int64_t watermark=0,std::optional<std::int64_t> cursor_ms={},std::int64_t cursor_sequence=0);
-    std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json);
+    std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json,std::optional<RootBudgetSpec> budget={});
+    std::future<RootBudgetRecord> root_budget(std::string id);
+    std::future<ModelCallReservation> reserve_model_call(std::string root,std::string owner,std::string attempt,ModelCallRole role);
+    std::future<ModelCallReservation> start_model_call(std::string root,std::string owner,std::string attempt);
+    std::future<ModelCallReservation> finish_model_call(std::string root,std::string owner,std::string attempt);
+    std::future<DelegationBatchRecord> accept_delegation_batch(DelegationBatchSpec spec);
+    std::future<DelegationBatchRecord> delegation_batch(std::string id);
+    std::future<std::vector<DelegationBatchRecord>> delegation_batches(std::string parent);
+    std::future<DelegationTaskRecord> settle_delegation_child(std::string child);
+    std::future<DelegationBatchRecord> settle_delegation_batch(std::string id);
+    std::future<ChildAdmissionRecord> child_admission(std::string child);
+    std::future<std::vector<OwnedChildRecord>> owned_children(std::string parent);
+    std::future<std::vector<Message>> owned_child_history(std::string parent,std::string child);
+    std::future<std::vector<Event>> tree_events(std::string parent,std::int64_t after=0,std::size_t count=256);
     std::future<Run> start_graph_run(std::string id,std::string session_id,std::string graph_id,std::int64_t revision,GraphPlan plan,std::string prompt_json);
     std::future<GraphRootRecord> graph_run(std::string id);
     std::future<Run> start_graph_child(std::string id,std::string parent_id,std::string node_id,std::string prompt_json,std::int64_t expected_checkpoint_revision=0);
