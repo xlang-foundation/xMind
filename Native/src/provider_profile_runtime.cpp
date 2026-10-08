@@ -57,6 +57,11 @@ ProviderProfileRuntime::ProviderProfileRuntime(PersistenceService& store,AgentSe
     :impl_(std::make_unique<Impl>(store,std::move(base),std::move(policy),workers,capacity)){}
 ProviderProfileRuntime::~ProviderProfileRuntime()=default;
 ProviderProfileRuntimeMetadata ProviderProfileRuntime::configuration()const{std::lock_guard lock(impl_->mutex);return impl_->metadata();}
+std::vector<ProviderProfileRouteMetadata> ProviderProfileRuntime::profile_routes()const{
+    std::vector<ProviderProfileRouteMetadata> result;
+    for(const auto& policy:impl_->policy)result.push_back({policy.route.id,policy.route.provider,policy.route.wire,policy.catalogue.has_value()});
+    return result;
+}
 std::vector<std::string> ProviderProfileRuntime::discover_models(std::string id,std::string route_id,SecretBytes key,std::int64_t expected,std::stop_token cancel){
     if(id.empty()||id.size()>256||id.starts_with("sk-")||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)throw std::invalid_argument("Invalid provider profile identity");
     ProviderCataloguePolicy catalogue;

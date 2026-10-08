@@ -1,5 +1,7 @@
 #include "agentflow/provider_profile_runtime.hpp"
 #include "agentflow/xlang_sqlite.hpp"
+#include "agentflow/http_server.hpp"
+#include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <filesystem>
 #include <iostream>
@@ -10,6 +12,11 @@ namespace {
 void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
 template<class Error,class F>void rejects(F call){try{call();}catch(const Error&){return;}throw std::runtime_error("Expected native profile runtime rejection");}
 SecretBytes key(const std::string& value){return SecretBytes({reinterpret_cast<const std::uint8_t*>(value.data()),value.size()});}
+struct Access {
+    HttpServer server;int port;std::thread thread;
+    Access(PersistenceService& store,ProviderProfileRuntime& runtime):server(store,"synthetic-profile-runtime-server-access-token",&runtime,nullptr,{},{},{},nullptr,&runtime,&runtime),port(server.bind(0)),thread([this]{server.listen();}){}
+    ~Access(){server.stop();if(thread.joinable())thread.join();}
+};
 std::vector<ProviderProfileExecutionPolicy> policy(const std::string& origin){
     std::vector<ProviderProfileExecutionPolicy> result;
     for(const auto& item:std::vector<ProviderProfileRoute>{{"openai.chat","openai",origin+"/chat","server","fixture:openai",ProviderWire::chat_completions},{"anthropic.messages","anthropic",origin+"/messages","server","fixture:anthropic",ProviderWire::anthropic_messages}}){
@@ -37,16 +44,25 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
     {
         PersistenceService store(database,imports);GraphCatalogStore(store).apply(R"({"graphs":[{"id":"review","spec":{"nodes":[{"id":"review","type":"human","prompt":"Review fixture"}]}}]})");
         ProviderProfileRuntime runtime(store,base,policy(origin),1,8);require(!runtime.available()&&runtime.models().empty()&&runtime.configuration().revision==0,"Unconfigured profiles cannot inherit a startup model");
+        Access access(store,runtime);httplib::Client client("127.0.0.1",access.port);client.set_read_timeout(5);const httplib::Headers authorized{{"Authorization","Bearer synthetic-profile-runtime-server-access-token"}};
+        const auto anonymous=client.Get("/v1/provider/profiles");require(anonymous&&anonymous->status==401,"Profile metadata requires actual native backend authentication");
+        const auto initial=client.Get("/v1/provider/profiles",authorized);require(initial&&initial->status==200&&Json::parse(initial->body).at("profiles").empty()&&Json::parse(initial->body).at("routes").size()==2,"Native HTTP API must publish fixed route identities and empty initial profiles");
+        const auto request=Json{{"id","openai"},{"route_id","openai.chat"},{"model","fixture-openai"},{"api_key","runtime-openai-fixture-key"},{"expected_revision",0},{"activate",true}};
+        const auto rejected_enrollment=client.Post("/v1/provider/profiles",request.dump(),"application/json");require(rejected_enrollment&&rejected_enrollment->status==401,"Profile mutation requires authentication before enrollment");
+        auto spoofed=request;spoofed["endpoint"]="https://unapproved.invalid";const auto spoof=client.Post("/v1/provider/profiles",authorized,spoofed.dump(),"application/json");require(spoof&&spoof->status==400&&store.credentials("server").get().empty(),"Client cannot supply a provider destination or cause rejected-key persistence");
         rejects<RunUnavailable>([&]{runtime.submit("unconfigured","missing","fixture");});
         require(runtime.discover_models("openai","openai.chat",key("runtime-openai-fixture-key"),0)==std::vector<std::string>{"fixture-openai","fixture-openai-updated"},"New-key discovery must use the actual OpenAI catalogue");
         require(store.credentials("server").get().empty()&&runtime.configuration().revision==0,"Discovery cannot persist a key or enroll a profile");
-        auto configured=runtime.save_profile("openai","openai.chat","fixture-openai",key("runtime-openai-fixture-key"),0,true);
+        const auto enrolled=client.Post("/v1/provider/profiles",authorized,request.dump(),"application/json");require(enrolled&&enrolled->status==200,"Authenticated profile API must enroll the native execution service");
+        require(enrolled->body.find("runtime-openai-fixture-key")==std::string::npos&&enrolled->body.find("credential_id")==std::string::npos&&enrolled->body.find("endpoint")==std::string::npos,"Profile API metadata must omit keys, credential references and destinations");
+        auto configured=runtime.configuration();
         require(configured.revision==1&&runtime.available()&&runtime.models()==std::vector<std::string>{"fixture-openai"},"Committed first profile must activate the real execution service");
         configured=runtime.save_profile("claude","anthropic.messages","fixture-claude",key("runtime-claude-fixture-key"),1);
         require(configured.revision==2&&configured.active=="openai"&&configured.profiles.size()==2&&runtime.models()[0]=="fixture-openai","Inactive profile enrollment must preserve active execution");
         rejects<Conflict>([&]{runtime.select_profile("claude",1);});
         rejects<std::invalid_argument>([&]{runtime.save_profile("openai","anthropic.messages","fixture-claude",key(""),2,true);});
-        require(runtime.discover_models("openai","openai.chat",key(""),2)==std::vector<std::string>{"fixture-openai","fixture-openai-updated"},"Saved-key OpenAI discovery must retain profile ownership");
+        const auto discovered=client.Post("/v1/provider/profiles/models",authorized,R"({"id":"openai","route_id":"openai.chat","expected_revision":2})","application/json");require(discovered&&discovered->status==200&&Json::parse(discovered->body)==Json{{"models",Json::array({{{"id","fixture-openai"}},{{"id","fixture-openai-updated"}}})}},"Authenticated saved-key profile discovery must return native account model identities");
+        const auto stale=client.Post("/v1/provider/profiles/select",authorized,R"({"id":"claude","expected_revision":1})","application/json");require(stale&&stale->status==409,"Profile selection API must preserve revision conflicts");
         require(runtime.discover_models("claude","anthropic.messages",key(""),2)==std::vector<std::string>{"fixture-claude","fixture-claude/next"},"Claude discovery must follow bounded provider cursor pages");
         rejects<Conflict>([&]{runtime.discover_models("claude","anthropic.messages",key(""),1);});
         rejects<std::invalid_argument>([&]{runtime.discover_models("openai","anthropic.messages",key("runtime-claude-fixture-key"),2);});

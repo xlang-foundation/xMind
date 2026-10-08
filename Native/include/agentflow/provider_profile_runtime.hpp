@@ -2,6 +2,7 @@
 #include "agentflow/execution_platform.hpp"
 #include "agentflow/provider_profiles.hpp"
 #include "agentflow/provider_catalogue.hpp"
+#include "agentflow/provider_profile_setup.hpp"
 namespace agentflow {
 // Native backend policy. Capabilities and credential destinations never come
 // from a view; the selected model identity is supplied by its saved profile.
@@ -10,28 +11,20 @@ struct ProviderProfileExecutionPolicy {
     ChatProviderConfig provider;
     std::optional<ProviderCataloguePolicy> catalogue;
 };
-struct ProviderProfileMetadata {
-    std::string id,route_id,provider,model;
-    std::int64_t revision=0;
-};
-struct ProviderProfileRuntimeMetadata {
-    std::int64_t revision=0;
-    std::string active;
-    std::vector<ProviderProfileMetadata> profiles;
-};
 // Shared single/graph execution platform with backend-owned model profiles.
 // Connection profiles (Local/Nexus) belong to a separate transport boundary.
-class ProviderProfileRuntime final : public RunExecutor,public GraphExecution {
+class ProviderProfileRuntime final : public RunExecutor,public GraphExecution,public ProviderProfileSetup {
 public:
     ProviderProfileRuntime(PersistenceService& store,AgentSettings base,
         std::vector<ProviderProfileExecutionPolicy> policy,std::size_t workers=2,std::size_t capacity=128);
     ~ProviderProfileRuntime();
-    ProviderProfileRuntimeMetadata configuration() const;
+    ProviderProfileRuntimeMetadata configuration() const override;
+    std::vector<ProviderProfileRouteMetadata> profile_routes() const override;
     std::vector<std::string> discover_models(std::string id,std::string route,SecretBytes key,
-        std::int64_t expected_revision,std::stop_token cancel={});
+        std::int64_t expected_revision,std::stop_token cancel={}) override;
     ProviderProfileRuntimeMetadata save_profile(std::string id,std::string route,std::string model,
-        SecretBytes key,std::int64_t expected_revision,bool activate=false);
-    ProviderProfileRuntimeMetadata select_profile(std::string id,std::int64_t expected_revision);
+        SecretBytes key,std::int64_t expected_revision,bool activate=false) override;
+    ProviderProfileRuntimeMetadata select_profile(std::string id,std::int64_t expected_revision) override;
     // Trusted migration caller must validate the legacy source record against
     // backend policy. This preserves its owned encrypted reference and revision.
     ProviderProfileRuntimeMetadata import_existing_profile(std::string id,std::string route,std::string model,

@@ -70,6 +70,19 @@ additions await compilation/execution while a sibling benchmark is live. Listing
 account identities does not establish model/adapter capability; HTTP/Settings
 integration and per-model compatibility remain pending.
 
+The native HTTP adapter now has source for authenticated profile operations:
+`GET /v1/provider/profiles`, `POST /v1/provider/profiles`,
+`POST /v1/provider/profiles/select` and `POST /v1/provider/profiles/models`.
+Public responses contain profile identities, revisions, selected models and
+fixed backend route identities/wires; they omit credential references, keys and
+network destinations. Mutations reject unknown fields, malformed revisions and
+non-boolean activation flags. Existing origin-bound view authentication covers
+the new paths using the same owner permissions as provider setup. The expanded
+native contract exercises actual HTTP authentication, enrollment, saved-key
+discovery, destination spoof rejection and stale selection. Compilation and
+execution are pending. Server startup/legacy-record migration and CLI/browser/
+VS Code client integration remain required before these become product Settings.
+
 Current setup is one saved OpenAI configuration. Claude request/stream/transport
 source additions do not change that API or make Claude selectable in Settings.
 The next enrollment change must retain the existing encrypted OpenAI key and

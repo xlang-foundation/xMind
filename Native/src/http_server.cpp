@@ -3,6 +3,7 @@
 #include <utility>
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/provider_setup.hpp"
+#include "agentflow/provider_profile_setup.hpp"
 #include "agentflow/graph_service.hpp"
 #include "agentflow/a2a_task_control.hpp"
 #include "agentflow/http_stream_transport.hpp"
@@ -161,7 +162,7 @@ struct HttpServer::Impl {
     };
     httplib::Server server;
     int port=-1;
-    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs):persistence(store),executor(execution),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
+    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup):persistence(store),executor(execution),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
         validate_local_auth_token(token);
 #if defined(_WIN32)
         view_sessions=std::make_unique<ViewSessions>(store,token);
@@ -183,7 +184,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|models|graphs|provider/(configuration|models)|sessions(/[A-Za-z0-9_-]+/(history|runs|title))?|runs(/[A-Za-z0-9_-]+(/(events|cancel|operations))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|models|graphs|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title))?|runs(/[A-Za-z0-9_-]+(/(events|cancel|operations))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
             if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && std::regex_match(request.path,view_route) && (request.method=="GET"||request.method=="POST")){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
@@ -303,6 +304,40 @@ struct HttpServer::Impl {
                 const auto key=value.contains("api_key")?string_field(value,"api_key",32768):std::string{};
                 SecretBytes secret({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()});
                 reply(response,metadata(setup->configure(string_field(value,"model",256),std::move(secret),value["expected_revision"].get<std::int64_t>())));
+            }));
+        }
+        if(profile_setup){
+            const auto metadata=[profile_setup](const ProviderProfileRuntimeMetadata& value){
+                auto entries=Json::array();for(const auto& profile:value.profiles)entries.push_back({{"id",profile.id},{"route_id",profile.route_id},{"provider",profile.provider},{"model",profile.model},{"revision",profile.revision}});
+                auto routes=Json::array();for(const auto& route:profile_setup->profile_routes()){
+                    const char* wire=nullptr;switch(route.wire){case ProviderWire::chat_completions:wire="chat-completions";break;case ProviderWire::responses:wire="responses";break;case ProviderWire::anthropic_messages:wire="anthropic-messages";break;}
+                    if(!wire)throw std::invalid_argument("Unknown backend provider wire");
+                    routes.push_back({{"id",route.id},{"provider",route.provider},{"wire",wire},{"discovery",route.discovery}});
+                }
+                return Json{{"revision",value.revision},{"active",value.active},{"profiles",std::move(entries)},{"routes",std::move(routes)}};
+            };
+            const auto revision=[](const Json& value){if(!value.contains("expected_revision")||!value["expected_revision"].is_number_integer()||value["expected_revision"]<0||value["expected_revision"]>9007199254740991)throw std::invalid_argument("Invalid provider profile revision");return value["expected_revision"].get<std::int64_t>();};
+            server.Get("/v1/provider/profiles",guarded([profile_setup,metadata](const Request& request,Response& response){
+                if(!request.params.empty())throw std::invalid_argument("Provider profile metadata does not accept query parameters");
+                reply(response,metadata(profile_setup->configuration()));
+            }));
+            server.Post("/v1/provider/profiles",guarded([profile_setup,metadata,revision](const Request& request,Response& response){
+                if(!request.params.empty()||request.body.size()>65536)throw std::invalid_argument("Provider profile setup request exceeds limits");
+                const auto value=body(request,{"id","route_id","model","api_key","expected_revision","activate"});
+                if(value.contains("activate")&&!value["activate"].is_boolean())throw std::invalid_argument("Invalid provider profile activation flag");
+                const auto key=value.contains("api_key")?string_field(value,"api_key",32768):std::string{};SecretBytes secret({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()});
+                reply(response,metadata(profile_setup->save_profile(string_field(value,"id",256),string_field(value,"route_id",256),string_field(value,"model",256),std::move(secret),revision(value),value.value("activate",false))));
+            }));
+            server.Post("/v1/provider/profiles/select",guarded([profile_setup,metadata,revision](const Request& request,Response& response){
+                if(!request.params.empty()||request.body.size()>65536)throw std::invalid_argument("Provider profile selection request exceeds limits");
+                const auto value=body(request,{"id","expected_revision"});reply(response,metadata(profile_setup->select_profile(string_field(value,"id",256),revision(value))));
+            }));
+            server.Post("/v1/provider/profiles/models",guarded([profile_setup,revision](const Request& request,Response& response){
+                if(!request.params.empty()||request.body.size()>65536)throw std::invalid_argument("Provider profile discovery request exceeds limits");
+                const auto value=body(request,{"id","route_id","api_key","expected_revision"});
+                const auto key=value.contains("api_key")?string_field(value,"api_key",32768):std::string{};SecretBytes secret({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()});
+                auto entries=Json::array();for(const auto& id:profile_setup->discover_models(string_field(value,"id",256),string_field(value,"route_id",256),std::move(secret),revision(value)))entries.push_back({{"id",id}});
+                reply(response,{{"models",std::move(entries)}});
             }));
         }
         if(graphs){
@@ -429,7 +464,7 @@ struct HttpServer::Impl {
         }
     }
 };
-HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs)) {}
+HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs,profile_setup)) {}
 HttpServer::~HttpServer(){stop();}
 int HttpServer::bind(int port) {
     if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");
