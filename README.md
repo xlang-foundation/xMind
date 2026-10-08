@@ -8,6 +8,14 @@ OpenCode 2 is the coding feature reference; LiteLLM is the provider coverage ref
 
 Run xMind locally with the VS Code plugin, webpage UI and native CLI. SQLite is the OSS database; C++ owns repository and encryption contracts, and embedded xlang3 performs SQLite I/O. Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE belong to the separate closed-source Nexus project. See the [current OSS specification](doc/architecture.md).
 
+xMind's target connection profiles are **Local** for single-user execution and
+**Nexus** for binding the local agent/workspace to a team server over the shared
+versioned protocol. Nexus owns shared PostgreSQL state and distributed
+coordination; xMind does not access its database directly. Generic profile/client
+support belongs in OSS, while the team-server implementation stays private.
+Nexus profile enrollment is not yet implemented. See the
+[profile boundaries](doc/architecture.md#local-and-nexus-connection-profiles).
+
 ## Current native product scope
 
 Native checkpoint `46262d6ef7949a9caf778ccb6cf74733ef28b5ac` passed **52 native and 73 extension tests**, plus **14 browser tests**, in its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37709335756). This includes embedded-xlang3 persistence, encrypted credentials, authenticated server/CLI, native model/tool execution, reviewed file/process effects, MCP components, registered graph execution, Chat Completions/Responses adapters saved-key wire enrollment/rebinding and durable native browser access sessions. Native effects are real; provider contracts use labelled synthetic peers. [Exact gate evidence](doc/evidence/native-model-protocol-diagnostics-hosted-provenance.json), [Responses scope](doc/native-responses-provider.md), [graph scope](doc/native-graph-checkpoints.md), [process scope](doc/native-process-tools.md). These checks do not prove full coding or protocol parity.

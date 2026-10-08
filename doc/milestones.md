@@ -154,5 +154,6 @@ Credential storage checkpoint: the C++ repository now protects and persists cred
 - Protocols and graphs: independent MCP/A2A peers, graph branching/pauses/checkpoint recovery.
 - Clients: browser UI and VS Code workflows over the local backend, with actual UI validation.
 - OSS release: reproducible native builds, scoped parity evidence, documented limitations and end-to-end local coding/protocol/provider acceptance.
+- Connection profiles: Local single-user mode plus optional Nexus binding over the shared protocol, scoped identities/state, authenticated local agent/workspace enrollment and real reconnect/lease/recovery acceptance. Nexus owns the private team-server/distributed implementation.
 
 These milestones retain the revised xMind OSS scope. Team-server features, PostgreSQL, WebRTC and Electron belong to Nexus and are excluded. Relevant OpenCode coding parity and agreed broad model/provider support remain required.

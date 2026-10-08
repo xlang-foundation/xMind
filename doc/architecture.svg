@@ -36,11 +36,11 @@
   <rect x="715" y="180" width="285" height="62" rx="11" fill="#edf2fb"/>
   <text x="857" y="218" text-anchor="middle" class="label">Web / graph editor</text>
   <rect x="1020" y="180" width="548" height="62" rx="11" fill="#edf2fb"/>
-  <text x="1294" y="218" text-anchor="middle" class="label">All views • shared history, runs and approvals</text>
+  <text x="1294" y="218" text-anchor="middle" class="label">Connection profiles • Local or Nexus server</text>
   <path d="M820 266V296" class="flow"/>
 
   <rect x="365" y="298" width="1225" height="93" rx="15" class="native"/>
-  <text x="391" y="331" class="heading">xMind Server · local OSS backend · C++</text>
+  <text x="391" y="331" class="heading">xMind local runtime · optional Nexus profile binding · C++</text>
   <text x="391" y="360" class="body">Versioned HTTP / JSON / SSE · sessions and runs · model discovery · approval and diff APIs · reconnect</text>
   <text x="70" y="338" class="label">One backend owns execution</text>
   <text x="70" y="364" class="small">Clients observe the same durable state</text>

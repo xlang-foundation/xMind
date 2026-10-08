@@ -32,6 +32,40 @@ remain extensible; private product modules are not bundled into OSS. Local
 authentication, credential protection, workspace boundaries and tool approval
 remain required. Browser UI and VS Code remain OSS deliverables.
 
+### Local and Nexus connection profiles
+
+xMind supports both single-user local execution and an optional connection to a
+Nexus team server. A **Local profile** uses the local agent runtime, authorized
+workspace and SQLite state. A **Nexus profile** binds the local xMind agent and
+workspace to an authenticated Nexus server over the same versioned command/event
+protocol. CLI, browser and VS Code select that connection profile. Selecting Nexus
+does not move the workspace or require remote SQL access.
+
+| Boundary | Local profile | Nexus profile |
+| --- | --- | --- |
+| Runtime/workspace | Local xMind core | Local xMind core enrolls as an authorized agent/workspace endpoint; server may assign other authorized workers |
+| Sessions and coordination | Local backend and SQLite | Nexus owns shared sessions, team policies, scheduling and durable shared events in PostgreSQL |
+| Local persistence | Sessions, configuration, encrypted credentials and execution journal | Connection/authentication metadata and local effect receipts; shared records stay server-owned |
+| Model-provider keys | Local backend resolves its own encrypted keys | Server-owned provider routes keep team keys on Nexus; worker access requires an authorized model-service contract |
+| Capabilities | Verified local features | Explicit authenticated server/worker capability negotiation; no inference from a URL or profile name |
+| Later cluster integration | None required | Cantor Cluster adapter belongs behind Nexus's scheduler/worker boundary |
+
+Connection profiles are separate from provider profiles (for example OpenAI or
+Claude). Model configuration does not select a storage server, and a connection
+profile is not a provider credential. Session/run/model choices and credentials
+must be scoped to the selected connection so two servers' identities cannot mix.
+Nexus connections require authenticated encrypted transport and validated protocol
+versions. Disconnect or server failure must not silently re-submit a Nexus task
+as local work. Local execution continues independently when Local is selected.
+
+Nexus remains the private team-server implementation. The generic connection and
+agent-enrollment protocol is an OSS capability, preserving the public C++ engine
+and private native-package extension boundary. Distributed jobs require actual
+workspace authorization, durable leases, idempotent receipts and cancellation/
+recovery checks before being advertised. Current native APIs do not yet implement
+Nexus profile enrollment or team-worker scheduling; this is the revised target
+architecture, not a new integration acceptance claim.
+
 OpenCode parity applies to relevant core coding, CLI and editor behavior; it does
 not reintroduce excluded desktop/deployment products. Preserve the pinned inventory
 and identify exclusions rather than counting them as implemented. Historical
