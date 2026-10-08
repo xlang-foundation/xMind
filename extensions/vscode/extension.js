@@ -1,7 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
-const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText } = require('./client');
+const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const { browserViewLauncher } = require('./browser-view');
@@ -42,13 +42,23 @@ async function activate(context) {
   let graphChildren=new Map(),childHistory=new Map();
   let ownedObservation=false;
   let planningObservation=false,planSnapshot,pendingPlanRead=false,planReadConflicts=0;
+  let contextObservation=false,contextController;
   const stateKey = 'agentflow.session';
   const modelStateKey = 'xmind.model';
   const runStateKey = 'xmind.observedRun';
   const graphStateKey = 'xmind.workflow';
 
   const post = message => panel?.webview.postMessage(message);
-  const stop = () => { clearInterval(timer); timer = undefined; generation++;profileController?.invalidate(); };
+  const stop = () => { clearInterval(timer); timer = undefined; generation++;contextController?.invalidate();profileController?.invalidate(); };
+  async function readContext(){
+    if(!panel||!client)return;
+    if(!contextObservation){if(contextController?.record)contextController.invalidate();return;}
+    const target=client;
+    contextController??=new ContextViewController(target,post,()=>({session:sessionId,model:selectedModel,generation,enabled:!!panel&&client===target&&configuredOrigin()===target.baseUrl&&contextObservation&&!sessionRuns.find(run=>run.id===runId)?.graph_root}),async()=>{
+      if(!contextProfileAdmission)return;return profileController.admission();
+    },()=>crypto.randomBytes(16).toString('hex'));return contextController.read();
+  }
+  let contextProfileAdmission=false;
   const busySession=()=>sessionRuns.some(run=>['queued','running','paused'].includes(run.state));
   const observedOperation=id=>id===runId || graphChildren.has(id);
   const clearGraph=()=>{planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
@@ -143,7 +153,7 @@ async function activate(context) {
         if(!busySession()) stop();
       }
     } catch (error) { if (version === generation) post({ type: 'error', text: error.message }); }
-    finally { polling = false; }
+    finally { polling = false;await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});}); }
   }
 
   async function pollOwned(id,version){
@@ -210,6 +220,12 @@ async function activate(context) {
     post({ type: 'history', history });
     const runs = await client.runs(id);
     if (version !== generation || !panel) return;
+    const previousProfile=profileController?.state;await profileController?.refresh();
+    if(version!==generation||!panel)return;
+    if(previousProfile&&(previousProfile.revision!==profileController.state?.revision||previousProfile.active!==profileController.state?.active)){
+      const current=await capabilities();if(version!==generation||!panel)return;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);post({type:'capabilities',execution:current.health.agent_execution,renameSessions:current.health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
+    }
+    profileController?.models(selectedModel);
     sessionRuns=runs;
     const savedRun=context.workspaceState.get(runStateKey);
     const selected=savedRun?.url===client.baseUrl && savedRun.session_id===id?sessionRuns.find(run=>run.id===savedRun.id):undefined;
@@ -248,6 +264,7 @@ async function activate(context) {
     const health=await client.health();let catalogue={models:[],default_model:''};
     ownedObservation=health.owned_child_observation===true;
     planningObservation=Object.hasOwn(health,'agent_planning');if(planningObservation)await client.planning();
+    contextObservation=health.context_controls===true;contextProfileAdmission=health.provider_profile_admission===true;
     if(health.agent_execution) {
       try {catalogue=await client.models();}
       catch(error) {
@@ -313,7 +330,7 @@ async function activate(context) {
     const origin = configuredOrigin();
     const bootstrapToken = typeof process !== 'undefined' ? process.env.XMIND_UI_BOOTSTRAP_TOKEN : undefined;
     if (!await context.secrets.get(secretKey(origin)) && !await configureToken(bootstrapToken)) return;
-    profileController?.dispose();client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
+    contextController?.dispose();contextController=undefined;profileController?.dispose();client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
     const profileTarget=client;profileController=new ProviderProfileController(client,post,()=>!!panel&&client===profileTarget&&configuredOrigin()===profileTarget.baseUrl);
     const initial=await capabilities();let health=initial.health;modelCatalogue=initial.catalogue;
     const savedModel=context.workspaceState.get(modelStateKey);
@@ -330,8 +347,9 @@ async function activate(context) {
       marked:asset('node_modules','marked','lib','marked.umd.js'),purify:asset('node_modules','dompurify','dist','purify.min.js')
     });
     const view = panel;
-    panel.onDidDispose(() => { if (panel === view) { stop(); reviewed.clear(); providerSelection=undefined; panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
+    panel.onDidDispose(() => { if (panel === view) { profileController?.dispose();stop(); reviewed.clear(); providerSelection=undefined; panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
     panel.webview.onDidReceiveMessage(message => {
+      if(panel===view&&['model','select-provider'].includes(message?.type))contextController?.invalidate();
       // Selection intent invalidates an in-flight approval immediately, before
       // its queued selection handler can run behind that network request.
       if (panel === view && ['select','select-run','new','refresh'].includes(message?.type)) {
@@ -354,9 +372,11 @@ async function activate(context) {
           try{await configureModel(key===''?undefined:key,message.profile,message.route);}finally{key=undefined;}
         } else if (message.type === 'discardProviderKey') {
           providerSelection=undefined;profileController?.invalidate();
+          const version=generation;await profileController?.refresh();if(panel!==view||version!==generation)return;
+          const current=await capabilities();if(panel!==view||version!==generation)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue,selectedModel);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});profileController?.models(selectedModel);
         } else if(message.type==='select-provider'){
           const version=generation;if(!await profileController.select(message.id)||panel!==view||version!==generation)return;
-          const current=await capabilities();health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);
+          const current=await capabilities();if(panel!==view||version!==generation||configuredOrigin()!==client.baseUrl)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);
           post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
           await context.workspaceState.update(modelStateKey,{url:client.baseUrl,id:selectedModel});await configureModel();
         } else if (message.type === 'refresh') {
@@ -378,7 +398,11 @@ async function activate(context) {
         }
         else if (message.type === 'model' && typeof message.id === 'string') {
           const modelVersion=generation;
-          if(await profileController?.save(message.id)){
+          let saved;try{saved=await profileController?.save(message.id);}catch(error){
+            if(panel===view&&modelVersion===generation&&configuredOrigin()===client.baseUrl){const current=await capabilities();if(panel!==view||modelVersion!==generation||configuredOrigin()!==client.baseUrl)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});}
+            throw error;
+          }
+          if(saved){
             if(panel!==view||modelVersion!==generation||configuredOrigin()!==client.baseUrl)return;
             const current=await capabilities();health=current.health;modelCatalogue=current.catalogue;
             if(panel!==view||modelVersion!==generation||configuredOrigin()!==client.baseUrl)return;
@@ -407,6 +431,18 @@ async function activate(context) {
           if(message.revision!==graphSnapshot.checkpoint_revision || !graphSnapshot.checkpoint.nodes.some(n=>n.id===message.node&&n.state==='waiting_human'))throw new Error('Human input changed. Refresh the current graph before answering.');
           if(typeof message.input_json!=='string' || message.input_json.length>65536)throw new Error('Human input must be bounded JSON.');
           await client.graphInput(runId,message.node,message.input_json,message.revision);await poll();
+        }
+        else if(message.type==='graph-resume'){
+          const root=runId,session=sessionId,observed=graphSnapshot,target=client,version=generation;
+          const current=()=>panel===view&&client===target&&version===generation&&runId===root&&sessionId===session&&configuredOrigin()===target.baseUrl;
+          if(!vscode.workspace.isTrusted||!observed||message.root!==root||observed.run.id!==root||observed.run.session_id!==session||message.revision!==observed.checkpoint_revision||!validateGraphContext(observed.context,observed.run).resumable)throw new Error('Refresh a ready paused graph before resuming.');
+          let fresh;try{fresh=await target.graph(root);}catch(error){if(error.status===409&&current()){graphSnapshot=undefined;post({type:'graph-clear'});}throw error;}if(!current())return;
+          if(fresh.run.id!==root||fresh.run.session_id!==session||fresh.checkpoint_revision!==message.revision||!validateGraphContext(fresh.context,fresh.run).resumable)throw new Error('Graph changed. Refresh before resuming.');
+          const result=await target.resumeGraph(root,message.revision);if(!current())return;if(result.id!==root||result.session_id!==session||result.graph_root!==true)throw new Error('Graph resume ownership changed');await poll();
+          if(!timer&&busySession())timer=setInterval(poll,500);
+        }
+        else if(message.type==='context-compact'){
+          if(!vscode.workspace.isTrusted||!contextObservation)throw new Error('The current backend has no available context controls.');await readContext();await contextController.compact(message);
         }
         else if(message.type==='plan-input'||message.type==='plan-resume'){await controlPlan(message);}
         else if (message.type === 'new') {
@@ -500,7 +536,8 @@ async function activate(context) {
           post({ type: 'operations', operations: [...reviewed.values()].map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id})) });
           await poll();
         }
-      } catch (error) { if (panel === view) post({ type: 'error', text: error.message }); } });
+      } catch (error) { if (panel === view) post({ type: 'error', text: error.message }); }
+        finally{if(panel===view)await readContext().catch(error=>post({type:'error',text:error.message}));} });
     }, null, context.subscriptions);
   }
   function open() {

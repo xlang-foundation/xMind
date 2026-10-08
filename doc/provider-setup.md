@@ -1,5 +1,152 @@
 # Native provider setup
 
+## Local YAML configuration: native integration in progress
+
+The new source accepts a trusted local `--provider-config FILE` using native
+yaml-cpp 0.9.0, pinned to upstream commit
+`56e3bb550c91fd7005566f19c079cb7a503223cf`. The full native build and YAML
+configuration contract passed in the first 86-contract local run. That complete
+run had 81 passes and five failures, so it is not an accepted checkpoint.
+The second complete attempt configured and compiled all 88 native contracts,
+then passed 85 and failed three in **162.98 seconds**. The context repository,
+context HTTP controller and provider CLI route fixture failed. After their
+repairs, the third full gate passed **88/88 in 161.48 seconds**, with zero
+failures/skips, all 560 frozen inputs unchanged and original test output
+captured. The earlier failures remain retained. A subsequently reproduced
+legacy Responses history serialization bug was repaired; the fourth complete
+gate passed **88/88 in 171.89 seconds**, again with all 560 inputs unchanged,
+zero failures/skips and the original test transcript captured.
+[Source-bound local evidence](evidence/native-context-provider-local-provenance.json)
+preserves the earlier attempts separately. The final saved-provider footer
+passed **141 extension / 32 browser** tests with all 37 inputs unchanged; the
+earlier **131 / 29** results retain their original scope. This source has
+not been installed in the ace/schema-v10 preview.
+
+The shared sidebar now has a saved-provider chooser beside its bottom model
+chooser. Selecting a saved provider uses the native profile revision check,
+then discovers models with its encrypted saved key. Key-only imported profiles
+require an explicit model selection before inference. Closing Settings and
+changing conversations retain only the credential-free saved catalogue;
+unsaved keys still expire or are discarded. The frontend gate passed;
+Model-free native/browser integration passed in **3.30 seconds**, including
+two source-checked server launches and durable cookie/history recovery without
+replay. The actual VSIX package passed **18 required asset checks**; all 12
+view files matched the tested bytes and all 30 payloads were hashed.
+[Integration and packaging evidence](evidence/native-provider-footer-integration-provenance.json)
+retains the initial guard-host failure separately. Installation and native
+live-provider acceptance remain pending.
+
+Copy [the empty example](examples/providers.example.yaml) to
+`D:\CantorAI2026\xMind\.config\providers.yaml` and enter keys locally. The
+development launchers pass that existing file to a newly launched configurable
+backend, or accept an explicit provider configuration path. Reusing an existing
+running backend does not hot-load the file. The file is ignored by Git and is
+never a client DTO or model input. The native backend encrypts imported keys
+into its SQLite credential store through embedded xlang3.
+
+`profiles` maps profile IDs to a backend-registered `route`, optional `api_key`
+and optional `model`. An omitted model preserves an existing choice. A new
+key-only profile has no selected model; catalogue discovery and the normal
+footer model chooser finish configuration. New empty-key placeholders are
+skipped; an existing empty key reuses that profile's encrypted credential.
+Optional `active_profile` selects an existing or supplied profile without
+inventing a model. Unspecified profiles and the current selection remain.
+
+An import publishes the complete validated document with one registry revision
+check. Identical configuration retains revisions and credential references.
+Invalid documents leave the active execution generation unchanged. Duplicate
+fields, unknown fields/routes, aliases/anchors, custom tags, additional YAML
+documents, invalid UTF-8 and bounded-size violations are rejected using fixed
+diagnostics that do not include keys or YAML values. Explicit legacy
+`--model/--model-endpoint` startup and YAML profile startup cannot be combined.
+
+The passing YAML contract exercised the native parser, encrypted registry,
+runtime import and model catalogue using owned disposable files and a labelled
+local provider peer. Test fixtures do not read user configuration.
+Installed Settings and native live-agent acceptance remain separate gates.
+
+## DeepSeek native route: local contracts passed, release pending
+
+The configurable backend now registers `deepseek.chat` alongside OpenAI Chat,
+OpenAI Responses, Claude Messages and Gemini GenerateContent. It selects
+`https://api.deepseek.com/chat/completions`, bearer authentication and the native
+DeepSeek chat dialect explicitly. Discovery uses the provider's `/models`
+catalogue; clients cannot supply destinations or select a dialect. The default
+workspace capability policy declares tool support for exactly `deepseek-flash`
+and `deepseek-v4-pro`, based on the dated
+[official API reference](https://api-docs.deepseek.com/api/create-chat-completion/).
+Unknown future model identities do not acquire tool support from their names.
+
+Thinking retains the provider's enabled default. Native completion preserves
+the exact assistant `reasoning_content`, complete tool-call identities and
+arguments in a model-bound private receipt. Subsequent tool turns replay those
+receipts, including earlier assistant answers. Missing or incompatible thinking
+history fails before another provider request or tool dispatch. Normal OpenAI
+Chat keeps its existing serialization and receipt rules. Signed history from
+other provider wires is not converted silently.
+
+DeepSeek supplies usage in its final finish chunk before `[DONE]`. The native
+stream accepts that completion rather than requiring a separate usage-only
+chunk. Input, output, total, cache and reasoning counters retain supplied
+values; missing cache counters are not invented. Each supplied cache counter
+must fit its actual prompt count. Reasoning events remain separate from answer
+text, and response metrics use the same sidebar history renderer.
+
+The gateway and profile lifecycle fixtures are synthetic provider tests of real
+native transport, AgentRunner, workspace tools and embedded xlang3 SQLite.
+In the second complete attempt, the gateway contract passed in **0.54 seconds**
+and the profile lifecycle contract in **0.71 seconds**. Gateway scope includes
+two actual file reads and reasoning replay after database reopen. Profile scope
+covers authenticated discovery, key-only YAML import, encrypted credential
+ownership, capability rejection before enrollment, revision checks and an actual
+run after model selection. Those individual timings belong to the failed
+second attempt; the third full 88/88 gate passed separately as recorded above.
+Release after the later Responses repair and live-provider acceptance remain
+pending. The database transcript is not claimed encrypted; credential blobs are
+encrypted separately.
+
+## Account API smoke checks on 2026-10-08
+
+All four configured keys authenticated against their real model catalogues.
+Separate direct HTTPS generation checks returned HTTP 200 and `OK`:
+
+| Provider | Model | Reported input / output tokens |
+| --- | --- | --- |
+| OpenAI | `gpt-4.1-mini` | 12 / 2 |
+| Claude | `claude-haiku-4-5-20251001` | 12 / 5 |
+| Gemini | `gemini-3.5-flash` | 6 / 1 |
+| DeepSeek | `deepseek-flash` | 9 / 1 |
+
+The listed `gemini-2.5-flash` returned HTTP 404 before the successful 3.5 check.
+Catalogue membership does not prove successful inference for every listed
+model. These small account checks did not execute the native adapters,
+AgentRunner, tools, streaming continuation or installed clients. They establish
+credential and generation access only. Credentials and private diagnostics
+remain outside Git. A live xlang3 benchmark deferred the original native
+diagnostic; the direct HTTPS checks did not start or modify that runtime.
+
+## Current installed preview issue
+
+Read-only metadata from the running ace/schema-v10 backend shows configured
+OpenAI Responses, one saved profile and one model. Its four advertised routes
+are OpenAI Chat, OpenAI Responses, Claude and Gemini; DeepSeek is absent. The
+four-key local configuration has not been imported into this running preview.
+
+A prior preview run failed with `provider_http_error`, HTTP **400**, type
+`invalid_request_error` and code `invalid_value`; its native diagnostic did not
+identify the parameter. A later isolated direct HTTPS reproduction identified
+`input[1].content[0]`: a legacy assistant text item serialized as `input_text`
+returned HTTP 400, while the otherwise identical request using `output_text`
+returned HTTP 200, a completed `OK`, and supplied input/output counts **27 / 5**.
+The serializer defect exists in both the installed ace and current source;
+its repair and fourth complete gate remain pending.
+
+A fresh browser session separately completed one real native OpenAI
+`gpt-5.6-sol` request returning `OK`, with supplied input/output counts
+**3884 / 5**. That narrow success does not validate legacy-history replay,
+four-provider native coding or compaction. No preview upgrade or YAML import is
+claimed here.
+
 ## Direct MCP graphs and provider independence
 
 New source allows a registered graph to invoke a configured MCP tool without

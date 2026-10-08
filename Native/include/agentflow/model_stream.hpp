@@ -7,6 +7,8 @@
 #include <vector>
 
 namespace agentflow {
+// Backend-selected Chat Completions dialect, never inferred from a model name.
+enum class ChatDialect {openai,deepseek};
 struct ModelProtocolError : std::runtime_error {using std::runtime_error::runtime_error;};
 // Only known native invariant codes; never reflect provider payloads/messages.
 std::string_view model_protocol_diagnostic(const ModelProtocolError& error);
@@ -23,7 +25,8 @@ struct ModelCompletion {
 class ChatCompletionStream {
 public:
     using Sink=std::function<void(const ModelEvent&)>;
-    explicit ChatCompletionStream(Sink sink);
+    explicit ChatCompletionStream(Sink sink,ChatDialect dialect=ChatDialect::openai,
+        std::string expected_model={});
     ~ChatCompletionStream();
     ChatCompletionStream(const ChatCompletionStream&)=delete;
     ChatCompletionStream& operator=(const ChatCompletionStream&)=delete;

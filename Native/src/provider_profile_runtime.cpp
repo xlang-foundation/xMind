@@ -1,5 +1,6 @@
 #include "agentflow/provider_profile_runtime.hpp"
 #include "agentflow/gemini_provider.hpp"
+#include "agentflow/provider_yaml_config.hpp"
 #include <algorithm>
 #include <mutex>
 #include <set>
@@ -36,7 +37,7 @@ Capability model_tools(const ProviderProfileExecutionPolicy& policy,const std::s
 }
 void validate_execution(const ProviderProfileExecutionPolicy& policy,const AgentSettings& base,const std::string& model,bool allow_empty=false){
     validate_model(policy.route,model,allow_empty);
-    if(policy.route.wire==ProviderWire::gemini_generate_content&&!model.empty()&&base.workspace&&model_tools(policy,model)!=Capability::supported)
+    if((policy.route.wire==ProviderWire::gemini_generate_content||policy.provider.chat_dialect==ChatDialect::deepseek)&&!model.empty()&&base.workspace&&model_tools(policy,model)!=Capability::supported)
         throw std::invalid_argument("Workspace agent requires declared model tool capability");
 }
 void validate_public_identity(const std::string& id,const std::string& model,const SecretBytes& secret){
@@ -51,8 +52,13 @@ std::vector<ProviderProfileRoute> routes(const std::vector<ProviderProfileExecut
         if(value.provider.endpoint!=value.route.endpoint||value.provider.wire!=value.route.wire||
             !value.provider.model.empty()||value.provider.deadline.count()<=0||value.provider.idle_timeout.count()<=0)
             throw std::invalid_argument("Provider execution policy differs from profile route");
+        if((value.provider.chat_dialect!=ChatDialect::openai&&value.provider.chat_dialect!=ChatDialect::deepseek)||
+            (value.provider.chat_dialect==ChatDialect::deepseek&&value.route.wire!=ProviderWire::chat_completions))
+            throw std::invalid_argument("Provider chat dialect differs from profile route wire");
         if(value.catalogue&&value.catalogue->format!=format)
             throw std::invalid_argument("Provider catalogue policy differs from route wire");
+        if(value.context&&value.route.wire!=ProviderWire::responses)
+            throw std::invalid_argument("Context strategy differs from provider route wire");
         // Validate the backend-owned base even before a key-only import or
         // empty registry, without selecting an executable model.
         validate_model(value.route,"xmind-policy-validation");
@@ -107,9 +113,21 @@ struct ProviderProfileRuntime::Impl {
             return std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
         }
         auto settings=base;settings.provider=allowed.provider;settings.provider.model=profile.model;
+        settings.context=allowed.context;
         settings.provider.tools=model_tools(allowed,profile.model);
         settings.selectable_models.clear();settings.credential=CredentialReference{allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose};
         settings.provider_identity=ProviderExecutionIdentity{profile.id,profile.route_id,allowed.route.provider,profile.revision};
+        if(settings.context){
+            for(auto& [model,capacity]:settings.context->model_capacities){
+                if(capacity.model_id!=model||capacity.wire!="responses")throw std::invalid_argument("Context capacity model binding differs");
+                capacity.provider_identity_json=provider_context_json(settings,model);
+                auto destination=settings.provider;destination.model=model;
+                capacity.route_identity=context_route_identity(destination,capacity.provider_identity_json);
+            }
+            const auto found=settings.context->model_capacities.find(profile.model);
+            if(!settings.max_output_tokens&&found!=settings.context->model_capacities.end()&&found->second.verified&&found->second.output_tokens)
+                settings.max_output_tokens=*found->second.output_tokens;
+        }
         return std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
     }
     void mutable_state(std::int64_t expected)const{
@@ -155,7 +173,7 @@ std::vector<std::string> ProviderProfileRuntime::discover_models(std::string id,
     {
         std::lock_guard lock(impl_->mutex);if(expected!=impl_->state.revision||impl_->profiles.snapshot().revision!=expected)throw Conflict("Provider profile changed during model discovery");
         const auto& allowed=impl_->route(route_id);
-        if(impl_->base.workspace&&allowed.route.wire==ProviderWire::gemini_generate_content)
+        if(impl_->base.workspace&&(allowed.route.wire==ProviderWire::gemini_generate_content||allowed.provider.chat_dialect==ChatDialect::deepseek))
             std::erase_if(result,[&](const auto& model){return model_tools(allowed,model)!=Capability::supported;});
     }
     return result;
@@ -163,7 +181,7 @@ std::vector<std::string> ProviderProfileRuntime::discover_models(std::string id,
 ProviderProfileRuntimeMetadata ProviderProfileRuntime::save_profile(std::string id,std::string route,std::string model,SecretBytes key,std::int64_t expected,bool activate){
     std::unique_lock lock(impl_->mutex);impl_->mutable_state(expected);
     // ProviderProfiles encrypts a candidate before its validation callback.
-    // Reject invalid Gemini resources and reflected public identities before
+    // Reject undeclared model tools, invalid resources and reflected identities before
     // even candidate persistence for any provider family.
     const auto& allowed=impl_->route(route);validate_execution(allowed,impl_->base,model);
     if(!key.view().empty())validate_public_identity(id,model,key);
@@ -186,6 +204,47 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::select_profile(std::strin
     std::unique_lock lock(impl_->mutex);impl_->mutable_state(expected);std::unique_ptr<ExecutionPlatform> candidate;
     auto next=impl_->profiles.select(std::move(id),expected,[&](const auto& profile,const auto&){candidate=impl_->prepare(profile);});
     impl_->state=std::move(next);auto previous=std::move(impl_->service);impl_->service=std::move(candidate);
+    const auto result=impl_->metadata();lock.unlock();previous.reset();return result;
+}
+ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_yaml_configuration(const std::filesystem::path& path,std::int64_t expected){
+    std::vector<std::string> allowed_routes;
+    for(const auto& policy:impl_->policy)allowed_routes.push_back(policy.route.id);
+    // The reader owns/wipes the bounded plaintext input. No view/API handler
+    // can supply this local path or obtain the decoded secret-bearing values.
+    auto configuration=read_provider_yaml_config(path,allowed_routes);
+    std::unique_lock lock(impl_->mutex);impl_->mutable_state(expected);
+    if(impl_->profiles.snapshot().revision!=expected)throw Conflict("Provider YAML registry revision changed");
+    std::erase_if(configuration.profiles,[&](const auto& entry){
+        return entry.key.view().empty()&&std::none_of(impl_->state.profiles.begin(),impl_->state.profiles.end(),
+            [&](const auto& saved){return saved.id==entry.id;});
+    });
+    // Empty template placeholders do not create fake credentials/models or
+    // replace the running provider. An explicit selection still must exist.
+    if(configuration.profiles.empty()&&!configuration.active_profile)return impl_->metadata();
+    for(const auto& entry:configuration.profiles){
+        const auto& allowed=impl_->route(entry.route_id);
+        const auto saved=std::find_if(impl_->state.profiles.begin(),impl_->state.profiles.end(),
+            [&](const auto& value){return value.id==entry.id;});
+        const auto model=entry.model?*entry.model:saved!=impl_->state.profiles.end()?saved->model:std::string{};
+        validate_execution(allowed,impl_->base,model,true);
+        if(!entry.key.view().empty())validate_public_identity(entry.id,model,entry.key);
+        else if(saved!=impl_->state.profiles.end()){
+            const auto& previous=impl_->route(saved->route_id).route;
+            auto owned=impl_->store.resolve_credential(previous.credential_scope,saved->credential_id,previous.credential_purpose).get();
+            validate_public_identity(entry.id,model,owned);
+        }
+    }
+    std::unique_ptr<ExecutionPlatform> candidate;
+    auto next=impl_->profiles.save_config(std::move(configuration.profiles),std::move(configuration.active_profile),expected,
+        [&](const auto& profile,const auto& allowed){
+            validate_execution(impl_->route(allowed.id),impl_->base,profile.model,true);
+            auto owned=impl_->store.resolve_credential(allowed.credential_scope,profile.credential_id,allowed.credential_purpose).get();
+            validate_public_identity(profile.id,profile.model,owned);
+        },[&](const auto& profile,const auto&){candidate=impl_->prepare(profile);});
+    // Publication succeeded. Adopt exactly that prepared generation only when
+    // there is an active selection; inactive imports retain the current service.
+    impl_->state=std::move(next);std::unique_ptr<ExecutionPlatform> previous;
+    if(candidate){previous=std::move(impl_->service);impl_->service=std::move(candidate);}
     const auto result=impl_->metadata();lock.unlock();previous.reset();return result;
 }
 ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_existing_profile(std::string id,std::string route,std::string model,std::string credential,std::int64_t revision){
@@ -250,10 +309,25 @@ void ProviderProfileRuntime::cancel(const std::string& id){std::lock_guard lock(
 bool ProviderProfileRuntime::healthy()const{std::lock_guard lock(impl_->mutex);return impl_->service->healthy();}
 bool ProviderProfileRuntime::supports_delegation()const{std::lock_guard lock(impl_->mutex);return impl_->service->supports_delegation();}
 bool ProviderProfileRuntime::supports_dynamic_planning()const{std::lock_guard lock(impl_->mutex);return impl_->service->supports_dynamic_planning();}
+bool ProviderProfileRuntime::supports_context()const{std::lock_guard lock(impl_->mutex);return impl_->service->supports_context();}
+ContextControlSnapshot ProviderProfileRuntime::context_status(const std::string& session,const std::string& model)const{
+    std::lock_guard lock(impl_->mutex);return impl_->service->context_status(session,model);
+}
+ContextManualStatus ProviderProfileRuntime::context_request(const std::string& session,const std::string& request,const std::string& model)const{
+    std::lock_guard lock(impl_->mutex);return impl_->service->context_request(session,request,model);
+}
+ContextManualStatus ProviderProfileRuntime::request_context(const std::string& session,const std::string& request,const std::string& actor,std::int64_t revision,const std::string& model){
+    std::lock_guard lock(impl_->mutex);return impl_->service->request_context(session,request,actor,revision,model);
+}
+ContextManualStatus ProviderProfileRuntime::request_context_profile(const std::string& session,const std::string& request,const std::string& actor,std::int64_t revision,const std::string& model,ProviderProfileAdmission expected){
+    std::lock_guard lock(impl_->mutex);impl_->admission(expected);return impl_->service->request_context(session,request,actor,revision,model);
+}
 Run ProviderProfileRuntime::plan_input(const std::string& root,const std::string& request,std::string input,const std::string& actor,std::int64_t revision,std::int64_t sequence){std::lock_guard lock(impl_->mutex);return impl_->service->plan_input(root,request,std::move(input),actor,revision,sequence);}
 Run ProviderProfileRuntime::resume_plan(const std::string& root,const std::string& actor,std::int64_t revision,std::int64_t sequence){std::lock_guard lock(impl_->mutex);return impl_->service->resume_plan(root,actor,revision,sequence);}
 bool ProviderProfileRuntime::available()const{std::lock_guard lock(impl_->mutex);return impl_->service->available();}
 std::vector<GraphExecutionMetadata> ProviderProfileRuntime::graphs()const{std::lock_guard lock(impl_->mutex);return impl_->service->graphs();}
 Run ProviderProfileRuntime::submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model){std::lock_guard lock(impl_->mutex);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
 GraphRootRecord ProviderProfileRuntime::human_input(const std::string& root,const std::string& node,const std::string& input,const std::string& actor,std::int64_t revision){std::lock_guard lock(impl_->mutex);return impl_->service->human_input(root,node,input,actor,revision);}
+Run ProviderProfileRuntime::resume_graph(const std::string& root,const std::string& actor,std::int64_t revision){std::lock_guard lock(impl_->mutex);return impl_->service->resume_graph(root,actor,revision);}
+GraphContextMetadata ProviderProfileRuntime::graph_context(const std::string& root)const{std::lock_guard lock(impl_->mutex);return impl_->service->graph_context(root);}
 }

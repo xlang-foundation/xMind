@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/records.hpp"
+#include "agentflow/context_control.hpp"
 #include <utility>
 #include <vector>
 
@@ -16,6 +17,11 @@ public:
     virtual bool supports_profile_admission()const{return false;}
     virtual bool supports_delegation()const{return false;}
     virtual bool supports_dynamic_planning()const{return false;}
+    virtual bool supports_context()const{return false;}
+    virtual ContextControlSnapshot context_status(const std::string&,const std::string& = {})const{throw RunUnavailable("Context controls are unavailable");}
+    virtual ContextManualStatus context_request(const std::string&,const std::string&,const std::string& = {})const{throw RunUnavailable("Context request inspection is unavailable");}
+    virtual ContextManualStatus request_context(const std::string&,const std::string&,const std::string&,std::int64_t,const std::string& = {}){throw RunUnavailable("Context controls are unavailable");}
+    virtual ContextManualStatus request_context_profile(const std::string&,const std::string&,const std::string&,std::int64_t,const std::string&,ProviderProfileAdmission){throw RunUnavailable("Context profile admission is unavailable");}
     virtual Run plan_input(const std::string&,const std::string&,std::string,const std::string&,std::int64_t,std::int64_t){throw RunUnavailable("Dynamic plan input is unavailable");}
     virtual Run resume_plan(const std::string&,const std::string&,std::int64_t,std::int64_t){throw RunUnavailable("Dynamic plan resume is unavailable");}
     virtual Run submit_profile(std::string,std::string,std::string,std::string,ProviderProfileAdmission){throw RunUnavailable("Provider profile admission is unavailable");}

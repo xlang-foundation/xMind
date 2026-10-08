@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 .agentflow/
+.config/
 build/
 .xlang3/
 node_modules/

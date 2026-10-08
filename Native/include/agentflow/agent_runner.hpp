@@ -6,6 +6,8 @@
 #include "agentflow/process_executor.hpp"
 #include "agentflow/agent_instructions.hpp"
 #include "agentflow/dynamic_plan_records.hpp"
+#include "agentflow/context_manager.hpp"
+#include "agentflow/context_control.hpp"
 
 namespace agentflow {
 class DelegationExecutor;
@@ -38,6 +40,7 @@ struct AgentSettings {
     // Native ordinary-root planning policy; graph nodes and depth-one children
     // must explicitly clear it rather than acquiring another root allowance.
     std::optional<DynamicPlanningPolicy> planning;
+    std::optional<ContextRuntimePolicy> context;
 };
 std::string provider_context_json(const AgentSettings& settings,const std::string& model_id={});
 // Shared native single-agent/model-tool loop, callable by backend workers and
@@ -57,6 +60,11 @@ public:
     void validate_dynamic_owner(const std::string& root_id,const std::string& model_id={}) const;
     std::string admitted_dynamic_model(const std::string& root_id) const;
     std::vector<std::string> models() const;
+    bool supports_context()const{return settings_.context.has_value();}
+    ContextBinding context_binding(const std::string& model_id={})const;
+    ContextControlSnapshot context_status(const std::string& session,const std::string& model_id={})const;
+    ContextProjection compact_idle_context(const IdleContextOwnerRecord& owner,
+        std::chrono::steady_clock::time_point deadline,const std::string& model_id={},std::stop_token cancel={});
 private:
     PersistenceService& persistence_;
     AgentSettings settings_;

@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/delegation_records.hpp"
+#include "agentflow/context_records.hpp"
 #include "agentflow/run_executor.hpp"
 #include <optional>
 #include <string>
@@ -157,16 +158,19 @@ struct DynamicPauseSpec {
     std::string plan_id,plan_call_id,segment_id,backend_identity;
     std::int64_t expected_revision=0,expected_state_sequence=0,expected_budget_revision=0;
     std::int64_t measured_active_elapsed_ms=0;
+    std::optional<ContextPausePin> context_pin;
 };
 struct DynamicResumeSpec {
     std::string plan_id,segment_id,backend_identity;
     std::int64_t expected_revision=0,expected_state_sequence=0,expected_budget_revision=0;
+    std::optional<ContextPausePin> context_pin;
 };
 struct DynamicResumeRecord {
     Run run;
     DynamicPlanRecord plan;
     DynamicBudgetSegment segment;
     DynamicPlanCallRecord pending_call;
+    std::optional<ContextPausePin> context_pin;
 };
 struct DynamicPlanStepResult {
     DynamicPlanRecord plan;

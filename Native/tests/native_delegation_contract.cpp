@@ -138,6 +138,38 @@ void actual_oversize(PersistenceService& store,const AgentSettings& value){
 }
 RootBudgetSpec repository_budget(const std::string& workspace,std::int64_t calls=32,std::int64_t children=8){RootBudgetSpec spec;spec.policy_id="native.delegation";spec.policy_revision=1;spec.workspace_identity=workspace;spec.provider_identity_json=R"({"wire":"anthropic-messages","model_id":"fixture-delegation"})";spec.max_model_calls=calls;spec.max_children=children;spec.wall_limit_ms=20000;return spec;}
 void repository_root(PersistenceService& store,const std::string& id,const RootBudgetSpec& budget){store.create_session(id+"-session","Synthetic repository lifecycle input; real xlang3 transaction").get();store.start_prompt_run(id,id+"-session",R"({"content":"Synthetic repository lifecycle input"})",budget).get();store.transition(id,RunState::queued,RunState::running).get();}
+void repository_provider_dialects(PersistenceService& store,const std::string& database,const std::vector<std::string>& imports,const std::string& workspace){
+    // Real durable admission/attempt rows; DTOs below are explicitly synthetic,
+    // not provider transports, receipts, execution results or added RPCs.
+    const Json fallback={{"wire","chat-completions"},{"model_id","deepseek-flash"},{"chat_dialect","deepseek"}};
+    const Json generic={{"wire","chat-completions"},{"model_id","fixture-generic-chat"}};
+    const Json profile={{"profile_id","fixture-deepseek"},{"profile_revision",1},{"route_id","deepseek.chat"},{"provider","deepseek"},{"wire","chat-completions"},{"model_id","deepseek-flash"}};
+    const std::vector<std::pair<std::string,Json>> admitted={{"dialect-fallback-root",fallback},{"dialect-default-root",generic},{"dialect-profile-root",profile}};
+    for(const auto& [root,identity]:admitted){
+        auto budget=repository_budget(workspace);budget.provider_identity_json=identity.dump();
+        store.create_session(root+"-session","Synthetic provider identity admission").get();
+        Json prompt={{"content","Synthetic provider identity boundary"}};if(identity.size()==6)prompt["provider_context"]=identity;
+        store.start_prompt_run(root,root+"-session",prompt.dump(),budget).get();store.transition(root,RunState::queued,RunState::running).get();
+        require(store.root_budget(root).get().spec.provider_identity_json==identity.dump(),"Native budget must retain the exact canonical admitted provider identity");
+        const auto reserved=store.reserve_model_call(root,root,root+"-attempt",ModelCallRole::parent).get();require(reserved.state=="reserved"&&reserved.root_run_id==root&&reserved.owner_run_id==root,"Provider identity admission must support a real durable native attempt");
+        store.start_model_call(root,root,root+"-attempt").get();store.finish_model_call(root,root,root+"-attempt",R"({"content":"Synthetic boundary response, not inference"})").get();store.complete_run(root,R"({"content":"Synthetic repository boundary completed"})").get();
+        require(store.root_budget(root).get().model_calls_reserved==1&&store.root_budget(root).get().spec.provider_identity_json==identity.dump(),"Actual attempt lifecycle cannot lose or rewrite its budget dialect");
+    }
+    std::vector<Json> invalid;
+    auto changed=fallback;changed.erase("chat_dialect");changed["arbitrary"]=true;invalid.push_back(changed);
+    for(const auto& value:std::vector<Json>{"openai","unknown",nullptr,17}){changed=fallback;changed["chat_dialect"]=value;invalid.push_back(changed);}
+    for(const auto* wire:{"responses","anthropic-messages","gemini-generate-content"}){changed=fallback;changed["wire"]=wire;invalid.push_back(changed);}
+    changed=fallback;changed["arbitrary"]=true;invalid.push_back(changed);changed=fallback;changed.erase("model_id");invalid.push_back(changed);changed=fallback;changed.erase("wire");invalid.push_back(changed);
+    std::vector<std::string> malformed;for(const auto& value:invalid)malformed.push_back(value.dump());malformed.push_back(R"({"wire":"chat-completions","model_id":"deepseek-flash","chat_dialect":"deepseek","chat_dialect":"deepseek"})");
+    for(std::size_t i=0;i<malformed.size();++i){
+        const auto root="invalid-dialect-root-"+std::to_string(i),session=root+"-session";store.create_session(session,"Synthetic rejected provider identity").get();auto budget=repository_budget(workspace);budget.provider_identity_json=malformed[i];
+        rejects<std::invalid_argument>([&]{store.start_prompt_run(root,session,R"({"content":"Must roll back rejected identity"})",budget).get();},"Unknown/foreign/extra dialect identity must reject native budget admission");
+        rejects<NotFound>([&]{store.run(root).get();},"Rejected dialect cannot leave a queued root");rejects<NotFound>([&]{store.root_budget(root).get();},"Rejected dialect cannot leave a budget");require(store.history(session).get().empty(),"Rejected dialect cannot leave prompt history");
+        XlangSqlite sql(database,imports);const auto count=sql.execute("SELECT (SELECT COUNT(*) FROM events WHERE run_id=?)+(SELECT COUNT(*) FROM task_history_owners WHERE run_id=?)+(SELECT COUNT(*) FROM task_messages WHERE run_id=?)+(SELECT COUNT(*) FROM agent_model_call_reservations WHERE root_run_id=?)",{root,root,root,root}).rows;
+        require(std::get<std::int64_t>(count.at(0).at(0))==0,"Rejected identity must roll back audit/ownership/attempt rows too");
+    }
+    require(store.root_budget("dialect-fallback-root").get().spec.provider_identity_json==fallback.dump(),"Rejected identities cannot mutate the accepted dialect ledger");
+}
 DelegationBatchSpec repository_batch(PersistenceService& store,const std::string& root,const std::string& id,const std::vector<std::string>& labels){
     DelegationBatchSpec spec;spec.id=id;spec.parent_run_id=root;spec.provider_tool_call_id="provider-"+id;spec.expected_budget_revision=store.root_budget(root).get().revision;
     auto tasks=Json::array();for(const auto& label:labels){const auto objective="Synthetic repository task "+label;tasks.push_back({{"id",label},{"objective",objective},{"preset","workspace.inspect"}});spec.tasks.push_back({label,id+"-"+label,id+"-child-"+label,Json{{"content",objective}}.dump(),objective});}
@@ -147,6 +179,7 @@ void requested_arguments(DelegationBatchSpec& spec,std::string arguments){
     spec.arguments_json=std::move(arguments);auto assistant=Json::parse(spec.parent_assistant_json);assistant["tool_calls"][0]["arguments"]=spec.arguments_json;spec.parent_assistant_json=assistant.dump();
 }
 void repository_contracts(PersistenceService& store,const std::string& database,const std::vector<std::string>& imports,const std::string& workspace){
+    repository_provider_dialects(store,database,imports,workspace);
     const auto budget=repository_budget(workspace);repository_root(store,"repository-root",budget);auto specification=repository_batch(store,"repository-root","repository-batch",{"left","right"});
     const auto definition=DelegationExecutor::definition();SchemaWorker().evaluate(definition.input_schema_json,specification.arguments_json,std::chrono::steady_clock::now()+3s);
     rejects<SchemaArgumentsInvalid>([&]{SchemaWorker().evaluate(definition.input_schema_json,R"({"tasks":[{"id":"one","objective":"inspect","preset":"workspace.inspect","actor":"model-injected-controller"}]})",std::chrono::steady_clock::now()+3s);},"Actual native schema worker must reject injected leaf authority");
@@ -252,7 +285,7 @@ void migration_contract(const std::filesystem::path& database,const std::vector<
         PersistenceService migrated(path,imports);same_history(original,migrated.history("legacy-session").get());require(migrated.run("legacy-run").get().state==RunState::completed&&migrated.information("fixture","legacy").get()==R"({"retained":true})","Actual v9-to-v10 migration must retain existing terminal execution and information");
         const auto secret=migrated.resolve_credential("fixture","legacy-key","fixture:migration").get();const auto bytes=secret.view();require(std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size())==fixture_key,"Existing encrypted legacy credential must remain resolvable after migration");
         rejects<NotFound>([&]{migrated.root_budget("legacy-run").get();},"Migration must not backfill fictional historical budgets or model usage");
-        {XlangSqlite sql(path,imports);require(std::get<std::int64_t>(sql.execute("PRAGMA user_version").rows.at(0).at(0))==11,"Corrected exact legacy schema must migrate through version10 to version11");require(std::get<std::int64_t>(sql.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name='owned_child_boundary'").rows.at(0).at(0))==1,"Successful migration must install the strict generic owned-child boundary");}migrated.close();
+        {XlangSqlite sql(path,imports);require(std::get<std::int64_t>(sql.execute("PRAGMA user_version").rows.at(0).at(0))==12,"Corrected exact legacy schema must migrate through version10 to version12");require(std::get<std::int64_t>(sql.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name='owned_child_boundary'").rows.at(0).at(0))==1,"Successful migration must install the strict generic owned-child boundary");}migrated.close();
     }
 }
 }
@@ -273,6 +306,7 @@ int main(int argc,char** argv){
             PersistenceService store(database,imports);same_history(saved,store.history("success-session").get());
             for(const auto& child:saved_children)require(store.run(child.run.id).get().state==RunState::completed&&store.run_history(child.run.id).get().size()==4,"Reopen must preserve isolated completed actual leaf histories");
             for(const auto* root:{"conversation-fault-root","settlement-fault-root","recovery-root"})require(store.run(root).get().state==RunState::failed,"Recovery must retire interrupted owners without relaunch");
+            require(store.run("dialect-fallback-root").get().state==RunState::completed&&store.root_budget("dialect-fallback-root").get().spec.provider_identity_json==Json{{"wire","chat-completions"},{"model_id","deepseek-flash"},{"chat_dialect","deepseek"}}.dump()&&store.root_budget("dialect-fallback-root").get().model_calls_reserved==1,"Reopen must retain the exact admitted DeepSeek fallback and consumed attempt without replay");
             const auto recovery=store.delegation_batch("recovery-batch").get();require(recovery.state=="interrupted"&&recovery.tasks[0].run.state==RunState::completed&&!recovery.tasks[0].outcome_json.empty()&&recovery.tasks[1].run.state==RunState::failed,"Recovery must preserve completed outcomes and retire unfinished leaves without replay");
             auto prior=repository_batch(store,"recovery-root","recovery-batch",{"done","pending"});rejects<Conflict>([&]{store.accept_delegation_batch(prior).get();},"Interrupted batch deduplication cannot resume execution after reopen");
             require(read(workspace/"target.txt")=="reviewed native delegation\n"&&store.credentials("fixture").get().size()==1,"Recovery must preserve the actual approved effect and encrypted owned credential without repeating either");store.close();

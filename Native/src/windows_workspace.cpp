@@ -44,7 +44,10 @@ std::string relative_path(const std::string& input) {
     wide(input);
     if(input.find(':')!=std::string::npos || input.starts_with('/') || input.starts_with('\\')) throw ToolAccessDenied("Use a relative workspace path");
     const auto path=std::filesystem::u8path(input);
-    for(const auto& part:path) if(part==L"..") throw ToolAccessDenied("Parent traversal is outside the tool contract");
+    for(const auto& part:path){
+        if(part==L"..")throw ToolAccessDenied("Parent traversal is outside the tool contract");
+        if(WorkspaceTools::backend_private_component(utf8(part.native())))throw ToolAccessDenied("Backend configuration is outside workspace tool authority");
+    }
     const auto normalized=path.lexically_normal().generic_u8string();
     return {reinterpret_cast<const char*>(normalized.data()),normalized.size()};
 }
@@ -115,11 +118,14 @@ struct WorkspaceTools::Impl {
         const auto attrs=GetFileAttributesW(base.c_str());
         if(attrs==INVALID_FILE_ATTRIBUTES || !(attrs&FILE_ATTRIBUTE_DIRECTORY)) throw std::invalid_argument("Workspace root must be a directory");
         while(!base.empty() && base.back()==L'\\') base.pop_back();
+        for(const auto& part:std::filesystem::path(base))if(WorkspaceTools::backend_private_component(utf8(part.native())))throw ToolAccessDenied("Backend configuration cannot be a model workspace");
     }
     void verify(HANDLE handle) const {
         const auto path=final_path(handle);
         if(!equal(path,base) && !(path.size()>base.size() && path[base.size()]==L'\\' && equal(path.substr(0,base.size()),base)))
             throw ToolAccessDenied("Resolved file is outside the workspace");
+        if(path.size()>base.size())for(const auto& part:std::filesystem::path(path.substr(base.size()+1)))
+            if(WorkspaceTools::backend_private_component(utf8(part.native())))throw ToolAccessDenied("Resolved backend configuration is outside workspace tool authority");
     }
     std::wstring path(const std::string& relative) const {
         if(relative==".") return base;
@@ -171,6 +177,14 @@ std::string WorkspaceTools::identity() const {
     while(!current.empty() && current.back()==L'\\') current.pop_back();
     if(!equal(current,impl_->base)) throw ToolAccessDenied("Workspace root identity changed");
     return file_identity(impl_->root.value);
+}
+std::string WorkspaceTools::directory_identity(const std::string& input,std::stop_token cancel) const {
+    check_cancel(cancel);const auto relative=relative_path(input);const auto workspace=identity();
+    Handle directory(CreateFileW(impl_->path(relative).c_str(),FILE_READ_ATTRIBUTES|FILE_TRAVERSE,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr));
+    impl_->verify(directory.value);BY_HANDLE_FILE_INFORMATION info{};
+    if(!GetFileInformationByHandle(directory.value,&info)||!(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Expected a workspace directory");
+    if(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)throw ToolAccessDenied("Directory links are not traversed");
+    check_cancel(cancel);if(identity()!=workspace)throw ToolAccessDenied("Workspace changed during directory admission");return file_identity(directory.value);
 }
 WorkspaceFile WorkspaceTools::read_file(const std::string& input,std::stop_token cancel) const {
     auto result=read_snapshot(input,false,cancel);return {std::move(result.path),std::move(result.content)};
@@ -334,7 +348,7 @@ WorkspaceListing WorkspaceTools::list_files(const std::string& input,std::stop_t
             if(offset+header>buffer.size() || entry->FileNameLength%sizeof(wchar_t) || entry->FileNameLength>buffer.size()-offset-header)
                 throw ToolFileError("Invalid directory enumeration record");
             const std::wstring name(entry->FileName,entry->FileNameLength/sizeof(wchar_t));
-            if(name!=L"." && name!=L"..") {
+            if(name!=L"." && name!=L".."&&!backend_private_component(utf8(name))) {
                 if(result.entries.size()==1000) {result.truncated=true;break;}
                 result.entries.push_back({utf8(name),(entry->FileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)?"link":((entry->FileAttributes&FILE_ATTRIBUTE_DIRECTORY)?"directory":"file")});
             }

@@ -1,5 +1,46 @@
 # Reviewable milestones
 
+Current schema-v12 context, YAML import and DeepSeek source passed a complete
+local gate. The first full 86-contract attempt passed **81 and failed five**;
+the second full 88-contract attempt passed **85 and failed three in 162.98
+seconds**, after configuration and compilation passed. After repository,
+context-controller and CLI route fixture repairs, the third full gate passed
+**88/88 in 161.48 seconds**, with zero failures/skips, 560 frozen inputs unchanged
+and original test output captured. The failed attempts are retained without
+exclusions. DeepSeek's synthetic gateway/profile contracts passed
+individually in **0.54 / 0.71 seconds**; **131 extension / 29 browser** source
+tests remain separate. The later Responses legacy-history serializer repair
+passed the fourth complete **88/88 gate in 171.89 seconds**, with all 560 inputs
+unchanged and no failures/skips. The final saved-provider footer and catalogue
+retention changes passed **141 extension and 32 browser tests**, with all 37
+frontend/vendor inputs unchanged. The later model-free native/browser
+integration passed in **3.30 seconds** and the actual VSIX passed **18 asset
+checks**, with all 12 tested view files matching and all 30 payloads hashed.
+[Integration and package evidence](evidence/native-provider-footer-integration-provenance.json)
+retains the initial guard-host failure. Hosted validation, installation and
+live provider acceptance remain separate.
+[Source-bound native gate](evidence/native-context-provider-local-provenance.json),
+[Current context scope](native-context-compaction-design.md),
+[provider scope](provider-setup.md).
+
+The installed preview remains ace/schema v10 with one OpenAI Responses profile
+and four routes; it has not imported the local four-key configuration and does
+not advertise DeepSeek. An earlier request failed with HTTP 400 `invalid_value`;
+an isolated direct reproduction later identified assistant `input_text` instead
+of `output_text` in ace and current source. A fresh native OpenAI browser prompt
+separately returned `OK` with supplied usage **3884 / 5**, without exercising
+legacy replay or compaction. Direct account catalogue and small generation
+checks passed for all four providers; native four-provider coding, installed
+new-source clients and live compaction acceptance remain separate.
+
+The latest accepted transport-only source `859aca7743e561e46fd574c82dff65df333a7bf4`
+passed hosted **78 native contracts in 246.07 seconds**, **119 extension tests in
+3.4198188 seconds** and **26 browser tests in 2.0534379 seconds**, all 16 steps,
+model-free browser/native integration and 18 VSIX assets. Its immutable source,
+archive payloads and original logs were verified. This predates the current
+context/YAML/DeepSeek implementation and establishes no compaction or new preview
+installation. [Exact hosted transport evidence](evidence/native-context-transport-hosted-859-provenance.json).
+
 Exact source `3fc420480f61db75d3efaf4bda77fbefd8246166` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37808089507): **77 native contracts in 206.89 seconds**, **119 extension tests in 2.4612639 seconds** and **26 browser tests in 1.3989153 seconds**. All 16 job steps passed, with the exact complete native manifest, zero failures/skips, model-free browser/native integration and 18 verified VSIX assets. Original logs, advertised archive digests and exact source/runtime maps were verified. Provider replies remain synthetic; this establishes the source checkpoint rather than installed or live planning acceptance. The installed preview remains ace/schema v10. [Artifact-bound hosted evidence](evidence/native-dynamic-plan-hosted-provenance.json).
 
 Current completion scope is the [revised xMind OSS specification](architecture.md). Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE are excluded and reserved for Nexus. Historical checkpoint paragraphs below preserve their original source/time scope and do not reinstate those requirements.

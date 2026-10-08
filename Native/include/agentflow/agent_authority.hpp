@@ -26,4 +26,10 @@ std::vector<AgentAuthorityCredentialVersion> select_agent_authority_credentials(
 std::string agent_authority_identity(const AgentSettings& settings,
     const std::string& selected_model,const std::string& workspace_identity,
     const std::vector<AgentAuthorityCredentialVersion>& credentials);
+// Same exact private binding for context maintenance, including honest absent
+// workspace/tool capability and the registered context policy. It grants no
+// child admission, tool effects, planning or credential access by itself.
+std::string context_authority_identity(const AgentSettings& settings,
+    const std::string& selected_model,const std::string& workspace_identity,
+    const std::vector<AgentAuthorityCredentialVersion>& credentials);
 }

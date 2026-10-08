@@ -31,12 +31,13 @@ if(-not(Test-Path -LiteralPath $ciCtest)){throw 'Matching CTest executable is mi
 $ciProvenance=@{xmind=(& git -C $ciRoot rev-parse HEAD).Trim();xlang3=$ciRevision;stdlib_source=$ciStdlibRevision;sqlite_patch_sha256=(Get-FileHash -LiteralPath $ciPatch -Algorithm SHA256).Hash;runtime='Native xlang3; no CPython execution or bridge';toolchain=$ciGenerator;toolchain_version=$ciVisualStudio.installationVersion}
 $ciProvenance|ConvertTo-Json|Set-Content (Join-Path $ciEvidence 'provenance.json')
 $ciRuntimeBuild=Join-Path $ciRuntime 'build'
-Invoke-CiCommand 'runtime-configure' $ciCmake @('-S',$ciRuntime,'-B',$ciRuntimeBuild,'-G',$ciGenerator,'-A','x64','-DXLANG3_BUILD_CPYTHON_BRIDGE=OFF')
+Invoke-CiCommand 'runtime-configure' $ciCmake @('-S',$ciRuntime,'-B',$ciRuntimeBuild,'-G',$ciGenerator,'-A','x64','-DXLANG3_BUILD_CPYTHON_BRIDGE=OFF','-DXLANG3_PYTHON314_EXECUTABLE:FILEPATH=OFF')
 Invoke-CiCommand 'runtime-build' $ciCmake @('--build',$ciRuntimeBuild,'--config','Release','--target','xlang3','xlang_json_native_package','xlang_sqlite3_native_package','--parallel','2')
 $ciRelease=Join-Path $ciRuntimeBuild 'Release'
 $ciNative=Join-Path $ciRoot 'build/native'
 $ciNode=(Get-Command node -ErrorAction Stop).Source
 Invoke-CiCommand 'native-schema-source-check' $ciNode @((Join-Path $ciRoot 'Tools/verify-jsoncons.mjs'))
+Invoke-CiCommand 'native-yaml-source-check' $ciNode @((Join-Path $ciRoot 'Tools/verify-yaml-cpp.mjs'))
 $ciNpm=(Get-Command npm.cmd -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
 Invoke-CiCommand 'native-sdk-peer-install' $ciNpm @('ci','--prefix',(Join-Path $ciRoot 'Native/tests/sdk'),'--ignore-scripts','--no-audit','--no-fund')
 $ciOpenSsl=(Get-Command openssl -ErrorAction Stop).Source
@@ -98,6 +99,8 @@ $ciExpected+='native_anthropic_request_contract'
 $ciExpected+='native_gemini_request_contract'
 $ciExpected+='native_gemini_stream_contract'
 $ciExpected+='native_gemini_provider_contract'
+$ciExpected+='native_deepseek_provider_contract'
+$ciExpected+='native_deepseek_profile_runtime_contract'
 $ciExpected+='native_gemini_history_contract'
 $ciExpected+='native_gemini_agent_contract'
 $ciExpected+='native_gemini_catalogue_contract'
@@ -109,6 +112,14 @@ $ciExpected+='native_anthropic_agent_contract'
 $ciExpected+='native_provider_profiles_contract'
 $ciExpected+='native_provider_profile_runtime_contract'
 $ciExpected+='native_provider_profile_cli_contract'
+$ciExpected+='native_context_selection_contract'
+$ciExpected+='native_responses_context_contract'
+$ciExpected+='native_context_repository_contract'
+$ciExpected+='native_context_engine_contract'
+$ciExpected+='native_context_graph_engine_contract'
+$ciExpected+='native_provider_yaml_config_contract'
+$ciExpected+='native_context_control_contract'
+$ciExpected+='native_context_cli_contract'
 $ciActual=($ciTests|ConvertFrom-Json).tests.name
 if(@($ciActual).Count -ne $ciExpected.Count -or (Compare-Object ($ciActual|Sort-Object) ($ciExpected|Sort-Object))){throw 'The complete expected native contract set was not registered; refusing a partial green build.'}
 Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error')

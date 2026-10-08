@@ -9,7 +9,7 @@ struct ProviderProfileRoute {
     ProviderWire wire=ProviderWire::chat_completions;
 };
 struct SavedProviderProfile {
-    // Empty model is a trusted migration's key-only profile awaiting repair.
+    // Empty model is a backend-imported key-only profile awaiting selection.
     // Public save operations still require a nonempty model identity.
     std::string id,route_id,model,credential_id;
     std::int64_t revision=0;
@@ -18,6 +18,14 @@ struct ProviderProfileSnapshot {
     std::int64_t revision=0;
     std::string active;
     std::vector<SavedProviderProfile> profiles;
+};
+// Backend-only configuration input. Plaintext is move-only and never becomes
+// metadata. An absent model preserves an existing choice; a new profile may
+// honestly have no selected model. Empty key reuses an existing encrypted key.
+struct ProviderProfileConfigEntry {
+    std::string id,route_id;
+    std::optional<std::string> model;
+    SecretBytes key{std::span<const std::uint8_t>{}};
 };
 // Backend-owned encrypted profile registry. Never serialize credential references
 // directly as client metadata. Does not publish or replace an execution service.
@@ -32,6 +40,14 @@ public:
     ProviderProfileSnapshot snapshot() const;
     ProviderProfileSnapshot save(std::string id,std::string route,std::string model,SecretBytes key,
         std::int64_t expected_revision,bool activate=false,Validator validate={});
+    // Atomic backend YAML/configuration batch. Unspecified profiles remain.
+    // Native static validation covers each supplied candidate; preparation of
+    // the final active execution service happens once, before the single CAS.
+    // Identical configuration verifies that CAS without rotating revisions/keys.
+    // An empty batch requires an explicit existing active-profile selection.
+    ProviderProfileSnapshot save_config(std::vector<ProviderProfileConfigEntry> entries,
+        std::optional<std::string> active_profile,std::int64_t expected_revision,
+        Validator validate_each={},Validator prepare_active={});
     ProviderProfileSnapshot select(std::string id,std::int64_t expected_revision,Validator validate={});
     // Migration only: retain an existing encrypted reference and configuration
     // revision. Backend policy/ownership must match; an existing registry wins.

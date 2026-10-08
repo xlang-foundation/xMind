@@ -27,12 +27,14 @@ Json object_json(const std::string& source,const char* error) {
     throw std::invalid_argument(error);
 }
 }
-std::string serialize_chat_request(const ChatProviderConfig& config,const ModelRequest& request) {
+static std::string serialize_request_fields(const ChatProviderConfig& config,const ModelRequest& request,std::size_t message_limit) {
+    if(request.canonical_window)throw IncompatibleProviderHistory("Canonical context requires the Responses wire");
     if(config.model.empty() || config.model.size()>512 || config.model.find('\0')!=std::string::npos || config.endpoint.empty()) throw std::invalid_argument("Missing or invalid model configuration");
-    if(request.messages.empty() || request.messages.size()>4096 || request.tools.size()>64) throw std::invalid_argument("Model request exceeds configured limits");
+    if(request.messages.empty())throw std::invalid_argument("Model request requires original messages");
+    if(request.messages.size()>message_limit || request.tools.size()>64) throw ModelRequestCapacityExceeded("Model request exceeds configured limits");
     std::size_t input_bytes=config.model.size();
     auto account=[&](std::size_t size) {
-        if(size>8*1024*1024-input_bytes) throw std::invalid_argument("Model request exceeds configured limits");
+        if(size>8*1024*1024-input_bytes) throw ModelRequestCapacityExceeded("Model request exceeds configured limits");
         input_bytes+=size;
     };
     Json body={{"model",config.model},{"stream",true},{"n",1},{"messages",Json::array()}};
@@ -65,7 +67,7 @@ std::string serialize_chat_request(const ChatProviderConfig& config,const ModelR
     for(const auto& message:request.messages) {
         if(message.provider_items_json!="[]")throw IncompatibleProviderHistory("Responses continuation requires the Responses wire");
         account(message.content.size());account(message.tool_call_id.size());account(message.refusal.size());
-        if(message.content.size()>4*1024*1024 || message.tool_calls.size()>64) throw std::invalid_argument("Model message exceeds configured limits");
+        if(message.content.size()>4*1024*1024 || message.tool_calls.size()>64) throw ModelRequestCapacityExceeded("Model message exceeds configured limits");
         Json item={{"role",role_name(message.role)},{"content",message.content}};
         if(!message.refusal.empty()) {
             if(message.role!=MessageRole::assistant) throw std::invalid_argument("Only assistant messages carry refusals");
@@ -101,7 +103,9 @@ std::string serialize_chat_request(const ChatProviderConfig& config,const ModelR
         body["max_completion_tokens"]=*request.max_output_tokens;
     }
     try {
-        auto encoded=body.dump();if(encoded.size()>8*1024*1024) throw std::invalid_argument("Model request exceeds configured limits");return encoded;
+        auto encoded=body.dump();if(encoded.size()>8*1024*1024) throw ModelRequestCapacityExceeded("Model request exceeds configured limits");return encoded;
     } catch(const Json::exception&) {throw std::invalid_argument("Invalid UTF-8 model request");}
 }
+std::string serialize_chat_request(const ChatProviderConfig& config,const ModelRequest& request){return serialize_request_fields(config,request,4096);}
+std::string serialize_responses_request_fields(const ChatProviderConfig& config,const ModelRequest& request){return serialize_request_fields(config,request,8192);}
 }

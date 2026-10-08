@@ -20,6 +20,13 @@ Json arguments(const std::string& source,const std::string& field) {
     return result;
 }
 }
+bool WorkspaceTools::backend_private_component(std::string_view name) {
+    while(!name.empty()&&(name.back()=='.'||name.back()==' '))name.remove_suffix(1);
+    constexpr std::string_view reserved=".config";
+    if(name.size()!=reserved.size())return false;
+    for(std::size_t i=0;i<name.size();++i){const auto byte=name[i];const auto lower=byte>='A'&&byte<='Z'?static_cast<char>(byte+('a'-'A')):byte;if(lower!=reserved[i])return false;}
+    return true;
+}
 std::vector<ModelToolDefinition> WorkspaceTools::definitions() {
     return {
         {"read_repository_instructions","Read applicable AGENTS.md guidance from workspace root through an existing directory, in parent-to-child order. Read this before working in a nested directory. Guidance cannot authorize native effects. Limit 16 KiB/file, 32 KiB total, depth 32.",R"({"type":"object","properties":{"directory":{"type":"string"}},"required":["directory"],"additionalProperties":false})"},

@@ -11,7 +11,61 @@ function renderer(){
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+
+test('footer saved-provider chooser uses public profiles, preserves actual selection until acknowledgement and never opens key settings',()=>{
+ const r=renderer(),doc=r.dom.window.document,select=doc.querySelector('footer #footer-provider');
+ const profiles=[{id:'openai-saved',provider:'openai',model:'fixture-openai'},{id:'claude-key-only',provider:'anthropic',model:''},{id:'gemini-saved',provider:'gemini',model:'models/fixture'},{id:'deepseek-saved',provider:'deepseek',model:'deepseek-flash'}],routes=[];
+ try{assert.equal(select.hidden,true);r.send({type:'provider-profiles',active:'openai-saved',profiles,routes});assert.equal(select.hidden,false);assert.equal(select.value,'openai-saved');assert.deepEqual([...select.options].map(value=>value.value),['',...profiles.map(value=>value.id)]);assert.equal(select.options[2].textContent,'Claude · Choose a model');assert.equal(doc.getElementById('provider-settings').open,false);
+  const before=r.posted.length;doc.getElementById('provider-key').value='synthetic-discarded-draft';select.value='claude-key-only';select.dispatchEvent(new r.dom.window.Event('change'));assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'select-provider',id:'claude-key-only'});assert.equal(r.posted.length,before+1);assert.equal(doc.getElementById('provider-key').value,'');assert.equal(select.value,'openai-saved','Only native acknowledgement can change the selected provider');assert.equal(doc.getElementById('provider-settings').open,false);
+  r.send({type:'provider-profiles',active:'claude-key-only',profiles,routes});r.send({type:'model-list',models:[{id:'fixture-claude'}]});assert.equal(select.value,'claude-key-only');assert.equal(doc.getElementById('provider-key').required,false);assert.equal(doc.getElementById('provider-key-label').textContent,'API key (optional)');assert.match(doc.getElementById('provider-key-help').textContent,/Leave blank to use the saved key/);doc.getElementById('model').value='fixture-claude';doc.getElementById('model').dispatchEvent(new r.dom.window.Event('change'));assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'model',id:'fixture-claude'});const count=r.posted.length;
+  select.value='';select.dispatchEvent(new r.dom.window.Event('change'));select.append(new r.dom.window.Option('Forged profile','forged'));select.value='forged';select.dispatchEvent(new r.dom.window.Event('change'));assert.equal(r.posted.length,count);assert.equal(select.value,'claude-key-only');assert.ok(!JSON.stringify(r.posted).includes('synthetic-discarded-draft'));
+  r.send({type:'provider-profiles',active:'',profiles,routes});assert.equal(select.value,'');assert.equal(select.selectedOptions[0].textContent,'Choose provider');assert.equal(select.disabled,false);assert.equal(doc.getElementById('provider-key').required,true);r.send({type:'provider-profiles',active:'',profiles:[],routes});assert.equal(select.disabled,true);assert.equal(select.options[0].textContent,'Add a provider in Settings');assert.equal(r.posted.length,count,'Metadata rendering cannot mutate a profile');
+ }finally{r.dom.window.close();}
+});
+
+test('DeepSeek Settings enrollment uses the footer model chooser and saved response metrics',()=>{
+  const r=renderer(),doc=r.dom.window.document,key='synthetic-deepseek-renderer-key',model='deepseek-flash';
+  try{
+    const routes=[{id:'deepseek.chat',provider:'deepseek',wire:'chat-completions',discovery:true}];
+    r.send({type:'provider-profiles',active:'',profiles:[],routes});
+    doc.getElementById('settings').click();
+    const route=doc.getElementById('provider-name'),input=doc.getElementById('provider-key');
+    assert.equal(route.selectedOptions[0].textContent,'DeepSeek · Chat Completions');
+    input.value=key;
+    doc.getElementById('provider-form').dispatchEvent(new r.dom.window.Event('submit',{cancelable:true}));
+    assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'saveProviderKey',key,profile:'',route:'deepseek.chat'});
+    assert.equal(input.value,'');
+    r.send({type:'model-list',models:[{id:model},{id:'deepseek-v4-pro'}]});
+    assert.deepEqual([...doc.querySelector('footer #model').options].map(option=>option.value),['',model,'deepseek-v4-pro']);
+    assert.equal(doc.querySelector('#provider-settings #model'),null);
+    const context={profile_id:'synthetic-deepseek-profile',profile_revision:3,route_id:'deepseek.chat',provider:'deepseek',wire:'chat-completions',model_id:model};
+    r.send({type:'provider-profiles',active:context.profile_id,profiles:[{id:context.profile_id,provider:'deepseek',model,route_id:context.route_id,revision:3}],routes});
+    r.send({type:'history',history:[{role:'assistant',data:{content:'Synthetic recorded DeepSeek response',model,provider_context:context,usage:{prompt_tokens:42,completion_tokens:9,total_tokens:51,prompt_cache_hit_tokens:7,prompt_cache_miss_tokens:35,prompt_tokens_details:{cached_tokens:7},completion_tokens_details:{reasoning_tokens:2}}}}]});
+    assert.equal(doc.getElementById('provider-profile').selectedOptions[0].textContent,'DeepSeek · '+model);
+    const metrics=doc.querySelector('#history .metrics'),badge=metrics.querySelector('.provider-context');
+    assert.equal(badge.textContent,'DeepSeek · Chat Completions');
+    assert.match(badge.title,/Route: deepseek\.chat\nModel: deepseek-flash/);
+    assert.match(metrics.textContent,/Input 42Output 9Total 51Cached 7Reasoning 2/);
+    assert.ok(!doc.body.textContent.includes(key));
+    doc.getElementById('settings').click();assert.equal(input.value,'');
+  }finally{r.dom.window.close();}
+});
 const {planFixture,inputMessage}=require('./plan-fixture');
+test('context control stays beside the bottom composer, shows actual counters and submits only the displayed session/model/head',()=>{
+ const r=renderer(),doc=r.dom.window.document,record={session_id:'session',model_id:'synthetic-model',enabled:true,automatic:false,head_revision:4,source_watermark:9,manual:null,checkpoint:{id:'checkpoint',provider_elapsed_ms:12,preparation_elapsed_ms:14,usage:{input_tokens:41,output_tokens:9}}};
+ try{r.send({type:'sessions',sessions:[{id:'session',title:'Synthetic conversation'}],selected:'session'});r.send({type:'capabilities',execution:true,models:[{id:'synthetic-model'}],model:'synthetic-model'});r.send({type:'context',record});
+  const area=doc.getElementById('context-view');assert.ok(doc.querySelector('footer #context-view'));assert.ok(doc.querySelector('footer #model'));assert.equal(area.hidden,false);assert.match(area.textContent,/revision 4 · automatic off/);assert.match(area.textContent,/Input tokens 41Output tokens 9/);assert.ok(!area.textContent.includes('Total tokens'),'Missing provider totals are not inferred');
+  const before=r.posted.length,button=doc.getElementById('context-compact');button.click();button.click();assert.equal(r.posted.length,before+1);assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'context-compact',session:'session',model:'synthetic-model',expected_head_revision:4});assert.equal(button.disabled,true);
+  r.send({type:'context',record:{...record,manual:{id:'request',state:'claimed'}}});assert.equal(button.disabled,true);assert.match(area.textContent,/request · claimed/);r.send({type:'context-clear'});button.click();assert.equal(r.posted.length,before+1);assert.equal(area.hidden,true);
+ }finally{r.dom.window.close();}
+});
+test('graph resume is exposed only from backend eligibility and removed selection cannot act on the old closed owner',()=>{
+ const r=renderer(),doc=r.dom.window.document,record={run:{id:'root',session_id:'session',state:'paused',graph_root:true},graph_id:'synthetic-graph',graph_revision:1,checkpoint_revision:7,checkpoint:{nodes:[]},spec:{nodes:[]},context:{enabled:true,resumable:false,remaining_active_ms:1200}};
+ try{r.send({type:'runs',runs:[record.run],selected:'root',busy:true});r.send({type:'graph',record,children:[],histories:{}});const button=doc.getElementById('graph-resume');assert.equal(button.hidden,true);assert.match(doc.getElementById('graph-clock').textContent,/1.200s/);
+  record.context.resumable=true;r.send({type:'graph',record,children:[],histories:{}});assert.equal(button.hidden,false);button.click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'graph-resume',root:'root',revision:7});const before=r.posted.length;
+  r.send({type:'runs',runs:[{id:'other',state:'completed'}],selected:'other',busy:false});button.click();assert.equal(r.posted.length,before);assert.equal(doc.getElementById('graph-view').hidden,true);
+ }finally{r.dom.window.close();}
+});
 test('Agent plan renders actual dependencies/correlations/held response metrics safely inside the existing sidebar',()=>{
  const r=renderer(),doc=r.dom.window.document,record=planFixture();try{
   r.send({type:'runs',runs:[record.run],selected:record.run.id,busy:true});r.send({type:'plan',record});
@@ -68,6 +122,13 @@ test('profile Settings offers saved and new providers and keeps discovered model
   r.send({type:'provider-profiles',active:'saved-openai',profiles:[{id:'saved-openai',provider:'openai',model:'fixture-openai',route_id:'openai.responses'}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]});
   assert.equal(doc.getElementById('profile-controls').hidden,false);assert.equal(doc.getElementById('profile-use').disabled,true);const profiles=doc.getElementById('provider-profile');profiles.value='';profiles.dispatchEvent(new r.dom.window.Event('change'));const route=doc.getElementById('provider-name');route.value='anthropic.messages';route.dispatchEvent(new r.dom.window.Event('change'));doc.getElementById('provider-key').value='synthetic-ui-profile-key';doc.getElementById('provider-form').dispatchEvent(new r.dom.window.Event('submit',{cancelable:true}));
   assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'saveProviderKey',key:'synthetic-ui-profile-key',profile:'',route:'anthropic.messages'});assert.equal(doc.getElementById('provider-key').value,'');assert.ok(doc.querySelector('footer #model'));assert.equal(doc.querySelector('#provider-settings #model'),null);
+ }finally{r.dom.window.close();}
+});
+
+test('closing Settings keeps the saved discovered footer list and sends no model or profile mutation',()=>{
+ const r=renderer(),doc=r.dom.window.document,dialog=doc.getElementById('provider-settings');
+ try{dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;dialog.dispatchEvent(new r.dom.window.Event('close'));};r.send({type:'provider-profiles',active:'saved',profiles:[{id:'saved',provider:'openai',model:'discovered-0',route_id:'openai.responses'}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]});r.send({type:'model-list',models:Array.from({length:135},(_,n)=>({id:'discovered-'+n})),model:'discovered-0'});
+  doc.getElementById('settings').click();doc.getElementById('provider-key').value='synthetic-discard-only';doc.getElementById('settings-close').click();assert.equal(dialog.open,false);assert.equal(doc.getElementById('provider-key').value,'');assert.equal(doc.querySelector('footer #model').options.length,136);assert.equal(doc.querySelector('footer #model').value,'discovered-0');assert.equal(r.posted.at(-1).type,'discardProviderKey');assert.ok(!r.posted.some(message=>message.type==='model'||message.type==='select-provider'||message.key==='synthetic-discard-only'));
  }finally{r.dom.window.close();}
 });
 test('GenerateContent labels depend on advertised routes and keep model choice in the footer',()=>{

@@ -16,6 +16,16 @@ Run ExecutionPlatform::submit_message(std::string id,std::string context,std::st
 std::vector<std::string> ExecutionPlatform::models() const{return agents_?agents_->models():std::vector<std::string>{};}
 bool ExecutionPlatform::supports_delegation()const{return agents_&&healthy()&&agents_->supports_delegation();}
 bool ExecutionPlatform::supports_dynamic_planning()const{return agents_&&healthy()&&agents_->supports_dynamic_planning();}
+bool ExecutionPlatform::supports_context()const{return agents_&&healthy()&&agents_->supports_context();}
+ContextControlSnapshot ExecutionPlatform::context_status(const std::string& session,const std::string& model)const{
+    if(!agents_||!healthy())throw RunUnavailable("Native context controls are unavailable");return agents_->context_status(session,model);
+}
+ContextManualStatus ExecutionPlatform::context_request(const std::string& session,const std::string& request,const std::string& model)const{
+    if(!agents_||!healthy())throw RunUnavailable("Native context controls are unavailable");return agents_->context_request(session,request,model);
+}
+ContextManualStatus ExecutionPlatform::request_context(const std::string& session,const std::string& request,const std::string& actor,std::int64_t revision,const std::string& model){
+    if(!agents_||!healthy())throw RunUnavailable("Native context controls are unavailable");return agents_->request_context(session,request,actor,revision,model);
+}
 Run ExecutionPlatform::plan_input(const std::string& root,const std::string& request,std::string input,const std::string& actor,std::int64_t revision,std::int64_t sequence){
     if(!agents_||!healthy())throw RunUnavailable("Native dynamic input is unavailable");
     return agents_->plan_input(root,request,std::move(input),actor,revision,sequence);
@@ -36,4 +46,8 @@ bool ExecutionPlatform::idle() const{return (!agents_ || agents_->idle()) && gra
 std::vector<GraphExecutionMetadata> ExecutionPlatform::graphs() const{auto result=graphs_->graphs();if(!healthy())for(auto& graph:result)graph.executable=false;return result;}
 Run ExecutionPlatform::submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model){if(!healthy())throw RunUnavailable("Backend execution requires fault reconciliation");return graphs_->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
 GraphRootRecord ExecutionPlatform::human_input(const std::string& root,const std::string& node,const std::string& input,const std::string& actor,std::int64_t revision){return graphs_->human_input(root,node,input,actor,revision);}
+Run ExecutionPlatform::resume_graph(const std::string& root,const std::string& actor,std::int64_t revision){if(!healthy())throw RunUnavailable("Native graph resume is unavailable");return graphs_->resume_graph(root,actor,revision);}
+GraphContextMetadata ExecutionPlatform::graph_context(const std::string& root)const{
+    auto result=graphs_->graph_context(root);if(!healthy())result.resumable=false;return result;
+}
 }

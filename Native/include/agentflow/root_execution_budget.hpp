@@ -23,6 +23,8 @@ public:
     void start(const ModelCallReservation& reservation,std::stop_token cancel={});
     void finish(const ModelCallReservation& reservation,const std::string& actual_assistant_json={});
     ModelCallReservation reserve_continuation(const std::string& plan_call,std::stop_token cancel={});
+    void pin_context(const ContextSnapshot& snapshot);
+    void adopt_context_pin(const ContextPausePin& pin);
     Run suspend_for_human(const DynamicPlanRecord& plan,const std::string& plan_call);
     std::int64_t active_elapsed_ms() const;
     const std::string& segment_id() const;
@@ -32,6 +34,7 @@ public:
 private:
     PersistenceService& store_;
     std::string root_;
+    std::string policy_;
     std::chrono::steady_clock::time_point deadline_;
     std::stop_token cancel_;
     std::size_t parallel_;
@@ -39,5 +42,6 @@ private:
     std::optional<DynamicBudgetSegment> segment_;
     std::string backend_identity_;
     std::chrono::steady_clock::time_point active_started_;
+    std::optional<ContextPausePin> context_pin_;
 };
 }

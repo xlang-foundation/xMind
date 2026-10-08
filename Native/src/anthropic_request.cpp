@@ -42,6 +42,7 @@ void add(std::vector<WireMessage>& messages,std::size_t& content_bytes,std::stri
 }
 }
 std::string serialize_anthropic_request(const ChatProviderConfig& config,const ModelRequest& request){
+    if(request.canonical_window)throw IncompatibleProviderHistory("Canonical context requires the Responses wire");
     if(config.reasoning_effort)throw std::invalid_argument("Claude reasoning controls are not implemented");
     if(!request.max_output_tokens)throw std::invalid_argument("Claude requires an explicit output token limit");
     if(request.messages.empty()||request.messages.size()>4096||request.tools.size()>64)throw std::invalid_argument("Claude request exceeds configured counts");

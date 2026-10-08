@@ -1,11 +1,16 @@
 #pragma once
 #include "agentflow/model_stream.hpp"
 #include "agentflow/http_stream_transport.hpp"
+#include "agentflow/responses_context.hpp"
 #include <optional>
 #include <stdexcept>
 
 namespace agentflow {
 class IncompatibleProviderHistory : public std::invalid_argument {
+public:
+    using std::invalid_argument::invalid_argument;
+};
+class ModelRequestCapacityExceeded : public std::invalid_argument {
 public:
     using std::invalid_argument::invalid_argument;
 };
@@ -27,6 +32,9 @@ struct ModelRequest {
     std::vector<ModelToolDefinition> tools;
     bool include_usage=false;
     std::optional<std::int64_t> max_output_tokens;
+    // Private validated provider-native context. The Responses adapter places
+    // it after current trusted instructions and before original tail messages.
+    std::optional<ResponsesCanonicalWindow> canonical_window;
 };
 struct ChatProviderConfig {
     // Backend-selected endpoint and model. Gemini uses a versioned endpoint
@@ -37,9 +45,14 @@ struct ChatProviderConfig {
     ProviderWire wire=ProviderWire::chat_completions;
     Capability reasoning=Capability::unknown;
     std::optional<ReasoningEffort> reasoning_effort;
+    // Explicit backend dialect; never inferred from an endpoint or model ID.
+    ChatDialect chat_dialect=ChatDialect::openai;
 };
 // Pure native request serialization; no model/provider availability is inferred.
 std::string serialize_chat_request(const ChatProviderConfig& config,const ModelRequest& request);
+// Common field/correlation validation for the bounded Responses input window.
+// Returns the common field representation, not a transport request.
+std::string serialize_responses_request_fields(const ChatProviderConfig& config,const ModelRequest& request);
 std::string serialize_responses_request(const ChatProviderConfig& config,const ModelRequest& request);
 // Claude Messages request component; transport/routing enrollment is separate.
 std::string serialize_anthropic_request(const ChatProviderConfig& config,const ModelRequest& request);

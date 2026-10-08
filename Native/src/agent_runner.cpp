@@ -9,6 +9,7 @@
 #include "agentflow/delegation_executor.hpp"
 #include "agentflow/dynamic_plan_executor.hpp"
 #include "agentflow/agent_authority.hpp"
+#include "agentflow/run_executor.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <random>
@@ -28,6 +29,20 @@ namespace {
 using Json=nlohmann::json;
 constexpr std::string_view instruction_prefix="\n\nBackend-configured agent instructions (native permissions and execution evidence remain authoritative):\n";
 std::string operation_id() {std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i) value<<std::setw(8)<<random();return value.str();}
+std::string public_context_usage(const std::string& raw){
+    const auto actual=Json::parse(raw);if(actual.is_null())return "null";
+    if(!actual.is_object())throw ModelProtocolError("Stored compaction usage has no valid public shape");
+    auto result=Json::object();
+    for(const auto* key:{"input_tokens","output_tokens","total_tokens"})if(actual.contains(key))result[key]=actual.at(key);
+    for(const auto* key:{"input_tokens_details","output_tokens_details"})if(actual.contains(key)){
+        auto details=Json::object();const auto& value=actual.at(key);
+        if(value.is_null()){result[key]=nullptr;continue;}
+        if(!value.is_object())throw ModelProtocolError("Stored compaction usage details are invalid");
+        for(const auto* name:{"cached_tokens","reasoning_tokens"})if(value.contains(name))details[name]=value.at(name);
+        result[key]=std::move(details);
+    }
+    return result.dump();
+}
 void cancelled(std::stop_token token) {if(token.stop_requested()) throw TransportCancelled("Agent cancelled");}
 MessageRole role(const std::string& name) {
     if(name=="user") return MessageRole::user;if(name=="assistant") return MessageRole::assistant;
@@ -59,7 +74,10 @@ Json assistant(const ModelCompletion& result,const std::string& model,std::int64
 std::string execution_identity(const AgentSettings& settings,const std::string& model){
     auto context=provider_context_json(settings,model);if(!context.empty())return context;
     const char* wire=settings.provider.wire==ProviderWire::responses?"responses":settings.provider.wire==ProviderWire::anthropic_messages?"anthropic-messages":settings.provider.wire==ProviderWire::gemini_generate_content?"gemini-generate-content":"chat-completions";
-    return Json{{"wire",wire},{"model_id",model.empty()?settings.provider.model:model}}.dump();
+    auto identity=Json{{"wire",wire},{"model_id",model.empty()?settings.provider.model:model}};
+    if(settings.provider.chat_dialect==ChatDialect::deepseek)identity["chat_dialect"]="deepseek";
+    else if(settings.provider.chat_dialect!=ChatDialect::openai)throw std::invalid_argument("Invalid native chat dialect");
+    return identity.dump();
 }
 std::string tool_catalogue(const std::vector<ModelToolDefinition>& definitions,const Json& actual_bindings){
     if(!actual_bindings.is_array())throw DynamicPlanUnavailable("Actual MCP approval bindings are not a native array");
@@ -125,6 +143,10 @@ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,
         // This allowance is inherited from the native agent configuration.
         policy.max_parent_turns=static_cast<std::int64_t>(settings_.max_turns);
     }
+    if(settings_.context){
+        if(settings_.max_turns>16)throw std::invalid_argument("Context-enabled ordinary agents require bounded logical turns");
+        ContextManager validate(persistence_,settings_.provider,*settings_.context,message);
+    }
 }
 AgentRunner::~AgentRunner()=default;
 std::vector<std::string> AgentRunner::models() const {
@@ -139,7 +161,11 @@ std::string provider_context_json(const AgentSettings& settings,const std::strin
     return nlohmann::json{{"profile_id",identity.profile_id},{"profile_revision",identity.profile_revision},{"route_id",identity.route_id},{"provider",identity.provider},{"wire",wire},{"model_id",model_id.empty()?settings.provider.model:model_id}}.dump();
 }
 std::optional<RootBudgetSpec> AgentRunner::execution_budget(const std::string& model_id)const{
-    if((!settings_.delegation||!delegation_)&&(!settings_.planning||!planning_))return {};
+    if((!settings_.delegation||!delegation_)&&(!settings_.planning||!planning_)){
+        if(!settings_.context)return {};
+        return RootBudgetSpec{"native.context",1,workspace_?workspace_->identity():"workspace:none",
+            execution_identity(settings_,model_id),0,0,32,settings_.run_timeout.count()};
+    }
     const auto policy=settings_.delegation.value_or(AgentDelegationPolicy{});const auto context=execution_identity(settings_,model_id);
     return RootBudgetSpec{settings_.planning?"native.dynamic-plan":"native.delegation",1,workspace_->identity(),context,static_cast<std::int64_t>(policy.max_children),static_cast<std::int64_t>(policy.max_parallel),static_cast<std::int64_t>(policy.max_model_calls),settings_.run_timeout.count()};
 }
@@ -197,11 +223,81 @@ Run AgentRunner::start(std::string id,std::string session_id,std::string prompt,
     auto input=Json{{"content",std::move(prompt)}};const auto context=provider_context_json(settings_,model_id);if(!context.empty())input["provider_context"]=Json::parse(context);
     return persistence_.start_prompt_run(std::move(id),std::move(session_id),input.dump(),execution_budget(model_id),execution_capabilities(model_id)).get();
 }
+ContextBinding AgentRunner::context_binding(const std::string& model_id)const{
+    if(!settings_.context)throw RunUnavailable("This provider has no registered context strategy");
+    const auto& selected=model_id.empty()?settings_.provider.model:model_id;
+    const auto allowed=models();if(std::find(allowed.begin(),allowed.end(),selected)==allowed.end())throw std::invalid_argument("Context model is not configured");
+    const auto& policy=settings_.context->compaction;
+    return {execution_identity(settings_,selected),context_authority_identity(settings_,selected,
+        workspace_?workspace_->identity():"workspace:none",agent_authority_credentials(persistence_,settings_)),
+        policy.id,policy.revision,policy.strategy_id,policy.strategy_revision};
+}
+ContextControlSnapshot AgentRunner::context_status(const std::string& session,const std::string& model)const{
+    persistence_.session(session).get();ContextControlSnapshot result;result.session_id=session;
+    result.model_id=model.empty()?settings_.provider.model:model;result.enabled=settings_.context.has_value();
+    if(!result.enabled)return result;
+    const auto binding=context_binding(result.model_id);const ContextScope scope{ContextScopeKind::session,session};
+    const auto observation=persistence_.context_status_observation(scope,binding).get();
+    result.automatic=settings_.context->compaction.automatic;result.head_revision=observation.head.revision;
+    result.source_watermark=observation.source_watermark;
+    if(const auto& manual=observation.current_manual)
+        result.manual=ContextManualStatus{manual->id,manual->state};
+    if(const auto& checkpoint=observation.checkpoint)
+        result.checkpoint=ContextCompactionStatus{checkpoint->compaction_id,checkpoint->measured_elapsed_ms,
+            checkpoint->measured_preparation_elapsed_ms,public_context_usage(checkpoint->actual_usage_json)};
+    return result;
+}
+ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord& owner,
+    std::chrono::steady_clock::time_point deadline,const std::string& model,std::stop_token token){
+    const auto binding=context_binding(model);const auto before_read=std::chrono::steady_clock::now();
+    const auto current=persistence_.idle_context_owner(owner.spec.id).get();
+    if(current.state!="active"||current.spec.scope.kind!=ContextScopeKind::session||
+       current.spec.binding!=binding||current.spec.manual_request_id!=owner.spec.manual_request_id||
+       current.spec.scope!=owner.spec.scope||current.remaining_active_ms<1)
+        throw ContextBindingChanged("Idle context preparation has no exact active owner");
+    deadline=std::min(deadline,before_read+std::chrono::milliseconds(current.remaining_active_ms));
+    const auto check=[&]{cancelled(token);if(std::chrono::steady_clock::now()>=deadline)throw RootBudgetDeadlineExceeded("Idle context preparation deadline elapsed");};
+    check();auto provider=settings_.provider;if(!model.empty())provider.model=model;
+    ModelRequest trusted;trusted.include_usage=provider.stream_usage==Capability::supported;trusted.max_output_tokens=settings_.max_output_tokens;
+    auto instructions=settings_.instructions;
+    if(workspace_){RepositoryInstructionContext context(*workspace_,workspace_->repository_instructions(".",token));instructions+=context.prepare(token);}
+    if(!settings_.instruction_policy.instructions.empty()){instructions.append(instruction_prefix);instructions+=settings_.instruction_policy.instructions;}
+    if(instructions.size()>65536)throw ModelRequestCapacityExceeded("Current idle context instructions exceed limits");
+    if(!instructions.empty())trusted.messages.push_back({MessageRole::system,std::move(instructions)});
+    if(workspace_)trusted.tools=workspace_->definitions();
+    if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());}
+    if(process_)trusted.tools.push_back(process_->definition());
+    struct McpRuntime {std::unique_ptr<McpStdioClient> client;std::unique_ptr<McpToolRegistry> registry;};
+    std::vector<McpRuntime> peers;std::set<std::string> aliases;for(const auto& definition:trusted.tools)aliases.insert(definition.name);
+    for(const auto& server:settings_.mcp_servers){
+        if(!server.enabled)continue;check();
+        McpStdioConfiguration configuration{server.executable,server.working_directory,server.arguments,{}};
+        struct ClearEnvironment {McpStdioConfiguration& value;~ClearEnvironment(){for(auto& entry:value.environment)if(!entry.second.empty())SecureZeroMemory(entry.second.data(),entry.second.size());}} clear{configuration};
+        for(const auto& reference:server.credentials){check();auto secret=persistence_.resolve_credential(reference.scope,reference.id,mcp_credential_purpose(server,reference.name)).get();
+            const auto bytes=secret.view();configuration.environment.emplace_back(reference.name,std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size()));}
+        check();McpRuntime runtime;runtime.client=std::make_unique<McpStdioClient>(configuration);runtime.client->connect(deadline,token);
+        runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,deadline,token);
+        for(const auto& definition:runtime.registry->definitions()){
+            if(trusted.tools.size()>=64||!aliases.insert(definition.name).second)throw ModelRequestCapacityExceeded("Idle model tool catalogue exceeds limits or has an alias collision");
+            trusted.tools.push_back(definition);
+        }
+        peers.push_back(std::move(runtime));
+    }
+    if(delegation_&&settings_.delegation)trusted.tools.push_back(DelegationExecutor::definition());
+    if(const auto planning=execution_capabilities(provider.model))for(auto& definition:context_dynamic_plan_tool_definitions(*planning))trusted.tools.push_back(std::move(definition));
+    if(trusted.tools.size()>64)throw ModelRequestCapacityExceeded("Idle model tool catalogue exceeds limits");
+    check();std::optional<SecretBytes> credential;
+    if(settings_.credential)credential=persistence_.resolve_credential(settings_.credential->scope,settings_.credential->id,settings_.credential->purpose).get();
+    if(context_binding(provider.model)!=binding)throw ContextBindingChanged("Idle context authority changed during preparation");
+    check();ContextManager manager(persistence_,provider,*settings_.context,message);
+    return manager.compact_idle(current.spec.scope,binding,current.spec.id,trusted,credential?&*credential:nullptr,token,deadline);
+}
 Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id,std::shared_ptr<RootExecutionBudget> budget) {
     const auto admitted=persistence_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
-    bool leaf=false,dynamic_child=false;std::optional<DynamicPlanCapabilities> child_caps;std::optional<DynamicPresetCapability> child_preset;
+    bool leaf=false,dynamic_child=false,graph_agent=false;std::optional<DynamicPlanCapabilities> child_caps;std::optional<DynamicPresetCapability> child_preset;
     if(!admitted.parent_id.empty()){
         const auto admission=persistence_.child_admission(id).get();dynamic_child=admission.kind==ChildAdmissionKind::dynamic_agent;
+        graph_agent=admission.kind==ChildAdmissionKind::graph_agent;
         leaf=admission.kind==ChildAdmissionKind::delegated_leaf||dynamic_child;
         if(admission.kind!=ChildAdmissionKind::graph_agent&&!leaf)throw std::invalid_argument("Only admitted agent children can invoke the model engine");
         if(leaf&&(!budget||budget->root_id()!=admission.root_run_id||settings_.planning||settings_.delegation||!settings_.selectable_models.empty()))throw std::invalid_argument("Agent child requires its exact bounded root owner");
@@ -224,13 +320,33 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             }catch(const DynamicPlanUnavailable&){return persistence_.transition(id,RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
              catch(const std::invalid_argument&){return persistence_.transition(id,RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
         }
-        if(!leaf&&budget)throw std::invalid_argument("Registered graph agent cannot acquire a separate delegation budget");
+        if(!leaf&&budget&&(!graph_agent||!settings_.context||budget->root_id()!=admission.root_run_id||
+            budget->snapshot().spec.policy_id!="native.graph-context"))
+            throw std::invalid_argument("Registered graph agent requires its exact shared graph context budget");
     }else if(budget)throw std::invalid_argument("Normal agent root must acquire its own durable budget");
     const bool dynamic_root=admitted.parent_id.empty()&&settings_.planning&&planning_;
     const bool resumed=dynamic_root&&admitted.state==RunState::paused;
     auto provider=settings_.provider;
     const auto selected=resumed&&model_id.empty()?admitted_dynamic_model(id):model_id;
     if(!selected.empty()) {const auto allowed=models();if(std::find(allowed.begin(),allowed.end(),selected)==allowed.end()) throw std::invalid_argument("Model is not configured on this backend");provider.model=selected;}
+    if(graph_agent&&settings_.context){
+        if(!budget)throw std::invalid_argument("Context graph agent requires its owning shared budget");
+        const auto captured=persistence_.graph_context_owner(budget->root_id()).get();
+        const auto node=std::find_if(captured.authority.agents.begin(),captured.authority.agents.end(),
+            [&](const auto& value){return value.node_id==admitted.node_id;});
+        bool compatible=node!=captured.authority.agents.end()&&node->model_id==provider.model&&
+            node->provider_identity_json==execution_identity(settings_,provider.model)&&
+            node->turn_limit==static_cast<std::int64_t>(settings_.max_turns);
+        if(compatible)try{compatible=node->backend_identity==context_authority_identity(settings_,provider.model,
+            workspace_?workspace_->identity():"workspace:none",agent_authority_credentials(persistence_,settings_));}
+        catch(const NotFound&){compatible=false;}
+        catch(const Conflict&){compatible=false;}
+        if(compatible)try{for(const auto& profile:settings_.process_profiles)
+            if(profile.executable_id.empty()||ForegroundProcess::executable_identity(profile.executable)!=profile.executable_id){compatible=false;break;}}
+        catch(const ProcessBeforeDispatchError&){compatible=false;}
+        catch(const std::filesystem::filesystem_error&){compatible=false;}
+        if(!compatible)return persistence_.transition(id,RunState::queued,RunState::failed,R"({"reason":"graph_child_configuration_changed"})").get();
+    }
     // Claim outside the failure handler. A duplicate worker losing this update
     // must not fail the run that another worker already owns.
     if(token.stop_requested()){
@@ -246,11 +362,14 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         const auto plan=persistence_.dynamic_plan_for_root(id).get();if(!plan)throw DynamicPlanUnavailable("Paused dynamic owner has no plan");
         const auto saved=persistence_.root_budget(id).get();
         DynamicResumeSpec spec{plan->id,operation_id(),plan->capabilities.backend_identity,plan->revision,plan->state_sequence,saved.revision};
+        spec.context_pin=persistence_.dynamic_context_pause(id).get();
+        if(settings_.context&&!spec.context_pin)throw DynamicPlanUnavailable("Context-enabled pause has no exact durable context pin");
         const auto active_started=std::chrono::steady_clock::now();
         resume=persistence_.resume_dynamic_owner(std::move(spec)).get();root_caps=resume->plan.capabilities;
         try{budget=std::make_shared<RootExecutionBudget>(persistence_,persistence_.root_budget(id).get(),
             active_started+std::chrono::milliseconds(resume->segment.remaining_active_ms),token,resume->segment,root_caps->backend_identity);}
         catch(...){throw DynamicOutcomeUnrecorded("Resumed dynamic segment lacks its live clock owner; recovery is required");}
+        if(resume->context_pin)budget->adopt_context_pin(*resume->context_pin);
     }else persistence_.transition(id,RunState::queued,RunState::running).get();
     std::stop_source linked;
     std::stop_callback external(token,[&]{linked.request_stop();});
@@ -305,7 +424,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(!instructions.empty()) request.messages.push_back({MessageRole::system,std::move(instructions)});
         if(settings_.instruction_policy.revision>0)persistence_.append_event(id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
         const auto instruction_messages=request.messages.size();
-        auto reload_history=[&]{request.messages.resize(instruction_messages);for(const auto& stored:persistence_.run_history(id).get())request.messages.push_back(message(stored));};
+        auto reload_history=[&]{
+            request.messages.resize(instruction_messages);request.canonical_window.reset();
+            if(!settings_.context)for(const auto& stored:persistence_.run_history(id).get())request.messages.push_back(message(stored));
+        };
         reload_history();
         if(workspace_) request.tools=workspace_->definitions();
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
@@ -370,6 +492,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             commit_plan_result(actual);refresh_tools();
         }
         std::string delivered_repository_metadata;
+        std::unique_ptr<ContextManager> context_manager;
+        if(settings_.context)context_manager=std::make_unique<ContextManager>(persistence_,provider,*settings_.context,message);
         for(std::size_t turn=0;turn<settings_.max_turns;++turn) {
             cancelled(token);
             if(!leaf&&budget&&delegation_&&!delegation_->healthy())throw DelegationOutcomeUnrecorded("Native delegation owner is faulted");
@@ -383,26 +507,70 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             }
             std::optional<SecretBytes> credential;
             if(settings_.credential) credential.emplace(persistence_.resolve_credential(settings_.credential->scope,settings_.credential->id,settings_.credential->purpose).get());
-            const auto response_started=std::chrono::steady_clock::now();
+            auto response_started=std::chrono::steady_clock::now();
             std::optional<std::int64_t> first_token_ms;
             std::optional<ModelCallReservation> reservation;
-            if(budget){
+            std::optional<PreparedModelContext> prepared_context;
+            std::optional<ContextOwner> context_owner;
+            auto trusted_current=request;trusted_current.messages.resize(instruction_messages);trusted_current.canonical_window.reset();
+            if(context_manager){
+                if(!budget)throw ContextUnavailable("Context execution has no owned native budget");
+                ContextOwner owner;owner.scope={admitted.parent_id.empty()?ContextScopeKind::session:ContextScopeKind::execution,
+                    admitted.parent_id.empty()?admitted.session_id:id};
+                owner.root_run_id=budget->root_id();owner.owner_run_id=id;owner.role=leaf||graph_agent?ModelCallRole::leaf:ModelCallRole::parent;
+                owner.binding.provider_identity_json=execution_identity(settings_,provider.model);
+                owner.binding.authority_identity=context_authority_identity(settings_,provider.model,workspace_?workspace_->identity():"workspace:none",
+                    agent_authority_credentials(persistence_,settings_));
+                const auto& p=settings_.context->compaction;owner.binding.policy_id=p.id;owner.binding.policy_revision=p.revision;
+                owner.binding.strategy_id=p.strategy_id;owner.binding.strategy_revision=p.strategy_revision;
+                if(!planning_continuation.empty())owner.planning_call_id=planning_continuation;
+                context_owner=owner;prepared_context=context_manager->prepare(owner,trusted_current,*budget,credential?&*credential:nullptr,token);
+                request=prepared_context->request;reservation=prepared_context->inference;
+                if(dynamic_root)budget->pin_context(prepared_context->snapshot);
+                planning_continuation.clear();
+            }else if(budget){
                 reservation=planning_continuation.empty()?budget->reserve(id,leaf?ModelCallRole::leaf:ModelCallRole::parent,token):budget->reserve_continuation(planning_continuation,token);
                 planning_continuation.clear();
             }
             ModelCompletion response;Json reply;
-            try{
+            bool durable_output=false,attempt_finished=false,rebuild_used=false;
+            auto finish_context_attempt=[&](InferenceAttemptOutcome outcome,const std::optional<std::string>& actual={},const std::string& error_code={}){
+                try{persistence_.finish_inference_attempt({prepared_context->inference_step_id,reservation->attempt_id,outcome,
+                    actual,error_code,std::chrono::ceil<std::chrono::milliseconds>(std::chrono::steady_clock::now()-response_started).count()}).get();attempt_finished=true;}
+                catch(...){throw ContextOutcomeUnrecorded("Inference outcome could not be recorded");}
+            };
+            try{for(;;){
+            response_started=std::chrono::steady_clock::now();first_token_ms.reset();durable_output=false;attempt_finished=false;
             if(reservation)budget->start(*reservation,token);
+            try{
             response=complete_model(provider,request,credential?&*credential:nullptr,[&](const ModelEvent& event) {
-                if(!first_token_ms && (event.kind=="model.text" || event.kind=="model.refusal" || event.kind=="model.tool_delta")) first_token_ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-response_started).count();
+                if(!first_token_ms && (event.kind=="model.text" || event.kind=="model.refusal" || event.kind=="model.tool_delta" || event.kind=="model.reasoning")) first_token_ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-response_started).count();
                 cancelled(token);persistence_.append_event(id,event.kind,event.json).get();
+                if(event.kind=="model.text"||event.kind=="model.refusal"||event.kind=="model.tool_delta"||event.kind=="model.reasoning")durable_output=true;
             },token);
+            }catch(const ProviderHttpError& error){
+                if(context_manager&&!rebuild_used&&settings_.context->compaction.automatic&&!durable_output&&
+                   error.status==400&&error.code=="context_length_exceeded"){
+                    finish_context_attempt(InferenceAttemptOutcome::context_overflow,{},"context_length_exceeded");
+                    prepared_context=context_manager->rebuild(*context_owner,trusted_current,*prepared_context,*budget,credential?&*credential:nullptr,token);
+                    request=prepared_context->request;reservation=prepared_context->inference;rebuild_used=true;
+                    if(dynamic_root)budget->pin_context(prepared_context->snapshot);
+                    continue;
+                }
+                throw;
+            }
             const auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-response_started).count();
             reply=assistant(response,provider.model,elapsed,first_token_ms);
             const auto context=provider_context_json(settings_,provider.model);if(!context.empty())reply["provider_context"]=Json::parse(context);
-            if(reservation)budget->finish(*reservation,reply.dump());
-            }catch(const BudgetOutcomeUnrecorded&){throw;}
-             catch(...){const auto failure=std::current_exception();if(reservation)budget->finish(*reservation);std::rethrow_exception(failure);}
+            if(prepared_context)finish_context_attempt(InferenceAttemptOutcome::completed,reply.dump());
+            else if(reservation)budget->finish(*reservation,reply.dump());
+            break;
+            }}catch(const BudgetOutcomeUnrecorded&){throw;}
+             catch(const ContextOutcomeUnrecorded&){throw;}
+             catch(...){const auto failure=std::current_exception();
+                if(reservation&&!attempt_finished){if(prepared_context)finish_context_attempt(token.stop_requested()?InferenceAttemptOutcome::cancelled:InferenceAttemptOutcome::failed);
+                    else budget->finish(*reservation);}
+                std::rethrow_exception(failure);}
             cancelled(token);
             if(response.finish_reason=="stop"){
                 if(dynamic_root){
@@ -495,13 +663,17 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             const bool delegated=std::any_of(response.tool_calls.begin(),response.tool_calls.end(),[](const auto& call){return call.name=="delegate_tasks";});
             try{persistence_.record_tool_turn(id,reply.dump(),std::move(results)).get();}
             catch(...){if(delegated)throw DelegationOutcomeUnrecorded("Delegation parent conversation could not be committed; recovery is required");throw;}
-            for(auto& next:continuation) request.messages.push_back(std::move(next));
+            if(!context_manager)for(auto& next:continuation) request.messages.push_back(std::move(next));
         }
         return terminate(RunState::failed,{{"reason","model_turn_limit"}});
     } catch(const TransportCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
       catch(const RootBudgetDeadlineExceeded&){return terminate(RunState::failed,{{"reason","agent_timeout"}});}
       catch(const RootBudgetExhausted&){return terminate(RunState::failed,{{"reason","execution_budget_exhausted"}});}
       catch(const BudgetOutcomeUnrecorded&){throw;}
+      catch(const ContextOutcomeUnrecorded&){throw;}
+      catch(const ContextCapacityExceeded&){return terminate(RunState::failed,{{"reason","context_capacity_exceeded"}});}
+      catch(const ModelRequestCapacityExceeded&){return terminate(RunState::failed,{{"reason","context_capacity_exceeded"}});}
+      catch(const ContextUnavailable&){return terminate(RunState::failed,{{"reason","context_unavailable"}});}
       catch(const DelegationOutcomeUnrecorded&){throw;}
       catch(const DynamicOutcomeUnrecorded&){throw;}
       catch(const NativeChildOutcomeUnrecorded&){throw;}

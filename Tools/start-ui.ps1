@@ -10,17 +10,19 @@ param(
     [string]$Workspace,[switch]$ApprovedEdits,
     [ValidatePattern('^[A-Za-z0-9_-]{1,64}$')][string]$PreviewName='ui-host',
     [ValidateRange(1024,65535)][int]$DebugPort=57217,
-    [string]$GraphsConfig
+    [string]$GraphsConfig,
+    [string]$ProviderConfig
 )
 $ErrorActionPreference='Stop'
 if([bool]$Model -ne [bool]$ModelEndpoint){throw 'Provide both -Model and -ModelEndpoint.'}
+if($ProviderConfig -and $Model){throw 'Provider YAML requires configurable provider profiles; omit -Model.'}
 if(-not $Model -and $ModelWire -ne 'chat-completions'){throw 'A Responses startup wire requires -Model and -ModelEndpoint.'}
 if(-not $Model -and ($CredentialId -or $SelectableModels)){throw 'Startup credential references/model lists require -Model and -ModelEndpoint.'}
 if($ApprovedEdits -and -not $Workspace){throw 'Approved file edits require a workspace.'}
 if($Workspace -and $ModelTools -ne 'supported'){throw 'Workspace execution requires -ModelTools supported.'}
 if($ProviderKeyEnvironment -notmatch '^[A-Za-z_][A-Za-z0-9_]*$'){throw 'Invalid provider key environment name.'}
 if($ProviderKeyEnvironment -eq 'XMIND_AUTH_TOKEN' -or $ProviderKeyEnvironment -like 'XMIND_UI_*'){throw 'Select a provider credential variable, not a preview authentication variable.'}
-foreach($uiArgument in @($CodeExecutable,$RuntimeDirectory,$BundleDirectory,$StdlibSource,$Model,$ModelEndpoint,$SelectableModels,$CredentialId,$Workspace,$GraphsConfig)){
+foreach($uiArgument in @($CodeExecutable,$RuntimeDirectory,$BundleDirectory,$StdlibSource,$Model,$ModelEndpoint,$SelectableModels,$CredentialId,$Workspace,$GraphsConfig,$ProviderConfig)){
     if($uiArgument -and $uiArgument.IndexOfAny([char[]]@([char]0,[char]10,[char]13,[char]34)) -ge 0){throw 'Preview arguments cannot contain quotes or control characters.'}
 }
 $uiProject=Split-Path $PSScriptRoot -Parent
@@ -78,6 +80,11 @@ try {
     $uiErrorLog=Join-Path $uiState 'backend-error.log'
     $uiReady=Join-Path $uiState ('opened-'+[Guid]::NewGuid().ToString('N')+'.json')
     $uiArgs=@('--db',('"'+$uiDatabase+'"'),'--modules',('"'+$uiModules+'"'),'--stdlib',('"'+$StdlibSource+'"'),'--port','0')
+    if(-not $ProviderConfig -and -not $Model){
+        $uiProviderTemplate=Join-Path $uiProject '.config/providers.yaml'
+        if(Test-Path -LiteralPath $uiProviderTemplate -PathType Leaf){$ProviderConfig=$uiProviderTemplate}
+    }
+    if($ProviderConfig){$uiArgs+=@('--provider-config',('"'+[System.IO.Path]::GetFullPath($ProviderConfig)+'"'))}
     if($Workspace){$uiArgs+=@('--workspace',('"'+[System.IO.Path]::GetFullPath($Workspace)+'"'))}
     if($ApprovedEdits){$uiArgs+=@('--workspace-edits','approved')}
     if($GraphsConfig){$uiArgs+=@('--graphs-config',('"'+[System.IO.Path]::GetFullPath($GraphsConfig)+'"'))}

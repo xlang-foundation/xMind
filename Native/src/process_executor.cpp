@@ -91,9 +91,11 @@ std::string ProcessExecutor::invoke(const std::string& id,const std::string& run
     const auto path=std::filesystem::u8path(relative);
     if(relative.empty() || path.is_absolute() || path.has_root_name() || path.has_root_directory())throw ToolAccessDenied("Process workdir must be relative to its workspace");
     for(const auto& part:path)if(part==L"..")throw ToolAccessDenied("Process directory traversal is forbidden");
+    const auto public_directory_id=workspace_.directory_identity(relative,cancel);
     launch.workspace_root=root_;launch.workspace_root_id=workspace_.identity();
     if(ForegroundProcess::directory_identity(root_)!=launch.workspace_root_id)throw ToolAccessDenied("Process workspace path identity changed");
     launch.working_directory=utf8((std::filesystem::u8path(root_)/path).lexically_normal());launch.working_directory_id=ForegroundProcess::directory_identity(launch.working_directory);
+    if(launch.working_directory_id!=public_directory_id)throw ToolAccessDenied("Process working directory changed during public workspace admission");
     OperationSpec spec{run,launch.workspace_root_id,"run_process",Json{{"profile_id",found->id},{"profile_revision",found->revision},{"executable",launch.executable},{"executable_id",launch.executable_id},{"arguments",launch.arguments},{"workdir",utf8(path.lexically_normal())},{"directory_id",launch.working_directory_id},{"timeout_ms",launch.timeout.count()},{"output_limit",launch.output_limit}}.dump(),{"process-profile:"+found->id}};
     guidance.validate();if(guidance.verify){auto payload=Json::parse(spec.arguments_json);payload["repository_guidance"]=Json::parse(guidance.metadata_json);spec.arguments_json=payload.dump();}
     PermissionWaiter(store_).acquire(id,spec,expiry,cancel);

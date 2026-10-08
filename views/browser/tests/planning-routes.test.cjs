@@ -3,6 +3,12 @@
 // access forwarding are tested. No native SQLite, model or agent execution.
 const test=require('node:test'),assert=require('node:assert/strict');
 const {createServer}=require('node:http'),{mkdtemp,writeFile,rm}=require('node:fs/promises'),{tmpdir}=require('node:os'),{join}=require('node:path');
+test('context and graph-resume view allowlist restricts methods and exposes no checkpoint/state mutation route',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs');
+ for(const path of ['/v1/sessions/session/context','/v1/sessions/session/context/requests/request'])for(const method of ['GET','POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),method==='GET');
+ for(const path of ['/v1/sessions/session/context/compact','/v1/graph-runs/root/resume'])for(const method of ['GET','POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),method==='POST');
+ for(const path of ['/v1/sessions/session/context/state','/v1/sessions/session/context/checkpoint','/v1/sessions/session/context/requests/foreign%2Frequest','/v1/sessions/session/context/compact/extra','/v1/graph-runs/root/resume/state'])for(const method of ['GET','POST'])assert.equal(allowedApiRoute(path,method),false);
+});
 test('planning view allowlist exposes only scoped observation, human input and resume methods',async()=>{
  const {allowedApiRoute}=await import('../server.mjs');
  for(const path of ['/v1/agent/planning','/v1/runs/owner/plan']){assert.equal(allowedApiRoute(path,'GET'),true);for(const method of ['POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),false);}
@@ -27,11 +33,17 @@ test('view forwards only allowed planning requests at the configured native orig
   for(const path of ['/v1/agent/planning','/v1/runs/owner/plan'])assert.equal((await fetch(expectedOrigin+path,{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,200);
   assert.equal((await fetch(expectedOrigin+'/v1/runs/owner/plan/human/question',{method:'POST',headers:{...sameOrigin,Cookie:cookie},body})).status,200);
   assert.equal((await fetch(expectedOrigin+'/v1/runs/owner/plan/resume',{method:'POST',headers:{...sameOrigin,Cookie:cookie},body:'{"expected_revision":2,"expected_state_sequence":8}'})).status,200);
+  for(const path of ['/v1/sessions/session/context?model_id=model%3Avariant%2Fv1','/v1/sessions/session/context/requests/request?model_id=model%3Avariant%2Fv1'])assert.equal((await fetch(expectedOrigin+path,{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,200);
+  const compact=JSON.stringify({id:'request',model_id:'model:variant/v1',expected_head_revision:4});assert.equal((await fetch(expectedOrigin+'/v1/sessions/session/context/compact',{method:'POST',headers:{...sameOrigin,Cookie:cookie},body:compact})).status,200);
+  assert.equal((await fetch(expectedOrigin+'/v1/graph-runs/root/resume',{method:'POST',headers:{...sameOrigin,Cookie:cookie},body:'{"expected_checkpoint_revision":7}'})).status,200);
+  assert.equal(observed.find(value=>value.path==='/v1/sessions/session/context/compact').input,compact);assert.equal(observed.find(value=>value.path.startsWith('/v1/sessions/session/context?')).path,'/v1/sessions/session/context?model_id=model%3Avariant%2Fv1');
   const input=observed.find(value=>value.path.endsWith('/human/question'));assert.equal(input.input,body);assert.equal(JSON.parse(input.input).input_json,raw);assert.equal(input.method,'POST');assert.equal(input.authorization,'View '+credential);assert.equal(input.viewOrigin,expectedOrigin);assert.equal(Object.hasOwn(JSON.parse(input.input),'actor'),false);
   const count=observed.length;
   for(const [path,method] of [['/v1/agent/planning','POST'],['/v1/runs/owner/plan','POST'],['/v1/runs/owner/plan/resume','GET'],['/v1/runs/owner/plan/human/question','GET'],['/v1/runs/owner/plan/spawn','POST'],['/v1/runs/owner/plan/state','POST'],['/v1/runs/owner/plan/human/foreign%2Fid','POST']])assert.equal((await fetch(expectedOrigin+path,{method,headers:{...sameOrigin,Cookie:cookie},...(method==='POST'?{body:'{}'}:{})})).status,404);
   assert.equal((await fetch(expectedOrigin+'/v1/runs/owner/plan?after=0',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,400);
   assert.equal((await fetch(expectedOrigin+'/v1/runs/owner/plan/human/question?after=0',{method:'POST',headers:{...sameOrigin,Cookie:cookie},body})).status,400);
+  for(const path of ['/v1/sessions/session/context?model_id=model&model_id=other','/v1/sessions/session/context?after=0','/v1/sessions/session/context?model_id=bad%20model'])assert.equal((await fetch(expectedOrigin+path,{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,400);
+  for(const path of ['/v1/sessions/session/context/compact?model_id=model','/v1/graph-runs/root/resume?after=0'])assert.equal((await fetch(expectedOrigin+path,{method:'POST',headers:{...sameOrigin,Cookie:cookie},body:'{}'})).status,400);
   assert.equal((await fetch(expectedOrigin+'/v1/runs/owner/plan/human/question',{method:'POST',headers:{'Content-Type':'application/json',Cookie:cookie,'Sec-Fetch-Site':'same-origin'},body})).status,403);
   assert.equal((await fetch(expectedOrigin+'/v1/runs/owner/plan',{headers:{Cookie:cookie,Origin:'http://127.0.0.1:1','Sec-Fetch-Site':'cross-site'}})).status,403);
   assert.equal((await fetch(expectedOrigin+'/v1/runs/owner/plan')).status,401);assert.equal(observed.length,count,'Rejected methods, identities, query or origins must never reach native');

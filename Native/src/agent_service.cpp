@@ -1,6 +1,11 @@
 #include "agentflow/agent_service.hpp"
 #include "agentflow/delegation_executor.hpp"
 #include "agentflow/dynamic_plan_executor.hpp"
+#include "agentflow/http_stream_transport.hpp"
+#include <atomic>
+#include <random>
+#include <sstream>
+#include <iomanip>
 #include <algorithm>
 #include <condition_variable>
 #include <list>
@@ -26,14 +31,31 @@ AgentSettings ordinary_settings(AgentSettings settings){
 }
 bool runnable(const DynamicPlanRecord& plan){const auto decision=inspect_dynamic_plan(plan);return !decision.halted&&(!decision.ready.empty()||decision.report_ready);}
 std::int64_t now_ms(){return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();}
+std::string context_owner_id(){std::random_device source;std::ostringstream result;result<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)result<<std::setw(8)<<source();return result.str();}
+ContextFailureCode context_failure(const std::exception_ptr& failure){
+    try{std::rethrow_exception(failure);}
+    catch(const TransportCancelled&){return ContextFailureCode::cancelled;}
+    catch(const TransportTimeout&){return ContextFailureCode::deadline;}
+    catch(const RootBudgetDeadlineExceeded&){return ContextFailureCode::deadline;}
+    catch(const ContextSourceChanged&){return ContextFailureCode::source_changed;}
+    catch(const ContextBindingChanged&){return ContextFailureCode::binding_changed;}
+    catch(const ContextCapacityExceeded&){return ContextFailureCode::capacity_exceeded;}
+    catch(const ModelRequestCapacityExceeded&){return ContextFailureCode::capacity_exceeded;}
+    catch(const ResponsesContextError&){return ContextFailureCode::invalid_result;}
+    catch(const ProviderHttpError&){return ContextFailureCode::provider_failure;}
+    catch(const TransportError&){return ContextFailureCode::provider_failure;}
+    catch(...){return ContextFailureCode::native_failure;}
+}
 }
 struct AgentService::Impl {
     enum class Phase {queued,working,waiting,faulted};
     struct Job {std::string id,model;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;};
+    struct ContextJob {std::string request_id,session,model,owner_id;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
     struct Prepared {};
     PersistenceService& persistence;
     std::string provider_context;
     bool planning_enabled;
+    std::optional<ContextPolicy> context_policy;
     std::shared_ptr<NativeChildExecutor> children;
     std::shared_ptr<DelegationExecutor> delegation;
     std::shared_ptr<DynamicPlanExecutor> planning;
@@ -50,6 +72,12 @@ struct AgentService::Impl {
     std::map<std::string,std::shared_ptr<Job>> active;
     std::vector<std::thread> workers;
     std::thread expiry_worker;
+    std::condition_variable context_changed;
+    std::list<std::shared_ptr<ContextJob>> context_pending;
+    std::map<std::string,std::shared_ptr<ContextJob>> context_jobs;
+    std::thread context_worker;
+    std::stop_source context_stop;
+    std::atomic<bool> context_shutdown=false;
     std::size_t limit,owned_limit;
     bool accepting=true,faulted=false;
 
@@ -57,6 +85,7 @@ struct AgentService::Impl {
         :Impl(store,ordinary_settings(std::move(settings)),count,capacity,Prepared{}){}
     Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,Prepared)
         :persistence(store),provider_context(provider_context_json(settings)),planning_enabled(settings.planning.has_value()),
+         context_policy(settings.context?std::optional<ContextPolicy>(settings.context->compaction):std::nullopt),
          children(settings.delegation||settings.planning?std::make_shared<NativeChildExecutor>():nullptr),
          delegation(settings.delegation?std::make_shared<DelegationExecutor>(store,children):nullptr),
          planning(settings.planning?std::make_shared<DynamicPlanExecutor>(store,children):nullptr),
@@ -76,7 +105,8 @@ struct AgentService::Impl {
             // Even an already-answered clean pause waits for an authenticated
             // duplicate answer or explicit resume; startup never replays it.
         }
-        try{for(std::size_t i=0;i<count;++i)workers.emplace_back([this]{work();});expiry_worker=std::thread([this]{expire_waiting();});}
+        try{for(std::size_t i=0;i<count;++i)workers.emplace_back([this]{work();});expiry_worker=std::thread([this]{expire_waiting();});
+            if(context_policy)context_worker=std::thread([this]{work_context();});}
         catch(...){close();throw;}
     }
     ~Impl(){close();}
@@ -96,7 +126,7 @@ struct AgentService::Impl {
         verify_effects(run.id);
     }
     std::vector<std::shared_ptr<Job>> fault_locked(){
-        faulted=true;accepting=false;std::vector<std::shared_ptr<Job>> jobs;jobs.reserve(active.size());
+        faulted=true;accepting=false;context_shutdown=true;std::vector<std::shared_ptr<Job>> jobs;jobs.reserve(active.size());
         for(const auto& [id,job]:active){(void)id;
             // A queued wake still owns a closed pause. Fault stops its token,
             // but removes its scheduler entry before a stopped Runner could
@@ -107,9 +137,10 @@ struct AgentService::Impl {
                     if(!plan)throw DatabaseError("Queued pause lost its plan");verify_pause(current,*plan);remove_ticket(job);job->phase=Phase::waiting;}
             }catch(...){}
             jobs.push_back(job);
-        }changed.notify_all();return jobs;
+        }changed.notify_all();context_changed.notify_all();return jobs;
     }
-    void stop_jobs(const std::vector<std::shared_ptr<Job>>& jobs){for(const auto& job:jobs)job->stop.request_stop();changed.notify_all();expiry_changed.notify_all();}
+    void stop_jobs(const std::vector<std::shared_ptr<Job>>& jobs){for(const auto& job:jobs)job->stop.request_stop();
+        if(context_shutdown.load())context_stop.request_stop();changed.notify_all();expiry_changed.notify_all();context_changed.notify_all();}
     void fail(){std::vector<std::shared_ptr<Job>> jobs;{std::lock_guard lock(mutex);jobs=fault_locked();}stop_jobs(jobs);if(children)children->fail();}
     auto ticket(const std::shared_ptr<Job>& job){return std::find(pending.begin(),pending.end(),job);}
     bool reserve_wake(const std::shared_ptr<Job>& job){
@@ -191,10 +222,89 @@ struct AgentService::Impl {
             }
         }
     }
+    bool session_busy(const std::string& session){
+        for(const auto& run:persistence.runs(session).get())if(run.parent_id.empty()&&!terminal(run.state))return true;
+        return false;
+    }
+    void remove_context_ticket(const std::shared_ptr<ContextJob>& job){
+        context_pending.remove(job);context_jobs.erase(job->request_id);
+    }
+    void defer_context_ticket(const std::shared_ptr<ContextJob>& job){
+        // Keep the preallocated list node and exact authenticated binding. A
+        // newly admitted root can use another model and cannot consume it.
+        job->phase=Phase::waiting;
+        const auto item=std::find(context_pending.begin(),context_pending.end(),job);
+        if(item==context_pending.end())throw DatabaseError("Context owner lost its scheduler ticket");
+        context_pending.splice(context_pending.end(),context_pending,item);
+    }
+    void work_context(){
+        for(;;){std::shared_ptr<ContextJob> job;
+            {std::unique_lock lock(mutex);
+                // Waiting tickets also cover graph/racing owners whose actual
+                // retirement occurs outside this service's ordinary workers.
+                // Poll their durable state at a bounded cadence; reopening a
+                // backend does not automatically adopt/replay old requests.
+                context_changed.wait_for(lock,std::chrono::milliseconds(200),[&]{return !accepting||
+                    std::any_of(context_pending.begin(),context_pending.end(),[](const auto& value){return value->phase==Phase::queued;});});
+                if(!accepting)return;
+                auto next=std::find_if(context_pending.begin(),context_pending.end(),[](const auto& value){return value->phase==Phase::queued;});
+                if(next==context_pending.end())next=std::find_if(context_pending.begin(),context_pending.end(),[](const auto& value){return value->phase==Phase::waiting;});
+                if(next==context_pending.end())continue;job=*next;job->phase=Phase::working;
+            }
+            std::optional<IdleContextOwnerRecord> lease;
+            const auto started=std::chrono::steady_clock::now();
+            try{
+                const auto request=persistence.context_manual_request(job->request_id,job->binding).get();
+                if(request.state!="pending"){
+                    // The actual ordinary owner may already have consumed or
+                    // retired this request. Never issue an idle second attempt.
+                    std::lock_guard lock(mutex);remove_context_ticket(job);continue;
+                }
+                if(session_busy(job->session)){
+                    std::lock_guard lock(mutex);defer_context_ticket(job);continue;
+                }
+                if(context_stop.stop_requested())throw TransportCancelled("Idle context cancelled before claim");
+                IdleContextOwnerSpec spec{job->owner_id,job->request_id,{ContextScopeKind::session,job->session},
+                    job->binding,job->head_revision,context_policy->max_maintenance_calls,context_policy->maintenance_deadline_ms};
+                lease=persistence.claim_idle_context_owner(spec).get();
+                if(lease->state!="active")throw ContextUnavailable("Idle request has already been retired");
+                const auto deadline=started+std::chrono::milliseconds(spec.wall_limit_ms);
+                runner.compact_idle_context(*lease,deadline,job->model,context_stop.get_token());
+                std::lock_guard lock(mutex);remove_context_ticket(job);
+            }catch(const ContextOutcomeUnrecorded&){
+                {std::lock_guard lock(mutex);job->phase=Phase::faulted;}fail();
+            }catch(...){
+                const auto failure=std::current_exception();
+                try{
+                    if(lease){
+                        const auto actual=persistence.idle_context_owner(lease->spec.id).get();
+                        if(actual.state=="active")persistence.retire_idle_context_owner(actual.spec.id,context_failure(failure),
+                            std::chrono::ceil<std::chrono::milliseconds>(std::chrono::steady_clock::now()-started).count()).get();
+                    }else{
+                        const auto request=persistence.context_manual_request(job->request_id,job->binding).get();
+                        if(request.state=="pending"&&!request.owner_id){
+                            // A root can win the transaction between the idle
+                            // observation and lease claim. Retain the ticket
+                            // rather than losing the exact model-A request.
+                            if(session_busy(job->session)){
+                                std::lock_guard lock(mutex);defer_context_ticket(job);continue;
+                            }
+                            persistence.retire_context_request(job->request_id,job->binding,context_failure(failure)).get();
+                        }else if(request.state=="pending"){
+                            throw ContextOutcomeUnrecorded("Pending context request has an unobserved owner");
+                        }
+                    }
+                    std::lock_guard lock(mutex);remove_context_ticket(job);
+                }catch(...){
+                    {std::lock_guard lock(mutex);job->phase=Phase::faulted;}fail();
+                }
+            }
+        }
+    }
     void close(){
         std::lock_guard serial(close_mutex);std::vector<std::shared_ptr<Job>> stopping;
         {
-            std::lock_guard lock(mutex);accepting=false;
+            std::lock_guard lock(mutex);accepting=false;context_shutdown=true;
             for(const auto& [id,job]:active){(void)id;
                 if(job->phase==Phase::working){
                     // Runner can already have committed a clean pause while
@@ -217,6 +327,18 @@ struct AgentService::Impl {
         }
         stop_jobs(stopping);changed.notify_all();
         for(auto& worker:workers)if(worker.joinable())worker.join();if(expiry_worker.joinable())expiry_worker.join();
+        if(context_worker.joinable())context_worker.join();
+        // Undispatched idle tickets have no model/effect to replay on shutdown.
+        // A request already claimed by an actual root keeps that owner's ledger.
+        {std::lock_guard lock(mutex);
+            for(const auto& job:context_pending)try{
+                if(job->phase==Phase::faulted)continue;
+                const auto request=persistence.context_manual_request(job->request_id,job->binding).get();
+                if(request.state=="pending"&&!request.owner_id)persistence.retire_context_request(job->request_id,job->binding,ContextFailureCode::cancelled).get();
+                context_jobs.erase(job->request_id);
+            }catch(...){faulted=true;}
+            context_pending.clear();
+        }
         // Roots drain all actual/staged batches first. Both execution paths
         // share this pool's four workers and 64 pending reservations.
         if(children)children->close();
@@ -229,6 +351,43 @@ Run AgentService::submit(std::string id,std::string session,std::string prompt){
 std::vector<std::string> AgentService::models()const{return impl_->runner.models();}
 bool AgentService::supports_delegation()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&impl_->delegation&&impl_->children->healthy();}
 bool AgentService::supports_dynamic_planning()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&impl_->planning_enabled&&impl_->children->healthy();}
+bool AgentService::supports_context()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&impl_->runner.supports_context();}
+ContextControlSnapshot AgentService::context_status(const std::string& session,const std::string& model)const{
+    std::lock_guard lock(impl_->mutex);impl_->require_available();return impl_->runner.context_status(session,model);
+}
+ContextManualStatus AgentService::context_request(const std::string& session,const std::string& request,const std::string& model)const{
+    std::lock_guard lock(impl_->mutex);impl_->require_available();impl_->persistence.session(session).get();
+    const auto recorded=impl_->persistence.context_manual_request(request,impl_->runner.context_binding(model)).get();
+    if(recorded.scope!=ContextScope{ContextScopeKind::session,session})throw NotFound("Context request belongs to another scope");
+    return {recorded.id,recorded.state};
+}
+ContextManualStatus AgentService::request_context(const std::string& session,const std::string& request_id,const std::string& actor,std::int64_t revision,const std::string& model){
+    controller(actor);std::unique_lock lock(impl_->mutex);impl_->require_available();
+    if(!impl_->context_policy)throw RunUnavailable("This provider has no registered context strategy");
+    impl_->persistence.session(session).get();auto selected=model;bool busy=false;
+    for(const auto& run:impl_->persistence.runs(session).get())if(run.parent_id.empty()&&!terminal(run.state)){
+        if(run.graph_root)throw Conflict("Select an ordinary conversation for manual session compaction");
+        const auto owned=impl_->active.find(run.id);if(owned==impl_->active.end())throw RunUnavailable("Context root is not owned by this service");
+        const auto actual_model=owned->second->model.empty()?impl_->runner.models().front():owned->second->model;
+        if(!selected.empty()&&selected!=actual_model)throw ContextBindingChanged("Manual context model differs from its active owner");
+        selected=actual_model;busy=true;
+    }
+    const auto binding=impl_->runner.context_binding(selected);
+    std::shared_ptr<Impl::ContextJob> job;
+    if(!impl_->context_jobs.contains(request_id)){
+        if(impl_->context_jobs.size()>=impl_->limit)throw RunBusy("Idle context ownership capacity is full");
+        job=std::make_shared<Impl::ContextJob>();job->request_id=request_id;job->session=session;job->model=selected;
+        job->owner_id=context_owner_id();job->binding=binding;job->head_revision=revision;
+        job->phase=busy?Impl::Phase::waiting:Impl::Phase::queued;
+        impl_->context_jobs.emplace(request_id,job);
+        try{impl_->context_pending.push_back(job);}catch(...){impl_->context_jobs.erase(request_id);throw;}
+    }
+    ContextManualRequest admitted;
+    try{admitted=impl_->persistence.request_context_compaction({request_id,actor,{ContextScopeKind::session,session},binding,revision}).get();}
+    catch(...){if(job){impl_->context_pending.remove(job);impl_->context_jobs.erase(request_id);}throw;}
+    if(job&&admitted.state!="pending"){impl_->context_pending.remove(job);impl_->context_jobs.erase(request_id);}
+    const auto result=ContextManualStatus{admitted.id,admitted.state};lock.unlock();impl_->context_changed.notify_one();return result;
+}
 Run AgentService::submit_model(std::string id,std::string session,std::string prompt,std::string model){
     if(!model.empty()){const auto configured=models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     auto job=std::make_shared<Impl::Job>();job->id=id;job->model=std::move(model);
@@ -295,6 +454,6 @@ void AgentService::cancel(const std::string& id){
     job->stop.request_stop();impl_->changed.notify_all();
 }
 bool AgentService::healthy()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&(!impl_->children||impl_->children->healthy());}
-bool AgentService::idle()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&impl_->active.empty();}
+bool AgentService::idle()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&impl_->active.empty()&&impl_->context_jobs.empty();}
 void AgentService::close(){impl_->close();}
 }

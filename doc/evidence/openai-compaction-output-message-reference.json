@@ -1,0 +1,17 @@
+{
+  "observed_date": "2026-10-08",
+  "source": "https://developers.openai.com/api/reference/resources/responses/methods/compact",
+  "retrieved_markdown": "https://developers.openai.com/api/reference/resources/responses/methods/compact.md",
+  "retrieved_markdown_bytes": 261198,
+  "scope": "Official output schema and example only; no live compaction result is claimed.",
+  "finding": "CompactedResponse.output Message requires an id string. The official returned-window example includes IDs and completed status for retained user messages, with role user and input_text content. An input EasyInputMessage may omit an ID; copying that input verbatim into a synthetic output is not a valid returned Message.",
+  "implementation_consequence": "Keep native canonical-window message ID validation. The synthetic repository fixture must assign unique synthetic provider IDs to returned user messages lacking an ID, retaining existing returned IDs on repeated compaction. User content and original transcripts remain unchanged.",
+  "diagnostic_scope": {
+    "native_test": "native_context_repository_contract",
+    "stage": "projection_recovery",
+    "substage": "first_install.result",
+    "method": "parse_responses_compaction_response",
+    "reported_fixed_error": "Responses context protocol rejected",
+    "production_code_changed": false
+  }
+}

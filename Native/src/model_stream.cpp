@@ -61,6 +61,35 @@ void bounded_append(std::string& target,std::string_view value,std::size_t limit
     if(value.size()>limit-target.size()) throw ModelProtocolError("Model stream exceeds configured limits");
     target.append(value);
 }
+Json deepseek_usage(const Json& value){
+    if(!value.is_object()||value.dump().size()>4096)throw ModelProtocolError("Invalid DeepSeek usage");
+    const std::set<std::string> scalar={"prompt_tokens","completion_tokens","total_tokens","prompt_cache_hit_tokens","prompt_cache_miss_tokens"};
+    const auto count=[](const Json& number){
+        if(!number.is_number_integer()||number<0||number>9007199254740991LL)
+            throw ModelProtocolError("Invalid DeepSeek usage");
+    };
+    for(const auto& [key,number]:value.items()){
+        if(scalar.contains(key)){count(number);continue;}
+        const char* detail=key=="prompt_tokens_details"?"cached_tokens":key=="completion_tokens_details"?"reasoning_tokens":nullptr;
+        if(!detail||!number.is_object()||number.size()>1)throw ModelProtocolError("Invalid DeepSeek usage");
+        for(const auto& [field,n]:number.items()){if(field!=detail)throw ModelProtocolError("Invalid DeepSeek usage");count(n);}
+    }
+    for(const auto* key:{"prompt_tokens","completion_tokens","total_tokens"})if(!value.contains(key))throw ModelProtocolError("Invalid DeepSeek usage");
+    const auto prompt=value.at("prompt_tokens").get<std::int64_t>(),completion=value.at("completion_tokens").get<std::int64_t>();
+    if(value.at("total_tokens").get<std::int64_t>()!=prompt+completion)throw ModelProtocolError("Invalid DeepSeek usage");
+    for(const auto* key:{"prompt_cache_hit_tokens","prompt_cache_miss_tokens"})
+        if(value.contains(key)&&value.at(key).get<std::int64_t>()>prompt)throw ModelProtocolError("Invalid DeepSeek usage");
+    if(value.contains("prompt_cache_hit_tokens")&&value.contains("prompt_cache_miss_tokens")&&
+        value.at("prompt_cache_hit_tokens").get<std::int64_t>()+value.at("prompt_cache_miss_tokens").get<std::int64_t>()!=prompt)
+        throw ModelProtocolError("Invalid DeepSeek usage");
+    if(value.contains("prompt_tokens_details")&&value.at("prompt_tokens_details").contains("cached_tokens")){
+        const auto cached=value.at("prompt_tokens_details").at("cached_tokens").get<std::int64_t>();
+        if(cached>prompt||(value.contains("prompt_cache_hit_tokens")&&value.at("prompt_cache_hit_tokens")!=cached))throw ModelProtocolError("Invalid DeepSeek usage");
+    }
+    if(value.contains("completion_tokens_details")&&value.at("completion_tokens_details").contains("reasoning_tokens")&&
+        value.at("completion_tokens_details").at("reasoning_tokens").get<std::int64_t>()>completion)throw ModelProtocolError("Invalid DeepSeek usage");
+    return value;
+}
 std::string optional_string(const Json& object,const char* key) {
     if(!object.contains(key) || object[key].is_null()) return {};
     if(!object[key].is_string()) throw ModelProtocolError("Invalid model string field");
@@ -69,12 +98,20 @@ std::string optional_string(const Json& object,const char* key) {
 }
 struct ChatCompletionStream::Impl {
     Sink sink;
+    ChatDialect dialect;
+    std::string expected_model,reasoning;
+    bool has_reasoning=false,reasoning_seen=false,has_usage=false;
     ModelCompletion completion;
     std::map<int,ModelToolCall> calls;
     std::string line,data,response_id,model;
     std::size_t total=0;
     bool skip_lf=false,first_line=true,has_data=false,done=false,finished=false,failed=false;
-    explicit Impl(Sink callback):sink(std::move(callback)) {if(!sink) throw std::invalid_argument("Model event sink is required");}
+    explicit Impl(Sink callback,ChatDialect selected,std::string expected):sink(std::move(callback)),dialect(selected),expected_model(std::move(expected)) {
+        if(!sink) throw std::invalid_argument("Model event sink is required");
+        if(dialect!=ChatDialect::openai&&dialect!=ChatDialect::deepseek)throw std::invalid_argument("Invalid chat dialect");
+        if(dialect==ChatDialect::deepseek&&(expected_model.empty()||expected_model.size()>512||expected_model.find('\0')!=std::string::npos))
+            throw std::invalid_argument("DeepSeek stream requires an exact model binding");
+    }
     void emit(const std::string& kind,const Json& value) {sink({kind,value.dump()});}
     void validate_calls() {
         std::set<std::string> identities;
@@ -94,10 +131,27 @@ struct ChatCompletionStream::Impl {
         if(done) throw ModelProtocolError("Model data after end marker");
         if(value=="[DONE]") {
             if(!finished) throw ModelProtocolError("Model end marker without a finish reason");
-            validate_calls();done=true;emit("model.done",Json::object());return;
+            validate_calls();
+            if(dialect==ChatDialect::deepseek){
+                if(!has_usage)throw ModelProtocolError("DeepSeek terminal usage is missing");
+                Json message={{"role","assistant"},{"content",completion.content}};
+                if(reasoning_seen)message["reasoning_content"]=has_reasoning?Json(reasoning):Json(nullptr);
+                if(completion.finish_reason=="tool_calls"){
+                    message["tool_calls"]=Json::array();
+                    for(const auto& [index,call]:calls){(void)index;message["tool_calls"].push_back({{"id",call.id},{"type","function"},{"function",{{"name",call.name},{"arguments",call.arguments_json}}}});}
+                }
+                completion.provider_items_json=Json::array({{{"type","deepseek_assistant"},{"model",model},{"message",std::move(message)}}}).dump();
+                if(completion.provider_items_json.size()>max_value)throw ModelProtocolError("DeepSeek continuation exceeds limits");
+            }
+            done=true;emit("model.done",Json::object());return;
         }
         const auto object=protocol_json(value);
         if(!object.is_object() || object.contains("error")) throw ModelProtocolError("Provider returned an invalid or error event");
+        if(dialect==ChatDialect::deepseek){
+            if(finished||object.value("object",std::string{})!="chat.completion.chunk"||
+                optional_string(object,"id").empty()||optional_string(object,"id").size()>256||optional_string(object,"model")!=expected_model)
+                throw ModelProtocolError("Invalid DeepSeek chunk identity");
+        }
         for(auto pair:{std::pair{"id",&response_id},std::pair{"model",&model}}) {
             const auto current=optional_string(object,pair.first);
             if(!current.empty()) {
@@ -105,7 +159,10 @@ struct ChatCompletionStream::Impl {
                 *pair.second=current;
             }
         }
-        if(object.contains("usage") && !object["usage"].is_null()) {
+        Json pending_usage=nullptr;
+        if(dialect==ChatDialect::deepseek&&object.contains("usage")&&!object["usage"].is_null()){
+            pending_usage=deepseek_usage(object["usage"]);
+        }else if(object.contains("usage") && !object["usage"].is_null()) {
             if(!object["usage"].is_object()) throw ModelProtocolError("Invalid model usage");
             for(const auto* key:{"prompt_tokens","completion_tokens","total_tokens"}) {
                 if(object["usage"].contains(key) && (!object["usage"][key].is_number_integer() || object["usage"][key]<0))
@@ -114,6 +171,9 @@ struct ChatCompletionStream::Impl {
             completion.usage_json=object["usage"].dump();emit("model.usage",object["usage"]);
         }
         if(!object.contains("choices") || !object["choices"].is_array()) throw ModelProtocolError("Missing model choices");
+        if(dialect==ChatDialect::deepseek&&(object["choices"].size()!=1||
+            (!pending_usage.is_null()&&optional_string(object["choices"][0],"finish_reason").empty())))
+            throw ModelProtocolError("Invalid DeepSeek terminal usage lifecycle");
         for(const auto& choice:object["choices"]) {
             if(!choice.is_object() || !choice.contains("index") || !choice["index"].is_number_integer() || choice["index"]!=0)
                 throw ModelProtocolError("This request supports one completion choice");
@@ -122,6 +182,16 @@ struct ChatCompletionStream::Impl {
             if(!delta.is_object()) throw ModelProtocolError("Invalid model delta");
             const auto role=optional_string(delta,"role");
             if(!role.empty() && role!="assistant") throw ModelProtocolError("Invalid model response role");
+            if(dialect==ChatDialect::deepseek){
+                for(const auto& [key,field]:delta.items()){
+                    (void)field;if(key!="role"&&key!="content"&&key!="tool_calls"&&key!="reasoning_content")throw ModelProtocolError("Unsupported DeepSeek delta");
+                }
+                if(delta.contains("reasoning_content"))reasoning_seen=true;
+                if(delta.contains("reasoning_content")&&!delta.at("reasoning_content").is_null()){
+                    const auto text=optional_string(delta,"reasoning_content");has_reasoning=true;
+                    bounded_append(reasoning,text,max_value);if(!text.empty())emit("model.reasoning",{{"text",text}});
+                }
+            }
             for(auto pair:{std::pair{"content",&completion.content},std::pair{"refusal",&completion.refusal}}) {
                 const auto text=optional_string(delta,pair.first);
                 if(!text.empty()) {bounded_append(*pair.second,text,max_value);emit(pair.first==std::string_view("content")?"model.text":"model.refusal",{{"text",text}});}
@@ -150,6 +220,7 @@ struct ChatCompletionStream::Impl {
             // continuation; never silently turn them into ordinary answer text.
             auto extensions=delta;
             for(const auto* key:{"role","content","refusal","tool_calls"}) extensions.erase(key);
+            if(dialect==ChatDialect::deepseek)extensions.erase("reasoning_content");
             if(!extensions.empty()) emit("model.extension",extensions);
             const auto reason=optional_string(choice,"finish_reason");
             if(!reason.empty()) {
@@ -157,6 +228,10 @@ struct ChatCompletionStream::Impl {
                     throw ModelProtocolError("Unsupported model finish reason");
                 completion.finish_reason=reason;finished=true;emit("model.finish",{{"reason",reason}});
             }
+        }
+        if(dialect==ChatDialect::deepseek&&!pending_usage.is_null()){
+            if(!finished||has_usage)throw ModelProtocolError("Invalid DeepSeek terminal usage lifecycle");
+            completion.usage_json=pending_usage.dump();has_usage=true;emit("model.usage",pending_usage);
         }
     }
     void end_line() {
@@ -189,7 +264,7 @@ struct ChatCompletionStream::Impl {
         }
     }
 };
-ChatCompletionStream::ChatCompletionStream(Sink sink):impl_(std::make_unique<Impl>(std::move(sink))) {}
+ChatCompletionStream::ChatCompletionStream(Sink sink,ChatDialect dialect,std::string expected_model):impl_(std::make_unique<Impl>(std::move(sink),dialect,std::move(expected_model))) {}
 ChatCompletionStream::~ChatCompletionStream()=default;
 void ChatCompletionStream::feed(std::string_view bytes) {
     try {impl_->feed(bytes);}

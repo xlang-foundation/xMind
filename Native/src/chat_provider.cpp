@@ -3,6 +3,7 @@
 #include "agentflow/anthropic_stream.hpp"
 #include "agentflow/gemini_provider.hpp"
 #include "agentflow/gemini_history.hpp"
+#include "agentflow/deepseek_provider.hpp"
 #include "nlohmann/json.hpp"
 #include <random>
 #include <sstream>
@@ -34,12 +35,21 @@ std::string anthropic_model_usage(const std::string& source){
 }
 ModelCompletion complete_chat(const ChatProviderConfig& config,const ModelRequest& request,
     const SecretBytes* bearer,ChatCompletionStream::Sink sink,std::stop_token cancel) {
-    const auto body=serialize_chat_request(config,request);
+    const auto body=config.chat_dialect==ChatDialect::deepseek?serialize_deepseek_request(config,request):serialize_chat_request(config,request);
     if(!sink) throw std::invalid_argument("Model event sink is required");
-    ChatCompletionStream stream([&](const ModelEvent& event){if(event.kind!="model.done") sink(event);});
+    if(config.chat_dialect==ChatDialect::deepseek&&!bearer)throw std::invalid_argument("DeepSeek requires a backend credential");
+    ChatCompletionStream stream([&](const ModelEvent& event){if(event.kind!="model.done") sink(event);},config.chat_dialect,config.model);
     post_event_stream({config.endpoint,body,config.deadline,config.idle_timeout},bearer,
         [&](std::string_view bytes){stream.feed(bytes);},cancel);
     auto result=stream.finish();
+    if(config.chat_dialect==ChatDialect::deepseek&&!request.tools.empty()&&
+        (!config.reasoning_effort||*config.reasoning_effort!=ReasoningEffort::none)){
+        // A tool-bearing thinking response must remain replayable on its next
+        // request, including an answer which made no actual function call.
+        const auto receipt=nlohmann::json::parse(result.provider_items_json);
+        if(!receipt.at(0).at("message").contains("reasoning_content"))
+            throw ModelProtocolError("DeepSeek thinking continuation is missing");
+    }
     std::set<std::string> names;for(const auto& tool:request.tools) names.insert(tool.name);
     for(const auto& call:result.tool_calls) if(!names.contains(call.name)) throw ModelProtocolError("Provider requested a tool outside this request");
     sink({"model.done","{}"});
@@ -48,6 +58,9 @@ ModelCompletion complete_chat(const ChatProviderConfig& config,const ModelReques
     return result;
 }
 ModelCompletion complete_model(const ChatProviderConfig& config,const ModelRequest& request,const SecretBytes* bearer,ChatCompletionStream::Sink sink,std::stop_token cancel){
+    if(config.chat_dialect!=ChatDialect::openai&&
+        (config.chat_dialect!=ChatDialect::deepseek||config.wire!=ProviderWire::chat_completions))
+        throw std::invalid_argument("Invalid provider chat dialect binding");
     if(config.wire==ProviderWire::chat_completions)return complete_chat(config,request,bearer,std::move(sink),cancel);
     if(config.wire==ProviderWire::gemini_generate_content){
         if(!sink)throw std::invalid_argument("Model event sink is required");

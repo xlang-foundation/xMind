@@ -13,6 +13,33 @@ const sources={
   '/ui/purify.js':'extensions/vscode/node_modules/dompurify/dist/purify.min.js',
   '/ui/chat.js':'extensions/vscode/media/chat.js'
 };
+
+test('production browser footer drives the same saved-provider CAS and explicit model enrollment using public metadata only',async()=>{
+ const dom=new JSDOM(browserHtml(),{url:'http://127.0.0.1:8765/ui/',runScripts:'outside-only'}),window=dom.window,document=window.document,requests=[];
+ let state={revision:3,active:'openai',profiles:[{id:'openai',provider:'openai',route_id:'openai.responses',model:'fixture-openai',revision:1},{id:'claude',provider:'anthropic',route_id:'anthropic.messages',model:'',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]};
+ window.AbortController=AbortController;window.AbortSignal=AbortSignal;window.TextDecoder=TextDecoder;window.TextEncoder=TextEncoder;
+ for(const dialog of document.querySelectorAll('dialog')){dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;dialog.dispatchEvent(new window.Event('close'));};}
+ window.fetch=async(input,options={})=>{
+  const url=new URL(input,window.location.origin);assert.equal(url.origin,window.location.origin);const body=options.body?JSON.parse(options.body):undefined;requests.push({path:url.pathname,method:options.method||'GET',body});assert.equal(options.credentials,'same-origin');assert.ok(!options.headers?.Authorization);
+  let data;const active=state.profiles.find(profile=>profile.id===state.active);
+  if(url.pathname==='/ui/session'||url.pathname==='/ui/session/disconnect')data={};
+  else if(url.pathname==='/v1/health')data={status:'ok',agent_execution:!!active.model};
+  else if(url.pathname==='/v1/models')data={models:[{id:active.model}],default_model:active.model};
+  else if(url.pathname==='/v1/graphs')data={graphs:[]};else if(url.pathname==='/v1/sessions')data=[];
+  else if(url.pathname==='/v1/provider/profiles'&&options.method!=='POST')data=state;
+  else if(url.pathname==='/v1/provider/profiles/select'){assert.deepEqual(body,{id:'claude',expected_revision:3});state={...state,active:'claude',revision:4};data=state;}
+  else if(url.pathname==='/v1/provider/profiles/models'){assert.deepEqual(body,{id:state.active,route_id:active.route_id,expected_revision:state.revision});data={models:state.active==='openai'?[{id:'fixture-openai'}]:[{id:'fixture-claude'},{id:'fixture-claude-next'}]};}
+  else if(url.pathname==='/v1/provider/profiles'&&options.method==='POST'){assert.deepEqual(body,{id:'claude',route_id:'anthropic.messages',model:'fixture-claude',expected_revision:4,activate:true});state={...state,revision:5,profiles:state.profiles.map(profile=>profile.id==='claude'?{...profile,model:body.model,revision:2}:profile)};data=state;}
+  else throw Error('Unexpected synthetic browser profile route');return {ok:true,status:200,json:async()=>structuredClone(data)};
+ };
+ async function until(predicate){for(let n=0;n<200&&!predicate();n++)await new Promise(resolve=>setImmediate(resolve));assert.ok(predicate(),'Actual classic script view reached the expected public observation');}
+ try{for(const script of document.querySelectorAll('script')){const pathName=script.getAttribute('src');new vm.Script(fs.readFileSync(path.join(root,sources[pathName]),'utf8'),{filename:pathName}).runInContext(dom.getInternalVMContext());}
+  const footer=document.querySelector('footer #footer-provider'),model=document.querySelector('footer #model');await until(()=>document.getElementById('workspace-info').textContent.startsWith('Connected')&&footer.value==='openai'&&model.value==='fixture-openai');assert.equal(document.getElementById('provider-settings').open,false);assert.equal(footer.options[2].textContent,'Claude · Choose a model');
+  footer.value='claude';footer.dispatchEvent(new window.Event('change'));await until(()=>footer.value==='claude'&&model.options.length===3);assert.equal(model.value,'');assert.equal(requests.filter(request=>request.path==='/v1/provider/profiles/select').length,1);assert.equal(requests.filter(request=>request.path==='/v1/provider/profiles'&&request.method==='POST').length,0);assert.equal(document.getElementById('provider-settings').open,false);
+  document.getElementById('settings').click();assert.equal(document.getElementById('provider-key').required,false);assert.match(document.getElementById('provider-key-help').textContent,/Leave blank to use the saved key/);document.getElementById('settings-close').click();await until(()=>model.options.length===3);model.value='fixture-claude';model.dispatchEvent(new window.Event('change'));await until(()=>requests.some(request=>request.path==='/v1/provider/profiles'&&request.method==='POST')&&model.value==='fixture-claude');assert.equal(requests.filter(request=>request.path==='/v1/provider/profiles/select').length,1);assert.equal(requests.filter(request=>request.path==='/v1/provider/profiles'&&request.method==='POST').length,1);assert.ok(!requests.some(request=>request.body&&Object.hasOwn(request.body,'api_key')));assert.equal(state.profiles[0].model,'fixture-openai');
+  document.getElementById('disconnect-view').click();await until(()=>footer.hidden);assert.equal(footer.disabled,true);assert.equal(model.disabled,true);assert.ok(!requests.some(request=>request.path==='/v1/runs'));
+ }finally{window.dispatchEvent(new window.Event('pagehide'));window.close();}
+});
 test('production classic scripts share a realm without collisions and restore owned history through the browser bridge',async()=>{
   const dom=new JSDOM(browserHtml(),{url:'http://127.0.0.1:8765/ui/',runScripts:'outside-only'});
   const window=dom.window,document=window.document,requests=[];

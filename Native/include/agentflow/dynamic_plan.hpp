@@ -36,4 +36,7 @@ std::string dynamic_plan_report(const DynamicPlanRecord& observed);
 // Only agent/human tasks and backend-registered presets are offered. Dynamic
 // deterministic tools remain absent until their real native owner exists.
 std::vector<ModelToolDefinition> dynamic_plan_tool_definitions(const DynamicPlanCapabilities& frozen);
+// Exact registered schema for idle context measurement; this does not finalize
+// a catalogue, create a plan or grant an execution capability.
+std::vector<ModelToolDefinition> context_dynamic_plan_tool_definitions(const DynamicPlanCapabilities& policy);
 }

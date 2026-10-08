@@ -20,6 +20,7 @@ param(
     [string]$McpConfig,
     [string]$InstructionsConfig,
     [string]$GraphsConfig,
+    [string]$ProviderConfig,
     [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
     [Parameter(ValueFromRemainingArguments=$true)][string[]]$ClientArguments
 )
@@ -39,6 +40,12 @@ if($Action -eq 'Serve') {
     $Database=[System.IO.Path]::GetFullPath($Database)
     New-Item -ItemType Directory -Force -Path (Split-Path $Database -Parent) | Out-Null
     $serverArguments=@('--db',$Database,'--modules',(Join-Path $RuntimeDirectory 'modules'),'--stdlib',$PythonLibSource,'--port',"$Port")
+    if($ProviderConfig -and $Model){throw 'Provider YAML requires configurable provider profiles; omit -Model.'}
+    if(-not $ProviderConfig -and -not $Model){
+        $providerTemplate=Join-Path $projectRoot '.config/providers.yaml'
+        if(Test-Path -LiteralPath $providerTemplate -PathType Leaf){$ProviderConfig=$providerTemplate}
+    }
+    if($ProviderConfig){$serverArguments+=@('--provider-config',[System.IO.Path]::GetFullPath($ProviderConfig))}
     if($Model) {$serverArguments+=@('--model',$Model)}
     if($Model -or $Workspace) {$serverArguments+=@('--model-tools',$ModelTools)}
     if($SelectableModels) {$serverArguments+=@('--models',$SelectableModels)}

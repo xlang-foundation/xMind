@@ -4,6 +4,8 @@
 #include "agentflow/operation.hpp"
 #include "agentflow/delegation_records.hpp"
 #include "agentflow/dynamic_plan_records.hpp"
+#include "agentflow/context_records.hpp"
+#include "agentflow/graph_context_records.hpp"
 #include <memory>
 #include <vector>
 #include <optional>
@@ -11,7 +13,6 @@
 namespace agentflow {
 class BackendLease;
 class GraphPlan;
-struct GraphRootRecord {Run run;std::string graph_id;std::int64_t graph_revision;std::string specification_json;std::int64_t checkpoint_revision;std::string checkpoint_json;std::string input_json;};
 struct RootRunRecord {Run run;std::optional<std::int64_t> status_ms;std::int64_t status_sequence;};
 struct RootRunPage {std::vector<RootRunRecord> entries;std::int64_t total,watermark;bool more;};
 struct StatusTimeUnavailable : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -58,6 +59,7 @@ public:
     DynamicHumanRequest expire_dynamic_human(const std::string& plan,const std::string& request);
     DynamicBudgetSegment open_dynamic_budget_segment(const DynamicSegmentSpec& spec);
     DynamicBudgetSegment dynamic_budget_segment(const std::string& root);
+    std::optional<ContextPausePin> dynamic_context_pause(const std::string& root);
     Run suspend_dynamic_owner(const DynamicPauseSpec& spec);
     DynamicResumeRecord resume_dynamic_owner(const DynamicResumeSpec& spec);
     void commit_dynamic_tool_turn(const std::string& root,const std::string& call);
@@ -69,6 +71,30 @@ public:
     ModelCallReservation reserve_model_call(const std::string& root,const std::string& owner,const std::string& attempt,ModelCallRole role);
     ModelCallReservation start_model_call(const std::string& root,const std::string& owner,const std::string& attempt);
     ModelCallReservation finish_model_call(const std::string& root,const std::string& owner,const std::string& attempt,std::optional<std::string> actual_assistant_json={});
+    ContextSnapshot context_snapshot(const ContextScope& scope,const ContextBinding& binding,ContextReadBound bound={});
+    ContextStatusObservation context_status_observation(const ContextScope& scope,const ContextBinding& binding);
+    std::vector<ContextGroupPayload> context_group_payloads(const ContextSnapshot& snapshot,const std::vector<std::int64_t>& ordinals,ContextReadBound bound={});
+    std::optional<ContextProjection> context_projection(const ContextScope& scope,const ContextBinding& binding,ContextReadBound bound={});
+    ContextStepReservation begin_context_compaction(const ContextCompactionSpec& spec);
+    ContextStepReservation start_context_compaction(const std::string& id,const std::string& maintenance_attempt);
+    ContextProjection record_context_compaction_response(const ContextCompactionCommit& result);
+    ContextProjection commit_context_compaction(const ContextCompactionCommit& result);
+    void retire_context_compaction(const ContextCompactionFailure& failure);
+    ContextManualRequest request_context_compaction(const ContextManualRequestSpec& spec);
+    ContextManualRequest context_manual_request(const std::string& id,const ContextBinding& binding);
+    std::optional<ContextManualRequest> context_current_manual_request(const ContextScope& scope,const ContextBinding& binding);
+    ContextManualRequest retire_context_request(const std::string& id,const ContextBinding& binding,ContextFailureCode code);
+    IdleContextOwnerRecord claim_idle_context_owner(const IdleContextOwnerSpec& spec);
+    IdleContextOwnerRecord idle_context_owner(const std::string& id);
+    void retire_idle_context_owner(const std::string& id,ContextFailureCode code,std::int64_t measured_elapsed_ms);
+    ContextMeasureReservation begin_context_measure(const ContextMeasureRequestSpec& spec);
+    ContextMeasureReservation start_context_measure(const std::string& id);
+    void finish_context_measure(const ContextInputMeasure& measure);
+    void retire_context_measure(const std::string& id,ContextFailureCode code,std::int64_t elapsed_ms);
+    InferenceStepRecord reserve_inference_step(const InferenceStepSpec& spec);
+    InferenceStepRecord inference_step(const std::string& id);
+    InferenceStepRecord finish_inference_attempt(const InferenceAttemptResult& result);
+    InferenceStepRecord reserve_inference_rebuild(const InferenceRebuildSpec& spec);
     DelegationBatchRecord accept_delegation_batch(const DelegationBatchSpec& spec);
     DelegationBatchRecord delegation_batch(const std::string& id);
     std::vector<DelegationBatchRecord> delegation_batches(const std::string& parent);
@@ -78,7 +104,13 @@ public:
     std::vector<OwnedChildRecord> owned_children(const std::string& parent);
     std::vector<Message> owned_child_history(const std::string& parent,const std::string& child);
     std::vector<Event> tree_events(const std::string& parent,std::int64_t after=0,std::size_t count=256);
-    Run start_graph_run(const std::string& id,const std::string& session_id,const std::string& graph_id,std::int64_t revision,const GraphPlan& plan,const std::string& prompt_json);
+    Run start_graph_run(const std::string& id,const std::string& session_id,const std::string& graph_id,std::int64_t revision,const GraphPlan& plan,const std::string& prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<GraphContextSpec> context={});
+    GraphContextOwnerRecord graph_context_owner(const std::string& root);
+    GraphContextOpenRecord open_graph_context_owner(const GraphContextOpenSpec& spec);
+    GraphContextOpenRecord resume_graph_context_owner(const GraphContextOpenSpec& spec);
+    GraphRootRecord suspend_graph_context_owner(const GraphContextBoundarySpec& spec);
+    Run complete_graph_context_owner(const GraphContextBoundarySpec& spec,const std::string& actual_join_json);
+    Run retire_graph_context_owner(const std::string& root,RunState terminal,const std::string& reason_json,const std::string& segment_id={},std::int64_t measured_elapsed_ms=0);
     GraphRootRecord graph_run(const std::string& id);
     Run start_graph_child(const std::string& id,const std::string& parent_id,const std::string& node_id,const std::string& prompt_json,std::int64_t expected_checkpoint_revision=0);
     GraphRootRecord settle_graph_child(const std::string& child_id,std::int64_t expected_checkpoint_revision=0);

@@ -1,0 +1,18 @@
+# Copy to .config/providers.yaml; that local folder is ignored by Git.
+# Enter keys locally. Model choices can be discovered in xMind Settings.
+# New empty-key placeholders are skipped. Existing empty keys reuse their
+# encrypted SQLite credential. Omitting model preserves an existing choice.
+version: 1
+profiles:
+  claude:
+    route: anthropic.messages
+    api_key: ""
+  openai:
+    route: openai.responses
+    api_key: ""
+  gemini:
+    route: gemini.generate-content
+    api_key: ""
+  deepseek:
+    route: deepseek.chat
+    api_key: ""

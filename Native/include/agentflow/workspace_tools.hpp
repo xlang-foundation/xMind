@@ -2,6 +2,7 @@
 #include "agentflow/model_provider.hpp"
 #include <memory>
 #include <optional>
+#include <string_view>
 
 namespace agentflow {
 struct ToolAccessDenied : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -41,6 +42,12 @@ public:
     // view's path spelling. Shared servers must namespace it by trusted worker
     // identity. Changed root path requires reopening the runtime.
     std::string identity() const;
+    // Backend configuration is outside model-visible workspace authority.
+    // Component matching includes Windows case and trailing-dot/space aliases.
+    static bool backend_private_component(std::string_view name);
+    // Verified public directory identity for native process workdir admission;
+    // validates both caller spelling and the normalized opened handle path.
+    std::string directory_identity(const std::string& path=".",std::stop_token cancel={}) const;
     WorkspaceFile read_file(const std::string& path,std::stop_token cancel={}) const;
     // Backend edit preconditions captured from one verified file handle.
     // Capturing a snapshot does not grant permission or mutate the file.

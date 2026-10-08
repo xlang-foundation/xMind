@@ -8,12 +8,21 @@ import {createHash} from 'node:crypto';
 const execute=promisify(execFile),folder=await mkdtemp(join(tmpdir(),'xmind-workspace-'));
 const root=join(folder,'workspace'),outside=join(folder,'workspace-other');
 try {
-  await Promise.all([mkdir(join(root,'sub'),{recursive:true}),mkdir(join(root,'.git'),{recursive:true}),mkdir(join(root,'many'),{recursive:true}),mkdir(join(outside,'sub'),{recursive:true})]);
+  await Promise.all([mkdir(join(root,'sub','.CoNfIg'),{recursive:true}),mkdir(join(root,'.config'),{recursive:true}),mkdir(join(root,'.configurable'),{recursive:true}),mkdir(join(root,'.git'),{recursive:true}),mkdir(join(root,'many'),{recursive:true}),mkdir(join(outside,'sub'),{recursive:true})]);
+  // Only disposable synthetic secret/guidance markers. No user configuration
+  // is read, copied or passed to the native fixture.
+  const privateRoot='api_key: SyntheticPrivateConfigValue-workspace-only\nalpha[.]needle private root\n';
+  const privateNested='api_key: SyntheticPrivateConfigValue-workspace-only\nalpha[.]needle private nested\n';
   await Promise.all([
     writeFile(join(root,'README.txt'),'first\r\nalpha[.]needle 中\r\nlast\n'),
     writeFile(join(root,'edit.txt'),'original\n'),
     writeFile(join(root,'edit-copy.txt'),'original\n'),
     writeFile(join(root,'sub','inside.txt'),'alpha[.]needle nested\n'),
+    writeFile(join(root,'.config','providers.yaml'),privateRoot),
+    writeFile(join(root,'.config','AGENTS.md'),'SyntheticPrivateConfigValue-workspace-only private guidance\n'),
+    writeFile(join(root,'sub','.CoNfIg','nested.yaml'),privateNested),
+    writeFile(join(root,'sub','.CoNfIg','AGENTS.md'),'SyntheticPrivateConfigValue-workspace-only nested private guidance\n'),
+    writeFile(join(root,'.configurable','visible.txt'),'Ordinary configuration documentation\n'),
     writeFile(join(root,'.git','ignored.txt'),'alpha[.]needle excluded\n'),
     writeFile(join(root,'binary.bin'),Buffer.from([0,255,128])),
     writeFile(join(root,'too-large.txt'),'x'.repeat(1024*1024+1)),
@@ -23,11 +32,14 @@ try {
   // Windows junction creation does not need symlink privileges. Failure fails
   // the contract rather than silently skipping the boundary tests.
   await symlink(outside,join(root,'outside-link'),'junction');
+  await symlink(join(root,'.config'),join(root,'config-alias'),'junction');
   await link(join(outside,'secret.txt'),join(root,'hard-link.txt'));
   for(let i=0;i<1001;i++) await writeFile(join(root,'many',`${i}.txt`),'');
   const expectedHash=createHash('sha256').update(await readFile(join(root,'README.txt'))).digest('hex');
   const expectedAfterHash=createHash('sha256').update((await readFile(join(root,'README.txt'),'utf8')).replace('alpha[.]needle','beta-native')).digest('hex');
   const result=await execute(process.argv[2],[root,outside,expectedHash,expectedAfterHash],{windowsHide:true,timeout:20000});
+  assert.equal(await readFile(join(root,'.config','providers.yaml'),'utf8'),privateRoot,'Rejected native access/edit attempts must preserve synthetic private configuration');
+  assert.equal(await readFile(join(root,'sub','.CoNfIg','nested.yaml'),'utf8'),privateNested,'Nested private configuration must remain unchanged');
   const oldVersion=JSON.parse((await execute(process.argv[2],['--snapshot',root,'README.txt'],{windowsHide:true,timeout:5000})).stdout);
   await writeFile(join(root,'README.txt'),'Actual fixture changed after snapshot\n');
   const newVersion=JSON.parse((await execute(process.argv[2],['--snapshot',root,'README.txt'],{windowsHide:true,timeout:5000})).stdout);

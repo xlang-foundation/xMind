@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText } = require('../client');
+const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext } = require('../client');
 const {planFixture,inputMessage}=require('./plan-fixture');
 
 function harness(options={}) {
@@ -17,19 +17,24 @@ function harness(options={}) {
   let pendingOperation;
   let operations=options.operations||[];
   let sidebarProvider;
-  const renameRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[];
+  const renameRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
     let data;
-    if(target.pathname==='/v1/agent/planning')data={enabled:true,tools:['inspect_plan','plan_tasks','revise_plan']};
+    if(target.pathname.endsWith('/context/compact')){const body=JSON.parse(requestOptions.body);contextRequests.push(body);options.contextRecord={...options.contextRecord,head_revision:options.contextRecord.head_revision+1};data={id:body.id,state:'pending'};}
+    else if(target.pathname.includes('/context/requests/'))data={id:target.pathname.split('/').at(-1),state:'completed'};
+    else if(target.pathname.endsWith('/context'))data=await (options.contextRead?options.contextRead():options.contextRecord);
+    else if(target.pathname.endsWith('/resume')&&target.pathname.startsWith('/v1/graph-runs/')){graphResumes.push(JSON.parse(requestOptions.body));data=options.graphRoot.run;}
+    else if(target.pathname==='/v1/agent/planning')data={enabled:true,tools:['inspect_plan','plan_tasks','revise_plan']};
     else if(options.plan&&target.pathname===`/v1/runs/${options.plan.run.id}/plan`)data=options.planRead?await options.planRead():options.plan;
     else if(options.plan&&target.pathname===`/v1/runs/${options.plan.run.id}/plan/human/${options.plan.questions[0].id}`){planInputs.push(JSON.parse(requestOptions.body));data={...options.plan.run,state:'running'};}
     else if(options.plan&&target.pathname===`/v1/runs/${options.plan.run.id}/plan/resume`){planResumes.push(JSON.parse(requestOptions.body));data={...options.plan.run,state:'running'};}
-    else if(target.pathname==='/v1/provider/profiles')return options.profileRegistry?{ok:true,json:async()=>options.profileRegistry()}:{ok:false,status:404,json:async()=>({detail:'Legacy backend has no profile API'})};
+    else if(target.pathname==='/v1/provider/profiles')return options.profileRegistry?{ok:true,json:async()=>requestOptions.method==='POST'?options.profileSave(JSON.parse(requestOptions.body)):options.profileRegistry()}:{ok:false,status:404,json:async()=>({detail:'Legacy backend has no profile API'})};
     if(data!==undefined)return {ok:true,json:async()=>data};
-    if(target.pathname==='/v1/provider/profiles/models')return {ok:true,json:async()=>({models:options.catalogue.models})};
+    if(target.pathname==='/v1/provider/profiles/models')return {ok:true,json:async()=>({models:options.profileModels||options.catalogue.models})};
+    if(target.pathname==='/v1/provider/profiles/select')return {ok:true,json:async()=>options.profileSelect(JSON.parse(requestOptions.body))};
     if(target.pathname==='/v1/runs'&&options.onAdmission)return options.onAdmission(JSON.parse(requestOptions.body));
     if(target.pathname==='/v1/health') data=options.health||{agent_execution:true,status:'ok'};
     else if(target.pathname==='/v1/graphs')data={graphs:options.graphs||[]};
@@ -105,23 +110,57 @@ function harness(options={}) {
     workspaceState:{get:key=>state.get(key),update:async (key,value)=>{state.set(key,value);}}};
   state.set('agentflow.session',{url:'http://127.0.0.1:8765',id:'saved'});
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext}:name==='./webview'?require('../webview'):require(name),
     setTimeout:callback=>{bootstrapTasks.push(callback);return 1;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./browser-view'?require('../browser-view'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,state,errors,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  return {token,commands,secrets,requests,views,intervals,state,errors,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
     pauseOperation(promise) {pendingOperation=promise;},
     pauseHistory(promise) {pendingHistory=promise;}};
 }
+
+test('VS Code retains saved-profile discovery after Settings close and conversation selection, and rejects another-view stale catalogue',async()=>{
+ let registry={revision:4,active:'first',profiles:[{id:'first',route_id:'openai.responses',provider:'openai',model:'fixture-current',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};const writes=[];
+ const options={health:{agent_execution:true},catalogue:{models:[{id:'fixture-current'}],default_model:'fixture-current'},profileModels:Array.from({length:135},(_,n)=>({id:'discovered-'+n})),profileRegistry:()=>registry,profileSave:body=>{writes.push(body);registry={...registry,revision:registry.revision+1,profiles:[{...registry.profiles[0],revision:registry.profiles[0].revision+1,model:body.model}]};options.catalogue={models:[{id:body.model}],default_model:body.model};return registry;}};
+ const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='model-list'&&m.models.length===135));
+  const metadataReads=h.requests.filter(path=>path==='/v1/provider/profiles').length;view.receive({type:'discardProviderKey'});await until(()=>h.requests.filter(path=>path==='/v1/provider/profiles').length>metadataReads);await new Promise(resolve=>setImmediate(resolve));assert.equal(view.posted.findLast(m=>m.type==='model-list').models.length,135);assert.equal(writes.length,0);
+  view.receive({type:'select',id:'saved'});await until(()=>view.posted.findLast(m=>m.type==='status')?.text==='completed');await new Promise(resolve=>setImmediate(resolve));view.receive({type:'model',id:'discovered-134'});await until(()=>writes.length===1);assert.equal(writes[0].model,'discovered-134');assert.equal(writes[0].expected_revision,4);assert.equal(Object.hasOwn(writes[0],'api_key'),false);await until(()=>view.posted.findLast(m=>m.type==='model-list')?.model==='discovered-134');assert.equal(view.posted.findLast(m=>m.type==='model-list').models.length,135);
+  registry={...registry,revision:6,profiles:[{...registry.profiles[0],revision:3,model:'externally-selected'}]};options.catalogue={models:[{id:'externally-selected'}],default_model:'externally-selected'};view.receive({type:'model',id:'discovered-133'});await until(()=>view.posted.some(m=>m.type==='error'&&/settings changed/.test(m.text)));assert.equal(writes.length,1);assert.equal(view.posted.findLast(m=>m.type==='capabilities').model,'externally-selected');assert.ok(!h.requests.includes('/v1/runs'));
+ }finally{view.close();}
+});
 async function until(predicate) {
   const deadline=Date.now()+2000;
   while(Date.now()<deadline) {if(predicate()) return;await new Promise(resolve=>setImmediate(resolve));}
   throw new Error('Extension host fixture timed out');
 }
+
+test('VS Code footer provider command selects a saved key-only profile via native CAS, then discovers without a key and waits for explicit model choice',async()=>{
+ let registry={revision:4,active:'first',profiles:[{id:'first',route_id:'openai.responses',provider:'openai',model:'fixture-current',revision:1},{id:'claude-key-only',route_id:'anthropic.messages',provider:'anthropic',model:'',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]};const selections=[],writes=[];
+ const options={health:{agent_execution:true},catalogue:{models:[{id:'fixture-current'}],default_model:'fixture-current'},profileModels:[{id:'fixture-claude'},{id:'fixture-claude-next'}],profileRegistry:()=>registry,profileSelect:body=>{selections.push(body);assert.deepEqual(body,{id:'claude-key-only',expected_revision:4});registry={...registry,revision:5,active:body.id};options.health={agent_execution:false};options.catalogue={models:[],default_model:''};return registry;},profileSave:body=>{writes.push(body);registry={...registry,revision:6,profiles:registry.profiles.map(profile=>profile.id===body.id?{...profile,revision:2,model:body.model}:profile)};options.health={agent_execution:true};options.catalogue={models:[{id:body.model}],default_model:body.model};return registry;}};
+ const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];try{view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='settings-state'&&m.complete));assert.match(view.webview.html,/footer-provider/);view.receive({type:'select-provider',id:'claude-key-only'});await until(()=>view.posted.findLast(m=>m.type==='provider-profiles')?.active==='claude-key-only'&&view.posted.findLast(m=>m.type==='model-list')?.model==='');assert.equal(selections.length,1);assert.equal(writes.length,0);assert.ok(view.posted.some(m=>m.type==='provider-wire'&&m.wire==='anthropic-messages'));assert.equal(h.inputPrompts.filter(value=>value.title==='xMind: OpenAI API key').length,0);assert.equal(h.pickers.length,0);
+  view.receive({type:'model',id:'fixture-claude'});await until(()=>writes.length===1);assert.deepEqual(writes[0],{id:'claude-key-only',route_id:'anthropic.messages',model:'fixture-claude',expected_revision:5,activate:true});assert.equal(registry.profiles[0].model,'fixture-current');await until(()=>view.posted.findLast(m=>m.type==='model-list')?.model==='fixture-claude');assert.equal(view.posted.findLast(m=>m.type==='model-list').models.length,2);assert.ok(!h.requests.includes('/v1/runs'));
+ }finally{view.close();}
+});
+test('VS Code context control uses actual observed head and keeps the request acknowledgement separate from completed execution',async()=>{
+ const options={health:{agent_execution:true,context_controls:true},contextRecord:{session_id:'saved',model_id:'synthetic-host-default',enabled:true,automatic:true,head_revision:4,source_watermark:7,manual:null,checkpoint:{id:'checkpoint',provider_elapsed_ms:12,preparation_elapsed_ms:14,usage:{input_tokens:41,output_tokens:9}}}},h=harness(options);
+ await h.commands.get('agentflow.open')();const view=h.views[0];try{view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='context'));
+  view.receive({type:'context-compact',session:'saved',model:'synthetic-host-default',expected_head_revision:4});await until(()=>h.contextRequests.length===1&&view.posted.some(message=>message.type==='context'&&message.record.manual?.state==='completed'));
+  assert.equal(h.contextRequests[0].expected_head_revision,4);assert.equal(h.contextRequests[0].model_id,'synthetic-host-default');assert.ok(/^[0-9a-f]{32}$/.test(h.contextRequests[0].id));assert.ok(!Object.hasOwn(h.contextRequests[0],'actor'));assert.ok(!JSON.stringify(view.posted).includes(h.token));assert.equal(view.posted.findLast(message=>message.type==='context').record.checkpoint.usage.total_tokens,undefined);
+  view.receive({type:'context-compact',session:'foreign',model:'synthetic-host-default',expected_head_revision:5});await until(()=>view.posted.some(message=>message.type==='error'&&message.text.includes('Refresh')));assert.equal(h.contextRequests.length,1);
+ }finally{view.close();}
+});
+test('VS Code graph Resume is bound to selected root and freshly observed checkpoint/eligibility',async()=>{
+ const run={id:'root',session_id:'saved',state:'paused',parent_id:'',node_id:'',graph_root:true},options={health:{agent_execution:true},runs:[run],graphRoot:{run,graph_id:'graph',graph_revision:1,checkpoint_revision:7,spec:{nodes:[{id:'gate',type:'human',prompt:'Synthetic answered question'}]},checkpoint:{nodes:[{id:'gate',state:'completed',output:{answer:'done'}}]},context:{enabled:true,resumable:true,remaining_active_ms:1000}}},h=harness(options);
+ await h.commands.get('agentflow.open')();const view=h.views[0];try{view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='graph'));
+  view.receive({type:'graph-resume',root:'root',revision:7});await until(()=>h.graphResumes.length===1);assert.deepEqual(h.graphResumes,[{expected_checkpoint_revision:7}]);
+  options.graphRoot={...options.graphRoot,checkpoint_revision:8};view.receive({type:'graph-resume',root:'root',revision:7});await until(()=>view.posted.some(message=>message.type==='error'&&message.text.includes('changed')));assert.equal(h.graphResumes.length,1);
+ }finally{view.close();}
+});
 test('VS Code Agent observes scoped leaf histories and tree events without inventing a graph or resubmitting work',async()=>{
  const parent={id:'finished',session_id:'saved',state:'completed',parent_id:'',graph_root:false},leaf={run:{id:'leaf',session_id:'saved',parent_id:'finished',state:'completed',graph_root:false},kind:'delegated_leaf',batch_id:'batch',task_id:'inspect',preset_id:'workspace.inspect',preset_revision:1};
  const h=harness({health:{agent_execution:true,owned_child_observation:true},runs:[parent],ownedChildren:[leaf],ownedHistories:{leaf:[{seq:3,role:'assistant',data:{content:'Synthetic leaf response',usage:{prompt_tokens:4,completion_tokens:2}}}]},treeEvents:[{seq:1,run_id:'leaf',kind:'conversation.assistant',data:{}},{seq:2,run_id:'finished',kind:'run.completed',data:{}}]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});

@@ -52,8 +52,25 @@ class BackendClient {
     executionIdentity(root);planPreconditions(expected_revision,expected_state_sequence);
     return validatePlanOwner(await this.request(`/v1/runs/${root}/plan/resume`,{expected_revision,expected_state_sequence}),root);
   }
+  async context(session,model) {
+    executionIdentity(session);if(model!==undefined)profileIdentity(model);
+    return validateContextObservation(await this.request(`/v1/sessions/${session}/context${model?`?model_id=${encodeURIComponent(model)}`:''}`),session,model);
+  }
+  async contextRequest(session,id,model) {
+    executionIdentity(session);executionIdentity(id);if(model!==undefined)profileIdentity(model);
+    return validateContextRequest(await this.request(`/v1/sessions/${session}/context/requests/${id}${model?`?model_id=${encodeURIComponent(model)}`:''}`),id);
+  }
+  async compactContext(session,id,expected_head_revision,model,binding) {
+    executionIdentity(session);executionIdentity(id);planInteger(expected_head_revision);if(model!==undefined)profileIdentity(model);
+    return validateContextRequest(await this.request(`/v1/sessions/${session}/context/compact`,{id,expected_head_revision,...(model?{model_id:model}:{}),...profileBindingFields(binding)}),id);
+  }
+  async resumeGraph(root,expected_checkpoint_revision) {
+    executionIdentity(root);planInteger(expected_checkpoint_revision,1);
+    const result=await this.request(`/v1/graph-runs/${root}/resume`,{expected_checkpoint_revision});validateRunDTO(result);
+    if(result.id!==root||result.parent_id!==''||result.graph_root!==true)throw new Error('Graph resume ownership changed');return result;
+  }
   graphRun(session_id,graph_id,graph_revision,prompt,model_id,binding) { return this.request('/v1/graph-runs',{session_id,graph_id,graph_revision,prompt,...(model_id?{model_id}:{}),...profileBindingFields(binding)}); }
-  graph(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}`); }
+  async graph(id) { const value=await this.request(`/v1/graph-runs/${encodeURIComponent(id)}`);if(value.context!==undefined)validateGraphContext(value.context,value.run);return value; }
   graphChildren(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/children`); }
   graphEvents(id,after) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/events?after=${after}`); }
   graphChildHistory(root,child) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/children/${encodeURIComponent(child)}/history`); }
@@ -129,6 +146,58 @@ function executionIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_-]{1
 function providerCallIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.:-]{1,256}$/.test(value))throw new Error('Invalid provider call identity');return value;}
 function planLabel(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.-]{1,32}$/.test(value))throw new Error('Invalid planning node label');return value;}
 function planInteger(value,minimum=0){if(!Number.isSafeInteger(value)||value<minimum)throw new Error('Invalid planning revision or counter');return value;}
+function validateContextRequest(value,id){
+  planFields(value,['id','state']);executionIdentity(value.id);if(id!==undefined&&value.id!==id)throw new Error('Context request identity changed');
+  if(!['pending','claimed','completed','failed','interrupted'].includes(value.state))throw new Error('Invalid context request state');return value;
+}
+function validateContextObservation(value,session,model){
+  planFields(value,['session_id','model_id','enabled','automatic','head_revision','source_watermark','manual','checkpoint']);executionIdentity(value.session_id);profileIdentity(value.model_id);
+  if(value.session_id!==session||(model!==undefined&&value.model_id!==model))throw new Error('Context conversation/model identity changed');
+  for(const key of ['enabled','automatic'])if(typeof value[key]!=='boolean')throw new Error('Invalid context capability');
+  planInteger(value.head_revision);planInteger(value.source_watermark);
+  if(value.manual!==null)validateContextRequest(value.manual);
+  if(value.checkpoint!==null){const c=value.checkpoint;planFields(c,['id','provider_elapsed_ms','preparation_elapsed_ms','usage']);executionIdentity(c.id);planInteger(c.provider_elapsed_ms);if(c.preparation_elapsed_ms!==null)planInteger(c.preparation_elapsed_ms);if(c.usage!==null)planUsage(c.usage);}
+  return value;
+}
+function validateGraphContext(value,run){
+  planFields(value,['enabled','resumable','remaining_active_ms']);for(const key of ['enabled','resumable'])if(typeof value[key]!=='boolean')throw new Error('Invalid graph context capability');
+  if(value.remaining_active_ms!==null)planInteger(value.remaining_active_ms);
+  if(value.resumable&&(!value.enabled||run?.state!=='paused'||value.remaining_active_ms===null||value.remaining_active_ms<1))throw new Error('Graph has no ready closed context owner');
+  if(!value.enabled&&(value.resumable||value.remaining_active_ms!==null))throw new Error('Disabled graph context cannot own an allowance');return value;
+}
+// Thin observation/control helper shared by browser and VS Code hosts. It never
+// compacts locally, edits history, retries a mutation or estimates token usage.
+class ContextViewController {
+  constructor(client,post,selection,admission=async()=>undefined,id=()=>globalThis.crypto.randomUUID().replaceAll('-','')){this.client=client;this.post=post;this.selection=selection;this.admission=admission;this.id=id;this.epoch=0;this.readOrdinal=0;}
+  invalidate(){clearTimeout(this.timer);this.timer=undefined;this.epoch++;this.record=undefined;this.request=undefined;this.post({type:'context-clear'});}
+  dispose(){this.disposed=true;this.invalidate();}
+  current(pin,epoch){const now=this.selection();return !this.disposed&&epoch===this.epoch&&now.enabled===true&&now.session===pin.session&&now.model===pin.model&&now.generation===pin.generation;}
+  async read(){
+    const pin=this.selection(),epoch=this.epoch,ordinal=++this.readOrdinal,current=()=>this.current(pin,epoch)&&ordinal===this.readOrdinal;
+    if(!pin.enabled||!pin.session||!pin.model){if(this.record)this.invalidate();return;}
+    try{
+      let value=await this.client.context(pin.session,pin.model);if(!current())return;
+      if(this.request?.session===pin.session&&this.request.model===pin.model){
+        const state=await this.client.contextRequest(pin.session,this.request.id,pin.model);if(!current())return;
+        if(['completed','failed','interrupted'].includes(state.state)){value=await this.client.context(pin.session,pin.model);if(!current())return;this.request=undefined;}
+        if(value.manual===null||value.manual.id===state.id)value={...value,manual:state};
+      }
+      this.record=value;this.post({type:'context',record:value});clearTimeout(this.timer);
+      if(value.manual&&['pending','claimed'].includes(value.manual.state))this.timer=setTimeout(()=>this.read().catch(error=>{if(this.current(pin,epoch))this.post({type:'error',text:error.message});}),500);
+      return value;
+    }catch(error){if(!current())return;if(error.status===409)this.invalidate();throw error;}
+  }
+  async compact(message){
+    const pin=this.selection(),epoch=this.epoch,observed=this.record;
+    if(!this.current(pin,epoch)||!observed?.enabled||message.session!==pin.session||message.model!==pin.model||message.expected_head_revision!==observed.head_revision)throw new Error('Refresh the current model context before compacting.');
+    const fresh=await this.read();if(!this.current(pin,epoch)||!fresh)return;
+    if(!fresh.enabled||fresh.head_revision!==message.expected_head_revision||fresh.manual&&['pending','claimed'].includes(fresh.manual.state))throw new Error('Context changed or already has a request. Review the current observation.');
+    const binding=await this.admission();if(!this.current(pin,epoch))return;
+    const id=this.id();executionIdentity(id);
+    const result=await this.client.compactContext(pin.session,id,message.expected_head_revision,pin.model,binding);if(!this.current(pin,epoch))return;
+    this.request={session:pin.session,model:pin.model,id:result.id};await this.read();
+  }
+}
 function planText(value,limit,empty=false){if(typeof value!=='string'||(!empty&&!value.length)||value.includes('\0')||new TextEncoder().encode(value).length>limit)throw new Error('Invalid planning text');}
 function planPreconditions(revision,sequence){planInteger(revision,1);planInteger(sequence,1);}
 function validatePlanInputText(source){
@@ -228,31 +297,49 @@ function providerEnrollmentWire(setup){
 }
 // Thin setup controller shared by both hosts. The native service owns profile
 // publication and execution; unsaved keys live only in this host's bounded draft.
+// Saved-key discovery retains only model IDs and public profile/route revisions
+// across conversation changes. A fresh native metadata read precedes every save;
+// external revisions retire it, while our acknowledged model-only CAS rebases it.
 class ProviderProfileController {
-  constructor(client,post,guard=()=>true){this.client=client;this.post=post;this.guard=guard;this.epoch=0;}
-  invalidate(){this.epoch++;clearTimeout(this.timer);if(this.draft)this.draft.key=undefined;this.draft=undefined;}
-  dispose(){this.invalidate();this.disposed=true;}
+  constructor(client,post,guard=()=>true){this.client=client;this.post=post;this.guard=guard;this.epoch=0;this.metadataRead=0;}
+  clearDraft(){clearTimeout(this.timer);if(this.draft)this.draft.key=undefined;this.draft=undefined;}
+  invalidate({catalogue=false}={}){this.epoch++;this.clearDraft();if(catalogue)this.savedCatalogue=undefined;else if(!this.disposed&&this.guard()&&!this.models())this.configuredModels();}
+  dispose(){this.disposed=true;this.invalidate({catalogue:true});}
   current(epoch){return !this.disposed&&this.epoch===epoch&&this.guard();}
   present(){if(this.state)this.post({type:'provider-profiles',profiles:this.state.profiles,routes:this.state.routes,active:this.state.active});}
+  binding(id){const profile=this.state.profiles.find(value=>value.id===id),route=this.state.routes.find(value=>value.id===profile?.route_id);return {client:this.client,origin:this.client.baseUrl,id,revision:this.state.revision,active:this.state.active,profile_revision:profile?.revision,owned_route:profile?.route_id,provider:profile?.provider,wire:route?.wire,route_provider:route?.provider,route_discovery:route?.discovery};}
+  bound(value,state=this.state){
+    if(!value||!state||value.client!==this.client||value.origin!==this.client.baseUrl||value.revision!==state.revision||value.active!==state.active)return false;
+    const profile=state.profiles.find(item=>item.id===value.id);
+    if(value.profile_revision===undefined)return !profile;
+    const route=state.routes.find(item=>item.id===profile?.route_id);
+    return !!profile&&profile.revision===value.profile_revision&&profile.route_id===value.owned_route&&profile.provider===value.provider&&route?.wire===value.wire&&route?.provider===value.route_provider&&route?.discovery===value.route_discovery;
+  }
+  configuredModels(){if(!this.state||!this.current(this.epoch))return;const profile=this.state.profiles.find(value=>value.id===this.state.active);this.post({type:'model-list',models:profile?.model?[{id:profile.model}]:[],model:profile?.model||undefined});}
   async refresh(){
     if(typeof this.client.providerProfiles!=='function')return false;
-    const epoch=this.epoch;
-    try{const state=await this.client.providerProfiles();if(this.current(epoch)){this.state=state;this.present();}return true;}
+    const epoch=this.epoch,read=++this.metadataRead;
+    try{const state=await this.client.providerProfiles();if(this.current(epoch)&&read===this.metadataRead){
+      const changed=this.state&&(state.revision!==this.state.revision||state.active!==this.state.active)||(this.draft&&!this.bound(this.draft,state))||(this.savedCatalogue&&!this.bound(this.savedCatalogue,state));
+      if(changed){this.clearDraft();this.savedCatalogue=undefined;}
+      this.state=state;this.present();if(changed){if(!this.models())this.configuredModels();this.post({type:'provider-wire',wire:this.wire(state.active)});}
+    }return true;}
     catch(error){if(error.status===404)return false;throw error;}
   }
   wire(id){const profile=this.state?.profiles.find(value=>value.id===id);return this.state?.routes.find(value=>value.id===profile?.route_id)?.wire;}
-  models(selected){if(this.draft)this.post({type:'model-list',models:this.draft.ids.map(id=>({id})),model:selected});}
+  choice(){if(this.bound(this.draft))return this.draft;if(this.bound(this.savedCatalogue))return this.savedCatalogue;return undefined;}
+  models(selected){const choice=this.choice();if(!choice||!this.current(this.epoch))return false;const profile=this.state.profiles.find(value=>value.id===choice.id);this.post({type:'model-list',models:choice.ids.map(id=>({id})),model:selected??profile?.model});return true;}
   async admission(){if(!this.state&&!await this.refresh())throw new Error('Provider profile admission requires profile metadata');if(this.disposed||!this.state||!this.guard())throw new Error('Backend changed before run admission');return {provider_profile_id:this.state.active,expected_provider_revision:this.state.revision};}
   async reconcileAdmission(binding,error){
     if(error?.status!==409||!binding)return false;
     const epoch=this.epoch;if(!await this.refresh()||!this.current(epoch))return false;
     if(this.state.revision===binding.expected_provider_revision&&this.state.active===binding.provider_profile_id)return false;
-    this.invalidate();this.present();const wire=this.wire(this.state.active);if(wire)this.post({type:'provider-wire',wire});return true;
+    this.invalidate({catalogue:true});this.present();const wire=this.wire(this.state.active);if(wire)this.post({type:'provider-wire',wire});return true;
   }
   async discover(key,id,route_id){
     if(!this.state&&!await this.refresh())return false;
     if(this.disposed||!this.state)return true;
-    this.invalidate();const epoch=this.epoch;
+    this.invalidate({catalogue:true});const epoch=this.epoch;
     try{
       id=id===undefined?this.state.active:id;
       const saved=this.state.profiles.find(value=>value.id===id);
@@ -263,34 +350,43 @@ class ProviderProfileController {
       if(!saved){if(!key)throw new Error('Enter a key for the new provider profile');id=route.provider+'-'+globalThis.crypto.randomUUID();}
       this.post({type:'settings-state',busy:true,text:'Fetching models from '+(route.provider==='anthropic'?'Claude':route.provider)+'…'});
       if(!this.current(epoch))throw new Error('Backend changed during provider setup');
-      const catalogue=await this.client.discoverProfileModels(id,saved&&key===undefined?saved.route_id:route_id,key,this.state.revision);
+      const captured=this.binding(id),savedCredential=!!saved&&key===undefined;
+      const catalogue=await this.client.discoverProfileModels(id,savedCredential?saved.route_id:route_id,key,this.state.revision);
       if(!this.current(epoch))return true;
+      if(!this.bound(captured))throw new Error('Provider settings changed. Fetch models again.');
       if(!catalogue.models.length)throw new Error('The provider returned no models');
-      this.draft={id,route_id,key,revision:this.state.revision,ids:catalogue.models.map(value=>value.id),expires:key===undefined?Infinity:Date.now()+300000};key=undefined;
+      this.draft={...captured,route_id,key,savedCredential,ids:catalogue.models.map(value=>value.id),expires:key===undefined?Infinity:Date.now()+300000};key=undefined;
+      if(savedCredential)this.savedCatalogue={...captured,route_id:saved.route_id,ids:[...this.draft.ids],expires:Infinity,savedCredential:true};
       this.models(saved?.model);this.post({type:'settings-state',busy:false,complete:true,text:'Choose a model below to save this profile'});
       if(this.draft.key!==undefined)this.timer=setTimeout(()=>{if(this.current(epoch)){this.invalidate();this.post({type:'settings-state',busy:false,text:'Unsaved key expired · fetch models again'});}},300000);
       return true;
     }catch(error){if(this.current(epoch))this.post({type:'settings-state',busy:false,text:error.message});throw error;}finally{key=undefined;}
   }
   async save(model){
-    if(!this.draft)return false;
-    const draft=this.draft,epoch=this.epoch;
+    const draft=this.choice();if(!draft)return false;
+    const epoch=this.epoch;
     if(Date.now()>draft.expires||!draft.ids.includes(model))throw new Error('Fetch models and select a returned model');
     if(!this.current(epoch))throw new Error('Backend changed during provider setup');
-    const state=await this.client.saveProviderProfile(draft.id,draft.route_id,model,draft.key,draft.revision,true);
+    if(!await this.refresh()){this.invalidate({catalogue:true});throw new Error('Provider profile metadata is unavailable. Reconnect before selecting.');}
+    if(!this.current(epoch)||!this.bound(draft))throw new Error('Provider settings changed. Fetch models again before selecting.');
+    let state;try{state=await this.client.saveProviderProfile(draft.id,draft.route_id,model,draft.key,draft.revision,true);}
+    catch(error){if(error.status===409)await this.refresh();throw error;}
     draft.key=undefined;if(!this.current(epoch))return true;
-    this.state=state;draft.revision=state.revision;draft.expires=Infinity;clearTimeout(this.timer);
-    this.present();this.models(model);this.post({type:'provider-wire',wire:this.wire(state.active)});return true;
+    this.state=state;const saved=this.binding(draft.id),routeChanged=draft.profile_revision!==undefined&&(saved.owned_route!==draft.owned_route||saved.provider!==draft.provider||saved.wire!==draft.wire||saved.route_provider!==draft.route_provider||saved.route_discovery!==draft.route_discovery);
+    this.draft=routeChanged?undefined:{...saved,route_id:draft.route_id,key:undefined,savedCredential:draft.savedCredential,ids:[...draft.ids],expires:Infinity};clearTimeout(this.timer);
+    this.savedCatalogue=draft.savedCredential&&!routeChanged?{...saved,route_id:saved.owned_route,ids:[...draft.ids],expires:Infinity,savedCredential:true}:undefined;
+    this.present();if(!this.models(model))this.configuredModels();this.post({type:'provider-wire',wire:this.wire(state.active)});return true;
   }
   async select(id){
     if(!this.state&&!await this.refresh())throw new Error('Update the backend to use provider profiles');
     if(this.disposed||!this.state)return;
     if(!this.state.profiles.some(profile=>profile.id===id))throw new Error('Choose a saved provider profile');
-    this.invalidate();const epoch=this.epoch;if(!this.current(epoch))throw new Error('Backend changed during provider setup');const state=await this.client.selectProviderProfile(id,this.state.revision);
+    this.invalidate({catalogue:true});const epoch=this.epoch;if(!this.current(epoch))throw new Error('Backend changed during provider setup');let state;
+    try{state=await this.client.selectProviderProfile(id,this.state.revision);}catch(error){if(error.status===409&&this.current(epoch))await this.refresh();throw error;}
     if(!this.current(epoch))return;
     this.state=state;this.present();this.post({type:'provider-wire',wire:this.wire(id)});
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText};
-else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController};
+else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController};

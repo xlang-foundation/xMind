@@ -285,6 +285,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(prompt=="/exit")return exit_status();
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
+            std::cerr<<"Context controls: context SESSION [MODEL], compact-context SESSION HEAD_REV REQUEST_ID [MODEL], context-request SESSION REQUEST_ID [MODEL]. Resume a ready closed graph with resume-graph ROOT CHECKPOINT_REV.\n";
             std::cerr<<"/runs lists recorded root runs in the selected conversation; use /watch or /graph-watch to attach one.\n";
             std::cerr<<"Agent /watch includes actual owned inspection or coding children and native plan questions when supported. Direct commands: children RUN, child-history PARENT CHILD, tree-events RUN [CURSOR], delegation, planning, inspect-plan RUN.\n";
             std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
@@ -486,6 +487,12 @@ int main(int argc,char** argv) {
         else if(command=="create-session" && argc==4) {path="/v1/sessions";body={{"title",argv[3]}};post=true;}
         else if(command=="rename-session" && argc==6) {path="/v1/sessions/"+id(argv[3])+"/title";body={{"title",argv[4]},{"expected_title",argv[5]}};post=true;}
         else if(command=="history" && argc==4) path="/v1/sessions/"+id(argv[3])+"/history";
+        else if(command=="context"&&(argc==4||argc==5))path="/v1/sessions/"+id(argv[3])+"/context"+(argc==5?"?model_id="+httplib::encode_query_component(provider_profile_identity(argv[4])):std::string{});
+        else if(command=="context-request"&&(argc==5||argc==6))path="/v1/sessions/"+id(argv[3])+"/context/requests/"+id(argv[4])+(argc==6?"?model_id="+httplib::encode_query_component(provider_profile_identity(argv[5])):std::string{});
+        else if(command=="compact-context"&&(argc==6||argc==7)){
+            path="/v1/sessions/"+id(argv[3])+"/context/compact";body={{"expected_head_revision",provider_revision(argv[4])},{"id",id(argv[5])}};
+            if(argc==7)body["model_id"]=provider_profile_identity(argv[6]);post=true;
+        }
         else if(command=="runs" && argc==4) path="/v1/sessions/"+id(argv[3])+"/runs";
         else if(command=="status" && argc==4) path="/v1/runs/"+id(argv[3]);
         else if(command=="operations" && argc==4) path="/v1/runs/"+id(argv[3])+"/operations";
@@ -542,6 +549,7 @@ int main(int argc,char** argv) {
         }
         else if(command=="graphs" && argc==3)path="/v1/graphs";
         else if(command=="graph" && argc==4)path="/v1/graph-runs/"+id(argv[3]);
+        else if(command=="resume-graph"&&argc==5){path="/v1/graph-runs/"+id(argv[3])+"/resume";body={{"expected_checkpoint_revision",plan_revision(argv[4])}};post=true;}
         else if(command=="graph-children" && argc==4)path="/v1/graph-runs/"+id(argv[3])+"/children";
         else if(command=="graph-child-history" && argc==5)path="/v1/graph-runs/"+id(argv[3])+"/children/"+id(argv[4])+"/history";
         else if(command=="graph-events" && (argc==4 || argc==5)){const auto after=event_cursor(argc==5?argv[4]:"0");path="/v1/graph-runs/"+id(argv[3])+"/events?after="+std::to_string(after);}
@@ -596,9 +604,9 @@ int main(int argc,char** argv) {
             }
         }
         if(watch)return watch_run(client,headers,path,watch_cursor,graph_watch);
-        if(post&&(path=="/v1/runs"||path=="/v1/graph-runs")){
+        if(post&&(path=="/v1/runs"||path=="/v1/graph-runs"||command=="compact-context")){
             const auto current=client.Get("/v1/health",headers);if(!current||current->status!=200)throw std::runtime_error("Cannot inspect backend admission capabilities");
-            const auto capability=Json::parse(current->body);if(capability.value(path=="/v1/graph-runs"?"graph_provider_profile_admission":"provider_profile_admission",false)){
+            const auto capability=Json::parse(current->body);if(command=="compact-context"&&!capability.value("context_controls",false))throw std::runtime_error("This backend has no registered context controls");if(capability.value(path=="/v1/graph-runs"?"graph_provider_profile_admission":"provider_profile_admission",false)){
                 const auto metadata=client.Get("/v1/provider/profiles",headers);if(!metadata||metadata->status!=200)throw std::runtime_error("Cannot inspect backend provider profile");body.update(provider_admission_binding(Json::parse(metadata->body)));
             }
         }

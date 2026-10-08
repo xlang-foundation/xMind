@@ -97,12 +97,13 @@ std::vector<AgentAuthorityCredentialVersion> select_agent_authority_credentials(
     }
     return result;
 }
-std::string agent_authority_identity(const AgentSettings& settings,const std::string& selected_model,
-    const std::string& workspace,const std::vector<AgentAuthorityCredentialVersion>& credentials){
+static std::string execution_authority_identity(const AgentSettings& settings,const std::string& selected_model,
+    const std::string& workspace,const std::vector<AgentAuthorityCredentialVersion>& credentials,bool for_context){
     const auto& model=selected_model.empty()?settings.provider.model:selected_model;
     text(model,256);text(workspace,4096);text(settings.provider.endpoint,4096);
     text(settings.instructions,65536,false);text(settings.instruction_policy.instructions,32768,false);
-    if(!settings.workspace)throw std::invalid_argument("Planning authority requires a configured workspace");
+    if(!settings.workspace&&!for_context)throw std::invalid_argument("Planning authority requires a configured workspace");
+    if(!settings.workspace&&workspace!="workspace:none")throw std::invalid_argument("Absent context workspace identity differs");
     if(settings.selectable_models.size()>64||settings.process_profiles.size()>16)
         throw std::invalid_argument("Private agent authority catalogue exceeds limits");
     for(const auto& selectable:settings.selectable_models)text(selectable,256);
@@ -111,11 +112,11 @@ std::string agent_authority_identity(const AgentSettings& settings,const std::st
             throw std::invalid_argument("Private agent authority process policy exceeds limits");
         for(const auto& argument:profile.prefix_arguments)text(argument,4096,false);
     }
-    if(settings.provider.tools!=Capability::supported||settings.max_turns<1||settings.max_turns>128||
+    if((!for_context&&settings.provider.tools!=Capability::supported)||settings.max_turns<1||settings.max_turns>128||
         settings.run_timeout.count()<1||settings.run_timeout.count()>3600000||
         (model!=settings.provider.model&&std::find(settings.selectable_models.begin(),settings.selectable_models.end(),model)==settings.selectable_models.end()))
         throw std::invalid_argument("Invalid admitted planning execution policy");
-    text(*settings.workspace,32768);
+    if(settings.workspace)text(*settings.workspace,32768);
     const auto expected=references(settings);std::map<Reference,std::int64_t> versions;
     for(const auto& value:credentials){
         const Reference reference{value.scope,value.id,value.purpose};
@@ -124,7 +125,7 @@ std::string agent_authority_identity(const AgentSettings& settings,const std::st
             throw std::invalid_argument("Invalid exact agent credential metadata binding");
     }
     if(versions.size()!=expected.size())throw std::invalid_argument("Incomplete agent credential metadata binding");
-    Json encoded={{"schema",1},{"workspace_identity",workspace},{"workspace",*settings.workspace},
+    Json encoded={{"schema",1},{"workspace_identity",workspace},{"workspace",settings.workspace?Json(*settings.workspace):Json(nullptr)},
         {"instructions",settings.instructions},{"instruction_policy",{{"revision",settings.instruction_policy.revision},{"instructions",settings.instruction_policy.instructions}}},
         {"approved_edits",settings.approved_edits},{"max_turns",settings.max_turns},
         {"run_timeout_ms",settings.run_timeout.count()},{"selectable_models",settings.selectable_models},
@@ -135,6 +136,10 @@ std::string agent_authority_identity(const AgentSettings& settings,const std::st
         {"credential_versions",Json::array()},{"process_profiles",Json::array()},{"mcp_servers",Json::array()}};
     encoded["max_output_tokens"]=settings.max_output_tokens?Json(*settings.max_output_tokens):Json(nullptr);
     encoded["provider"]["reasoning_effort"]=settings.provider.reasoning_effort?Json(effort(*settings.provider.reasoning_effort)):Json(nullptr);
+    if(settings.provider.chat_dialect==ChatDialect::deepseek){
+        if(settings.provider.wire!=ProviderWire::chat_completions)throw std::invalid_argument("DeepSeek dialect requires its chat wire");
+        encoded["provider"]["chat_dialect"]="deepseek";
+    }else if(settings.provider.chat_dialect!=ChatDialect::openai)throw std::invalid_argument("Invalid native chat dialect");
     encoded["provider_identity"]=settings.provider_identity?Json{{"id",settings.provider_identity->profile_id},
         {"route",settings.provider_identity->route_id},{"provider",settings.provider_identity->provider},
         {"revision",settings.provider_identity->profile_revision}}:Json(nullptr);
@@ -147,6 +152,23 @@ std::string agent_authority_identity(const AgentSettings& settings,const std::st
         {"max_revisions",settings.planning->max_revisions},{"max_humans",settings.planning->max_humans},
         {"change_bytes",settings.planning->change_bytes},{"human_expiry_ms",settings.planning->human_expiry_ms},
         {"max_parent_turns",settings.planning->max_parent_turns}}:Json(nullptr);
+    if(settings.context){
+        const auto& runtime=*settings.context;const auto& p=runtime.compaction;
+        encoded["context"]={{"id",p.id},{"revision",p.revision},{"strategy",p.strategy_id},{"strategy_revision",p.strategy_revision},
+            {"automatic",p.automatic},{"max_groups",p.max_groups},{"max_messages",p.max_messages},
+            {"max_request_bytes",p.max_request_bytes},{"max_checkpoint_bytes",p.max_checkpoint_bytes},
+            {"max_maintenance_calls",p.max_maintenance_calls},{"max_count_requests",p.max_count_requests},
+            {"maintenance_deadline_ms",p.maintenance_deadline_ms},{"retain_recent_groups",p.retain_recent_groups},
+            {"buffer_tokens",runtime.buffer_tokens},{"model_capacities",Json::array()}};
+        for(const auto& [id,c]:runtime.model_capacities)encoded["context"]["model_capacities"].push_back({{"id",id},
+            {"provider_identity_json",c.provider_identity_json},{"wire",c.wire},{"model_id",c.model_id},
+            {"route_identity",c.route_identity},
+            {"revision",c.revision},{"source_binding",c.source_binding},{"verified",c.verified},
+            {"input_tokens",c.input_tokens?Json(*c.input_tokens):Json(nullptr)},
+            {"output_tokens",c.output_tokens?Json(*c.output_tokens):Json(nullptr)},
+            {"context_tokens",c.context_tokens?Json(*c.context_tokens):Json(nullptr)},
+            {"default_output_tokens",c.default_output_tokens?Json(*c.default_output_tokens):Json(nullptr)}});
+    }
     for(const auto& [reference,revision]:versions){const auto& [scope,id,purpose]=reference;
         encoded["credential_versions"].push_back({{"scope",scope},{"id",id},{"purpose",purpose},{"revision",revision}});}
     for(const auto& profile:settings.process_profiles){
@@ -163,4 +185,8 @@ std::string agent_authority_identity(const AgentSettings& settings,const std::st
     }
     try{return digest(encoded.dump());}catch(const Json::type_error&){throw std::invalid_argument("Invalid UTF-8 agent authority binding");}
 }
+std::string agent_authority_identity(const AgentSettings& settings,const std::string& model,const std::string& workspace,
+    const std::vector<AgentAuthorityCredentialVersion>& credentials){return execution_authority_identity(settings,model,workspace,credentials,false);}
+std::string context_authority_identity(const AgentSettings& settings,const std::string& model,const std::string& workspace,
+    const std::vector<AgentAuthorityCredentialVersion>& credentials){return execution_authority_identity(settings,model,workspace,credentials,true);}
 }

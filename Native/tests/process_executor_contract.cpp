@@ -51,7 +51,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
     phase("workspace-setup");
     const auto root=std::filesystem::u8path(argv[3]);const std::vector<std::string> imports{argv[4],argv[5]};
     const std::vector<ProcessProfile> profiles{{"fixture",argv[1],1,{argv[2]},10s}};WorkspaceTools workspace(root.string());
-    std::filesystem::create_directory(root/"sub");const auto database=(root.parent_path()/"process-state.sqlite").string();
+    std::filesystem::create_directory(root/"sub");std::filesystem::create_directories(root/".config");std::filesystem::create_directories(root/"sub"/".config");const auto database=(root.parent_path()/"process-state.sqlite").string();
     {
         phase("repository-open");
         PersistenceService store(database,imports);owner(store);ProcessExecutor executor(store,workspace,root.string(),profiles);
@@ -60,6 +60,11 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         for(const auto source:{R"({"profile":"unknown","arguments":[]})",R"({"profile":"fixture","arguments":[],"executable":"spoof"})",R"({"profile":"fixture","arguments":[],"environment":{"SECRET":"spoof"}})",R"({"profile":"fixture","profile":"fixture","arguments":[]})",R"({"profile":"fixture","arguments":[],"timeout_ms":10001})"})
             rejects<std::invalid_argument>([&]{executor.invoke("invalid","run",source,now()+600000);});
         rejects<ToolAccessDenied>([&]{executor.invoke("invalid","run",args("normal","escape.txt",".."),now()+600000);});rejects<NotFound>([&]{store.operation("invalid").get();});
+        for(const auto* directory:{".config","./.CONFIG",".config.",".config ","sub/.config"}){
+            rejects<ToolAccessDenied>([&]{executor.invoke("private-workdir","run",args("normal","private-effect.txt",directory),now()+600000);});
+            rejects<NotFound>([&]{store.operation("private-workdir").get();});
+        }
+        require(!std::filesystem::exists(root/".config"/"private-effect.txt")&&!std::filesystem::exists(root/"sub"/".config"/"private-effect.txt"),"Private workdir rejection cannot propose or dispatch a process effect");
         phase("approval-denial");
         Task denied(executor,"denied",args("normal","denied.txt"));proposed(store,"denied");store.decide_operation("denied",OperationDecision::deny,"actual-fixture-controller").get();rejects<PermissionDenied>([&]{denied.result.get();});require(!std::filesystem::exists(root/"denied.txt"),"Denied command must not run effect");
         phase("approval-cancellation");

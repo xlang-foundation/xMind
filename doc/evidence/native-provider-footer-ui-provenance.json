@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "dateUtc": "2026-10-08",
+  "sourceBase": "859aca7743e561e46fd574c82dff65df333a7bf4",
+  "scope": "Node-only full extension/browser adapter and renderer suites with isolated built view assets; no Native/provider/config/live/installed/VSIX execution",
+  "node": "22.19.0",
+  "extension": {
+    "tests": 141,
+    "passed": 141,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "duration_ms": 1757.5458,
+    "rawLog": "extension.log",
+    "rawLogSha256": "bceaf6451fe2790c6a345f0c1d3b3cf669ee8dacaad8ed8afe73321febdb37ef"
+  },
+  "browser": {
+    "tests": 32,
+    "passed": 32,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "duration_ms": 861.7145,
+    "rawLog": "browser.log",
+    "rawLogSha256": "fae7ae023f2fadfb577806f2eb8b188c426492b7f56fc21335b65790b794d145"
+  },
+  "sourceFilesMatched": 37,
+  "sourceUnchangedDuringGate": true,
+  "sourceRawSha256": {
+    "extensions/vscode/.vscodeignore": "fe8a6e48beb48a2c4be33c9dbcbc750a8369b7079a5bae5debdb55575f6d8ea3",
+    "extensions/vscode/LICENSE": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
+    "extensions/vscode/README.md": "6145da7cb4021d0e8eff8953312cf329a14d73027cd7427af04587f2144948f6",
+    "extensions/vscode/browser-view.js": "f5e47b3b60530b4ed1b98ff3254eb0debbb49c5fde860912abd09d4a1d05a1ea",
+    "extensions/vscode/client.js": "395d7c75f6fd571071b85d44aab28225991559d09df13a65a31a46d150193609",
+    "extensions/vscode/edit-review.js": "8afc5443fc2f7aedb5af57f2add361519b381b9c14baefaabf5c39702ad2c06e",
+    "extensions/vscode/extension.js": "d62341cd1803e3bd6d75d6a4a927560fa5ba954bc0de494fde9d532f48e3e03f",
+    "extensions/vscode/media/chat.css": "6a2acb07374ce4f8cc54d658634ad53ffdf3baa2b959baf5c729a7dadf492292",
+    "extensions/vscode/media/chat.js": "63e50c1b31b1177c5a03a6fde5bd6831484f9c0868c99a7d8420c8daaf090df5",
+    "extensions/vscode/media/xmind.svg": "45123fe1e365d6ca284a245029b4a3de12f511fdc42945bf6fe15c9f3cf18b7b",
+    "extensions/vscode/node_modules/dompurify/LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "extensions/vscode/node_modules/dompurify/LICENSE-MPL": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+    "extensions/vscode/node_modules/dompurify/dist/purify.min.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+    "extensions/vscode/node_modules/marked/LICENSE": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+    "extensions/vscode/node_modules/marked/lib/marked.umd.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+    "extensions/vscode/package-lock.json": "c24f907b381145cd1de6fd64ce86515f5e1879189216ceb1390498c49407b661",
+    "extensions/vscode/package.json": "8df7f81df26412d5ac78c46bad13099e9535993d674758eabee1a3f8daee1bac",
+    "extensions/vscode/tests/backend-smoke.js": "3c662b35158f596342c5bbf05a84377f8e25091e43eb8f9ede13957f254ceb0d",
+    "extensions/vscode/tests/browser-view.test.js": "21e89ece7e270a55719e40e8973b612afa3ca7facb66abf2d3031dd0fa93dbb4",
+    "extensions/vscode/tests/client-planning.test.js": "68dc4ea1ef5389aa78eb9bff0757d9ea6effa59b651d54260ea2322359922fc8",
+    "extensions/vscode/tests/client.test.js": "b2df32d12f4f5e0200f6ca2fe5e53857c7704abf9c9a9ba6d622edd366b0114e",
+    "extensions/vscode/tests/extension-host.test.js": "6bf726c0b9fe3c42ad3da74a1de958311f43935a3a8158972e16f664d3b8c0c7",
+    "extensions/vscode/tests/plan-fixture.js": "89e8149512ae818236b1411078d2a86d704bdcbc109e6278bbc9c68705e3a3a4",
+    "extensions/vscode/tests/provider-profile-controller.test.js": "060fc524edad5bbdb645643c388c43f2ea17db03db1c1c7264866c1dbd6fa524",
+    "extensions/vscode/tests/renderer.test.js": "16b76dc9750e43ac39cc92ce27dd423410b4d6abc24d1c34c2ff3ab2fda591a7",
+    "extensions/vscode/webview.js": "07efd26f4353303e1e84311b23d0d924841f790ed65f45c742e7d9e3b30a9281",
+    "views/browser/browser.css": "50d6a5758dfa255fc8ade9c1c9826e8c0633831a2f03deded0dbaca5a0e3f459",
+    "views/browser/browser.js": "5bb6184830039d3e20e0846fe8c396772b09a8e5330d2b05bbe539becafd2035",
+    "views/browser/build.mjs": "dfe1470c5510607a3fbaffcca873f5f8b91c41d1339cfb978232acefc9ca0326",
+    "views/browser/page.cjs": "8042acc2d6ca6bc80ac58fb05e721e3b85c5db37bf0e6adc90bd9f8f7eaa2f28",
+    "views/browser/server.mjs": "6a6b3233eedb800d1174c5664cc200529eae3ed46a9412ece5f684dac0d57db3",
+    "views/browser/tests/classic-script.test.cjs": "98628213446f6ecdbdc6f4baa1c4e5f4b229cfd43115a554db3054094aacd5c8",
+    "views/browser/tests/connection.test.cjs": "804bede20c1cb12cb1c59188464f20f8e1e662a403e238e8594c4c5db0aa8444",
+    "views/browser/tests/controller.test.cjs": "2d3c89a8409fc145ad3d6d111972298af959ba0436da1f8e283005a748780878",
+    "views/browser/tests/native-contract.mjs": "4d1952f0a96ba089f6d8c832cae5eeffcfe7bba2115a1c776e8d4966d66a857c",
+    "views/browser/tests/planning-routes.test.cjs": "5a7175c025e8fab836117f91026fc906e83ae9cfbf92fb5dc91edb1b0ad9249e",
+    "views/browser/tests/server.test.cjs": "e014f463a82dd6ff1902edd235087e47f7ef0ed9ebee7e3cbf80be363f196d29"
+  },
+  "sourceProofSha256": "dfb8daf4e815953118721a92ec0a8ce04e1b72b0084137654c32034e934731b9",
+  "isolatedViewFiles": {
+    "browser.css": "50d6a5758dfa255fc8ade9c1c9826e8c0633831a2f03deded0dbaca5a0e3f459",
+    "browser.js": "5bb6184830039d3e20e0846fe8c396772b09a8e5330d2b05bbe539becafd2035",
+    "chat.css": "6a2acb07374ce4f8cc54d658634ad53ffdf3baa2b959baf5c729a7dadf492292",
+    "chat.js": "63e50c1b31b1177c5a03a6fde5bd6831484f9c0868c99a7d8420c8daaf090df5",
+    "client.js": "395d7c75f6fd571071b85d44aab28225991559d09df13a65a31a46d150193609",
+    "index.html": "21821fb3518f07592f29f3c4d18ce588a1bd48a70ecd7b566c9bdc2bb34b610d",
+    "licenses/dompurify-MPL.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+    "licenses/dompurify.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "licenses/marked.txt": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+    "marked.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+    "purify.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+    "server.mjs": "6a6b3233eedb800d1174c5664cc200529eae3ed46a9412ece5f684dac0d57db3"
+  },
+  "logs": {
+    "extension": {
+      "path": "doc/evidence/native-provider-footer-extension.log",
+      "bytes": 39004,
+      "sha256": "bceaf6451fe2790c6a345f0c1d3b3cf669ee8dacaad8ed8afe73321febdb37ef"
+    },
+    "browser": {
+      "path": "doc/evidence/native-provider-footer-browser.log",
+      "bytes": 8572,
+      "sha256": "fae7ae023f2fadfb577806f2eb8b188c426492b7f56fc21335b65790b794d145"
+    }
+  },
+  "previousAttempt": {
+    "extension": {
+      "tests": 141,
+      "passed": 139,
+      "failed": 2
+    },
+    "retainedPrivately": true,
+    "repairs": "No premature catalogue publication for invalid routes; existing Gemini fixture asserts fresh metadata read before unchanged native CAS"
+  },
+  "subsequentStandaloneIntegrationFixture": {
+    "path": "views/browser/tests/native-contract.mjs",
+    "before": "4d1952f0a96ba089f6d8c832cae5eeffcfe7bba2115a1c776e8d4966d66a857c",
+    "after": "a3f3c361b55247871c6c376a0a5571e1d6657f26099964e01344581a0e1b675b",
+    "change": "Exact fifth native public route record; these Node suites do not execute this standalone .mjs"
+  },
+  "notEstablished": [
+    "Installed provider footer",
+    "Imported actual YAML credentials",
+    "Live multi-provider coding",
+    "VSIX/rendered extension acceptance"
+  ]
+}

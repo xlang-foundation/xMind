@@ -15,6 +15,9 @@
 #include "agentflow/provider_setup.hpp"
 #include "agentflow/provider_profile_legacy_setup.hpp"
 #include "agentflow/gemini_model_policy.hpp"
+#include "agentflow/deepseek_model_policy.hpp"
+#include "agentflow/context_model_policy.hpp"
+#include "agentflow/provider_yaml_config.hpp"
 #include "agentflow/execution_platform.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/process_configuration.hpp"
@@ -49,8 +52,8 @@ int main(int argc,char** argv) {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config" && key!="--graphs-config") || !options.emplace(key,argv[i+1]).second)
-                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--model ID --model-endpoint URL] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE]");
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config") || !options.emplace(key,argv[i+1]).second)
+                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
         int port=8765;
@@ -65,10 +68,12 @@ int main(int argc,char** argv) {
         if(options.contains("--mcp-config"))throw std::invalid_argument("Native MCP configuration currently requires Windows");
         if(options.contains("--process-config"))throw std::invalid_argument("Native process configuration currently requires Windows");
         if(options.contains("--graphs-config"))throw std::invalid_argument("Native graph execution currently requires Windows");
+        if(options.contains("--provider-config"))throw std::invalid_argument("Native provider configuration currently requires Windows");
 #endif
         const std::string auth=token;
         if(port<0 || port>65535) throw std::invalid_argument("Invalid port");
         if(options.contains("--model")!=options.contains("--model-endpoint")) throw std::invalid_argument("Model ID and endpoint must be configured together");
+        if(options.contains("--provider-config")&&options.contains("--model"))throw std::invalid_argument("Provider YAML requires the configurable profile runtime");
         if(options.contains("--model-wire")&&(!options.contains("--model")||(options.at("--model-wire")!="chat-completions"&&options.at("--model-wire")!="responses")))throw std::invalid_argument("Model wire requires a configured model and chat-completions or responses");
         if(options.contains("--inspection-workspace") && options.contains("--workspace")) throw std::invalid_argument("Select the execution workspace or an inspection-only workspace");
         if(!options.contains("--model") && options.contains("--credential-id")) throw std::invalid_argument("Startup credential references require a model configuration");
@@ -167,20 +172,28 @@ int main(int argc,char** argv) {
             if(settings.workspace)settings.delegation=agentflow::AgentDelegationPolicy{};
             std::vector<agentflow::ProviderProfileExecutionPolicy> policies;
             std::vector<agentflow::ProviderProfileRoute> routes;
-            const auto add=[&](std::string id,std::string provider,std::string endpoint,agentflow::ProviderWire wire,std::string catalogue,agentflow::ProviderCatalogueFormat format){
+            const auto add=[&](std::string id,std::string provider,std::string endpoint,agentflow::ProviderWire wire,std::string catalogue,agentflow::ProviderCatalogueFormat format,agentflow::ChatDialect dialect=agentflow::ChatDialect::openai){
                 agentflow::ProviderProfileRoute route{std::move(id),std::move(provider),endpoint,"server",provider_purpose(endpoint,"provider:setup:"),wire};
-                agentflow::ChatProviderConfig configuration;configuration.endpoint=std::move(endpoint);configuration.wire=wire;
-                configuration.tools=wire==agentflow::ProviderWire::gemini_generate_content?agentflow::Capability::unknown:agentflow::Capability::supported;configuration.stream_usage=agentflow::Capability::supported;
-                if(wire==agentflow::ProviderWire::anthropic_messages||wire==agentflow::ProviderWire::gemini_generate_content)configuration.output_limit=agentflow::Capability::supported;
+                agentflow::ChatProviderConfig configuration;configuration.endpoint=std::move(endpoint);configuration.wire=wire;configuration.chat_dialect=dialect;
+                configuration.tools=wire==agentflow::ProviderWire::gemini_generate_content||dialect==agentflow::ChatDialect::deepseek?agentflow::Capability::unknown:agentflow::Capability::supported;configuration.stream_usage=agentflow::Capability::supported;
+                if(wire==agentflow::ProviderWire::responses||wire==agentflow::ProviderWire::anthropic_messages||wire==agentflow::ProviderWire::gemini_generate_content||dialect==agentflow::ChatDialect::deepseek)configuration.output_limit=agentflow::Capability::supported;
+                if(dialect==agentflow::ChatDialect::deepseek)configuration.reasoning=agentflow::Capability::supported;
                 auto tools=wire==agentflow::ProviderWire::gemini_generate_content?agentflow::gemini_documented_tool_policy():std::map<std::string,agentflow::Capability>{};
+                if(dialect==agentflow::ChatDialect::deepseek)tools=agentflow::deepseek_documented_tool_policy();
                 routes.push_back(route);policies.push_back({std::move(route),std::move(configuration),agentflow::ProviderCataloguePolicy{std::move(catalogue),format},std::move(tools)});
             };
             add("openai.chat","openai","https://api.openai.com/v1/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.openai.com/v1/models",agentflow::ProviderCatalogueFormat::openai);
             add("openai.responses","openai","https://api.openai.com/v1/responses",agentflow::ProviderWire::responses,"https://api.openai.com/v1/models",agentflow::ProviderCatalogueFormat::openai);
+            policies.back().context=agentflow::documented_openai_context_policy();
             add("anthropic.messages","anthropic","https://api.anthropic.com/v1/messages",agentflow::ProviderWire::anthropic_messages,"https://api.anthropic.com/v1/models",agentflow::ProviderCatalogueFormat::anthropic);
             add("gemini.generate-content","gemini","https://generativelanguage.googleapis.com/v1beta",agentflow::ProviderWire::gemini_generate_content,"https://generativelanguage.googleapis.com/v1beta/models",agentflow::ProviderCatalogueFormat::gemini);
+            add("deepseek.chat","deepseek","https://api.deepseek.com/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.deepseek.com/models",agentflow::ProviderCatalogueFormat::openai,agentflow::ChatDialect::deepseek);
             auto configurable=std::make_unique<agentflow::ProviderProfileRuntime>(persistence,std::move(settings),std::move(policies),workers,queue);
             configurable->import_legacy_configuration();
+            if(options.contains("--provider-config")){
+                try{configurable->import_yaml_configuration(std::filesystem::absolute(options.at("--provider-config")),configurable->configuration().revision);}
+                catch(...){throw std::runtime_error("Provider YAML configuration could not be imported");}
+            }
             legacy_provider_setup=std::make_unique<agentflow::ProviderProfileLegacySetup>(*configurable,std::move(routes));
             provider_setup=legacy_provider_setup.get();provider_profiles=configurable.get();graph_execution=configurable.get();executor=std::move(configurable);
         }

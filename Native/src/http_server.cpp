@@ -1,6 +1,7 @@
 #include "agentflow/http_server.hpp"
 #include <initializer_list>
 #include <utility>
+#include <algorithm>
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/provider_setup.hpp"
 #include "agentflow/provider_profile_setup.hpp"
@@ -20,6 +21,7 @@
 #include <chrono>
 #include <regex>
 #include <optional>
+#include <string_view>
 #if defined(_WIN32)
 #include "agentflow/view_sessions.hpp"
 #endif
@@ -79,6 +81,33 @@ std::string identifier(const std::string& value) {
     for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
     return value;
 }
+std::string strict_context_model_query(const Request& request) {
+    // Params cannot establish uniqueness: pinned cpp-httplib removes identical
+    // raw key/value pairs before populating that decoded collection.
+    const auto marker=request.target.find('?');
+    if(marker==std::string::npos){if(!request.params.empty())throw std::invalid_argument("Invalid context model query");return {};}
+    const auto query=std::string_view(request.target).substr(marker+1);
+    if(query.empty()||query.size()>1024||query.find('&')!=std::string_view::npos)
+        throw std::invalid_argument("Invalid context model query");
+    const auto equal=query.find('=');
+    if(equal==std::string_view::npos||equal==0||equal+1==query.size()||query.find('=',equal+1)!=std::string_view::npos)
+        throw std::invalid_argument("Invalid context model query");
+    const auto decode=[](std::string_view encoded,std::size_t limit){
+        std::string value;value.reserve(std::min(encoded.size(),limit));
+        const auto hex=[](unsigned char byte)->int{if(byte>='0'&&byte<='9')return byte-'0';if(byte>='a'&&byte<='f')return byte-'a'+10;if(byte>='A'&&byte<='F')return byte-'A'+10;return -1;};
+        for(std::size_t i=0;i<encoded.size();++i){unsigned char byte=static_cast<unsigned char>(encoded[i]);
+            if(byte=='%'){if(encoded.size()-i<3)throw std::invalid_argument("Invalid context model query");const auto high=hex(static_cast<unsigned char>(encoded[i+1])),low=hex(static_cast<unsigned char>(encoded[i+2]));if(high<0||low<0)throw std::invalid_argument("Invalid context model query");byte=static_cast<unsigned char>((high<<4)|low);i+=2;}
+            else if(byte=='+')byte=' ';
+            if(byte<=32||byte>=127||value.size()>=limit)throw std::invalid_argument("Invalid context model query");value.push_back(static_cast<char>(byte));
+        }
+        return value;
+    };
+    const auto key=decode(query.substr(0,equal),8),model=decode(query.substr(equal+1),256);
+    if(key!="model_id"||model.empty()||model.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos||
+       request.params.size()!=1||!request.has_param("model_id")||request.get_param_value("model_id")!=model)
+        throw std::invalid_argument("Invalid context model query");
+    return model;
+}
 std::int64_t graph_revision(const Json& value,const char* field) {
     if(!value.contains(field) || !value[field].is_number_integer() || value[field]<1 || value[field]>9007199254740991)throw std::invalid_argument("Invalid graph revision");
     return value[field].get<std::int64_t>();
@@ -116,6 +145,18 @@ Json public_response(const std::string& actual){
     if(source.contains("model")&&source["model"].is_string()&&source["model"].get_ref<const std::string&>().size()<=256)result["model"]=source["model"];
     if(source.contains("usage")){auto usage=public_usage(source["usage"]);if(!usage.empty())result["usage"]=std::move(usage);}
     for(const auto* field:{"elapsed_ms","first_token_ms"})if(source.contains(field)&&source[field].is_number_integer()&&source[field]>=0&&source[field]<=9007199254740991)result[field]=source[field];
+    return result;
+}
+Json context_record(const ContextControlSnapshot& value){
+    Json result={{"session_id",value.session_id},{"model_id",value.model_id},{"enabled",value.enabled},
+        {"automatic",value.automatic},{"head_revision",value.head_revision},{"source_watermark",value.source_watermark},
+        {"manual",nullptr},{"checkpoint",nullptr}};
+    if(value.manual)result["manual"]={{"id",value.manual->id},{"state",value.manual->state}};
+    if(value.checkpoint){const auto& c=*value.checkpoint;const auto supplied=Json::parse(c.actual_usage_json);
+        result["checkpoint"]={{"id",c.id},{"provider_elapsed_ms",c.provider_elapsed_ms},
+            {"preparation_elapsed_ms",c.preparation_elapsed_ms?Json(*c.preparation_elapsed_ms):Json(nullptr)},
+            {"usage",supplied.is_null()?Json(nullptr):public_usage(supplied)}};
+    }
     return result;
 }
 Json public_plan(const DynamicPlanRecord& value){
@@ -236,9 +277,9 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|models|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
-            static const std::regex owned_read_route(R"(^/v1/(agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan))$)");
-            static const std::regex plan_write_route(R"(^/v1/runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)$)");
+            static const std::regex view_route(R"(^/v1/(health|models|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
+            static const std::regex owned_read_route(R"(^/v1/(agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
+            static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && std::regex_match(request.path,view_route) && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
@@ -338,7 +379,7 @@ struct HttpServer::Impl {
         }));
         server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()}});
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
         }));
         server.Get("/v1/agent/planning",guarded([this](const Request& request,Response& response){
             if(!request.params.empty())throw std::invalid_argument("Planning metadata does not accept query parameters");
@@ -420,9 +461,19 @@ struct HttpServer::Impl {
                 const auto session=identifier(string_field(value,"session_id",128)),graph=string_field(value,"graph_id",64),prompt=string_field(value,"prompt",1024*1024);const auto revision=graph_revision(value,"graph_revision");
                 reply(response,encode(binding?graphs->submit_graph_profile(id,session,graph,revision,prompt,model,*binding):graphs->submit_graph(id,session,graph,revision,prompt,model)),202);
             }));
-            server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response){
+            server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+))",guarded([this,graphs](const Request& request,Response& response){
                 if(!request.params.empty())throw std::invalid_argument("Graph detail does not accept query parameters");
-                reply(response,graph_record(persistence.graph_run(identifier(request.matches[1])).get()));
+                const auto id=identifier(request.matches[1]);
+                for(int attempt=0;attempt<3;++attempt){
+                    const auto root=persistence.graph_run(id).get();auto value=graph_record(root);
+                    const auto context=graphs->graph_context(id);value["context"]={{"enabled",context.enabled},{"resumable",context.resumable},{"remaining_active_ms",context.remaining_active_ms?Json(*context.remaining_active_ms):Json(nullptr)}};
+                    // Disabled context is immutable for this admitted graph;
+                    // its original single repository snapshot is sufficient.
+                    if(!context.enabled){reply(response,value);return;}
+                    const auto fresh=persistence.graph_run(id).get();
+                    if(fresh.checkpoint_revision==root.checkpoint_revision&&fresh.run.state==root.run.state){reply(response,value);return;}
+                }
+                throw Conflict("Graph context observation changed");
             }));
             server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+)/children)",guarded([this](const Request& request,Response& response){
                 if(!request.params.empty())throw std::invalid_argument("Graph children do not accept query parameters");
@@ -446,6 +497,11 @@ struct HttpServer::Impl {
                 if(value.contains("input_json"))input=string_field(value,"input_json",65536);
                 else {if(!value["input"].is_object())throw std::invalid_argument("Human input must be a JSON object");input=value["input"].dump();}
                 reply(response,graph_record(graphs->human_input(identifier(request.matches[1]),request.matches[2],input,"local-owner",graph_revision(value,"expected_checkpoint_revision"))));
+            }));
+            server.Post(R"(/v1/graph-runs/([A-Za-z0-9_-]+)/resume)",guarded([graphs](const Request& request,Response& response){
+                if(!request.params.empty())throw std::invalid_argument("Graph resume does not accept query parameters");
+                const auto value=body(request,{"expected_checkpoint_revision"});
+                reply(response,encode(graphs->resume_graph(identifier(request.matches[1]),"local-owner",graph_revision(value,"expected_checkpoint_revision"))),202);
             }));
         }
         server.Get("/v1/models",guarded([this](const Request&,Response& response) {
@@ -481,6 +537,30 @@ struct HttpServer::Impl {
         }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/history)",guarded([this](const Request& request,Response& response) {
             reply(response,encode_all(persistence.history(identifier(request.matches[1])).get()));
+        }));
+        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/context)",guarded([this](const Request& request,Response& response){
+            const auto model=strict_context_model_query(request);
+            if(!executor)throw RunUnavailable("Configure a provider before inspecting context");
+            reply(response,context_record(executor->context_status(identifier(request.matches[1]),model)));
+        }));
+        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/context/requests/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response){
+            const auto model=strict_context_model_query(request);
+            if(!executor)throw RunUnavailable("Configure a provider before inspecting context");
+            const auto recorded=executor->context_request(identifier(request.matches[1]),identifier(request.matches[2]),model);
+            reply(response,{{"id",recorded.id},{"state",recorded.state}});
+        }));
+        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/context/compact)",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>16384)throw std::invalid_argument("Context request exceeds limits");
+            if(!executor||!executor->supports_context())throw RunUnavailable("This provider has no registered context controls");
+            const auto value=body(request,{"id","model_id","expected_head_revision","provider_profile_id","expected_provider_revision"});
+            if(!value.contains("expected_head_revision")||!value["expected_head_revision"].is_number_integer()||value["expected_head_revision"]<0||value["expected_head_revision"]>9007199254740991)throw std::invalid_argument("Invalid observed context head revision");
+            const auto binding=profile_admission(value);if(executor->supports_profile_admission()&&!binding)throw Conflict("Capture the active provider profile before requesting compaction");
+            if(binding&&!executor->supports_profile_admission())throw std::invalid_argument("Context provider profile admission is unavailable");
+            const auto session=identifier(request.matches[1]);const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
+            const auto model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};
+            const auto head=value["expected_head_revision"].get<std::int64_t>();
+            const auto admitted=binding?executor->request_context_profile(session,id,"local-owner",head,model,*binding):executor->request_context(session,id,"local-owner",head,model);
+            reply(response,{{"id",admitted.id},{"state",admitted.state}},202);
         }));
         server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/messages)",guarded([this](const Request& request,Response& response) {
             const auto value=body(request,{"role","data"});const auto role=string_field(value,"role",16);

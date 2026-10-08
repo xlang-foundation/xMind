@@ -306,7 +306,11 @@ DynamicPlanDecision inspect_dynamic_plan(const DynamicPlanRecord& value){return 
 DynamicPreparedNode prepare_dynamic_node(const DynamicPlanRecord& value,const std::string& id){return DynamicPlanCoordinator(value).prepare(id);}
 std::string dynamic_plan_report(const DynamicPlanRecord& value){return DynamicPlanCoordinator(value).report();}
 std::vector<ModelToolDefinition> dynamic_plan_tool_definitions(const DynamicPlanCapabilities& frozen){
-    capabilities(frozen);if(!frozen.catalogue_finalized)throw std::invalid_argument("Planning tools require their finalized native catalogue");Json presets=Json::array();for(const auto& preset:frozen.presets)presets.push_back(preset.id);
+    if(!frozen.catalogue_finalized)throw std::invalid_argument("Planning tools require their finalized native catalogue");
+    return context_dynamic_plan_tool_definitions(frozen);
+}
+std::vector<ModelToolDefinition> context_dynamic_plan_tool_definitions(const DynamicPlanCapabilities& frozen){
+    capabilities(frozen);Json presets=Json::array();for(const auto& preset:frozen.presets)presets.push_back(preset.id);
     const auto dependency=Json{{"type","object"},{"properties",{{"task",{{"type","string"},{"maxLength",32}}},{"require",{{"enum",{"success","observed"}}}}}},{"required",{"task","require"}},{"additionalProperties",false}};
     const auto common=Json{{"id",{{"type","string"},{"minLength",1},{"maxLength",32},{"pattern","^[A-Za-z0-9_.-]+$"}}},{"type",{{"const","agent"}}},{"objective",{{"type","string"},{"minLength",1},{"maxLength",8192}}},{"preset",{{"enum",presets}}},{"depends_on",{{"type","array"},{"maxItems",32},{"items",dependency}}}};
     const auto agent=Json{{"type","object"},{"properties",common},{"required",{"id","type","objective","preset","depends_on"}},{"additionalProperties",false}};

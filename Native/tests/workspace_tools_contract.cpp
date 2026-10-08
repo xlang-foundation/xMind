@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <algorithm>
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
@@ -122,6 +123,23 @@ int main(int argc,char** argv) {
         require(root && nested && preview,"Literal search must return actual path/line matches");
         require(search.skipped_entries>=3 && search.truncated,"Search must report skipped and bounded coverage");
         auto listed=tools.list_files();require(!listed.entries.empty(),"Root directory handle enumeration");
+        require(std::none_of(listed.entries.begin(),listed.entries.end(),[](const auto& entry){return WorkspaceTools::backend_private_component(entry.name);}),"Root listing must not expose backend configuration entries");
+        require(std::any_of(listed.entries.begin(),listed.entries.end(),[](const auto& entry){return entry.name==".git";}),"Existing public Git listing policy must remain unchanged");
+        const auto sub_listing=tools.list_files("sub");require(std::none_of(sub_listing.entries.begin(),sub_listing.entries.end(),[](const auto& entry){return WorkspaceTools::backend_private_component(entry.name);}),"Nested case-aliased configuration entries must remain private");
+        require(tools.read_file(".configurable/visible.txt").content=="Ordinary configuration documentation\n","Only the reserved component is private, not similarly named project files");
+        require(tools.search_files("SyntheticPrivateConfigValue-workspace-only").matches.empty(),"Literal search cannot expose synthetic backend key/guidance markers");
+        const auto public_listing=Json::parse(tools.invoke("list_files",R"({"path":"sub"})"));for(const auto& entry:public_listing["entries"])require(!WorkspaceTools::backend_private_component(entry["name"].get<std::string>()),"Model listing must use the same private-directory boundary");
+        for(const auto* path:{".config/providers.yaml","./.CONFIG/providers.yaml",".config./providers.yaml",".config /providers.yaml","sub/.config/nested.yaml","config-alias/providers.yaml"}){
+            rejects<ToolAccessDenied>([&]{tools.read_file(path);});rejects<ToolAccessDenied>([&]{tools.snapshot_file(path);});rejects<ToolAccessDenied>([&]{tools.fingerprint_file(path);});
+            rejects<ToolAccessDenied>([&]{tools.plan_replacement(path,"api_key","changed");});rejects<ToolAccessDenied>([&]{tools.invoke("read_file",Json{{"path",path}}.dump());});
+        }
+        for(const auto* path:{".config",".CONFIG",".config.",".config ","sub/.config","config-alias"}){
+            rejects<ToolAccessDenied>([&]{tools.list_files(path);});rejects<ToolAccessDenied>([&]{tools.directory_identity(path);});rejects<ToolAccessDenied>([&]{tools.repository_instructions(path);});
+        }
+        rejects<ToolAccessDenied>([&]{tools.instruction_file(".config/AGENTS.md");});rejects<ToolAccessDenied>([&]{tools.instruction_file("sub/.config/AGENTS.md");});
+        rejects<ToolAccessDenied>([&]{tools.plan_creation(".config/created.txt","Synthetic forbidden configuration mutation");});
+        rejects<ToolAccessDenied>([&]{WorkspaceTools private_root(std::string(argv[1])+"/.config");});
+        require(tools.directory_identity(".")==tools.identity()&&!tools.directory_identity("sub").empty(),"Public directory identity remains usable for exact native process workdir binding");
         auto many=tools.list_files("many");require(many.entries.size()==1000 && many.truncated,"Listing truncation must be explicit");
         rejects<ToolAccessDenied>([&]{tools.read_file("../workspace-other/secret.txt");});
         rejects<ToolAccessDenied>([&]{tools.read_file(std::string(argv[2])+"/secret.txt");});

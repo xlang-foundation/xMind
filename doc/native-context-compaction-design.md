@@ -1,14 +1,52 @@
 # Native context compaction design
 
-**Design only. No compaction implementation or acceptance is claimed.** This
-design is grounded in the native source at checkpoint
+**Complete local contract gate passed; release and installed/live compaction
+acceptance remain pending.** The
+design baseline is grounded in the native source at checkpoint
 `2cd392f83f642ae5278e7d77fa55822258a8a126` and the complete local 78-contract MCP
 checkpoint. Its exact source
 capture, commit identity and gate evidence remain separate from this proposal.
 The installed preview is still the separately accepted ace/schema-v10 backend.
-Schema-v11 preview installation remains blocked by the separately recorded
+The current schema-v12 source has not been installed; preview upgrade remains
+blocked by the separately recorded
 Windows file-open compatibility finding; compaction does not work around it or
 require a CPython fallback.
+
+The first complete local build configured all 86 expected native contracts and
+passed compilation. Its full test run passed 81 and failed five: the repository
+recovery fixture, context HTTP controller and three graph HTTP observations.
+The second attempt configured and compiled all **88 contracts**, preserving all
+78 original contracts, then passed **85 and failed three in 162.98 seconds**.
+The remaining failures were the context repository, context HTTP controller and
+provider CLI route fixture. After their repairs, the third full gate passed
+**88/88 in 161.48 seconds**, with zero failures/skips, 560 frozen inputs unchanged
+and original test output captured. Both failed attempts remain separate and no
+failing contract was excluded. A later isolated Responses legacy-history
+reproduction found a serializer defect. Its role-aware repair subsequently
+passed the fourth complete gate: **88/88 in 171.89 seconds**, with all 560 inputs
+unchanged and no failures/skips.
+[Exact local source/log evidence](evidence/native-context-provider-local-provenance.json)
+also retains the scope of the earlier attempts. This local result does not complete installed/live
+compaction or all provider strategies.
+
+The two synthetic DeepSeek native contracts passed individually in **0.54 and
+0.71 seconds** during the second attempt. The shared-view suites retain their
+**131 extension / 29 browser** source-test scope after the DeepSeek renderer
+change. The final saved-provider footer subsequently passed **141 extension /
+32 browser** tests, with all 37 frozen inputs unchanged.
+[Frontend source evidence](evidence/native-provider-footer-ui-provenance.json)
+binds that separate gate. Model-free native/browser integration subsequently
+passed in **3.30 seconds** and the VSIX passed **18 asset checks**, with all 12
+tested view files matching.
+[Integration/package evidence](evidence/native-provider-footer-integration-provenance.json)
+preserves the first guard-host failure. These results do not establish installed IDE or live compaction
+acceptance. The installed preview still has only one configured OpenAI Responses
+profile and has not imported the four-key configuration. Its earlier HTTP 400
+`invalid_value` remains recorded; a direct reproduction later identified legacy
+assistant `input_text` where `output_text` is required. A fresh native OpenAI
+browser prompt returned `OK` separately, without exercising compaction or that
+legacy-history path.
+[Provider and preview scopes](provider-setup.md).
 
 The product target is bounded context throughout real coding conversations:
 across user prompts, inside model/tool loops, in independent child agents and
@@ -41,18 +79,63 @@ implementation belongs in native C++ and embedded-xlang3 persistence.
 | `provider_catalogue.hpp` and `ChatProviderConfig` | Discovery returns model IDs. Compaction support, input/context capacities and token-counting support are currently absent. Listing a model does not prove any of them. |
 | `http_stream_transport.hpp` | Native transport has bounded JSON GET and streaming POST. Standalone provider compaction and token counting need bounded JSON POST with the same destination/authentication/deadline policy. |
 
-The current complete gate proves these existing contracts, not this design.
+The accepted complete gate proves these existing contracts, not the new context
+implementation.
 No missing xlang3 API has been established for compaction: C++ can own selection,
 transport, validation and orchestration while database I/O stays embedded xlang3.
 
-The current working tree adds `post_json(request, credential, max_response_bytes,
-cancel)` as the stage-0 transport foundation. The complete local 78-contract
+Checkpoint `859aca7743e561e46fd574c82dff65df333a7bf4` adds
+`post_json(request, credential, max_response_bytes, cancel)` as the stage-0
+transport foundation. The complete local 78-contract
 gate passed in 193.91 seconds with 427 frozen inputs verified. An earlier fresh
 guard deferred before any native action while an SDK benchmark was live; the
-later attempt began with clear guards. This is the single bounded POST primitive
-planned below, not a second transport or implemented token-counting/compaction
-adapter. Its [local evidence](evidence/native-context-transport-local-provenance.json)
-remains separate from this unimplemented compaction design.
+later attempt began with clear guards. This transport checkpoint establishes the
+single bounded POST primitive; the later token-counting/compaction adapters have
+their own source and gate scope. Its
+[local evidence](evidence/native-context-transport-local-provenance.json) remains
+separate from the context implementation described below.
+
+## Current implementation status
+
+The working source contains native Responses count/compact adapters, an exact
+private canonical-window representation, metadata-based complete-group
+selection, typed context records and schema-v12 repository
+transactions through embedded xlang3. The native context manager is connected
+in source to the real agent pre-inference path, including shared physical-call
+budgets, original signed planning continuations, durable compaction receipts,
+once-only pre-output overflow recovery and clean dynamic-pause context pins.
+These changes compiled and were exercised in the two failed attempts and the
+third complete 88/88 gate above. They have not been installed; the later
+serializer repair still needs a fourth full gate. Complete local contract
+acceptance is distinct from installed/live acceptance and broader strategy
+completion.
+
+Source guards cover receipt compatibility and concurrent budget admission within
+the third local gate's scope. Opaque receipts require proved producing ownership
+and an exact compatible private binding before any count, compaction or inference
+request. Refreshing a raced budget revision may retry only an undispatched
+transaction with identical scope, source, authority, payload and member IDs;
+accepted provider requests are never replayed.
+
+Backend policy registration, authenticated manual commands, preclaimed idle-owner
+preparation and shared registered-graph execution now have native source paths.
+Manual requests admitted during a root retain their exact bound scheduler
+ticket: the actual root can consume the request at a safe boundary, or the
+service can claim real idle maintenance after that root retires. A racing root
+using another model does not absorb or silently discard the request. Views
+observe public status and supplied metrics; private provider windows, receipt
+proofs and authority identities are excluded from those DTOs.
+
+Client controls and independent controller tests have source implementations;
+the Node suites passed at the separate adapter/DOM scope above. The repaired
+native controller and repository paths passed the third complete gate; the
+later serializer change must preserve that result in a fresh full gate.
+Native acceptance must exercise
+rolling context across roots, mid-run/repeated compaction, original held
+continuations, concurrent leaves, cancellation, recovery and real populated-v11
+migration before acceptance. Live-provider tests and installed browser/VS Code
+acceptance remain separate gates. The installed preview does not expose this
+source work as a working product capability.
 
 ## Requirements that apply to every strategy
 

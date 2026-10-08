@@ -152,6 +152,21 @@ void reasoning_continuation_contract(const std::vector<Json>& fixture){
     std::vector<ModelEvent> oversize_observed;bool exceeded=false;try{decode(wire(oversized),4096,&oversize_observed);}catch(const ModelProtocolError& error){require(std::string(error.what())=="Responses continuation exceeds limits");exceeded=true;}require(exceeded);
     for(const auto& event:oversize_observed)require(event.kind!="model.protocol_diagnostic"&&event.kind!="model.usage"&&event.kind!="model.finish"&&event.kind!="model.done");
 }
+void plain_history_contract(const ChatProviderConfig& config){
+    // Independently authored historical text, not invented provider receipts.
+    const std::string legacy="Synthetic legacy answer with quote \" and slash \\\n"+std::string(3956,'x')+" \xf0\x9f\x8c\x8d";
+    const std::string graph=R"({"source":"graph_join","outputs":{"read":{"content":"Synthetic graph bytes\n"}}})";
+    ModelRequest request;request.messages={{MessageRole::system,"Synthetic system instructions."},{MessageRole::developer,"Synthetic developer instructions."},{MessageRole::user,"Original question."},{MessageRole::assistant,legacy},{MessageRole::assistant,graph},{MessageRole::assistant,""},{MessageRole::user,"Next question."}};
+    const auto body=Json::parse(serialize_responses_request(config,request));const auto& input=body.at("input");require(input.size()==request.messages.size());
+    for(std::size_t i=0;i<input.size();++i){const auto& item=input[i];require(!item.contains("id")&&!item.contains("status")&&item.size()==3&&item["type"]=="message"&&item["content"].size()==1&&item["content"][0].size()==2&&item["content"][0]["text"]==request.messages[i].content);
+        require(item["content"][0]["type"]==(i>=3&&i<=5?"output_text":"input_text"));}
+    require(input[3]["role"]=="assistant"&&input[4]["role"]=="assistant"&&input[5]["role"]=="assistant");
+    require(legacy.size()>3956&&input[3]["content"][0]["text"].get<std::string>()==legacy&&input[4]["content"][0]["text"].get<std::string>()==graph);
+    const std::string arguments=R"({"pa\u0074h":"README.md","decimal":1.00000000000000000001})";
+    request.messages={{MessageRole::user,"Read"},{MessageRole::assistant,"Synthetic plain tool preface.",{{"plain_call","read_file",arguments}}},{MessageRole::tool,"Synthetic actual-boundary result",{},"plain_call"}};
+    const auto tool=Json::parse(serialize_responses_request(config,request)).at("input");require(tool.size()==4&&tool[1]["content"][0]["type"]=="output_text"&&!tool[1].contains("id")&&tool[2]["type"]=="function_call"&&tool[2]["arguments"]==arguments&&tool[3]["call_id"]=="plain_call");
+    request.messages[1].content.clear();const auto empty=Json::parse(serialize_responses_request(config,request)).at("input");require(empty.size()==3&&empty[1]["type"]=="function_call"&&empty[1]["arguments"]==arguments);
+}
 int main(){try{
     const auto fixture=events();const auto bytes=wire(fixture);const auto result=decode(bytes);require(result.content=="Hello \xf0\x9f\x8c\x8d"&&result.tool_calls.size()==1&&result.finish_reason=="tool_calls");require(result.tool_calls[0].id=="call_test");const auto usage=Json::parse(result.usage_json);require(usage["prompt_tokens"]==12&&usage["completion_tokens"]==7&&usage["prompt_tokens_details"]["cached_tokens"]==4&&usage["completion_tokens_details"]["reasoning_tokens"]==3);
     for(std::size_t size:{2,7,129,4096})require(decode(bytes,size).provider_items_json==result.provider_items_json);
@@ -184,7 +199,8 @@ int main(){try{
     config.reasoning_effort=ReasoningEffort::high;rejected([&]{serialize_responses_request(config,request);});config.reasoning=Capability::supported;
     const auto reasoningBody=Json::parse(serialize_responses_request(config,request));require(reasoningBody["reasoning"]["effort"]=="high"&&!reasoningBody.contains("reasoning_effort"));config.reasoning_effort.reset();
     rejected([&]{serialize_chat_request(config,request);});auto changed=request;changed.messages[1].content="changed";rejected([&]{serialize_responses_request(config,changed);});changed=request;changed.messages.pop_back();rejected([&]{serialize_responses_request(config,changed);});
-    ModelRequest authored;authored.messages={{MessageRole::user,"Question"},{MessageRole::assistant,"Previous plain text"},{MessageRole::user,"Next"}};const auto authored_body=Json::parse(serialize_responses_request(config,authored));require(authored_body["input"][1]["role"]=="assistant"&&authored_body["input"][1]["content"][0]["type"]=="input_text");authored.messages[1].refusal="Refusal without provider items";rejected([&]{serialize_responses_request(config,authored);});
+    plain_history_contract(config);
+    ModelRequest authored;authored.messages={{MessageRole::user,"Question"},{MessageRole::assistant,"Previous plain text"},{MessageRole::user,"Next"}};const auto authored_body=Json::parse(serialize_responses_request(config,authored));require(authored_body["input"][1]["role"]=="assistant"&&authored_body["input"][1]["content"][0]["type"]=="output_text");authored.messages[1].refusal="Refusal without provider items";rejected([&]{serialize_responses_request(config,authored);});
     require(model_protocol_diagnostic(ModelProtocolError("Responses final arguments differ from deltas"))=="responses_arguments_mismatch");
     require(model_protocol_diagnostic(ModelProtocolError("Incomplete Responses stream"))=="responses_stream_incomplete");
     require(model_protocol_diagnostic(ModelProtocolError("Provider response failed or was incomplete"))=="responses_provider_incomplete");

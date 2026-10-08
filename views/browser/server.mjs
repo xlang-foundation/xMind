@@ -4,9 +4,11 @@ import {pathToFileURL} from 'node:url';
 const assets={'/ui/':['index.html','text/html; charset=utf-8'],'/ui/browser.js':['browser.js','text/javascript; charset=utf-8'],'/ui/browser.css':['browser.css','text/css; charset=utf-8'],'/ui/chat.js':['chat.js','text/javascript; charset=utf-8'],'/ui/chat.css':['chat.css','text/css; charset=utf-8'],'/ui/client.js':['client.js','text/javascript; charset=utf-8'],'/ui/marked.js':['marked.js','text/javascript; charset=utf-8'],'/ui/purify.js':['purify.js','text/javascript; charset=utf-8']};
 const csp="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'";
 function origin(input){const url=new URL(input);if(url.protocol!=='http:'||!['127.0.0.1','localhost'].includes(url.hostname)||url.username||url.password||url.pathname!=='/'||url.search||url.hash)throw new Error('Use a loopback native backend origin');url.hostname='127.0.0.1';return url.origin;}
-function apiPath(path){return /^\/v1\/(?:health|models|graphs|agent\/(?:delegation|planning)|provider\/(?:configuration|models|profiles(?:\/(?:select|models))?)|sessions(?:\/[A-Za-z0-9_-]+\/(?:history|runs|title))?|runs(?:\/[A-Za-z0-9_-]+(?:\/(?:events|tree-events|children(?:\/[A-Za-z0-9_-]+\/history)?|cancel|operations|plan(?:\/(?:human\/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(?:\/[A-Za-z0-9_-]+(?:\/(?:children(?:\/[A-Za-z0-9_-]+\/history)?|events|human\/[A-Za-z0-9_.-]+))?)?|operations\/[A-Za-z0-9_-]+(?:\/(?:inspection|decision))?)$/.test(path);}
+function apiPath(path){return /^\/v1\/(?:health|models|graphs|agent\/(?:delegation|planning)|provider\/(?:configuration|models|profiles(?:\/(?:select|models))?)|sessions(?:\/[A-Za-z0-9_-]+\/(?:history|runs|title|context(?:\/(?:compact|requests\/[A-Za-z0-9_-]+))?))?|runs(?:\/[A-Za-z0-9_-]+(?:\/(?:events|tree-events|children(?:\/[A-Za-z0-9_-]+\/history)?|cancel|operations|plan(?:\/(?:human\/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(?:\/[A-Za-z0-9_-]+(?:\/(?:children(?:\/[A-Za-z0-9_-]+\/history)?|events|human\/[A-Za-z0-9_.-]+|resume))?)?|operations\/[A-Za-z0-9_-]+(?:\/(?:inspection|decision))?)$/.test(path);}
 export function allowedApiRoute(path,method){
  if(!apiPath(path)||!['GET','POST'].includes(method))return false;
+ if(/^\/v1\/sessions\/[A-Za-z0-9_-]+\/context(?:\/requests\/[A-Za-z0-9_-]+)?$/.test(path))return method==='GET';
+ if(/^\/v1\/sessions\/[A-Za-z0-9_-]+\/context\/compact$/.test(path)||/^\/v1\/graph-runs\/[A-Za-z0-9_-]+\/resume$/.test(path))return method==='POST';
  if(/^\/v1\/runs\/[A-Za-z0-9_-]+\/plan\/(?:human\/[A-Za-z0-9_-]+|resume)$/.test(path))return method==='POST';
  if(/^\/v1\/agent\/(?:delegation|planning)$/.test(path)||/^\/v1\/runs\/[A-Za-z0-9_-]+\/(?:tree-events|children(?:\/[A-Za-z0-9_-]+\/history)?|plan)$/.test(path))return method==='GET';
  return true;
@@ -53,7 +55,10 @@ export async function createBrowserServer({backend,assetRoot}){
    if(/^Bearer [\x21-\x7e]{32,256}$/.test(authorization||''))access={Authorization:authorization};
    else if(!authorization&&request.headers['sec-fetch-site']==='same-origin'){const credential=sessionFor(request);if(credential)access=viewHeaders(credential);}
    if(!access){reply(401,{detail:'Enter the native server access token to connect'});return;}
-   if((url.pathname==='/v1/agent/planning'||/^\/v1\/runs\/[A-Za-z0-9_-]+\/plan(?:\/.*)?$/.test(url.pathname))&&url.search||[...url.searchParams.keys()].some(key=>key!=='after')||url.searchParams.getAll('after').length>1||url.searchParams.has('after')&&!/^\d+$/.test(url.searchParams.get('after'))){reply(400,{detail:'Invalid view cursor'});return;}
+   const contextRead=/^\/v1\/sessions\/[A-Za-z0-9_-]+\/context(?:\/requests\/[A-Za-z0-9_-]+)?$/.test(url.pathname);
+   const queryInvalid=contextRead?[...url.searchParams.keys()].some(key=>key!=='model_id')||url.searchParams.getAll('model_id').length>1||url.searchParams.has('model_id')&&!/^[A-Za-z0-9_.:/-]{1,256}$/.test(url.searchParams.get('model_id')):
+    (request.method==='POST'||url.pathname==='/v1/agent/planning'||/^\/v1\/runs\/[A-Za-z0-9_-]+\/plan(?:\/.*)?$/.test(url.pathname))&&!!url.search||[...url.searchParams.keys()].some(key=>key!=='after')||url.searchParams.getAll('after').length>1||url.searchParams.has('after')&&!/^\d+$/.test(url.searchParams.get('after'));
+   if(queryInvalid){reply(400,{detail:'Invalid view observation query'});return;}
    if(request.method==='POST'&&request.headers['content-type']!=='application/json'){reply(400,{detail:'Use application/json'});return;}
    const chunks=[];let size=0;for await(const chunk of request){size+=chunk.length;if(size>1024*1024){reply(413,{detail:'Request exceeds limits'});return;}chunks.push(chunk);}
    const controller=new AbortController();response.on('close',()=>{if(!response.writableEnded)controller.abort();});

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "dateUtc": "2026-10-08",
+  "scope": "Real-account request-format diagnosis; source repair and installed upgrade acceptance are separate",
+  "installedNativeRevision": "ace246094f6c1fc8cf61c146cfe001c63f1bbc8f",
+  "installedSchemaVersion": 10,
+  "model": "gpt-5.6-sol",
+  "savedCredentialDiscovery": {
+    "httpStatus": 200,
+    "modelsReturned": 135,
+    "credentialReentered": false,
+    "providerSelectionChanged": false
+  },
+  "reportedConversationFailure": {
+    "httpStatus": 400,
+    "type": "invalid_request_error",
+    "code": "invalid_value",
+    "parameterRetained": false,
+    "plainAssistantMessagesObserved": 2,
+    "userMessageTextPublished": false
+  },
+  "freshInstalledNativeConversation": {
+    "prompt": "Reply only with OK. Do not call tools.",
+    "state": "completed",
+    "answer": "OK",
+    "usage": {"input_tokens": 3884, "output_tokens": 5, "total_tokens": 3889},
+    "scope": "Real browser view and installed native AgentRunner with saved OpenAI configuration; no tool effects requested"
+  },
+  "isolatedDirectHttpsComparison": {
+    "input": "Synthetic earlier user question, plain assistant answer, and request to reply OK; no real conversation or provider receipt replayed",
+    "otherRequestFieldsIdentical": true,
+    "cases": [
+      {"assistantContentType": "input_text", "httpStatus": 400, "type": "invalid_request_error", "code": "invalid_value", "parameter": "input[1].content[0]"},
+      {"assistantContentType": "output_text", "httpStatus": 200, "responseStatus": "completed", "answer": "OK", "usage": {"input_tokens": 27, "output_tokens": 5, "total_tokens": 32}}
+    ],
+    "nativeAdapterExecuted": false
+  },
+  "sourceFinding": "The ordinary plain-message branch of the installed and working native Responses serializer emits input_text for assistant text. Signed provider receipts use a separate branch. Role-specific output_text is required for this tested plain-assistant request.",
+  "notEstablished": [
+    "Raw error parameter from the original failed native request",
+    "Successful continuation of the original conversation after installing the source repair",
+    "Imported YAML provider keys or native live acceptance for Claude, Gemini and DeepSeek",
+    "Universal compatibility of every returned catalogue model with the coding route"
+  ],
+  "credentialsPublished": false
+}

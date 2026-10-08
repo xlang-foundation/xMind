@@ -1,0 +1,38 @@
+
+> agentflow@0.1.0 package
+> vsce package --allow-missing-repository --out D:\CantorAI2026\xMind\.agentflow\ci\provider-footer-integration\second-attempt\xmind-provider-footer.vsix
+
+Executing prepublish script 'npm run vscode:prepublish'...
+
+> agentflow@0.1.0 vscode:prepublish
+> node ../../views/browser/build.mjs browser-runtime/assets browser-runtime/server.mjs
+
+Browser view assets built at D:\CantorAI2026\xMind\extensions\vscode\browser-runtime\assets
+Browser access adapter bundled at D:\CantorAI2026\xMind\extensions\vscode\browser-runtime\server.mjs
+ INFO  Files included in the VSIX:
+xmind-provider-footer.vsix
+├─ [Content_Types].xml 
+├─ extension.vsixmanifest 
+└─ extension/
+   ├─ LICENSE.txt [11.29 KB]
+   ├─ browser-view.js [2.13 KB]
+   ├─ client.js [45.33 KB]
+   ├─ edit-review.js [2.17 KB]
+   ├─ extension.js [45.96 KB]
+   ├─ package.json [2.08 KB]
+   ├─ readme.md [14.05 KB]
+   ├─ webview.js [5.48 KB]
+   ├─ browser-runtime/
+   │  ├─ server.mjs [11.87 KB]
+   │  └─ assets/ (11 files) [261.65 KB]
+   ├─ media/
+   │  ├─ chat.css [8.39 KB]
+   │  ├─ chat.js [58.16 KB]
+   │  └─ xmind.svg [0.37 KB]
+   └─ node_modules/
+      ├─ dompurify/ (3 files) [55.63 KB]
+      └─ marked/ (2 files) [48.99 KB]
+
+=> Run vsce ls --tree to see all included files.
+
+ DONE  Packaged: D:\CantorAI2026\xMind\.agentflow\ci\provider-footer-integration\second-attempt\xmind-provider-footer.vsix (30 files, 174.75 KB)

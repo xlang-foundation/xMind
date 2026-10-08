@@ -20,11 +20,52 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+Current schema-v12 context, YAML configuration and DeepSeek source configured
+and compiled in the second complete **88-contract** attempt, which passed
+**85 and failed three in 162.98 seconds**. The first 86-contract attempt passed
+81 and failed five. Both failures are retained. After repository/controller and
+CLI fixture repairs, the third full gate passed **88/88 in 161.48 seconds**,
+with zero failures/skips, all 560 frozen inputs unchanged and original test
+output captured. DeepSeek gateway/profile
+contracts passed individually in **0.54 / 0.71 seconds** with synthetic replies.
+The earlier **131 extension / 29 browser** source tests retain their scope.
+The final saved-provider footer passed **141 extension / 32 browser** tests,
+with all 37 frozen inputs unchanged. It loads catalogues using saved credentials
+and keeps the provider and model controls together at the bottom of the sidebar.
+[Frontend source evidence](evidence/native-provider-footer-ui-provenance.json)
+does not establish installation or live-provider acceptance. The later
+model-free native/browser integration passed in **3.30 seconds** and the
+actual VSIX passed **18 asset checks**, with all 12 tested view files matching.
+[Integration/package evidence](evidence/native-provider-footer-integration-provenance.json)
+has its own scope and retains the initial guard-host failure.
+The complete local pass establishes its contract scope. A later Responses
+serializer defect was repaired and passed the fourth complete **88/88 gate in
+171.89 seconds**, with all 560 source inputs unchanged and no failures/skips.
+[Exact local evidence](evidence/native-context-provider-local-provenance.json)
+binds that repair and the original output;
+installed/live context and broader provider strategy acceptance remain separate.
+[Current implementation](native-context-compaction-design.md),
+[provider scopes](provider-setup.md).
+
+All four provider accounts passed separate direct HTTPS catalogue and small
+generation checks. The installed ace/schema-v10 preview still has one configured
+OpenAI Responses profile and four advertised routes, with DeepSeek absent; the
+local four-key configuration has not been imported. An earlier run returned HTTP
+400 `invalid_value`; an isolated direct reproduction later identified legacy
+assistant `input_text` instead of `output_text` in both ace and current source.
+A fresh native OpenAI browser prompt separately returned `OK` with supplied
+usage **3884 / 5**. That success does not validate legacy-history replay or
+four-provider native coding; direct account smoke checks remain separate.
+
 The native [JSON POST transport foundation](native-context-transport.md)
 passed its complete local **78-contract gate in 193.91 seconds**, with 427
 frozen inputs and the accepted xlang3 runtime verified unchanged. It supplies
-bounded transport for future context APIs; compaction and token-counting
-adapters remain unimplemented. [Local evidence](evidence/native-context-transport-local-provenance.json).
+bounded transport; the later compaction and token-counting implementation has
+the separate local scope above. Exact `859aca7` subsequently passed its separate
+hosted **78 native / 119 extension / 26 browser** gate, all 16 steps, model-free
+integration and 18 VSIX assets. That transport checkpoint contains no compaction
+acceptance. [Local evidence](evidence/native-context-transport-local-provenance.json),
+[hosted transport evidence](evidence/native-context-transport-hosted-859-provenance.json).
 
 Earlier exact source `2cd392f` passed the [hosted MCP gate](https://github.com/xlang-foundation/xMind/actions/runs/37824215372):
 **78 native / 119 extension / 26 browser** tests, all 16 steps, model-free
@@ -240,14 +281,14 @@ removed Python prototype's status table; it is not a completion score.
 | --- | --- | --- |
 | Persistent sessions and run events | C++ repositories, ownership, transactions, replay and recovery use SQLite through embedded xlang3 | Complete concurrent-client conversations, failure/recovery and release acceptance |
 | Agent/model/tool loop | Shared C++ single-agent/graph execution, hosted71 read-only delegation, hosted77 bounded dependency planning/revision and local78 coding-child MCP effects with durable budgets and signed continuation | Broad live coding tasks, live/rendered/installed planning acceptance, recursive/deterministic dynamic nodes, context bounds and production recovery |
-| Models and providers | Native Chat Completions and Responses; Gemini catalogue/enrollment/owned-key execution is hosted-verified at 64, profile CLI controls at hosted65, Claude tools/metrics at hosted66 and ordered opaque signed receipts/actual SQLite replay at hosted67 | Thinking request controls and live Claude/Gemini acceptance, model/account binding, pinned-model and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
+| Models and providers | Native Chat Completions and Responses; Gemini catalogue/enrollment/owned-key execution is hosted-verified at 64, profile CLI controls at hosted65, Claude tools/metrics at hosted66 and ordered opaque signed receipts/actual SQLite replay at hosted67. New DeepSeek gateway/profile contracts passed with synthetic replies, and the third complete local 88 gate passed | Fix the subsequently reproduced Responses legacy text serialization and pass the fourth full gate; native live four-provider coding and installed-client acceptance, thinking controls, model/account binding and broad provider/authentication/capability coverage remain; direct account smoke checks are separate; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
 | File/search/edit/process tools | Native workspace reads/search, approval-backed edits/creation and foreground process effects have scoped contracts | General patch review, background/PTY execution and complete repository coding tasks |
 | Instructions and agent presets | Native repository guidance discovery, source binding, durable approval checks and explicit workspace.inspect revision1 leaf policy | Full instruction scoping/configuration and broader reproducible presets |
 | Skills and commands | Native ownership is specified | Discovery, execution, lifecycle and CLI/editor acceptance |
 | Plugins | Native ownership is specified | Lifecycle, hooks, isolation and compatibility acceptance |
 | MCP | Native configured stdio tools, schema worker, approvals and modern/legacy official SDK peers have scoped contracts; hosted69 direct graph effects and local78 dynamically planned coding-child effects have separate acceptance scopes | Streamable HTTP/OAuth, resources/prompts, broader SDK features and full live coding interoperability |
 | Permissions and policies | Backend-owned durable grant/deny/cancel and effect ownership have actual file/process/peer fixtures | Complete policy rules, recovery and consistent enforcement across exposed tools/protocols |
-| Context compaction | Required by the native coding goal; [native design](native-context-compaction-design.md) covers session/mid-run, manual/automatic, private provider state and actual budgets | Implement and validate rolling native checkpoints, compatible provider strategies, every execution scope and thin-client controls; design and transport infrastructure do not establish compaction |
+| Context compaction | Current native source implements Responses checkpoints/counting, session/mid-run and manual/automatic paths, private provider state and actual budgets within the third local 88/88 gate's scope; [design and status](native-context-compaction-design.md) | Preserve the full gate after the later serializer repair; complete non-Responses provider strategies, upgrade/rollback, installed thin-client and live coding acceptance; local contracts do not establish full compaction completion |
 | Snapshots and recovery | Durable uncertainty inspection and non-replay safeguards cover selected effects | General reviewable snapshots, restoration and attributed reconciliation |
 | Attachments and references | Native CLI/editor context work is documented in [CLI scope](native-interactive-cli.md) | Complete model-input, editor-context and multimodal acceptance |
 | Formatters and diagnostics | Required by the native coding goal | Real project integrations and end-to-end verification |

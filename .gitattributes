@@ -1,11 +1,15 @@
 # Preserve vendored upstream bytes and the documented header hashes.
 Native/third_party/** -text
+# yaml-cpp retains upstream whitespace as part of its verified original bytes.
+Native/third_party/yaml-cpp/** whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 
 # Keep new verification logs byte-for-byte, matching their provenance hashes.
 doc/evidence/native-dynamic-plan-* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 doc/evidence/native-dynamic-plan-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-dynamic-mcp-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-context-transport-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-context-provider-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-provider-footer-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-cleanup-*.log -text
 doc/evidence/native-cleanup-5775990-failed-ctest.log -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 doc/evidence/native-cleanup-8a53282-hosted-*.log -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

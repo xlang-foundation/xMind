@@ -20,10 +20,13 @@ struct RootBudgetRecord {
     std::int64_t planned_children_reserved=0,parent_model_calls_reserved=0;
 };
 enum class ModelCallRole {parent,leaf};
+enum class ModelCallPurpose {inference,context_compaction};
 struct ModelCallReservation {
     std::string root_run_id,attempt_id,owner_run_id;
     ModelCallRole role=ModelCallRole::parent;
     std::string state;
+    ModelCallPurpose purpose=ModelCallPurpose::inference;
+    std::string inference_step_id;
 };
 struct DelegationTaskSpec {
     std::string task_id,node_id,child_run_id,prompt_json,objective;

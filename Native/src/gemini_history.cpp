@@ -170,6 +170,7 @@ ModelCompletion gemini_model_completion(const GeminiCompletion& completion,const
 }
 
 GeminiRequest gemini_model_request(const ModelRequest& request,Capability function_calls){
+    if(request.canonical_window)throw IncompatibleProviderHistory("Canonical context requires the Responses wire");
     if(request.messages.empty()||request.messages.size()>4096||request.tools.size()>64)invalid();GeminiRequest result;result.tools=request.tools;result.function_calls=function_calls;result.max_output_tokens=request.max_output_tokens;
     bool leading_system=true;std::size_t bytes=0;std::set<std::string> native_ids;
     for(std::size_t index=0;index<request.messages.size();++index){

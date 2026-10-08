@@ -15,6 +15,11 @@ public:
     std::vector<std::string> models() const override;
     bool supports_delegation() const override;
     bool supports_dynamic_planning() const override;
+    bool supports_context() const override;
+    ContextControlSnapshot context_status(const std::string& session,const std::string& model={})const override;
+    ContextManualStatus context_request(const std::string& session,const std::string& request,const std::string& model={})const override;
+    ContextManualStatus request_context(const std::string& session,const std::string& request,
+        const std::string& actor,std::int64_t expected_head_revision,const std::string& model={})override;
     Run plan_input(const std::string& root,const std::string& request,std::string input_json,
         const std::string& actor,std::int64_t revision,std::int64_t state_sequence) override;
     Run resume_plan(const std::string& root,const std::string& actor,
@@ -28,6 +33,8 @@ public:
         std::string prompt,std::string model={}) override;
     GraphRootRecord human_input(const std::string& root,const std::string& node,
         const std::string& input,const std::string& actor,std::int64_t revision) override;
+    Run resume_graph(const std::string& root,const std::string& actor,std::int64_t revision)override;
+    GraphContextMetadata graph_context(const std::string& root)const override;
 private:
     PersistenceService& store_;
     std::unique_ptr<AgentService> agents_;
