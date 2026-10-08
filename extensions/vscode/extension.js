@@ -1,7 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
-const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire } = require('./client');
+const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const { browserViewLauncher } = require('./browser-view');
@@ -37,6 +37,7 @@ async function activate(context) {
   let modelCatalogue = {models:[],default_model:''};
   let selectedModel;
   let providerSelection;
+  let profileController;
   let graphCatalogue=[],selectedGraph,graphSnapshot;
   let graphChildren=new Map(),childHistory=new Map();
   const stateKey = 'agentflow.session';
@@ -45,7 +46,7 @@ async function activate(context) {
   const graphStateKey = 'xmind.workflow';
 
   const post = message => panel?.webview.postMessage(message);
-  const stop = () => { clearInterval(timer); timer = undefined; generation++; };
+  const stop = () => { clearInterval(timer); timer = undefined; generation++;profileController?.invalidate(); };
   const busySession=()=>sessionRuns.some(run=>['queued','running','paused'].includes(run.state));
   const observedOperation=id=>id===runId || graphChildren.has(id);
   const clearGraph=()=>{graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});};
@@ -224,12 +225,13 @@ async function activate(context) {
     await context.secrets.store(secretKey(origin), validateToken(token));
     return true;
   }
-  async function configureModel(key) {
+  async function configureModel(key,profile,route) {
     if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before configuring xMind.');
     const target=client,origin=configuredOrigin(),version=generation;
     if(!target || target.baseUrl!==origin)throw new Error('Connect to xMind Server before configuring a model.');
     if(key!==undefined && (typeof key!=='string' || !/^[\x21-\x7e]{1,32768}$/.test(key)))throw new Error('Enter your provider API key without spaces.');
     providerSelection=undefined;
+    if(await profileController?.discover(key,profile,route))return;
     try{
       const current=()=>{if(!panel || client!==target || configuredOrigin()!==origin || version!==generation)throw new Error('Backend or conversation changed during provider setup. Try again.');};
       const setup=await target.providerConfiguration();current();
@@ -259,7 +261,8 @@ async function activate(context) {
     const origin = configuredOrigin();
     const bootstrapToken = typeof process !== 'undefined' ? process.env.XMIND_UI_BOOTSTRAP_TOKEN : undefined;
     if (!await context.secrets.get(secretKey(origin)) && !await configureToken(bootstrapToken)) return;
-    client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
+    profileController?.dispose();client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
+    const profileTarget=client;profileController=new ProviderProfileController(client,post,()=>!!panel&&client===profileTarget&&configuredOrigin()===profileTarget.baseUrl);
     const initial=await capabilities();let health=initial.health;modelCatalogue=initial.catalogue;
     const savedModel=context.workspaceState.get(modelStateKey);
     selectedModel=chooseModel(modelCatalogue,savedModel?.url===client.baseUrl?savedModel.id:undefined);
@@ -296,9 +299,14 @@ async function activate(context) {
           try{await configureModel();}catch{}
         } else if (message.type === 'saveProviderKey') {
           let key=message.key;delete message.key;
-          try{await configureModel(key===''?undefined:key);}finally{key=undefined;}
+          try{await configureModel(key===''?undefined:key,message.profile,message.route);}finally{key=undefined;}
         } else if (message.type === 'discardProviderKey') {
-          providerSelection=undefined;
+          providerSelection=undefined;profileController?.invalidate();
+        } else if(message.type==='select-provider'){
+          const version=generation;if(!await profileController.select(message.id)||panel!==view||version!==generation)return;
+          const current=await capabilities();health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);
+          post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
+          await context.workspaceState.update(modelStateKey,{url:client.baseUrl,id:selectedModel});await configureModel();
         } else if (message.type === 'refresh') {
           providerSelection=undefined;
           const version=generation;
@@ -317,7 +325,13 @@ async function activate(context) {
           await refreshGraphs();
         }
         else if (message.type === 'model' && typeof message.id === 'string') {
-          if(providerSelection){
+          const modelVersion=generation;
+          if(await profileController?.save(message.id)){
+            if(panel!==view||modelVersion!==generation||configuredOrigin()!==client.baseUrl)return;
+            const current=await capabilities();health=current.health;modelCatalogue=current.catalogue;
+            if(panel!==view||modelVersion!==generation||configuredOrigin()!==client.baseUrl)return;
+            post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:message.id});profileController.models(message.id);
+          }else if(providerSelection){
             const selection=providerSelection;
             if(selection.target!==client || selection.origin!==configuredOrigin() || Date.now()>selection.expires){providerSelection=undefined;throw new Error('Model discovery expired. Fetch models again in Settings.');}
             if(!selection.ids.includes(message.id))throw new Error('Choose a model returned by OpenAI.');

@@ -209,10 +209,21 @@ for(const id of ['rename-close','rename-cancel'])byId(id).onclick=()=>renameDial
 renameDialog.addEventListener('close',()=>{renameSnapshot=undefined;byId('conversation-title').value='';byId('rename-save').disabled=false;if(!byId('rename').hidden)byId('rename').focus();});
 byId('rename-form').onsubmit=event=>{event.preventDefault();if(!renameSnapshot||byId('rename-save').disabled)return;const title=byId('conversation-title').value;if(!title.trim())return;byId('rename-save').disabled=true;byId('rename-status').textContent='Saving…';api.postMessage({type:'rename-session',id:renameSnapshot.id,title,expected_title:renameSnapshot.title});};
 const settings=byId('provider-settings');
+let profileState;
+function profileRoutes(){
+  if(!profileState)return;const selected=profileState.profiles.find(value=>value.id===byId('provider-profile').value),routes=profileState.routes.filter(value=>value.discovery&&(!selected||value.provider===selected.provider));
+  const choose=byId('provider-name');choose.replaceChildren();for(const route of routes){const option=node('option',(route.provider==='anthropic'?'Claude':route.provider==='openai'?'OpenAI':route.provider)+' · '+(route.wire==='responses'?'Responses':route.wire==='anthropic-messages'?'Messages':'Chat Completions'));option.value=route.id;choose.append(option);}
+  if(selected)choose.value=selected.route_id;else if(routes.some(value=>value.id==='openai.responses'))choose.value='openai.responses';
+  choose.disabled=!routes.length;byId('profile-use').disabled=!selected||selected.id===profileState.active;
+}
+byId('provider-profile').onchange=()=>{byId('provider-key').value='';byId('settings-status').textContent='';profileRoutes();api.postMessage({type:'discardProviderKey'});};
+byId('provider-name').onchange=()=>{byId('provider-key').value='';api.postMessage({type:'discardProviderKey'});};
+byId('profile-use').onclick=()=>{byId('provider-key').value='';api.postMessage({type:'select-provider',id:byId('provider-profile').value});};
 byId('settings').onclick=()=>{byId('provider-key').value='';settings.showModal();byId('provider-key').focus();};
-byId('settings-close').onclick=()=>settings.close();
+byId('settings-close').onclick=()=>{api.postMessage({type:'discardProviderKey'});settings.close();};
+settings.addEventListener('cancel',()=>api.postMessage({type:'discardProviderKey'}));
 settings.addEventListener('close',()=>{byId('provider-key').value='';byId('settings').focus();});
-byId('provider-form').onsubmit=event=>{event.preventDefault();const key=byId('provider-key').value;byId('provider-key').value='';byId('settings-save').disabled=true;byId('settings-status').textContent='Fetching models…';api.postMessage({type:'saveProviderKey',key});};
+byId('provider-form').onsubmit=event=>{event.preventDefault();const key=byId('provider-key').value;byId('provider-key').value='';byId('settings-save').disabled=true;byId('settings-status').textContent='Fetching models…';api.postMessage({type:'saveProviderKey',key,...(profileState?{profile:byId('provider-profile').value,route:byId('provider-name').value}:{})});};
 function renderModels(models,selected){byId('model').replaceChildren();const placeholder=node('option',models.length?'Choose a model':'Open Settings to fetch models');placeholder.value='';placeholder.disabled=true;placeholder.selected=!models.some(model=>model.id===selected);byId('model').append(placeholder);for(const model of models){const option=node('option',model.id);option.value=model.id;option.selected=model.id===selected;byId('model').append(option);}byId('model').disabled=!models.length;byId('model').title=models.length?'Choose a discovered model':'Open Settings, enter your provider key and fetch models';}
 window.addEventListener('message',event=>{
   if(globalThis.xMindView&&(event.source!==window||event.origin!==location.origin))return;
@@ -232,7 +243,8 @@ window.addEventListener('message',event=>{
   else if(m.type==='reset-run'){resetLive();resetFailure();resetProcessStreams();byId('events').textContent='';}
   else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();byId('events').textContent='';}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data);}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
-  else if(m.type==='provider-wire'){const label=byId('provider-mode');label.textContent=m.wire==='responses'?'Responses':m.wire==='chat-completions'?'Chat Completions':'';label.hidden=!label.textContent;}
+  else if(m.type==='provider-profiles'){profileState=m;byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',(profile.provider==='anthropic'?'Claude':'OpenAI')+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);profiles.value=m.active;profileRoutes();}
+  else if(m.type==='provider-wire'){const label=byId('provider-mode');label.textContent=m.wire==='responses'?'Responses':m.wire==='chat-completions'?'Chat Completions':m.wire==='anthropic-messages'?'Claude Messages':'';label.hidden=!label.textContent;}
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
   else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;refreshRename();byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
   else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';byId('events').textContent='';}

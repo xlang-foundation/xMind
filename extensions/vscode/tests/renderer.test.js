@@ -11,6 +11,13 @@ function renderer(){
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+test('profile Settings offers saved and new providers and keeps discovered models in the footer',()=>{
+ const r=renderer(),doc=r.dom.window.document;try{
+  r.send({type:'provider-profiles',active:'saved-openai',profiles:[{id:'saved-openai',provider:'openai',model:'fixture-openai',route_id:'openai.responses'}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]});
+  assert.equal(doc.getElementById('profile-controls').hidden,false);assert.equal(doc.getElementById('profile-use').disabled,true);const profiles=doc.getElementById('provider-profile');profiles.value='';profiles.dispatchEvent(new r.dom.window.Event('change'));const route=doc.getElementById('provider-name');route.value='anthropic.messages';route.dispatchEvent(new r.dom.window.Event('change'));doc.getElementById('provider-key').value='synthetic-ui-profile-key';doc.getElementById('provider-form').dispatchEvent(new r.dom.window.Event('submit',{cancelable:true}));
+  assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'saveProviderKey',key:'synthetic-ui-profile-key',profile:'',route:'anthropic.messages'});assert.equal(doc.getElementById('provider-key').value,'');assert.ok(doc.querySelector('footer #model'));assert.equal(doc.querySelector('#provider-settings #model'),null);
+ }finally{r.dom.window.close();}
+});
 
 const processProposalFixture=()=>({id:'fixture-command',tool:'run_process',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,
   arguments_json:JSON.stringify({profile_id:'fixture-profile',profile_revision:2,executable:'C:/fixture/tool.exe',executable_id:'opaque-fixture-backend-executable-binding',arguments:['space argument','<script>fixtureAttack()</script>','trailing\\'],workdir:'src',directory_id:'fixture-directory',timeout_ms:120000,output_limit:65536}),result_json:'{}'});

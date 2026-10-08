@@ -1,5 +1,30 @@
 # Provider setup in the sidebar
 
+## Shared profile Settings controls
+
+Settings now has a saved-profile selector, an Add profile choice, a provider API
+selector and a Use saved profile action. OpenAI Chat/Responses and Claude
+Messages routes come from validated native metadata. New profiles receive an
+automatic identity; users do not enter model IDs. Keys are consumed privately by
+the browser/extension host, and models returned by account discovery appear in
+the sidebar footer. A footer choice calls native save/activation before updating
+the model view. Switching a saved profile calls native selection with its known
+revision; running/paused ownership conflicts remain backend decisions.
+
+Both hosts use `ProviderProfileController`. Its unsaved-key draft expires after
+five minutes; backend/conversation changes invalidate it and late discovery does
+not publish into a retired view. Saved-key discovery stays on the profile's
+owned route; a later native save can rebind a model within that provider family.
+The prior single-OpenAI setup path remains for an explicitly missing profile API.
+
+Local validation passed **80 extension tests**, including profile controller,
+renderer and legacy host contracts, the existing 14 browser tests, an additional
+browser Settings/controller contract and the actual browser/native integration.
+Synthetic controller/DOM fixtures do not prove live account inference. Live
+Claude, actual VS Code profile UI acceptance, and atomic provider-profile revision
+binding on run admission remain required. The browser view upgrade and visual
+inspection are the next acceptance step.
+
 ## Profile runtime in server startup
 
 The shared browser/VS Code `BackendClient` now exposes profile metadata,

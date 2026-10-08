@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire } = require('../client');
+const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController } = require('../client');
 
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
@@ -22,6 +22,7 @@ function harness(options={}) {
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
     let data;
+    if(target.pathname==='/v1/provider/profiles')return {ok:false,status:404,json:async()=>({detail:'Legacy backend has no profile API'})};
     if(target.pathname==='/v1/health') data=options.health||{agent_execution:true,status:'ok'};
     else if(target.pathname==='/v1/graphs')data={graphs:options.graphs||[]};
     else if(target.pathname==='/v1/graph-runs'){
@@ -92,7 +93,7 @@ function harness(options={}) {
     workspaceState:{get:key=>state.get(key),update:async (key,value)=>{state.set(key,value);}}};
   state.set('agentflow.session',{url:'http://127.0.0.1:8765',id:'saved'});
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController}:name==='./webview'?require('../webview'):require(name),
     setTimeout:callback=>{bootstrapTasks.push(callback);return 1;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./browser-view'?require('../browser-view'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);

@@ -109,5 +109,64 @@ function providerEnrollmentWire(setup){
   if(!((wire==='chat-completions'&&setup.endpoint==='https://api.openai.com/v1/chat/completions')||(wire==='responses'&&setup.endpoint==='https://api.openai.com/v1/responses')))throw new Error('Backend provider setup policy is unsupported.');
   return wire;
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken,providerEnrollmentWire};
-else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken,providerEnrollmentWire};
+// Thin setup controller shared by both hosts. The native service owns profile
+// publication and execution; unsaved keys live only in this host's bounded draft.
+class ProviderProfileController {
+  constructor(client,post,guard=()=>true){this.client=client;this.post=post;this.guard=guard;this.epoch=0;}
+  invalidate(){this.epoch++;clearTimeout(this.timer);if(this.draft)this.draft.key=undefined;this.draft=undefined;}
+  dispose(){this.invalidate();this.disposed=true;}
+  current(epoch){return !this.disposed&&this.epoch===epoch&&this.guard();}
+  present(){if(this.state)this.post({type:'provider-profiles',profiles:this.state.profiles,routes:this.state.routes,active:this.state.active});}
+  async refresh(){
+    if(typeof this.client.providerProfiles!=='function')return false;
+    const epoch=this.epoch;
+    try{const state=await this.client.providerProfiles();if(this.current(epoch)){this.state=state;this.present();}return true;}
+    catch(error){if(error.status===404)return false;throw error;}
+  }
+  wire(id){const profile=this.state?.profiles.find(value=>value.id===id);return this.state?.routes.find(value=>value.id===profile?.route_id)?.wire;}
+  models(selected){if(this.draft)this.post({type:'model-list',models:this.draft.ids.map(id=>({id})),model:selected});}
+  async discover(key,id,route_id){
+    if(!this.state&&!await this.refresh())return false;
+    if(this.disposed||!this.state)return true;
+    this.invalidate();const epoch=this.epoch;
+    try{
+      id=id===undefined?this.state.active:id;
+      const saved=this.state.profiles.find(value=>value.id===id);
+      if(id&&!saved)throw new Error('Choose a saved profile or Add profile');
+      route_id=route_id||saved?.route_id||this.state.routes.find(value=>value.id==='openai.responses')?.id||this.state.routes[0].id;
+      const route=this.state.routes.find(value=>value.id===route_id&&value.discovery);
+      if(!route||saved&&saved.provider!==route.provider)throw new Error('Choose an available route for this provider');
+      if(!saved){if(!key)throw new Error('Enter a key for the new provider profile');id=route.provider+'-'+globalThis.crypto.randomUUID();}
+      this.post({type:'settings-state',busy:true,text:'Fetching models from '+(route.provider==='anthropic'?'Claude':route.provider)+'…'});
+      if(!this.current(epoch))throw new Error('Backend changed during provider setup');
+      const catalogue=await this.client.discoverProfileModels(id,saved&&key===undefined?saved.route_id:route_id,key,this.state.revision);
+      if(!this.current(epoch))return true;
+      if(!catalogue.models.length)throw new Error('The provider returned no models');
+      this.draft={id,route_id,key,revision:this.state.revision,ids:catalogue.models.map(value=>value.id),expires:key===undefined?Infinity:Date.now()+300000};key=undefined;
+      this.models(saved?.model);this.post({type:'settings-state',busy:false,complete:true,text:'Choose a model below to save this profile'});
+      if(this.draft.key!==undefined)this.timer=setTimeout(()=>{if(this.current(epoch)){this.invalidate();this.post({type:'settings-state',busy:false,text:'Unsaved key expired · fetch models again'});}},300000);
+      return true;
+    }catch(error){if(this.current(epoch))this.post({type:'settings-state',busy:false,text:error.message});throw error;}finally{key=undefined;}
+  }
+  async save(model){
+    if(!this.draft)return false;
+    const draft=this.draft,epoch=this.epoch;
+    if(Date.now()>draft.expires||!draft.ids.includes(model))throw new Error('Fetch models and select a returned model');
+    if(!this.current(epoch))throw new Error('Backend changed during provider setup');
+    const state=await this.client.saveProviderProfile(draft.id,draft.route_id,model,draft.key,draft.revision,true);
+    draft.key=undefined;if(!this.current(epoch))return true;
+    this.state=state;draft.revision=state.revision;draft.expires=Infinity;clearTimeout(this.timer);
+    this.present();this.models(model);this.post({type:'provider-wire',wire:this.wire(state.active)});return true;
+  }
+  async select(id){
+    if(!this.state&&!await this.refresh())throw new Error('Update the backend to use provider profiles');
+    if(this.disposed||!this.state)return;
+    if(!this.state.profiles.some(profile=>profile.id===id))throw new Error('Choose a saved provider profile');
+    this.invalidate();const epoch=this.epoch;if(!this.current(epoch))throw new Error('Backend changed during provider setup');const state=await this.client.selectProviderProfile(id,this.state.revision);
+    if(!this.current(epoch))return;
+    this.state=state;this.present();this.post({type:'provider-wire',wire:this.wire(id)});
+    return true;
+  }
+}
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController};
+else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController};
