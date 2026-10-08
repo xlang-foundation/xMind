@@ -1,4 +1,5 @@
 #include "agentflow/provider_profile_runtime.hpp"
+#include "agentflow/provider_profile_legacy_setup.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/http_server.hpp"
 #include "httplib.h"
@@ -14,7 +15,7 @@ template<class Error,class F>void rejects(F call){try{call();}catch(const Error&
 SecretBytes key(const std::string& value){return SecretBytes({reinterpret_cast<const std::uint8_t*>(value.data()),value.size()});}
 struct Access {
     HttpServer server;int port;std::thread thread;
-    Access(PersistenceService& store,ProviderProfileRuntime& runtime):server(store,"synthetic-profile-runtime-server-access-token",&runtime,nullptr,{},{},{},nullptr,&runtime,&runtime),port(server.bind(0)),thread([this]{server.listen();}){}
+    Access(PersistenceService& store,ProviderProfileRuntime& runtime,ProviderSetup* legacy=nullptr):server(store,"synthetic-profile-runtime-server-access-token",&runtime,nullptr,{},{},{},legacy,&runtime,&runtime),port(server.bind(0)),thread([this]{server.listen();}){}
     ~Access(){server.stop();if(thread.joinable())thread.join();}
 };
 std::vector<ProviderProfileExecutionPolicy> policy(const std::string& origin){
@@ -104,13 +105,28 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         invalid=legacy;invalid["wire"]="responses";store.put_information("native-provider","active",invalid.dump()).get();rejects<DatabaseError>([&]{runtime.import_legacy_configuration();});
         invalid=legacy;invalid["extra"]=true;store.put_information("native-provider","active",invalid.dump()).get();rejects<DatabaseError>([&]{runtime.import_legacy_configuration();});
         store.put_information("native-provider","active",std::string("{\"provider\":\"openai\",")+legacy.dump().substr(1)).get();rejects<DatabaseError>([&]{runtime.import_legacy_configuration();});
-        invalid=legacy;invalid["model"]="runtime-openai-fixture-key";store.put_information("native-provider","active",invalid.dump()).get();rejects<std::invalid_argument>([&]{runtime.import_legacy_configuration();});
-        require(runtime.configuration().revision==0&&store.credentials("server").get().size()==1,"Malformed and credential-shaped legacy models cannot publish or rotate keys");
+        require(runtime.configuration().revision==0&&store.credentials("server").get().size()==1,"Malformed legacy records cannot publish or rotate keys");
         store.put_information("native-provider","active",legacy.dump()).get();require(runtime.import_legacy_configuration(),"Native startup reader must import the validated legacy configuration");const auto migrated=runtime.configuration();
         require(migrated.revision==9&&runtime.available()&&store.credentials("server").get().size()==1,"Native profile migration must activate the original encrypted key without rotation");
         require(store.information("native-provider","active").get()==legacy.dump(),"Migration must preserve the original legacy source record");
         store.put_information("native-provider","active",R"({"invalid":"legacy fixture"})").get();require(!runtime.import_legacy_configuration(),"Existing registry must take precedence over stale legacy configuration");
         rejects<Conflict>([&]{runtime.import_existing_profile("other","openai.chat","fixture-openai","legacy-owned-key",9);});
+    }
+    for(const auto* legacy_model:{"runtime-openai-fixture-key","sk-invalid-legacy-model"}){
+        PersistenceService store((std::filesystem::u8path(argv[1])/(std::string(legacy_model)+"-repair.sqlite")).string(),imports);
+        store.put_credential("server","legacy-repair-key","fixture:openai","Legacy repair fixture",key("runtime-openai-fixture-key"),0).get();
+        const auto legacy=Json{{"provider","openai"},{"endpoint",origin+"/chat"},{"model",legacy_model},{"credential_id","legacy-repair-key"},{"revision",9}}.dump();
+        store.put_information("native-provider","active",legacy).get();
+        {ProviderProfileRuntime runtime(store,base,policy(origin),1,8);require(runtime.import_legacy_configuration(),"Credential-shaped legacy model must migrate to a key-only profile");
+            require(!runtime.available()&&runtime.models().empty()&&runtime.configuration().profiles[0].model.empty(),"Key-only profile cannot expose a secret as a model or execute inference");
+            require(store.credentials("server").get().size()==1&&store.information("native-provider","active").get()==legacy,"Key-only migration must preserve original key and source");}
+        ProviderProfileRuntime runtime(store,base,policy(origin),1,8);std::vector<ProviderProfileRoute> allowed;for(const auto& entry:policy(origin))allowed.push_back(entry.route);
+        ProviderProfileLegacySetup compatibility(runtime,std::move(allowed),"openai","openai.chat","");Access access(store,runtime,&compatibility);
+        require(compatibility.configuration().configured&&compatibility.configuration().model.empty()&&compatibility.configuration().revision==9,"Compatibility metadata must retain saved-key status and revision after restart");
+        httplib::Client client("127.0.0.1",access.port);const httplib::Headers auth{{"Authorization","Bearer synthetic-profile-runtime-server-access-token"}};
+        const auto discovered=client.Post("/v1/provider/models",auth,R"({"expected_revision":9})","application/json");require(discovered&&discovered->status==200,"Legacy saved-key discovery must repair without asking for the key again");
+        const auto repaired=client.Post("/v1/provider/configuration",auth,R"({"model":"fixture-openai","expected_revision":9})","application/json");require(repaired&&repaired->status==200&&Json::parse(repaired->body).at("revision")==10&&runtime.available(),"Legacy setup must publish the same profile runtime after repair");
+        require(store.information("native-provider","active").get()==legacy,"Repair must not rewrite historical legacy source");
     }
     {
         PersistenceService store((std::filesystem::u8path(argv[1])/"discovery-race.sqlite").string(),imports);ProviderProfileRuntime runtime(store,base,policy(origin),1,8);
@@ -120,6 +136,11 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         require(runtime.select_profile("openai",1).revision==2,"Discovery cannot hold the runtime admission lock during network I/O");
         std::cout<<"fixture-discovery-committed\n"<<std::flush;
         rejects<Conflict>([&]{discovery.get();});require(runtime.configuration().revision==2&&store.credentials("server").get().size()==1,"Stale discovery must not alter committed configuration or keys");
+    }
+    for(const auto* name:{"startup-valid","startup-repair"}){
+        PersistenceService store((std::filesystem::u8path(argv[1])/(std::string(name)+".sqlite")).string(),imports);
+        ProviderRuntime legacy(store,base,1,8);legacy.configure("fixture-startup",key("runtime-openai-fixture-key"),0);
+        if(std::string(name)=="startup-repair"){auto record=Json::parse(store.information("native-provider","active").get());record["model"]="sk-invalid-legacy-model";store.put_information("native-provider","active",record.dump()).get();}
     }
     std::cout<<"Native profile runtime passed actual OpenAI/Claude wire and key isolation, SQL failure preservation, active/paused-graph ownership, active-profile update, restart and encrypted-reference migration; peers are synthetic, no live account or UI enrollment tested\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

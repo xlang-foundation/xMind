@@ -1,5 +1,35 @@
 # Provider setup in the sidebar
 
+## Profile runtime in server startup
+
+The model-free Windows server now constructs `ProviderProfileRuntime`, registers
+the authenticated profile API and imports legacy OpenAI setup before listening.
+Backend routes are fixed OpenAI Chat/Responses and Anthropic Messages with their
+account catalogue endpoints. Explicit `--model` startup configuration keeps its
+existing execution path. Client-supplied destinations remain prohibited.
+
+`ProviderProfileLegacySetup` adapts the existing configuration/discovery endpoints
+to this same runtime. It owns no separate execution engine. Existing CLI and
+OpenAI Settings clients therefore use the profile registry through their current
+API, while the new profile API supports separate keys and active selection.
+The legacy adapter retains the existing GPT-family Chat/Responses selection rule;
+the profile API chooses explicit backend route identities.
+
+A trusted migration may import an empty-model profile when a legacy model equals
+its key or looks like an API key. Its encrypted credential and revision survive,
+but no model is advertised and inference remains unavailable. Saved-key discovery
+and configuration can repair selection without key reentry. Public enrollment
+still requires a valid nonempty model. The legacy source record is retained;
+this does not erase plaintext from older SQLite pages or backups.
+
+Local checks passed for the compiled server/CLI profile enrollment, selection,
+restart and conversation preservation, and the native profile runtime contract
+now starts the actual server on valid and repairable legacy databases. The
+existing **73 extension and 14 browser tests** and actual browser/native graph
+contract passed against the new compiled backend. The complete corrected native
+suite is being revalidated. A multi-provider client Settings selector and live
+Claude acceptance remain pending; the running preview has not been upgraded.
+
 ## Multiple provider enrollment boundary
 
 The native model-profile registry now has source for independently encrypted

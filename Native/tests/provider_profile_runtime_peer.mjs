@@ -2,15 +2,29 @@
 // persistence and key resolution. This does not establish live account support.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {execFile} from 'node:child_process';
+import {execFile,spawn} from 'node:child_process';
 import {promisify} from 'node:util';
 import {mkdtemp,rm} from 'node:fs/promises';
-import {join} from 'node:path';
+import {join,dirname} from 'node:path';
 import {tmpdir} from 'node:os';
 const execute=promisify(execFile),root=await mkdtemp(join(tmpdir(),'xmind-profile-runtime-'));
+const [binary,modules,stdlib]=process.argv.slice(2);
 let failure;const observed=[];
 let openaiDiscoveries=0,claudePages=0,pageLimitPages=0,child,stalledDiscovery,discoveryReleased=false;
 const event=value=>`event: ${value.type}\ndata: ${JSON.stringify(value)}\n\n`;
+async function startup(database,check){
+  const token='synthetic-profile-startup-owner-access-token';
+  const backend=spawn(join(dirname(binary),'xmind_server.exe'),['--db',join(root,database),'--modules',modules,'--stdlib',stdlib,'--port','0'],{windowsHide:true,env:{...process.env,XMIND_AUTH_TOKEN:token}});
+  let stdout='',stderr='';backend.stderr.on('data',data=>stderr+=data);
+  try{
+    const port=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Native profile startup readiness timed out')),10000);
+      backend.once('error',error=>{clearTimeout(timer);reject(error);});backend.once('exit',code=>{clearTimeout(timer);reject(new Error(`Native profile startup exited ${code}: ${stderr}`));});
+      backend.stdout.on('data',data=>{stdout+=data;const match=/listening on http:\/\/127\.0\.0\.1:(\d+)/.exec(stdout);if(match){clearTimeout(timer);resolve(Number(match[1]));}});
+    });
+    const api=async(path,body)=>{const response=await fetch(`http://127.0.0.1:${port}${path}`,{headers:{Authorization:`Bearer ${token}`,...(body?{'Content-Type':'application/json'}:{})},method:body?'POST':'GET',...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(10000)});assert.equal(response.status,200);const result=await response.json();assert.ok(!JSON.stringify(result).includes('runtime-openai-fixture-key'));assert.ok(!JSON.stringify(result).includes('sk-invalid-legacy-model'));return result;};
+    await check(api);
+  }finally{if(backend.exitCode===null){const closed=new Promise(resolve=>backend.once('exit',resolve));backend.kill();await closed;}}
+}
 const server=createServer((request,response)=>{
   let raw='';request.on('data',data=>{raw+=data;if(raw.length>65536)request.destroy();});
   request.on('end',()=>{try{
@@ -65,7 +79,6 @@ const server=createServer((request,response)=>{
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 try{
-  const [binary,modules,stdlib]=process.argv.slice(2);
   const running=execute(binary,[root,modules,stdlib,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:35000});child=running.child;
   let output='';child.stdout.on('data',chunk=>{
     output+=chunk;if(!discoveryReleased&&output.includes('fixture-discovery-committed')){
@@ -75,6 +88,9 @@ try{
   const result=await running;
   if(failure)throw failure;
   assert.deepEqual(observed,[{route:'/chat',model:'fixture-openai'},{route:'/messages',model:'fixture-claude'},{route:'/chat',model:'fixture-openai-updated'},{route:'/messages',model:'fixture-claude'}]);
-  assert.equal(openaiDiscoveries,3);assert.equal(claudePages,2);assert.equal(pageLimitPages,8);assert.equal(discoveryReleased,true);
+  assert.equal(openaiDiscoveries,5);assert.equal(claudePages,2);assert.equal(pageLimitPages,8);assert.equal(discoveryReleased,true);
+  await startup('startup-valid.sqlite',async api=>{const profiles=await api('/v1/provider/profiles');assert.equal(profiles.revision,1);assert.equal(profiles.active,'openai');assert.equal(profiles.profiles[0].model,'fixture-startup');assert.equal((await api('/v1/health')).agent_execution,true);});
+  await startup('startup-repair.sqlite',async api=>{const profiles=await api('/v1/provider/profiles');assert.equal(profiles.revision,1);assert.equal(profiles.profiles[0].model,'');assert.equal((await api('/v1/health')).agent_execution,false);assert.deepEqual((await api('/v1/models')).models,[]);const repaired=await api('/v1/provider/configuration',{model:'fixture-startup',expected_revision:1});assert.equal(repaired.revision,2);assert.equal((await api('/v1/health')).agent_execution,true);});
+  await startup('startup-repair.sqlite',async api=>{const profiles=await api('/v1/provider/profiles');assert.equal(profiles.revision,2);assert.equal(profiles.profiles[0].model,'fixture-startup');});
   process.stdout.write(result.stdout);
 }finally{await new Promise(resolve=>server.close(resolve));await rm(root,{recursive:true,force:true});}

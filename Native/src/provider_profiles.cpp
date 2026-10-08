@@ -29,7 +29,7 @@ ProviderProfiles::State ProviderProfiles::load()const{
         state.snapshot.revision=revision(record.at("revision"));state.snapshot.active=record.at("active").get<std::string>();std::set<std::string> ids;
         for(const auto& value:record["profiles"]){
             if(!value.is_object()||value.size()!=10)throw DatabaseError("Invalid provider profile record");SavedProviderProfile profile{value.at("id").get<std::string>(),value.at("route_id").get<std::string>(),value.at("model").get<std::string>(),value.at("credential_id").get<std::string>(),revision(value.at("revision"))};
-            identity(profile.id);identity(profile.model);identity(profile.credential_id);const auto& policy=route(profile.route_id);
+            identity(profile.id);if(!profile.model.empty())identity(profile.model);identity(profile.credential_id);const auto& policy=route(profile.route_id);
             if(!ids.insert(profile.id).second||profile.revision>state.snapshot.revision||value.at("provider")!=policy.provider||value.at("endpoint")!=policy.endpoint||value.at("wire")!=wire_name(policy.wire)||value.at("credential_scope")!=policy.credential_scope||value.at("credential_purpose")!=policy.credential_purpose)throw DatabaseError("Stored provider profile differs from backend policy");
             state.snapshot.profiles.push_back(std::move(profile));
         }
@@ -72,7 +72,7 @@ ProviderProfileSnapshot ProviderProfiles::select(std::string id,std::int64_t exp
     state.record["revision"]=expected+1;state.record["active"]=id;store_.compare_information("native-provider-profiles","registry",state.record.dump(),state.source).get();state.snapshot.revision=expected+1;state.snapshot.active=id;return state.snapshot;
 }
 ProviderProfileSnapshot ProviderProfiles::import_existing(std::string id,std::string route_id,std::string model,std::string credential_id,std::int64_t initial,Validator validate){
-    identity(id);identity(model);identity(credential_id);const auto& policy=route(route_id);
+    identity(id);if(!model.empty())identity(model);identity(credential_id);const auto& policy=route(route_id);
     if(initial<1||initial>maximum)throw std::invalid_argument("Invalid imported provider revision");
     auto state=load();if(state.source)throw Conflict("Provider profile registry already exists");
     auto verified=store_.resolve_credential(policy.credential_scope,credential_id,policy.credential_purpose).get();

@@ -40,6 +40,10 @@ struct ProviderProfileRuntime::Impl {
         if(found==policy.end())throw std::invalid_argument("Provider execution route is not allowed");return *found;
     }
     std::unique_ptr<ExecutionPlatform> prepare(const SavedProviderProfile& profile){
+        if(profile.model.empty()){
+            auto settings=base;settings.provider.model.clear();settings.selectable_models.clear();settings.credential.reset();
+            return std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
+        }
         const auto& allowed=route(profile.route_id);auto settings=base;settings.provider=allowed.provider;settings.provider.model=profile.model;
         settings.selectable_models.clear();settings.credential=CredentialReference{allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose};
         return std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
@@ -140,6 +144,10 @@ bool ProviderProfileRuntime::import_legacy_configuration(std::string id){
     }catch(const DatabaseError&){throw;}catch(...){throw DatabaseError("Legacy provider configuration is invalid");}
     // Import validates identity, resolves the exact owned encrypted credential,
     // prepares execution and publishes with absent-registry CAS. No rotation.
+    const auto& route=impl_->route(route_id).route;
+    auto owned=impl_->store.resolve_credential(route.credential_scope,credential,route.credential_purpose).get();
+    const auto bytes=owned.view();
+    if(model.starts_with("sk-")||(model.size()==bytes.size()&&std::equal(model.begin(),model.end(),bytes.begin(),[](char left,std::uint8_t right){return static_cast<unsigned char>(left)==right;})))model.clear();
     import_existing_profile(std::move(id),std::move(route_id),std::move(model),std::move(credential),revision);
     return true;
 }

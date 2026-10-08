@@ -13,6 +13,7 @@
 #if defined(_WIN32)
 #include "agentflow/agent_service.hpp"
 #include "agentflow/provider_setup.hpp"
+#include "agentflow/provider_profile_legacy_setup.hpp"
 #include "agentflow/execution_platform.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/process_configuration.hpp"
@@ -22,13 +23,13 @@
 namespace {
 std::mutex control_mutex;
 agentflow::HttpServer* active_server=nullptr;
-std::string provider_purpose(const std::string& endpoint) {
+std::string provider_purpose(const std::string& endpoint,const char* domain="provider:chat:") {
     BCRYPT_ALG_HANDLE algorithm=nullptr;std::array<UCHAR,32> hash{};
     if(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)<0) throw std::runtime_error("Cannot bind provider credential context");
     const auto status=BCryptHash(algorithm,nullptr,0,reinterpret_cast<PUCHAR>(const_cast<char*>(endpoint.data())),static_cast<ULONG>(endpoint.size()),hash.data(),static_cast<ULONG>(hash.size()));
     BCryptCloseAlgorithmProvider(algorithm,0);
     if(status<0) throw std::runtime_error("Cannot bind provider credential context");
-    std::ostringstream result;result<<"provider:chat:"<<std::hex<<std::setfill('0');
+    std::ostringstream result;result<<domain<<std::hex<<std::setfill('0');
     for(auto byte:hash) result<<std::setw(2)<<static_cast<unsigned>(byte);return result.str();
 }
 std::string credential_id() {
@@ -97,10 +98,12 @@ int main(int argc,char** argv) {
 #endif
         std::unique_ptr<agentflow::RunExecutor> executor;
         agentflow::ProviderSetup* provider_setup=nullptr;
+        agentflow::ProviderProfileSetup* provider_profiles=nullptr;
         agentflow::GraphExecution* graph_execution=nullptr;
         std::vector<agentflow::McpServerMetadata> mcp_metadata;
         std::vector<agentflow::ProcessProfileMetadata> process_metadata;
 #if defined(_WIN32)
+        std::unique_ptr<agentflow::ProviderProfileLegacySetup> legacy_provider_setup;
         agentflow::McpConfigurationStore mcp_configurations(persistence);
         std::vector<agentflow::McpServerSetting> mcp_settings;
         if(options.contains("--mcp-config")) {
@@ -157,7 +160,22 @@ int main(int argc,char** argv) {
         if(!executor){
             agentflow::AgentSettings settings;settings.mcp_servers=mcp_settings;settings.process_profiles=process_profiles;settings.instruction_policy=instruction_policy;
             if(options.contains("--workspace"))settings.workspace=options.at("--workspace");settings.approved_edits=options.contains("--workspace-edits");
-            auto configurable=std::make_unique<agentflow::ProviderRuntime>(persistence,std::move(settings),workers,queue);provider_setup=configurable.get();graph_execution=configurable.get();executor=std::move(configurable);
+            std::vector<agentflow::ProviderProfileExecutionPolicy> policies;
+            std::vector<agentflow::ProviderProfileRoute> routes;
+            const auto add=[&](std::string id,std::string provider,std::string endpoint,agentflow::ProviderWire wire,std::string catalogue,agentflow::ProviderCatalogueFormat format){
+                agentflow::ProviderProfileRoute route{std::move(id),std::move(provider),endpoint,"server",provider_purpose(endpoint,"provider:setup:"),wire};
+                agentflow::ChatProviderConfig configuration;configuration.endpoint=std::move(endpoint);configuration.wire=wire;
+                configuration.tools=agentflow::Capability::supported;configuration.stream_usage=agentflow::Capability::supported;
+                if(wire==agentflow::ProviderWire::anthropic_messages)configuration.output_limit=agentflow::Capability::supported;
+                routes.push_back(route);policies.push_back({std::move(route),std::move(configuration),agentflow::ProviderCataloguePolicy{std::move(catalogue),format}});
+            };
+            add("openai.chat","openai","https://api.openai.com/v1/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.openai.com/v1/models",agentflow::ProviderCatalogueFormat::openai);
+            add("openai.responses","openai","https://api.openai.com/v1/responses",agentflow::ProviderWire::responses,"https://api.openai.com/v1/models",agentflow::ProviderCatalogueFormat::openai);
+            add("anthropic.messages","anthropic","https://api.anthropic.com/v1/messages",agentflow::ProviderWire::anthropic_messages,"https://api.anthropic.com/v1/models",agentflow::ProviderCatalogueFormat::anthropic);
+            auto configurable=std::make_unique<agentflow::ProviderProfileRuntime>(persistence,std::move(settings),std::move(policies),workers,queue);
+            configurable->import_legacy_configuration();
+            legacy_provider_setup=std::make_unique<agentflow::ProviderProfileLegacySetup>(*configurable,std::move(routes));
+            provider_setup=legacy_provider_setup.get();provider_profiles=configurable.get();graph_execution=configurable.get();executor=std::move(configurable);
         }
         if(options.contains("--workspace") || options.contains("--inspection-workspace")) {
             recovery_workspace=std::make_unique<agentflow::WorkspaceTools>(options.at(options.contains("--workspace")?"--workspace":"--inspection-workspace"));
@@ -172,7 +190,7 @@ int main(int argc,char** argv) {
 #else
             ,nullptr,{},{}
 #endif
-            ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()},provider_setup,graph_execution
+            ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()},provider_setup,graph_execution,provider_profiles
         );const auto bound=server.bind(port);
 #if defined(_WIN32)
         {std::lock_guard lock(control_mutex);active_server=&server;}

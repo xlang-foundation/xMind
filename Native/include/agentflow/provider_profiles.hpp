@@ -9,6 +9,8 @@ struct ProviderProfileRoute {
     ProviderWire wire=ProviderWire::chat_completions;
 };
 struct SavedProviderProfile {
+    // Empty model is a trusted migration's key-only profile awaiting repair.
+    // Public save operations still require a nonempty model identity.
     std::string id,route_id,model,credential_id;
     std::int64_t revision=0;
 };
