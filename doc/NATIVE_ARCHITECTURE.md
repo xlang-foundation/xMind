@@ -37,6 +37,25 @@ the superseded direct-SQLite implementation was removed. See
 
 ## Current source and verification
 
+The current Claude checkpoint passed the complete local **66-contract native
+gate in 114.49 seconds**, with an exact manifest, zero failures/skips and no
+post-build exclusions. Actual AgentRunner two-file execution, provider call/result
+correlation, encrypted credential reuse, xlang3 SQLite history/reopen without
+repeating tools, held-stream cancellation/recovery and second-tool-row SQL
+rollback passed with an independent synthetic Messages peer. Shared native usage
+events and saved responses preserve supplied uncached input/output/cache counters,
+including zeros, without summed input or invented totals. The new agent contract
+took **0.56 seconds** and the gateway adapter contract **0.23 seconds**.
+
+The updated frontend suites passed **98 extension and 17 browser tests**, with
+zero failures/skips; actual shared DOM fixtures cover live and saved metrics.
+Fresh browser/native integration passed against the rebuilt server and matching
+assets. Exact hosted66 validation is pending. Thinking/signatures, live Claude
+inference, rendered Claude IDE acceptance, all 21 pinned Anthropic models and full
+parity remain incomplete. Installed previews are unchanged.
+[Local66 provenance](evidence/native-anthropic-agent-local-provenance.json),
+[Claude scope](native-claude-agent.md).
+
 The original `Core` used the old xlang package/embedding ABI. That source and
 its CLI, configuration, service, debug-plugin and legacy dependency assets were
 removed. The Python/FastAPI `agentflow` prototype, dependent launcher/probes and
@@ -86,7 +105,7 @@ policy, while text-only mode can retain unknown-tool models. Direct-SQLite
 removal and shared `records.hpp` cleanup are included.
 [Exact hosted enrollment scope](evidence/native-gemini-enrollment-hosted-provenance.json).
 
-The newer generic CLI source passed all **65 native contracts locally in 113.16
+The preceding generic CLI source passed all **65 native contracts locally in 113.16
 seconds**, with the exact manifest, zero failures/skips and no post-build
 exclusions. Its CLI contract took **4.23 seconds** and exercises OpenAI, Claude
 and Gemini profile catalogues, private environment-key setup, explicit shared
@@ -96,11 +115,12 @@ encrypted credentials, stale discovery/admission without retry and failed-turn s
 through settings until actual recovery also passed. The C++ backend retains
 credential binding, revision CAS and execution ownership; the CLI does not
 silently rebind from metadata inspection or discovery. Fresh browser/native
-integration passed again against the rebuilt server. Unchanged frontend sources
-retain the earlier verified **94 extension and 17 browser tests**; those suites
-were not rerun for this CLI change.
+integration passed again against the rebuilt server. Its unchanged frontend
+sources retained the earlier verified **94 extension and 17 browser tests**;
+those suites were not rerun for that CLI change.
 [Local CLI scope](evidence/native-provider-profile-cli-local-provenance.json).
-Hosted verification of the newer 65-contract source is pending. Live Gemini
+Hosted verification of that 65-contract source is pending; it excludes the newer
+Claude agent/metrics changes. Live Gemini
 inference and actual Gemini IDE interaction remain unverified.
 [Provider setup](provider-setup.md).
 The installed browser preview retains its separately verified native `19d69dd`

@@ -305,6 +305,43 @@ test('provider cache/reasoning counts and backend first-token time render withou
   const r=renderer();r.send({type:'history',history:[{role:'assistant',data:{content:'Synthetic metrics fixture',usage:{prompt_tokens:12,completion_tokens:6,total_tokens:18,prompt_tokens_details:{cached_tokens:4},completion_tokens_details:{reasoning_tokens:2}},first_token_ms:200,elapsed_ms:1250}}]});
   const text=r.dom.window.document.querySelector('.metrics').textContent;assert.match(text,/Cached 4/);assert.match(text,/Reasoning 2/);assert.match(text,/First token 0.20s/);assert.match(text,/1.25s/);r.dom.window.close();
 });
+test('Claude usage events and persisted metadata keep uncached input, cache writes and reads distinct',()=>{
+  const r=renderer(),doc=r.dom.window.document,usage={input_tokens:2,output_tokens:5,cache_creation_input_tokens:13,cache_read_input_tokens:21,prompt_tokens:2,completion_tokens:5,input_tokens_scope:'uncached',prompt_tokens_details:{cached_tokens:21}};
+  try{
+    r.send({type:'event',event:{kind:'model.text',data:{text:'Synthetic Claude metrics fixture'}}});r.send({type:'event',event:{kind:'model.usage',data:usage}});
+    const live=doc.querySelector('#live .metrics');assert.deepEqual([...live.children].map(el=>el.textContent),['Input (uncached) 2','Output 5','Total —','Cache write 13','Cached 21']);assert.match(live.title,/excludes cache writes and reads/);
+    const context={profile_id:'fixture-claude',profile_revision:2,route_id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',model_id:'fixture-recorded-claude'};
+    r.send({type:'transcript',history:[{role:'assistant',data:{content:'Synthetic Claude metrics fixture',usage,model:context.model_id,provider_context:context,first_token_ms:125,elapsed_ms:1100}}]});
+    assert.equal(doc.getElementById('live').childElementCount,0);const recorded=doc.querySelector('#history .metrics');assert.deepEqual([...recorded.children].map(el=>el.textContent),['Input (uncached) 2','Output 5','Total —','Cache write 13','Cached 21','fixture-recorded-claude','Claude · Messages','First token 0.13s','1.10s']);assert.ok(!recorded.textContent.includes('Total 41'),'Cache accounting must not invent a total');assert.match(recorded.querySelector('.provider-context').title,/fixture-claude\nProfile version: 2/);
+  }finally{r.dom.window.close();}
+});
+test('zero Claude counters remain visible while absent input and output stay unavailable',()=>{
+  const r=renderer(),doc=r.dom.window.document;try{
+    r.send({type:'event',event:{kind:'model.usage',data:{prompt_tokens:0,completion_tokens:0,input_tokens_scope:'uncached',cache_creation_input_tokens:0,prompt_tokens_details:{cached_tokens:0}}}});
+    assert.deepEqual([...doc.querySelector('#live .metrics').children].map(el=>el.textContent),['Input (uncached) 0','Output 0','Total —','Cache write 0','Cached 0']);
+    r.send({type:'transcript',history:[{role:'assistant',data:{content:'Synthetic absent input/output fixture',usage:{cache_creation_input_tokens:0,cache_read_input_tokens:0,prompt_tokens_details:{cached_tokens:0}}}}]});
+    assert.deepEqual([...doc.querySelector('#history .metrics').children].map(el=>el.textContent),['Input —','Output —','Total —','Cache write 0','Cached 0']);
+    r.send({type:'history',history:[{role:'assistant',data:{content:'Synthetic raw-only fixture',usage:{input_tokens:9,output_tokens:4,cache_read_input_tokens:8,input_tokens_scope:'uncached'}}}]});
+    assert.deepEqual([...doc.querySelector('#history .metrics').children].map(el=>el.textContent),['Input (uncached) —','Output —','Total —'],'The view consumes normalized counters without computing or translating missing ones');
+  }finally{r.dom.window.close();}
+});
+test('cache-write badges require supplied safe nonnegative integer counts',()=>{
+  const r=renderer(),doc=r.dom.window.document;try{
+    for(const cache_creation_input_tokens of [undefined,null,-1,0.5,'12',true,NaN,Infinity,Number.MAX_SAFE_INTEGER+1,{},[]]){
+      const usage={prompt_tokens:3,completion_tokens:1,input_tokens_scope:'uncached',cache_creation_input_tokens,prompt_tokens_details:{cached_tokens:0}};
+      r.send({type:'event',event:{kind:'model.usage',data:usage}});assert.deepEqual([...doc.querySelector('#live .metrics').children].map(el=>el.textContent),['Input (uncached) 3','Output 1','Total —','Cached 0']);
+      r.send({type:'transcript',history:[{role:'assistant',data:{content:'Synthetic invalid cache-write fixture',usage}}]});assert.deepEqual([...doc.querySelector('#history .metrics').children].map(el=>el.textContent),['Input (uncached) 3','Output 1','Total —','Cached 0']);
+    }
+  }finally{r.dom.window.close();}
+});
+test('common provider metrics keep their original label unless native usage marks uncached input',()=>{
+  const r=renderer(),doc=r.dom.window.document;try{
+    for(const input_tokens_scope of [undefined,'all','UNCACHED',['uncached'],{scope:'uncached'}]){
+      r.send({type:'history',history:[{role:'assistant',data:{content:'Synthetic common metrics fixture',usage:{prompt_tokens:12,completion_tokens:6,total_tokens:31,input_tokens_scope,prompt_tokens_details:{cached_tokens:0},completion_tokens_details:{reasoning_tokens:0}},first_token_ms:200,elapsed_ms:1250}}]});
+      assert.deepEqual([...doc.querySelector('#history .metrics').children].map(el=>el.textContent),['Input 12','Output 6','Total 31','Cached 0','Reasoning 0','First token 0.20s','1.25s']);
+    }
+  }finally{r.dom.window.close();}
+});
 
 test('pending file comparison sends only an operation ID and remains separate from approval',()=>{
   const r=renderer();r.send({type:'operations',operations:[{id:'fixture-edit',tool:'replace_file',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'file.cpp',before_content:'old',after_content:'new'})}]});

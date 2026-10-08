@@ -5,10 +5,11 @@ export const nativePartial = {
       ['Native/src/anthropic_request.cpp', 'serialize_anthropic_request'],
       ['Native/src/anthropic_stream.cpp', 'AnthropicStream::feed'],
       ['Native/src/chat_provider.cpp', 'ProviderWire::anthropic_messages'],
+      ['Native/src/agent_runner.cpp', 'AgentRunner::execute'],
     ],
-    evidenceFiles: ['doc/evidence/native-cleanup-hosted-provenance.json','doc/evidence/native-provider-profile-cli-local-provenance.json'],
-    scope: 'Native Claude Messages request, SSE and header-authenticated HTTP boundaries passed the exact cleanup58 hosted gate, including synthetic socket tool/signature continuation. Local65 additionally verifies authenticated paginated Claude catalogue discovery, real CLI encrypted profile enrollment/selection and shared public-identity guards using synthetic provider sockets. No live Anthropic inference or complete agent/model acceptance is established.',
-    gaps: 'The 21 pinned Anthropic entries are not individually accepted. Live model discovery/enrollment/inference, actual Claude agent effects, broader media/cache/thinking controls, non-chat modes and complete per-model capability/error behavior remain incomplete or require their own evidence.',
+    evidenceFiles: ['doc/evidence/native-cleanup-hosted-provenance.json','doc/evidence/native-provider-profile-cli-local-provenance.json','doc/evidence/native-anthropic-agent-local-provenance.json'],
+    scope: 'Native Claude Messages request, SSE and header-authenticated HTTP boundaries passed the exact cleanup58 hosted gate with synthetic socket text/tool continuation. Local65 verifies authenticated paginated catalogue discovery, real CLI encrypted profile enrollment/selection and shared public-identity guards. Local66 additionally passed actual AgentRunner two-file execution, encrypted xlang3 SQLite reopen and exact tool-history replay without repeated effects, held-stream cancellation/recovery, second-tool-row SQL rollback and common usage event/completion consistency. The shared renderer passed live/persisted uncached input and cache-write/read metrics fixtures. Provider replies are synthetic; no thinking/signature continuation, live account or complete model acceptance is established.',
+    gaps: 'The 21 pinned Anthropic entries are not individually accepted. Live discovery/enrollment/inference, broader media/cache/thinking controls, signed continuation, non-chat modes and complete per-model capability/error behavior remain incomplete or require their own evidence. Exact hosted validation of the new local66 source and actual rendered IDE acceptance remain pending.',
   },
   gemini: {
     sources: [

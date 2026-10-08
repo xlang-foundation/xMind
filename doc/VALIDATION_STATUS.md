@@ -1,8 +1,36 @@
 # Current native validation
 
-Current source passed the complete local **65 native contracts in 113.16
-seconds**, with the exact expected manifest, zero failures/skips and no
-post-build exclusions. The new CLI contract took **4.23 seconds**. It exercises
+Current source passed the complete local **66 native contracts in 114.49
+seconds**, **98 extension and 17 browser tests**, with the exact expected native
+manifest, zero failures/skips and no post-build exclusions. The new actual
+Claude AgentRunner contract passed in **0.56 seconds**; its native provider
+adapter contract passed in **0.23 seconds**. Two real native file reads and
+correlated Messages tool IDs/results survive actual xlang3 SQLite close/reopen
+and a new run's exact history replay without repeating earlier tools. Encrypted
+provider credentials and terminal run ownership remain intact. Malformed,
+unoffered, incomplete, length-truncated and late-error provider turns fail before
+tool effects or successful assistant history. Held-stream cancellation and later
+actual execution recover; injected tool-row SQL failure rolls back the
+conversation batch while retaining observed real read outcomes.
+
+Native Claude usage retains supplied raw input/output/cache counters and zeros,
+adds common aliases without inventing totals, and marks input as uncached.
+Actual shared DOM tests display live usage events and persisted transcript
+metadata, separate cache writes/reads, safe zero counters, missing counts,
+provider/model identity and backend-measured timing. Fresh browser/native
+integration passed against the rebuilt server and source-matched assets using
+disposable processes/database. The independent provider socket replies and
+credentials are synthetic; these checks do not establish Claude
+thinking/signatures, live Claude account acceptance, actual rendered IDE
+acceptance or an installed-preview upgrade. Hosted validation of this newer
+66-contract source remains pending.
+[Exact local provenance](evidence/native-anthropic-agent-local-provenance.json),
+[Claude agent scope](native-claude-agent.md).
+
+The earlier `ac69c1f` CLI checkpoint separately passed the complete local
+**65 native contracts in 113.16 seconds**, with its exact manifest, zero
+failures/skips and no post-build exclusions. Its CLI contract took
+**4.23 seconds**. It exercises
 OpenAI, Claude and Gemini catalogue authentication, private environment-key
 setup, saved-key updates, explicit profile selection and actual xlang3 SQLite
 reopen with encrypted credentials. Signed Gemini text/history/usage, stale discovery/admission
@@ -11,11 +39,14 @@ through settings until a later actual successful turn also passed. Public
 profile/model key reflection is rejected across all three provider families.
 Provider sockets and credentials are synthetic.
 [Local CLI provenance](evidence/native-provider-profile-cli-local-provenance.json).
-Hosted validation of this newer 65-contract source remains pending.
+Its [hosted run](https://github.com/xlang-foundation/xMind/actions/runs/37746664258)
+was last observed running; no hosted success is claimed here. This prior gate
+excludes the newer Claude agent and renderer work above.
 
-Unchanged thin-client sources retain their earlier verified **94 extension and
-17 browser tests**, with zero failures/skips; those suites were not rerun for the
-CLI change. Fresh browser/native integration passed against the rebuilt server
+At that CLI checkpoint, unchanged thin-client sources retained the earlier
+verified **94 extension and 17 browser tests**, with zero failures/skips; those
+suites were not rerun for the
+CLI change. Fresh browser/native integration passed against that rebuilt server
 and source-matched assets, including four default routes, inactive Gemini
 profile save, refresh/restart, real file-reading graph execution, history and
 reconnect. No live Gemini inference, rendered IDE acceptance or installed-preview
@@ -93,7 +124,10 @@ The [Gemini bridge](native-gemini-history.md) uses labelled synthetic component
 and socket fixtures. Actual native AgentRunner/file/SQLite acceptance is now
 verified with synthetic provider replies, including the new native
 discovery/enrollment source in the local/hosted 64-contract gates and the generic
-CLI boundary in the newer local 65-contract gate. Live Gemini inference remains
+CLI boundary in the prior local 65-contract gate. The current local 66-contract
+gate additionally verifies actual Claude AgentRunner/file/SQLite acceptance and
+its shared metrics renderer at the scoped synthetic-provider/DOM boundary.
+Live Gemini and Claude inference remain
 unverified.
 
 The installed browser preview retains its separate verified native `19d69dd`

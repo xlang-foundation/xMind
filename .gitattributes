@@ -8,3 +8,4 @@ doc/evidence/native-gemini-enrollment-*.log -text
 doc/evidence/native-provider-profile-cli-*.log -text
 doc/evidence/native-gemini-agent-*.log -text
 doc/evidence/native-gemini-transport-*.log -text
+doc/evidence/native-anthropic-agent-*.log -text

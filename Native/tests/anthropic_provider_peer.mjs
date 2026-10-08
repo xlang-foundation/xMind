@@ -22,13 +22,16 @@ const server=createServer((request,response)=>{
     if(request.url==='/unauthorized'){response.writeHead(401,{'Content-Type':'application/json'});response.end(JSON.stringify({error:{type:'authentication_error',message:'private fixture detail'}}));return;}
     if(request.url==='/redirect'){response.writeHead(307,{Location:'/must-not-arrive'});response.end();return;}
     response.writeHead(200,{'Content-Type':'text/event-stream'});
-    response.write(event({type:'message_start',message:{id:'msg-fixture',type:'message',role:'assistant',model:'fixture-claude',content:[],stop_reason:null,stop_sequence:null,usage:{input_tokens:8,output_tokens:0}}}));
-    const text=request.url==='/continuation';
+    const zero=request.url==='/zero-cache',usage={input_tokens:zero?0:8,output_tokens:0};
+    if(request.url==='/messages')Object.assign(usage,{cache_creation_input_tokens:3,cache_read_input_tokens:7});
+    if(zero)Object.assign(usage,{cache_creation_input_tokens:0,cache_read_input_tokens:0});
+    response.write(event({type:'message_start',message:{id:'msg-fixture',type:'message',role:'assistant',model:'fixture-claude',content:[],stop_reason:null,stop_sequence:null,usage}}));
+    const text=request.url==='/continuation'||zero;
     response.write(event({type:'content_block_start',index:0,content_block:text?{type:'text',text:''}:{type:'tool_use',id:'toolu-fixture',name:request.url==='/unknown'?'unoffered_tool':'read_file',input:{}}}));
     response.write(event({type:'content_block_delta',index:0,delta:text?{type:'text_delta',text:'Fixture complete'}:{type:'input_json_delta',partial_json:'{"path":"README"}'}}));
     if(request.url==='/incomplete'){response.end();return;}
     response.write(event({type:'content_block_stop',index:0}));
-    response.write(event({type:'message_delta',delta:{stop_reason:text?'end_turn':'tool_use',stop_sequence:null},usage:{output_tokens:5}}));
+    response.write(event({type:'message_delta',delta:{stop_reason:text?'end_turn':'tool_use',stop_sequence:null},usage:{output_tokens:request.url==='/bad-usage'?'5':zero?0:5}}));
     response.write(event({type:'message_stop'}));
     if(request.url==='/late-error')response.write(event({type:'error',error:{type:'overloaded_error',message:'private fixture detail'}}));
     response.end();
@@ -38,6 +41,6 @@ try{
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const result=await execute(process.argv[2],[`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:20000});
   if(failure)throw failure;
-  assert.deepEqual(routes,['/messages','/continuation','/unknown','/incomplete','/late-error','/unauthorized','/redirect']);
+  assert.deepEqual(routes,['/messages','/continuation','/zero-cache','/unknown','/incomplete','/late-error','/bad-usage','/unauthorized','/redirect']);
   process.stdout.write(result.stdout);
 }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

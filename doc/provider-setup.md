@@ -1,5 +1,27 @@
 # Native provider setup
 
+## Native Claude agent and metrics checkpoint
+
+Claude uses the existing `anthropic.messages` profile route and backend-owned
+credential storage. New native gateway source preserves supplied input/output
+and cache counters consistently in usage events and saved responses. Input is
+labelled **Input (uncached)**; cache writes and reads remain separate, supplied
+zeros survive, and missing totals are not calculated. The semantics follow the
+dated [official usage reference](evidence/anthropic-usage-reference.json).
+
+The complete local **66-contract native gate passed in 114.49 seconds**, with
+an exact manifest, zero failures/skips and no post-build exclusions. It verifies
+actual two-file AgentRunner execution, xlang3
+SQLite close/reopen and tool-history replay, held-stream cancellation/recovery
+and second-tool-row SQL rollback. Frontend suites passed **98 extension and 17
+browser tests**, with zero failures/skips, including actual shared-renderer DOM
+fixtures. Fresh browser/native integration passed against the rebuilt server;
+installed previews are unchanged. Exact hosted66 validation remains pending.
+Thinking/signatures, live Claude inference, rendered Claude IDE acceptance and
+the 21 pinned models remain incomplete.
+[Local evidence](evidence/native-anthropic-agent-local-provenance.json),
+[Claude acceptance scope](native-claude-agent.md).
+
 ## Native Gemini discovery and enrollment
 
 The backend advertises `gemini.generate-content` among its provider routes,
@@ -60,13 +82,15 @@ extension and 17 browser tests**, actual browser/native integration and VSIX
 verification, with zero failures/skips.
 [Hosted evidence](evidence/native-gemini-enrollment-hosted-provenance.json),
 [hosted run](https://github.com/xlang-foundation/xMind/actions/runs/37743203538).
-The newer generic profile CLI and all-route identity guards passed **65 native
+The preceding generic profile CLI and all-route identity guards passed **65 native
 contracts locally in 113.16 seconds**, with the exact manifest, zero
 failures/skips and no post-build exclusions. Actual browser/native integration
-passed again against the fresh native server. Frontend sources are unchanged
-from `2f5e0f0`; the prior hosted frontend results were not repeated or counted as
-new tests. [CLI local evidence](evidence/native-provider-profile-cli-local-provenance.json).
-Hosted verification of this newer checkpoint remains pending. No live Gemini
+passed again against the fresh native server. At that CLI checkpoint, frontend
+sources were unchanged from `2f5e0f0`; the prior hosted frontend results were not
+repeated or counted as new tests.
+[CLI local evidence](evidence/native-provider-profile-cli-local-provenance.json).
+Hosted verification of that CLI source remains pending and excludes the newer
+Claude agent/metrics changes. No live Gemini
 key, external account acceptance or installed-preview upgrade is claimed.
 The actual browser/native integration passed the four default routes and an
 inactive Gemini profile save against the rebuilt server, together with durable
@@ -146,7 +170,7 @@ errors and preserve the last failed/cancelled model turn's exit status. Discover
 has a 35-second CLI read deadline and restores ordinary request timing afterward;
 redirects and automatic retries remain disabled.
 
-The new CLI contract passed in **4.23 seconds** as part of the local 65-contract
+The CLI contract passed in **4.23 seconds** as part of the preceding local 65-contract
 gate. It runs the compiled CLI against the authenticated native server and
 embedded xlang3 SQLite with labelled synthetic provider peers. It verifies
 private key input/reuse, full resources, inactive save/selection, registry races,
@@ -158,7 +182,7 @@ installed-preview acceptance remain pending.
 [CLI syntax, behavior and historical evidence](native-interactive-cli.md).
 
 The sections below preserve earlier provider-setup checkpoints and their limits.
-Their pending statements describe those revisions; current Gemini source and
+Their pending statements describe those revisions; current Claude/Gemini source and
 verification are summarized above. The installed preview retains native
 `19d69dd` and view `6f32d215`; historical preview references below describe earlier
 installations.

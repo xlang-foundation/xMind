@@ -4,6 +4,26 @@ Current completion scope is the [revised xMind OSS specification](architecture.m
 
 ## Current checkpoint scope
 
+The current Claude checkpoint passed the full local **66-contract native gate
+in 114.49 seconds**, with an exact manifest, zero failures/skips and no post-build
+exclusions. Its new actual AgentRunner contract took **0.56 seconds**, verifying
+two native file reads, correlated tool-use/results, encrypted credential reuse,
+xlang3 SQLite history/reopen without repeated tools, held-stream cancellation
+and recovery, and second-tool-row SQL rollback. Its normalized usage adapter
+contract passed in **0.23 seconds**. Supplied uncached input/output/cache counters
+and zeros remain distinct in events and persisted responses, without sums or
+invented totals.
+
+Frontend suites passed **98 extension and 17 browser tests**, with zero
+failures/skips and actual shared-renderer DOM metric fixtures. Fresh browser/native
+integration passed against the rebuilt server and matching assets. Exact hosted66
+validation remains pending; this current working-tree checkpoint is separate from
+the preceding CLI65 and hosted enrollment64 scopes below. Thinking/signatures,
+live Claude inference, rendered Claude IDE acceptance, the 21 pinned models and
+full parity remain incomplete. Installed previews are unchanged.
+[Local66 source/runtime/log evidence](evidence/native-anthropic-agent-local-provenance.json),
+[Claude scope](native-claude-agent.md).
+
 The user-requested native-only cleanup was committed and pushed as
 `dea588874e5a8c8e40bf1a158fa925520443c8a0`. The Python agent prototype and
 old xlang Core/service/plugin assets are removed, root CMake delegates to
@@ -50,7 +70,7 @@ separate from backend tool policy. Direct-SQLite removal and shared `records.hpp
 cleanup are included.
 [Exact hosted enrollment evidence](evidence/native-gemini-enrollment-hosted-provenance.json).
 
-The newer CLI checkpoint passed all **65 native contracts locally in 113.16
+The preceding CLI checkpoint passed all **65 native contracts locally in 113.16
 seconds**, with the exact manifest, zero failures/skips and no post-build
 exclusions. Its new CLI contract took **4.23 seconds** and covers OpenAI, Claude
 and Gemini profile catalogue/setup/selection, private environment input,
@@ -59,10 +79,11 @@ signed Gemini text/history/usage and actual SQLite reopen with encrypted credent
 discovery/admission does not retry or silently rebind; failed-turn status survives
 settings success and recovers only through a later actual successful turn.
 Fresh browser/native integration passed again against the rebuilt server and
-source-matched assets. Unchanged frontend sources retain the earlier verified
+source-matched assets. That checkpoint's unchanged frontend sources retained the earlier verified
 **94 extension and 17 browser tests**, without rerunning those suites for the
 CLI change. [Local CLI evidence](evidence/native-provider-profile-cli-local-provenance.json).
-Hosted validation of the newer 65-contract source remains pending. Installed
+Hosted validation of that 65-contract source remains pending; it excludes the
+newer Claude agent/metrics changes. Installed
 previews are unchanged; live Gemini inference, actual Gemini IDE acceptance and
 full provider/coding/protocol parity remain incomplete.
 [Provider setup](provider-setup.md), [CLI scope](native-interactive-cli.md).

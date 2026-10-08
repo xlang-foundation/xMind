@@ -20,6 +20,23 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+The current local checkpoint passed **66 native contracts in 114.49 seconds**,
+**98 extension and 17 browser tests**, with zero failures/skips, an exact native
+manifest and no post-build exclusions. Actual Claude AgentRunner file reads,
+matching tool results, xlang3 SQLite history/reopen, cancellation/recovery and
+second-tool-row SQL rollback passed with synthetic provider replies. Native
+usage events and persisted responses retain supplied uncached input/output/cache
+counts and zeros without sums or invented totals; actual DOM fixtures verify
+their live/history labels. Fresh browser/native integration passed against the
+rebuilt server. The new agent contract took **0.56 seconds** and adapter contract
+**0.23 seconds**. Exact hosted66 validation remains pending.
+[Local66 evidence](evidence/native-anthropic-agent-local-provenance.json),
+[Claude scope](native-claude-agent.md).
+
+This does not establish Claude thinking/signatures, live inference, rendered
+Claude IDE acceptance or acceptance of the 21 pinned Anthropic models. Provider
+and OpenCode parity counts are unchanged; installed previews are unchanged.
+
 The cleanup source `dea588874e5a8c8e40bf1a158fa925520443c8a0` passed its hosted
 gate: **58 native, 88 extension and 17 browser contracts**, native/browser
 integration and VSIX verification, with zero failures or skips.
@@ -63,17 +80,18 @@ and signed xlang3 SQLite replay passed with synthetic provider replies. The
 direct-SQLite removal and shared `records.hpp` cleanup are included.
 [Exact hosted enrollment scope](evidence/native-gemini-enrollment-hosted-provenance.json).
 
-Newer source passed all **65 native contracts locally in 113.16 seconds**,
+The preceding CLI source passed all **65 native contracts locally in 113.16 seconds**,
 with its exact manifest, zero failures/skips and no post-build exclusions. The
 new CLI contract took **4.23 seconds** and covers OpenAI/Claude/Gemini profile
 catalogues, private environment setup, selection, all-family secret reflection
 rejection, safe provider diagnostics, signed Gemini text/history/SQLite reopen,
 stale ownership without retry and actual failed-turn/recovery status. Fresh
-browser/native integration passed again; unchanged frontend sources retain the
-earlier verified **94 extension and 17 browser tests**, without rerunning those
-suites for this CLI change.
+browser/native integration passed again; that checkpoint's unchanged frontend
+sources retained the earlier verified **94 extension and 17 browser tests**,
+without rerunning those suites for the CLI change.
 [Local CLI scope](evidence/native-provider-profile-cli-local-provenance.json).
-Hosted verification of the newer 65-contract source is pending. GenerateContent
+Hosted verification of that 65-contract source is pending; it excludes the newer
+Claude agent/metrics changes. GenerateContent
 eligibility alone does not establish tool capability or live acceptance. Live
 Gemini inference and actual Gemini IDE acceptance remain unverified. See
 [provider setup](provider-setup.md), [current validation](VALIDATION_STATUS.md)
@@ -113,7 +131,7 @@ removed Python prototype's status table; it is not a completion score.
 | --- | --- | --- |
 | Persistent sessions and run events | C++ repositories, ownership, transactions, replay and recovery use SQLite through embedded xlang3 | Complete concurrent-client conversations, failure/recovery and release acceptance |
 | Agent/model/tool loop | Shared C++ single-agent and graph execution with durable admission, cancellation and tool continuation | Broad live coding tasks, dynamic delegation, context bounds and production recovery |
-| Models and providers | Native Chat Completions, Responses and Anthropic Messages components; Gemini catalogue/enrollment/owned-key execution is hosted-verified at 64, and generic profile CLI controls have local 65-contract acceptance | Hosted verification of the newer CLI source, live Gemini and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
+| Models and providers | Native Chat Completions and Responses; Gemini catalogue/enrollment/owned-key execution is hosted-verified at 64, profile CLI controls passed locally at 65, and actual Claude tools/history/cancellation/rollback plus normalized metrics passed locally at 66 | Exact hosted verification of newer source, Claude thinking/signatures and live Claude/Gemini acceptance, pinned-model and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
 | File/search/edit/process tools | Native workspace reads/search, approval-backed edits/creation and foreground process effects have scoped contracts | General patch review, background/PTY execution and complete repository coding tasks |
 | Instructions and agent presets | Native repository guidance discovery, source binding and durable approval checks | Full instruction scoping/configuration and reproducible presets |
 | Skills and commands | Native ownership is specified | Discovery, execution, lifecycle and CLI/editor acceptance |

@@ -1,0 +1,23 @@
+{
+  "observedDate": "2026-10-08",
+  "scope": "Primary documentation reference for native Claude Messages token counters; this is not execution or model-availability evidence.",
+  "sources": [
+    {
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching",
+      "section": "How do I calculate total input tokens from the usage fields?",
+      "interpretation": "input_tokens measures uncached input. cache_creation_input_tokens and cache_read_input_tokens measure distinct cache writes and reads. The view must identify uncached input separately from the two cache counters."
+    },
+    {
+      "url": "https://platform.claude.com/docs/en/build-with-claude/streaming",
+      "section": "Event types",
+      "interpretation": "message_delta usage counters are cumulative; the backend retains the latest supplied counts rather than adding each streamed update."
+    }
+  ],
+  "nativeMapping": {
+    "prompt_tokens": "Supplied input_tokens, with input_tokens_scope set to uncached",
+    "completion_tokens": "Supplied output_tokens",
+    "prompt_tokens_details.cached_tokens": "Supplied cache_read_input_tokens",
+    "cache_creation_input_tokens": "Preserved supplied field, shown as Cache write"
+  },
+  "unavailableCounts": "Missing counters remain absent. Supplied zero counters remain zero. No total_tokens, aggregate input, reasoning tokens or cost is inferred."
+}

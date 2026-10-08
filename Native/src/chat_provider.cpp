@@ -10,6 +10,28 @@
 #include <set>
 
 namespace agentflow {
+namespace {
+std::string anthropic_model_usage(const std::string& source){
+    using Json=nlohmann::json;
+    if(source.size()>1024)throw ModelProtocolError("Claude usage exceeds limits");
+    try{
+        auto usage=Json::parse(source);
+        if(!usage.is_object())throw ModelProtocolError("Invalid Claude usage");
+        for(const auto& [key,value]:usage.items()){
+            if(key!="input_tokens"&&key!="output_tokens"&&key!="cache_creation_input_tokens"&&key!="cache_read_input_tokens")throw ModelProtocolError("Invalid Claude usage field");
+            if(!value.is_number_integer()||value<0||value>9007199254740991)throw ModelProtocolError("Invalid Claude usage count");
+        }
+        if(usage.contains("input_tokens")){
+            usage["prompt_tokens"]=usage["input_tokens"];
+            // Claude reports uncached input separately from cache reads/writes.
+            usage["input_tokens_scope"]="uncached";
+        }
+        if(usage.contains("output_tokens"))usage["completion_tokens"]=usage["output_tokens"];
+        if(usage.contains("cache_read_input_tokens"))usage["prompt_tokens_details"]={{"cached_tokens",usage["cache_read_input_tokens"]}};
+        return usage.dump();
+    }catch(const Json::exception&){throw ModelProtocolError("Invalid Claude usage JSON");}
+}
+}
 ModelCompletion complete_chat(const ChatProviderConfig& config,const ModelRequest& request,
     const SecretBytes* bearer,ChatCompletionStream::Sink sink,std::stop_token cancel) {
     const auto body=serialize_chat_request(config,request);
@@ -45,9 +67,13 @@ ModelCompletion complete_model(const ChatProviderConfig& config,const ModelReque
         const auto body=serialize_anthropic_request(config,request);
         if(!sink)throw std::invalid_argument("Model event sink is required");
         if(!bearer)throw std::invalid_argument("Claude requires a backend credential");
-        AnthropicStream stream([&](const ModelEvent& event){if(event.kind!="model.done")sink(event);});
+        AnthropicStream stream([&](const ModelEvent& event){
+            if(event.kind=="model.done")return;
+            if(event.kind=="model.usage")sink({event.kind,anthropic_model_usage(event.json)});else sink(event);
+        });
         post_event_stream({config.endpoint,body,config.deadline,config.idle_timeout,CredentialHeader::x_api_key,ProviderHttpProtocol::anthropic},bearer,[&](std::string_view bytes){stream.feed(bytes);},cancel);
         auto result=stream.finish();
+        result.usage_json=anthropic_model_usage(result.usage_json);
         std::set<std::string> names;for(const auto& tool:request.tools)names.insert(tool.name);
         for(const auto& call:result.tool_calls)if(!names.contains(call.name))throw ModelProtocolError("Provider requested a tool outside this request");
         sink({"model.done","{}"});return result;

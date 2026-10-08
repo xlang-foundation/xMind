@@ -27,7 +27,17 @@ function renderRunContext(run){
   const badge=profileBadge(run?.provider_context);if(!badge)return;
   area.append(node('span','Admitted profile:'),badge,node('span',run.provider_context.model_id));area.hidden=false;
 }
-function metrics(el,data={}){const usage=data.usage||{};el.replaceChildren();for(const text of ['Input '+count(usage.prompt_tokens),'Output '+count(usage.completion_tokens),'Total '+count(usage.total_tokens)])el.append(node('span',text));if(Number.isSafeInteger(usage.prompt_tokens_details?.cached_tokens))el.append(node('span','Cached '+count(usage.prompt_tokens_details.cached_tokens)));if(Number.isSafeInteger(usage.completion_tokens_details?.reasoning_tokens))el.append(node('span','Reasoning '+count(usage.completion_tokens_details.reasoning_tokens)));if(data.model)el.append(node('span',data.model));const profile=profileBadge(data.provider_context);if(profile)el.append(profile);if(Number.isFinite(data.first_token_ms)&&data.first_token_ms>=0)el.append(node('span','First token '+(data.first_token_ms/1000).toFixed(2)+'s'));if(Number.isFinite(data.elapsed_ms)&&data.elapsed_ms>=0)el.append(node('span',(data.elapsed_ms/1000).toFixed(2)+'s'));el.title='Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.';}
+function metrics(el,data={}){
+  const usage=data.usage||{},uncached=usage.input_tokens_scope==='uncached';el.replaceChildren();
+  for(const text of [(uncached?'Input (uncached) ':'Input ')+count(usage.prompt_tokens),'Output '+count(usage.completion_tokens),'Total '+count(usage.total_tokens)])el.append(node('span',text));
+  if(Number.isSafeInteger(usage.cache_creation_input_tokens)&&usage.cache_creation_input_tokens>=0)el.append(node('span','Cache write '+count(usage.cache_creation_input_tokens)));
+  if(Number.isSafeInteger(usage.prompt_tokens_details?.cached_tokens))el.append(node('span','Cached '+count(usage.prompt_tokens_details.cached_tokens)));
+  if(Number.isSafeInteger(usage.completion_tokens_details?.reasoning_tokens))el.append(node('span','Reasoning '+count(usage.completion_tokens_details.reasoning_tokens)));
+  if(data.model)el.append(node('span',data.model));const profile=profileBadge(data.provider_context);if(profile)el.append(profile);
+  if(Number.isFinite(data.first_token_ms)&&data.first_token_ms>=0)el.append(node('span','First token '+(data.first_token_ms/1000).toFixed(2)+'s'));
+  if(Number.isFinite(data.elapsed_ms)&&data.elapsed_ms>=0)el.append(node('span',(data.elapsed_ms/1000).toFixed(2)+'s'));
+  el.title='Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.'+(uncached?' Input (uncached) excludes cache writes and reads.':'');
+}
 function processProposal(section,item){
   let plan;try{plan=JSON.parse(item.arguments_json);}catch{}
   if(!plan||typeof plan.profile_id!=='string'||!Number.isSafeInteger(plan.profile_revision)||plan.profile_revision<1||typeof plan.executable!=='string'||typeof plan.executable_id!=='string'||!plan.executable_id||plan.executable_id.length>512||plan.executable_id.includes('\0')||!Array.isArray(plan.arguments)||plan.arguments.length>64||plan.arguments.some(arg=>typeof arg!=='string')||typeof plan.workdir!=='string'||typeof plan.directory_id!=='string'||!plan.directory_id||!Number.isSafeInteger(plan.timeout_ms)||plan.timeout_ms<1||plan.timeout_ms>600000||!Number.isSafeInteger(plan.output_limit)||plan.output_limit<1||plan.output_limit>4194304){
