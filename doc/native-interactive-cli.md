@@ -215,6 +215,17 @@ in a conversation already owned by a paused graph, continued inspection in that
 same console process, exact retained request and unchanged history, root runs
 and graph events. JavaScript syntax checks passed; native execution is pending.
 
+The earlier graph-control gate at `51d731d` subsequently completed with 50 native
+contracts passing and the same two request-count failures already corrected in
+`add0a12`. Its graph-service HTTP/CLI contract passed, including interactive
+attachment, human input/stale conflict, child effect approval and root
+cancellation. [Exact gate provenance](evidence/native-cli-graph-control-initial-gate-provenance.json)
+and [unaltered excerpts](evidence/native-cli-graph-control-initial-gate.log)
+preserve that scope. Extension/browser gates were skipped and no runtime bundle
+was published. The corrected full gate `37713082833` at `37e153b` is now running;
+later console changes and live acceptance remain pending. The preview stays on
+verified `46262d6`.
+
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
 52 native and 66 extension contracts. This verifies initial-model prevalidation

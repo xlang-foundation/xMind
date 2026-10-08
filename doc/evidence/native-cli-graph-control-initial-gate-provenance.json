@@ -1,0 +1,19 @@
+{
+  "xmind": "51d731d153eb8c030ae2d5eb755ad5e985155e98",
+  "workflowRun": 37711998665,
+  "job": 113100585800,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37711998665",
+  "conclusion": "failure",
+  "evidenceArtifact": 11522323465,
+  "nativeBuildSucceeded": true,
+  "nativeContractsPassed": 50,
+  "nativeContractsFailed": 2,
+  "graphServiceHttpContract": "passed",
+  "failedContracts": [
+    "native_agent_http_contract",
+    "native_agent_edit_http_contract"
+  ],
+  "extensionAndBrowserGatesSkipped": true,
+  "runtimeArtifactPublished": false,
+  "scope": "Exact failed gate inspected. Native graph service/CLI fixture passed interactive graph attachment, human input and stale conflict, child approval and root cancellation at this revision. Two known request-count assertions failed; corrections and later CLI additions await gate 37713082833 at 37e153b. No installed runtime or live-console acceptance is claimed."
+}

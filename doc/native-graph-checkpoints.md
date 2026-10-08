@@ -1,6 +1,10 @@
 # Durable native graph checkpoints
 
-Interactive CLI graph control is newer source pending compiled validation.
+Interactive CLI graph control passed its native graph-service contract at
+`51d731d` in a gate whose overall result failed two separate request-count
+assertions. The exact [provenance](evidence/native-cli-graph-control-initial-gate-provenance.json)
+and [unaltered test excerpts](evidence/native-cli-graph-control-initial-gate.log)
+record that limited result; no runtime bundle was published.
 `chat` now accepts `/graph-watch ROOT_ID`, using the same recorded root and
 validated children rather than admitting a new workflow. It exposes human
 prompts with checkpoint revisions and accepts explicit bounded JSON input,
@@ -8,8 +12,10 @@ child-operation approval/denial and root cancellation. Stale input is rejected
 without automatic replay, and detaching leaves backend execution owned by the
 server. The extended native graph service contract covers model-free human/tool
 flows, cross-client stale input, reconnection, cancellation and a real child file
-creation. Only syntax/whitespace checks have run for this addition because the
-local build guard detected an active xlang3 benchmark. This does not establish
+creation. These cases ran against actual compiled native components and xlang3
+persistence; inference and human answers are labelled protocol fixtures. Later
+console graph launch, run navigation, rejection recovery and cancellation receipt
+changes still await the corrected full gate at `37e153b`. This does not establish
 live console acceptance, dynamic graph planning or full coding parity.
 See [interactive CLI scope](native-interactive-cli.md).
 

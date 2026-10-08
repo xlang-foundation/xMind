@@ -1,0 +1,55 @@
+      Start 12: native_graph_service_http_contract
+12/52 Test #12: native_graph_service_http_contract ..........   Passed    5.65 sec
+      Start 39: native_agent_http_contract
+39/52 Test #39: native_agent_http_contract ..................***Failed    3.73 sec
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+16 !== 15
+
+    at file:///D:/a/xMind/xMind/xmind/Native/tests/agent_http_contract.mjs:165:197
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 16,
+  expected: 15,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.23.3
+
+      Start 40: native_agent_edit_http_contract
+40/52 Test #40: native_agent_edit_http_contract .............***Failed   11.03 sec
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+49 !== 48
+
+    at file:///D:/a/xMind/xMind/xmind/Native/tests/agent_edit_http_contract.mjs:207:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 49,
+  expected: 48,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.23.3
+
+      Start 41: native_agent_mcp_http_contract
+96% tests passed, 2 tests failed out of 52
+
+Total Test time (real) = 132.89 sec
+
+The following tests FAILED:
+	 39 - native_agent_http_contract (Failed)
+	 40 - native_agent_edit_http_contract (Failed)
+Errors while running CTest
