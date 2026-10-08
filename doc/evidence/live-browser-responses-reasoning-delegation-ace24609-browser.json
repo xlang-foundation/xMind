@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-08T13:53:03.645Z",
+  "observationSource": "Actual CUA browser DOM and screenshots; not a synthetic test or API execution",
+  "nativeSourceRevision": "ace246094f6c1fc8cf61c146cfe001c63f1bbc8f",
+  "retainedViewRevision": "e353-browser-global-fix",
+  "url": "http://127.0.0.1:60405/ui/",
+  "publicSessionId": "94767d2cff3be2d682e79b7dd5091e8e",
+  "publicRunId": "0c7b872eb029adde251392f07e6d47b5",
+  "actions": {
+    "intentionalRefreshAfterManagedUpgrade": true,
+    "savedModelLoadedWithoutCredentialEntry": true,
+    "newConversationClicked": true,
+    "publicTwoLeafPromptSentThroughActualComposer": true,
+    "completedResponseIntentionallyRefreshed": true
+  },
+  "rendered": {
+    "rootState": "completed",
+    "model": "gpt-5.6-sol",
+    "wire": "Responses",
+    "workflow": "Agent (default)",
+    "completedReadOnlyChildren": 2,
+    "joinedAnswer": {
+      "clientInterfaces": [
+        "Native CLI",
+        "Browser/webpage UI",
+        "VS Code client/plugin"
+      ],
+      "limits": {
+        "concurrentLeavesPerRoot": 2,
+        "lifetimeChildrenPerRoot": 8,
+        "sharedModelCallAttempts": 32
+      },
+      "sourcePaths": [
+        "README.md",
+        "doc/native-delegation.md"
+      ]
+    },
+    "separateResponseTokens": [
+      {
+        "owner": "parent",
+        "response": 1,
+        "input": 3979,
+        "output": 157,
+        "total": 4136,
+        "cached": 0,
+        "reasoning": 11
+      },
+      {
+        "owner": "parent",
+        "response": 2,
+        "input": 4612,
+        "output": 79,
+        "total": 4691,
+        "cached": 3976,
+        "reasoning": 0
+      },
+      {
+        "owner": "README leaf",
+        "response": 1,
+        "input": 1524,
+        "output": 19,
+        "total": 1543,
+        "cached": 1475,
+        "reasoning": 0
+      },
+      {
+        "owner": "README leaf",
+        "response": 2,
+        "input": 6639,
+        "output": 49,
+        "total": 6688,
+        "cached": 1521,
+        "reasoning": 0
+      },
+      {
+        "owner": "delegation limits leaf",
+        "response": 1,
+        "input": 1539,
+        "output": 23,
+        "total": 1562,
+        "cached": 0,
+        "reasoning": 0
+      },
+      {
+        "owner": "delegation limits leaf",
+        "response": 2,
+        "input": 5688,
+        "output": 62,
+        "total": 5750,
+        "cached": 1536,
+        "reasoning": 0
+      }
+    ],
+    "providerReportedUsageAndBackendMeasuredTimingVisible": true
+  },
+  "immediateRefresh": {
+    "samePublicSessionSelected": true,
+    "sameCompletedPublicRunSelected": true,
+    "savedModelSelected": true,
+    "agentDefaultSelected": true,
+    "noCredentialEntry": true,
+    "composerLength": 0,
+    "sendEnabled": true,
+    "initialAsynchronousModelLoadingPlaceholderObserved": true,
+    "executionReplayClaimed": false
+  },
+  "screenshots": {
+    "live-browser-responses-reasoning-delegation-ace24609.jpg": {
+      "bytes": 26510,
+      "sha256": "d95871dc3c7e0f6d8b4415818994619e2d2ba2fa29d2b76d7d65e977717db5cf",
+      "scope": "Actual normal-viewport public browser session; no viewport resizing or image editing"
+    },
+    "live-browser-responses-reasoning-delegation-ace24609-joined.jpg": {
+      "bytes": 32353,
+      "sha256": "ccb50361f5ef2fec1d761b599bc80f332bfe0253ff9ad9937296b80e0f715079",
+      "scope": "Actual normal-viewport public browser session; no viewport resizing or image editing"
+    }
+  },
+  "tokenTotalsAggregated": false,
+  "scope": "One public user prompt served by real OpenAI Responses execution and immediate browser refresh. Native owned histories, attempts, file receipts and persistence are checked separately by the read-only recorder. No eight-hour expiry, restart, whole-store, provider-wire opaque value or installed VS Code acceptance claim.",
+  "credentialsPrivateHistoriesOrOpaqueValuesPublished": false
+}

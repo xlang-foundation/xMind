@@ -1,15 +1,37 @@
 # Native dynamic plans and revisioned replanning
 
-Status: proposed next implementation, not implemented or validated. The current
-source checkpoint is `e353a37799530a234a6fa13e51f61a5c52d3ae6a`:
-[bounded native delegation](native-delegation.md) passed scoped local and exact
-hosted 71/103/19 gates, with
+Status: proposed next implementation, not implemented or validated.
+[Bounded native delegation](native-delegation.md) was introduced at historical
+revision `e353a37799530a234a6fa13e51f61a5c52d3ae6a`, with scoped local and exact
+hosted 71/103/19 gates and
 [revision/artifact/pin verification](evidence/native-delegation-hosted-provenance.json).
-The exact backend is now installed with schema v10. A separate local browser
-repair passed 103/20 gates and restored the rendered prior conversation without
-key entry. The first live delegation request failed terminal Responses
-consistency before admitting children; successful live delegation/join and
-installed VS Code acceptance remain unverified. [Separate acceptance scopes](native-delegation-acceptance.md).
+The separate e353 browser repair passed 103/20 gates. The first live request
+failed terminal Responses consistency before admitting children; its outcome
+remains recorded in the [earlier acceptance scopes](native-delegation-acceptance.md).
+The later 7fe7 diagnostic request isolated encrypted-content-only variation in
+that specific request, without establishing the cause of the earlier failure.
+[Historical diagnostic evidence](native-responses-diagnostics.md).
+
+The current native checkpoint is
+`ace246094f6c1fc8cf61c146cfe001c63f1bbc8f`: its narrow reasoning continuation
+change passed the exact hosted **71 native / 103 extension / 20 browser** gates.
+The verified native bundle is installed with schema v10 and the retained
+repaired e353 browser view. On **2026-10-08**, a new actual browser request
+visibly completed a parent and two read-only children with separate response
+metrics. A separate read-only audit of that same completed request passed:
+six finished owned model attempts, independent parent/child histories, actual
+child settlements and parent continuation, with zero operations. Leaf
+responses may omit reasoning; present reasoning remains strictly validated
+and the parent's initiating delegation receipt contained nonempty reasoning.
+Live terminal opaque values were not inspected, and the audit did not repeat
+the model request.
+[Live owned-record audit](evidence/live-browser-responses-reasoning-delegation-ace24609.json),
+[actual browser completion](evidence/live-browser-responses-reasoning-delegation-ace24609-browser.json),
+[managed upgrade scope](evidence/native-responses-reasoning-upgrade-provenance.json),
+[current reasoning checkpoint and acceptance scope](native-responses-reasoning.md).
+
+These observations do not implement mutable plans, dependency scheduling,
+human nodes or replanning. Installed VS Code delegation remains unverified.
 This document adds no planning completion claim and does not redefine the
 broader [dynamic Agent target](dynamic-agent-execution.md).
 

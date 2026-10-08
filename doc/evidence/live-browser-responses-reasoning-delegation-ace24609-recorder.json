@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-08T13:57:47.173Z",
+  "publicSessionId": "94767d2cff3be2d682e79b7dd5091e8e",
+  "publicRunId": "0c7b872eb029adde251392f07e6d47b5",
+  "initialInvocation": {
+    "sourceSha256": "2f445f8ced36f35d04f4b72a05b1f9d88367197b7e3f0f0c752ac3ff7e3c59f4",
+    "actualExitCode": 1,
+    "actualSafeError": "actual_completed_reasoning_receipt_missing",
+    "publicAcceptanceFileCreated": false,
+    "classification": "Evidence recorder incorrectly required reasoning items in every leaf execution; not a native product failure",
+    "originalStderrReconstructed": false
+  },
+  "correction": {
+    "sourceSha256": "7755a000619e8f1e55b71a0bd7bd86011ae09b824d97bdb21a60ed0cc3004633",
+    "independentlyReviewed": true,
+    "scope": "Allow absent reasoning items in valid leaf receipts. Present reasoning remains nonempty and strict; require reasoning specifically in the initiating parent delegate receipt. Every other record, usage, file, ownership, join and privacy check retained.",
+    "syntheticDtoPositiveCases": [
+      "Seven-response two-child owned-record DTO",
+      "Valid leaf receipts without reasoning and supplied zero reasoning tokens"
+    ],
+    "syntheticDtoNegativeCases": {
+      "existingSelectedRecordCases": 12,
+      "privacyCases": 5,
+      "originatingParentReasoningMissingOrEmpty": 2
+    },
+    "syntheticChecksAreExecutionAcceptance": false
+  },
+  "actualRetry": {
+    "actualExitCode": 0,
+    "sameAlreadyCompletedPublicRun": true,
+    "readOnlyNativeApiRequests": 38,
+    "providerRequests": 0,
+    "newAgentOrToolInvocations": 0,
+    "managedProcessStartsStopsOrRestarts": 0,
+    "directSqlAccess": false,
+    "completedRoot": true,
+    "completedReadOnlyChildren": 2,
+    "actualReservedStartedFinishedModelAttempts": 6,
+    "nativeOperations": 0,
+    "resultFile": "live-browser-responses-reasoning-delegation-ace24609.json",
+    "resultBytes": 48559,
+    "resultSha256": "277956ea0cd6f2fb13425131a1300e9f3b191aee09e7c255d99e3ab127c025ac"
+  },
+  "scope": "Actual root-invoked read-only evidence collector failure and correction. This retry observes saved results from the earlier real OpenAI browser prompt; it does not execute six new provider requests. No raw provider continuation, opaque values or private fingerprints published.",
+  "privateValuesPublished": false
+}

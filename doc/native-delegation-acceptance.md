@@ -1,15 +1,19 @@
 # Native delegation acceptance scopes
 
-The current managed preview uses the later verified 7fe diagnostic backend with
-the same repaired browser view. Its new public failure identifies only an
-encrypted-content difference. [Current installation and diagnostic scope](native-responses-diagnostics.md).
-Successful live delegation remains unverified; the compatibility source is
-[under validation](native-responses-reasoning.md).
+The current managed preview uses the exact hosted ace native backend and the
+retained repaired e353 browser view. A fresh real OpenAI prompt completed two
+read-only children and a joined parent response, with six owned model attempts,
+separate supplied metrics and zero effect operations. The completed conversation
+and selected model survived immediate refresh without credential entry.
+[Current implementation, upgrade and live acceptance](native-responses-reasoning.md),
+[owned native histories and join](evidence/live-browser-responses-reasoning-delegation-ace24609.json),
+[rendered browser observations](evidence/live-browser-responses-reasoning-delegation-ace24609-browser.json).
+Installed VS Code delegation acceptance remains pending.
 
 The historical acceptance below used the exact hosted e353 backend and schema
-v10. Its browser view contains a separate local source repair. Successful live
-delegation is still unverified: the first real `delegate_tasks` response failed
-terminal consistency validation before any child was admitted.
+v10. Its browser view contains a separate local source repair. At that checkpoint,
+the first real `delegate_tasks` response failed terminal consistency validation
+before any child was admitted; successful live delegation had not been verified.
 
 These are separate evidence scopes; the browser repair does not change the
 recorded hosted gate or establish a new native build.
@@ -29,7 +33,7 @@ These are observation times, not measured test or execution durations.
 | Separate local browser repair | 103 extension in 1.6557025 s; 20 browser in 0.9090882 s; zero failures/skips, actual native/browser fixture and all 18 VSIX assets passed. Ten frozen view sources and 12 installed view files recorded; native bundle preserved | [Repair provenance](evidence/native-delegation-browser-global-fix-provenance.json), [extension log](evidence/native-delegation-browser-global-extension.log), [browser log](evidence/native-delegation-browser-global-browser.log), [native/browser log](evidence/native-delegation-browser-global-native.log), [VSIX log](evidence/native-delegation-browser-global-package.log) |
 | Repaired rendered webpage | Existing cookie reused without key entry; prior public README response/history/metrics restored, bottom `gpt-5.6-sol` model and Agent default selected. An immediate refresh retained connection and selection, then displayed the same failed live run | [Refreshed actual DOM observation](evidence/native-delegation-repaired-browser-dom.json), [actual screenshot](evidence/native-delegation-browser-live-failure.jpg) |
 | First live delegation request | Failed `model_protocol_error` / `responses_terminal_mismatch` after streamed `delegate_tasks` arguments; zero children, only the user history row and one parent model-budget attempt | [Filtered live failure record](evidence/native-delegation-first-live-failure.json) |
-| Installed VS Code delegation and successful live join | Not accepted | Remain required |
+| Installed VS Code delegation and successful live join at e353 | Not accepted at that historical scope | Later ace browser join accepted above; installed editor acceptance remains required |
 
 The repair wraps browser-local declarations so production classic scripts share
 one global realm safely. The new regression executes the emitted production

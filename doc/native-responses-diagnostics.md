@@ -1,9 +1,21 @@
 # Native Responses mismatch diagnostics
 
-Status: implementation checkpoint `7fe7ec9bd37c34863efc9f74e6508f0aba643d61`
+Historical implementation checkpoint `7fe7ec9bd37c34863efc9f74e6508f0aba643d61`
 passed complete local and exact hosted gates, with terminal equality and
 rejection unchanged. It adds evidence for a rejected Responses completion;
 it does not fix live protocol compatibility or establish successful delegation.
+
+This document records that diagnostic implementation and its earlier failed
+live requests. The later
+[reasoning continuation checkpoint](native-responses-reasoning.md) is revision
+`ace246094f6c1fc8cf61c146cfe001c63f1bbc8f`, which passed the exact hosted
+71/103/20 gates and is now installed with the retained repaired browser view.
+On **2026-10-08**, a new actual browser request visibly completed its parent and
+two read-only children with separate response metrics. A separate read-only
+machine audit of that same completed request passed; its selected histories,
+owned attempts and child settlements remained unchanged across repeated reads.
+[Live owned-record audit](evidence/live-browser-responses-reasoning-delegation-ace24609.json),
+[actual browser observation](evidence/live-browser-responses-reasoning-delegation-ace24609-browser.json).
 
 The full guarded local gate passed **71/71 native contracts in 130.49 seconds**,
 with the exact expected/registered/passed manifest, no failures/skips/exclusions,
@@ -50,7 +62,8 @@ installation and live observations are recorded separately below.
 
 ## Event boundary
 
-After existing response identity/status/output-count checks, the first cached
+At the 7fe7 diagnostic checkpoint, after response identity/status/output-count
+checks, the first cached
 item versus terminal-output mismatch emits `model.protocol_diagnostic`, then
 throws the same `responses_terminal_mismatch` protocol error. Completed-item
 equality, stream sequencing, identity, lifecycle and exact argument-delta guards
@@ -76,8 +89,8 @@ not claim to redact every event in the stream.
 
 ## Verified rejection and continuation limits
 
-Unit fixtures independently construct completed-item and terminal snapshots.
-Optional metadata, opaque bytes, execution fields, content/summary, unlisted
+The 7fe7 unit fixtures independently construct completed-item and terminal
+snapshots. Optional metadata, opaque bytes, execution fields, content/summary, unlisted
 members, scalar/type changes, sparse indices and unfinished items still reject.
 Multiple mismatched outputs emit only the first diagnostic; fragmentation and
 repeat-feed/finish cases verify the failure latch and value-free bounds.
@@ -95,15 +108,16 @@ are real.
 OpenAI's streaming event reference specifies using the reasoning item from its
 corresponding `response.output_item.done` for subsequent input; an added item's
 encrypted content can be incomplete. [Official Responses streaming events](https://developers.openai.com/api/reference/resources/responses/streaming-events).
-The unchanged guard requires JSON-value equality against completed items;
+The 7fe7 guard required JSON-value equality against completed items;
 the reasoning item's encrypted-content string must therefore match its completed
-snapshot exactly. This diagnostic leaves continuation construction unchanged.
-No normalization is implemented or established by it; a future compatibility
-change must respect the documented completed-item continuation source.
+snapshot exactly at that checkpoint. The diagnostic patch left continuation
+construction unchanged. The later reasoning checkpoint accepts only the
+observed narrow opaque-string variation and retains completed-item snapshots;
+it does not decrypt or normalize those strings.
 
-## Installed and live scope
+## Historical installation and live scope
 
-The verified **7fe7 diagnostic native bundle is installed**, retaining the
+The verified **7fe7 diagnostic native bundle was installed**, retaining the
 separately repaired browser view: 29 native files, 12 view files and 10 view
 source bindings. At upgrade observation, saved native API records and typed
 owned-attempt audit preserved **12 sessions, 16 roots, 38 history records,
@@ -128,8 +142,8 @@ the corrected fixture's pass does not overwrite it.
 [owner-loss rollback log](evidence/native-responses-diagnostic-upgrade-owner-loss.log)
 retain the authentic failed and passed attempts separately.
 
-The new public live root `8dc406dca1efce9a8cb1dffc4454fa9a` on saved OpenAI
-Responses `gpt-5.6-sol` failed with `responses_terminal_mismatch` after 150
+At that checkpoint, public live root `8dc406dca1efce9a8cb1dffc4454fa9a` on saved
+OpenAI Responses `gpt-5.6-sol` failed with `responses_terminal_mismatch` after 150
 delegation deltas. Its bounded diagnostic identifies **only `encrypted_content`**
 as different, with both values strings and every other known/unlisted field
 equal. It retained one finished model-budget attempt, user-only history,
@@ -138,15 +152,35 @@ Opaque values were withheld. [Actual live structural proof](evidence/native-resp
 [rendered browser failure](evidence/native-responses-diagnostic-live-7fe7.jpg).
 
 Historical root `20349b91c30e11b54f90902e137899da` has no structural diagnostic;
-the new observation does not establish that earlier run's differing field.
+the later 7fe7 observation does not establish that earlier run's differing field.
 [Earlier installed browser and live-failure record](native-delegation-acceptance.md).
 
-A narrow native compatibility patch is reviewed and frozen: reasoning-only
-nonempty encrypted-content differences may be accepted while all other
-members remain equal, and continuation uses completed-item snapshots.
-Its local guard exited **3** because a sibling benchmark was active, so the
-build was deferred with all 229 frozen source hashes unchanged. The exact
-hosted gate, installation and new live acceptance remain pending; the installed
-7fe7 bundle still rejects this shape. [Reasoning compatibility patch and source scope](native-responses-reasoning.md).
-Successful live children/join, installed VS Code delegation, broader planning,
-skills, compaction, outbound A2A and full coding/provider parity remain required.
+## Later reasoning checkpoint
+
+The narrow native compatibility patch in **ace24609** accepts reasoning-only
+nonempty encrypted-content differences when every other member and the member
+set remain equal. Continuation uses the original completed-item snapshots.
+Its local guard exited **3** because a sibling benchmark was active; the
+separate exact hosted gate subsequently passed **71 native, 103 extension and
+20 browser contracts**. The managed preview was upgraded to the verified ace
+native bundle while retaining the repaired e353 browser assets and schema v10.
+Managed preservation used native APIs and typed audit observations, without a
+direct live SQL-row or database-byte identity claim.
+[Managed upgrade and disposable fixture scope](evidence/native-responses-reasoning-upgrade-provenance.json).
+
+The new browser request observed on **2026-10-08** displayed a completed parent
+and two completed read-only leaves. The separate audit of that same saved run
+passed with **six finished owned model attempts, two read-only children and
+zero operations**, including independent histories and supplied per-response
+metrics, actual child settlements and parent continuation after the join.
+Leaf responses may omit reasoning items; any present reasoning remains
+strictly validated, and the parent's initiating delegation receipt carried
+nonempty reasoning. The audit did not inspect live terminal opaque values or
+repeat a model request. These results leave the earlier failed roots and their
+documented causes unchanged.
+[Live owned-record audit](evidence/live-browser-responses-reasoning-delegation-ace24609.json),
+[actual browser completion](evidence/live-browser-responses-reasoning-delegation-ace24609-browser.json),
+[Current reasoning implementation, hosted gate and acceptance scope](native-responses-reasoning.md).
+
+Installed VS Code delegation, broader planning, skills, compaction, outbound
+A2A and full coding/provider parity remain required.
