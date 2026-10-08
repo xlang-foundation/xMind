@@ -101,8 +101,20 @@ updated together, preserves an existing connection and clears the token input.
 All 14 browser adapter/DOM tests pass locally. Native persistence tests now
 check durations for both eight-hour and one-second policies, and the actual
 native/browser contract checks the public duration and revocation. Compiled
-execution remains pending; the local benchmark guard deferred compilation.
+execution subsequently passed the exact hosted checkpoint below; the local
+benchmark guard still defers development-machine compilation.
 This removes a clock-precision dependency demonstrated by fixtures, but the
 earlier live 502 cause remains unproven. The live preview still uses the exact
-tested `6263630` pair; this changed contract must roll out as a matched pair after
-native verification. Remote/team access is still outside this local adapter.
+tested `4203b84` pair; this changed contract must roll out as a matched pair.
+Remote/team access is still outside this local adapter.
+
+Hosted checkpoint `e9f562aa0bb412d0f871fee7bc0db87d2b469dc1` passed 52 native,
+72 extension and 14 browser contracts in
+[run 37708019275](https://github.com/xlang-foundation/xMind/actions/runs/37708019275).
+The exact successful job log and evidence artifact were inspected, including
+the actual native duration/revocation and browser/native restart contract.
+[Provenance and limits](evidence/native-view-session-duration-hosted-provenance.json),
+[projected results](evidence/native-view-session-duration-hosted-summary.log).
+The clock-skew and invalid-duration checks remain explicitly labelled adapter
+fixtures. This gate verifies the duration contract; it neither diagnoses the
+earlier live enrollment 502 nor claims that the newer pair is installed.

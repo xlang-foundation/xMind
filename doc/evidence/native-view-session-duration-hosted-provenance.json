@@ -1,0 +1,14 @@
+{
+  "xmind": "e9f562aa0bb412d0f871fee7bc0db87d2b469dc1",
+  "workflowRun": 37708019275,
+  "job": 113088228591,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37708019275",
+  "conclusion": "success",
+  "evidenceArtifact": 11520689735,
+  "nativeContractsPassed": 52,
+  "extensionContractsPassed": 72,
+  "browserTestsPassed": 14,
+  "scope": "Exact successful hosted job log and evidence artifact inspected. Native bounded view-session duration issuance and adapter contract passed, including native/browser restart preservation. Browser clock-skew and invalid-duration rejection use labelled adapter fixtures. This does not establish the cause of the earlier live enrollment HTTP 502.",
+  "installedPreviewRevision": "4203b84678b51b2ae7c6ee47fccfa14b684680ae",
+  "installedPreviewUpdated": false
+}

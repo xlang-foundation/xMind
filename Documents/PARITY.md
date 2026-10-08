@@ -17,7 +17,10 @@ The exact native/browser pair is now installed in the preview: real browser
 rename, Cancel, refresh, native reopen and read-only CLI navigation passed with
 history/runs/provider settings preserved. [Live scope](../doc/evidence/live-browser-cli-navigation-rename.json).
 Actual editor rename acceptance remains separate.
-Newer cookie-duration and MCP diagnostic/catalogue changes await their own gates.
+The later cookie-duration checkpoint `e9f562a` passed 52 native, 72 extension and
+14 browser contracts; [exact scope](../doc/evidence/native-view-session-duration-hosted-provenance.json).
+Its matched-pair rollout remains pending. Newer MCP diagnostic/catalogue and CLI
+attachment/model-free inspection changes await their own gates.
 The browser preview now uses tested checkpoint `4203b84`. Actual live Responses
 text, read, approved edit and registered Git status turns succeeded within
 [their recorded scope](../doc/live-provider-compatibility.md). An official MCP
