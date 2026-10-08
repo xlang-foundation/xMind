@@ -66,5 +66,14 @@ retain the failure.
 The corrected fixture waits for actual persisted provider-stream evidence before
 cancellation and requires stream entry before native deadline expiry. It retains
 the exact nine-request assertion and supplies no fabricated terminal reply.
-Source review and Node syntax passed; the correction still requires its full
-native gate. Uncommitted dynamic-plan work is excluded from this checkpoint.
+The exact `8a53282` correction subsequently passed its complete
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37799714388):
+**71 native contracts in 173.41 seconds, 103 extension and 20 browser tests**,
+with zero failures/skips, native/browser integration and all 18 required VSIX
+assets. The expected and registered native manifests match exactly. Downloaded
+evidence matches GitHub's advertised archive digest; preserved
+[original CTest bytes](evidence/native-cleanup-8a53282-hosted-ctest.log) and
+[artifact-bound provenance](evidence/native-cleanup-8a53282-hosted-provenance.json)
+record the source/runtime pins and distinct verification scopes.
+The original `5775990` failure remains above. Uncommitted dynamic-plan work and
+the installed preview are excluded from this cleanup checkpoint.
