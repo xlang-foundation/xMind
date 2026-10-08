@@ -1,0 +1,19 @@
+{
+  "run": 37715406198,
+  "job": 113111147655,
+  "revision": "112a5f4302ac37ccd0ce3d0c05631744bb4e15c2",
+  "conclusion": "failure",
+  "evidenceArtifact": 11524390443,
+  "nativeBuild": "succeeded",
+  "registeredContracts": 53,
+  "expectedContracts": 52,
+  "missingExpectedEntry": "native_anthropic_request_contract",
+  "failure": "Tools/ci-native.ps1 exact expected-contract registration guard rejected 53 registered tests against 52 expected",
+  "nativeTestsExecuted": false,
+  "extensionTestsExecuted": false,
+  "browserTestsExecuted": false,
+  "runtimePublished": false,
+  "contractsSha256": "ba6cfe98feee222d3c4c95b3ec0eb06e38c76c929211244b79ed901c1ceb2406",
+  "nativeBuildLogSha256": "bc085e8916d6c833bd76c8ecb0c09ee5d5695a30f53892dbbc6507e393d88864",
+  "scope": "Registration failure, not evidence of a Claude component test failure. Fix adds all three new Claude contracts and preserves exact-set comparison; local registration check observes all 55 required contracts."
+}
