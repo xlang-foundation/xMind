@@ -9,6 +9,7 @@
 #include <random>
 #include <barrier>
 using namespace agentflow;
+using Json=nlohmann::json;
 namespace {
 void require(bool value,const char* text){if(!value)throw std::runtime_error(text);}
 template<class Error,class Function>void rejects(Function call){try{call();}catch(const Error&){return;}throw std::runtime_error("Expected profile rejection did not occur");}

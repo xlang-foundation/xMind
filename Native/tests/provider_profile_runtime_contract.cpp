@@ -53,7 +53,7 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         require(runtime.configuration().revision==3&&runtime.models()[0]=="fixture-claude"&&store.information("native-provider-profiles","registry").get()==preserved,"Actual SQL failure must retain previous service, selection and profile keys");
         {XlangSqlite inject(database,imports);inject.execute("DROP TRIGGER reject_profile_runtime");}
         store.create_session("graph-session","Profile graph fixture").get();runtime.submit_graph("graph-run","graph-session","review",1,"Review fixture");wait(store,"graph-run",RunState::paused);
-        rejects<Conflict>([&]{runtime.select_profile("openai",3);});const auto graph=store.graph_run("graph-run").get();runtime.human_input("graph-run","review","true","fixture-controller",graph.checkpoint_revision);wait(store,"graph-run",RunState::completed);
+        rejects<Conflict>([&]{runtime.select_profile("openai",3);});const auto graph=store.graph_run("graph-run").get();runtime.human_input("graph-run","review",R"({"approved":true})","fixture-controller",graph.checkpoint_revision);wait(store,"graph-run",RunState::completed);
         require(select(runtime,"openai",3).revision==4,"Completed graph must release profile ownership");
         configured=runtime.save_profile("openai","openai.chat","fixture-openai-updated",key(""),4);
         require(configured.revision==5&&configured.active=="openai"&&runtime.models()[0]=="fixture-openai-updated","Updating the active profile must replace its service even without a selection flag");
