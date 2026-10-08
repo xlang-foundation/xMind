@@ -37,6 +37,7 @@ local gate is recorded above. The newer cleanup revision is building in CI;
 hosted verification of the correction remains pending. See
 [failed hosted scope](evidence/native-gemini-request-hosted-failure.json).
 
-The newer [native streaming source](native-gemini-stream.md) is a separate,
-unverified component and increases the configured gate to 59. The 58-contract
-evidence above excludes that source and does not establish streaming support.
+The newer [native streaming source](native-gemini-stream.md) and
+[request/transport boundary](native-gemini-provider.md) are separate unverified
+components and increase the configured gate to 60. The 58-contract evidence
+above excludes that source and does not establish streaming/transport support.

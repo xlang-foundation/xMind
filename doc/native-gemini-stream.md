@@ -24,8 +24,9 @@ supplied usage and malformed/unsupported response rejection. Source adds a
 remains pending while the sibling runtime benchmark is active; the previous
 58-contract gate does not verify it.
 
-This is a stream component, not Gemini product availability. Endpoint/auth
-transport, request/response history adaptation, usage normalization, native
+This is a stream component, not Gemini product availability. New native
+[endpoint/auth transport source](native-gemini-provider.md) joins these components
+but has not been compiled/executed. Request/response history adaptation, usage normalization, native
 agent tool identity bridging, discovery, credential enrollment and live
 provider acceptance remain unfinished. Request serialization uses its
 [separate native component](native-gemini-request.md); signature-only response
