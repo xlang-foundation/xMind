@@ -169,6 +169,24 @@ completed-cancellation state. New fixtures check the record type, unchanged file
 and cancelled operation/run for single-agent approval cancellation and graph
 human-step cancellation. Syntax checks passed; execution remains pending.
 
+Interactive chat now also implements `/graphs` and `/graph GRAPH_ID REQUEST` in
+source. The catalogue comes from the selected native backend; admission uses
+that registered graph's current revision, the selected conversation and optional
+selected model. Unknown graphs, blank requests and unavailable graph definitions
+are rejected before creating a conversation. Tool-only graphs can start without
+a configured provider. Once admitted, the same graph watcher displays persisted
+root/child events, exact effect approvals and revision-bound human input. Closing
+the client leaves server ownership intact. Admission errors do not trigger a
+second submission.
+
+The compiled graph-service fixture now requires catalogue/rejection to preserve
+the conversation catalogue and a model-free console launch to execute an actual
+workspace read, retain its registered revision and restore the exact history.
+JavaScript syntax and whitespace checks passed. Local compilation was deferred
+by live sibling benchmark process 17832; hosted execution of this addition is
+pending. This is registered graph execution, not dynamic graph generation or a
+completed console/TUI parity claim.
+
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
 52 native and 66 extension contracts. This verifies initial-model prevalidation

@@ -166,6 +166,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(prompt=="/exit")return last_result;
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
+            std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
             std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
         }
@@ -247,14 +248,28 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             }
             continue;
         }
-        if(prompt.front()=='/'){
+        bool graphSubmission=false;std::string graphId;std::int64_t graphRevision=0;
+        if(prompt=="/graphs"||prompt.starts_with("/graph ")){
+            const auto catalogue=request("/v1/graphs");
+            if(!catalogue.is_object()||!catalogue.contains("graphs")||!catalogue["graphs"].is_array())throw std::runtime_error("Invalid backend graph catalogue");
+            if(prompt=="/graphs"){std::cout<<Json{{"type","graphs"},{"catalogue",catalogue}}.dump()<<'\n'<<std::flush;continue;}
+            const auto split=prompt.find(' ',7);graphId=split==std::string::npos?std::string{}:prompt.substr(7,split-7);
+            const auto task=split==std::string::npos?std::string{}:prompt.substr(split+1);
+            if(graphId.empty()||graphId.size()>64||graphId.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||task.find_first_not_of(" \t\r\n")==std::string::npos){std::cerr<<"Use /graph GRAPH_ID REQUEST with a registered graph and nonempty request.\n";continue;}
+            const auto& entries=catalogue["graphs"];const auto selected=std::find_if(entries.begin(),entries.end(),[&](const Json& item){return item.is_object()&&item.value("id",std::string{})==graphId;});
+            if(selected==entries.end()){std::cerr<<"Graph was not found. Use /graphs to see registered graphs.\n";continue;}
+            if(!selected->contains("executable")||!(*selected)["executable"].is_boolean()||!selected->contains("revision")||!(*selected)["revision"].is_number_integer()||(*selected)["revision"]<1||(*selected)["revision"]>9007199254740991)throw std::runtime_error("Invalid registered graph capabilities");
+            if(!(*selected)["executable"].get<bool>()){std::cerr<<"Graph cannot execute with the current backend configuration. Use /graphs to inspect availability.\n";continue;}
+            graphRevision=(*selected)["revision"].get<std::int64_t>();graphSubmission=true;prompt=task;
+        }
+        if(!graphSubmission&&prompt.front()=='/'){
             if(prompt.starts_with("//"))prompt.erase(0,1);
             else {std::cerr<<"Unknown chat command. Use /help, or // to send a literal slash request.\n";continue;}
         }
         if(prompt.size()>1024*1024)throw std::invalid_argument("Prompt exceeds limits");
-        const auto current=request("/v1/health");
+        if(!graphSubmission){const auto current=request("/v1/health");
         if(!current.is_object()||!current.contains("agent_execution")||!current["agent_execution"].is_boolean())throw std::runtime_error("Invalid backend chat capabilities");
-        if(!current["agent_execution"].get<bool>()){std::cerr<<"Configure a backend model before submitting a request. Saved conversations and runs remain available for inspection.\n";continue;}
+        if(!current["agent_execution"].get<bool>()){std::cerr<<"Configure a backend model before submitting a request. Saved conversations and runs remain available for inspection.\n";continue;}}
         if(session.empty()){
             const auto first=prompt.find_first_not_of(" \t\r\n");auto end=std::min(prompt.size(),first+80);
             // Truncate only at a UTF-8 boundary, preserving the original prompt.
@@ -266,11 +281,12 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<std::flush;
         }
         Json body={{"session_id",session},{"prompt",prompt}};if(!model.empty())body["model_id"]=model;
-        const auto run=request("/v1/runs",&body);
-        if(!run.is_object() || run.value("session_id",std::string{})!=session || run.value("graph_root",false)!=false || !run.contains("id") || !run["id"].is_string())throw std::runtime_error("Invalid chat run admission");const auto id=run["id"].get<std::string>();
+        if(graphSubmission){body["graph_id"]=graphId;body["graph_revision"]=graphRevision;}
+        const auto run=request(graphSubmission?"/v1/graph-runs":"/v1/runs",&body);
+        if(!run.is_object() || run.value("session_id",std::string{})!=session || run.value("graph_root",false)!=graphSubmission || !run.contains("id") || !run["id"].is_string())throw std::runtime_error("Invalid chat run admission");const auto id=run["id"].get<std::string>();
         if(id.empty() || id.size()>128 || id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid chat run identity");
         std::cout<<Json{{"type","run"},{"run",run}}.dump()<<'\n'<<std::flush;
-        last_result=watch_run(client,headers,id,0,false,true);
+        last_result=watch_run(client,headers,id,0,graphSubmission,true);
         std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
     }
     if(!std::cin.eof())throw std::runtime_error("Chat input is unavailable");
