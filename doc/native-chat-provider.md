@@ -17,3 +17,17 @@ Ten native contracts passed in Release. The new request contract checks capabili
 Fixtures are explicitly synthetic. No inference service or real model was called, and no product run route was enabled. Evidence: [native-chat-provider-ctest.log](evidence/native-chat-provider-ctest.log) and final request/adapter checks after the aggregate-size guard in [native-chat-provider-final.log](evidence/native-chat-provider-final.log).
 
 The [native agent loop](native-agent-loop.md) now invokes this adapter and resolves encrypted credential references internally. Live provider validation still requires the chosen endpoint/model and privately configured credentials. Backend configuration/discovery, product HTTP/CLI scheduling, complete coding tools/policies, other protocol families, routing/retries and provider coverage against LiteLLM remain required. The project's full goal remains unchanged.
+
+The regenerated [pinned LiteLLM coverage inventory](../Documents/LITELLM_PROVIDER_INVENTORY.json)
+now distinguishes declared upstream capabilities from native implementation
+evidence. Its 4,483 entries span 136 provider groups. OpenAI is one partial native
+candidate with checked C++ source anchors/hashes and selected recorded live
+Responses evidence; the other 135 groups are unmapped. Zero complete provider
+groups have verified parity. The 209 pinned OpenAI entries include modes and
+models beyond those live checks; their catalogue presence is not tested support.
+The audit rejects catalogue-byte drift from the pinned SHA-256 and hashes native
+source with normalized line endings. `node Tools/audit-litellm.mjs` checks and
+regenerates the inventory without importing or executing LiteLLM. Native provider
+implementation and per-model acceptance remain required for the requested broad
+coverage; xlang3 owns embedded scripts and database I/O, while C++ owns provider
+networking, wire adapters and model orchestration.

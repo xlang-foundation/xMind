@@ -19,6 +19,12 @@
     "fireworks-ai-moe-up-to-56b",
     "fireworks-ai-up-to-4b"
   ],
+  "nativeCoverage": {
+    "partialProviderGroups": 1,
+    "unmappedProviderGroups": 135,
+    "verifiedProviderParity": 0,
+    "caveat": "Source anchors and selected recorded live checks are partial evidence. No complete provider-group or model-entry parity is verified."
+  },
   "caveat": "Pinned upstream metadata is a coverage reference, not tested AgentFlow support, current availability or current pricing. Entries include aliases, regions, pricing buckets and non-chat modes. Missing modes remain unspecified; non-provider metadata is excluded and recorded separately.",
   "providers": [
     {
@@ -29,7 +35,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "ai21",
@@ -42,7 +49,8 @@
         "supports_tool_choice": 9
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "aihubmix",
@@ -60,7 +68,8 @@
         "supports_web_search": 32
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "aiml",
@@ -72,7 +81,8 @@
         "supports_vision": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "amazon_nova",
@@ -88,7 +98,8 @@
         "supports_vision": 3
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "anthropic",
@@ -120,7 +131,8 @@
         "supports_fast_mode": 3
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "anyscale",
@@ -132,7 +144,8 @@
         "supports_function_calling": 3
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "apiserpent",
@@ -142,7 +155,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "assemblyai",
@@ -152,7 +166,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "aws_polly",
@@ -162,7 +177,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "azure",
@@ -198,7 +214,8 @@
         "supports_max_reasoning_effort": 13
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "azure_ai",
@@ -241,7 +258,8 @@
         "supports_video_input": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "azure_text",
@@ -251,7 +269,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "baseten",
@@ -268,7 +287,8 @@
         "supports_vision": 12
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "bedrock",
@@ -310,7 +330,8 @@
         "supports_xhigh_reasoning_effort": 12
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "bedrock_converse",
@@ -346,7 +367,8 @@
         "supports_bedrock_runtime_chat_completions_response_format": 17
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "bedrock_mantle",
@@ -377,7 +399,8 @@
         "supports_output_config": 4
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "bespoke",
@@ -387,7 +410,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "bing_grounding",
@@ -397,7 +421,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "black_forest_labs",
@@ -408,7 +433,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "cerebras",
@@ -425,7 +451,8 @@
         "supports_vision": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "chatgpt",
@@ -445,7 +472,8 @@
         "supports_minimal_reasoning_effort": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "cloudflare",
@@ -461,7 +489,8 @@
         "supports_vision": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "codestral",
@@ -474,7 +503,8 @@
         "supports_tool_choice": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "cognition",
@@ -487,7 +517,8 @@
         "supports_prompt_caching": 3
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "cohere",
@@ -503,7 +534,8 @@
         "supports_image_input": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "cohere_chat",
@@ -519,7 +551,8 @@
         "supports_vision": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "crusoe",
@@ -536,7 +569,8 @@
         "supports_vision": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "darkbloom",
@@ -551,7 +585,8 @@
         "supports_tool_choice": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "dashscope",
@@ -572,7 +607,8 @@
         "supports_audio_input": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "databricks",
@@ -602,7 +638,8 @@
         "supports_parallel_function_calling": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "dataforseo",
@@ -612,7 +649,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "deepgram",
@@ -622,7 +660,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "deepinfra",
@@ -641,7 +680,8 @@
         "supports_adaptive_thinking": 6
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "deepseek",
@@ -662,7 +702,8 @@
         "supports_vision": 6
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "duckduckgo",
@@ -672,7 +713,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "elevenlabs",
@@ -683,7 +725,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "exa_ai",
@@ -693,7 +736,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "fal_ai",
@@ -708,7 +752,8 @@
         "supports_reasoning": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "featherless_ai",
@@ -718,7 +763,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "firecrawl",
@@ -728,7 +774,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "fireworks_ai",
@@ -751,7 +798,8 @@
         "supports_prompt_caching": 4
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "fireworks_ai-embedding-models",
@@ -762,7 +810,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "friendliai",
@@ -784,7 +833,8 @@
         "supports_video_input": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "gemini",
@@ -818,7 +868,8 @@
         "supports_computer_use": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "gigachat",
@@ -833,7 +884,8 @@
         "supports_vision": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "github_copilot",
@@ -854,7 +906,8 @@
         "supports_response_schema": 10
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "gmi",
@@ -869,7 +922,8 @@
         "supports_system_messages": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "google_pse",
@@ -879,7 +933,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "gradient_ai",
@@ -889,7 +944,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "groq",
@@ -909,7 +965,8 @@
         "supports_vision": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "heroku",
@@ -923,7 +980,8 @@
         "supports_tool_choice": 4
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "hyperbolic",
@@ -938,7 +996,8 @@
         "supports_tool_choice": 16
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "inception",
@@ -954,7 +1013,8 @@
         "supports_tool_choice": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "jina_ai",
@@ -964,7 +1024,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "lambda_ai",
@@ -981,7 +1042,8 @@
         "supports_vision": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "laya",
@@ -991,7 +1053,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "lemonade",
@@ -1005,7 +1068,8 @@
         "supports_tool_choice": 5
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "libertai",
@@ -1022,7 +1086,8 @@
         "supports_reasoning": 5
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "linkup",
@@ -1032,7 +1097,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "llamagate",
@@ -1048,7 +1114,8 @@
         "supports_vision": 3
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "meta",
@@ -1073,7 +1140,8 @@
         "supports_audio_input": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "meta_llama",
@@ -1086,7 +1154,8 @@
         "supports_tool_choice": 4
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "minimax",
@@ -1104,7 +1173,8 @@
         "supports_vision": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "mistral",
@@ -1129,7 +1199,8 @@
         "supports_prompt_caching": 7
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "moonshot",
@@ -1147,7 +1218,8 @@
         "supports_vision": 7
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "morph",
@@ -1159,7 +1231,8 @@
         "supports_system_messages": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "nebius",
@@ -1174,7 +1247,8 @@
         "supports_vision": 13
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "nimble",
@@ -1184,7 +1258,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "nlp_cloud",
@@ -1195,7 +1270,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "novita",
@@ -1218,7 +1294,8 @@
         "supports_audio_output": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "nscale",
@@ -1229,7 +1306,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "nvidia_nim",
@@ -1239,7 +1317,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "oci",
@@ -1261,7 +1340,8 @@
         "supports_embedding_image_input": 4
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "ollama",
@@ -1274,7 +1354,8 @@
         "supports_function_calling": 16
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "openai",
@@ -1312,7 +1393,49 @@
         "supports_prompt_cache_breakpoint": 8
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "partial",
+      "nativeEvidence": {
+        "sources": [
+          {
+            "path": "Native/src/model_request.cpp",
+            "anchor": "serialize_chat_request",
+            "sha256": "03c0578fe4048984b9434b11f36c36911b92f2cc53164d9cf43c3a8a038e8725"
+          },
+          {
+            "path": "Native/src/responses_request.cpp",
+            "anchor": "serialize_responses_request",
+            "sha256": "5c54f93515b97de98b6481638d39aa0ae16c68acf5fa4191043851b82c3c72a9"
+          },
+          {
+            "path": "Native/src/responses_stream.cpp",
+            "anchor": "ResponsesStream::feed",
+            "sha256": "e676ff93421b7e8becf9495ac9d5cf651b04a0d297fd0bc0f3c3eb159977b27a"
+          },
+          {
+            "path": "Native/src/chat_provider.cpp",
+            "anchor": "complete_model",
+            "sha256": "d003767df5fc1d5ff0f8586d48a135830d27a463c9f33b2b791cf07c3c072f2d"
+          },
+          {
+            "path": "Native/src/provider_setup.cpp",
+            "anchor": "ProviderRuntime::configuration",
+            "sha256": "7c783a59233aea1bb893d1347ba94f9cc765a8684b5a74ab91904d77f4edd50c"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "doc/evidence/live-responses-provider-success.json",
+            "sha256": "6d47cb835b20a204abc308d6e00b640dc88b51538116eeb4d49b9a44608b237f"
+          },
+          {
+            "path": "doc/evidence/live-responses-mcp-diagnostic-read.json",
+            "sha256": "3e1b3663db37f6ebaf51d6da226f50ea9de81ec39b6cce207507756314c0ae3e"
+          }
+        ],
+        "scope": "Native Chat Completions and Responses request/stream boundaries, encrypted backend enrollment and selected live Responses checks exist. Evidence applies only to its exact revisions, configured model and recorded scenarios.",
+        "gaps": "The 209 pinned OpenAI entries are not all tested or implemented. Non-chat modes, multimodal input/output, embeddings, batch, full reasoning/model capability controls and per-model acceptance remain incomplete. Other providers and OpenAI-compatible deployments require their own authentication, endpoint, wire and behavior validation."
+      }
     },
     {
       "provider": "openrouter",
@@ -1345,7 +1468,8 @@
         "supports_url_context": 3
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "ovhcloud",
@@ -1361,7 +1485,8 @@
         "supports_vision": 3
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "parallel_ai",
@@ -1371,7 +1496,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "perplexity",
@@ -1392,7 +1518,8 @@
         "supports_output_config": 3
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "pinstripes",
@@ -1406,7 +1533,8 @@
         "supports_reasoning": 4
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "prism",
@@ -1426,7 +1554,8 @@
         "supports_vision": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "publicai",
@@ -1440,7 +1569,8 @@
         "supports_reasoning": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "qwen_ai_platform",
@@ -1461,7 +1591,8 @@
         "supports_audio_input": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "qwencloud",
@@ -1479,7 +1610,8 @@
         "supports_vision": 9
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "recraft",
@@ -1489,7 +1621,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "reducto",
@@ -1499,7 +1632,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "replicate",
@@ -1521,7 +1655,8 @@
         "supports_video_input": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "runwayml",
@@ -1533,7 +1668,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "sagemaker",
@@ -1544,7 +1680,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "sail",
@@ -1561,7 +1698,8 @@
         "supports_vision": 4
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "sambanova",
@@ -1577,7 +1715,8 @@
         "supports_vision": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "sarvam",
@@ -1589,7 +1728,8 @@
         "supports_reasoning": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "scaleway",
@@ -1607,7 +1747,8 @@
         "supports_prompt_caching": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "scx-ai",
@@ -1624,7 +1765,8 @@
         "supports_vision": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "searxng",
@@ -1634,7 +1776,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "serper",
@@ -1644,7 +1787,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "snowflake",
@@ -1665,7 +1809,8 @@
         "supports_legacy_thinking": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "soniox",
@@ -1677,7 +1822,8 @@
         "supports_audio_input": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "stability",
@@ -1688,7 +1834,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "strands_decider",
@@ -1698,7 +1845,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "tavily",
@@ -1708,7 +1856,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "tencent",
@@ -1729,7 +1878,8 @@
         "supports_adaptive_thinking": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "tensormesh",
@@ -1746,7 +1896,8 @@
         "supports_reasoning": 9
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "text-completion-codestral",
@@ -1756,7 +1907,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "text-completion-inception",
@@ -1766,7 +1918,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "text-completion-openai",
@@ -1776,7 +1929,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "tinyfish",
@@ -1786,7 +1940,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "together_ai",
@@ -1807,7 +1962,8 @@
         "supports_vision": 4
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "transcribe",
@@ -1817,7 +1973,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "typesafe",
@@ -1827,7 +1984,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "v0",
@@ -1843,7 +2001,8 @@
         "supports_vision": 3
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vercel_ai_gateway",
@@ -1869,7 +2028,8 @@
         "supports_parallel_function_calling": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai",
@@ -1903,7 +2063,8 @@
         "supports_multimodal": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-ai21_models",
@@ -1915,7 +2076,8 @@
         "supports_tool_choice": 5
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-anthropic_models",
@@ -1943,7 +2105,8 @@
         "supports_native_structured_output": 4
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-deepseek_models",
@@ -1959,7 +2122,8 @@
         "supports_tool_choice": 3
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-embedding-models",
@@ -1971,7 +2135,8 @@
         "supports_multimodal": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-language-models",
@@ -2001,7 +2166,8 @@
         "supports_computer_use": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-llama_models",
@@ -2016,7 +2182,8 @@
         "supports_function_calling": 5
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-minimax_models",
@@ -2029,7 +2196,8 @@
         "supports_tool_choice": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-mistral_models",
@@ -2043,7 +2211,8 @@
         "supports_vision": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-moonshot_models",
@@ -2057,7 +2226,8 @@
         "supports_web_search": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-openai_models",
@@ -2072,7 +2242,8 @@
         "supports_reasoning": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-qwen_models",
@@ -2085,7 +2256,8 @@
         "supports_tool_choice": 4
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-text-models",
@@ -2095,7 +2267,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-video-models",
@@ -2105,7 +2278,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "vertex_ai-zai_models",
@@ -2121,7 +2295,8 @@
         "supports_response_schema": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "volcengine",
@@ -2139,7 +2314,8 @@
         "supports_vision": 6
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "voyage",
@@ -2152,7 +2328,8 @@
         "supports_embedding_image_input": 1
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "wandb",
@@ -2169,7 +2346,8 @@
         "supports_tool_choice": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "watsonx",
@@ -2188,7 +2366,8 @@
         "supports_vision": 5
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "xai",
@@ -2210,7 +2389,8 @@
         "supports_response_schema": 43
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "xiaomi_mimo",
@@ -2230,7 +2410,8 @@
         "supports_vision": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "you_com",
@@ -2240,7 +2421,8 @@
       },
       "declaredCapabilities": {},
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     },
     {
       "provider": "zai",
@@ -2256,7 +2438,8 @@
         "supports_vision": 2
       },
       "agentflowStatus": "unverified",
-      "acceptance": "Validate provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability on xlang3."
+      "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
+      "nativeStatus": "unmapped"
     }
   ]
 }
