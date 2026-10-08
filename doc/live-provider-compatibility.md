@@ -104,3 +104,13 @@ actual response and supplied usage. [A2A evidence](evidence/live-a2a-responses.j
 This adds one local-owner external-client text flow; remote delegation, team
 authorization, broader live A2A coverage and full frontier-provider support
 remain incomplete.
+
+Live MCP continuation also completed on the installed verified `46262d6` pair:
+the model selected the official external filesystem server's `read_text_file`,
+the acceptance controller reviewed and explicitly allowed the exact public
+architecture-document read through the native CLI, and returned content matched
+the repository. The final response matched the document heading and supplied
+8,338 input, 12 output and 8,350 total tokens. The browser rendered the real
+operation/result and metrics. [Separate retry evidence](evidence/live-responses-mcp-diagnostic-read.json).
+The earlier failed attempt remains recorded with an unproven cause. This covers
+one external stdio read and continuation, not full MCP or coding parity.

@@ -48,3 +48,10 @@ composer text, run reset and omission of assistant/metric cards. Shared browser
 assets built successfully. This is source/fixture validation: the installed
 preview now runs the later tested `4203b84` pair, and the newer native diagnostic producer and live
 MCP failure diagnosis still await the compiled hosted gate.
+
+Subsequent checkpoint `46262d6` passed the compiled hosted gate: 52 native,
+73 extension and 14 browser contracts. [Exact scope](evidence/native-model-protocol-diagnostics-hosted-provenance.json).
+The matching native/browser pair is installed. Its new live MCP read completed
+and rendered the actual result and metrics, while the original failed attempt
+remains recorded without a proven cause. This confirms the new source's gate
+and successful retry; it does not turn the earlier failure into a diagnosed one.

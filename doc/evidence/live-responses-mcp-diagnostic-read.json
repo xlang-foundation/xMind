@@ -1,0 +1,45 @@
+{
+  "revision": "46262d6ef7949a9caf778ccb6cf74733ef28b5ac",
+  "model": "gpt-5.6-sol",
+  "wire": "responses",
+  "scope": "Live native MCP diagnostic read attempt. Connection, discovery, approvals, dispatch and continuation are reported only by their observed fields; no full MCP parity claim.",
+  "peerPackage": "@modelcontextprotocol/server-filesystem",
+  "peerVersion": "2026.8.31",
+  "terminal": "run.completed",
+  "exitStatus": 0,
+  "connected": true,
+  "discovered": true,
+  "protocolVersion": "2025-11-25",
+  "proposalReviewed": true,
+  "operationState": "succeeded",
+  "acknowledgedByPeer": true,
+  "returnedContentMatchesRepository": true,
+  "responseMatchesHeading": true,
+  "contentSha256": "37121c2fc1847b145f4c428908e7d9afdbffb0729471d05fbb5d325c59b647c4",
+  "operationCount": 1,
+  "usage": {
+    "completion_tokens": 12,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "input_tokens": 8338,
+    "input_tokens_details": {
+      "cache_write_tokens": 4669,
+      "cached_tokens": 3666
+    },
+    "output_tokens": 12,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 8338,
+    "prompt_tokens_details": {
+      "cache_write_tokens": 4669,
+      "cached_tokens": 3666
+    },
+    "total_tokens": 8350
+  },
+  "browserResultAndMetricsVisible": true,
+  "browserRefreshRetainedConnection": true,
+  "approvalMethod": "Explicit native CLI allow after exact proposal validation by the acceptance controller; not an observed human UI approval click",
+  "earlierFailureCause": "Unproven; original failed attempt retained separately"
+}

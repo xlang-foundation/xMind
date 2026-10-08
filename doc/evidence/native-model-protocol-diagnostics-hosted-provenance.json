@@ -1,0 +1,13 @@
+{
+  "xmind": "46262d6ef7949a9caf778ccb6cf74733ef28b5ac",
+  "workflowRun": 37709335756,
+  "job": 113092406087,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37709335756",
+  "conclusion": "success",
+  "evidenceArtifact": 11521588223,
+  "runtimeArtifact": 11521618116,
+  "nativeContractsPassed": 52,
+  "extensionContractsPassed": 73,
+  "browserTestsPassed": 14,
+  "scope": "Exact successful job log and artifacts inspected. Includes native bounded view-session duration, allowlisted model protocol diagnostics and their actual failure journal fixture, MCP quoted peer-name catalogue, shared failure renderer and browser/native restart contracts. This gate alone does not establish live MCP or full coding/protocol parity."
+}

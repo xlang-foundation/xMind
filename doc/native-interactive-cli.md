@@ -113,6 +113,16 @@ input, including an empty chat that must create no placeholder conversation.
 These additions passed JavaScript syntax and whitespace checks; compiled
 execution and actual console acceptance remain pending.
 
+Installed preview update: the browser backend and matching adapter now use
+verified checkpoint `46262d6`, which passed 52 native, 73 extension and 14 browser
+contracts. It includes the earlier navigation/title capabilities and the newer
+cookie-duration/MCP diagnostic changes. The `/watch` and model-free inspection
+additions were introduced after this source and still await their own compiled
+gate; they are not yet present in the installed CLI. The native CLI on `46262d6`
+also carried the exact approval for the completed live external MCP read.
+[Gate scope](evidence/native-model-protocol-diagnostics-hosted-provenance.json),
+[live MCP scope](evidence/live-responses-mcp-diagnostic-read.json).
+
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
 52 native and 66 extension contracts. This verifies initial-model prevalidation

@@ -9,9 +9,9 @@ This is an initial inventory, not a claim of parity. All unverified features rem
 ## Current native progress
 
 The latest inspected successful native checkpoint is
-`4203b84678b51b2ae7c6ee47fccfa14b684680ae`: 52 native, 72 extension and 13 browser
-contracts passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37707042113).
-[Exact evidence](../doc/evidence/native-session-navigation-hosted-provenance.json).
+`46262d6ef7949a9caf778ccb6cf74733ef28b5ac`: 52 native, 73 extension and 14 browser
+contracts passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37709335756).
+[Exact evidence](../doc/evidence/native-model-protocol-diagnostics-hosted-provenance.json).
 This includes native CLI conversation navigation and optimistic title changes.
 The exact native/browser pair is now installed in the preview: real browser
 rename, Cancel, refresh, native reopen and read-only CLI navigation passed with
@@ -19,13 +19,16 @@ history/runs/provider settings preserved. [Live scope](../doc/evidence/live-brow
 Actual editor rename acceptance remains separate.
 The later cookie-duration checkpoint `e9f562a` passed 52 native, 72 extension and
 14 browser contracts; [exact scope](../doc/evidence/native-view-session-duration-hosted-provenance.json).
-Its matched-pair rollout remains pending. Newer MCP diagnostic/catalogue and CLI
-attachment/model-free inspection changes await their own gates.
-The browser preview now uses tested checkpoint `4203b84`. Actual live Responses
+The matched duration/diagnostic/catalogue pair is installed as `46262d6`. Newer CLI
+attachment/model-free inspection changes await their own gate.
+The browser preview now uses tested checkpoint `46262d6`. Actual live Responses
 text, read, approved edit and registered Git status turns succeeded within
 [their recorded scope](../doc/live-provider-compatibility.md). An official MCP
-peer connected and discovered tools, but its live model/tool read failed before
-dispatch; [failed acceptance evidence](../doc/evidence/live-responses-mcp-read.json).
+peer's original model/tool read failed before dispatch;
+[failed acceptance evidence](../doc/evidence/live-responses-mcp-read.json).
+A separate approved stdio read and live continuation completed on the newer
+verified pair; [bounded success evidence](../doc/evidence/live-responses-mcp-diagnostic-read.json).
+The original failure's cause remains unproven, and full MCP parity is incomplete.
 Dynamic multi-agent delegation and complete live coding parity remain incomplete.
 The older checkpoint summaries and prototype table below remain historical
 evidence, not the current product status or a claim of full parity.

@@ -118,3 +118,10 @@ the actual native duration/revocation and browser/native restart contract.
 The clock-skew and invalid-duration checks remain explicitly labelled adapter
 fixtures. This gate verifies the duration contract; it neither diagnoses the
 earlier live enrollment 502 nor claims that the newer pair is installed.
+
+Subsequent verified checkpoint `46262d6` includes this duration contract and is
+now installed with its matching browser adapter. The actual update preserved
+all existing conversations and provider settings, and browser refresh retained
+the original authenticated cookie and visible history without another login.
+The following live MCP read completed using that pair; [bounded evidence](evidence/live-responses-mcp-diagnostic-read.json).
+The earlier live enrollment 502 remains undiagnosed.
