@@ -82,7 +82,7 @@ std::vector<std::string> AgentRunner::models() const {
 std::string provider_context_json(const AgentSettings& settings,const std::string& model_id){
     if(!settings.provider_identity)return {};
     const auto& identity=*settings.provider_identity;
-    const auto wire=settings.provider.wire==ProviderWire::responses?"responses":settings.provider.wire==ProviderWire::anthropic_messages?"anthropic-messages":"chat-completions";
+    const auto wire=settings.provider.wire==ProviderWire::responses?"responses":settings.provider.wire==ProviderWire::anthropic_messages?"anthropic-messages":settings.provider.wire==ProviderWire::gemini_generate_content?"gemini-generate-content":"chat-completions";
     return nlohmann::json{{"profile_id",identity.profile_id},{"profile_revision",identity.profile_revision},{"route_id",identity.route_id},{"provider",identity.provider},{"wire",wire},{"model_id",model_id.empty()?settings.provider.model:model_id}}.dump();
 }
 Run AgentRunner::start(std::string id,std::string session_id,std::string prompt,const std::string& model_id) {

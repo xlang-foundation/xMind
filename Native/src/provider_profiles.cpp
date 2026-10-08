@@ -10,7 +10,7 @@ namespace {
 using Json=nlohmann::json;
 constexpr std::int64_t maximum=9007199254740991;
 void identity(const std::string& value){if(value.empty()||value.size()>256||value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos||value.starts_with("sk-"))throw std::invalid_argument("Invalid provider profile identity");}
-const char* wire_name(ProviderWire wire){switch(wire){case ProviderWire::chat_completions:return "chat-completions";case ProviderWire::responses:return "responses";case ProviderWire::anthropic_messages:return "anthropic-messages";}throw std::invalid_argument("Invalid provider profile wire");}
+const char* wire_name(ProviderWire wire){switch(wire){case ProviderWire::chat_completions:return "chat-completions";case ProviderWire::responses:return "responses";case ProviderWire::anthropic_messages:return "anthropic-messages";case ProviderWire::gemini_generate_content:return "gemini-generate-content";}throw std::invalid_argument("Invalid provider profile wire");}
 std::int64_t revision(const Json& value){if(!value.is_number_integer()||value<1||value>maximum)throw DatabaseError("Invalid provider profile revision");return value.get<std::int64_t>();}
 std::string identifier(){std::random_device random;std::ostringstream output;output<<"profile-key-"<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)output<<std::setw(8)<<random();return output.str();}
 bool same_secret(const std::string& model,const SecretBytes& key){const auto bytes=key.view();std::size_t difference=model.size()^bytes.size();for(std::size_t i=0;i<bytes.size();++i)difference|=bytes[i]^(i<model.size()?static_cast<unsigned char>(model[i]):0);return difference==0;}

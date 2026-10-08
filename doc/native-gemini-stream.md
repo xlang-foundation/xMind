@@ -1,34 +1,34 @@
-# Native Gemini streaming component
+# Native Gemini streaming
 
 The C++ `GeminiStream` component decodes GenerateContent Server-Sent Events.
-It accepts a single response candidate and retains the supplied model version,
+It accepts a single response candidate and retains supplied model version,
 response identity, original ordered part JSON and actual cumulative token
-counters. JSON arguments retain their original numeric tokens; optional
-provider call IDs and absent arguments remain absent.
+counters. JSON arguments retain their numeric tokens; optional provider call
+IDs and absent arguments remain absent.
 
-Thought summaries and signature-only parts are retained in the wire-specific
-history, outside ordinary text events. Signatures remain opaque and attached
-to their original parts. The component does not merge signed parts, fabricate
-usage totals, invent tool IDs or acknowledge an incomplete stream. Tool calls
-are available only from a successful, validated `finish()`; output truncation
-removes executable calls. Provider errors, blocked/unsupported finish reasons,
-duplicate fields/IDs, changed response identity, multiple candidates,
-unsupported media and excessive input fail explicitly with native diagnostics.
+Thought summaries and signature-only parts stay in provider history, outside
+ordinary text events. Signatures remain opaque and attached to their original
+parts. Tool calls become available only from a validated `finish()`; output
+truncation removes executable calls. Provider errors, blocked/unsupported finish
+reasons, duplicate fields/IDs, changed response identity, multiple candidates,
+unsupported media and excessive input fail explicitly. The decoder limits raw
+part history to 8 MiB and aligns object depth/size with request replay limits.
 
 The implementation follows Google's
 [GenerateContent REST reference](https://ai.google.dev/api/generate-content).
-Its synthetic contract covers fragmented Unicode/SSE framing, EOF, signed
-history, hidden thought separation, precise arguments, optional identities,
-supplied usage and malformed/unsupported response rejection. Source adds a
-59th required native contract. Compilation/execution of this new component
-remains pending while the sibling runtime benchmark is active; the previous
-58-contract gate does not verify it.
+Its synthetic native contract covers fragmented Unicode/SSE framing, EOF,
+signed history, precise arguments, optional identities, supplied usage and
+malformed/unsupported response rejection. It passed in the local complete
+**61-contract native gate**; see
+[local evidence](evidence/native-gemini-history-local-provenance.json).
+The earlier transport/replay revision `ddd1d3d` passed its full hosted
+**60-contract gate**, with **88 extension and 17 browser checks**, no
+failures/skips, native/browser integration and VSIX verification.
+[Exact evidence](evidence/native-gemini-transport-hosted-provenance.json).
+It includes this decoder and expanded replay DTOs, but excludes the newer common
+gateway/history bridge and limit corrections.
 
-This is a stream component, not Gemini product availability. New native
-[endpoint/auth transport source](native-gemini-provider.md) joins these components
-but has not been compiled/executed. Request/response history adaptation, usage normalization, native
-agent tool identity bridging, discovery, credential enrollment and live
-provider acceptance remain unfinished. Request serialization uses its
-[separate native component](native-gemini-request.md); signature-only response
-parts do not yet have a request-history bridge. The Interactions API and media
-are not implemented by this decoder.
+The [native transport](native-gemini-provider.md) and
+[history bridge](native-gemini-history.md) connect this decoder to `complete_model`.
+This does not establish product enrollment or live provider acceptance. Media
+and the Interactions API remain outside the implemented decoder scope.

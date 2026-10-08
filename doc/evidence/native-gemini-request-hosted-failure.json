@@ -6,7 +6,7 @@
   "job_id": 113169353362,
   "failure": "Malformed prompt JSON leaked a JSON parser exception instead of the required DatabaseError",
   "run_id": 37733868178,
-  "hosted_correction": "Cleanup source dea5888 is building; no successful hosted correction claimed yet",
+  "hosted_correction": "Cleanup source dea588874e5a8c8e40bf1a158fa925520443c8a0 passed all58 native contracts in run37734970144, zero failures/skips; later Gemini source excluded",
   "corrected_local_gate": "58 passed, zero failures, 98.49 seconds",
   "scope": "Hosted request/attribution source before the repository regression fix. New Gemini SSE source is excluded.",
   "failed_contract": "native_agent_runner_contract"

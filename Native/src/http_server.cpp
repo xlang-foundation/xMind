@@ -305,7 +305,7 @@ struct HttpServer::Impl {
                 auto entries=Json::array();for(const auto& id:setup->discover(std::move(secret),value["expected_revision"].get<std::int64_t>()))entries.push_back({{"id",id}});
                 reply(response,{{"models",entries}});
             }));
-            const auto metadata=[](const ProviderSetupMetadata& value){return Json{{"revision",value.revision},{"provider",value.provider},{"model",value.model},{"endpoint",value.endpoint},{"configured",value.configured},{"wire",value.wire==ProviderWire::responses?"responses":value.wire==ProviderWire::anthropic_messages?"anthropic-messages":"chat-completions"}};};
+            const auto metadata=[](const ProviderSetupMetadata& value){return Json{{"revision",value.revision},{"provider",value.provider},{"model",value.model},{"endpoint",value.endpoint},{"configured",value.configured},{"wire",value.wire==ProviderWire::responses?"responses":value.wire==ProviderWire::anthropic_messages?"anthropic-messages":value.wire==ProviderWire::gemini_generate_content?"gemini-generate-content":"chat-completions"}};};
             server.Get("/v1/provider/configuration",guarded([setup,metadata](const Request& request,Response& response){if(!request.params.empty())throw std::invalid_argument("Provider metadata does not accept query parameters");reply(response,metadata(setup->configuration()));}));
             server.Post("/v1/provider/configuration",guarded([setup,metadata](const Request& request,Response& response){
                 if(!request.params.empty() || request.body.size()>65536)throw std::invalid_argument("Provider setup request exceeds limits");
@@ -320,7 +320,7 @@ struct HttpServer::Impl {
             const auto metadata=[profile_setup](const ProviderProfileRuntimeMetadata& value){
                 auto entries=Json::array();for(const auto& profile:value.profiles)entries.push_back({{"id",profile.id},{"route_id",profile.route_id},{"provider",profile.provider},{"model",profile.model},{"revision",profile.revision}});
                 auto routes=Json::array();for(const auto& route:profile_setup->profile_routes()){
-                    const char* wire=nullptr;switch(route.wire){case ProviderWire::chat_completions:wire="chat-completions";break;case ProviderWire::responses:wire="responses";break;case ProviderWire::anthropic_messages:wire="anthropic-messages";break;}
+                    const char* wire=nullptr;switch(route.wire){case ProviderWire::chat_completions:wire="chat-completions";break;case ProviderWire::responses:wire="responses";break;case ProviderWire::anthropic_messages:wire="anthropic-messages";break;case ProviderWire::gemini_generate_content:wire="gemini-generate-content";break;}
                     if(!wire)throw std::invalid_argument("Unknown backend provider wire");
                     routes.push_back({{"id",route.id},{"provider",route.provider},{"wire",wire},{"discovery",route.discovery}});
                 }

@@ -38,7 +38,7 @@ std::string provider_context(const Json& value){
         const auto identity=value[field].get<std::string>();if(identity.empty()||identity.size()>256||identity.starts_with("sk-")||identity.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)throw DatabaseError("Invalid saved provider identity");
     }
     if(!value.contains("profile_revision")||!value["profile_revision"].is_number_integer()||value["profile_revision"]<1||value["profile_revision"]>9007199254740991)throw DatabaseError("Invalid saved provider version");
-    if(value["wire"]!="chat-completions"&&value["wire"]!="responses"&&value["wire"]!="anthropic-messages")throw DatabaseError("Invalid saved provider wire");
+    if(value["wire"]!="chat-completions"&&value["wire"]!="responses"&&value["wire"]!="anthropic-messages"&&value["wire"]!="gemini-generate-content")throw DatabaseError("Invalid saved provider wire");
     return value.dump();
 }
 std::string prompt_context(const std::string& prompt){

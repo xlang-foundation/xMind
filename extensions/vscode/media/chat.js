@@ -11,13 +11,15 @@ function markdown(el,text){
   for(const block of el.querySelectorAll('pre')){const button=node('button','Copy code','copy-code');button.onclick=()=>api.postMessage({type:'copy',text:block.querySelector('code')?.textContent||block.textContent});block.after(button);}
 }
 const count=value=>Number.isSafeInteger(value)&&value>=0?value.toLocaleString():'—';
+const providerWireLabels={'chat-completions':'Chat Completions',responses:'Responses','anthropic-messages':'Messages','gemini-generate-content':'GenerateContent'};
+const providerWireLabel=value=>typeof value==='string'&&Object.hasOwn(providerWireLabels,value)?providerWireLabels[value]:undefined;
+const providerLabel=value=>value==='openai'?'OpenAI':value==='anthropic'?'Claude':value==='gemini'?'Gemini':value;
 function profileBadge(value){
   const fields=['profile_id','profile_revision','route_id','provider','wire','model_id'];
   if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field))||!Number.isSafeInteger(value.profile_revision)||value.profile_revision<1)return;
   for(const field of ['profile_id','route_id','provider','model_id'])if(typeof value[field]!=='string'||!value[field]||value[field].length>256||value[field].startsWith('sk-')||!/^[A-Za-z0-9_.:/-]+$/.test(value[field]))return;
-  const wires={'chat-completions':'Chat Completions',responses:'Responses','anthropic-messages':'Messages'};if(!Object.hasOwn(wires,value.wire))return;
-  const label=value.provider==='openai'?'OpenAI':value.provider==='anthropic'?'Claude':value.provider;
-  const badge=node('span',label+' · '+wires[value.wire],'provider-context');badge.title='Provider profile: '+value.profile_id+'\nProfile version: '+value.profile_revision+'\nRoute: '+value.route_id+'\nModel: '+value.model_id;return badge;
+  const wire=providerWireLabel(value.wire);if(!wire)return;
+  const badge=node('span',providerLabel(value.provider)+' · '+wire,'provider-context');badge.title='Provider profile: '+value.profile_id+'\nProfile version: '+value.profile_revision+'\nRoute: '+value.route_id+'\nModel: '+value.model_id;return badge;
 }
 const guidanceLiteral=value=>value.replace(/[\u0000-\u001f\u007f]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));
 function renderRunContext(run){
@@ -224,8 +226,8 @@ byId('rename-form').onsubmit=event=>{event.preventDefault();if(!renameSnapshot||
 const settings=byId('provider-settings');
 let profileState;
 function profileRoutes(){
-  if(!profileState)return;const selected=profileState.profiles.find(value=>value.id===byId('provider-profile').value),routes=profileState.routes.filter(value=>value.discovery&&(!selected||value.provider===selected.provider));
-  const choose=byId('provider-name');choose.replaceChildren();for(const route of routes){const option=node('option',(route.provider==='anthropic'?'Claude':route.provider==='openai'?'OpenAI':route.provider)+' · '+(route.wire==='responses'?'Responses':route.wire==='anthropic-messages'?'Messages':'Chat Completions'));option.value=route.id;choose.append(option);}
+  if(!profileState)return;const selected=profileState.profiles.find(value=>value.id===byId('provider-profile').value),routes=profileState.routes.filter(value=>value.discovery&&providerWireLabel(value.wire)&&(!selected||value.provider===selected.provider));
+  const choose=byId('provider-name');choose.replaceChildren();for(const route of routes){const option=node('option',providerLabel(route.provider)+' · '+providerWireLabels[route.wire]);option.value=route.id;choose.append(option);}
   if(selected)choose.value=selected.route_id;else if(routes.some(value=>value.id==='openai.responses'))choose.value='openai.responses';
   choose.disabled=!routes.length;byId('profile-use').disabled=!selected||selected.id===profileState.active;
 }
@@ -257,8 +259,8 @@ window.addEventListener('message',event=>{
   else if(m.type==='reset-run'){resetLive();resetFailure();resetProcessStreams();byId('events').textContent='';renderRunContext();}
   else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();byId('events').textContent='';}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data);}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
-  else if(m.type==='provider-profiles'){profileState=m;byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',(profile.provider==='anthropic'?'Claude':'OpenAI')+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);profiles.value=m.active;profileRoutes();}
-  else if(m.type==='provider-wire'){const label=byId('provider-mode');label.textContent=m.wire==='responses'?'Responses':m.wire==='chat-completions'?'Chat Completions':m.wire==='anthropic-messages'?'Claude Messages':'';label.hidden=!label.textContent;}
+  else if(m.type==='provider-profiles'){profileState=m;byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);profiles.value=m.active;profileRoutes();}
+  else if(m.type==='provider-wire'){const label=byId('provider-mode');label.textContent=m.wire==='gemini-generate-content'?'Gemini GenerateContent':m.wire==='anthropic-messages'?'Claude Messages':providerWireLabel(m.wire)||'';label.hidden=!label.textContent;}
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
   else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;refreshRename();byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
   else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';byId('events').textContent='';}

@@ -1,19 +1,48 @@
 # Current native validation
 
-Newer Gemini SSE and request/transport source increase the required native
-gate to 60 contracts. Those components have not yet been compiled/executed;
-the 58-contract evidence below excludes them. See
-[stream scope](native-gemini-stream.md) and
-[transport scope](native-gemini-provider.md).
+The cleanup revision `dea588874e5a8c8e40bf1a158fa925520443c8a0` passed its
+hosted gate: **58 native, 88 extension and 17 browser contracts**, native/browser
+integration and VSIX verification, with zero failures/skips.
+[Hosted run](https://github.com/xlang-foundation/xMind/actions/runs/37734970144),
+[exact provenance](evidence/native-cleanup-hosted-provenance.json).
+This verifies removal of the prototype/legacy tree, the native root build,
+merged `doc/`, descriptor attribution, graph dependency filtering and the original
+Gemini request component. It also verifies the repository error-boundary fix
+that failed the earlier request gate.
 
-The latest request DTO replay additions (signature-only/empty signed parts,
-absent arguments and part metadata) also await recompilation. Earlier request
-component evidence does not verify those new cases.
+Gemini transport/replay revision `ddd1d3da087f9ca7f8b0b8d81705c82632e15094`
+also passed its separate hosted gate: **60 native, 88 extension and 17 browser
+contracts**, native/browser integration and VSIX verification, with no
+failures/skips. [Hosted run](https://github.com/xlang-foundation/xMind/actions/runs/37736323072),
+[exact evidence](evidence/native-gemini-transport-hosted-provenance.json).
+This verifies native request/SSE/HTTP components and expanded replay data;
+it excludes the newer common gateway, history bridge and limit fixes below.
 
-The local native source `9e3a104b27414fc61c6e346c75e41cf630c21991` passed all **58 contracts** in 98.49 seconds, with **88 extension and 17 browser checks**, no skips, and the native/browser integration contract passing. See [provenance](../doc/evidence/native-gemini-local-provenance.json) and [CTest output](../doc/evidence/native-gemini-local-ctest.log). Synthetic peers verify mechanics; this gate does not establish new live provider coverage.
+Newer working source passed **61 native contracts** locally in **103.05 seconds**,
+**91 extension and 17 browser checks**, plus actual browser/native integration.
+This includes Gemini SSE, native HTTP transport, expanded replay data, common
+model gateway and the agent-history bridge. Additional callback ordering/usage
+assertions and a function-response bound correction with escaped large-read
+regressions were added after compilation; those changes await execution and are
+excluded from the pass claim. A sibling runtime benchmark
+prevents a local C++ rebuild. Hosted execution of this checkpoint is still
+required. [Local log/provenance](evidence/native-gemini-history-local-provenance.json).
 
-The installed browser preview retains its separately verified backend/view versions. See [provider setup](../doc/provider-setup.md) for hosted and installed scope. The new Gemini component handles request serialization and history metadata; transport, engine integration and live acceptance remain incomplete.
+The [Gemini bridge](native-gemini-history.md) uses labelled synthetic component
+and socket fixtures. No live Gemini inference, product enrollment or actual
+Gemini AgentRunner execution is claimed. Thin clients can display the new wire;
+default discovery/enrollment remains unchanged.
 
-The Python prototype and original xlang-based runtime, service/plugin assets, launchers and dependent probes have been removed. The root build now delegates to Native/ and configures the same 58-contract manifest. Generic xlang3 dependency setup and its runtime probe remain independent of the native agent engine.
+The installed browser preview retains its separate verified native `19d69dd`
+and view `6f32d215` snapshots. Neither the cleanup bundle nor this newer native
+source is installed there. See [provider setup](provider-setup.md).
 
-Complete coding parity, broad native provider support, remaining MCP/A2A capabilities and Local/Nexus connection profiles are still active requirements. Team-server implementation, PostgreSQL, WebRTC and Electron belong to private Nexus. [Architecture](../doc/architecture.md), [parity baseline](PARITY.md).
+The Python prototype and original xlang runtime/service/plugin assets, launchers
+and dependent probes are removed. Both root and Native CMake entry points use
+the current native contracts. Generic xlang3 dependency setup remains separate
+from the native agent engine. [Cleanup](cleanup.md).
+
+Complete coding parity, broad native providers, remaining MCP/A2A capabilities
+and Local/Nexus connection profiles remain active requirements. Team-server
+implementation, PostgreSQL, WebRTC and Electron belong to private Nexus.
+[Architecture](architecture.md), [parity baseline](PARITY.md).

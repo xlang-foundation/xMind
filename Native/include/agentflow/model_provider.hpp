@@ -10,7 +10,7 @@ public:
     using std::invalid_argument::invalid_argument;
 };
 enum class Capability {unknown,unsupported,supported};
-enum class ProviderWire {chat_completions,responses,anthropic_messages};
+enum class ProviderWire {chat_completions,responses,anthropic_messages,gemini_generate_content};
 enum class ReasoningEffort {none,minimal,low,medium,high,xhigh,max};
 enum class MessageRole {system,developer,user,assistant,tool};
 struct ModelMessage {
@@ -29,7 +29,9 @@ struct ModelRequest {
     std::optional<std::int64_t> max_output_tokens;
 };
 struct ChatProviderConfig {
-    std::string endpoint,model; // Explicit full endpoint and deployment/model ID.
+    // Backend-selected endpoint and model. Gemini uses a versioned endpoint
+    // base; its model resource is bound into the path by the native adapter.
+    std::string endpoint,model;
     Capability tools=Capability::unknown,stream_usage=Capability::unknown,output_limit=Capability::unknown;
     std::chrono::milliseconds deadline{120000},idle_timeout{60000};
     ProviderWire wire=ProviderWire::chat_completions;

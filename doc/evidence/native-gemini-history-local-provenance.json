@@ -1,0 +1,61 @@
+{
+  "baseRevision": "ddd1d3da087f9ca7f8b0b8d81705c82632e15094",
+  "sourceState": "Uncommitted Gemini history/common-gateway working-tree integration, not an exact committed revision. See exclusions for changes made after compilation.",
+  "nativePassed": 61,
+  "nativeFailed": 0,
+  "nativeSkipped": 0,
+  "nativeSeconds": 103.05,
+  "nativeManifestMatched": true,
+  "extensionPassed": 91,
+  "extensionFailed": 0,
+  "extensionSkipped": 0,
+  "browserPassed": 17,
+  "browserFailed": 0,
+  "browserSkipped": 0,
+  "browserAssets": "Built from current thin-client source into a fresh ignored directory; source-copy equality checked",
+  "browserNativeIntegration": "Passed with freshly built native backend and disposable SQLite/processes; real graph/auth/restart/history/reconnect contracts. Live preview untouched.",
+  "runtimeRevision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "runtimeSource": "Isolated xlang3-nexus-buffer worktree",
+  "stdlibSource": "C:/Python/Python314/Lib source only; no CPython execution",
+  "excludedPostBuildChanges": [
+    "Native/tests/gemini_provider_contract.cpp: stronger common tool callback ordering/native-ID/exact-argument/usage assertions added after target compilation",
+    "Native/src/gemini_request.cpp and request/history contracts: function-response bound correction and escaped large-read regressions added after complete gate; require compilation/execution"
+  ],
+  "pendingSourceSha256": {
+    "Native/CMakeLists.txt": "b6ee78c8f7dcae592a5680b81f840c427ac8c32b18a4964980739f0515b1cb97",
+    "Native/include/agentflow/gemini_history.hpp": "ccc903bc69a1a9f3aa5cc0677797f532249bfd1cc13574add3a9dfdcbe12c026",
+    "Native/include/agentflow/model_provider.hpp": "9ba38e54840dda6fb65e05c4b91cea0f0a455cac7249c7a3c5a496715ae1a4d6",
+    "Native/src/agent_runner.cpp": "7dcbe7bd664712178d4246713b52bcfc08867688fa701dcfb460f1c3645f90c9",
+    "Native/src/chat_provider.cpp": "eb13aaed6371b4bd701b044e03ef43292f67f4eef1234950dff6ad5309973f78",
+    "Native/src/gemini_history.cpp": "abf5eaa961c24b87cc371b141b8e59707ebec41e996e17127ed1a6d211f4e66a",
+    "Native/src/gemini_request.cpp": "0067513ce04b5cafd98d2e5c35368ea1069aafa6868e2a1c88b01552dbc2efc3",
+    "Native/src/gemini_stream.cpp": "ff1e4167ccfd2d8ffce2586d105b3d28200a78daf7b6fcb00293403e8341e84a",
+    "Native/src/http_server.cpp": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
+    "Native/src/provider_profile_runtime.cpp": "c16a433d58c959fa75e27b86afc7f0442df7bcc2fca7f98ad1e8523665f32f10",
+    "Native/src/provider_profiles.cpp": "2cf15843ab48b0f92bded25d0b4cd5bb4b178cb12cb0a1aa9486e8d4d6a4c620",
+    "Native/src/repository.cpp": "cfb4126542b5d53e95c641079e7cbfe5d5cde1019985a60ce9467b694f8ac00d",
+    "Native/tests/gemini_history_contract.cpp": "24728728265d5febbb461e0247c70768d9d0532123188792c7a4f2786b8e64a6",
+    "Native/tests/gemini_provider_contract.cpp": "fa31891d785e892feebcf7776237f2f6989fbaa6a6432092b5ce3b70f9d568e5",
+    "Native/tests/gemini_provider_peer.mjs": "6d17eda6cd1deb1d120ccae03a34d0a121ea70e8c1789cad87721cd27d1ca29b",
+    "Native/tests/gemini_request_contract.cpp": "a10a758f405df64cf04dba3a525d4cee8e2df093d09fd2525b2d963f2f428733",
+    "Native/tests/gemini_stream_contract.cpp": "83825395f339684046f44570e485938cd9748770ea3610f5fc7b3a959b3d71a9",
+    "Tools/ci-native.ps1": "68f0bf39eaff19e490c524bb1624c187e07d07285bf2347aeb116a986cd2f8a3",
+    "extensions/vscode/client.js": "8b6fc8296ecbba650b26d8034fccba9d8867defb993c0a87393db5958533cb25",
+    "extensions/vscode/media/chat.js": "a5971d5a40436de0fc214af3c635d5ea96fb16c62ff2ef96d5d2dcadd5136755",
+    "extensions/vscode/tests/client.test.js": "d4f1ac0f165ed041ad3700bf9da52af82b5e1af1dba00d3b86cb314f1dc6348a",
+    "extensions/vscode/tests/renderer.test.js": "610ab07281c46575c4052ff0679acf298c3e3eb163a415bc1891f6f7163b380c"
+  },
+  "compiledBinarySha256": {
+    "xmind_server.exe": "95f537d0a695c60162f17e85bd548680da6ffe9aa7087652328babe6459a3cf7",
+    "agentflow_gemini_provider_contract.exe": "96371022e0b68bc36b613c23e1884ef034123b1d7aae9879cdf8ab012daf133e",
+    "agentflow_gemini_history_contract.exe": "6185b025b4a5cee445902907dabf058dab66b4b342832a5f971cd843926cd653",
+    "agentflow_gemini_request_contract.exe": "de1495347019e4e1dbbd0de5e394d57fadc3ebf080b5e5c997912b46ad25af1f"
+  },
+  "logSha256": {
+    "native-gemini-history-local-ctest.log": "1c051c0b1c57817212269a30eb8f909e0177f0c9df2be344ab512f0ef7fa798c",
+    "native-gemini-history-local-extension.log": "d4e70d7cff67f4a36b74d9057045f1e2c7199a7b6bd3e5b61d5012b491954221",
+    "native-gemini-history-local-browser.log": "8e4afaa103746e8a1a6a9386b99ba2c8958b8d52405825c8c27849bb86a753f2",
+    "native-gemini-history-local-browser-native.log": "ffa8a56eeb33ceb7dc064c220c2fff5c93805595cb78a3f52cb677f765a71f56"
+  },
+  "scope": "61-contract gate verifies compiled Gemini SSE/request/HTTP/common-gateway/history baseline before the excluded changes. Synthetic provider fixtures only; no actual Gemini AgentRunner execution, discovery/enrollment, live Gemini inference, preview upgrade or broad parity completion claimed. New source must pass the hosted gate or a guarded local rebuild."
+}

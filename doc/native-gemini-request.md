@@ -1,50 +1,39 @@
-# Native Gemini request component
+# Native Gemini request serialization
 
-The new C++ component builds GenerateContent JSON with text turns, system
+The C++ component builds GenerateContent JSON with text turns, leading system
 instructions, JSON Schema function declarations, correlated function results
-and an optional output limit. It preserves argument/response numeric tokens and
-opaque thought signatures. Provider call IDs remain optional and are never
-invented. Unknown function capability, mismatched or incomplete results,
-duplicates, malformed JSON and excessive input are rejected.
+and an optional output limit. It preserves argument/response numeric tokens,
+opaque thought signatures and original `partMetadata` JSON. Provider call IDs
+and function arguments remain optional; absent values are not invented.
 
-Model parts retain the optional `thought` flag, including the distinction
-between absent and explicitly false. Signed thought summaries remain separate
-from visible answer parts; the serializer preserves their order and signature
-attachment. User/tool-result thought metadata is rejected. This is history
-serialization only, not a reasoning display or streaming implementation.
+Model parts retain the optional `thought` flag, including absent versus false,
+signature-only parts and empty text. Signed summaries remain separate from
+visible answer parts, in their original order. User/tool-result thought metadata,
+unknown function capability, mismatched or incomplete results, duplicate fields,
+malformed JSON and excessive input are rejected. Model turns allow up to 4096
+parts, with at most 64 pending calls; serialized requests are bounded to 8 MiB.
 
-The newer replay DTO source also represents signature-only parts, signed empty
-text, absent function arguments and original `partMetadata` JSON. It preserves
-data-field presence and metadata numeric tokens rather than inventing text or
-an empty argument object. Conflicting omitted arguments and misplaced metadata
-are rejected. These additions await recompilation; the earlier 58-contract
-gate below excludes them.
+The implementation follows Google's
+[GenerateContent REST reference](https://ai.google.dev/api/generate-content).
+Request serialization is now connected to the native
+[HTTP/SSE adapter](native-gemini-provider.md) and
+[common agent-history bridge](native-gemini-history.md).
 
-The wire-specific DTO keeps model endpoint selection and credentials outside
-the request body. It is not connected to the execution platform or provider
-selector. Native transport, streaming/event translation, engine-history
-adaptation, account discovery, protected credential enrollment and live model
-acceptance remain pending. Media, caching, thinking controls and the separate
-Interactions API also remain unimplemented.
+The local working source passed the complete **61-contract native gate**,
+including expanded replay cases. A later function-response bound correction
+and escaped large-read regressions await compilation/execution. See
+[local scope and remaining assertions](evidence/native-gemini-history-local-provenance.json).
+The original request component and repository error-boundary correction also
+passed the hosted cleanup gate at `dea5888`: **58 native, 88 extension and 17
+browser contracts**, with zero failures or skips.
+[Hosted provenance](evidence/native-cleanup-hosted-provenance.json).
+That older hosted gate excludes the later stream, transport and history source.
 
-The implementation follows Google's [GenerateContent REST reference](https://ai.google.dev/api/generate-content).
-Its synthetic native contract checks text, schemas, signatures, precision,
-function correlation and rejection cases. This source increases the required
-complete native gate from 57 to 58 contracts. The local full gate passed all
-58 contracts in 98.49 seconds, with 88 extension and 17 browser checks and the
-actual native/browser integration contract also passing. See
-[local provenance](evidence/native-gemini-local-provenance.json) and
-[CTest output](evidence/native-gemini-local-ctest.log). Hosted validation of this
-source remains pending. No Gemini availability or inference is claimed.
+Expanded signature-only/empty/metadata replay DTOs subsequently passed the hosted
+**60-contract gate** at `ddd1d3d`, alongside native streaming and transport.
+[Exact evidence](evidence/native-gemini-transport-hosted-provenance.json).
+It excludes the newer history bridge, gateway and limit corrections.
 
-The older hosted source `34f2206` compiled its 58 contracts, but failed the
-agent-runner check because malformed prompt JSON leaked a parser exception.
-That repository error boundary was corrected in `9e3a104`, whose complete
-local gate is recorded above. The newer cleanup revision is building in CI;
-hosted verification of the correction remains pending. See
-[failed hosted scope](evidence/native-gemini-request-hosted-failure.json).
-
-The newer [native streaming source](native-gemini-stream.md) and
-[request/transport boundary](native-gemini-provider.md) are separate unverified
-components and increase the configured gate to 60. The 58-contract evidence
-above excludes that source and does not establish streaming/transport support.
+Gemini is not yet enrolled through product Settings or model discovery. No live
+Gemini inference is claimed. Media, caching controls, thinking controls, Vertex
+AI/OAuth and the separate Interactions API remain unimplemented.

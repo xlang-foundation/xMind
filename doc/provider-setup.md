@@ -11,7 +11,8 @@ response or invented usage. Missing/malformed context hides the row; changing
 conversation or resetting run observation clears it. Local verification passed
 **88 extension and 17 browser tests**, plus actual native/browser integration
 against the existing hosted `19d69dd` binary. That integration proves backward
-compatibility, not the pending native descriptor projection. This view source
+compatibility. The descriptor projection subsequently passed the cleanup's
+hosted gate, recorded below. This view source
 has not replaced the installed preview.
 
 New native source projects `provider_context` into admitted, inspected and listed
@@ -30,9 +31,14 @@ in child history and run descriptors.
 Native tests now cover API admission receipts, descriptor projection across
 updates/reopen, unrelated legacy messages, malformed-context rejection without
 partial admission, and two dependent agent nodes with an independent peer
-checking that profile metadata never enters model requests. Compilation and the
-full native gate for this source are pending. The installed preview remains on
-native admission checkpoint `19d69dd`.
+checking that profile metadata never enters model requests. The complete cleanup
+gate at `dea5888` passed **58 native, 88 extension and 17 browser contracts**,
+native/browser integration and VSIX verification with no failures/skips.
+[Exact hosted evidence](evidence/native-cleanup-hosted-provenance.json).
+This verifies descriptor projection, graph dependency filtering and the run
+inspector; it excludes newer Gemini stream/transport/history changes. The
+installed preview remains on native admission checkpoint `19d69dd` and view
+`6f32d215`; the cleanup bundle has not been installed.
 
 ## Recovering from another view's provider change
 
@@ -59,7 +65,9 @@ integration and VSIX verification, with no test skips.
 [job/TAP output](evidence/native-provider-history-passing-ci-job.log) and
 [exact provenance](evidence/native-provider-history-hosted-provenance.json)
 establish that component scope. Later descriptor projection, graph dependency
-filtering, run-inspector UI and Gemini source require their own gate. The live
+filtering, run-inspector UI and the original Gemini request component passed the
+separate cleanup gate above. Newer Gemini source has its own
+[validation scope](VALIDATION_STATUS.md). The live
 preview still uses the previously installed `19d69dd` native binary.
 
 New source captures a public `provider_context` in the admitted user message
@@ -77,7 +85,8 @@ their original durable history; an idempotent replay returns the original run.
 Tool children do not receive invented model provenance. A graph root's selected
 provider context does not imply that its human/tool nodes called a model.
 The context is stored atomically with existing message/graph admission records
-through xlang3 SQLite. It is not yet a field on the public run descriptor.
+through xlang3 SQLite. At checkpoint `6f32d215` it was not a field on the public
+run descriptor; the later projection is verified by the cleanup gate above.
 
 The shared renderer displays the recorded provider/wire beside response metrics,
 with profile version and identity available in its tooltip. Old history with no

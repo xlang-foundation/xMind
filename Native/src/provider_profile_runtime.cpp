@@ -8,6 +8,7 @@ namespace {
 std::vector<ProviderProfileRoute> routes(const std::vector<ProviderProfileExecutionPolicy>& policy){
     std::vector<ProviderProfileRoute> result;
     for(const auto& value:policy){
+        if(value.route.wire==ProviderWire::gemini_generate_content&&value.catalogue)throw std::invalid_argument("Gemini catalogue integration is not implemented");
         if(value.provider.endpoint!=value.route.endpoint||value.provider.wire!=value.route.wire||
             !value.provider.model.empty()||value.provider.deadline.count()<=0||value.provider.idle_timeout.count()<=0)
             throw std::invalid_argument("Provider execution policy differs from profile route");

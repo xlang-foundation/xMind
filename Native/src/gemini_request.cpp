@@ -9,8 +9,8 @@ using Json=nlohmann::json;
 std::string quoted(const std::string& value){try{return Json(value).dump();}catch(const Json::exception&){throw std::invalid_argument("Invalid Gemini UTF-8 text");}}
 void name(const std::string& value){if(value.empty()||value.size()>128||value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::invalid_argument("Invalid Gemini function name");}
 void identity(const std::string& value){if(value.empty()||value.size()>256||value.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid Gemini call identity");}
-std::string object(const std::string& source){
-    if(source.size()>1024*1024)throw std::invalid_argument("Gemini JSON object exceeds limits");
+std::string object(const std::string& source,std::size_t limit=1024*1024){
+    if(source.size()>limit)throw std::invalid_argument("Gemini JSON object exceeds limits");
     std::vector<std::set<std::string>> fields;
     try{
         const auto parsed=Json::parse(source,[&](int depth,Json::parse_event_t event,Json& value){
@@ -35,7 +35,7 @@ std::string serialize_gemini_request(const GeminiRequest& request){
     std::string body="{\"contents\":[";bool first_content=true;
     for(const auto& content:request.contents){
         if(content.role!=GeminiRole::user&&content.role!=GeminiRole::model)throw std::invalid_argument("Invalid Gemini content role");
-        if(content.parts.empty()||content.parts.size()>128)throw std::invalid_argument("Gemini content parts exceed limits");
+        if(content.parts.empty()||content.parts.size()>(content.role==GeminiRole::model?4096:128))throw std::invalid_argument("Gemini content parts exceed limits");
         const bool answering=!pending.empty();if(answering&&content.role!=GeminiRole::user)throw std::invalid_argument("Gemini function results must precede model continuation");
         if(!first_content)body+=',';first_content=false;
         body+="{\"role\":"+quoted(content.role==GeminiRole::user?"user":"model")+",\"parts\":[";bool first_part=true;
@@ -44,17 +44,23 @@ std::string serialize_gemini_request(const GeminiRequest& request){
             auto field=[&](const char* key,const std::string& value){if(encoded.size()>1)encoded+=',';encoded+=quoted(key)+':'+value;};
             if(part.kind==GeminiPartKind::text){
                 if(answering||!part.name.empty()||part.call_id||part.object_json!="{}"||part.arguments_omitted)throw std::invalid_argument("Invalid Gemini text part");
-                const bool signed_empty=part.text.empty()&&content.role==GeminiRole::model&&part.thought_signature;
-                encoded="{\"text\":"+(signed_empty?quoted(part.text):text(part.text));
+                const bool empty_model=part.text.empty()&&content.role==GeminiRole::model;
+                encoded="{\"text\":"+(empty_model?quoted(part.text):text(part.text));
             }else if(part.kind==GeminiPartKind::signature){
                 if(answering||content.role!=GeminiRole::model||!part.thought_signature||!part.text.empty()||!part.name.empty()||part.call_id||part.object_json!="{}"||part.arguments_omitted)throw std::invalid_argument("Invalid Gemini signature-only part");
                 encoded="{";
             }else{
-                functions();name(part.name);account(part.name.size());account(part.object_json.size());if(part.arguments_omitted&&(part.kind!=GeminiPartKind::function_call||part.object_json!="{}"))throw std::invalid_argument("Conflicting omitted Gemini arguments");const auto payload=object(part.object_json);
+                functions();name(part.name);account(part.name.size());account(part.object_json.size());if(part.arguments_omitted&&(part.kind!=GeminiPartKind::function_call||part.object_json!="{}"))throw std::invalid_argument("Conflicting omitted Gemini arguments");
+                // Native read results may exceed 1 MiB once their original text
+                // is escaped and wrapped as a string-valued function response.
+                // Only responses share the existing 8 MiB total-body budget;
+                // arguments, declarations and replay metadata retain 1 MiB.
+                const auto payload=object(part.object_json,part.kind==GeminiPartKind::function_response?8*1024*1024:1024*1024);
                 if(!part.text.empty())throw std::invalid_argument("Function part cannot also carry text");
                 if(part.call_id){identity(*part.call_id);account(part.call_id->size());}
                 if(part.kind==GeminiPartKind::function_call){
                     if(content.role!=GeminiRole::model||answering)throw std::invalid_argument("Gemini function call requires a model turn");
+                    if(pending.size()>=64)throw std::invalid_argument("Gemini function call count exceeds limits");
                     if(part.call_id&&!seen_ids.insert(*part.call_id).second)throw std::invalid_argument("Duplicate Gemini call identity");
                     pending.push_back({part.name,part.call_id});encoded="{\"functionCall\":{\"name\":"+quoted(part.name);if(!part.arguments_omitted)encoded+=",\"args\":"+payload;
                 }else if(part.kind==GeminiPartKind::function_response){
@@ -74,7 +80,7 @@ std::string serialize_gemini_request(const GeminiRequest& request){
                 field("thought",*part.thought?"true":"false");
             }
             if(part.part_metadata_json){if(content.role!=GeminiRole::model)throw std::invalid_argument("Gemini replay metadata requires a model part");account(part.part_metadata_json->size());field("partMetadata",object(*part.part_metadata_json));}
-            encoded+='}';body+=encoded;
+            encoded+='}';body+=encoded;if(body.size()>8*1024*1024)throw std::invalid_argument("Gemini serialized request exceeds limits");
         }
         if(answering&&!pending.empty())throw std::invalid_argument("Gemini continuation requires all function results in one user turn");
         body+="]}";

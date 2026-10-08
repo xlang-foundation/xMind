@@ -41,7 +41,7 @@ void identity(const std::string& value,std::size_t bound=256){if(value.empty()||
 struct GeminiStream::Impl {
     ChatCompletionStream::Sink sink;GeminiCompletion result;Json usage=Json::object();
     std::vector<std::string> parts;std::set<std::string> ids;std::string line,data,event;
-    std::size_t bytes=0;bool first_line=true,skip_lf=false,has_data=false,terminal=false,failed=false,acknowledged=false;
+    std::size_t bytes=0,parts_bytes=2;bool first_line=true,skip_lf=false,has_data=false,terminal=false,failed=false,acknowledged=false;
     explicit Impl(ChatCompletionStream::Sink value):sink(std::move(value)){if(!sink)throw std::invalid_argument("Model event sink is required");}
     void emit(const std::string& kind,const Json& value){sink({kind,value.dump()});}
     void metadata(const Json& value,const char* field,std::string& target){if(!value.contains(field))return;const auto observed=text(value,field);identity(observed);if(!target.empty()&&target!=observed)throw ModelProtocolError("Gemini response identity changed");target=observed;}
@@ -54,10 +54,11 @@ struct GeminiStream::Impl {
     }
     void part(const Json& value,std::string_view raw){
         if(!value.is_object()||value.empty())throw ModelProtocolError("Invalid Gemini content part");
+        const auto stored_size=raw.size()+(parts.empty()?0:1);if(stored_size>limit-parts_bytes)throw ModelProtocolError("Gemini part history exceeds limits");
         for(auto it=value.begin();it!=value.end();++it)if(it.key()!="text"&&it.key()!="functionCall"&&it.key()!="thought"&&it.key()!="thoughtSignature"&&it.key()!="partMetadata")throw ModelProtocolError("Unsupported Gemini content part");
         if(value.contains("thought")&&!value["thought"].is_boolean())throw ModelProtocolError("Invalid Gemini thought flag");
         if(value.contains("thoughtSignature"))identity(text(value,"thoughtSignature"),65536);
-        if(value.contains("partMetadata")&&!value["partMetadata"].is_object())throw ModelProtocolError("Invalid Gemini part metadata");
+        if(value.contains("partMetadata")){if(!value["partMetadata"].is_object())throw ModelProtocolError("Invalid Gemini part metadata");const auto metadata=member(raw,"partMetadata");if(metadata.size()>1024*1024)throw ModelProtocolError("Gemini part metadata exceeds limits");parse(std::string(metadata),16);}
         if(value.contains("text")&&value.contains("functionCall"))throw ModelProtocolError("Conflicting Gemini part data");
         if(value.contains("text")){
             const auto added=text(value,"text");if(!value.value("thought",false)){append(result.content,added);if(!added.empty())emit("model.text",{{"text",added}});}
@@ -69,7 +70,7 @@ struct GeminiStream::Impl {
             if(call.contains("args")){if(!call["args"].is_object())throw ModelProtocolError("Invalid Gemini function arguments");decoded.arguments_json=std::string(member(member(raw,"functionCall"),"args"));if(decoded.arguments_json->size()>1024*1024)throw ModelProtocolError("Gemini function arguments exceed limits");parse(*decoded.arguments_json,16);}
             result.function_calls.push_back(std::move(decoded));
         }else if(!value.contains("thoughtSignature"))throw ModelProtocolError("Gemini part has no supported data");
-        if(parts.size()>=4096)throw ModelProtocolError("Gemini part count exceeds limits");parts.emplace_back(raw);
+        if(parts.size()>=4096)throw ModelProtocolError("Gemini part count exceeds limits");parts.emplace_back(raw);parts_bytes+=stored_size;
     }
     void dispatch(){
         if(!has_data)return;data.pop_back();if(!event.empty()&&event!="message")throw ModelProtocolError("Unsupported Gemini SSE event");
