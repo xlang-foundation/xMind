@@ -24,6 +24,17 @@ available in Settings. Runtime/service publication, migration, discovery and bot
 client adapters still need integration and acceptance. The hosted native gate's
 exact expected set includes the new profile contract (56 total).
 
+The next registry change adds a backend-only validator before durable publication
+and an initial import operation that retains an existing encrypted credential
+reference and configuration revision. The validator can construct the native
+execution service before the registry CAS; its failure leaves the published
+profile unchanged. Service publication remains the owning runtime's responsibility
+after successful CAS. Initial migration cannot replace an existing registry or
+rewrite the legacy source record. Actual SQLite/key/restart contracts now include
+native service-construction rejection and two concurrent migration candidates;
+these new additions await compilation and hosted execution. Automatic legacy
+record loading, runtime activation and client enrollment remain pending.
+
 Current setup is one saved OpenAI configuration. Claude request/stream/transport
 source additions do not change that API or make Claude selectable in Settings.
 The next enrollment change must retain the existing encrypted OpenAI key and

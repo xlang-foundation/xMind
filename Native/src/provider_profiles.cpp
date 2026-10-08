@@ -38,7 +38,7 @@ ProviderProfiles::State ProviderProfiles::load()const{
 }
 ProviderProfileSnapshot ProviderProfiles::snapshot()const{return load().snapshot;}
 SecretBytes ProviderProfiles::credential(const std::string& id)const{identity(id);const auto state=load();for(const auto& profile:state.snapshot.profiles)if(profile.id==id){const auto& policy=route(profile.route_id);return store_.resolve_credential(policy.credential_scope,profile.credential_id,policy.credential_purpose).get();}throw NotFound("Provider profile not found");}
-ProviderProfileSnapshot ProviderProfiles::save(std::string id,std::string route_id,std::string model,SecretBytes key,std::int64_t expected,bool activate){
+ProviderProfileSnapshot ProviderProfiles::save(std::string id,std::string route_id,std::string model,SecretBytes key,std::int64_t expected,bool activate,Validator validate){
     identity(id);identity(model);const auto& policy=route(route_id);auto state=load();if(expected<0||expected!=state.snapshot.revision||expected>=maximum)throw Conflict("Provider profile registry revision changed");
     auto& profiles=state.record["profiles"];auto found=std::find_if(profiles.begin(),profiles.end(),[&](const Json& value){return value.at("id")==id;});
     if(found==profiles.end()&&profiles.size()>=32)throw std::invalid_argument("Provider profile limit reached");
@@ -54,16 +54,35 @@ ProviderProfileSnapshot ProviderProfiles::save(std::string id,std::string route_
     // Candidate encryption precedes CAS; failed publication leaves an unreferenced
     // encrypted candidate and never rotates/deletes any active credential.
     store_.put_credential(policy.credential_scope,credential_id,policy.credential_purpose,"Model provider profile",std::move(key),0).get();
+    const SavedProviderProfile saved{id,route_id,model,credential_id,profile_revision};
+    if(validate)validate(saved,policy);
     store_.compare_information("native-provider-profiles","registry",encoded,state.source).get();
     state.snapshot.revision=expected+1;if(activate)state.snapshot.active=id;
-    const SavedProviderProfile saved{id,route_id,model,credential_id,profile_revision};
     const auto previous=std::find_if(state.snapshot.profiles.begin(),state.snapshot.profiles.end(),[&](const auto& value){return value.id==id;});
     if(previous==state.snapshot.profiles.end())state.snapshot.profiles.push_back(saved);else *previous=saved;return state.snapshot;
 }
-ProviderProfileSnapshot ProviderProfiles::select(std::string id,std::int64_t expected){
+ProviderProfileSnapshot ProviderProfiles::select(std::string id,std::int64_t expected,Validator validate){
     identity(id);auto state=load();if(expected<0||expected!=state.snapshot.revision||expected>=maximum)throw Conflict("Provider profile registry revision changed");
-    if(std::none_of(state.snapshot.profiles.begin(),state.snapshot.profiles.end(),[&](const auto& value){return value.id==id;}))throw NotFound("Provider profile not found");
+    const auto selected=std::find_if(state.snapshot.profiles.begin(),state.snapshot.profiles.end(),[&](const auto& value){return value.id==id;});
+    if(selected==state.snapshot.profiles.end())throw NotFound("Provider profile not found");
     // Confirm credential ownership before publishing selection; no key forwarding.
-    auto verified=credential(id);state.record["revision"]=expected+1;state.record["active"]=id;store_.compare_information("native-provider-profiles","registry",state.record.dump(),state.source).get();state.snapshot.revision=expected+1;state.snapshot.active=id;return state.snapshot;
+    const auto& policy=route(selected->route_id);
+    auto verified=store_.resolve_credential(policy.credential_scope,selected->credential_id,policy.credential_purpose).get();
+    if(validate)validate(*selected,policy);
+    state.record["revision"]=expected+1;state.record["active"]=id;store_.compare_information("native-provider-profiles","registry",state.record.dump(),state.source).get();state.snapshot.revision=expected+1;state.snapshot.active=id;return state.snapshot;
+}
+ProviderProfileSnapshot ProviderProfiles::import_existing(std::string id,std::string route_id,std::string model,std::string credential_id,std::int64_t initial,Validator validate){
+    identity(id);identity(model);identity(credential_id);const auto& policy=route(route_id);
+    if(initial<1||initial>maximum)throw std::invalid_argument("Invalid imported provider revision");
+    auto state=load();if(state.source)throw Conflict("Provider profile registry already exists");
+    auto verified=store_.resolve_credential(policy.credential_scope,credential_id,policy.credential_purpose).get();
+    if(same_secret(model,verified))throw std::invalid_argument("Provider key is not a model identity");
+    const SavedProviderProfile saved{id,route_id,model,credential_id,initial};
+    state.record["revision"]=initial;state.record["active"]=id;
+    state.record["profiles"].push_back({{"id",id},{"route_id",route_id},{"model",model},{"credential_id",credential_id},{"revision",initial},{"provider",policy.provider},{"endpoint",policy.endpoint},{"wire",wire_name(policy.wire)},{"credential_scope",policy.credential_scope},{"credential_purpose",policy.credential_purpose}});
+    if(validate)validate(saved,policy);
+    const auto encoded=state.record.dump();if(encoded.size()>65536)throw std::invalid_argument("Provider profile registry exceeds limits");
+    store_.compare_information("native-provider-profiles","registry",encoded,{}).get();
+    return {initial,id,{saved}};
 }
 }
