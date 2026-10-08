@@ -56,3 +56,11 @@ by the active benchmark guard. Existing live previews keep their already-loaded
 adapter and tested native binary; updating requires the matching verified pair.
 The native persistence tests, integration test and live restart acceptance are
 still pending, so this document does not claim the feature is ready to use.
+
+A separate local adapter contract passed against a labelled synthetic native
+access peer. It checks real HTTP forwarding, adapter restart at the same origin,
+bound credential headers, disconnect/revocation, duplicate-cookie and origin
+rejection, failed replacement login, malformed enrollment replies and backend
+unavailability. The adapter never sends the master token outside explicit
+enrollment or in JSON. All 12 browser tests pass locally. This peer verifies
+adapter behavior only; the C++/xlang3 restart and SQL fault tests remain pending.
