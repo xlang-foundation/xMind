@@ -1,0 +1,32 @@
+{
+  "xmindBase": "719122c246481e2d2684426f3038067a359d72be",
+  "workingTreeDelta": "Phase diagnostics added only to Native/tests/process_executor_contract.cpp; no product process engine, assertions or timeout changed.",
+  "sourceSha256": "ddddffd7c4a122299099a5a6fbc360a3b0aaf47fabf8e2255f5406616de964a5",
+  "binarySha256": "a1e1389e8076a77b2960397651250758b4dc7624889cc2fe8d98512e17ddd15a",
+  "evidenceSha256": "183e041a1dce3bceb69fd2d2c6d40abdaacbca63a2326312e5ff256070162348",
+  "fullPrivateLastTestSha256": "6f774e993785c0d640d1c1a371c11979efd8081b6d3453e825d35dd2c18aa6a1",
+  "nativePassed": 52,
+  "nativeFailed": 0,
+  "exitCode": 0,
+  "testTimeSeconds": 92.19,
+  "processContractSeconds": 10.32,
+  "outerTimeoutMs": 45000,
+  "xlang3Base": "914783909835116969aad7c66b210a5ac9a27661",
+  "xlang3Branch": "agentflow/mcp-native-compat",
+  "xlang3WorkingTree": [
+    "M modules/cryptography/CMakeLists.txt",
+    " M modules/cryptography/hashes_module.cpp",
+    " M modules/cryptography/native_state.h",
+    " M modules/sqlite/sqlite_handles.h",
+    " M modules/sqlite/sqlite_package.cpp",
+    " M modules/sqlite/sqlite_values.cpp",
+    "?? build-release.log",
+    "?? doc/agentflow-mcp-native-compat.md",
+    "?? modules/cryptography/aead_module.cpp",
+    "?? tests/fastapi/aesgcm_vectors.json",
+    "?? tests/fastapi/cryptography_aesgcm_contract.py",
+    "?? tests/fastapi/generate_aesgcm_vectors.mjs",
+    "?? tests/native/sqlite/isolation_and_text.py"
+  ],
+  "scope": "Actual local diagnostic fixture and complete native suite passed. Test peer/model replies are synthetic, process effects and xlang3 persistence are actual. The hosted 37e153b timeout cause is still unproven; this is no engine fix or hosted pass."
+}

@@ -1,5 +1,21 @@
 # Native coding process tools — implementation contract
 
+The `37e153b` hosted gate built and passed 51 native contracts but its approved
+process-executor fixture exceeded the unchanged 45-second outer timeout.
+[Exact gate provenance](evidence/native-cli-recovery-corrected-gate-failure-provenance.json)
+records that failure. It supplied no phase output locating the stall, so its cause
+remains unproven.
+
+The fixture now flushes static phase names with measured elapsed milliseconds
+around approval, dispatch, binary/stream/flood output, executable binding,
+result/output journal faults, reopen/quarantine, timeout/cancellation and store
+closure. No product engine behavior, assertion or timeout was changed. A new
+local build passed all 52 native contracts; this fixture completed in 10.32
+seconds with every phase reaching completion. [Local phase trace](evidence/native-process-timeout-diagnostic-local.log)
+and [provenance](evidence/native-process-timeout-diagnostic-local-provenance.json)
+preserve that scope. Diagnostics have not yet reproduced or explained the hosted
+stall; the next exact hosted gate remains required before release validation.
+
 The installed verified runtime `4fc1148` has now completed one live
 `gpt-5.6-sol` Responses command cycle through the native CLI and shared browser.
 A trusted `git-status` profile binds the installed Git executable, read-only

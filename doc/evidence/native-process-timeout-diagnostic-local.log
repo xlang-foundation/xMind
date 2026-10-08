@@ -1,0 +1,40 @@
+21/52 Testing: native_process_executor_contract
+21/52 Test: native_process_executor_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/process_executor_peer.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_process_executor_contract.exe" "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/process_peer.mjs" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/a2a-native
+"native_process_executor_contract" start time: Oct 07 18:49 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native process executor passed actual approved child effects, deny/cancel/expiry, exact profiles/arguments/workdir, stale directory, explicit binary output/nonzero exit, duplicate rejection, real result-storage fault, uncertain restart and cross-workspace profile quarantine, timeout and post-effect cancellation. Model/server/editor integration remains separate.
+[process-contract] phase=workspace-setup elapsed_ms=0
+[process-contract] phase=repository-open elapsed_ms=0
+[process-contract] phase=request-validation elapsed_ms=91
+[process-contract] phase=approval-denial elapsed_ms=92
+[process-contract] phase=approval-cancellation elapsed_ms=204
+[process-contract] phase=approval-expiry elapsed_ms=222
+[process-contract] phase=stale-directory elapsed_ms=1239
+[process-contract] phase=approved-dispatch elapsed_ms=1427
+[process-contract] phase=binary-output elapsed_ms=1671
+[process-contract] phase=streamed-output elapsed_ms=1913
+[process-contract] phase=output-flood elapsed_ms=2196
+[process-contract] phase=changed-executable elapsed_ms=2478
+[process-contract] phase=result-journal-fault elapsed_ms=7109
+[process-contract] phase=result-fault-close elapsed_ms=7386
+[process-contract] phase=restart-recovery elapsed_ms=7390
+[process-contract] phase=cross-workspace-quarantine elapsed_ms=7413
+[process-contract] phase=recovery-close elapsed_ms=7591
+[process-contract] phase=output-journal-fault elapsed_ms=7597
+[process-contract] phase=output-fault-close elapsed_ms=7973
+[process-contract] phase=timeout elapsed_ms=7976
+[process-contract] phase=interruption-close elapsed_ms=9739
+[process-contract] phase=cancel elapsed_ms=9746
+[process-contract] phase=interruption-close elapsed_ms=10112
+[process-contract] phase=complete elapsed_ms=10115
+<end of output>
+Test time =  10.32 sec
+----------------------------------------------------------
+Test Passed.
+"native_process_executor_contract" end time: Oct 07 18:49 Pacific Daylight Time
+"native_process_executor_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
