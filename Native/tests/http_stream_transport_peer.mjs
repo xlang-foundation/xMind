@@ -10,10 +10,32 @@ import {join} from 'node:path';
 const execute=promisify(execFile);
 const [executable,openssl]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-transport-'));
-let redirected=0,requests=0,plain,tls;const credentialRequests=new Map();
+let redirected=0,requests=0,plain,tls;const credentialRequests=new Map(),jsonPostRequests=new Map();
+const jsonPostBody=String.raw`{"input":"native 🌍","decimal":1.00000000000000000001,"pa\u0074h":"raw"}`;
+const jsonPostReply='{"input_tokens":19,"opaque":"synthetic 🌍"}';
 const wire='data: '+JSON.stringify({choices:[{index:0,delta:{content:'transport fixture'},finish_reason:'stop'}]})+'\n\ndata: [DONE]\n\n';
 function handler(request,response) {
   requests++;
+  if(request.url.startsWith('/post-json/')){
+    jsonPostRequests.set(request.url,(jsonPostRequests.get(request.url)??0)+1);
+    assert.equal(request.method,'POST');assert.equal(request.headers.accept,'application/json');assert.equal(request.headers['content-type'],'application/json');assert.equal(request.headers['x-extra'],undefined);
+    const mode=request.url.endsWith('/google-key')?'x-goog-api-key':request.url.endsWith('/api-key')||request.url.endsWith('/claude-protocol')?'x-api-key':'authorization';
+    for(const header of ['authorization','x-api-key','x-goog-api-key'])assert.equal(request.headers[header],header===mode?(mode==='authorization'?'Bearer ':'')+'transport-test-token-not-a-real-key':undefined,'JSON POST must select exactly one credential placement');
+    assert.equal(request.headers['anthropic-version'],request.url.endsWith('/claude-protocol')?'2023-06-01':undefined);
+    const chunks=[];request.on('data',bytes=>chunks.push(bytes));request.on('end',()=>{
+      assert.equal(Buffer.concat(chunks).toString('utf8'),jsonPostBody,'JSON POST must preserve raw request lexemes and UTF-8 bytes');
+      if(request.url.endsWith('/redirect')){response.writeHead(302,{Location:`http://127.0.0.1:${plain.address().port}/redirect-target`});response.end();return;}
+      if(request.url.endsWith('/diagnostic')){response.writeHead(400,{'Content-Type':'application/json'});response.end('{"error":{"type":"invalid_request_error","code":"context_length_exceeded","param":"input","message":"private-json-post"}}');return;}
+      if(request.url.endsWith('/delay'))return;
+      response.writeHead(200,{'Content-Type':request.url.endsWith('/wrong-media')?'text/event-stream':'application/json; charset=utf-8'});
+      if(request.url.endsWith('/stall')){response.flushHeaders();return;}
+      if(request.url.endsWith('/large')){response.end('{"opaque":"'+'x'.repeat(1024*1024+257)+'"}');return;}
+      if(request.url.endsWith('/oversized')){response.end('{"opaque":"'+'x'.repeat(128)+'"}');return;}
+      // Split in the middle of a multi-byte code point to check byte-preserving
+      // collection independently of transport's read chunk boundaries.
+      const bytes=Buffer.from(jsonPostReply),split=bytes.indexOf(Buffer.from('🌍'))+2;response.write(bytes.subarray(0,split));setTimeout(()=>response.end(bytes.subarray(split)),10);
+    });return;
+  }
   assert.equal(request.headers['anthropic-version'],undefined,'Generic transport must not add Claude protocol headers');
   if(request.url==='/redirect-target') {redirected++;response.writeHead(500);response.end();return;}
   if(request.url.startsWith('/auth/')||request.url.startsWith('/json-auth/')){
@@ -60,6 +82,7 @@ try {
   const result=await execute(executable,[`http://127.0.0.1:${plain.address().port}`,`https://127.0.0.1:${tls.address().port}`],{timeout:20000,windowsHide:true});
   assert.equal(redirected,0,'Credentials must not be forwarded by a followed redirect');
   assert.deepEqual(Object.fromEntries(credentialRequests),{'/auth/api-key':1,'/json-auth/api-key':1,'/auth/api-key/redirect':1,'/auth/google-key':1,'/json-auth/google-key':1,'/auth/google-key/redirect':1},'Only selected-header requests reach the wire; missing/injected credentials are rejected before sending');
+  assert.deepEqual(Object.fromEntries(jsonPostRequests),{'/post-json/bearer':1,'/post-json/api-key':1,'/post-json/google-key':1,'/post-json/claude-protocol':1,'/post-json/boundary':2,'/post-json/large':1,'/post-json/oversized':1,'/post-json/wrong-media':1,'/post-json/redirect':1,'/post-json/diagnostic':1,'/post-json/delay':2,'/post-json/stall':1,'/post-json/after-failure':1},'Exact native JSON POST requests reach the wire once; invalid requests, TLS failure and pre-cancellation never dispatch');
   assert.ok(requests>=9,'Protocol cases must reach real native sockets');
   process.stdout.write(result.stdout);
 } finally {

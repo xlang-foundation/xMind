@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/secret_protection.hpp"
 #include <chrono>
+#include <cstddef>
 #include <functional>
 #include <stdexcept>
 #include <stop_token>
@@ -32,4 +33,10 @@ void post_event_stream(const HttpStreamRequest& request,const SecretBytes* beare
     const std::function<void(std::string_view)>& consume,std::stop_token cancel={});
 // Bounded JSON discovery through the same certificate, redirect and deadline policy.
 std::string get_json(const HttpStreamRequest& request,const SecretBytes* bearer,std::stop_token cancel={});
+// Bounded non-streaming provider POST through the same transport policy. The
+// native API adapter must select a nonempty serialized body and an explicit
+// response byte limit (1..8 MiB), and validate the returned protocol JSON.
+// This transport preserves response bytes; it does not interpret opaque state.
+std::string post_json(const HttpStreamRequest& request,const SecretBytes* bearer,
+    std::size_t max_response_bytes,std::stop_token cancel={});
 }

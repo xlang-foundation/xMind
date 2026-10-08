@@ -1,5 +1,28 @@
 # Current native validation
 
+The bounded native JSON POST foundation passed the complete guarded local
+**78-contract gate in 193.91 seconds**, with all **427 frozen inputs** and
+accepted xlang3 runtime files verified unchanged. The extended transport
+contract took **8.80 seconds** and reached its exact 15 synthetic-peer POST
+request assertions while preserving prior GET/SSE cases. The first attempt
+deferred before native execution because an SDK benchmark was live; the later
+attempt began with clear guards. Full per-test output was preserved before
+CTest discovery. This implements transport; token-counting adapters, rolling
+compaction and its controls remain pending. The installed preview is unchanged.
+[Transport scope](native-context-transport.md),
+[local evidence](evidence/native-context-transport-local-provenance.json),
+[full compaction design](native-context-compaction-design.md).
+
+Exact earlier source `2cd392f83f642ae5278e7d77fa55822258a8a126` passed its
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37824215372):
+**78 native tests in 153.16 seconds**, **119 extension tests in 1.8119155
+seconds** and **26 browser tests in 1.0266805 seconds**, all 16 steps plus
+model-free integration and 18 VSIX assets. Source maps, advertised archive
+digests and all extracted payloads were verified against exact Git input.
+The raw job log and all 78 per-test blocks are preserved. This checkpoint
+predates the JSON POST change and does not establish installed/live planning.
+[Artifact-bound evidence](evidence/native-dynamic-mcp-hosted-2cd-provenance.json).
+
 The dynamic coding-child MCP checkpoint passed the complete guarded local
 **78 native contracts in 145.17 seconds**, with the exact complete manifest and
 all **427 frozen native/build-source inputs** verified. The new contract took

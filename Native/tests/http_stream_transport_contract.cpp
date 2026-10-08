@@ -19,6 +19,9 @@ int main(int argc,char** argv) {
         SecretBytes secret({reinterpret_cast<const std::uint8_t*>(synthetic.data()),synthetic.size()});
         auto request=[&](const std::string& path) {return HttpStreamRequest{base+path,R"({"fixture":"transport"})",10s,5s};};
         auto discovery=[&](const std::string& path){return HttpStreamRequest{base+path,"",10s,5s};};
+        const std::string json_post_body=R"({"input":"native )"+std::string("\xf0\x9f\x8c\x8d")+R"(","decimal":1.00000000000000000001,"pa\u0074h":"raw"})";
+        const std::string json_post_reply=R"({"input_tokens":19,"opaque":"synthetic )"+std::string("\xf0\x9f\x8c\x8d")+R"("})";
+        auto post_request=[&](const std::string& path){return HttpStreamRequest{base+"/post-json/"+path,json_post_body,10s,5s};};
         for(const auto mode:{CredentialHeader::x_api_key,CredentialHeader::x_goog_api_key}){
             const std::string name=mode==CredentialHeader::x_api_key?"api-key":"google-key";
             auto input=request("/auth/"+name);input.credential_header=mode;
@@ -43,6 +46,42 @@ int main(int argc,char** argv) {
             rejects<TransportCancelled>([&]{get_json(discovery("/json-delay"),&secret,cancellation.get_token());});
         }
         {auto timed=discovery("/json-delay");timed.deadline=200ms;rejects<TransportTimeout>([&]{get_json(timed,&secret);});}
+        // Native non-streaming JSON POST is shared infrastructure for context
+        // APIs. These are real socket/header/byte checks against a synthetic
+        // peer, not token-counting or model-compaction acceptance.
+        for(const auto mode:{CredentialHeader::bearer,CredentialHeader::x_api_key,CredentialHeader::x_goog_api_key}){
+            const std::string name=mode==CredentialHeader::bearer?"bearer":mode==CredentialHeader::x_api_key?"api-key":"google-key";
+            auto input=post_request(name);input.credential_header=mode;
+            require(post_json(input,&secret,json_post_reply.size())==json_post_reply,"JSON POST must preserve exact UTF-8 response bytes and selected credentials");
+            if(mode!=CredentialHeader::bearer)rejects<std::invalid_argument>([&]{post_json(input,nullptr,1024);});
+        }
+        {auto input=post_request("claude-protocol");input.credential_header=CredentialHeader::x_api_key;input.protocol=ProviderHttpProtocol::anthropic;
+         require(post_json(input,&secret,1024)==json_post_reply,"JSON POST must use the selected Claude protocol header");}
+        require(post_json(post_request("boundary"),&secret,json_post_reply.size())==json_post_reply,"JSON POST must accept exactly its byte limit");
+        rejects<TransportError>([&]{post_json(post_request("boundary"),&secret,json_post_reply.size()-1);});
+        const std::string large_reply=R"({"opaque":")"+std::string(1024*1024+257,'x')+R"("})";
+        require(post_json(post_request("large"),&secret,2*1024*1024)==large_reply,"JSON POST must honor its explicit limit independently of discovery's 1 MiB cap");
+        rejects<TransportError>([&]{post_json(post_request("oversized"),&secret,64);});
+        rejects<TransportError>([&]{post_json(post_request("wrong-media"),&secret,1024);});
+        rejects<ProviderHttpError>([&]{post_json(post_request("redirect"),&secret,1024);});
+        {bool rejected=false;try{post_json(post_request("diagnostic"),&secret,1024);}catch(const ProviderHttpError& error){
+            rejected=true;require(error.status==400&&error.type=="invalid_request_error"&&error.code=="context_length_exceeded"&&error.param=="input","JSON POST must preserve allowlisted context-limit diagnostics");
+            require(std::string(error.what()).find("private-json-post")==std::string::npos,"JSON POST diagnostics must not expose response messages");
+         }require(rejected,"JSON POST diagnostic must remain an HTTP failure");}
+        {std::stop_source cancellation;std::jthread canceller([&]{std::this_thread::sleep_for(150ms);cancellation.request_stop();});
+         rejects<TransportCancelled>([&]{post_json(post_request("delay"),&secret,1024,cancellation.get_token());});}
+        {auto timed=post_request("delay");timed.deadline=200ms;rejects<TransportTimeout>([&]{post_json(timed,&secret,1024);});}
+        {auto timed=post_request("stall");timed.idle_timeout=200ms;rejects<TransportTimeout>([&]{post_json(timed,&secret,1024);});}
+        {auto input=post_request("pre-cancel");std::stop_source cancellation;cancellation.request_stop();
+         rejects<TransportCancelled>([&]{post_json(input,&secret,1024,cancellation.get_token());});}
+        {auto input=post_request("invalid");rejects<std::invalid_argument>([&]{post_json(input,&secret,0);});rejects<std::invalid_argument>([&]{post_json(input,&secret,8*1024*1024+1);});
+         input.body.clear();rejects<std::invalid_argument>([&]{post_json(input,&secret,1024);});
+         input.body=std::string(8*1024*1024+1,'x');rejects<std::invalid_argument>([&]{post_json(input,&secret,1024);});
+         input.body=json_post_body;const std::string injected="transport-fixture\r\nx-extra: injected";SecretBytes invalid({reinterpret_cast<const std::uint8_t*>(injected.data()),injected.size()});rejects<std::invalid_argument>([&]{post_json(input,&invalid,1024);});}
+        rejects<TransportError>([&]{post_json({tls+"/post-json/bearer",json_post_body,10s,5s},&secret,1024);});
+        rejects<std::invalid_argument>([&]{post_json({"http://example.invalid/",json_post_body},&secret,1024);});
+        rejects<std::invalid_argument>([&]{post_json({"https://user:password@example.invalid/",json_post_body},&secret,1024);});
+        require(post_json(post_request("after-failure"),&secret,1024)==json_post_reply,"Fresh JSON POST must work after cancellation, TLS and boundary failures");
         {
             ChatCompletionStream decoder([](const ModelEvent&){});
             post_event_stream(request("/ok"),&secret,[&](std::string_view bytes){decoder.feed(bytes);});

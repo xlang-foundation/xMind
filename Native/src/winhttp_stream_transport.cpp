@@ -83,9 +83,11 @@ std::wstring wide(const std::string& text) {
     return result;
 }
 std::wstring lower(std::wstring value) {for(auto& c:value) c=static_cast<wchar_t>(std::towlower(c));return value;}
+enum class TransferKind {event_post,json_get,json_post};
 }
 static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
-    const std::function<void(std::string_view)>& consume,std::stop_token cancel,bool json) {
+    const std::function<void(std::string_view)>& consume,std::stop_token cancel,
+    TransferKind kind,std::size_t response_limit) {
     if(!consume || input.url.empty() || input.url.size()>8192 || input.body.size()>8*1024*1024 ||
         input.deadline.count()<=0 || input.deadline.count()>600000 || input.idle_timeout.count()<=0 || input.idle_timeout.count()>600000)
         throw std::invalid_argument("Invalid provider transport configuration");
@@ -118,7 +120,9 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     checked(WinHttpSetTimeouts(session.value,10000,10000,10000,static_cast<int>(input.idle_timeout.count())));
     Handle connection(WinHttpConnect(session.value,host.c_str(),parts.nPort,0));
     WipedHeaders headers;
-    headers.value=json?L"Accept: application/json\r\n":L"Content-Type: application/json\r\nAccept: text/event-stream\r\n";
+    const auto json=kind!=TransferKind::event_post;
+    headers.value=kind==TransferKind::json_get?L"":L"Content-Type: application/json\r\n";
+    headers.value+=json?L"Accept: application/json\r\n":L"Accept: text/event-stream\r\n";
     if(input.protocol==ProviderHttpProtocol::anthropic)headers.value+=L"anthropic-version: 2023-06-01\r\n";
     if(bearer) {
         const auto bytes=bearer->view();
@@ -134,7 +138,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         headers.value+=L"\r\n";
     }
     std::array<char,8192> buffer{};State state;
-    Handle raw(WinHttpOpenRequest(connection.value,json?L"GET":L"POST",path.c_str(),nullptr,WINHTTP_NO_REFERER,WINHTTP_DEFAULT_ACCEPT_TYPES,secure?WINHTTP_FLAG_SECURE:0));
+    Handle raw(WinHttpOpenRequest(connection.value,kind==TransferKind::json_get?L"GET":L"POST",path.c_str(),nullptr,WINHTTP_NO_REFERER,WINHTTP_DEFAULT_ACCEPT_TYPES,secure?WINHTTP_FLAG_SECURE:0));
     DWORD policy=WINHTTP_OPTION_REDIRECT_POLICY_NEVER;checked(WinHttpSetOption(raw.value,WINHTTP_OPTION_REDIRECT_POLICY,&policy,sizeof(policy)));
     // Never ask the OS to send ambient user credentials to a model endpoint.
     DWORD logon=WINHTTP_AUTOLOGON_SECURITY_LEVEL_HIGH;checked(WinHttpSetOption(raw.value,WINHTTP_OPTION_AUTOLOGON_POLICY,&logon,sizeof(logon)));
@@ -200,7 +204,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     auto media=lower(std::wstring(content.data()));media=media.substr(0,media.find(L';'));
     while(!media.empty() && (media.back()==L' ' || media.back()==L'\t')) media.pop_back();
     if(media!=(json?L"application/json":L"text/event-stream")) throw TransportError("Unexpected provider response content type");
-    const std::size_t limit=json?1024*1024:64*1024*1024;
+    const std::size_t limit=response_limit;
     std::size_t received=0;
     for(;;) {
         if(cancel.stop_requested()) throw TransportCancelled("Provider request cancelled");
@@ -214,12 +218,20 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
 }
 void post_event_stream(const HttpStreamRequest& input,const SecretBytes* bearer,
     const std::function<void(std::string_view)>& consume,std::stop_token cancel) {
-    transfer(input,bearer,consume,cancel,false);
+    transfer(input,bearer,consume,cancel,TransferKind::event_post,64*1024*1024);
 }
 std::string get_json(const HttpStreamRequest& input,const SecretBytes* bearer,std::stop_token cancel) {
     if(!input.body.empty()) throw std::invalid_argument("JSON discovery cannot send a request body");
     std::string result;
-    transfer(input,bearer,[&](std::string_view chunk){result.append(chunk);},cancel,true);
+    transfer(input,bearer,[&](std::string_view chunk){result.append(chunk);},cancel,TransferKind::json_get,1024*1024);
+    return result;
+}
+std::string post_json(const HttpStreamRequest& input,const SecretBytes* bearer,
+    std::size_t max_response_bytes,std::stop_token cancel) {
+    if(input.body.empty() || max_response_bytes==0 || max_response_bytes>8*1024*1024)
+        throw std::invalid_argument("Invalid bounded JSON provider POST");
+    std::string result;
+    transfer(input,bearer,[&](std::string_view chunk){result.append(chunk);},cancel,TransferKind::json_post,max_response_bytes);
     return result;
 }
 }

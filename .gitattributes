@@ -5,6 +5,7 @@ Native/third_party/** -text
 doc/evidence/native-dynamic-plan-* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 doc/evidence/native-dynamic-plan-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-dynamic-mcp-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-context-transport-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-cleanup-*.log -text
 doc/evidence/native-cleanup-5775990-failed-ctest.log -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 doc/evidence/native-cleanup-8a53282-hosted-*.log -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

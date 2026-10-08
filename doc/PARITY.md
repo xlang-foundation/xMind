@@ -20,6 +20,18 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+The native [JSON POST transport foundation](native-context-transport.md)
+passed its complete local **78-contract gate in 193.91 seconds**, with 427
+frozen inputs and the accepted xlang3 runtime verified unchanged. It supplies
+bounded transport for future context APIs; compaction and token-counting
+adapters remain unimplemented. [Local evidence](evidence/native-context-transport-local-provenance.json).
+
+Earlier exact source `2cd392f` passed the [hosted MCP gate](https://github.com/xlang-foundation/xMind/actions/runs/37824215372):
+**78 native / 119 extension / 26 browser** tests, all 16 steps, model-free
+integration and 18 VSIX assets. Exact Git, raw logs, archive digests and
+payload maps were verified; the installed preview remains ace/schema v10.
+[Hosted evidence](evidence/native-dynamic-mcp-hosted-2cd-provenance.json).
+
 The bounded dependency-planning implementation now has a complete local
 **78-contract gate** covering actual MCP effects inside dynamically admitted
 coding children. Five new integration scenarios verify exact child-owned
@@ -235,7 +247,7 @@ removed Python prototype's status table; it is not a completion score.
 | Plugins | Native ownership is specified | Lifecycle, hooks, isolation and compatibility acceptance |
 | MCP | Native configured stdio tools, schema worker, approvals and modern/legacy official SDK peers have scoped contracts; hosted69 direct graph effects and local78 dynamically planned coding-child effects have separate acceptance scopes | Streamable HTTP/OAuth, resources/prompts, broader SDK features and full live coding interoperability |
 | Permissions and policies | Backend-owned durable grant/deny/cancel and effect ownership have actual file/process/peer fixtures | Complete policy rules, recovery and consistent enforcement across exposed tools/protocols |
-| Context compaction | Required by the native coding goal | Bounded context with preserved instructions, provider state and continuation |
+| Context compaction | Required by the native coding goal; [native design](native-context-compaction-design.md) covers session/mid-run, manual/automatic, private provider state and actual budgets | Implement and validate rolling native checkpoints, compatible provider strategies, every execution scope and thin-client controls; design and transport infrastructure do not establish compaction |
 | Snapshots and recovery | Durable uncertainty inspection and non-replay safeguards cover selected effects | General reviewable snapshots, restoration and attributed reconciliation |
 | Attachments and references | Native CLI/editor context work is documented in [CLI scope](native-interactive-cli.md) | Complete model-input, editor-context and multimodal acceptance |
 | Formatters and diagnostics | Required by the native coding goal | Real project integrations and end-to-end verification |

@@ -12,6 +12,7 @@ WebRTC and Electron IDE.
 | Browser and editor | [Browser view](browser-view.md), [VS Code setup](../extensions/vscode/README.md) |
 | Models and credentials | [Provider setup](provider-setup.md), [credential storage](credential-storage.md) |
 | General agents and graphs | [Agent loop](native-agent-loop.md), [delegation](native-delegation.md), [graph service](native-graph-service.md) |
+| Long conversations | [JSON POST foundation](native-context-transport.md), [native compaction design](native-context-compaction-design.md); compaction implementation and acceptance remain pending |
 | Coding tools and approvals | [Workspace tools](native-workspace-tools.md), [file creation](native-file-creation.md), [process tools](native-process-tools.md), [permissions](PERMISSIONS.md) |
 | Protocols and profiles | [MCP](native-mcp.md), [A2A](A2A.md), [connection profiles](connection-profiles.md) |
 | Coverage and verification | [Validation status](VALIDATION_STATUS.md), [parity baseline](PARITY.md), [model coverage](MODEL_SUPPORT.md), [milestones](milestones.md) |
