@@ -1,12 +1,14 @@
 #pragma once
 #include "agentflow/execution_platform.hpp"
 #include "agentflow/provider_profiles.hpp"
+#include "agentflow/provider_catalogue.hpp"
 namespace agentflow {
 // Native backend policy. Capabilities and credential destinations never come
 // from a view; the selected model identity is supplied by its saved profile.
 struct ProviderProfileExecutionPolicy {
     ProviderProfileRoute route;
     ChatProviderConfig provider;
+    std::optional<ProviderCataloguePolicy> catalogue;
 };
 struct ProviderProfileMetadata {
     std::string id,route_id,provider,model;
@@ -25,6 +27,8 @@ public:
         std::vector<ProviderProfileExecutionPolicy> policy,std::size_t workers=2,std::size_t capacity=128);
     ~ProviderProfileRuntime();
     ProviderProfileRuntimeMetadata configuration() const;
+    std::vector<std::string> discover_models(std::string id,std::string route,SecretBytes key,
+        std::int64_t expected_revision,std::stop_token cancel={});
     ProviderProfileRuntimeMetadata save_profile(std::string id,std::string route,std::string model,
         SecretBytes key,std::int64_t expected_revision,bool activate=false);
     ProviderProfileRuntimeMetadata select_profile(std::string id,std::int64_t expected_revision);

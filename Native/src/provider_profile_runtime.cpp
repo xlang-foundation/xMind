@@ -9,6 +9,8 @@ std::vector<ProviderProfileRoute> routes(const std::vector<ProviderProfileExecut
         if(value.provider.endpoint!=value.route.endpoint||value.provider.wire!=value.route.wire||
             !value.provider.model.empty()||value.provider.deadline.count()<=0||value.provider.idle_timeout.count()<=0)
             throw std::invalid_argument("Provider execution policy differs from profile route");
+        if(value.catalogue&&value.catalogue->format!=(value.route.wire==ProviderWire::anthropic_messages?ProviderCatalogueFormat::anthropic:ProviderCatalogueFormat::openai))
+            throw std::invalid_argument("Provider catalogue policy differs from route wire");
         result.push_back(value.route);
     }
     return result;
@@ -55,6 +57,25 @@ ProviderProfileRuntime::ProviderProfileRuntime(PersistenceService& store,AgentSe
     :impl_(std::make_unique<Impl>(store,std::move(base),std::move(policy),workers,capacity)){}
 ProviderProfileRuntime::~ProviderProfileRuntime()=default;
 ProviderProfileRuntimeMetadata ProviderProfileRuntime::configuration()const{std::lock_guard lock(impl_->mutex);return impl_->metadata();}
+std::vector<std::string> ProviderProfileRuntime::discover_models(std::string id,std::string route_id,SecretBytes key,std::int64_t expected,std::stop_token cancel){
+    if(id.empty()||id.size()>256||id.starts_with("sk-")||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)throw std::invalid_argument("Invalid provider profile identity");
+    ProviderCataloguePolicy catalogue;
+    {
+        std::lock_guard lock(impl_->mutex);
+        if(expected<0||expected!=impl_->state.revision||impl_->profiles.snapshot().revision!=expected)throw Conflict("Provider profile discovery revision changed");
+        const auto& allowed=impl_->route(route_id);if(!allowed.catalogue)throw std::invalid_argument("Provider model discovery is unavailable for this route");catalogue=*allowed.catalogue;
+        const auto saved=std::find_if(impl_->state.profiles.begin(),impl_->state.profiles.end(),[&](const auto& profile){return profile.id==id;});
+        if(saved!=impl_->state.profiles.end()&&impl_->route(saved->route_id).route.provider!=allowed.route.provider)throw std::invalid_argument("A profile cannot discover another provider family");
+        if(key.view().empty()){
+            if(saved==impl_->state.profiles.end())throw std::invalid_argument("New provider profile discovery requires a key");
+            if(saved->route_id!=route_id)throw std::invalid_argument("Saved-key discovery must use the profile's own route");
+            key=impl_->store.resolve_credential(allowed.route.credential_scope,saved->credential_id,allowed.route.credential_purpose).get();
+        }
+    }
+    auto result=discover_provider_models(catalogue,key,cancel);
+    {std::lock_guard lock(impl_->mutex);if(expected!=impl_->state.revision||impl_->profiles.snapshot().revision!=expected)throw Conflict("Provider profile changed during model discovery");}
+    return result;
+}
 ProviderProfileRuntimeMetadata ProviderProfileRuntime::save_profile(std::string id,std::string route,std::string model,SecretBytes key,std::int64_t expected,bool activate){
     std::unique_lock lock(impl_->mutex);impl_->mutable_state(expected);
     const bool replace=activate||impl_->state.active==id;std::unique_ptr<ExecutionPlatform> candidate;

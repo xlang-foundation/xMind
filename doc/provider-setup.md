@@ -54,6 +54,22 @@ The build uses the correctness/performance-validated xlang3 buffer-fix pin
 reader, model discovery and client adapters still need integration. This source
 does not upgrade the running preview or establish live Claude account support.
 
+Profile-specific account discovery is now implemented in source for OpenAI and
+Claude. C++ owns the catalogue endpoint and authentication format. Omitted keys
+resolve only the named profile's own route-bound credential; supplied keys are
+used for discovery without storage. Discovery checks the registry revision before
+and after network I/O and never holds the admission lock during that I/O.
+Claude pages use bounded, encoded `after_id` cursors as documented by the
+[Claude Models API](https://platform.claude.com/docs/en/api/models/list), with
+eight pages, 4096 entries and a 30-second total deadline. Malformed or duplicate
+JSON fields, repeated cursors, reflected keys, incomplete oversized catalogues
+and redirects fail rather than returning an incomplete list. The expanded native
+peer contract includes actual saved-key requests, pagination, URI encoding,
+cancelled discovery and a profile change during an in-flight request. These new
+additions await compilation/execution while a sibling benchmark is live. Listing
+account identities does not establish model/adapter capability; HTTP/Settings
+integration and per-model compatibility remain pending.
+
 Current setup is one saved OpenAI configuration. Claude request/stream/transport
 source additions do not change that API or make Claude selectable in Settings.
 The next enrollment change must retain the existing encrypted OpenAI key and
