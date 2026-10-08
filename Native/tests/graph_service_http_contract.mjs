@@ -42,10 +42,10 @@ async function start(withModel=false){
 async function stop(){if(!child||child.exitCode!==null)return;const finished=new Promise(resolve=>child.once('exit',resolve));child.kill();await finished;child=undefined;}
 async function request(path,body,headers={}){const response=await fetch(`http://127.0.0.1:${port}${path}`,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+token,...(body===undefined?{}:{'Content-Type':'application/json'}),...headers},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(10000)});return {status:response.status,data:await response.json()};}
 async function cli(...args){const result=await execute(cliExe,[String(port),...args],{env,windowsHide:true,timeout:12000});return JSON.parse(result.stdout);}
-async function scriptedChat(commands){
+async function scriptedChat(commands,expectedExit=0){
  const process=spawn(cliExe,[String(port),'chat'],{env,windowsHide:true});let output='',errors='';process.stdout.on('data',bytes=>output+=bytes);process.stderr.on('data',bytes=>errors+=bytes);
  const timer=setTimeout(()=>process.kill(),12000),ended=new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});});process.stdin.end(commands.join('\n')+'\n');
- const result=await ended;assert.equal(result.signal,null,errors);assert.equal(result.code,0,errors);return {records:output.trim().split('\n').filter(Boolean).map(line=>JSON.parse(line)),errors};
+ const result=await ended;assert.equal(result.signal,null,errors);assert.equal(result.code,expectedExit,errors);return {records:output.trim().split('\n').filter(Boolean).map(line=>JSON.parse(line)),errors};
 }
 async function interactiveGraph(id,mode='input'){
  const process=spawn(cliExe,[String(port),'chat'],{env,windowsHide:true}),records=[];let pending='',errors='',failure,foreignSent=false,raced=false;
@@ -79,6 +79,9 @@ try {
  assert.equal((await request('/v1/graph-runs',{id:'stale',session_id:'first',graph_id:'wait.read',graph_revision:99,prompt:'fixture'})).status,409);
  assert.equal((await submit('no-model','first','model.flow')).status,503);assert.deepEqual(await cli('runs','first'),[]);
  assert.equal((await submit('first-root','first')).status,202);let first=await state('first-root','paused');assert.deepEqual(await cli('graph-children','first-root'),[]);
+ const beforeBusyRuns=await cli('runs','first'),beforeBusyHistory=await cli('history','first'),beforeBusyEvents=await cli('graph-events','first-root');
+ const busyChat=await scriptedChat(['/session first','/graph plain.read Keep this rejected graph request','/runs','/history','/exit'],1);
+ assert.deepEqual(busyChat.records.find(record=>record.type==='run_rejected'),{type:'run_rejected',session_id:'first',http_status:409,prompt:'Keep this rejected graph request',graph_id:'plain.read'});assert.match(busyChat.errors,/no automatic retry/);assert.ok(!busyChat.records.some(record=>record.type==='run'||record.type==='turn_finished'));assert.deepEqual(busyChat.records.find(record=>record.type==='runs').runs,beforeBusyRuns);assert.deepEqual(busyChat.records.filter(record=>record.type==='history').at(-1).history,beforeBusyHistory);assert.deepEqual(await cli('runs','first'),beforeBusyRuns);assert.deepEqual(await cli('history','first'),beforeBusyHistory);assert.deepEqual(await cli('graph-events','first-root'),beforeBusyEvents);assert.equal(modelRequests,0,'Rejected graph admission and subsequent inspection cannot invoke inference');
  const pausedObserver=observe('first-root');await waitEvent(pausedObserver,event=>event.run_id==='first-root'&&event.kind==='run.paused');await stopObserver(pausedObserver);assert.equal((await cli('graph','first-root')).run.state,'paused','Closing the graph observer must not cancel native ownership');const resumeCursor=pausedObserver.events.at(-1).seq;
  for(const source of ['{"accepted":true,"accepted":false}','{"nested":{"path":"left.txt","path":"right.txt"}}',JSON.stringify({nested:Array.from({length:18}).reduce(value=>({nested:value}),{})})]){
   await writeFile(join(root,'invalid-answer.json'),source);await assert.rejects(cli('graph-input','first-root','first.answer',String(first.checkpoint_revision),join(root,'invalid-answer.json')),error=>error.code===1&&/duplicate keys|nesting exceeds/.test(error.stderr));assert.equal((await cli('graph','first-root')).checkpoint_revision,first.checkpoint_revision,'Rejected ambiguous/deep input must not mutate the graph checkpoint');

@@ -288,7 +288,15 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         }
         Json body={{"session_id",session},{"prompt",prompt}};if(!model.empty())body["model_id"]=model;
         if(graphSubmission){body["graph_id"]=graphId;body["graph_revision"]=graphRevision;}
-        const auto run=request(graphSubmission?"/v1/graph-runs":"/v1/runs",&body);
+        const auto admitted=client.Post(graphSubmission?"/v1/graph-runs":"/v1/runs",headers,body.dump(),"application/json");
+        if(!admitted)throw std::runtime_error("Cannot reach xMind Server during run admission; admission outcome is unknown. Inspect /runs before resubmitting.");
+        if(admitted->status==400||admitted->status==404||admitted->status==409||admitted->status==429||admitted->status==503){
+            std::cout<<Json{{"type","run_rejected"},{"session_id",session},{"http_status",admitted->status},{"prompt",prompt},{"graph_id",graphSubmission?graphId:std::string{}}}.dump()<<'\n'<<std::flush;
+            std::cerr<<"Backend rejected run admission (HTTP "<<admitted->status<<"). Request retained above; no automatic retry. Use /runs to inspect existing work.\n";
+            last_result=1;continue;
+        }
+        if(admitted->status!=202)throw std::runtime_error("Unexpected run admission response; inspect /runs before resubmitting");
+        const auto run=Json::parse(admitted->body);
         if(!run.is_object() || run.value("session_id",std::string{})!=session || run.value("graph_root",false)!=graphSubmission || !run.contains("id") || !run["id"].is_string())throw std::runtime_error("Invalid chat run admission");const auto id=run["id"].get<std::string>();
         if(id.empty() || id.size()>128 || id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid chat run identity");
         std::cout<<Json{{"type","run"},{"run",run}}.dump()<<'\n'<<std::flush;

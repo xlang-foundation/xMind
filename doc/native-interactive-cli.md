@@ -200,6 +200,21 @@ Native fixtures require exact saved run records after single-agent attachment,
 graph completion and provider-free conversation inspection, with no additional
 inference or admission. Syntax checks passed; compiled execution is pending.
 
+Run-admission rejections with HTTP 400, 404, 409, 429 or 503 now keep interactive
+chat open in source. A `run_rejected` record retains the exact requested prompt,
+selected conversation, optional graph ID and actual HTTP status. No assistant
+message, terminal event or run descriptor is fabricated; raw error bodies are
+not printed. The user may inspect `/runs` and `/history`, attach existing work,
+or explicitly submit another request. Exit status remains 1 until a subsequent
+observed turn changes it. There is no automatic retry. If transport fails before
+an admission response is received, the client reports an unknown outcome and
+asks the user to inspect recorded runs before resubmission.
+
+The graph-service fixture now checks actual HTTP 409 from a second graph request
+in a conversation already owned by a paused graph, continued inspection in that
+same console process, exact retained request and unchanged history, root runs
+and graph events. JavaScript syntax checks passed; native execution is pending.
+
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
 52 native and 66 extension contracts. This verifies initial-model prevalidation
