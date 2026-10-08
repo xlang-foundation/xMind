@@ -1,0 +1,34 @@
+{
+  "revision": "4fc1148239c66db59634039defa68b7b61e8ef01",
+  "model": "gpt-5.6-sol",
+  "wire": "responses",
+  "scope": "One live native read_file tool call and Responses continuation; no edit/process/coding acceptance claim",
+  "terminal": "run.completed",
+  "exitStatus": 0,
+  "toolName": "read_file",
+  "toolContentMatchesRepository": true,
+  "responseMatchesHeading": true,
+  "response": "# xMind",
+  "readmeSha256": "2cf3d0e05087e680ea66deec069dd6158a2aa9081bf00ab35b3cd35b58911926",
+  "usage": {
+    "completion_tokens": 7,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "input_tokens": 3830,
+    "input_tokens_details": {
+      "cache_write_tokens": 2428,
+      "cached_tokens": 1399
+    },
+    "output_tokens": 7,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 3830,
+    "prompt_tokens_details": {
+      "cache_write_tokens": 2428,
+      "cached_tokens": 1399
+    },
+    "total_tokens": 3837
+  }
+}

@@ -57,3 +57,14 @@ records only the public check and sanitized metrics. This proves that specific
 model and minimal request through the installed wire, not full coding/tool
 acceptance or compatibility for every discovered model. Durable adapter-restart
 sessions are newer source and remain pending their compiled gate.
+
+A second actual `gpt-5.6-sol` Responses run requested `read_file` for the public
+repository `README.md`. The native tool's output matched the file exactly, and
+the provider continued with `# xMind`, its actual first heading. The browser
+displayed the persisted tool request, expandable result and both responses'
+provider usage: 1,402 input/19 output for the tool request and 3,830 input/7
+output for the final reply. [Read-tool evidence](evidence/live-responses-read-file.json)
+records the repository content hash, equality checks and final usage without
+private keys, session IDs or provider continuation items. This proves one real
+read-tool cycle and its Responses continuation, not live approved edits,
+process execution, MCP, A2A or full coding acceptance.
