@@ -51,6 +51,17 @@ client behavior evidence, not a new native or live-account acceptance claim.
 
 ## Durable provider context
 
+Exact checkpoint `6f32d215493122b433d6e20ff65bfce6c9120c27` passed its full
+hosted gate: **57 native, 86 extension and 17 browser contracts**, native/browser
+integration and VSIX verification, with no test skips.
+[Hosted run](https://github.com/xlang-foundation/xMind/actions/runs/37731334471),
+[unaltered native log](evidence/native-provider-history-hosted-ctest.log),
+[job/TAP output](evidence/native-provider-history-passing-ci-job.log) and
+[exact provenance](evidence/native-provider-history-hosted-provenance.json)
+establish that component scope. Later descriptor projection, graph dependency
+filtering, run-inspector UI and Gemini source require their own gate. The live
+preview still uses the previously installed `19d69dd` native binary.
+
 New source captures a public `provider_context` in the admitted user message
 and each persisted model response. It records profile ID, profile version,
 route ID, provider family, wire API and selected model. These values come from

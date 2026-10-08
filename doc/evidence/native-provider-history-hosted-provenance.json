@@ -1,0 +1,19 @@
+{
+  "revision": "6f32d215493122b433d6e20ff65bfce6c9120c27",
+  "runtime_revision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+  "run_id": 37731334471,
+  "job_id": 113161124657,
+  "artifact_id": 11530642214,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37731334471",
+  "conclusion": "success",
+  "native_contracts": 57,
+  "extension_contracts": 86,
+  "browser_contracts": 17,
+  "skipped": 0,
+  "native_seconds": 127.73,
+  "native_manifest_matched": true,
+  "browser_native_integration": "passed",
+  "vsix_verification": "passed",
+  "scope": "Profile context in admitted task/model history and stale-profile client reconciliation. Later descriptor projection, graph-dependency metadata exclusion, run-inspector UI and Gemini component are excluded. This binary is not installed in the preview."
+}
