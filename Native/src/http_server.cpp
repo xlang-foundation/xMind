@@ -88,8 +88,8 @@ std::string new_id() {
     return value.str();
 }
 Json encode(const Session& value) {return {{"id",value.id},{"title",value.title}};}
-Json encode(const Run& value) {return {{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)},
-    {"parent_id",value.parent_id},{"node_id",value.node_id},{"graph_root",value.graph_root}};}
+Json encode(const Run& value) {Json result={{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)},
+    {"parent_id",value.parent_id},{"node_id",value.node_id},{"graph_root",value.graph_root}};if(!value.provider_context_json.empty())result["provider_context"]=Json::parse(value.provider_context_json);return result;}
 Json graph_record(const GraphRootRecord& root) {
     return {{"run",encode(root.run)},{"graph_id",root.graph_id},{"graph_revision",root.graph_revision},
         {"checkpoint_revision",root.checkpoint_revision},{"checkpoint",Json::parse(root.checkpoint_json)},

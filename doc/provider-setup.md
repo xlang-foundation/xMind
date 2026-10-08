@@ -1,5 +1,27 @@
 # Provider setup in the sidebar
 
+## Run-descriptor attribution
+
+New native source projects `provider_context` into admitted, inspected and listed
+run descriptors, including graph roots and agent children. Repository reads use
+the first user message owned by that exact run, through xlang3 SQLite. They do
+not consult the current profile or unrelated session messages. The existing
+durable admission receipt remains the source of truth; no database migration or
+client-owned metadata is introduced. Absent historical context stays absent.
+
+The repository validates the exact six public context fields before admission
+and when reading them. Unexpected credential fields, invalid profile versions,
+identities or wire APIs fail closed. Graph child completion excludes this backend
+metadata from dependency outputs sent to later model nodes, while retaining it
+in child history and run descriptors.
+
+Native tests now cover API admission receipts, descriptor projection across
+updates/reopen, unrelated legacy messages, malformed-context rejection without
+partial admission, and two dependent agent nodes with an independent peer
+checking that profile metadata never enters model requests. Compilation and the
+full native gate for this source are pending. The installed preview remains on
+native admission checkpoint `19d69dd`.
+
 ## Recovering from another view's provider change
 
 On an admission HTTP 409, a client with a profile binding re-reads public

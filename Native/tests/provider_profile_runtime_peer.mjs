@@ -87,7 +87,7 @@ try{
   });
   const result=await running;
   if(failure)throw failure;
-  assert.deepEqual(observed,[{route:'/chat',model:'fixture-openai'},{route:'/messages',model:'fixture-claude'},{route:'/chat',model:'fixture-openai-updated'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'}]);
+  assert.deepEqual(observed,[{route:'/chat',model:'fixture-openai'},{route:'/messages',model:'fixture-claude'},{route:'/chat',model:'fixture-openai-updated'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'}]);
   assert.equal(openaiDiscoveries,5);assert.equal(claudePages,2);assert.equal(pageLimitPages,8);assert.equal(discoveryReleased,true);
   await startup('startup-valid.sqlite',async api=>{const profiles=await api('/v1/provider/profiles');assert.equal(profiles.revision,1);assert.equal(profiles.active,'openai');assert.equal(profiles.profiles[0].model,'fixture-startup');assert.equal((await api('/v1/health')).agent_execution,true);});
   await startup('startup-repair.sqlite',async api=>{const profiles=await api('/v1/provider/profiles');assert.equal(profiles.revision,1);assert.equal(profiles.profiles[0].model,'');assert.equal((await api('/v1/health')).agent_execution,false);assert.deepEqual((await api('/v1/models')).models,[]);const repaired=await api('/v1/provider/configuration',{model:'fixture-startup',expected_revision:1});assert.equal(repaired.revision,2);assert.equal((await api('/v1/health')).agent_execution,true);});
