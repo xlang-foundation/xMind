@@ -18,9 +18,8 @@ const server=createServer((request,response)=>{
       const body=JSON.parse(source);assert.equal(body.model,'fixture-deployment');assert.equal(body.stream,true);
       assert.deepEqual(body.tools.map(item=>item.function.name),['read_repository_instructions','read_file','list_files','search_files']);
       if(request.url==='/error') {response.writeHead(429,{'Content-Type':'application/json'});response.end('{"error":"do-not-log-provider-body"}');return;}
-      if(request.url==='/delay') return;
       response.writeHead(200,{'Content-Type':'text/event-stream'});
-      if(request.url==='/claim') {response.write('data: '+JSON.stringify({choices:[{index:0,delta:{content:'Synthetic pending stream'}}]})+'\n\n');return;}
+      if(request.url==='/claim'||request.url==='/delay') {response.write('data: '+JSON.stringify({choices:[{index:0,delta:{content:'Synthetic pending stream'}}]})+'\n\n');return;}
       const last=body.messages.at(-1);
       if(last.role==='tool') {
         const result=JSON.parse(last.content);
@@ -38,6 +37,6 @@ const server=createServer((request,response)=>{
 try {
   await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual file content written by fixture\n');
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
-  const result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:20000});
+  const result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:30000});
   if(failure) throw failure;assert.equal(requests,9);process.stdout.write(result.stdout);
 } finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await rm(folder,{recursive:true,force:true});}

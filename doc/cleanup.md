@@ -52,3 +52,19 @@ Earlier cleanup revision `dea5888` passed its hosted 58-native/88-extension/
 retains that result. This later cleanup changes unused tooling and documentation,
 not the native runtime. Its validation consists of tracked-reference, layout,
 documentation-link and Git diff checks; it does not claim a new native test pass.
+
+The exact `5775990` cleanup [hosted run](https://github.com/xlang-foundation/xMind/actions/runs/37795363134)
+compiled native targets but failed its full gate: **70 passed, one failed out of
+71**, in 178.21 seconds. Extension/browser/integration/package steps were skipped.
+The independent agent peer observed seven requests instead of its required nine.
+The two short cancellation/deadline cases could retire before transport entry;
+that cause is inferred from the fixture, not a measured timing trace.
+[Original CTest bytes](evidence/native-cleanup-5775990-failed-ctest.log) and
+[artifact-bound provenance](evidence/native-cleanup-5775990-failed-provenance.json)
+retain the failure.
+
+The corrected fixture waits for actual persisted provider-stream evidence before
+cancellation and requires stream entry before native deadline expiry. It retains
+the exact nine-request assertion and supplies no fabricated terminal reply.
+Source review and Node syntax passed; the correction still requires its full
+native gate. Uncommitted dynamic-plan work is excluded from this checkpoint.

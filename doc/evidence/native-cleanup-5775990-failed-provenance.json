@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-08T15:17:21.299Z",
+  "revision": "577599065ff6924893154a7b48689505edf24bba",
+  "ci": {
+    "runId": 37795363134,
+    "jobId": 113373291927,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/37795363134",
+    "conclusion": "failure",
+    "nativeBuild": "passed",
+    "nativeRegistered": 71,
+    "nativePassed": 70,
+    "nativeFailed": 1,
+    "nativeSkipped": 0,
+    "nativeElapsedSeconds": 178.21,
+    "failedTest": "native_agent_runner_contract",
+    "extension": "skipped",
+    "browser": "skipped",
+    "integration": "skipped",
+    "vsix": "skipped",
+    "runtimeBundle": "not published"
+  },
+  "artifact": {
+    "id": 11559482099,
+    "name": "native-windows-evidence-577599065ff6924893154a7b48689505edf24bba",
+    "bytes": 24895,
+    "advertisedDigest": "sha256:ef4a23cc184358ae502bfdecf6be1b04c147253ff38d3a03f429eb3139f98a9f",
+    "verifiedDownloadedSha256": "ef4a23cc184358ae502bfdecf6be1b04c147253ff38d3a03f429eb3139f98a9f"
+  },
+  "ctest": {
+    "path": "doc/evidence/native-cleanup-5775990-failed-ctest.log",
+    "bytes": 10164,
+    "sha256": "6a2113dac1e879fc643aa124c9a31ee80b334f9c8aac940b8480a71d93b42209",
+    "originalBytes": true
+  },
+  "failure": {
+    "observed": "Independent Node peer counted 7 provider requests; its unchanged assertion required 9.",
+    "inference": "The required main/claim/error/denied/limit cases account for seven requests. The 150 ms cancellation and 200 ms deadline cases could retire during setup before entering the delayed provider. This is inferred from the fixture and successful native executable exit, not an observed timing trace."
+  },
+  "sourceCorrection": {
+    "nativeProductChanged": false,
+    "files": [
+      {
+        "path": "Native/tests/agent_runner_contract.cpp",
+        "sha256": "c4d09d8bb021f9418bfe101dcf56327265cb2e7b797ee0837c48ef23f745faf5"
+      },
+      {
+        "path": "Native/tests/agent_runner_peer.mjs",
+        "sha256": "f900dabbd0f22f3bab66f9389a079ec293acab7b12ca18d9bbeb0ac723496233"
+      }
+    ],
+    "scope": "Cancellation waits for actual persisted model.text, deadline requires actual stream entry and native agent_timeout, exact nine-request assertion remains; synthetic incomplete peer stream supplies no terminal response.",
+    "verification": "Independent source review, Node peer syntax and whitespace only; corrected native fixture has not been compiled or executed locally."
+  },
+  "runtime": {
+    "xlang3": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+    "stdlibSource": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "cpythonExecution": false,
+    "cpythonBridge": false
+  },
+  "excluded": "Uncommitted dynamic-plan runtime, schema11, shared-pool and UI work is excluded from this published cleanup and fixture correction."
+}

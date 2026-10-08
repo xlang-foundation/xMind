@@ -3,6 +3,8 @@
 #include "nlohmann/json.hpp"
 #include <iostream>
 #include <thread>
+#include <condition_variable>
+#include <mutex>
 
 using namespace agentflow;
 using Json=nlohmann::json;
@@ -11,6 +13,30 @@ namespace {
 void require(bool value,const char* message) {if(!value) throw std::runtime_error(message);}
 template<class Error,class Function> void rejects(Function action) {
     try {action();} catch(const Error&) {return;} throw std::runtime_error("Expected rejection did not occur");
+}
+bool streamed(PersistenceService& store,const std::string& id){
+    for(const auto& event:store.events(id).get())if(event.kind=="model.text")return true;
+    return false;
+}
+Run cancel_after_stream(AgentRunner& runner,PersistenceService& store,const std::string& id){
+    std::stop_source cancellation;
+    // A bounded cleanup timer retires the real owner on fixture failure. The
+    // normal cancellation below is anchored to observed provider traffic.
+    std::jthread safety([&](std::stop_token ending){
+        std::mutex mutex;std::condition_variable_any changed;std::unique_lock lock(mutex);
+        changed.wait_for(lock,ending,5s,[]{return false;});
+        if(!ending.stop_requested())cancellation.request_stop();
+    });
+    auto owner=std::async(std::launch::async,[&]{return runner.execute(id,cancellation.get_token());});
+    const auto deadline=std::chrono::steady_clock::now()+4s;
+    bool observed=false;
+    while(std::chrono::steady_clock::now()<deadline&&owner.wait_for(0ms)!=std::future_status::ready){
+        if(streamed(store,id)){observed=true;break;}
+        std::this_thread::sleep_for(5ms);
+    }
+    cancellation.request_stop();const auto result=owner.get();safety.request_stop();
+    require(observed,"Cancellation fixture must enter its actual provider stream before requesting stop");
+    return result;
 }
 }
 int main(int argc,char** argv) {
@@ -53,10 +79,7 @@ int main(int argc,char** argv) {
             store.create_session(route,route).get();auto variant=settings;
             variant.provider.endpoint=base+"/"+route;if(std::string(route)=="limit") variant.max_turns=1;
             AgentRunner action(store,variant);action.start(route,route,std::string("Protocol case ")+route);
-            std::stop_source cancellation;
-            std::optional<std::jthread> canceller;
-            if(std::string(route)=="delay") canceller.emplace([&]{std::this_thread::sleep_for(150ms);cancellation.request_stop();});
-            const auto final=action.execute(route,cancellation.get_token());
+            const auto final=std::string(route)=="delay"?cancel_after_stream(action,store,route):action.execute(route);
             require(final.state==(std::string(route)=="delay"?RunState::cancelled:(std::string(route)=="denied"?RunState::completed:RunState::failed)),"Terminal state must reflect actual outcome");
             if(std::string(route)=="error") require(Json::parse(store.events(route).get().back().json)["status"]==429,"HTTP failure must be recorded without provider body");
             if(std::string(route)=="denied") {
@@ -65,10 +88,11 @@ int main(int argc,char** argv) {
             }
         }
         store.create_session("deadline","Deadline").get();auto timed=settings;
-        timed.provider.endpoint=base+"/delay";timed.run_timeout=200ms;
+        timed.provider.endpoint=base+"/delay";timed.run_timeout=5s;
         AgentRunner deadline(store,timed);deadline.start("deadline","deadline","Protocol deadline case");
         require(deadline.execute("deadline").state==RunState::failed,"Run deadline must fail rather than simulate a response");
         require(Json::parse(store.events("deadline").get().back().json)["reason"]=="agent_timeout","Run deadline must have its own reason");
+        require(streamed(store,"deadline"),"Deadline fixture must expire after actual provider stream entry");
         store.create_session("atomic","Atomic lifecycle").get();
         rejects<DatabaseError>([&]{store.start_prompt_run("invalid","atomic","invalid JSON").get();});
         require(store.history("atomic").get().empty(),"Failed start must not leave a prompt");
