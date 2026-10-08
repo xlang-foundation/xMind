@@ -16,6 +16,13 @@ and [provenance](evidence/native-process-timeout-diagnostic-local-provenance.jso
 preserve that scope. Diagnostics have not yet reproduced or explained the hosted
 stall; the next exact hosted gate remains required before release validation.
 
+Three additional sequential runs of only this traced contract passed in 9.67,
+10.17 and 10.19 seconds, each reaching the final phase under the same 45-second
+outer timeout. [Unaltered repeated CTest output](evidence/native-process-timeout-diagnostic-repeat.log)
+and [source/binary provenance](evidence/native-process-timeout-diagnostic-repeat-provenance.json)
+record the actual temporary-workspace effects. No engine change or timeout
+increase was made, and the hosted stall has not reproduced or been diagnosed.
+
 The installed verified runtime `4fc1148` has now completed one live
 `gpt-5.6-sol` Responses command cycle through the native CLI and shared browser.
 A trusted `git-status` profile binds the installed Git executable, read-only

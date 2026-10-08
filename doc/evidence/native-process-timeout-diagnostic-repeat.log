@@ -1,0 +1,110 @@
+UpdateCTestConfiguration  from :D:/CantorAI2026/xMind/build/a2a-native/DartConfiguration.tcl
+Parse Config file:D:/CantorAI2026/xMind/build/a2a-native/DartConfiguration.tcl
+Test project D:/CantorAI2026/xMind/build/a2a-native
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 21
+    Start 21: native_process_executor_contract
+
+21: Test command: "C:\Program Files\nodejs\node.exe" "D:/CantorAI2026/xMind/Native/tests/process_executor_peer.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_process_executor_contract.exe" "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/process_peer.mjs" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+21: Working Directory: D:/CantorAI2026/xMind/build/a2a-native
+21: Test timeout computed to be: 60
+21: Native process executor passed actual approved child effects, deny/cancel/expiry, exact profiles/arguments/workdir, stale directory, explicit binary output/nonzero exit, duplicate rejection, real result-storage fault, uncertain restart and cross-workspace profile quarantine, timeout and post-effect cancellation. Model/server/editor integration remains separate.
+21: [process-contract] phase=workspace-setup elapsed_ms=0
+21: [process-contract] phase=repository-open elapsed_ms=0
+21: [process-contract] phase=request-validation elapsed_ms=90
+21: [process-contract] phase=approval-denial elapsed_ms=91
+21: [process-contract] phase=approval-cancellation elapsed_ms=197
+21: [process-contract] phase=approval-expiry elapsed_ms=215
+21: [process-contract] phase=stale-directory elapsed_ms=1298
+21: [process-contract] phase=approved-dispatch elapsed_ms=1459
+21: [process-contract] phase=binary-output elapsed_ms=1707
+21: [process-contract] phase=streamed-output elapsed_ms=1965
+21: [process-contract] phase=output-flood elapsed_ms=2229
+21: [process-contract] phase=changed-executable elapsed_ms=2501
+21: [process-contract] phase=result-journal-fault elapsed_ms=6554
+21: [process-contract] phase=result-fault-close elapsed_ms=6839
+21: [process-contract] phase=restart-recovery elapsed_ms=6843
+21: [process-contract] phase=cross-workspace-quarantine elapsed_ms=6866
+21: [process-contract] phase=recovery-close elapsed_ms=7052
+21: [process-contract] phase=output-journal-fault elapsed_ms=7059
+21: [process-contract] phase=output-fault-close elapsed_ms=7443
+21: [process-contract] phase=timeout elapsed_ms=7446
+21: [process-contract] phase=interruption-close elapsed_ms=9198
+21: [process-contract] phase=cancel elapsed_ms=9204
+21: [process-contract] phase=interruption-close elapsed_ms=9564
+21: [process-contract] phase=complete elapsed_ms=9569
+    Test #21: native_process_executor_contract ...   Passed    9.67 sec
+    Start 21: native_process_executor_contract
+
+21: Test command: "C:\Program Files\nodejs\node.exe" "D:/CantorAI2026/xMind/Native/tests/process_executor_peer.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_process_executor_contract.exe" "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/process_peer.mjs" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+21: Working Directory: D:/CantorAI2026/xMind/build/a2a-native
+21: Test timeout computed to be: 60
+21: Native process executor passed actual approved child effects, deny/cancel/expiry, exact profiles/arguments/workdir, stale directory, explicit binary output/nonzero exit, duplicate rejection, real result-storage fault, uncertain restart and cross-workspace profile quarantine, timeout and post-effect cancellation. Model/server/editor integration remains separate.
+21: [process-contract] phase=workspace-setup elapsed_ms=0
+21: [process-contract] phase=repository-open elapsed_ms=0
+21: [process-contract] phase=request-validation elapsed_ms=91
+21: [process-contract] phase=approval-denial elapsed_ms=92
+21: [process-contract] phase=approval-cancellation elapsed_ms=198
+21: [process-contract] phase=approval-expiry elapsed_ms=213
+21: [process-contract] phase=stale-directory elapsed_ms=1224
+21: [process-contract] phase=approved-dispatch elapsed_ms=1393
+21: [process-contract] phase=binary-output elapsed_ms=1642
+21: [process-contract] phase=streamed-output elapsed_ms=1880
+21: [process-contract] phase=output-flood elapsed_ms=2165
+21: [process-contract] phase=changed-executable elapsed_ms=2446
+21: [process-contract] phase=result-journal-fault elapsed_ms=7111
+21: [process-contract] phase=result-fault-close elapsed_ms=7385
+21: [process-contract] phase=restart-recovery elapsed_ms=7389
+21: [process-contract] phase=cross-workspace-quarantine elapsed_ms=7412
+21: [process-contract] phase=recovery-close elapsed_ms=7595
+21: [process-contract] phase=output-journal-fault elapsed_ms=7600
+21: [process-contract] phase=output-fault-close elapsed_ms=7961
+21: [process-contract] phase=timeout elapsed_ms=7963
+21: [process-contract] phase=interruption-close elapsed_ms=9714
+21: [process-contract] phase=cancel elapsed_ms=9721
+21: [process-contract] phase=interruption-close elapsed_ms=10088
+21: [process-contract] phase=complete elapsed_ms=10092
+    Test #21: native_process_executor_contract ...   Passed   10.17 sec
+    Start 21: native_process_executor_contract
+
+21: Test command: "C:\Program Files\nodejs\node.exe" "D:/CantorAI2026/xMind/Native/tests/process_executor_peer.mjs" "D:/CantorAI2026/xMind/build/a2a-native/Release/agentflow_process_executor_contract.exe" "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/process_peer.mjs" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+21: Working Directory: D:/CantorAI2026/xMind/build/a2a-native
+21: Test timeout computed to be: 60
+21: Native process executor passed actual approved child effects, deny/cancel/expiry, exact profiles/arguments/workdir, stale directory, explicit binary output/nonzero exit, duplicate rejection, real result-storage fault, uncertain restart and cross-workspace profile quarantine, timeout and post-effect cancellation. Model/server/editor integration remains separate.
+21: [process-contract] phase=workspace-setup elapsed_ms=0
+21: [process-contract] phase=repository-open elapsed_ms=0
+21: [process-contract] phase=request-validation elapsed_ms=93
+21: [process-contract] phase=approval-denial elapsed_ms=94
+21: [process-contract] phase=approval-cancellation elapsed_ms=209
+21: [process-contract] phase=approval-expiry elapsed_ms=225
+21: [process-contract] phase=stale-directory elapsed_ms=1336
+21: [process-contract] phase=approved-dispatch elapsed_ms=1532
+21: [process-contract] phase=binary-output elapsed_ms=1782
+21: [process-contract] phase=streamed-output elapsed_ms=2019
+21: [process-contract] phase=output-flood elapsed_ms=2298
+21: [process-contract] phase=changed-executable elapsed_ms=2586
+21: [process-contract] phase=result-journal-fault elapsed_ms=7099
+21: [process-contract] phase=result-fault-close elapsed_ms=7385
+21: [process-contract] phase=restart-recovery elapsed_ms=7388
+21: [process-contract] phase=cross-workspace-quarantine elapsed_ms=7411
+21: [process-contract] phase=recovery-close elapsed_ms=7605
+21: [process-contract] phase=output-journal-fault elapsed_ms=7612
+21: [process-contract] phase=output-fault-close elapsed_ms=7980
+21: [process-contract] phase=timeout elapsed_ms=7983
+21: [process-contract] phase=interruption-close elapsed_ms=9733
+21: [process-contract] phase=cancel elapsed_ms=9739
+21: [process-contract] phase=interruption-close elapsed_ms=10107
+21: [process-contract] phase=complete elapsed_ms=10110
+1/1 Test #21: native_process_executor_contract ...   Passed   10.19 sec
+
+The following tests passed:
+	native_process_executor_contract
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =  30.04 sec

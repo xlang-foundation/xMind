@@ -1,0 +1,19 @@
+{
+  "xmind": "c34895db457c443aa6a924f314c834f7a5c61782",
+  "command": "ctest --test-dir build/a2a-native -C Release -R ^native_process_executor_contract$ --repeat until-fail:3 -V",
+  "exitCode": 0,
+  "completedRuns": 3,
+  "failedRuns": 0,
+  "processContractSeconds": [
+    9.67,
+    10.17,
+    10.19
+  ],
+  "outerTimeoutMs": 45000,
+  "sourceSha256": "ddddffd7c4a122299099a5a6fbc360a3b0aaf47fabf8e2255f5406616de964a5",
+  "binarySha256": "a1e1389e8076a77b2960397651250758b4dc7624889cc2fe8d98512e17ddd15a",
+  "runtimeSha256": "fb02403bff1bf9967d5e49cb4f2a5a4f6d13ad139cc02b069e20fc03cc6c4862",
+  "sqliteModuleSha256": "fcb0e481352672eb72d86a96e2ef5d9b58939a35ad03a4ac3e32bfe7dc733b8c",
+  "evidenceSha256": "01fdc2c8c65a4690db6f88dbc134fe7ef7c0edd4cd2910fedeac574adea3d731",
+  "scope": "Three actual sequential local runs with independent temporary workspaces; all assertions/timeouts retained. No simulated process effect or native engine change. Hosted timeout has not reproduced; its cause remains unproven and exact hosted gate remains required."
+}
