@@ -105,3 +105,14 @@ The guard now explicitly includes all three new Claude contracts and locally
 matches the full 55-entry configured set; its exact-set comparison is retained.
 Corrected hosted validation, product enrollment and live Claude inference remain
 pending. The running preview retains its previously verified bundle.
+
+Corrected gate `df423591eb89540041f030228db42ec4dccbfcf5` subsequently passed
+all **55 native, 73 extension and 14 browser contracts**, with no failures/skips:
+[hosted CTest](evidence/native-anthropic-adapter-hosted-ctest.log),
+[exact source/runtime provenance](evidence/native-anthropic-adapter-hosted-provenance.json).
+The native suite includes the Claude request, stream and actual HTTP adapter
+contracts using the independent synthetic peer. Packaging and runtime publication
+also succeeded. This gate does not include the newer provider-profile registry;
+its separate 56-contract gate is running. Product Claude Settings enrollment,
+live inference and full provider feature parity remain incomplete. No preview
+runtime was replaced for this component validation.

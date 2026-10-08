@@ -1,0 +1,115 @@
+Test project D:/a/xMind/xMind/xmind/build/native
+      Start  1: native_json_schema_contract
+ 1/55 Test  #1: native_json_schema_contract .................   Passed    0.01 sec
+      Start  2: native_mcp_wire_contract
+ 2/55 Test  #2: native_mcp_wire_contract ....................   Passed    0.02 sec
+      Start  3: model_stream_protocol_contract
+ 3/55 Test  #3: model_stream_protocol_contract ..............   Passed    0.06 sec
+      Start  4: model_request_contract
+ 4/55 Test  #4: model_request_contract ......................   Passed    0.01 sec
+      Start  5: native_anthropic_request_contract
+ 5/55 Test  #5: native_anthropic_request_contract ...........   Passed    0.01 sec
+      Start  6: native_anthropic_stream_contract
+ 6/55 Test  #6: native_anthropic_stream_contract ............   Passed    0.02 sec
+      Start  7: native_responses_protocol_contract
+ 7/55 Test  #7: native_responses_protocol_contract ..........   Passed    0.01 sec
+      Start  8: native_secret_protection_contract
+ 8/55 Test  #8: native_secret_protection_contract ...........   Passed    0.01 sec
+      Start  9: native_a2a_task_control_http_contract
+ 9/55 Test  #9: native_a2a_task_control_http_contract .......   Passed    1.53 sec
+      Start 10: native_a2a_message_http_contract
+10/55 Test #10: native_a2a_message_http_contract ............   Passed    0.38 sec
+      Start 11: native_a2a_stream_http_contract
+11/55 Test #11: native_a2a_stream_http_contract .............   Passed    2.29 sec
+      Start 12: native_a2a_v1_http_contract
+12/55 Test #12: native_a2a_v1_http_contract .................   Passed    1.02 sec
+      Start 13: native_responses_agent_http_contract
+13/55 Test #13: native_responses_agent_http_contract ........   Passed    1.17 sec
+      Start 14: native_graph_service_http_contract
+14/55 Test #14: native_graph_service_http_contract ..........   Passed    5.96 sec
+      Start 15: native_provider_cli_contract
+15/55 Test #15: native_provider_cli_contract ................   Passed    0.67 sec
+      Start 16: native_provider_setup_contract
+16/55 Test #16: native_provider_setup_contract ..............   Passed    1.11 sec
+      Start 17: native_graph_runner_contract
+17/55 Test #17: native_graph_runner_contract ................   Passed    3.06 sec
+      Start 18: native_graph_checkpoint_contract
+18/55 Test #18: native_graph_checkpoint_contract ............   Passed    0.60 sec
+      Start 19: native_graph_children_contract
+19/55 Test #19: native_graph_children_contract ..............   Passed    1.17 sec
+      Start 20: native_graph_contract
+20/55 Test #20: native_graph_contract .......................   Passed    0.78 sec
+      Start 21: native_instruction_configuration_contract
+21/55 Test #21: native_instruction_configuration_contract ...   Passed    0.47 sec
+      Start 22: native_process_configuration_contract
+22/55 Test #22: native_process_configuration_contract .......   Passed    0.33 sec
+      Start 23: native_process_executor_contract
+23/55 Test #23: native_process_executor_contract ............   Passed    9.58 sec
+      Start 24: native_agent_process_http_contract
+24/55 Test #24: native_agent_process_http_contract ..........   Passed    2.90 sec
+      Start 25: native_process_adapter_contract
+25/55 Test #25: native_process_adapter_contract .............   Passed    4.10 sec
+      Start 26: native_mcp_configuration_contract
+26/55 Test #26: native_mcp_configuration_contract ...........   Passed    0.16 sec
+      Start 27: native_schema_worker_contract
+27/55 Test #27: native_schema_worker_contract ...............   Passed    2.36 sec
+      Start 28: native_mcp_stdio_contract
+28/55 Test #28: native_mcp_stdio_contract ...................   Passed    3.03 sec
+      Start 29: native_mcp_handshake_contract
+29/55 Test #29: native_mcp_handshake_contract ...............   Passed    0.74 sec
+      Start 30: native_mcp_client_contract
+30/55 Test #30: native_mcp_client_contract ..................   Passed    0.97 sec
+      Start 31: native_mcp_effect_contract
+31/55 Test #31: native_mcp_effect_contract ..................   Passed   14.27 sec
+      Start 32: native_agent_service_contract
+32/55 Test #32: native_agent_service_contract ...............   Passed    0.53 sec
+      Start 33: native_agent_runner_contract
+33/55 Test #33: native_agent_runner_contract ................   Passed    1.88 sec
+      Start 34: native_create_executor_contract
+34/55 Test #34: native_create_executor_contract .............   Passed    2.13 sec
+      Start 35: native_edit_executor_contract
+35/55 Test #35: native_edit_executor_contract ...............   Passed    1.15 sec
+      Start 36: native_approved_edit_http_contract
+36/55 Test #36: native_approved_edit_http_contract ..........   Passed    1.32 sec
+      Start 37: native_workspace_tools_contract
+37/55 Test #37: native_workspace_tools_contract .............   Passed    0.81 sec
+      Start 38: native_repository_instructions_contract
+38/55 Test #38: native_repository_instructions_contract .....   Passed    0.35 sec
+      Start 39: native_chat_provider_contract
+39/55 Test #39: native_chat_provider_contract ...............   Passed    0.12 sec
+      Start 40: native_anthropic_provider_contract
+40/55 Test #40: native_anthropic_provider_contract ..........   Passed    0.13 sec
+      Start 41: native_http_stream_transport_contract
+41/55 Test #41: native_http_stream_transport_contract .......   Passed    6.17 sec
+      Start 42: native_agent_http_contract
+42/55 Test #42: native_agent_http_contract ..................   Passed    3.58 sec
+      Start 43: native_agent_edit_http_contract
+43/55 Test #43: native_agent_edit_http_contract .............   Passed    8.37 sec
+      Start 44: native_agent_mcp_http_contract
+44/55 Test #44: native_agent_mcp_http_contract ..............   Passed    2.03 sec
+      Start 45: native_mcp_sdk_modern_contract
+45/55 Test #45: native_mcp_sdk_modern_contract ..............   Passed    2.53 sec
+      Start 46: native_mcp_sdk_legacy_contract
+46/55 Test #46: native_mcp_sdk_legacy_contract ..............   Passed    2.61 sec
+      Start 47: native_http_cli_contract
+47/55 Test #47: native_http_cli_contract ....................   Passed    2.07 sec
+      Start 48: embedded_xlang_sqlite_contract
+48/55 Test #48: embedded_xlang_sqlite_contract ..............   Passed    0.04 sec
+      Start 49: native_incoming_repository_contract
+49/55 Test #49: native_incoming_repository_contract .........   Passed    0.32 sec
+      Start 50: native_task_list_repository_contract
+50/55 Test #50: native_task_list_repository_contract ........   Passed    0.38 sec
+      Start 51: native_permission_waiter_contract
+51/55 Test #51: native_permission_waiter_contract ...........   Passed    0.85 sec
+      Start 52: native_operation_repository_contract
+52/55 Test #52: native_operation_repository_contract ........   Passed    1.15 sec
+      Start 53: xlang_repository_contract
+53/55 Test #53: xlang_repository_contract ...................   Passed    0.23 sec
+      Start 54: persistence_service_contract
+54/55 Test #54: persistence_service_contract ................   Passed    2.45 sec
+      Start 55: encrypted_credential_repository_contract
+55/55 Test #55: encrypted_credential_repository_contract ....   Passed    0.46 sec
+
+100% tests passed, 0 tests failed out of 55
+
+Total Test time (real) = 100.51 sec

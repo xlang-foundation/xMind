@@ -1,0 +1,26 @@
+{
+  "run": 37717199177,
+  "job": 113117350719,
+  "revision": "df423591eb89540041f030228db42ec4dccbfcf5",
+  "conclusion": "success",
+  "nativePassed": 55,
+  "extensionPassed": 73,
+  "browserPassed": 14,
+  "failed": 0,
+  "skipped": 0,
+  "nativeTestTimeSeconds": 100.51,
+  "evidenceArtifact": 11524767243,
+  "runtimePublished": true,
+  "runtimeSource": {
+    "xmind": "df423591eb89540041f030228db42ec4dccbfcf5",
+    "toolchain": "Visual Studio 18 2026",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "toolchain_version": "18.10.12217.157",
+    "sqlite_patch_sha256": "5388CDB3D1946CE48A2416055E27B422A2AA1364271A24DC8EB124C72C2C64B4",
+    "xlang3": "914783909835116969aad7c66b210a5ac9a27661",
+    "runtime": "Native xlang3; no CPython execution or bridge"
+  },
+  "xmindNativeCtestSha256": "03d95a4c9cf90a24039bc56d18ad2d412beb0b0b0079373253382571ecef94c1",
+  "jobLogSha256": "6f671c336c2a3f3ee413b50bb2ccaa50b4405d8a76cedfc6327ee0552f136481",
+  "scope": "Full hosted native/extension/browser gate including Claude request, stream and independent HTTP adapter contracts; synthetic Claude peer only. Provider-profile registry is newer source and not covered. No live Claude, Settings enrollment or preview upgrade claimed."
+}
