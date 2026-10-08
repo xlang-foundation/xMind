@@ -1,0 +1,17 @@
+{
+  "revision": "4203b84678b51b2ae7c6ee47fccfa14b684680ae",
+  "scope": "Actual browser rename of the completed live Git status conversation, refresh/reopen and read-only native CLI conversation navigation; no new model inference.",
+  "renamedTitle": "Repository Git status",
+  "historyCount": 4,
+  "runCount": 1,
+  "historyPreserved": true,
+  "runsPreserved": true,
+  "providerConfigurationPreserved": true,
+  "cliNavigationPassed": true,
+  "cliExitStatus": 0,
+  "modelRequestAdmitted": false,
+  "browserRefreshRetainedConnection": true,
+  "nativeBackendReopened": true,
+  "titleRestoredAfterNativeReopen": true,
+  "cancelledDraftDidNotChangeTitle": true
+}

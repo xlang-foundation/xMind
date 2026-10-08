@@ -12,10 +12,13 @@ The latest inspected successful native checkpoint is
 `4203b84678b51b2ae7c6ee47fccfa14b684680ae`: 52 native, 72 extension and 13 browser
 contracts passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37707042113).
 [Exact evidence](../doc/evidence/native-session-navigation-hosted-provenance.json).
-This includes native CLI conversation navigation and optimistic title changes;
-actual preview installation and editor rename acceptance remain separate.
+This includes native CLI conversation navigation and optimistic title changes.
+The exact native/browser pair is now installed in the preview: real browser
+rename, Cancel, refresh, native reopen and read-only CLI navigation passed with
+history/runs/provider settings preserved. [Live scope](../doc/evidence/live-browser-cli-navigation-rename.json).
+Actual editor rename acceptance remains separate.
 Newer cookie-duration and MCP diagnostic/catalogue changes await their own gates.
-The browser preview remains on tested checkpoint `6263630`. Actual live Responses
+The browser preview now uses tested checkpoint `4203b84`. Actual live Responses
 text, read, approved edit and registered Git status turns succeeded within
 [their recorded scope](../doc/live-provider-compatibility.md). An official MCP
 peer connected and discovered tools, but its live model/tool read failed before

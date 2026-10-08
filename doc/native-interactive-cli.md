@@ -73,9 +73,13 @@ stale and empty title rejection, unchanged history/runs and rename persistence
 after reopening, without inference. The HTTP/CLI contract includes request-based
 titles and whitespace input behavior. [Exact scope and totals](evidence/native-session-navigation-hosted-provenance.json).
 This supersedes the historical pending-compilation notes below for those features;
-it does not establish actual editor rename acceptance. The browser preview still
-uses checkpoint `6263630`, so its installed CLI and sidebar lack the newer rename
-capability. Full interactive/TUI parity remains incomplete.
+it does not establish actual editor rename acceptance. The browser preview now
+uses that exact checkpoint and exposes the rename capability. Actual browser
+rename/Cancel, refresh and native reopen retained the title and connection; the
+installed CLI listed/resumed the same completed conversation and restored its
+exact history without inference. [Live evidence](evidence/live-browser-cli-navigation-rename.json).
+Full interactive/TUI parity remains incomplete. Earlier installation notes below
+retain their historical checkpoint scope.
 
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):

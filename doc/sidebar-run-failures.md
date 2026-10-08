@@ -46,5 +46,5 @@ without skips. The labelled renderer fixture covers known identifiers, unknown
 strings/markup and non-string fields, transcript refresh, unchanged unsent
 composer text, run reset and omission of assistant/metric cards. Shared browser
 assets built successfully. This is source/fixture validation: the installed
-preview remains on `6263630`, and the newer native diagnostic producer and live
+preview now runs the later tested `4203b84` pair, and the newer native diagnostic producer and live
 MCP failure diagnosis still await the compiled hosted gate.
