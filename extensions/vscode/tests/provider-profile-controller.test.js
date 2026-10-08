@@ -4,6 +4,16 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const {ProviderProfileController}=require('../client');
 const registry=()=>({revision:4,active:'openai',profiles:[{id:'openai',route_id:'openai.responses',provider:'openai',model:'fixture-openai',revision:4}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'openai.chat',provider:'openai',wire:'chat-completions',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]});
+test('admission reconciliation refreshes changed metadata and discards pending keys without replay',async()=>{
+ let state=registry(),reads=0;const posted=[],controller=new ProviderProfileController({providerProfiles:async()=>{reads++;return state;}},value=>posted.push(value));
+ try{await controller.refresh();const binding=await controller.admission();controller.draft={key:'synthetic-pending-key'};state={...state,revision:5};
+ assert.equal(await controller.reconcileAdmission(binding,{status:409}),true);assert.equal(controller.draft,undefined);assert.deepEqual(await controller.admission(),{provider_profile_id:'openai',expected_provider_revision:5});assert.equal(reads,2);assert.ok(!JSON.stringify(posted).includes('synthetic-pending-key'));
+ assert.equal(await controller.reconcileAdmission(await controller.admission(),{status:409}),false);assert.equal(await controller.reconcileAdmission(binding,{status:503}),false);assert.equal(reads,3);}finally{controller.dispose();}
+});
+test('retired admission reconciliation cannot publish a late metadata response',async()=>{
+ let release;const pending=new Promise(resolve=>release=resolve),posted=[],controller=new ProviderProfileController({providerProfiles:()=>pending},value=>posted.push(value));
+ const request=controller.reconcileAdmission({provider_profile_id:'openai',expected_provider_revision:4},{status:409});controller.dispose();release({...registry(),revision:5});assert.equal(await request,false);assert.deepEqual(posted,[]);
+});
 test('admission uses the profile snapshot already shown in this view and does not refresh past an external change',async()=>{
  let reads=0;const controller=new ProviderProfileController({providerProfiles:async()=>{reads++;return registry();}},()=>{});
  try{await controller.refresh();const binding=await controller.admission();assert.deepEqual(binding,{provider_profile_id:'openai',expected_provider_revision:4});assert.equal(reads,1);controller.invalidate();assert.deepEqual(await controller.admission(),binding);assert.equal(reads,1);}finally{controller.dispose();}

@@ -127,6 +127,12 @@ class ProviderProfileController {
   wire(id){const profile=this.state?.profiles.find(value=>value.id===id);return this.state?.routes.find(value=>value.id===profile?.route_id)?.wire;}
   models(selected){if(this.draft)this.post({type:'model-list',models:this.draft.ids.map(id=>({id})),model:selected});}
   async admission(){if(!this.state&&!await this.refresh())throw new Error('Provider profile admission requires profile metadata');if(this.disposed||!this.state||!this.guard())throw new Error('Backend changed before run admission');return {provider_profile_id:this.state.active,expected_provider_revision:this.state.revision};}
+  async reconcileAdmission(binding,error){
+    if(error?.status!==409||!binding)return false;
+    const epoch=this.epoch;if(!await this.refresh()||!this.current(epoch))return false;
+    if(this.state.revision===binding.expected_provider_revision&&this.state.active===binding.provider_profile_id)return false;
+    this.invalidate();this.present();const wire=this.wire(this.state.active);if(wire)this.post({type:'provider-wire',wire});return true;
+  }
   async discover(key,id,route_id){
     if(!this.state&&!await this.refresh())return false;
     if(this.disposed||!this.state)return true;

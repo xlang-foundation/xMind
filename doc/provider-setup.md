@@ -1,5 +1,20 @@
 # Provider setup in the sidebar
 
+## Recovering from another view's provider change
+
+On an admission HTTP 409, a client with a profile binding re-reads public
+profile metadata. If the revision or active profile differs from the submitted
+binding, it clears any unsaved key draft and refreshes the displayed profile,
+wire API and backend-enabled models. It tells the user to review the current
+profile and submit again. The prompt remains in the composer; the rejected task
+is never retried or appended as an accepted user message.
+
+Unchanged-profile conflicts retain their original error. Transport failures do
+not trigger task replay. Disposed views and obsolete backend generations cannot
+publish a late reconciliation. These paths passed **86 extension and 17 browser
+tests**, including actual host-controller fixtures for both clients. This is
+client behavior evidence, not a new native or live-account acceptance claim.
+
 ## Durable provider context
 
 New source captures a public `provider_context` in the admitted user message

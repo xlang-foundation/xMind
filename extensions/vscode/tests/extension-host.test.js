@@ -22,7 +22,9 @@ function harness(options={}) {
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
     let data;
-    if(target.pathname==='/v1/provider/profiles')return {ok:false,status:404,json:async()=>({detail:'Legacy backend has no profile API'})};
+    if(target.pathname==='/v1/provider/profiles')return options.profileRegistry?{ok:true,json:async()=>options.profileRegistry()}:{ok:false,status:404,json:async()=>({detail:'Legacy backend has no profile API'})};
+    if(target.pathname==='/v1/provider/profiles/models')return {ok:true,json:async()=>({models:options.catalogue.models})};
+    if(target.pathname==='/v1/runs'&&options.onAdmission)return options.onAdmission(JSON.parse(requestOptions.body));
     if(target.pathname==='/v1/health') data=options.health||{agent_execution:true,status:'ok'};
     else if(target.pathname==='/v1/graphs')data={graphs:options.graphs||[]};
     else if(target.pathname==='/v1/graph-runs'){
@@ -110,6 +112,17 @@ async function until(predicate) {
   while(Date.now()<deadline) {if(predicate()) return;await new Promise(resolve=>setImmediate(resolve));}
   throw new Error('Extension host fixture timed out');
 }
+test('native admission profile conflict updates the sidebar account/model without task replay',async()=>{
+  let registry={revision:4,active:'first',profiles:[{id:'first',route_id:'openai.responses',provider:'openai',model:'fixture-first',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};const bodies=[];
+  const options={health:{agent_execution:true,provider_profile_admission:true},catalogue:{default_model:'fixture-first',models:[{id:'fixture-first'}]},profileRegistry:()=>registry,onAdmission:body=>{
+    bodies.push(body);registry={...registry,revision:5,active:'second',profiles:[...registry.profiles,{id:'second',route_id:'openai.responses',provider:'openai',model:'fixture-second',revision:1}]};options.catalogue={default_model:'fixture-second',models:[{id:'fixture-second'}]};
+    return {ok:false,status:409,json:async()=>({detail:'Provider profile changed before run admission'})};
+  }};
+  const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+  await until(()=>view.posted.some(value=>value.type==='provider-profiles'&&value.active==='first'));await until(()=>view.posted.some(value=>value.type==='transcript'));
+  view.receive({type:'send',prompt:'Retained host fixture task'});await until(()=>view.posted.some(value=>value.type==='error'&&value.text.includes('draft has been kept')));
+  assert.equal(bodies.length,1);assert.equal(bodies[0].provider_profile_id,'first');assert.equal(bodies[0].expected_provider_revision,4);assert.ok(view.posted.some(value=>value.type==='provider-profiles'&&value.active==='second'));assert.ok(view.posted.some(value=>value.type==='capabilities'&&value.model==='fixture-second'));assert.ok(!view.posted.some(value=>value.type==='user'));view.close();
+});
 
 test('native terminal state refreshes transcript and stops polling with durable operation inspection',async()=>{
   const h=harness();await h.commands.get('agentflow.open')();

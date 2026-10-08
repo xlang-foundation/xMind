@@ -383,7 +383,22 @@ async function activate(context) {
           }
           if (panel !== view) return;
           if(busySession()) throw new Error('This conversation still has an active run. Stop or finish it before submitting another prompt.');
-          const run = graph?await client.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel,binding):await client.run(sessionId,message.prompt,selectedModel,binding);
+          const admissionClient=client,runVersion=generation;let run;
+          try{run=graph?await admissionClient.graphRun(sessionId,graph.id,graph.revision,message.prompt,selectedModel,binding):await admissionClient.run(sessionId,message.prompt,selectedModel,binding);}
+          catch(error){
+            if(panel!==view||generation!==runVersion||client!==admissionClient)return;
+            const changed=await profileController.reconcileAdmission(binding,error).catch(()=>false);
+            if(panel!==view||generation!==runVersion||client!==admissionClient)return;
+            if(changed){
+              const current=await capabilities();if(panel!==view||generation!==runVersion||client!==admissionClient)return;
+              health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);
+              post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
+              await refreshGraphs();await context.workspaceState.update(modelStateKey,{url:client.baseUrl,id:selectedModel});
+              if(panel!==view||generation!==runVersion||client!==admissionClient)return;
+              throw new Error('Provider settings changed in another view. Review the current profile and submit again. Your draft has been kept.');
+            }
+            throw error;
+          }
           if (panel !== view) return; // Accepted backend execution survives view closure.
           stop();clearGraph();runId = run.id; cursor = 0;
           sessionRuns=[...sessionRuns,run];presentRuns();
