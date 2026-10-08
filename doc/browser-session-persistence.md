@@ -1,11 +1,11 @@
 # Durable local browser access sessions
 
-The current browser adapter keeps its eight-hour sessions in memory. A UI
+The live preview's tested browser adapter keeps its eight-hour sessions in memory. A UI
 refresh and a native restart at the same origin preserve access while that
 adapter remains alive; restarting the adapter currently requires login again.
 Provider keys remain in the native encrypted credential repository.
 
-The new `ViewSessions` C++ service prepares durable access sessions for that
+The `ViewSessions` C++ service implements durable access sessions for that
 remaining restart case. Windows BCrypt generates independent 256-bit identifiers
 and secrets. The secret is encrypted by the existing credential repository;
 origin, expiry and the SHA-256 binding to the master authority are public
@@ -22,16 +22,20 @@ policy currently accepts canonical `http://127.0.0.1:PORT` origins only. Remote
 deployments still require their own authenticated access adapter and transport.
 Issuance must be called only after master-token authentication. A view credential
 must never be permitted to issue additional credentials or receive the master
-token. The planned adapter will retain the credential in an HttpOnly cookie and
-forward it with its bound origin; native verification must run on each request.
+token. The adapter retains the credential in an HttpOnly cookie and forwards it
+with its bound origin; native verification runs on each request.
 
 The existing native persistence contract now includes issuance, secret tamper,
 origin mismatch, metadata disclosure checks, real repository reopen, master
-rotation, durable revocation and expiry. This source is not yet compiled or
-executed: the local native build guard deferred while sibling xlang3 benchmarks
-were running. HTTP and browser adapter integration are still pending. The live
-browser therefore continues using its existing in-memory access sessions;
-restart persistence is not yet available to users.
+rotation, durable revocation and expiry. It also injects actual SQLite trigger
+failures during metadata publication and credential deletion: unpublished
+candidates must be pruned on the next enrollment, while failed revocation must
+preserve the previous credential transactionally. The test requires the
+32-session capacity limit to reject before adding another credential, then
+checks that revocation releases capacity. These source tests are not yet
+compiled or executed: the local build guard deferred while sibling xlang3
+benchmarks were running. The live browser continues using its existing
+in-memory sessions; restart persistence is not yet available to users.
 
 HTTP and adapter integration is now present in source. Master authentication can
 issue a credential through `POST /v1/view-sessions`. The adapter uses an HttpOnly

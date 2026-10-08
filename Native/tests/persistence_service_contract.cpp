@@ -49,7 +49,26 @@ int main(int argc,char** argv) {
             views.revoke(cookie,origin);require(!views.accepts(cookie,origin),"Revocation must remove encrypted view credential");
             ViewSessions brief(store,authority,std::chrono::seconds(1));const auto expiring=brief.issue(origin);std::this_thread::sleep_for(std::chrono::milliseconds(1100));require(!brief.accepts(expiring.credential,origin),"Expired cookie must not authenticate");
         }
-        {PersistenceService store(viewPath,roots);ViewSessions views(store,authority);require(!views.accepts(cookie,origin),"Revocation must survive repository reopen");}
+        {
+            PersistenceService store(viewPath,roots);ViewSessions views(store,authority);require(!views.accepts(cookie,origin),"Revocation must survive repository reopen");
+            const auto cleaned=views.issue(origin);views.revoke(cleaned.credential,origin);
+            require(store.credentials("local-view-sessions").get().empty(),"Issuance must prune expired encrypted credentials");
+            {
+                XlangSqlite inject(viewPath,roots);inject.execute("CREATE TRIGGER reject_view_metadata BEFORE INSERT ON information WHEN NEW.category='local-view-sessions' BEGIN SELECT RAISE(ABORT,'actual view publication fault'); END");
+                rejects<DatabaseError>([&]{views.issue(origin);});inject.execute("DROP TRIGGER reject_view_metadata");
+            }
+            const auto orphaned=store.credentials("local-view-sessions").get();require(orphaned.size()==1,"Failed publication fixture must leave an unpublished encrypted candidate");
+            rejects<NotFound>([&]{store.information("local-view-sessions",orphaned[0].id).get();});
+            const auto recovered=views.issue(origin);require(views.accepts(recovered.credential,origin) && store.credentials("local-view-sessions").get().size()==1,"Next issuance must prune unpublished candidates before admitting a session");
+            {
+                XlangSqlite inject(viewPath,roots);inject.execute("CREATE TRIGGER reject_view_revoke BEFORE DELETE ON credentials WHEN OLD.scope='local-view-sessions' BEGIN SELECT RAISE(ABORT,'actual view revocation fault'); END");
+                rejects<DatabaseError>([&]{views.revoke(recovered.credential,origin);});require(views.accepts(recovered.credential,origin),"Failed revocation must preserve the previous credential transactionally");inject.execute("DROP TRIGGER reject_view_revoke");
+            }
+            views.revoke(recovered.credential,origin);
+            std::vector<std::string> retained;for(int i=0;i<32;++i)retained.push_back(views.issue(origin).credential);
+            rejects<Conflict>([&]{views.issue(origin);});require(store.credentials("local-view-sessions").get().size()==32,"Session limit must reject before persisting another credential");
+            views.revoke(retained.back(),origin);const auto replacement=views.issue(origin);require(views.accepts(replacement.credential,origin),"Revocation must release session capacity");
+        }
 #endif
         {
             Repository before(path,roots);
