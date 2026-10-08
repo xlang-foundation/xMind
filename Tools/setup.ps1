@@ -44,7 +44,7 @@ try {
     $nativeFiles = @(Get-ChildItem -LiteralPath $packages -Recurse -File | Where-Object { $_.Extension -in '.pyd','.dll','.so','.dylib' })
     if ($nativeFiles.Count -gt 0) { throw "Native dependency binaries found in pure-Python package directory." }
     $env:PYTHONPATH = "$projectRoot;$packages"
-    & $Runtime "$projectRoot\tests\runtime_probe.py"
+    & $Runtime "$projectRoot\Tools\probes\xlang3_dependencies.py"
     if ($LASTEXITCODE -ne 0) { throw "xlang3 dependency probe failed. Discuss the gap before changing native code." }
 } finally {
     $env:PYTHONPATH = $savedPath

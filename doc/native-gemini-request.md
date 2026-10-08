@@ -23,5 +23,9 @@ Interactions API also remain unimplemented.
 The implementation follows Google's [GenerateContent REST reference](https://ai.google.dev/api/generate-content).
 Its synthetic native contract checks text, schemas, signatures, precision,
 function correlation and rejection cases. This source increases the required
-complete native gate from 57 to 58 contracts; compilation and execution are
-pending. No Gemini availability or inference is claimed.
+complete native gate from 57 to 58 contracts. The local full gate passed all
+58 contracts in 98.49 seconds, with 88 extension and 17 browser checks and the
+actual native/browser integration contract also passing. See
+[local provenance](evidence/native-gemini-local-provenance.json) and
+[CTest output](evidence/native-gemini-local-ctest.log). Hosted validation of this
+source remains pending. No Gemini availability or inference is claimed.

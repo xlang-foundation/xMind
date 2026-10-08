@@ -1,18 +1,6 @@
 // Source-level equivalents only. These entries do not assert passing parity.
-export const partial = {
-  'session.list': ['agentflow/server.py', '/v1/sessions', 'Filtering, pagination and project/location scoping are missing.'],
-  'session.create': ['agentflow/server.py', 'POST /v1/sessions', 'Agent/model/environment configuration and upstream session fields are missing.'],
-  'session.message.list': ['agentflow/store.py', '/v1/sessions/{session_id}/history', 'Typed message parts, message IDs and pagination need comparison.'],
-  'session.prompt': ['agentflow/engine.py', 'POST /v1/runs', 'Attachments, queued input, per-session agent/model selection and interruption semantics are incomplete.'],
-  'session.interrupt': ['agentflow/server.py', 'POST /v1/runs/{run_id}/cancel', 'Cancellation exists; recoverable interruption and full session semantics are not established.'],
-  'event.subscribe': ['agentflow/server.py', '/v1/runs/{run_id}/stream', 'Only per-run events exist; global/location event subscription is absent.'],
-  'session.permission.list': ['agentflow/permissions.py', '/v1/runs/{run_id}/approvals', 'Only run-scoped pending mutation approvals exist.'],
-  'session.permission.reply': ['agentflow/permissions.py', 'POST /v1/approvals/{approval_id}', 'Persistent policy rules and upstream permission categories are absent.'],
-  'fs.find': ['agentflow/tools.py', 'WorkspaceTools search_files', 'Tool-level workspace content search; upstream filename-search API contract is missing.'],
-  'fs.list': ['agentflow/tools.py', 'WorkspaceTools list_files', 'Backend filesystem API and client navigation semantics are missing.'],
-  'fs.read': ['agentflow/tools.py', 'WorkspaceTools read_file', 'Backend filesystem API, binary and range semantics need comparison.'],
-  'experimental.fs.write': ['agentflow/tools.py', 'WorkspaceTools write_file/replace_text', 'Tool permission controls exist; standalone filesystem mutation API is absent.'],
-};
+// The Python prototype was removed. Never map deleted sources as capabilities.
+export const partial = {};
 
 const requirements = {
   session: 'Persist the full session lifecycle, typed messages, input ordering and configuration; validate restart, concurrent inputs, cross-client consistency and missing/terminal session errors.',

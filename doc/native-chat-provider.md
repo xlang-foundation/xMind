@@ -18,7 +18,7 @@ Fixtures are explicitly synthetic. No inference service or real model was called
 
 The [native agent loop](native-agent-loop.md) now invokes this adapter and resolves encrypted credential references internally. Live provider validation still requires the chosen endpoint/model and privately configured credentials. Backend configuration/discovery, product HTTP/CLI scheduling, complete coding tools/policies, other protocol families, routing/retries and provider coverage against LiteLLM remain required. The project's full goal remains unchanged.
 
-The regenerated [pinned LiteLLM coverage inventory](../Documents/LITELLM_PROVIDER_INVENTORY.json)
+The regenerated [pinned LiteLLM coverage inventory](../doc/LITELLM_PROVIDER_INVENTORY.json)
 now distinguishes declared upstream capabilities from native implementation
 evidence. Its 4,483 entries span 136 provider groups. OpenAI is one partial native
 candidate with checked C++ source anchors/hashes and selected recorded live

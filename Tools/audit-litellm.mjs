@@ -70,5 +70,5 @@ const inventory = { source: `https://github.com/BerriAI/litellm/tree/${revision}
     caveat: 'Source anchors and selected recorded live checks are partial evidence. No complete provider-group or model-entry parity is verified.' },
   caveat: 'Pinned upstream metadata is a coverage reference, not tested AgentFlow support, current availability or current pricing. Entries include aliases, regions, pricing buckets and non-chat modes. Missing modes remain unspecified; non-provider metadata is excluded and recorded separately.',
   providers: [...groups.values()].sort((a, b) => a.provider.localeCompare(b.provider)) };
-writeFileSync(resolve(root, 'Documents/LITELLM_PROVIDER_INVENTORY.json'), JSON.stringify(inventory, null, 2) + '\n');
+writeFileSync(resolve(root, 'doc/LITELLM_PROVIDER_INVENTORY.json'), JSON.stringify(inventory, null, 2) + '\n');
 console.log(`Audited ${models} entries across ${groups.size} provider groups; ${Object.keys(nativePartial).length} native partial candidates, ${groups.size - Object.keys(nativePartial).length} unmapped, 0 verified provider parity`);

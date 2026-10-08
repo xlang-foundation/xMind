@@ -46,11 +46,11 @@ for (const [path, methods] of Object.entries(schema.paths)) {
 operations.sort((a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method));
 for (const id of Object.keys(nativePartial)) if (!operations.some(operation => operation.operationId === id)) throw new Error(`Native mapping is outside the pinned schema: ${id}`);
 const inventory = { source: 'https://github.com/anomalyco/opencode/tree/v2.0.16', revision,
-  statusScope: 'status and agentflowEvidence describe the historical Python prototype. nativeStatus and nativeEvidence describe reviewed C++ source candidates. Unmapped is not proof of absence; no operation is verified parity.',
+  statusScope: 'Historical Python prototype mappings were removed with that implementation. nativeStatus and nativeEvidence describe reviewed C++ source candidates. Unmapped is not proof of absence; no operation is verified parity.',
   nativeSourceHashFormat: 'SHA-256 of UTF-8 source text with CRLF normalized to LF; source candidates may include uncommitted changes at audit time.',
   schema: 'packages/protocol/openapi.json', schemaSha256: createHash('sha256').update(schemaBytes).digest('hex'),
   schemaReferences: 'Resolve $ref values against the pinned source schema. This inventory does not dereference them or cover every non-API behavior.',
   operationCount: operations.length, operations };
-const target = resolve(root, 'Documents/OPENCODE_API_INVENTORY.json');
+const target = resolve(root, 'doc/OPENCODE_API_INVENTORY.json');
 writeFileSync(target, JSON.stringify(inventory, null, 2) + '\n');
 console.log(`Audited ${operations.length} pinned OpenCode operations: ${operations.filter(x => x.agentflowEvidence).length} historical prototype and ${operations.filter(x => x.nativeEvidence).length} native source candidates; no verified parity claims`);

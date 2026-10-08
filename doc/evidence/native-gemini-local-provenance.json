@@ -1,0 +1,14 @@
+{
+  "source_revision": "9e3a104b27414fc61c6e346c75e41cf630c21991",
+  "native_contracts": 58,
+  "failed": 0,
+  "skipped": 0,
+  "native_seconds": 98.49,
+  "extension_contracts": 88,
+  "browser_contracts": 17,
+  "browser_native_integration": "passed with rebuilt native server and shared assets; synthetic contract only",
+  "runtime_revision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "runtime_source": "isolated xlang3-nexus-buffer worktree",
+  "stdlib_source": "C:/Python/Python314/Lib source only; no CPython execution",
+  "scope": "Local complete native gate including Gemini request history, run-descriptor attribution and prompt DatabaseError regression fix. No Gemini transport/live inference or preview upgrade claimed."
+}

@@ -166,7 +166,7 @@ Retry transient provider failures only within explicit limits and before externa
 
 ## Build and migration boundaries
 
-Keep the new native target independent of the legacy `ThirdParty/xlang` build. Pin native infrastructure dependencies and licenses. Port useful xMind behaviors through tests rather than assume the old package ABI is compatible. Preserve the Python/FastAPI prototype as historical material until its useful scenarios have native equivalents; it is not production implementation evidence.
+Keep the new native target independent of the legacy `ThirdParty/xlang` build. Pin native infrastructure dependencies and licenses. Port useful xMind behaviors through tests rather than assume the old package ABI is compatible. The earlier Python/FastAPI prototype and its dependent probes/launcher were removed at the user's request. Git history preserves that material; it is not production implementation evidence. Generic xlang3 dependency and native-runtime probes remain separate from the agent backend.
 
 First establish native persistence and event contracts, then the service/CLI, engine/provider/tools, protocol interoperability, graph execution and editor workflows. The pinned OpenCode API inventory and LiteLLM provider inventory guide coverage. Source presence and catalogue entries alone do not prove parity. The requested platform remains incomplete until native behavior, live peers/providers and actual IDE interaction have been validated.
 

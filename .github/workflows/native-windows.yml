@@ -2,9 +2,9 @@ name: Native Windows contracts
 on:
   push:
     branches: [main, 'checkpoint/**']
-    paths: ['Native/**', 'Tools/**', 'doc/runtime-prerequisites/**', 'extensions/vscode/**', 'views/browser/**', '.github/workflows/native-windows.yml']
+    paths: ['CMakeLists.txt', 'Native/**', 'Tools/**', 'doc/runtime-prerequisites/**', 'extensions/vscode/**', 'views/browser/**', '.github/workflows/native-windows.yml']
   pull_request:
-    paths: ['Native/**', 'Tools/**', 'doc/runtime-prerequisites/**', 'extensions/vscode/**', 'views/browser/**', '.github/workflows/native-windows.yml']
+    paths: ['CMakeLists.txt', 'Native/**', 'Tools/**', 'doc/runtime-prerequisites/**', 'extensions/vscode/**', 'views/browser/**', '.github/workflows/native-windows.yml']
   workflow_dispatch:
 permissions:
   contents: read
