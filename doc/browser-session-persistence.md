@@ -87,3 +87,22 @@ configuration, survived without inference replay.
 [Live restart evidence](evidence/browser-durable-session-live-restarts.json)
 records sanitized results and the unresolved initial enrollment issue. This
 does not establish remote/team authentication or eliminate that known issue.
+
+Newer source returns `max_age_seconds` from the native lifetime policy alongside
+the absolute expiry. The adapter validates a duration of 1–28,800 seconds and
+uses that value for its cookie. Native validation continues to enforce the
+stored absolute expiry on every request. Enrollment no longer compares the
+native expiry to the Node process's clock at an exact eight-hour boundary.
+Labelled adapter tests pass with the peer clock five seconds ahead or behind,
+and reject missing/excessive durations without setting a cookie. A known
+protocol-error code explains that mismatched server/adapter versions must be
+updated together, preserves an existing connection and clears the token input.
+
+All 14 browser adapter/DOM tests pass locally. Native persistence tests now
+check durations for both eight-hour and one-second policies, and the actual
+native/browser contract checks the public duration and revocation. Compiled
+execution remains pending; the local benchmark guard deferred compilation.
+This removes a clock-precision dependency demonstrated by fixtures, but the
+earlier live 502 cause remains unproven. The live preview still uses the exact
+tested `6263630` pair; this changed contract must roll out as a matched pair after
+native verification. Remote/team access is still outside this local adapter.

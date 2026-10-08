@@ -53,7 +53,7 @@ ViewSession ViewSessions::issue(const std::string& origin){
     const auto expires=now()+std::chrono::duration_cast<std::chrono::milliseconds>(lifetime_).count();
     store_.put_credential(scope,id,binding_,"Browser access session",SecretBytes(std::span(reinterpret_cast<const std::uint8_t*>(token.data()),token.size())),0).get();
     store_.put_information(scope,id,Json{{"origin",origin},{"binding",binding_},{"expires_unix_ms",expires}}.dump()).get();
-    return {id+"."+token,expires};
+    return {id+"."+token,expires,lifetime_.count()};
 }
 bool ViewSessions::accepts(std::string_view credential,const std::string& origin){check_origin(origin);std::lock_guard lock(mutex_);return accepted(store_,binding_,credential,origin);}
 void ViewSessions::revoke(std::string_view credential,const std::string& origin){

@@ -15,7 +15,7 @@ test('browser adapter forwards durable native view credentials across restart wi
     if(request.url==='/v1/view-sessions'){
       if(request.headers.authorization!=='Bearer '+master){reply(401,{});return;}
       assert.deepEqual(Object.keys(JSON.parse(input)),['origin']);boundOrigin=JSON.parse(input).origin;
-      active=true;reply(200,{credential:mode==='invalid'?'invalid':credential,expires_unix_ms:Date.now()+28800000});return;
+      active=true;reply(200,{credential:mode==='invalid'?'invalid':credential,expires_unix_ms:Date.now()+28800000+(mode==='clock-ahead'?5000:mode==='clock-behind'?-5000:0),max_age_seconds:mode==='excessive-lifetime'?28801:mode==='missing-lifetime'?undefined:28800});return;
     }
     if(request.headers.authorization!=='View '+credential||request.headers['x-xmind-view-origin']!==boundOrigin||!active){reply(401,{});return;}
     if(request.url==='/v1/view-sessions/current'){reply(mode==='unavailable'?503:200,{connected:true});return;}
@@ -39,9 +39,11 @@ test('browser adapter forwards durable native view credentials across restart wi
     mode='unavailable';assert.equal((await fetch(origin+'/ui/session',{method:'POST',headers:{...headers,Cookie:cookie},body:'{}'})).status,502);mode='ok';
     const badLogin=await fetch(origin+'/ui/session',{method:'POST',headers:{...headers,Cookie:cookie,Authorization:'Bearer '+'z'.repeat(64)},body:'{}'});assert.equal(badLogin.status,401);assert.equal(badLogin.headers.get('set-cookie'),null);assert.ok(active);
     mode='invalid';const invalid=await fetch(origin+'/ui/session',{method:'POST',headers:{...headers,Authorization:'Bearer '+master},body:'{}'});assert.equal(invalid.status,502);assert.equal(invalid.headers.get('set-cookie'),null);mode='ok';
+    for(const clockMode of ['clock-ahead','clock-behind']){mode=clockMode;const enrolled=await fetch(origin+'/ui/session',{method:'POST',headers:{...headers,Authorization:'Bearer '+master},body:'{}'});assert.equal(enrolled.status,200);assert.match(enrolled.headers.get('set-cookie'),/Max-Age=28800(?:;|$)/);}
+    for(const invalidMode of ['excessive-lifetime','missing-lifetime']){mode=invalidMode;const rejected=await fetch(origin+'/ui/session',{method:'POST',headers:{...headers,Authorization:'Bearer '+master},body:'{}'});assert.equal(rejected.status,502);assert.equal((await rejected.json()).error_code,'invalid_view_session');assert.equal(rejected.headers.get('set-cookie'),null);}mode='ok';
     const disconnected=await fetch(origin+'/ui/session/disconnect',{method:'POST',headers:{...headers,Cookie:cookie},body:'{}'});assert.equal(disconnected.status,200);assert.match(disconnected.headers.get('set-cookie'),/Max-Age=0/);assert.equal(observed.at(-1).path,'/v1/view-sessions/revoke');assert.equal(observed.at(-1).authorization,'View '+credential);
     assert.equal((await fetch(origin+'/v1/health',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,401);
-    assert.equal(observed.filter(item=>item.authorization==='Bearer '+master).length,2,'Master token is sent only for explicit enrollment');
+    assert.equal(observed.filter(item=>item.authorization==='Bearer '+master).length,6,'Master token is sent only for explicit enrollment');
     assert.ok(observed.every(item=>!item.input.includes(master)),'Master token cannot enter session JSON');
   }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
 });

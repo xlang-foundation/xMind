@@ -203,7 +203,7 @@ struct HttpServer::Impl {
 #if defined(_WIN32)
         server.Post("/v1/view-sessions",guarded([this](const Request& request,Response& response){
             const auto input=body(request,{"origin"});const auto session=view_sessions->issue(string_field(input,"origin",256));
-            reply(response,{{"credential",session.credential},{"expires_unix_ms",session.expires_unix_ms}});
+            reply(response,{{"credential",session.credential},{"expires_unix_ms",session.expires_unix_ms},{"max_age_seconds",session.max_age_seconds}});
         }));
         server.Post("/v1/view-sessions/current",guarded([this](const Request& request,Response& response){
             body(request,{});const auto supplied=request.get_header_value("Authorization");

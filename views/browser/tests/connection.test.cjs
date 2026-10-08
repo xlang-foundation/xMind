@@ -13,6 +13,12 @@ async function fixture(options={}){
  await until(()=>posted.some(m=>m.type==='history'));return {dom,window,dialog,divider,posted,requests,element:id=>window.document.getElementById(id),close:()=>{window.dispatchEvent(new window.Event('pagehide'));window.close();}};
 }
 async function until(predicate){for(let i=0;i<100;i++){if(predicate())return;await new Promise(resolve=>setImmediate(resolve));}throw new Error('Browser connection fixture deadline');}
+test('native session protocol mismatch explains the required update and preserves the existing connection',async()=>{
+ const f=await fixture({enroll:async()=>({ok:false,status:502,json:async()=>({error_code:'invalid_view_session',detail:'private upstream diagnostic'})})});
+ f.element('connect-view').click();f.element('server-token').value='synthetic-access-token'.padEnd(64,'x');f.element('connection-form').dispatchEvent(new f.window.Event('submit',{cancelable:true}));
+ await until(()=>f.element('connection-error').textContent.includes('versions do not match'));assert.ok(!f.element('connection-error').textContent.includes('private upstream diagnostic'));assert.equal(f.element('server-token').value,'');
+ f.element('connection-cancel').click();assert.equal(f.dialog.open,false);assert.ok(!f.requests.includes('/ui/session/disconnect'));assert.ok(f.posted.some(message=>message.type==='history'));f.close();
+});
 test('Cancel and Escape preserve an existing connection and do not logout or cancel execution',async()=>{
  const f=await fixture();f.element('connect-view').click();assert.equal(f.dialog.open,true);f.element('server-token').value='fixture-unsaved-server-token-123456';f.element('connection-cancel').click();assert.equal(f.dialog.open,false);assert.equal(f.element('server-token').value,'');assert.equal(f.element('disconnect-view').hidden,false);f.element('connect-view').click();f.dialog.dispatchEvent(new f.window.Event('cancel',{cancelable:true}));assert.equal(f.dialog.open,false);assert.ok(!f.requests.some(route=>route.includes('disconnect')||route.includes('cancel')));assert.equal(f.posted.filter(m=>m.type==='history').length,1);f.close();
 });

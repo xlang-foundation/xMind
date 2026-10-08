@@ -5,7 +5,7 @@
 #include <string_view>
 
 namespace agentflow {
-struct ViewSession {std::string credential;std::int64_t expires_unix_ms;};
+struct ViewSession {std::string credential;std::int64_t expires_unix_ms,max_age_seconds;};
 // Local access sessions only. Team identity and workspace authorization remain
 // separate. Call issue only after authenticating the server's master token.
 class ViewSessions {

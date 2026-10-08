@@ -28,10 +28,12 @@ export async function createBrowserServer({backend,assetRoot}){
      if(!/^Bearer [\x21-\x7e]{32,256}$/.test(authorization)){reply(401,{detail:'Invalid server access token'});return;}
      const issued=await nativeSession('',{Authorization:authorization},{origin:viewOrigin});
      if(issued.status!==200){reply(issued.status===401?401:issued.status===409?429:502,{detail:issued.status===409?'Too many active browser sessions':'Server access token was not accepted or session enrollment is unavailable'});return;}
-     const {credential,expires_unix_ms:expires}=issued.data;
-     if(!/^[0-9a-f]{64}\.[0-9a-f]{64}$/.test(credential)||!Number.isSafeInteger(expires)||expires<=Date.now()||expires>Date.now()+8*60*60*1000)throw new Error('Invalid native view credential');
+     const {credential,expires_unix_ms:expires,max_age_seconds:maxAge}=issued.data;
+     // Native UTC owns expiry. Use its bounded duration for the browser cookie
+     // rather than requiring identical native/Node clock precision.
+     if(!/^[0-9a-f]{64}\.[0-9a-f]{64}$/.test(credential)||!Number.isSafeInteger(expires)||expires<1||!Number.isSafeInteger(maxAge)||maxAge<1||maxAge>28800){reply(502,{error_code:'invalid_view_session',detail:'The server returned an invalid access session. Update the server and browser adapter together.'});return;}
      const previous=sessionFor(request);if(previous){const revoked=await nativeSession('/revoke',viewHeaders(previous));if(revoked.status!==200&&revoked.status!==401)throw new Error('Previous view revocation failed');}
-     response.setHeader('Set-Cookie',`${cookieName}=${credential}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${Math.ceil((expires-Date.now())/1000)}`);reply(200,{connected:true});return;
+     response.setHeader('Set-Cookie',`${cookieName}=${credential}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}`);reply(200,{connected:true});return;
     }
     const current=sessionFor(request);if(!current){reply(401,{connected:false});return;}const restored=await nativeSession('/current',viewHeaders(current));reply(restored.status===200?200:restored.status===401?401:502,{connected:restored.status===200});return;
    }

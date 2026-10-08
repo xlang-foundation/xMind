@@ -37,7 +37,7 @@ int main(int argc,char** argv) {
         const auto viewPath=(directory.path/"views.sqlite").string();const std::string authority(64,'a'),origin="http://127.0.0.1:60405";std::string cookie;
         {
             PersistenceService store(viewPath,roots);ViewSessions views(store,authority);
-            const auto issued=views.issue(origin);cookie=issued.credential;require(views.accepts(cookie,origin),"Issued view credential must authenticate");
+            const auto issued=views.issue(origin);cookie=issued.credential;require(issued.max_age_seconds==28800 && views.accepts(cookie,origin),"Issued view credential must authenticate with a bounded native cookie lifetime");
             require(!views.accepts(cookie,"http://127.0.0.1:60406"),"View credential must bind to its origin");
             auto tampered=cookie;tampered.back()=tampered.back()=='a'?'b':'a';require(!views.accepts(tampered,origin),"Altered view secret must be rejected");
             const auto record=store.information("local-view-sessions",cookie.substr(0,64)).get();require(record.find(cookie.substr(65))==std::string::npos && record.find(authority)==std::string::npos,"Public view metadata cannot contain credentials");
@@ -47,7 +47,7 @@ int main(int argc,char** argv) {
             PersistenceService store(viewPath,roots);ViewSessions views(store,authority);require(views.accepts(cookie,origin),"View session must survive real xlang3 repository reopen");
             ViewSessions rotated(store,std::string(64,'b'));require(!rotated.accepts(cookie,origin),"Master authority rotation must invalidate old view sessions");
             views.revoke(cookie,origin);require(!views.accepts(cookie,origin),"Revocation must remove encrypted view credential");
-            ViewSessions brief(store,authority,std::chrono::seconds(1));const auto expiring=brief.issue(origin);std::this_thread::sleep_for(std::chrono::milliseconds(1100));require(!brief.accepts(expiring.credential,origin),"Expired cookie must not authenticate");
+            ViewSessions brief(store,authority,std::chrono::seconds(1));const auto expiring=brief.issue(origin);require(expiring.max_age_seconds==1,"Cookie duration must follow the native lifetime policy");std::this_thread::sleep_for(std::chrono::milliseconds(1100));require(!brief.accepts(expiring.credential,origin),"Expired cookie must not authenticate");
         }
         {
             PersistenceService store(viewPath,roots);ViewSessions views(store,authority);require(!views.accepts(cookie,origin),"Revocation must survive repository reopen");
