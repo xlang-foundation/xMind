@@ -11,6 +11,7 @@ public:
     ~GraphRunner();
     void validate(const GraphPlan& plan,const std::string& model_id={}) const;
     std::vector<std::string> models() const;
+    std::string provider_context(const std::string& model_id={}) const;
     // Service shutdown preserves a committed human pause for the next owner.
     // Explicit cancellation is still retired by that service's controller.
     Run execute(const std::string& root_id,std::stop_token cancel={},bool preserve_human_pause=false);

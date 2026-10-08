@@ -38,12 +38,18 @@ ProviderProfileRuntimeMetadata select(ProviderProfileRuntime& runtime,const std:
     for(;;){try{return runtime.select_profile(id,revision);}catch(const Conflict&){require(std::chrono::steady_clock::now()<deadline,"Native profile workers did not retire");std::this_thread::sleep_for(std::chrono::milliseconds(5));}}
 }
 void reply(PersistenceService& store,const std::string& session,const std::string& content){const auto history=store.history(session).get();require(history.size()==2,"Actual native run must commit its user and assistant messages");const auto value=Json::parse(history.back().json);require(value.at("content")==content&&value.contains("usage"),"Actual provider reply and usage must reach durable history");}
+void provenance(PersistenceService& store,const std::string& session,const std::string& profile,std::int64_t revision,const std::string& model){
+    const bool claude=profile=="claude";
+    const auto expected=Json{{"profile_id",profile},{"profile_revision",revision},{"route_id",claude?"anthropic.messages":"openai.chat"},{"provider",claude?"anthropic":"openai"},{"wire",claude?"anthropic-messages":"chat-completions"},{"model_id",model}};
+    const auto history=store.history(session).get();require(history.size()==2,"Provenance requires the actual persisted task and response");
+    for(const auto& message:history){const auto record=Json::parse(message.json);require(record.at("provider_context")==expected,"Durable provenance must retain the profile version and actual selected model");require(message.json.find("runtime-openai-fixture-key")==std::string::npos&&message.json.find("runtime-claude-fixture-key")==std::string::npos&&message.json.find("credential_id")==std::string::npos&&message.json.find("endpoint")==std::string::npos,"Public provenance cannot contain credentials or destinations");}
+}
 }
 int main(int argc,char** argv){if(argc!=5)return 2;try{
     const auto database=(std::filesystem::u8path(argv[1])/"profile-runtime.sqlite").string();const std::vector<std::string> imports{argv[2],argv[3]};const std::string origin=argv[4];
     AgentSettings base;base.max_output_tokens=64;
     {
-        PersistenceService store(database,imports);GraphCatalogStore(store).apply(R"({"graphs":[{"id":"review","spec":{"nodes":[{"id":"review","type":"human","prompt":"Review fixture"}]}}]})");
+        PersistenceService store(database,imports);GraphCatalogStore(store).apply(R"({"graphs":[{"id":"review","spec":{"nodes":[{"id":"review","type":"human","prompt":"Review fixture"}]}},{"id":"model-review","spec":{"nodes":[{"id":"agent","type":"agent","prompt":"Synthetic profile graph task"}]}}]})");
         ProviderProfileRuntime runtime(store,base,policy(origin),1,8);require(!runtime.available()&&runtime.models().empty()&&runtime.configuration().revision==0,"Unconfigured profiles cannot inherit a startup model");
         Access access(store,runtime);httplib::Client client("127.0.0.1",access.port);client.set_read_timeout(5);const httplib::Headers authorized{{"Authorization","Bearer synthetic-profile-runtime-server-access-token"}};
         const auto anonymous=client.Get("/v1/provider/profiles");require(anonymous&&anonymous->status==401,"Profile metadata requires actual native backend authentication");
@@ -80,9 +86,9 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         outdated=admission;outdated["expected_provider_revision"]=2.5;const auto malformed_binding=client.Post("/v1/runs",authorized,outdated.dump(),"application/json");require(malformed_binding&&malformed_binding->status==400,"Profile admission must reject fractional revisions");
         require(store.runs("openai-first").get().empty()&&store.history("openai-first").get().empty(),"Rejected profile admission cannot create a run or prompt history");
         const auto admitted=client.Post("/v1/runs",authorized,admission.dump(),"application/json");require(admitted&&admitted->status==202,"Current bound profile must admit the real native model run");
-        rejects<Conflict>([&]{runtime.select_profile("claude",2);});wait(store,"openai-first-run",RunState::completed);reply(store,"openai-first","Actual OpenAI fixture reply");
+        rejects<Conflict>([&]{runtime.select_profile("claude",2);});wait(store,"openai-first-run",RunState::completed);reply(store,"openai-first","Actual OpenAI fixture reply");provenance(store,"openai-first","openai",1,"fixture-openai");
         require(select(runtime,"claude",2).revision==3&&runtime.models()[0]=="fixture-claude","Selection must publish independently credentialed Claude execution");
-        store.create_session("claude-first","Profile Claude fixture").get();runtime.submit("claude-first-run","claude-first","Claude profile fixture");wait(store,"claude-first-run",RunState::completed);reply(store,"claude-first","Actual Claude fixture reply");
+        store.create_session("claude-first","Profile Claude fixture").get();runtime.submit("claude-first-run","claude-first","Claude profile fixture");wait(store,"claude-first-run",RunState::completed);reply(store,"claude-first","Actual Claude fixture reply");provenance(store,"claude-first","claude",1,"fixture-claude");
         const auto preserved=store.information("native-provider-profiles","registry").get();
         {XlangSqlite inject(database,imports);inject.execute("CREATE TRIGGER reject_profile_runtime BEFORE UPDATE ON information WHEN NEW.category='native-provider-profiles' BEGIN SELECT RAISE(ABORT,'profile runtime fixture failure'); END");}
         const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);bool rejected=false;
@@ -93,16 +99,22 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         const auto graph_admission=Json{{"id","graph-run"},{"session_id","graph-session"},{"graph_id","review"},{"graph_revision",1},{"prompt","Review fixture"},{"provider_profile_id","claude"},{"expected_provider_revision",3}};
         auto stale_graph=graph_admission;stale_graph["expected_provider_revision"]=2;const auto denied_graph=client.Post("/v1/graph-runs",authorized,stale_graph.dump(),"application/json");require(denied_graph&&denied_graph->status==409&&store.runs("graph-session").get().empty(),"Graph profile conflicts must precede root persistence");
         const auto admitted_graph=client.Post("/v1/graph-runs",authorized,graph_admission.dump(),"application/json");require(admitted_graph&&admitted_graph->status==202,"Current bound graph must use the same native ownership lock");wait(store,"graph-run",RunState::paused);
-        rejects<Conflict>([&]{runtime.select_profile("openai",3);});const auto graph=store.graph_run("graph-run").get();runtime.human_input("graph-run","review",R"({"approved":true})","fixture-controller",graph.checkpoint_revision);wait(store,"graph-run",RunState::completed);
+        rejects<Conflict>([&]{runtime.select_profile("openai",3);});const auto graph=store.graph_run("graph-run").get();require(Json::parse(graph.input_json).at("provider_context").at("profile_id")=="claude"&&Json::parse(graph.input_json).at("provider_context").at("profile_revision")==1,"Graph root must retain its admission profile context independently of registry selection revision");runtime.human_input("graph-run","review",R"({"approved":true})","fixture-controller",graph.checkpoint_revision);wait(store,"graph-run",RunState::completed);
         require(select(runtime,"openai",3).revision==4,"Completed graph must release profile ownership");
         configured=runtime.save_profile("openai","openai.chat","fixture-openai-updated",key(""),4);
         require(configured.revision==5&&configured.active=="openai"&&runtime.models()[0]=="fixture-openai-updated","Updating the active profile must replace its service even without a selection flag");
-        store.create_session("openai-updated","Updated profile fixture").get();runtime.submit("openai-updated-run","openai-updated","Updated OpenAI fixture");wait(store,"openai-updated-run",RunState::completed);reply(store,"openai-updated","Actual OpenAI fixture reply");
+        store.create_session("openai-updated","Updated profile fixture").get();runtime.submit("openai-updated-run","openai-updated","Updated OpenAI fixture");wait(store,"openai-updated-run",RunState::completed);reply(store,"openai-updated","Actual OpenAI fixture reply");provenance(store,"openai-updated","openai",2,"fixture-openai-updated");
     }
     {
         PersistenceService store(database,imports);ProviderProfileRuntime runtime(store,base,policy(origin),1,8);
         require(runtime.configuration().revision==5&&runtime.configuration().profiles.size()==2&&runtime.models()[0]=="fixture-openai-updated","Restart must restore profile policy, selection and independently encrypted keys");
-        require(select(runtime,"claude",5).revision==6,"Restarted runtime must select the saved Claude key");store.create_session("claude-reopened","Reopened profile fixture").get();runtime.submit("claude-reopened-run","claude-reopened","Reopened Claude fixture");wait(store,"claude-reopened-run",RunState::completed);reply(store,"claude-reopened","Actual Claude fixture reply");
+        require(select(runtime,"claude",5).revision==6,"Restarted runtime must select the saved Claude key");store.create_session("claude-reopened","Reopened profile fixture").get();runtime.submit("claude-reopened-run","claude-reopened","Reopened Claude fixture");wait(store,"claude-reopened-run",RunState::completed);reply(store,"claude-reopened","Actual Claude fixture reply");provenance(store,"claude-reopened","claude",1,"fixture-claude");provenance(store,"openai-first","openai",1,"fixture-openai");provenance(store,"openai-updated","openai",2,"fixture-openai-updated");
+        store.create_session("profile-agent-graph","Graph provenance fixture").get();runtime.submit_graph_profile("profile-agent-root","profile-agent-graph","model-review",1,"Synthetic graph provenance",{},ProviderProfileAdmission{"claude",6});wait(store,"profile-agent-root",RunState::completed);
+        const auto children=store.children("profile-agent-root").get();require(children.size()==1,"Profile graph must execute one actual agent child");
+        const auto child_history=store.run_history(children[0].id).get();require(child_history.size()==2,"Agent child must persist task and response separately");
+        for(const auto& item:child_history){const auto context=Json::parse(item.json).at("provider_context");require(context.at("profile_id")=="claude"&&context.at("profile_revision")==1&&context.at("model_id")=="fixture-claude","Graph agent child must retain the actual profile and model");}
+        const auto incoming=runtime.submit_message("profile-incoming",{},"profile-message","Synthetic incoming provenance",R"({"role":"fixture"})");wait(store,incoming.id,RunState::completed);provenance(store,incoming.session_id,"claude",1,"fixture-claude");
+        require(runtime.submit_message("unused-replay-id",{},"profile-message","Synthetic incoming provenance",R"({"role":"fixture"})").id==incoming.id,"Incoming replay must retain its original run and profile receipt");
         auto changed=policy(origin);changed[1].route.endpoint="https://unapproved.invalid/messages";changed[1].provider.endpoint=changed[1].route.endpoint;
         rejects<DatabaseError>([&]{ProviderProfileRuntime invalid(store,base,changed,1,8);});
     }
@@ -155,7 +167,7 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
     }
     {
         PersistenceService store((std::filesystem::u8path(argv[1])/"model-free-bound-graph.sqlite").string(),imports);
-        GraphCatalogStore(store).apply(R"({"graphs":[{"id":"review","spec":{"nodes":[{"id":"review","type":"human","prompt":"Review fixture"}]}}]})");
+        GraphCatalogStore(store).apply(R"({"graphs":[{"id":"review","spec":{"nodes":[{"id":"review","type":"human","prompt":"Review fixture"}]}},{"id":"model-review","spec":{"nodes":[{"id":"agent","type":"agent","prompt":"Synthetic profile graph task"}]}}]})");
         ProviderProfileRuntime runtime(store,base,policy(origin),1,8);Access access(store,runtime);httplib::Client client("127.0.0.1",access.port);const httplib::Headers auth{{"Authorization","Bearer synthetic-profile-runtime-server-access-token"}};
         const auto health=client.Get("/v1/health",auth);require(health&&health->status==200&&Json::parse(health->body).at("provider_profile_admission")==true&&Json::parse(health->body).at("graph_provider_profile_admission")==true,"Backend must advertise its actual profile admission support");
         store.create_session("bound-review","Model-free bound graph fixture").get();const auto accepted=client.Post("/v1/graph-runs",auth,R"({"id":"bound-review-run","session_id":"bound-review","graph_id":"review","graph_revision":1,"prompt":"Review","provider_profile_id":"","expected_provider_revision":0})","application/json");require(accepted&&accepted->status==202,"Empty active-profile binding must preserve real model-free graph execution");wait(store,"bound-review-run",RunState::paused);const auto graph=store.graph_run("bound-review-run").get();runtime.human_input("bound-review-run","review",R"({"approved":true})","fixture-controller",graph.checkpoint_revision);wait(store,"bound-review-run",RunState::completed);

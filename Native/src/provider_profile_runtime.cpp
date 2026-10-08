@@ -31,7 +31,7 @@ struct ProviderProfileRuntime::Impl {
             const auto selected=std::find_if(state.profiles.begin(),state.profiles.end(),[&](const auto& value){return value.id==state.active;});
             service=prepare(*selected);
         }else{
-            auto unconfigured=base;unconfigured.provider.model.clear();unconfigured.selectable_models.clear();unconfigured.credential.reset();
+            auto unconfigured=base;unconfigured.provider.model.clear();unconfigured.selectable_models.clear();unconfigured.credential.reset();unconfigured.provider_identity.reset();
             service=std::make_unique<ExecutionPlatform>(store,std::move(unconfigured),workers,capacity);
         }
     }
@@ -41,11 +41,12 @@ struct ProviderProfileRuntime::Impl {
     }
     std::unique_ptr<ExecutionPlatform> prepare(const SavedProviderProfile& profile){
         if(profile.model.empty()){
-            auto settings=base;settings.provider.model.clear();settings.selectable_models.clear();settings.credential.reset();
+            auto settings=base;settings.provider.model.clear();settings.selectable_models.clear();settings.credential.reset();settings.provider_identity.reset();
             return std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
         }
         const auto& allowed=route(profile.route_id);auto settings=base;settings.provider=allowed.provider;settings.provider.model=profile.model;
         settings.selectable_models.clear();settings.credential=CredentialReference{allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose};
+        settings.provider_identity=ProviderExecutionIdentity{profile.id,profile.route_id,allowed.route.provider,profile.revision};
         return std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
     }
     void mutable_state(std::int64_t expected)const{

@@ -1,5 +1,33 @@
 # Provider setup in the sidebar
 
+## Durable provider context
+
+New source captures a public `provider_context` in the admitted user message
+and each persisted model response. It records profile ID, profile version,
+route ID, provider family, wire API and selected model. These values come from
+the immutable native execution configuration, not from client-supplied labels.
+Profile version identifies that profile's saved configuration; it differs from
+the registry revision used for admission conflicts. Credentials, credential
+references and endpoint URLs are excluded. Provenance fields are not serialized
+into model conversation requests.
+
+Graph roots retain their admission context; agent children record their actual
+selected model, including node overrides. Incoming A2A tasks retain context in
+their original durable history; an idempotent replay returns the original run.
+Tool children do not receive invented model provenance. A graph root's selected
+provider context does not imply that its human/tool nodes called a model.
+The context is stored atomically with existing message/graph admission records
+through xlang3 SQLite. It is not yet a field on the public run descriptor.
+
+The shared renderer displays the recorded provider/wire beside response metrics,
+with profile version and identity available in its tooltip. Old history with no
+context remains unattributed; it never borrows today's selected profile.
+Malformed context is suppressed without inventing tokens or profile labels.
+Local verification passed **83 extension and 16 browser tests**. Native source
+adds checks across profile updates, reopen, graph agent children and incoming
+message replay; its full compiled gate remains pending. The preview has not
+been upgraded to this source.
+
 ## Profile binding at task admission
 
 New source adds optional `provider_profile_id` and

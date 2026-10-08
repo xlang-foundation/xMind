@@ -218,6 +218,13 @@ test('uncertain edit inspection renders escaped observations and never offers an
   assert.match(doc.querySelector('.edit-inspection pre').textContent,/<script>fixtureAttack/);assert.equal(doc.querySelectorAll('#operations script').length,0);
   r.send({type:'operations',operations:[]});r.send({type:'edit-inspection',id:operation.id,inspection});assert.equal(doc.querySelectorAll('.edit-inspection').length,0);r.dom.window.close();
 });
+test('durable response profile badges use recorded identities and reject malformed metadata',()=>{
+  const r=renderer(),context={profile_id:'saved-profile',profile_revision:2,route_id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',model_id:'fixture-claude'};
+  const show=value=>r.send({type:'history',history:[{role:'assistant',data:{content:'Synthetic renderer response',provider_context:value}}]});show(context);
+  const doc=r.dom.window.document;assert.equal(doc.querySelector('.provider-context').textContent,'Claude · Messages');assert.match(doc.querySelector('.provider-context').title,/saved-profile\nProfile version: 2/);assert.match(doc.querySelector('.metrics').textContent,/Input —Output —Total —/);
+  for(const bad of [{...context,api_key:'synthetic-private-key'},{...context,profile_revision:0},{...context,profile_id:'<img onerror=fixtureAttack()>'},{...context,wire:'unknown'}]){show(bad);assert.equal(doc.querySelector('.provider-context'),null);assert.ok(!doc.body.textContent.includes('synthetic-private-key'));}
+  show(undefined);assert.equal(doc.querySelector('.provider-context'),null,'Old history cannot invent a current profile');r.dom.window.close();
+});
 test('history renders Markdown/code, copies plain code and shows exact provider usage',()=>{
   const r=renderer();r.send({type:'history',history:[{role:'assistant',data:{content:'## Fixture heading\n\n**Fixture bold**\n\n```js\nx < y\n```',model:'synthetic-renderer-fixture',usage:{prompt_tokens:12,completion_tokens:6,total_tokens:18},elapsed_ms:1500}}]});
   const doc=r.dom.window.document;assert.equal(doc.querySelector('.markdown h2').textContent,'Fixture heading');assert.equal(doc.querySelector('.markdown strong').textContent,'Fixture bold');

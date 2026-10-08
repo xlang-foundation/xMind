@@ -11,6 +11,7 @@ namespace agentflow {
 struct AgentService::Impl {
     struct Job {std::string id,model;std::stop_source stop;};
     PersistenceService& persistence;
+    std::string provider_context;
     AgentRunner runner;
     mutable std::mutex mutex;
     std::mutex close_mutex;
@@ -21,7 +22,7 @@ struct AgentService::Impl {
     std::size_t limit;
     bool accepting=true,faulted=false;
     Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity)
-        :persistence(store),runner(store,std::move(settings)),limit(capacity) {
+        :persistence(store),provider_context(provider_context_json(settings)),runner(store,std::move(settings)),limit(capacity) {
         if(count==0 || count>16 || capacity==0 || capacity>4096) throw std::invalid_argument("Invalid agent worker capacity");
         try {for(std::size_t i=0;i<count;++i) workers.emplace_back([this]{work();});}
         catch(...) {close();throw;}
@@ -77,7 +78,7 @@ Run AgentService::submit_model(std::string id,std::string session,std::string pr
     impl_->active.emplace(id,job);
     try {impl_->pending.push_back(job);} catch(...) {impl_->active.erase(id);throw;}
     Run result;
-    try {result=impl_->runner.start(id,std::move(session),std::move(prompt));}
+    try {result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model);}
     catch(...) {impl_->pending.pop_back();impl_->active.erase(id);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
 }
@@ -89,7 +90,8 @@ Run AgentService::submit_message(std::string id,std::string context,std::string 
     if(impl_->pending.size()>=impl_->limit)throw RunBusy("Agent queue is full");
     auto job=std::make_shared<Impl::Job>();job->id=id;if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
-    Run result;try{result=impl_->persistence.start_incoming_message(id,context,message,nlohmann::json{{"content",content},{"a2a_message_id",message}}.dump(),identity).get();}catch(...){impl_->pending.pop_back();impl_->active.erase(id);throw;}
+    auto prompt=nlohmann::json{{"content",content},{"a2a_message_id",message}};if(!impl_->provider_context.empty())prompt["provider_context"]=nlohmann::json::parse(impl_->provider_context);
+    Run result;try{result=impl_->persistence.start_incoming_message(id,context,message,prompt.dump(),identity).get();}catch(...){impl_->pending.pop_back();impl_->active.erase(id);throw;}
     if(result.id!=id){impl_->pending.pop_back();impl_->active.erase(id);return result;}
     lock.unlock();impl_->changed.notify_one();return result;
 }

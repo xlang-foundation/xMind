@@ -79,9 +79,16 @@ std::vector<std::string> AgentRunner::models() const {
     for(const auto& model:settings_.selectable_models) if(std::find(result.begin(),result.end(),model)==result.end()) result.push_back(model);
     return result;
 }
-Run AgentRunner::start(std::string id,std::string session_id,std::string prompt) {
+std::string provider_context_json(const AgentSettings& settings,const std::string& model_id){
+    if(!settings.provider_identity)return {};
+    const auto& identity=*settings.provider_identity;
+    const auto wire=settings.provider.wire==ProviderWire::responses?"responses":settings.provider.wire==ProviderWire::anthropic_messages?"anthropic-messages":"chat-completions";
+    return nlohmann::json{{"profile_id",identity.profile_id},{"profile_revision",identity.profile_revision},{"route_id",identity.route_id},{"provider",identity.provider},{"wire",wire},{"model_id",model_id.empty()?settings.provider.model:model_id}}.dump();
+}
+Run AgentRunner::start(std::string id,std::string session_id,std::string prompt,const std::string& model_id) {
     if(prompt.empty() || prompt.size()>1024*1024) throw std::invalid_argument("Prompt must contain 1-1048576 UTF-8 bytes");
-    return persistence_.start_prompt_run(std::move(id),std::move(session_id),Json{{"content",std::move(prompt)}}.dump()).get();
+    auto input=Json{{"content",std::move(prompt)}};const auto context=provider_context_json(settings_,model_id);if(!context.empty())input["provider_context"]=Json::parse(context);
+    return persistence_.start_prompt_run(std::move(id),std::move(session_id),input.dump()).get();
 }
 Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id) {
     const auto admitted=persistence_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
@@ -163,7 +170,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 cancelled(token);persistence_.append_event(id,event.kind,event.json).get();
             },token);
             const auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-response_started).count();
-            cancelled(token);const auto reply=assistant(response,provider.model,elapsed,first_token_ms);
+            cancelled(token);auto reply=assistant(response,provider.model,elapsed,first_token_ms);
+            const auto context=provider_context_json(settings_,provider.model);if(!context.empty())reply["provider_context"]=Json::parse(context);
             if(response.finish_reason=="stop") return persistence_.complete_run(id,reply.dump()).get();
             if(response.finish_reason!="tool_calls" || !workspace_) throw ModelProtocolError("Model did not produce a complete supported turn");
             std::vector<std::string> results;std::vector<ModelMessage> continuation;

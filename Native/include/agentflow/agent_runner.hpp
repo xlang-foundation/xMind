@@ -8,6 +8,8 @@
 
 namespace agentflow {
 struct CredentialReference {std::string scope,id,purpose;};
+// Public, immutable profile identity; never contains credentials or destinations.
+struct ProviderExecutionIdentity {std::string profile_id,route_id,provider;std::int64_t profile_revision=0;};
 struct AgentSettings {
     ChatProviderConfig provider;
     std::optional<std::string> workspace;
@@ -21,7 +23,9 @@ struct AgentSettings {
     std::vector<McpServerSetting> mcp_servers;
     std::vector<ProcessProfile> process_profiles;
     AgentInstructionPolicy instruction_policy;
+    std::optional<ProviderExecutionIdentity> provider_identity;
 };
+std::string provider_context_json(const AgentSettings& settings,const std::string& model_id={});
 // Shared native single-agent/model-tool loop, callable by backend workers and
 // future graph nodes. Always invokes the configured real provider transport.
 // PersistenceService must outlive this runner and all execute calls.
@@ -29,7 +33,7 @@ class AgentRunner {
 public:
     AgentRunner(PersistenceService& persistence,AgentSettings settings);
     ~AgentRunner();
-    Run start(std::string id,std::string session_id,std::string prompt);
+    Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={});
     Run execute(const std::string& run_id,std::stop_token cancel={},const std::string& model_id={});
     std::vector<std::string> models() const;
 private:

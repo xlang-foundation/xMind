@@ -143,7 +143,7 @@ Run GraphService::submit_graph(std::string id,std::string session,std::string gr
         const auto models=impl_->runner.models();if(agent && !models.empty())model=models.front();
     }
     impl_->runner.validate(entry->plan,model);
-    const auto input=Json{{"content",std::move(prompt)},{"model_id",std::move(model)}}.dump();
+    auto input_record=Json{{"content",std::move(prompt)},{"model_id",model}};const auto context=impl_->runner.provider_context(model);if(!context.empty())input_record["provider_context"]=Json::parse(context);const auto input=input_record.dump();
     auto job=std::make_shared<Impl::Job>();job->id=id;
     const auto [owned,inserted]=impl_->active.emplace(id,job);if(!inserted)throw Conflict("Graph is already owned");
     try {impl_->pending.push_back(job);}catch(...){impl_->active.erase(owned);throw;}
