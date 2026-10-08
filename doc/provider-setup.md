@@ -83,10 +83,10 @@ The shared renderer displays the recorded provider/wire beside response metrics,
 with profile version and identity available in its tooltip. Old history with no
 context remains unattributed; it never borrows today's selected profile.
 Malformed context is suppressed without inventing tokens or profile labels.
-Local verification passed **83 extension and 16 browser tests**. Native source
-adds checks across profile updates, reopen, graph agent children and incoming
-message replay; its full compiled gate remains pending. The preview has not
-been upgraded to this source.
+Initial local verification passed **83 extension and 16 browser tests**. The
+later full hosted checkpoint above passed native checks across profile updates,
+reopen, graph agent children and incoming message replay. The preview has not
+been upgraded to that native history-context binary.
 
 ## Profile binding at task admission
 
@@ -125,8 +125,8 @@ runs and 33 history messages by exact fingerprint, provider revision 3 and the
 durable browser cookie. Actual browser reload restored saved history, the
 OpenAI Responses profile, Agent default and the gpt-5.6-sol footer chooser
 ([metadata-only live record](evidence/live-provider-admission-upgrade.json)).
-No new key or inference was submitted. Later native history attribution is
-awaiting its own hosted gate and remains absent from the installed binary.
+No new key or inference was submitted. Later native history attribution passed
+its separate `6f32d21` hosted gate and remains absent from the installed binary.
 Public run-descriptor attribution, live Claude acceptance and actual VS Code
 profile UI acceptance remain outstanding.
 
