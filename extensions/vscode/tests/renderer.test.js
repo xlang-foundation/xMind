@@ -35,6 +35,16 @@ const processOutcomeFixture=()=>{
 };
 const processOutputFixture=(data,offset=0,channel='stdout',id='fixture-stream')=>({type:'event',event:{kind:'process.output',data:{operation_id:id,profile_id:'fixture-profile',channel,encoding:'hex',offset,retained_bytes:data.length/2,data}}});
 
+test('model protocol failure shows only recognized diagnostics and preserves conversation context',()=>{
+  const r=renderer(),doc=r.dom.window.document,card=doc.getElementById('run-failure');
+  doc.getElementById('prompt').value='Keep unsent request';
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code:'responses_arguments_mismatch',message:'private fixture provider body'}}});
+  r.send({type:'transcript',history:[]});assert.equal(card.hidden,false);assert.match(card.textContent,/model response could not be validated/);assert.match(card.textContent,/Review the recorded tool outcomes/);assert.equal(card.querySelector('pre').textContent,'responses_arguments_mismatch');assert.equal(card.querySelector('.metrics'),null);assert.equal(doc.querySelector('#history .assistant'),null);assert.equal(doc.getElementById('prompt').value,'Keep unsent request');assert.ok(!card.textContent.includes('private fixture provider body'));
+  for(const protocol_error_code of ['private-fixture-key','<script>fixtureAttack()</script>','responses_arguments_mismatch private-fixture-key',null,{}]){
+    r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code}}});assert.equal(card.querySelector('details'),null);assert.ok(!card.textContent.includes('private-fixture-key'));assert.equal(card.querySelector('script'),null);
+  }
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'agent_error',protocol_error_code:'responses_arguments_mismatch'}}});assert.equal(card.querySelector('details'),null);r.send({type:'reset-run'});assert.equal(card.hidden,true);r.dom.window.close();
+});
 test('provider failures remain visible through transcript refresh without invented replies or metrics',()=>{
   const r=renderer(),doc=r.dom.window.document,failure={type:'event',event:{kind:'run.failed',data:{reason:'provider_http_error',status:400,message:'<script>fixtureAttack()</script> private body'}}};
   r.send(failure);r.send(failure);r.send({type:'transcript',history:[]});

@@ -31,3 +31,20 @@ extension contracts pass with zero skips, including known/unknown diagnostic
 payloads. This is DOM fixture validation; the running preview's older native
 binary supplies no diagnostic fields, and current C++ compilation/live request
 diagnosis remain pending. See [native diagnostics](native-provider-diagnostics.md).
+
+Model protocol failures now have their own explanation and a collapsed
+"Recorded model protocol diagnostic" detail when the native backend supplies a
+recognized `protocol_error_code`. The renderer checks an exact identifier
+allowlist independently of the backend, omits unknown values and raw messages,
+and shows no diagnostic detail for other failure reasons. It advises reviewing
+recorded tool outcomes before starting another run, because earlier turns in a
+failed run may already have executed tools. It does not infer that all effects
+were prevented, retry the request, invent an assistant reply or supply metrics.
+
+Local verification of this source passed 73 extension and 14 browser tests,
+without skips. The labelled renderer fixture covers known identifiers, unknown
+strings/markup and non-string fields, transcript refresh, unchanged unsent
+composer text, run reset and omission of assistant/metric cards. Shared browser
+assets built successfully. This is source/fixture validation: the installed
+preview remains on `6263630`, and the newer native diagnostic producer and live
+MCP failure diagnosis still await the compiled hosted gate.

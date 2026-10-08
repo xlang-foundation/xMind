@@ -87,6 +87,17 @@ function entry(role,data,parent=byId('history')){
 }
 function resetLive(){byId('live').replaceChildren();live=undefined;streamText='';streamUsage=null;}
 function resetFailure(){byId('run-failure').replaceChildren();byId('run-failure').hidden=true;}
+const protocolDiagnosticCodes=new Set([
+  'responses_function_final_mismatch','responses_arguments_mismatch','responses_terminal_mismatch',
+  'responses_event_unsupported','responses_item_unsupported','responses_reasoning_continuation_missing',
+  'responses_reasoning_incomplete','responses_item_incomplete','responses_turn_incomplete',
+  'responses_item_lifecycle_invalid','responses_function_lifecycle_invalid','responses_function_start_invalid',
+  'provider_json_invalid','responses_json_invalid','responses_stream_incomplete','responses_provider_incomplete',
+  'responses_sequence_invalid','responses_event_type_mismatch','responses_item_identity_mismatch',
+  'responses_identity_mismatch','responses_model_identity_mismatch','responses_final_identity_mismatch',
+  'responses_message_mismatch','responses_text_mismatch','responses_summary_mismatch',
+  'responses_usage_invalid','responses_limit_exceeded','chat_stream_incomplete'
+]);
 function runFailure(data){
   const card=byId('run-failure');card.replaceChildren();card.hidden=false;byId('empty').hidden=true;
   card.append(node('h4','Selected run failed'));
@@ -95,7 +106,12 @@ function runFailure(data){
     ?'The model provider returned HTTP '+status+'. This run stopped before completing its response.'
     :data?.reason==='incompatible_provider_history'
     ?'This conversation contains provider history that the selected model’s wire cannot use. Start a new conversation or select a model using the previous wire. The recorded history is preserved.'
+    :data?.reason==='model_protocol_error'
+    ?'The model response could not be validated, so this run stopped. Review the recorded tool outcomes before starting another run.'
     :'Execution failed. Inspect the selected run activity for the recorded reason.'));
+  if(data?.reason==='model_protocol_error'&&protocolDiagnosticCodes.has(data.protocol_error_code)){
+    const detail=node('details');detail.append(node('summary','Recorded model protocol diagnostic'),node('pre',data.protocol_error_code));card.append(detail);
+  }
   if(data?.reason==='provider_http_error'){
     const fields=[
       ['Type','provider_error_type',['invalid_request_error','authentication_error','permission_error','rate_limit_error','server_error','insufficient_quota']],
