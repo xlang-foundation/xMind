@@ -1,8 +1,12 @@
 # xMind
 
-xMind is being built as a general-purpose single-agent and graph platform with a shared coding runtime. The C++ backend owns execution, providers, tools, permissions, sessions and protocols. Embedded xlang3 runs compatible scripts/pure-Python libraries and performs SQLite database I/O. CLI, browser UI and VS Code clients use the same local backend. Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE are excluded from xMind OSS and reserved for CantorAI’s closed-source Cantor Nexus product.
+xMind is being built as a general-purpose single-agent and graph platform with a shared coding runtime. The C++ backend owns execution, providers, tools, permissions, sessions and protocols. Embedded xlang3 runs compatible scripts/pure-Python libraries and performs SQLite database I/O. CLI, browser UI and VS Code clients use the same local backend. Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE are excluded from xMind OSS and reserved for CantorAI’s closed-source Nexus product.
 
 OpenCode 2 is the coding feature reference; LiteLLM is the provider coverage reference. Their implementations are not the engine. See the [architecture](doc/architecture.md), [SVG](doc/architecture.svg), [pinned parity baseline](Documents/PARITY.md) and [provider requirements](Documents/MODEL_SUPPORT.md).
+
+## OSS deployment scope
+
+Run xMind locally with the VS Code plugin, webpage UI and native CLI. SQLite is the OSS database; C++ owns repository and encryption contracts, and embedded xlang3 performs SQLite I/O. Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE belong to the separate closed-source Nexus project. See the [current OSS specification](doc/architecture.md).
 
 ## Current native product scope
 

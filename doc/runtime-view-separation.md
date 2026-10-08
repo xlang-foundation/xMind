@@ -4,6 +4,6 @@ The C++/xlang3 backend owns agent execution, graphs, workspace tools, permission
 
 Access adapters carry authenticated requests and subscriptions and remain separate from the core. Provider keys remain encrypted on the backend; browser connection credentials follow the native view-session policy. No client fabricates run outcomes, assistant content or usage metrics.
 
-WebRTC transport/signaling, a standalone Electron IDE and team-server topology are excluded from OSS and reserved for Cantor Nexus. Their historical diagrams and design were moved to the private workspace. This scope change preserves runtime/view separation without requiring those transports or clients.
+WebRTC transport/signaling, a standalone Electron IDE and team-server topology are excluded from OSS and reserved for Nexus. Their historical diagrams and design were moved to the private workspace. This scope change preserves runtime/view separation without requiring those transports or clients.
 
 See the current [OSS architecture](architecture.md) and [diagram](architecture.svg).

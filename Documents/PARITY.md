@@ -1,6 +1,6 @@
 # OpenCode 2 feature baseline
 
-Current scope: the [xMind OSS specification](../doc/architecture.md) excludes team-server features, PostgreSQL, WebRTC and the standalone Electron IDE. Those belong to Cantor Nexus; earlier roadmap language does not make them OSS completion requirements.
+Current scope: the [xMind OSS specification](../doc/architecture.md) excludes team-server features, PostgreSQL, WebRTC and the standalone Electron IDE. Those belong to Nexus; earlier roadmap language does not make them OSS completion requirements.
 
 The user now requires native C++ implementation. OpenCode is a reference only. Existing Python source equivalents are historical prototypes and do not count as delivered native capabilities; the status table below records prototype evidence. See `NATIVE_ARCHITECTURE.md`.
 

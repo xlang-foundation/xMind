@@ -1,6 +1,6 @@
 # Reviewable milestones
 
-Current completion scope is the [revised xMind OSS specification](architecture.md). Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE are excluded and reserved for Cantor Nexus. Historical checkpoint paragraphs below preserve their original source/time scope and do not reinstate those requirements.
+Current completion scope is the [revised xMind OSS specification](architecture.md). Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE are excluded and reserved for Nexus. Historical checkpoint paragraphs below preserve their original source/time scope and do not reinstate those requirements.
 
 Native Responses provider checkpoint: explicit C++ wire selection now reaches the shared single-agent and graph engine, preserving stateless reasoning/tool continuation, actual supplied token metrics and persisted conversation replay. Two dependent agents perform actual file reads; provider-native items stay in child conversations rather than graph dependency/join outputs. Final local Release validation passed **52 native and 60 extension contracts**, no skips. [Scope and evidence](native-responses-provider.md). Inference/opaque reasoning are synthetic; live provider/IDE acceptance, interactive wire enrollment, standalone browser UI, broader provider coverage and full product parity remain pending.
 
@@ -155,4 +155,4 @@ Credential storage checkpoint: the C++ repository now protects and persists cred
 - Clients: browser UI and VS Code workflows over the local backend, with actual UI validation.
 - OSS release: reproducible native builds, scoped parity evidence, documented limitations and end-to-end local coding/protocol/provider acceptance.
 
-These milestones retain the revised xMind OSS scope. Team-server features, PostgreSQL, WebRTC and Electron belong to Cantor Nexus and are excluded. Relevant OpenCode coding parity and agreed broad model/provider support remain required.
+These milestones retain the revised xMind OSS scope. Team-server features, PostgreSQL, WebRTC and Electron belong to Nexus and are excluded. Relevant OpenCode coding parity and agreed broad model/provider support remain required.

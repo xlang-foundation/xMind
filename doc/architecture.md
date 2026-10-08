@@ -26,7 +26,7 @@ remains xMind; AgentFlow describes its single-agent and graph capability.
 Team-server features (organizations, shared company sessions, multi-user/tenant
 authorization and distributed workers), PostgreSQL, WebRTC/signaling and a
 standalone Electron IDE are **excluded from xMind OSS**, reserved for CantorAI's
-closed-source **Cantor Nexus** project. They are not deferred OSS milestones or
+closed-source **Nexus** project. They are not deferred OSS milestones or
 OSS completion blockers. Backend/view separation and repository/API contracts
 remain extensible; private product modules are not bundled into OSS. Local
 authentication, credential protection, workspace boundaries and tool approval
@@ -58,7 +58,7 @@ The C++ scheduler owns root runs and graph-node executions. A session permits on
 
 The native engine owns the model/tool loop. It consumes a provider stream and produces normalized events, requests tool actions through the tool registry, and records resulting conversation parts. Providers, tools and script callbacks do not directly transition root runs or publish durable completion events.
 
-The C++ repository owns contracts, transactions and durable sequence numbers. xMind OSS uses local SQLite, with database I/O through embedded xlang3. PostgreSQL belongs to the separate Cantor Nexus project. See [database-backends.md](database-backends.md) for adapter and ownership rules. State changes and their corresponding events commit together. An event publisher exposes committed events only. A dedicated persistence runtime/thread owns database handles and performs parameterized operations. Scheduler and HTTP threads submit owned requests; they do not share runtime values. The service must obtain a backend-appropriate ownership lease before startup recovery; opening another API/CLI process must not mark live runs interrupted.
+The C++ repository owns contracts, transactions and durable sequence numbers. xMind OSS uses local SQLite, with database I/O through embedded xlang3. PostgreSQL belongs to the separate Nexus project. See [database-backends.md](database-backends.md) for adapter and ownership rules. State changes and their corresponding events commit together. An event publisher exposes committed events only. A dedicated persistence runtime/thread owns database handles and performs parameterized operations. Scheduler and HTTP threads submit owned requests; they do not share runtime values. The service must obtain a backend-appropriate ownership lease before startup recovery; opening another API/CLI process must not mark live runs interrupted.
 
 SQLite stores sessions, conversations, events, agent/graph definitions, model/provider configuration, workspace/tool settings, approvals, checkpoints and other backend information. Credentials use a separate encrypted-blob table with public metadata and credential references. On Windows, propose C++ DPAPI protection before sending blobs to xlang3 for insertion, and decryption only for the provider/connector that needs the secret. OS-specific protection and credential migrations require native tests; they are not implemented yet. Secret values never enter public model/configuration discovery, events or conversation context.
 

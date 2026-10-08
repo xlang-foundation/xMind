@@ -1,6 +1,6 @@
 # Native implementation direction
 
-Current scope: the [xMind OSS specification](../doc/architecture.md) excludes team-server features, PostgreSQL, WebRTC and the standalone Electron IDE. Those belong to Cantor Nexus; earlier roadmap language does not make them OSS completion requirements.
+Current scope: the [xMind OSS specification](../doc/architecture.md) excludes team-server features, PostgreSQL, WebRTC and the standalone Electron IDE. Those belong to Nexus; earlier roadmap language does not make them OSS completion requirements.
 
 The user requires the core platform to be implemented in C++. OpenCode is a feature reference only; LiteLLM is a provider/model capability reference only. Neither implementation is embedded or executed as AgentFlow. This supersedes the earlier Python/FastAPI implementation plan.
 
