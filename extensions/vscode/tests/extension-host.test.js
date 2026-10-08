@@ -16,7 +16,7 @@ function harness(options={}) {
   let pendingOperation;
   let operations=options.operations||[];
   let sidebarProvider;
-  const decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[];
+  const renameRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
@@ -49,7 +49,8 @@ function harness(options={}) {
         const value=JSON.parse(requestOptions.body);providerRequests.push(value);options.health={agent_execution:true,status:'ok'};options.catalogue={default_model:value.model,models:[{id:value.model}]};data={...options.providerSetup,revision:options.providerSetup.revision+1,configured:true,model:value.model};
       }else data=options.providerSetup;
     }
-    else if(target.pathname==='/v1/sessions') data=[{id:'saved',title:'Saved session'}];
+    else if(target.pathname==='/v1/sessions') data=[{id:'saved',title:options.savedTitle||'Saved session'}];
+    else if(target.pathname==='/v1/sessions/saved/title'){const value=JSON.parse(requestOptions.body);renameRequests.push(value);if(options.renameConflict)return {ok:false,status:409,json:async()=>({detail:'Title changed'})};options.savedTitle=value.title;data={id:'saved',title:value.title};}
     else if(target.pathname==='/v1/sessions/saved/history') data=pendingHistory?await pendingHistory:transcript;
     else if(target.pathname==='/v1/sessions/saved/runs') data=options.runs||[{id:'finished',state:options.running?'running':'completed'}];
     else if(options.graphChildren?.some(child=>target.pathname==='/v1/runs/'+child.id+'/operations'))data=operations;
@@ -97,7 +98,7 @@ function harness(options={}) {
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./browser-view'?require('../browser-view'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,state,errors,context,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  return {token,commands,secrets,requests,views,intervals,state,errors,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
     pauseOperation(promise) {pendingOperation=promise;},
@@ -144,6 +145,16 @@ test('settings key fetches a sidebar list; only a separate model selection saves
 });
 test('sidebar selection rejects an ID outside the actual discovery response',async()=>{
   const {h,view}=await setupView();view.receive({type:'saveProviderKey',key:'synthetic-private-provider-key'});await until(()=>view.posted.some(m=>m.type==='model-list'));view.receive({type:'model',id:'forged-model'});await until(()=>view.posted.some(m=>m.type==='error'));assert.equal(h.providerRequests.length,0);assert.match(view.posted.find(m=>m.type==='error').text,/returned by OpenAI/);view.close();
+});
+test('sidebar rename binds selected session and original title, refreshes metadata and reports conflicts without inference',async()=>{
+  for(const conflict of [false,true]){
+    const {h,view}=await setupView({health:{agent_execution:false,status:'ok',session_rename:true},renameConflict:conflict});
+    view.receive({type:'rename-session',id:'foreign',title:'Forged',expected_title:'Old'});await until(()=>view.posted.some(message=>message.type==='rename-result'));assert.equal(h.renameRequests.length,0);
+    const historyReads=h.requests.filter(route=>route==='/v1/sessions/saved/history').length;
+    view.receive({type:'rename-session',id:'saved',title:'Renamed fixture',expected_title:'Saved session'});await until(()=>h.renameRequests.length===1&&view.posted.some(message=>message.type==='rename-result'&&message.id==='saved'));
+    assert.deepEqual(h.renameRequests,[{title:'Renamed fixture',expected_title:'Saved session'}]);assert.equal(view.posted.findLast(message=>message.type==='rename-result').success,!conflict);
+    assert.equal(h.requests.filter(route=>route==='/v1/sessions/saved/history').length,historyReads);assert.ok(!h.requests.includes('/v1/runs'));view.close();
+  }
 });
 test('invalid keys and unsupported provider destinations never transmit credentials',async()=>{
   for(const options of [{key:'bad key'},{key:'synthetic-key',providerSetup:{...providerFixture,endpoint:'https://outside.invalid'}}]){

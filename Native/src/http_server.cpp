@@ -283,7 +283,7 @@ struct HttpServer::Impl {
         }));
         server.Get("/v1/health",guarded([this](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()}});
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()}});
         }));
         if(setup){
             server.Post("/v1/provider/models",guarded([setup](const Request& request,Response& response){

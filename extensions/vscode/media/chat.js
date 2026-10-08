@@ -1,6 +1,7 @@
 'use strict';
 const api=globalThis.xMindView||acquireVsCodeApi(),byId=id=>document.getElementById(id);
 let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null;
+let renameCapability=false,renameSnapshot;
 const operationSections=new Map();
 const processStreams=new Map();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
@@ -180,11 +181,17 @@ function graphEvent(message){
 byId('workflow').onchange=()=>{workflowExecutable=!!byId('workflow').selectedOptions[0]?.dataset.executable;api.postMessage({type:'graph-select',id:byId('workflow').value});byId('send').disabled=!canExecute()||activeRun||sessionBusy;};
 function send(){if(canExecute()&&!activeRun&&!sessionBusy&&byId('prompt').value.trim())api.postMessage({type:'send',prompt:byId('prompt').value});}
 for(const type of ['new','refresh','cancel'])byId(type).onclick=()=>api.postMessage({type});
-byId('sessions').onchange=()=>api.postMessage({type:'select',id:byId('sessions').value});byId('send').onclick=send;
+byId('sessions').onchange=()=>{refreshRename();api.postMessage({type:'select',id:byId('sessions').value});};byId('send').onclick=send;
 byId('runs').onchange=()=>api.postMessage({type:'select-run',id:byId('runs').value});
 byId('model').onchange=()=>api.postMessage({type:'model',id:byId('model').value});
 byId('prompt').onkeydown=event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}};
 byId('prompt').oninput=()=>{byId('prompt').style.height='auto';byId('prompt').style.height=Math.min(180,byId('prompt').scrollHeight)+'px';};
+const renameDialog=byId('rename-dialog');
+function refreshRename(){const selected=byId('sessions').selectedOptions[0];byId('rename').hidden=!renameCapability;byId('rename').disabled=!renameCapability||!selected?.dataset.sessionId;if(renameSnapshot&&(!renameCapability||renameSnapshot.id!==byId('sessions').value))renameDialog.close();}
+byId('rename').onclick=()=>{const selected=byId('sessions').selectedOptions[0];if(!renameCapability||!selected?.dataset.sessionId)return;renameSnapshot={id:selected.value,title:selected.textContent};byId('conversation-title').value=renameSnapshot.title;byId('rename-status').textContent='';byId('rename-save').disabled=false;renameDialog.showModal();byId('conversation-title').focus();};
+for(const id of ['rename-close','rename-cancel'])byId(id).onclick=()=>renameDialog.close();
+renameDialog.addEventListener('close',()=>{renameSnapshot=undefined;byId('conversation-title').value='';byId('rename-save').disabled=false;if(!byId('rename').hidden)byId('rename').focus();});
+byId('rename-form').onsubmit=event=>{event.preventDefault();if(!renameSnapshot||byId('rename-save').disabled)return;const title=byId('conversation-title').value;if(!title.trim())return;byId('rename-save').disabled=true;byId('rename-status').textContent='Saving…';api.postMessage({type:'rename-session',id:renameSnapshot.id,title,expected_title:renameSnapshot.title});};
 const settings=byId('provider-settings');
 byId('settings').onclick=()=>{byId('provider-key').value='';settings.showModal();byId('provider-key').focus();};
 byId('settings-close').onclick=()=>settings.close();
@@ -199,7 +206,8 @@ window.addEventListener('message',event=>{
   else if(m.type==='graph-clear')clearGraph();
   else if(m.type==='graph')graphView(m.record,m.children,m.histories);
   else if(m.type==='graph-event')graphEvent(m);
-  else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.title);option.value=session.id;option.selected=session.id===m.selected;byId('sessions').append(option);}}
+  else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.title);option.value=session.id;option.dataset.sessionId=session.id;option.selected=session.id===m.selected;byId('sessions').append(option);}refreshRename();}
+  else if(m.type==='rename-result'){if(renameSnapshot?.id===m.id){byId('rename-save').disabled=false;byId('rename-status').textContent=m.text||'';if(m.success)renameDialog.close();}}
   else if(m.type==='runs'){
     sessionBusy=m.busy;byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
     for(const run of m.runs){const option=node('option',run.state+' · '+run.id);option.value=run.id;option.selected=run.id===m.selected;byId('runs').append(option);}
@@ -210,7 +218,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-wire'){const label=byId('provider-mode');label.textContent=m.wire==='responses'?'Responses':m.wire==='chat-completions'?'Chat Completions':'';label.hidden=!label.textContent;}
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
-  else if(m.type==='capabilities'){execution=m.execution;byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
+  else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;refreshRename();byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
   else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';byId('events').textContent='';}
   else if(m.type==='draft')byId('prompt').value=m.text;
   else if(m.type==='event'){const event=m.event;byId('events').textContent+=JSON.stringify(event)+'\n';if(event.kind==='run.failed')runFailure(event.data);else if(event.kind==='process.output')processOutput(event.data);else if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}

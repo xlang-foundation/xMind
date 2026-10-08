@@ -1,4 +1,13 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController}=require('../browser.js');
+test('rename sends the displayed expected title only for the selected supported conversation and retains conflicts',async()=>{
+ const posted=[],calls=[];let conflict=false;
+ const client={renameSession:async(...args)=>{calls.push(args);if(conflict)throw Object.assign(new Error('Conflict'),{status:409});},sessions:async()=>[{id:'selected',title:'Renamed fixture'}]};
+ const view=new BrowserController(client,message=>posted.push(message));view.health={session_rename:true};view.session='selected';
+ await view.handle({type:'rename-session',id:'foreign',title:'New',expected_title:'Old'});assert.equal(calls.length,0);
+ await view.handle({type:'rename-session',id:'selected',title:'New',expected_title:'Displayed original'});assert.deepEqual(calls[0],['selected','New','Displayed original']);assert.ok(posted.some(message=>message.type==='sessions'));assert.equal(posted.at(-1).success,true);
+ conflict=true;await view.handle({type:'rename-session',id:'selected',title:'Draft',expected_title:'Stale'});assert.equal(posted.at(-1).success,false);assert.match(posted.at(-1).text,/title changed/);
+ view.health={};await view.handle({type:'rename-session',id:'selected',title:'New',expected_title:'Old'});assert.equal(calls.length,2);view.dispose();
+});
 test('Responses saved-key discovery and model selection preserve backend-reported wire',async()=>{
  const posted=[],setup={provider:'openai',wire:'responses',endpoint:'https://api.openai.com/v1/responses',revision:3,configured:true,model:'gpt-5.6-sol'};let discovered=0,configured=0;
  const client={providerConfiguration:async()=>setup,discoverProviderModels:async(key,revision)=>{assert.equal(key,undefined);assert.equal(revision,3);discovered++;return {models:[{id:'gpt-5.6-sol'}]};},configureProvider:async(id,key,revision)=>{assert.equal(id,'gpt-5.6-sol');assert.equal(key,undefined);assert.equal(revision,3);configured++;return {...setup,revision:4};},health:async()=>({agent_execution:true}),models:async()=>({default_model:'gpt-5.6-sol',models:[{id:'gpt-5.6-sol'}]})};

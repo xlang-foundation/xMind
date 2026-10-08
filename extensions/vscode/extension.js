@@ -288,7 +288,7 @@ async function activate(context) {
         if (panel !== view) return;
         if (!message || typeof message.type !== 'string') return;
         if (message.type === 'ready') {
-          post({ type: 'capabilities', execution: health.agent_execution, model:selectedModel, models:modelCatalogue.models });
+          post({ type: 'capabilities', execution: health.agent_execution, renameSessions:health.session_rename===true, model:selectedModel, models:modelCatalogue.models });
           await refresh();
           if (sessionId) await selectSession(sessionId);
           await refreshGraphs();
@@ -308,7 +308,7 @@ async function activate(context) {
           if(panel!==view || version!==generation) return;
           health=current.health;modelCatalogue=current.catalogue;
           selectedModel=chooseModel(modelCatalogue,selectedModel);
-          post({type:'capabilities',execution:health.agent_execution,models:modelCatalogue.models,model:selectedModel});
+          post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
           await refresh();
           if(panel!==view || version!==generation) return;
           if(sessionId) await selectSession(sessionId);
@@ -325,7 +325,7 @@ async function activate(context) {
             post({type:'provider-wire',wire:providerEnrollmentWire(configured)});
             selection.key=undefined;selection.revision=configured.revision;selection.expires=Infinity;
             const current=await capabilities();health=current.health;modelCatalogue=current.catalogue;
-            post({type:'capabilities',execution:health.agent_execution,models:selection.ids.map(id=>({id})),model:message.id});
+            post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:selection.ids.map(id=>({id})),model:message.id});
             post({type:'status',text:'Model configured · send a message to verify provider access'});
           }else if (!modelCatalogue.models.some(model => model.id === message.id)) throw new Error('Fetch models in Settings before choosing this model.');
           selectedModel = message.id;
@@ -348,6 +348,10 @@ async function activate(context) {
           await refresh();
         } else if (message.type === 'select' && typeof message.id === 'string') {
           await selectSession(message.id);
+        } else if(message.type==='rename-session'){
+          const version=generation;
+          try{if(health.session_rename!==true||message.id!==sessionId||typeof message.title!=='string'||typeof message.expected_title!=='string')throw new Error('Select a conversation on a backend supporting rename.');await client.renameSession(sessionId,message.title,message.expected_title);if(panel!==view||version!==generation)return;await refresh();if(panel===view&&version===generation)post({type:'rename-result',id:message.id,success:true});}
+          catch(error){if(panel===view&&version===generation)post({type:'rename-result',id:message.id,success:false,text:error.status===409?'Conversation title changed. Refresh history and reopen Rename before saving.':error.message});}
         } else if (message.type === 'select-run' && typeof message.id === 'string') {
           await selectRun(message.id);
         } else if (message.type === 'send' && typeof message.prompt === 'string' && message.prompt.trim()) {

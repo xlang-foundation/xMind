@@ -14,6 +14,16 @@ function renderer(){
 
 const processProposalFixture=()=>({id:'fixture-command',tool:'run_process',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,
   arguments_json:JSON.stringify({profile_id:'fixture-profile',profile_revision:2,executable:'C:/fixture/tool.exe',executable_id:'opaque-fixture-backend-executable-binding',arguments:['space argument','<script>fixtureAttack()</script>','trailing\\'],workdir:'src',directory_id:'fixture-directory',timeout_ms:120000,output_limit:65536}),result_json:'{}'});
+test('conversation rename keeps expected title and draft through conflicts, and cancels when selection changes',()=>{
+  const r=renderer(),doc=r.dom.window.document,dialog=doc.getElementById('rename-dialog');dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;dialog.dispatchEvent(new r.dom.window.Event('close'));};
+  r.send({type:'sessions',sessions:[{id:'first',title:'<script>fixture title</script>'},{id:'second',title:'Other'}],selected:'first'});assert.equal(doc.getElementById('rename').hidden,true);
+  r.send({type:'capabilities',execution:false,renameSessions:true,models:[]});assert.equal(doc.getElementById('rename').disabled,false);doc.getElementById('prompt').value='Keep composer draft';doc.getElementById('rename').click();assert.equal(dialog.open,true);
+  const title=doc.getElementById('conversation-title');assert.equal(title.value,'<script>fixture title</script>');title.value='Renamed fixture';r.send({type:'sessions',sessions:[{id:'first',title:'Changed elsewhere'},{id:'second',title:'Other'}],selected:'first'});
+  doc.getElementById('rename-form').dispatchEvent(new r.dom.window.Event('submit',{cancelable:true}));assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'rename-session',id:'first',title:'Renamed fixture',expected_title:'<script>fixture title</script>'});
+  r.send({type:'rename-result',id:'first',success:false,text:'Title changed'});assert.equal(dialog.open,true);assert.equal(title.value,'Renamed fixture');assert.equal(doc.getElementById('rename-save').disabled,false);
+  const sessions=doc.getElementById('sessions');sessions.value='second';sessions.dispatchEvent(new r.dom.window.Event('change'));assert.equal(dialog.open,false);assert.equal(title.value,'');r.send({type:'rename-result',id:'first',success:true});assert.equal(doc.getElementById('prompt').value,'Keep composer draft');
+  const sent=r.posted.length;doc.getElementById('rename').click();doc.getElementById('rename-cancel').click();assert.equal(r.posted.length,sent);r.send({type:'capabilities',execution:false,models:[]});assert.equal(doc.getElementById('rename').hidden,true);r.dom.window.close();
+});
 test('footer displays only a recognized backend-reported provider wire',()=>{
   const r=renderer(),label=r.dom.window.document.getElementById('provider-mode');r.send({type:'provider-wire',wire:'responses'});assert.equal(label.textContent,'Responses');assert.equal(label.hidden,false);r.send({type:'provider-wire',wire:'chat-completions'});assert.equal(label.textContent,'Chat Completions');r.send({type:'provider-wire',wire:'<script>fixtureAttack()</script>'});assert.equal(label.hidden,true);assert.equal(label.textContent,'');
 });

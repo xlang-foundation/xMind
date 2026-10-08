@@ -148,10 +148,26 @@ title. The CLI exposes `/title NAME` for the selected conversation and
 `rename-session ID TITLE EXPECTED_TITLE` for one-shot use. Invalid titles and
 conflicts leave the selection intact. The shared backend client has the same
 typed request, and local browser/native view allowlists include the route.
-The sidebar does not yet expose a rename control.
+The shared sidebar control is described below; the installed preview does not
+yet advertise the newer backend capability.
 
 The native provider CLI contract now requires rename, stale-title and empty-title
 rejection, identical saved messages/runs and persisted rename after backend
 reopen without inference. JavaScript syntax checks, 70 extension tests and 12
 browser tests passed locally. Native execution of the rename addition is
 pending; the local build guard again deferred for active sibling benchmarks.
+
+The browser and VS Code right sidebar now contain a capability-gated SVG rename
+button and title dialog in source. The original selected ID/title remain bound
+to the draft; external metadata refresh cannot silently replace its expected
+title. A conflict preserves the draft and explains how to refresh/reopen.
+Changing conversations closes and clears the dialog; Cancel submits nothing
+and the message composer remains intact. Both access adapters reject attempts
+to rename another conversation, then forward the same native request and
+refresh only the session catalogue. Older backends keep the button hidden.
+
+All 72 extension and 13 browser adapter/DOM tests passed, including extension
+host conflict/selection handling and renderer/browser controller behavior. These
+are labelled fixtures, not proof of actual IDE/native rename execution. Native
+compilation and actual browser/IDE acceptance remain pending. Other previews
+and their existing settings/drafts were not reloaded for these source tests.
