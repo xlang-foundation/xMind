@@ -1,8 +1,8 @@
-# Provider setup in the sidebar
+# Native provider setup
 
 ## Native Gemini discovery and enrollment
 
-New source adds `gemini.generate-content` to the backend-owned provider routes,
+The backend advertises `gemini.generate-content` among its provider routes,
 using Google's versioned GenerateContent base and its separate models-list
 endpoint. Authenticated `/v1/provider/profiles` metadata advertises the actual
 route and discovery capability. The existing Settings dialog obtains the key;
@@ -35,23 +35,39 @@ policy before publication. Saved-key discovery resolves that profile's owned
 credential privately; public metadata excludes keys, credential references and
 endpoint URLs. Stale
 discovery, selection or admission fails without task replay or partial publication.
-Gemini profile and model identities containing the provider key are rejected
-before draft discovery, saved/imported persistence or metadata publication.
+Discovered model resources containing the provider key are rejected. The generic
+profile runtime applies the same public-identity guard across all routes during
+draft/save/import/reopen validation, including saved-key updates, and before
+account discovery. Key-reflected profile/model identities fail before public
+publication or candidate credential persistence; a reflected discovery profile
+ID sends no provider request.
 Reopen validates inactive profiles' resource grammar and public identities;
 workspace tool capability is required when an active profile is prepared or an
 inactive profile is selected. A valid inactive text-only model can remain saved
 while a different coding profile runs.
 
-The new native acceptance sources exercise authenticated API boundaries, actual
+The native enrollment acceptance sources exercise authenticated API boundaries, actual
 SQLite publication rollback, key reuse/reopen, native file-tool continuation,
 cancellation ownership and discovery/selection races with independent synthetic
-catalogue/model peers. Current local source passed **64 native contracts in
+catalogue/model peers. The enrollment milestone passed **64 native contracts locally in
 120.98 seconds**, with an exact expected manifest and no post-build exclusions.
 The same milestone passed **94 extension and 17 browser tests**, with zero
 failures/skips across all three suites.
-[Current local evidence](evidence/native-gemini-enrollment-local-provenance.json).
-Hosted validation of this newer checkpoint remains pending. No live Gemini key,
-external account acceptance or installed-preview upgrade is claimed.
+[Enrollment local evidence](evidence/native-gemini-enrollment-local-provenance.json).
+The committed enrollment source `2f5e0f05e9bfadcf86b5508863da0ec5a9e78cfe`
+passed its exact hosted gate: **64 native contracts in 158.09 seconds**, **94
+extension and 17 browser tests**, actual browser/native integration and VSIX
+verification, with zero failures/skips.
+[Hosted evidence](evidence/native-gemini-enrollment-hosted-provenance.json),
+[hosted run](https://github.com/xlang-foundation/xMind/actions/runs/37743203538).
+The newer generic profile CLI and all-route identity guards passed **65 native
+contracts locally in 113.16 seconds**, with the exact manifest, zero
+failures/skips and no post-build exclusions. Actual browser/native integration
+passed again against the fresh native server. Frontend sources are unchanged
+from `2f5e0f0`; the prior hosted frontend results were not repeated or counted as
+new tests. [CLI local evidence](evidence/native-provider-profile-cli-local-provenance.json).
+Hosted verification of this newer checkpoint remains pending. No live Gemini
+key, external account acceptance or installed-preview upgrade is claimed.
 The actual browser/native integration passed the four default routes and an
 inactive Gemini profile save against the rebuilt server, together with durable
 refresh, adapter/backend restarts and the existing real graph/file/history flow.
@@ -72,9 +88,80 @@ seconds**. [Hosted scope](evidence/native-gemini-agent-hosted-provenance.json).
 These earlier gates exclude the new catalogue/profile enrollment source. See
 [validation status](VALIDATION_STATUS.md) for the remaining acceptance boundary.
 
+## Generic provider-profile CLI controls
+
+The native CLI exposes the same backend-owned profile API as Settings:
+
+```text
+xmind_cli PORT provider-profiles
+xmind_cli PORT profile-models ID ROUTE REVISION [KEY_ENV]
+xmind_cli PORT save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate]
+xmind_cli PORT select-profile ID REVISION
+xmind_cli PORT provider-models
+```
+
+`provider-profiles` returns actual public metadata and advertised routes.
+`REVISION` is its registry revision, not the individual profile's saved version.
+`profile-models` discovers for that profile/route snapshot without persisting a
+draft key. `save-profile` publishes a validated profile; a new inactive profile
+does not replace shared execution. `--activate` explicitly requests activation
+and must be the final argument. Updating an already active profile preserves
+its active identity. `select-profile` explicitly changes shared selection with
+the supplied revision. Setup commands create no conversations, user messages
+or agent runs and do not request inference.
+
+Only a privately inherited environment-variable name, `KEY_ENV`, is accepted in
+command arguments. The CLI forwards its value in the authenticated request;
+the backend owns encrypted persistence through xlang3 SQLite. Public responses
+exclude raw keys, credential references and provider destinations. Reserved
+authentication/UI variables cannot be used as provider-key variables. Omitting
+`KEY_ENV` omits `api_key` and reuses the saved profile's owned credential; a new
+profile still requires a key. Discovery/save retain full returned model resource
+identities, including Gemini's `models/<id>` prefix, and cannot substitute a
+display label or infer tool capability from catalogue generation methods.
+
+No-argument `provider-models` prefers the active profile's saved-key discovery
+on a profile-capable backend. The existing `provider-models KEY_ENV REVISION`
+form remains the legacy setup API. The older single-OpenAI compatibility
+configuration commands retain their own scope.
+
+Inside chat, `/profiles` reads fresh metadata without rebinding the chat's
+admission snapshot. `/provider-models` discovers the freshly observed active
+profile/route/revision using its saved key, also without rebinding admission.
+Only explicit `/profile ID REVISION` selection updates that binding from the
+returned committed metadata and clears the local model override. Stale
+selection/discovery reports failure, retains the prior binding/model and sends
+no automatic retry. External changes cannot be silently adopted by a listing
+or discovery command.
+
+Selection preserves existing history; it does not implement conversion of
+foreign signed/provider/tool receipts. Fresh conversations and compatible text
+histories can continue on the selected wire. A Gemini receipt mapped into
+Chat/Claude, or older Chat tool calls without their original Gemini receipt,
+are rejected by native history validation. Recorded history and tool outcomes
+remain preserved. Full cross-wire receipt mapping/acceptance is still required;
+generic profile controls do not establish arbitrary session continuation across
+every provider. Successful chat settings commands clear only prior settings
+errors and preserve the last failed/cancelled model turn's exit status. Discovery
+has a 35-second CLI read deadline and restores ordinary request timing afterward;
+redirects and automatic retries remain disabled.
+
+The new CLI contract passed in **4.23 seconds** as part of the local 65-contract
+gate. It runs the compiled CLI against the authenticated native server and
+embedded xlang3 SQLite with labelled synthetic provider peers. It verifies
+private key input/reuse, full resources, inactive save/selection, registry races,
+encrypted reopen/rollback, bounded safe diagnostics and failed-turn status
+through successful settings commands. All new source cases were compiled and
+passed; the preceding hosted 64-contract gate excludes these additions.
+Hosted verification of the newer checkpoint, live account and new
+installed-preview acceptance remain pending.
+[CLI syntax, behavior and historical evidence](native-interactive-cli.md).
+
 The sections below preserve earlier provider-setup checkpoints and their limits.
 Their pending statements describe those revisions; current Gemini source and
-verification are summarized above.
+verification are summarized above. The installed preview retains native
+`19d69dd` and view `6f32d215`; historical preview references below describe earlier
+installations.
 
 ## Run-descriptor attribution
 

@@ -570,6 +570,18 @@ if(BUILD_TESTING)
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/provider_profile_runtime_peer.mjs" "$<TARGET_FILE:agentflow_provider_profile_runtime_contract>"
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_provider_profile_runtime_contract PROPERTIES TIMEOUT 45)
+    add_executable(agentflow_provider_profile_cli_contract tests/provider_profile_cli_contract.cpp)
+    target_include_directories(agentflow_provider_profile_cli_contract PRIVATE third_party third_party/cpp-httplib)
+    target_link_libraries(agentflow_provider_profile_cli_contract PRIVATE agentflow_runtime agentflow_http)
+    if(MSVC)
+      target_compile_options(agentflow_provider_profile_cli_contract PRIVATE /utf-8)
+    endif()
+    add_custom_command(TARGET agentflow_provider_profile_cli_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_provider_profile_cli_contract>")
+    add_test(NAME native_provider_profile_cli_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/provider_profile_cli_peer.mjs" "$<TARGET_FILE:agentflow_provider_profile_cli_contract>"
+      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "$<TARGET_FILE:xmind_cli>")
+    set_tests_properties(native_provider_profile_cli_contract PROPERTIES TIMEOUT 60)
     add_executable(agentflow_gemini_catalogue_contract tests/gemini_catalogue_contract.cpp)
     target_include_directories(agentflow_gemini_catalogue_contract PRIVATE third_party)
     target_link_libraries(agentflow_gemini_catalogue_contract PRIVATE agentflow_runtime)

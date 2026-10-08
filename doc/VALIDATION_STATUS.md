@@ -1,23 +1,40 @@
 # Current native validation
 
-Current local source passed **64 native contracts in 120.98 seconds**, with an
-exact expected manifest and no post-build exclusions. It adds independent Gemini
-models-list discovery, opaque pagination, full resource identities, native
-per-model tool policy and authenticated encrypted
-profile enrollment. New native sources cover method/capability separation,
-key reuse/reopen, actual enrolled file execution, selection/publication rollback,
-cancellation ownership and stale discovery rejection using synthetic provider
-peers. Current thin-client tests passed **94 extension and 17 browser tests**;
-all three suites have zero failures/skips. No live Gemini
-key/inference, actual IDE acceptance or installed-preview upgrade is claimed.
-Actual browser/native integration against the rebuilt server passed the four
-default routes, inactive Gemini profile save, durable refresh, adapter/backend
-restarts, real file-reading graph execution, history and reconnect. This is
-adapter/backend acceptance with synthetic provider fixtures, not live Gemini or
-rendered IDE acceptance.
-[Current local provenance](evidence/native-gemini-enrollment-local-provenance.json).
-Hosted validation of this newer checkpoint remains pending.
-[Provider setup](provider-setup.md).
+Current source passed the complete local **65 native contracts in 113.16
+seconds**, with the exact expected manifest, zero failures/skips and no
+post-build exclusions. The new CLI contract took **4.23 seconds**. It exercises
+OpenAI, Claude and Gemini catalogue authentication, private environment-key
+setup, saved-key updates, explicit profile selection and actual xlang3 SQLite
+reopen with encrypted credentials. Signed Gemini text/history/usage, stale discovery/admission
+without retry, safe native provider diagnostics and failed-turn status preserved
+through settings until a later actual successful turn also passed. Public
+profile/model key reflection is rejected across all three provider families.
+Provider sockets and credentials are synthetic.
+[Local CLI provenance](evidence/native-provider-profile-cli-local-provenance.json).
+Hosted validation of this newer 65-contract source remains pending.
+
+Unchanged thin-client sources retain their earlier verified **94 extension and
+17 browser tests**, with zero failures/skips; those suites were not rerun for the
+CLI change. Fresh browser/native integration passed against the rebuilt server
+and source-matched assets, including four default routes, inactive Gemini
+profile save, refresh/restart, real file-reading graph execution, history and
+reconnect. No live Gemini inference, rendered IDE acceptance or installed-preview
+upgrade is claimed. [CLI scope](native-interactive-cli.md),
+[provider setup](provider-setup.md).
+
+Enrollment revision `2f5e0f05e9bfadcf86b5508863da0ec5a9e78cfe` passed its
+exact hosted **64 native, 94 extension and 17 browser contracts**, native/browser
+integration and VSIX verification, with zero failures/skips. Its native gate
+took **158.09 seconds**. It previously passed the local 64-contract gate in
+**120.98 seconds**. Gemini discovery/pagination, generation-method filtering
+separate from native tool policy, encrypted enrollment/selection, owned-key file
+execution, cancellation, CAS rollback and signed SQLite replay passed using
+synthetic peers. Direct-SQLite removal and shared `records.hpp` cleanup are
+included. This hosted result excludes the newer generic CLI controls and
+all-provider reflection guard.
+[Hosted enrollment run](https://github.com/xlang-foundation/xMind/actions/runs/37743203538),
+[exact hosted provenance](evidence/native-gemini-enrollment-hosted-provenance.json),
+[earlier local scope](evidence/native-gemini-enrollment-local-provenance.json).
 
 Gateway/history revision `75f45f0a036f1ffbab8c4b157df364f3697b52a0` passed the
 exact hosted gate: **61 native, 91 extension and 17 browser contracts**,
@@ -75,8 +92,9 @@ catalogue/enrollment source.
 The [Gemini bridge](native-gemini-history.md) uses labelled synthetic component
 and socket fixtures. Actual native AgentRunner/file/SQLite acceptance is now
 verified with synthetic provider replies, including the new native
-discovery/enrollment source in the local 64-contract gate. Live Gemini inference
-remains unverified.
+discovery/enrollment source in the local/hosted 64-contract gates and the generic
+CLI boundary in the newer local 65-contract gate. Live Gemini inference remains
+unverified.
 
 The installed browser preview retains its separate verified native `19d69dd`
 and view `6f32d215` snapshots. Neither the cleanup bundle nor this newer native

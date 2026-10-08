@@ -1,369 +1,220 @@
 # Interactive native CLI sessions
 
-The browser preview now runs exact hosted revision `5cf3c79`, which passed all
-52 native, 73 extension and 14 browser contracts plus asset packaging.
-[Hosted provenance](evidence/native-cli-recovery-provider-headers-hosted-provenance.json)
-and [unaltered test/TAP summary](evidence/native-cli-recovery-provider-headers-hosted-summary.log)
-record that complete gate. The process executor passed this run; its earlier
-45-second timeout's cause remains unproven. Native restart preserved all nine
-conversations, 13 root runs and 31 history records by exact hashes, with unchanged
-provider configuration. The browser adapter/view source is unchanged across
-the upgrade and remained running; its existing cookie still refreshed history
-without login. Other IDE previews were left untouched.
+The C++ CLI connects to the same authenticated local xMind Server used by the
+browser and VS Code. The backend owns agents, tools, permissions, sessions and
+SQLite through embedded xlang3. The CLI reads command/event contracts and does
+not access the database or run a separate agent.
 
-A live console acceptance then launched `/graph read.repository.file ...`,
-submitted `/input choose.file {"path":"README.md"}`, and completed the native
-read child. The recorded 11,810-byte content equals the repository file exactly;
-the graph's revision, history and root-only run list match native inspection.
-The browser renders that same completed graph and both observed nodes.
-[Live read evidence](evidence/live-console-registered-graph-read.json) distinguishes
-this actual execution from synthetic protocol fixtures. No inference occurred,
-so no provider tokens were fabricated. Full TUI/OpenCode parity, broader provider
-adapters and team deployment remain required. The newer Claude request component
-is locally validated separately and is absent from this installed revision.
+Current source passed **65 native contracts locally in 113.16 seconds**, with
+the exact manifest matched, zero failures/skips and no post-build exclusions.
+The new provider-profile CLI contract passed in **4.23 seconds**, and actual
+browser/native integration passed again against the freshly rebuilt server.
+[Exact local scope](evidence/native-provider-profile-cli-local-provenance.json).
 
-The C++ CLI now has source for `xmind_cli PORT chat [SESSION [MODEL]]`. It uses the same authenticated xMind Server, persistent conversations and dynamic native agent/tool loop as the editor and browser. It does not execute a separate agent or access SQLite directly.
+The preceding enrollment revision `2f5e0f0` separately passed its hosted gate:
+**64 native contracts in 158.09 seconds**, **94 extension and 17 browser tests**,
+native/browser integration and VSIX verification, with zero failures/skips.
+[Exact hosted scope](evidence/native-gemini-enrollment-hosted-provenance.json).
+The frontend sources are unchanged from that revision; those frontend tests
+were not repeated or counted as new results in the local 65-contract gate.
+Hosted verification of the newer CLI checkpoint remains pending.
 
-With a configured backend and `XMIND_AUTH_TOKEN` privately set, enter requests at `xMind >`. A new conversation is created only after the first non-empty request; opening chat and immediately leaving does not create placeholder history. A supplied session is validated and reused. A supplied model is sent through normal native model-selection validation; otherwise the server's configured default is used. Enter `/exit` between turns to leave.
+The installed browser preview retains native `19d69dd` and view `6f32d215`
+snapshots. It has not been upgraded to the newer enrollment/profile CLI source.
+Earlier installed CLI/browser checks below retain their historical scope.
+[Current validation](VALIDATION_STATUS.md), [provider setup](provider-setup.md).
+Full interactive/TUI coding parity and live Gemini CLI/IDE acceptance remain
+incomplete; private team-server implementation belongs to Nexus.
 
-Each admitted run is observed to its actual terminal state. Standard output contains escaped NDJSON session/run descriptors and original durable events, including tool results and supplied usage. Prompts and connection errors use standard error. No token usage, assistant text or tool effects are synthesized by this client. Reconnecting to an existing session adds only the requested new turn; completed work is not replayed.
+## Conversations, observation and approvals
 
-Resuming an existing session emits a `history` record containing the actual saved
-conversation before accepting input. Entering `/exit` immediately displays that
-history without admitting a run. A failed turn emits its recorded failure and a
-`turn_finished` record with exit status 1. The user can submit another explicit
-request in the same session; the CLI does not automatically retry the failed
-request. Process exit status reflects the last observed turn (or zero if no turn
-was admitted).
+With `XMIND_AUTH_TOKEN` privately set, run:
 
-Between turns, `/models` displays the backend-enabled model catalogue and
-`/model ID` selects an advertised ID for subsequent requests in this CLI client.
-`/model` returns to the server default. Selection does not rewrite shared provider
-settings. `/history` reads the current durable conversation, and `/help` describes
-the commands. These commands do not create a session or invoke inference.
-Unavailable IDs are rejected without changing selection. Prefix a literal slash
-request with a second slash (`//`); unknown commands are not sent to the model.
-The optional initial model argument is checked against the backend catalogue
-before displaying history or accepting requests. Its regression cases require an
-unavailable ID to leave runs, history and provider request counts unchanged, and
-an enabled ID to retain normal read-only session inspection. These newer cases
-remain pending compiled validation.
+```text
+xmind_cli PORT chat [SESSION [MODEL]]
+```
 
-The catalogue is `/v1/models`, the executor's currently enabled models. It is not
-the provider account discovery endpoint; enabling additional providers/models is
-a separate backend configuration action. Integrated console settings and live
-model-selection acceptance remain pending.
+Chat validates a supplied session and optional backend-enabled model, then
+displays saved history before accepting input at `xMind >`. An empty chat
+creates a conversation only after its first nonempty request. Whitespace, setup,
+inspection and immediate `/exit` do not create placeholder conversations.
 
-`/provider-models` now requests account discovery through the native backend's
-saved encrypted credential and current provider revision. The CLI sends only
-`expected_revision`, not a provider key. It emits a `provider_models` record and
-does not change shared settings or admit a model run. The provider setup contract
-adds an interactive discovery check with the actual CLI and synthetic provider,
-including omission of fixture keys from output. This source and its compiled
-contract are pending validation.
+Standard output contains escaped NDJSON descriptors and actual durable backend
+events, including tool results and supplied usage. Prompts and connection
+diagnostics use standard error. A failed turn reports its recorded failure;
+the user can explicitly submit another request without automatic retry. Ending
+or interrupting the client leaves backend execution ownership unchanged.
 
-During chat observation, pending effect proposals are read from the backend and
-shown as escaped NDJSON `operation_review` records, including the exact argument
-bytes, file snapshots or command specification, ownership and expiry. Enter
-`/allow ID` or `/deny ID` using the displayed ID, or `/cancel` to request run
-cancellation. Decisions contain no client-supplied plan or authority; the backend
-revalidates the operation. Rejected/stale decisions cause state to be reread.
-No approval is automatic. EOF or `/exit` at the approval prompt detaches with an
-error status and sends no decision or cancellation. Backend execution continues.
+| Command | Behavior |
+| --- | --- |
+| `/sessions`, `/session ID`, `/new` | List/resume saved conversations or clear selection; `/new` creates no database session until the next request |
+| `/history`, `/runs` | Read the selected conversation's saved history and root runs without inference |
+| `/title NAME` | Rename the selected conversation with its observed title as the conflict precondition |
+| `/models`, `/model ID`, `/model` | Inspect backend-enabled execution models, select an advertised model for this chat, or clear the local override |
+| `/watch RUN_ID`, `/graph-watch ROOT_ID` | Attach existing single-agent or graph work and replay durable state without admitting another run |
+| `/graphs`, `/graph GRAPH_ID REQUEST` | Inspect registered backend graphs or explicitly admit one at its observed catalogue revision |
+| `/help`, `/exit` | Show commands or leave between turns; prefix a literal slash request with `//` |
 
-Closing or interrupting the CLI leaves backend ownership unchanged. Input is
-currently read between turns and at an approval prompt, not concurrently during
-model streaming. Existing `cancel`, `operations`, `operation` and `decide`
-commands remain available from another console/view. Concurrent input, rich
-terminal diff/TUI controls, attachment/context controls and full OpenCode CLI
-parity remain required. The edit HTTP contract now drives this approval path
-through the actual CLI for both allow and deny, with synthetic inference and real
-native file effects when compiled validation runs; execution is still pending.
-Additional cases reject an unrelated operation ID before accepting the exact
-displayed ID, and detach while leaving the file unchanged and the backend
-operation awaiting approval. The detached fixture is cancelled separately by
-the authenticated test controller. These are pending contract cases, not observed
-product acceptance results.
+Model-free backends still permit history/run inspection and registered human/tool
+graphs. New agent requests reread execution availability; unavailable execution
+creates no session, user message or run. Unknown commands/IDs and rejected
+admission preserve selection. HTTP admission errors do not fabricate a run or
+assistant response and do not trigger resubmission. An unknown transport outcome
+requires inspecting recorded runs before an explicit resubmission.
 
-## Verification status
+At an actual approval prompt, `/allow ID` and `/deny ID` use only the displayed
+owned operation; the backend revalidates its exact plan, arguments and expiry.
+At a graph human prompt, `/input NODE_ID JSON` forwards bounded raw JSON with
+the displayed checkpoint revision. `/cancel` requests cancellation and
+observation continues to the actual terminal event; an acknowledgement is not
+a completed cancellation. EOF or `/exit` at either prompt detaches without
+approval, human input or cancellation. No approval is automatic.
 
-Current inspected hosted checkpoint `4203b84678b51b2ae7c6ee47fccfa14b684680ae`
-passed 52 native, 72 extension and 13 browser contracts in
-[run 37707042113](https://github.com/xlang-foundation/xMind/actions/runs/37707042113).
-The native provider/CLI contract exercised conversation list/resume/new/rename,
-stale and empty title rejection, unchanged history/runs and rename persistence
-after reopening, without inference. The HTTP/CLI contract includes request-based
-titles and whitespace input behavior. [Exact scope and totals](evidence/native-session-navigation-hosted-provenance.json).
-This supersedes the historical pending-compilation notes below for those features;
-it does not establish actual editor rename acceptance. The browser preview now
-uses that exact checkpoint and exposes the rename capability. Actual browser
-rename/Cancel, refresh and native reopen retained the title and connection; the
-installed CLI listed/resumed the same completed conversation and restored its
-exact history without inference. [Live evidence](evidence/live-browser-cli-navigation-rename.json).
-Full interactive/TUI parity remains incomplete. Earlier installation notes below
-retain their historical checkpoint scope.
+Input is currently read between turns and at approval/human prompts. Concurrent
+stdin controls during model streaming, rich terminal diffs, attachment/context
+controls and full TUI/OpenCode CLI parity remain required.
 
-New source adds `/watch RUN_ID` inside chat. It reads the existing single-agent
-run, restores its conversation history and emits `run_attached`, then observes
-durable events and explicit pending approvals through the existing native client
-path. It sends no model admission request. An empty chat adopts the recorded
-conversation; a selected different conversation is rejected until the user
-selects the correct one or clears selection with `/new`. Missing/invalid IDs and
-graph roots/children are rejected without changing selection; graph observation
-continues through `graph-watch`. Terminal observation updates the actual last
-turn exit status. EOF at an approval still detaches without a decision.
+## Generic provider-profile controls
 
-The native HTTP/CLI contract now checks completed attachment and unchanged
-history/runs/provider request counts, plus invalid, absent and foreign-context
-rejection. The edit contract now detaches from a real pending operation, attaches
-the same run in another CLI process and denies that exact operation, preserving
-the actual file and run count. Inference in those contracts is labelled
-synthetic. JavaScript syntax and whitespace checks passed; compiled execution
-is pending because the local build guard detected active xlang3 benchmarks.
-This source is not installed in the preview. Concurrent stdin controls while
-model output streams remain required; `/watch` does not close that gap.
+These commands use the backend's public profile registry and advertised routes.
+`REVISION` is the registry revision returned by `provider-profiles`, distinct
+from an individual profile's saved version. Model identities retain the exact
+discovered resource, including Gemini's `models/<id>` prefix.
 
-Chat inspection no longer requires an available model in newer source. The CLI
-can list/resume saved conversations, read history and attach existing runs on a
-model-free server. Before each new prompt it rereads native execution capability;
-when unavailable it reports the setup requirement without creating a session,
-appending input or admitting a run. This also allows a later successful backend
-configuration to be recognized without reopening chat. Explicit initial model
-IDs still require backend catalogue validation. The model-free HTTP/CLI contract
-checks saved-history inspection and unchanged sessions/history/runs after rejected
-input, including an empty chat that must create no placeholder conversation.
-These additions passed JavaScript syntax and whitespace checks; compiled
-execution and actual console acceptance remain pending.
+```text
+xmind_cli PORT provider-profiles
+xmind_cli PORT profile-models ID ROUTE REVISION [KEY_ENV]
+xmind_cli PORT save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate]
+xmind_cli PORT select-profile ID REVISION
+xmind_cli PORT provider-models
+```
 
-Installed preview update: the browser backend and matching adapter now use
-verified checkpoint `46262d6`, which passed 52 native, 73 extension and 14 browser
-contracts. It includes the earlier navigation/title capabilities and the newer
-cookie-duration/MCP diagnostic changes. The `/watch` and model-free inspection
-additions were introduced after this source and still await their own compiled
-gate; they are not yet present in the installed CLI. The native CLI on `46262d6`
-also carried the exact approval for the completed live external MCP read.
-[Gate scope](evidence/native-model-protocol-diagnostics-hosted-provenance.json),
-[live MCP scope](evidence/live-responses-mcp-diagnostic-read.json).
+`provider-profiles` reads actual public metadata: registry revision, active ID,
+saved profiles and backend-owned route/discovery declarations. `profile-models`
+discovers account models for the specified profile/route/revision.
+`save-profile` publishes a validated profile; it stays inactive unless
+`--activate` is explicitly supplied or it updates the already active profile.
+The optional flag must be the final argument; alternate ordering is rejected.
+`select-profile` explicitly changes the shared active profile using the supplied
+revision.
 
-New graph-control source adds `/graph-watch ROOT_ID` inside chat. It attaches a
-recorded root without graph admission, restores the conversation, and validates
-root/child ownership while replaying durable events. A model-free server can
-still expose registered human/tool graphs. Pending steps emit escaped
-`graph_human_review` records with actual prompts, node IDs and the displayed
-checkpoint revision. Enter `/input NODE_ID JSON`, `/cancel`, or `/exit` at that
-prompt. Raw bounded JSON is forwarded as `input_json` with that exact revision;
-an invalid, stale or already-answered step is not retried automatically.
+Only the environment-variable name `KEY_ENV` appears in command arguments.
+The CLI consumes its privately inherited value and forwards the key only in the
+authenticated setup request; the backend owns encrypted credential persistence
+through xlang3 SQLite. Keys, credential references and provider destinations are
+excluded from public metadata/output. Authentication/reserved UI environment
+variables cannot be used as provider-key variables. On Windows, consumption
+clears that variable in the child CLI process, preserving the parent environment.
+Across all advertised routes, the backend rejects profile/model identities that
+reflect the private key during draft/save/import/reopen validation and checks the
+profile identity before account discovery. Rejection precedes public publication
+or candidate credential persistence; discovery sends no request for such an ID.
 
-Child effect operations are read from validated children and retain the same
-exact `/allow ID` and `/deny ID` path. Graph root cancellation is explicit;
-EOF or `/exit` at a human/approval prompt detaches without granting an effect,
-answering a step or cancelling backend ownership. Completed/failed/cancelled
-observation reports the actual terminal exit status. Single-agent/graph and
-selected-conversation boundaries remain enforced.
+Omitting `KEY_ENV` omits `api_key` from the request and requests the saved
+profile's owned credential. New profiles still require a key. Draft discovery
+does not persist one; save and selection use native registry CAS and execution
+ownership checks. Setup/discovery/profile controls create no conversations,
+user messages or agent runs and do not invoke inference. Backend validation,
+stale revisions and running/paused ownership conflicts are reported without
+automatic retry or partial client-side publication.
 
-The graph service contract now exercises actual model-free CLI attachment,
-foreign-node rejection, human answer delivery, a stale-answer race against a
-second client, detach/reconnect, root cancellation and approved creation through
-a child operation. Human inputs and inference replies remain labelled fixtures;
-filesystem/backend effects are real when compiled execution runs. JavaScript
-syntax and whitespace checks passed. Local compilation was deferred by a live
-xlang3 benchmark; hosted execution and installation of this source remain
-pending. Concurrent input during model streaming and full console/TUI parity
-remain required.
+No-argument `provider-models` prefers the active profile's saved-key discovery
+on a profile-capable backend. The older
+`provider-models KEY_ENV REVISION` form remains the legacy setup API; it is not
+a generic provider-profile enrollment command. The legacy
+`configure-provider MODEL KEY_ENV REVISION` retains its existing scope.
 
-Initial recovery checkpoint `38cd516` compiled but failed its hosted native gate:
-50 contracts passed and two failed request-count assertions. The cancelled-run
-attachment case compared a global provider count while an unrelated queued read
-was allowed to execute. It now checks that cancelled task's unique prompt count,
-unchanged run records and absence of new admission output. The edit case retained
-the older 48-request total after adding a resumed denial's normal continuation.
-That continuation is now checked locally in the scenario; the suite total adds
-explicitly verified new console scenarios to the original baseline.
-[Initial failed gate](evidence/native-cli-recovery-initial-failure-provenance.json),
-[unaltered failure excerpts](evidence/native-cli-recovery-initial-failure.log).
-No runtime artifact was published from that failed gate. These corrections still
-await compiled rerun; the running preview remains on verified `46262d6`.
+Between chat turns, the new controls are:
 
-Cancellation acknowledgements now use `run_cancel_result`, separating the
-server's `cancellation_requested` receipt from effect decisions and human answers.
-Observation continues until the actual terminal event; a receipt is not a
-completed-cancellation state. New fixtures check the record type, unchanged file
-and cancelled operation/run for single-agent approval cancellation and graph
-human-step cancellation. Syntax checks passed; execution remains pending.
+| Command | Profile/admission effect |
+| --- | --- |
+| `/profiles` | Display fresh public registry metadata without silently rebinding this chat |
+| `/profile ID REVISION` | Explicitly select with registry CAS, then bind the returned committed metadata and clear the local model override |
+| `/provider-models` | Discover the freshly observed active profile/route with its owned key, without rebinding existing chat admission |
 
-Interactive chat now also implements `/graphs` and `/graph GRAPH_ID REQUEST` in
-source. The catalogue comes from the selected native backend; admission uses
-that registered graph's current revision, the selected conversation and optional
-selected model. Unknown graphs, blank requests and unavailable graph definitions
-are rejected before creating a conversation. Tool-only graphs can start without
-a configured provider. Once admitted, the same graph watcher displays persisted
-root/child events, exact effect approvals and revision-bound human input. Closing
-the client leaves server ownership intact. Admission errors do not trigger a
-second submission.
+If another view changes the shared profile, listing or discovery does not acquire
+that new admission binding. A stale profile command reports failure and retains
+the previous binding/model selection. An explicit successful `/profile` action
+is required to replace the chat binding; tasks are never automatically retried.
+Successful settings-only commands clear only a prior settings error and preserve
+the last failed/cancelled model turn's exit status. A later actual successful run
+can recover that turn status. Discovery uses a 35-second client read deadline,
+then restores ordinary request timing; it follows no redirects and sends no retry.
 
-The compiled graph-service fixture now requires catalogue/rejection to preserve
-the conversation catalogue and a model-free console launch to execute an actual
-workspace read, retain its registered revision and restore the exact history.
-JavaScript syntax and whitespace checks passed. Local compilation was deferred
-by live sibling benchmark process 17832; hosted execution of this addition is
-pending. This is registered graph execution, not dynamic graph generation or a
-completed console/TUI parity claim.
+Profile selection changes future execution and preserves existing conversation
+records. Fresh conversations and compatible text histories can use the selected
+wire. Foreign signed/provider/tool receipts require their original native wire
+mapping: for example, a Gemini receipt cannot be silently rewritten for Chat or
+Claude, and older Chat tool calls lack the original Gemini receipt needed for
+GenerateContent replay. Incompatible histories are rejected explicitly rather
+than guessing signatures or replaying tools. Use `/new` for a fresh conversation
+or restore a compatible provider for the recorded history. Arbitrary cross-wire
+history conversion remains native acceptance work.
 
-`/runs` now lists the selected conversation's recorded root runs in source,
-including their actual backend state and graph-root identity. An empty selection
-returns an empty catalogue without creating a conversation. This closes the
-console navigation path `/sessions` → `/session ID` → `/runs` → `/watch ID` or
-`/graph-watch ID`. Graph children remain available through the existing separate
-graph-child commands. The graph-launch fixture was corrected to check this
-repository contract: one root in the session catalogue and one actual read child
-under that root, rather than expecting children in the root catalogue.
+The compiled local gate covers exact command syntax, private environment input,
+omitted-key reuse, inactive enrollment, explicit selection, saved-key updates,
+encrypted SQLite restart/rollback and unchanged setup session/history/run state.
+Independent synthetic provider peers exercise OpenAI/Claude/Gemini discovery,
+full model resources, sanitized diagnostics and external-change races. Actual
+native Gemini text execution and signed-history reopen also passed. Regressions
+verify the discovery deadline and failed-turn status through successful settings
+commands. These results establish the native CLI/backend contracts, with hosted
+verification still pending for this checkpoint. They do not establish live
+account discovery, rendered IDE enrollment or end-to-end coding parity.
 
-Native fixtures require exact saved run records after single-agent attachment,
-graph completion and provider-free conversation inspection, with no additional
-inference or admission. Syntax checks passed; compiled execution is pending.
+## Historical checkpoint and live evidence
 
-Run-admission rejections with HTTP 400, 404, 409, 429 or 503 now keep interactive
-chat open in source. A `run_rejected` record retains the exact requested prompt,
-selected conversation, optional graph ID and actual HTTP status. No assistant
-message, terminal event or run descriptor is fabricated; raw error bodies are
-not printed. The user may inspect `/runs` and `/history`, attach existing work,
-or explicitly submit another request. Exit status remains 1 until a subsequent
-observed turn changes it. There is no automatic retry. If transport fails before
-an admission response is received, the client reports an unknown outcome and
-asks the user to inspect recorded runs before resubmission.
+The records here apply to their exact revisions and dates. Earlier preview
+versions and pending-compilation statements are not the current source or
+installed-preview status.
 
-The graph-service fixture now checks actual HTTP 409 from a second graph request
-in a conversation already owned by a paused graph, continued inspection in that
-same console process, exact retained request and unchanged history, root runs
-and graph events. JavaScript syntax checks passed; native execution is pending.
+- `51724ab8fdda3b9349b18f110a1256ec4f1398eb` passed hosted 52 native/63 extension
+  contracts for initial shared-session chat and restart history.
+  [Exact evidence](evidence/native-interactive-chat-hosted-provenance.json).
+  Its separately installed CLI passed an empty launch against the existing backend,
+  without inference or a new session.
+  [Installed scope](evidence/native-interactive-chat-local-installed.json).
+- `d0a70fef888c3724c2490bcb2cf8ef38d60f08c0` passed hosted 52 native/66 extension
+  contracts, adding resumed history, failure recovery, slash/model/history controls
+  and explicit approval/denial, unrelated-ID rejection and detach behavior.
+  [Exact scope](evidence/native-cli-approval-diagnostics-hosted-provenance.json).
+- `d3a395d89a1ecf93947728338a65822c441464bd` passed hosted 52 native/66 extension
+  contracts, including initial-model prevalidation and the original OpenAI
+  saved-key `/provider-models` path.
+  [Exact scope](evidence/native-cli-discovery-setup-hosted-provenance.json).
+  It does not prove the newer generic-profile path.
+- `4203b84678b51b2ae7c6ee47fccfa14b684680ae` passed hosted 52 native/72 extension/
+  13 browser contracts, including native list/resume/new/rename, stale/empty title
+  rejection and unchanged durable history/runs.
+  [Exact scope](evidence/native-session-navigation-hosted-provenance.json).
+  Actual browser rename/Cancel, refresh/reopen and installed CLI navigation have
+  their own [live scope](evidence/live-browser-cli-navigation-rename.json).
+- `46262d6` passed hosted 52 native/73 extension/14 browser contracts and carried
+  an actual approved external MCP read through the CLI.
+  [Gate](evidence/native-model-protocol-diagnostics-hosted-provenance.json),
+  [live MCP scope](evidence/live-responses-mcp-diagnostic-read.json).
+- `5cf3c79` passed hosted 52 native/73 extension/14 browser contracts plus
+  packaging, and was installed in the browser preview at that checkpoint.
+  [Exact gate](evidence/native-cli-recovery-provider-headers-hosted-provenance.json),
+  [original summary](evidence/native-cli-recovery-provider-headers-hosted-summary.log).
+  Its later actual console `/graph read.repository.file ...` and
+  `/input choose.file {"path":"README.md"}` read 11,810 bytes matching the observed
+  file, with matching graph/history/root-run inspection and no inference.
+  [Historical live read](evidence/live-console-registered-graph-read.json).
 
-The earlier graph-control gate at `51d731d` subsequently completed with 50 native
-contracts passing and the same two request-count failures already corrected in
-`add0a12`. Its graph-service HTTP/CLI contract passed, including interactive
-attachment, human input/stale conflict, child effect approval and root
-cancellation. [Exact gate provenance](evidence/native-cli-graph-control-initial-gate-provenance.json)
-and [unaltered excerpts](evidence/native-cli-graph-control-initial-gate.log)
-preserve that scope. Extension/browser gates were skipped and no runtime bundle
-was published. The corrected full gate `37713082833` at `37e153b` is now running;
-later console changes and live acceptance remain pending. The preview stays on
-verified `46262d6`.
+Failed gates remain evidence too. `38cd516` passed 50 native contracts but failed
+two request-count assertions; their corrected ownership/count scenarios are
+described in [the original failure](evidence/native-cli-recovery-initial-failure-provenance.json).
+The `51d731d` graph-control gate passed its graph-service contract but retained
+those failures; frontend gates were skipped and no runtime was published.
+[Exact failed scope](evidence/native-cli-graph-control-initial-gate-provenance.json).
+The corrected `37e153b` passed 51 of 52 native contracts but timed out the process
+fixture at 45 seconds; its stall phase/cause remains unproven.
+[Exact failure](evidence/native-cli-recovery-corrected-gate-failure-provenance.json).
+The later `5cf3c79` full success does not explain that earlier timeout.
 
-The corrected `37e153b` hosted gate then built and passed 51 of 52 native
-contracts, including the CLI recovery, graph launch/navigation/rejection and
-cancellation receipt cases. It failed `native_process_executor_contract` when
-the Node wrapper timed out its compiled child at 45 seconds. The artifact has
-no phase trace identifying where that child stalled, so the cause is unproven.
-[Exact failed gate provenance](evidence/native-cli-recovery-corrected-gate-failure-provenance.json)
-and [unaltered excerpts](evidence/native-cli-recovery-corrected-gate-failure.log)
-record the result. No runtime bundle was published; extension/browser gates were
-skipped and the preview was not upgraded. The complete local 52-contract pass at
-the later credential-header checkpoint is recorded separately with its local
-compatibility-branch runtime provenance. Neither local success nor the CLI
-contracts' hosted passes establish a successful overall hosted release gate.
-
-The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
-passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
-52 native and 66 extension contracts. This verifies initial-model prevalidation
-and `/provider-models` saved-key discovery in the actual CLI, in addition to the
-earlier controls/approval cases. [Exact-source scope](evidence/native-cli-discovery-setup-hosted-provenance.json),
-[projected results](evidence/native-cli-discovery-setup-hosted-summary.log).
-The source-prepared notes above/below retain their historical introduction
-status; this exact hosted result supersedes pending status for those features.
-New reasoning and Responses enrollment/routing changes remain separately pending.
-
-Update: `d0a70fef888c3724c2490bcb2cf8ef38d60f08c0` passed its
-[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37701625318)
-with 52 native and 66 extension contracts. This extends the initial chat result
-to resumed-history output, failed-turn recovery, slash/model/history commands
-and interactive approval/denial, unrelated-ID rejection and detachment without
-a decision. [Exact revision/results](evidence/native-cli-approval-diagnostics-hosted-provenance.json).
-Initial model prevalidation and `/provider-models` were added after this tested
-revision and still await compiled validation. Public launcher and installed
-checks retain their separately stated local scope. The historical checkpoint
-notes below describe when each portion was introduced.
-
-The actual-native HTTP/CLI contract is extended to exercise an empty launch, two model/tool turns in one new session, reconnection for a third turn, read-only history on reconnect, failed-turn exit status, a later explicit request after failure, and persisted history after server restart. Its provider replies are labelled synthetic; file reads and backend/CLI/database execution are real when the contract runs.
-
-The initial interactive chat checkpoint `51724ab8fdda3b9349b18f110a1256ec4f1398eb`
-passed compiled hosted validation: 52 native and 63 extension contracts. Its
-native HTTP/CLI case exercised empty launch, two shared-session turns,
-reconnection and durable history after restart. [Run](https://github.com/xlang-foundation/xMind/actions/runs/37700262597),
-[projected contract log](evidence/native-interactive-chat-hosted-contract-summary.log),
-[exact-source provenance](evidence/native-interactive-chat-hosted-provenance.json).
-
-Later resumed-history output, failure recovery cases, slash/model commands and
-interactive approval controls described above are newer source and **remain
-pending compiled validation**. Node syntax/whitespace checks pass. The guarded
-local build still defers while sibling benchmarks are live. No old binary proves
-these newer features. No running preview has been replaced by this checkpoint.
-
-The exact hosted CLI bundle for revision `51724ab` was downloaded and installed
-in this machine's ignored `.agentflow/ci/installed/51724ab8fdda3b9349b18f110a1256ec4f1398eb/`
-folder after archive-path and provenance checks. Its health request and empty
-interactive chat passed against the existing browser native backend. Chat exited
-zero, emitted no fabricated records and left the session count unchanged.
-[Local installed-binary evidence](evidence/native-interactive-chat-local-installed.json)
-records the binary hash and scope. This local check submitted no provider request
-and does not validate the newer CLI features or live coding. Other previews and
-their backend processes were left running.
-
-`Tools/agentflow.ps1 -Action Chat -Port PORT` is the public console entry point.
-It accepts `-Session ID` and optional `-Model ID` for an existing session, and
-`-BinaryDirectory DIR` for an installed native distribution. It forwards normal
-native arguments and inherits the existing private authentication environment;
-it does not copy keys or access SQLite. This public launcher also passed the
-empty-chat check above. `-Action Serve -ModelWire responses` now forwards the
-explicit native wire option; that forwarding was checked against the server
-argument contract, not a live Responses request.
-
-Interactive chat now has `/sessions`, `/session ID` and `/new` in source.
-Listing and resuming use the selected server's actual catalogue/history. Invalid
-or missing IDs preserve the current selection. `/new` clears the console's
-selection and displays empty history, creating no database session until the
-next real request. These commands preserve model selection and the last actual
-turn's exit status. The native provider CLI contract now navigates a labelled
-persisted user-message fixture, checks exact history and verifies no runs,
-duplicate sessions or provider configuration changes. Syntax checks passed;
-compiled execution of these additions is pending because local compilation was
-deferred by active sibling xlang3 benchmarks. This does not claim a complete TUI
-or full OpenCode CLI parity.
-
-New console conversations now use the first request as their title, bounded to
-80 UTF-8 bytes without splitting a character. Leading whitespace is omitted
-from the title, and control bytes are rendered as spaces. The original submitted
-prompt remains unchanged. Whitespace-only console input creates no conversation
-or run. Existing saved titles are preserved. This source change awaits native
-compilation; the installed browser preview still runs the earlier verified CLI
-and retains its original conversation titles.
-
-Native conversation renaming is now implemented in source through the C++
-repository/persistence service and `POST /v1/sessions/ID/title`. Clients supply
-`title` and `expected_title`; a mismatched current title returns conflict before
-mutation. SQLite I/O uses embedded xlang3 and changes only the selected session's
-title. The CLI exposes `/title NAME` for the selected conversation and
-`rename-session ID TITLE EXPECTED_TITLE` for one-shot use. Invalid titles and
-conflicts leave the selection intact. The shared backend client has the same
-typed request, and local browser/native view allowlists include the route.
-The shared sidebar control is described below; the installed preview does not
-yet advertise the newer backend capability.
-
-The native provider CLI contract now requires rename, stale-title and empty-title
-rejection, identical saved messages/runs and persisted rename after backend
-reopen without inference. JavaScript syntax checks, 70 extension tests and 12
-browser tests passed locally. Native execution of the rename addition is
-pending; the local build guard again deferred for active sibling benchmarks.
-
-The browser and VS Code right sidebar now contain a capability-gated SVG rename
-button and title dialog in source. The original selected ID/title remain bound
-to the draft; external metadata refresh cannot silently replace its expected
-title. A conflict preserves the draft and explains how to refresh/reopen.
-Changing conversations closes and clears the dialog; Cancel submits nothing
-and the message composer remains intact. Both access adapters reject attempts
-to rename another conversation, then forward the same native request and
-refresh only the session catalogue. Older backends keep the button hidden.
-
-All 72 extension and 13 browser adapter/DOM tests passed, including extension
-host conflict/selection handling and renderer/browser controller behavior. These
-are labelled fixtures, not proof of actual IDE/native rename execution. Native
-compilation and actual browser/IDE acceptance remain pending. Other previews
-and their existing settings/drafts were not reloaded for these source tests.
+`Tools/agentflow.ps1 -Action Chat -Port PORT` remains the public chat launcher,
+with optional `-Session ID`, `-Model ID` and `-BinaryDirectory DIR`. It forwards
+native arguments and inherits private authentication; it copies no provider key
+or database. Its earlier empty-chat and explicit Responses-wire forwarding checks
+retain their [installed-binary scope](evidence/native-interactive-chat-local-installed.json).

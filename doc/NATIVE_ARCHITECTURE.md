@@ -74,21 +74,33 @@ native/browser integration and VSIX verification, with zero failures/skips. The
 native gate took **128.80 seconds** and excludes newer catalogue/enrollment work.
 [Hosted agent evidence](evidence/native-gemini-agent-hosted-provenance.json).
 
-New source adds native Gemini catalogue discovery, authenticated encrypted
-profile enrollment and per-model tool policy. GenerateContent discovery does
-not imply function-call capability: workspace mode requires backend-supported
-tool declarations, while text-only mode can retain unknown-tool models. The
-working-tree checkpoint passed all **64 native contracts locally in 120.98
-seconds**, with the exact manifest matched, zero failures/skips and no post-build
-exclusions. It verifies actual enrolled file execution, signed conversation
-continuation after encrypted xlang3 SQLite reopen, cancellation, publication/CAS
-failure and stale discovery using synthetic provider replies. Final removal of
-the disabled direct-SQLite source/build and migration of shared domain types to
-`records.hpp` compiled and passed in that gate. Current thin-client checks passed
-**94 extension and 17 browser tests**, and actual browser/native integration
-passed against the fresh four-route backend and source-matched assets.
-[Exact local enrollment scope](evidence/native-gemini-enrollment-local-provenance.json).
-This newer checkpoint still requires its own hosted verification. Live Gemini
+Enrollment source `2f5e0f05e9bfadcf86b5508863da0ec5a9e78cfe` passed its
+exact hosted **64 native, 94 extension and 17 browser contracts**, native/browser
+integration and VSIX verification, with zero failures/skips. Its native gate
+took **158.09 seconds**, following the local 64-contract pass in **120.98
+seconds**. Native Gemini catalogue discovery, encrypted profile enrollment,
+owned-key file execution/cancellation/CAS rollback and signed xlang3 SQLite
+replay are verified using synthetic peers. GenerateContent discovery does not
+imply function-call capability: workspace mode requires backend-supported tool
+policy, while text-only mode can retain unknown-tool models. Direct-SQLite
+removal and shared `records.hpp` cleanup are included.
+[Exact hosted enrollment scope](evidence/native-gemini-enrollment-hosted-provenance.json).
+
+The newer generic CLI source passed all **65 native contracts locally in 113.16
+seconds**, with the exact manifest, zero failures/skips and no post-build
+exclusions. Its CLI contract took **4.23 seconds** and exercises OpenAI, Claude
+and Gemini profile catalogues, private environment-key setup, explicit shared
+profile selection, safe native diagnostics and all-family public identity
+reflection rejection. Signed Gemini text/history/usage, SQLite reopen with
+encrypted credentials, stale discovery/admission without retry and failed-turn status preserved
+through settings until actual recovery also passed. The C++ backend retains
+credential binding, revision CAS and execution ownership; the CLI does not
+silently rebind from metadata inspection or discovery. Fresh browser/native
+integration passed again against the rebuilt server. Unchanged frontend sources
+retain the earlier verified **94 extension and 17 browser tests**; those suites
+were not rerun for this CLI change.
+[Local CLI scope](evidence/native-provider-profile-cli-local-provenance.json).
+Hosted verification of the newer 65-contract source is pending. Live Gemini
 inference and actual Gemini IDE interaction remain unverified.
 [Provider setup](provider-setup.md).
 The installed browser preview retains its separately verified native `19d69dd`

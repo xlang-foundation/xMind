@@ -39,8 +39,7 @@ void validate_execution(const ProviderProfileExecutionPolicy& policy,const Agent
     if(policy.route.wire==ProviderWire::gemini_generate_content&&!model.empty()&&base.workspace&&model_tools(policy,model)!=Capability::supported)
         throw std::invalid_argument("Workspace agent requires declared model tool capability");
 }
-void validate_public_identity(const ProviderProfileRoute& route,const std::string& id,const std::string& model,const SecretBytes& secret){
-    if(route.wire!=ProviderWire::gemini_generate_content)return;
+void validate_public_identity(const std::string& id,const std::string& model,const SecretBytes& secret){
     const auto bytes=secret.view();if(bytes.empty())return;
     if(std::search(id.begin(),id.end(),bytes.begin(),bytes.end())!=id.end()||std::search(model.begin(),model.end(),bytes.begin(),bytes.end())!=model.end())
         throw std::invalid_argument("Provider credentials are not public profile identities");
@@ -82,12 +81,10 @@ struct ProviderProfileRuntime::Impl {
         try{
             for(const auto& profile:state.profiles){
                 const auto& allowed=route(profile.route_id);validate_model(allowed.route,profile.model,true);
-                if(allowed.route.wire==ProviderWire::gemini_generate_content){
-                    auto owned=store.resolve_credential(allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose).get();
-                    validate_public_identity(allowed.route,profile.id,profile.model,owned);
-                }
+                auto owned=store.resolve_credential(allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose).get();
+                validate_public_identity(profile.id,profile.model,owned);
             }
-        }catch(const std::invalid_argument&){throw DatabaseError("Stored Gemini profile has an invalid public identity");}
+        }catch(const std::invalid_argument&){throw DatabaseError("Stored provider profile has an invalid public identity");}
         if(!state.active.empty()){
             auto owned=profiles.credential(state.active);
             const auto selected=std::find_if(state.profiles.begin(),state.profiles.end(),[&](const auto& value){return value.id==state.active;});
@@ -103,10 +100,8 @@ struct ProviderProfileRuntime::Impl {
     }
     std::unique_ptr<ExecutionPlatform> prepare(const SavedProviderProfile& profile){
         const auto& allowed=route(profile.route_id);validate_execution(allowed,base,profile.model,true);
-        if(allowed.route.wire==ProviderWire::gemini_generate_content){
-            auto owned=store.resolve_credential(allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose).get();
-            validate_public_identity(allowed.route,profile.id,profile.model,owned);
-        }
+        auto owned=store.resolve_credential(allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose).get();
+        validate_public_identity(profile.id,profile.model,owned);
         if(profile.model.empty()){
             auto settings=base;settings.provider.model.clear();settings.selectable_models.clear();settings.credential.reset();settings.provider_identity.reset();
             return std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
@@ -154,6 +149,7 @@ std::vector<std::string> ProviderProfileRuntime::discover_models(std::string id,
             if(saved->route_id!=route_id)throw std::invalid_argument("Saved-key discovery must use the profile's own route");
             key=impl_->store.resolve_credential(allowed.route.credential_scope,saved->credential_id,allowed.route.credential_purpose).get();
         }
+        validate_public_identity(id,"",key);
     }
     auto result=discover_provider_models(catalogue,key,cancel);
     {
@@ -167,15 +163,16 @@ std::vector<std::string> ProviderProfileRuntime::discover_models(std::string id,
 ProviderProfileRuntimeMetadata ProviderProfileRuntime::save_profile(std::string id,std::string route,std::string model,SecretBytes key,std::int64_t expected,bool activate){
     std::unique_lock lock(impl_->mutex);impl_->mutable_state(expected);
     // ProviderProfiles encrypts a candidate before its validation callback.
-    // Reject invalid Gemini resource paths before even candidate persistence.
+    // Reject invalid Gemini resources and reflected public identities before
+    // even candidate persistence for any provider family.
     const auto& allowed=impl_->route(route);validate_execution(allowed,impl_->base,model);
-    if(!key.view().empty())validate_public_identity(allowed.route,id,model,key);
-    else if(allowed.route.wire==ProviderWire::gemini_generate_content){
+    if(!key.view().empty())validate_public_identity(id,model,key);
+    else{
         const auto saved=std::find_if(impl_->state.profiles.begin(),impl_->state.profiles.end(),[&](const auto& profile){return profile.id==id;});
         if(saved!=impl_->state.profiles.end()){
             const auto& old=impl_->route(saved->route_id).route;
             auto owned=impl_->store.resolve_credential(old.credential_scope,saved->credential_id,old.credential_purpose).get();
-            validate_public_identity(allowed.route,id,model,owned);
+            validate_public_identity(id,model,owned);
         }
     }
     const bool replace=activate||impl_->state.active==id;std::unique_ptr<ExecutionPlatform> candidate;
@@ -194,10 +191,8 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::select_profile(std::strin
 ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_existing_profile(std::string id,std::string route,std::string model,std::string credential,std::int64_t revision){
     std::unique_lock lock(impl_->mutex);impl_->mutable_state(0);std::unique_ptr<ExecutionPlatform> candidate;
     const auto& allowed=impl_->route(route);validate_execution(allowed,impl_->base,model,true);
-    if(allowed.route.wire==ProviderWire::gemini_generate_content){
-        auto owned=impl_->store.resolve_credential(allowed.route.credential_scope,credential,allowed.route.credential_purpose).get();
-        validate_public_identity(allowed.route,id,model,owned);
-    }
+    auto owned=impl_->store.resolve_credential(allowed.route.credential_scope,credential,allowed.route.credential_purpose).get();
+    validate_public_identity(id,model,owned);
     auto next=impl_->profiles.import_existing(std::move(id),std::move(route),std::move(model),std::move(credential),revision,
         [&](const auto& profile,const auto&){candidate=impl_->prepare(profile);});
     impl_->state=std::move(next);auto previous=std::move(impl_->service);impl_->service=std::move(candidate);

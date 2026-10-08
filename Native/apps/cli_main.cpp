@@ -12,8 +12,14 @@
 #include <set>
 #include <vector>
 #include <algorithm>
+#include <string_view>
 
 namespace {
+std::string provider_profile_identity(const std::string& value){
+    if(value.empty()||value.size()>256||value.starts_with("sk-")||value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)
+        throw std::invalid_argument("Invalid provider profile identity");
+    return value;
+}
  nlohmann::json provider_admission_binding(const nlohmann::json& metadata){
     using Json=nlohmann::json;
     if(!metadata.is_object()||!metadata.contains("revision")||!metadata["revision"].is_number_integer()||metadata["revision"]<0||metadata["revision"]>9007199254740991||!metadata.contains("active")||!metadata["active"].is_string()||!metadata.contains("profiles")||!metadata["profiles"].is_array())throw std::runtime_error("Invalid backend provider admission metadata");
@@ -26,16 +32,65 @@ std::int64_t event_cursor(const std::string& source) {
     if(parsed.ec!=std::errc{} || parsed.ptr!=source.data()+source.size() || value<0)throw std::invalid_argument("Invalid cursor");
     return value;
 }
+std::int64_t provider_revision(const std::string& source){
+    const auto value=event_cursor(source);if(value>9007199254740991)throw std::invalid_argument("Invalid provider revision");return value;
+}
+nlohmann::json active_profile_discovery(const nlohmann::json& metadata){
+    using Json=nlohmann::json;const auto binding=provider_admission_binding(metadata);const auto id=binding.at("provider_profile_id").get<std::string>();
+    if(id.empty())throw std::runtime_error("Select a saved provider profile before discovering account models");
+    const auto& profiles=metadata.at("profiles");const auto active=std::find_if(profiles.begin(),profiles.end(),[&](const Json& profile){return profile.is_object()&&profile.value("id",std::string{})==id;});
+    if(active==profiles.end()||!active->contains("route_id")||!(*active)["route_id"].is_string())throw std::runtime_error("Invalid backend provider discovery metadata");
+    return Json{{"id",provider_profile_identity(id)},{"route_id",provider_profile_identity((*active)["route_id"].get<std::string>())},{"expected_revision",binding.at("expected_provider_revision")}};
+}
 nlohmann::json provider_key_fields(const std::string& variable,const std::string& revision_text) {
     auto normalized=variable;for(auto& character:normalized)if(character>='a' && character<='z')character=static_cast<char>(character-'a'+'A');
     if(variable.empty() || variable.size()>128 || variable.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")!=std::string::npos || (variable.front()>='0' && variable.front()<='9') || normalized=="XMIND_AUTH_TOKEN" || normalized.starts_with("XMIND_UI_"))throw std::invalid_argument("Select a provider key environment variable");
-    const auto revision=event_cursor(revision_text);if(revision>9007199254740991)throw std::invalid_argument("Invalid provider revision");
+    const auto revision=provider_revision(revision_text);
     const auto* secret=std::getenv(variable.c_str());if(!secret || !*secret)throw std::invalid_argument("Provider key environment variable is empty");const auto length=std::strlen(secret);if(length>32768)throw std::invalid_argument("Provider key exceeds limits");
     nlohmann::json fields={{"api_key",std::string(secret,length)},{"expected_revision",revision}};
 #if defined(_WIN32)
     _putenv_s(variable.c_str(),""); // Only this client process; preserve parent/user settings.
 #endif
     return fields;
+}
+// Native catalogue discovery has a bounded 30-second provider deadline. Keep
+// its client wait large enough, without extending later chat/watch requests.
+struct ProviderDiscoveryTimeout {
+    httplib::Client& client;
+    explicit ProviderDiscoveryTimeout(httplib::Client& value):client(value){client.set_read_timeout(35,0);}
+    ~ProviderDiscoveryTimeout(){client.set_read_timeout(15,0);}
+    ProviderDiscoveryTimeout(const ProviderDiscoveryTimeout&)=delete;
+    ProviderDiscoveryTimeout& operator=(const ProviderDiscoveryTimeout&)=delete;
+};
+auto provider_discovery_request(httplib::Client& client,const httplib::Headers& headers,const std::string& path,const nlohmann::json& body){
+    ProviderDiscoveryTimeout timeout(client);return client.Post(path,headers,body.dump(),"application/json");
+}
+nlohmann::json provider_rejection(const std::string& source){
+    using Json=nlohmann::json;
+    const Json unavailable={{"detail","Backend returned invalid provider diagnostics"}};
+    if(source.empty()||source.size()>16384)return unavailable;
+    try{
+        std::vector<std::set<std::string>> fields;
+        const auto value=Json::parse(source,[&](int depth,Json::parse_event_t event,Json& parsed){
+            if(depth>8)throw std::invalid_argument("Invalid provider diagnostic depth");
+            if(event==Json::parse_event_t::object_start)fields.emplace_back();
+            else if(event==Json::parse_event_t::object_end)fields.pop_back();
+            else if(event==Json::parse_event_t::key&&!fields.back().insert(parsed.get<std::string>()).second)throw std::invalid_argument("Duplicate provider diagnostic");
+            return true;
+        });
+        if(!value.is_object())return unavailable;Json result=Json::object();
+        // The native server already sanitizes provider bodies and credentials.
+        // Retain only its public diagnostic fields, never request/raw-body data.
+        for(const auto* name:{"detail","provider_error_type","provider_error_code","provider_error_param"})if(value.contains(name)){
+            if(!value[name].is_string()||value[name].get_ref<const std::string&>().size()>(std::string_view(name)=="detail"?4096:256))return unavailable;
+            result[name]=value[name];
+        }
+        if(value.contains("provider_status")){
+            if(!value["provider_status"].is_number_integer()||value["provider_status"]<100||value["provider_status"]>599)return unavailable;
+            result["provider_status"]=value["provider_status"];
+        }
+        return result.empty()?unavailable:result;
+    }catch(...){return unavailable;}
 }
 // Observation only: ending this client never grants, cancels or owns execution.
 // Each flushed NDJSON record is an actual persisted backend event. Its seq can
@@ -151,7 +206,8 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         return Json::parse(response->body);
     };
     const auto health=request("/v1/health");if(!health.is_object() || !health.contains("agent_execution") || !health["agent_execution"].is_boolean())throw std::runtime_error("Invalid backend chat capabilities");
-    const auto provider_binding=(health.value("provider_profile_admission",false)||health.value("graph_provider_profile_admission",false))?provider_admission_binding(request("/v1/provider/profiles")):Json::object();
+    const bool profile_admission=health.value("provider_profile_admission",false)||health.value("graph_provider_profile_admission",false);
+    auto provider_binding=profile_admission?provider_admission_binding(request("/v1/provider/profiles")):Json::object();
     if(!model.empty()){
         const auto catalogue=request("/v1/models");
         if(!catalogue.is_object() || !catalogue.contains("models") || !catalogue["models"].is_array())throw std::runtime_error("Invalid backend model catalogue");
@@ -168,15 +224,17 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
                  <<Json{{"type","history"},{"session_id",session},{"history",history}}.dump()<<'\n'<<std::flush;
         if(!std::cout)throw std::runtime_error("Chat history output is unavailable");
     }
-    int last_result=0;std::string prompt;
+    int last_result=0,profile_result=0;std::string prompt;
+    const auto exit_status=[&]{return last_result!=0?last_result:profile_result;};
     while(std::cerr<<"xMind > "<<std::flush,std::getline(std::cin,prompt)) {
         if(!prompt.empty() && prompt.back()=='\r')prompt.pop_back();
-        if(prompt=="/exit")return last_result;
+        if(prompt=="/exit")return exit_status();
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
             std::cerr<<"/runs lists recorded root runs in the selected conversation; use /watch or /graph-watch to attach one.\n";
             std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
+            std::cerr<<"/profiles lists saved provider metadata without changing this chat's admission binding; /profile ID REVISION explicitly selects a shared profile and clears this chat's model override.\n";
             std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
         }
         if(prompt.starts_with("/watch ")||prompt.starts_with("/graph-watch ")){
@@ -195,7 +253,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             const auto saved=request("/v1/sessions/"+owner+"/history");if(!saved.is_array())throw std::runtime_error("Invalid attached conversation history");
             session=owner;
             std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",saved}}.dump()<<'\n'<<Json{{"type","run_attached"},{"run",run}}.dump()<<'\n'<<std::flush;
-            last_result=watch_run(client,headers,id,0,graphAttachment,true);
+            last_result=watch_run(client,headers,id,0,graphAttachment,true);profile_result=0;
             std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
             continue;
         }
@@ -233,13 +291,51 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             const auto selectedHistory=request("/v1/sessions/"+selected+"/history");if(!selectedHistory.is_array())throw std::runtime_error("Invalid session history");
             session=selected;std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",selectedHistory}}.dump()<<'\n'<<std::flush;continue;
         }
+        if(prompt=="/profiles"){
+            if(!profile_admission){std::cerr<<"This backend does not support provider profile admission.\n";profile_result=1;continue;}
+            const auto metadata=request("/v1/provider/profiles");(void)provider_admission_binding(metadata);
+            std::cout<<Json{{"type","provider_profiles"},{"metadata",metadata}}.dump()<<'\n'<<std::flush;profile_result=0;continue;
+        }
+        if(prompt=="/profile"||prompt.starts_with("/profile ")){
+            std::string selected;std::int64_t revision=0;
+            try{
+                const auto fields=prompt.size()>9?prompt.substr(9):std::string{};const auto split=fields.find(' ');
+                if(split==std::string::npos)throw std::invalid_argument("Use /profile ID REVISION");
+                selected=provider_profile_identity(fields.substr(0,split));revision=provider_revision(fields.substr(split+1));
+            }catch(const std::invalid_argument&){std::cerr<<"Use /profile ID REVISION with a valid saved profile ID and safe revision. No selection sent.\n";profile_result=1;continue;}
+            if(!profile_admission){std::cerr<<"This backend does not support provider profile admission. No selection sent.\n";profile_result=1;continue;}
+            const Json body={{"id",selected},{"expected_revision",revision}};
+            const auto response=client.Post("/v1/provider/profiles/select",headers,body.dump(),"application/json");
+            if(!response)throw std::runtime_error("Cannot reach xMind Server for profile selection; outcome is unknown. Inspect /profiles before selecting again.");
+            if(response->status<200||response->status>=300){
+                std::cout<<Json{{"type","provider_profile_rejected"},{"http_status",response->status},{"error",provider_rejection(response->body)}}.dump()<<'\n'<<std::flush;
+                std::cerr<<"Backend rejected profile selection (HTTP "<<response->status<<"). Chat binding and model are unchanged; no automatic retry. Use /profiles to inspect the shared revision.\n";profile_result=1;continue;
+            }
+            const auto metadata=Json::parse(response->body);const auto committed=provider_admission_binding(metadata);
+            if(committed.at("provider_profile_id")!=selected||committed.at("expected_provider_revision")!=revision+1)throw std::runtime_error("Invalid committed profile selection; inspect /profiles before continuing");
+            provider_binding=committed;model.clear();profile_result=0;
+            std::cout<<Json{{"type","provider_profile"},{"metadata",metadata},{"provider_profile_id",committed.at("provider_profile_id")},{"expected_provider_revision",committed.at("expected_provider_revision")},{"selected_model",model}}.dump()<<'\n'<<std::flush;continue;
+        }
         if(prompt=="/provider-models"){
-            const auto setup=request("/v1/provider/configuration");
-            if(!setup.is_object() || setup.value("configured",false)!=true || setup.value("provider",std::string{})!="openai" || !setup.contains("revision") || !setup["revision"].is_number_integer() || setup["revision"]<1 || setup["revision"]>9007199254740991){std::cerr<<"Configure a backend provider key before discovering account models.\n";continue;}
-            const Json body={{"expected_revision",setup["revision"]}};
-            const auto catalogue=request("/v1/provider/models",&body);
+            Json body;std::string route;
+            if(profile_admission){
+                const auto metadata=request("/v1/provider/profiles");
+                if(metadata.value("active",std::string{}).empty()){std::cerr<<"Select a saved provider profile before discovering account models.\n";profile_result=1;continue;}
+                body=active_profile_discovery(metadata);route="/v1/provider/profiles/models";
+            }else{
+                const auto setup=request("/v1/provider/configuration");
+                if(!setup.is_object() || setup.value("configured",false)!=true || setup.value("provider",std::string{})!="openai" || !setup.contains("revision") || !setup["revision"].is_number_integer() || setup["revision"]<1 || setup["revision"]>9007199254740991){std::cerr<<"Configure a backend provider key before discovering account models.\n";continue;}
+                body={{"expected_revision",setup["revision"]}};route="/v1/provider/models";
+            }
+            const auto response=provider_discovery_request(client,headers,route,body);
+            if(!response)throw std::runtime_error("Cannot reach xMind Server for provider discovery");
+            if(response->status<200||response->status>=300){
+                std::cout<<Json{{"type","provider_models_rejected"},{"http_status",response->status},{"error",provider_rejection(response->body)}}.dump()<<'\n'<<std::flush;
+                std::cerr<<"Backend rejected provider discovery (HTTP "<<response->status<<"). Chat binding and model are unchanged; no automatic retry.\n";profile_result=1;continue;
+            }
+            const auto catalogue=Json::parse(response->body);
             if(!catalogue.is_object() || !catalogue.contains("models") || !catalogue["models"].is_array())throw std::runtime_error("Invalid provider model catalogue");
-            std::cout<<Json{{"type","provider_models"},{"catalogue",catalogue},{"provider_revision",setup["revision"]}}.dump()<<'\n'<<std::flush;
+            std::cout<<Json{{"type","provider_models"},{"catalogue",catalogue},{"provider_revision",body.at("expected_revision")}}.dump()<<'\n'<<std::flush;profile_result=0;
             std::cerr<<"These are discovered account models. /models shows models currently enabled for execution. Discovery does not change shared provider settings.\n";
             continue;
         }
@@ -309,17 +405,17 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(!run.is_object() || run.value("session_id",std::string{})!=session || run.value("graph_root",false)!=graphSubmission || !run.contains("id") || !run["id"].is_string())throw std::runtime_error("Invalid chat run admission");const auto id=run["id"].get<std::string>();
         if(id.empty() || id.size()>128 || id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid chat run identity");
         std::cout<<Json{{"type","run"},{"run",run}}.dump()<<'\n'<<std::flush;
-        last_result=watch_run(client,headers,id,0,graphSubmission,true);
+        last_result=watch_run(client,headers,id,0,graphSubmission,true);profile_result=0;
         std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
     }
     if(!std::cin.eof())throw std::runtime_error("Chat input is unavailable");
-    return last_result;
+    return exit_status();
 }
 }
 
 int main(int argc,char** argv) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -328,7 +424,7 @@ int main(int argc,char** argv) {
             for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
             return value;
         };
-        using Json=nlohmann::json;std::string path,chat_model;Json body;bool post=false,watch=false,graph_watch=false,chat=false,saved_provider_key=false;std::int64_t watch_cursor=0;
+        using Json=nlohmann::json;std::string path,chat_model;Json body;bool post=false,watch=false,graph_watch=false,chat=false,saved_provider_key=false,profile_operation=false;std::int64_t watch_cursor=0;
         if(command=="health" && argc==3) path="/v1/health";
         else if(command=="chat" && argc>=3 && argc<=5){chat=true;if(argc>=4)path=id(argv[3]);if(argc==5)chat_model=argv[4];}
         else if(command=="sessions" && argc==3) path="/v1/sessions";
@@ -346,6 +442,25 @@ int main(int argc,char** argv) {
             path="/v1/operations/"+id(argv[3])+"/decision";body={{"decision",decision}};post=true;
         }
         else if(command=="models" && argc==3) path="/v1/models";
+        else if(command=="provider-profiles" && argc==3){path="/v1/provider/profiles";profile_operation=true;}
+        else if(command=="profile-models" && (argc==6||argc==7)){
+            const auto profile=provider_profile_identity(argv[3]),route=provider_profile_identity(argv[4]);const auto revision=provider_revision(argv[5]);
+            body=argc==7?provider_key_fields(argv[6],argv[5]):Json{{"expected_revision",revision}};
+            body["id"]=profile;body["route_id"]=route;path="/v1/provider/profiles/models";post=true;profile_operation=true;
+        }
+        else if(command=="save-profile" && argc>=7&&argc<=9){
+            const auto profile=provider_profile_identity(argv[3]),route=provider_profile_identity(argv[4]),model=provider_profile_identity(argv[5]);const auto revision=provider_revision(argv[6]);
+            std::string variable;bool activate=false,has_key_env=false;
+            if(argc==8){if(std::string(argv[7])=="--activate")activate=true;else{variable=argv[7];has_key_env=true;}}
+            else if(argc==9){if(std::string(argv[8])!="--activate")throw std::invalid_argument("Use save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate]");variable=argv[7];has_key_env=true;activate=true;}
+            body=has_key_env?provider_key_fields(variable,argv[6]):Json{{"expected_revision",revision}};
+            body["id"]=profile;body["route_id"]=route;body["model"]=model;if(activate)body["activate"]=true;
+            path="/v1/provider/profiles";post=true;profile_operation=true;
+        }
+        else if(command=="select-profile" && argc==5){
+            const auto profile=provider_profile_identity(argv[3]);const auto revision=provider_revision(argv[4]);
+            path="/v1/provider/profiles/select";body={{"id",profile},{"expected_revision",revision}};post=true;profile_operation=true;
+        }
         else if(command=="provider" && argc==3) path="/v1/provider/configuration";
         else if(command=="provider-models" && (argc==3 || argc==5)){
             path="/v1/provider/models";post=true;
@@ -399,12 +514,19 @@ int main(int argc,char** argv) {
         const httplib::Headers headers{{"Authorization",std::string("Bearer ")+token}};
         if(chat)return chat_session(client,headers,path,chat_model);
         if(saved_provider_key){
-            const auto metadata=client.Get("/v1/provider/configuration",headers);
-            if(!metadata)throw std::runtime_error("Cannot reach xMind Server for provider discovery");
-            if(metadata->status<200 || metadata->status>=300)throw std::runtime_error("Server rejected provider metadata (HTTP "+std::to_string(metadata->status)+")");
-            const auto setup=Json::parse(metadata->body);
-            if(!setup.is_object() || !setup.contains("configured") || setup["configured"]!=true || setup.value("provider",std::string{})!="openai" || !setup.contains("revision") || !setup["revision"].is_number_integer() || setup["revision"]<1 || setup["revision"]>9007199254740991)throw std::runtime_error("Configure a provider key before discovering saved-account models");
-            body={{"expected_revision",setup["revision"]}};
+            const auto current=client.Get("/v1/health",headers);if(!current||current->status!=200)throw std::runtime_error("Cannot inspect backend provider capabilities");
+            const auto capability=Json::parse(current->body);
+            if(capability.value("provider_profile_admission",false)||capability.value("graph_provider_profile_admission",false)){
+                const auto metadata=client.Get("/v1/provider/profiles",headers);if(!metadata||metadata->status!=200)throw std::runtime_error("Cannot inspect backend provider profiles for discovery");
+                body=active_profile_discovery(Json::parse(metadata->body));path="/v1/provider/profiles/models";profile_operation=true;
+            }else{
+                const auto metadata=client.Get("/v1/provider/configuration",headers);
+                if(!metadata)throw std::runtime_error("Cannot reach xMind Server for provider discovery");
+                if(metadata->status<200 || metadata->status>=300)throw std::runtime_error("Server rejected provider metadata (HTTP "+std::to_string(metadata->status)+")");
+                const auto setup=Json::parse(metadata->body);
+                if(!setup.is_object() || !setup.contains("configured") || setup["configured"]!=true || setup.value("provider",std::string{})!="openai" || !setup.contains("revision") || !setup["revision"].is_number_integer() || setup["revision"]<1 || setup["revision"]>9007199254740991)throw std::runtime_error("Configure a provider key before discovering saved-account models");
+                body={{"expected_revision",setup["revision"]}};
+            }
         }
         if(watch)return watch_run(client,headers,path,watch_cursor,graph_watch);
         if(post&&(path=="/v1/runs"||path=="/v1/graph-runs")){
@@ -413,10 +535,14 @@ int main(int argc,char** argv) {
                 const auto metadata=client.Get("/v1/provider/profiles",headers);if(!metadata||metadata->status!=200)throw std::runtime_error("Cannot inspect backend provider profile");body.update(provider_admission_binding(Json::parse(metadata->body)));
             }
         }
-        auto response=post?client.Post(path,headers,body.dump(),"application/json"):client.Get(path,headers);
+        auto response=post?((path=="/v1/provider/profiles/models"||path=="/v1/provider/models")?provider_discovery_request(client,headers,path,body):client.Post(path,headers,body.dump(),"application/json")):client.Get(path,headers);
         if(!response) throw std::runtime_error("Cannot reach xMind Server");
+        if(response->status<200 || response->status>=300) {
+            if(profile_operation)std::cerr<<provider_rejection(response->body).dump()<<'\n'<<"Backend rejected provider profile request (HTTP "<<response->status<<"). No automatic retry or selection fallback.\n";
+            else std::cerr<<Json::parse(response->body).dump()<<'\n';
+            return 1;
+        }
         const auto result=Json::parse(response->body);
-        if(response->status<200 || response->status>=300) {std::cerr<<result.dump()<<'\n';return 1;}
         std::cout<<result.dump(2)<<'\n';return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }

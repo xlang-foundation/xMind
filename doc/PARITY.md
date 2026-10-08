@@ -53,22 +53,31 @@ failures/skips. Its native gate took **128.80 seconds**.
 [Exact hosted agent evidence](evidence/native-gemini-agent-hosted-provenance.json).
 That hosted result excludes the new catalogue/enrollment source below.
 
-New source adds authenticated Gemini models-list discovery, opaque pagination,
-full resource identities, encrypted profile enrollment and backend-owned
-per-model tool policy. This working-tree checkpoint passed all **64 native
-contracts locally in 120.98 seconds**, with its exact manifest matched, zero
-failures/skips and no post-build exclusions. Actual enrolled file execution,
-encrypted xlang3 SQLite reopen, signed replay, cancellation, publication/CAS
-failure and stale discovery were exercised with synthetic provider replies.
-The final direct-SQLite removal and shared `records.hpp` cleanup were included
-in this compiled gate. Current thin-client checks passed **94 extension and 17
-browser tests**, and actual browser/native integration passed against the fresh
-four-route backend and source-matched assets. [Exact local enrollment scope](evidence/native-gemini-enrollment-local-provenance.json).
-Hosted verification of this new checkpoint remains pending; earlier hosted
-results do not cover its source. GenerateContent eligibility alone does not
-establish tool capability or live model acceptance. Live Gemini inference and
-actual Gemini IDE acceptance remain unverified. See [provider setup](provider-setup.md),
-[current validation](VALIDATION_STATUS.md) and [milestones](milestones.md).
+Enrollment source `2f5e0f05e9bfadcf86b5508863da0ec5a9e78cfe` passed its
+exact hosted **64 native, 94 extension and 17 browser contracts**, native/browser
+integration and VSIX verification, with zero failures/skips. Its native gate
+took **158.09 seconds**; the earlier local 64-contract gate took **120.98
+seconds**. Native Gemini catalogue pagination, encrypted enrollment, separate
+per-model tool policy, actual owned-key file execution/cancellation/CAS failure
+and signed xlang3 SQLite replay passed with synthetic provider replies. The
+direct-SQLite removal and shared `records.hpp` cleanup are included.
+[Exact hosted enrollment scope](evidence/native-gemini-enrollment-hosted-provenance.json).
+
+Newer source passed all **65 native contracts locally in 113.16 seconds**,
+with its exact manifest, zero failures/skips and no post-build exclusions. The
+new CLI contract took **4.23 seconds** and covers OpenAI/Claude/Gemini profile
+catalogues, private environment setup, selection, all-family secret reflection
+rejection, safe provider diagnostics, signed Gemini text/history/SQLite reopen,
+stale ownership without retry and actual failed-turn/recovery status. Fresh
+browser/native integration passed again; unchanged frontend sources retain the
+earlier verified **94 extension and 17 browser tests**, without rerunning those
+suites for this CLI change.
+[Local CLI scope](evidence/native-provider-profile-cli-local-provenance.json).
+Hosted verification of the newer 65-contract source is pending. GenerateContent
+eligibility alone does not establish tool capability or live acceptance. Live
+Gemini inference and actual Gemini IDE acceptance remain unverified. See
+[provider setup](provider-setup.md), [current validation](VALIDATION_STATUS.md)
+and [milestones](milestones.md).
 
 The installed browser preview is a separate native `19d69dd` and view `6f32d215`
 pair. Current source or CI success does not establish a preview upgrade.
@@ -104,7 +113,7 @@ removed Python prototype's status table; it is not a completion score.
 | --- | --- | --- |
 | Persistent sessions and run events | C++ repositories, ownership, transactions, replay and recovery use SQLite through embedded xlang3 | Complete concurrent-client conversations, failure/recovery and release acceptance |
 | Agent/model/tool loop | Shared C++ single-agent and graph execution with durable admission, cancellation and tool continuation | Broad live coding tasks, dynamic delegation, context bounds and production recovery |
-| Models and providers | Native Chat Completions, Responses and Anthropic Messages components; Gemini agent/history is hosted-verified, catalogue/enrollment/owned-key file execution has the local 64-contract acceptance above | Hosted verification of the new checkpoint, live Gemini and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
+| Models and providers | Native Chat Completions, Responses and Anthropic Messages components; Gemini catalogue/enrollment/owned-key execution is hosted-verified at 64, and generic profile CLI controls have local 65-contract acceptance | Hosted verification of the newer CLI source, live Gemini and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
 | File/search/edit/process tools | Native workspace reads/search, approval-backed edits/creation and foreground process effects have scoped contracts | General patch review, background/PTY execution and complete repository coding tasks |
 | Instructions and agent presets | Native repository guidance discovery, source binding and durable approval checks | Full instruction scoping/configuration and reproducible presets |
 | Skills and commands | Native ownership is specified | Discovery, execution, lifecycle and CLI/editor acceptance |
@@ -117,7 +126,7 @@ removed Python prototype's status table; it is not a completion score.
 | Formatters and diagnostics | Required by the native coding goal | Real project integrations and end-to-end verification |
 | Search and network configuration | Native HTTP/TLS and workspace search components exist | Configured network/search behavior across coding workflows |
 | Session sharing | Local backend sessions are shared across authorized views | Explicit export/sharing behavior and access-controlled output; team sharing belongs to Nexus |
-| CLI/TUI | Native client supports authenticated conversation/run/approval/inspection flows | Complete interactive coding and terminal UX acceptance |
+| CLI/TUI | Native client supports authenticated conversation/run/approval/inspection flows plus profile catalogue/setup/selection, revision-bound admission and signed native history in the local 65-contract scope | Hosted verification of the new CLI source and complete interactive coding/terminal UX acceptance |
 | Browser and VS Code | Thin browser and right-sidebar clients display native history, models, approvals and actual metrics within recorded scopes | Complete populated coding, diff/recovery/context and editor acceptance |
 | A2A and agent graphs | Native shared-executor task controls, admission, discovery/stream/history and durable graph components have scoped contracts | Remote delegation, remaining protocol interoperability and live multi-agent acceptance |
 | Local/Nexus profiles | Shared protocol and ownership boundaries are specified | Profile isolation, authenticated enrollment and reconnect/lease/recovery acceptance; Nexus implements private coordination |

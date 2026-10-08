@@ -6,8 +6,8 @@ export const nativePartial = {
       ['Native/src/anthropic_stream.cpp', 'AnthropicStream::feed'],
       ['Native/src/chat_provider.cpp', 'ProviderWire::anthropic_messages'],
     ],
-    evidenceFiles: ['doc/evidence/native-cleanup-hosted-provenance.json'],
-    scope: 'Native Claude Messages request, SSE and header-authenticated HTTP boundaries passed the exact cleanup58 hosted gate, including synthetic socket tool/signature continuation. This is component evidence; default provider-profile routes exist but no live Anthropic inference or complete agent/model acceptance is established.',
+    evidenceFiles: ['doc/evidence/native-cleanup-hosted-provenance.json','doc/evidence/native-provider-profile-cli-local-provenance.json'],
+    scope: 'Native Claude Messages request, SSE and header-authenticated HTTP boundaries passed the exact cleanup58 hosted gate, including synthetic socket tool/signature continuation. Local65 additionally verifies authenticated paginated Claude catalogue discovery, real CLI encrypted profile enrollment/selection and shared public-identity guards using synthetic provider sockets. No live Anthropic inference or complete agent/model acceptance is established.',
     gaps: 'The 21 pinned Anthropic entries are not individually accepted. Live model discovery/enrollment/inference, actual Claude agent effects, broader media/cache/thinking controls, non-chat modes and complete per-model capability/error behavior remain incomplete or require their own evidence.',
   },
   gemini: {
@@ -26,9 +26,11 @@ export const nativePartial = {
       'doc/evidence/native-gemini-agent-hosted-provenance.json',
       'doc/evidence/native-gemini-history-hosted-provenance.json',
       'doc/evidence/native-gemini-enrollment-local-provenance.json',
+      'doc/evidence/native-gemini-enrollment-hosted-provenance.json',
+      'doc/evidence/native-provider-profile-cli-local-provenance.json',
     ],
-    scope: 'Native GenerateContent request/SSE/header-authenticated transport and signed DTO replay passed the exact ddd1d3d hosted60 gate; common gateway/history and escaped large results passed75f45f0 hosted61. Exact c9591fe hosted62 and local62 verify actual AgentRunner two-file execution and xlang3 SQLite signed replay. Newer local64 verifies native authenticated catalogue/profile enrollment, separate model tool policy, encrypted-key reuse, actual enrolled agent/file execution/cancellation/reopen and thin Settings fixtures using labelled synthetic provider replies. No full provider-group or individual model acceptance is established.',
-    gaps: 'The 84 pinned Gemini entries are not individually accepted. Live authenticated account discovery/enrollment/inference and actual Gemini IDE/graph acceptance remain pending. Vertex AI/OAuth, media, caching/thinking controls, Interactions and complete per-model behavior remain unimplemented or unverified. The new catalogue/enrollment checkpoint still requires exact hosted validation; documentation-based tool declarations do not establish account access or per-model execution.',
+    scope: 'Native GenerateContent request/SSE/header-authenticated transport and signed DTO replay passed ddd1d3d hosted60; common gateway/history and escaped large results passed75f45f0 hosted61. Exact c9591fe hosted62 verifies actual AgentRunner file execution and SQLite signed replay. Exact2f5e0f0 hosted64 verifies native catalogue/profile enrollment, separate model tool policy, encrypted-key reuse, actual enrolled file execution/cancellation/reopen and thin Settings fixtures. Local65 adds real CLI discovery/profile selection, safe diagnostics, explicit admission rebinding, signed agent history and failed-turn recovery. Provider sockets are labelled synthetic; no full provider-group or individual model acceptance is established.',
+    gaps: 'The 84 pinned Gemini entries are not individually accepted. Live authenticated account discovery/enrollment/inference and actual Gemini IDE/graph acceptance remain pending. Vertex AI/OAuth, media, caching/thinking controls, Interactions, foreign signed/tool history conversion and complete per-model behavior remain unimplemented or unverified. The new CLI checkpoint still requires exact hosted validation; documentation-based tool declarations do not establish account access or per-model execution.',
   },
   openai: {
     sources: [
@@ -41,8 +43,9 @@ export const nativePartial = {
     evidenceFiles: [
       'doc/evidence/live-responses-provider-success.json',
       'doc/evidence/live-responses-mcp-diagnostic-read.json',
+      'doc/evidence/native-provider-profile-cli-local-provenance.json',
     ],
-    scope: 'Native Chat Completions and Responses request/stream boundaries, encrypted backend enrollment and selected live Responses checks exist. Evidence applies only to its exact revisions, configured model and recorded scenarios.',
+    scope: 'Native Chat Completions and Responses request/stream boundaries, encrypted backend enrollment and selected live Responses checks exist. Local65 adds real CLI profile controls, OpenAI catalogue discovery/encrypted enrollment and shared identity guards using synthetic provider sockets. Evidence applies only to its exact revisions, configured model and recorded scenarios.',
     gaps: 'The 209 pinned OpenAI entries are not all tested or implemented. Non-chat modes, multimodal input/output, embeddings, batch, full reasoning/model capability controls and per-model acceptance remain incomplete. Other providers and OpenAI-compatible deployments require their own authentication, endpoint, wire and behavior validation.',
   },
 };

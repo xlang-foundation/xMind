@@ -1,0 +1,60 @@
+{
+  "baseRevision": "2f5e0f05e9bfadcf86b5508863da0ec5a9e78cfe",
+  "sourceState": "Local working-tree source based on2f5e0f0, adding native generic CLI profile commands, explicit chat profile selection, bounded native diagnostics/discovery timeout, separate execution/settings status and generic credential-reflection guards. All source cases compiled and passed; no post-build exclusions.",
+  "nativePassed": 65,
+  "nativeFailed": 0,
+  "nativeSkipped": 0,
+  "nativeSeconds": 113.16,
+  "nativeManifestMatched": true,
+  "runtimeRevision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "runtimeSource": "Isolated xlang3-nexus-buffer worktree",
+  "stdlibSource": "C:/Python/Python314/Lib source only; no CPython execution",
+  "sourceSha256": {
+    "Native/CMakeLists.txt": "7a6a052f8fd94c5be520cb4c771ce8dc347791f91188a4128daa4798d5f3b4c0",
+    "Tools/ci-native.ps1": "2651901e04c792fedf919de0e80e8402da4729f8520f1a19e803c345aed93edc",
+    "Native/apps/cli_main.cpp": "45e284b7dbad87b7b90e7b5f34f8668f7ea0b101a91e5751b9bb2830e0509e7e",
+    "Native/src/provider_profile_runtime.cpp": "da546961f15f1ded6167c20a965767d9242e2ed2b26f8b1f71023bcf6d0698c1",
+    "Native/tests/provider_profile_cli_contract.cpp": "13c482dfbdc30d0e7fc31aeb951dba9f84e8db520d4652f716051c942f89e514",
+    "Native/tests/provider_profile_cli_peer.mjs": "22933abe23572f4ef45d22ef6ec13ef24b6aa02541295f82613b2b9921fd4c8a",
+    "Native/src/provider_profiles.cpp": "2cf15843ab48b0f92bded25d0b4cd5bb4b178cb12cb0a1aa9486e8d4d6a4c620",
+    "Native/src/provider_catalogue.cpp": "764013d6293f1ad676da27e8e6eff905890e7f6d2472c2d28ce1e6e9fa658199",
+    "Native/src/http_server.cpp": "5d1f30570b872799fafe7680003f46d2cf2cf92e3cab4a6e78b8531a9ee15c6b",
+    "Native/src/agent_runner.cpp": "7dcbe7bd664712178d4246713b52bcfc08867688fa701dcfb460f1c3645f90c9",
+    "Native/src/gemini_history.cpp": "abf5eaa961c24b87cc371b141b8e59707ebec41e996e17127ed1a6d211f4e66a"
+  },
+  "compiledBinarySha256": {
+    "xmind_server.exe": "21b2d5ce58d237ecdda2c8a165affbbbee495da553db21ba3c144d24c15ea226",
+    "xmind_cli.exe": "6293b91db269a15de5994a13e80692c0abcd7b3f608365eab6fa3eddbbe297a8",
+    "agentflow_provider_profile_cli_contract.exe": "11ae397bb7cd0a738182d55d5df497feb23b7b2f9387c9ee236e90a3b1a85ee2",
+    "agentflow_provider_profile_runtime_contract.exe": "e0e6df1e4ee56d13042a8ad6d28978d921d202585114f2de3ce8483a40aab5b3",
+    "xlang3_runtime.dll": "166e8d96bd3b3a886fadfb7482374d7512a2dad7b389ca5d907a4b581f18a3a5"
+  },
+  "logSha256": {
+    "native-provider-profile-cli-local-ctest.log": "5e1487bb3c3afe429a7ded08a2b1ec8feb2c71e3488abfb81530d80c28aeec89",
+    "native-provider-profile-cli-local-browser-native.log": "ffa8a56eeb33ceb7dc064c220c2fff5c93805595cb78a3f52cb677f765a71f56"
+  },
+  "priorFrontendGate": {
+    "revision": "2f5e0f05e9bfadcf86b5508863da0ec5a9e78cfe",
+    "extensionPassed": 94,
+    "browserPassed": 17,
+    "failed": 0,
+    "skipped": 0,
+    "provenance": "native-gemini-enrollment-hosted-provenance.json",
+    "sourceEqualityVerified": true,
+    "scope": "Unchanged frontend sources retain their exact prior hosted gate; those tests were not repeated or counted as extra."
+  },
+  "browserNativeIntegration": "Passed again with fresh native server and unchanged source-matched shared assets in disposable processes/database; installed previews unchanged.",
+  "verifiedNewCases": [
+    "Actual compiled CLI through real authenticated Native HttpServer/ProfileRuntime and embedded xlang3 SQLite",
+    "OpenAI/Claude/Gemini draft and saved-key catalogues using real native headers and escaped provider pagination/full resources",
+    "Private environment input, inactive enrollment, explicit selection, saved-key model updates, three-profile encrypted SQLite restart and actual publication-fault rollback",
+    "All three provider families reject key-reflected public identities before discovery/persistence",
+    "Bounded sanitized native provider401 diagnostics retained without private key/body output",
+    "Stale one-shot discovery, raced interactive discovery and stale admission reject without automatic retry/rebinding",
+    "Explicit committed interactive selection clears old model override and updates exact admission ID/registry revision",
+    "Actual text-only Gemini native agent execution, raw signed/precise history, supplied non-computed usage and measured timing",
+    "SQLite reopen resumes original signed conversation; two actual blocked model turns retain failures without assistant fabrication",
+    "Successful settings preserve a prior failed turn exit status; only actual subsequent successful model execution recovers it"
+  ],
+  "scope": "Labelled synthetic provider sockets validate the real native CLI/backend/transport/agent/persistence code. No live Gemini/Claude account acceptance, rendered editor interaction, cross-provider signed/tool history conversion, rich TUI or full provider/coding/protocol parity claimed. New exact checkpoint hosted validation remains required. No installed-preview upgrade."
+}
