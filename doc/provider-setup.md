@@ -2,6 +2,22 @@
 
 ## Profile runtime in server startup
 
+The shared browser/VS Code `BackendClient` now exposes profile metadata,
+profile-specific discovery, save and selection operations. It validates public
+metadata, unique identities, route/family consistency, safe revisions and model
+catalogues before returning them to a view. Unknown/secret-bearing metadata is
+rejected. Omitted keys remain omitted on the wire; account discovery has a
+35-second client deadline for the native adapter's bounded 30-second request.
+The browser gateway permits only the exact native profile paths and preserves
+its existing origin/authentication rules.
+
+All **76 extension and 14 browser tests** passed locally. The actual compiled
+native/browser contract additionally saved and selected an independently keyed
+profile, checked inactive-profile behavior and stale revisions, preserved graph
+history, and exercised profile reads/mutations through an origin-bound durable
+cookie. Profile/model values and keys in this contract are synthetic; it does
+not request inference. Visible profile Settings controls are still pending.
+
 The model-free Windows server now constructs `ProviderProfileRuntime`, registers
 the authenticated profile API and imports legacy OpenAI setup before listening.
 Backend routes are fixed OpenAI Chat/Responses and Anthropic Messages with their
