@@ -64,7 +64,7 @@ async function api(path,body) {
   assert.ok(response.ok,await response.clone().text());return response.json();
 }
 function cli(...args) {const result=spawnSync(cliExe,[String(port),...args],{env,encoding:'utf8',windowsHide:true,timeout:5000});assert.equal(result.status,0,result.stderr);return JSON.parse(result.stdout);}
-async function approvedChat(name,decision){
+async function approvedChat(name,decision,attachedRun){
   const process=spawn(cliExe,[String(port),'chat'],{env,windowsHide:true});let pending='',stderr='',failure,reviews=0;const records=[];
   process.stderr.on('data',bytes=>stderr+=bytes);
   process.stdout.on('data',bytes=>{
@@ -86,7 +86,7 @@ async function approvedChat(name,decision){
     }
   });
   const timer=setTimeout(()=>process.kill(),12000);
-  const result=await new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});process.stdin.write((name==='allowed'?'/model synthetic-edit-alternate\n':'')+name+'\n');});
+  const result=await new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});process.stdin.write(attachedRun?'/watch '+attachedRun+'\n':(name==='allowed'?'/model synthetic-edit-alternate\n':'')+name+'\n');});
   if(failure)throw failure;assert.equal(result.signal,null);assert.equal(result.code,decision==='detach'?1:0,stderr);assert.ok(records.some(record=>record.type==='operation_review'));
   if(decision!=='detach')assert.ok(records.some(record=>record.kind==='run.completed'));
   if(decision==='allow-foreign'){assert.equal(reviews,2);assert.match(stderr,/No decision sent/);}
@@ -115,7 +115,9 @@ try {
   const detached=await approvedChat('denied','detach'),detachedProposal=detached.find(record=>record.type==='operation_review').operation;
   assert.ok(!detached.some(record=>record.type==='operation_decision_result'||record.type==='turn_finished'),'Detach cannot fabricate a decision or terminal state');
   assert.equal((await api(`/v1/operations/${detachedProposal.id}`)).state,'awaiting_approval');assert.equal(await readFile(join(workspace,'denied.txt'),'utf8'),'original\n');
-  await api(`/v1/runs/${detachedProposal.run_id}/cancel`,{});await until(()=>api(`/v1/runs/${detachedProposal.run_id}`),value=>value.state==='cancelled');
+  const detachedRun=await api(`/v1/runs/${detachedProposal.run_id}`),runsBeforeAttach=cli('runs',detachedRun.session_id);
+  const reattached=await approvedChat('denied','deny',detachedProposal.run_id);
+  assert.equal(reattached.find(record=>record.type==='run_attached').run.id,detachedProposal.run_id);assert.ok(!reattached.some(record=>record.type==='run'),'Attachment must not submit a new model request');assert.equal(reattached.find(record=>record.type==='operation_review').operation.id,detachedProposal.id);assert.equal(cli('runs',detachedRun.session_id).length,runsBeforeAttach.length);assert.equal((await api(`/v1/operations/${detachedProposal.id}`)).state,'denied');assert.equal(await readFile(join(workspace,'denied.txt'),'utf8'),'original\n');
   for(const name of ['allowed','denied','stale','cancelled']) {
     await api('/v1/sessions',{id:name,title:'Synthetic edit protocol fixture'});
     if(name==='allowed') {

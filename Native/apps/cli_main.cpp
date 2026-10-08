@@ -135,7 +135,28 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(prompt=="/exit")return last_result;
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
+            std::cerr<<"/watch RUN_ID attaches an existing single-agent run without submitting another request; pending approvals remain explicit.\n";
             std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+        }
+        if(prompt.starts_with("/watch ")){
+            const auto id=prompt.substr(7);
+            if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos){std::cerr<<"Use /watch with a recorded run ID.\n";continue;}
+            const auto response=client.Get("/v1/runs/"+id,headers);
+            if(!response)throw std::runtime_error("Cannot reach xMind Server to attach the run");
+            if(response->status==404){std::cerr<<"Run was not found.\n";continue;}
+            if(response->status!=200)throw std::runtime_error("Server rejected run attachment");
+            const auto run=Json::parse(response->body);
+            if(!run.is_object()||run.value("id",std::string{})!=id||!run.contains("session_id")||!run["session_id"].is_string())throw std::runtime_error("Invalid attached run identity");
+            if(run.value("graph_root",false)||!run.value("parent_id",std::string{}).empty()){std::cerr<<"Use graph-watch for graph runs.\n";continue;}
+            const auto owner=run["session_id"].get<std::string>();
+            if(owner.empty()||owner.size()>128||owner.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid attached conversation identity");
+            if(!session.empty()&&session!=owner){std::cerr<<"Select the run's conversation with /session first, or use /new before attaching.\n";continue;}
+            const auto saved=request("/v1/sessions/"+owner+"/history");if(!saved.is_array())throw std::runtime_error("Invalid attached conversation history");
+            session=owner;
+            std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",saved}}.dump()<<'\n'<<Json{{"type","run_attached"},{"run",run}}.dump()<<'\n'<<std::flush;
+            last_result=watch_run(client,headers,id,0,false,true);
+            std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
+            continue;
         }
         if(prompt=="/sessions"){
             const auto saved=request("/v1/sessions");if(!saved.is_array())throw std::runtime_error("Invalid backend session catalogue");

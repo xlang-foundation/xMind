@@ -132,6 +132,11 @@ try {
   const resumedChat=await chat('Read README after reconnect\n/exit\n',chatSession);assert.equal(resumedChat.find(record=>record.type==='session').session_id,chatSession);assert.equal(cli('history',chatSession).length,12);assert.equal(cli('runs',chatSession).length,3,'Reconnect must add only the requested new turn, not replay completed work');
   assert.equal(resumedChat.find(record=>record.type==='history').history.length,8,'Resuming emits the actual pre-turn durable conversation');
   assert.deepEqual((await chat('/exit\n',chatSession)).find(record=>record.type==='history').history,cli('history',chatSession),'Viewing history without a request must not start work');
+  const attachmentRequests=requests,attachmentRuns=cli('runs','coding');
+  const attached=await chat('/watch '+run.id+'\n/exit\n');
+  assert.equal(attached.find(record=>record.type==='run_attached').run.id,run.id);assert.ok(!attached.some(record=>record.type==='run'));assert.equal(attached.find(record=>record.type==='turn_finished').exit_status,0);assert.deepEqual(attached.find(record=>record.type==='history').history,history);
+  const rejectedAttachments=await chat('/watch ../invalid\n/watch absent-fixture\n/watch '+run.id+'\n/history\n/exit\n',chatSession);
+  assert.ok(!rejectedAttachments.some(record=>record.type==='run_attached'||record.type==='turn_finished'));assert.ok(rejectedAttachments.every(record=>record.type!=='session'||record.session_id===chatSession));assert.deepEqual(cli('runs','coding'),attachmentRuns);assert.equal(requests,attachmentRequests,'Attaching completed runs and rejecting foreign/absent runs cannot invoke inference');
   const failureChat=await chatResult(1,'provider-error\n/exit\n');
   assert.equal(failureChat.filter(record=>record.type==='turn_finished'&&record.exit_status===1).length,1);
   assert.ok(failureChat.some(record=>record.kind==='run.failed'&&record.data.status===429));
@@ -155,6 +160,9 @@ try {
   // Queued cancellation frees bounded admission capacity before the worker exits.
   assert.equal((await api('/v1/runs',{id:'replacement-run',session_id:'overflow',prompt:'Read README again'})).status,202);
   cli('cancel','held-run');await terminal('held-run','cancelled');
+  const cancelledAttachmentRequests=requests,cancelledAttachmentRuns=cli('runs','held');
+  const cancelledAttachment=await chatResult(2,'/watch held-run\n/exit\n');
+  assert.equal(cancelledAttachment.find(record=>record.type==='run_attached').run.id,'held-run');assert.equal(cancelledAttachment.find(record=>record.type==='turn_finished').exit_status,2);assert.equal(requests,cancelledAttachmentRequests);assert.deepEqual(cli('runs','held'),cancelledAttachmentRuns,'Viewing cancellation cannot restart the run');
   await terminal('replacement-run','completed');
 
   await session('error');

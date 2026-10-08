@@ -81,6 +81,26 @@ exact history without inference. [Live evidence](evidence/live-browser-cli-navig
 Full interactive/TUI parity remains incomplete. Earlier installation notes below
 retain their historical checkpoint scope.
 
+New source adds `/watch RUN_ID` inside chat. It reads the existing single-agent
+run, restores its conversation history and emits `run_attached`, then observes
+durable events and explicit pending approvals through the existing native client
+path. It sends no model admission request. An empty chat adopts the recorded
+conversation; a selected different conversation is rejected until the user
+selects the correct one or clears selection with `/new`. Missing/invalid IDs and
+graph roots/children are rejected without changing selection; graph observation
+continues through `graph-watch`. Terminal observation updates the actual last
+turn exit status. EOF at an approval still detaches without a decision.
+
+The native HTTP/CLI contract now checks completed attachment and unchanged
+history/runs/provider request counts, plus invalid, absent and foreign-context
+rejection. The edit contract now detaches from a real pending operation, attaches
+the same run in another CLI process and denies that exact operation, preserving
+the actual file and run count. Inference in those contracts is labelled
+synthetic. JavaScript syntax and whitespace checks passed; compiled execution
+is pending because the local build guard detected active xlang3 benchmarks.
+This source is not installed in the preview. Concurrent stdin controls while
+model output streams remain required; `/watch` does not close that gap.
+
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
 52 native and 66 extension contracts. This verifies initial-model prevalidation
