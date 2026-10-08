@@ -8,15 +8,19 @@ This is an initial inventory, not a claim of parity. All unverified features rem
 
 ## Current native progress
 
-The newer verified native checkpoint is `67de5b16a8732477606957cb52736df06f078f16`:
-52 native and 60 extension contracts passed locally and its
-[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37695836041)
-succeeded. Browser checkpoint `e4b7f1f9774cddbe7c430477aadb9be646692eec` also passed
-its hosted gates. Later shared renderer contracts pass locally (65 extension,
-10 browser); newer C++ CLI and diagnostic changes await compiled validation.
-See the [current README scope](../README.md#current-native-product-scope).
-Registered native graphs and a single live OpenAI reply are verified within that
-scope; dynamic multi-agent delegation and complete live coding parity are not.
+The latest inspected successful native checkpoint is
+`4203b84678b51b2ae7c6ee47fccfa14b684680ae`: 52 native, 72 extension and 13 browser
+contracts passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37707042113).
+[Exact evidence](../doc/evidence/native-session-navigation-hosted-provenance.json).
+This includes native CLI conversation navigation and optimistic title changes;
+actual preview installation and editor rename acceptance remain separate.
+Newer cookie-duration and MCP diagnostic/catalogue changes await their own gates.
+The browser preview remains on tested checkpoint `6263630`. Actual live Responses
+text, read, approved edit and registered Git status turns succeeded within
+[their recorded scope](../doc/live-provider-compatibility.md). An official MCP
+peer connected and discovered tools, but its live model/tool read failed before
+dispatch; [failed acceptance evidence](../doc/evidence/live-responses-mcp-read.json).
+Dynamic multi-agent delegation and complete live coding parity remain incomplete.
 The older checkpoint summaries and prototype table below remain historical
 evidence, not the current product status or a claim of full parity.
 
@@ -24,7 +28,7 @@ The current native graph backend checkpoint `bd059a46781292640d95943e00b0d86a489
 
 The following historical table records prototype coverage, not native implementation status. Current C++ checkpoints and exact verification scopes are in [milestones](../doc/milestones.md): **35 native and 40 extension contracts passed isolated CI**, source `3297a4bce2d591c0f1c1dd37ccc18a15297369e7`, including approved edits/creation, stored response metadata, registered MCP tools with official SDK peers, executable-bound foreground commands, descendant cleanup, durable retained output and native watcher reconnect. Real subprocess/file/database effects are verified with synthetic inference; live coding completion, full shell/background/PTY and broader SDK features remain pending. No OpenCode operation or capability is considered fully equivalent merely because a component contract passes. Full API/tool/plugin/context/CLI/editor/provider acceptance remains required against the pinned inventory.
 
-The pinned source is cloned locally under `.agentflow/reference/opencode`. `Tools/audit-opencode.mjs` verifies its commit and maps the actual OpenAPI schema into `Documents/OPENCODE_API_INVENTORY.json`: 136 operations. The historical upstream audit document lists 139; the pinned schema count is authoritative. Every operation includes upstream parameters/body/responses and acceptance requirements. Twelve have partial prototype source equivalents; 124 have no mapped equivalent. None is verified parity. API inventory alone does not cover all UI, plugin, model/provider or tool behavior.
+The pinned source is cloned locally under `.agentflow/reference/opencode`. `Tools/audit-opencode.mjs` verifies its commit and reads the committed OpenAPI schema object, so local reference edits cannot silently change the baseline. It generates `Documents/OPENCODE_API_INVENTORY.json`: 136 operations. The historical upstream audit document lists 139; the pinned schema count is authoritative. Every operation includes upstream parameters/body/responses and acceptance requirements. Twelve have historical prototype mappings. The separate native mapping identifies **23 partial C++ source candidates and 113 unmapped operations**. Each candidate records a checked source anchor, source SHA-256, candidate surface and explicit gap. Unmapped means no reviewed mapping, not proof that no related component exists. Neither source presence nor these hashes establish behavioral equivalence, executed contracts or CLI/editor acceptance. **Zero operations are claimed as verified parity.** API inventory alone does not cover all UI, plugin, model/provider or tool behavior.
 
 | Capability | AgentFlow status | Required evidence |
 | --- | --- | --- |

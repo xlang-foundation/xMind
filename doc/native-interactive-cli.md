@@ -65,6 +65,18 @@ product acceptance results.
 
 ## Verification status
 
+Current inspected hosted checkpoint `4203b84678b51b2ae7c6ee47fccfa14b684680ae`
+passed 52 native, 72 extension and 13 browser contracts in
+[run 37707042113](https://github.com/xlang-foundation/xMind/actions/runs/37707042113).
+The native provider/CLI contract exercised conversation list/resume/new/rename,
+stale and empty title rejection, unchanged history/runs and rename persistence
+after reopening, without inference. The HTTP/CLI contract includes request-based
+titles and whitespace input behavior. [Exact scope and totals](evidence/native-session-navigation-hosted-provenance.json).
+This supersedes the historical pending-compilation notes below for those features;
+it does not establish actual editor rename acceptance. The browser preview still
+uses checkpoint `6263630`, so its installed CLI and sidebar lack the newer rename
+capability. Full interactive/TUI parity remains incomplete.
+
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
 52 native and 66 extension contracts. This verifies initial-model prevalidation

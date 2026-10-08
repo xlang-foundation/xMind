@@ -1,8 +1,10 @@
 {
   "source": "https://github.com/anomalyco/opencode/tree/v2.0.16",
   "revision": "3a103fe0aff726a4edc7492f03f7b88195d9e4c9",
+  "statusScope": "status and agentflowEvidence describe the historical Python prototype. nativeStatus and nativeEvidence describe reviewed C++ source candidates. Unmapped is not proof of absence; no operation is verified parity.",
+  "nativeSourceHashFormat": "SHA-256 of UTF-8 source text with CRLF normalized to LF; source candidates may include uncommitted changes at audit time.",
   "schema": "packages/protocol/openapi.json",
-  "schemaSha256": "04bf1abeea57f492577488c64afe374f4e8a8f012ca187dacfec387f9d7a7612",
+  "schemaSha256": "8ab6ec800922fc68890c68134320b4063fb317e0d944252d232083e12d32f4e9",
   "schemaReferences": "Resolve $ref values against the pinned source schema. This inventory does not dereference them or cover every non-API behavior.",
   "operationCount": 136,
   "operations": [
@@ -15,6 +17,8 @@
         "agent"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -115,6 +119,8 @@
         "agent"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -230,6 +236,8 @@
         "command"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -330,6 +338,8 @@
         "config"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -417,6 +427,8 @@
         "config"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -473,6 +485,8 @@
         "credential"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -528,6 +542,8 @@
         "credential"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -601,6 +617,8 @@
         "credential"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -656,6 +674,8 @@
         "debug"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -733,6 +753,8 @@
         "debug"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -789,6 +811,16 @@
         "event"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "Native per-run durable event observation",
+        "sourceAnchor": "persistence.events",
+        "gap": "Per-run event reads support client polling; upstream global/location subscription semantics remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/server.py",
         "surface": "/v1/runs/{run_id}/stream",
@@ -947,6 +979,16 @@
         "config"
       ],
       "status": "missing",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "POST /v1/provider/configuration",
+        "sourceAnchor": "\"/v1/provider/configuration\"",
+        "gap": "Optimistic provider enrollment exists; general effective configuration precedence and reload remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -1002,6 +1044,16 @@
         "filesystem"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/agent_runner.cpp",
+        "sourceSha256": "27b3875210a6718ae5dbc30f6c0745c2a5526483cd1f49222e0e8cab21fe4414",
+        "surface": "Reviewed native edit_file/create_file tools",
+        "sourceAnchor": "CreateExecutor",
+        "gap": "Approved exact edits and creation exist; general upstream filesystem write API and its full semantics remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/tools.py",
         "surface": "WorkspaceTools write_file/replace_text",
@@ -1123,6 +1175,8 @@
         "generate"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -1221,6 +1275,8 @@
         "integration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -1323,6 +1379,8 @@
         "mcp"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -1418,6 +1476,8 @@
         "mcp"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -1528,6 +1588,8 @@
         "mcp"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -1623,6 +1685,8 @@
         "mcp"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -1718,6 +1782,8 @@
         "migration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -1857,6 +1923,8 @@
         "persistentPty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -1933,6 +2001,8 @@
         "persistentPty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -2025,6 +2095,8 @@
         "persistentPty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -2126,6 +2198,8 @@
         "persistentPty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -2261,6 +2335,8 @@
         "persistentPty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -2378,6 +2454,8 @@
         "persistentPty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -2470,6 +2548,8 @@
         "persistentPty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -2549,6 +2629,8 @@
         "persistentPty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -2605,6 +2687,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -2716,6 +2800,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -2808,6 +2894,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -2889,6 +2977,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -2996,6 +3086,16 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "GET /v1/runs/{id}/events",
+        "sourceAnchor": "persistence.events",
+        "gap": "Run events are not a complete upstream session log with its filtering and response contract.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -3203,6 +3303,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -3307,6 +3409,8 @@
         "persistentPty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -3399,6 +3503,8 @@
         "persistentPty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -3497,6 +3603,8 @@
         "persistentPty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -3601,6 +3709,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -3684,6 +3794,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -3801,6 +3913,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -3951,6 +4065,8 @@
         "form"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -4051,6 +4167,16 @@
         "filesystem"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/workspace_tools.cpp",
+        "sourceSha256": "85eee0877d1a101e1dcb858599f6c0d96554676c0e7698304efcf0c5c323fd69",
+        "surface": "Native search_files tool",
+        "sourceAnchor": "\"search_files\"",
+        "gap": "Literal content search exists; the upstream filename search API and navigation behavior are absent.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/tools.py",
         "surface": "WorkspaceTools search_files",
@@ -4191,6 +4317,16 @@
         "filesystem"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/workspace_tools.cpp",
+        "sourceSha256": "85eee0877d1a101e1dcb858599f6c0d96554676c0e7698304efcf0c5c323fd69",
+        "surface": "Native list_files tool",
+        "sourceAnchor": "\"list_files\"",
+        "gap": "Bounded workspace directory listing exists; upstream filesystem API response and client navigation remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/tools.py",
         "surface": "WorkspaceTools list_files",
@@ -4312,6 +4448,16 @@
         "filesystem"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/workspace_tools.cpp",
+        "sourceSha256": "85eee0877d1a101e1dcb858599f6c0d96554676c0e7698304efcf0c5c323fd69",
+        "surface": "Native read_file tool",
+        "sourceAnchor": "\"read_file\"",
+        "gap": "Bounded UTF-8 reads exist; binary/range semantics and the upstream filesystem API remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/tools.py",
         "surface": "WorkspaceTools read_file",
@@ -4412,6 +4558,16 @@
         "server"
       ],
       "status": "missing",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "GET /v1/health",
+        "sourceAnchor": "\"/v1/health\"",
+        "gap": "Native health/capabilities exist; the full pinned identity/version response remains incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -4465,6 +4621,8 @@
         "integration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -4565,6 +4723,8 @@
         "integration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -4680,6 +4840,8 @@
         "integration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -4837,6 +4999,8 @@
         "integration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -4930,6 +5094,8 @@
         "integration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -5060,6 +5226,8 @@
         "integration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -5200,6 +5368,8 @@
         "integration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -5350,6 +5520,8 @@
         "integration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -5443,6 +5615,8 @@
         "integration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -5573,6 +5747,8 @@
         "integration"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -5712,6 +5888,8 @@
         "location"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -5796,6 +5974,8 @@
         "location"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -5852,6 +6032,16 @@
         "mcp"
       ],
       "status": "missing",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "GET /v1/mcp/servers",
+        "sourceAnchor": "\"/v1/mcp/servers\"",
+        "gap": "Saved stdio server metadata exists; upstream connection lifecycle fields, HTTP/OAuth and live model/tool acceptance remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -5952,6 +6142,8 @@
         "mcp"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -6049,6 +6241,16 @@
         "model"
       ],
       "status": "missing",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "GET /v1/models; POST /v1/provider/models",
+        "sourceAnchor": "\"/v1/models\"",
+        "gap": "Enabled models and OpenAI account discovery exist; broad provider capabilities and upstream catalogue fields remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -6159,6 +6361,16 @@
         "model"
       ],
       "status": "missing",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/provider_setup.cpp",
+        "sourceSha256": "7c783a59233aea1bb893d1347ba94f9cc765a8684b5a74ab91904d77f4edd50c",
+        "surface": "Selected backend provider model metadata",
+        "sourceAnchor": "ProviderRuntime::configuration",
+        "gap": "A configured backend model exists; the upstream default selection API and per-location defaults remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -6273,6 +6485,16 @@
         "permission"
       ],
       "status": "missing",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "GET /v1/runs/{id}/operations",
+        "sourceAnchor": "persistence.operations",
+        "gap": "Only run-scoped operations exist; a global/location pending permission catalogue is absent.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -6373,6 +6595,8 @@
         "permission"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -6454,6 +6678,8 @@
         "permission"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -6509,6 +6735,8 @@
         "plugin"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -6609,6 +6837,8 @@
         "plugin"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -6738,6 +6968,8 @@
         "plugin"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -6853,6 +7085,8 @@
         "project"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -6909,6 +7143,8 @@
         "project"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -7005,6 +7241,16 @@
         "provider"
       ],
       "status": "missing",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "GET /v1/provider/configuration",
+        "sourceAnchor": "\"/v1/provider/configuration\"",
+        "gap": "Single OpenAI-compatible configuration exists; a multi-provider registry is absent.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -7115,6 +7361,16 @@
         "provider"
       ],
       "status": "missing",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "GET /v1/provider/configuration",
+        "sourceAnchor": "\"/v1/provider/configuration\"",
+        "gap": "Single configured provider metadata exists; provider-by-ID contracts and broader native providers remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -7240,6 +7496,8 @@
         "pty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -7340,6 +7598,8 @@
         "pty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -7470,6 +7730,8 @@
         "pty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -7566,6 +7828,8 @@
         "pty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -7682,6 +7946,8 @@
         "pty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -7831,6 +8097,8 @@
         "pty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -7935,6 +8203,8 @@
         "pty"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -8076,6 +8346,8 @@
         "reference"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -8176,6 +8448,8 @@
         "rpc"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -8302,6 +8576,16 @@
         "session"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "GET /v1/sessions",
+        "sourceAnchor": "\"/v1/sessions\"",
+        "gap": "Location/project scoping, filters and pagination remain to be compared.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/server.py",
         "surface": "/v1/sessions",
@@ -8510,6 +8794,16 @@
         "session"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "POST /v1/sessions",
+        "sourceAnchor": "persistence.create_session",
+        "gap": "The upstream session fields, agent/environment configuration and full creation lifecycle remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/server.py",
         "surface": "POST /v1/sessions",
@@ -8660,6 +8954,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -8726,6 +9022,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -8808,6 +9106,16 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "POST /v1/sessions/{id}/title",
+        "sourceAnchor": "persistence.rename_session",
+        "gap": "Only optimistic title updates exist; other upstream session metadata changes remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -8923,6 +9231,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -9014,6 +9324,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -9087,6 +9399,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -9223,6 +9537,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -9355,6 +9671,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -9450,6 +9768,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -9609,6 +9929,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -9696,6 +10018,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -9818,6 +10142,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -9909,6 +10235,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -10023,6 +10351,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -10117,6 +10447,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -10217,6 +10549,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -10327,6 +10661,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -10435,6 +10771,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -10520,6 +10858,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -10595,6 +10935,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -10698,6 +11040,16 @@
         "session"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "POST /v1/runs/{id}/cancel",
+        "sourceAnchor": "executor->cancel",
+        "gap": "Run cancellation exists; session-level interruption and resumable upstream semantics remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/server.py",
         "surface": "POST /v1/runs/{run_id}/cancel",
@@ -10802,6 +11154,16 @@
         "session"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "GET /v1/sessions/{id}/history",
+        "sourceAnchor": "persistence.history",
+        "gap": "Durable role/data history exists; upstream message IDs, typed parts and pagination need comparison.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/store.py",
         "surface": "/v1/sessions/{session_id}/history",
@@ -10977,6 +11339,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -11075,6 +11439,16 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "Native per-run model override",
+        "sourceAnchor": "executor->submit_model",
+        "gap": "A per-run override is not persistent session model switching; upstream behavior remains incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -11166,6 +11540,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -11267,6 +11643,16 @@
         "permission"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "GET /v1/runs/{id}/operations",
+        "sourceAnchor": "persistence.operations",
+        "gap": "Run-scoped effect proposals exist; full session permission categories and lifecycle remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/permissions.py",
         "surface": "/v1/runs/{run_id}/approvals",
@@ -11357,6 +11743,8 @@
         "permission"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -11518,6 +11906,8 @@
         "permission"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -11619,6 +12009,16 @@
         "permission"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "POST /v1/operations/{id}/decision",
+        "sourceAnchor": "persistence.decide_operation",
+        "gap": "Single-use allow/deny exists; upstream saved rules and permission category behavior remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/permissions.py",
         "surface": "POST /v1/approvals/{approval_id}",
@@ -11737,6 +12137,16 @@
         "session"
       ],
       "status": "partial-source-unverified",
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "87ea752a01feb409ca351be0916b6a89163c06b0c75d248e01bced5cc3521038",
+        "surface": "POST /v1/runs",
+        "sourceAnchor": "executor->submit_model",
+        "gap": "Native model/tool admission exists; attachments, queued input and upstream session input ordering remain incomplete.",
+        "verifiedParity": false,
+        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+      },
       "agentflowEvidence": {
         "source": "agentflow/engine.py",
         "surface": "POST /v1/runs",
@@ -11918,6 +12328,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -12011,6 +12423,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -12094,6 +12508,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -12235,6 +12651,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -12337,6 +12755,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -12498,6 +12918,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -12582,6 +13004,8 @@
         "session"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -12649,6 +13073,8 @@
         "shell"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -12749,6 +13175,8 @@
         "shell"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -12874,6 +13302,8 @@
         "shell"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -12960,6 +13390,8 @@
         "shell"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -13076,6 +13508,8 @@
         "shell"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -13233,6 +13667,8 @@
         "skill"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -13333,6 +13769,8 @@
         "vcs"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -13430,6 +13868,8 @@
         "vcs"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -13544,6 +13984,8 @@
         "vcs"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -13671,6 +14113,8 @@
         "vcs"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -13812,6 +14256,8 @@
         "vcs"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -13912,6 +14358,8 @@
         "websearch"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -14047,6 +14495,8 @@
         "websearch"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -14157,6 +14607,8 @@
         "worktree"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -14229,6 +14681,8 @@
         "worktree"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [
@@ -14301,6 +14755,8 @@
         "worktree"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
@@ -14380,6 +14836,8 @@
         "worktree"
       ],
       "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [],
