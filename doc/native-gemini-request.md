@@ -29,3 +29,14 @@ actual native/browser integration contract also passing. See
 [local provenance](evidence/native-gemini-local-provenance.json) and
 [CTest output](evidence/native-gemini-local-ctest.log). Hosted validation of this
 source remains pending. No Gemini availability or inference is claimed.
+
+The older hosted source `34f2206` compiled its 58 contracts, but failed the
+agent-runner check because malformed prompt JSON leaked a parser exception.
+That repository error boundary was corrected in `9e3a104`, whose complete
+local gate is recorded above. The newer cleanup revision is building in CI;
+hosted verification of the correction remains pending. See
+[failed hosted scope](evidence/native-gemini-request-hosted-failure.json).
+
+The newer [native streaming source](native-gemini-stream.md) is a separate,
+unverified component and increases the configured gate to 59. The 58-contract
+evidence above excludes that source and does not establish streaming support.
