@@ -35,10 +35,26 @@ passed using synthetic peer protocol replies. Fresh browser/native integration
 also passed against the rebuilt server and source-matched assets. The first
 HTTP startup guard failure is retained in a [separate interim log](evidence/native-graph-mcp-initial-ctest.log);
 the final gate includes the corrected guard and expanded invalid model settings.
-Hosted69 remains pending. Unchanged frontend source retains the prior **98
-extension and 17 browser tests**, without a new frontend rerun. Installed
-previews remain unchanged; live direct-MCP graph and rendered IDE acceptance
-remain separate requirements. [Exact local69 scope](evidence/native-graph-mcp-local-provenance.json).
+Exact revision `c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616` subsequently passed
+its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37755382937):
+**69 native contracts in 184.36 seconds**, **98 extension tests in 3.2107402
+seconds** and **17 browser tests in 1.5543002 seconds**, plus native/browser
+integration and verification of the 18-asset VSIX. All 16 job steps passed;
+there were zero failures/skips and the native manifest matched exactly.
+Live direct-MCP graph and rendered IDE acceptance remain separate requirements.
+[Exact local69 scope](evidence/native-graph-mcp-local-provenance.json),
+[exact hosted69 scope](evidence/native-graph-mcp-hosted-provenance.json).
+
+The next [native delegation design](native-delegation-design.md) describes
+model-selected leaf investigations in ordinary Agent mode, with actual child
+AgentRunners, shared budgets, owned histories and controller-approved parent
+effects. It is a design; delegation is not implemented by this checkpoint.
+
+The managed browser preview now runs the verified c4 native bundle and packaged
+view. Prior records/configuration were preserved and an actual read-only
+OpenAI Agent request displayed retained token/timing metrics after refresh.
+The original browser session required a reconnect; its precise cause remains
+unresolved. [Installed scope and screenshot](preview-checkpoint-c4ec09fc.md).
 
 The preceding `fceb50b` source passed the complete local **67 native contracts in 117.65
 seconds**, with the exact native manifest, zero failures/skips and no post-build

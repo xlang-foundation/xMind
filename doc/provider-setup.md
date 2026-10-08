@@ -36,11 +36,18 @@ capture; the initial HTTP start-guard failure is retained separately.
 
 Fresh browser/native integration passed against the rebuilt server and matching
 assets. Frontend sources are unchanged from exact fceb hosted **98 extension
-and 17 browser tests**; those suites were not rerun for this native change.
-Hosted69, live MCP interoperability, rendered IDE acceptance and installed
-preview upgrades remain pending. Provider profiles and provider coverage counts
-are unchanged.
+and 17 browser tests**; those suites were not rerun for that local native gate.
+Exact c4ec09fc subsequently passed hosted **69 native, 98 extension and 17
+browser tests**, native/browser integration and 18-asset VSIX verification,
+with zero failures/skips. The verified native bundle and packaged browser view
+are now installed. Existing records/settings were preserved; one actual
+read-only OpenAI Agent request and subsequent rendered refresh passed. The
+original browser session required reconnect; its exact cause remains unresolved.
+Live direct-MCP graph and rendered IDE acceptance remain pending. Provider
+coverage counts are unchanged.
 [Local69 source/runtime/log evidence](evidence/native-graph-mcp-local-provenance.json),
+[exact hosted69 evidence](evidence/native-graph-mcp-hosted-provenance.json),
+[installed acceptance](preview-checkpoint-c4ec09fc.md),
 [Configuration and execution contract](native-graph-mcp.md).
 
 ## Native Claude ordered history checkpoint
@@ -264,9 +271,9 @@ pending.
 
 The sections below preserve earlier provider-setup checkpoints and their limits.
 Their pending statements describe those revisions; current Claude/Gemini source and
-verification are summarized above. The installed preview retains native
-`19d69dd` and view `6f32d215`; historical preview references below describe earlier
-installations.
+verification are summarized above. The installed preview now uses the verified
+`c4ec09fc` native bundle and packaged view; historical preview references below
+describe earlier installations. [Current installed scope](preview-checkpoint-c4ec09fc.md).
 
 ## Run-descriptor attribution
 

@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-08T10:01:33.387Z",
+  "sourceRevision": "c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616",
+  "previousNativeRevision": "19d69dd0876e0a01accb444e06924f36008f8ee6",
+  "ci": {
+    "runId": 37755382937,
+    "jobId": 113238520871,
+    "status": "completed",
+    "conclusion": "success",
+    "nativePassed": 69,
+    "nativeFailed": 0,
+    "nativeSkipped": 0,
+    "extensionPassed": 98,
+    "browserPassed": 17,
+    "allStepsSucceeded": 16,
+    "nativeSeconds": 184.36,
+    "browserNativeIntegration": "passed",
+    "vsixVerification": "passed",
+    "vsixRequiredAssets": 18,
+    "evidenceArtifactId": 11541175583,
+    "runtimeArtifactId": 11540193696
+  },
+  "backend": "http://127.0.0.1:57447",
+  "view": "http://127.0.0.1:60405/ui/",
+  "installation": {
+    "nativeFiles": {
+      "README.txt": "bb7fe3bdcc78f892bc84887b1574aa981a9ed9511b863bfe66f3ec5ec014e3c8",
+      "licenses/xlang3-LICENSE": "54a4b957dae6a8a5de150c49d9ab74c35d1ff10f7a4206e9d5b92474524e8c80",
+      "licenses/xlang3-NOTICE": "eed657c00c9b299cee02952e09fac855287ce981c91ec8648792891ea1d2eba9",
+      "licenses/xlang3-modules/cffi/libffi/LICENSE": "0ff971b6b04d61754994a25d6fba23d5e5fe35993d82abf5008d78ace0a521bd",
+      "licenses/xlang3-modules/httptools/vendor/http-parser/LICENSE-MIT": "5cd1b682c0ccbac0cb31b86a9a1104c3e2e7b1377a282b8169d2694b400db7c2",
+      "licenses/xlang3-modules/httptools/vendor/llhttp/LICENSE": "279012e02a10acfd59a3f2d8f13a497332535d871c2b27c89988985b06a3a438",
+      "licenses/xlang3-modules/httptools/vendor/llhttp/LICENSE-MIT": "6ddfa628db76d2d87b8968bafbad60f51c4ec88100dd7bb96f97216d88af0808",
+      "licenses/xlang3-third-party/argon2/LICENSE": "e01fc30f00792a2bb95136ebe7dd7d01baab62e719ed26ae1b08a3b6b114fdad",
+      "licenses/xlang3-third-party/brotli-1.2.0/LICENSE": "60ae0f13e76cc2eaaa108677eefa4ce16b647f6bbe8cf0a1ac9429d82eca7248",
+      "licenses/xlang3-third-party/bzip2/LICENSE": "9102b70091e84168c468d57dcca64ec1f60c76cefbc83b66e1754725b9dd90cf",
+      "licenses/xlang3-third-party/nlohmann_json/LICENSE.MIT": "b9715282b2f1db1359a919bb3a542dd4362fd9e38ae72d421367eb11abe62eec",
+      "licenses/xlang3-third-party/yaml-cpp/LICENSE": "c06fd4ee9241e3b6841fcee5d471475be412c822ddf2876af17127acd426c011",
+      "licenses/xlang3-third-party/zlib/LICENSE": "439c75ab12b340c5362b9d4b08ff05ec3a4d0eb7667a6fff49a9b16d8795c78e",
+      "licenses/xlang3-third-party/zlib/contrib/dotzlib/LICENSE_1_0.txt": "36266a8fd073568394cb81cdb2b124f7fdae2c64c1a7ed09db34b4d22efa2951",
+      "licenses/xlang3-third-party/zlib/contrib/minizip/LICENSE.Info-Zip": "a6b3dd98c9eee4c6213ffcdbbe5fb782815d0f701059e6c9f2af18740ce6ab98",
+      "licenses/xlang3-third-party/zstd-1.5.7/LICENSE": "d3baadc2e1dd7a7e0b483633e6b39743c16a16f28d696baff507fcd451f3d4ad",
+      "licenses/xmind-LICENSE": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
+      "licenses/xmind-native/cpp-httplib/LICENSE": "4b45cbe16d7b71b89ae6127e26e0d90a029198ca5e958ad8e3d0b8bbed364d8b",
+      "licenses/xmind-native/jsoncons/LICENSE": "88790a489250911e98b3a0059842886846758b45cde330949d0afc8a97d75a42",
+      "licenses/xmind-native/nlohmann/LICENSE.MIT": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603",
+      "modules/xlang_json.x3pkg.dll": "46dbd23f95402d7e0b7e2aa259f6dbbb56bc82112482f5f394d8b25c54f5ea73",
+      "modules/xlang_sqlite3.x3pkg.dll": "28c025f24c292cdeb928b514aac798e4923e1acc6f64d66e955fde9effb78838",
+      "provenance.json": "a0978dcd84359c05b6234604ba2f144af2cce5fae347a5f15c96d9039051acc7",
+      "xlang3.exe": "8e87c05b2ccaced177042211594d4072f45d421ab32d7fdb4e91ea5aeca7f0bc",
+      "xlang3_runtime.dll": "316b9fa78c5bd8a675933121b77c93380a8ddd9f7aa33ed69bc55b19f63341d7",
+      "xmind_admin.exe": "785dc32c147688af179122af1f2d7bd01b7db34cb21fe02f627658a18267fb7d",
+      "xmind_cli.exe": "e1f2d9f5d42728b270b355f7858b5e74f83ee4eda64b9d440be8a0314afe8957",
+      "xmind_schema_worker.exe": "0a42e879c3a047a682df346ec5fb97783a9fa3166267d0285a9e5ef0edff4f7d",
+      "xmind_server.exe": "f126159b4246a868efda411a93f90ed9c311742691649e41023be183f0c52463"
+    },
+    "viewFiles": {
+      "assets/browser.css": "c91bcdd5cba2f65bfab7cb0b20697b3d75c1d82ce53a8d057aa40a83969fff06",
+      "assets/browser.js": "142afb6098ad05883952df695b40aa62cc9c2713256614010ffac32a43be4621",
+      "assets/chat.css": "631e259fce1dfeafe3338737a32b5ca48563c177a29a1edbcd9c9d23470c2601",
+      "assets/chat.js": "f8bab7c36a2f2af0821d2a67df55c905e7baf0d8f048cda46305f47e8503d5ce",
+      "assets/client.js": "9e5f735850b774b6420a3011e136087215187066d54aef583bfd684d386a1905",
+      "assets/index.html": "2981661425b9d6c461b8e4c2a9d87de2d97d6461de13467000af2f2093aa22f6",
+      "assets/licenses/dompurify-MPL.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+      "assets/licenses/dompurify.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "assets/licenses/marked.txt": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+      "assets/marked.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+      "assets/purify.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+      "server.mjs": "8855bc09b139b857a1017e3607144d238767dab080669cb593070e873f1efa6b"
+    },
+    "provenance": {
+      "toolchain": "Visual Studio 18 2026",
+      "runtime": "Native xlang3; no CPython execution or bridge",
+      "xmind": "c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616",
+      "xlang3": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+      "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+      "sqlite_patch_sha256": "5388CDB3D1946CE48A2416055E27B422A2AA1364271A24DC8EB124C72C2C64B4",
+      "toolchain_version": "18.10.12217.157"
+    },
+    "allInstalledArtifactHashesMatched": true,
+    "ownedNativeAndViewProcessesVerified": true,
+    "startupImportsOmitted": true,
+    "staleRuntimeTagCorrected": true
+  },
+  "upgrade": {
+    "countsBeforeLiveAcceptance": {
+      "sessionCount": 10,
+      "runCount": 14,
+      "historyCount": 33,
+      "operationsCount": 3,
+      "graphsCount": 2,
+      "graphChildrenCount": 2
+    },
+    "allPriorRecordsAndGraphChildrenPreserved": true,
+    "operationsPreserved": true,
+    "providerSelectionAndConfigurationPreserved": true,
+    "registeredConfigurationsPreserved": true,
+    "sameAuthenticationTokenAndOrigins": true,
+    "verifiedClosedDatabaseBackupRetained": true,
+    "controlledFreshNativeCookieSurvivedRestart": true,
+    "gracefulShutdownClaimed": false,
+    "sqliteAccess": "Embedded xlang3 only",
+    "stdlibScope": "Existing local standard-library source reused; not claimed Git-pinned",
+    "helperSha256": "43bc603178655a213e430d93e755d3506db43d17d6523bee70d04953687a2ca8"
+  },
+  "fixture": {
+    "schemaVersion": 1,
+    "attempt": 1,
+    "exitCode": 0,
+    "helperSha256": "43bc603178655a213e430d93e755d3506db43d17d6523bee70d04953687a2ca8",
+    "runnerSha256": "1e4cac664b25ea70dcb35192e782edbc70ebf9a722916f257c81492e073de03e",
+    "scope": "Disposable real old19 native/view to verified c4 CI binaries and explicit idle rollback. Graph execution, CLI controller approval, SQLite and DPAPI credential storage are real. Inputs and saved provider credential are synthetic; no provider network or inference. Cookie is a fresh fixture-native cookie, not the user browser cookie.",
+    "livePreviewTouched": false,
+    "liveProviderTested": false,
+    "actualUserBrowserCookieTested": false,
+    "parser": {
+      "fixed": 5,
+      "rejected": 4,
+      "roundTrips": 100,
+      "unknownProviderEnvironmentRemoved": true
+    },
+    "result": {
+      "oldNative": "19d69dd0876e0a01accb444e06924f36008f8ee6",
+      "oldView": "6f32d215493122b433d6e20ff65bfce6c9120c27",
+      "revision": "c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616",
+      "actualNativeGraphRead": true,
+      "actualControllerApprovedCreate": true,
+      "actualXlang3SQLite": true,
+      "savedEncryptedSyntheticCredentialResolved": true,
+      "providerNetworkRequests": 0,
+      "privateRecordsPreserved": true,
+      "configurationPreserved": true,
+      "existingRouteDescriptorsPreserved": true,
+      "newBuiltinRouteAccepted": true,
+      "oldCookieAcrossUpgradeAndRollback": true,
+      "explicitIdleRollback": true,
+      "startupImportsOmitted": true,
+      "retainedBackup": true,
+      "retainedFixture": true,
+      "privateFingerprintPrinted": false,
+      "sessionCount": 2,
+      "runCount": 2,
+      "historyCount": 4,
+      "operationsCount": 1,
+      "graphsCount": 2,
+      "graphChildrenCount": 3
+    },
+    "knownOwnedProcessesStopped": true
+  },
+  "browser": {
+    "originalCookieRefresh": {
+      "result": "Authentication prompt",
+      "cause": "Expired or missing original cookie not distinguished; cookie value not inspected",
+      "softwareCauseEstablished": false
+    },
+    "existingLocalTokenReconnect": true,
+    "providerKeyReentry": false,
+    "actualImmediateRefreshAfterReconnect": true,
+    "actualRefreshAfterLiveAgent": true,
+    "selectionHistoryAndMetricsRetained": true,
+    "desktopViewport": {
+      "height": 760,
+      "rightSidebarVerified": true,
+      "sidebarLeft": 528,
+      "sidebarRight": 1100,
+      "width": 1100,
+      "workspaceRight": 523
+    },
+    "viewportOverrideReset": true,
+    "normalViewportScreenshot": "live-browser-checkpoint-c4ec09fc.jpg",
+    "desktopScreenshot": "live-browser-checkpoint-c4ec09fc-desktop.jpg",
+    "screenshotSha256": {
+      "live-browser-checkpoint-c4ec09fc.jpg": "0db91b34ee4e7dd155ad5c5549f3b31284b3c4e9b5fbc2b79eeed1ea93f0d56d",
+      "live-browser-checkpoint-c4ec09fc-desktop.jpg": "7563df9ab14683c5a39280a3bcf9770dd11bfb95a3d6f7184d2f539cc9732b10"
+    }
+  },
+  "liveAgent": {
+    "sessionId": "76d08cff77dd1f16410e8651a894dfc5",
+    "runId": "a7dd27b5beaae2b56cd56a80354ebc47",
+    "conversationTitle": "Preview acceptance · README clients",
+    "mode": "Agent (default)",
+    "provider": "OpenAI",
+    "wire": "Responses",
+    "model": "gpt-5.6-sol",
+    "prompt": "Read README.md using read_file. Reply only with the three supported client interfaces named there. Do not modify files or execute commands.",
+    "state": "completed",
+    "publicFileRead": "README.md",
+    "publicFileSha256": "004eb3d3f618bdcb475f2f9a5c811ef12e703caee8eaf38ca64ceffdf9d8dcae",
+    "toolCalls": [
+      {
+        "name": "read_file",
+        "completed": true
+      }
+    ],
+    "operations": 0,
+    "reply": "Native CLI, browser UI, and VS Code client.",
+    "providerResponses": [
+      {
+        "model": "gpt-5.6-sol",
+        "usage": {
+          "completion_tokens": 19,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 3739,
+          "input_tokens_details": {
+            "cache_write_tokens": 3736,
+            "cached_tokens": 0
+          },
+          "output_tokens": 19,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 3739,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 3736,
+            "cached_tokens": 0
+          },
+          "total_tokens": 3758
+        },
+        "firstTokenMilliseconds": 1979,
+        "elapsedMilliseconds": 2187
+      },
+      {
+        "model": "gpt-5.6-sol",
+        "usage": {
+          "completion_tokens": 15,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 7824,
+          "input_tokens_details": {
+            "cache_write_tokens": 4085,
+            "cached_tokens": 3736
+          },
+          "output_tokens": 15,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 7824,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 4085,
+            "cached_tokens": 3736
+          },
+          "total_tokens": 7839
+        },
+        "firstTokenMilliseconds": 1444,
+        "elapsedMilliseconds": 1780
+      }
+    ],
+    "visiblePersistedMetrics": [
+      "Input 3,739Output 19Total 3,758Cached 0Reasoning 0gpt-5.6-solOpenAI · ResponsesFirst token 1.98s2.19s",
+      "Input 7,824Output 15Total 7,839Cached 3,736Reasoning 0gpt-5.6-solOpenAI · ResponsesFirst token 1.44s1.78s"
+    ],
+    "providerOrToolRepliesSynthetic": false,
+    "agentExecution": "Native C++",
+    "historyPersistence": "Embedded xlang3 SQLite",
+    "nativeEventCount": 35,
+    "publicFileScope": "Working-tree README with prepared hosted69 and delegation-design documentation edits, read before final installed-preview rollup. Hash records the actual persisted tool-result bytes, not the c4 Git README blob."
+  },
+  "countsAfterLiveAcceptance": {
+    "sessionCount": 11,
+    "runCount": 15,
+    "historyCount": 37,
+    "operationsCount": 3,
+    "graphsCount": 2,
+    "graphChildrenCount": 2,
+    "activeRuns": 0,
+    "activeClaims": 0
+  },
+  "scope": "Actual installed c4 native bundle and packaged shared browser view, verified preservation, rendered browser refresh and one live read-only OpenAI Agent task. Disposable fixture effects and credential inputs have their separate labelled scope.",
+  "incomplete": [
+    "Original browser cookie refresh cause",
+    "Long-duration or expired-cookie refresh acceptance",
+    "Live direct-MCP graph acceptance",
+    "Live Claude/Gemini acceptance",
+    "Actual rendered VS Code acceptance",
+    "Complete OpenCode/provider parity",
+    "Native dynamic delegation"
+  ],
+  "privateCredentialsContentOrFingerprintsPublished": false,
+  "installedCli": {
+    "sourceRevision": "c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616",
+    "installedCliHashMatched": true,
+    "actualBackend": "http://127.0.0.1:57447",
+    "commands": [
+      "provider-profiles",
+      "models",
+      "history"
+    ],
+    "readOnly": true,
+    "profileRevision": 3,
+    "publicRoutes": 4,
+    "backendAdvertisedModels": 1,
+    "liveAcceptanceHistoryMessages": 4,
+    "persistedUsageMatched": true,
+    "providerInferenceOrDiscoveryInvoked": false,
+    "privateValuesPrinted": false
+  }
+}

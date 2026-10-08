@@ -9,9 +9,23 @@ in **2.31 seconds**. Fresh browser/native integration passed the rebuilt server
 and source-matched assets. An initial HTTP startup failure exposed an obsolete
 model-only guard; the corrected final source and expanded model-configuration
 negatives passed the full gate. Its [failed interim log](evidence/native-graph-mcp-initial-ctest.log)
-is retained separately and is not counted as a pass. Exact hosted69 validation
-remains pending.
+is retained separately and is not counted as a pass.
 [Local69 source/runtime/log evidence](evidence/native-graph-mcp-local-provenance.json).
+
+Exact `c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616` subsequently passed its
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37755382937):
+**69 native contracts in 184.36 seconds**, **98 extension tests in 3.2107402
+seconds** and **17 browser tests in 1.5543002 seconds**, native/browser integration
+and verification of all 18 required VSIX assets. All 16 job steps succeeded;
+zero failures/skips and the exact expected/registered/passed manifest were
+verified. The direct MCP graph and HTTP/CLI contracts took **12.60/3.87 seconds**.
+All 14 final local source hashes match this hosted revision. Raw job bytes,
+including the UTF-8 BOM, are preserved. Exact runtime/evidence archive digests,
+source/runtime/standard-library pins and the SQLite patch hash were checked;
+safe fresh extraction records all 29 runtime, 30 VSIX and 12 browser-runtime
+file hashes. Downloaded artifact verification does not establish installation
+or a live provider/IDE result.
+[Exact hosted69 evidence](evidence/native-graph-mcp-hosted-provenance.json).
 
 MCP nodes exclusively use an exact alias, a pinned enabled server revision and
 a strict `arguments_json` object string. Native execution rediscovery precedes
@@ -28,14 +42,23 @@ remain inspectable/cancellable but resume rejects before input commit. The
 stopped-backend administrator adds private credential resolution and catalogue
 reflection rejection. Actual owned peers write real disposable files after
 approval; dependent native reads, human pause/reopen, denied/cancelled/invalid/
-drift/stale paths, shared-server claim serialization, lost replies, acknowledged
+drift/stale paths, jointly shared-workspace/configured-server claim serialization, lost replies, acknowledged
 output bounds and injected outcome-journal failures/recovery passed through the
 native graph/permission engines and embedded-xlang3 SQLite.
 [Implementation and acceptance scope](native-graph-mcp.md).
 
 Frontend sources remain unchanged from the prior verified `ae7c4ba`/`fceb50b`
-checkpoints, retaining **98 extension and 17 browser tests**; those suites have not been rerun for the
-direct-MCP graph change. Installed native/view snapshots remain unchanged.
+checkpoints, retaining **98 extension and 17 browser tests** in the local scope;
+those suites were rerun and passed in the exact hosted69 gate above.
+The verified c4 native bundle and packaged view are now installed, with all
+29/12 artifact hashes matched and prior records/configuration preserved. A
+disposable actual upgrade and explicit rollback passed before installation.
+One live read-only OpenAI Agent request, retained visible metrics and subsequent
+rendered refresh passed. The original browser session needed one reconnect;
+its precise cause remains unresolved. Installed native CLI `provider-profiles`,
+`models` and the live acceptance `history` reads also passed without inference
+or discovery. [Installed acceptance](preview-checkpoint-c4ec09fc.md),
+[exact public record](evidence/live-browser-checkpoint-c4ec09fc.json).
 Synthetic peer protocol fixtures do not establish live direct-MCP graph or
 rendered IDE acceptance, or complete MCP/graph parity.
 
@@ -229,9 +252,10 @@ raw/signed/redacted receipts and same-wire replay without repeated effects.
 Live Gemini and Claude inference remain
 unverified.
 
-The installed browser preview retains its separate verified native `19d69dd`
-and view `6f32d215` snapshots. Neither the cleanup bundle nor this newer native
-source is installed there. See [provider setup](provider-setup.md).
+The installed browser preview uses the verified native `c4ec09fc` bundle and
+packaged shared view. Its records and one live OpenAI read-only scenario were
+verified separately from the hosted tests. See
+[installed scope](preview-checkpoint-c4ec09fc.md).
 
 The Python prototype and original xlang runtime/service/plugin assets, launchers
 and dependent probes are removed. Both root and Native CMake entry points use

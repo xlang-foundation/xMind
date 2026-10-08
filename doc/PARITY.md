@@ -37,11 +37,19 @@ reply-loss quarantine and journal fail-stop without replay. Fourteen frozen
 source hashes match the pre-build capture. Fresh browser/native integration
 passed; unchanged frontend sources retain exact fceb hosted **98 extension and
 17 browser tests**, without rerunning those suites for this native change.
-Hosted69, live MCP interoperability and rendered IDE acceptance remain pending;
-installed previews and provider/parity counts are unchanged. The initial HTTP
-start-guard failure remains separate historical evidence.
+Exact source `c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616` subsequently passed
+hosted **69 native contracts in 184.36 seconds**, **98 extension and 17 browser
+tests**, native/browser integration and 18-asset VSIX verification, with zero
+failures/skips and all 16 job steps successful. Live direct-MCP graph and
+rendered IDE acceptance remain pending; provider/parity counts are unchanged.
+The initial HTTP start-guard failure remains separate historical evidence.
 [Local69 evidence](evidence/native-graph-mcp-local-provenance.json),
+[exact hosted69 evidence](evidence/native-graph-mcp-hosted-provenance.json),
 [Direct MCP graph scope](native-graph-mcp.md).
+
+[Native dynamic delegation](native-delegation-design.md) is the next design,
+covering real model-selected children under ordinary Agent mode. It does not
+count as implemented delegation, runtime replanning or verified OpenCode parity.
 
 The ordered-Claude-history local checkpoint passed **67 native contracts in 117.65 seconds**,
 with an exact manifest, zero failures/skips and no post-build exclusions. Strict

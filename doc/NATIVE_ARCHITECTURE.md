@@ -61,12 +61,22 @@ the external effect. This scope is separate from the completed Claude67 gate
 below and adds no provider-parity claim. Fresh browser/native integration
 passed against the rebuilt server and source-matched assets. Unchanged frontend
 sources retain the exact fceb hosted **98 extension and 17 browser tests**;
-those suites were not rerun for this native change. Hosted69 validation, live
-MCP interoperability and rendered IDE acceptance remain pending; installed
-previews are unchanged. The initial HTTP start-guard failure is retained
+those suites were not rerun for that local native gate. Exact source
+`c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616` subsequently passed hosted **69
+native contracts in 184.36 seconds**, **98 extension and 17 browser tests**,
+native/browser integration and 18-asset VSIX verification, with zero failures/skips
+and all 16 job steps successful. Live direct-MCP graph and rendered IDE
+acceptance remain pending. The initial HTTP start-guard failure is retained
 separately from the final passing gate.
 [Local69 provenance](evidence/native-graph-mcp-local-provenance.json),
+[exact hosted69 provenance](evidence/native-graph-mcp-hosted-provenance.json),
 [Direct MCP graph contract](native-graph-mcp.md).
+
+The [next native delegation design](native-delegation-design.md) proposes
+model-selected leaf investigations in normal Agent mode. Child AgentRunners
+retain separate histories and shared execution budgets; approved effects stay
+with the native controller. This is unimplemented design, not graph or parity
+acceptance and not an applied v10 migration.
 
 The ordered-Claude-history checkpoint passed all **67 native contracts
 locally in 117.65 seconds**, with an exact manifest, zero failures/skips and no
@@ -192,8 +202,12 @@ This hosted65 result excludes newer Claude66 agent/metrics and Claude67 history
 source. Live Gemini
 inference and actual Gemini IDE interaction remain unverified.
 [Provider setup](provider-setup.md).
-The installed browser preview retains its separately verified native `19d69dd`
-and view `6f32d215` snapshots. [Current validation](VALIDATION_STATUS.md).
+The installed browser preview now uses the verified `c4ec09fc` native bundle
+and packaged shared view. Installation preserved prior records and settings;
+one actual read-only OpenAI Agent task rendered history/metrics and survived
+refresh. The original browser session required reconnect and its exact cause
+remains unresolved. [Installed scope](preview-checkpoint-c4ec09fc.md),
+[current validation](VALIDATION_STATUS.md).
 
 [OPENCODE_API_INVENTORY.json](OPENCODE_API_INVENTORY.json) records **136** pinned
 operations with acceptance requirements, **zero** removed-prototype mappings,

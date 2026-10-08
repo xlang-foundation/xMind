@@ -30,11 +30,21 @@ browser/native integration passed the rebuilt server and source-matched assets.
 Its first HTTP launch failure exposed an obsolete model-only guard; the [failed
 interim log](evidence/native-graph-mcp-initial-ctest.log) is retained separately
 from the final passing corrected-source gate and additional invalid model
-configuration cases. Hosted69 remains pending. Unchanged frontend sources
-retain the prior **98 extension and 17 browser tests**, without rerunning those
-suites for this native change. Installed previews remain unchanged; live
-direct-MCP graph, rendered IDE and complete parity acceptance remain incomplete.
-[Exact local69 evidence](evidence/native-graph-mcp-local-provenance.json).
+configuration cases. Exact revision
+`c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616` subsequently passed its
+[hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37755382937):
+**69 native contracts in 184.36 seconds**, **98 extension tests in 3.2107402
+seconds**, **17 browser tests in 1.5543002 seconds**, native/browser integration
+and 18-asset VSIX verification. All 16 job steps passed, with an exact native
+manifest and zero failures/skips. Live direct-MCP graph, rendered IDE and
+complete parity acceptance remain incomplete.
+[Exact local69 evidence](evidence/native-graph-mcp-local-provenance.json),
+[exact hosted69 evidence](evidence/native-graph-mcp-hosted-provenance.json).
+
+The [next native delegation design](native-delegation-design.md) defines
+model-selected leaf investigations in ordinary Agent mode, actual child
+AgentRunners, owned histories, shared execution budgets and approved parent
+effects. Its proposed v10 schema is not a migration in this checkpoint.
 
 The preceding `fceb50b` Claude receipt checkpoint passed the full local **67-contract native
 gate in 117.65 seconds**, with an exact manifest, zero failures/skips and no
@@ -167,10 +177,14 @@ previews are unchanged; live Gemini inference, actual Gemini IDE acceptance and
 full provider/coding/protocol parity remain incomplete.
 [Provider setup](provider-setup.md), [CLI scope](native-interactive-cli.md).
 
-The installed browser preview is still the separately verified native
-`19d69dd` and view `6f32d215` pair. These source checkpoints do not imply a
-preview upgrade. [Current validation](VALIDATION_STATUS.md),
-[installed provider scope](provider-setup.md).
+The installed browser preview now uses the verified `c4ec09fc` native bundle
+and packaged shared view, with all 29/12 file hashes matched. Prior records and
+settings were preserved; an actual read-only OpenAI Agent request, visible
+metrics and subsequent refresh passed. Its original browser session needed one
+reconnect; the exact cause remains unresolved. The disposable actual upgrade
+and explicit rollback passed separately before installation.
+[Installed acceptance](preview-checkpoint-c4ec09fc.md),
+[current validation](VALIDATION_STATUS.md).
 
 All counts describe bounded verification, not product or OpenCode parity
 percentages. Broad native providers, full coding workflows, remaining MCP/A2A,

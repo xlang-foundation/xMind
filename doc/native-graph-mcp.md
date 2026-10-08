@@ -114,8 +114,28 @@ HTTP/CLI contract in **2.31 seconds**. All 14 changed native/config/fixture
 source hashes match the capture before the final guarded build. Fresh
 browser/native integration passed the rebuilt server and source-matched assets.
 Frontend sources are unchanged from the exact preceding hosted `fceb50ba`
-gate and retain its **98 extension and 17 browser tests**, without rerunning
-those suites for this native change. [Local evidence](evidence/native-graph-mcp-local-provenance.json).
+gate and retain its **98 extension and 17 browser tests** in the local scope,
+without rerunning those suites locally for this native change.
+[Local evidence](evidence/native-graph-mcp-local-provenance.json).
+
+Exact revision `c4ec09fc3ee25c1b3a2bd9087b25f5af420ee616` subsequently passed
+the [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37755382937):
+**69 native contracts in 184.36 seconds**, **98 extension tests in 3.2107402
+seconds** and **17 browser tests in 1.5543002 seconds**, with zero failures/skips,
+the exact registered/expected/passed manifest and all 16 job steps successful.
+The new graph and HTTP/CLI contracts took **12.60/3.87 seconds**. Hosted
+native/browser integration and verification of the 18 required VSIX assets
+passed. All 14 final local source hashes match that exact hosted revision.
+[Hosted evidence](evidence/native-graph-mcp-hosted-provenance.json).
+
+The exact evidence/runtime archives and contained VSIX were downloaded and
+verified against GitHub artifact digests, source/runtime/standard-library pins
+and the SQLite prerequisite patch hash. Every destination was validated inside
+fresh owned CI folders before extraction. The provenance records all **29
+runtime files, 30 VSIX files and 12 browser-runtime files** with SHA-256 hashes;
+direct packaged source text matches the exact revision modulo checkout CRLF.
+Original job-log bytes retain their UTF-8 BOM. This artifact verification does
+not execute/install the bundle or establish an installed-preview upgrade.
 
 The first intermediate gate failed one HTTP startup case because the existing
 workspace guard demanded a model capability flag without a model. The final
@@ -132,7 +152,7 @@ SQLite. `native_graph_mcp_http_contract` exercises actual native administrator,
 server, CLI and the shared view adapter. Their peer metadata/protocol replies
 are explicitly synthetic. The scope does not establish live providers,
 rendered IDE acceptance, dynamic graph planning, MCP HTTP/OAuth/resources,
-outbound A2A or complete coding/protocol parity. Installed previews are separate
-and remain unchanged. Exact hosted69 verification remains pending. The separate
+outbound A2A or complete coding/protocol parity. Installed-preview verification
+is a separate scope. The separate
 [preceding hosted67 evidence](evidence/native-anthropic-history-hosted-provenance.json)
 covers Claude history source and excludes this newer MCP graph implementation.
