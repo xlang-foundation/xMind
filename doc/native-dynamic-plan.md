@@ -1,5 +1,23 @@
 # Native dependency plans in ordinary Agent mode
 
+The dynamic coding-child MCP checkpoint passed the complete guarded local
+**78-contract native gate in 145.17 seconds**, with the exact complete manifest
+and all **427 frozen native/build-source input hashes** verified. The new
+contract passed in **3.08 seconds** and covered approved peer writes followed by
+an independent native read, denied approval, child-only negotiated-protocol
+drift, cancellation before dispatch, and a write with a lost reply. Its five
+scenarios asserted **16 synthetic provider requests, 13 actual MCP peer discovery
+cycles and two actual MCP dispatches** through AgentService, owned coding/inspect
+children, exact approvals and embedded-xlang3 SQLite. The peer is an independent
+legacy-wire fixture; this is neither an upstream SDK nor live-provider result.
+[Local78 source, logs and limits](evidence/native-dynamic-mcp-local-provenance.json).
+
+The earlier hosted 3fc gate below remains a separate 77/119/26 result. Frontend
+sources are unchanged and those suites were not rerun for this native contract.
+The installed preview remains ace/schema v10; schema-v11 installation, rendered
+planning and installed VS Code acceptance remain pending. No SDK fix was made
+for this checkpoint.
+
 Exact source `3fc420480f61db75d3efaf4bda77fbefd8246166` subsequently passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37808089507): **77 native contracts in 206.89 seconds**, **119 extension tests in 2.4612639 seconds** and **26 browser tests in 1.3989153 seconds**. All 16 job steps passed, with the exact complete native manifest, zero failures/skips, model-free browser/native integration and 18 verified VSIX assets. Original logs, advertised archive digests and exact source/runtime maps were verified. Provider replies remain synthetic; this establishes the source checkpoint rather than installed or live planning acceptance. The installed preview remains ace/schema v10. [Artifact-bound hosted evidence](evidence/native-dynamic-plan-hosted-provenance.json).
 
 The initial schema-v11 source increment passed the complete guarded local gate:
@@ -133,9 +151,29 @@ browser/native integration uses disposable model-free state to check graph,
 human, authentication, durable cookie and reconnect boundaries; it does not
 establish end-to-end dynamic planning through a rendered view. The actual
 modern/legacy MCP registry checks and SQLite binding negatives do not establish
-a real dynamic coding-child MCP peer effect.
+a real dynamic coding-child MCP peer effect on their own. The later local 78-contract
+contract does: its coding child rediscovers the exact nine-field private MCP
+binding, proposes a child-owned journal operation and waits for actual controller
+approval before the peer appends bytes. A dependent inspect child reads those
+bytes independently; the peer acknowledgement still reports
+`independently_verified: false`. Protocol-only child drift rejects before its
+model request or proposal, denial/cancellation produce no peer dispatch, and a
+lost reply retains an uncertain operation/node without verifier dispatch or
+replay after reopen. This contract does not separately prove a newly approved
+root is blocked by the retained quarantine; existing direct-MCP contracts cover
+that boundary. It also does not establish live or installed IDE MCP effects.
 
 ## Retained failed gates and corrections
+
+The first complete gate for the additional MCP contract passed **77 of 78** in
+**159.80 seconds**. Its synthetic initial coding proposal omitted the required
+empty `depends_on` array, so native admission rejected it before child approval,
+peer dispatch or a file effect. Adding only `depends_on: []` to that proposal
+preserved production validation, all five scenario assertions and their exact
+request-count checks. The second complete gate passed all 78; no production C++
+change was needed. The first failed source, log and disposable fixture remain
+retained and are not counted as a pass.
+[Failed attempt and corrected full gate](evidence/native-dynamic-mcp-local-provenance.json).
 
 The first complete native gate passed 68 of 77 contracts in 239.52 seconds.
 A shared condition variable allowed the expiry observer to consume a worker

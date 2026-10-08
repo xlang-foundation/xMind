@@ -20,6 +20,20 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+The bounded dependency-planning implementation now has a complete local
+**78-contract gate** covering actual MCP effects inside dynamically admitted
+coding children. Five new integration scenarios verify exact child-owned
+approval and captured protocol bindings, a real peer write with a separate
+native verification read, denial/cancellation before dispatch, and lost-reply
+uncertainty without reopening replay. The provider replies and bespoke legacy
+peer descriptors are synthetic; native agents, effects and xlang3 SQLite are
+real. The initial malformed fixture failure remains separate. Frontend source
+and the installed ace/schema-v10 preview are unchanged. This does not establish
+live planning, editor acceptance, recursive planning, deterministic dynamic
+nodes, skills, compaction, outbound A2A or complete coding/provider parity.
+[Local78 evidence](evidence/native-dynamic-mcp-local-provenance.json),
+[planning scope](native-dynamic-plan.md).
+
 Native Responses reasoning continuation passed the exact ace2460 hosted gate: **71 native contracts in 171.52 seconds, 103 extension and 20 browser contracts**, with all 16 job steps, native/browser integration and 18 VSIX assets passing. Verified sources and artifact maps bind the completed-item continuation fix and its real native two-child read/join with synthetic provider replies. The local build was deferred by the benchmark guard. The exact native bundle is installed. One real OpenAI browser prompt completed two read-only native children and a joined parent response, with six owned model attempts, separate per-response metrics and zero effect operations. Immediate refresh retained the connection and selection. Upgrade and rollback checks passed at their separately documented scopes. [Compatibility and scope](native-responses-reasoning.md), [exact hosted evidence](evidence/native-responses-reasoning-hosted-provenance.json).
 
 Ordinary Agent mode now offers native `delegate_tasks` for model-selected read-only workspace investigations. Actual child AgentRunners keep separate conversations and measured response usage/timing, share their parent's call/deadline limits, and return observed results before the parent continues or requests an approval-controlled effect. Schema v10 durably binds tasks, immutable presets, budgets and once-only settlements; recovery never replays children. CLI, browser and VS Code observe the same owned child histories and committed tree cursors.
@@ -213,13 +227,13 @@ removed Python prototype's status table; it is not a completion score.
 | Capability | Native component scope | Remaining acceptance |
 | --- | --- | --- |
 | Persistent sessions and run events | C++ repositories, ownership, transactions, replay and recovery use SQLite through embedded xlang3 | Complete concurrent-client conversations, failure/recovery and release acceptance |
-| Agent/model/tool loop | Shared C++ single-agent/graph execution and exact hosted71 ordinary-Agent read-only delegation, durable budgets/settlement and signed tool continuation | Broad live coding tasks, mutable dependency planning/replanning, context bounds and production recovery |
+| Agent/model/tool loop | Shared C++ single-agent/graph execution, hosted71 read-only delegation, hosted77 bounded dependency planning/revision and local78 coding-child MCP effects with durable budgets and signed continuation | Broad live coding tasks, live/rendered/installed planning acceptance, recursive/deterministic dynamic nodes, context bounds and production recovery |
 | Models and providers | Native Chat Completions and Responses; Gemini catalogue/enrollment/owned-key execution is hosted-verified at 64, profile CLI controls at hosted65, Claude tools/metrics at hosted66 and ordered opaque signed receipts/actual SQLite replay at hosted67 | Thinking request controls and live Claude/Gemini acceptance, model/account binding, pinned-model and broad provider/authentication/capability coverage; see [MODEL_SUPPORT.md](MODEL_SUPPORT.md) |
 | File/search/edit/process tools | Native workspace reads/search, approval-backed edits/creation and foreground process effects have scoped contracts | General patch review, background/PTY execution and complete repository coding tasks |
 | Instructions and agent presets | Native repository guidance discovery, source binding, durable approval checks and explicit workspace.inspect revision1 leaf policy | Full instruction scoping/configuration and broader reproducible presets |
 | Skills and commands | Native ownership is specified | Discovery, execution, lifecycle and CLI/editor acceptance |
 | Plugins | Native ownership is specified | Lifecycle, hooks, isolation and compatibility acceptance |
-| MCP | Native configured stdio tools, schema worker, approvals and modern/legacy official SDK peers have scoped contracts; direct graph nodes/offline alias discovery and actual local graph effects passed the scoped 69-contract gate | Streamable HTTP/OAuth, resources/prompts, broader SDK features and full live coding interoperability |
+| MCP | Native configured stdio tools, schema worker, approvals and modern/legacy official SDK peers have scoped contracts; hosted69 direct graph effects and local78 dynamically planned coding-child effects have separate acceptance scopes | Streamable HTTP/OAuth, resources/prompts, broader SDK features and full live coding interoperability |
 | Permissions and policies | Backend-owned durable grant/deny/cancel and effect ownership have actual file/process/peer fixtures | Complete policy rules, recovery and consistent enforcement across exposed tools/protocols |
 | Context compaction | Required by the native coding goal | Bounded context with preserved instructions, provider state and continuation |
 | Snapshots and recovery | Durable uncertainty inspection and non-replay safeguards cover selected effects | General reviewable snapshots, restoration and attributed reconciliation |
@@ -229,7 +243,7 @@ removed Python prototype's status table; it is not a completion score.
 | Session sharing | Local backend sessions are shared across authorized views | Explicit export/sharing behavior and access-controlled output; team sharing belongs to Nexus |
 | CLI/TUI | Native client supports authenticated conversation/run/approval/inspection flows plus profile catalogue/setup/selection, revision-bound admission and signed native history in the exact hosted65 scope | Complete interactive coding/terminal UX acceptance and execution of newer source at its own scope |
 | Browser and VS Code | Thin browser and right-sidebar clients display native history, models, approvals and actual metrics within recorded scopes | Complete populated coding, diff/recovery/context and editor acceptance |
-| A2A and agent graphs | Native shared-executor task controls, admission, discovery/stream/history and durable graphs have scoped contracts; hosted69 verifies direct MCP graph effects, hosted71 ordinary-Agent read-only delegation; exact e353 backend is installed and its browser repair is rendered | Successful live delegation/join after the first Responses terminal-validation failure, installed VS Code delegation acceptance, dynamic dependency planning/replanning, outbound remote delegation and remaining protocol interoperability |
+| A2A and agent graphs | Native shared-executor task controls and durable graphs have scoped contracts; hosted69 direct MCP effects, hosted71 read-only delegation, hosted77 bounded planning/revision and local78 coding-child MCP effects are distinct results. The installed ace/schema-v10 preview completed a real OpenAI two-child read/join; its repaired browser view was rendered | Installed VS Code delegation and live/rendered/installed planning acceptance, recursive/deterministic dynamic nodes, outbound remote delegation and remaining protocol interoperability |
 | Local/Nexus profiles | Shared protocol and ownership boundaries are specified | Profile isolation, authenticated enrollment and reconnect/lease/recovery acceptance; Nexus implements private coordination |
 
 Themes, warming and additional build/API surfaces need comparison against the

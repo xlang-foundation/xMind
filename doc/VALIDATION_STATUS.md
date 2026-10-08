@@ -1,5 +1,27 @@
 # Current native validation
 
+The dynamic coding-child MCP checkpoint passed the complete guarded local
+**78 native contracts in 145.17 seconds**, with the exact complete manifest and
+all **427 frozen native/build-source inputs** verified. The new contract took
+**3.08 seconds**: five scenarios asserted 16 synthetic provider requests,
+13 actual legacy-wire MCP discovery cycles and two actual MCP dispatches. Real
+native coding-child ownership, a full nine-field immutable binding, exact
+controller approval, peer filesystem writes, dependent native read verification
+and embedded-xlang3 SQLite passed. Denial/cancellation had no peer effect;
+child-only protocol drift rejected before its provider request; lost-reply
+uncertainty retained the actual journal/node and did not replay after reopen.
+The acknowledgement retains `independently_verified: false` despite the separate
+read. This is not live/upstream-SDK/installed-IDE acceptance or a new-root
+quarantine test. The first complete attempt passed **77/78 in 159.80 seconds**;
+its fixture omitted required `depends_on: []`, and the sole peer correction
+preserved production C++ and all assertions/counts. Both attempts remain separate.
+[Local78 evidence and retained failure](evidence/native-dynamic-mcp-local-provenance.json).
+
+The preceding hosted 3fc **77/119/26** results remain scoped below. UI sources
+are unchanged; their suites were not rerun for this native contract. The managed
+preview remains ace/schema v10, and the native path-gap discussion has not
+resulted in an SDK fix or schema-v11 installation.
+
 The schema-v11 preview upgrade remains **uninstalled**. Two disposable migration
 attempts failed and are retained. A separately guarded diagnostic confirmed that
 the exact xlang3 runtime reads an identical schema file at a 226-character Windows
@@ -14,7 +36,8 @@ Exact source `3fc420480f61db75d3efaf4bda77fbefd8246166` subsequently passed its 
 
 The initial native dependency-planning checkpoint (schema v11) passed the complete guarded local **77-contract gate in 153.88 seconds**, with the exact expected/registered/passed manifest and all **421 frozen native source hashes** verified. Native contracts cover model-selected agent/human dependencies, an actual failed investigation, same-plan revision, clean pause/reopen, authenticated same-owner input, a separately approved coding-child edit and a dependent verification read. Provider replies, signatures and keys are synthetic; execution, files, permissions, transport and embedded-xlang3 SQLite are real. **119 extension and 26 browser contracts** passed at their separate renderer/controller scope. The earlier **68/77** and **76/77** gate failures remain separate retained attempts. [Initial implementation and limits](native-dynamic-plan.md), [local source and gate evidence](evidence/native-dynamic-plan-local-provenance.json).
 
-Model-free browser/native graph/human/auth/cookie/reconnect integration passed against the rebuilt server and matching assets; all **18 required VSIX assets** were packaged and verified. These checks establish neither rendered dynamic-planning nor installed-editor acceptance. The installed preview remains **ace2460/schema v10** with the retained repaired browser view and its separately recorded live read-only join. Schema-v11 installation, live planning and installed VS Code acceptance remain pending. The local gates do not establish actual dynamic coding-child MCP peer effects. Deterministic dynamic tool/MCP/process nodes, recursive planning, skills, context compaction, outbound A2A and complete coding/provider parity remain required.
+Model-free browser/native graph/human/auth/cookie/reconnect integration passed against the rebuilt server and matching assets; all **18 required VSIX assets** were packaged and verified. These checks establish neither rendered dynamic-planning nor installed-editor acceptance. The installed preview remains **ace2460/schema v10** with the retained repaired browser view and its separately recorded live read-only join. Schema-v11 installation, live planning and installed VS Code acceptance remain pending. The initial 77-contract gates do not establish dynamic coding-child MCP peer effects; the
+later local 78-contract contract above supplies that bounded actual-peer scope. Deterministic dynamic tool/MCP/process nodes, recursive planning, skills, context compaction, outbound A2A and complete coding/provider parity remain required.
 
 Native Responses reasoning continuation passed the exact ace2460 hosted gate: **71 native contracts in 171.52 seconds, 103 extension and 20 browser contracts**, with all 16 job steps, native/browser integration and 18 VSIX assets passing. Verified sources and artifact maps bind the completed-item continuation fix and its real native two-child read/join with synthetic provider replies. The local build was deferred by the benchmark guard. The exact native bundle is installed. One real OpenAI browser prompt completed two read-only native children and a joined parent response, with six owned model attempts, separate per-response metrics and zero effect operations. Immediate refresh retained the connection and selection. Upgrade and rollback checks passed at their separately documented scopes. [Compatibility and scope](native-responses-reasoning.md), [exact hosted evidence](evidence/native-responses-reasoning-hosted-provenance.json).
 
