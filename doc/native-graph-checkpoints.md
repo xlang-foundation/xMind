@@ -1,5 +1,18 @@
 # Durable native graph checkpoints
 
+Interactive CLI graph control is newer source pending compiled validation.
+`chat` now accepts `/graph-watch ROOT_ID`, using the same recorded root and
+validated children rather than admitting a new workflow. It exposes human
+prompts with checkpoint revisions and accepts explicit bounded JSON input,
+child-operation approval/denial and root cancellation. Stale input is rejected
+without automatic replay, and detaching leaves backend execution owned by the
+server. The extended native graph service contract covers model-free human/tool
+flows, cross-client stale input, reconnection, cancellation and a real child file
+creation. Only syntax/whitespace checks have run for this addition because the
+local build guard detected an active xlang3 benchmark. This does not establish
+live console acceptance, dynamic graph planning or full coding parity.
+See [interactive CLI scope](native-interactive-cli.md).
+
 Source `b9e96fceb8a8cc25db597f51b2a50583294b6009` passed **40 native and 41 extension contracts** in [isolated CI](https://github.com/xlang-foundation/xMind/actions/runs/37653997518): [hosted CTest](evidence/native-graph-checkpoint-hosted-ctest.log), [original job/TAP output](evidence/native-graph-checkpoint-passing-ci-job.log), [hosted provenance](evidence/native-graph-checkpoint-hosted-provenance.json). Earlier local evidence is preserved: [complete build/CTest output](evidence/native-graph-checkpoint-local-build-ctest.log), [source/binary provenance](evidence/native-graph-checkpoint-local-provenance.json). Completion/controller values in the ledger fixture are synthetic; transactions and SQLite failure/reopen checks are actual. The subsequent [native graph executor](native-graph-runner.md) adds actual component execution; public graph scheduling, authenticated graph HTTP/CLI/view controls and live-provider acceptance remain pending.
 
 Repository schema version 6 adds an immutable-plan-bound coordinator snapshot and positive checkpoint revision to each graph root. Admission advances the coordinator and creates the child, private prompt and root/child events in one transaction. A revision precondition rejects stale scheduling decisions. Failed admission events roll checkpoint changes back along with the child. Node readiness/conditions are checked again from the stored checkpoint, so a declared but unready agent cannot be admitted.

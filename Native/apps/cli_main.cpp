@@ -42,17 +42,20 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
     };
     std::string session;
     if(graph){const auto root=read(path);if(!root.is_object() || root.value("id",std::string{})!=run || root.value("graph_root",false)!=true || !root.contains("session_id") || !root["session_id"].is_string() || root["session_id"].get<std::string>().empty())throw std::runtime_error("Select a graph root for graph observation");session=root["session_id"].get<std::string>();}
+    auto owners=[&] {
+        std::set<std::string> owned{run};
+        if(graph){
+            const auto children=read("/v1/graph-runs/"+run+"/children");
+            if(!children.is_array())throw std::runtime_error("Invalid graph child batch");
+            for(const auto& child:children){const auto id=child.value("id",std::string{});if(!child.is_object() || child.value("parent_id",std::string{})!=run || child.value("session_id",std::string{})!=session || id.empty() || id.size()>128 || id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos || !owned.insert(id).second)throw std::runtime_error("Invalid graph child ownership");}
+        }
+        return owned;
+    };
     auto emit=[&] {
         const auto events=read((graph?"/v1/graph-runs/"+run:path)+"/events?after="+std::to_string(cursor));
         if(!events.is_array())throw std::runtime_error("Invalid backend event batch");
-        std::set<std::string> owned{run};
-        if(graph){
-            // Children can be admitted between reads. Fetch ownership AFTER the
-            // event batch so newly observed child events have durable identities.
-            const auto children=read("/v1/graph-runs/"+run+"/children");
-            if(!children.is_array())throw std::runtime_error("Invalid graph child batch");
-            for(const auto& child:children){if(!child.is_object() || child.value("parent_id",std::string{})!=run || child.value("session_id",std::string{})!=session || !child.contains("id") || !child["id"].is_string() || child["id"].get<std::string>().empty() || !owned.insert(child["id"].get<std::string>()).second)throw std::runtime_error("Invalid graph child ownership");}
-        }
+        // Ownership is read after events so newly admitted children are covered.
+        const auto owned=owners();
         for(const auto& event:events) {
             if(!event.is_object() || !event.contains("seq") || !event["seq"].is_number_integer() || event["seq"]<=cursor || event["seq"]>std::numeric_limits<std::int64_t>::max() || !event.contains("run_id") || !event["run_id"].is_string() || !owned.contains(event["run_id"].get<std::string>()) || !event.contains("kind") || !event["kind"].is_string() || !event.contains("data"))throw std::runtime_error("Invalid backend event identity or cursor");
             std::cout<<event.dump()<<'\n'<<std::flush;
@@ -71,10 +74,11 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
         }
         if(value!="queued" && value!="running" && value!="paused")throw std::runtime_error("Unknown backend run state");
         if(interactive){
-            const auto operations=read(path+"/operations");
-            if(!operations.is_array())throw std::runtime_error("Invalid backend operation list");
+            auto operations=Json::array();const auto owned=owners();
+            for(const auto& owner:owned){const auto batch=read("/v1/runs/"+owner+"/operations");if(!batch.is_array())throw std::runtime_error("Invalid backend operation list");for(const auto& operation:batch){if(!operation.is_object()||operation.value("run_id",std::string{})!=owner)throw std::runtime_error("Invalid operation ownership");operations.push_back(operation);}}
+            bool interacted=false;
             for(const auto& operation:operations){
-                if(!operation.is_object() || operation.value("run_id",std::string{})!=run)throw std::runtime_error("Invalid operation ownership");
+                if(!operation.is_object() || !owned.contains(operation.value("run_id",std::string{})))throw std::runtime_error("Invalid operation ownership");
                 if(operation.value("state",std::string{})!="awaiting_approval")continue;
                 const auto operationId=operation.value("id",std::string{});
                 if(operationId.empty() || operationId.size()>128 || operationId.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid approval identity");
@@ -96,7 +100,34 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
                 if(!response)throw std::runtime_error("Cannot reach xMind Server for approval");
                 if(response->status<200 || response->status>=300)std::cerr<<"Backend rejected the decision (HTTP "<<response->status<<"). Refreshing recorded state.\n";
                 else std::cout<<Json{{"type","operation_decision_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;
+                interacted=true;
                 break; // Re-read state before reviewing another operation.
+            }
+            if(interacted)continue;
+            if(graph){
+                const auto snapshot=read("/v1/graph-runs/"+run);
+                if(!snapshot.is_object()||snapshot.at("run").value("id",std::string{})!=run||snapshot.at("run").value("session_id",std::string{})!=session||!snapshot.contains("checkpoint_revision")||!snapshot["checkpoint_revision"].is_number_integer()||snapshot["checkpoint_revision"]<1||snapshot["checkpoint_revision"]>9007199254740991||!snapshot.at("checkpoint").at("nodes").is_array()||!snapshot.at("spec").at("nodes").is_array())throw std::runtime_error("Invalid graph input snapshot");
+                auto steps=Json::array();std::set<std::string> waiting;
+                for(const auto& node:snapshot["checkpoint"]["nodes"]){
+                    if(node.value("state",std::string{})!="waiting_human")continue;
+                    const auto id=node.value("id",std::string{});
+                    if(id.empty()||id.size()>64||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||!waiting.insert(id).second)throw std::runtime_error("Invalid graph human identity");
+                    const auto& definitions=snapshot["spec"]["nodes"];const auto definition=std::find_if(definitions.begin(),definitions.end(),[&](const Json& value){return value.value("id",std::string{})==id&&value.value("type",std::string{})=="human";});
+                    if(definition==definitions.end()||!definition->contains("prompt")||!(*definition)["prompt"].is_string())throw std::runtime_error("Invalid graph human definition");
+                    steps.push_back({{"node_id",id},{"prompt",(*definition)["prompt"]}});
+                }
+                if(!steps.empty()){
+                    const auto revision=snapshot["checkpoint_revision"].get<std::int64_t>();
+                    std::cout<<Json{{"type","graph_human_review"},{"root_run_id",run},{"checkpoint_revision",revision},{"steps",steps}}.dump()<<'\n'<<std::flush;
+                    if(!std::cout)throw std::runtime_error("Graph review output is unavailable");
+                    std::cerr<<"Enter /input NODE_ID JSON for a displayed step, /cancel or /exit to detach.\n";
+                    std::string answer;if(!std::getline(std::cin,answer))throw std::runtime_error("CLI detached before graph input; backend execution remains owned by the server");if(!answer.empty()&&answer.back()=='\r')answer.pop_back();if(answer=="/exit")throw std::runtime_error("CLI detached before graph input; backend execution remains owned by the server");
+                    std::string route;Json body;
+                    if(answer=="/cancel"){route=path+"/cancel";body=Json::object();}
+                    else if(answer.starts_with("/input ")){const auto split=answer.find(' ',7);const auto node=split==std::string::npos?std::string{}:answer.substr(7,split-7);const auto input=split==std::string::npos?std::string{}:answer.substr(split+1);if(!waiting.contains(node)||input.empty()||input.size()>65536){std::cerr<<"No input sent. Use a displayed node and bounded JSON.\n";continue;}route="/v1/graph-runs/"+run+"/human/"+node;body={{"input_json",input},{"expected_checkpoint_revision",revision}};}
+                    else {std::cerr<<"No input sent. Use /input, /cancel or /exit.\n";continue;}
+                    const auto response=client.Post(route,headers,body.dump(),"application/json");if(!response)throw std::runtime_error("Cannot reach xMind Server for graph input");if(response->status<200||response->status>=300)std::cerr<<"Backend rejected graph input (HTTP "<<response->status<<"). Refreshing the checkpoint; no automatic retry.\n";else std::cout<<Json{{"type","graph_input_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;
+                }
             }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
@@ -135,11 +166,11 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(prompt=="/exit")return last_result;
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
-            std::cerr<<"/watch RUN_ID attaches an existing single-agent run without submitting another request; pending approvals remain explicit.\n";
+            std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
             std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
         }
-        if(prompt.starts_with("/watch ")){
-            const auto id=prompt.substr(7);
+        if(prompt.starts_with("/watch ")||prompt.starts_with("/graph-watch ")){
+            const bool graphAttachment=prompt.starts_with("/graph-watch ");const auto id=prompt.substr(graphAttachment?13:7);
             if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos){std::cerr<<"Use /watch with a recorded run ID.\n";continue;}
             const auto response=client.Get("/v1/runs/"+id,headers);
             if(!response)throw std::runtime_error("Cannot reach xMind Server to attach the run");
@@ -147,14 +178,14 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             if(response->status!=200)throw std::runtime_error("Server rejected run attachment");
             const auto run=Json::parse(response->body);
             if(!run.is_object()||run.value("id",std::string{})!=id||!run.contains("session_id")||!run["session_id"].is_string())throw std::runtime_error("Invalid attached run identity");
-            if(run.value("graph_root",false)||!run.value("parent_id",std::string{}).empty()){std::cerr<<"Use graph-watch for graph runs.\n";continue;}
+            if(run.value("graph_root",false)!=graphAttachment||!run.value("parent_id",std::string{}).empty()){std::cerr<<"Use /graph-watch for graph roots and /watch for single-agent runs.\n";continue;}
             const auto owner=run["session_id"].get<std::string>();
             if(owner.empty()||owner.size()>128||owner.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid attached conversation identity");
             if(!session.empty()&&session!=owner){std::cerr<<"Select the run's conversation with /session first, or use /new before attaching.\n";continue;}
             const auto saved=request("/v1/sessions/"+owner+"/history");if(!saved.is_array())throw std::runtime_error("Invalid attached conversation history");
             session=owner;
             std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",saved}}.dump()<<'\n'<<Json{{"type","run_attached"},{"run",run}}.dump()<<'\n'<<std::flush;
-            last_result=watch_run(client,headers,id,0,false,true);
+            last_result=watch_run(client,headers,id,0,graphAttachment,true);
             std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
             continue;
         }

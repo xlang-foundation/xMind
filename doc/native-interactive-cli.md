@@ -123,6 +123,32 @@ also carried the exact approval for the completed live external MCP read.
 [Gate scope](evidence/native-model-protocol-diagnostics-hosted-provenance.json),
 [live MCP scope](evidence/live-responses-mcp-diagnostic-read.json).
 
+New graph-control source adds `/graph-watch ROOT_ID` inside chat. It attaches a
+recorded root without graph admission, restores the conversation, and validates
+root/child ownership while replaying durable events. A model-free server can
+still expose registered human/tool graphs. Pending steps emit escaped
+`graph_human_review` records with actual prompts, node IDs and the displayed
+checkpoint revision. Enter `/input NODE_ID JSON`, `/cancel`, or `/exit` at that
+prompt. Raw bounded JSON is forwarded as `input_json` with that exact revision;
+an invalid, stale or already-answered step is not retried automatically.
+
+Child effect operations are read from validated children and retain the same
+exact `/allow ID` and `/deny ID` path. Graph root cancellation is explicit;
+EOF or `/exit` at a human/approval prompt detaches without granting an effect,
+answering a step or cancelling backend ownership. Completed/failed/cancelled
+observation reports the actual terminal exit status. Single-agent/graph and
+selected-conversation boundaries remain enforced.
+
+The graph service contract now exercises actual model-free CLI attachment,
+foreign-node rejection, human answer delivery, a stale-answer race against a
+second client, detach/reconnect, root cancellation and approved creation through
+a child operation. Human inputs and inference replies remain labelled fixtures;
+filesystem/backend effects are real when compiled execution runs. JavaScript
+syntax and whitespace checks passed. Local compilation was deferred by a live
+xlang3 benchmark; hosted execution and installation of this source remain
+pending. Concurrent input during model streaming and full console/TUI parity
+remain required.
+
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
 52 native and 66 extension contracts. This verifies initial-model prevalidation
