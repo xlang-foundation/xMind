@@ -1,0 +1,25 @@
+{
+  "revision": "0238da0bab9296b70c67281d923a1d17d440e791",
+  "runtimeRevision": "4aea7d8fb24da9ba86f9d7eeb92820794f213d29",
+  "environment": "Local Windows Release build; native xlang3, source-only standard library; no CPython execution",
+  "nativePassed": 57,
+  "nativeFailed": 0,
+  "skipped": 0,
+  "nativeTestTimeSeconds": 93.22,
+  "ctestLogSha256": "7889c521819884eec8195e913b69bfde51ca44f3348b0a1e80dac76edefb2874",
+  "sourceSha256NormalizedLF": {
+    "Native/include/agentflow/provider_profile_runtime.hpp": "31644bd24222b8d3749ab3a655560bf00f837b4a5f2cb211f95da92c00fc37e4",
+    "Native/include/agentflow/provider_profile_setup.hpp": "e2ea6128ef971a90de63e7ebf2880457f31b8410208abed249d5550cb0ea7df8",
+    "Native/src/provider_profile_runtime.cpp": "0553cadc0cfbc6136d2cfc40775ec4803f6a0e5583b347dffe0ab89cd118fd82",
+    "Native/src/provider_catalogue.cpp": "8ddc366954bde57ecdb11a461f8e6ebbdb937876f09b6cb8a5f3209d9d3ccd86",
+    "Native/src/http_server.cpp": "7a8ffdddd9ad44eea29f839ba7c941b1c0f9d34b3e6ce4a301b51c64a4cd85a0",
+    "Native/tests/provider_profile_runtime_contract.cpp": "5dc9794e875dfda1b58454afd714f4b9b9c61042a62489bdffd25c60d4be96c8",
+    "Native/tests/provider_profile_runtime_peer.mjs": "3765ce6350dc1701f2639592607c32536ddc1556971181881bf4ea5b8e128ae8"
+  },
+  "releaseBinarySha256": {
+    "xmind_server.exe": "fae1d93e94fe7732d2d1f9d9cecc4d4301ffb6611efee405d96cd698901cc7d0",
+    "agentflow_provider_profile_runtime_contract.exe": "29f2ed0bda989728d5a48d7f6cd0f6739113e3a9099b8a1e03bef25dcaf1e074",
+    "xlang3_runtime.dll": "166e8d96bd3b3a886fadfb7482374d7512a2dad7b389ca5d907a4b581f18a3a5"
+  },
+  "scope": "Complete native suite, including real synthetic HTTP peers for profile account discovery/API, revision race, OpenAI/Claude routing and validated legacy-reader import preserving encrypted credentials/revision. No product startup/profile UI integration, live Claude or Nexus enrollment acceptance."
+}

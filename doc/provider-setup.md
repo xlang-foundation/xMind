@@ -96,10 +96,14 @@ candidate-service/CAS checks. It preserves the original encrypted reference,
 revision and legacy source record. Missing legacy state is a no-op; an existing
 registry wins over stale legacy state. Invalid legacy models are rejected;
 credential-shaped legacy-model repair still needs a product compatibility path.
-This reader is not yet called by server startup. Its expanded native runtime
-contract passed locally after correcting a test fixture to respect the database's
-JSON constraint; the complete suite is being revalidated. No preview upgrade is
-claimed.
+This reader is not yet called by server startup. Source
+`0238da0bab9296b70c67281d923a1d17d440e791` passed all **57 native contracts**
+locally in **93.22 seconds**, without failures or skips
+([CTest](evidence/native-provider-profile-api-migration-local-ctest.log),
+[source/binary provenance](evidence/native-provider-profile-api-migration-local-provenance.json)).
+The full gate covers discovery, authenticated profile APIs and this reader.
+The test fixture was corrected to respect the database's JSON constraint before
+that complete passing run. No preview upgrade or product profile UI is claimed.
 
 Current setup is one saved OpenAI configuration. Claude request/stream/transport
 source additions do not change that API or make Claude selectable in Settings.
