@@ -149,6 +149,26 @@ xlang3 benchmark; hosted execution and installation of this source remain
 pending. Concurrent input during model streaming and full console/TUI parity
 remain required.
 
+Initial recovery checkpoint `38cd516` compiled but failed its hosted native gate:
+50 contracts passed and two failed request-count assertions. The cancelled-run
+attachment case compared a global provider count while an unrelated queued read
+was allowed to execute. It now checks that cancelled task's unique prompt count,
+unchanged run records and absence of new admission output. The edit case retained
+the older 48-request total after adding a resumed denial's normal continuation.
+That continuation is now checked locally in the scenario; the suite total adds
+explicitly verified new console scenarios to the original baseline.
+[Initial failed gate](evidence/native-cli-recovery-initial-failure-provenance.json),
+[unaltered failure excerpts](evidence/native-cli-recovery-initial-failure.log).
+No runtime artifact was published from that failed gate. These corrections still
+await compiled rerun; the running preview remains on verified `46262d6`.
+
+Cancellation acknowledgements now use `run_cancel_result`, separating the
+server's `cancellation_requested` receipt from effect decisions and human answers.
+Observation continues until the actual terminal event; a receipt is not a
+completed-cancellation state. New fixtures check the record type, unchanged file
+and cancelled operation/run for single-agent approval cancellation and graph
+human-step cancellation. Syntax checks passed; execution remains pending.
+
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
 52 native and 66 extension contracts. This verifies initial-model prevalidation

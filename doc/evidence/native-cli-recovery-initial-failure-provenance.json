@@ -1,0 +1,18 @@
+{
+  "xmind": "38cd516312491beacd057acb1756b5ab296ee810",
+  "workflowRun": 37710258582,
+  "job": 113096613240,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37710258582",
+  "conclusion": "failure",
+  "evidenceArtifact": 11522555498,
+  "nativeBuildSucceeded": true,
+  "nativeContractsPassed": 50,
+  "nativeContractsFailed": 2,
+  "failedContracts": [
+    "native_agent_http_contract",
+    "native_agent_edit_http_contract"
+  ],
+  "extensionAndBrowserGatesSkipped": true,
+  "runtimeArtifactPublished": false,
+  "scope": "Exact failed native gate artifact inspected. Failure excerpts retain the initial request-count assertions. Corrected tests and cancellation record changes await a new compiled gate; the installed preview remains on verified 46262d6."
+}

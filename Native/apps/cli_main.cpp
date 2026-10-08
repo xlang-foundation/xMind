@@ -99,7 +99,7 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
                 const auto response=client.Post(route,headers,body.dump(),"application/json");
                 if(!response)throw std::runtime_error("Cannot reach xMind Server for approval");
                 if(response->status<200 || response->status>=300)std::cerr<<"Backend rejected the decision (HTTP "<<response->status<<"). Refreshing recorded state.\n";
-                else std::cout<<Json{{"type","operation_decision_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;
+                else std::cout<<Json{{"type",decision=="/cancel"?"run_cancel_result":"operation_decision_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;
                 interacted=true;
                 break; // Re-read state before reviewing another operation.
             }
@@ -126,7 +126,7 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
                     if(answer=="/cancel"){route=path+"/cancel";body=Json::object();}
                     else if(answer.starts_with("/input ")){const auto split=answer.find(' ',7);const auto node=split==std::string::npos?std::string{}:answer.substr(7,split-7);const auto input=split==std::string::npos?std::string{}:answer.substr(split+1);if(!waiting.contains(node)||input.empty()||input.size()>65536){std::cerr<<"No input sent. Use a displayed node and bounded JSON.\n";continue;}route="/v1/graph-runs/"+run+"/human/"+node;body={{"input_json",input},{"expected_checkpoint_revision",revision}};}
                     else {std::cerr<<"No input sent. Use /input, /cancel or /exit.\n";continue;}
-                    const auto response=client.Post(route,headers,body.dump(),"application/json");if(!response)throw std::runtime_error("Cannot reach xMind Server for graph input");if(response->status<200||response->status>=300)std::cerr<<"Backend rejected graph input (HTTP "<<response->status<<"). Refreshing the checkpoint; no automatic retry.\n";else std::cout<<Json{{"type","graph_input_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;
+                    const auto response=client.Post(route,headers,body.dump(),"application/json");if(!response)throw std::runtime_error("Cannot reach xMind Server for graph input");if(response->status<200||response->status>=300)std::cerr<<"Backend rejected graph input (HTTP "<<response->status<<"). Refreshing the checkpoint; no automatic retry.\n";else std::cout<<Json{{"type",answer=="/cancel"?"run_cancel_result":"graph_input_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;
                 }
             }
         }

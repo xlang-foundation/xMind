@@ -78,6 +78,7 @@ async function approvedChat(name,decision,attachedRun){
           assert.equal(JSON.parse(record.operation.arguments_json).before_content,'original\n');
           assert.equal(record.operation.state,'awaiting_approval');
           if(decision==='detach')process.stdin.end('/exit\n');
+          else if(decision==='cancel')process.stdin.write('/cancel\n');
           else if(decision==='allow-foreign'&&reviews===1)process.stdin.write('/allow foreign-fixture-operation\n');
           else process.stdin.write(`/${decision==='allow-foreign'?'allow':decision} ${record.operation.id}\n`);
         }
@@ -87,8 +88,8 @@ async function approvedChat(name,decision,attachedRun){
   });
   const timer=setTimeout(()=>process.kill(),12000);
   const result=await new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});process.stdin.write(attachedRun?'/watch '+attachedRun+'\n':(name==='allowed'?'/model synthetic-edit-alternate\n':'')+name+'\n');});
-  if(failure)throw failure;assert.equal(result.signal,null);assert.equal(result.code,decision==='detach'?1:0,stderr);assert.ok(records.some(record=>record.type==='operation_review'));
-  if(decision!=='detach')assert.ok(records.some(record=>record.kind==='run.completed'));
+  if(failure)throw failure;assert.equal(result.signal,null);assert.equal(result.code,decision==='detach'?1:decision==='cancel'?2:0,stderr);assert.ok(records.some(record=>record.type==='operation_review'));
+  if(decision!=='detach')assert.ok(records.some(record=>record.kind===(decision==='cancel'?'run.cancelled':'run.completed')));
   if(decision==='allow-foreign'){assert.equal(reviews,2);assert.match(stderr,/No decision sent/);}
   return records;
 }
@@ -116,8 +117,12 @@ try {
   assert.ok(!detached.some(record=>record.type==='operation_decision_result'||record.type==='turn_finished'),'Detach cannot fabricate a decision or terminal state');
   assert.equal((await api(`/v1/operations/${detachedProposal.id}`)).state,'awaiting_approval');assert.equal(await readFile(join(workspace,'denied.txt'),'utf8'),'original\n');
   const detachedRun=await api(`/v1/runs/${detachedProposal.run_id}`),runsBeforeAttach=cli('runs',detachedRun.session_id);
-  const reattached=await approvedChat('denied','deny',detachedProposal.run_id);
+  const beforeReattachmentRequests=requests,reattached=await approvedChat('denied','deny',detachedProposal.run_id);
+  assert.equal(requests,beforeReattachmentRequests+1,'Denying the existing pending call admits only its normal tool-result continuation');
   assert.equal(reattached.find(record=>record.type==='run_attached').run.id,detachedProposal.run_id);assert.ok(!reattached.some(record=>record.type==='run'),'Attachment must not submit a new model request');assert.equal(reattached.find(record=>record.type==='operation_review').operation.id,detachedProposal.id);assert.equal(cli('runs',detachedRun.session_id).length,runsBeforeAttach.length);assert.equal((await api(`/v1/operations/${detachedProposal.id}`)).state,'denied');assert.equal(await readFile(join(workspace,'denied.txt'),'utf8'),'original\n');
+  const beforeCancellationRequests=requests,cancelRecords=await approvedChat('cancelled','cancel'),cancelRun=cancelRecords.find(record=>record.type==='run').run,cancelProposal=cancelRecords.find(record=>record.type==='operation_review').operation;
+  assert.equal(requests,beforeCancellationRequests+1,'Cancelling at approval stops after the initial model call');
+  assert.deepEqual(cancelRecords.find(record=>record.type==='run_cancel_result').result,{id:cancelRun.id,cancellation_requested:true});assert.ok(!cancelRecords.some(record=>record.type==='operation_decision_result'));assert.equal((await api('/v1/operations/'+cancelProposal.id)).state,'cancelled');assert.equal(await readFile(join(workspace,'cancelled.txt'),'utf8'),'original\n');
   for(const name of ['allowed','denied','stale','cancelled']) {
     await api('/v1/sessions',{id:name,title:'Synthetic edit protocol fixture'});
     if(name==='allowed') {
@@ -204,7 +209,8 @@ try {
   assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'changed allowed\n');
   const retired=await fetch(`http://127.0.0.1:${port}/v1/operations/${interrupted.id}/decision`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({decision:'allow'}),signal:AbortSignal.timeout(5000)});
   assert.equal(retired.status,409,'Restart must not grant an unused approval to a retired owner');
-  assert.equal(requests,48);if(peerError) throw peerError;
+  const additionalConsoleRequests=1 /* resumed denial continuation */ + 1 /* new cancellation case */;
+  assert.equal(requests,48+additionalConsoleRequests,'Original scenario baseline plus individually checked console-control calls');if(peerError) throw peerError;
   console.log('Compiled native agent edit loop passed: real approved edits, denial, stale content, cancellation, actual tool-result continuation and pending-approval restart recovery. Inference is synthetic.');
 } finally {
   await stop();

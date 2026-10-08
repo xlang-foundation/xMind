@@ -1,0 +1,47 @@
+      Start 39: native_agent_http_contract
+39/52 Test #39: native_agent_http_contract ..................***Failed    3.65 sec
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+17 !== 15
+
+    at file:///D:/a/xMind/xMind/xmind/Native/tests/agent_http_contract.mjs:165:197
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 17,
+  expected: 15,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.23.3
+
+      Start 40: native_agent_edit_http_contract
+40/52 Test #40: native_agent_edit_http_contract .............***Failed   20.91 sec
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+49 !== 48
+
+    at file:///D:/a/xMind/xMind/xmind/Native/tests/agent_edit_http_contract.mjs:207:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 49,
+  expected: 48,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.23.3
+
+      Start 41: native_agent_mcp_http_contract
+41/52 Test #41: native_agent_mcp_http_contract ..............   Passed    4.26 sec
+      Start 42: native_mcp_sdk_modern_contract

@@ -20,6 +20,7 @@ const key='synthetic-native-http-protocol-credential';
 const baseEnv={...process.env,XMIND_AUTH_TOKEN:token};
 delete baseEnv.XMIND_API_KEY;
 let child,port,peerError,requests=0;
+const requestsByPrompt=new Map();
 const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});
   request.on('end',()=>{
@@ -31,6 +32,7 @@ const peer=createServer((request,response)=>{
       assert.equal(body.model,'synthetic-protocol-model');assert.equal(body.stream,true);
       assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files']);
       const prompt=body.messages.findLast(message=>message.role==='user').content;
+      requestsByPrompt.set(prompt,(requestsByPrompt.get(prompt)??0)+1);
       if(prompt==='provider-error') {
         response.writeHead(429,{'Content-Type':'application/json'});
         response.end(JSON.stringify({error:{type:'rate_limit_error',code:'rate_limit_exceeded',param:'private-provider-error-body',message:'private-provider-error-body'}}));return;
@@ -160,9 +162,9 @@ try {
   // Queued cancellation frees bounded admission capacity before the worker exits.
   assert.equal((await api('/v1/runs',{id:'replacement-run',session_id:'overflow',prompt:'Read README again'})).status,202);
   cli('cancel','held-run');await terminal('held-run','cancelled');
-  const cancelledAttachmentRequests=requests,cancelledAttachmentRuns=cli('runs','held');
+  const cancelledAttachmentRequests=requestsByPrompt.get('hold-stream'),cancelledAttachmentRuns=cli('runs','held');
   const cancelledAttachment=await chatResult(2,'/watch held-run\n/exit\n');
-  assert.equal(cancelledAttachment.find(record=>record.type==='run_attached').run.id,'held-run');assert.equal(cancelledAttachment.find(record=>record.type==='turn_finished').exit_status,2);assert.equal(requests,cancelledAttachmentRequests);assert.deepEqual(cli('runs','held'),cancelledAttachmentRuns,'Viewing cancellation cannot restart the run');
+  assert.equal(cancelledAttachment.find(record=>record.type==='run_attached').run.id,'held-run');assert.equal(cancelledAttachment.find(record=>record.type==='turn_finished').exit_status,2);assert.equal(requestsByPrompt.get('hold-stream'),cancelledAttachmentRequests,'Unrelated queued work may execute while the cancelled task is inspected');assert.ok(!cancelledAttachment.some(record=>record.type==='run'));assert.deepEqual(cli('runs','held'),cancelledAttachmentRuns,'Viewing cancellation cannot restart the run');
   await terminal('replacement-run','completed');
 
   await session('error');
