@@ -1,11 +1,33 @@
 #include "agentflow/responses_stream.hpp"
 #include "nlohmann/json.hpp"
+#include <array>
 #include <map>
 #include <set>
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
 constexpr std::size_t max_value=4*1024*1024;
+constexpr std::size_t max_diagnostic=4096;
+constexpr std::array<const char*,12> diagnostic_fields={"id","type","status","call_id","name","arguments","role","content","summary","encrypted_content","channel","phase"};
+const Json* member(const Json* value,const char* field){if(!value||!value->is_object())return nullptr;const auto found=value->find(field);return found==value->end()?nullptr:&*found;}
+const char* diagnostic_type(const Json* value){
+    if(!value)return "absent";
+    switch(value->type()){
+    case Json::value_t::null:return "null";case Json::value_t::object:return "object";case Json::value_t::array:return "array";
+    case Json::value_t::string:return "string";case Json::value_t::boolean:return "boolean";
+    case Json::value_t::number_integer:return "integer";case Json::value_t::number_unsigned:return "unsigned_integer";
+    case Json::value_t::number_float:return "number";default:return "unsupported";
+    }
+}
+bool diagnostic_field(std::string_view field){for(const auto* known:diagnostic_fields)if(field==known)return true;return false;}
+bool unlisted_fields_equal(const Json* completed,const Json& terminal){
+    if(!completed||!completed->is_object()||!terminal.is_object())return completed&&*completed==terminal;
+    // Compare in place: never copy, serialize or publish unlisted member names
+    // or values. The existing bounded event parser owns both snapshots.
+    for(auto it=completed->begin();it!=completed->end();++it)if(!diagnostic_field(it.key())){const auto found=terminal.find(it.key());if(found==terminal.end()||*it!=*found)return false;}
+    for(auto it=terminal.begin();it!=terminal.end();++it)if(!diagnostic_field(it.key())&&!completed->contains(it.key()))return false;
+    return true;
+}
 Json parse(const std::string& source){std::vector<std::set<std::string>> keys;return Json::parse(source,[&](int depth,Json::parse_event_t event,Json& value){if(depth>64)throw ModelProtocolError("Responses JSON exceeds nesting limits");if(event==Json::parse_event_t::object_start)keys.emplace_back();else if(event==Json::parse_event_t::object_end)keys.pop_back();else if(event==Json::parse_event_t::key&&!keys.back().insert(value.get<std::string>()).second)throw ModelProtocolError("Duplicate Responses JSON field");return true;});}
 void append(std::string& target,std::string_view value,std::size_t limit=max_value){if(value.size()>limit-target.size())throw ModelProtocolError("Responses stream exceeds limits");target.append(value);}
 std::string text(const Json& value,const char* key){if(!value.contains(key)||!value[key].is_string())throw ModelProtocolError("Missing Responses string field");return value[key].get<std::string>();}
@@ -21,6 +43,27 @@ struct ResponsesStream::Impl {
     ModelCompletion completion;
     explicit Impl(ChatCompletionStream::Sink callback):sink(std::move(callback)){if(!sink)throw std::invalid_argument("Model event sink is required");}
     void emit(const std::string& kind,const Json& value){sink({kind,value.dump()});}
+    void terminal_diagnostic(std::size_t position,const Item* current,const Json& terminal){
+        const auto* completed=current&&current->done?&current->final:nullptr;
+        Json fields=Json::array(),changed=Json::array();
+        for(const auto* field:diagnostic_fields){
+            const auto* before=member(completed,field);const auto* after=member(&terminal,field);
+            const bool equal=(!before&&!after)||(before&&after&&*before==*after);
+            fields.push_back({{"field",field},{"completed_present",before!=nullptr},{"completed_type",diagnostic_type(before)},
+                {"terminal_present",after!=nullptr},{"terminal_type",diagnostic_type(after)},{"equal",equal}});
+            if(!equal)changed.push_back(field);
+        }
+        // Every output key, label and type below is a native constant. The only
+        // variable data are a bounded output index and structural booleans.
+        const Json diagnostic={{"code","responses_terminal_mismatch"},{"output_index",position},
+            {"item_present",current!=nullptr},{"item_done",current&&current->done},
+            {"completed_snapshot_type",diagnostic_type(completed)},{"terminal_snapshot_type",diagnostic_type(&terminal)},
+            {"fields",std::move(fields)},{"changed_fields",std::move(changed)},
+            {"unlisted_fields_equal",unlisted_fields_equal(completed,terminal)}};
+        const auto encoded=diagnostic.dump();
+        if(encoded.size()>max_diagnostic)throw ModelProtocolError("Responses terminal output differs from completed items");
+        sink({"model.protocol_diagnostic",encoded});
+    }
     Item& item(const Json& value){const auto pos=index(value,"output_index");const auto found=items.find(pos);if(found==items.end()||found->second.done)throw ModelProtocolError("Responses event has no active item");auto& result=found->second;if(value.contains("item_id")&&text(value,"item_id")!=result.id)throw ModelProtocolError("Responses item identity changed");return result;}
     void response_identity(const Json& response){if(!response.is_object()||text(response,"id")!=response_id)throw ModelProtocolError("Responses response identity changed");if(response.contains("model")){const auto current=text(response,"model");if(!model.empty()&&model!=current)throw ModelProtocolError("Responses model identity changed");model=current;}}
     void final_item(Item& current,const Json& value){
@@ -41,7 +84,7 @@ struct ResponsesStream::Impl {
     void terminal(const Json& event){
         const auto& response=event.at("response");response_identity(response);
         if(response.value("status",Json{})!="completed"||(response.contains("error")&&!response["error"].is_null())||!response.contains("output")||!response["output"].is_array()||response["output"].size()!=items.size())throw ModelProtocolError("Responses turn did not complete");
-        for(std::size_t i=0;i<response["output"].size();++i){const auto found=items.find(static_cast<int>(i));if(found==items.end()||!found->second.done||found->second.final!=response["output"][i])throw ModelProtocolError("Responses terminal output differs from completed items");const auto& current=found->second;
+        for(std::size_t i=0;i<response["output"].size();++i){const auto found=items.find(static_cast<int>(i));if(found==items.end()||!found->second.done||found->second.final!=response["output"][i]){terminal_diagnostic(i,found==items.end()?nullptr:&found->second,response["output"][i]);throw ModelProtocolError("Responses terminal output differs from completed items");}const auto& current=found->second;
             if(current.type=="message")for(const auto& [pos,part]:current.parts){(void)pos;append(part.type=="output_text"?completion.content:completion.refusal,part.value);}
             else if(current.type=="function_call")completion.tool_calls.push_back({current.call_id,current.name,current.arguments});
         }

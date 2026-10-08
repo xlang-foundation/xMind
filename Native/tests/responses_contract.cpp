@@ -2,7 +2,9 @@
 #include "agentflow/model_provider.hpp"
 #include "nlohmann/json.hpp"
 #include <iostream>
+#include <set>
 #include <stdexcept>
+#include <utility>
 using namespace agentflow;using Json=nlohmann::json;
 void require(bool value){if(!value)throw std::runtime_error("Responses contract failed");}
 template<class F>void rejected(F call){bool failed=false;try{call();}catch(const std::exception&){failed=true;}require(failed);}
@@ -35,10 +37,59 @@ std::vector<Json> events(){
     };
 }
 std::string wire(std::vector<Json> values){std::string result="\xef\xbb\xbf: Synthetic fixture\r\n\r\n";int sequence=0;for(auto& value:values){value["sequence_number"]=sequence++;result+="event: "+value["type"].get<std::string>()+"\r\ndata: "+value.dump()+"\r\n\r\n";}return result;}
-ModelCompletion decode(const std::string& bytes,std::size_t fragment=1){ResponsesStream stream([](const ModelEvent&){});for(std::size_t i=0;i<bytes.size();i+=fragment)stream.feed(std::string_view(bytes).substr(i,fragment));return stream.finish();}
+ModelCompletion decode(const std::string& bytes,std::size_t fragment=1,std::vector<ModelEvent>* observed=nullptr){ResponsesStream stream([&](const ModelEvent& event){if(observed)observed->push_back(event);});for(std::size_t i=0;i<bytes.size();i+=fragment)stream.feed(std::string_view(bytes).substr(i,fragment));return stream.finish();}
+Json mismatch_diagnostic(std::vector<Json> values,std::size_t fragment=1){
+    std::vector<ModelEvent> observed;ResponsesStream stream([&](const ModelEvent& event){observed.push_back(event);});const auto bytes=wire(std::move(values));bool failed=false;
+    try{for(std::size_t i=0;i<bytes.size();i+=fragment)stream.feed(std::string_view(bytes).substr(i,fragment));stream.finish();}
+    catch(const ModelProtocolError& error){require(model_protocol_diagnostic(error)=="responses_terminal_mismatch");failed=true;}require(failed);
+    rejected([&]{stream.feed("data: {}\n\n");});rejected([&]{stream.finish();});
+    Json diagnostic;std::size_t count=0;for(const auto& event:observed){require(event.kind!="model.usage"&&event.kind!="model.finish"&&event.kind!="model.done");if(event.kind=="model.protocol_diagnostic"){++count;require(event.json.size()<=4096);diagnostic=Json::parse(event.json);}}
+    require(count==1&&diagnostic.size()==9&&diagnostic["code"]=="responses_terminal_mismatch"&&diagnostic["output_index"]>=0&&diagnostic["output_index"]<1024);
+    require(diagnostic["item_present"].is_boolean()&&diagnostic["item_done"].is_boolean()&&diagnostic["unlisted_fields_equal"].is_boolean());
+    const std::vector<std::string> labels={"id","type","status","call_id","name","arguments","role","content","summary","encrypted_content","channel","phase"};
+    const std::set<std::string> types={"absent","null","object","array","string","boolean","integer","unsigned_integer","number","unsupported"};
+    require(diagnostic["fields"].is_array()&&diagnostic["fields"].size()==labels.size()&&diagnostic["changed_fields"].is_array());
+    Json changes=Json::array();for(std::size_t i=0;i<labels.size();++i){const auto& field=diagnostic["fields"][i];require(field.size()==6&&field["field"]==labels[i]);
+        for(const auto* flag:{"completed_present","terminal_present","equal"})require(field[flag].is_boolean());
+        require(types.contains(field["completed_type"].get<std::string>())&&types.contains(field["terminal_type"].get<std::string>()));if(!field["equal"].get<bool>())changes.push_back(labels[i]);
+    }require(changes==diagnostic["changed_fields"]);require(types.contains(diagnostic["completed_snapshot_type"].get<std::string>())&&types.contains(diagnostic["terminal_snapshot_type"].get<std::string>()));
+    return diagnostic;
+}
+const Json& diagnostic_field(const Json& diagnostic,const std::string& name){for(const auto& field:diagnostic.at("fields"))if(field.at("field")==name)return field;throw std::runtime_error("Missing fixed diagnostic field");}
+void terminal_diagnostics_contract(const std::vector<Json>& fixture){
+    std::vector<ModelEvent> unchanged;decode(wire(fixture),7,&unchanged);for(const auto& event:unchanged)require(event.kind!="model.protocol_diagnostic");
+    // Build separate completed-item and terminal snapshots. Even benign-looking
+    // metadata or opaque changes remain rejected; diagnosis is not normalization.
+    auto optional=fixture;optional[7]["item"].erase("status");const auto optional_diagnostic=mismatch_diagnostic(optional,7);
+    require(optional_diagnostic["output_index"]==1&&optional_diagnostic["item_present"]==true&&optional_diagnostic["item_done"]==true&&optional_diagnostic["changed_fields"]==Json::array({"status"})&&optional_diagnostic["unlisted_fields_equal"]==true);
+    const auto& status=diagnostic_field(optional_diagnostic,"status");require(status["completed_present"]==false&&status["completed_type"]=="absent"&&status["terminal_present"]==true&&status["terminal_type"]=="string"&&status["equal"]==false);
+    require(diagnostic_field(optional_diagnostic,"id")["equal"]==true&&diagnostic_field(optional_diagnostic,"name")["equal"]==true&&diagnostic_field(optional_diagnostic,"arguments")["equal"]==true);
+    auto opaque=fixture;opaque[2]["item"]["encrypted_content"]="SYNTHETIC_OPAQUE_ITEM_SECRET";opaque.back()["response"]["output"][0]["encrypted_content"]="SYNTHETIC_OPAQUE_TERMINAL_SECRET";
+    opaque.back()["response"]["output"][1]["arguments"]="{\"private\":\"SYNTHETIC_TERMINAL_ARGUMENT_SECRET\"}";
+    const auto opaque_diagnostic=mismatch_diagnostic(opaque,129);require(opaque_diagnostic["output_index"]==0&&opaque_diagnostic["changed_fields"]==Json::array({"encrypted_content"}));
+    for(const auto* marker:{"SYNTHETIC_OPAQUE_ITEM_SECRET","SYNTHETIC_OPAQUE_TERMINAL_SECRET","SYNTHETIC_TERMINAL_ARGUMENT_SECRET","rs_test","call_test","read_file"})require(opaque_diagnostic.dump().find(marker)==std::string::npos);
+    auto unlisted=fixture;unlisted[7]["item"]["SYNTHETIC_PRIVATE_MEMBER_NAME"]="SYNTHETIC_UNLISTED_ITEM_VALUE";unlisted.back()["response"]["output"][1]["SYNTHETIC_PRIVATE_MEMBER_NAME"]="SYNTHETIC_UNLISTED_TERMINAL_VALUE";
+    const auto unlisted_diagnostic=mismatch_diagnostic(unlisted);require(unlisted_diagnostic["output_index"]==1&&unlisted_diagnostic["changed_fields"]==Json::array()&&unlisted_diagnostic["unlisted_fields_equal"]==false);
+    for(const auto* marker:{"SYNTHETIC_PRIVATE_MEMBER_NAME","SYNTHETIC_UNLISTED_ITEM_VALUE","SYNTHETIC_UNLISTED_TERMINAL_VALUE","README.md","read_file","fc_test"})require(unlisted_diagnostic.dump().find(marker)==std::string::npos);
+    auto unlisted_added=fixture;unlisted_added.back()["response"]["output"][1]["SYNTHETIC_PRIVATE_ADDED_NAME"]="SYNTHETIC_PRIVATE_ADDED_VALUE";
+    const auto added_diagnostic=mismatch_diagnostic(unlisted_added);require(added_diagnostic["changed_fields"]==Json::array()&&added_diagnostic["unlisted_fields_equal"]==false&&added_diagnostic.dump().find("SYNTHETIC_PRIVATE")==std::string::npos);
+    for(const auto& [value,type]:std::vector<std::pair<Json,std::string>>{{nullptr,"null"},{Json::object({{"SYNTHETIC_NESTED_NAME","SYNTHETIC_NESTED_VALUE"}}),"object"},{Json::array({"SYNTHETIC_ARRAY_VALUE"}),"array"},{"SYNTHETIC_CHANNEL_VALUE","string"},{true,"boolean"},{-7,"integer"},{Json::number_unsigned_t{7},"unsigned_integer"},{1.25,"number"}}){
+        auto typed=fixture;typed.back()["response"]["output"][1]["channel"]=value;const auto diagnostic=mismatch_diagnostic(typed,2);
+        require(diagnostic["changed_fields"]==Json::array({"channel"})&&diagnostic_field(diagnostic,"channel")["completed_type"]=="absent"&&diagnostic_field(diagnostic,"channel")["terminal_type"]==type&&diagnostic.dump().find("SYNTHETIC_")==std::string::npos);
+    }
+    for(const auto* field:{"id","type","call_id","name","arguments"}){auto altered=fixture;altered.back()["response"]["output"][1][field]="SYNTHETIC_EXECUTION_FIELD_CHANGE";const auto diagnostic=mismatch_diagnostic(altered);require(diagnostic["changed_fields"]==Json::array({field})&&diagnostic.dump().find("SYNTHETIC_EXECUTION_FIELD_CHANGE")==std::string::npos);}
+    for(const auto& [position,field]:std::vector<std::pair<int,const char*>>{{0,"summary"},{2,"content"}}){auto altered=fixture;altered.back()["response"]["output"][position][field]=Json::array({"SYNTHETIC_CONTENT_CHANGE"});const auto diagnostic=mismatch_diagnostic(altered);require(diagnostic["changed_fields"]==Json::array({field})&&diagnostic.dump().find("SYNTHETIC_CONTENT_CHANGE")==std::string::npos);}
+    auto unfinished=fixture;unfinished.erase(unfinished.begin()+7);const auto unfinished_diagnostic=mismatch_diagnostic(unfinished);
+    require(unfinished_diagnostic["output_index"]==1&&unfinished_diagnostic["item_present"]==true&&unfinished_diagnostic["item_done"]==false&&unfinished_diagnostic["completed_snapshot_type"]=="absent");
+    auto sparse=fixture;for(auto& event:sparse)if(event.contains("output_index")&&event["output_index"]==2)event["output_index"]=3;const auto missing_diagnostic=mismatch_diagnostic(sparse);
+    require(missing_diagnostic["output_index"]==2&&missing_diagnostic["item_present"]==false&&missing_diagnostic["item_done"]==false&&missing_diagnostic["completed_snapshot_type"]=="absent");
+    auto scalar=fixture;scalar.back()["response"]["output"][1]=nullptr;const auto scalar_diagnostic=mismatch_diagnostic(scalar);
+    require(scalar_diagnostic["output_index"]==1&&scalar_diagnostic["completed_snapshot_type"]=="object"&&scalar_diagnostic["terminal_snapshot_type"]=="null"&&scalar_diagnostic["unlisted_fields_equal"]==false);
+}
 int main(){try{
     const auto fixture=events();const auto bytes=wire(fixture);const auto result=decode(bytes);require(result.content=="Hello \xf0\x9f\x8c\x8d"&&result.tool_calls.size()==1&&result.finish_reason=="tool_calls");require(result.tool_calls[0].id=="call_test");const auto usage=Json::parse(result.usage_json);require(usage["prompt_tokens"]==12&&usage["completion_tokens"]==7&&usage["prompt_tokens_details"]["cached_tokens"]==4&&usage["completion_tokens_details"]["reasoning_tokens"]==3);
     for(std::size_t size:{2,7,129,4096})require(decode(bytes,size).provider_items_json==result.provider_items_json);
+    terminal_diagnostics_contract(fixture);
     auto summarized=fixture;const Json summary={{"type","summary_text"},{"text","Synthetic reasoning summary"}};
     summarized.insert(summarized.begin()+2,{
         {{"type","response.reasoning_summary_part.added"},{"output_index",0},{"item_id","rs_test"},{"summary_index",0},{"part",{{"type","summary_text"},{"text",""}}}},
@@ -72,5 +123,5 @@ int main(){try{
     require(model_protocol_diagnostic(ModelProtocolError("Provider response failed or was incomplete"))=="responses_provider_incomplete");
     require(model_protocol_diagnostic(ModelProtocolError("Invalid Responses JSON event"))=="responses_json_invalid");
     require(model_protocol_diagnostic(ModelProtocolError("private synthetic provider payload"))=="");
-    std::cout<<"Native Responses request and SSE contract passed byte fragmentation, output identity/lifecycle validation, terminal consistency, usage normalization, stateless reasoning/tool continuation, safe invariant diagnostics and malformed/incomplete rejection. All model output is synthetic.\n";
+    std::cout<<"Native Responses request and SSE contract passed byte fragmentation, output identity/lifecycle validation, strict terminal consistency, bounded value-free first-mismatch structural diagnostics, usage normalization, stateless reasoning/tool continuation, safe invariant diagnostics and malformed/incomplete rejection. All model output is synthetic.\n";
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

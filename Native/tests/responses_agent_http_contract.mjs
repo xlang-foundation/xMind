@@ -1,19 +1,19 @@
 // Independent synthetic Responses wire peer. Product execution is native C++;
 // actual reads, tools, credentials and persistence use the production backend.
 import assert from 'node:assert/strict';import {createServer} from 'node:http';import {spawn,spawnSync} from 'node:child_process';
-import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join,dirname,basename,resolve} from 'node:path';
+import {mkdtemp,mkdir,writeFile,readFile,readdir,rm} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join,dirname,basename,resolve} from 'node:path';
 import {randomBytes} from 'node:crypto';import {setTimeout as delay} from 'node:timers/promises';
 const [server,cli,modules,stdlib]=process.argv.slice(2),root=await mkdtemp(join(tmpdir(),'xmind-responses-')),workspace=join(root,'workspace');
 const token=randomBytes(32).toString('hex'),key='synthetic-responses-key',env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
 let child,port,peerError;const requests=[],held=[];
-function output(response,id,items,{incomplete=false}={}){let sequence=0;const send=(type,fields)=>response.write(`event: ${type}\ndata: ${JSON.stringify({type,sequence_number:sequence++,...fields})}\n\n`);send('response.created',{response:{id,model:'synthetic-responses-model',status:'in_progress'}});
+function output(response,id,items,{incomplete=false,terminalItems}={}){const terminal=structuredClone(terminalItems??items);let sequence=0;const send=(type,fields)=>response.write(`event: ${type}\ndata: ${JSON.stringify({type,sequence_number:sequence++,...fields})}\n\n`);send('response.created',{response:{id,model:'synthetic-responses-model',status:'in_progress'}});
  for(let index=0;index<items.length;++index){const item=items[index],base={output_index:index,item_id:item.id};const added={...item,status:'in_progress'};if(item.type==='message')added.content=[];else if(item.type==='function_call')added.arguments='';else if(item.type==='reasoning')delete added.encrypted_content;
   send('response.output_item.added',{output_index:index,item:added});
   if(item.type==='function_call'){const half=Math.floor(item.arguments.length/2);for(const delta of [item.arguments.slice(0,half),item.arguments.slice(half)])send('response.function_call_arguments.delta',{...base,delta});send('response.function_call_arguments.done',{...base,arguments:item.arguments});}
   else if(item.type==='message')for(let content_index=0;content_index<item.content.length;++content_index){const part=item.content[content_index],refusal=part.type==='refusal',field=refusal?'refusal':'text',type=refusal?'refusal':'output_text';send('response.content_part.added',{...base,content_index,part:{...part,[field]:''}});for(const delta of [part[field].slice(0,3),part[field].slice(3)])send(`response.${type}.delta`,{...base,content_index,delta});send(`response.${type}.done`,{...base,content_index,[field]:part[field]});send('response.content_part.done',{...base,content_index,part});}
   send('response.output_item.done',{output_index:index,item});
  }
- send(incomplete?'response.incomplete':'response.completed',{response:{id,model:'synthetic-responses-model',status:incomplete?'incomplete':'completed',output:items,usage:{input_tokens:17,output_tokens:8,total_tokens:25,input_tokens_details:{cached_tokens:5},output_tokens_details:{reasoning_tokens:3}}}});response.end();}
+ send(incomplete?'response.incomplete':'response.completed',{response:{id,model:'synthetic-responses-model',status:incomplete?'incomplete':'completed',output:terminal,usage:{input_tokens:17,output_tokens:8,total_tokens:25,input_tokens_details:{cached_tokens:5},output_tokens_details:{reasoning_tokens:3}}}});response.end();}
 const peer=createServer((request,response)=>{let raw='';request.on('data',bytes=>raw+=bytes);request.on('end',()=>{try{
  assert.equal(request.url,'/responses');assert.equal(request.headers.authorization,'Bearer '+key);assert.ok(!raw.includes(key));const body=JSON.parse(raw);requests.push(body);assert.equal(body.model,'synthetic-responses-model');assert.equal(body.store,false);assert.equal(body.stream,true);assert.ok(!body.messages&&!body.stream_options);assert.ok(body.tools.every(tool=>tool.type==='function'&&tool.name&&tool.strict===false));
  const current=body.input.findLast(item=>item.role==='user'),prompt=current.content.map(part=>part.text).join(''),number=requests.length,id='resp_'+number;
@@ -23,6 +23,17 @@ const peer=createServer((request,response)=>{let raw='';request.on('data',bytes=
  if(prompt==='hold'){response.write(`data: ${JSON.stringify({type:'response.created',sequence_number:0,response:{id,model:body.model,status:'in_progress'}})}\n\n`);held.push(response);return;}
  const reasoning={id:'rs_'+number,type:'reasoning',summary:[],encrypted_content:'synthetic-opaque-'+number};
  if(prompt==='incomplete'){output(response,id,[{id:'msg_'+number,type:'message',status:'completed',role:'assistant',content:[{type:'output_text',text:'Synthetic partial answer',annotations:[]}]}],{incomplete:true});return;}
+ if(prompt.startsWith('terminal-')){
+  assert.ok(body.tools.some(tool=>tool.name==='delegate_tasks'),'Use the actual configured native delegation path');
+  const call={id:'fc_'+number,type:'function_call',call_id:'call_'+number,name:'delegate_tasks',arguments:JSON.stringify({tasks:[{id:'inspect',objective:'SYNTHETIC_DELEGATED_OBJECTIVE_NOT_A_DIAGNOSTIC_VALUE',preset:'workspace.inspect'}]}),status:'completed'};
+  const items=[reasoning,call],terminalItems=structuredClone(items);
+  if(prompt==='terminal-metadata')terminalItems[1].phase='SYNTHETIC_PRIVATE_PHASE_'+key;
+  else if(prompt==='terminal-opaque'){items[0].encrypted_content='SYNTHETIC_PRIVATE_OPAQUE_BEFORE_'+key;terminalItems[0].encrypted_content='SYNTHETIC_PRIVATE_OPAQUE_AFTER_'+key;}
+  else if(prompt==='terminal-unlisted'){const name='SYNTHETIC_PRIVATE_MEMBER_'+key;items[1][name]='SYNTHETIC_PRIVATE_MEMBER_BEFORE';terminalItems[1][name]='SYNTHETIC_PRIVATE_MEMBER_AFTER';}
+  else if(prompt==='terminal-arguments')terminalItems[1].arguments=JSON.stringify({tasks:[{id:'changed',objective:'SYNTHETIC_PRIVATE_TERMINAL_ARGUMENT',preset:'workspace.inspect'}]});
+  else throw new Error('Unexpected terminal diagnostic fixture');
+  output(response,id,items,{terminalItems});return;
+ }
  if(body.input.at(-1).type==='function_call_output'){
   const last=body.input.at(-1);assert.equal(JSON.parse(last.output).content,'Actual Responses workspace content\n');const previous=body.input.findLast(item=>item.type==='function_call');assert.equal(previous.call_id,last.call_id);assert.ok(body.input.some(item=>item.type==='reasoning'&&item.encrypted_content.startsWith('synthetic-opaque-')),'Completed reasoning must survive tool continuation');
   output(response,id,[reasoning,{id:'msg_'+number,type:'message',status:'completed',role:'assistant',content:[{type:'output_text',text:'Synthetic verified native read 🌍',annotations:[]}]}]);
@@ -43,6 +54,32 @@ try{
  for(const prompt of ['unknown-tool','incomplete','http-error']){const before=requests.length,value=await run(prompt,prompt,'failed');assert.equal(requests.length,before+1,'Failed/partial Responses must not silently retry');const events=command('events',value.id);assert.ok(!events.some(item=>item.kind==='tool.started'));assert.ok(!JSON.stringify(events).includes('DO_NOT_ECHO_RESPONSES_ERROR'));assert.equal(command('history',prompt).filter(item=>item.role==='assistant').length,0);
   if(prompt==='incomplete'){const failure=events.find(item=>item.kind==='run.failed');assert.equal(failure.data.reason,'model_protocol_error');assert.equal(failure.data.protocol_error_code,'responses_provider_incomplete');}
  }
+ assert.equal((await api('/v1/health')).agent_delegation,true);
+ const rejectedTerminals=[],labels=['id','type','status','call_id','name','arguments','role','content','summary','encrypted_content','channel','phase'];
+ const allowedTypes=new Set(['absent','null','object','array','string','boolean','integer','unsigned_integer','number','unsupported']);
+ for(const prompt of ['terminal-metadata','terminal-opaque','terminal-unlisted','terminal-arguments']){
+  const before=requests.length,value=await run(prompt,prompt,'failed');assert.equal(requests.length,before+1,'Terminal mismatch cannot retry or start a child provider request');
+  const events=command('events',value.id),diagnostics=events.filter(event=>event.kind==='model.protocol_diagnostic');assert.equal(diagnostics.length,1);
+  const diagnostic=diagnostics[0].data,encoded=JSON.stringify(diagnostic);assert.ok(Buffer.byteLength(encoded,'utf8')<=4096);
+  assert.deepEqual(Object.keys(diagnostic).sort(),['code','output_index','item_present','item_done','completed_snapshot_type','terminal_snapshot_type','fields','changed_fields','unlisted_fields_equal'].sort());
+  assert.equal(diagnostic.code,'responses_terminal_mismatch');assert.equal(diagnostic.output_index,prompt==='terminal-opaque'?0:1);assert.equal(diagnostic.item_present,true);assert.equal(diagnostic.item_done,true);assert.equal(diagnostic.completed_snapshot_type,'object');assert.equal(diagnostic.terminal_snapshot_type,'object');
+  assert.deepEqual(diagnostic.fields.map(field=>field.field),labels);for(const field of diagnostic.fields){assert.deepEqual(Object.keys(field).sort(),['field','completed_present','completed_type','terminal_present','terminal_type','equal'].sort());for(const name of ['completed_present','terminal_present','equal'])assert.equal(typeof field[name],'boolean');assert.ok(allowedTypes.has(field.completed_type)&&allowedTypes.has(field.terminal_type));}
+  const changed=prompt==='terminal-metadata'?['phase']:prompt==='terminal-opaque'?['encrypted_content']:prompt==='terminal-arguments'?['arguments']:[];
+  assert.deepEqual(diagnostic.changed_fields,changed);assert.deepEqual(diagnostic.fields.filter(field=>!field.equal).map(field=>field.field),changed);assert.equal(diagnostic.unlisted_fields_equal,prompt!=='terminal-unlisted');
+  if(prompt==='terminal-metadata'){const field=diagnostic.fields.find(field=>field.field==='phase');assert.equal(field.completed_present,false);assert.equal(field.completed_type,'absent');assert.equal(field.terminal_present,true);assert.equal(field.terminal_type,'string');}
+  for(const marker of [key,'SYNTHETIC_PRIVATE_','SYNTHETIC_DELEGATED_OBJECTIVE_NOT_A_DIAGNOSTIC_VALUE','delegate_tasks','fc_'+(before+1),'call_'+(before+1),'rs_'+(before+1)])assert.ok(!encoded.includes(marker),'Diagnostic cannot include provider IDs, names, arguments, opaque values or unlisted keys');
+  // Earlier model.tool_delta intentionally contains the tool argument prefix;
+  // the new diagnostic alone must be value-free. Credentials never appear in events.
+  assert.ok(!JSON.stringify(events).includes(key));
+  assert.ok(!events.some(event=>['tool.started','tool.completed','tool.failed','model.usage','model.finish','model.done','run.completed','delegation.batch.accepted','delegation.child.admitted'].includes(event.kind)));
+  const failure=events.at(-1);assert.equal(failure.kind,'run.failed');assert.equal(failure.data.reason,'model_protocol_error');assert.equal(failure.data.protocol_error_code,'responses_terminal_mismatch');
+  for(const kind of ['budget.model_call.reserved','budget.model_call.started','budget.model_call.finished'])assert.equal(events.filter(event=>event.kind===kind).length,1);
+  assert.deepEqual(command('history',prompt).map(item=>item.role),['user']);assert.deepEqual(await api('/v1/runs/'+value.id+'/children'),[]);assert.deepEqual(command('operations',value.id),[]);
+  assert.equal(await readFile(join(workspace,'README.md'),'utf8'),'Actual Responses workspace content\n');assert.deepEqual(await readdir(workspace),['README.md']);
+  rejectedTerminals.push({prompt,runId:value.id,events});
+ }
+ await stop();await start();
+ for(const rejected of rejectedTerminals){assert.deepEqual(command('events',rejected.runId),rejected.events,'The actual bounded diagnostic and failed lifecycle persist through native SQLite reopen');assert.deepEqual(command('history',rejected.prompt).map(item=>item.role),['user']);assert.deepEqual(await api('/v1/runs/'+rejected.runId+'/children'),[]);}
  await api('/v1/sessions',{id:'cancel-responses',title:'cancel'});const cancelled=command('run','cancel-responses','hold');await until(()=>held.length,value=>value>0);command('cancel',cancelled.id);await until(()=>api('/v1/runs/'+cancelled.id),value=>value.state==='cancelled');
- console.log('Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, stateless reasoning item continuation, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, unsupported tool and incomplete/provider-error rejection without retries or effects, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.');
+ console.log('Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, stateless reasoning item continuation, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/opaque/unlisted/argument mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.');
 }finally{for(const response of held)response.destroy();await stop();await new Promise(resolve=>peer.close(resolve));assert.equal(dirname(resolve(root)),resolve(tmpdir()));assert.ok(basename(root).startsWith('xmind-responses-'));await rm(root,{recursive:true,force:true});}
