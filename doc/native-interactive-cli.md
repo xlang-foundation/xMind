@@ -101,6 +101,18 @@ is pending because the local build guard detected active xlang3 benchmarks.
 This source is not installed in the preview. Concurrent stdin controls while
 model output streams remain required; `/watch` does not close that gap.
 
+Chat inspection no longer requires an available model in newer source. The CLI
+can list/resume saved conversations, read history and attach existing runs on a
+model-free server. Before each new prompt it rereads native execution capability;
+when unavailable it reports the setup requirement without creating a session,
+appending input or admitting a run. This also allows a later successful backend
+configuration to be recognized without reopening chat. Explicit initial model
+IDs still require backend catalogue validation. The model-free HTTP/CLI contract
+checks saved-history inspection and unchanged sessions/history/runs after rejected
+input, including an empty chat that must create no placeholder conversation.
+These additions passed JavaScript syntax and whitespace checks; compiled
+execution and actual console acceptance remain pending.
+
 The subsequent checkpoint `d3a395d89a1ecf93947728338a65822c441464bd` also
 passed its [hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37702741919):
 52 native and 66 extension contracts. This verifies initial-model prevalidation

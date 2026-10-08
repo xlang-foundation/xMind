@@ -112,7 +112,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(response->status<200 || response->status>=300)throw std::runtime_error("Server rejected chat request (HTTP "+std::to_string(response->status)+")");
         return Json::parse(response->body);
     };
-    const auto health=request("/v1/health");if(!health.is_object() || health.value("agent_execution",false)!=true)throw std::runtime_error("Configure a backend model before starting chat");
+    const auto health=request("/v1/health");if(!health.is_object() || !health.contains("agent_execution") || !health["agent_execution"].is_boolean())throw std::runtime_error("Invalid backend chat capabilities");
     if(!model.empty()){
         const auto catalogue=request("/v1/models");
         if(!catalogue.is_object() || !catalogue.contains("models") || !catalogue["models"].is_array())throw std::runtime_error("Invalid backend model catalogue");
@@ -221,6 +221,9 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             else {std::cerr<<"Unknown chat command. Use /help, or // to send a literal slash request.\n";continue;}
         }
         if(prompt.size()>1024*1024)throw std::invalid_argument("Prompt exceeds limits");
+        const auto current=request("/v1/health");
+        if(!current.is_object()||!current.contains("agent_execution")||!current["agent_execution"].is_boolean())throw std::runtime_error("Invalid backend chat capabilities");
+        if(!current["agent_execution"].get<bool>()){std::cerr<<"Configure a backend model before submitting a request. Saved conversations and runs remain available for inspection.\n";continue;}
         if(session.empty()){
             const auto first=prompt.find_first_not_of(" \t\r\n");auto end=std::min(prompt.size(),first+80);
             // Truncate only at a UTF-8 boundary, preserving the original prompt.
