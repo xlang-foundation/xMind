@@ -1,5 +1,6 @@
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/path_glob.hpp"
+#include "agentflow/path_ignore.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "nlohmann/json.hpp"
 #include <future>
@@ -144,7 +145,24 @@ int main(int argc,char** argv) {
         const auto bounded_glob=tools.glob_files("*.txt","many",false,1000);require(bounded_glob.paths.size()==1000&&bounded_glob.truncated&&std::find(bounded_glob.limits.begin(),bounded_glob.limits.end(),"result_limit")!=bounded_glob.limits.end(),"A discovered extra match must disclose result truncation");
         const auto wire_glob=Json::parse(tools.invoke("glob_files",R"({"pattern":"nested/item[1-2].{cpp,hpp}","path":"glob-src","hidden":false,"limit":10})"));require(wire_glob["paths"].size()==2&&wire_glob["skipped_entries"].get<std::size_t>()>=2,"Typed invocation must use actual native glob traversal");
         const auto private_glob=tools.glob_files("**/*",".",true,1000);for(const auto& path:private_glob.paths)require(path.find(".config/")==std::string::npos&&path.find(".CoNfIg/")==std::string::npos&&path.find(".agentflow/")==std::string::npos&&path.find(".AgEnTfLoW/")==std::string::npos&&path.find(".git/")==std::string::npos&&path.find("outside-link/")==std::string::npos,"Glob cannot expose private or outside metadata");
-        for(const auto* pattern:{"","../*.cpp","/absolute/*","C:/*.cpp","src\\*.cpp","src/**x","[z-a]","[abc","[]","{one}","{one,}","{one,two"})rejects<std::invalid_argument>([&]{tools.glob_files(pattern);});
+        for(const auto* pattern:{"","../*.cpp","/absolute/*","C:/*.cpp","src/**x","[z-a]","[abc","[]","{one}","{one,}","{one,two","dangling\\"})rejects<std::invalid_argument>([&]{tools.glob_files(pattern);});
+        const auto ignored=tools.glob_files("!*.never","ignore-corpus");
+        require(ignored.paths==std::vector<std::string>{"ignore-corpus/build/built.cpp","ignore-corpus/children/keep.cpp","ignore-corpus/items/a.cpp","ignore-corpus/keep.tmp","ignore-corpus/main.cpp","ignore-corpus/nested/item1.cpp","ignore-corpus/root-only.cpp"},"Native ignore hierarchy must honor source priority, scoped rules, escapes, POSIX classes and directory pruning");
+        require(!ignored.truncated&&ignored.ignored_entries>0&&ignored.ignore_files==5,"Intentional ignore exclusions are complete coverage, with actual source counters");
+        const auto positive=tools.glob_files("*.cpp","ignore-corpus");require(std::find(positive.paths.begin(),positive.paths.end(),"ignore-corpus/info-drop.cpp")!=positive.paths.end()&&std::find(positive.paths.begin(),positive.paths.end(),"ignore-corpus/blocked/inside.cpp")==positive.paths.end(),"Positive file globs override file exclusions but do not bypass a nonmatching ignored parent");
+        const auto bypass=tools.glob_files("*.cpp","ignore-corpus",false,100,{},false);require(std::find(bypass.paths.begin(),bypass.paths.end(),"ignore-corpus/blocked/inside.cpp")!=bypass.paths.end()&&bypass.ignore_files==0,"Explicit bypass changes only ignore rules");
+        require(tools.glob_files("\\!literal.cpp","ignore-corpus").paths==std::vector<std::string>{"ignore-corpus/!literal.cpp"},"Escaped leading exclamation is a literal positive glob");
+        require(tools.glob_files("literal\\{x\\}.cpp","ignore-corpus").paths==std::vector<std::string>{"ignore-corpus/literal{x}.cpp"},"Escaped literal braces must not expand");
+        rejects<ToolAccessDenied>([&]{tools.glob_files("*.cpp","unsafe-ignore");});
+        require(tools.glob_files("*.cpp","unsafe-ignore",false,100,{},false).paths==std::vector<std::string>{"unsafe-ignore/visible.cpp"},"Bypass does not read unsafe ignore metadata");
+        const auto searched=tools.search_files("OwnedIgnoreNeedle");std::vector<std::string> search_paths;for(const auto& match:searched.matches)search_paths.push_back(match.path);std::sort(search_paths.begin(),search_paths.end());require(search_paths==ignored.paths,"Content search must share actual hierarchical ignore traversal rather than the positive-glob override");
+        PathIgnore dialect;dialect.begin_repository(".");dialect.add(".",0,"\xef\xbb\xbf" "# comment\r\n/root.cpp\r\n*.tmp\n!keep.tmp\nfolder/**\n!folder/keep.cpp\nname\\ \n\\#literal\n");std::size_t rule_steps=0;
+        require(dialect.ignored("root.cpp",false,rule_steps)&&!dialect.ignored("sub/root.cpp",false,rule_steps)&&!dialect.ignored("keep.tmp",false,rule_steps)&&dialect.ignored("drop.tmp",false,rule_steps),"Leading anchors, BOM/CRLF and ordered negation must follow Git-style rules");
+        require(!dialect.ignored("folder",true,rule_steps)&&dialect.ignored("folder/drop.cpp",false,rule_steps)&&!dialect.ignored("folder/keep.cpp",false,rule_steps)&&dialect.ignored("name ",false,rule_steps)&&dialect.ignored("#literal",false,rule_steps),"Trailing recursive stars must not prematurely prune the parent; escaped spaces/hash remain literal");
+        const auto before_repository=dialect.checkpoint();dialect.begin_repository("sub");require(!dialect.ignored("sub/drop.tmp",false,rule_steps),"Nested repository boundary excludes ancestor Git rules");dialect.restore(before_repository);require(dialect.ignored("sub/drop.tmp",false,rule_steps),"Sibling traversal must restore its previous repository scope");
+        dialect.add(".",1,"nested\\/literal.cpp\n");require(dialect.ignored("nested/literal.cpp",false,rule_steps),"Escaped interior separators retain path anchoring");
+        rejects<ToolFileError>([&]{PathIgnore oversized;oversized.add(".",1,std::string(32769,'#'));});
+        PathIgnore exhausted;for(int i=0;i<8;++i)exhausted.add(".",1,std::string(32768,'#'));rejects<IgnoreMetadataBudgetExceeded>([&]{exhausted.add(".",1,"# extra");});
         for(const auto* source:{R"({"pattern":"*","path":false})",R"({"pattern":"*","hidden":"true"})",R"({"pattern":"*","limit":0})",R"({"pattern":"*","limit":1001})",R"({"pattern":"*","limit":1.0})",R"({"pattern":"*","unknown":true})",R"({"pattern":"a","pattern":"b"})"})rejects<std::invalid_argument>([&]{tools.invoke("glob_files",source);});
         std::size_t glob_steps=0;PathGlob complex("{a,{b,c}}/**/file[1-3].cpp");require(complex.matches("c/deep/file2.cpp",glob_steps)&&!complex.matches("c/file9.cpp",glob_steps),"Nested braces and character ranges must compile deterministically");
         glob_steps=49999999;rejects<GlobMatchBudgetExceeded>([&]{complex.matches("c/file2.cpp",glob_steps);});

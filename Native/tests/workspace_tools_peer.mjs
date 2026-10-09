@@ -16,6 +16,16 @@ try {
   const privateState='owner_token: SyntheticBackendStateValue-workspace-only\nalpha[.]needle private state\n';
   await mkdir(join(root,'glob-src','nested'),{recursive:true});await mkdir(join(root,'.glob-hidden'),{recursive:true});
   const globDepth=Array(33).fill('d');await mkdir(join(root,'glob-depth',...globDepth),{recursive:true});
+  const ignored=join(root,'ignore-corpus');
+  for(const dir of ['.git/info','build','nested','children','blocked','items'])await mkdir(join(ignored,dir),{recursive:true});
+  await writeFile(join(ignored,'.gitignore'),'# owned Git-style corpus\n/build/\n/root-only.cpp\n*.tmp\n!keep.tmp\nnested/item?.cpp\ntrailing.cpp   \n\\#literal.cpp\n\\!literal.cpp\nliteral{x}.cpp\nitems/[[:digit:]].cpp\nchildren/**\n!children/keep.cpp\nblocked/\n!blocked/inside.cpp\n');
+  await writeFile(join(ignored,'.ignore'),'!build/\n!root-only.cpp\n*.ignore.cpp\n');
+  await writeFile(join(ignored,'.rgignore'),'priority.cpp\n');
+  await writeFile(join(ignored,'.git','info','exclude'),'info-*.cpp\n');
+  await writeFile(join(ignored,'nested','.gitignore'),'!item1.cpp\nlocal.hpp\n');
+  const ignoreNames=['main.cpp','root-only.cpp','drop.tmp','keep.tmp','trailing.cpp','#literal.cpp','!literal.cpp','literal{x}.cpp','info-drop.cpp','priority.cpp','drop.ignore.cpp','build/built.cpp','nested/item1.cpp','nested/item2.cpp','nested/local.hpp','children/keep.cpp','children/drop.cpp','blocked/inside.cpp','items/1.cpp','items/a.cpp'];
+  for(const file of ignoreNames)await writeFile(join(ignored,file),'OwnedIgnoreNeedle '+file+'\n');
+  await mkdir(join(root,'unsafe-ignore'));await writeFile(join(root,'unsafe-ignore','visible.cpp'),'');
   await Promise.all([
     writeFile(join(root,'README.txt'),'first\r\nalpha[.]needle 中\r\nlast\n'),
     writeFile(join(root,'edit.txt'),'original\n'),
@@ -64,6 +74,7 @@ try {
   await symlink(join(root,'.agentflow'),join(root,'state-alias'),'junction');
   await link(join(outside,'secret.txt'),join(root,'hard-link.txt'));
   await link(join(outside,'secret.txt'),join(root,'glob-src','hard.cpp'));
+  await link(join(outside,'secret.txt'),join(root,'unsafe-ignore','.ignore'));
   await symlink(outside,join(root,'glob-src','link'),'junction');
   for(let i=0;i<1001;i++) await writeFile(join(root,'many',`${i}.txt`),'');
   const expectedHash=createHash('sha256').update(await readFile(join(root,'README.txt'))).digest('hex');

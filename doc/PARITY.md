@@ -20,6 +20,16 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+Native file discovery and literal content search now interpret hierarchical
+workspace-local Git/search ignore metadata, ordered negation and scoped overrides.
+Positive glob behavior matches the inspected adapter's file-whitelist/directory
+pruning behavior on owned reference fixtures. All 98 native and 215/39 client
+contracts passed; actual OpenAI filtered search and xlang3/SQLite restart passed.
+Actual Git corpus decisions match the native assertions; two installed-ripgrep
+dialect differences remain explicit. This does not establish global-ignore,
+complete parser/regex/large-file search parity or installed writing acceptance.
+[Scope and remaining work](native-ignore.md), [exact evidence](evidence/native-ignore-local.json).
+
 Native `glob_files` provides recursive patterns, brace alternatives, character
 classes and Unicode filename matching, with scoped retained-handle traversal,
 hidden-file choice and explicit coverage bounds. All 98 native and 215/39 client

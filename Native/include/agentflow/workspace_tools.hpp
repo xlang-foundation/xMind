@@ -3,6 +3,7 @@
 #include <memory>
 #include <optional>
 #include <string_view>
+#include <functional>
 
 namespace agentflow {
 struct ToolAccessDenied : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -34,11 +35,12 @@ struct WorkspaceMatch {std::string path,text;std::int64_t line;bool text_truncat
 struct WorkspaceSearch {
     std::vector<WorkspaceMatch> matches;
     std::size_t scanned_files=0,skipped_entries=0;
+    std::size_t ignored_entries=0,ignore_files=0;
     bool truncated=false;
 };
 struct WorkspaceGlob {
     std::vector<std::string> paths,limits;
-    std::size_t scanned_entries=0,scanned_directories=0,skipped_entries=0;
+    std::size_t scanned_entries=0,scanned_directories=0,skipped_entries=0,ignored_entries=0,ignore_files=0;
     bool truncated=false;
 };
 // Workspace boundary is an opened OS directory, not a caller-controlled path.
@@ -103,11 +105,14 @@ public:
     WorkspaceListing list_files(const std::string& path=".",std::stop_token cancel={}) const;
     WorkspaceSearch search_files(const std::string& query,std::stop_token cancel={}) const;
     WorkspaceGlob glob_files(const std::string& pattern,const std::string& path=".",
-        bool hidden=false,std::size_t limit=100,std::stop_token cancel={}) const;
+        bool hidden=false,std::size_t limit=100,std::stop_token cancel={},bool respect_ignore=true) const;
     static std::vector<ModelToolDefinition> definitions();
     // Validate exact built-in argument shapes and return a bounded JSON result.
     std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={}) const;
 private:
+    WorkspaceGlob discover_files(const std::string& pattern,const std::string& path,bool hidden,
+        std::size_t limit,std::stop_token cancel,bool respect_ignore,
+        const std::function<bool(const std::string&)>& visitor={}) const;
     WorkspaceSnapshot read_snapshot(const std::string& path,bool capture_version,std::stop_token cancel,bool require_text=true) const;
     struct Impl;
     std::unique_ptr<Impl> impl_;

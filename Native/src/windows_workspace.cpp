@@ -1,5 +1,6 @@
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/path_glob.hpp"
+#include "agentflow/path_ignore.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <bcrypt.h>
@@ -133,6 +134,31 @@ struct WorkspaceTools::Impl {
         if(relative==".") return base;
         auto suffix=wide(relative);std::replace(suffix.begin(),suffix.end(),L'/',L'\\');
         return base+L"\\"+suffix;
+    }
+    std::optional<std::string> ignore_content(HANDLE directory,const std::wstring& leaf,std::stop_token cancel) const {
+        check_cancel(cancel);const auto opened=relative_file(directory,leaf,false,false,true,true);if(!opened)return {};
+        Handle file(opened);verify(opened);BY_HANDLE_FILE_INFORMATION info{};
+        if(!GetFileInformationByHandle(opened,&info)||GetFileType(opened)!=FILE_TYPE_DISK||(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Ignore metadata is not a regular file");
+        if((info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)||info.nNumberOfLinks!=1)throw ToolAccessDenied("Ignore metadata cannot use links");
+        if(info.nFileSizeHigh||info.nFileSizeLow>32768)throw ToolFileError("Ignore metadata exceeds the per-file limit");
+        std::string content;std::array<char,8192> buffer{};
+        for(;;){check_cancel(cancel);DWORD count=0;if(!ReadFile(opened,buffer.data(),static_cast<DWORD>(buffer.size()),&count,nullptr))throw ToolFileError("Cannot read ignore metadata");if(!count)break;if(count>32768-content.size())throw ToolFileError("Ignore metadata exceeds the per-file limit");content.append(buffer.data(),count);}
+        if(!valid_text(content))throw ToolFileError("Ignore metadata must be UTF-8 text without NUL");verify(opened);return content;
+    }
+    void load_ignores(HANDLE directory,const std::string& scope,PathIgnore& rules,std::stop_token cancel) const {
+        check_cancel(cancel);const auto marker=relative_file(directory,L".git",false,false,true);
+        if(marker){
+            Handle git(marker);verify(marker);BY_HANDLE_FILE_INFORMATION info{};
+            if(!GetFileInformationByHandle(marker,&info))throw ToolFileError("Cannot inspect repository marker");
+            if((info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)||(!(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)&&info.nNumberOfLinks!=1))throw ToolAccessDenied("Repository marker cannot use links");
+            rules.begin_repository(scope);
+            if(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY){Handle git_directory(relative_file(directory,L".git",true,false));verify_creation_directory(git_directory.value);if(file_identity(git_directory.value)!=file_identity(marker))throw ToolAccessDenied("Repository marker changed");const auto opened=relative_file(git_directory.value,L"info",true,false,true);
+                if(opened){Handle directory_info(opened);verify_creation_directory(opened);if(auto content=ignore_content(opened,L"exclude",cancel))rules.add(scope,-1,*content);}
+            }
+        }
+        if(rules.in_repository())if(auto content=ignore_content(directory,L".gitignore",cancel))rules.add(scope,0,*content);
+        if(auto content=ignore_content(directory,L".ignore",cancel))rules.add(scope,1,*content);
+        if(auto content=ignore_content(directory,L".rgignore",cancel))rules.add(scope,2,*content);
     }
     struct CreationParent {std::vector<std::unique_ptr<Handle>> directories;std::vector<std::string> missing;std::wstring leaf;std::string relative,existing_directory=".";};
     void verify_creation_directory(HANDLE directory) const {verify(directory);BY_HANDLE_FILE_INFORMATION info{};if(!GetFileInformationByHandle(directory,&info) || !(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Creation parent is not a directory");if(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)throw ToolAccessDenied("Creation does not traverse directory links");}
@@ -460,20 +486,27 @@ WorkspaceListing WorkspaceTools::list_files(const std::string& input,std::stop_t
     }
     std::sort(result.entries.begin(),result.entries.end(),[](const auto& a,const auto& b){return a.name<b.name;});return result;
 }
-WorkspaceGlob WorkspaceTools::glob_files(const std::string& pattern,const std::string& input,bool hidden,std::size_t limit,std::stop_token cancel) const {
+WorkspaceGlob WorkspaceTools::glob_files(const std::string& pattern,const std::string& input,bool hidden,std::size_t limit,std::stop_token cancel,bool respect_ignore) const {
     if(!limit||limit>1000)throw std::invalid_argument("Glob result limit must be 1-1000");
-    const PathGlob compiled(pattern);check_cancel(cancel);const auto relative=relative_path(input),workspace=identity();
+    return discover_files(pattern,input,hidden,limit,cancel,respect_ignore);
+}
+WorkspaceGlob WorkspaceTools::discover_files(const std::string& pattern,const std::string& input,bool hidden,std::size_t limit,std::stop_token cancel,bool respect_ignore,const std::function<bool(const std::string&)>& visitor) const {
+    const bool negative=pattern.starts_with('!');const PathGlob compiled(negative?pattern.substr(1):pattern);check_cancel(cancel);const auto relative=relative_path(input),workspace=identity();PathIgnore ignores;
     // Retain every search-root ancestor. Unlike pathname recursion this cannot
     // traverse a junction substituted between directory admission and opening.
     std::vector<std::unique_ptr<Handle>> anchors;
     anchors.push_back(std::make_unique<Handle>(CreateFileW(impl_->base.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr)));
     if(file_identity(anchors.back()->value)!=workspace)throw ToolAccessDenied("Glob root identity changed");
     impl_->verify_creation_directory(anchors.back()->value);
+    std::string ancestor=".";
     if(relative!=".")for(const auto& component:std::filesystem::u8path(relative)){
+        if(respect_ignore)try{impl_->load_ignores(anchors.back()->value,ancestor,ignores,cancel);}catch(const IgnoreMetadataBudgetExceeded&){throw ToolFileError("Ancestor ignore metadata exceeds limits");}
         check_cancel(cancel);creation_component(component.native());if(anchors.size()>32)throw ToolAccessDenied("Glob search root exceeds 32 components");
         anchors.push_back(std::make_unique<Handle>(relative_file(anchors.back()->value,component.native(),true,false)));impl_->verify_creation_directory(anchors.back()->value);
+        ancestor=ancestor=="."?utf8(component.native()):ancestor+"/"+utf8(component.native());
     }
-    WorkspaceGlob result;std::size_t steps=0,output_bytes=256;bool stopped=false;
+    WorkspaceGlob result;std::size_t steps=0,output_bytes=256,visited_files=0;bool stopped=false;
+    const std::size_t entry_limit=visitor?10000:20000;
     // Enumeration finishes before descending, so one buffer can serve every
     // frame without 64 KiB per recursive level on a Windows thread stack.
     alignas(FILE_ID_BOTH_DIR_INFO) std::array<std::byte,65536> buffer{};
@@ -484,6 +517,9 @@ WorkspaceGlob WorkspaceTools::glob_files(const std::string& pattern,const std::s
         check_cancel(cancel);if(stopped)return;
         if(++result.scanned_directories>2000){--result.scanned_directories;bounded("directory_limit");stopped=true;return;}
         impl_->verify_creation_directory(directory);
+        const auto saved_ignores=ignores.checkpoint();
+        struct Restore {PathIgnore& state;PathIgnore::Checkpoint before;~Restore(){state.restore(before);}} restore{ignores,saved_ignores};
+        if(respect_ignore)try{impl_->load_ignores(directory,scope,ignores,cancel);}catch(const IgnoreMetadataBudgetExceeded&){bounded("ignore_metadata_limit");stopped=true;return;}
         std::vector<WorkspaceEntry> entries;bool first=true;
         for(;;){
             check_cancel(cancel);const auto kind=first?FileIdBothDirectoryRestartInfo:FileIdBothDirectoryInfo;first=false;
@@ -495,14 +531,14 @@ WorkspaceGlob WorkspaceTools::glob_files(const std::string& pattern,const std::s
                 if(entry->FileNameLength%sizeof(wchar_t)||entry->FileNameLength>buffer.size()-position-header)throw ToolFileError("Invalid glob directory name");
                 const std::wstring wide_name(entry->FileName,entry->FileNameLength/sizeof(wchar_t));
                 if(wide_name!=L"."&&wide_name!=L".."){
-                    if(result.scanned_entries==20000){bounded("entry_limit");break;}++result.scanned_entries;
+                    if(result.scanned_entries==entry_limit){bounded("entry_limit");break;}++result.scanned_entries;
                     const auto name=utf8(wide_name);auto lower=name;for(auto& byte:lower)if(byte>='A'&&byte<='Z')byte+=('a'-'A');while(!lower.empty()&&(lower.back()=='.'||lower.back()==' '))lower.pop_back();
                     if(!backend_private_component(name)&&lower!=".git"&&(hidden||(!name.starts_with('.')&&!(entry->FileAttributes&FILE_ATTRIBUTE_HIDDEN))))entries.push_back({name,(entry->FileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)?"link":((entry->FileAttributes&FILE_ATTRIBUTE_DIRECTORY)?"directory":"file")});
                 }
                 if(!entry->NextEntryOffset)break;
                 if(entry->NextEntryOffset<header||entry->NextEntryOffset%alignof(FILE_ID_BOTH_DIR_INFO)||entry->NextEntryOffset>buffer.size()-position-header)throw ToolFileError("Invalid glob directory offset");position+=entry->NextEntryOffset;
             }
-            if(result.scanned_entries==20000){bounded("entry_limit");break;}
+            if(result.scanned_entries==entry_limit){bounded("entry_limit");break;}
         }
         std::sort(entries.begin(),entries.end(),[](const auto& a,const auto& b){return a.name<b.name;});
         for(const auto& entry:entries){
@@ -513,12 +549,17 @@ WorkspaceGlob WorkspaceTools::glob_files(const std::string& pattern,const std::s
                 Handle opened(relative_file(directory,wide(entry.name),entry.kind=="directory",false));impl_->verify(opened.value);
                 BY_HANDLE_FILE_INFORMATION info{};if(!GetFileInformationByHandle(opened.value,&info))throw ToolFileError("Cannot inspect glob entry");
                 if(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT){skipped();continue;}
+                const bool directory_entry=entry.kind=="directory",matched=compiled.matches(matching,steps,cancel);
+                if(directory_entry){if(!(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Discovery entry changed type");}
+                else if(GetFileType(opened.value)!=FILE_TYPE_DISK||(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)||info.nNumberOfLinks!=1){skipped();continue;}
+                if(negative&&matched){++result.ignored_entries;continue;}
+                if(respect_ignore&&(negative||!matched)&&ignores.ignored(path,directory_entry,steps,cancel)){++result.ignored_entries;continue;}
                 if(entry.kind=="directory"){
                     if(!(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Glob entry changed type");
                     if(depth==32){bounded("depth_limit");continue;}walk(opened.value,path,matching,depth+1);
                 }else{
-                    if(GetFileType(opened.value)!=FILE_TYPE_DISK||(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)||info.nNumberOfLinks!=1){skipped();continue;}
-                    if(!compiled.matches(matching,steps,cancel))continue;
+                    if(!negative&&!matched)continue;
+                    if(visitor){if(visited_files==limit){bounded("file_limit");stopped=true;break;}++visited_files;if(!visitor(path)){bounded("consumer_limit");stopped=true;break;}continue;}
                     if(result.paths.size()==limit){bounded("result_limit");stopped=true;break;}
                     std::size_t cost=4;for(const unsigned char byte:path)cost+=byte<32?6:(byte=='"'||byte=='\\'?2:1);
                     if(output_bytes+cost>50*1024){bounded("output_limit");stopped=true;break;}output_bytes+=cost;result.paths.push_back(path);
@@ -530,39 +571,29 @@ WorkspaceGlob WorkspaceTools::glob_files(const std::string& pattern,const std::s
     };
     walk(anchors.back()->value,relative,"",0);check_cancel(cancel);
     if(identity()!=workspace)throw ToolAccessDenied("Workspace identity changed during glob");
-    std::sort(result.paths.begin(),result.paths.end());return result;
+    result.ignore_files=ignores.source_files();std::sort(result.paths.begin(),result.paths.end());return result;
 }
 WorkspaceSearch WorkspaceTools::search_files(const std::string& query,std::stop_token cancel) const {
     if(query.empty() || query.size()>4096 || !valid_text(query)) throw std::invalid_argument("Search query must be UTF-8 text of 1-4096 bytes");
-    const std::set<std::string> excluded{".git",".venv",".agentflow","node_modules","__pycache__"};
-    WorkspaceSearch result;std::deque<std::string> directories{"."};std::size_t entries=0,bytes=0;
-    while(!directories.empty()) {
-        check_cancel(cancel);auto current=std::move(directories.front());directories.pop_front();
-        WorkspaceListing listing;
-        try {listing=list_files(current,cancel);} catch(const ToolAccessDenied&) {++result.skipped_entries;continue;} catch(const ToolFileError&) {++result.skipped_entries;continue;}
-        result.truncated=result.truncated || listing.truncated;
-        for(const auto& item:listing.entries) {
-            check_cancel(cancel);if(++entries>10000) {result.truncated=true;return result;}
-            if(excluded.contains(item.name)) continue;
-            const auto path=current=="."?item.name:current+"/"+item.name;
-            if(item.kind=="directory") {directories.push_back(path);continue;}
-            if(item.kind!="file") {++result.skipped_entries;continue;}
+    WorkspaceSearch result;std::size_t bytes=0;
+    const auto found=discover_files("!**/.git/**",".",false,10000,cancel,true,[&](const std::string& path){
             WorkspaceFile file;
-            try {file=read_file(path,cancel);} catch(const ToolAccessDenied&) {++result.skipped_entries;continue;} catch(const ToolFileError&) {++result.skipped_entries;continue;}
+            try {file=read_file(path,cancel);} catch(const ToolAccessDenied&) {++result.skipped_entries;result.truncated=true;return true;} catch(const ToolFileError&) {++result.skipped_entries;result.truncated=true;return true;}
             ++result.scanned_files;
-            if(file.content.size()>64*1024*1024-bytes) {result.truncated=true;return result;}bytes+=file.content.size();
+            if(file.content.size()>64*1024*1024-bytes) {result.truncated=true;return false;}bytes+=file.content.size();
             std::size_t start=0;std::int64_t number=1;
             while(start<file.content.size()) {
                 check_cancel(cancel);auto end=file.content.find('\n',start);if(end==std::string::npos) end=file.content.size();
                 auto text=file.content.substr(start,end-start);if(!text.empty() && text.back()=='\r') text.pop_back();
                 if(text.find(query)!=std::string::npos) {
-                    if(result.matches.size()==100) {result.truncated=true;return result;}
+                    if(result.matches.size()==100) {result.truncated=true;return false;}
                     result.matches.push_back({path,prefix(text,4096),number,text.size()>4096});
                 }
                 start=end+1;++number;
             }
-        }
-    }
+        return true;
+    });
+    result.truncated=result.truncated||found.truncated;result.skipped_entries+=found.skipped_entries;result.ignored_entries=found.ignored_entries;result.ignore_files=found.ignore_files;
     return result;
 }
 }

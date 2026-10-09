@@ -3,7 +3,8 @@
 `glob_files` finds file paths through the same native workspace authority used
 by coding agents. Its input is `pattern`, optional search-directory `path`
 (default `.`), optional `hidden` (default false), and optional `limit`
-(default 100, range 1–1,000). It reads names and file attributes, not contents,
+(default 100, range 1–1,000). `respect_ignore` defaults true. It reads names,
+file attributes and bounded local ignore metadata, not matching file contents,
 and creates no mutation proposals or approvals.
 
 Patterns support `*`, Unicode-scalar `?`, recursive directory component `**`,
@@ -13,6 +14,9 @@ pattern such as `*.cpp` matches files at any depth. A pattern containing a
 slash is relative to the search directory: `src/**/*.cpp` also matches
 `src/main.cpp`, because `**` can consume zero directories. Paths returned by a
 scoped search remain relative to the authorized workspace, not to its `path`.
+Backslash escapes literal metacharacters; a leading `!` excludes matching paths.
+Workspace-local hierarchical ignore rules apply, with explicit positive-glob
+overrides and a controlled metadata bypass. [Exact ignore semantics and limits](native-ignore.md).
 
 The result contains `paths`, `truncated`, `limits`, `scanned_entries`,
 `scanned_directories` and `skipped_entries`. Returned paths are sorted; when
@@ -21,6 +25,8 @@ not a claim about every match in the workspace. An extra matching file beyond
 the requested limit marks `result_limit`. Unsafe or inaccessible entries are
 skipped and explicitly mark incomplete coverage rather than becoming an empty
 successful search.
+`ignored_entries` and `ignore_files` count intentional exclusions and actual
+metadata sources. Rule exclusions are not mistaken for inaccessible coverage.
 
 C++ retains opened directory handles from the canonical workspace root through
 the chosen search directory and every active traversal branch. Child entries
@@ -52,8 +58,9 @@ The behavior reference is OpenCode v2.0.16 at
 `3a103fe0aff726a4edc7492f03f7b88195d9e4c9`, specifically its glob plugin,
 filesystem input contract and ripgrep adapter. xMind implements its own C++
 matcher and handle traversal. It does not execute or embed OpenCode/ripgrep.
-Gitignore/global-ignore rules, escaped literal metacharacters and full search
-parity remain incomplete.
+Local ignore rules and escaped literal metacharacters were subsequently added.
+Global/parent/external-worktree ignore configuration, full dialect compatibility
+and full search parity remain incomplete. [Current ignore checkpoint](native-ignore.md).
 
 The final source passed all 98 native contracts in 208.70 seconds, with 635
 mapped inputs unchanged and exact expected/registered/passed manifests matched.

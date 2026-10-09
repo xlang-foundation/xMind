@@ -1,5 +1,18 @@
 # Current native validation
 
+The local ignore-rule candidate passed **98 native contracts in 209.78 seconds**,
+with all 637 mapped inputs unchanged and exact expected/registered/passed
+manifests matched. **215 extension / 39 browser** contracts passed separately.
+Actual OpenAI content search returned only two allowed fixture paths, excluded
+generated/private data and retained exact history across an xlang3/SQLite restart,
+with zero mutation operations. Native synthetic-peer checks also persist filtered
+discovery/search results. Actual Git decisions plus explicit fixture-defined
+search overrides match the native corpus; the first ripgrep comparison's two
+POSIX-class/brace differences remain recorded. The candidate was not installed
+over the pending VS Code migration. Global/parent/external-worktree ignore
+configuration, full dialect/search parity and installed writing remain incomplete.
+[Behavior and limits](native-ignore.md), [exact evidence](evidence/native-ignore-local.json).
+
 The native glob-discovery candidate passed **98 native contracts in 208.70
 seconds**, with all 635 mapped source inputs unchanged and exact manifests
 matched. The unchanged view sources passed **215 extension / 39 browser**

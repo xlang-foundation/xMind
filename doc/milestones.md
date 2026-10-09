@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+Native discovery/content search now share hierarchical local ignore rules,
+scoped Git repository boundaries, negation, source priority and explicit positive
+glob overrides. All **98 native contracts passed in 209.78 seconds**, with 637
+unchanged inputs, plus **215/39 client** contracts. A real OpenAI search returned
+only two allowed paths and retained history across an xlang3/SQLite restart,
+without mutation operations. Actual Git corpus decisions match; the first
+ripgrep comparison exposed two retained dialect differences. Global ignore
+configuration, full dialect/search parity and installed writing remain incomplete.
+[Behavior and scope](native-ignore.md), [exact evidence](evidence/native-ignore-local.json).
+
 Native `glob_files` supports recursive wildcard, brace, character-class and
 Unicode path discovery through retained workspace handles. Ordinary agents,
 read-only delegated children and direct graph tools share the implementation.

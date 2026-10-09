@@ -5,12 +5,14 @@ xMind is being built as a general-purpose single-agent and graph platform with a
 OpenCode 2 is the coding feature reference; LiteLLM is the provider coverage reference. Their implementations are not the engine. See the [architecture](doc/architecture.md), [SVG](doc/architecture.svg), [pinned parity baseline](doc/PARITY.md) and [provider requirements](doc/MODEL_SUPPORT.md).
 
 The latest local checkpoint passed all **98 native, 215 extension and 39 browser
-contracts**. Native `glob_files` supports recursive pattern discovery for agents,
-read-only children and graph tools. Real OpenAI discovery and an xlang3/SQLite
-history restart passed. Native `read_file` also supports bounded line pages
+contracts**. Native discovery and literal content search now share hierarchical
+local ignore rules. Real OpenAI filtered search and an xlang3/SQLite history
+restart passed. Native `glob_files` supports recursive discovery for agents,
+read-only children and graph tools; `read_file` supports bounded line pages
 for files up to 64 MiB. The installed legacy
 VS Code preview still needs migration before approval-based file writing is
-ready. See [discovery behavior and limits](doc/native-glob.md),
+ready. See [ignore behavior and limits](doc/native-ignore.md),
+[discovery behavior](doc/native-glob.md),
 [file-page behavior](doc/native-file-pages.md),
 [current validation](doc/VALIDATION_STATUS.md) and the
 [replacement protocol](doc/native-owner-replacement.md) for exact scope.

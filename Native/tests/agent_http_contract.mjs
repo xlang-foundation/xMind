@@ -44,7 +44,11 @@ const peer=createServer((request,response)=>{
       }
       const last=body.messages.at(-1);
       if(last.role==='tool') {
-        if(prompt==='Discover actual native source paths'){
+        if(prompt==='Find nonignored owned fixture paths'){
+          const result=JSON.parse(last.content);assert.deepEqual(result.paths,['ignore-http/keep.tmp','ignore-http/main.cpp']);assert.equal(result.truncated,false);assert.equal(result.ignore_files,1);assert.ok(result.ignored_entries>0);
+        }else if(prompt==='Find filtered native content'){
+          const result=JSON.parse(last.content);assert.deepEqual(result.matches.map(match=>match.path).sort(),['ignore-http/keep.tmp','ignore-http/main.cpp']);assert.ok(result.matches.every(match=>match.line===1&&match.text==='IgnoreHttpNeedle'));assert.equal(result.ignore_files,1);assert.ok(result.ignored_entries>0);
+        }else if(prompt==='Discover actual native source paths'){
           const result=JSON.parse(last.content);assert.deepEqual(result.paths,['glob-src/main.cpp','glob-src/nested/header.hpp']);assert.equal(result.truncated,false);assert.equal(result.skipped_entries,0);
         }else if(prompt==='Read the last two lines of the large native fixture'){
           const page=JSON.parse(last.content);
@@ -55,7 +59,8 @@ const peer=createServer((request,response)=>{
       } else {
         const paged=prompt==='Read the last two lines of the large native fixture',discovery=prompt==='Discover actual native source paths';
         if(paged){const schema=body.tools.find(tool=>tool.function.name==='read_file').function.parameters;assert.equal(schema.properties.offset.minimum,1);assert.equal(schema.properties.limit.maximum,2000);assert.deepEqual(schema.required,['path']);}
-        send({choices:[{index:0,delta:{tool_calls:[{index:0,id:`http-call-${requests}`,type:'function',function:{name:discovery?'glob_files':'read_file',arguments:discovery?'{"pattern":"glob-src/**/*.{cpp,hpp}"}':paged?'{"path":"large.txt","offset":99999,"limit":2}':'{"path":"README.md"}'}}]},finish_reason:'tool_calls'}]});
+        const ignored=prompt==='Find nonignored owned fixture paths',search=prompt==='Find filtered native content';
+        send({choices:[{index:0,delta:{tool_calls:[{index:0,id:`http-call-${requests}`,type:'function',function:{name:search?'search_files':discovery||ignored?'glob_files':'read_file',arguments:search?'{"query":"IgnoreHttpNeedle"}':ignored?'{"pattern":"!*.never","path":"ignore-http"}':discovery?'{"pattern":"glob-src/**/*.{cpp,hpp}"}':paged?'{"path":"large.txt","offset":99999,"limit":2}':'{"path":"README.md"}'}}]},finish_reason:'tool_calls'}]});
       }
       response.end('data: [DONE]\n\n');
     } catch(error) {peerError=error;response.destroy();}
@@ -113,6 +118,8 @@ try {
   await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual workspace content\n');
   await writeFile(join(workspace,'large.txt'),Array.from({length:100000},(_,i)=>`line ${i+1} 中\r\n`).join(''));
   await mkdir(join(workspace,'glob-src','nested'),{recursive:true});await writeFile(join(workspace,'glob-src','main.cpp'),'');await writeFile(join(workspace,'glob-src','nested','header.hpp'),'');
+  await mkdir(join(workspace,'ignore-http','.git'),{recursive:true});await mkdir(join(workspace,'ignore-http','build'));await writeFile(join(workspace,'ignore-http','.gitignore'),'build/\n*.tmp\n!keep.tmp\n');
+  for(const name of ['main.cpp','keep.tmp','drop.tmp','build/skip.cpp'])await writeFile(join(workspace,'ignore-http',name),'IgnoreHttpNeedle\n');
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
   await start(true);
   assert.equal(cli('health').agent_execution,true);
@@ -134,6 +141,7 @@ try {
   assert.equal(JSON.parse(pagedHistory[2].data.content).content,'line 99999 中\r\nline 100000 中\r\n');
   assert.ok(cli('events',pagedRun.id).some(event=>event.kind==='tool.completed'));
   await session('discovery');const discovered=cli('run','discovery','Discover actual native source paths');await terminal(discovered.id,'completed');const discoveryHistory=cli('history','discovery');assert.deepEqual(JSON.parse(discoveryHistory.find(message=>message.role==='tool').data.content).paths,['glob-src/main.cpp','glob-src/nested/header.hpp']);
+  const ignoreHistories=new Map();for(const [id,prompt] of [['ignored','Find nonignored owned fixture paths'],['filtered','Find filtered native content']]){await session(id);const result=cli('run',id,prompt);await terminal(result.id,'completed');const saved=cli('history',id);assert.deepEqual(saved.map(message=>message.role),['user','assistant','tool','assistant']);ignoreHistories.set(id,saved);}
   const beforeChat=cli('sessions').length;assert.deepEqual(await chat('/exit\n'),[]);assert.equal(cli('sessions').length,beforeChat,'Leaving an empty chat must not create a session');
   const beforeInvalidRequests=requests,beforeInvalidRuns=cli('runs','coding').length;
   assert.deepEqual(await chatResult(1,'Read README\n/exit\n','coding','unavailable-fixture'),[],'An unavailable initial model must fail before emitting history or admitting work');
@@ -196,6 +204,7 @@ try {
   assert.deepEqual(cli('history','coding'),history);
   assert.deepEqual(cli('history','paged'),pagedHistory,'Exact native range results must survive embedded xlang3/SQLite restart');
   assert.deepEqual(cli('history','discovery'),discoveryHistory,'Native discovery results must survive embedded xlang3/SQLite restart');
+  for(const [id,saved] of ignoreHistories)assert.deepEqual(cli('history',id),saved,'Native ignore-filtered results must persist exactly without replay');
   assert.equal(cli('history',chatSession).length,12,'Interactive CLI history must survive native restart');
   // Use the actual editor host client against the same native server; no IDE
   // rendering or VS Code SecretStorage behavior is claimed by this wire test.
