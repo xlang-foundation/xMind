@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+Native `glob_files` supports recursive wildcard, brace, character-class and
+Unicode path discovery through retained workspace handles. Ordinary agents,
+read-only delegated children and direct graph tools share the implementation.
+The corrected source passed **98 native contracts in 208.70 seconds**, with
+635 frozen inputs, plus the unchanged **215/39 client** gate. Actual OpenAI
+discovery found and quoted four fixture paths, excluded private configuration
+and preserved history across an xlang3/SQLite restart. An actual depth-boundary
+fixture passed after moving the enumeration buffer out of recursive frames.
+The initial four stale synthetic-catalogue failures are retained. Gitignore
+rules, escaped metacharacters and full search/editor parity remain incomplete.
+[Behavior and limits](native-glob.md), [exact evidence](evidence/native-glob-local.json).
+
 Native text-file pages support 1-based offsets, up to 2,000 lines, explicit
 Unicode clipping and resumable output bounds for files up to 64 MiB. All
 **98 native contracts passed in 207.52 seconds**, with 633 mapped inputs

@@ -65,7 +65,7 @@ std::string GraphRunner::provider_context(const std::string& model_id)const{retu
 std::vector<std::string> GraphRunner::models() const{return agents_?agents_->models():std::vector<std::string>{};}
 void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const{
     const auto configured=models();if(!model.empty() && std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Graph model is not configured");
-    const std::vector<std::string> reads{"read_file","list_files","search_files","read_repository_instructions"};
+    const std::vector<std::string> reads{"read_file","list_files","search_files","glob_files","read_repository_instructions"};
     std::size_t agent_count=0;
     for(const auto& node:plan.nodes()){
         if(node.kind==GraphNodeKind::agent){if(!agents_)throw RunUnavailable("Graph agent execution requires a configured model");if(!node.model_id.empty() && std::find(configured.begin(),configured.end(),node.model_id)==configured.end())throw std::invalid_argument("Graph node model is not configured");}

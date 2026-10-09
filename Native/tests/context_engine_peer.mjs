@@ -17,7 +17,7 @@ const modes = ['rolling', 'held', 'held-count-failure', 'second-overflow', 'late
 const model = 'synthetic-context-engine-model';
 const key = 'synthetic-context-engine-key-not-live';
 const bytes = 'Actual native context fixture file bytes\n';
-const readTools = ['list_files', 'list_skills', 'load_skill', 'read_file', 'read_repository_instructions', 'search_files'];
+const readTools = ['glob_files', 'list_files', 'list_skills', 'load_skill', 'read_file', 'read_repository_instructions', 'search_files'];
 const state = new Map(modes.map(mode => [mode, {calls: new Map(), requests: [], compact: 0, canonical: undefined, userIds: new Map()}]));
 let failure;
 

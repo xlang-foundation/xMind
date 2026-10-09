@@ -36,6 +36,11 @@ struct WorkspaceSearch {
     std::size_t scanned_files=0,skipped_entries=0;
     bool truncated=false;
 };
+struct WorkspaceGlob {
+    std::vector<std::string> paths,limits;
+    std::size_t scanned_entries=0,scanned_directories=0,skipped_entries=0;
+    bool truncated=false;
+};
 // Workspace boundary is an opened OS directory, not a caller-controlled path.
 // Model definitions remain read-only; backend mutations require separate policy contracts.
 class WorkspaceTools {
@@ -97,6 +102,8 @@ public:
     WorkspaceFingerprint fingerprint_file(const std::string& path,std::stop_token cancel={}) const;
     WorkspaceListing list_files(const std::string& path=".",std::stop_token cancel={}) const;
     WorkspaceSearch search_files(const std::string& query,std::stop_token cancel={}) const;
+    WorkspaceGlob glob_files(const std::string& pattern,const std::string& path=".",
+        bool hidden=false,std::size_t limit=100,std::stop_token cancel={}) const;
     static std::vector<ModelToolDefinition> definitions();
     // Validate exact built-in argument shapes and return a bounded JSON result.
     std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={}) const;

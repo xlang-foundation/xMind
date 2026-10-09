@@ -1,5 +1,18 @@
 # Current native validation
 
+The native glob-discovery candidate passed **98 native contracts in 208.70
+seconds**, with all 635 mapped source inputs unchanged and exact manifests
+matched. The unchanged view sources passed **215 extension / 39 browser**
+contracts. An actual OpenAI run discovered four exact paths, including Unicode
+and public hidden names, excluded a synthetic private configuration file,
+created no mutation operations and retained its history after an xlang3/SQLite
+restart. Synthetic native contracts separately exercise graph and delegated
+discovery. An actual depth-boundary fixture passes with a shared enumeration
+buffer; first-gate catalogue assertion failures remain retained. The candidate
+was not installed over the pending VS Code migration. Gitignore/global-ignore
+rules, escaped metacharacters and full search/coding parity remain incomplete.
+[Behavior and scope](native-glob.md), [exact evidence](evidence/native-glob-local.json).
+
 The bounded native file-reader candidate passed **98 native contracts in
 207.52 seconds**, with all 633 mapped source inputs unchanged and exact
 expected/registered/passed manifests matched. **215 extension / 39 browser**

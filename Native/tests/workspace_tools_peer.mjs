@@ -14,6 +14,8 @@ try {
   const privateRoot='api_key: SyntheticPrivateConfigValue-workspace-only\nalpha[.]needle private root\n';
   const privateNested='api_key: SyntheticPrivateConfigValue-workspace-only\nalpha[.]needle private nested\n';
   const privateState='owner_token: SyntheticBackendStateValue-workspace-only\nalpha[.]needle private state\n';
+  await mkdir(join(root,'glob-src','nested'),{recursive:true});await mkdir(join(root,'.glob-hidden'),{recursive:true});
+  const globDepth=Array(33).fill('d');await mkdir(join(root,'glob-depth',...globDepth),{recursive:true});
   await Promise.all([
     writeFile(join(root,'README.txt'),'first\r\nalpha[.]needle 中\r\nlast\n'),
     writeFile(join(root,'edit.txt'),'original\n'),
@@ -42,6 +44,15 @@ try {
     ...[[0xc0,0xaf],[0xed,0xa0,0x80],[0xf4,0x90,0x80,0x80],[0xe4,0xb8],[0x61,0x00,0x62]].map((bytes,i)=>writeFile(join(root,`range-invalid-${i}.txt`),Buffer.from(bytes))),
     writeFile(join(root,'range-invalid-skipped.txt'),Buffer.from([0xff,10,0x61,10])),
     writeFile(join(root,'range-invalid-clipped.txt'),Buffer.concat([Buffer.from('x'.repeat(3000)),Buffer.from([0xff,10])])),
+    writeFile(join(root,'glob-src','main.cpp'),'Glob fixture: no native reader needs these contents\n'),
+    writeFile(join(root,'glob-src','main.hpp'),''),
+    writeFile(join(root,'glob-src','nested','item1.cpp'),''),
+    writeFile(join(root,'glob-src','nested','item2.hpp'),''),
+    writeFile(join(root,'glob-src','nested','中文😀.cpp'),''),
+    writeFile(join(root,'.glob-hidden','hidden.cpp'),''),
+    writeFile(join(root,'windows-hidden.cpp'),''),
+    writeFile(join(root,'glob-depth',...globDepth.slice(0,32),'edge.deep'),''),
+    writeFile(join(root,'glob-depth',...globDepth,'beyond.deep'),''),
     writeFile(join(outside,'secret.txt'),'outside marker\n')
   ]);
   const oversize=await open(join(root,'range-oversize.txt'),'wx');
@@ -52,6 +63,8 @@ try {
   await symlink(join(root,'.config'),join(root,'config-alias'),'junction');
   await symlink(join(root,'.agentflow'),join(root,'state-alias'),'junction');
   await link(join(outside,'secret.txt'),join(root,'hard-link.txt'));
+  await link(join(outside,'secret.txt'),join(root,'glob-src','hard.cpp'));
+  await symlink(outside,join(root,'glob-src','link'),'junction');
   for(let i=0;i<1001;i++) await writeFile(join(root,'many',`${i}.txt`),'');
   const expectedHash=createHash('sha256').update(await readFile(join(root,'README.txt'))).digest('hex');
   const expectedAfterHash=createHash('sha256').update((await readFile(join(root,'README.txt'),'utf8')).replace('alpha[.]needle','beta-native')).digest('hex');

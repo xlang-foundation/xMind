@@ -20,6 +20,14 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+Native `glob_files` provides recursive patterns, brace alternatives, character
+classes and Unicode filename matching, with scoped retained-handle traversal,
+hidden-file choice and explicit coverage bounds. All 98 native and 215/39 client
+contracts passed; real OpenAI discovery and xlang3/SQLite history restart passed
+separately. Graph and delegated discovery use the same native implementation.
+Gitignore/global-ignore rules, escaped literals and full search parity remain
+incomplete. [Behavior and limits](native-glob.md), [exact evidence](evidence/native-glob-local.json).
+
 Native `read_file` now implements optional 1-based `offset` and bounded `limit`
 arguments, streamed UTF-8 validation, explicit per-line clipping and continuation
 offsets. Its complete 98-contract native and 215/39 client gates passed, followed

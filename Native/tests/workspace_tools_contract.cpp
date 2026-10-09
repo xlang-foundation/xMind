@@ -1,4 +1,5 @@
 #include "agentflow/workspace_tools.hpp"
+#include "agentflow/path_glob.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "nlohmann/json.hpp"
 #include <future>
@@ -127,7 +128,26 @@ int main(int argc,char** argv) {
         for(const auto* source:{R"({"path":"README.txt","offset":0})",R"({"path":"README.txt","offset":-1})",R"({"path":"README.txt","offset":1.0})",R"({"path":"README.txt","offset":true})",R"({"path":"README.txt","offset":67108865})",R"({"path":"README.txt","offset":18446744073709551615})",R"({"path":"README.txt","limit":null})",R"({"path":"README.txt","limit":0})",R"({"path":"README.txt","limit":2001})",R"({"path":"README.txt","offset":1,"offset":2})"})rejects<std::invalid_argument>([&]{tools.invoke("read_file",source);});
         rejects<std::invalid_argument>([&]{tools.invoke("list_files",R"({"path":"sub","offset":1})");});
         rejects<std::invalid_argument>([&]{tools.read_file_page("README.txt",0);});rejects<std::invalid_argument>([&]{tools.read_file_page("README.txt",1,2001);});
-        require(tools.definitions().size()==4,"Available definitions must match implemented tools");
+        require(tools.definitions().size()==5,"Available definitions must match implemented tools");
+        const auto glob=tools.glob_files("glob-src/**/*.{cpp,hpp}");
+        require(glob.paths==std::vector<std::string>{"glob-src/main.cpp","glob-src/main.hpp","glob-src/nested/item1.cpp","glob-src/nested/item2.hpp","glob-src/nested/\xe4\xb8\xad\xe6\x96\x87\xf0\x9f\x98\x80.cpp"},"Glob must support zero/multiple directory levels and brace alternatives with actual UTF-8 filenames");
+        require(glob.truncated&&glob.skipped_entries>=2,"Unsafe hard links and junctions must be skipped with explicit incomplete coverage");
+        const auto deep=tools.glob_files("**/*.deep","glob-depth");std::string edge="glob-depth";for(int i=0;i<32;++i)edge+="/d";edge+="/edge.deep";
+        require(deep.paths==std::vector<std::string>{edge}&&deep.truncated&&std::find(deep.limits.begin(),deep.limits.end(),"depth_limit")!=deep.limits.end(),"Actual depth boundary must return the admitted file and explicitly skip deeper descent without exhausting the thread stack");
+        const auto classes=tools.glob_files("nested/item[!2].?pp","glob-src");require(classes.paths==std::vector<std::string>{"glob-src/nested/item1.cpp"},"Character classes and question marks must match relative to the selected directory");
+        const auto unicode=tools.glob_files("nested/???.[ch]pp","glob-src");require(unicode.paths==std::vector<std::string>{"glob-src/nested/\xe4\xb8\xad\xe6\x96\x87\xf0\x9f\x98\x80.cpp"},"Question marks count Unicode scalars rather than bytes or surrogate halves");
+        require(tools.glob_files("*.hpp","glob-src").paths==std::vector<std::string>{"glob-src/main.hpp","glob-src/nested/item2.hpp"},"Basename patterns must find nested files");
+        require(tools.glob_files("**/hidden.cpp").paths.empty(),"Hidden directories are excluded by default");
+        require(tools.glob_files("**/hidden.cpp",".",true).paths==std::vector<std::string>{".glob-hidden/hidden.cpp"},"Explicit hidden discovery includes public hidden files");
+        require(SetFileAttributesW((std::filesystem::path(argv[1])/L"windows-hidden.cpp").c_str(),FILE_ATTRIBUTE_HIDDEN)!=0,"Fixture must set actual Windows hidden attribute");
+        require(tools.glob_files("windows-hidden.cpp").paths.empty()&&tools.glob_files("windows-hidden.cpp",".",true).paths==std::vector<std::string>{"windows-hidden.cpp"},"Hidden choice also covers actual Windows attributes");
+        const auto bounded_glob=tools.glob_files("*.txt","many",false,1000);require(bounded_glob.paths.size()==1000&&bounded_glob.truncated&&std::find(bounded_glob.limits.begin(),bounded_glob.limits.end(),"result_limit")!=bounded_glob.limits.end(),"A discovered extra match must disclose result truncation");
+        const auto wire_glob=Json::parse(tools.invoke("glob_files",R"({"pattern":"nested/item[1-2].{cpp,hpp}","path":"glob-src","hidden":false,"limit":10})"));require(wire_glob["paths"].size()==2&&wire_glob["skipped_entries"].get<std::size_t>()>=2,"Typed invocation must use actual native glob traversal");
+        const auto private_glob=tools.glob_files("**/*",".",true,1000);for(const auto& path:private_glob.paths)require(path.find(".config/")==std::string::npos&&path.find(".CoNfIg/")==std::string::npos&&path.find(".agentflow/")==std::string::npos&&path.find(".AgEnTfLoW/")==std::string::npos&&path.find(".git/")==std::string::npos&&path.find("outside-link/")==std::string::npos,"Glob cannot expose private or outside metadata");
+        for(const auto* pattern:{"","../*.cpp","/absolute/*","C:/*.cpp","src\\*.cpp","src/**x","[z-a]","[abc","[]","{one}","{one,}","{one,two"})rejects<std::invalid_argument>([&]{tools.glob_files(pattern);});
+        for(const auto* source:{R"({"pattern":"*","path":false})",R"({"pattern":"*","hidden":"true"})",R"({"pattern":"*","limit":0})",R"({"pattern":"*","limit":1001})",R"({"pattern":"*","limit":1.0})",R"({"pattern":"*","unknown":true})",R"({"pattern":"a","pattern":"b"})"})rejects<std::invalid_argument>([&]{tools.invoke("glob_files",source);});
+        std::size_t glob_steps=0;PathGlob complex("{a,{b,c}}/**/file[1-3].cpp");require(complex.matches("c/deep/file2.cpp",glob_steps)&&!complex.matches("c/file9.cpp",glob_steps),"Nested braces and character ranges must compile deterministically");
+        glob_steps=49999999;rejects<GlobMatchBudgetExceeded>([&]{complex.matches("c/file2.cpp",glob_steps);});
         const auto search=tools.search_files("alpha[.]needle");
         bool root=false,nested=false,preview=false;
         for(const auto& match:search.matches) {
@@ -156,6 +176,7 @@ int main(int argc,char** argv) {
             rejects<ToolAccessDenied>([&]{tools.plan_replacement(path,"api_key","changed");});rejects<ToolAccessDenied>([&]{tools.invoke("read_file",Json{{"path",path}}.dump());});
         }
         for(const auto* path:{".config",".CONFIG",".config.",".config ","sub/.config","config-alias",".agentflow",".AGENTFLOW",".agentflow.",".agentflow ","sub/.agentflow","state-alias"}){
+            rejects<ToolAccessDenied>([&]{tools.glob_files("**/*",path,true);});
             rejects<ToolAccessDenied>([&]{tools.list_files(path);});rejects<ToolAccessDenied>([&]{tools.directory_identity(path);});rejects<ToolAccessDenied>([&]{tools.repository_instructions(path);});
         }
         rejects<ToolAccessDenied>([&]{tools.instruction_file(".config/AGENTS.md");});rejects<ToolAccessDenied>([&]{tools.instruction_file("sub/.config/AGENTS.md");});
@@ -176,6 +197,7 @@ int main(int argc,char** argv) {
         rejects<ToolAccessDenied>([&]{tools.list_files("outside-link/sub");});
         rejects<ToolAccessDenied>([&]{tools.read_file("hard-link.txt");});
         for(const auto* path:{"../workspace-other/secret.txt","outside-link/secret.txt","hard-link.txt","README.txt:stream"})rejects<ToolAccessDenied>([&]{tools.read_file_page(path,1,1);});
+        for(const auto* path:{"../workspace-other","outside-link", "README.txt:stream"})rejects<ToolAccessDenied>([&]{tools.glob_files("**/*",path,true);});
         rejects<ToolAccessDenied>([&]{tools.read_file("README.txt:stream");});
         rejects<ToolFileError>([&]{tools.read_file("binary.bin");});
         rejects<ToolFileError>([&]{tools.read_file("too-large.txt");});
@@ -192,6 +214,7 @@ int main(int argc,char** argv) {
         std::stop_source cancelled;cancelled.request_stop();
         rejects<ToolCancelled>([&]{tools.read_file("README.txt",cancelled.get_token());});
         rejects<ToolCancelled>([&]{tools.read_file_page("range-large.txt",99999,2,cancelled.get_token());});
+        rejects<ToolCancelled>([&]{tools.glob_files("**/*",".",true,100,cancelled.get_token());});
         rejects<ToolCancelled>([&]{tools.snapshot_file("README.txt",cancelled.get_token());});
         rejects<ToolCancelled>([&]{tools.plan_replacement("README.txt","first","changed",1,cancelled.get_token());});
         rejects<ToolCancelled>([&]{tools.search_files("needle",cancelled.get_token());});

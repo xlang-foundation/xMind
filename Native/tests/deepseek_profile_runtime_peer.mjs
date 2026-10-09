@@ -33,7 +33,7 @@ const peer=createServer((request,response)=>{
     for(const field of ['n','max_completion_tokens','thinking','reasoning_effort'])assert.equal(Object.hasOwn(body,field),false);
     assert.ok(!source.includes('provider_items')&&!source.includes('provider_context')&&!source.includes('credential_id'));
     assert.equal(body.messages.length,2);assert.equal(body.messages[0].role,'system');assert.ok(body.messages[0].content.startsWith('Synthetic DeepSeek enrollment fixture:'));assert.deepEqual(body.messages[1],{role:'user',content:prompt});
-    assert.deepEqual(body.tools.map(tool=>tool.function.name).sort(),['read_repository_instructions','read_file','list_files','search_files','list_skills','load_skill','plan_tasks','revise_plan','inspect_plan'].sort(),'The actual enrolled ordinary Agent must retain its backend tool/planning capability');
+    assert.deepEqual(body.tools.map(tool=>tool.function.name).sort(),['read_repository_instructions','read_file','list_files','search_files','glob_files','list_skills','load_skill','plan_tasks','revise_plan','inspect_plan'].sort(),'The actual enrolled ordinary Agent must retain its backend tool/planning capability');
     response.writeHead(200,{'Content-Type':'text/event-stream'});
     const chunk=(delta,finish=null,metrics=null)=>'data: '+JSON.stringify({id:'synthetic-enrolled-response',object:'chat.completion.chunk',model:'deepseek-flash',choices:[{index:0,delta,finish_reason:finish}],usage:metrics})+'\n\n';
     const wire=Buffer.from(chunk({role:'assistant',reasoning_content:reasoning.slice(0,17)})+chunk({reasoning_content:reasoning.slice(17)})+chunk({content:answer})+chunk({},'stop',usage)+'data: [DONE]\n\n');

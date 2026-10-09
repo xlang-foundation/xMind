@@ -30,7 +30,7 @@ const peer=createServer((request,response)=>{
       assert.ok(!source.includes(key));
       const body=JSON.parse(source);
       assert.equal(body.model,'synthetic-protocol-model');assert.equal(body.stream,true);
-      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','list_skills','load_skill','delegate_tasks','plan_tasks','revise_plan','inspect_plan']);
+      assert.deepEqual(body.tools.map(tool=>tool.function.name),['read_repository_instructions','read_file','list_files','search_files','glob_files','list_skills','load_skill','delegate_tasks','plan_tasks','revise_plan','inspect_plan']);
       const prompt=body.messages.findLast(message=>message.role==='user').content;
       requestsByPrompt.set(prompt,(requestsByPrompt.get(prompt)??0)+1);
       if(prompt==='provider-error') {
@@ -44,16 +44,18 @@ const peer=createServer((request,response)=>{
       }
       const last=body.messages.at(-1);
       if(last.role==='tool') {
-        if(prompt==='Read the last two lines of the large native fixture'){
+        if(prompt==='Discover actual native source paths'){
+          const result=JSON.parse(last.content);assert.deepEqual(result.paths,['glob-src/main.cpp','glob-src/nested/header.hpp']);assert.equal(result.truncated,false);assert.equal(result.skipped_entries,0);
+        }else if(prompt==='Read the last two lines of the large native fixture'){
           const page=JSON.parse(last.content);
           assert.equal(page.path,'large.txt');assert.equal(page.offset,99999);assert.equal(page.lines_read,2);
           assert.equal(page.content,'line 99999 中\r\nline 100000 中\r\n');assert.equal(page.has_more,false);assert.equal(page.truncated,false);assert.deepEqual(page.truncated_lines,[]);assert.ok(!Object.hasOwn(page,'next_offset'));
         }else assert.equal(JSON.parse(last.content).content,'Actual workspace content\n');
         send({choices:[{index:0,delta:{content:'Synthetic peer checked the actual workspace read.'},finish_reason:'stop'}]});
       } else {
-        const paged=prompt==='Read the last two lines of the large native fixture';
+        const paged=prompt==='Read the last two lines of the large native fixture',discovery=prompt==='Discover actual native source paths';
         if(paged){const schema=body.tools.find(tool=>tool.function.name==='read_file').function.parameters;assert.equal(schema.properties.offset.minimum,1);assert.equal(schema.properties.limit.maximum,2000);assert.deepEqual(schema.required,['path']);}
-        send({choices:[{index:0,delta:{tool_calls:[{index:0,id:`http-call-${requests}`,type:'function',function:{name:'read_file',arguments:paged?'{"path":"large.txt","offset":99999,"limit":2}':'{"path":"README.md"}'}}]},finish_reason:'tool_calls'}]});
+        send({choices:[{index:0,delta:{tool_calls:[{index:0,id:`http-call-${requests}`,type:'function',function:{name:discovery?'glob_files':'read_file',arguments:discovery?'{"pattern":"glob-src/**/*.{cpp,hpp}"}':paged?'{"path":"large.txt","offset":99999,"limit":2}':'{"path":"README.md"}'}}]},finish_reason:'tool_calls'}]});
       }
       response.end('data: [DONE]\n\n');
     } catch(error) {peerError=error;response.destroy();}
@@ -110,6 +112,7 @@ const chat=(input,...args)=>chatResult(0,input,...args);
 try {
   await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual workspace content\n');
   await writeFile(join(workspace,'large.txt'),Array.from({length:100000},(_,i)=>`line ${i+1} 中\r\n`).join(''));
+  await mkdir(join(workspace,'glob-src','nested'),{recursive:true});await writeFile(join(workspace,'glob-src','main.cpp'),'');await writeFile(join(workspace,'glob-src','nested','header.hpp'),'');
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
   await start(true);
   assert.equal(cli('health').agent_execution,true);
@@ -130,6 +133,7 @@ try {
   const pagedHistory=cli('history','paged');assert.deepEqual(pagedHistory.map(message=>message.role),['user','assistant','tool','assistant']);
   assert.equal(JSON.parse(pagedHistory[2].data.content).content,'line 99999 中\r\nline 100000 中\r\n');
   assert.ok(cli('events',pagedRun.id).some(event=>event.kind==='tool.completed'));
+  await session('discovery');const discovered=cli('run','discovery','Discover actual native source paths');await terminal(discovered.id,'completed');const discoveryHistory=cli('history','discovery');assert.deepEqual(JSON.parse(discoveryHistory.find(message=>message.role==='tool').data.content).paths,['glob-src/main.cpp','glob-src/nested/header.hpp']);
   const beforeChat=cli('sessions').length;assert.deepEqual(await chat('/exit\n'),[]);assert.equal(cli('sessions').length,beforeChat,'Leaving an empty chat must not create a session');
   const beforeInvalidRequests=requests,beforeInvalidRuns=cli('runs','coding').length;
   assert.deepEqual(await chatResult(1,'Read README\n/exit\n','coding','unavailable-fixture'),[],'An unavailable initial model must fail before emitting history or admitting work');
@@ -191,6 +195,7 @@ try {
   await stop();await start(); // Reuse encrypted stored credential without env key.
   assert.deepEqual(cli('history','coding'),history);
   assert.deepEqual(cli('history','paged'),pagedHistory,'Exact native range results must survive embedded xlang3/SQLite restart');
+  assert.deepEqual(cli('history','discovery'),discoveryHistory,'Native discovery results must survive embedded xlang3/SQLite restart');
   assert.equal(cli('history',chatSession).length,12,'Interactive CLI history must survive native restart');
   // Use the actual editor host client against the same native server; no IDE
   // rendering or VS Code SecretStorage behavior is claimed by this wire test.

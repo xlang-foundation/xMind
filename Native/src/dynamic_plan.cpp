@@ -107,7 +107,7 @@ void capabilities(const DynamicPlanCapabilities& value){
         if(preset.tools.empty()||preset.tools.size()>128)throw std::invalid_argument("Invalid registered dynamic tool catalogue");
         std::set<std::string> tools;
         for(const auto& tool:preset.tools){valid_text(tool,128);if(!tools.insert(tool).second)throw std::invalid_argument("Duplicate registered dynamic tool");
-            if(preset.readonly&&tool!="read_repository_instructions"&&tool!="read_file"&&tool!="list_files"&&tool!="search_files"&&tool!="list_skills"&&tool!="load_skill")throw std::invalid_argument("Read-only dynamic preset contains an effect tool");
+            if(preset.readonly&&tool!="read_repository_instructions"&&tool!="read_file"&&tool!="list_files"&&tool!="search_files"&&tool!="glob_files"&&tool!="list_skills"&&tool!="load_skill")throw std::invalid_argument("Read-only dynamic preset contains an effect tool");
             if(tool=="delegate_tasks"||tool=="plan_tasks"||tool=="revise_plan"||tool=="inspect_plan")throw std::invalid_argument("Dynamic child recursion is not supported");
         }
     }
