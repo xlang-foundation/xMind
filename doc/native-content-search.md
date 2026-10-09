@@ -1,9 +1,10 @@
 # Native content search
 
-This source implementation extends `search_files`. Native compilation,
-filesystem execution and actual provider acceptance are pending; earlier
-ignore/glob checkpoints do not validate these changes. Do not treat this file as
-an accepted milestone until fresh native evidence is recorded.
+This implementation extends `search_files`. Exact source `5c8c918` passed native
+compilation and all 98 hosted contracts in 274.50 seconds. Complete test identities,
+receipt/archive hashes and every packaged runtime file were independently checked.
+Actual provider-driven regex search and installed-client regex acceptance remain
+pending. [Hosted evidence](evidence/native-regex-hosted.json).
 
 The C++ tool accepts `query`, optional `regex` (default false), `case_sensitive`
 (default true), `path` (default `.`), `include`, `hidden` (default false),
@@ -54,7 +55,7 @@ default and adds equivalent choices explicitly. The reference's external-path
 authorization, timeout behavior, global ignore configuration and complete
 syntax/output parity are not established by this implementation.
 
-Pending tests exercise actual large files, scoped paths/include globs, Unicode
+Passed native tests exercise actual large files, scoped paths/include globs, Unicode
 case folding, malformed/unsupported patterns, an eight-MiB pathological nonmatch,
 binary tails, charged binary-read budgets, serialized output limits, strict
 argument parsing and private/link boundaries. Further acceptance must execute

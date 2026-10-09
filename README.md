@@ -23,10 +23,12 @@ See [saved-context recovery](doc/saved-context-recovery.md),
 [current validation](doc/VALIDATION_STATUS.md) and the
 [replacement protocol](doc/native-owner-replacement.md) for exact scope.
 
-The [native regex-search candidate](doc/native-content-search.md) adds scoped
-content search, case folding and charged aggregate read budgets. Compilation
-and execution acceptance are pending on the isolated Windows workflow; earlier
-passing checks do not establish this feature's runtime behavior.
+The [native regex-search implementation](doc/native-content-search.md) adds scoped
+content search, case folding and charged aggregate read budgets. Exact source
+`5c8c918` passed all 98 hosted native contracts in 274.50 seconds. Both artifact
+digests, complete test identities and all 1,863 packaged runtime file hashes were
+independently verified. Actual provider-driven regex acceptance and installed
+client regex acceptance remain pending. [Hosted evidence](doc/evidence/native-regex-hosted.json).
 
 ## OSS deployment scope
 

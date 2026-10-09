@@ -1,12 +1,17 @@
 # Current native validation
 
-The native regex-search implementation was introduced in candidate `2e127c7`
-and is being reviewed further for scoped-directory behavior. Its
-[isolated Windows workflow](https://github.com/xlang-foundation/xMind/actions/workflows/native-windows.yml)
-must validate the final candidate revision; compilation and native execution
-have not yet been established for these changes. The source adds real filesystem/HTTP regressions and pins RE2
-and Abseil, with exact dependency bytes verified. Local builds remain deferred
-while the separate xlang3 benchmark is active. [Candidate behavior and limits](native-content-search.md).
+The native regex-search implementation at exact source `5c8c918` passed its
+[isolated Windows workflow](https://github.com/xlang-foundation/xMind/actions/runs/37968627266):
+all 98 native contracts in 274.50 seconds, with exact expected/registered/passed
+identities and receipt hashes verified. Actual filesystem/HTTP regressions cover
+large files, UTF-8, scoped paths, regex failures, read/output budgets and link
+boundaries. All 39 browser controller contracts and packaged asset checks passed.
+Independent verification matched both archive digests, all 32 development bundle
+files and all 1,863 packaged runtime files, including RE2/Abseil licenses.
+Provider replies in native agent contracts are synthetic; actual provider-driven
+regex and installed client regex acceptance remain pending. Local native workload
+is deferred while the separate xlang3 benchmark is active.
+[Behavior and limits](native-content-search.md), [exact evidence](evidence/native-regex-hosted.json).
 
 The VS Code preview's saved profile migration was observed complete, with an
 approval-enabled backend rooted at `D:\CantorAI2026\TestProj`. A subsequent
