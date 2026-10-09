@@ -38,7 +38,7 @@ std::string_view member(std::string_view source,std::string_view wanted){
 Json tool_input(std::string_view source){if(source.size()>object_limit)throw ModelProtocolError("Claude tool input exceeds limits");auto value=parse(source,16);if(!value.is_object())throw ModelProtocolError("Claude tool input is not an object");return value;}
 }
 struct AnthropicStream::Impl {
-    struct Block {std::string type,id,name,value,input,signature;bool stopped=false,initial_input_empty=false,input_delta=false,signature_phase=false;};
+    struct Block {std::string type,id,name,value,input,signature,caller;bool stopped=false,initial_input_empty=false,input_delta=false,signature_phase=false;};
     ChatCompletionStream::Sink sink;std::vector<Block> blocks;std::set<std::string> calls;Json usage=Json::object();ModelCompletion result;
     std::string line,data,event,reason;std::size_t bytes=0;bool first=true,skip_lf=false,has_data=false,started=false,delta=false,done=false,failed=false,acknowledged=false;
     explicit Impl(ChatCompletionStream::Sink value):sink(std::move(value)){if(!sink)throw std::invalid_argument("Model event sink is required");}
@@ -80,7 +80,9 @@ struct AnthropicStream::Impl {
                 if(block.type=="text"){append(result.content,block.value);encoded=Json{{"type","text"},{"text",block.value}}.dump();}
                 else if(block.type=="tool_use"){
                     if(reason=="tool_use")result.tool_calls.push_back({block.id,block.name,block.input});
-                    encoded="{\"type\":\"tool_use\",\"id\":"+Json(block.id).dump()+",\"name\":"+Json(block.name).dump()+",\"input\":"+block.input+'}';
+                    encoded="{\"type\":\"tool_use\",\"id\":"+Json(block.id).dump()+",\"name\":"+Json(block.name).dump()+",\"input\":"+block.input;
+                    if(!block.caller.empty())append(encoded,",\"caller\":"+block.caller,receipt_limit);
+                    append(encoded,"}",receipt_limit);
                 }else if(block.type=="thinking")encoded=Json{{"type","thinking"},{"thinking",block.value},{"signature",block.signature}}.dump();
                 else if(block.type=="redacted_thinking")encoded=Json{{"type","redacted_thinking"},{"data",block.value}}.dump();
                 append(content,encoded,receipt_limit);
@@ -102,7 +104,15 @@ struct AnthropicStream::Impl {
             if(static_cast<std::size_t>(position(value))!=blocks.size())throw ModelProtocolError("Claude block sequence is invalid");const auto& content=value.at("content_block");Block block;block.type=text(content,"type");
             if(block.type=="text"){fields(content,{"type","text"});block.value=text(content,"text");if(block.value.size()>limit)throw ModelProtocolError("Claude content exceeds limits");if(!block.value.empty())emit("model.text",{{"text",block.value}});}
             else if(block.type=="tool_use"){
-                fields(content,{"type","id","name","input"});block.id=text(content,"id");identity(block.id);block.name=text(content,"name");if(block.name.empty()||block.name.size()>64||block.name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos||!calls.insert(block.id).second)throw ModelProtocolError("Invalid Claude tool block");
+                fields(content,{"type","id","name","input","caller"});
+                if(content.contains("caller")){
+                    const auto& caller=content.at("caller");fields(caller,{"type"});
+                    if(text(caller,"type")!="direct")throw ModelProtocolError("Unsupported Claude tool caller");
+                    // Keep validated original metadata for the next provider turn.
+                    // A direct caller does not grant native effect authorization.
+                    block.caller=member(member(data,"content_block"),"caller");
+                }
+                block.id=text(content,"id");identity(block.id);block.name=text(content,"name");if(block.name.empty()||block.name.size()>64||block.name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos||!calls.insert(block.id).second)throw ModelProtocolError("Invalid Claude tool block");
                 block.input=member(member(data,"content_block"),"input");block.initial_input_empty=tool_input(block.input).empty();
                 emit("model.tool_delta",{{"index",blocks.size()},{"id",block.id},{"name",block.name},{"arguments",""}});
             }else if(block.type=="thinking"){

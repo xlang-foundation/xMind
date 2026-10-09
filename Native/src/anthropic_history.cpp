@@ -65,7 +65,12 @@ Content content(const std::string& source){
             fields(block,{"type","text"});const auto text=string(block,"text",text_limit);
             if(text.size()>text_limit-result.visible.size())invalid();result.visible+=text;
         }else if(type=="tool_use"){
-            fields(block,{"type","id","name","input"});ModelToolCall call;call.id=string(block,"id",256);opaque(call.id,256);call.name=string(block,"name",64);name(call.name);
+            fields(block,{"type","id","name","input","caller"});
+            if(block.contains("caller")){
+                const auto& caller=block.at("caller");fields(caller,{"type"});
+                if(string(caller,"type",32)!="direct")invalid();
+            }
+            ModelToolCall call;call.id=string(block,"id",256);opaque(call.id,256);call.name=string(block,"name",64);name(call.name);
             if(!ids.insert(call.id).second)invalid();const auto input=member(raw[index],"input");
             if(!parse(input,input_limit,16).is_object())invalid();call.arguments_json=std::string(input);result.calls.push_back(std::move(call));
         }else if(type=="thinking"){

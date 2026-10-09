@@ -26,6 +26,22 @@ Json receipt(const ModelCompletion& result){const auto items=Json::parse(result.
 void rejects(const std::string& wire){bool failed=false;std::size_t acknowledgements=0;AnthropicStream decoder([&](const ModelEvent& value){if(value.kind=="model.done")++acknowledgements;});try{decoder.feed(wire);decoder.finish();}catch(const ModelProtocolError&){failed=true;}require(failed&&acknowledgements==0,"Invalid Claude stream cannot acknowledge completion");}
 }
 int main(){try{
+    {
+        const std::string caller=R"({ "\u0074ype" : "\u0064irect" })";
+        const std::string input=R"({ "path" : "README.md", "n" : 1.00000000000000000001 })";
+        const std::string prefix="event: content_block_start\ndata: {\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"tool_use\",\"id\":\"direct-call\",\"name\":\"read_file\",\"input\":{},\"caller\":";
+        const auto opening=prefix+caller+"}}\n\n";
+        const auto wire=event(start())+opening+change(0,"input_json_delta","partial_json",input)+end(0)+event(update("tool_use"))+stop();
+        for(const std::size_t width:{1,3,64,4096}){
+            AnthropicStream stream([](const auto&){});for(std::size_t offset=0;offset<wire.size();offset+=width)stream.feed(std::string_view(wire).substr(offset,width));const auto completion=stream.finish();
+            require(completion.tool_calls.size()==1&&completion.tool_calls[0].arguments_json==input,"Direct caller metadata must not change executable tool arguments");
+            const auto content=receipt(completion).at("content_json").get<std::string>();require(content.find(caller)!=std::string::npos&&content.find(input)!=std::string::npos,"Direct caller and precise arguments must retain their original token slices for replay");
+        }
+        for(const auto* invalid:{"null","[]","{}",R"({"type":"DIRECT"})",R"({"type":"direct","extra":true})",R"({"type":"code_execution_20260120","tool_id":"server-call"})"}){
+            rejects(event(start())+begin(0,{{"type","tool_use"},{"id","invalid-caller"},{"name","read_file"},{"input",Json::object()},{"caller",Json::parse(invalid)}})+end(0)+event(update("tool_use"))+stop());
+        }
+        rejects(event(start())+prefix+R"({"type":"direct","type":"direct"})"+"}}\n\n"+end(0)+event(update("tool_use"))+stop());
+    }
     const auto wire=event(start())+event({{"type","ping"}})+text()+event(update())+stop();
     for(const std::size_t width:{1,2,7,37,4096}){
         std::vector<ModelEvent> events;AnthropicStream decoder([&](const ModelEvent& value){events.push_back(value);});for(std::size_t offset=0;offset<wire.size();offset+=width)decoder.feed(std::string_view(wire).substr(offset,width));require(std::none_of(events.begin(),events.end(),[](const auto& value){return value.kind=="model.done";}),"Terminal acknowledgement waits for validated EOF");const auto result=decoder.finish();require(result.content=="Exact text 🌍"&&result.finish_reason=="stop"&&result.tool_calls.empty(),"Chunking must preserve observed content and terminal state");require(Json::parse(result.usage_json)==Json{{"input_tokens",12},{"output_tokens",8},{"cache_read_input_tokens",7}},"Reported token counters remain exact without invented totals");const auto saved=receipt(result);require(saved.at("finish_reason")=="stop"&&saved.at("provider_finish_reason")=="end_turn"&&Json::parse(saved.at("content_json").get<std::string>())==Json::array({{{"type","text"},{"text","Exact text 🌍"}}}),"Ordinary Claude text must receive an ordered replay receipt");decoder.finish();require(std::count_if(events.begin(),events.end(),[](const auto& value){return value.kind=="model.done";})==1,"Repeated finish cannot duplicate completion acknowledgement");

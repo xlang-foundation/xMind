@@ -361,6 +361,11 @@ class ProviderProfileController {
     if(this.disposed||!this.state)return true;
     this.invalidate({catalogue:true});const epoch=this.epoch;
     try{
+      if(!this.current(epoch))return true;
+      if(id===undefined&&route_id===undefined&&key===undefined&&!this.state.active&&this.state.profiles.length){
+        const text='Choose a saved provider below, then choose a model. Your saved key will be used.';
+        this.configuredModels();this.post({type:'settings-state',busy:false,text});this.post({type:'status',text});return true;
+      }
       id=id===undefined?this.state.active:id;
       const saved=this.state.profiles.find(value=>value.id===id);
       if(id&&!saved)throw new Error('Choose a saved profile or Add profile');

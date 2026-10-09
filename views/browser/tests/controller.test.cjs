@@ -1,6 +1,12 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController}=require('../browser.js');
 const {planFixture,inputMessage}=require('../../../extensions/vscode/tests/plan-fixture');
 
+test('browser imported key-only profiles guide the footer selection without a new-key error or provider calls',async()=>{
+ const state={revision:1,active:'',profiles:[{id:'saved-openai',provider:'openai',route_id:'openai.responses',model:'',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]},calls=[],posted=[];
+ const view=new BrowserController({providerProfiles:async()=>state,discoverProfileModels:async()=>{calls.push('discover');},selectProviderProfile:async()=>{calls.push('select');},saveProviderProfile:async()=>{calls.push('save');},providerConfiguration:async()=>{calls.push('legacy');}},value=>posted.push(value));
+ try{await view.discover();assert.deepEqual(calls,[]);assert.equal(view.profileController.state.active,'');assert.ok(!posted.some(value=>value.type==='error'));assert.match(posted.findLast(value=>value.type==='status').text,/Choose a saved provider below/);assert.match(posted.findLast(value=>value.type==='settings-state').text,/saved key will be used/);assert.equal(view.profileController.draft,undefined);}finally{view.dispose();}
+});
+
 test('browser saved catalogue remains usable after settings close, new conversation and selection without automatic profile writes',async()=>{
  let state={revision:4,active:'saved',profiles:[{id:'saved',provider:'openai',route_id:'openai.responses',model:'current',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};const writes=[],discoveries=[],posted=[],models=Array.from({length:135},(_,n)=>({id:'discovered-'+n}));
  const client={providerProfiles:async()=>state,discoverProfileModels:async(...args)=>{discoveries.push(args);return {models};},saveProviderProfile:async(...args)=>{writes.push(args);state={...state,revision:state.revision+1,profiles:[{...state.profiles[0],revision:state.profiles[0].revision+1,model:args[2]}]};return state;},health:async()=>({agent_execution:true}),models:async()=>({models:[{id:state.profiles[0].model}],default_model:state.profiles[0].model}),graphs:async()=>({graphs:[]}),createSession:async()=>({id:'new-session'}),sessions:async()=>[{id:'new-session'},{id:'older-session'}],history:async()=>[],runs:async()=>[]};

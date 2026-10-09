@@ -26,6 +26,18 @@ ModelMessage with_content(ModelMessage message,const std::string& replacement){
 }
 int main(){try{
     ChatProviderConfig config{"http://127.0.0.1:1/messages","synthetic-claude",Capability::supported,Capability::supported,Capability::supported};config.wire=ProviderWire::anthropic_messages;
+    {
+        const std::string caller=R"({ "\u0074ype" : "\u0064irect" })";
+        const auto source=std::string(R"([{"type":"tool_use","id":"caller-direct","name":"measure","input":)")+input+",\"caller\":"+caller+"}]";
+        ModelMessage direct;direct.role=MessageRole::assistant;direct.tool_calls={{"caller-direct","measure",input}};direct.provider_items_json=anthropic_content_receipt(source,"tool_calls","tool_use");
+        require(anthropic_history_content(direct)==source,"Validated direct caller metadata must survive receipt validation exactly");
+        ModelRequest next;next.max_output_tokens=64;next.tools={{"measure","Synthetic direct-call component",R"({"type":"object"})"}};next.messages={{MessageRole::user,"Synthetic direct caller"},direct,{MessageRole::tool,"Synthetic tool result",{},"caller-direct"}};
+        const auto encoded=serialize_anthropic_request(config,next);require(encoded.find(source)!=std::string::npos&&encoded.find(caller)!=std::string::npos,"Next Claude request must replay the original direct caller rather than drop or normalize it");
+        for(const auto* invalid:{"null","[]","{}",R"({"type":"DIRECT"})",R"({"type":"direct","extra":true})",R"({"type":"code_execution_20260120","tool_id":"server-call"})",R"({"type":"direct","type":"direct"})"}){
+            const auto bad=std::string(R"([{"type":"tool_use","id":"caller-direct","name":"measure","input":)")+input+",\"caller\":"+invalid+"}]";
+            rejects([&]{anthropic_content_receipt(bad,"tool_calls","tool_use");});rejects([&]{anthropic_history_content(with_content(direct,bad));});
+        }
+    }
     auto message=assistant();require(anthropic_history_content(message)==raw,"Receipt must retain exact block order and raw argument/escaped-key tokens");
     // This is the agent's real parse/dump envelope shape, without claiming SQL.
     const auto envelope=Json{{"provider_items",Json::parse(message.provider_items_json)},{"tool_calls",Json::array({{{"id","toolu-left"},{"name","measure"},{"arguments",input}},{{"id","toolu-right"},{"name","measure"},{"arguments","{}"}}})},{"content",message.content}}.dump();

@@ -5,6 +5,20 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const {ProviderProfileController}=require('../client');
 const registry=()=>({revision:4,active:'openai',profiles:[{id:'openai',route_id:'openai.responses',provider:'openai',model:'fixture-openai',revision:4}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'openai.chat',provider:'openai',wire:'chat-completions',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]});
 
+test('new workspace with imported keys asks for a saved provider without discovery, activation or another key',async()=>{
+ const state={...registry(),active:'',profiles:[{...registry().profiles[0],model:''},{id:'claude',route_id:'anthropic.messages',provider:'anthropic',model:'',revision:1}]},posted=[],calls=[];
+ const controller=new ProviderProfileController({providerProfiles:async()=>state,discoverProfileModels:async()=>{calls.push('discover');},selectProviderProfile:async()=>{calls.push('select');},saveProviderProfile:async()=>{calls.push('save');}},value=>posted.push(value));
+ try{assert.equal(await controller.discover(),true);assert.deepEqual(calls,[]);assert.equal(controller.state.active,'');assert.equal(controller.draft,undefined);assert.equal(controller.savedCatalogue,undefined);assert.match(posted.findLast(value=>value.type==='status').text,/Choose a saved provider below/);assert.match(posted.findLast(value=>value.type==='settings-state').text,/saved key will be used/);assert.equal(posted.findLast(value=>value.type==='settings-state').busy,false);assert.deepEqual(posted.findLast(value=>value.type==='model-list').models,[]);
+  await assert.rejects(controller.discover(undefined,'','anthropic.messages'),/Enter a key for the new provider profile/);assert.deepEqual(calls,[]);
+ }finally{controller.dispose();}
+});
+
+test('saved-provider guidance cannot publish after its workspace attachment is retired',async()=>{
+ let current=true;const posted=[],state={...registry(),active:''};
+ const controller=new ProviderProfileController({providerProfiles:async()=>state},value=>posted.push(value),()=>current);
+ try{await controller.refresh();const count=posted.length;current=false;assert.equal(await controller.discover(),true);assert.equal(posted.length,count);assert.equal(controller.state.active,'');}finally{controller.dispose();}
+});
+
 test('saved key-only provider selection is a native CAS followed by discovery, with model enrollment only on explicit selection',async()=>{
  let state=registry();state={...state,profiles:[...state.profiles,{id:'claude-key-only',route_id:'anthropic.messages',provider:'anthropic',model:'',revision:1}]};const calls=[],posted=[];
  const controller=new ProviderProfileController({providerProfiles:async()=>state,selectProviderProfile:async(...args)=>{calls.push(['select',...args]);state={...state,revision:5,active:args[0]};return state;},discoverProfileModels:async(...args)=>{calls.push(['discover',...args]);return {models:[{id:'fixture-claude'}]};},saveProviderProfile:async(...args)=>{calls.push(['save',...args]);state={...state,revision:6,profiles:state.profiles.map(value=>value.id===args[0]?{...value,model:args[2],revision:2}:value)};return state;}},value=>posted.push(value));
