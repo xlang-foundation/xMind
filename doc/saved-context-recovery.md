@@ -29,8 +29,11 @@ See [installed writing evidence](evidence/vscode-file-creation-live.json).
 The shared renderer now explains `context_unavailable` and
 `context_binding_changed`, directs users to a fresh conversation, and states that
 recorded history is preserved. It does not interpolate exception messages or
-invent model responses or token usage. The installed renderer has not yet been
-updated; these messages are in source for the next client package.
+invent model responses or token usage. These messages are now included in the
+installed 0.1.3 VS Code client. The client was reloaded with the same native
+backend and restored the completed creation run before a fresh conversation was
+opened. This does not repair or relabel the old conversation's context receipts.
+See [installed client update](evidence/vscode-sidebar-recovery-installed.json).
 
 Validation: 215 extension contracts and 39 browser contracts passed, including
 failure-message retention across transcript refresh, with 43 input files and 11

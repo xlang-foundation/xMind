@@ -14,8 +14,9 @@ contributing to the notice. Run/workspace reset clears the old controls.
 
 This addresses the observed installed-editor test where expanded activity pushed
 the pending `hello.py` proposal out of view. The actual creation succeeded on the
-older installed runtime; this renderer change has not been installed or accepted
-visually in that editor.
+older installed runtime. This renderer is now installed in client 0.1.3 and the
+idle sidebar has been observed after reload. Pending-approval layout and
+navigation still require live acceptance in that editor.
 
 The candidate passed 66 renderer contracts and the complete isolated client gate:
 217 extension and 39 browser contracts, with zero failures, skips or cancellations.

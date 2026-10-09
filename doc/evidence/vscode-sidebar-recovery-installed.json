@@ -1,0 +1,45 @@
+{
+  "observedAt": "2026-10-09T19:17:50.910Z",
+  "sourceRevision": "a1ed50d4fc314f93a1a57fb7115cc106d8003008",
+  "scope": "Installed thin VS Code client update, reload/history restoration and fresh ready conversation; no new inference or filesystem mutation",
+  "extensionVersion": "0.1.3",
+  "nativeRevision": "5d8b17572fabf56b7ddf477cba96626f954cc329",
+  "runtimeManifestSha256": "2c54166484f2cbf1f62b26f831d5aeb20e75da5d40f6c445172cd2e53965e162",
+  "vsixSha256": "b6bc25f11e61d681299b1dac8dfa3fc9563a7789537b19261e73c9a139011b7a",
+  "installedSourceHashes": {
+    "media/chat.js": "58744fa3328db044124ae02d085bf6765eded85b3ae256102046c9870172c3ac",
+    "extension.js": "8ce5301fe0f36c0689825bb96bc843e4a8259aa72a4beb0c44e3db9853cc3106",
+    "webview.js": "04e4a28e43285266f0b850162d060fd4d23c8448aa7e4b14a0ea075be25032cb",
+    "client.js": "24a89672dfb91907f86116e10c904593103db2c14a050eac50bb2df86ac14b46"
+  },
+  "runtimeFilesVerified": 1899,
+  "browserPackageRequiredAssetsVerified": 18,
+  "backendProcessId": 25608,
+  "sameBackendObservedAfterReload": true,
+  "restoredCompletedRun": "8d6e0557a034a324acb48d16177c10ff",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "freshConversationReady": true,
+  "provider": "openai",
+  "model": "gpt-6.1-sol",
+  "approvalRequired": true,
+  "priorCreationFileHashRechecked": "65667c97e08fbafda450bd52669beb4663f2a965fb2393d4b7a0670ab7e33c59",
+  "adapterTests": {
+    "extension": 217,
+    "browser": 39,
+    "failed": 0,
+    "scope": "Complete isolated Node suites rerun; this rerun did not freeze source/assets"
+  },
+  "screenshot": {
+    "path": "vscode-sidebar-recovery-ready.png",
+    "sha256": "1cf1fe9786e505754aaa9b81b580215639f60b144bc44e16483913309c6b67a4"
+  },
+  "limits": [
+    "The older context_unavailable run remains failed; no saved authority receipts were retagged.",
+    "The new recovery text is present in verified installed source; the failed card was not visually accepted in this check.",
+    "No new inference, approval proposal, patch execution or native upgrade was performed.",
+    "This updates only the managed TestProj VS Code client; the separate browser preview was not upgraded."
+  ],
+  "providerKeysAccessed": false,
+  "databaseMutatedByDiagnostic": false,
+  "cpythonExecuted": false
+}
