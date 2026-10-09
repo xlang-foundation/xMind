@@ -23,12 +23,51 @@ struct Directory {
     }
     ~Directory() {std::error_code ignored;std::filesystem::remove_all(path,ignored);}
 };
+#if defined(_WIN32)
+void long_backend_lease(const Directory& directory,const std::vector<std::string>& roots) {
+    // Real native lease and embedded xlang3 SQLite at the product failure's
+    // boundary: database254 UTF-16 units, unchanged sidecar267 (>MAX_PATH).
+    auto parent=directory.path/"long-backend";const std::filesystem::path name="state.sqlite";
+    require((parent/name).native().size()<254,"Owned temporary prefix must permit the exact long-path case");
+    while((parent/name).native().size()+60<254)parent/=std::wstring(40,L'x');
+    const auto needed=254-(parent/name).native().size();
+    std::filesystem::path filename=name;
+    if(needed>=2)parent/=std::wstring(needed-1,L'y');else if(needed==1)filename="xstate.sqlite";
+    const auto database=parent/filename;std::filesystem::create_directories(parent);
+    require(database.native().size()==254,"Long database spelling must remain254 units");
+    auto sidecar=database;sidecar+=".backend-lock";
+    require(sidecar.native().size()==267,"Lease sidecar must retain original267-unit spelling");
+    const auto encoded=database.u8string();const std::string path(encoded.begin(),encoded.end());
+    const auto extended=std::filesystem::path(L"\\\\?\\"+database.native()).u8string();const std::string extended_path(extended.begin(),extended.end());
+    {
+        BackendLease owner(path);require(owner.covers(path),"Long lease must cover its public canonical database");
+        rejects<Conflict>([&]{BackendLease competing(path);});
+        rejects<Conflict>([&]{BackendLease competing(extended_path);});
+        Repository persisted(path,roots);persisted.create_session("long-session","Native long lease fixture");
+        persisted.append_message("long-session","user",R"({"content":"Synthetic persistence marker; no model or keys"})");
+        persisted.put_information("long-lease","marker",R"({"retained":true})");
+        require(owner.covers(extended_path),"Existing extended spelling must cover the same physical database");
+        require(!owner.covers((parent/"other.sqlite").string()),"Long lease must not cover another database");
+    }
+    {
+        BackendLease reopened(extended_path);require(reopened.covers(path),"Released long lease must reopen through extended spelling");
+        rejects<Conflict>([&]{BackendLease competing(path);});
+        Repository persisted(path,roots);
+        require(persisted.history("long-session").size()==1,"Long database conversation must survive lease release/reopen");
+        require(persisted.information("long-lease","marker")==R"({"retained":true})","Long database information must survive reopen");
+    }
+    BackendLease final_owner(path);require(final_owner.covers(path),"Extended-owner release must allow ordinary spelling again");
+}
+#endif
 }
 int main(int argc,char** argv) {
     if(argc!=3) {std::cerr<<"Expected package and stdlib-source roots\n";return 2;}
     try {
         Directory directory; const auto path=(directory.path/"state.sqlite").string();
         const std::vector<std::string> roots{argv[1],argv[2]};
+#if defined(_WIN32)
+        long_backend_lease(directory,roots);
+#endif
         std::int64_t cursor=0;
         {
             BackendLease owner(path); Repository first(path,roots),second(path,roots);
