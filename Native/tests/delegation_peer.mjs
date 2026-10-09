@@ -90,7 +90,7 @@ const server=createServer((request,response)=>{
    }
    throw new Error('Unexpected fixture parent provider route');
   }
-  assert.deepEqual([...names].sort(),['list_files','read_file','read_repository_instructions','search_files']);
+  assert.deepEqual([...names].sort(),['list_files','list_skills','load_skill','read_file','read_repository_instructions','search_files']);
   assert.notEqual(label,'unknown','Accepted native leaf objective must identify its own fixture task');
   if(label==='left')assert.ok(!user.includes('fixture-leaf-right'));if(label==='right')assert.ok(!user.includes('fixture-leaf-left'));
   assert.ok(!source.includes('opaque-parent-'),'Parent signed continuation must not be copied into leaf prompt/history');

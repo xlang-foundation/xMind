@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <thread>
 
 using namespace agentflow;
@@ -18,9 +19,12 @@ using Json=nlohmann::json;
 const std::string provider_key="synthetic-dynamic-mcp-provider-not-live";
 const std::string connector_key="synthetic-dynamic-mcp-connector-not-live";
 const std::string effect="Actual dynamic coding MCP bytes\n";
-void require(bool value,const char* reason){if(!value)throw std::runtime_error(reason);}
+// Only fixture-authored constant messages may enter public CI diagnostics.
+// Library errors and provider/peer payloads remain in the private fixture log.
+struct ContractFailure : std::runtime_error {using std::runtime_error::runtime_error;};
+void require(bool value,const char* reason){if(!value)throw ContractFailure(reason);}
 template<class Error,class Action>void rejects(Action action,const char* reason){try{action();}catch(const Error&){return;}throw std::runtime_error(reason);}
-template<class Action>void eventually(Action action,const char* reason){const auto until=std::chrono::steady_clock::now()+15s;while(std::chrono::steady_clock::now()<until){if(action())return;std::this_thread::sleep_for(5ms);}throw std::runtime_error(reason);}
+template<class Action>void eventually(Action action,const char* reason){const auto until=std::chrono::steady_clock::now()+15s;while(std::chrono::steady_clock::now()<until){if(action())return;std::this_thread::sleep_for(5ms);}throw ContractFailure(reason);}
 bool terminal(RunState state){return state==RunState::completed||state==RunState::failed||state==RunState::cancelled;}
 std::string read(const std::filesystem::path& path){std::ifstream stream(path,std::ios::binary);return {std::istreambuf_iterator<char>(stream),std::istreambuf_iterator<char>()};}
 std::size_t audit_count(const std::filesystem::path& root,const std::string& kind){std::ifstream stream(root/"mcp-audit.jsonl");std::size_t count=0;std::string line;while(std::getline(stream,line))if(Json::parse(line).at("kind")==kind)count++;return count;}
@@ -63,4 +67,4 @@ void scenario(char** argv,const std::string& mode){
     if(lost||cancel){const auto starts=audit_count(workspace,"started"),calls=audit_count(workspace,"called");PersistenceService store(database,imports);AgentService service(store,frozen,2,8);require(service.idle()&&store.run(root).get().state==(cancel?RunState::cancelled:RunState::failed)&&store.operation(operation_id).get().state==(cancel?OperationState::cancelled:OperationState::uncertain),"Reopen must preserve actual terminal owners and consumed journals");require(store.run_history(root).get().size()==saved_root_history.size()&&store.owned_child_history(root,child_id).get().size()==saved_child_history.size()&&store.root_budget(root).get().model_calls_reserved==2,"Reopen must not fabricate history/model attempts");if(lost)require(store.operation(operation_id).get().result_json==saved_result&&read(workspace/"effect.txt")==effect,"Quarantined actual effect and reply-loss record must survive reopen");service.close();store.close();require(audit_count(workspace,"started")==starts&&audit_count(workspace,"called")==calls,"Recovery/adoption must not reconnect or replay the uncertain/cancelled effect");}
 }
 }
-int main(int argc,char** argv){if(argc!=7)return 2;try{for(const auto* mode:{"success","denied","protocol-drift","cancel","lost-reply"})scenario(argv,mode);std::cout<<"Native dynamic MCP coding contract passed actual full-binding rediscovery, independently approved peer write and dependent native read, denied/cancelled no dispatch, same-alias protocol drift before child provider, uncertain lost reply and reopen without replay. Provider/credentials/bespoke peer descriptors are synthetic; actual native/files/embedded xlang3 SQLite, no upstream SDK/live/IDE claim.\n";return 0;}catch(const std::exception& error){try{std::ofstream private_log(std::filesystem::u8path(argv[1])/"native-contract-failure-private.log",std::ios::binary);private_log<<error.what();}catch(...){}std::cerr<<"Native dynamic MCP fixture assertion failed; diagnostic details retained privately in the disposable fixture.\n";return 1;}}
+int main(int argc,char** argv){if(argc!=7)return 2;try{for(const auto* mode:{"success","denied","protocol-drift","cancel","lost-reply"})scenario(argv,mode);std::cout<<"Native dynamic MCP coding contract passed actual full-binding rediscovery, independently approved peer write and dependent native read, denied/cancelled no dispatch, same-alias protocol drift before child provider, uncertain lost reply and reopen without replay. Provider/credentials/bespoke peer descriptors are synthetic; actual native/files/embedded xlang3 SQLite, no upstream SDK/live/IDE claim.\n";return 0;}catch(const std::exception& error){try{std::ofstream private_log(std::filesystem::u8path(argv[1])/"native-contract-failure-private.log",std::ios::binary);private_log<<error.what();}catch(...){}if(const auto* fixture=dynamic_cast<const ContractFailure*>(&error))std::cerr<<"Native dynamic MCP fixture assertion: "<<fixture->what()<<"\n";else std::cerr<<"Native dynamic MCP library failure; diagnostic details retained privately in the disposable fixture.\n";return 1;}}

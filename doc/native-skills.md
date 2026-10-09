@@ -66,12 +66,26 @@ native agent runner contract gains a synthetic provider sequence that activates
 a guide, verifies same-batch deferral and reads actual companion bytes. The MCP
 effect contract gains a changed-skill-after-approval case with an actual peer and
 durable operation retirement. Host fixtures assert the complete new tool
-catalogue; existing effect and protocol assertions remain in place. These tests
-have not run yet, so their presence is not evidence that the feature works.
+catalogue; existing effect and protocol assertions remain in place.
+
+The first hosted gate, source `045779e3c8c487e01b1512bdd7a86f45b5bf477a`,
+[run 37879098352](https://github.com/xlang-foundation/xMind/actions/runs/37879098352),
+compiled successfully and passed 84 of 90 native contracts. The new skill
+context, agent activation/delivery barrier and changed-skill MCP approval
+contracts passed. The complete gate failed: dynamic-plan MCP, delegation,
+DeepSeek provider, agent MCP HTTP and both upstream MCP SDK contracts failed.
+The HTTP/SDK shared fixture, delegated-leaf catalogue and DeepSeek engine
+fixture still expected the former four native reads. Their strict expectations
+now include the two skill tools, preserving the existing effect and protocol
+checks. Dynamic-plan MCP already expected the new catalogue; its cause remains
+unresolved. Its fixture now reports bounded request progress and assertion
+locations without printing provider or peer payloads. These corrections await
+another complete hosted gate; they do not establish that failures are fixed.
 The agent fixture also covers a guide larger than its remaining instruction
 capacity and verifies a completed conversation after the rejected load, with no
 activated skill snapshot. The context fixture covers aggregate overflow while
-retaining two previously delivered guides. These additions remain unvalidated.
+retaining two previously delivered guides. These later capacity tests and the
+optional-description change remain unvalidated.
 
 Delivery still requires the complete 90-contract native gate, frontend suites,
 browser/native integration, independently verified VSIX/runtime artifacts and

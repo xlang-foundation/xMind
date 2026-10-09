@@ -41,7 +41,7 @@ const server=createServer((request,response)=>{
       if(request.url==='/redirect'){response.writeHead(307,{Location:'/must-not-arrive'});response.end();return;}
       if(request.url==='/engine'){
         engine.push(body);assert.equal(body.max_tokens,128);assert.ok(!Object.hasOwn(body,'reasoning_effort'));assert.ok(!Object.hasOwn(body,'thinking'));
-        assert.deepEqual(body.tools.map(item=>item.function.name).sort(),['read_repository_instructions','read_file','list_files','search_files'].sort());
+        assert.deepEqual(body.tools.map(item=>item.function.name).sort(),['read_repository_instructions','read_file','list_files','search_files','list_skills','load_skill'].sort());
         const prior=body.messages.filter(item=>item.role==='assistant');
         if(engine.length===1){assert.equal(prior.length,0);assert.equal(body.messages.at(-1).content,'Read both fixture files');stream(response,[{reasoning_content:'Engine reasoning A'},{tool_calls:[tool('engine-a','read_file','{"path":"A.txt"}')]}],'tool_calls');return;}
         const first=assistant(body,0,'Engine reasoning A','');assert.equal(first.tool_calls[0].id,'engine-a');assert.equal(first.tool_calls[0].function.arguments,'{"path":"A.txt"}');
