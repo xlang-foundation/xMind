@@ -21,12 +21,14 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 ## Current native verification scope
 
 Native workspace skill discovery, loading, context delivery and effect approval
-bindings are now implemented in source. The complete 90-contract gate and
-installed/live acceptance remain pending; this is not a verified equivalent
+bindings passed the complete 90-contract hosted native gate, browser/native
+integration and packaging at source `d767d506`. Independent verification binds
+the packaged runtime and view sources to that commit. Installed/live skill
+acceptance remains pending; this is not a verified equivalent
 OpenCode skill operation. [Skill scope and remaining delivery](native-skills.md).
 The shared skill approval display passed the complete isolated 176-extension /
 35-browser view gate. It displays source bindings for file, command and MCP
-approvals; native skills delivery and installed/rendered acceptance remain
+approvals; full skill delivery and installed/rendered acceptance remain
 separate requirements. [Verified view evidence](evidence/native-skill-approval-views-hosted.json).
 
 The later catalogue-recovery source passed its isolated hosted **175/35** view
@@ -36,7 +38,7 @@ validation. This fixes an adapter recovery path without claiming a new native
 gate or broader behavioral parity.
 [Catalogue recovery](model-catalogue-recovery.md).
 
-The latest native source `60475f84` passed its full 89-contract gate and real
+The browser preview's native source `60475f84` passed its full 89-contract gate and real
 four-provider native workspace reads. Its installed browser upgrade preserved
 existing API records and passed actual four-provider rendered runs and refresh.
 The later compact-height CSS passed 173/33 frontend tests and actual short-pane

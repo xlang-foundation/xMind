@@ -1,9 +1,11 @@
 # Native workspace skills
 
 This checkpoint adds C++ discovery and per-run activation of workspace skills to
-the actual agent tool loop. The source is unvalidated and is not installed in the
-preview. Its complete native gate, packaging and live-provider acceptance remain
-pending. It does not establish OpenCode skill parity.
+the actual agent tool loop. Source `d767d506` passed the complete 90-contract
+native gate and hosted packaging. Independent verification binds the tested
+runtime and VSIX to that source. The new package is not installed in the preview;
+installed and live-provider skill acceptance remain pending. It does not
+establish OpenCode skill parity.
 
 The behavior reference is the pinned OpenCode `v2.0.16` source, commit
 `3a103fe0aff726a4edc7492f03f7b88195d9e4c9`: skill discovery describes available
@@ -103,10 +105,9 @@ optional snapshot with a bounded exact native shape, while retaining equality
 checks for all nine sealed registry fields, exact raw arguments and the captured
 server resource. Repository contracts cover malformed snapshots, registry drift
 with guidance and preservation of valid guidance metadata; their source additions
-remain unvalidated. The integration fixture now reports bounded request progress,
+were subsequently covered by the successful complete gate below. The integration fixture reports bounded request progress,
 native lifecycle states and assertion locations without printing provider or peer
-payloads. These corrections await
-another complete hosted gate; they do not establish that failures are fixed.
+payloads. The successful complete gate below includes these corrections.
 The agent fixture also covers a guide larger than its remaining instruction
 capacity and verifies a completed conversation after the rejected load, with no
 activated skill snapshot. The context fixture covers aggregate overflow while
@@ -120,11 +121,11 @@ fixture and dynamic MCP proposal fixes. The
 [verified failed-gate receipt](evidence/native-skills-capacity-hosted.json) and
 [complete result projection](evidence/native-skills-capacity-test-results.json)
 retain that scope. These individual contracts do not establish full delivery.
-The later automatic-suggestion correction also remains unvalidated. Its native
+The later automatic-suggestion correction is included in that gate. Its native
 contract covers explicit loading with `autoinvoke: false`, the normalized pinned
 metadata flag and the separate explicit loading prohibition. It changes no
 effect authority or source snapshot verification.
-The subsequent format correction adds unvalidated contract cases for root
+The subsequent format correction adds contract cases for root
 Markdown files, nested `SKILL.md`, optional/custom display names, empty metadata,
 case/space/Unicode and longer ids, duplicate-id refusal and changed flat-source
 approval snapshots. Configured source precedence and broader source providers
@@ -149,9 +150,20 @@ tracked view sources to each exact Git revision and binds all 11 tested assets.
 Installed/rendered acceptance remains pending. No local runtime, provider or
 editor was executed for these isolated results.
 
-Delivery still requires the complete 90-contract native gate, frontend suites,
-browser/native integration, independently verified VSIX/runtime artifacts and
-installed/live acceptance. Durable activation restoration across resumed or new
+Source `d767d5069f52e3e6b899ae7a3e8313ebcc0ecbaf`
+[run 37883217775](https://github.com/xlang-foundation/xMind/actions/runs/37883217775)
+passed the complete workflow: all 90 native contracts, frontend suites,
+browser/native integration, runtime staging, VSIX verification and artifact
+publication. Independent file verification matched every registered native
+contract to a passed result, checked both advertised archive digests, all 30
+accepted bundle files and all 1,861 packaged runtime inventory files. Seven
+host sources and five copied view sources match the exact commit, and two
+vendor copies match the packaged dependencies.
+[Verified package receipt](evidence/native-skills-hosted-package.json) records
+this scope. It does not claim local execution, installation or rendered/live
+skill acceptance. Earlier failed gates remain recorded above.
+
+Delivery still requires installed/live acceptance. Durable activation restoration across resumed or new
 runs, explicit manual activation and deactivation, configured/global/URL/embedded
 sources, skill management events and CLI/view catalog controls remain work toward
 the full skill experience. Pure Python scripts and dependencies must execute

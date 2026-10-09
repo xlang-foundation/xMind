@@ -4,6 +4,17 @@ The Windows workflow builds the native C++/xlang3 runtime, validates the complet
 registered CTest set, runs the extension/browser suites and native browser
 integration, then stages that tested runtime before packaging the VSIX.
 
+The later skills source `d767d5069f52e3e6b899ae7a3e8313ebcc0ecbaf` passed
+[the complete workflow](https://github.com/xlang-foundation/xMind/actions/runs/37883217775)
+with all 90 native contracts and successful frontend, native/browser, staging
+and VSIX checks. Independent verification checked both advertised archive
+digests, every registered native result, all 30 accepted source-bundle files,
+all 1,861 packaged runtime inventory files and the pinned host/view source
+copies. [Skills package evidence](evidence/native-skills-hosted-package.json)
+records this file-only verification. Installation and rendered/live skill
+acceptance remain pending; the installed profile and running browser versions
+described below retain their earlier acceptance scope.
+
 `Tools/ci-native.ps1` writes a successful gate receipt only after the exact
 registered contract set has passed. `Tools/ci-stage-runtime.mjs` binds that
 receipt to the source revision, registered names and SHA-256 hashes of the test
@@ -45,7 +56,8 @@ Existing settings bytes were unchanged, and no workspace-trust bypass was
 requested. [Installation evidence](evidence/native-ci-staging-installed.json)
 records this scope. Window reload, rendered acceptance and native execution were
 not performed by this installation; the live browser preview retains its
-previously accepted runtime. Later skill changes have separate pending gates.
+previously accepted runtime. Later skill changes have the successful hosted
+gate above, with installation and live acceptance still pending.
 
 A subsequent fresh VS Code test host loaded this verified package, opened
 `D:\CantorAI2026\TestProj` directly and passed its real extension-host workspace
