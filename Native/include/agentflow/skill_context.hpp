@@ -6,7 +6,9 @@
 #include <utility>
 namespace agentflow {
 struct LocalSkill {
-    std::string id,description,body;
+    std::string id;
+    std::optional<std::string> description;
+    std::string body;
     bool model_invocable=true;
     WorkspaceSnapshot source;
 };

@@ -21,8 +21,11 @@ unreadable, linked, malformed or oversized sources are explicit errors. Backend
 private directories remain outside workspace authority. Discovery does not
 execute files, import scripts, read provider configuration or grant effects.
 
-A skill has YAML frontmatter with `name` matching its directory and a nonempty
-`description`, followed by a Markdown body. Names use lower-case letters, digits
+A skill has YAML frontmatter with `name` matching its directory and an optional
+`description`, followed by a Markdown body. An absent description stays absent in
+catalogue metadata and excludes the guide from automatic suggestions; explicit
+loading by an available id remains supported. This follows the pinned schema's
+optional description and instruction catalogue filtering. Names use lower-case letters, digits
 and single hyphens, up to 64 bytes. Frontmatter supports bounded scalar fields
 and one scalar metadata map. Native rejects aliases, anchors, duplicate keys,
 tagged objects and sequences. Other scalar metadata grants no capability.
