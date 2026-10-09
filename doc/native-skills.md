@@ -80,9 +80,16 @@ DeepSeek provider, agent MCP HTTP and both upstream MCP SDK contracts failed.
 The HTTP/SDK shared fixture, delegated-leaf catalogue and DeepSeek engine
 fixture still expected the former four native reads. Their strict expectations
 now include the two skill tools, preserving the existing effect and protocol
-checks. Dynamic-plan MCP already expected the new catalogue; its cause remains
-unresolved. Its fixture now reports bounded request progress and assertion
-locations without printing provider or peer payloads. These corrections await
+checks. Source inspection identified a separate dynamic-plan MCP defect: its
+repository authority boundary still required a ten-field proposal after native
+instruction snapshots added an eleventh field. The boundary now accepts that
+optional snapshot with a bounded exact native shape, while retaining equality
+checks for all nine sealed registry fields, exact raw arguments and the captured
+server resource. Repository contracts cover malformed snapshots, registry drift
+with guidance and preservation of valid guidance metadata; their source additions
+remain unvalidated. The integration fixture now reports bounded request progress,
+native lifecycle states and assertion locations without printing provider or peer
+payloads. These corrections await
 another complete hosted gate; they do not establish that failures are fixed.
 The agent fixture also covers a guide larger than its remaining instruction
 capacity and verifies a completed conversation after the rejected load, with no

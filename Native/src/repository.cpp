@@ -269,6 +269,28 @@ void validate_dynamic_caps(const DynamicPlanCapabilities& c,const RootBudgetSpec
     }
 }
 const DynamicPresetCapability& dynamic_preset(const DynamicPlanCapabilities& c,const DynamicNodeDefinition& d){const auto p=std::find_if(c.presets.begin(),c.presets.end(),[&](const auto& v){return v.id==d.preset_id&&v.revision==d.preset_revision;});if(p==c.presets.end())throw DynamicPlanUnavailable("Dynamic preset is unavailable");return *p;}
+void dynamic_mcp_instruction_snapshot(const Json& value,const std::string& workspace){
+    if(!value.is_object()||value.size()!=(value.contains("skills")?4u:3u)||value.dump().size()>24576||
+        !value.contains("version")||!value["version"].is_number_integer()||value["version"]!=1||
+        !value.contains("directory")||value["directory"]!="."||!value.contains("sources")||
+        !value["sources"].is_array()||value["sources"].size()>32||
+        (value.contains("skills")&&(!value["skills"].is_array()||value["skills"].size()>8)))
+        throw Conflict("Dynamic MCP instruction snapshot has an invalid native shape");
+    auto text=[](const Json& source,const char* field,std::size_t maximum){return source.contains(field)&&source[field].is_string()&&!source[field].get_ref<const std::string&>().empty()&&source[field].get_ref<const std::string&>().size()<=maximum&&source[field].get_ref<const std::string&>().find('\0')==std::string::npos;};
+    auto validate=[&](const Json& source,bool skill){
+        if(!source.is_object()||source.size()!=(skill?6u:5u)||!text(source,"path",4096)||
+            !text(source,"workspace_id",32768)||source["workspace_id"]!=workspace||!text(source,"file_id",256)||
+            !text(source,"content_sha256",64)||source["content_sha256"].get_ref<const std::string&>().size()!=64||
+            source["content_sha256"].get_ref<const std::string&>().find_first_not_of("0123456789abcdef")!=std::string::npos||
+            !source.contains("byte_count")||!source["byte_count"].is_number_integer()||source["byte_count"]<0||source["byte_count"]>65536||
+            (skill&&!text(source,"id",64)))throw Conflict("Dynamic MCP instruction source differs from its native snapshot shape");
+    };
+    for(const auto& source:value["sources"])validate(source,false);
+    if(value.contains("skills"))for(const auto& source:value["skills"])validate(source,true);
+    // This metadata binds guidance only. The captured registry/preset still
+    // supplies effect authority, and the executor rechecks source handles and
+    // hashes after approval before dispatch.
+}
 void dynamic_effect_authority(const OperationSpec& spec,const DynamicPlanRecord& plan,const DynamicNodeRecord& node,const DynamicPresetCapability& preset){
     if(plan.state!="active"||!plan.capabilities.catalogue_finalized||node.state!=DynamicNodeState::claimed||node.definition.kind!=DynamicNodeKind::agent||node.claim_revision!=node.definition_revision||node.claim_id.empty()||preset.readonly||spec.workspace!=plan.capabilities.workspace_identity)throw Conflict("Dynamic child effect is outside its immutable workspace and claim");
     // Effect journals use backend adapter identities, not model tool names.
@@ -291,7 +313,8 @@ void dynamic_effect_authority(const OperationSpec& spec,const DynamicPlanRecord&
     if(spec.tool!="mcp_tool")return;
     if(!captured->contains("mcp_binding")||!(*captured)["mcp_binding"].is_object())throw Conflict("Dynamic MCP tool lacks its native registry binding");
     const auto& binding=(*captured)["mcp_binding"];const auto proposal=Json::parse(spec.arguments_json);
-    if(binding.size()!=9||proposal.size()!=10)throw Conflict("Dynamic MCP registry binding has unexpected fields");
+    if(binding.size()!=9||proposal.size()!=(proposal.contains("instructions")?11u:10u))throw Conflict("Dynamic MCP registry binding has unexpected fields");
+    if(proposal.contains("instructions"))dynamic_mcp_instruction_snapshot(proposal["instructions"],spec.workspace);
     for(const auto* field:{"server_config_id","config_revision","peer_tool","alias","catalogue_fingerprint","protocol_version","input_schema_json","output_schema_json","annotations_json"})if(!binding.contains(field)||!proposal.contains(field)||binding[field].type()!=proposal[field].type()||binding[field]!=proposal[field])throw Conflict("Dynamic MCP proposal differs from its captured native registry binding");
     for(const auto* field:{"server_config_id","peer_tool","protocol_version","input_schema_json","annotations_json"})if(!binding[field].is_string()||binding[field].get_ref<const std::string&>().empty()||binding[field].get_ref<const std::string&>().find('\0')!=std::string::npos)throw Conflict("Dynamic MCP registry metadata is invalid");
     if(binding["server_config_id"].get_ref<const std::string&>().size()>128||binding["peer_tool"].get_ref<const std::string&>().size()>256||binding["protocol_version"].get_ref<const std::string&>().size()>64||!binding["config_revision"].is_number_integer()||binding["config_revision"]<1||binding["config_revision"]>9007199254740991||!binding["catalogue_fingerprint"].is_string())throw Conflict("Dynamic MCP registry identity is invalid");
