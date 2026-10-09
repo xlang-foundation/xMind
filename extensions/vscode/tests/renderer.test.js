@@ -11,6 +11,12 @@ function renderer(){
   for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+test('skill chooser stays in the sidebar footer, retains focus, and sends revision-bound attachment intent',()=>{
+ const r=renderer(),doc=r.dom.window.document;const catalogue={workspace_id:'windows-local-file-v1:fixture',authority_id:'a'.repeat(32),skills:[{id:'manual',name:'<img onerror=unsafe> Guide',path:'.agents/skills/manual.md',model_invocable:false}]};const selection={session_id:'session',workspace_id:catalogue.workspace_id,authority_id:catalogue.authority_id,revision:3,ids:[],manual_ids:[],editable:true};
+ try{r.send({type:'skills',catalogue,selection});const pane=doc.getElementById('skills-view'),button=doc.querySelector('#skill-list button');assert.equal(pane.closest('footer')!==null,true);assert.equal(pane.hidden,false);assert.equal(pane.querySelector('img'),null);assert.ok(pane.textContent.includes('User attachment only'));button.focus();r.send({type:'skills',catalogue,selection});assert.equal(doc.activeElement,button);button.click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'skills-change',session:'session',revision:3,ids:['manual']});assert.equal(button.disabled,true);
+ r.send({type:'skills',catalogue,selection:{...selection,revision:4,ids:['manual'],manual_ids:['manual']}});assert.equal(button.textContent,'Remove');r.send({type:'runs',runs:[],busy:true});assert.equal(button.disabled,true);r.send({type:'runs',runs:[],busy:false});doc.getElementById('skills-clear').click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'skills-change',session:'session',revision:4,ids:[]});r.send({type:'skills-error',text:'Revision changed'});assert.equal(button.disabled,true);assert.ok(doc.getElementById('skills-status').textContent.includes('Refresh'));r.send({type:'skills-clear'});assert.equal(pane.hidden,true);assert.equal(doc.getElementById('skill-list').children.length,0);
+ }finally{r.dom.window.close();}
+});
 
 test('effective backend root uses plain text and folder switch clears the old draft',()=>{
  const r=renderer(),doc=r.dom.window.document;

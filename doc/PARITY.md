@@ -64,11 +64,23 @@ Hosted packaging and installed/rendered schema13 acceptance remain pending.
 Native catalogue inspection subsequently passed the exact 92-contract local
 gate and complete 178/36 view suites. It is available through the authenticated
 backend, native CLI and shared client, including scoped browser-cookie routing.
-Manual attachment/removal and rendered catalogue controls remain incomplete.
+The earlier source's manual attachment/removal and rendered catalogue controls
+were incomplete. Newer native user controls and inline view controls passed
+the full 92 native / 184 extension / 38 browser local gates. Three real OpenAI
+runs passed user attachment of model-disabled guidance, removal, persisted
+reattachment and fresh source/companion restoration after backend restart.
+Hosted packaging and installed/rendered acceptance remain separate.
+[User-control evidence](evidence/native-user-skill-controls-local.json).
 The ordinary VS Code window was initially observed in Restricted Mode, which
 disabled xMind. That historical boundary remains recorded; the user subsequently
 granted trust and the workspace-read UI acceptance above passed.
 [Catalogue and window-boundary evidence](evidence/native-skill-catalogue-local.json).
+The exact `7b1dc1d` source subsequently passed its complete hosted 92-contract
+native workflow and packaging. Independent verification checks the archives,
+native inventory and packaged host/view bytes against that commit. This file-only
+check does not establish installed schema13 acceptance or include newer user
+attachment controls.
+[Hosted package verification](evidence/native-skill-catalogue-hosted-package.json).
 [Browser evidence](evidence/native-skills-browser-upgrade.json).
 [Verified view gate](evidence/native-approval-stability-views-hosted.json),
 [actual approval retry](evidence/native-approval-stability-live.json).

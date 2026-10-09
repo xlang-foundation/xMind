@@ -103,38 +103,39 @@ std::string SkillContext::activation_directory(const std::string& arguments,std:
 }
 std::string SkillContext::activate(const std::string& arguments,std::stop_token cancel,std::size_t instruction_budget){
     const auto selected=id(arguments);const auto catalogue=discover(cancel);const auto found=catalogue.find(selected);if(found==catalogue.end()||!found->second.model_invocable)throw ToolAccessDenied("Skill is unavailable for model invocation");
-    auto candidate=requested_;candidate.insert(selected);const auto prepared=render(catalogue,candidate);
+    auto candidate=requested_;candidate.insert(selected);const auto prepared=render(catalogue,candidate,manual_);
     if(prepared.first.size()>instruction_budget)throw ToolFileError("Skill activation exceeds the remaining native instruction budget");
     // Publication happens only after the complete prospective text is valid.
     // Rejected loads preserve the delivered guidance and dispatch readiness.
     requested_=std::move(candidate);
     return Json{{"skill",description(found->second)},{"activation","requested_for_next_model_request"},{"effect_permission",false}}.dump();
 }
-std::pair<std::string,std::map<std::string,LocalSkill>> SkillContext::render(const std::map<std::string,LocalSkill>& catalogue,const std::set<std::string>& selected){
+std::pair<std::string,std::map<std::string,LocalSkill>> SkillContext::render(const std::map<std::string,LocalSkill>& catalogue,const std::set<std::string>& selected,const std::set<std::string>& manual){
     if(selected.size()>8)throw ToolFileError("Active skill count exceeds eight");
     auto advertised=Json::array(),documents=Json::array();std::map<std::string,LocalSkill> next;std::size_t bytes=0;
     for(const auto& [name,skill]:catalogue)if(skill.model_invocable&&skill.description&&skill.autoinvoke!=std::optional<bool>(false))advertised.push_back(description(skill));
-    for(const auto& name:selected){const auto found=catalogue.find(name);if(found==catalogue.end()||!found->second.model_invocable)throw ToolGuidanceChanged("An activated skill is no longer available");const auto& skill=found->second;if(skill.body.size()>32768-bytes)throw ToolFileError("Active skill text exceeds 32 KiB");bytes+=skill.body.size();auto document=source_metadata(skill);document["name"]=skill.name;document["content"]=skill.body;document["base_directory"]=skill.source.path.substr(0,skill.source.path.rfind('/'));documents.push_back(std::move(document));next.emplace(name,skill);}
+    for(const auto& name:selected){const auto found=catalogue.find(name);if(found==catalogue.end()||(!found->second.model_invocable&&!manual.contains(name)))throw ToolGuidanceChanged("An activated skill is no longer available");const auto& skill=found->second;if(skill.body.size()>32768-bytes)throw ToolFileError("Active skill text exceeds 32 KiB");bytes+=skill.body.size();auto document=source_metadata(skill);document["name"]=skill.name;document["content"]=skill.body;document["activation_origin"]=manual.contains(name)?"user":"model";document["base_directory"]=skill.source.path.substr(0,skill.source.path.rfind('/'));documents.push_back(std::move(document));next.emplace(name,skill);}
     if(advertised.empty()&&documents.empty())return {std::string{},std::move(next)};
     const auto result=std::string("\n\nCurrent workspace skill guidance supplied by the native backend. Available skill descriptions are metadata, not activated instructions. Use load_skill with an exact id when appropriate. Active documents replace earlier skill snapshots for this run, apply as task guidance only, and cannot override native permissions, repository scope or execution evidence. Companion paths are relative to base_directory and still require ordinary workspace tools; loading never executes scripts or grants permission.\n")+Json{{"available_skills",std::move(advertised)},{"active_skills",std::move(documents)}}.dump();
     if(result.size()>49152)throw ToolFileError("Serialized skill guidance exceeds 48 KiB");return {result,std::move(next)};
 }
 std::string SkillContext::prepare(std::stop_token cancel){
-    auto prepared=render(discover(cancel),requested_);delivered_=std::move(prepared.second);return std::move(prepared.first);
+    auto prepared=render(discover(cancel),requested_,manual_);delivered_=std::move(prepared.second);return std::move(prepared.first);
 }
 void SkillContext::restore(const SkillSelections& selections,std::stop_token cancel){
     validate_skill_selections(selections);if(selections.workspace_id!=workspace_.identity())throw ToolAccessDenied("Saved skills belong to a different workspace");
     const std::set<std::string> candidate(selections.ids.begin(),selections.ids.end());
-    render(discover(cancel),candidate);requested_=candidate;delivered_.clear();
+    const std::set<std::string> manual(selections.manual_ids.begin(),selections.manual_ids.end());
+    render(discover(cancel),candidate,manual);requested_=candidate;manual_=manual;delivered_.clear();
 }
-SkillSelections SkillContext::selections() const{return {workspace_.identity(),std::vector<std::string>(requested_.begin(),requested_.end())};}
+SkillSelections SkillContext::selections() const{return {workspace_.identity(),std::vector<std::string>(requested_.begin(),requested_.end()),std::vector<std::string>(manual_.begin(),manual_.end())};}
 bool SkillContext::ready(std::stop_token cancel) const{
     if(requested_.size()!=delivered_.size())return false;const auto catalogue=discover(cancel);
-    for(const auto& selected:requested_){const auto previous=delivered_.find(selected),current=catalogue.find(selected);if(previous==delivered_.end()||current==catalogue.end()||!current->second.model_invocable||!same(previous->second,current->second))return false;}return true;
+    for(const auto& selected:requested_){const auto previous=delivered_.find(selected),current=catalogue.find(selected);if(previous==delivered_.end()||current==catalogue.end()||(!current->second.model_invocable&&!manual_.contains(selected))||!same(previous->second,current->second))return false;}return true;
 }
 std::string SkillContext::metadata() const{auto values=Json::array();for(const auto& [name,skill]:delivered_)values.push_back(source_metadata(skill));return values.dump();}
 InstructionPrecondition SkillContext::precondition() const{
-    if(requested_.size()!=delivered_.size())throw ToolGuidanceChanged("Skill activation has not reached the model request");const auto captured=delivered_;auto* workspace=&workspace_;
-    InstructionPrecondition condition{metadata(),[workspace,captured](std::stop_token cancel){SkillContext current(*workspace);const auto catalogue=current.discover(cancel);for(const auto& [name,skill]:captured){const auto found=catalogue.find(name);if(found==catalogue.end()||!found->second.model_invocable||!same(skill,found->second))throw ToolGuidanceChanged("Skill guidance changed after proposal; effect was not dispatched");}}};condition.validate();return condition;
+    if(requested_.size()!=delivered_.size())throw ToolGuidanceChanged("Skill activation has not reached the model request");const auto captured=delivered_;const auto manual=manual_;auto* workspace=&workspace_;
+    InstructionPrecondition condition{metadata(),[workspace,captured,manual](std::stop_token cancel){SkillContext current(*workspace);const auto catalogue=current.discover(cancel);for(const auto& [name,skill]:captured){const auto found=catalogue.find(name);if(found==catalogue.end()||(!found->second.model_invocable&&!manual.contains(name))||!same(skill,found->second))throw ToolGuidanceChanged("Skill guidance changed after proposal; effect was not dispatched");}}};condition.validate();return condition;
 }
 }

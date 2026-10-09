@@ -47,7 +47,21 @@ try{
   await fs.writeFile(path.join(skills,'explicit.md'),explicit,{flag:'wx'});assert.equal((await fetch(origin+'/v1/workspace/skills',{headers})).status,409,'Ambiguous current sources cannot yield a partial catalogue');await fs.unlink(path.join(skills,'explicit.md'));
   await fs.writeFile(path.join(skills,'malformed.md'),'---\nname: [not, scalar]\n---\nSynthetic invalid guide',{flag:'wx'});assert.equal((await fetch(origin+'/v1/workspace/skills',{headers})).status,409);await fs.unlink(path.join(skills,'malformed.md'));
   assert.deepEqual(await client.sessions(),[],'Scoped catalogue inspection must leave sessions empty');
-  await fs.writeFile(path.join(skills,'explicit/SKILL.md'),explicit);await stop();
+  await fs.writeFile(path.join(skills,'explicit/SKILL.md'),explicit);
+  const session=await client.createSession('Synthetic explicit skill controls');const sessionPath='/v1/sessions/'+session.id+'/skills';
+  assert.equal((await fetch(origin+sessionPath)).status,401);assert.equal((await fetch(origin+'/v1/sessions/absent/skills',{headers})).status,404);
+  const initial=await client.sessionSkills(session.id);assert.equal(initial.revision,0);assert.deepEqual(initial.ids,[]);assert.equal(initial.editable,true);assert.equal(initial.workspace_id,binding.workspace_id);assert.equal(initial.authority_id,binding.authority_id);
+  const attached=await client.replaceSessionSkills(session.id,['disabled'],initial);assert.equal(attached.revision,1);assert.deepEqual(attached.ids,['disabled']);assert.deepEqual(attached.manual_ids,['disabled']);assert.ok(!JSON.stringify(attached).includes('Synthetic disabled body'));assert.deepEqual(await client.sessionSkills(session.id),attached);
+  const change={ids:[],expected_revision:attached.revision,expected_workspace_id:binding.workspace_id,expected_workspace_authority_id:binding.authority_id};
+  for(const [data,status] of [[{...change,expected_revision:0},409],[{...change,expected_workspace_authority_id:'f'.repeat(32)},409],[{...change,ids:['absent']},409],[{...change,ids:['disabled','disabled']},400],[{...change,manual_ids:['disabled']},400],[{...change,ids:['../.config/providers.yaml']},400],[{...change,ids:[3]},400]])assert.equal((await fetch(origin+sessionPath,{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(data)})).status,status);
+  assert.deepEqual(await client.sessionSkills(session.id),attached,'Rejected writes cannot change selection or revision');
+  const scopedHeaders={...viewHeaders,Cookie:activeCookie};const scoped=await fetch(viewOrigin+sessionPath,{headers:{Cookie:activeCookie,'Sec-Fetch-Site':'same-origin'}});assert.equal(scoped.status,200);assert.deepEqual(await scoped.json(),attached);
+  const cleared=await fetch(viewOrigin+sessionPath,{method:'POST',headers:scopedHeaders,body:JSON.stringify(change)});assert.equal(cleared.status,200);const clearState=await cleared.json();assert.equal(clearState.revision,2);assert.deepEqual(clearState.ids,[]);
+  assert.equal((await fetch(viewOrigin+sessionPath,{method:'POST',headers:{Cookie:activeCookie,'Content-Type':'application/json'},body:JSON.stringify({...change,expected_revision:2})})).status,403);
+  assert.equal((await fetch(viewOrigin+sessionPath+'?other=scope',{headers:{Cookie:activeCookie,'Sec-Fetch-Site':'same-origin'}})).status,400);
+  const recovered=await client.replaceSessionSkills(session.id,['disabled'],await client.sessionSkills(session.id));await fs.writeFile(path.join(skills,'broken.md'),'---\nname: [invalid, shape]\n---\nSynthetic broken guide',{flag:'wx'});assert.equal((await fetch(origin+'/v1/workspace/skills',{headers})).status,409);const recoveryClear=await client.replaceSessionSkills(session.id,[],recovered);assert.deepEqual(recoveryClear.ids,[]);assert.equal(recoveryClear.revision,recovered.revision+1,'A broken catalogue cannot trap a session in its saved attachments');await fs.unlink(path.join(skills,'broken.md'));
+  assert.deepEqual(await client.runs(session.id),[],'Manual selection must not simulate inference or admit runs');
+  await stop();
  }
  // No configured root must fail explicitly rather than choosing a directory.
  exited=false;const noRoot=spawn(server,['--db',path.join(root,'unbound.sqlite'),'--modules',modules,'--stdlib',stdlib,'--port','0'],{env,windowsHide:true,stdio:['ignore','pipe','pipe']});child=noRoot;exitPromise=new Promise((yes,no)=>{noRoot.once('error',no);noRoot.once('exit',()=>{exited=true;yes();});});

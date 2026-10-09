@@ -34,10 +34,11 @@ public:
     std::string metadata() const;
 private:
     static std::pair<std::string,std::map<std::string,LocalSkill>> render(
-        const std::map<std::string,LocalSkill>& catalogue,const std::set<std::string>& selected);
+        const std::map<std::string,LocalSkill>& catalogue,const std::set<std::string>& selected,const std::set<std::string>& manual={});
     std::map<std::string,LocalSkill> discover(std::stop_token cancel) const;
     WorkspaceTools& workspace_;
     std::set<std::string> requested_;
+    std::set<std::string> manual_;
     std::map<std::string,LocalSkill> delivered_;
 };
 }

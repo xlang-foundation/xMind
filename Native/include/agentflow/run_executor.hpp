@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/records.hpp"
 #include "agentflow/context_control.hpp"
+#include "agentflow/skill_records.hpp"
 #include <utility>
 #include <optional>
 #include <vector>
@@ -14,6 +15,7 @@ struct ProviderProfileAdmission {std::string id;std::int64_t revision=0;};
 struct ExecutionWorkspaceMetadata {bool configured=false;std::string root,workspace_id,authority_id;};
 struct WorkspaceSkillCatalogue {ExecutionWorkspaceMetadata workspace;std::string catalogue_json;};
 struct WorkspaceAdmission {std::string workspace_id,authority_id;};
+struct WorkspaceSessionSkills {ExecutionWorkspaceMetadata workspace;SessionSkillState state;};
 inline void validate_workspace_admission(const WorkspaceAdmission& expected,const ExecutionWorkspaceMetadata& actual){
     if(expected.workspace_id.empty()||expected.workspace_id.size()>256||expected.authority_id.size()!=32||
        expected.authority_id.find_first_not_of("0123456789abcdef")!=std::string::npos)
@@ -29,7 +31,10 @@ public:
     virtual std::vector<std::string> models() const {return {};}
     virtual ExecutionWorkspaceMetadata execution_workspace()const{return {};}
     virtual bool supports_skill_catalogue()const{return false;}
+    virtual bool supports_session_skills()const{return false;}
     virtual WorkspaceSkillCatalogue workspace_skills()const{throw RunUnavailable("Workspace skill inspection is unavailable");}
+    virtual WorkspaceSessionSkills session_skills(const std::string&)const{throw RunUnavailable("Session skill controls are unavailable");}
+    virtual WorkspaceSessionSkills replace_session_skills(const std::string&,std::vector<std::string>,std::int64_t,WorkspaceAdmission){throw RunUnavailable("Session skill controls are unavailable");}
     virtual Run submit_workspace(std::string,std::string,std::string,std::string,WorkspaceAdmission,
         std::optional<ProviderProfileAdmission> = {}){throw RunUnavailable("Workspace-bound admission is unavailable");}
     virtual bool supports_profile_admission()const{return false;}

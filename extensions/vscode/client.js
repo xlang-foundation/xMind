@@ -110,6 +110,12 @@ class BackendClient {
   }
   sessions() { return this.request('/v1/sessions'); }
   skills() { return this.request('/v1/workspace/skills'); }
+  async sessionSkills(id) { executionIdentity(id);return validateSessionSkills(await this.request(`/v1/sessions/${encodeURIComponent(id)}/skills`),id); }
+  async replaceSessionSkills(id,ids,observed) {
+    executionIdentity(id);skillIds(ids);validateSessionSkills(observed,id);
+    if(!observed.editable)throw new Error('Wait for this conversation to become idle before changing skills.');
+    return validateSessionSkills(await this.request(`/v1/sessions/${encodeURIComponent(id)}/skills`,{ids,expected_revision:observed.revision,expected_workspace_id:observed.workspace_id,expected_workspace_authority_id:observed.authority_id}),id);
+  }
   createSession(title) { return this.request('/v1/sessions', { title }); }
   renameSession(id,title,expectedTitle) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/title`,{title,expected_title:expectedTitle}); }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }
@@ -163,6 +169,34 @@ async function observeOwnedRun(client,run,session,after){
 // Public observation schemas only. Native owns topology, admission, effects and
 // transitions. These validators never manufacture grants or metric totals.
 function planFields(value,required,optional=[]){if(!value||typeof value!=='object'||Array.isArray(value)||required.some(field=>!Object.hasOwn(value,field))||Object.keys(value).some(field=>!required.includes(field)&&!optional.includes(field)))throw new Error('Invalid public planning metadata');}
+function skillIds(ids){if(!Array.isArray(ids)||ids.length>8||new Set(ids).size!==ids.length||ids.some(id=>typeof id!=='string'||!id||new TextEncoder().encode(id).length>256||id==='.'||id==='..'||/[\/\\:\x00]/.test(id)))throw new Error('Choose at most eight distinct catalogue skills.');return ids;}
+function validateSessionSkills(value,session){
+  if(!value||typeof value!=='object'||Object.keys(value).length!==7||value.session_id!==session||typeof value.workspace_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(value.workspace_id)||typeof value.authority_id!=='string'||!/^[a-f0-9]{32}$/.test(value.authority_id)||!Number.isSafeInteger(value.revision)||value.revision<0||typeof value.editable!=='boolean')throw new Error('Invalid backend session skill scope.');
+  skillIds(value.ids);skillIds(value.manual_ids);if(value.manual_ids.some(id=>!value.ids.includes(id)))throw new Error('Invalid backend skill attachment provenance.');return value;
+}
+function validateSkillCatalogue(value){
+  if(!value||typeof value.workspace_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(value.workspace_id)||typeof value.authority_id!=='string'||!/^[a-f0-9]{32}$/.test(value.authority_id)||!Array.isArray(value.skills)||value.skills.length>64||new Set(value.skills.map(s=>s?.id)).size!==value.skills.length)throw new Error('Invalid backend skill catalogue.');
+  for(const skill of value.skills){skillIds([skill?.id]);if(typeof skill.name!=='string'||new TextEncoder().encode(skill.name).length>1024||typeof skill.path!=='string'||!skill.path.startsWith('.agents/skills/')||typeof skill.model_invocable!=='boolean'||Object.keys(skill).some(key=>!['id','name','path','model_invocable','description','autoinvoke'].includes(key))||Object.hasOwn(skill,'description')&&typeof skill.description!=='string'||Object.hasOwn(skill,'autoinvoke')&&typeof skill.autoinvoke!=='boolean')throw new Error('Invalid backend skill catalogue entry.');}return value;
+}
+class SkillViewController {
+  constructor(client,post,scope){this.client=client;this.post=post;this.scope=scope;this.serial=0;}
+  invalidate(){this.serial++;this.record=undefined;this.post({type:'skills-clear'});}
+  current(scope,serial){const now=this.scope();return serial===this.serial&&now.enabled&&now.session===scope.session&&now.generation===scope.generation;}
+  async read(){
+    const scope=this.scope(),serial=++this.serial;if(!scope.enabled){this.record=undefined;this.post({type:'skills-clear'});return;}
+    this.record=undefined;const selection=scope.session?await this.client.sessionSkills(scope.session):undefined;if(!this.current(scope,serial))return;
+    let catalogue,catalogueError;try{catalogue=validateSkillCatalogue(await this.client.skills());}catch(error){if(!selection||error.status!==409)throw error;catalogue={workspace_id:selection.workspace_id,authority_id:selection.authority_id,skills:[]};catalogueError=error.message;}if(!this.current(scope,serial))return;
+    if(selection&&(selection.workspace_id!==catalogue.workspace_id||selection.authority_id!==catalogue.authority_id))throw new Error('Workspace changed while reading skills. Refresh before editing.');
+    this.record={scope,catalogue,selection,catalogueError};this.post({type:'skills',catalogue,selection,catalogueError});return this.record;
+  }
+  async change(message){
+    const observed=this.record,scope=this.scope();if(!observed||!observed.selection||!scope.enabled||scope.session!==observed.scope.session||scope.generation!==observed.scope.generation||message.session!==scope.session||message.revision!==observed.selection.revision)throw new Error('Refresh the selected conversation skills before editing.');
+    skillIds(message.ids);if(message.ids.some(id=>!observed.catalogue.skills.some(skill=>skill.id===id)))throw new Error('Choose skills from the current catalogue.');
+    const serial=++this.serial;const selection=await this.client.replaceSessionSkills(scope.session,message.ids,observed.selection);if(!this.current(scope,serial))return;
+    if(selection.workspace_id!==observed.catalogue.workspace_id||selection.authority_id!==observed.catalogue.authority_id||selection.revision!==observed.selection.revision+1||selection.ids.length!==message.ids.length||message.ids.some(id=>!selection.ids.includes(id))||selection.manual_ids.length!==message.ids.length||message.ids.some(id=>!selection.manual_ids.includes(id)))throw new Error('Backend skill acknowledgement changed scope or selection.');
+    this.record={scope,catalogue:observed.catalogue,selection,catalogueError:observed.catalogueError};this.post({type:'skills',catalogue:observed.catalogue,selection,catalogueError:observed.catalogueError});return this.record;
+  }
+}
 function executionIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(value))throw new Error('Invalid execution identity');return value;}
 function providerCallIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.:-]{1,256}$/.test(value))throw new Error('Invalid provider call identity');return value;}
 function planLabel(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.-]{1,32}$/.test(value))throw new Error('Invalid planning node label');return value;}
@@ -414,5 +448,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController};
-else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue};
+else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue};

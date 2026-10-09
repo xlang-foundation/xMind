@@ -15,7 +15,10 @@ public:
     std::vector<std::string> models() const override;
     ExecutionWorkspaceMetadata execution_workspace()const override;
     bool supports_skill_catalogue()const override;
+    bool supports_session_skills()const override{return supports_skill_catalogue();}
     WorkspaceSkillCatalogue workspace_skills()const override;
+    WorkspaceSessionSkills session_skills(const std::string& session)const override;
+    WorkspaceSessionSkills replace_session_skills(const std::string& session,std::vector<std::string> ids,std::int64_t revision,WorkspaceAdmission expected)override;
     Run submit_workspace(std::string id,std::string session,std::string prompt,std::string model,
         WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile={})override;
     Run submit_graph_workspace(std::string id,std::string session,std::string graph,std::int64_t revision,

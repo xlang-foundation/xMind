@@ -6,11 +6,18 @@ const observeOwnedRun=typeof module!=='undefined'&&module.exports?require('../..
 const validatePlanObservation=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').validatePlanObservation:globalThis.XMindBackend.validatePlanObservation;
 const validatePlanInputText=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').validatePlanInputText:globalThis.XMindBackend.validatePlanInputText;
 const ContextViewController=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').ContextViewController:globalThis.XMindBackend.ContextViewController;
+const SkillViewController=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').SkillViewController:globalThis.XMindBackend.SkillViewController;
 const validateGraphContext=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').validateGraphContext:globalThis.XMindBackend.validateGraphContext;
 // Thin view controller. All execution, permissions and persistence stay native.
 class BrowserController {
+  async readSkills(){
+    if(this.disposed)return;const version=this.generation;
+    if(this.health?.skill_controls!==true){if(this.skillController)this.skillController.invalidate();return;}
+    this.skillController??=new SkillViewController(this.client,m=>{if(!this.disposed)this.post(m);},()=>({session:this.session,generation:this.generation,enabled:!this.disposed&&this.health?.skill_controls===true}));
+    try{await this.skillController.read();}catch(error){if(this.current(version))this.post({type:'skills-error',text:error.message});}
+  }
   constructor(client,post,{save=()=>{},review=()=>{},copy=()=>{},link=()=>{}}={}){this.client=client;this.post=post;this.save=save;this.review=review;this.copy=copy;this.link=link;this.generation=0;this.cursor=0;this.runs=[];this.graphs=[];this.children=new Map();this.operations=new Map();this.models={models:[]};this.queue=Promise.resolve();}
-  stop(){clearInterval(this.timer);this.timer=undefined;this.contextController?.invalidate();this.pendingTreeEvents=false;const hadPlan=!!this.planObservation||this.pendingPlanObservation;this.pendingPlanObservation=false;this.planReadConflicts=0;this.planObservation=undefined;if(hadPlan)this.post({type:'plan-clear'});this.generation++;this.profileController?.invalidate();}
+  stop(){clearInterval(this.timer);this.timer=undefined;this.contextController?.invalidate();this.skillController?.invalidate();this.pendingTreeEvents=false;const hadPlan=!!this.planObservation||this.pendingPlanObservation;this.pendingPlanObservation=false;this.planReadConflicts=0;this.planObservation=undefined;if(hadPlan)this.post({type:'plan-clear'});this.generation++;this.profileController?.invalidate();}
   dispose(){this.disposed=true;this.profileController?.dispose();this.stop();this.contextController?.dispose();clearTimeout(this.keyTimer);this.selection=undefined;}
   async readContext(){
     if(this.disposed)return;
@@ -25,7 +32,7 @@ class BrowserController {
   remember(){this.save({session:this.session,run:this.runId,model:this.model,graph:this.graphId});}
   present(){this.post({type:'runs',runs:this.runs,selected:this.runId,busy:this.busy()});}
   async refreshCapabilities(){const version=this.generation,health=await this.client.health();if(Object.hasOwn(health,'agent_planning'))await this.client.planning();let catalogue={models:[]};if(health.agent_execution)catalogue=await this.client.models();let graphs={graphs:[]};try{graphs=await this.client.graphs();}catch(error){if(error.status!==404)throw error;}if(!this.current(version))return;if(!Array.isArray(catalogue.models)||!Array.isArray(graphs.graphs)||graphs.graphs.some(g=>typeof g.id!=='string'||!Number.isSafeInteger(g.revision)||g.revision<1||typeof g.executable!=='boolean'))throw new Error('Invalid backend capabilities');this.health=health;this.models=catalogue;this.model=catalogue.models.some(m=>m.id===this.model)?this.model:catalogue.default_model;this.graphs=graphs.graphs;if(!this.graphs.some(g=>g.id===this.graphId&&g.executable))this.graphId=undefined;this.post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:catalogue.models,model:this.model});this.post({type:'graphs',graphs:this.graphs,selected:this.graphId});if(this.profileController){await this.profileController.refresh();if(this.current(version))this.profileController.models(this.model);}}
-  async initialize(saved){this.model=saved?.model;this.graphId=saved?.graph;await this.refreshCapabilities();if(this.disposed)return;const version=this.generation,sessions=await this.client.sessions();if(!this.current(version))return;if(saved?.session&&sessions.some(s=>s.id===saved.session))await this.select(saved.session,saved.run);else if(sessions.length)await this.select(sessions.at(-1).id);if(this.disposed)return;this.post({type:'sessions',sessions,selected:this.session});if(!this.session)this.post({type:'status',text:this.health.agent_execution?'Ready':'Backend connected · open Settings to configure a model'});this.discover().catch(()=>{}); }
+  async initialize(saved){this.model=saved?.model;this.graphId=saved?.graph;await this.refreshCapabilities();if(this.disposed)return;const version=this.generation,sessions=await this.client.sessions();if(!this.current(version))return;if(saved?.session&&sessions.some(s=>s.id===saved.session))await this.select(saved.session,saved.run);else if(sessions.length)await this.select(sessions.at(-1).id);if(this.disposed)return;this.post({type:'sessions',sessions,selected:this.session});if(!this.session)this.post({type:'status',text:this.health.agent_execution?'Ready':'Backend connected · open Settings to configure a model'});await this.readSkills();this.discover().catch(()=>{}); }
   async select(id,preferred){this.stop();const version=this.generation;this.session=id;this.runId=undefined;this.children.clear();this.graph=undefined;this.operations.clear();this.post({type:'graph-clear'});this.post({type:'operations',operations:[]});this.post({type:'reset-run'});const history=await this.client.history(id),runs=await this.client.runs(id);if(!this.current(version))return;
     const previousProfile=this.profileController?.state;await this.profileController?.refresh();if(!this.current(version))return;
     if(previousProfile&&(previousProfile.revision!==this.profileController.state?.revision||previousProfile.active!==this.profileController.state?.active))await this.refreshCapabilities();
@@ -36,7 +43,7 @@ class BrowserController {
     // Recover with the freshly observed saved profile; never replay the CAS or
     // carry an unsaved key across the conversation change.
     if(this.current(version)&&previousProfile&&!retainedCatalogue&&this.profileController?.state?.active){try{await this.discover();}catch{}}
-    if(!this.current(version))return;if(this.runId){await this.poll();this.watch();}else this.post({type:'status',text:'Ready'});}
+    if(!this.current(version))return;if(this.runId){await this.poll();this.watch();}else this.post({type:'status',text:'Ready'});await this.readSkills();}
   watch(){clearInterval(this.timer);if(this.busy()||this.pendingTreeEvents||this.pendingPlanObservation)this.timer=setInterval(()=>this.poll(),500);}
   async refreshSessions(){const version=this.generation,sessions=await this.client.sessions();if(this.current(version))this.post({type:'sessions',sessions,selected:this.session});}
   async poll(){if(this.polling||!this.runId)return;this.polling=true;const version=this.generation,id=this.runId;try{
@@ -52,7 +59,7 @@ class BrowserController {
       if(run.graph_root){const root=await this.client.graph(id),children=await this.client.graphChildren(id),histories={};for(const child of children)if(root.spec.nodes.find(node=>node.id===child.node_id)?.type==='agent')histories[child.id]=await this.client.graphChildHistory(id,child.id);if(!this.current(version))return;this.graph=root;this.post({type:'graph',record:root,children,histories});}
     }
     const history=await this.client.history(this.session),runs=await this.client.runs(this.session);if(!this.current(version))return;this.runs=runs;this.present();this.post({type:'transcript',history,preserveLive:['queued','running','paused'].includes(latest.state)});this.post({type:'status',text:latest.state});if(!this.busy())clearInterval(this.timer);
-  }catch(error){if(error.status===409&&this.current(version)){this.graph=undefined;this.post({type:'graph-clear'});}if(this.current(version))this.post({type:'error',text:error.message});}finally{this.polling=false;await this.readContext().catch(error=>{if(this.current(version))this.post({type:'error',text:error.message});});}}
+  }catch(error){if(error.status===409&&this.current(version)){this.graph=undefined;this.post({type:'graph-clear'});}if(this.current(version))this.post({type:'error',text:error.message});}finally{this.polling=false;if(!this.busy())await this.readSkills();await this.readContext().catch(error=>{if(this.current(version))this.post({type:'error',text:error.message});});}}
   async pollOwned(run,version){
     const id=this.runId,validRoot=value=>{if(value.id!==id||value.session_id!==this.session||value.parent_id||value.graph_root)throw new Error('Owned run observation identity changed');};validRoot(run);
     const publish=snapshot=>{
@@ -116,6 +123,8 @@ class BrowserController {
   }
   async command(message){if(this.disposed||!message||typeof message.type!=='string')return;const version=this.generation;
     if(message.type==='ready')return;
+    if(message.type==='skills-refresh'){if(!this.session){const session=await this.client.createSession('Workspace skills');if(this.current(version))await this.select(session.id);}await this.readSkills();return;}
+    if(message.type==='skills-change'){try{if(this.health?.skill_controls!==true||this.busy()||!this.skillController)throw new Error('Wait for the selected conversation to become idle.');await this.skillController.change(message);}catch(error){if(this.current(version))this.post({type:'skills-error',text:error.message});}return;}
     if(message.type==='saveProviderKey'){let key=message.key;delete message.key;try{await this.discover(key||undefined,message.profile,message.route);}finally{key=undefined;}return;}
     if(message.type==='discardProviderKey'){this.selection=undefined;clearTimeout(this.keyTimer);this.profileController?.invalidate();await this.refreshCapabilities();return;}
     if(message.type==='select-provider'){this.profileController??=new ProfileController(this.client,this.post);if(!await this.profileController.select(message.id)||!this.current(version))return;await this.refreshCapabilities();if(!this.current(version))return;this.model=this.models.default_model;this.remember();this.discover().catch(()=>{});return;}

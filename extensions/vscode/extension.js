@@ -1,7 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
-const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext } = require('./client');
+const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const { browserViewLauncher } = require('./browser-view');
@@ -48,13 +48,20 @@ async function activate(context) {
   let ownedObservation=false;
   let planningObservation=false,planSnapshot,pendingPlanRead=false,planReadConflicts=0;
   let contextObservation=false,contextController;
+  let skillController;
   const stateKey = 'agentflow.session';
   const modelStateKey = 'xmind.model';
   const runStateKey = 'xmind.observedRun';
   const graphStateKey = 'xmind.workflow';
 
   const post = message => panel?.webview.postMessage(message);
-  const stop = () => { clearInterval(timer); timer = undefined; generation++;contextController?.invalidate();profileController?.invalidate(); };
+  async function readSkills(){
+    if(!panel||!client)return;const target=client,version=generation;
+    if(health?.skill_controls!==true){if(skillController)skillController.invalidate();return;}
+    if(!skillController||skillController.client!==target)skillController=new SkillViewController(target,post,()=>({session:sessionId,generation,enabled:!!panel&&client===target&&health?.skill_controls===true}));
+    try{await skillController.read();}catch(error){if(client===target&&version===generation)post({type:'skills-error',text:error.message});}
+  }
+  const stop = () => { clearInterval(timer); timer = undefined; generation++;contextController?.invalidate();skillController?.invalidate();profileController?.invalidate(); };
   async function readContext(){
     if(!panel||!client)return;
     if(!contextObservation){if(contextController?.record)contextController.invalidate();return;}
@@ -158,7 +165,7 @@ async function activate(context) {
         if(!busySession()) stop();
       }
     } catch (error) { if (version === generation) post({ type: 'error', text: error.message }); }
-    finally { polling = false;await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});}); }
+    finally { polling = false;if(!busySession())await readSkills();await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});}); }
   }
 
   async function pollOwned(id,version){
@@ -249,6 +256,7 @@ async function activate(context) {
       timer = setInterval(poll, 500);
       await poll();
     } else {presentRuns();post({ type: 'status', text: 'Ready' });}
+    await readSkills();
   }
 
   async function selectRun(id) {
@@ -387,6 +395,11 @@ async function activate(context) {
           await refreshGraphs();
           // Fetch with the saved backend key; settings handles a rejected key.
           try{await configureModel();}catch{}
+          await readSkills();
+        } else if(message.type==='skills-refresh'){
+          if(!sessionId){const session=await client.createSession('Workspace skills');if(panel!==view)return;await selectSession(session.id);await refresh();}else await readSkills();
+        } else if(message.type==='skills-change'){
+          try{if(health?.skill_controls!==true||busySession()||!skillController)throw new Error('Wait for the selected conversation to become idle.');await skillController.change(message);}catch(error){post({type:'skills-error',text:error.message});}
         } else if (message.type === 'saveProviderKey') {
           let key=message.key;delete message.key;
           try{await configureModel(key===''?undefined:key,message.profile,message.route);}finally{key=undefined;}
@@ -415,6 +428,7 @@ async function activate(context) {
           else if(health.agent_execution) post({type:'status',text:'Ready'});
           try{await configureModel();}catch{}
           await refreshGraphs();
+          await readSkills();
         }
         else if (message.type === 'model' && typeof message.id === 'string') {
           const modelVersion=generation;

@@ -3,6 +3,31 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('node:http');
 const { BackendClient } = require('../client');
+const {SkillViewController,validateSessionSkills}=require('../client');
+const skillWorkspace='windows-local-file-v1:synthetic-test-workspace',skillAuthority='a'.repeat(32);
+const skillState=(ids=[],revision=0,editable=true)=>({session_id:'session',workspace_id:skillWorkspace,authority_id:skillAuthority,revision,ids,manual_ids:ids,editable});
+const skillCatalogue={workspace_id:skillWorkspace,authority_id:skillAuthority,skills:[{id:'manual',name:'User guide',path:'.agents/skills/manual.md',model_invocable:false}]};
+test('session skill client posts only exact revision, ids and workspace authority',async()=>{
+ const requests=[],client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>skillState(['manual'],1)};});
+ const result=await client.replaceSessionSkills('session',['manual'],skillState());assert.equal(result.revision,1);assert.deepEqual(JSON.parse(requests[0].options.body),{ids:['manual'],expected_revision:0,expected_workspace_id:skillWorkspace,expected_workspace_authority_id:skillAuthority});assert.equal(requests[0].options.method,'POST');assert.equal(requests[0].url,'http://127.0.0.1:8765/v1/sessions/session/skills');
+ await assert.rejects(client.replaceSessionSkills('session',['manual','manual'],skillState()),/distinct/);await assert.rejects(client.replaceSessionSkills('session',[],skillState(['manual'],1,false)),/idle/);assert.equal(requests.length,1);assert.throws(()=>validateSessionSkills({...skillState(),manual_ids:['foreign']},'session'),/provenance/);
+});
+test('skill controller publishes acknowledged manual attachment and removal without model prompts',async()=>{
+ let state=skillState();const commands=[],posted=[];const client={skills:async()=>skillCatalogue,sessionSkills:async()=>state,replaceSessionSkills:async(session,ids,previous)=>{commands.push({session,ids,previous});state=skillState(ids,previous.revision+1);return state;}};
+ const controller=new SkillViewController(client,m=>posted.push(m),()=>({session:'session',generation:1,enabled:true}));await controller.read();await controller.change({session:'session',revision:0,ids:['manual']});await controller.change({session:'session',revision:1,ids:[]});assert.deepEqual(commands.map(c=>c.ids),[['manual'],[]]);assert.equal(posted.at(-1).selection.revision,2);assert.deepEqual(posted.at(-1).selection.ids,[]);assert.ok(posted.every(m=>m.type==='skills'));
+ await assert.rejects(controller.change({session:'session',revision:1,ids:['manual']}),/Refresh/);await assert.rejects(controller.change({session:'session',revision:2,ids:['unknown']}),/catalogue/);assert.equal(commands.length,2);
+});
+test('skill reads discard responses from a previous conversation generation',async()=>{
+ let release,scope={session:'session',generation:1,enabled:true};const posted=[];const controller=new SkillViewController({sessionSkills:()=>new Promise(yes=>release=yes),skills:async()=>skillCatalogue},m=>posted.push(m),()=>scope);
+ const pending=controller.read();scope={session:'other',generation:2,enabled:true};controller.invalidate();release(skillState());await pending;assert.equal(controller.record,undefined);assert.ok(!posted.some(m=>m.type==='skills'));
+});
+test('skill acknowledgements cannot publish into a newly selected conversation',async()=>{
+ let release,scope={session:'session',generation:1,enabled:true};const posted=[];const controller=new SkillViewController({sessionSkills:async()=>skillState(),skills:async()=>skillCatalogue,replaceSessionSkills:()=>new Promise(yes=>release=yes)},m=>posted.push(m),()=>scope);await controller.read();const pending=controller.change({session:'session',revision:0,ids:['manual']});scope={session:'other',generation:2,enabled:true};controller.invalidate();release(skillState(['manual'],1));await pending;assert.equal(controller.record,undefined);assert.equal(posted.filter(m=>m.type==='skills').length,1);
+});
+test('malformed catalogue metadata cannot enter a skill chooser, while source conflicts allow only clearing',async()=>{
+ const invalid=new SkillViewController({sessionSkills:async()=>skillState(),skills:async()=>({...skillCatalogue,skills:[{...skillCatalogue.skills[0],body:'Untrusted injected guide'}]})},()=>{},()=>({session:'session',generation:1,enabled:true}));await assert.rejects(invalid.read(),/catalogue entry/);assert.equal(invalid.record,undefined);
+ const posted=[];let changed=0;const conflict=Object.assign(new Error('Ambiguous current skill sources'),{status:409});const client={sessionSkills:async()=>skillState(['manual'],1),skills:async()=>{throw conflict;},replaceSessionSkills:async()=>{changed++;return skillState([],2);}};const controller=new SkillViewController(client,m=>posted.push(m),()=>({session:'session',generation:1,enabled:true}));await controller.read();assert.equal(posted.at(-1).catalogueError,conflict.message);await assert.rejects(controller.change({session:'session',revision:1,ids:['manual']}),/catalogue/);await controller.change({session:'session',revision:1,ids:[]});assert.equal(changed,1);assert.deepEqual(posted.at(-1).selection.ids,[]);
+});
 test('provider enrollment accepts only matching approved OpenAI wire and endpoint pairs',()=>{
   const {providerEnrollmentWire}=require('../client'),base={provider:'openai',revision:1,endpoint:'https://api.openai.com/v1/chat/completions'};
   assert.equal(providerEnrollmentWire(base),'chat-completions');assert.equal(providerEnrollmentWire({...base,wire:'responses',endpoint:'https://api.openai.com/v1/responses'}),'responses');

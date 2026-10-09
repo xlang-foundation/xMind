@@ -6,6 +6,24 @@ const operationSections=new Map();
 const operationRows=new Map();
 const processStreams=new Map();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
+let skillSnapshot,skillPending=false;
+const skillRows=new Map();
+function skillControls(){const disabled=skillPending||sessionBusy||activeRun||!skillSnapshot?.selection?.editable;for(const row of skillRows.values())row.button.disabled=disabled;byId('skills-clear').disabled=disabled;}
+function clearSkills(){skillSnapshot=undefined;skillPending=false;skillRows.clear();byId('skill-list').replaceChildren();byId('skills-view').hidden=true;}
+function renderSkills(message){
+  skillSnapshot=message;skillPending=false;byId('skills-view').hidden=false;const selected=message.selection?.ids||[];
+  byId('skills-summary').textContent='Skills'+(selected.length?' · '+selected.length+' attached':'');byId('skills-status').textContent=message.catalogueError?message.catalogueError+' Clear attachments or refresh after repairing the guides.':message.selection?'Guidance for this conversation. Tools still require their usual permissions.':'Choose skills to start a conversation, or use New conversation.';
+  const list=byId('skill-list'),present=new Set();let index=0;
+  for(const skill of message.catalogue.skills){present.add(skill.id);let row=skillRows.get(skill.id);if(!row){const element=node('div',undefined,'skill-row'),text=node('div'),name=node('strong'),description=node('div',undefined,'hint'),policy=node('div',undefined,'hint'),button=node('button');text.append(name,description,policy);element.append(text,button);row={element,name,description,policy,button};skillRows.set(skill.id,row);button.onclick=()=>{if(button.disabled||!skillSnapshot?.selection)return;const state=skillSnapshot.selection,ids=state.ids.includes(skill.id)?state.ids.filter(id=>id!==skill.id):[...state.ids,skill.id];skillPending=true;skillControls();api.postMessage({type:'skills-change',session:state.session_id,revision:state.revision,ids});};}
+    row.name.textContent=skill.name;row.description.textContent=skill.description||skill.path;row.policy.textContent=skill.model_invocable?(skill.autoinvoke===false?'Explicit use only':'Model may load this guide'):'User attachment only';row.button.textContent=selected.includes(skill.id)?'Remove':'Attach';row.button.setAttribute('aria-label',(selected.includes(skill.id)?'Remove ':'Attach ')+skill.name);if(list.children[index]!==row.element)list.insertBefore(row.element,list.children[index]||null);index++;
+  }
+  for(const [id,row] of skillRows)if(!present.has(id)){row.element.remove();skillRows.delete(id);}
+  const missing=selected.filter(id=>!present.has(id));byId('skills-status').textContent+=missing.length?' Missing guide: '+missing.join(', ')+'. Clear attachments to recover.':'';
+  byId('skills-clear').hidden=!selected.length;byId('skills-clear').disabled=!message.selection?.editable;skillControls();
+}
+function skillError(text){skillPending=true;byId('skills-status').textContent=text+' Refresh skills before editing.';skillControls();}
+byId('skills-refresh').onclick=()=>{skillPending=true;skillControls();api.postMessage({type:'skills-refresh'});};
+byId('skills-clear').onclick=()=>{if(!skillSnapshot?.selection?.editable||sessionBusy||activeRun||skillPending)return;skillPending=true;skillControls();const state=skillSnapshot.selection;api.postMessage({type:'skills-change',session:state.session_id,revision:state.revision,ids:[]});};
 function markdown(el,text){
   el.innerHTML=DOMPurify.sanitize(marked.parse(text||'',{gfm:true,breaks:false}),{FORBID_TAGS:['style','iframe','form','input','button'],FORBID_ATTR:['style'],ALLOW_DATA_ATTR:false});
   for(const anchor of el.querySelectorAll('a')){anchor.addEventListener('click',event=>{event.preventDefault();api.postMessage({type:'openLink',url:anchor.getAttribute('href')});});}
@@ -412,6 +430,9 @@ window.addEventListener('message',event=>{
   else if(m.type==='workspace-clear'){const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}byId('prompt').value='';}
   else if(m.type==='graphs'){const select=byId('workflow');select.replaceChildren();const single=node('option','Agent (default)');single.value='';select.append(single);for(const graph of m.graphs){const option=node('option',graph.id+' · '+graph.node_count+' nodes'+(graph.executable?'':' · unavailable'));option.value=graph.id;option.disabled=!graph.executable;option.dataset.executable=graph.executable?'true':'';option.selected=graph.id===m.selected;select.append(option);}if(!m.selected)select.value='';workflowExecutable=!!m.graphs.find(g=>g.id===m.selected&&g.executable);byId('workflow-picker').hidden=!m.graphs.length;byId('send').disabled=!canExecute()||activeRun||sessionBusy;}
   else if(m.type==='graph-clear')clearGraph();
+  else if(m.type==='skills')renderSkills(m);
+  else if(m.type==='skills-clear')clearSkills();
+  else if(m.type==='skills-error')skillError(m.text);
   else if(m.type==='context-clear')clearContext();
   else if(m.type==='context')contextView(m.record);
   else if(m.type==='plan-clear')clearPlan();
@@ -424,7 +445,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.title);option.value=session.id;option.dataset.sessionId=session.id;option.selected=session.id===m.selected;byId('sessions').append(option);}refreshRename();}
   else if(m.type==='rename-result'){if(renameSnapshot?.id===m.id){byId('rename-save').disabled=false;byId('rename-status').textContent=m.text||'';if(m.success)renameDialog.close();}}
   else if(m.type==='runs'){
-    sessionBusy=m.busy;byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
+    sessionBusy=m.busy;skillControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
     for(const run of m.runs){const option=node('option',run.state+' · '+run.id);option.value=run.id;option.selected=run.id===m.selected;byId('runs').append(option);}
     renderRunContext(m.runs.find(run=>run.id===m.selected));
     if(displayedPlan&&displayedPlan.run.id!==m.selected)clearPlan();planControls();if(displayedGraph&&displayedGraph.run.id!==m.selected)clearGraph();
@@ -454,7 +475,7 @@ window.addEventListener('message',event=>{
       section.append(detail);
     }
   }
-  else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);byId('send').disabled=!canExecute()||activeRun||sessionBusy;byId('cancel').hidden=!activeRun;}
+  else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);skillControls();byId('send').disabled=!canExecute()||activeRun||sessionBusy;byId('cancel').hidden=!activeRun;}
   else if(m.type==='error'){for(const row of graphRows.values())if(row.button)row.button.disabled=false;for(const row of planRows.values())row.submitting=false;const graphResume=byId('graph-resume');if(graphResume)graphResume.disabled=displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true;const resume=byId('plan-resume');if(resume)delete resume.dataset.submitting;planControls();if(displayedContext)contextView(displayedContext);byId('status').textContent=m.text;if(settings.open){byId('settings-status').textContent=m.text;byId('settings-save').disabled=false;}}
   if(follow)scroll.scrollTop=scroll.scrollHeight;
 });api.postMessage({type:'ready'});

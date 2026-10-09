@@ -67,6 +67,10 @@ std::string string_field(const Json& value,const char* key,std::size_t max=4096)
     if(result.empty() || result.size()>max || result.find('\0')!=std::string::npos) throw std::invalid_argument("String field exceeds limits");
     return result;
 }
+Json session_skill_metadata(const std::string& session,const WorkspaceSessionSkills& value){
+    return {{"session_id",session},{"workspace_id",value.workspace.workspace_id},{"authority_id",value.workspace.authority_id},
+        {"revision",value.state.revision},{"ids",value.state.selections.ids},{"manual_ids",value.state.selections.manual_ids},{"editable",value.state.editable}};
+}
 std::optional<ProviderProfileAdmission> profile_admission(const Json& value){
     const bool named=value.contains("provider_profile_id"),versioned=value.contains("expected_provider_revision");
     if(named!=versioned)throw std::invalid_argument("Provider profile and revision must be supplied together");
@@ -237,6 +241,7 @@ template<class Handler> auto guarded(Handler handler) {
         catch(const TransportTimeout&) {reply(response,{{"detail","Model discovery timed out; try again"}},504);}
         catch(const TransportError&) {reply(response,{{"detail","Model discovery failed; check provider access and try again"}},502);}
         catch(const ToolAccessDenied&) {reply(response,{{"detail","Workspace inspection denied"}},403);}
+        catch(const ToolGuidanceChanged&) {reply(response,{{"detail","Selected workspace guidance changed or is unavailable; refresh skills"}},409);}
         catch(const ToolFileError&) {reply(response,{{"detail","Workspace file unavailable for inspection"}},409);}
         catch(const Json::exception&) {reply(response,{{"detail","Invalid JSON request"}},400);}
         catch(const std::invalid_argument& error) {reply(response,{{"detail",error.what()}},400);}
@@ -287,7 +292,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/skills)?|models|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/skills)?|models|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/skills|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && std::regex_match(request.path,view_route) && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))){
@@ -389,7 +394,7 @@ struct HttpServer::Impl {
         }));
         server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
         }));
         server.Get("/v1/workspace",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Workspace metadata does not accept query parameters");
@@ -403,6 +408,19 @@ struct HttpServer::Impl {
             const auto actual=executor->workspace_skills();auto catalogue=Json::parse(actual.catalogue_json);
             catalogue["workspace_id"]=actual.workspace.workspace_id;catalogue["authority_id"]=actual.workspace.authority_id;
             reply(response,catalogue);
+        }));
+        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/skills)",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session skills do not accept query parameters");
+            if(!executor||!executor->supports_session_skills())throw RunUnavailable("Session skill controls are unavailable");
+            const auto session=request.matches[1].str();reply(response,session_skill_metadata(session,executor->session_skills(session)));
+        }));
+        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/skills)",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>8192)throw std::invalid_argument("Invalid session skill request target or size");
+            if(!executor||!executor->supports_session_skills())throw RunUnavailable("Session skill controls are unavailable");
+            const auto value=body(request,{"ids","expected_revision","expected_workspace_id","expected_workspace_authority_id"});
+            const auto binding=workspace_admission(value);if(!binding||value.size()!=4||!value.contains("ids")||!value["ids"].is_array()||value["ids"].size()>8||!value.contains("expected_revision")||!value["expected_revision"].is_number_integer()||value["expected_revision"]<0||value["expected_revision"]>=9007199254740991LL)throw std::invalid_argument("Skill changes require exact ids, revision and workspace authority");
+            std::vector<std::string> ids;for(const auto& id:value["ids"]){if(!id.is_string())throw std::invalid_argument("Skill ids must be strings");ids.push_back(id.get<std::string>());}
+            const auto session=request.matches[1].str();reply(response,session_skill_metadata(session,executor->replace_session_skills(session,std::move(ids),value["expected_revision"].get<std::int64_t>(),*binding)));
         }));
         server.Get("/v1/agent/planning",guarded([this](const Request& request,Response& response){
             if(!request.params.empty())throw std::invalid_argument("Planning metadata does not accept query parameters");

@@ -188,6 +188,8 @@ std::future<std::vector<Message>> PersistenceService::run_history(std::string id
 std::future<std::vector<Event>> PersistenceService::graph_events(std::string id,std::int64_t after){return impl_->submit([id=std::move(id),after](Repository& repository){return repository.graph_events(id,after);});}
 std::future<SkillSelections> PersistenceService::initialize_run_skills(std::string id,std::string workspace){return impl_->submit([id=std::move(id),workspace=std::move(workspace)](Repository& repository){return repository.initialize_run_skills(id,workspace);});}
 std::future<SkillSelections> PersistenceService::run_skills(std::string id){return impl_->submit([id=std::move(id)](Repository& repository){return repository.run_skills(id);});}
+std::future<SessionSkillState> PersistenceService::session_skills(std::string session,std::string workspace){return impl_->submit([session=std::move(session),workspace=std::move(workspace)](Repository& repository){return repository.session_skills(session,workspace);});}
+std::future<SessionSkillState> PersistenceService::replace_session_skills(std::string session,SkillSelections selections,std::int64_t revision){return impl_->submit([session=std::move(session),selections=std::move(selections),revision](Repository& repository){return repository.replace_session_skills(session,selections,revision);});}
 std::future<void> PersistenceService::record_tool_turn(std::string id,std::string assistant,std::vector<std::string> tools,std::optional<SkillSelections> skills) {
     return impl_->submit([id=std::move(id),assistant=std::move(assistant),tools=std::move(tools),skills=std::move(skills)](Repository& repository){repository.record_tool_turn(id,assistant,tools,skills);});
 }

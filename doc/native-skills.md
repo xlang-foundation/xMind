@@ -46,7 +46,8 @@ by an available id. The pinned reference's `metadata.opencode/autoinvoke` flag
 has the same meaning; its string value is trimmed and normalized. The native
 top-level alias accepts `true` or `false` and conflicting declarations fail
 explicitly. `disable-model-invocation: true` remains an explicit native loading
-prohibition. User-driven attachment controls for disabled guides are pending.
+prohibition. The newer native user-control source supports explicit attachment
+of disabled guides; validation and installation scope is recorded below.
 
 `list_skills` returns current metadata. `load_skill` accepts an exact catalogue
 id and requests activation for the next model request. Skill bodies enter the
@@ -320,8 +321,11 @@ The successful retry's owned sources and files were removed after verification;
 the failed attempt's isolated fixture was subsequently moved from `TestProj`
 into private diagnostic storage, retaining all three files and failed records.
 
-This schema13 source is locally validated, not yet installed or packaged by the
-hosted workflow. The current persistent VS Code package and browser runtime use
+The schema13 persistence/catalogue source `7b1dc1d` subsequently passed its exact
+92-contract hosted workflow, complete extension/browser gates and packaging.
+Independent verification binds every runtime and packaged host/view file to
+that commit. [Verified package](evidence/native-skill-catalogue-hosted-package.json).
+It has not yet passed installed acceptance. The current VS Code and browser use
 schema12. The subsequent installed-package workspace-read UI check and window
 reload passed after the user granted trust; rendered skill activation remains
 separate. Delivery still requires installed schema13 acceptance, paused-run
@@ -360,3 +364,60 @@ receipt after reload; the observation retains the error, while xMind activated
 and restored its completed run. This check establishes one workspace-read UI
 path, not rendered skill activation, edit approvals, schema13 installation or
 full provider/parity acceptance.
+
+## Explicit user attachments
+
+The newer source adds authenticated `GET` and `POST` controls at
+`/v1/sessions/{session_id}/skills`. Reads return selected ids, explicit user ids,
+revision, current workspace/authority and whether the session is idle. Writes
+replace the selection using the exact previously observed revision and workspace
+generation. Queued, running and paused runs and active context maintenance prevent
+changes. The embedded-xlang3 repository commits the selection and next revision
+in one transaction; stale or failed writes leave the previous record intact.
+Clearing retains an empty selection at a new revision.
+
+User attachments carry a distinct `manual_ids` subset in typed native records.
+Existing schema13 records without that optional field retain model provenance.
+The authenticated control marks its chosen guides as user selected. A model's
+`load_skill` acknowledgement cannot create or change that provenance. A user can
+therefore attach `disable-model-invocation: true` guidance while the model tool's
+prohibition remains intact. Active documents report their `activation_origin`;
+neither kind of activation grants effects or script execution. Current retained
+sources and instruction limits are checked again before delivery and approvals.
+Selection records contain no cached guide bodies.
+
+Both views provide an inline Skills section in the sidebar footer. Attachment and
+removal use acknowledged backend records. Conversation switches retire stale
+observations and acknowledgements. The chooser renders catalogue metadata as
+text, retains unchanged row controls and disables changes during execution.
+A missing saved guide can be cleared; a malformed catalogue remains an explicit
+error but does not prevent clearing attachments. Recovery never retries a write
+automatically.
+
+This source passed the exact complete 92-contract native gate and all 184
+extension / 38 browser contracts with frozen input bytes. The native runner's
+synthetic provider contract checks user guidance at the first actual model
+request and its absence after removal. HTTP contracts exercise both execution
+platforms, actual scoped browser cookies, stale revisions/authority, invalid ids,
+explicit disabled attachment and clearing through malformed discovery. Actual
+embedded-xlang3 repository checks cover rollback, close/reopen, model rejection
+of manual-origin promotion and running/paused ownership restrictions.
+
+Three real OpenAI runs then passed user attachment of a model-disabled guide,
+an exact native companion read, removal on the next prompt, persisted
+reattachment, actual backend exit/restart and reading a changed guide's new
+companion. Each run completed with actual provider usage and zero `load_skill`
+calls or effect events. Exact guide hashes, workspace ids and native scope
+events match the independent owned files. Their cleanup verified paths and
+contents before removing the owned fixture.
+
+[Local user-control evidence](evidence/native-user-skill-controls-local.json)
+retains the initial HTTP error-mapping failure (91/92 passed) and the initial
+browser compatibility failures. Missing guidance now returns a bounded conflict
+instead of HTTP 500, and unsupported backends do not instantiate the new
+controller or publish after disposal. Hosted packaging and installed/rendered
+control acceptance remain required for this newer source. The real calls used
+the locally tested build, not the currently installed schema12 UI package.
+CLI manual attachment commands, configured/global/URL/embedded discovery,
+skill source management and broader parity remain incomplete. The existing CLI
+`skills` and `/skills` commands inspect the current catalogue.

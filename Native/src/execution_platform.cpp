@@ -29,6 +29,15 @@ WorkspaceSkillCatalogue ExecutionPlatform::workspace_skills()const{
     validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
     return {workspace,catalogue};
 }
+WorkspaceSessionSkills ExecutionPlatform::session_skills(const std::string& session)const{
+    if(!workspace_binding_)throw RunUnavailable("Session skills require an opened root");const auto workspace=execution_workspace();
+    auto state=store_.session_skills(session,workspace.workspace_id).get();validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());return {workspace,std::move(state)};
+}
+WorkspaceSessionSkills ExecutionPlatform::replace_session_skills(const std::string& session,std::vector<std::string> ids,std::int64_t revision,WorkspaceAdmission expected){
+    if(!workspace_binding_||!healthy())throw RunUnavailable("Session skill controls are unavailable");const auto workspace=execution_workspace();validate_workspace_admission(expected,workspace);
+    SkillSelections selections{workspace.workspace_id,ids,ids};if(!ids.empty()){SkillContext validation(*workspace_binding_);validation.restore(selections);validation.prepare();validation.precondition().verify({});}
+    validate_workspace_admission(expected,execution_workspace());return {workspace,store_.replace_session_skills(session,std::move(selections),revision).get()};
+}
 Run ExecutionPlatform::submit_workspace(std::string id,std::string session,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile){
     validate_workspace_admission(expected,execution_workspace());if(profile)throw RunUnavailable("Provider profile admission is unavailable");
     return submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));

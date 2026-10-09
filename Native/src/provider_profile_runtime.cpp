@@ -349,6 +349,14 @@ WorkspaceSkillCatalogue ProviderProfileRuntime::workspace_skills()const{
     const auto workspace=impl_->workspace_metadata();const auto catalogue=SkillContext(*impl_->workspace_binding).catalogue_json();
     validate_workspace_admission({workspace.workspace_id,workspace.authority_id},impl_->workspace_metadata());return {workspace,catalogue};
 }
+WorkspaceSessionSkills ProviderProfileRuntime::session_skills(const std::string& session)const{
+    std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Session skills require an opened root");const auto workspace=impl_->workspace_metadata();return {workspace,impl_->store.session_skills(session,workspace.workspace_id).get()};
+}
+WorkspaceSessionSkills ProviderProfileRuntime::replace_session_skills(const std::string& session,std::vector<std::string> ids,std::int64_t revision,WorkspaceAdmission expected){
+    std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding||!impl_->service->healthy())throw RunUnavailable("Session skill controls are unavailable");const auto workspace=impl_->workspace_metadata();validate_workspace_admission(expected,workspace);
+    SkillSelections selections{workspace.workspace_id,ids,ids};if(!ids.empty()){SkillContext validation(*impl_->workspace_binding);validation.restore(selections);validation.prepare();validation.precondition().verify({});}
+    validate_workspace_admission(expected,impl_->workspace_metadata());return {workspace,impl_->store.replace_session_skills(session,std::move(selections),revision).get()};
+}
 Run ProviderProfileRuntime::submit_workspace(std::string id,std::string session,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile){
     std::lock_guard lock(impl_->mutex);validate_workspace_admission(expected,impl_->workspace_metadata());if(profile)impl_->admission(*profile);
     return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));

@@ -116,6 +116,8 @@ public:
     std::future<void> append_user_message(std::string session_id,std::string json);
     std::future<SkillSelections> initialize_run_skills(std::string id,std::string workspace_id);
     std::future<SkillSelections> run_skills(std::string id);
+    std::future<SessionSkillState> session_skills(std::string session,std::string workspace);
+    std::future<SessionSkillState> replace_session_skills(std::string session,SkillSelections selections,std::int64_t expected_revision);
     std::future<void> record_tool_turn(std::string id,std::string assistant_json,std::vector<std::string> tool_json,std::optional<SkillSelections> skills={});
     std::future<Run> complete_run(std::string id,std::string assistant_json);
     std::future<Run> run(std::string id);

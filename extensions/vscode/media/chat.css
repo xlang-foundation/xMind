@@ -29,3 +29,10 @@ input{font:inherit;color:var(--vscode-input-foreground);background:var(--vscode-
   .hint{margin-top:3px}
   .context-view{max-height:100px}
 }
+.skills-view{margin:0 0 6px;max-height:180px;overflow:auto}
+.skills-view summary{cursor:pointer;color:var(--vscode-descriptionForeground)}
+.skill-actions{display:flex;gap:6px;margin-top:6px}
+.skill-row{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--vscode-panel-border)}
+.skill-row>div{flex:1;min-width:0;overflow-wrap:anywhere}
+.skill-row button{flex:none}
+.skill-row .hint{margin-top:3px}

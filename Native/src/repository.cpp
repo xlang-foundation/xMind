@@ -37,12 +37,15 @@ std::string object_json(const std::string& source,std::size_t limit=2*1024*1024)
 }
 std::string skill_selections_json(const SkillSelections& value){
     validate_skill_selections(value);const std::set<std::string> ids(value.ids.begin(),value.ids.end());
-    return Json{{"version",1},{"workspace_id",value.workspace_id},{"ids",std::vector<std::string>(ids.begin(),ids.end())}}.dump();
+    Json result{{"version",1},{"workspace_id",value.workspace_id},{"ids",std::vector<std::string>(ids.begin(),ids.end())}};
+    if(!value.manual_ids.empty()){const std::set<std::string> manual(value.manual_ids.begin(),value.manual_ids.end());result["manual_ids"]=std::vector<std::string>(manual.begin(),manual.end());}return result.dump();
 }
 SkillSelections skill_selections(const std::string& source){
     const auto value=Json::parse(object_json(source,8192));
-    if(value.size()!=3||!value.contains("version")||!value["version"].is_number_integer()||value["version"]!=1||!value.contains("workspace_id")||!value["workspace_id"].is_string()||!value.contains("ids")||!value["ids"].is_array()||value["ids"].size()>8)throw DatabaseError("Invalid saved native skill selection");
-    SkillSelections result{value["workspace_id"].get<std::string>(),{}};for(const auto& id:value["ids"]){if(!id.is_string())throw DatabaseError("Invalid saved native skill id");result.ids.push_back(id.get<std::string>());}validate_skill_selections(result);return result;
+    if((value.size()!=3&&value.size()!=4)||(value.size()==4&&!value.contains("manual_ids"))||!value.contains("version")||!value["version"].is_number_integer()||value["version"]!=1||!value.contains("workspace_id")||!value["workspace_id"].is_string()||!value.contains("ids")||!value["ids"].is_array()||value["ids"].size()>8)throw DatabaseError("Invalid saved native skill selection");
+    SkillSelections result{value["workspace_id"].get<std::string>(),{}};for(const auto& id:value["ids"]){if(!id.is_string())throw DatabaseError("Invalid saved native skill id");result.ids.push_back(id.get<std::string>());}
+    if(value.contains("manual_ids")){if(!value["manual_ids"].is_array()||value["manual_ids"].size()>8)throw DatabaseError("Invalid saved manual skills");for(const auto& id:value["manual_ids"]){if(!id.is_string())throw DatabaseError("Invalid saved manual skill id");result.manual_ids.push_back(id.get<std::string>());}}
+    validate_skill_selections(result);return result;
 }
 const std::string& text(const SqlValue& value) { return std::get<std::string>(value); }
 std::string provider_context(const Json& value){
@@ -1581,6 +1584,24 @@ std::vector<Event> Repository::graph_events(const std::string& id,std::int64_t a
 SkillSelections Repository::run_skills(const std::string& id){
     run(id);const auto rows=impl_->database.execute("SELECT workspace_id,selections_json FROM run_skills WHERE run_id=?",{id}).rows;if(rows.empty())throw NotFound("Run skills not initialized");
     auto result=skill_selections(text(rows[0][1]));if(result.workspace_id!=text(rows[0][0]))throw DatabaseError("Saved run skill workspace differs");return result;
+}
+SessionSkillState Repository::session_skills(const std::string& id,const std::string& workspace){
+    session(id);SessionSkillState result{{workspace,{}}};validate_skill_selections(result.selections);auto& db=impl_->database;
+    const auto rows=db.execute("SELECT selections_json,revision FROM session_skills WHERE session_id=? AND workspace_id=?",{id,workspace}).rows;
+    if(!rows.empty()){result.selections=skill_selections(text(rows[0][0]));result.revision=integer(rows[0][1]);if(result.selections.workspace_id!=workspace)throw DatabaseError("Saved session skill workspace differs");}
+    result.editable=db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused') UNION ALL SELECT id FROM context_idle_owners WHERE session_id=? AND state='active' LIMIT 1",{id,id}).rows.empty();return result;
+}
+SessionSkillState Repository::replace_session_skills(const std::string& id,const SkillSelections& selections,std::int64_t expected){
+    validate_skill_selections(selections);if(expected<0||expected>=9007199254740991LL)throw std::invalid_argument("Invalid session skill revision");
+    const std::set<std::string> selected(selections.ids.begin(),selections.ids.end()),manual(selections.manual_ids.begin(),selections.manual_ids.end());
+    if(selected!=manual)throw std::invalid_argument("User skill replacement requires explicit provenance for every selection");
+    auto& db=impl_->database;Transaction tx(db);const auto previous=session_skills(id,selections.workspace_id);
+    if(!previous.editable)throw Conflict("Session skills cannot change while execution or context maintenance owns the session");
+    if(previous.revision!=expected)throw Conflict("Session skills changed; refresh before editing");
+    const auto source=skill_selections_json(selections);
+    if(expected==0)db.execute("INSERT INTO session_skills VALUES(?,?,?,1)",{id,selections.workspace_id,source});
+    else changed_one(db.execute("UPDATE session_skills SET selections_json=?,revision=revision+1 WHERE session_id=? AND workspace_id=? AND revision=?",{source,id,selections.workspace_id,expected}));
+    auto result=session_skills(id,selections.workspace_id);tx.commit();return result;
 }
 SkillSelections Repository::initialize_run_skills(const std::string& id,const std::string& workspace){
     SkillSelections initial{workspace,{}};validate_skill_selections(initial);auto& db=impl_->database;Transaction tx(db);const auto current=run(id);
