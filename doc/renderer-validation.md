@@ -19,3 +19,12 @@ an installed editor, execute a native backend, call a model or approve effects.
 It does not establish installed-browser or VS Code writing acceptance.
 
 [Exact client evidence](evidence/renderer-callback-validation.json).
+
+Exact revision `14179542b75fb0ef90d02f8b61e8c9f4a07837d2` also passed its
+[hosted client gate](https://github.com/xlang-foundation/xMind/actions/runs/37969986513).
+The returned archive matched GitHub's advertised digest and size. Its receipt,
+43 before/after source hashes, 11 before/after asset hashes and every archived
+asset byte were verified. The extension log contains no swallowed dialog API
+errors. The scope remains synthetic client/controller validation, with no native
+inference or installed writing claim.
+[Hosted evidence](evidence/renderer-callback-hosted.json).
