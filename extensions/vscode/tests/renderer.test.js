@@ -5,6 +5,14 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {JSDOM}=require('jsdom');const {html}=require('../webview');
 function renderer(){
   const dom=new JSDOM(html('fixture-nonce',{source:'https://fixture',css:'fixture.css',marked:'marked.js',purify:'purify.js',script:'chat.js'}),{runScripts:'outside-only'}),posted=[];
+  // JSDOM has no native dialog methods. Model only that browser platform API;
+  // the production handlers and messages remain under test.
+  dom.window.HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};
+  dom.window.HTMLDialogElement.prototype.close=function(){this.removeAttribute('open');this.dispatchEvent(new dom.window.Event('close'));};
+  const callbackErrors=[];
+  dom.window.addEventListener('error',event=>{callbackErrors.push(event.error?.message??event.message);event.preventDefault();});
+  const closeWindow=dom.window.close.bind(dom.window);
+  dom.window.close=()=>{closeWindow();assert.deepEqual(callbackErrors,[],'Renderer event callbacks must not fail silently');};
   dom.window.acquireVsCodeApi=()=>({postMessage:message=>posted.push(message)});
   dom.window.TextDecoder=TextDecoder;
   dom.window.TextEncoder=TextEncoder;
@@ -44,6 +52,7 @@ test('DeepSeek Settings enrollment uses the footer model chooser and saved respo
     const routes=[{id:'deepseek.chat',provider:'deepseek',wire:'chat-completions',discovery:true}];
     r.send({type:'provider-profiles',active:'',profiles:[],routes});
     doc.getElementById('settings').click();
+    assert.equal(doc.getElementById('provider-settings').open,true,'Settings must actually reach the dialog platform API');
     const route=doc.getElementById('provider-name'),input=doc.getElementById('provider-key');
     assert.equal(route.selectedOptions[0].textContent,'DeepSeek · Chat Completions');
     input.value=key;
@@ -236,9 +245,12 @@ test('incompatible provider history and unavailable saved context explain recove
   }
   r.send({type:'reset-run'});assert.equal(card.hidden,true);
 });
-test('unknown failure reasons do not interpolate untrusted payloads or guess provider causes',()=>{
+test('unknown failure reasons remain safe and DOM callback exceptions invalidate the fixture',()=>{
   const r=renderer(),doc=r.dom.window.document;r.send({type:'event',event:{kind:'run.failed',data:{reason:'<img onerror=fixtureAttack()>',status:'401'}}});
   const card=doc.getElementById('run-failure');assert.match(card.textContent,/Execution failed/);assert.ok(!card.textContent.includes('401'));assert.equal(card.querySelector('img'),null);
+  r.dom.window.close();
+  const broken=renderer();broken.dom.window.document.getElementById('provider-settings').showModal=()=>{throw new Error('Synthetic callback failure');};broken.dom.window.document.getElementById('settings').click();
+  assert.throws(()=>broken.dom.window.close(),/Renderer event callbacks must not fail silently/,'An actual DOM callback exception must invalidate the fixture instead of becoming a green test');
 });
 test('recorded provider identifiers render without raw error messages or unknown fields',()=>{
   const r=renderer(),doc=r.dom.window.document;
