@@ -133,7 +133,7 @@ if(WIN32)
   target_link_libraries(agentflow_legacy_owner_process PRIVATE agentflow_core agentflow_provider_transport iphlpapi ws2_32 shell32 wbemuuid ole32 oleaut32)
   target_include_directories(agentflow_workspace PUBLIC include PRIVATE third_party)
   target_link_libraries(agentflow_workspace PRIVATE bcrypt agentflow_mcp_wire yaml-cpp::yaml-cpp re2::re2 agentflow_file_patch)
-  add_library(agentflow_edits STATIC src/edit_executor.cpp src/create_executor.cpp src/patch_file_executor.cpp src/patch_executor.cpp)
+  add_library(agentflow_edits STATIC src/edit_executor.cpp src/create_executor.cpp src/patch_file_executor.cpp src/patch_executor.cpp src/patch_tool.cpp)
   target_include_directories(agentflow_edits PUBLIC include PRIVATE third_party)
   target_link_libraries(agentflow_edits PUBLIC agentflow_workspace agentflow_policy PRIVATE agentflow_mcp_wire)
   add_library(agentflow_mcp_effects STATIC src/mcp_tool_registry.cpp)
@@ -666,6 +666,17 @@ if(BUILD_TESTING)
     add_test(NAME native_patch_executor_contract COMMAND agentflow_patch_executor_contract
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_patch_executor_contract PROPERTIES TIMEOUT 60)
+    add_executable(agentflow_patch_tool_contract tests/patch_tool_contract.cpp)
+    target_include_directories(agentflow_patch_tool_contract PRIVATE third_party)
+    target_link_libraries(agentflow_patch_tool_contract PRIVATE agentflow_edits)
+    if(MSVC)
+      target_compile_options(agentflow_patch_tool_contract PRIVATE /utf-8)
+    endif()
+    add_custom_command(TARGET agentflow_patch_tool_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_patch_tool_contract>")
+    add_test(NAME native_patch_tool_contract COMMAND agentflow_patch_tool_contract
+      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+    set_tests_properties(native_patch_tool_contract PROPERTIES TIMEOUT 60)
     add_executable(agentflow_approved_edit_http_fixture tests/approved_edit_http_fixture.cpp)
     target_include_directories(agentflow_approved_edit_http_fixture PRIVATE third_party)
     target_link_libraries(agentflow_approved_edit_http_fixture PRIVATE agentflow_edits agentflow_http)
@@ -767,6 +778,10 @@ if(BUILD_TESTING)
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_edit_http_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
       set_tests_properties(native_agent_edit_http_contract PROPERTIES TIMEOUT 60)
+      add_test(NAME native_agent_patch_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_patch_http_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      set_tests_properties(native_agent_patch_http_contract PROPERTIES TIMEOUT 90)
       add_test(NAME native_agent_mcp_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_mcp_http_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>" "$<TARGET_FILE:xmind_admin>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")

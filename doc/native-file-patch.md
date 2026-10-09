@@ -119,18 +119,48 @@ The batch contract source covers complete mixed-operation batches, shared folder
 validation before the first effect, identity reuse, partial denial, cancellation,
 stale later files, externally replaced owned folders and exact per-file receipts
 across an xlang3/SQLite restart. It independently reads actual files. These checks
-have not executed for this candidate. Batch-wide model guidance delivery and
-client live acceptance remain separate requirements. The shared client now
+have not executed for this candidate. Client live acceptance remains a separate
+requirement. The shared client now
 renders native per-file patch review and opens revalidated read-only comparisons;
-its complete frozen adapter gate passed 221/41 contracts. It has not been
+its latest complete frozen adapter gate passed 222/41 contracts. It has not been
 installed or exercised with a native model-generated patch.
 [Client implementation and limits](patch-review.md).
 
-These increments do not expose a model tool or filesystem endpoint and perform
-no model-invokable filesystem effects. Delivery still requires model-call input and guidance
-integration, recorded
-partial or uncertain outcomes, recovery without replay, model/graph integration,
-CLI/browser/VS Code review and real-provider acceptance. A multi-file patch must
+## Native model and graph integration candidate
+
+The source now advertises `apply_patch` for approval-enabled ordinary agents and
+the sealed `workspace.coding` preset. Read-only agents/inspection children do not
+receive it. Its strict arguments are `patch_text` and optional `create_parents`;
+model-supplied authority fields and duplicate JSON fields are rejected. The
+adapter discovers every source/destination guidance scope before planning an
+approval. Undelivered guidance returns the existing
+`repository_instructions_required` result without a proposal or requested effect.
+
+Before each file, including files sharing newly created parent folders, the
+adapter checks the currently applicable scopes against guidance already supplied
+to the model. Moves bind both source and destination conditions into one durable
+approval, rechecked after approval. A newly approved `AGENTS.md` that affects a
+later file stops the batch with its actual earlier success preserved; that new
+guidance must reach another model request before a fresh call and approval.
+Partial/uncertain reports are recorded as failed tool outcomes, not full success.
+
+Declared direct graph patch steps use the same native adapter and per-file
+approvals, with guidance captured from all discovered scopes before proposal.
+An incomplete patch fails its graph node with the actual partial report. A report
+over the graph's 64 KiB output bound fails after effects and retains its patch id
+and authoritative per-file journals; it cannot be mistaken for full completion.
+
+The complete native manifest now contains **103 contracts**. New contract source
+covers strict input and guidance delivery, approval-time changes, sibling-folder
+refresh, own-guidance partial results, agent/CLI mixed effects and independent
+file hashes, denial, read-only catalogue and exact SQLite history across restart.
+The existing graph contract now also covers direct patch approvals and denial.
+Provider replies/usage and controller fixture decisions are synthetic. These new
+C++ paths have not yet compiled or executed; the HTTP peer passed a Node syntax
+check only. No installed or real-provider patch acceptance is claimed.
+
+Delivery still requires a passing complete native gate, artifact verification,
+installed CLI/browser/VS Code review and real-provider acceptance. A multi-file patch must
 report actual outcomes for each file; it must not claim an atomic filesystem
 transaction or hide earlier effects when a later file fails. Fuzzy matching and
 full upstream patch semantics remain explicit parity gaps.

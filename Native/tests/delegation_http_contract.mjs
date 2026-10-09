@@ -24,7 +24,7 @@ const peer=createServer((request,response)=>{
    ++requests;assert.equal(request.method,'POST');assert.equal(request.url,'/chat');assert.equal(request.headers.authorization,'Bearer '+key);
    const body=JSON.parse(source);assert.equal(body.model,'synthetic-delegation-model');assert.equal(body.stream_options.include_usage,true);
    const objective=body.messages.findLast(value=>value.role==='user').content,leaf=objective.includes('[leaf-left]')?'left':objective.includes('[leaf-right]')?'right':undefined;
-   const names=body.tools.map(value=>value.function.name);assert.deepEqual(names,leaf?reads:[...reads,'edit_file','create_file','delegate_tasks','plan_tasks','revise_plan','inspect_plan']);
+   const names=body.tools.map(value=>value.function.name);assert.deepEqual(names,leaf?reads:[...reads,'edit_file','create_file','apply_patch','delegate_tasks','plan_tasks','revise_plan','inspect_plan']);
    const foreign=objective==='Scope-only foreign-root response';calls.set(leaf||(foreign?'foreign':'parent'),(calls.get(leaf||(foreign?'foreign':'parent'))||0)+1);const tool=body.messages.findLast(value=>value.role==='tool');let delta,finish;
    if(foreign){assert.equal(tool,undefined);delta={content:'Synthetic scope-only foreign-root response'};finish='stop';}
    else if(leaf){

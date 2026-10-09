@@ -2,6 +2,7 @@
 #include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/create_executor.hpp"
+#include "agentflow/patch_tool.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/schema_worker.hpp"
 #include "agentflow/agent_authority.hpp"
@@ -75,7 +76,7 @@ void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const
             if(node.mcp){
                 const auto found=std::find_if(settings_.mcp_servers.begin(),settings_.mcp_servers.end(),[&](const auto& server){return server.id==node.mcp->server_id;});
                 if(found==settings_.mcp_servers.end() || !found->enabled || found->revision!=node.mcp->config_revision)throw GraphMcpUnavailable("Graph MCP server binding is unavailable or has changed");
-            }else{const bool read=std::find(reads.begin(),reads.end(),node.tool)!=reads.end();const bool write=settings_.approved_edits && (node.tool=="edit_file" || node.tool=="create_file");if(!read && !write && !(node.tool=="run_process" && process_))throw std::invalid_argument("Graph tool is not registered for direct execution");}
+            }else{const bool read=std::find(reads.begin(),reads.end(),node.tool)!=reads.end();const bool write=settings_.approved_edits && (node.tool=="edit_file" || node.tool=="create_file" || node.tool=="apply_patch");if(!read && !write && !(node.tool=="run_process" && process_))throw std::invalid_argument("Graph tool is not registered for direct execution");}
         }
     }
     if(settings_.context&&agent_count>8)throw GraphContextUnavailable("Context graph agent admission exceeds its shared child limit");
@@ -163,6 +164,22 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
             // graph payload is a graph failure, never a lost or replayed effect.
             if(output.size()>65536)return store_.transition(id,RunState::running,RunState::failed,Json{{"reason","graph_mcp_output_exceeds_limit"},{"operation_id",result.at("operation_id")},{"request_id",result.at("request_id")}}.dump()).get();
             store_.append_event(id,"tool.completed",Json{{"name",name},{"data",result},{"source","graph"}}.dump()).get();return store_.complete_run(id,output).get();
+        }else if(name=="apply_patch"){
+            // A registered direct graph step is controller-declared rather than
+            // model-generated. Capture all discovered scopes before proposal;
+            // later changes still retire the batch and fail this graph node.
+            RepositoryInstructionContext instructions(*workspace_,workspace_->repository_instructions(".",cancel));instructions.prepare(cancel);
+            PatchTool patch(store_,*workspace_,instructions);auto prepared=patch.prepare(source,cancel);
+            if(!prepared){instructions.prepare(cancel);prepared=patch.prepare(source,cancel);}
+            if(!prepared)throw ToolGuidanceChanged("Graph patch guidance changed during preparation");
+            const auto lifetime=shared_context?std::max<std::int64_t>(1,std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now()).count()):settings_.run_timeout.count();
+            const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+lifetime;
+            result=Json::parse(patch.execute(identifier(),id,std::move(*prepared),expiry,cancel));
+            if(result.dump().size()>65536)return store_.transition(id,RunState::running,RunState::failed,Json{{"reason","graph_patch_output_exceeds_limit"},{"patch_id",result.at("patch_id")}}.dump()).get();
+            if(result.at("state")!="succeeded"){
+                store_.append_event(id,"tool.failed",Json{{"name",name},{"data",result},{"source","graph"}}.dump()).get();
+                result["reason"]="graph_patch_incomplete";result["source"]="graph_tool";return store_.transition(id,RunState::running,RunState::failed,result.dump()).get();
+            }
         }else if(name=="edit_file" || name=="create_file" || name=="run_process"){
             const auto args=Json::parse(source);const auto field=name=="run_process"?"workdir":"path";std::string directory=".";
             if(args.contains(field)){if(!args[field].is_string())throw std::invalid_argument("Invalid graph effect scope");directory=args[field].get<std::string>();}else if(name!="run_process")throw std::invalid_argument("Graph file effect requires a path");
@@ -189,6 +206,7 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
     catch(const McpCredentialUnavailable&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_mcp_credential_unavailable"})").get();}
     catch(const GraphMcpUnavailable&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_mcp_configuration_unavailable"})").get();}
     catch(const ToolMutationUncertain&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_file_effect_uncertain"})").get();}
+    catch(const ToolGuidanceChanged&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_tool_guidance_changed"})").get();}
     catch(const ProcessEffectUncertain&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_process_effect_uncertain"})").get();}
     catch(const PermissionCancelled&){return store_.transition(id,RunState::running,RunState::cancelled,R"({"reason":"graph_tool_cancelled"})").get();}
     catch(const ToolCancelled&){return store_.transition(id,RunState::running,RunState::cancelled,R"({"reason":"graph_tool_cancelled"})").get();}

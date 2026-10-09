@@ -3,6 +3,7 @@
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/create_executor.hpp"
+#include "agentflow/patch_tool.hpp"
 #include "agentflow/schema_worker.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/mcp_wire.hpp"
@@ -183,7 +184,7 @@ std::optional<DynamicPlanCapabilities> AgentRunner::execution_capabilities(const
     caps.presets.push_back(inspect);
     if(settings_.approved_edits||process_||std::any_of(settings_.mcp_servers.begin(),settings_.mcp_servers.end(),[](const auto& server){return server.enabled;})){
         auto coding=inspect;coding.id="workspace.coding";coding.readonly=false;
-        if(settings_.approved_edits){coding.tools.push_back("edit_file");coding.tools.push_back("create_file");}
+        if(settings_.approved_edits){coding.tools.push_back("edit_file");coding.tools.push_back("create_file");coding.tools.push_back("apply_patch");}
         if(process_)coding.tools.push_back("run_process");caps.presets.push_back(std::move(coding));
     }
     return caps;
@@ -266,7 +267,7 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     if(instructions.size()>65536)throw ModelRequestCapacityExceeded("Current idle context instructions exceed limits");
     if(!instructions.empty())trusted.messages.push_back({MessageRole::system,std::move(instructions)});
     if(workspace_){trusted.tools=workspace_->definitions();for(auto& definition:SkillContext::definitions())trusted.tools.push_back(std::move(definition));}
-    if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());}
+    if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());trusted.tools.push_back(PatchTool::definition());}
     if(process_)trusted.tools.push_back(process_->definition());
     struct McpRuntime {std::unique_ptr<McpStdioClient> client;std::unique_ptr<McpToolRegistry> registry;};
     std::vector<McpRuntime> peers;std::set<std::string> aliases;for(const auto& definition:trusted.tools)aliases.insert(definition.name);
@@ -434,6 +435,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(workspace_){request.tools=workspace_->definitions();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
+        if(settings_.approved_edits) request.tools.push_back(PatchTool::definition());
         if(process_)request.tools.push_back(process_->definition());
         struct McpRuntime {std::unique_ptr<McpStdioClient> client;std::unique_ptr<McpToolRegistry> registry;};
         std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;Json mcp_bindings=Json::array();
@@ -612,7 +614,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 persistence_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)}}.dump()).get();
                 Json output;bool success=false;
                 try {
-                    bool guidance_ready=true;InstructionPrecondition guidance;
+                    bool guidance_ready=true;InstructionPrecondition guidance;std::optional<PreparedPatch> prepared_patch;
                     if(repository_context&&call.name!="list_skills"&&call.name!="load_skill")guidance_ready=repository_context->skills().ready(token);
                     if(repository_context && (call.name=="read_file" || call.name=="edit_file" || call.name=="create_file" || call.name=="list_files" || call.name=="run_process")){
                         Json args;try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid scoped tool JSON");}
@@ -628,6 +630,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     }
                     if(repository_context&&call.name=="load_skill")guidance_ready=repository_context->ready(repository_context->skills().activation_directory(call.arguments_json,token),token);
                     if(repository_context&&mcp_tools.contains(call.name)){guidance_ready=guidance_ready&&repository_context->ready(".",token);if(guidance_ready)guidance=repository_context->precondition(".");}
+                    if(call.name=="apply_patch"&&settings_.approved_edits&&repository_context){prepared_patch=PatchTool(persistence_,*workspace_,*repository_context).prepare(call.arguments_json,token);guidance_ready=prepared_patch.has_value()&&guidance_ready;}
                     if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}}}};}
                     else if(call.name=="list_skills"&&repository_context){try{if(mcp_compact_object(call.arguments_json)!="{}")throw std::invalid_argument("Skill listing takes no arguments");}catch(const McpProtocolError&){throw std::invalid_argument("Invalid skill listing arguments");}output=Json::parse(repository_context->skills().catalogue_json(token));}
                     else if(call.name=="load_skill"&&repository_context){const auto base_bytes=settings_.instructions.size()+(settings_.instruction_policy.instructions.empty()?0:instruction_prefix.size()+settings_.instruction_policy.instructions.size());output=Json::parse(repository_context->activate_skill(call.arguments_json,base_bytes,token));}
@@ -637,6 +640,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     } else if(call.name=="create_file" && settings_.approved_edits) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(CreateExecutor(persistence_,*workspace_).invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance)));
+                    } else if(call.name=="apply_patch"&&settings_.approved_edits&&repository_context&&prepared_patch){
+                        const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
+                        output=Json::parse(PatchTool(persistence_,*workspace_,*repository_context).execute(operation_id(),id,std::move(*prepared_patch),expiry,token));
                     } else if(call.name=="run_process" && process_) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(process_->invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance)));
@@ -647,7 +653,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance)));
                     } else output=Json::parse(workspace_->invoke(call.name,call.arguments_json,token));
-                    success=guidance_ready;
+                    success=guidance_ready&&(call.name!="apply_patch"||output.value("state",std::string{})=="succeeded");
                 }
                 catch(const PermissionCancelled&) {throw;}
                 catch(const RootBudgetExhausted&){output={{"error",{{"code","delegation_budget_exhausted"},{"message","No additional children were admitted; the root execution allowance is exhausted"}}}};}

@@ -5,7 +5,7 @@
 namespace agentflow {
 using Json=nlohmann::json;
 std::string PatchExecutor::execute(std::string patch_id,std::string run,WorkspacePatchPlan plan,
-    std::int64_t expiry,std::stop_token cancel,std::vector<InstructionPrecondition> guidance){
+    std::int64_t expiry,std::stop_token cancel,std::vector<InstructionPrecondition> guidance,GuidanceRefresh refresh_guidance){
     if(plan.workspace_id!=workspace_.identity())throw ToolAccessDenied("Patch batch belongs to another workspace");
     if(plan.files.empty()||plan.files.size()>128)throw std::invalid_argument("Invalid patch batch size");
     if(guidance.empty())guidance.resize(plan.files.size());if(guidance.size()!=plan.files.size())throw std::invalid_argument("Patch guidance count differs");
@@ -23,7 +23,7 @@ std::string PatchExecutor::execute(std::string patch_id,std::string run,Workspac
         auto spec=file_executor.proposal(patch_id+"-"+std::to_string(index),run,plan.files[index],{patch_id,index,plan.files.size(),manifest_source},guidance[index]);
         if(spec.arguments_json.size()>8*1024*1024-encoded_bytes)throw std::invalid_argument("Encoded patch batch review exceeds bounds");encoded_bytes+=spec.arguments_json.size();
     }
-    std::vector<WorkspaceDirectoryBinding> owned_directories;
+    std::vector<WorkspaceDirectoryBinding> owned_directories;std::size_t reviewed_bytes=0;
     auto owned=[&](const std::string& path)->const WorkspaceDirectoryBinding*{for(const auto& binding:owned_directories)if(WorkspaceTools::same_relative_path(binding.path,path))return &binding;return nullptr;};
     auto refresh_creation=[&](WorkspaceCreatePlan& creation){
         if(creation.create_directories.empty())return;
@@ -47,6 +47,10 @@ std::string PatchExecutor::execute(std::string patch_id,std::string run,Workspac
         const auto id=patch_id+"-"+std::to_string(index);
         try{
             std::visit([&](auto& file){using T=std::decay_t<decltype(file)>;if constexpr(std::is_same_v<T,WorkspaceCreatePlan>)refresh_creation(file);else if constexpr(std::is_same_v<T,WorkspaceMovePlan>)refresh_creation(file.destination);},plan.files[index]);
+            if(refresh_guidance)guidance[index]=refresh_guidance(index,plan.files[index],cancel);
+            const auto reviewed=file_executor.proposal(id,run,plan.files[index],{patch_id,index,plan.files.size(),manifest_source},guidance[index]);
+            if(reviewed.arguments_json.size()>8*1024*1024-reviewed_bytes)throw std::invalid_argument("Refreshed patch review exceeds the aggregate bound");
+            reviewed_bytes+=reviewed.arguments_json.size();
             // Refreshed parents are disclosed in a new immutable per-file
             // proposal. Original requested paths/content remain in the manifest.
             (void)file_executor.execute(id,run,plan.files[index],{patch_id,index,plan.files.size(),manifest_source},expiry,cancel,guidance[index]);

@@ -625,3 +625,10 @@ test('malformed patch identity, missing batch manifest, absence, hashes and dest
   const item=patchFixture('move'),plan=JSON.parse(item.arguments_json);plan.destination_path='source.txt';item.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[item]});assert.match(doc.getElementById('scroll').textContent,/malformed/);assert.ok(!r.posted.some(message=>message.type==='decide'||message.type==='review'));
  }finally{r.dom.window.close();}
 });
+
+test('patch move review discloses both guidance scopes and rejects unbound scope metadata',()=>{
+ const r=renderer(),doc=r.dom.window.document;try{
+  const item=patchFixture('move'),plan=JSON.parse(item.arguments_json);plan.repository_guidance={version:1,directory:'src',scope_directories:['src','dest'],sources:[]};item.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[item]});assert.match(doc.getElementById('scroll').textContent,/Source scope: src/);assert.match(doc.getElementById('scroll').textContent,/Destination scope: dest/);assert.ok([...doc.querySelectorAll('#scroll button')].some(button=>button.textContent==='Allow move'&&!button.disabled));
+  plan.repository_guidance.scope_directories=['foreign','dest'];item.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[item]});assert.ok([...doc.querySelectorAll('#scroll button')].find(button=>button.textContent==='Allow move').disabled);assert.ok(!r.posted.some(message=>message.type==='decide'));
+ }finally{r.dom.window.close();}
+});

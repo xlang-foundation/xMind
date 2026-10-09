@@ -223,8 +223,11 @@ function operations(items){
       try{
         const proposal=JSON.parse(item.arguments_json),guidance=item.tool==='mcp_tool'?proposal.instructions:proposal.repository_guidance;
         if(guidance!==undefined){
-          if(!guidance || guidance.version!==1 || typeof guidance.directory!=='string' || !guidance.directory || guidance.directory.length>4096 || !Array.isArray(guidance.sources) || guidance.sources.length>33 || (guidance.skills!==undefined&&(!Array.isArray(guidance.skills)||guidance.skills.length>8)))throw new Error('Malformed guidance binding');
+          const multiScope=guidance?.scope_directories!==undefined;
+          if(multiScope&&(item.tool!=='patch_file'||!Array.isArray(guidance.scope_directories)||guidance.scope_directories.length!==2||guidance.scope_directories.some(directory=>typeof directory!=='string'||!directory||directory.length>4096)||guidance.scope_directories[0]!==guidance.directory))throw new Error('Malformed patch guidance scopes');
+          if(!guidance || guidance.version!==1 || typeof guidance.directory!=='string' || !guidance.directory || guidance.directory.length>4096 || !Array.isArray(guidance.sources) || guidance.sources.length>(multiScope?66:33) || (guidance.skills!==undefined&&(!Array.isArray(guidance.skills)||guidance.skills.length>8)))throw new Error('Malformed guidance binding');
           const lines=['Directory: '+guidanceLiteral(guidance.directory)];
+          if(multiScope)lines.push('Source scope: '+guidanceLiteral(guidance.scope_directories[0])+'\nDestination scope: '+guidanceLiteral(guidance.scope_directories[1]));
           const sourceLine=(source,skill)=>{
             if(!source || typeof source.path!=='string' || !source.path || source.path.length>8192 || typeof source.file_id!=='string' || !source.file_id || typeof source.workspace_id!=='string' || source.workspace_id!==item.workspace_id || typeof source.content_sha256!=='string' || !/^[a-f0-9]{64}$/.test(source.content_sha256) || !Number.isSafeInteger(source.byte_count) || source.byte_count<0 || source.byte_count>16384 || (skill&&(typeof source.id!=='string'||!source.id||source.id.length>256)))throw new Error('Malformed guidance source');
             return (skill?'Skill: '+guidanceLiteral(source.id)+'\n':'')+guidanceLiteral(source.path)+' · '+source.byte_count+' bytes\nSHA-256: '+source.content_sha256;

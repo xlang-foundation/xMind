@@ -1,6 +1,6 @@
 # Current native validation
 
-The shared patch-review client candidate passed **221 extension / 41 browser**
+The shared patch-review client candidate passed **222 extension / 41 browser**
 contracts with all 44 input and 12 generated asset hashes unchanged. It renders
 all four per-file patch actions and uses revalidated read-only comparisons;
 malformed proposals cannot receive an Allow through either adapter. These are
@@ -11,13 +11,14 @@ The earlier native patch primitive source `a7f484a` compiled on Windows but its
 complete gate failed: **97/99 contracts passed**, with failures in workspace
 move effects and the parallel delegation deadline. New diagnostics preserve
 the move phase/Win32 code and actual parent/child state on timeout. Current
-101-contract candidate execution remains pending; no patch release is accepted.
+103-contract candidate compilation/execution remains pending; no patch release is accepted.
 [Exact failed job](https://github.com/xlang-foundation/xMind/actions/runs/37974972815).
 
 Native general-patch parsing/preparation and actual-workspace planning are source increments, with a new
-contracts included in the complete 101-contract native manifest. Compilation and
-execution are pending the isolated workflow. No patch model tool or filesystem
-effects are exposed by these increments. Expanded filesystem tests cover source/
+contracts included in the complete 103-contract native manifest. Compilation and
+execution are pending the isolated workflow. The new model adapter is connected
+in source to approval-enabled agents/coding children and declared graph steps;
+it has not been installed or accepted by a native gate. Expanded filesystem tests cover source/
 parent identities, destination absence, private/link paths, Unicode collisions,
 overlapping targets and aggregate review bounds. Approval/effect integration remains
 required. [Implementation and remaining delivery](native-file-patch.md).
@@ -26,8 +27,7 @@ Backend-only deletion and move effects are implemented in source, with exclusive
 handle/snapshot checks, no-overwrite rename, post-effect verification and explicit
 uncertainty handling. Disposable-filesystem contract source covers actual delete,
 rename/content update, missing folders and rejected stale/private/link operations.
-Compilation and execution remain pending. No model tool, approval journal or
-installed patch acceptance is claimed.
+Compilation and execution remain pending. No installed patch acceptance is claimed.
 
 The new per-file patch executor now binds immutable batch/file proposals to the
 native permission waiter, claim and outcome journal. Contract source covers actual
@@ -38,8 +38,12 @@ source, with all-proposal preflight, full requested manifests, observed partial
 outcomes and verified reuse of this batch's created parent directories. New
 contract source covers mixed effects, shared folders, denial/cancellation, stale
 later files, replaced directories and restart without replay. These tests have
-not run for the candidate. Model input/guidance integration and client patch
-delivery remain incomplete.
+not run for the candidate. Model input/guidance and graph integration are now
+source candidates, with new native/HTTP/CLI contract source and expanded graph
+checks. Move approvals bind source/destination guidance; later files refresh
+scope delivery before another proposal. Own `AGENTS.md` changes preserve a
+partial outcome and require a fresh model turn. Native execution and installed
+client delivery remain incomplete.
 
 The shared sidebar approval-review candidate passed the complete isolated
 **217 extension / 39 browser** gate. A persistent review notice and bounded

@@ -53,7 +53,7 @@ const peer=createServer((request,response)=>{
   const raw=Buffer.concat(chunks).toString('utf8');assert.ok(!raw.includes(key));const body=JSON.parse(raw);assert.equal(body.model,'synthetic-dynamic-engine');assert.equal(body.stream,true);
   const names=body.tools.map(tool=>tool.name).sort(),source=content(body.messages),parent=names.includes('plan_tasks');
   const readTools=['read_repository_instructions','read_file','list_files','search_files','glob_files','list_skills','load_skill'];
-  if(parent)assert.deepEqual(names,[...readTools,'edit_file','create_file','plan_tasks','revise_plan','inspect_plan'].sort(),'Ordinary Agent planning retains existing exact coding authority');
+  if(parent)assert.deepEqual(names,[...readTools,'edit_file','create_file','apply_patch','plan_tasks','revise_plan','inspect_plan'].sort(),'Ordinary Agent planning retains existing exact coding authority');
   const owner=parent?(['main','final-human','cancel','expiry'].find(label=>source.includes('fixture-'+label+'-parent'))):(['left','right','code','verify'].find(label=>source.includes('fixture-main-'+label+':')));
   assert.ok(owner,'Unknown actual execution objective');const count=(counts.get(owner)??0)+1;counts.set(owner,count);requests.push({owner,count});
   const last=results(body.messages).at(-1),signature=(parent?'opaque-parent-':'opaque-child-')+owner+'-'+count;
@@ -84,7 +84,7 @@ const peer=createServer((request,response)=>{
    held.push({response,wire:start(7)+thought(signature)+text('Synthetic final human-only continuation completed without a child.')+terminal('end_turn',3)});return;
   }
   assert.ok(!names.some(name=>['plan_tasks','revise_plan','inspect_plan','delegate_tasks'].includes(name)),'Native depth-one child cannot delegate or plan');
-  assert.deepEqual(names,(owner==='code'?[...readTools,'edit_file','create_file']:readTools).sort(),'Registered preset exposes exact inherited or read-only authority');
+  assert.deepEqual(names,(owner==='code'?[...readTools,'edit_file','create_file','apply_patch']:readTools).sort(),'Registered preset exposes exact inherited or read-only authority');
   const input={left:11,right:13,code:19,verify:23}[owner],output={left:3,right:4,code:5,verify:7}[owner];
   if(count===1){
    assert.equal(last,undefined);
