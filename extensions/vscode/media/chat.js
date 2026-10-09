@@ -5,6 +5,16 @@ let renameCapability=false,renameSnapshot;
 let currentWorkspaceRoot;
 const operationSections=new Map();
 const operationRows=new Map();
+let pendingOperations=[];
+function pendingApprovals(){return pendingOperations.filter(item=>Date.now()<item.expires_unix_ms&&operationRows.get(item.id)?.section.isConnected);}
+function refreshPendingApprovals(){
+  const pending=pendingApprovals(),notice=byId('approval-notice'),label=byId('approval-count');
+  notice.hidden=!pending.length;
+  const text=pending.length?(pending.length===1?'1 approval awaiting review':pending.length+' approvals awaiting review'):'';
+  if(label.textContent!==text)label.textContent=text;
+  return pending.length>0;
+}
+byId('approval-review').onclick=()=>{const item=pendingApprovals()[0];if(item)operationRows.get(item.id).section.scrollIntoView({block:'start',behavior:'auto'});else refreshPendingApprovals();};
 const processStreams=new Map();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
 let skillSnapshot,skillPending=false;
@@ -230,6 +240,8 @@ function operations(items){
     operationExtras(section,item);operationRows.set(item.id,{signature,section});sections.push(section);
   }
   for(const [index,section] of sections.entries())if(container.children[index]!==section)container.insertBefore(section,container.children[index]||null);
+  pendingOperations=items.filter(item=>item.state==='awaiting_approval');
+  refreshPendingApprovals();
 }
 function operationExtras(section,item){
   if(item.tool==='mcp_tool'){
@@ -442,7 +454,7 @@ window.addEventListener('message',event=>{
   const m=event.data;if(!m||typeof m.type!=='string')return;
   const scroll=byId('scroll'),follow=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<80;
   if(m.type==='workspace'){const root=byId('workspace-root');if(root&&typeof m.root==='string'&&m.root.length<=32760&&Array.isArray(m.roots)){currentWorkspaceRoot=m.root;root.textContent='Backend root: '+m.root+(m.roots.length>1?' · active root from '+m.roots.length+' workspace folders':'')+(m.backendChangePending===true?' · Backend changes pending; using saved backend':'');root.hidden=false;}}
-  else if(m.type==='workspace-clear'){currentWorkspaceRoot=undefined;const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}const mode=byId('file-mode');if(mode){mode.textContent='';mode.hidden=true;}byId('prompt').value='';}
+  else if(m.type==='workspace-clear'){currentWorkspaceRoot=undefined;operations([]);const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}const mode=byId('file-mode');if(mode){mode.textContent='';mode.hidden=true;}byId('prompt').value='';}
   else if(m.type==='graphs'){const select=byId('workflow');select.replaceChildren();const single=node('option','Agent (default)');single.value='';select.append(single);for(const graph of m.graphs){const option=node('option',graph.id+' · '+graph.node_count+' nodes'+(graph.executable?'':' · unavailable'));option.value=graph.id;option.disabled=!graph.executable;option.dataset.executable=graph.executable?'true':'';option.selected=graph.id===m.selected;select.append(option);}if(!m.selected)select.value='';workflowExecutable=!!m.graphs.find(g=>g.id===m.selected&&g.executable);byId('workflow-picker').hidden=!m.graphs.length;byId('send').disabled=!canExecute()||activeRun||sessionBusy;}
   else if(m.type==='graph-clear')clearGraph();
   else if(m.type==='skills')renderSkills(m);
@@ -466,7 +478,7 @@ window.addEventListener('message',event=>{
     if(displayedPlan&&displayedPlan.run.id!==m.selected)clearPlan();planControls();if(displayedGraph&&displayedGraph.run.id!==m.selected)clearGraph();
     byId('send').disabled=!canExecute()||activeRun||sessionBusy;
   }
-  else if(m.type==='reset-run'){clearPlan();resetLive();resetFailure();resetProcessStreams();byId('events').textContent='';renderRunContext();}
+  else if(m.type==='reset-run'){operations([]);clearPlan();resetLive();resetFailure();resetProcessStreams();byId('events').textContent='';renderRunContext();}
   else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();byId('events').textContent='';}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data);}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
@@ -498,5 +510,7 @@ window.addEventListener('message',event=>{
   }
   else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);skillControls();byId('send').disabled=!canExecute()||activeRun||sessionBusy;byId('cancel').hidden=!activeRun;}
   else if(m.type==='error'){for(const row of graphRows.values())if(row.button)row.button.disabled=false;for(const row of planRows.values())row.submitting=false;const graphResume=byId('graph-resume');if(graphResume)graphResume.disabled=displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true;const resume=byId('plan-resume');if(resume)delete resume.dataset.submitting;planControls();if(displayedContext)contextView(displayedContext);byId('status').textContent=m.text;if(settings.open){byId('settings-status').textContent=m.text;byId('settings-save').disabled=false;}}
-  if(follow)scroll.scrollTop=scroll.scrollHeight;
+  // Keep review position stable while backend-owned effects await a decision.
+  // The notice navigates to the proposal; it never sends an approval itself.
+  if(follow&&!refreshPendingApprovals())scroll.scrollTop=scroll.scrollHeight;
 });api.postMessage({type:'ready'});

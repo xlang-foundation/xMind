@@ -1,5 +1,12 @@
 # Current native validation
 
+The shared sidebar approval-review candidate passed the complete isolated
+**217 extension / 39 browser** gate. A persistent review notice and bounded
+activity log address the installed test's offscreen proposal; pending review
+suppresses automatic scroll movement. Run/workspace reset clears old controls.
+These are source/DOM checks; this renderer has not been installed or visually
+accepted. [Behavior and validation scope](sidebar-approval-review.md).
+
 The native regex-search implementation at exact source `5c8c918` passed its
 [isolated Windows workflow](https://github.com/xlang-foundation/xMind/actions/runs/37968627266):
 all 98 native contracts in 274.50 seconds, with exact expected/registered/passed

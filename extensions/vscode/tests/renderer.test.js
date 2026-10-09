@@ -392,6 +392,36 @@ test('command output metrics require exact encoded retained bytes and safe drain
   }
   const malformed={...result,stderr:{...result.stderr,retained_bytes:3}};r.send({type:'history',history:[{role:'tool',data:{content:JSON.stringify(malformed)}}]});assert.equal(doc.querySelector('.process-result'),null);assert.equal(doc.querySelector('#history pre').textContent,JSON.stringify(malformed));r.dom.window.close();
 });
+test('pending approval remains reachable without streamed activity moving review or granting permission',()=>{
+ const r=renderer(),doc=r.dom.window.document;
+ try{
+  const operation={id:'pending-create',tool:'create_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'hello.py',before_content:'',after_content:'print("Hello")\n'}),result_json:'{}'};
+  const scroll=doc.getElementById('scroll');let position=400,writes=0;
+  Object.defineProperties(scroll,{scrollHeight:{get:()=>500},clientHeight:{get:()=>100},scrollTop:{get:()=>position,set:value=>{writes++;position=value;}}});
+  r.send({type:'operations',operations:[operation]});
+  const notice=doc.getElementById('approval-notice'),card=doc.querySelector('#operations .operation'),allow=[...card.querySelectorAll('button')].find(b=>b.textContent==='Allow creation');
+  assert.equal(notice.closest('main'),null);assert.equal(notice.hidden,false);assert.equal(doc.getElementById('approval-count').textContent,'1 approval awaiting review');
+  doc.getElementById('events').closest('details').open=true;allow.focus();const initial=r.posted.length;
+  for(let seq=1;seq<=30;seq++)r.send({type:'event',event:{kind:'model.tool_delta',seq,data:{arguments:'fixture streamed activity'}}});
+  r.send({type:'status',text:'running'});r.send({type:'operations',operations:[{...operation}]});
+  assert.equal(writes,0,'Pending review must not be pushed to the end of the activity log');assert.equal(doc.activeElement,allow);assert.equal(doc.querySelector('#operations .operation'),card);assert.equal(r.posted.length,initial);
+  let target;card.scrollIntoView=options=>{target={card,options};};doc.getElementById('approval-review').click();assert.equal(target.card,card);assert.equal(target.options.block,'start');assert.equal(r.posted.length,initial,'Review navigation cannot approve or dispatch an operation');assert.equal(allow.disabled,false);
+ }finally{r.dom.window.close();}
+});
+
+test('approval notice follows current unexpired backend proposals and retires on run or workspace changes',()=>{
+ const r=renderer(),doc=r.dom.window.document;
+ try{
+  const item={id:'pending',tool:'create_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,arguments_json:'{"path":"hello.py","before_content":"","after_content":"hello"}',result_json:'{}'};
+  const notice=doc.getElementById('approval-notice');assert.equal(notice.hidden,true);
+  r.send({type:'operations',operations:[item,{...item,id:'second'},{...item,id:'expired',expires_unix_ms:1},{...item,id:'uncertain',state:'uncertain'}]});assert.equal(doc.getElementById('approval-count').textContent,'2 approvals awaiting review');
+  const now=r.dom.window.Date.now;r.dom.window.Date.now=()=>item.expires_unix_ms+1;
+  try{const posted=r.posted.length;doc.getElementById('approval-review').click();assert.equal(notice.hidden,true);assert.equal(r.posted.length,posted);}finally{r.dom.window.Date.now=now;}
+  for(const type of ['reset-run','workspace-clear']){r.send({type:'operations',operations:[item]});assert.equal(notice.hidden,false);r.send({type});assert.equal(notice.hidden,true);assert.equal(doc.querySelectorAll('#operations button').length,0);}
+  r.send({type:'operations',operations:[item]});r.send({type:'operations',operations:[{...item,state:'succeeded'}]});assert.equal(notice.hidden,true);
+ }finally{r.dom.window.close();}
+});
+
 test('new-file review distinguishes absence, previews exact content and never retries uncertainty',()=>{
   const r=renderer(),doc=r.dom.window.document;const operation={id:'fixture-create',tool:'create_file',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'new.cpp',parent_id:'fixture-parent',before_exists:false,before_content:'',after_content:'actual proposed source\n'}),result_json:'{}'};
   r.send({type:'operations',operations:[operation]});assert.equal(doc.querySelector('#operations .after').textContent,'actual proposed source\n');assert.match(doc.querySelector('#operations').textContent,/New file/);

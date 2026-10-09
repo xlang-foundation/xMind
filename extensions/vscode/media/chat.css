@@ -36,3 +36,7 @@ input{font:inherit;color:var(--vscode-input-foreground);background:var(--vscode-
 .skill-row>div{flex:1;min-width:0;overflow-wrap:anywhere}
 .skill-row button{flex:none}
 .skill-row .hint{margin-top:3px}
+.approval-notice{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 12px;border-bottom:1px solid var(--vscode-panel-border);color:var(--vscode-foreground);font-size:11px}
+.approval-notice[hidden]{display:none}
+.approval-notice button{flex:none}
+#events{max-height:240px;overflow:auto}
