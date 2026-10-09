@@ -1,5 +1,19 @@
 # Current native validation
 
+The bounded native file-reader candidate passed **98 native contracts in
+207.52 seconds**, with all 633 mapped source inputs unchanged and exact
+expected/registered/passed manifests matched. **215 extension / 39 browser**
+contracts passed with unchanged source and asset bytes. Actual OpenAI
+`gpt-6.1-sol` inference read the last two lines of a 4.29 MB file through the
+native tool loop, quoted the exact Unicode text and retained its complete
+history across an embedded-xlang3 SQLite restart. The reader made no mutation
+operations. The initial live harness incorrectly asserted execution readiness
+before provider/model activation; that failure remains recorded.
+This candidate was not installed over the pending VS Code migration.
+Directory/media paging, omitted long-line suffix recovery and full coding-tool
+parity remain incomplete. [Behavior and scope](native-file-pages.md),
+[exact evidence](evidence/native-file-pages-local.json).
+
 Post-stop publication rollback and operator recovery passed **98 native
 contracts in 205.33 seconds**, with 631 inputs unchanged, plus **198 extension /
 39 browser tests**. The real source process exits before a deferred foreign-key

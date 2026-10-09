@@ -211,6 +211,69 @@ std::string WorkspaceTools::directory_identity(const std::string& input,std::sto
 WorkspaceFile WorkspaceTools::read_file(const std::string& input,std::stop_token cancel) const {
     auto result=read_snapshot(input,false,cancel);return {std::move(result.path),std::move(result.content)};
 }
+WorkspaceFilePage WorkspaceTools::read_file_page(const std::string& input,std::size_t offset,std::size_t limit,std::stop_token cancel) const {
+    constexpr std::size_t scan_limit=64*1024*1024,page_limit=50*1024,line_limit=2000;
+    if(!offset||offset>scan_limit||!limit||limit>2000)throw std::invalid_argument("Invalid read page bounds");
+    check_cancel(cancel);const auto relative=relative_path(input),workspace=identity();
+    Handle file(CreateFileW(impl_->path(relative).c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN,nullptr));
+    impl_->verify(file.value);BY_HANDLE_FILE_INFORMATION info{};
+    if(!GetFileInformationByHandle(file.value,&info)||GetFileType(file.value)!=FILE_TYPE_DISK||(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Expected a regular workspace file");
+    if(info.nNumberOfLinks!=1)throw ToolAccessDenied("Hard-linked files require a separate explicit policy");
+    if(info.nFileSizeHigh||info.nFileSizeLow>scan_limit)throw ToolFileError("File exceeds the 64 MiB paged text limit");
+    // FILE_SHARE_READ excludes concurrent writers/deletion while this verified
+    // handle is used. UTF-8 validation spans OS read buffers and skipped/clipped
+    // lines; no byte cut can turn a partial code point into valid output.
+    const auto json_cost=[](std::string_view text){std::size_t size=0;for(const unsigned char byte:text)size+=byte<32?6:(byte=='"'||byte=='\\'?2:1);return size;};
+    WorkspaceFilePage result;result.path=relative;result.offset=offset;
+    std::size_t budget=256+json_cost(relative),line=1,characters=0,scanned=0;
+    std::string text,sequence;bool line_present=false,clipped=false,done=false;
+    unsigned remaining=0;std::uint32_t code=0,minimum=0;
+    const auto finish_line=[&](bool newline){
+        if(remaining)throw ToolFileError("File is binary or not UTF-8 text");
+        if(line>=offset){
+            const auto cost=json_cost(text)+(newline?6:0)+24;
+            if(result.lines_read>=limit||budget+cost>page_limit){
+                if(!result.lines_read)throw ToolFileError("Read page cannot fit within the output limit");
+                result.next_offset=line;return true;
+            }
+            result.content+=text;if(newline)result.content+='\n';
+            ++result.lines_read;budget+=cost;if(clipped)result.truncated_lines.push_back(line);
+        }
+        ++line;text.clear();characters=0;line_present=false;clipped=false;return false;
+    };
+    std::array<char,8192> buffer{};
+    while(!done){
+        check_cancel(cancel);DWORD count=0;
+        if(!ReadFile(file.value,buffer.data(),static_cast<DWORD>(buffer.size()),&count,nullptr))throw ToolFileError("Cannot read workspace file");
+        if(!count){if(remaining)throw ToolFileError("File is binary or not UTF-8 text");if(line_present)finish_line(false);break;}
+        if(count>scan_limit-scanned)throw ToolFileError("File exceeds the 64 MiB paged text limit");scanned+=count;
+        for(DWORD i=0;i<count;++i){
+            const auto byte=static_cast<unsigned char>(buffer[i]);
+            if(!remaining&&byte=='\n'){if(finish_line(true)){done=true;break;}continue;}
+            line_present=true;
+            if(!remaining){
+                sequence.clear();sequence+=static_cast<char>(byte);
+                if(byte>0&&byte<0x80){code=byte;minimum=0;}
+                else if(byte>=0xc2&&byte<=0xdf){remaining=1;code=byte&0x1f;minimum=0x80;}
+                else if(byte>=0xe0&&byte<=0xef){remaining=2;code=byte&0x0f;minimum=0x800;}
+                else if(byte>=0xf0&&byte<=0xf4){remaining=3;code=byte&0x07;minimum=0x10000;}
+                else throw ToolFileError("File is binary or not UTF-8 text");
+            }else{
+                if((byte&0xc0)!=0x80)throw ToolFileError("File is binary or not UTF-8 text");
+                sequence+=static_cast<char>(byte);code=(code<<6)|(byte&0x3f);--remaining;
+            }
+            if(!remaining){
+                if(code<minimum||code>0x10ffff||(code>=0xd800&&code<=0xdfff))throw ToolFileError("File is binary or not UTF-8 text");
+                if(line>=offset){if(characters<line_limit)text+=sequence;else clipped=true;}
+                ++characters;
+            }
+        }
+    }
+    if(!result.lines_read&&offset!=1)throw ToolFileError("Read offset is beyond the end of the file");
+    check_cancel(cancel);impl_->verify(file.value);
+    if(identity()!=workspace)throw ToolAccessDenied("Workspace identity changed during read page");
+    return result;
+}
 WorkspaceSnapshot WorkspaceTools::snapshot_file(const std::string& input,std::stop_token cancel) const {
     return read_snapshot(input,true,cancel);
 }

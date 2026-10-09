@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,symlink,link,rm,readFile,rename} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,symlink,link,rm,readFile,rename,open} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname} from 'node:path';
 import {execFile} from 'node:child_process';
@@ -33,8 +33,19 @@ try {
     writeFile(join(root,'binary.bin'),Buffer.from([0,255,128])),
     writeFile(join(root,'too-large.txt'),'x'.repeat(1024*1024+1)),
     writeFile(join(root,'long.txt'),'alpha[.]needle '+'中'.repeat(3000)+'\n'),
+    writeFile(join(root,'range-large.txt'),Array.from({length:100000},(_,i)=>`line ${i+1} 中\r\n`).join('')),
+    writeFile(join(root,'range-empty.txt'),''),
+    writeFile(join(root,'range-ending.txt'),'\n\r\nlast'),
+    writeFile(join(root,'range-boundary.txt'),'x'.repeat(8191)+'中\n😀end'),
+    writeFile(join(root,'range-budget.txt'),('\t'.repeat(2000)+'\n').repeat(100)),
+    writeFile(join(root,'range-astral.txt'),'😀'.repeat(2001)+'\n'),
+    ...[[0xc0,0xaf],[0xed,0xa0,0x80],[0xf4,0x90,0x80,0x80],[0xe4,0xb8],[0x61,0x00,0x62]].map((bytes,i)=>writeFile(join(root,`range-invalid-${i}.txt`),Buffer.from(bytes))),
+    writeFile(join(root,'range-invalid-skipped.txt'),Buffer.from([0xff,10,0x61,10])),
+    writeFile(join(root,'range-invalid-clipped.txt'),Buffer.concat([Buffer.from('x'.repeat(3000)),Buffer.from([0xff,10])])),
     writeFile(join(outside,'secret.txt'),'outside marker\n')
   ]);
+  const oversize=await open(join(root,'range-oversize.txt'),'wx');
+  try{await oversize.truncate(64*1024*1024+1);}finally{await oversize.close();}
   // Windows junction creation does not need symlink privileges. Failure fails
   // the contract rather than silently skipping the boundary tests.
   await symlink(outside,join(root,'outside-link'),'junction');

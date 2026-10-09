@@ -4,13 +4,14 @@ xMind is being built as a general-purpose single-agent and graph platform with a
 
 OpenCode 2 is the coding feature reference; LiteLLM is the provider coverage reference. Their implementations are not the engine. See the [architecture](doc/architecture.md), [SVG](doc/architecture.svg), [pinned parity baseline](doc/PARITY.md) and [provider requirements](doc/MODEL_SUPPORT.md).
 
-The latest local checkpoint passed all **98 native contracts**, including
-authenticated legacy stop, preparation and qualified activation against the same
-SQLite database through the managed upgrade adapter. All **198 extension and
-39 browser tests** passed. The installed
-legacy VS Code preview still needs migration
-before approval-based file writing is ready. See [current validation](doc/VALIDATION_STATUS.md)
-and the [replacement protocol](doc/native-owner-replacement.md) for exact scope.
+The latest local checkpoint passed all **98 native, 215 extension and 39 browser
+contracts**. Native `read_file` now supports bounded line pages for files up to
+64 MiB. A real OpenAI run read the exact last two lines of a 4.29 MB file and
+preserved its history across an xlang3/SQLite restart. The installed legacy
+VS Code preview still needs migration before approval-based file writing is
+ready. See [file-page behavior and limits](doc/native-file-pages.md),
+[current validation](doc/VALIDATION_STATUS.md) and the
+[replacement protocol](doc/native-owner-replacement.md) for exact scope.
 
 ## OSS deployment scope
 

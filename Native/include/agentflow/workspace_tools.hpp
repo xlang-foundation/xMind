@@ -12,6 +12,12 @@ struct ToolContentConflict : std::runtime_error {using std::runtime_error::runti
 struct ToolGuidanceChanged : ToolContentConflict {using ToolContentConflict::ToolContentConflict;};
 struct ToolMutationUncertain : std::runtime_error {using std::runtime_error::runtime_error;};
 struct WorkspaceFile {std::string path,content;};
+struct WorkspaceFilePage {
+    std::string path,content;
+    std::size_t offset=1,lines_read=0;
+    std::optional<std::size_t> next_offset;
+    std::vector<std::size_t> truncated_lines;
+};
 struct WorkspaceSnapshot {
     std::string path,content,workspace_id,file_id,content_sha256;
 };
@@ -52,6 +58,10 @@ public:
     // validates both caller spelling and the normalized opened handle path.
     std::string directory_identity(const std::string& path=".",std::stop_token cancel={}) const;
     WorkspaceFile read_file(const std::string& path,std::stop_token cancel={}) const;
+    // A bounded UTF-8 line page, not an edit snapshot. Offsets are 1-based.
+    // Preserves source bytes/line endings except explicitly clipped lines.
+    WorkspaceFilePage read_file_page(const std::string& path,std::size_t offset=1,
+        std::size_t limit=2000,std::stop_token cancel={}) const;
     // Backend edit preconditions captured from one verified file handle.
     // Capturing a snapshot does not grant permission or mutate the file.
     WorkspaceSnapshot snapshot_file(const std::string& path,std::stop_token cancel={}) const;

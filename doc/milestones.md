@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+Native text-file pages support 1-based offsets, up to 2,000 lines, explicit
+Unicode clipping and resumable output bounds for files up to 64 MiB. All
+**98 native contracts passed in 207.52 seconds**, with 633 mapped inputs
+unchanged, alongside **215 extension / 39 browser** contracts. A real
+`gpt-6.1-sol` run read the exact final two lines of a 4.29 MB file, quoted their
+Unicode text and retained the same history after an xlang3/SQLite restart.
+No mutation operations were created. The initial live harness setup failure is
+retained; full read parity and installed/editor writing remain incomplete.
+[Behavior and limits](native-file-pages.md), [exact local evidence](evidence/native-file-pages-local.json).
+
 Workspace-bound editor selection now appends exact, labelled buffer context
 to the existing sidebar draft without a question popup or automatic submission.
 Initial view readiness, stale editor/workspace state and retained-view

@@ -108,6 +108,25 @@ int main(int argc,char** argv) {
         require(tools.read_file("README.TXT").content==read.content,"Normal Windows filename lookup must remain usable");
         require(tools.read_file("sub/inside.txt").content=="alpha[.]needle nested\n","Nested file read");
         require(Json::parse(tools.invoke("read_file",R"({"path":"README.txt"})"))["content"]==read.content,"Typed tool invocation must perform actual read");
+        const auto page=Json::parse(tools.invoke("read_file",R"({"path":"README.txt","offset":2,"limit":1})"));
+        require(page["content"]=="alpha[.]needle \xe4\xb8\xad\r\n"&&page["offset"]==2&&page["lines_read"]==1&&page["next_offset"]==3&&page["has_more"]==true&&page["truncated"]==true&&page["truncated_lines"].empty(),"Pages preserve exact bytes and provide an actual continuation");
+        const auto tail=Json::parse(tools.invoke("read_file",R"({"path":"README.txt","offset":3})"));
+        require(tail["content"]=="last\n"&&tail["lines_read"]==1&&!tail.contains("next_offset")&&tail["has_more"]==false&&tail["truncated"]==false,"A trailing newline must not fabricate an extra line");
+        const auto first=Json::parse(tools.invoke("read_file",R"({"path":"README.txt","limit":1})"));require(first["offset"]==1&&first["content"]=="first\r\n","Limit alone defaults to the first line");
+        const auto empty=tools.read_file_page("range-empty.txt");require(empty.content.empty()&&!empty.lines_read&&!empty.next_offset,"An empty file at offset one is an empty page");
+        const auto endings=tools.read_file_page("range-ending.txt");require(endings.content=="\n\r\nlast"&&endings.lines_read==3&&!endings.next_offset,"Empty lines and unterminated last line remain exact");
+        rejects<ToolFileError>([&]{tools.read_file_page("README.txt",4);});rejects<ToolFileError>([&]{tools.read_file_page("range-empty.txt",2);});
+        const auto large=tools.read_file_page("range-large.txt",99999,2);require(large.content=="line 99999 \xe4\xb8\xad\r\nline 100000 \xe4\xb8\xad\r\n"&&large.lines_read==2&&!large.next_offset,"Native streaming must reach requested lines in a file above one MiB");
+        const auto boundary=tools.read_file_page("range-boundary.txt",2,1);require(boundary.content=="\xf0\x9f\x98\x80" "end"&&boundary.lines_read==1,"UTF-8 validation must span OS read-buffer boundaries even on skipped lines");
+        const auto astral=tools.read_file_page("range-astral.txt",1,1);require(astral.content.size()==8001&&astral.content.back()=='\n'&&astral.truncated_lines==std::vector<std::size_t>{1}&&!astral.next_offset,"Clipping uses complete Unicode characters and reports a clipped EOF line without a false continuation");
+        for(std::size_t i=0;i<astral.content.size()-1;i+=4)require(astral.content.substr(i,4)=="\xf0\x9f\x98\x80","Clipped UTF-8 stays intact");
+        const auto bounded_source=tools.invoke("read_file",R"({"path":"range-budget.txt","limit":2000})");const auto bounded=Json::parse(bounded_source);
+        require(bounded_source.size()<=65536&&bounded["lines_read"].get<std::size_t>()>0&&bounded["lines_read"].get<std::size_t>()<100&&bounded["next_offset"]==bounded["lines_read"].get<std::size_t>()+1&&bounded["truncated_lines"].empty(),"Escaped JSON output must be bounded with a resumable next line");
+        for(const auto* path:{"range-invalid-0.txt","range-invalid-1.txt","range-invalid-2.txt","range-invalid-3.txt","range-invalid-4.txt","range-invalid-clipped.txt","binary.bin","range-oversize.txt"})rejects<ToolFileError>([&]{tools.read_file_page(path);});
+        rejects<ToolFileError>([&]{tools.read_file_page("range-invalid-skipped.txt",2,1);});
+        for(const auto* source:{R"({"path":"README.txt","offset":0})",R"({"path":"README.txt","offset":-1})",R"({"path":"README.txt","offset":1.0})",R"({"path":"README.txt","offset":true})",R"({"path":"README.txt","offset":67108865})",R"({"path":"README.txt","offset":18446744073709551615})",R"({"path":"README.txt","limit":null})",R"({"path":"README.txt","limit":0})",R"({"path":"README.txt","limit":2001})",R"({"path":"README.txt","offset":1,"offset":2})"})rejects<std::invalid_argument>([&]{tools.invoke("read_file",source);});
+        rejects<std::invalid_argument>([&]{tools.invoke("list_files",R"({"path":"sub","offset":1})");});
+        rejects<std::invalid_argument>([&]{tools.read_file_page("README.txt",0);});rejects<std::invalid_argument>([&]{tools.read_file_page("README.txt",1,2001);});
         require(tools.definitions().size()==4,"Available definitions must match implemented tools");
         const auto search=tools.search_files("alpha[.]needle");
         bool root=false,nested=false,preview=false;
@@ -133,6 +152,7 @@ int main(int argc,char** argv) {
         const auto public_listing=Json::parse(tools.invoke("list_files",R"({"path":"sub"})"));for(const auto& entry:public_listing["entries"])require(!WorkspaceTools::backend_private_component(entry["name"].get<std::string>()),"Model listing must use the same private-directory boundary");
         for(const auto* path:{".config/providers.yaml","./.CONFIG/providers.yaml",".config./providers.yaml",".config /providers.yaml","sub/.config/nested.yaml","config-alias/providers.yaml",".agentflow/owner.token","./.AGENTFLOW/owner.token",".agentflow./owner.token",".agentflow /owner.token","sub/.agentflow/owner.token","state-alias/owner.token"}){
             rejects<ToolAccessDenied>([&]{tools.read_file(path);});rejects<ToolAccessDenied>([&]{tools.snapshot_file(path);});rejects<ToolAccessDenied>([&]{tools.fingerprint_file(path);});
+            rejects<ToolAccessDenied>([&]{tools.read_file_page(path,1,1);});
             rejects<ToolAccessDenied>([&]{tools.plan_replacement(path,"api_key","changed");});rejects<ToolAccessDenied>([&]{tools.invoke("read_file",Json{{"path",path}}.dump());});
         }
         for(const auto* path:{".config",".CONFIG",".config.",".config ","sub/.config","config-alias",".agentflow",".AGENTFLOW",".agentflow.",".agentflow ","sub/.agentflow","state-alias"}){
@@ -155,6 +175,7 @@ int main(int argc,char** argv) {
         rejects<ToolAccessDenied>([&]{tools.list_files("outside-link");});
         rejects<ToolAccessDenied>([&]{tools.list_files("outside-link/sub");});
         rejects<ToolAccessDenied>([&]{tools.read_file("hard-link.txt");});
+        for(const auto* path:{"../workspace-other/secret.txt","outside-link/secret.txt","hard-link.txt","README.txt:stream"})rejects<ToolAccessDenied>([&]{tools.read_file_page(path,1,1);});
         rejects<ToolAccessDenied>([&]{tools.read_file("README.txt:stream");});
         rejects<ToolFileError>([&]{tools.read_file("binary.bin");});
         rejects<ToolFileError>([&]{tools.read_file("too-large.txt");});
@@ -170,6 +191,7 @@ int main(int argc,char** argv) {
         rejects<std::invalid_argument>([&]{tools.read_file(std::string("README.txt\0tail",15));});
         std::stop_source cancelled;cancelled.request_stop();
         rejects<ToolCancelled>([&]{tools.read_file("README.txt",cancelled.get_token());});
+        rejects<ToolCancelled>([&]{tools.read_file_page("range-large.txt",99999,2,cancelled.get_token());});
         rejects<ToolCancelled>([&]{tools.snapshot_file("README.txt",cancelled.get_token());});
         rejects<ToolCancelled>([&]{tools.plan_replacement("README.txt","first","changed",1,cancelled.get_token());});
         rejects<ToolCancelled>([&]{tools.search_files("needle",cancelled.get_token());});
