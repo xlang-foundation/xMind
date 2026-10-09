@@ -1,0 +1,336 @@
+{
+  "observedAt": "2026-10-09T22:21:28.387Z",
+  "scope": "Exact new-format VSIX integrity plus actual packaged native server/console execution in a fresh SQLite profile; no old-profile migration, installed extension or rendered IDE acceptance.",
+  "nativeRevision": "6adb9a11f9b3b87cda891fae504cbdec749f3ad5",
+  "archive": {
+    "passed": true,
+    "scope": "Independent exact ZIP inventory, all native/runtime/source/asset bytes and generated metadata bounds; not installed acceptance",
+    "version": "0.1.5",
+    "vsixSha256": "ae057e469dc383d6c696df604ae536a010a270795e51f79d78fb25d3c2c25b1e",
+    "archiveEntries": 1935,
+    "expandedBytes": 67064298,
+    "runtimeManifestSha256": "48a8b4ac284613dd87d39111a685ac0f28f8a86bab1a61099bc3d4a0487aca29",
+    "nativeRevision": "6adb9a11f9b3b87cda891fae504cbdec749f3ad5",
+    "runtimeFiles": 1898,
+    "pureSources": 1869,
+    "nativeProgramsPackages": 5,
+    "licenseFiles": 23,
+    "nonRuntimeByteBindings": 34,
+    "sourceFiles": 14,
+    "browserAssets": 12,
+    "duplicateNames": false,
+    "symlinks": false,
+    "privateState": false,
+    "cpythonExecutablesExtensionsBytecode": false,
+    "installed": false
+  },
+  "live": {
+    "passed": true,
+    "scope": "Actual unified native xmind serve/console modes with real OpenAI multiline mixed patch and partial denial, exact approvals/receipts, independent filesystem hashes and SQLite history across restart. The new single-format package supplies the actual product executable and pure-source/runtime dependencies.",
+    "sourceBaseRevision": "6adb9a11f9b3b87cda891fae504cbdec749f3ad5",
+    "qualification": "Committed single-format package bound by manifest, executed program hash and source revision.",
+    "programSha256": "e01d566b0f6b213a0a0e4354f615256c9734e4a1ac971cb6157eba9da5f928fa",
+    "sdkRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+    "dependencyManifestSha256": "48a8b4ac284613dd87d39111a685ac0f28f8a86bab1a61099bc3d4a0487aca29",
+    "literalMultilineHistoryExact": true,
+    "model": "gpt-6.1-sol",
+    "runIds": [
+      "ec84e9bf9152c7ce78349f5790f4f88e",
+      "7f0519a056152e85b97cc58e9f31e8f2"
+    ],
+    "patchReports": [
+      {
+        "atomic": false,
+        "not_requested": [],
+        "outcomes": [
+          {
+            "action": "add",
+            "create_directories": [
+              "created"
+            ],
+            "index": 0,
+            "operation_id": "6ccc990b25b171bb8795350a0345e94f-0",
+            "path": "created/first.txt",
+            "result": {
+              "action": "add",
+              "after_exists": true,
+              "after_sha256": "b640e840b19d378660b32fb51ae18d67dccb4a8596a29e7bd72c1b2ae5928f41",
+              "created_directories": [
+                "created"
+              ],
+              "created_directory_bindings": [
+                {
+                  "file_id": "windows-local-file-v1:fec0809ac0805ab3:db99060000004b000000000000000000",
+                  "path": "created"
+                }
+              ],
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:dc990600000042000000000000000000",
+              "operation_id": "6ccc990b25b171bb8795350a0345e94f-0",
+              "patch_id": "6ccc990b25b171bb8795350a0345e94f",
+              "patch_index": 0,
+              "path": "created/first.txt",
+              "size": 6,
+              "state": "succeeded",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:972d0600000094000000000000000000"
+            },
+            "state": "succeeded"
+          },
+          {
+            "action": "update",
+            "index": 1,
+            "operation_id": "6ccc990b25b171bb8795350a0345e94f-1",
+            "path": "update.txt",
+            "result": {
+              "action": "update",
+              "after_exists": true,
+              "after_sha256": "7b9a72466d3960eb2aacccfc848939453490db0678bd4725def3f789b891c919",
+              "before_sha256": "9160d4be34c8695bd172a76c7c7966587ea5a4d991ad22c87b2b91af54aa9ebb",
+              "created_directory_bindings": [],
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:d0990600000021000000000000000000",
+              "operation_id": "6ccc990b25b171bb8795350a0345e94f-1",
+              "patch_id": "6ccc990b25b171bb8795350a0345e94f",
+              "patch_index": 1,
+              "path": "update.txt",
+              "size": 6,
+              "state": "succeeded",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:972d0600000094000000000000000000"
+            },
+            "state": "succeeded"
+          },
+          {
+            "action": "move",
+            "create_directories": [],
+            "destination_path": "dest/moved.txt",
+            "index": 2,
+            "operation_id": "6ccc990b25b171bb8795350a0345e94f-2",
+            "path": "src/source.txt",
+            "result": {
+              "action": "move",
+              "after_exists": true,
+              "after_sha256": "32ff26beddb756b29702e29677ad34a06b10023f1c6a55893a9c9311e2706f9d",
+              "before_sha256": "5f30c85c248ee151e91979734fd0587aac9e7bb0ca4f0e5d1d09669bd5791a76",
+              "created_directories": [],
+              "created_directory_bindings": [],
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:d299060000005b000000000000000000",
+              "operation_id": "6ccc990b25b171bb8795350a0345e94f-2",
+              "patch_id": "6ccc990b25b171bb8795350a0345e94f",
+              "patch_index": 2,
+              "path": "dest/moved.txt",
+              "size": 11,
+              "source_path": "src/source.txt",
+              "state": "succeeded",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:972d0600000094000000000000000000"
+            },
+            "state": "succeeded"
+          },
+          {
+            "action": "delete",
+            "index": 3,
+            "operation_id": "6ccc990b25b171bb8795350a0345e94f-3",
+            "path": "delete.txt",
+            "result": {
+              "action": "delete",
+              "after_exists": false,
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:d499060000004e000000000000000000",
+              "operation_id": "6ccc990b25b171bb8795350a0345e94f-3",
+              "patch_id": "6ccc990b25b171bb8795350a0345e94f",
+              "patch_index": 3,
+              "path": "delete.txt",
+              "removed_sha256": "8b7e3b523c27641976a222f2a6f6a7c4024a1f91c8efb253bcbec1459b212f8c",
+              "removed_size": 19,
+              "state": "succeeded",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:972d0600000094000000000000000000"
+            },
+            "state": "succeeded"
+          }
+        ],
+        "patch_id": "6ccc990b25b171bb8795350a0345e94f",
+        "requested_files": 4,
+        "state": "succeeded",
+        "stop_reason": "",
+        "succeeded_files": 4
+      },
+      {
+        "atomic": false,
+        "not_requested": [],
+        "outcomes": [
+          {
+            "action": "add",
+            "create_directories": [],
+            "index": 0,
+            "operation_id": "4d24fd39bc60297c11c278399addbb20-0",
+            "path": "allow-first.txt",
+            "result": {
+              "action": "add",
+              "after_exists": true,
+              "after_sha256": "fda0c6dbbd27bb4682f2931877d6c3e6b408e65b07feb9b4c1e9cc29b1a2cda2",
+              "created_directories": [],
+              "created_directory_bindings": [],
+              "file_id": "windows-local-file-v1:fec0809ac0805ab3:dd990600000040000000000000000000",
+              "operation_id": "4d24fd39bc60297c11c278399addbb20-0",
+              "patch_id": "4d24fd39bc60297c11c278399addbb20",
+              "patch_index": 0,
+              "path": "allow-first.txt",
+              "size": 8,
+              "state": "succeeded",
+              "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:972d0600000094000000000000000000"
+            },
+            "state": "succeeded"
+          },
+          {
+            "action": "add",
+            "create_directories": [],
+            "index": 1,
+            "operation_id": "4d24fd39bc60297c11c278399addbb20-1",
+            "path": "deny-second.txt",
+            "result": {},
+            "state": "denied"
+          }
+        ],
+        "patch_id": "4d24fd39bc60297c11c278399addbb20",
+        "requested_files": 2,
+        "state": "partial",
+        "stop_reason": "permission_denied",
+        "succeeded_files": 1
+      }
+    ],
+    "providerUsage": [
+      [
+        {
+          "completion_tokens": 92,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 2383,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 2380
+          },
+          "output_tokens": 92,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 2383,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 2380
+          },
+          "total_tokens": 2475
+        },
+        {
+          "completion_tokens": 123,
+          "completion_tokens_details": {
+            "reasoning_tokens": 29
+          },
+          "input_tokens": 2696,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 2693
+          },
+          "output_tokens": 123,
+          "output_tokens_details": {
+            "reasoning_tokens": 29
+          },
+          "prompt_tokens": 2696,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 2693
+          },
+          "total_tokens": 2819
+        },
+        {
+          "completion_tokens": 47,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 3949,
+          "input_tokens_details": {
+            "cache_write_tokens": 1253,
+            "cached_tokens": 2693
+          },
+          "output_tokens": 47,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 3949,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 1253,
+            "cached_tokens": 2693
+          },
+          "total_tokens": 3996
+        }
+      ],
+      [
+        {
+          "completion_tokens": 48,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 2327,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 2324
+          },
+          "output_tokens": 48,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 2327,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 2324
+          },
+          "total_tokens": 2375
+        },
+        {
+          "completion_tokens": 40,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 2733,
+          "input_tokens_details": {
+            "cache_write_tokens": 406,
+            "cached_tokens": 2324
+          },
+          "output_tokens": 40,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 2733,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 406,
+            "cached_tokens": 2324
+          },
+          "total_tokens": 2773
+        }
+      ]
+    ],
+    "fileHashes": {
+      "created/first.txt": "b640e840b19d378660b32fb51ae18d67dccb4a8596a29e7bd72c1b2ae5928f41",
+      "update.txt": "7b9a72466d3960eb2aacccfc848939453490db0678bd4725def3f789b891c919",
+      "dest/moved.txt": "32ff26beddb756b29702e29677ad34a06b10023f1c6a55893a9c9311e2706f9d",
+      "allow-first.txt": "fda0c6dbbd27bb4682f2931877d6c3e6b408e65b07feb9b4c1e9cc29b1a2cda2"
+    },
+    "workspace": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-live-patch-rbsXeD",
+    "restartHistoryExact": true,
+    "earlierSuccessPreservedAfterDenial": true,
+    "deniedFileAbsent": true,
+    "initialFixturesWrittenByDriver": [
+      "AGENTS.md",
+      "src/AGENTS.md",
+      "dest/AGENTS.md",
+      "update.txt",
+      "src/source.txt",
+      "delete.txt"
+    ],
+    "testedEffectsWrittenByDriver": false,
+    "providerConfigReadByDriver": false,
+    "cpythonExecuted": false,
+    "installedIdeAccepted": false
+  },
+  "existingInstallationTouched": false,
+  "existingProfileMigrated": false,
+  "providerConfigurationReadByDriver": false,
+  "cpythonExecuted": false,
+  "installedIdeAccepted": false
+}

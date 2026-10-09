@@ -1,5 +1,21 @@
 # Reviewable milestones
 
+The single-format package checkpoint **6adb9a1** removes the client legacy-profile
+migration path and accepts only `xmind.exe` plus xlang3 dependencies. The complete
+local **107 native / 225 extension / 41 browser** suites pass. The first native
+attempt exposed an outdated PowerShell test build path; the corrected complete
+rerun passed in **210.08 seconds**, with **2,414 frozen inputs**.
+[Source and original logs](evidence/native-unified-package-local.json).
+
+The new **0.1.5 VSIX** passed exact verification of **1,935 archive entries**,
+including **1,869 pure-source files** and **23 license files**. Its actual packaged
+`xmind.exe` completed two real OpenAI runs in a fresh SQLite profile: five
+approved effects, one denied effect, actual provider usage and exact multiline
+history across restart. No old profile or installation was touched.
+[Package and live evidence](evidence/native-unified-package-release.json).
+Fresh installed/rendered VS Code acceptance, automatic console bootstrap, UI
+SSE, authoring APIs and agent-worker integration remain pending.
+
 The primary **`xmind.exe`** now executes the existing native backend, console,
 admin and private schema handlers through one program. The complete local
 **107-contract gate passed in 233.55 seconds** with **2,393 unchanged mapped
