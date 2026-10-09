@@ -3,9 +3,11 @@
 This checkpoint adds C++ discovery and per-run activation of workspace skills to
 the actual agent tool loop. Source `d767d506` passed the complete 90-contract
 native gate and hosted packaging. Independent verification binds the tested
-runtime and VSIX to that source. The new package is not installed in the preview;
-installed and live-provider skill acceptance remain pending. It does not
-establish OpenCode skill parity.
+runtime and VSIX to that source. The package is installed in the persistent
+VS Code profile, passed a real isolated opened-folder host and passed skill
+activation/companion reads with four real providers. The browser preview still
+uses its earlier runtime. Rendered acceptance and full skill delivery remain
+pending; this does not establish OpenCode skill parity.
 
 The behavior reference is the pinned OpenCode `v2.0.16` source, commit
 `3a103fe0aff726a4edc7492f03f7b88195d9e4c9`: skill discovery describes available
@@ -147,8 +149,8 @@ passed the complete workflow with 176/176 extension and 35/35 browser contracts.
 [Independent view evidence](evidence/native-skill-approval-views-hosted.json)
 retains both workflow conclusions, verifies all archive bytes, matches the 39
 tracked view sources to each exact Git revision and binds all 11 tested assets.
-Installed/rendered acceptance remains pending. No local runtime, provider or
-editor was executed for these isolated results.
+The isolated results themselves executed no local runtime, provider or editor;
+the later installed/live checks below have a separate scope.
 
 Source `d767d5069f52e3e6b899ae7a3e8313ebcc0ecbaf`
 [run 37883217775](https://github.com/xlang-foundation/xMind/actions/runs/37883217775)
@@ -160,10 +162,40 @@ accepted bundle files and all 1,861 packaged runtime inventory files. Seven
 host sources and five copied view sources match the exact commit, and two
 vendor copies match the packaged dependencies.
 [Verified package receipt](evidence/native-skills-hosted-package.json) records
-this scope. It does not claim local execution, installation or rendered/live
-skill acceptance. Earlier failed gates remain recorded above.
+this file-only scope. Later installation and actual execution have the separate
+receipt below. Earlier failed gates remain recorded above.
 
-Delivery still requires installed/live acceptance. Durable activation restoration across resumed or new
+## Installed and real-provider acceptance
+
+The actual Code CLI installed that exact VSIX into the existing persistent
+profile. All 1,861 runtime files, 19 other package files and 12 browser-runtime
+files matched; settings bytes were unchanged and no trust override was requested.
+A fresh isolated VS Code host then opened `D:\CantorAI2026\TestProj` directly,
+activated the extension and verified the native authenticated workspace root.
+No `.code-workspace` was needed. The isolated test profile used the standard
+trust-disabled test flag; the normal profile's trust settings were unchanged.
+
+Fresh real OpenAI, Claude, Gemini and DeepSeek runs used the installed native
+runtime and production provider controller. Each explicitly activated a guide
+with `autoinvoke: false`, received a delivered skill snapshot bound to its
+identity/hash and read an owned companion file whose random marker was absent
+from the prompt and guide. All four replies included those actual file bytes;
+there were no effect-operation events. The first strict-format attempt passed
+three of four replies: Claude added prose and a code fence. That harness failed
+and also reported `EBUSY` because cleanup did not wait for backend exit. A
+Claude-only retry added an explicit final-reply format instruction and waited
+for backend exit before cleanup; it passed with the exact marker. The original
+failure is retained in the receipt rather than reported as a passing batch.
+Owned guides and marker files were removed, and the original leftover empty
+workspace was removed after verifying its exact path and emptiness.
+
+[Installed/live evidence](evidence/native-skills-installed-live.json) checks the
+private native histories, actual calls/results, delivered snapshot events and
+real usage/timing fields. It publishes metadata and hashes only. These checks
+do not establish rendered browser/IDE acceptance, normal-window reload or
+durable activation restoration. The live browser runtime is unchanged.
+
+Delivery still requires rendered acceptance and normal-window reload. Durable activation restoration across resumed or new
 runs, explicit manual activation and deactivation, configured/global/URL/embedded
 sources, skill management events and CLI/view catalog controls remain work toward
 the full skill experience. Pure Python scripts and dependencies must execute

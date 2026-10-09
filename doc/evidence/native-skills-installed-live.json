@@ -1,0 +1,222 @@
+{
+  "sourceRevision": "d767d5069f52e3e6b899ae7a3e8313ebcc0ecbaf",
+  "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+  "runtimeManifestSha256": "d1a8d27ad64fa17d2a520e98d1707f635473e5955d4e1461f14e1b112bd15891",
+  "scope": "Verified persistent VSIX installation, actual isolated VS Code opened-folder host and four real native provider skill activation/companion reads; no rendered UI acceptance",
+  "installation": {
+    "passed": true,
+    "sourceRevision": "d767d5069f52e3e6b899ae7a3e8313ebcc0ecbaf",
+    "scope": "Actual Code CLI installation into the existing persistent profile and complete on-disk package verification; no reload, rendered acceptance or native execution claimed",
+    "settingsBytesUnchanged": true,
+    "sourceFiles": 19,
+    "viewFiles": 12,
+    "runtimeInventoryFiles": 1861,
+    "nativeManifestSha256": "d1a8d27ad64fa17d2a520e98d1707f635473e5955d4e1461f14e1b112bd15891",
+    "windowReloadPending": true,
+    "trustBypassRequested": false,
+    "installed": true,
+    "nativeExecuted": false
+  },
+  "openedFolder": {
+    "passed": true,
+    "root": "D:\\CantorAI2026\\TestProj",
+    "requiresCodeWorkspace": false,
+    "isolatedTestTrustDisabled": true,
+    "normalProfileTrustOverride": false,
+    "modelInferenceTested": false,
+    "screenshotVerified": false
+  },
+  "liveSkillAcceptance": {
+    "syntheticProvider": false,
+    "keysReadByClient": false,
+    "autoinvoke": false,
+    "initialAttempt": {
+      "harnessPassed": false,
+      "strictRepliesPassed": 3,
+      "providersAttempted": 4,
+      "activationAndCompanionReadsPassed": 4,
+      "claudeReplyAddedProseAndCodeFence": true,
+      "cleanupFailedWith": "EBUSY after stop before owned process exit"
+    },
+    "retry": {
+      "provider": "claude",
+      "explicitStrictReplyInstruction": true,
+      "harnessPassed": true,
+      "ownedBackendExitAwaited": true
+    },
+    "records": [
+      {
+        "provider": "openai",
+        "model": "gpt-6.1-sol",
+        "catalogueCount": 20,
+        "runId": "a1a9eb6ec9465d3cc120e8614fb584c8",
+        "state": "completed",
+        "retry": false,
+        "skillActivationVerified": true,
+        "deliveredSkillSnapshotVerified": true,
+        "actualCompanionReadVerified": true,
+        "replyContainsActualCompanion": true,
+        "exactMarkerReply": true,
+        "effectOperationEvents": 0,
+        "usage": {
+          "completion_tokens": 34,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 2196,
+          "input_tokens_details": {
+            "cache_write_tokens": 187,
+            "cached_tokens": 2006
+          },
+          "output_tokens": 34,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 2196,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 187,
+            "cached_tokens": 2006
+          },
+          "total_tokens": 2230
+        },
+        "elapsedMs": 1854,
+        "firstTokenMs": 1357
+      },
+      {
+        "provider": "claude",
+        "model": "claude-haiku-4-5-20251001",
+        "catalogueCount": 13,
+        "runId": "24432d9f88ca95771fdf4c47efba730f",
+        "state": "completed",
+        "retry": false,
+        "skillActivationVerified": true,
+        "deliveredSkillSnapshotVerified": true,
+        "actualCompanionReadVerified": true,
+        "replyContainsActualCompanion": true,
+        "exactMarkerReply": false,
+        "effectOperationEvents": 0,
+        "usage": {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 47,
+          "input_tokens": 4133,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 47,
+          "prompt_tokens": 4133,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "elapsedMs": 905,
+        "firstTokenMs": 489
+      },
+      {
+        "provider": "gemini",
+        "model": "models/gemini-3.5-flash",
+        "catalogueCount": 11,
+        "runId": "a51158afe70c5d53c88aee0804064995",
+        "state": "completed",
+        "retry": false,
+        "skillActivationVerified": true,
+        "deliveredSkillSnapshotVerified": true,
+        "actualCompanionReadVerified": true,
+        "replyContainsActualCompanion": true,
+        "exactMarkerReply": true,
+        "effectOperationEvents": 0,
+        "usage": {
+          "candidatesTokenCount": 49,
+          "completion_tokens": 49,
+          "completion_tokens_details": {
+            "reasoning_tokens": 90
+          },
+          "input_tokens": 3672,
+          "output_tokens": 49,
+          "output_tokens_details": {
+            "reasoning_tokens": 90
+          },
+          "promptTokenCount": 3672,
+          "prompt_tokens": 3672,
+          "thoughtsTokenCount": 90,
+          "totalTokenCount": 3811,
+          "total_tokens": 3811
+        },
+        "elapsedMs": 1014,
+        "firstTokenMs": 910
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "catalogueCount": 2,
+        "runId": "0ff8b68f31a77f8e57a74797e386461e",
+        "state": "completed",
+        "retry": false,
+        "skillActivationVerified": true,
+        "deliveredSkillSnapshotVerified": true,
+        "actualCompanionReadVerified": true,
+        "replyContainsActualCompanion": true,
+        "exactMarkerReply": true,
+        "effectOperationEvents": 0,
+        "usage": {
+          "completion_tokens": 30,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_cache_hit_tokens": 3456,
+          "prompt_cache_miss_tokens": 152,
+          "prompt_tokens": 3608,
+          "prompt_tokens_details": {
+            "cached_tokens": 3456
+          },
+          "total_tokens": 3638
+        },
+        "elapsedMs": 1061,
+        "firstTokenMs": 977
+      },
+      {
+        "provider": "claude",
+        "model": "claude-haiku-4-5-20251001",
+        "catalogueCount": 13,
+        "runId": "0ac1608b17b9bd93ae2f948f9ed372f6",
+        "state": "completed",
+        "retry": true,
+        "skillActivationVerified": true,
+        "deliveredSkillSnapshotVerified": true,
+        "actualCompanionReadVerified": true,
+        "replyContainsActualCompanion": true,
+        "exactMarkerReply": true,
+        "effectOperationEvents": 0,
+        "usage": {
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "completion_tokens": 39,
+          "input_tokens": 4082,
+          "input_tokens_scope": "uncached",
+          "output_tokens": 39,
+          "prompt_tokens": 4082,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "elapsedMs": 850,
+        "firstTokenMs": 473
+      }
+    ]
+  },
+  "renderedAcceptance": false,
+  "browserPreviewUpgraded": false,
+  "windowReloadPending": true,
+  "privateEvidenceHashes": {
+    ".agentflow/ci/native-hosted-d767d50-37883217775/normal-install.json": "a5ffe8590dea7458270bcef204972f89ab22b6a0083965862451ecd41e9933a1",
+    ".agentflow/ui-host/open-folder-skills-d767-check/result.json": "f51ad81bc8de7ee96e968c254278ce63dd876b3e10136bf00c7efe8a311df72f",
+    ".agentflow/ui-host/open-folder-skills-d767-check/exit.json": "6af52b6de8c27c97653a66160b5f84cecdacb9597fb7971cf6eb7ba98636701e",
+    ".agentflow/ui-host/open-folder-skills-d767-check/runtime-proof.json": "5654782850ecd3a094250a59e51a6da40e2d5fac3aa0919ad10c2969733a925c",
+    ".agentflow/ui-host/open-folder-skills-d767-check/launch.json": "d31d9178521d63fe12a18b361697e352bf1c4a8a2657d770e5e1b1c74644a460",
+    ".agentflow/acceptance/skills-d767-20261009/results.json": "fa2eea1b029a65d3931a805cbb120ffd1c8779e1bbf95e761bab4bbca86b34e0",
+    ".agentflow/acceptance/skills-d767-20261009/openai-records.json": "f4ced984c5cd539dc246f627e1b961ac37ded985fb03a6934232ae33f7164000",
+    ".agentflow/acceptance/skills-d767-20261009/claude-records.json": "83d9b7ad185ac22feb222df539fd32d30a6a27d2f8f1799a5d6bb1fe46c17f46",
+    ".agentflow/acceptance/skills-d767-20261009/gemini-records.json": "d9eebe0a108baff07063481b778d76bd036d4b7bb71d2e9099bfdbc04580bca6",
+    ".agentflow/acceptance/skills-d767-20261009/deepseek-records.json": "d6c1de8b4a76f751089bee08e5f31d7b404ba46a9292a662004fe755719b6142",
+    ".agentflow/acceptance/skills-d767-claude-retry-20261009/results.json": "de3998deab4e46de0a0b4a599d8a09dee2c8642b7a1c833f3639705d4ddf7f05",
+    ".agentflow/acceptance/skills-d767-claude-retry-20261009/claude-records.json": "b77081bec5c6ef40f8c57e6d6cb63d8cea42228ae32f765e64bffadf3eeb5f15"
+  }
+}

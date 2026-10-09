@@ -11,9 +11,14 @@ and VSIX checks. Independent verification checked both advertised archive
 digests, every registered native result, all 30 accepted source-bundle files,
 all 1,861 packaged runtime inventory files and the pinned host/view source
 copies. [Skills package evidence](evidence/native-skills-hosted-package.json)
-records this file-only verification. Installation and rendered/live skill
-acceptance remain pending; the installed profile and running browser versions
-described below retain their earlier acceptance scope.
+records this file-only verification. The skills VSIX subsequently replaced the
+persistent profile's earlier package, with complete installed file verification
+and unchanged settings. A real isolated VS Code opened-folder host passed;
+four real providers passed native skill activation and companion reads, with
+the initial Claude formatting failure and successful retry retained. See the
+[installed/live receipt](evidence/native-skills-installed-live.json).
+Rendered acceptance and ordinary-window reload remain pending. The running
+browser version described below retains its earlier acceptance scope.
 
 `Tools/ci-native.ps1` writes a successful gate receipt only after the exact
 registered contract set has passed. `Tools/ci-stage-runtime.mjs` binds that
@@ -57,7 +62,7 @@ requested. [Installation evidence](evidence/native-ci-staging-installed.json)
 records this scope. Window reload, rendered acceptance and native execution were
 not performed by this installation; the live browser preview retains its
 previously accepted runtime. Later skill changes have the successful hosted
-gate above, with installation and live acceptance still pending.
+gate and separate installed/live acceptance above; rendered checks are pending.
 
 A subsequent fresh VS Code test host loaded this verified package, opened
 `D:\CantorAI2026\TestProj` directly and passed its real extension-host workspace

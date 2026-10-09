@@ -23,13 +23,18 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 Native workspace skill discovery, loading, context delivery and effect approval
 bindings passed the complete 90-contract hosted native gate, browser/native
 integration and packaging at source `d767d506`. Independent verification binds
-the packaged runtime and view sources to that commit. Installed/live skill
-acceptance remains pending; this is not a verified equivalent
+the packaged runtime and view sources to that commit. That package is installed
+and passed an actual VS Code opened-folder host plus four real-provider skill
+activation/companion reads. Rendered acceptance and broader skill delivery
+remain pending; this is not a verified equivalent
 OpenCode skill operation. [Skill scope and remaining delivery](native-skills.md).
 The shared skill approval display passed the complete isolated 176-extension /
 35-browser view gate. It displays source bindings for file, command and MCP
-approvals; full skill delivery and installed/rendered acceptance remain
+approvals; full skill delivery and rendered acceptance remain
 separate requirements. [Verified view evidence](evidence/native-skill-approval-views-hosted.json).
+The [separate installed/live receipt](evidence/native-skills-installed-live.json)
+retains the initial Claude formatting and harness cleanup failures and the
+successful Claude retry. The browser preview still uses the earlier runtime.
 
 The later catalogue-recovery source passed its isolated hosted **175/35** view
 gate and its tested browser asset is published. Rendered recovery and an updated
