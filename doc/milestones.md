@@ -1,5 +1,12 @@
 # Reviewable milestones
 
+Native legacy preflight now authenticates the workspace and verifies actual
+listener PID/birth, executable/hash and database/workspace command line before
+migration. All **98 contracts passed**, with 631 mapped inputs unchanged.
+It leaves the source running and creates no ticket. Installed shutdown/adoption
+and rendered file writing remain pending.
+[Exact scope and evidence](native-legacy-preflight.md).
+
 Stopped legacy-owner preparation and qualified activation passed all **98 native
 contracts**, with 629 mapped inputs unchanged. Actual administration/server
 fixtures preserve the same database and keep admission closed until activation.

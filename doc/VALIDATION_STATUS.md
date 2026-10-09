@@ -1,5 +1,16 @@
 # Current native validation
 
+Authenticated native legacy-owner preflight passed **98 contracts in 188.46
+seconds**, with 631 mapped inputs unchanged. Actual listener/process handles,
+source image/hash, database/workspace command line and authenticated workspace
+identity are checked before any migration. Wrong credentials and bindings fail;
+the real fixture process stays running with sessions unchanged. This increment
+does not stop an owner, publish a migration ticket or upgrade the installed
+preview. The 39 view inputs are unchanged from the previous 197/39 passing
+checkpoint. Product shutdown, extension legacy adoption and rendered writing
+remain pending. [Preflight guide](native-legacy-preflight.md),
+[exact evidence](evidence/native-legacy-preflight-local.json).
+
 Native post-exit legacy preparation, qualified closed bootstrap and exact
 activation passed **98 native contracts in 193.73 seconds**, with all 629
 mapped inputs unchanged. The actual CLI/server fixture rejected a live source,

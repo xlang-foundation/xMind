@@ -70,3 +70,7 @@ The later [native post-exit preparation increment](native-legacy-owner.md)
 passed 98 contracts and provides a distinct legacy operator ticket. It does
 not yet add legacy shutdown/adoption to this extension command or upgrade the
 installed preview.
+
+The separate [native legacy preflight](native-legacy-preflight.md) now verifies
+the actual listener/process, image, database command line and authenticated
+workspace. It does not yet connect shutdown/adoption to this extension command.

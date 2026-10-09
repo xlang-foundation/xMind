@@ -17,7 +17,7 @@ WebRTC and Electron IDE.
 | Protocols and profiles | [MCP](native-mcp.md), [A2A](A2A.md), [connection profiles](connection-profiles.md) |
 | Coverage and verification | [Validation status](VALIDATION_STATUS.md), [parity baseline](PARITY.md), [model coverage](MODEL_SUPPORT.md), [milestones](milestones.md) |
 | Source layout | [Cleanup](cleanup.md) |
-| Local owner upgrades | [Native persistence barrier](native-backend-owner.md), [native package verifier](native-runtime-generation.md), [owner commands](native-owner-control.md), [retirement request](native-owner-retirement.md), [qualified replacement startup](native-owner-replacement.md), [stopped legacy preparation](native-legacy-owner.md), [managed upgrade adapter](native-owner-upgrade-client.md), [remaining runtime handoff](native-runtime-handoff.md) |
+| Local owner upgrades | [Native persistence barrier](native-backend-owner.md), [native package verifier](native-runtime-generation.md), [owner commands](native-owner-control.md), [retirement request](native-owner-retirement.md), [qualified replacement startup](native-owner-replacement.md), [legacy preflight](native-legacy-preflight.md), [stopped legacy preparation](native-legacy-owner.md), [managed upgrade adapter](native-owner-upgrade-client.md), [remaining runtime handoff](native-runtime-handoff.md) |
 
 The [native dependency-plan increment](native-dynamic-plan.md) documents current
 source work, its passing local and exact hosted 77/119/26 gates, and remaining acceptance boundaries.

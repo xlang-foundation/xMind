@@ -5,6 +5,7 @@
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/owner_process.hpp"
 #include "agentflow/legacy_owner.hpp"
+#include "agentflow/legacy_owner_process.hpp"
 #include "agentflow/backend_owner_control.hpp"
 #include "nlohmann/json.hpp"
 #define NOMINMAX
@@ -31,6 +32,12 @@ bool reflected(const nlohmann::json& value,const std::string& secret){
 }
 int run_admin(int argc,char** argv){
     try {
+        if(argc==9&&std::string(argv[1])=="inspect-legacy-owner"){
+            const std::string input=argv[2];std::uint32_t port=0;const auto parsed=std::from_chars(input.data(),input.data()+input.size(),port);if(parsed.ec!=std::errc{}||parsed.ptr!=input.data()+input.size()||port==0||port>65535)throw std::invalid_argument("Invalid legacy listener port");
+            const auto* raw=std::getenv("XMIND_AUTH_TOKEN");if(!raw)throw std::invalid_argument("Existing legacy owner authentication is required");const std::string_view value(raw);agentflow::SecretBytes token(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(value.data()),value.size()));
+            agentflow::VerifiedLegacyOwnerProcess owner(static_cast<std::uint16_t>(port),argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],token);owner.revalidate();const auto& observed=owner.observation();
+            std::cout<<nlohmann::json{{"process_id",observed.source.process_id},{"process_birth",observed.source.process_birth},{"server_sha256",observed.source.server_sha256},{"image_path",observed.image_path},{"database_path",observed.database_path},{"authenticated",true},{"database_command_line_verified",true},{"process_signalled",false},{"migration_ticket_created",false}}.dump()<<'\n';return 0;
+        }
         if(argc==3&&std::string(argv[1])=="inspect-owner-process"){
             const std::string input=argv[2];std::uint32_t pid=0;const auto parsed=std::from_chars(input.data(),input.data()+input.size(),pid);if(parsed.ec!=std::errc{}||parsed.ptr!=input.data()+input.size())throw std::invalid_argument("Invalid native process ID");std::cout<<nlohmann::json{{"process_id",pid},{"process_birth",agentflow::inspect_owner_process_birth(pid)}}.dump()<<'\n';return 0;
         }

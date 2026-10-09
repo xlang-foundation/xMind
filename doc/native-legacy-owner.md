@@ -5,8 +5,10 @@ The native backend supports an operator ticket for a **stopped** schema 12 or
 actual PID/creation-time exit, acquires the same canonical database lease,
 requires idle execution/maintenance records and snapshots the original tables.
 It leaves the schema unchanged. This is a post-exit administration primitive;
-it does not stop a running backend or authenticate its pre-exit listener,
-executable or database command line. Source-image metadata is supplied by the
+it does not stop a running backend or itself authenticate its pre-exit listener,
+executable or database command line. The separate
+[native preflight](native-legacy-preflight.md) now verifies those bindings
+without stopping the process. Source-image metadata for preparation is supplied by the
 operator. The installed VS Code migration flow remains unfinished.
 
 The administration interface is:
@@ -54,7 +56,7 @@ Persistence now imports xlang3's existing native `_sqlite3` export directly.
 The local complete gate includes that repair. A new hosted success is not yet
 claimed. [Original failed CTest](evidence/native-owner-replacement-hosted-failure-ctest.log).
 
-An authenticated legacy operator preflight and explicit shutdown, thin-client
+Connecting authenticated legacy preflight to explicit shutdown, thin-client
 adoption/recovery, independently verified installation and real rendered
 create/edit approvals are still required before the installed TestProj preview
 can write files. Its running backend and profile were left unchanged.
