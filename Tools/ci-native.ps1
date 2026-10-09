@@ -51,6 +51,7 @@ if($LASTEXITCODE -ne 0){throw 'Could not inspect the configured native contracts
 $ciTests|Set-Content (Join-Path $ciEvidence 'contracts.json')
 $ciExpected=@('model_stream_protocol_contract','model_request_contract','native_secret_protection_contract','native_agent_service_contract','native_agent_runner_contract','native_edit_executor_contract','native_approved_edit_http_contract','native_workspace_tools_contract','native_chat_provider_contract','native_http_stream_transport_contract','native_agent_http_contract','native_agent_edit_http_contract','native_http_cli_contract','embedded_xlang_sqlite_contract','native_permission_waiter_contract','native_operation_repository_contract','xlang_repository_contract','persistence_service_contract','encrypted_credential_repository_contract')
 $ciExpected+='native_mcp_wire_contract'
+$ciExpected+='native_file_patch_contract'
 $ciExpected+='native_mcp_stdio_contract'
 $ciExpected+='native_mcp_handshake_contract'
 $ciExpected+='native_mcp_client_contract'
