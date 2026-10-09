@@ -1,0 +1,22 @@
+{"retainedFixture":"C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-local-profile-pzRiuc"}
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: copy_file: The system cannot find the path specified.: "C:\Users\shaw9\AppData\Local\Temp\xmind-local-profile-pzRiuc\runtime\stdlib/test/archivetestdata/testdata_module_inside_zip.py", "C:\Users\shaw9\AppData\Local\Temp\xmind-local-profile-pzRiuc\profiles\47e90f9d451cea26b055b7cdc1a6cbd54773982065d3d90e6e462936a718cf41\runtime-8daccf1b9c04543804c6c9b0e14f31dde2ddb8ac272120525df325115e8d04f4\stdlib/test/archivetestdata/testdata_module_inside_zip.py"
+
+
+
+2 !== 0
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/local_profile_contract.mjs:20:77
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 2,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0

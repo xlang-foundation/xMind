@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+Native automatic console profiles now start or reconnect to one persistent
+workspace backend without a manual port/token setup. The controller verifies
+the actual native process and authenticated workspace, seals its rendezvous
+with user DPAPI and preserves the same SQLite sessions/history after restart.
+A console exit leaves its backend alive. The full **109 native contracts** and
+**10 focused checks** pass with frozen source. Runtime inventories remain
+immutable while ancestor control records can update atomically.
+[Profile contract](local-profiles.md) · [Actual local evidence](evidence/native-local-profile-local.json).
+This is native console acceptance; installed VS Code/browser controller adoption,
+worker IPC, authoring and complete parity remain pending. No migration is needed.
+
 Native console workspace pinning now accepts `--workspace DIR`, checks the
 selected OS directory identity and authenticated backend authority before each
 request, and sends the pinned pair in agent/graph admission. The actual native
@@ -8,7 +19,8 @@ server rejects a stale-authority race before creating a run. The complete local
 The first focused test had an incorrect stderr assertion; its original log is
 retained and the corrected test checks the native HTTP status and stored state.
 [Console connection evidence](evidence/native-console-workspace-local.json).
-Automatic profile discovery/start remains pending.
+Automatic profile discovery/start was pending at that checkpoint; the native
+controller is accepted above.
 
 The verified **0.1.5** VSIX is installed in a fresh dedicated VS Code profile;
 its runtime and 25 client/browser assets match their accepted hashes. First-run
@@ -29,8 +41,9 @@ including **1,869 pure-source files** and **23 license files**. Its actual packa
 approved effects, one denied effect, actual provider usage and exact multiline
 history across restart. No old profile or installation was touched.
 [Package and live evidence](evidence/native-unified-package-release.json).
-Fresh installed/rendered VS Code acceptance, automatic console bootstrap, UI
-SSE, authoring APIs and agent-worker integration remain pending.
+Fresh installed/rendered VS Code acceptance, UI SSE, authoring APIs and
+agent-worker integration remain pending. Native console bootstrap is accepted
+in the later checkpoint above.
 
 The primary **`xmind.exe`** now executes the existing native backend, console,
 admin and private schema handlers through one program. The complete local

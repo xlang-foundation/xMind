@@ -184,7 +184,7 @@ Cancellation propagates from the root run to children, provider requests, local 
 
 Retry transient provider failures only within explicit limits and before externally visible continuation makes replay ambiguous. A partially streamed reply cannot silently restart as a fresh successful reply. Retrying tools or remote tasks requires proven idempotency. After a crash, incomplete effects remain uncertain and need reconciliation; checkpoints alone do not prove exactly-once execution.
 
-## Build and migration boundaries
+## Native build boundaries
 
 The legacy `ThirdParty/xlang` build, Core/services/plugins and Python/FastAPI prototype were removed at the user's request. Root CMake delegates to `Native/` and uses the supported xlang3 SDK. Native infrastructure dependencies and licenses remain pinned. Useful xMind behaviors require native acceptance tests; the old package ABI does not establish compatibility. Git history preserves the removed material, which is not production implementation evidence. Generic xlang3 dependency and native-runtime probes remain separate from the agent backend.
 

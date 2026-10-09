@@ -104,7 +104,8 @@ observation; it does not cancel agent execution. The runtime owns durable
 sessions, events, approvals and SQLite. Client discovery/start must validate
 workspace, connection, process identity and protocol compatibility; it must
 not silently create an empty profile or replace an existing owner. Existing
-native upgrade/handoff rules continue to apply. Internal administrative/schema
+native ownership and effect-reconciliation rules continue to apply. There is
+one current package/profile format, with no old-format migration. Internal administrative/schema
 entry points may also be modes of this executable; they do not create a second
 agent engine. xlang3 DLLs, native packages and pure-source libraries remain
 runtime dependencies; one product executable does not mean a dependency-free
@@ -144,27 +145,28 @@ agent/tool/human graphs, bounded dynamic dependency planning, provider adapters,
 encrypted configuration and embedded-xlang3 SQLite. See the scoped evidence in
 [milestones.md](milestones.md); this is not a claim of complete feature parity.
 
-The primary native `xmind` target now provides real `serve`, console, `admin`
-and private `schema-worker` modes using the same existing handlers. Dedicated
-contracts run actual patches, graphs and MCP through that same executable.
-Unicode config readers use filesystem UTF-8 paths. The console currently
-attaches to an existing authenticated backend using `--port` (default 8765);
-it does not yet discover or start a managed workspace profile. Transitional
-launchers remain while the installed manifest/owner protocol is migrated.
-The [107-contract gate](evidence/native-unified-local.json) binds unchanged source
-inputs and binaries. [Two real provider console runs](evidence/native-unified-cli-live.json)
-also verify literal multiline patch execution, partial denial, disk receipts,
-actual usage and exact restart history through that same tested executable.
-These are local native/console checks, not installed UI/package acceptance.
+The primary native `xmind` target provides real `serve`, console, `admin`
+and private `schema-worker` modes using the same handlers. Dedicated contracts
+run actual patches, graphs and MCP through that executable. Without `--port`,
+the console now discovers or starts a protected native workspace profile;
+`--port` explicitly attaches to an operator-selected backend.
+[Native profile startup and restart](local-profiles.md) passed with the complete
+[109-contract gate](evidence/native-local-profile-local.json).
+[Two real provider console runs](evidence/native-unified-cli-live.json) separately
+verify literal multiline patches, denial, disk receipts, actual usage and exact
+restart history. These are local native checks, not installed UI acceptance.
 
-Pending delivery includes the consolidated installed executable and automatic
-console bootstrap, HTTP SSE for the shared UI event feed (currently 500 ms
-polling; A2A streaming is separate), unified YAML/Markdown/Python authoring,
-reusable nested super-agents, shared scheduling/worker placement, xlang3 IPC,
-Local/Nexus connection integration and remaining provider/coding parity.
-The new package contains one `xmind.exe` product executable. Validate it with a
-fresh local profile; old installations remain intact. No legacy-format or
-existing-profile migration is required.
+The package contains one `xmind.exe` product executable plus xlang3 dependencies.
+The fresh 0.1.5 installation passed file-integrity checks; it still carries the
+earlier accepted runtime and managed launcher. Its rendered/sidebar acceptance
+and adoption of the native profile controller remain pending. Preserve existing
+installations; no legacy-format or existing-profile migration is required.
+
+Pending delivery includes native-controller adoption by client adapters, HTTP
+SSE for the shared UI event feed (currently 500 ms polling; A2A streaming is
+separate), unified YAML/Markdown/Python authoring, reusable nested super-agents,
+shared scheduling/worker placement, xlang3 IPC, Local/Nexus connection integration
+and remaining provider/coding parity.
 
 Required acceptance covers the actual consolidated server/console, existing
 native contracts, client adapters and a fresh installed profile, then stream

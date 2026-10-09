@@ -24,6 +24,7 @@
 #include "agentflow/process_configuration.hpp"
 #include "agentflow/backend_owner_control.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include "agentflow/local_profile.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <bcrypt.h>
@@ -57,7 +58,7 @@ int run_server(int argc,char** argv) {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket") || !options.emplace(key,argv[i+1]).second)
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket" && key!="--profile-state") || !options.emplace(key,argv[i+1]).second)
                 throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
@@ -248,6 +249,7 @@ int run_server(int argc,char** argv) {
 #endif
         );const auto bound=server.bind(port);
 #if defined(_WIN32)
+        if(options.contains("--profile-state")){if(!runtime_generation||!executor)throw std::invalid_argument("Managed profile publication requires a qualified workspace backend");const auto metadata=executor->execution_workspace();agentflow::publish_local_profile_ready(options.at("--profile-state"),bound,auth,metadata.root,metadata.workspace_id,metadata.authority_id);}
         {std::lock_guard lock(control_mutex);active_server=&server;}
         SetConsoleCtrlHandler(control,TRUE);
 #endif

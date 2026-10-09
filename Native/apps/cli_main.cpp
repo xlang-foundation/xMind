@@ -562,7 +562,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
 }
 }
 
-int cli_main(int argc,char** argv,const std::string& workspace) {
+int cli_main(int argc,char** argv,const std::string& workspace,const std::function<agentflow::LocalProfileConnection()>& profile) {
     try {
         if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, skills, session-skills SESSION, set-skills SESSION SNAPSHOT_JSON_FILE [ID...], provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, inspect-plan ROOT, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
@@ -678,11 +678,12 @@ int cli_main(int argc,char** argv,const std::string& workspace) {
         }
         else if(command=="append-message" && argc==5) {path="/v1/sessions/"+id(argv[3])+"/messages";body={{"role","user"},{"data",{{"content",argv[4]}}}};post=true;}
         else throw std::invalid_argument("Unknown command or incorrect arguments");
-        const auto* token=std::getenv("XMIND_AUTH_TOKEN");
-        if(!token) throw std::invalid_argument("Set XMIND_AUTH_TOKEN for the local client");
-        agentflow::ConsoleTransport client(port,workspace);
+        std::optional<agentflow::LocalProfileConnection> managed;std::string auth,selected=workspace;
+        if(profile){managed.emplace(profile());port=managed->port;selected=managed->workspace;auth.assign(reinterpret_cast<const char*>(managed->auth.view().data()),managed->auth.view().size());}
+        else{const auto* token=std::getenv("XMIND_AUTH_TOKEN");if(!token)throw std::invalid_argument("Set XMIND_AUTH_TOKEN for the local client");auth=token;}
+        agentflow::ConsoleTransport client(port,selected);
         client.set_connection_timeout(5,0);client.set_read_timeout(15,0);client.set_write_timeout(5,0);client.set_follow_location(false);
-        const httplib::Headers headers{{"Authorization",std::string("Bearer ")+token}};
+        const httplib::Headers headers{{"Authorization",std::string("Bearer ")+auth}};
         if(chat)return chat_session(client,headers,path,chat_model);
         if(saved_provider_key){
             const auto current=client.Get("/v1/health",headers);if(!current||current->status!=200)throw std::runtime_error("Cannot inspect backend provider capabilities");

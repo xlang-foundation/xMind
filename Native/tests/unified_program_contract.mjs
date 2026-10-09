@@ -33,7 +33,7 @@ async function start(){
 }
 async function stop(){if(child){if(child.exitCode===null)child.kill();await closed;child=undefined;}}
 try{
- const help=invoke(['--help']);assert.equal(help.status,0);assert.match(help.stdout,/xmind serve/);assert.match(help.stdout,/Automatic workspace-profile discovery\/start.*pending/);
+ const help=invoke(['--help']);assert.equal(help.status,0);assert.match(help.stdout,/xmind serve/);assert.match(help.stdout,/discovers or starts its persistent local workspace profile/);
  for(const args of [['--port'],['--port','0'],['--port','65536'],['--port','12x'],['worker']])assert.equal(invoke(args).status,2,'Invalid/unimplemented mode cannot start a backend');
  const schemaRequest=JSON.stringify({jsonrpc:'2.0',id:1,method:'schema/validate',params:{schema_json:'{"type":"object","properties":{"value":{"type":"string"}},"required":["value"],"additionalProperties":false}',instance_json:'{"value":"雪"}'}})+'\n';
  const schema=invoke(['schema-worker'],{input:schemaRequest});assert.equal(schema.status,0,schema.stderr);assert.deepEqual(JSON.parse(schema.stdout),{jsonrpc:'2.0',id:1,result:{schema_valid:true,instance_valid:true}});
