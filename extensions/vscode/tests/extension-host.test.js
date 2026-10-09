@@ -117,7 +117,7 @@ function harness(options={}) {
     dispose(){this.invalidate();}
     async selectedFolder(){return {};}
     stateFields(){return options.stateScope;}
-    async connect(){const root=vscode.workspace.workspaceFolders[0].uri.fsPath;let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,roots:vscode.workspace.workspaceFolders.map(value=>({fsPath:value.uri.fsPath})),epoch:this.epoch,backendChangePending:options.backendChangePending===true};return this.active;}
+    async connect(){const root=vscode.workspace.workspaceFolders[0].uri.fsPath,epoch=this.epoch;await options.beforeConnect?.(root);if(epoch!==this.epoch)throw new Error('Workspace changed while preparing its backend');let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,roots:vscode.workspace.workspaceFolders.map(value=>({fsPath:value.uri.fsPath})),epoch:this.epoch,backendChangePending:options.backendChangePending===true};return this.active;}
     async attach(){return this.connect();}
     async prepare(){if(!this.active)throw new Error('Workspace disconnected');return {origin:this.active.origin,epoch:this.epoch,fields:{expected_workspace_id:this.active.metadata.workspace_id,expected_workspace_authority_id:this.active.metadata.authority_id}};}
     assert(ticket){if(!this.active||ticket.epoch!==this.epoch||ticket.origin!==this.active.origin)throw new Error('Workspace changed');}
@@ -574,4 +574,12 @@ test('managed model choice survives an adapter-port change using native workspac
 test('a different native profile cannot restore a foreign saved model even at the same adapter URL',async()=>{
  const h=harness({stateScope:{workspace_id:'windows-local-file-v1:1:2',profile_directory:'C:\\Private\\profile-b'}});h.state.set('xmind.model',{url:'http://127.0.0.1:8765',id:'synthetic-host-alternate',workspace_id:'windows-local-file-v1:1:2',profile_directory:'C:\\Private\\profile-a'});await h.commands.get('agentflow.open')();const view=h.views[0];
  try{view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='capabilities'&&m.model==='synthetic-host-default'));assert.ok(!view.posted.some(m=>m.type==='capabilities'&&m.model==='synthetic-host-alternate'));}finally{view.close();}
+});
+
+
+test('folder switching before the first sidebar exists reopens the latest workspace after stale startup',async()=>{
+ let release,entered;const paused=new Promise(resolve=>release=resolve),arrived=new Promise(resolve=>entered=resolve);
+ const h=harness({beforeConnect:async root=>{if(root==='D:\\TestProj'){entered();await paused;}}});await h.activation;const first=h.commands.get('agentflow.open')();await arrived;
+ h.changeWorkspace('D:\\LatestProject');release();await first;
+ try{await until(()=>h.views.length===1&&h.backendOwners.some(owner=>owner.metadata.root==='D:\\LatestProject'));const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='workspace'&&message.root==='D:\\LatestProject'));assert.ok(!h.backendOwners.some(owner=>owner.metadata.root==='D:\\TestProj'));assert.ok(!h.requests.some(path=>path.endsWith('/cancel')));}finally{for(const view of h.views)view.close();}
 });

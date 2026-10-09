@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-10-09T23:56:18.668Z",
+  "sourceBaseRevision": "0c99425c3ec023996b11e7c60d97d351d53d5c0c",
+  "qualification": "Sidebar reconnect candidate bound by source hashes. Native view readiness is still unaccepted.",
+  "scope": "Synthetic VS Code API/backend observations, not rendered IDE or real native backend execution.",
+  "sourceHashes": {
+    "extensions/vscode/extension.js": "371e7df73cf48a5b4760fe207a5f20f7f50a7af9e828e82104427c4120c85547",
+    "extensions/vscode/tests/extension-host.test.js": "fb7e9a4d74a3c1944f3768eb1d003aa5356085d584a3b395583eab447a8f93c1",
+    "Tools/ci-views.mjs": "6c48392b19ccaa3e08c739320f9d69041715a4ad5d0d8db0f0ce9fa44726e68b"
+  },
+  "rawLogHashes": {
+    "native-unified-first-sidebar-before.log": "4fd5561b3fed6d7429144e5eff0b85a1f491e0630cbe523ecbf19ad14b4c220c",
+    "native-unified-first-sidebar-extension.log": "bfd7ea20df25e9f487373936959a70f8c529f0896206e01ae57738878500f56e"
+  },
+  "regression": {
+    "before": {
+      "passed": 0,
+      "failed": 1,
+      "reason": "Folder change cleared startup before a view existed; the current root was never reopened."
+    },
+    "after": {
+      "completeExtensionTests": 220,
+      "passed": 220,
+      "failed": 0
+    }
+  },
+  "behavior": "Pending sidebar opening now counts as intent to show the view during reconnect, so stale startup cleanup is followed by opening the latest folder. Existing backend work is not cancelled.",
+  "nativeAccepted": false,
+  "installedPackageUpdated": false,
+  "renderedIdeAccepted": false,
+  "realProviderRequests": 0
+}

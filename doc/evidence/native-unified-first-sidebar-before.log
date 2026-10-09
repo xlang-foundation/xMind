@@ -1,0 +1,25 @@
+TAP version 13
+# Subtest: folder switching before the first sidebar exists reopens the latest workspace after stale startup
+not ok 1 - folder switching before the first sidebar exists reopens the latest workspace after stale startup
+  ---
+  duration_ms: 2009.2946
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\extensions\\vscode\\tests\\extension-host.test.js:580:1'
+  failureType: 'testCodeFailure'
+  error: 'Extension host fixture timed out'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    until (D:\CantorAI2026\xMind\extensions\vscode\tests\extension-host.test.js:221:9)
+    async TestContext.<anonymous> (D:\CantorAI2026\xMind\extensions\vscode\tests\extension-host.test.js:584:6)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2075.6694

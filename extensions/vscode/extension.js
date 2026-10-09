@@ -613,7 +613,7 @@ async function activate(context) {
     post({type:'workspace-clear'});post({type:'history',history:[]});post({type:'sessions',sessions:[]});post({type:'runs',runs:[],busy:false});post({type:'graphs',graphs:[]});post({type:'operations',operations:[]});post({type:'capabilities',execution:false,models:[]});post({type:'status',text:'Connecting the opened workspace…'});panel=undefined;
   }
   async function reconnectWorkspace(forcePick=false){
-    const shown=!!panel||!!sidebarView;disconnectWorkspace();
+    const shown=!!panel||!!sidebarView||!!opening;disconnectWorkspace();
     if(opening)await opening.catch(()=>{});
     if(forcePick)await workspaceBackend.selectedFolder(true);
     if(shown)await open();

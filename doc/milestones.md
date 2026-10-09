@@ -1,5 +1,12 @@
 # Reviewable milestones
 
+First-sidebar reconnect fix: changing folders before the first view exists
+now preserves the pending open intent and reopens the latest workspace. The
+regression failed on the previous code and the complete **220 extension fixture
+checks** pass after the fix. No run cancellation is issued.
+[Original failure and complete rerun](evidence/first-sidebar-reconnect-local.json).
+Native adapter/installed acceptance remains pending.
+
 Editor startup selection fix: a folder change during pending preparation now
 waits for stale cleanup and connects the latest root; trust revocation prevents
 new native startup. The complete **219 extension fixture checks** pass.
