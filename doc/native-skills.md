@@ -248,12 +248,58 @@ only after verifying their exact owned paths and contents.
 [Live approval evidence](evidence/native-approval-stability-live.json) retains
 the original cancelled run alongside the successful retry. The
 [completed-page screenshot](evidence/native-skill-browser-completed.png) shows
-the actual compact sidebar response. This does not update the persistent
-VS Code profile's older script or establish rendered IDE acceptance.
+the actual compact sidebar response. This browser check does not establish
+rendered IDE acceptance. The fixed package subsequently passed the complete
+90-contract native workflow and was independently verified and installed into
+the persistent VS Code profile. Its complete installed inventory matched and
+settings remained unchanged; no trust bypass was requested.
+[Package and installation evidence](evidence/native-approval-stability-hosted-package.json).
 
-Delivery still requires normal VS Code rendered acceptance and window reload.
-Durable activation restoration across resumed or new
-runs, explicit manual activation and deactivation, configured/global/URL/embedded
-sources, skill management events and CLI/view catalog controls remain work toward
-the full skill experience. Pure Python scripts and dependencies must execute
-through xlang3; this checkpoint adds no interpreter fallback or xlang3 native API.
+## Durable native selections
+
+Schema13 adds typed session/workspace and run skill selections. It stores only
+model-activated guide identities, never cached bodies or permissions. A
+successful native `load_skill` acknowledgement commits its selection in the
+same transaction as the assistant call and all matching results. Cancellation,
+an unmatched batch, a foreign tool's acknowledgement-shaped output or a failed
+transcript commit cannot publish a new selection. Generic telemetry cannot
+write skill lifecycle events.
+
+A new prompt inherits this session's selections for the actual workspace
+identity. A child inherits its parent run's selection, or the session selection
+for a graph agent; later child activations remain local to that child. Existing
+run selections survive reopening the repository. Before the first model request,
+the runner discovers the current sources and renders their current bodies.
+Missing or no-longer-invocable guides fail with `skill_context_unavailable`
+instead of supplying cached instructions. Explicit clearing controls remain
+pending; restore the guide or start a new conversation to avoid its selection.
+Migration does not infer selections from historical messages or events.
+
+The complete local 91-contract native build passed with unchanged source maps
+and the exact expected CI test names. Tests include real embedded-xlang3
+transaction rollback, repository reopening, continued-session restoration,
+workspace binding, graph-child isolation and current-source restoration. Their
+provider replies and activation acknowledgements are labeled synthetic.
+The first selected attempt failed because a second constructor version check
+still rejected schema13; its failure and the successful retry are retained.
+
+Two actual OpenAI runs additionally passed native backend exit/restart and
+continued-session restoration. After exit, the owned guide was changed to name
+a different random companion file. The continued run received the new guide
+hash, read that file and returned its exact contents without another
+`load_skill` call. The provider profile authority stayed unchanged, and neither
+run requested effects. The original live harness re-saved the model on restart,
+which rotated provider authority and caused `context_unavailable` before any
+new provider request. The corrected harness reused its persisted configuration;
+both attempts remain in [local evidence](evidence/native-skill-state-local.json).
+The successful retry's owned sources and files were removed after verification;
+the failed attempt's isolated fixtures remain for diagnostics.
+
+This schema13 source is locally validated, not yet installed or packaged by the
+hosted workflow. The current persistent VS Code package and browser runtime use
+schema12. Delivery still requires normal VS Code rendered acceptance and window
+reload, installed schema13 acceptance, paused-run restoration checks, explicit
+manual activation and deactivation, configured/global/URL/embedded sources,
+skill management controls and CLI/view catalog controls. Pure Python scripts
+and dependencies must execute through xlang3; this checkpoint adds no interpreter
+fallback or xlang3 native API.

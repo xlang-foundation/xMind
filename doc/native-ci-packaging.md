@@ -24,8 +24,15 @@ bug and was cancelled before an effect. The DOM-retention fix subsequently
 passed its complete isolated 177/35 view gate, was verified and published as the
 preview's `chat.js`. An actual browser retry passed guidance retention, approval,
 native file creation and completed-response reload. Neither preview process
-restarted for this script update. The persistent VS Code profile still needs
-the fixed script/package and ordinary-window rendered acceptance.
+restarted for this script update. The fixed source
+`5d48bdd72713dcc23d5a1b15a0a08d3e3b7b1fd2` then passed
+[the complete 90-contract native workflow](https://github.com/xlang-foundation/xMind/actions/runs/37886895025).
+Both advertised archive digests, every native test name/result, native bundle,
+VSIX inventory and pinned host/view copies were independently verified. The
+actual Code CLI installed that exact package into the persistent profile;
+all installed bytes matched and settings remained unchanged. No trust bypass
+was requested. Ordinary-window reload and rendered acceptance remain pending.
+[Fixed package and installation evidence](evidence/native-approval-stability-hosted-package.json).
 [Browser upgrade evidence](evidence/native-skills-browser-upgrade.json),
 [isolated view evidence](evidence/native-approval-stability-views-hosted.json) and
 [live retry evidence](evidence/native-approval-stability-live.json) retain these

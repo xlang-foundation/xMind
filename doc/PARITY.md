@@ -40,9 +40,21 @@ metadata rendering passed, but a moving approval-card interaction failed and
 was cancelled before an effect. The DOM-retention fix subsequently passed its
 complete isolated 177/35 gate and is published in the browser preview. A real
 retry passed expanded-guidance retention, sidebar approval, native file creation,
-exact final response and reload with actual metrics. The normal VS Code profile
-still needs this script update and rendered acceptance; full skills remain
-incomplete.
+exact final response and reload with actual metrics. The fixed package at
+`5d48bdd72713dcc23d5a1b15a0a08d3e3b7b1fd2` subsequently passed its complete
+90-contract native workflow and replaced the normal VS Code profile's installed
+package. Its full runtime and view inventory was verified with unchanged
+settings. Ordinary-window reload and rendered acceptance remain pending;
+full skills remain incomplete.
+[Package and installation evidence](evidence/native-approval-stability-hosted-package.json).
+The subsequent schema13 source passed the exact full 91-contract local native
+gate and real OpenAI continued-session restoration after backend exit/restart,
+including reading a changed guide's new companion without reloading the skill.
+Selections commit atomically with native tool turns and remain bound to the
+session/workspace or child run. Initial constructor-check and live harness
+configuration failures are retained in
+[local persistence evidence](evidence/native-skill-state-local.json).
+Hosted packaging and installed/rendered schema13 acceptance remain pending.
 [Browser evidence](evidence/native-skills-browser-upgrade.json).
 [Verified view gate](evidence/native-approval-stability-views-hosted.json),
 [actual approval retry](evidence/native-approval-stability-live.json).

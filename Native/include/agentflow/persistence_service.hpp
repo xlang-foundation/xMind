@@ -114,7 +114,9 @@ public:
     std::future<std::vector<Message>> run_history(std::string id);
     std::future<std::vector<Event>> graph_events(std::string id,std::int64_t after=0);
     std::future<void> append_user_message(std::string session_id,std::string json);
-    std::future<void> record_tool_turn(std::string id,std::string assistant_json,std::vector<std::string> tool_json);
+    std::future<SkillSelections> initialize_run_skills(std::string id,std::string workspace_id);
+    std::future<SkillSelections> run_skills(std::string id);
+    std::future<void> record_tool_turn(std::string id,std::string assistant_json,std::vector<std::string> tool_json,std::optional<SkillSelections> skills={});
     std::future<Run> complete_run(std::string id,std::string assistant_json);
     std::future<Run> run(std::string id);
     std::future<std::vector<Run>> runs(std::string session_id);

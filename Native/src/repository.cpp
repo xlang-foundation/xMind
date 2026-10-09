@@ -35,6 +35,15 @@ std::string object_json(const std::string& source,std::size_t limit=2*1024*1024)
         return source;
     } catch(const Json::exception&) {throw std::invalid_argument("Invalid operation JSON");}
 }
+std::string skill_selections_json(const SkillSelections& value){
+    validate_skill_selections(value);const std::set<std::string> ids(value.ids.begin(),value.ids.end());
+    return Json{{"version",1},{"workspace_id",value.workspace_id},{"ids",std::vector<std::string>(ids.begin(),ids.end())}}.dump();
+}
+SkillSelections skill_selections(const std::string& source){
+    const auto value=Json::parse(object_json(source,8192));
+    if(value.size()!=3||!value.contains("version")||!value["version"].is_number_integer()||value["version"]!=1||!value.contains("workspace_id")||!value["workspace_id"].is_string()||!value.contains("ids")||!value["ids"].is_array()||value["ids"].size()>8)throw DatabaseError("Invalid saved native skill selection");
+    SkillSelections result{value["workspace_id"].get<std::string>(),{}};for(const auto& id:value["ids"]){if(!id.is_string())throw DatabaseError("Invalid saved native skill id");result.ids.push_back(id.get<std::string>());}validate_skill_selections(result);return result;
+}
 const std::string& text(const SqlValue& value) { return std::get<std::string>(value); }
 std::string provider_context(const Json& value){
     if(!value.is_object()||value.size()!=6)throw DatabaseError("Invalid saved provider context");
@@ -444,6 +453,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
+    if(version>13)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     if(version==0) {
@@ -459,7 +469,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>12) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>13) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -575,6 +585,15 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         for(const auto* table:{"dynamic_capabilities","dynamic_plans","dynamic_plan_calls","dynamic_plan_revisions","dynamic_plan_nodes","dynamic_revision_nodes","dynamic_plan_edges","dynamic_human_requests","agent_budget_segments","dynamic_owner_pauses"})db.execute(std::string("CREATE TRIGGER retain_")+table+" BEFORE DELETE ON "+table+" BEGIN SELECT RAISE(ABORT,'dynamic durable evidence cannot be deleted'); END");
         db.execute("PRAGMA user_version=11");
     }
+    // Empty typed tables precede the context migration's final deferred-FK
+    // validation. No relational writes follow that counter-clearing boundary.
+    if(version<13){
+        db.execute("CREATE TABLE session_skills(session_id TEXT NOT NULL REFERENCES sessions(id),workspace_id TEXT NOT NULL,selections_json TEXT NOT NULL CHECK(length(CAST(selections_json AS BLOB))<=8192 AND json_valid(selections_json) AND COALESCE(json_type(selections_json,'$.version')='integer' AND json_extract(selections_json,'$.version')=1 AND json_type(selections_json,'$.ids')='array' AND json_array_length(selections_json,'$.ids')<=8 AND json_extract(selections_json,'$.workspace_id')=workspace_id,0)),revision INTEGER NOT NULL CHECK(revision>0),PRIMARY KEY(session_id,workspace_id))");
+        db.execute("CREATE TABLE run_skills(run_id TEXT PRIMARY KEY REFERENCES runs(id),workspace_id TEXT NOT NULL,selections_json TEXT NOT NULL CHECK(length(CAST(selections_json AS BLOB))<=8192 AND json_valid(selections_json) AND COALESCE(json_type(selections_json,'$.version')='integer' AND json_extract(selections_json,'$.version')=1 AND json_type(selections_json,'$.ids')='array' AND json_array_length(selections_json,'$.ids')<=8 AND json_extract(selections_json,'$.workspace_id')=workspace_id,0)),revision INTEGER NOT NULL CHECK(revision>0))");
+        db.execute("CREATE TRIGGER run_skill_identity BEFORE UPDATE OF run_id,workspace_id ON run_skills BEGIN SELECT RAISE(ABORT,'run skill scope is immutable'); END");
+        db.execute("CREATE TRIGGER run_skill_insert_owner BEFORE INSERT ON run_skills WHEN NOT EXISTS(SELECT 1 FROM runs WHERE id=NEW.run_id AND state='running') BEGIN SELECT RAISE(ABORT,'run skill initialization requires its running owner'); END");
+        db.execute("CREATE TRIGGER run_skill_update_owner BEFORE UPDATE OF selections_json,revision ON run_skills WHEN NOT EXISTS(SELECT 1 FROM runs WHERE id=OLD.run_id AND state='running') OR NEW.revision!=OLD.revision+1 BEGIN SELECT RAISE(ABORT,'run skill change requires its running owner and next revision'); END");
+    }
     if(version<12){
         // All referencing budget foreign keys are NO ACTION, never CASCADE.
         // Deferral permits an atomic replacement with exactly the same keys;
@@ -665,6 +684,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("PRAGMA defer_foreign_keys=OFF");
         if(integer(db.execute("PRAGMA defer_foreign_keys").rows.at(0).at(0))!=0||integer(db.execute("PRAGMA foreign_keys").rows.at(0).at(0))!=1)throw DatabaseError("Context migration foreign key enforcement differs");
     }
+    if(version<13)db.execute("PRAGMA user_version=13");
     transaction.commit(); db.execute("PRAGMA journal_mode=WAL"); db.execute("PRAGMA synchronous=FULL");
 }
 Repository::~Repository()=default;
@@ -1558,12 +1578,56 @@ Run Repository::retire_graph_run(const std::string& id,RunState next,const std::
 std::vector<Run> Repository::children(const std::string& id){graph_run(id);std::vector<Run> result;for(const auto& row:impl_->database.execute("SELECT id FROM runs WHERE parent_run_id=? ORDER BY rowid",{id}).rows)result.push_back(run(text(row[0])));return result;}
 std::vector<Message> Repository::run_history(const std::string& id){const auto current=run(id);if(current.parent_id.empty())return history(current.session_id);std::vector<Message> result;for(const auto& row:impl_->database.execute("SELECT seq,role,payload FROM messages WHERE execution_run_id=? ORDER BY seq",{id}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2])});return result;}
 std::vector<Event> Repository::graph_events(const std::string& id,std::int64_t after){if(after<0)throw std::invalid_argument("Negative cursor");graph_run(id);std::vector<Event> result;for(const auto& row:impl_->database.execute("SELECT e.seq,e.run_id,e.kind,e.payload FROM events e JOIN runs r ON r.id=e.run_id WHERE (r.id=? OR r.parent_run_id=?) AND e.seq>? ORDER BY e.seq",{id,id,after}).rows)result.push_back({integer(row[0]),text(row[1]),text(row[2]),text(row[3])});return result;}
-void Repository::record_tool_turn(const std::string& id,const std::string& assistant_json,const std::vector<std::string>& tool_json) {
+SkillSelections Repository::run_skills(const std::string& id){
+    run(id);const auto rows=impl_->database.execute("SELECT workspace_id,selections_json FROM run_skills WHERE run_id=?",{id}).rows;if(rows.empty())throw NotFound("Run skills not initialized");
+    auto result=skill_selections(text(rows[0][1]));if(result.workspace_id!=text(rows[0][0]))throw DatabaseError("Saved run skill workspace differs");return result;
+}
+SkillSelections Repository::initialize_run_skills(const std::string& id,const std::string& workspace){
+    SkillSelections initial{workspace,{}};validate_skill_selections(initial);auto& db=impl_->database;Transaction tx(db);const auto current=run(id);
+    if(current.state!=RunState::running||current.graph_root)throw Conflict("Skills require a running agent owner");
+    if(!db.execute("SELECT run_id FROM run_skills WHERE run_id=?",{id}).rows.empty()){auto saved=run_skills(id);if(saved.workspace_id!=workspace)throw Conflict("Saved run skills belong to another workspace");tx.commit();return saved;}
+    bool inherited=false;
+    if(!current.parent_id.empty()&&!db.execute("SELECT run_id FROM run_skills WHERE run_id=?",{current.parent_id}).rows.empty()){
+        initial=run_skills(current.parent_id);if(initial.workspace_id!=workspace)throw Conflict("Parent skill workspace differs");inherited=true;
+    }else{const auto rows=db.execute("SELECT selections_json FROM session_skills WHERE session_id=? AND workspace_id=?",{current.session_id,workspace}).rows;if(!rows.empty())initial=skill_selections(text(rows[0][0]));}
+    db.execute("INSERT INTO run_skills VALUES(?,?,?,1)",{id,workspace,skill_selections_json(initial)});
+    if(!initial.ids.empty())impl_->event(id,"skill.selection.restored",Json{{"workspace_id",workspace},{"ids",initial.ids},{"source",inherited?"parent_run":"session"}}.dump());
+    tx.commit();return initial;
+}
+void Repository::record_tool_turn(const std::string& id,const std::string& assistant_json,const std::vector<std::string>& tool_json,const std::optional<SkillSelections>& skills) {
     if(tool_json.empty() || tool_json.size()>64) throw std::invalid_argument("Invalid tool result batch");
     auto& db=impl_->database;Transaction transaction(db);const auto current=run(id);
     if(current.state!=RunState::running) throw Conflict("Run is not running");
     if(!db.execute("SELECT id FROM dynamic_plan_calls WHERE root_run_id=? AND state IN ('accepted','report_ready')",{id}).rows.empty())throw Conflict("Signed planning turns require their typed commit");
     const auto actual=Json::parse(object_json(assistant_json,8*1024*1024));if(actual.contains("tool_calls"))for(const auto& call:actual["tool_calls"])if(call.value("name",std::string{})=="plan_tasks"||call.value("name",std::string{})=="revise_plan")throw Conflict("Planning conversation turns require their accepted signed ledger");
+    if(skills){
+        const auto selected_json=skill_selections_json(*skills);const auto previous=run_skills(id);if(previous.workspace_id!=skills->workspace_id)throw Conflict("Skill tool turn workspace changed");
+        std::map<std::string,Json> results;for(const auto& raw:tool_json){const auto item=Json::parse(object_json(raw,8*1024*1024));if(!item.contains("tool_call_id")||!item["tool_call_id"].is_string()||!results.emplace(item["tool_call_id"].get<std::string>(),item).second)throw std::invalid_argument("Skill tool turn requires unique actual result identities");}
+        if(!actual.contains("tool_calls")||!actual["tool_calls"].is_array()||actual["tool_calls"].size()!=results.size())throw std::invalid_argument("Skill tool turn requires all matched native calls and results");
+        std::set<std::string> call_ids;for(const auto& call:actual["tool_calls"]){
+            if(!call.is_object()||!call.contains("id")||!call["id"].is_string()||call["id"].get_ref<const std::string&>().empty()||!call_ids.insert(call["id"].get<std::string>()).second||!call.contains("name")||!call["name"].is_string()||!call.contains("arguments")||!call["arguments"].is_string()||!results.contains(call["id"].get<std::string>())||!results.at(call["id"].get<std::string>()).contains("content")||!results.at(call["id"].get<std::string>())["content"].is_string())throw std::invalid_argument("Invalid matched native skill tool batch");
+        }
+        auto expected=previous;
+        if(actual.contains("tool_calls"))for(const auto& call:actual["tool_calls"])if(call.value("name",std::string{})=="load_skill"){
+            const auto found=results.find(call.at("id").get<std::string>());if(found==results.end()||!found->second.contains("content")||!found->second["content"].is_string())throw std::invalid_argument("Skill activation lacks its matching tool result");
+            const auto output=Json::parse(object_json(found->second["content"].get<std::string>(),32768));
+            if(output.contains("activation")){
+                const auto arguments=Json::parse(object_json(call.at("arguments").get<std::string>(),4096));
+                if(output["activation"]!="requested_for_next_model_request"||output.value("effect_permission",true)||arguments.size()!=1||!arguments.contains("id")||!arguments["id"].is_string()||!output.contains("skill")||!output["skill"].is_object()||output["skill"].value("id",std::string{})!=arguments["id"].get<std::string>()||!output["skill"].value("model_invocable",false))throw std::invalid_argument("Invalid native skill activation acknowledgement");
+                const auto selected=arguments["id"].get<std::string>();if(std::find(expected.ids.begin(),expected.ids.end(),selected)==expected.ids.end())expected.ids.push_back(selected);
+            }
+        }
+        if(skill_selections_json(expected)!=selected_json)throw Conflict("Selection change lacks a committed successful native activation");
+        if(selected_json!=skill_selections_json(previous)){
+            changed_one(db.execute("UPDATE run_skills SET selections_json=?,revision=revision+1 WHERE run_id=? AND workspace_id=?",{selected_json,id,skills->workspace_id}));
+            if(current.parent_id.empty()){
+                const auto rows=db.execute("SELECT selections_json,revision FROM session_skills WHERE session_id=? AND workspace_id=?",{current.session_id,skills->workspace_id}).rows;
+                if(rows.empty()){if(!previous.ids.empty())throw Conflict("Session skill state disappeared");db.execute("INSERT INTO session_skills VALUES(?,?,?,1)",{current.session_id,skills->workspace_id,selected_json});}
+                else{if(text(rows[0][0])!=skill_selections_json(previous))throw Conflict("Session skill state changed outside its running owner");changed_one(db.execute("UPDATE session_skills SET selections_json=?,revision=revision+1 WHERE session_id=? AND workspace_id=? AND revision=?",{selected_json,current.session_id,skills->workspace_id,integer(rows[0][1])}));}
+            }
+            impl_->event(id,"skill.selection.changed",Json{{"workspace_id",skills->workspace_id},{"ids",skills->ids},{"session_selection",current.parent_id.empty()}}.dump());
+        }
+    }
     impl_->message(current,"assistant",assistant_json);
     for(const auto& json:tool_json) impl_->message(current,"tool",json);
     impl_->event(id,"conversation.tool_turn","{}");transaction.commit();
@@ -1616,7 +1680,7 @@ Run Repository::transition(const std::string& id,RunState expected,RunState next
     transaction.commit(); result.state=next; return result;
 }
 Event Repository::append_event(const std::string& id,const std::string& kind,const std::string& json) {
-    identifier(kind); if(kind.rfind("context.",0)==0 || kind.rfind("run.",0)==0 || kind.rfind("operation.",0)==0 || kind.rfind("delegation.",0)==0 || kind.rfind("budget.",0)==0 || kind.rfind("plan.",0)==0) throw std::invalid_argument("Lifecycle events require their owning repository operation");
+    identifier(kind); if(kind.rfind("context.",0)==0 || kind.rfind("run.",0)==0 || kind.rfind("operation.",0)==0 || kind.rfind("delegation.",0)==0 || kind.rfind("budget.",0)==0 || kind.rfind("plan.",0)==0 || kind.rfind("skill.",0)==0) throw std::invalid_argument("Lifecycle events require their owning repository operation");
     Transaction transaction(impl_->database);
     if(terminal(run(id).state)) throw Conflict("Run is terminal");
     auto result=impl_->event(id,kind,json); transaction.commit(); return result;

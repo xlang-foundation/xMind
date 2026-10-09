@@ -418,6 +418,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             }
             persistence_.append_event(id,"agent.repository_instructions",Json{{"scope","workspace_root"},{"snapshot","run_start"},{"sources",std::move(metadata)}}.dump()).get();
             repository_context=std::make_unique<RepositoryInstructionContext>(*workspace_,sources);
+            repository_context->skills().restore(persistence_.initialize_run_skills(id,workspace_->identity()).get(),token);
             instructions+=repository_context->prepare(token);
         }
         if(!settings_.instruction_policy.instructions.empty()){instructions.append(instruction_prefix);instructions+=settings_.instruction_policy.instructions;}
@@ -667,7 +668,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             // The assistant call and all matching results commit together; a
             // cancelled/crashed read batch cannot leave dangling call messages.
             const bool delegated=std::any_of(response.tool_calls.begin(),response.tool_calls.end(),[](const auto& call){return call.name=="delegate_tasks";});
-            try{persistence_.record_tool_turn(id,reply.dump(),std::move(results)).get();}
+            try{persistence_.record_tool_turn(id,reply.dump(),std::move(results),repository_context?std::optional<SkillSelections>{repository_context->skills().selections()}:std::nullopt).get();}
             catch(...){if(delegated)throw DelegationOutcomeUnrecorded("Delegation parent conversation could not be committed; recovery is required");throw;}
             if(!context_manager)for(auto& next:continuation) request.messages.push_back(std::move(next));
         }
@@ -686,6 +687,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
       catch(const DynamicHumanExpired&){return terminate(RunState::failed,{{"reason","human_input_expired"}});}
       catch(const DynamicPlanUnavailable&){return terminate(RunState::failed,{{"reason","dynamic_configuration_changed"}});}
       catch(const PermissionCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
+      catch(const ToolGuidanceChanged&) {return terminate(RunState::failed,{{"reason","skill_context_unavailable"}});}
       catch(const ToolMutationUncertain&) {return terminate(RunState::failed,{{"reason","file_effect_uncertain"}});}
       catch(const EditOutcomeUnrecorded&) {throw;} // Leave claim for recovery; AgentService degrades admission.
       catch(const McpOutcomeUnrecorded&) {throw;}

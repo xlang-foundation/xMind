@@ -122,6 +122,12 @@ std::pair<std::string,std::map<std::string,LocalSkill>> SkillContext::render(con
 std::string SkillContext::prepare(std::stop_token cancel){
     auto prepared=render(discover(cancel),requested_);delivered_=std::move(prepared.second);return std::move(prepared.first);
 }
+void SkillContext::restore(const SkillSelections& selections,std::stop_token cancel){
+    validate_skill_selections(selections);if(selections.workspace_id!=workspace_.identity())throw ToolAccessDenied("Saved skills belong to a different workspace");
+    const std::set<std::string> candidate(selections.ids.begin(),selections.ids.end());
+    render(discover(cancel),candidate);requested_=candidate;delivered_.clear();
+}
+SkillSelections SkillContext::selections() const{return {workspace_.identity(),std::vector<std::string>(requested_.begin(),requested_.end())};}
 bool SkillContext::ready(std::stop_token cancel) const{
     if(requested_.size()!=delivered_.size())return false;const auto catalogue=discover(cancel);
     for(const auto& selected:requested_){const auto previous=delivered_.find(selected),current=catalogue.find(selected);if(previous==delivered_.end()||current==catalogue.end()||!current->second.model_invocable||!same(previous->second,current->second))return false;}return true;

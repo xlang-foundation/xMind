@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/instruction_precondition.hpp"
+#include "agentflow/skill_records.hpp"
 #include <map>
 #include <set>
 #include <utility>
@@ -23,6 +24,8 @@ public:
     static std::vector<ModelToolDefinition> definitions();
     static LocalSkill parse(WorkspaceSnapshot source,const std::string& skill_id);
     std::string prepare(std::stop_token cancel={});
+    void restore(const SkillSelections& selections,std::stop_token cancel={});
+    SkillSelections selections() const;
     std::string catalogue_json(std::stop_token cancel={}) const;
     std::string activate(const std::string& arguments,std::stop_token cancel={},std::size_t instruction_budget=49152);
     std::string activation_directory(const std::string& arguments,std::stop_token cancel={}) const;

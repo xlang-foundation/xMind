@@ -9,7 +9,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 const [executable,modules,stdlib]=process.argv.slice(2),execute=promisify(execFile);
 const folder=await mkdtemp(join(tmpdir(),'xmind-agent-')),workspace=join(folder,'workspace');
-let failure,requests=0,skillRequests=0,skillCapacityRequests=0;
+let failure,requests=0,skillRequests=0,skillCapacityRequests=0,skillFollowRequests=0;
 const server=createServer((request,response)=>{
   let source='';request.on('data',data=>{source+=data;});request.on('end',()=>{
     try {
@@ -34,6 +34,12 @@ const server=createServer((request,response)=>{
         }else {assert.equal(turn,3);assert.equal(JSON.parse(body.messages.at(-1).content).content,'Actual native skill companion bytes\n');delta={content:'Synthetic skill conclusion after the actual native companion read.'};finish='stop';}
         response.write('data: '+JSON.stringify({choices:[{index:0,delta,finish_reason:finish}]})+'\n\n');response.write('data: '+JSON.stringify({choices:[],usage:{prompt_tokens:8,completion_tokens:5,total_tokens:13}})+'\n\n');response.end('data: [DONE]\n\n');return;
       }
+      if(request.url==='/skill-follow-up'){
+        const turn=++skillFollowRequests;assert.ok(body.messages[0].content.includes('Synthetic active skill body'));let delta,finish;
+        if(turn===1){assert.equal(body.messages.at(-1).role,'user');delta={tool_calls:[{index:0,id:'continued-skill-read',type:'function',function:{name:'read_file',arguments:'{"path":".agents/skills/inspect/helper.txt"}'}}]};finish='tool_calls';}
+        else{assert.equal(turn,2);assert.equal(JSON.parse(body.messages.at(-1).content).content,'Actual native skill companion bytes\n');delta={content:'Synthetic continued skill conclusion after actual companion read.'};finish='stop';}
+        response.write('data: '+JSON.stringify({choices:[{index:0,delta,finish_reason:finish}]})+'\n\n');response.end('data: [DONE]\n\n');return;
+      }
       if(request.url==='/claim'||request.url==='/delay') {response.write('data: '+JSON.stringify({choices:[{index:0,delta:{content:'Synthetic pending stream'}}]})+'\n\n');return;}
       const last=body.messages.at(-1);
       if(last.role==='tool') {
@@ -55,5 +61,5 @@ try {
   await mkdir(join(workspace,'.agents','skills','large'));await writeFile(join(workspace,'.agents','skills','large','SKILL.md'),'---\nname: large\ndescription: Synthetic instruction budget fixture\n---\nSynthetic oversized active skill body '+ 'x'.repeat(14500));
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:30000});
-  if(failure) throw failure;assert.equal(requests,14);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);process.stdout.write(result.stdout);
+  if(failure) throw failure;assert.equal(requests,16);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);process.stdout.write(result.stdout);
 } finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await rm(folder,{recursive:true,force:true});}
