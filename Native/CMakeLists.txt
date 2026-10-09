@@ -190,6 +190,19 @@ if(WIN32)
     "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:xmind_server>")
 endif()
 add_executable(xmind_persistence_demo demos/persistence_demo.cpp)
+
+# Primary product executable. Transitional launchers remain while installed
+# runtime manifests/client ownership are migrated; these share the same handlers.
+add_executable(xmind apps/xmind_main.cpp apps/server_main.cpp apps/cli_main.cpp apps/schema_worker_main.cpp)
+target_compile_definitions(xmind PRIVATE XMIND_UNIFIED_EXECUTABLE)
+target_include_directories(xmind PRIVATE include third_party/cpp-httplib third_party)
+target_link_libraries(xmind PRIVATE agentflow_http agentflow_instruction_configuration agentflow_json_schema agentflow_mcp_wire Threads::Threads)
+if(WIN32)
+  target_sources(xmind PRIVATE apps/admin_main.cpp)
+  target_link_libraries(xmind PRIVATE agentflow_runtime agentflow_process_configuration agentflow_mcp_configuration agentflow_mcp_effects agentflow_graph agentflow_owner_process agentflow_backend_owner_control agentflow_legacy_owner_process bcrypt ws2_32 crypt32)
+  add_custom_command(TARGET xmind POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+    "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:xmind>")
+endif()
 target_link_libraries(xmind_persistence_demo PRIVATE agentflow_core)
 if(WIN32)
   add_custom_command(TARGET xmind_persistence_demo POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
@@ -801,6 +814,21 @@ if(BUILD_TESTING)
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/http_cli_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>"
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_http_cli_contract PROPERTIES TIMEOUT 90)
+    if(WIN32)
+      add_test(NAME native_unified_program_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/unified_program_contract.mjs" "$<TARGET_FILE:xmind>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      add_test(NAME native_unified_patch_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_patch_http_contract.mjs" "$<TARGET_FILE:xmind>" "$<TARGET_FILE:xmind>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "unified")
+      add_test(NAME native_unified_graph_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/graph_service_http_contract.mjs" "$<TARGET_FILE:xmind>" "$<TARGET_FILE:xmind>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "unified")
+      add_test(NAME native_unified_mcp_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_mcp_http_contract.mjs" "$<TARGET_FILE:xmind>" "$<TARGET_FILE:xmind>" "$<TARGET_FILE:xmind>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "" "unified")
+      set_tests_properties(native_unified_program_contract native_unified_patch_http_contract native_unified_graph_http_contract native_unified_mcp_http_contract PROPERTIES TIMEOUT 90)
+    endif()
   else()
     message(WARNING "Node.js is required to run the independent HTTP/CLI contract")
   endif()

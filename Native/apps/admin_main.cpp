@@ -13,6 +13,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <fstream>
+#include <filesystem>
 #include <iostream>
 #include <map>
 #include <charconv>
@@ -94,20 +95,20 @@ int run_admin(int argc,char** argv){
         agentflow::PersistenceService store(options.at("--db"),{options.at("--modules"),options.at("--stdlib")});agentflow::McpConfigurationStore configurations(store);
         using Json=nlohmann::json;const std::string action=argv[command];
         if(action=="import-graphs" && command+2==argc){
-            std::ifstream file(argv[command+1],std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted graph catalog");std::string source;char byte;
+            std::ifstream file(std::filesystem::u8path(argv[command+1]),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted graph catalog");std::string source;char byte;
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Graph catalog exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted graph catalog");
             const auto catalog=agentflow::GraphCatalogStore(store).apply(source);auto graphs=Json::array();for(const auto& graph:catalog.entries)graphs.push_back({{"id",graph.id},{"revision",graph.revision},{"node_count",graph.plan.nodes().size()}});
             std::cout<<Json{{"catalog_revision",catalog.revision},{"graphs",std::move(graphs)},{"execution_available",false}}.dump()<<'\n';
         }else if(action=="import-instructions" && command+2==argc){
-            std::ifstream file(argv[command+1],std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted instruction configuration");std::string source;char byte;
+            std::ifstream file(std::filesystem::u8path(argv[command+1]),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted instruction configuration");std::string source;char byte;
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Instruction configuration exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted instruction configuration");
             const auto value=agentflow::AgentInstructionStore(store).apply(source);std::cout<<Json{{"revision",value.revision},{"byte_count",value.instructions.size()}}.dump()<<'\n';
         }else if(action=="import-processes" && command+2==argc){
-            std::ifstream file(argv[command+1],std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted process configuration");std::string source;char byte;
+            std::ifstream file(std::filesystem::u8path(argv[command+1]),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted process configuration");std::string source;char byte;
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Process configuration exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted process configuration");
             const auto values=agentflow::ProcessConfigurationStore(store).apply(source);Json metadata=Json::array();for(const auto& value:values)metadata.push_back({{"id",value.id},{"revision",value.revision}});std::cout<<Json{{"profiles",metadata}}.dump()<<'\n';
         }else if(action=="import-mcp" && command+2==argc){
-            std::ifstream file(argv[command+1],std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted MCP configuration");std::string source;char byte;
+            std::ifstream file(std::filesystem::u8path(argv[command+1]),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted MCP configuration");std::string source;char byte;
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("MCP configuration exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted MCP configuration");
             const auto values=configurations.apply(source);Json metadata=Json::array();for(const auto& value:values)metadata.push_back({{"id",value.id},{"revision",value.revision},{"enabled",value.enabled}});std::cout<<Json{{"servers",metadata}}.dump()<<'\n';
         }else if(action=="discover-mcp" && command+3==argc){
@@ -154,8 +155,10 @@ int run_admin(int argc,char** argv){
         store.close();return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }
+#if !defined(XMIND_UNIFIED_EXECUTABLE)
 int wmain(int argc,wchar_t** argv){
     std::vector<std::string> values;std::vector<char*> pointers;
     for(int i=0;i<argc;++i){const std::wstring value=argv[i];if(value.size()>32768)return 2;if(value.empty()){values.emplace_back();continue;}const int size=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0,nullptr,nullptr);if(size<=0)return 2;std::string utf8(size,'\0');if(WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),utf8.data(),size,nullptr,nullptr)!=size)return 2;values.push_back(std::move(utf8));}
     for(auto& value:values)pointers.push_back(value.data());return run_admin(argc,pointers.data());
 }
+#endif

@@ -5,6 +5,13 @@ browser and VS Code. The backend owns agents, tools, permissions, sessions and
 SQLite through embedded xlang3. The CLI reads command/event contracts and does
 not access the database or run a separate agent.
 
+The [product design](runtime-product-design.md) consolidates these roles into
+`xmind serve` and `xmind [--port PORT] [COMMAND ...]`. The native `xmind` target
+now shares the existing server/console/admin/schema handlers. Existing installed
+packages still use the older launchers pending a verified manifest and owner
+migration. Automatic console discovery/start and worker execution remain pending;
+the current console needs an existing authenticated backend.
+
 ## Multiline requests
 
 Use `/compose` to enter a multiline agent request, or `/compose GRAPH_ID` for

@@ -6,7 +6,7 @@
 #if defined(_WIN32)
 #include <windows.h>
 #endif
-int main(int argc,char**) {
+int run_schema_worker(int argc,char**) {
 #if defined(_WIN32)
     SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
 #endif
@@ -30,3 +30,6 @@ int main(int argc,char**) {
         std::cout<<reply.dump()<<'\n';std::cout.flush();return std::cout?0:2;
     }catch(...){return 2;}
 }
+#if !defined(XMIND_UNIFIED_EXECUTABLE)
+int main(int argc,char** argv){return run_schema_worker(argc,argv);}
+#endif

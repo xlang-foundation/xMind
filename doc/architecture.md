@@ -15,14 +15,13 @@ The platform combines xMind's general-agent and graph concepts with coding capab
 
 Coding has three OSS clients: native console CLI, HTML/browser UI and the VS Code extension. They use the same local xMind Server API and durable session/event contracts. Views render backend state; execution, tools, permissions, model routing and persistence remain in C++ with embedded xlang3.
 
-Managed local package upgrades still need a native ownership handoff that
-preserves the same profile database. The launcher now keeps the authenticated
-existing owner and reports pending backend changes, rather than implicitly
-creating an empty replacement database. Unknown owner outcomes fail explicitly.
-Local view contracts and an actual model-free native API comparison cover this
-retention boundary; generation migration remains incomplete. The
-[runtime handoff requirements](native-runtime-handoff.md) record this gap and its
-required admission, retirement, migration and multi-view acceptance boundaries.
+The installed 0.1.4 checkpoint completed an authenticated native owner upgrade
+in the existing TestProj profile, preserving all 22 messages and seven runs.
+The launcher retains the profile database and explicitly rejects unknown owner
+outcomes. [Installed evidence](native-file-patch.md) and the
+[runtime handoff contract](native-runtime-handoff.md) record the verified scope.
+The new unified executable still needs its own installed package/manifest and
+owner-migration acceptance; the older installation is not evidence of that step.
 
 ## xMind OSS specification — revised 2026-10-07
 

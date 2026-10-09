@@ -1,0 +1,23 @@
+{
+  "sdkRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+  "scope": "Existing official SDK shared-memory smoke: xlang3 script client, four parallel script clients and native C++ ImportRemote client. This is not xMind worker integration or a speed benchmark.",
+  "exitCode": 0,
+  "binaryHashes": {
+    "build/Release/xlang3_cpp_ipc_client.exe": "fbdad40552fb03982f39131e411781fbd10757ebe0477102220162d0054fa8e6",
+    "build/Release/xlang3.exe": "45e8581b7d235ad451b6fd1d5b3e1d31ac8ebe926c93f2eb9191cae8bef06e9b",
+    "build/Release/xlang3_runtime.dll": "4c0959726dfdaf8c12321188da524808e516cf224bab5ae590b3bd05a4349c07"
+  },
+  "cpythonExecuted": false,
+  "benchmarkProcesses": 0,
+  "observedAt": "2026-10-09T21:51:48.789Z",
+  "sourceHashes": {
+    "tests/ipc/run_lrpc_smoke.ps1": "1c7bc8afc88acc6839f846175200de037e7b0938316e16f97f3f2d2752cd9d80",
+    "tests/ipc/server.py": "ae74c6c5d0083224b8408e3b008309f9b05c9e9197ed3a7b158291c47ed7ced0",
+    "tests/ipc/client.py": "b258c8a5c8e803dcc929e4842b568ecf07d18bd9b4d166fb0299460889cd7f78",
+    "tests/ipc/expected.out": "dd51f93d7a04fec19cda80aa25106426811ca64b9d1ed2a2aa2c1a7f93a4d927",
+    "tests/cpp/ipc_client.cpp": "f004a0a8d27df3b7695dcdd72e3b5e94da430d470c05a995d362b9e0722ac456",
+    "sdk/xlang3/cpp/runtime.h": "d4e29fd6b34aafbd4b32c4d930d7de09341cc031154966d4fb841399b57b7a00",
+    "sdk/xlang3/abi/xapi.h": "bbc0f4ac577e6ba246863be414eb46471d85337f38c8f452790277cc42797ba5"
+  },
+  "logSha256": "f80a6f7a8194572cd1133e249b77dbaee623f4aa50138edc726d5f17e1367616"
+}

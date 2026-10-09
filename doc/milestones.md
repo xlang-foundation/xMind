@@ -1,12 +1,41 @@
 # Reviewable milestones
 
+The primary **`xmind.exe`** now executes the existing native backend, console,
+admin and private schema handlers through one program. The complete local
+**107-contract gate passed in 233.55 seconds** with **2,393 unchanged mapped
+inputs**. The four unified contracts cover actual patch approvals/effects,
+graph execution, MCP subprocess effects, Unicode configuration paths and
+embedded-xlang3 SQLite restart. Synthetic provider fixtures remain explicitly
+scoped. The first focused attempt exposed a Windows Unicode config-open defect;
+all eight admin/server readers were corrected and the original failure retained.
+[Complete native evidence](evidence/native-unified-local.json).
+
+The exact tested `xmind.exe` hash also completed **two real OpenAI gpt-6.1-sol
+console runs**: literal multiline mixed add/update/move/delete and a partial
+two-file patch with the second file denied. Five actual approved effects and
+one denied effect matched native receipts and disk hashes. Both prompt/history
+records survived an actual backend restart unchanged, and six actual provider
+usage records were retained. [Live console evidence](evidence/native-unified-cli-live.json).
+
+The pinned xlang3 SDK independently passed its official shared-memory script,
+parallel-client and native C++ smoke without a rebuild or CPython. This is a
+transport prerequisite, not integrated agent-worker or performance acceptance.
+[IPC evidence](evidence/xlang3-ipc-foundation-local.json) and
+[worker design](native-ipc-worker-design.md).
+
+The installed client still uses its existing 0.1.4 runtime generation. A
+consolidated package/manifest, verified owner migration and automatic console
+bootstrap remain pending, along with UI SSE, authoring APIs and agent workers.
+
 The CLI multiline/composer source checkpoint passed the complete **103 native
 contracts in 215.71 seconds**, with 2,390 unchanged mapped inputs, plus **222
 extension / 41 browser** fixture tests. Native contracts exercise composed
 agent/graph prompts and discard boundaries; provider responses are synthetic.
 The first complete attempt also passed 103 tests but its source-freeze wrapper
 correctly rejected a concurrent extension version change; a fresh gate passed.
-No installed 0.1.5 rendering or live-provider multiline acceptance is claimed.
+That earlier source-only gate did not establish installed 0.1.5 rendering or
+live-provider multiline acceptance; the later live console evidence above is
+separate. Installed 0.1.5 rendering remains pending.
 [Frozen evidence](evidence/native-compose-local.json).
 
 The next product direction is [Agent Runtime + Coding Harness + Model
@@ -21,8 +50,9 @@ UI approvals and completed with matching native receipts, disk hashes and
 provider metrics. The packaged interactive CLI separately passed real mixed
 add/update/move/delete and partial denial, plus exact restart history. The
 archive audit checked 1,938 entries and 1,901 runtime files; the versioned
-client suites passed 222/41. Older browser-preview coverage, composer-height
-reset, CLI multiline input and full coding parity remain incomplete.
+client suites passed 222/41. The installed 0.1.4 composer and CLI retain their
+older behavior; the source fixes above have not been installed there. Older
+browser-preview coverage and full coding parity remain incomplete.
 [Package and live/installed evidence](native-file-patch.md).
 
 Native multi-file patch execution now passes the complete **103-contract local

@@ -717,10 +717,12 @@ int cli_main(int argc,char** argv) {
         std::cout<<result.dump(2)<<'\n';return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }
+#if !defined(XMIND_UNIFIED_EXECUTABLE)
 #if defined(_WIN32)
 int wmain(int argc,wchar_t** argv){
     try{std::vector<std::string> arguments;arguments.reserve(argc);for(int i=0;i<argc;i++)arguments.push_back(utf8_argument(argv[i]));std::vector<char*> pointers;for(auto& value:arguments)pointers.push_back(value.data());return cli_main(argc,pointers.data());}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }
 #else
 int main(int argc,char** argv){return cli_main(argc,argv);}
+#endif
 #endif

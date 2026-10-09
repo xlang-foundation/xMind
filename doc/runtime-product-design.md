@@ -123,6 +123,9 @@ after the actual SDK API and cross-process ownership rules are verified. It
 carries the same versioned command/event contracts and authorization as HTTP.
 Browser JavaScript cannot directly attach to that native transport; the browser
 adapter bridges it if selected. No performance claim is made before measurement.
+The existing pinned SDK now passed its official script/parallel/native IPC smoke;
+[worker integration and remaining acceptance](native-ipc-worker-design.md) remain
+separate from that transport foundation.
 
 Worker mode offers process/crash isolation and resource limits. Scheduling,
 approval authority, durable state and effect receipts remain runtime-owned.
@@ -140,6 +143,19 @@ Current native components include single-agent coding/tool execution, registered
 agent/tool/human graphs, bounded dynamic dependency planning, provider adapters,
 encrypted configuration and embedded-xlang3 SQLite. See the scoped evidence in
 [milestones.md](milestones.md); this is not a claim of complete feature parity.
+
+The primary native `xmind` target now provides real `serve`, console, `admin`
+and private `schema-worker` modes using the same existing handlers. Dedicated
+contracts run actual patches, graphs and MCP through that same executable.
+Unicode config readers use filesystem UTF-8 paths. The console currently
+attaches to an existing authenticated backend using `--port` (default 8765);
+it does not yet discover or start a managed workspace profile. Transitional
+launchers remain while the installed manifest/owner protocol is migrated.
+The [107-contract gate](evidence/native-unified-local.json) binds unchanged source
+inputs and binaries. [Two real provider console runs](evidence/native-unified-cli-live.json)
+also verify literal multiline patch execution, partial denial, disk receipts,
+actual usage and exact restart history through that same tested executable.
+These are local native/console checks, not installed UI/package acceptance.
 
 Pending delivery includes the consolidated installed executable and automatic
 console bootstrap, HTTP SSE for the shared UI event feed (currently 500 ms

@@ -14,6 +14,12 @@ SchemaWorkerExecutable adjacent_worker() {
     if(!count || count>=path.size())throw SchemaEvaluationFailure("Cannot locate the native schema worker");path.resize(count);
     const auto directory=std::filesystem::path(path).parent_path();
     const auto encode=[](const std::filesystem::path& value){const auto bytes=value.u8string();return std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size());};
+    // The unified product launches its own bounded schema mode. Transitional
+    // launchers/tests retain their adjacent helper until package migration.
+    const auto image=std::filesystem::path(path);
+    const auto leaf=image.filename().wstring();
+    if(CompareStringOrdinal(leaf.data(),static_cast<int>(leaf.size()),L"xmind.exe",9,TRUE)==CSTR_EQUAL)
+        return {encode(image),encode(directory),{"schema-worker"}};
     return {encode(directory/"xmind_schema_worker.exe"),encode(directory),{}};
 }
 }

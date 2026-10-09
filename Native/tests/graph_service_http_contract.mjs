@@ -11,7 +11,9 @@ import {tmpdir} from 'node:os';
 import {join,resolve,dirname,basename} from 'node:path';
 import {randomBytes} from 'node:crypto';
 const execute=promisify(execFile);
-const [serverExe,cliExe,modules,stdlib]=process.argv.slice(2);
+const [serverExe,cliExe,modules,stdlib,programMode]=process.argv.slice(2);
+const unified=programMode==='unified';
+assert.ok(programMode===undefined||unified,'Unknown native program mode');
 const root=await mkdtemp(join(tmpdir(),'xmind-graph-service-')),workspace=join(root,'work'),database=join(root,'state.sqlite');
 const token=randomBytes(32).toString('hex'),modelKey='synthetic-graph-service-model-key';
 const env={...process.env,XMIND_AUTH_TOKEN:token};
@@ -36,19 +38,19 @@ const model=createServer((request,response)=>{
 async function start(withModel=false){
  const args=['--db',database,'--modules',modules,'--stdlib',stdlib,'--port','0','--workspace',workspace,'--model-tools','supported','--workspace-edits','approved','--workers','1','--queue-limit','2','--graphs-config',join(root,'graphs.json')];
  if(withModel)args.push('--model','fixture-model','--model-endpoint',`http://127.0.0.1:${model.address().port}/chat`,'--model-stream-usage','supported');
- child=spawn(serverExe,args,{env:{...env,XMIND_API_KEY:withModel?modelKey:''},windowsHide:true});let out='',err='';child.stderr.on('data',data=>err+=data);
+ child=spawn(serverExe,unified?['serve',...args]:args,{env:{...env,XMIND_API_KEY:withModel?modelKey:''},windowsHide:true});let out='',err='';child.stderr.on('data',data=>err+=data);
  port=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Graph server readiness timed out')),10000);child.once('error',error=>{clearTimeout(timer);reject(error);});child.once('exit',code=>{clearTimeout(timer);reject(new Error(`Graph server exited ${code}: ${err}`));});child.stdout.on('data',data=>{out+=data;const match=/listening on http:\/\/127\.0\.0\.1:(\d+)/.exec(out);if(match){clearTimeout(timer);resolve(Number(match[1]));}});});
 }
 async function stop(){if(!child||child.exitCode!==null)return;const finished=new Promise(resolve=>child.once('exit',resolve));child.kill();await finished;child=undefined;}
 async function request(path,body,headers={}){const response=await fetch(`http://127.0.0.1:${port}${path}`,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+token,...(body===undefined?{}:{'Content-Type':'application/json'}),...headers},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(10000)});return {status:response.status,data:await response.json()};}
-async function cli(...args){const result=await execute(cliExe,[String(port),...args],{env,windowsHide:true,timeout:12000});return JSON.parse(result.stdout);}
+async function cli(...args){const result=await execute(cliExe,[...(unified?['--port']:[]),String(port),...args],{env,windowsHide:true,timeout:12000});return JSON.parse(result.stdout);}
 async function scriptedChat(commands,expectedExit=0){
- const process=spawn(cliExe,[String(port),'chat'],{env,windowsHide:true});let output='',errors='';process.stdout.on('data',bytes=>output+=bytes);process.stderr.on('data',bytes=>errors+=bytes);
+ const process=spawn(cliExe,[...(unified?['--port']:[]),String(port),'chat'],{env,windowsHide:true});let output='',errors='';process.stdout.on('data',bytes=>output+=bytes);process.stderr.on('data',bytes=>errors+=bytes);
  const timer=setTimeout(()=>process.kill(),12000),ended=new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});});process.stdin.end(commands.join('\n')+'\n');
  const result=await ended;assert.equal(result.signal,null,errors);assert.equal(result.code,expectedExit,errors);return {records:output.trim().split('\n').filter(Boolean).map(line=>JSON.parse(line)),errors};
 }
 async function interactiveGraph(id,mode='input'){
- const process=spawn(cliExe,[String(port),'chat'],{env,windowsHide:true}),records=[];let pending='',errors='',failure,foreignSent=false,raced=false;
+ const process=spawn(cliExe,[...(unified?['--port']:[]),String(port),'chat'],{env,windowsHide:true}),records=[];let pending='',errors='',failure,foreignSent=false,raced=false;
  process.stderr.on('data',bytes=>errors+=bytes);process.stdout.on('data',bytes=>{pending+=bytes;let newline;while((newline=pending.indexOf('\n'))>=0){const line=pending.slice(0,newline);pending=pending.slice(newline+1);try{const record=JSON.parse(line);records.push(record);
   if(record.type==='graph_human_review'){assert.equal(record.root_run_id,id);assert.ok(Number.isSafeInteger(record.checkpoint_revision)&&record.checkpoint_revision>0);assert.ok(record.steps.length);
    if(mode==='detach')process.stdin.end('/exit\n');else if(mode==='cancel')process.stdin.write('/cancel\n');else if(mode==='race'&&!raced){raced=true;assert.equal(record.steps[0].node_id,'first.answer');request('/v1/graph-runs/'+id+'/human/first.answer',{input:{accepted:true},expected_checkpoint_revision:record.checkpoint_revision}).then(result=>{assert.equal(result.status,200);process.stdin.write('/input first.answer {"accepted":false}\n');}).catch(error=>{failure=error;process.kill();});}else if(mode!=='race'&&!foreignSent){foreignSent=true;process.stdin.write('/input foreign-fixture-node {}\n');}else {const node=record.steps[0].node_id;assert.ok(['first.answer','second.answer'].includes(node));process.stdin.write('/input '+node+' '+JSON.stringify(node==='first.answer'?{accepted:true}:{path:'left.txt'})+'\n');}
@@ -58,7 +60,7 @@ async function interactiveGraph(id,mode='input'){
  }catch(error){failure=error;process.kill();}}});
  const timer=setTimeout(()=>process.kill(),12000),ended=new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});});process.stdin.write('/graph-watch '+id+'\n');const result=await ended;if(failure)throw failure;assert.equal(result.signal,null,errors);assert.equal(result.code,mode==='detach'?1:mode==='cancel'?2:0,errors);assert.ok(!records.some(record=>record.type==='run'),'Attachment must not admit another run');assert.equal(records.find(record=>record.type==='run_attached').run.id,id);return {records,errors};
 }
-function observe(id,after=0){const process=spawn(cliExe,[String(port),'graph-watch',id,String(after)],{env,windowsHide:true}),events=[];let pending='',error='';process.stdout.on('data',bytes=>{pending+=bytes;const lines=pending.split('\n');pending=lines.pop();for(const line of lines)if(line.trim())events.push(JSON.parse(line));});process.stderr.on('data',bytes=>error+=bytes);const ended=new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>yes({code,signal,error}));});const result={process,events,ended};observers.push(result);return result;}
+function observe(id,after=0){const process=spawn(cliExe,[...(unified?['--port']:[]),String(port),'graph-watch',id,String(after)],{env,windowsHide:true}),events=[];let pending='',error='';process.stdout.on('data',bytes=>{pending+=bytes;const lines=pending.split('\n');pending=lines.pop();for(const line of lines)if(line.trim())events.push(JSON.parse(line));});process.stderr.on('data',bytes=>error+=bytes);const ended=new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>yes({code,signal,error}));});const result={process,events,ended};observers.push(result);return result;}
 async function waitEvent(observer,predicate){const deadline=Date.now()+10000;while(!observer.events.some(predicate)){if(observer.process.exitCode!==null||observer.process.signalCode!==null)throw new Error('Graph observer exited before expected event');if(Date.now()>=deadline)throw new Error('Graph observer event deadline');await new Promise(resolve=>setTimeout(resolve,10));}}
 async function stopObserver(observer){if(observer.process.exitCode===null&&observer.process.signalCode===null)observer.process.kill();return observer.ended;}
 async function state(id,wanted){const deadline=Date.now()+10000;for(;;){const result=await request('/v1/graph-runs/'+id);assert.equal(result.status,200);if(result.data.run.state===wanted)return result.data;if(['failed','cancelled','completed'].includes(result.data.run.state)&&result.data.run.state!==wanted)throw new Error('Unexpected graph retirement: '+result.data.run.state);if(Date.now()>=deadline)throw new Error('Graph did not reach '+wanted);await new Promise(resolve=>setTimeout(resolve,5));}}

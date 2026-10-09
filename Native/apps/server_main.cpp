@@ -10,6 +10,7 @@
 #include <random>
 #include <sstream>
 #include <fstream>
+#include <filesystem>
 #if defined(_WIN32)
 #include "agentflow/agent_service.hpp"
 #include "agentflow/provider_setup.hpp"
@@ -23,7 +24,6 @@
 #include "agentflow/process_configuration.hpp"
 #include "agentflow/backend_owner_control.hpp"
 #include "agentflow/workspace_tools.hpp"
-#include <filesystem>
 #define NOMINMAX
 #include <windows.h>
 #include <bcrypt.h>
@@ -118,12 +118,12 @@ int run_server(int argc,char** argv) {
         agentflow::PersistenceService persistence(options.at("--db"),{options.at("--modules"),options.at("--stdlib")},1024,bootstrap,legacy);
         agentflow::AgentInstructionStore instruction_configurations(persistence);agentflow::AgentInstructionPolicy instruction_policy;
         if(options.contains("--instructions-config")) {
-            std::ifstream file(options.at("--instructions-config"),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted instruction configuration file");std::string source;char byte;
+            std::ifstream file(std::filesystem::u8path(options.at("--instructions-config")),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted instruction configuration file");std::string source;char byte;
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Instruction configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted instruction configuration file");instruction_policy=instruction_configurations.apply(source);
         }else instruction_policy=instruction_configurations.load();
 #if defined(_WIN32)
         if(options.contains("--graphs-config")) {
-            std::ifstream file(options.at("--graphs-config"),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted graph catalog");
+            std::ifstream file(std::filesystem::u8path(options.at("--graphs-config")),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted graph catalog");
             std::string source;char byte;while(file.get(byte)){if(source.size()>=262144)throw std::invalid_argument("Graph catalog exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted graph catalog");
             agentflow::GraphCatalogStore(persistence).apply(source);
         }
@@ -139,14 +139,14 @@ int run_server(int argc,char** argv) {
         agentflow::McpConfigurationStore mcp_configurations(persistence);
         std::vector<agentflow::McpServerSetting> mcp_settings;
         if(options.contains("--mcp-config")) {
-            std::ifstream file(options.at("--mcp-config"),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted MCP configuration file");
+            std::ifstream file(std::filesystem::u8path(options.at("--mcp-config")),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted MCP configuration file");
             std::string source;char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("MCP configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted MCP configuration file");
             mcp_settings=mcp_configurations.apply(source);
         }else mcp_settings=mcp_configurations.load();
         agentflow::ProcessConfigurationStore process_configurations(persistence);
         std::vector<agentflow::ProcessProfile> process_profiles;
         if(options.contains("--process-config")) {
-            std::ifstream file(options.at("--process-config"),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted process configuration file");
+            std::ifstream file(std::filesystem::u8path(options.at("--process-config")),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted process configuration file");
             std::string source;char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Process configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted process configuration file");process_profiles=process_configurations.apply(source);
         }else process_profiles=process_configurations.load();
         for(const auto& item:process_profiles)process_metadata.push_back({item.id,item.revision,item.max_timeout.count()});
@@ -260,8 +260,10 @@ int run_server(int argc,char** argv) {
         return ok?0:1;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }
+#if !defined(XMIND_UNIFIED_EXECUTABLE)
 #if defined(_WIN32)
 int wmain(int argc,wchar_t** argv){std::vector<std::string> values;std::vector<char*> pointers;for(int i=0;i<argc;++i){const std::wstring value=argv[i];if(value.size()>32768)return 2;const int size=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0,nullptr,nullptr);if(size<=0)return 2;std::string utf8(size,'\0');if(WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),utf8.data(),size,nullptr,nullptr)!=size)return 2;values.push_back(std::move(utf8));}for(auto& value:values)pointers.push_back(value.data());return run_server(argc,pointers.data());}
 #else
 int main(int argc,char** argv){return run_server(argc,argv);}
+#endif
 #endif

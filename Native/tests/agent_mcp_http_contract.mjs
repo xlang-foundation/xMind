@@ -9,7 +9,9 @@ import {join,resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomBytes} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
-const [serverExe,cliExe,adminExe,modules,stdlib,sdkEra]=process.argv.slice(2);
+const [serverExe,cliExe,adminExe,modules,stdlib,sdkEra,programMode]=process.argv.slice(2);
+const unified=programMode==='unified';
+assert.ok(programMode===undefined||unified,'Unknown native program mode');
 const folder=await mkdtemp(join(tmpdir(),'xmind-agent-mcp-')),workspace=join(folder,'workspace');
 const db=join(folder,'state.sqlite'),effect=join(workspace,'effect.txt'),marker=join(folder,'marker');
 if(sdkEra&&!['modern','legacy'].includes(sdkEra))throw new Error('Unknown SDK fixture era');
@@ -36,13 +38,13 @@ const peer=createServer((request,response)=>{
   });
 });
 async function api(path,body){const response=await fetch(`http://127.0.0.1:${port}${path}`,{method:body===undefined?'GET':'POST',headers:{Authorization:`Bearer ${token}`,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(5000)});assert.ok(response.ok,await response.clone().text());return response.json();}
-function cli(...args){const result=spawnSync(cliExe,[String(port),...args],{env,encoding:'utf8',windowsHide:true,timeout:5000});assert.equal(result.status,0,result.stderr);assert.equal(result.stdout.includes(secret),false);return JSON.parse(result.stdout);}
-function admin(args,privateEnv=env){const result=spawnSync(adminExe,['--db',db,'--modules',modules,'--stdlib',stdlib,...args],{env:privateEnv,encoding:'utf8',windowsHide:true,timeout:10000});assert.equal(result.status,0,result.stderr);assert.equal((result.stdout+result.stderr).includes(secret),false);return JSON.parse(result.stdout);}
+function cli(...args){const result=spawnSync(cliExe,[...(unified?['--port']:[]),String(port),...args],{env,encoding:'utf8',windowsHide:true,timeout:5000});assert.equal(result.status,0,result.stderr);assert.equal(result.stdout.includes(secret),false);return JSON.parse(result.stdout);}
+function admin(args,privateEnv=env){const result=spawnSync(adminExe,[...(unified?['admin']:[]),'--db',db,'--modules',modules,'--stdlib',stdlib,...args],{env:privateEnv,encoding:'utf8',windowsHide:true,timeout:10000});assert.equal(result.status,0,result.stderr);assert.equal((result.stdout+result.stderr).includes(secret),false);return JSON.parse(result.stdout);}
 async function until(read,predicate){const deadline=Date.now()+10000;while(Date.now()<deadline){const value=await read();if(predicate(value))return value;if(peerError)throw peerError;await delay(10);}throw new Error(`State deadline: ${errors}`);}
 async function start(model=true){
   const args=['--db',db,'--modules',modules,'--stdlib',stdlib,'--port','0'];
   if(model)args.push('--model','synthetic-mcp-protocol-model','--model-stream-usage','supported','--model-endpoint',`http://127.0.0.1:${peer.address().port}/chat`,'--model-tools','supported','--workspace',workspace);
-  child=spawn(serverExe,args,{env,windowsHide:true});child.stderr.on('data',data=>{errors+=data;});
+  child=spawn(serverExe,unified?['serve',...args]:args,{env,windowsHide:true});child.stderr.on('data',data=>{errors+=data;});
   port=await new Promise((resolve,reject)=>{let output='';const timer=setTimeout(()=>reject(new Error(`Readiness deadline: ${errors}`)),10000);child.on('error',error=>{clearTimeout(timer);reject(error);});child.once('exit',code=>{clearTimeout(timer);reject(new Error(`Server exited ${code}: ${errors}`));});child.stdout.on('data',data=>{output+=data;const match=/listening on http:\/\/127\.0\.0\.1:(\d+)/.exec(output);if(match){clearTimeout(timer);resolve(Number(match[1]));}});});
 }
 async function stop(){if(child&&child.exitCode===null){const exited=new Promise(resolve=>child.once('exit',resolve));child.kill();await exited;}}
