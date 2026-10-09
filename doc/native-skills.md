@@ -127,8 +127,14 @@ source paths, sizes and hashes alongside repository guidance. It recognizes MCP
 when those bindings are malformed and sends only the operation id and decision.
 Its new DOM contract covers all four effect adapters, safe literal rendering,
 workspace mismatch, bad hashes/ids/counts and inspection of uncertain outcomes
-without offering another approval. These view changes are source-only until the
-isolated view gate and installed/rendered acceptance pass.
+without offering another approval. The isolated source `d767d5069f52e3e6b899ae7a3e8313ebcc0ecbaf`
+[view run](https://github.com/xlang-foundation/xMind/actions/runs/37883217731)
+passed all 176 extension and 35 browser contracts with all 41 source/vendor files
+and 11 assets unchanged. The workflow still failed because its fixed expected
+extension count remained 175 after adding the new renderer contract. The helper
+now requires exactly 176; a complete successful view gate and installed/rendered
+acceptance remain pending. No local runtime, provider or editor was executed for
+this isolated result.
 
 Delivery still requires the complete 90-contract native gate, frontend suites,
 browser/native integration, independently verified VSIX/runtime artifacts and
