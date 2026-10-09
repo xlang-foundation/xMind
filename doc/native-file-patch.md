@@ -1,6 +1,35 @@
 # Native patch implementation
 
-## Hosted gate still failing
+The local candidate now compiles with the pinned xlang3 SDK. Its first local
+build exposed an incorrect fixture enum name (`PermissionDecision`); replacing
+it with the repository's actual `OperationDecision` resolved compilation without
+changing the approval assertions. The first focused
+run passed three of seven checks and exposed the exact move failure at rename:
+Win32 error 87. The Win32 wrapper was replaced with native
+`NtSetInformationFile` / `FileRenameInformation`, keeping the already verified
+destination directory handle, literal leaf and no-overwrite requirement. This
+uses the same native file boundary as handle-relative creation; it adds no
+xlang3 runtime changes or absolute-path fallback.
+[Microsoft native rename structure](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_rename_information).
+
+The corrected focused build passed all seven selected contracts in 20.12 seconds:
+workspace tools, per-file patch execution, batch execution, patch model adapter,
+agent/CLI HTTP patch lifecycle, MCP effects and graph runner. These use actual
+files, approvals and embedded xlang3 SQLite with synthetic provider/controller
+fixtures. Complete 103-contract and installed/live patch acceptance are separate.
+
+The subsequent complete local build and exact registered manifest passed all
+**103 contracts in 211.24 seconds**, with 2,390 mapped source inputs unchanged.
+The initial complete run passed 102/103; the synthetic skill-catalogue routing
+fixture omitted the required `patch-review.js` asset. Adding that fixture asset
+resolved the failure without changing production checks or test assertions.
+[Corrected complete output](evidence/native-patch-local-ctest.log),
+[initial failure](evidence/native-patch-initial-ctest.log),
+[candidate source/SDK hashes and limits](evidence/native-patch-local.json).
+The existing SDK binaries were identity-checked and reused; its full suite and
+external installed library bytes are outside this local source freeze.
+
+## Earlier hosted gate failures
 
 Run [37974972815](https://github.com/xlang-foundation/xMind/actions/runs/37974972815)
 compiled revision `a7f484a809cc8b27b8b02d3f94dacfddf7def263` and passed
@@ -165,10 +194,10 @@ refresh, own-guidance partial results, agent/CLI mixed effects and independent
 file hashes, denial, read-only catalogue and exact SQLite history across restart.
 The existing graph contract now also covers direct patch approvals and denial.
 Provider replies/usage and controller fixture decisions are synthetic. These new
-C++ paths have not yet compiled or executed; the HTTP peer passed a Node syntax
-check only. No installed or real-provider patch acceptance is claimed.
+C++ paths now compile and the focused contracts above pass. No installed or
+real-provider patch acceptance is claimed.
 
-Delivery still requires a passing complete native gate, artifact verification,
+Delivery still requires hosted artifact verification,
 installed CLI/browser/VS Code review and real-provider acceptance. A multi-file patch must
 report actual outcomes for each file; it must not claim an atomic filesystem
 transaction or hide earlier effects when a later file fails. Fuzzy matching and

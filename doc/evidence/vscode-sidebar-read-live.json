@@ -1,0 +1,50 @@
+{
+  "observedAt": "2026-10-09T19:58:27.938Z",
+  "scope": "Actual installed VS Code sidebar, live OpenAI response, native read_file and retained xlang3 SQLite history; no native patch acceptance",
+  "extensionVersion": "0.1.3",
+  "nativeRevision": "5d8b17572fabf56b7ddf477cba96626f954cc329",
+  "runtimeManifestSha256": "2c54166484f2cbf1f62b26f831d5aeb20e75da5d40f6c445172cd2e53965e162",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "runId": "b09a04b2292ef3d2ceac7fb7aa58702a",
+  "sessionId": "9fabcc1d7d9a7e254139ef1d820ea502",
+  "state": "completed",
+  "provider": "openai",
+  "wire": "responses",
+  "model": "gpt-6.1-sol",
+  "tool": "read_file",
+  "path": "hello.py",
+  "actualContent": "print(\"Hello from xMind\")\n",
+  "actualBytes": 26,
+  "sha256": "65667c97e08fbafda450bd52669beb4663f2a965fb2393d4b7a0670ab7e33c59",
+  "providerReportedUsage": [
+    {
+      "input": 1581,
+      "output": 19,
+      "total": 1600,
+      "cached": 0
+    },
+    {
+      "input": 1629,
+      "output": 38,
+      "total": 1667,
+      "cached": 1578
+    }
+  ],
+  "visibleResponseMatchedFile": true,
+  "visibleCompletedRunMatchedJournal": true,
+  "priorFailure": {
+    "runId": "ceeb49df9ff22fefb5b999895edd8147",
+    "reason": "context_unavailable",
+    "state": "failed",
+    "unchanged": true
+  },
+  "diagnosticDatabaseMode": "query_only",
+  "diagnosticMutatedDatabase": false,
+  "providerKeysExposed": false,
+  "cpythonExecuted": false,
+  "limits": [
+    "This is a fresh conversation; it does not repair or replay the failed historical run.",
+    "No new file mutation or patch approval was requested.",
+    "The separate browser client is not upgraded by this check."
+  ]
+}

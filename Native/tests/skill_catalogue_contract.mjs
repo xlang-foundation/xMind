@@ -14,7 +14,7 @@ import {createBrowserServer} from '../../views/browser/server.mjs';
 const require=createRequire(import.meta.url),{BackendClient}=require('../../extensions/vscode/client.js'),execute=promisify(execFile);
 const [server,cli,modules,stdlib]=process.argv.slice(2),parent=await fs.realpath(tmpdir()),root=await fs.mkdtemp(path.join(parent,'xmind-skill-catalogue-')),workspace=path.join(root,'workspace'),skills=path.join(workspace,'.agents/skills'),assets=path.join(root,'assets');
 await fs.mkdir(skills,{recursive:true});await fs.mkdir(assets);
-for(const name of ['index.html','browser.js','browser.css','chat.js','chat.css','client.js','marked.js','purify.js'])await fs.writeFile(path.join(assets,name),'Synthetic routing fixture; not rendered UI.\n',{flag:'wx'});
+for(const name of ['index.html','browser.js','browser.css','chat.js','chat.css','client.js','patch-review.js','marked.js','purify.js'])await fs.writeFile(path.join(assets,name),'Synthetic routing fixture; not rendered UI.\n',{flag:'wx'});
 const explicit='---\nname: Explicit guide\ndescription: Synthetic catalogue metadata\nautoinvoke: false\n---\nSynthetic body must not appear in a catalogue.\n',disabled='---\nname: Disabled guide\ndisable-model-invocation: true\n---\nSynthetic disabled body must not be invoked.\n';
 await fs.mkdir(path.join(skills,'explicit'));await fs.writeFile(path.join(skills,'explicit/SKILL.md'),explicit,{flag:'wx'});await fs.writeFile(path.join(skills,'disabled.md'),disabled,{flag:'wx'});
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;

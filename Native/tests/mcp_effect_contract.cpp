@@ -32,10 +32,12 @@ struct Task {
     std::shared_future<std::string> bindings;std::future<std::string> result;
     Task(PersistenceService& store,char** argv,std::filesystem::path root,std::string run,std::string id,std::string mode,std::string arguments=R"({"body":"actual native MCP effect\n","decimal":1.00000000000000000001})",std::optional<std::filesystem::path> shared_server_root={}):
         bindings(discovered_bindings.get_future().share()),result(std::async(std::launch::async,[this,&store,argv,root,run,id,mode,arguments,shared_server_root]{
+            const auto started=std::chrono::steady_clock::now();const char* phase="connect";
             const auto peer_root=shared_server_root.value_or(root);const auto config_id="fixture-server-"+peer_root.filename().string();
             WorkspaceTools workspace(root.string());McpStdioClient client({argv[1],argv[3],{argv[2],mode,(peer_root/"effect.txt").string(),(peer_root/"effect.marker").string()},{}});
             try {
                 client.connect(std::chrono::steady_clock::now()+5s,cancel.get_token());
+                phase="catalogue";
                 McpToolRegistry registry(client,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token());
                 const auto definitions=registry.definitions();require(definitions.size()==1 && definitions[0].name.starts_with("mcp_") && definitions[0].name.size()==52,"Native registry must derive a bounded alias from trusted identity and exact snapshot");
                 require(definitions[0].description.find("Peer tool name (untrusted metadata): \"fixture.write\"")!=std::string::npos,"Model catalogue must expose the original peer tool identity as quoted untrusted metadata");
@@ -44,13 +46,21 @@ struct Task {
                 for(const auto* field:{"server_config_id","config_revision","peer_tool","alias","catalogue_fingerprint","protocol_version","input_schema_json","output_schema_json","annotations_json"})require(metadata[0].contains(field),"Approval metadata must contain only the immutable registered binding fields");
                 require(metadata[0]["alias"]==definitions[0].name&&metadata[0]["input_schema_json"]==definitions[0].input_schema_json&&metadata[0]["protocol_version"]==(mode=="legacy"?"2025-11-25":"2026-07-28"),"Private binding must preserve the actual alias, exact schema text and negotiated protocol");
                 discovered_bindings.set_value(snapshot);
+                phase="invoke";
                 const auto alias=mode=="unknown-alias"?"fixture.write":definitions[0].name;
                 const auto deadline=std::chrono::steady_clock::now()+(mode=="stopped-before-dispatch"?1500ms:mode=="timeout"?1500ms:5s);
                 InstructionPrecondition guidance;if(mode=="skill-changed"){RepositoryInstructionContext context(workspace,workspace.repository_instructions());context.prepare();context.skills().activate(R"({"id":"inspect"})");context.prepare();guidance=context.precondition(".");}
                 const auto output=registry.invoke(id,run,alias,arguments,expiry(),deadline,cancel.get_token(),std::move(guidance));
                 client.shutdown();require(client.status().exit_code==0,"Actual MCP peer must verify a valid exchange");
                 require(registry.approval_bindings_json()==snapshot,"Immutable approval metadata must remain inspectable without ready peer access after actual shutdown");return output;
-            }catch(...){const auto error=std::current_exception();client.shutdown();require(client.status().exit_code==0,"Failure peer must accept the expected wire sequence and shutdown");std::rethrow_exception(error);}
+            }catch(...){
+                const auto error=std::current_exception();
+                // Fixture-only actual observations; retain deadlines and all
+                // dispatch/effect assertions. No arguments or auth are printed.
+                std::cerr<<"MCP fixture mode="<<mode<<" phase="<<phase<<" elapsed_ms="<<std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-started).count()<<" actual_effect_marker="<<std::filesystem::exists(peer_root/"effect.marker")<<'\n';
+                try{const auto operation=store.operation(id).get();std::cerr<<"MCP fixture operation_state="<<to_string(operation.state)<<" recorded_result="<<operation.result_json<<'\n';}catch(const NotFound&){std::cerr<<"MCP fixture operation_not_created\n";}catch(...){std::cerr<<"MCP fixture operation_observation_unavailable\n";}
+                client.shutdown();require(client.status().exit_code==0,"Failure peer must accept the expected wire sequence and shutdown");std::rethrow_exception(error);
+            }
         })){}
     ~Task(){cancel.request_stop();if(result.valid())result.wait();}
 };

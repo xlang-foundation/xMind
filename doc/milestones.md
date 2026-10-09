@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+Native multi-file patch execution now passes the complete **103-contract local
+gate** in 211.24 seconds after correcting the Windows handle-relative rename
+call and a missing synthetic routing asset. All 2,390 mapped source inputs
+remained unchanged. Separate hosted client acceptance passed **222/41** tests
+with verified artifact/source bindings. The installed VS Code 0.1.3 client also
+completed a fresh real OpenAI workspace read, preserving the earlier failed
+conversation. This does not install or accept the new patch runtime; packaging,
+rendered patch approvals and real-provider patch execution remain pending.
+[Native evidence and limits](native-file-patch.md), [client evidence](patch-review.md),
+[installed fresh-read recovery](evidence/vscode-sidebar-read-live.json).
+
 Native discovery/content search now share hierarchical local ignore rules,
 scoped Git repository boundaries, negation, source priority and explicit positive
 glob overrides. All **98 native contracts passed in 209.78 seconds**, with 637

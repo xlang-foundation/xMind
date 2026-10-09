@@ -85,11 +85,19 @@ std::string content_hash(const std::string& content) {
     std::ostringstream result;result<<std::hex<<std::setfill('0');for(auto byte:hash) result<<std::setw(2)<<static_cast<unsigned>(byte);return result.str();
 }
 using NativeCreate=decltype(&NtCreateFile);
+using NativeSet=NTSTATUS(NTAPI*)(HANDLE,PIO_STATUS_BLOCK,PVOID,ULONG,FILE_INFORMATION_CLASS);
 using NativeError=ULONG(NTAPI*)(NTSTATUS);
 struct NativeFiles {
     NativeCreate create;
+    NativeSet set;
     NativeError error;
-    NativeFiles(){const auto module=GetModuleHandleW(L"ntdll.dll");create=reinterpret_cast<NativeCreate>(GetProcAddress(module,"NtCreateFile"));error=reinterpret_cast<NativeError>(GetProcAddress(module,"RtlNtStatusToDosError"));if(!create || !error)throw ToolFileError("Handle-relative file operations are unavailable");}
+    NativeFiles(){const auto module=GetModuleHandleW(L"ntdll.dll");create=reinterpret_cast<NativeCreate>(GetProcAddress(module,"NtCreateFile"));set=reinterpret_cast<NativeSet>(GetProcAddress(module,"NtSetInformationFile"));error=reinterpret_cast<NativeError>(GetProcAddress(module,"RtlNtStatusToDosError"));if(!create || !set || !error)throw ToolFileError("Handle-relative file operations are unavailable");}
+};
+struct NativeRenameInformation {
+    BOOLEAN replace_if_exists;
+    HANDLE root_directory;
+    ULONG file_name_length;
+    WCHAR file_name[1];
 };
 // One literal component relative to the already opened parent. Never parses a
 // model-supplied absolute NT/DOS namespace and never follows final reparses.
@@ -474,6 +482,7 @@ WorkspaceRemovalResult WorkspaceTools::apply_removal(const WorkspaceRemovalPlan&
     }catch(...){throw ToolMutationUncertain("Removal was attempted; its final state requires reconciliation");}
 }
 WorkspaceSnapshot WorkspaceTools::apply_move(const WorkspaceMovePlan& plan,std::stop_token cancel) const {
+    static const NativeFiles api;
     check_cancel(cancel);const auto& before=plan.before;const auto& destination=plan.destination;
     if(before.content.size()>1024*1024||destination.content.size()>1024*1024||!valid_text(before.content)||!valid_text(destination.content))throw std::invalid_argument("Invalid move contents");
     if(content_hash(before.content)!=before.content_sha256||content_hash(destination.content)!=destination.content_sha256)throw ToolContentConflict("Move plan hashes differ");
@@ -518,12 +527,17 @@ WorkspaceSnapshot WorkspaceTools::apply_move(const WorkspaceMovePlan& plan,std::
         phase="verify_before_rename";check_cancel(cancel);impl_->verify(file.value);impl_->verify_creation_directory(directory);
         if(identity()!=before.workspace_id)throw ToolAccessDenied("Workspace changed before rename");
         const auto expected_path=final_path(directory)+L"\\"+target.leaf;
-        const auto buffer_size=sizeof(FILE_RENAME_INFO)+target.leaf.size()*sizeof(wchar_t);
-        auto storage=std::make_unique<unsigned char[]>(buffer_size);auto* rename=new(storage.get()) FILE_RENAME_INFO{};
-        rename->ReplaceIfExists=FALSE;rename->RootDirectory=directory;rename->FileNameLength=static_cast<DWORD>(target.leaf.size()*sizeof(wchar_t));
-        std::memcpy(rename->FileName,target.leaf.c_str(),(target.leaf.size()+1)*sizeof(wchar_t));
+        const auto buffer_size=sizeof(NativeRenameInformation)+target.leaf.size()*sizeof(wchar_t);
+        auto storage=std::make_unique<unsigned char[]>(buffer_size);auto* rename=new(storage.get()) NativeRenameInformation{};
+        rename->replace_if_exists=FALSE;rename->root_directory=directory;rename->file_name_length=static_cast<ULONG>(target.leaf.size()*sizeof(wchar_t));
+        std::memcpy(rename->file_name,target.leaf.c_str(),(target.leaf.size()+1)*sizeof(wchar_t));
+        // The Win32 wrapper rejects a non-null RootDirectory on this system.
+        // Native FileRenameInformation preserves the retained parent handle and
+        // literal leaf binding; no absolute path lookup or overwrite fallback.
+        IO_STATUS_BLOCK outcome{};
         attempted=true;phase="rename";
-        if(!SetFileInformationByHandle(file.value,FileRenameInfo,rename,static_cast<DWORD>(buffer_size))){const auto code=GetLastError();throw ToolFileError("Cannot move source to absent destination; win32="+std::to_string(code));}
+        const auto status=api.set(file.value,&outcome,rename,static_cast<ULONG>(buffer_size),static_cast<FILE_INFORMATION_CLASS>(10));
+        if(status<0){throw ToolFileError("Cannot move source to absent destination; win32="+std::to_string(api.error(status)));}
         // Inspect the actual renamed handle even if cancellation arrived.
         phase="verify_renamed_handle";impl_->verify(file.value);
         if(!equal(final_path(file.value),expected_path)||file_identity(file.value)!=before.file_id)throw ToolFileError("Renamed file binding differs");

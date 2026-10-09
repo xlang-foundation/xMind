@@ -28,6 +28,13 @@ disables Allow. This follow-up passed the complete frozen **222/41** adapter
 gate with 44 input and 12 asset hashes unchanged.
 [Guidance follow-up evidence](evidence/patch-guidance-local.json).
 
+The hosted client workflow for exact revision
+`6083a62dbe3354b528e3822c9a4222c7d9c21de3` also passed **222/41** tests.
+The downloaded artifact's advertised digest and bytes were verified, all 42
+tracked sources were bound to that commit, and 12 generated assets were checked
+against the archive and unchanged gate maps. This is client acceptance only.
+[Independently verified hosted evidence](evidence/patch-guidance-hosted.json).
+
 The installed VS Code client remains the separately verified 0.1.3 recovery
 package. This patch client change has not been installed. The native patch
 candidate now includes model/guidance, CLI and graph integration in source,

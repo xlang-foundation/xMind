@@ -1,5 +1,14 @@
 # Recorded execution failures in the shared sidebar
 
+The managed TestProj VS Code client is now version 0.1.3. Its earlier “Go”
+run remains failed with the actual `context_unavailable` reason. A fresh request
+through the installed sidebar completed using OpenAI `gpt-6.1-sol`, invoked
+native `read_file` for `hello.py`, and rendered its exact bytes and supplied
+token metrics. Read-only xlang3 SQLite inspection confirmed the completed run
+and preserved the earlier failure. This verifies recovery through a new
+conversation, not repair or replay of the failed run.
+[Actual installed read evidence](evidence/vscode-sidebar-read-live.json).
+
 The shared VS Code/browser renderer displays a visible selected-run failure card
 from the native `run.failed` event. Provider HTTP failures show the recorded HTTP
 status, without guessing the cause or interpolating provider error bodies. Other
