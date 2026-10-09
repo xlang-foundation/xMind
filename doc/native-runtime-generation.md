@@ -1,8 +1,9 @@
 # Native runtime package verification
 
 `VerifiedRuntimeGeneration` implements the C++ package-integrity check needed
-by the [runtime handoff](native-runtime-handoff.md). The library is tested, but
-the server/controller does not invoke it yet. This checkpoint does not upgrade
+by the [runtime handoff](native-runtime-handoff.md). The newer optional
+[owner controller](native-owner-control.md) invokes it; the production server
+has not enabled that controller. This checkpoint does not upgrade
 the running VS Code backend or enable writing there.
 
 An owner-controlled caller supplies an absolute local generation directory and

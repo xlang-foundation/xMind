@@ -38,7 +38,7 @@ public:
     bool healthy() const override;
     bool available() const override;
     bool supports_file_edit_proposals()const override{return file_edit_proposals_;}
-    bool idle() const;
+    bool idle() const override;
     std::vector<GraphExecutionMetadata> graphs() const override;
     Run submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,
         std::string prompt,std::string model={}) override;

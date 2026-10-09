@@ -8,6 +8,7 @@
 #include "agentflow/graph_service.hpp"
 #include "agentflow/dynamic_plan.hpp"
 #include "agentflow/a2a_task_control.hpp"
+#include "agentflow/backend_owner_control.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
@@ -220,7 +221,7 @@ std::int64_t cursor(const Request& request) {
     if(parsed.ec!=std::errc{} || parsed.ptr!=value.data()+value.size() || number<0) throw std::invalid_argument("Invalid event cursor");
     return number;
 }
-template<class Handler> auto guarded(Handler handler) {
+template<class Handler> auto guard_errors(Handler handler) {
     return [handler=std::move(handler)](const Request& request,Response& response) {
         try {handler(request,response);}
         catch(const NotFound&) {reply(response,{{"detail","Resource not found"}},404);}
@@ -256,6 +257,7 @@ struct HttpServer::Impl {
 #endif
     PersistenceService& persistence;
     RunExecutor* executor;
+    BackendOwnerControl* owner_control;
     EditRecoveryReader* recovery;
     std::vector<McpServerMetadata> mcp_servers;
     std::vector<ProcessProfileMetadata> process_profiles;
@@ -271,8 +273,25 @@ struct HttpServer::Impl {
     };
     httplib::Server server;
     int port=-1;
-    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup):persistence(store),executor(execution),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
+    bool owner_admission_open()const{
+#if defined(_WIN32)
+        if(owner_control)return !owner_control->status().quiesced;
+#endif
+        return true;
+    }
+    template<class Handler> auto guarded(Handler handler){return guard_errors([this,handler=std::move(handler)](const Request& request,Response& response){
+#if defined(_WIN32)
+        std::optional<std::shared_lock<std::shared_mutex>> admission;
+        // Context status can start counting/index maintenance even on GET.
+        if(owner_control&&(request.method!="GET"||std::regex_match(request.path,std::regex(R"(^/v1/sessions/[A-Za-z0-9_-]+/context$)"))))admission.emplace(owner_control->admit());
+#endif
+        handler(request,response);
+    });}
+    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner):persistence(store),executor(execution),owner_control(owner),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
         validate_local_auth_token(token);
+#if defined(_WIN32)
+        if(owner_control&&!owner_control->covers(store,execution,graphs))throw std::invalid_argument("Native owner controller does not cover this transport");
+#endif
 #if defined(_WIN32)
         view_sessions=std::make_unique<ViewSessions>(store,token);
 #endif
@@ -313,6 +332,16 @@ struct HttpServer::Impl {
         });
         server.set_exception_handler([](const Request&,Response& response,std::exception_ptr) {reply(response,{{"detail","Backend operation failed"}},500);});
 #if defined(_WIN32)
+        if(owner_control){
+            const auto encode_owner=[](const BackendOwnerState& state){return Json{{"generation",state.generation},{"revision",state.revision},{"quiesced",state.quiesced},{"receipt_id",state.receipt_id},{"retirement_supported",false}};};
+            server.Get("/v1/backend/owner",guard_errors([this,encode_owner](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Owner status does not accept query parameters");reply(response,encode_owner(owner_control->status()));}));
+            server.Post("/v1/backend/owner/quiesce",guard_errors([this,encode_owner](const Request& request,Response& response){
+                if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Owner control does not accept query parameters");const auto input=body(request,{"expected_generation","expected_revision","expected_workspace_id","expected_workspace_authority_id"});const auto authority=workspace_admission(input);if(!authority)throw std::invalid_argument("Owner control requires workspace authority");reply(response,encode_owner(owner_control->quiesce({string_field(input,"expected_generation",32),graph_revision(input,"expected_revision")},*authority)));
+            }));
+            server.Post("/v1/backend/owner/resume",guard_errors([this,encode_owner](const Request& request,Response& response){
+                if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Owner control does not accept query parameters");const auto input=body(request,{"expected_generation","expected_revision","receipt_id","expected_workspace_id","expected_workspace_authority_id"});const auto authority=workspace_admission(input);if(!authority)throw std::invalid_argument("Owner control requires workspace authority");reply(response,encode_owner(owner_control->resume({string_field(input,"expected_generation",32),string_field(input,"receipt_id",32),graph_revision(input,"expected_revision")},*authority)));
+            }));
+        }
         server.Post("/v1/view-sessions",guarded([this](const Request& request,Response& response){
             const auto input=body(request,{"origin"});const auto session=view_sessions->issue(string_field(input,"origin",256));
             reply(response,{{"credential",session.credential},{"expires_unix_ms",session.expires_unix_ms},{"max_age_seconds",session.max_age_seconds}});
@@ -329,6 +358,10 @@ struct HttpServer::Impl {
         }));
 #endif
         server.Post("/a2a",[this](const Request& request,Response& response){
+#if defined(_WIN32)
+            std::optional<std::shared_lock<std::shared_mutex>> admission;
+            try{if(owner_control)admission.emplace(owner_control->admit());}catch(const BackendQuiesced&){reply(response,{{"detail","Native backend admission is closed"}},503);return;}catch(...){reply(response,{{"detail","Native admission is unavailable"}},503);return;}
+#endif
             if(request.get_header_value("Content-Type")!="application/json"&&request.get_header_value("Content-Type")!="application/a2a+json"){reply(response,{{"detail","Use application/json"}},415);return;}
             if(!request.params.empty()){reply(response,{{"detail","A2A does not accept query parameters"}},400);return;}
             const auto requested=request.get_header_value("A2A-Version");
@@ -395,7 +428,7 @@ struct HttpServer::Impl {
         }));
         server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{ "skill_controls",executor&&executor->supports_session_skills()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{ "skill_controls",executor&&executor->supports_session_skills()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
         }));
         server.Get("/v1/workspace",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Workspace metadata does not accept query parameters");
@@ -714,7 +747,7 @@ struct HttpServer::Impl {
         }
     }
 };
-HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs,profile_setup)) {}
+HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs,profile_setup,owner)) {}
 HttpServer::~HttpServer(){stop();}
 int HttpServer::bind(int port) {
     if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");

@@ -27,7 +27,7 @@ public:
         std::int64_t expected_revision,std::int64_t expected_state_sequence) override;
     void cancel(const std::string& id) override;
     bool healthy() const override;
-    bool idle() const;
+    bool idle() const override;
     void close();
 private:
     struct Impl;

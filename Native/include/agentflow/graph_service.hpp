@@ -18,6 +18,8 @@ struct GraphContextMetadata {
 class GraphExecution {
 public:
     virtual ~GraphExecution()=default;
+    virtual bool healthy()const{return false;}
+    virtual bool idle()const{return false;}
     virtual std::vector<GraphExecutionMetadata> graphs() const=0;
     virtual bool supports_graph_profile_admission()const{return false;}
     virtual Run submit_graph_workspace(std::string,std::string,std::string,std::int64_t,std::string,std::string,
@@ -46,8 +48,8 @@ public:
         std::int64_t expected_checkpoint_revision) override;
     GraphContextMetadata graph_context(const std::string& root)const override;
     void cancel(const std::string& id,const std::string& actor);
-    bool healthy() const;
-    bool idle() const;
+    bool healthy() const override;
+    bool idle() const override;
     void close();
 private:
     struct Impl;

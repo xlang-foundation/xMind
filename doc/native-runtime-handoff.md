@@ -15,8 +15,14 @@ runtime to the new generation.
 
 The [native package verifier](native-runtime-generation.md) now checks the
 complete candidate inventory and exact loaded image using retained Windows
-handles. Its full 94-contract local gate passed. It is not wired into the owner
-controller/server yet and does not constitute a completed handoff.
+handles. Its full 94-contract local gate passed. The production server has not
+enabled that capability, and it does not constitute a completed handoff.
+The newer [optional native owner controller](native-owner-control.md) now uses
+that verifier and exposes authenticated inspection/quiescence/same-generation
+resume through `HttpServer`, with shared admission guards and an exclusive
+owner boundary. All 95 native contracts passed locally. The production server
+does not enable it until retirement and replacement startup are implemented;
+an inspection/quiescence receipt alone is not an upgrade acknowledgement.
 
 All 189 extension and 38 browser contracts passed locally with frozen inputs.
 A separate actual packaged C++/embedded-xlang3 SQLite check retained one process,

@@ -1,5 +1,16 @@
 # Current native validation
 
+The optional native owner controller/HTTP boundary passed all **95 local native
+contracts in 190.08 seconds**, with 622 inputs unchanged. Actual HTTP mutation
+races, scoped-view denial, authority/receipt checks and context/A2A admission
+fencing passed against C++/embedded-xlang3 SQLite. The controller checks the
+actual runtime and the qualified loaded package and rejects a mismatched
+transport binding. Earlier package-fixture startup failures are retained.
+Production server enablement, retirement/bootstrap, legacy migration and
+installed VS Code writing remain pending.
+[Owner commands and limits](native-owner-control.md),
+[exact local evidence](evidence/native-owner-control-http-local.json).
+
 The native runtime-package verifier passed all **94 local native contracts in
 183.90 seconds**, with 618 inputs unchanged. Actual Windows image identity,
 Unicode paths/names, inventory/hash checks and pinned-file protections passed.

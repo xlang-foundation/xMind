@@ -56,6 +56,8 @@ public:
     virtual Run submit_message(std::string,std::string,std::string,std::string,std::string){throw RunUnavailable("Incoming message admission is unavailable");}
     virtual void cancel(const std::string& id)=0;
     virtual bool healthy() const=0;
+    // Unknown execution owners cannot authorize runtime quiescence.
+    virtual bool idle()const{return false;}
     virtual bool available() const {return true;}
 };
 }
