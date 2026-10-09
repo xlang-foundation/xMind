@@ -3,8 +3,9 @@
 This is a required delivery design, not an implemented or validated upgrade
 protocol. The [native persistence owner barrier](native-backend-owner.md) now
 implements durable queued-mutation fencing and same-live-generation receipt
-resume. It passed all 93 local native contracts; transport admission, retirement
-and target-generation startup remain pending. The launcher retains its latest authenticated workspace owner
+resume. It passed all 93 local native contracts; the optional native transport
+controller is documented below. Retirement shutdown and target-generation
+startup remain pending. The launcher retains its latest authenticated workspace owner
 across package/settings changes and host reloads. It reports pending backend
 changes while continuing to use that owner's capabilities and saved state.
 Invalid/unreachable owners, unavailable credentials, changed authority or unsafe
@@ -23,6 +24,11 @@ resume through `HttpServer`, with shared admission guards and an exclusive
 owner boundary. All 95 native contracts passed locally. The production server
 does not enable it until retirement and replacement startup are implemented;
 an inspection/quiescence receipt alone is not an upgrade acknowledgement.
+The [durable retirement request](native-owner-retirement.md) now consumes an
+exact quiescence receipt without reopening admission. Same-generation resume
+is rejected after consumption, and ordinary startup checks closed/malformed
+owner state before migrations. Actual shutdown, target qualification and
+receipt-controlled replacement startup remain pending.
 
 All 189 extension and 38 browser contracts passed locally with frozen inputs.
 A separate actual packaged C++/embedded-xlang3 SQLite check retained one process,

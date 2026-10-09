@@ -32,7 +32,7 @@ struct PersistenceService::Impl {
             bool started=false;
             try {
                 BackendLease lease(path);
-                Repository repository(path,roots);
+                Repository repository(path,roots,&lease);
                 repository.open_backend_owner(lease,generation);
                 repository.recover_interrupted(lease);
                 owner_lease=&lease;
@@ -102,6 +102,10 @@ std::future<BackendOwnerState> PersistenceService::resume_backend(BackendOwnerRe
     if(expected.generation!=impl_->generation)throw Conflict("Backend owner generation changed");
     auto result=r.resume_backend_owner(*impl_->owner_lease,expected);
     return result;
+});}
+std::future<BackendOwnerState> PersistenceService::request_backend_retirement(BackendOwnerReceipt expected){return impl_->observe([this,expected=std::move(expected)](Repository& r){
+    if(expected.generation!=impl_->generation)throw Conflict("Backend owner generation changed");
+    return r.request_backend_retirement(*impl_->owner_lease,expected);
 });}
 std::future<DynamicPlanCapabilities> PersistenceService::dynamic_capabilities(std::string root) {return impl_->observe([root=std::move(root)](Repository& repository){return repository.dynamic_capabilities(root);});}
 std::future<DynamicPlanCapabilities> PersistenceService::finalize_dynamic_capabilities(std::string root,std::string backend_identity,std::string catalogue_json,std::vector<DynamicPresetCapability> presets) {return impl_->submit([root=std::move(root),backend_identity=std::move(backend_identity),catalogue_json=std::move(catalogue_json),presets=std::move(presets)](Repository& repository){return repository.finalize_dynamic_capabilities(root,backend_identity,catalogue_json,presets);});}

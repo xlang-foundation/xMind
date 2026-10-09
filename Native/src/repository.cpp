@@ -15,6 +15,8 @@
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
+BackendOwnerState decode_owner(const std::string&);
+std::optional<std::string> owner_record(XlangSqlite&);
 std::int64_t now_ms() {return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();}
 std::string object_json(const std::string& source,std::size_t limit=2*1024*1024) {
     if(source.size()>limit) throw std::invalid_argument("Operation JSON exceeds its limit");
@@ -452,13 +454,23 @@ struct Repository::Impl {
         changed_one(database.execute("UPDATE agent_budget_segments SET state='closed',active_elapsed_ms=?,remaining_active_ms=?,closed_event_seq=? WHERE root_run_id=? AND id=? AND state='open'",{elapsed,remaining,e.sequence,root,id}));return {root,id,"closed",integer(r[1]),elapsed,remaining,integer(r[4]),e.sequence};
     }
 };
-Repository::Repository(const std::string& file,const std::vector<std::string>& roots):impl_(std::make_unique<Impl>(file,roots)) {
+Repository::Repository(const std::string& file,const std::vector<std::string>& roots,const BackendLease* startup_lease):impl_(std::make_unique<Impl>(file,roots)) {
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
     if(version>13)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
+    // Reject a closed or malformed durable owner before schema writes. Direct
+    // repository inspection does not claim startup ownership; PersistenceService
+    // always supplies its actual worker-held lease here.
+    if(startup_lease){
+        if(!startup_lease->covers(file))throw Conflict("Startup requires this database lease");
+        if(!db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='information'").rows.empty()){
+            const auto prior=owner_record(db);
+            if(prior&&decode_owner(*prior).quiesced)throw BackendQuiesced("Durable native admission is closed; normal startup cannot apply migrations");
+        }
+    }
     if(version==0) {
         if(integer(db.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").rows.at(0).at(0))!=0)
             throw DatabaseError("Existing database requires an explicit migration");
@@ -1733,9 +1745,15 @@ namespace {
 constexpr const char* backend_owner_category="native-backend-owner";
 void owner_identity(const std::string& value){if(value.size()!=32||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid native owner identity");}
 void owner_revision(std::int64_t value){if(value<1||value>=9007199254740991LL)throw std::invalid_argument("Invalid native owner revision");}
-Json owner_json(const BackendOwnerState& s){owner_identity(s.generation);owner_revision(s.revision);if(s.quiesced)owner_identity(s.receipt_id);else if(!s.receipt_id.empty())throw std::invalid_argument("Active owner cannot retain a quiescence receipt");return {{"version",1},{"generation",s.generation},{"revision",s.revision},{"quiesced",s.quiesced},{"receipt_id",s.receipt_id}};}
+Json owner_json(const BackendOwnerState& s){
+    owner_identity(s.generation);owner_revision(s.revision);
+    if(s.quiesced)owner_identity(s.receipt_id);else if(!s.receipt_id.empty()||s.retirement_requested)throw std::invalid_argument("Active owner cannot retain closed lifecycle state");
+    Json result{{"version",s.retirement_requested?2:1},{"generation",s.generation},{"revision",s.revision},{"quiesced",s.quiesced},{"receipt_id",s.receipt_id}};
+    if(s.retirement_requested)result["retirement_requested"]=true;
+    return result;
+}
 BackendOwnerState decode_owner(const std::string& raw){
-    try {if(raw.size()>1024)throw std::invalid_argument("Owner record exceeds limits");const auto j=Json::parse(raw);BackendOwnerState s{j.at("generation").get<std::string>(),j.at("revision").get<std::int64_t>(),j.at("quiesced").get<bool>(),j.at("receipt_id").get<std::string>()};if(owner_json(s).dump()!=raw)throw std::invalid_argument("Owner record differs from canonical typed state");return s;}
+    try {if(raw.size()>1024)throw std::invalid_argument("Owner record exceeds limits");const auto j=Json::parse(raw);BackendOwnerState s{j.at("generation").get<std::string>(),j.at("revision").get<std::int64_t>(),j.at("quiesced").get<bool>(),j.at("receipt_id").get<std::string>()};if(j.at("version")==2)s.retirement_requested=j.at("retirement_requested").get<bool>();if(owner_json(s).dump()!=raw)throw std::invalid_argument("Owner record differs from canonical typed state");return s;}
     catch(...){throw DatabaseError("Saved native owner state is invalid");}
 }
 std::optional<std::string> owner_record(XlangSqlite& db){const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id='owner'",{std::string(backend_owner_category)}).rows;return rows.empty()?std::optional<std::string>{}:text(rows[0][0]);}
@@ -1773,7 +1791,14 @@ BackendOwnerState Repository::quiesce_backend_owner(const BackendLease& lease,co
 }
 BackendOwnerState Repository::resume_backend_owner(const BackendLease& lease,const BackendOwnerReceipt& expected){
     if(!lease.covers(impl_->path))throw Conflict("Resume requires this database lease");owner_identity(expected.generation);owner_identity(expected.receipt_id);owner_revision(expected.revision);auto& db=impl_->database;Transaction tx(db);const auto previous=owner_record(db);if(!previous)throw NotFound("Native owner is absent");auto current=decode_owner(*previous);
-    if(!current.quiesced||current.generation!=expected.generation||current.receipt_id!=expected.receipt_id||current.revision!=expected.revision)throw Conflict("Native resume receipt changed");require_database_idle(db);owner_revision(current.revision+1);++current.revision;current.quiesced=false;current.receipt_id.clear();write_owner(db,current,previous);tx.commit();return current;
+    if(!current.quiesced||current.retirement_requested||current.generation!=expected.generation||current.receipt_id!=expected.receipt_id||current.revision!=expected.revision)throw Conflict("Native resume receipt changed or retirement is requested");require_database_idle(db);owner_revision(current.revision+1);++current.revision;current.quiesced=false;current.receipt_id.clear();write_owner(db,current,previous);tx.commit();return current;
+}
+BackendOwnerState Repository::request_backend_retirement(const BackendLease& lease,const BackendOwnerReceipt& expected){
+    if(!lease.covers(impl_->path))throw Conflict("Retirement requires this database lease");
+    owner_identity(expected.generation);owner_identity(expected.receipt_id);owner_revision(expected.revision);
+    auto& db=impl_->database;Transaction tx(db);const auto previous=owner_record(db);if(!previous)throw NotFound("Native owner is absent");auto current=decode_owner(*previous);
+    if(!current.quiesced||current.retirement_requested||current.generation!=expected.generation||current.receipt_id!=expected.receipt_id||current.revision!=expected.revision)throw Conflict("Native retirement receipt changed");
+    require_database_idle(db);owner_revision(current.revision+1);++current.revision;current.retirement_requested=true;write_owner(db,current,previous);tx.commit();return current;
 }
 void Repository::put_information(const std::string& category,const std::string& id,const std::string& json) {
     identifier(category); identifier(id);

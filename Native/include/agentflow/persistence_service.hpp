@@ -26,6 +26,9 @@ public:
     std::future<BackendOwnerState> backend_owner();
     std::future<BackendOwnerState> quiesce_backend(BackendOwnerPrecondition);
     std::future<BackendOwnerState> resume_backend(BackendOwnerReceipt);
+    // Consumes quiescence; same-generation resume is permanently rejected.
+    // Transport shutdown, observed exit and replacement startup are separate.
+    std::future<BackendOwnerState> request_backend_retirement(BackendOwnerReceipt);
     std::future<Session> create_session(std::string id,std::string title);
     std::future<Session> rename_session(std::string id,std::string title,std::string expected_title);
     std::future<Session> session(std::string id);

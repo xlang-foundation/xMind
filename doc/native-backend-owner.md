@@ -12,7 +12,9 @@ typed owner record is stored through embedded xlang3 in the reserved
 replace that record. Malformed records fail explicitly. An active generation
 can reopen with a new generation/revision; an updated runtime's ordinary
 startup rejects a saved quiescence receipt before interrupted-work recovery.
-Schema upgrade and target-runtime admission have not been validated here.
+The newer [retirement request](native-owner-retirement.md) checks closed or
+malformed owner state under the worker's lease before schema migrations.
+Qualified schema upgrade and target-runtime admission remain pending.
 
 Every queued mutation checks the durable owner generation and phase on the
 persistence worker immediately before execution. This includes tasks already
@@ -30,8 +32,9 @@ The backend-only C++ methods are:
 | `backend_owner()` | Read the current generation, revision, phase and receipt ID. |
 | `quiesce_backend(expected)` | Require the exact active generation/revision and idle persisted execution/effect/maintenance ownership; commit a new revision and receipt before returning. |
 | `resume_backend(receipt)` | Require the same live generation and exact quiesced revision/receipt; commit the next active revision and discard the receipt. |
+| `request_backend_retirement(receipt)` | Consume the exact live quiescence receipt, retain closed admission and permanently reject same-generation resume. This is not a process-exit acknowledgement. |
 
-Both mutations verify the actual database lease. A stale or repeated command
+All owner mutations verify the actual database lease. A stale or repeated command
 fails; a lost response must be observed through status rather than replayed.
 Publication and deferred commit failures preserve the prior durable phase.
 Quiescence never cancels a run or settles an effect to manufacture idleness.
@@ -53,9 +56,11 @@ provider calls or file effects are claimed. The complete native gate and its
 retained earlier attempts are recorded in the accompanying evidence.
 [Complete 93-contract gate and retained attempts](evidence/native-backend-owner-local.json).
 
-Authenticated HTTP/CLI owner controls, retirement, target-package binding,
-receipt-controlled generation startup, migrations and installed/rendered
-continuity remain pending. No lifecycle route or UI button is advertised by
-this increment. Older runtimes do not implement this barrier; they require the
+The [optional HTTP controller](native-owner-control.md) separately supplies
+authenticated observation, quiescence and same-generation resume. Public
+shutdown commands, CLI lifecycle controls, target-package binding,
+receipt-controlled generation startup and installed/rendered continuity remain
+pending. No retirement route or UI button is advertised. Older runtimes do not
+implement this barrier; they require the
 explicit legacy operator path and cannot be treated as receiving a native
 quiescence receipt. Views never open or copy the profile database.

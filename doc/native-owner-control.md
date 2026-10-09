@@ -19,6 +19,9 @@ The optional authenticated HTTP boundary implements:
 Scoped browser view credentials cannot invoke these routes. They are not model
 tools. Queries and unknown/duplicate body fields are rejected. The response
 explicitly reports `retirement_supported: false`.
+The newer backend-only [retirement request](native-owner-retirement.md) applies
+the same native checks. HTTP status exposes `retirement_requested`, but no
+public retirement/shutdown route is enabled.
 
 Registered mutating HTTP handlers retain their shared admission guard through
 execution. Context status GET is guarded too because it can start counting or
@@ -41,7 +44,7 @@ The complete native gate passed **95 contracts in 190.08 seconds**, with all
 622 input hashes unchanged. The earlier fixture failures remain recorded.
 [Exact verification and scope](evidence/native-owner-control-http-local.json).
 
-The production `xmind_server` does not attach this controller yet. Retirement,
+The production `xmind_server` does not attach this controller yet. Actual shutdown,
 replacement admission, receipt-controlled startup and the explicit legacy
 operator migration still need implementation before enabling it there. The
 normal VS Code `TestProj` backend is not upgraded by this work and writing in

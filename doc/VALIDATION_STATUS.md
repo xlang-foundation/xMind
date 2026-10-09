@@ -1,5 +1,18 @@
 # Current native validation
 
+The durable retirement request and pre-migration startup refusal passed all
+**95 local native contracts in 193.41 seconds**, with 622 inputs unchanged.
+Actual SQLite commit rollback, a resume/retirement race, same-generation resume
+rejection, observable closed admission and three schema 12 startup-refusal
+fixtures passed. Qualified native controller and HTTP observation checks also
+passed. The metadata-order publication error is retained with a successful
+supplemental two-contract detail run. The earlier `c9335ca` hosted scoped-approval
+timeout remains failed; the new diagnostic preserves its deadline and is not a
+root-cause fix. Process shutdown, qualified replacement bootstrap, legacy
+migration and installed VS Code writing remain pending.
+[Retirement scope](native-owner-retirement.md),
+[exact evidence and retained failure](evidence/native-owner-retirement-local.json).
+
 The optional native owner controller/HTTP boundary passed all **95 local native
 contracts in 190.08 seconds**, with 622 inputs unchanged. Actual HTTP mutation
 races, scoped-view denial, authority/receipt checks and context/A2A admission

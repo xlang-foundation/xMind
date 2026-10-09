@@ -17,6 +17,9 @@ public:
     bool covers(PersistenceService& store,RunExecutor* executor,GraphExecution* graphs)const{return &store==&store_&&executor==&executor_&&graphs==graphs_;}
     BackendOwnerState quiesce(BackendOwnerPrecondition,WorkspaceAdmission);
     BackendOwnerState resume(BackendOwnerReceipt,WorkspaceAdmission);
+    // Durable only; the caller must still arrange/observe actual shutdown.
+    // No public retirement route until replacement startup is qualified.
+    BackendOwnerState request_retirement(BackendOwnerReceipt,WorkspaceAdmission);
 private:
     PersistenceService& store_;RunExecutor& executor_;VerifiedRuntimeGeneration& runtime_;
     GraphExecution* graphs_;std::string generation_;std::shared_mutex admission_;

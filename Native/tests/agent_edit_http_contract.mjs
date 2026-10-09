@@ -94,6 +94,23 @@ async function approvedChat(name,decision,attachedRun){
   return records;
 }
 async function until(read,predicate) {const deadline=Date.now()+5000;while(Date.now()<deadline){const value=await read();if(predicate(value)) return value;if(peerError) throw peerError;await delay(10);}throw new Error(`State deadline: ${errors}`);}
+async function scopedApproval(runId,label){
+  // Keep the same five-second requirement. A terminal run cannot turn into an
+  // approval; report actual safe state instead of hiding it behind a timeout.
+  const deadline=Date.now()+5000;let operations=[],run;
+  while(Date.now()<deadline){
+    operations=await api(`/v1/runs/${runId}/operations`);
+    if(operations.some(item=>item.state==='awaiting_approval'))return operations;
+    run=await api(`/v1/runs/${runId}`);
+    if(peerError)throw peerError;
+    if(['completed','failed','cancelled'].includes(run.state))break;
+    await delay(10);
+  }
+  const events=await api(`/v1/runs/${runId}/events`);
+  // These peers use fixed synthetic prompts/credentials. Never print request
+  // headers, provider bodies, tool arguments, raw payloads or process env.
+  throw new Error('Scoped approval missing: '+JSON.stringify({label,runState:run?.state,providerSteps:scopeSteps.get(label),operations:operations.map(item=>({tool:item.tool,state:item.state})),events:events.map(event=>({kind:event.kind,errorCode:event.data?.data?.error?.code}))}));
+}
 async function start() {
   child=spawn(serverExe,['--db',join(folder,'state.sqlite'),'--modules',modules,'--stdlib',stdlib,'--port','0','--model','synthetic-edit-protocol-model','--models','synthetic-edit-alternate','--model-stream-usage','supported','--model-endpoint',`http://127.0.0.1:${peer.address().port}/chat`,'--model-tools','supported','--workspace',workspace,'--workspace-edits','approved'],{env,windowsHide:true});
   child.stderr.on('data',data=>{errors+=data;});
@@ -170,7 +187,7 @@ try {
     await mkdir(join(workspace,name));await writeFile(join(workspace,name,'AGENTS.md'),`Synthetic nested instruction for ${name}`);
     if(name!=='scope-create')await writeFile(join(workspace,name,'target.txt'),'original\n');
     await api('/v1/sessions',{id:name,title:'Synthetic inference, actual scoped delivery and approved effect'});const run=cli('run',name,name);
-    const operations=await until(()=>api(`/v1/runs/${run.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));assert.equal(operations.length,1);const [proposal]=operations;
+    const operations=await scopedApproval(run.id,name);assert.equal(operations.length,1);const [proposal]=operations;
     const events=cli('events',run.id);const deferred=events.filter(event=>event.kind==='tool.failed' && event.data.data.error?.code==='repository_instructions_required');assert.equal(deferred.length,name==='scope-refresh'?4:2);
     const scopes=events.filter(event=>event.kind==='agent.repository_scope');assert.ok(scopes.length>=2);assert.equal(JSON.stringify(scopes).includes('Synthetic nested instruction'),false);assert.equal(JSON.stringify(scopes).includes('Refreshed nested instruction'),false);
     cli('decide',proposal.id,'allow');await until(()=>api(`/v1/runs/${run.id}`),value=>value.state==='completed');
