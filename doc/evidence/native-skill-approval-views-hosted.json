@@ -1,0 +1,94 @@
+{
+  "initialFailedWorkflow": {
+    "sourceRevision": "d767d5069f52e3e6b899ae7a3e8313ebcc0ecbaf",
+    "workflowRunId": "37883217731",
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/37883217731",
+    "workflowConclusion": "failure",
+    "gatePassed": false,
+    "scope": "Independent file/source verification of complete isolated synthetic Node view suites; no native execution, live provider, installation or rendered editor acceptance",
+    "artifact": {
+      "id": 11594879787,
+      "digest": "sha256:a2d13e7bebd6a6665812c0e708d0c56a5f48cbb2e9bea47dec97568939f2609a",
+      "bytes": 98672
+    },
+    "sourceFiles": 41,
+    "trackedSourcesMatchedToGit": 39,
+    "vendorCopiesMatched": 2,
+    "testedBrowserAssets": 11,
+    "sourceAndAssetBytesUnchanged": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 176,
+      "passed": 176,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 35,
+      "passed": 35,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "evidenceHashes": {
+      "gate": "060a340e52d475b173aa9534eeea2b19f53c2503edd3923a532455ab6974537b",
+      "sourceBefore": "bc82a48cac8f796b62e05528fd25ce0c9d2dcc6216c6e064fb610639163e1450",
+      "sourceAfter": "bc82a48cac8f796b62e05528fd25ce0c9d2dcc6216c6e064fb610639163e1450",
+      "assetBefore": "dae105dad1b807adf468574cffa3bc91f8fcb5f27a64482cb0d01b704a1bdd1c",
+      "assetAfter": "dae105dad1b807adf468574cffa3bc91f8fcb5f27a64482cb0d01b704a1bdd1c",
+      "extension": "db24d73bf620e9439d7d3d8283bdf4e80bc61a6799f1594a28ea301670d19ad0",
+      "browser": "4c8666d496aae136287aacba8ccc0766b7e7a30bf62bf2f45235be54f75207e4"
+    },
+    "nativeExecuted": false,
+    "installed": false,
+    "liveRuntimeChanged": false
+  },
+  "successfulWorkflow": {
+    "sourceRevision": "dcfc4415696dff9dac175c5a44f7375c39e08a25",
+    "workflowRunId": "37883391612",
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/37883391612",
+    "workflowConclusion": "success",
+    "gatePassed": true,
+    "scope": "Independent file/source verification of complete isolated synthetic Node view suites; no native execution, live provider, installation or rendered editor acceptance",
+    "artifact": {
+      "id": 11594269699,
+      "digest": "sha256:e830d10b766beddb0b90cb96604eba52ea7a9a1f8a4811fb145f158808a39dc9",
+      "bytes": 98694
+    },
+    "sourceFiles": 41,
+    "trackedSourcesMatchedToGit": 39,
+    "vendorCopiesMatched": 2,
+    "testedBrowserAssets": 11,
+    "sourceAndAssetBytesUnchanged": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 176,
+      "passed": 176,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 35,
+      "passed": 35,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "evidenceHashes": {
+      "gate": "d47033ef74d1a5e287ad2fed63c966536df4b14cce5023c11ae7e8a5d1c219b2",
+      "sourceBefore": "bc82a48cac8f796b62e05528fd25ce0c9d2dcc6216c6e064fb610639163e1450",
+      "sourceAfter": "bc82a48cac8f796b62e05528fd25ce0c9d2dcc6216c6e064fb610639163e1450",
+      "assetBefore": "dae105dad1b807adf468574cffa3bc91f8fcb5f27a64482cb0d01b704a1bdd1c",
+      "assetAfter": "dae105dad1b807adf468574cffa3bc91f8fcb5f27a64482cb0d01b704a1bdd1c",
+      "extension": "1a5a5d8d6648a0e7e50d3d8f2e11fb0525f73b025abe1355ffa09d19a143a4a5",
+      "browser": "36799ad43ac006d3430d62c3c6d980055e3ad1ec736cbfc92c252b00af95907e"
+    },
+    "nativeExecuted": false,
+    "installed": false,
+    "liveRuntimeChanged": false
+  }
+}

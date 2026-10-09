@@ -110,8 +110,16 @@ another complete hosted gate; they do not establish that failures are fixed.
 The agent fixture also covers a guide larger than its remaining instruction
 capacity and verifies a completed conversation after the rejected load, with no
 activated skill snapshot. The context fixture covers aggregate overflow while
-retaining two previously delivered guides. These later capacity tests and the
-optional-description change remain unvalidated.
+retaining two previously delivered guides. The second hosted source
+`50750656e43cd51107ebe92e4331fa07c93ca440`
+[run 37880927365](https://github.com/xlang-foundation/xMind/actions/runs/37880927365)
+compiled and passed the skill context, agent runner and MCP effect contracts,
+including the capacity and optional-description cases. Its complete gate still
+failed with the same six failures, 84/90 in 325.86 seconds; it predates the
+fixture and dynamic MCP proposal fixes. The
+[verified failed-gate receipt](evidence/native-skills-capacity-hosted.json) and
+[complete result projection](evidence/native-skills-capacity-test-results.json)
+retain that scope. These individual contracts do not establish full delivery.
 The later automatic-suggestion correction also remains unvalidated. Its native
 contract covers explicit loading with `autoinvoke: false`, the normalized pinned
 metadata flag and the separate explicit loading prohibition. It changes no
@@ -131,10 +139,15 @@ without offering another approval. The isolated source `d767d5069f52e3e6b899ae7a
 [view run](https://github.com/xlang-foundation/xMind/actions/runs/37883217731)
 passed all 176 extension and 35 browser contracts with all 41 source/vendor files
 and 11 assets unchanged. The workflow still failed because its fixed expected
-extension count remained 175 after adding the new renderer contract. The helper
-now requires exactly 176; a complete successful view gate and installed/rendered
-acceptance remain pending. No local runtime, provider or editor was executed for
-this isolated result.
+extension count remained 175 after adding the new renderer contract. After the
+helper was corrected to require exactly 176, source `dcfc4415696dff9dac175c5a44f7375c39e08a25`
+[run 37883391612](https://github.com/xlang-foundation/xMind/actions/runs/37883391612)
+passed the complete workflow with 176/176 extension and 35/35 browser contracts.
+[Independent view evidence](evidence/native-skill-approval-views-hosted.json)
+retains both workflow conclusions, verifies all archive bytes, matches the 39
+tracked view sources to each exact Git revision and binds all 11 tested assets.
+Installed/rendered acceptance remains pending. No local runtime, provider or
+editor was executed for these isolated results.
 
 Delivery still requires the complete 90-contract native gate, frontend suites,
 browser/native integration, independently verified VSIX/runtime artifacts and

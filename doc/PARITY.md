@@ -24,6 +24,10 @@ Native workspace skill discovery, loading, context delivery and effect approval
 bindings are now implemented in source. The complete 90-contract gate and
 installed/live acceptance remain pending; this is not a verified equivalent
 OpenCode skill operation. [Skill scope and remaining delivery](native-skills.md).
+The shared skill approval display passed the complete isolated 176-extension /
+35-browser view gate. It displays source bindings for file, command and MCP
+approvals; native skills delivery and installed/rendered acceptance remain
+separate requirements. [Verified view evidence](evidence/native-skill-approval-views-hosted.json).
 
 The later catalogue-recovery source passed its isolated hosted **175/35** view
 gate and its tested browser asset is published. Rendered recovery and an updated

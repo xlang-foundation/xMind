@@ -1,0 +1,637 @@
+{
+  "sourceRevision": "50750656e43cd51107ebe92e4331fa07c93ca440",
+  "workflowRunId": "37880927365",
+  "scope": "Parsed test identity/status/timing projection; not a copy of raw diagnostic output",
+  "tests": [
+    {
+      "number": 1,
+      "testNumber": 1,
+      "name": "native_json_schema_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.02
+    },
+    {
+      "number": 2,
+      "testNumber": 2,
+      "name": "native_mcp_wire_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.03
+    },
+    {
+      "number": 3,
+      "testNumber": 3,
+      "name": "model_stream_protocol_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.08
+    },
+    {
+      "number": 4,
+      "testNumber": 4,
+      "name": "model_request_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.02
+    },
+    {
+      "number": 5,
+      "testNumber": 5,
+      "name": "native_context_selection_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.01
+    },
+    {
+      "number": 6,
+      "testNumber": 6,
+      "name": "native_gemini_request_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.21
+    },
+    {
+      "number": 7,
+      "testNumber": 7,
+      "name": "native_gemini_stream_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.04
+    },
+    {
+      "number": 8,
+      "testNumber": 8,
+      "name": "native_gemini_history_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.19
+    },
+    {
+      "number": 9,
+      "testNumber": 9,
+      "name": "native_anthropic_request_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.01
+    },
+    {
+      "number": 10,
+      "testNumber": 10,
+      "name": "native_anthropic_stream_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.13
+    },
+    {
+      "number": 11,
+      "testNumber": 11,
+      "name": "native_anthropic_history_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.44
+    },
+    {
+      "number": 12,
+      "testNumber": 12,
+      "name": "native_responses_protocol_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.15
+    },
+    {
+      "number": 13,
+      "testNumber": 13,
+      "name": "native_dynamic_plan_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.03
+    },
+    {
+      "number": 14,
+      "testNumber": 14,
+      "name": "native_agent_authority_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.02
+    },
+    {
+      "number": 15,
+      "testNumber": 15,
+      "name": "native_dynamic_plan_repository_contract",
+      "status": "passed",
+      "elapsedSeconds": 9.68
+    },
+    {
+      "number": 16,
+      "testNumber": 16,
+      "name": "native_context_repository_contract",
+      "status": "passed",
+      "elapsedSeconds": 14.43
+    },
+    {
+      "number": 17,
+      "testNumber": 17,
+      "name": "native_context_control_contract",
+      "status": "passed",
+      "elapsedSeconds": 7.13
+    },
+    {
+      "number": 18,
+      "testNumber": 18,
+      "name": "native_context_cli_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.3
+    },
+    {
+      "number": 19,
+      "testNumber": 19,
+      "name": "native_context_engine_contract",
+      "status": "passed",
+      "elapsedSeconds": 19.72
+    },
+    {
+      "number": 20,
+      "testNumber": 20,
+      "name": "native_context_graph_engine_contract",
+      "status": "passed",
+      "elapsedSeconds": 3.76
+    },
+    {
+      "number": 21,
+      "testNumber": 21,
+      "name": "native_provider_yaml_config_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.55
+    },
+    {
+      "number": 22,
+      "testNumber": 22,
+      "name": "native_planning_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.82
+    },
+    {
+      "number": 23,
+      "testNumber": 23,
+      "name": "native_child_executor_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.62
+    },
+    {
+      "number": 24,
+      "testNumber": 24,
+      "name": "native_dynamic_plan_engine_contract",
+      "status": "passed",
+      "elapsedSeconds": 3.91
+    },
+    {
+      "number": 25,
+      "testNumber": 25,
+      "name": "native_dynamic_plan_mcp_contract",
+      "status": "failed",
+      "elapsedSeconds": 15.73
+    },
+    {
+      "number": 26,
+      "testNumber": 26,
+      "name": "native_secret_protection_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.02
+    },
+    {
+      "number": 27,
+      "testNumber": 27,
+      "name": "native_a2a_task_control_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 5.41
+    },
+    {
+      "number": 28,
+      "testNumber": 28,
+      "name": "native_a2a_message_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.78
+    },
+    {
+      "number": 29,
+      "testNumber": 29,
+      "name": "native_a2a_stream_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 6.1
+    },
+    {
+      "number": 30,
+      "testNumber": 30,
+      "name": "native_a2a_v1_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.63
+    },
+    {
+      "number": 31,
+      "testNumber": 31,
+      "name": "native_responses_agent_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 11.15
+    },
+    {
+      "number": 32,
+      "testNumber": 32,
+      "name": "native_graph_service_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 9.42
+    },
+    {
+      "number": 33,
+      "testNumber": 33,
+      "name": "native_provider_cli_contract",
+      "status": "passed",
+      "elapsedSeconds": 2.09
+    },
+    {
+      "number": 34,
+      "testNumber": 34,
+      "name": "native_provider_setup_contract",
+      "status": "passed",
+      "elapsedSeconds": 2.59
+    },
+    {
+      "number": 35,
+      "testNumber": 35,
+      "name": "native_graph_runner_contract",
+      "status": "passed",
+      "elapsedSeconds": 10.39
+    },
+    {
+      "number": 36,
+      "testNumber": 36,
+      "name": "native_graph_mcp_contract",
+      "status": "passed",
+      "elapsedSeconds": 15.36
+    },
+    {
+      "number": 37,
+      "testNumber": 37,
+      "name": "native_graph_mcp_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 4.17
+    },
+    {
+      "number": 38,
+      "testNumber": 38,
+      "name": "native_delegation_contract",
+      "status": "failed",
+      "elapsedSeconds": 8.64
+    },
+    {
+      "number": 39,
+      "testNumber": 39,
+      "name": "native_delegation_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 2.44
+    },
+    {
+      "number": 40,
+      "testNumber": 40,
+      "name": "native_graph_checkpoint_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.61
+    },
+    {
+      "number": 41,
+      "testNumber": 41,
+      "name": "native_graph_children_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.36
+    },
+    {
+      "number": 42,
+      "testNumber": 42,
+      "name": "native_graph_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.17
+    },
+    {
+      "number": 43,
+      "testNumber": 43,
+      "name": "native_instruction_configuration_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.73
+    },
+    {
+      "number": 44,
+      "testNumber": 44,
+      "name": "native_process_configuration_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.53
+    },
+    {
+      "number": 45,
+      "testNumber": 45,
+      "name": "native_process_executor_contract",
+      "status": "passed",
+      "elapsedSeconds": 8.7
+    },
+    {
+      "number": 46,
+      "testNumber": 46,
+      "name": "native_agent_process_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 6.41
+    },
+    {
+      "number": 47,
+      "testNumber": 47,
+      "name": "native_process_adapter_contract",
+      "status": "passed",
+      "elapsedSeconds": 4.33
+    },
+    {
+      "number": 48,
+      "testNumber": 48,
+      "name": "native_mcp_configuration_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.46
+    },
+    {
+      "number": 49,
+      "testNumber": 49,
+      "name": "native_schema_worker_contract",
+      "status": "passed",
+      "elapsedSeconds": 2.38
+    },
+    {
+      "number": 50,
+      "testNumber": 50,
+      "name": "native_mcp_stdio_contract",
+      "status": "passed",
+      "elapsedSeconds": 3.17
+    },
+    {
+      "number": 51,
+      "testNumber": 51,
+      "name": "native_mcp_handshake_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.92
+    },
+    {
+      "number": 52,
+      "testNumber": 52,
+      "name": "native_mcp_client_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.12
+    },
+    {
+      "number": 53,
+      "testNumber": 53,
+      "name": "native_mcp_effect_contract",
+      "status": "passed",
+      "elapsedSeconds": 8.68
+    },
+    {
+      "number": 54,
+      "testNumber": 54,
+      "name": "native_agent_service_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.23
+    },
+    {
+      "number": 55,
+      "testNumber": 55,
+      "name": "native_agent_runner_contract",
+      "status": "passed",
+      "elapsedSeconds": 6.67
+    },
+    {
+      "number": 56,
+      "testNumber": 56,
+      "name": "native_gemini_agent_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.07
+    },
+    {
+      "number": 57,
+      "testNumber": 57,
+      "name": "native_anthropic_agent_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.94
+    },
+    {
+      "number": 58,
+      "testNumber": 58,
+      "name": "native_create_executor_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.58
+    },
+    {
+      "number": 59,
+      "testNumber": 59,
+      "name": "native_edit_executor_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.12
+    },
+    {
+      "number": 60,
+      "testNumber": 60,
+      "name": "native_approved_edit_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.35
+    },
+    {
+      "number": 61,
+      "testNumber": 61,
+      "name": "native_workspace_tools_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.78
+    },
+    {
+      "number": 62,
+      "testNumber": 62,
+      "name": "native_repository_instructions_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.46
+    },
+    {
+      "number": 63,
+      "testNumber": 63,
+      "name": "native_skill_context_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.25
+    },
+    {
+      "number": 64,
+      "testNumber": 64,
+      "name": "native_chat_provider_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.15
+    },
+    {
+      "number": 65,
+      "testNumber": 65,
+      "name": "native_gemini_provider_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.18
+    },
+    {
+      "number": 66,
+      "testNumber": 66,
+      "name": "native_deepseek_provider_contract",
+      "status": "failed",
+      "elapsedSeconds": 0.56
+    },
+    {
+      "number": 67,
+      "testNumber": 67,
+      "name": "native_deepseek_profile_runtime_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.9
+    },
+    {
+      "number": 68,
+      "testNumber": 68,
+      "name": "native_provider_model_policy_runtime_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.28
+    },
+    {
+      "number": 69,
+      "testNumber": 69,
+      "name": "native_anthropic_provider_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.18
+    },
+    {
+      "number": 70,
+      "testNumber": 70,
+      "name": "native_responses_context_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.34
+    },
+    {
+      "number": 71,
+      "testNumber": 71,
+      "name": "native_http_stream_transport_contract",
+      "status": "passed",
+      "elapsedSeconds": 9.21
+    },
+    {
+      "number": 72,
+      "testNumber": 72,
+      "name": "native_agent_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 17.64
+    },
+    {
+      "number": 73,
+      "testNumber": 73,
+      "name": "native_agent_edit_http_contract",
+      "status": "passed",
+      "elapsedSeconds": 17.92
+    },
+    {
+      "number": 74,
+      "testNumber": 74,
+      "name": "native_agent_mcp_http_contract",
+      "status": "failed",
+      "elapsedSeconds": 1.2
+    },
+    {
+      "number": 75,
+      "testNumber": 75,
+      "name": "native_mcp_sdk_modern_contract",
+      "status": "failed",
+      "elapsedSeconds": 1.31
+    },
+    {
+      "number": 76,
+      "testNumber": 76,
+      "name": "native_mcp_sdk_legacy_contract",
+      "status": "failed",
+      "elapsedSeconds": 1.32
+    },
+    {
+      "number": 77,
+      "testNumber": 77,
+      "name": "native_http_cli_contract",
+      "status": "passed",
+      "elapsedSeconds": 2.61
+    },
+    {
+      "number": 78,
+      "testNumber": 78,
+      "name": "embedded_xlang_sqlite_contract",
+      "status": "passed",
+      "elapsedSeconds": 0.05
+    },
+    {
+      "number": 79,
+      "testNumber": 79,
+      "name": "native_incoming_repository_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.86
+    },
+    {
+      "number": 80,
+      "testNumber": 80,
+      "name": "native_task_list_repository_contract",
+      "status": "passed",
+      "elapsedSeconds": 2.2
+    },
+    {
+      "number": 81,
+      "testNumber": 81,
+      "name": "native_permission_waiter_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.32
+    },
+    {
+      "number": 82,
+      "testNumber": 82,
+      "name": "native_operation_repository_contract",
+      "status": "passed",
+      "elapsedSeconds": 5.9
+    },
+    {
+      "number": 83,
+      "testNumber": 83,
+      "name": "xlang_repository_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.21
+    },
+    {
+      "number": 84,
+      "testNumber": 84,
+      "name": "persistence_service_contract",
+      "status": "passed",
+      "elapsedSeconds": 6
+    },
+    {
+      "number": 85,
+      "testNumber": 85,
+      "name": "native_provider_profiles_contract",
+      "status": "passed",
+      "elapsedSeconds": 1.52
+    },
+    {
+      "number": 86,
+      "testNumber": 86,
+      "name": "native_provider_profile_runtime_contract",
+      "status": "passed",
+      "elapsedSeconds": 10.14
+    },
+    {
+      "number": 87,
+      "testNumber": 87,
+      "name": "native_provider_profile_cli_contract",
+      "status": "passed",
+      "elapsedSeconds": 4.51
+    },
+    {
+      "number": 88,
+      "testNumber": 88,
+      "name": "native_gemini_catalogue_contract",
+      "status": "passed",
+      "elapsedSeconds": 10.84
+    },
+    {
+      "number": 89,
+      "testNumber": 89,
+      "name": "native_gemini_profile_runtime_contract",
+      "status": "passed",
+      "elapsedSeconds": 3.89
+    },
+    {
+      "number": 90,
+      "testNumber": 90,
+      "name": "encrypted_credential_repository_contract",
+      "status": "passed",
+      "elapsedSeconds": 2.26
+    }
+  ]
+}
