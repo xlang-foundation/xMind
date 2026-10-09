@@ -1,0 +1,73 @@
+{
+  "sourceRevision": "5795e347af957e3e0bfc5195e2be946df6367728",
+  "nativeSourceRevision": "60475f84ac2d1355dfe77736b187f7cb899f560f",
+  "scope": "Actual browser short-pane and desktop layout with retained live responses; no new provider inference, compaction or rendered IDE interaction",
+  "nativeFilesVerifiedUnchanged": 564,
+  "frontendFilesVerifiedUnchanged": 39,
+  "sessionCount": 20,
+  "rootRunCount": 27,
+  "runRecordsUnchanged": true,
+  "newRunsAdmitted": 0,
+  "backendAndViewProcessesRestarted": false,
+  "settingsPreservedByInstallationCheck": true,
+  "renderedMeasurements": [
+    {
+      "case": "short-empty-composer",
+      "viewport": {
+        "width": 319,
+        "height": 431
+      },
+      "historyHeight": 112,
+      "footerHeight": 144.14584350585938,
+      "bodyOverflow": 0
+    },
+    {
+      "case": "short-12-line-unsent-draft",
+      "historyHeight": 112,
+      "composerHeight": 64,
+      "composerScrollHeight": 234,
+      "footerHeight": 143,
+      "bodyOverflow": 0
+    },
+    {
+      "case": "short-expanded-context",
+      "historyHeight": 112,
+      "footerHeight": 160,
+      "footerScrollHeight": 254,
+      "bodyOverflow": 0
+    },
+    {
+      "case": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "historyHeight": 464.6458435058594,
+      "sidebarX": 708,
+      "sidebarWidth": 572,
+      "bodyOverflow": 0
+    }
+  ],
+  "temporaryDesktopViewportReset": true,
+  "draftCleared": true,
+  "compactionDispatched": false,
+  "knownSeparateIssue": "Concurrent provider/session switching can retire discovery and leave only the configured model; recovery/catalogue retention fix remains pending",
+  "retainedAttempts": [
+    {
+      "scope": "Frontend gate launcher before test execution",
+      "failure": "frontend_manifest_mismatch",
+      "correction": "Use the actual 39-path source map, rather than treating its digest string as a path map"
+    },
+    {
+      "scope": "Initial Code CLI launch",
+      "failure": "MODULE_NOT_FOUND",
+      "correction": "Use the vendor wrapper observed versioned CLI path"
+    },
+    {
+      "scope": "Post-install source verifier",
+      "failure": "installed_source_differs for package.json",
+      "correction": "Compare all product fields after excluding only Code-added __metadata; all six other source files remain byte-verified",
+      "reinstallRequired": false
+    }
+  ]
+}

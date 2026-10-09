@@ -1,0 +1,17 @@
+{
+  "sourceRevision": "5795e347af957e3e0bfc5195e2be946df6367728",
+  "nativeSourceRevision": "60475f84ac2d1355dfe77736b187f7cb899f560f",
+  "artifacts": {
+    "native-compact-sidebar-gate.json": "0cdc2488dbe994c4497c69a04745d670c50c225c564e34447d0ed42c68fedbd4",
+    "native-compact-sidebar-extension.log": "e684c1a795775f141f6ee290838703d688cb30010e03388f16d1069d162538f4",
+    "native-compact-sidebar-browser.log": "4d66818893d79700586eaeb83f22e23e209f86cfe8e21b92552e6a0a8cece62a",
+    "native-compact-sidebar-publication.json": "7ecbd92616a42762cfc86d64b791817dd8353ef6add0d6c786f00f5059db7c54",
+    "native-compact-sidebar-vsix.json": "c80d9b34b3e070b6b97b6d29d1fb522d0e04e467f31d5af459f246d362c416b8",
+    "native-compact-sidebar-install.json": "8b067a29f040577a27bf358fc16d8df561587f04144bbebe402fe2f87aadfdde",
+    "native-compact-sidebar-narrow.jpg": "6811644bdffd079fc089279c9fb9f9d8add2e0851ec06dc3370af39344c9d902",
+    "native-compact-sidebar-desktop.jpg": "22d37be8e81a678044d0229c987c0b2ae8383b4fd5d8bc389409260eb6c6be4c",
+    "native-compact-sidebar-acceptance.json": "33cd7cd2591a1bf36204c85c374d938b2cba03757b0bc2a8c931b511664ae7fe"
+  },
+  "privateConfigurationPublished": false,
+  "privateAuditPublished": false
+}

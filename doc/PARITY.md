@@ -20,6 +20,18 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+The latest native source `60475f84` passed its full 89-contract gate and real
+four-provider native workspace reads. Its installed browser upgrade preserved
+existing API records and passed actual four-provider rendered runs and refresh.
+The later compact-height CSS passed 173/33 frontend tests and actual short-pane
+rendering. These checkpoints do not establish full parity: rendered normal
+VS Code interaction, concurrent provider/session catalogue recovery, live
+compaction and broader provider/coding capabilities remain separate work.
+[Model policy](native-model-eligibility.md),
+[browser upgrade](browser-preview-upgrade.md),
+[compact sidebar](compact-sidebar.md).
+The older acceptance paragraphs below retain their original checkpoint scope.
+
 Current schema-v12 context, YAML configuration and DeepSeek source configured
 and compiled in the second complete **88-contract** attempt, which passed
 **85 and failed three in 162.98 seconds**. The first 86-contract attempt passed

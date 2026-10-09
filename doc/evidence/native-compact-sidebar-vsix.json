@@ -1,0 +1,68 @@
+{
+  "passed": true,
+  "scope": "Independent VSIX ZIP and staged-file integrity; no execution or installed acceptance",
+  "archive": {
+    "file": "xmind-compact-0.1.0.vsix",
+    "sha256": "38a793db7a0ff3d4c27078933a3c3464325f0cee0a3340d4d7060f72a378240d",
+    "bytes": 18354196,
+    "entries": 1924,
+    "expandedBytes": 66749201
+  },
+  "runtime": {
+    "manifestSha256": "56cd0487728f339a5a386ffaaec0de38247c2a45e72a2ce5e6d86ebe66830f60",
+    "nativeRevision": "60475f84ac2d1355dfe77736b187f7cb899f560f",
+    "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+    "inventoryFiles": 1890,
+    "nativeFiles": 8,
+    "pureSourceFiles": 1869,
+    "licenseFiles": 13,
+    "allArchiveBytesMatchManifest": true,
+    "manifestBytesMatchStaged": true,
+    "stagedInventoryVerified": true,
+    "nativeSha256": {
+      "xmind_server.exe": "0e6edd80efdf78c868d2d2c108520a9468120f21eaad2912054730d9c6aa2b24",
+      "xmind_schema_worker.exe": "4149d02b1fe319076d3a13b1c7331833442c9fef0e19f1c817231b869a5b293e",
+      "xmind_cli.exe": "567a93476a5c16d68850b74eb7a758918e45a41a0389b65b9c3cac99686977d5",
+      "xmind_admin.exe": "ebe9a67aa96eea4b5ab8ed6f95fc57400d2c7fea11f851978c69d8e0cd327dcf",
+      "xlang3_runtime.dll": "64883ab20bd54f7ea5d051a1af6ff88e5ac4b4152e013ec44e13227283695445",
+      "xlang3.exe": "7c62d0646bf275fcc55fb114634f2f3a5bcec88b9b63f5f2b10392276d0dcb49",
+      "modules/xlang_json.x3pkg.dll": "e3f045d31e46fafb778e896c163def74e4a4d965a57d11894f359374e823ec67",
+      "modules/xlang_sqlite3.x3pkg.dll": "d0d874d7d8444b8c1c011789ad49fa41bf72a25ca4df111eeced3e56da21e908"
+    }
+  },
+  "extensionSourceSha256": {
+    "workspace-backend.js": "926a7703c232886a3731440bea98709d2742ec2a50ba2544f73ac277a39bccd4",
+    "package.json": "17412ae3adb3c192d19d4a0e43f75f0e63f3b25627d2e5cd891eabc31c076c2f",
+    "native-runtime.js": "0fe700c4fecbd8a790ac8d9ad792a72aeb482f6511c6e2436673be9207b7dbce",
+    "extension.js": "efb247a44a266e3ff4fc209e335a907aa4bfc821a97548320e610955452c24cf",
+    "client.js": "7cb9170707a60e90f633d04148017e6f807c018a0e2f15be545460d1767ff342",
+    "scripts/package-native-runtime.mjs": "dbdd2aca335a947ce60749967f9b64db2e458a320c4a5498196e305981dd4bcd",
+    "media/chat.css": "99dfa05f684d2c20a953ddcd89c2eb8c31d672df0a81a0e5ed9267abbea9d436"
+  },
+  "browserAssetSha256": {
+    "server.mjs": "6a6b3233eedb800d1174c5664cc200529eae3ed46a9412ece5f684dac0d57db3",
+    "assets/purify.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+    "assets/marked.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+    "assets/index.html": "095049d654140dc4bdf689e429cf685bb308e9b1a817865d00477c5bbb2ec6a8",
+    "assets/client.js": "7cb9170707a60e90f633d04148017e6f807c018a0e2f15be545460d1767ff342",
+    "assets/chat.js": "a78b642d3101023b2c07f1e6a0688ab73092307059535a348371854c6ba0a701",
+    "assets/chat.css": "99dfa05f684d2c20a953ddcd89c2eb8c31d672df0a81a0e5ed9267abbea9d436",
+    "assets/browser.js": "5bb6184830039d3e20e0846fe8c396772b09a8e5330d2b05bbe539becafd2035",
+    "assets/browser.css": "8cae13ebf6ff2700bbcbe1a7150315603fc5865ff8bdbe3c9e30c2cb3ca901dc",
+    "assets/licenses/marked.txt": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+    "assets/licenses/dompurify.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "assets/licenses/dompurify-MPL.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+  },
+  "guards": {
+    "exactInventory": true,
+    "duplicateNames": false,
+    "symlinks": false,
+    "privateConfigurationFiles": false,
+    "cpythonExecutablesExtensionsOrBytecode": false
+  },
+  "nativeExecuted": false,
+  "sdkExecuted": false,
+  "configurationAccessed": false,
+  "providerCalls": 0,
+  "installed": false
+}

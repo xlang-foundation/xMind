@@ -1,5 +1,14 @@
 # Current native validation
 
+The subsequent compact-height CSS checkpoint passed 173 extension and 33
+browser tests, then actual short-pane rendering, long-draft and expanded-context
+checks. The 319 × 431 browser pane now retains 112 pixels for history, up from
+16. The browser styles are live and the verified VSIX is installed in the
+existing profile; its open window still needs a reload. Native inputs and run
+records are unchanged. A separate concurrent provider/session selection
+catalogue issue was found and remains pending.
+[Compact sidebar scope](compact-sidebar.md).
+
 The browser preview is now upgraded to source `60475f8` and the paired xlang3
 SDK `ad8040f`, at its existing local addresses. Its live API records and cookie
 were preserved; a separate disposable schema 10 → 12 → 10 fixture passed,

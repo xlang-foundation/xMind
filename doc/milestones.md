@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+Compact-height browser/IDE styles now preserve conversation space. The actual
+319 × 431 pane gained 96 pixels of history space; long drafts and expanded
+context controls scroll without collapsing it. Complete 173/33 frontend suites,
+independent VSIX verification and persistent-profile installation passed.
+Native source and runs stayed unchanged. Rendered IDE interaction and the
+separate provider/session catalogue recovery issue remain pending.
+[Compact layout evidence](compact-sidebar.md).
+
 The local browser preview now runs source `60475f8` with its matching assets
 and paired xlang3 SDK. The upgrade preserved existing API records, configuration
 and browser authentication. A disposable schema 10 → 12 → 10 fixture and fresh

@@ -1,0 +1,30 @@
+{
+  "scope": "CSS-only publication; same access adapter and backend owners. Source revision pending commit; exact hashes recorded.",
+  "nativePid": 33408,
+  "viewPid": 4832,
+  "nativeRevision": "60475f84ac2d1355dfe77736b187f7cb899f560f",
+  "changedAssets": [
+    "assets/chat.css",
+    "assets/browser.css"
+  ],
+  "viewFiles": {
+    "server.mjs": "6a6b3233eedb800d1174c5664cc200529eae3ed46a9412ece5f684dac0d57db3",
+    "assets/index.html": "095049d654140dc4bdf689e429cf685bb308e9b1a817865d00477c5bbb2ec6a8",
+    "assets/browser.js": "5bb6184830039d3e20e0846fe8c396772b09a8e5330d2b05bbe539becafd2035",
+    "assets/browser.css": "8cae13ebf6ff2700bbcbe1a7150315603fc5865ff8bdbe3c9e30c2cb3ca901dc",
+    "assets/chat.js": "a78b642d3101023b2c07f1e6a0688ab73092307059535a348371854c6ba0a701",
+    "assets/chat.css": "99dfa05f684d2c20a953ddcd89c2eb8c31d672df0a81a0e5ed9267abbea9d436",
+    "assets/client.js": "7cb9170707a60e90f633d04148017e6f807c018a0e2f15be545460d1767ff342",
+    "assets/marked.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+    "assets/purify.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+    "assets/licenses/marked.txt": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+    "assets/licenses/dompurify.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "assets/licenses/dompurify-MPL.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+  },
+  "sessionCount": 20,
+  "rootRunCount": 27,
+  "nativeStateUnchanged": true,
+  "processesRestarted": false,
+  "tokenChanged": false,
+  "backupRetained": true
+}

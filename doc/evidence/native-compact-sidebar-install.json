@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "scope": "Existing persistent VS Code profile updated through Code CLI; on-disk source/browser/manifest identity verified. Existing window not reloaded and no rendered IDE interaction claimed.",
+  "settingsBytesUnchanged": true,
+  "installationExitCode": 0,
+  "priorSuccessfulInstallVerifiedWithoutReinstall": true,
+  "extensionSourceFilesByteVerified": 6,
+  "packageJsonFieldsMatchWithCodeMetadataExcluded": true,
+  "browserFilesVerified": 12,
+  "nativeManifestVerified": true,
+  "nativeRevision": "60475f84ac2d1355dfe77736b187f7cb899f560f",
+  "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+  "windowReloadPending": true,
+  "trustBypassRequested": false
+}
