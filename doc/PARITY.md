@@ -34,7 +34,12 @@ approvals; full skill delivery and rendered acceptance remain
 separate requirements. [Verified view evidence](evidence/native-skill-approval-views-hosted.json).
 The [separate installed/live receipt](evidence/native-skills-installed-live.json)
 retains the initial Claude formatting and harness cleanup failures and the
-successful Claude retry. The browser preview still uses the earlier runtime.
+successful Claude retry. The browser preview subsequently upgraded to the same
+accepted runtime with exact saved-record comparison. Reload and real skill
+metadata rendering passed, but a moving approval-card interaction failed and
+was cancelled before an effect. A DOM-retention fix passed 58 renderer contracts;
+its full 177/35 gate and installed interaction remain pending.
+[Browser evidence](evidence/native-skills-browser-upgrade.json).
 
 The later catalogue-recovery source passed its isolated hosted **175/35** view
 gate and its tested browser asset is published. Rendered recovery and an updated
@@ -43,7 +48,7 @@ validation. This fixes an adapter recovery path without claiming a new native
 gate or broader behavioral parity.
 [Catalogue recovery](model-catalogue-recovery.md).
 
-The browser preview's native source `60475f84` passed its full 89-contract gate and real
+The earlier browser preview source `60475f84` passed its full 89-contract gate and real
 four-provider native workspace reads. Its installed browser upgrade preserved
 existing API records and passed actual four-provider rendered runs and refresh.
 The later compact-height CSS passed 173/33 frontend tests and actual short-pane

@@ -5,8 +5,9 @@ the actual agent tool loop. Source `d767d506` passed the complete 90-contract
 native gate and hosted packaging. Independent verification binds the tested
 runtime and VSIX to that source. The package is installed in the persistent
 VS Code profile, passed a real isolated opened-folder host and passed skill
-activation/companion reads with four real providers. The browser preview still
-uses its earlier runtime. Rendered acceptance and full skill delivery remain
+activation/companion reads with four real providers. The browser preview now
+uses this runtime and preserved its saved records during replacement. Rendered
+approval acceptance and full skill delivery remain
 pending; this does not establish OpenCode skill parity.
 
 The behavior reference is the pinned OpenCode `v2.0.16` source, commit
@@ -193,7 +194,43 @@ workspace was removed after verifying its exact path and emptiness.
 private native histories, actual calls/results, delivered snapshot events and
 real usage/timing fields. It publishes metadata and hashes only. These checks
 do not establish rendered browser/IDE acceptance, normal-window reload or
-durable activation restoration. The live browser runtime is unchanged.
+durable activation restoration. The subsequent browser upgrade has separate
+evidence below.
+
+## Browser upgrade and approval stability
+
+The same accepted native runtime and packaged browser assets replaced the owned
+preview at `http://127.0.0.1:60405/ui/`. A disposable instance first exercised
+the helper's replacement, startup and durable-cookie checks. The live instance
+was idle before stopping its view and native owners, copying a closed database
+backup and starting the verified replacements on the same addresses. Exact
+pre/post API snapshots matched 20 sessions, 27 root runs, 57 history rows, three
+operation journals, two graphs/two graph children, two delegated children and
+four planning roots, including all configuration and paginated events. No
+CPython interpreter or direct SQLite client was used.
+
+Actual page reload restored its connection, saved conversation and all 20
+OpenAI model choices without entering a token. Compact 319×431 and desktop
+1024×768 observations covered the footer controls and right sidebar. A fresh
+real browser run loaded an owned skill, read its companion and proposed file
+creation. The approval displayed the actual guide id, source path, byte count
+and hash. Polling then rebuilt the operation card and collapsed the expanded
+guidance; during a click the moving control opened Compare changes instead.
+The run was stopped before approval, its operation was durably cancelled and
+the result file was absent. Owned source/companion fixtures were then removed.
+This is a failed approval-interaction check, not a completed coding effect.
+
+The source fix retains unchanged operation DOM nodes, expanded guidance,
+keyboard focus and in-flight decision controls across polls. Changed native
+bindings replace the card, and cached expired approvals are still disabled.
+Uncertain-file inspection results also survive identical updates. The renderer's
+58 contracts passed, including a new regression case covering file, command and
+MCP cards. The complete expected extension suite increases to 177; the full
+view gate, installation and another real approval interaction are pending.
+[Browser upgrade and cancelled-proposal receipt](evidence/native-skills-browser-upgrade.json)
+retains both the successful state-preserving upgrade and the UI failure. New
+test admission has occurred; the pre-upgrade database backup must not replace
+the current database.
 
 Delivery still requires rendered acceptance and normal-window reload. Durable activation restoration across resumed or new
 runs, explicit manual activation and deactivation, configured/global/URL/embedded

@@ -3,6 +3,7 @@ const api=globalThis.xMindView||acquireVsCodeApi(),byId=id=>document.getElementB
 let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null;
 let renameCapability=false,renameSnapshot;
 const operationSections=new Map();
+const operationRows=new Map();
 const processStreams=new Map();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
 function markdown(el,text){
@@ -151,8 +152,15 @@ function runFailure(data){
 }
 function stream(text){if(!live){live=node('article',undefined,'message assistant streaming');live.append(node('h4','xMind · responding'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));byId('live').append(live);byId('empty').hidden=true;}streamText+=text;markdown(live.querySelector('.message-body'),streamText);metrics(live.querySelector('.metrics'),{usage:streamUsage});}
 function operations(items){
-  byId('operations').replaceChildren();
+  const container=byId('operations'),ids=new Set(items.map(item=>item.id)),sections=[];
+  for(const [id,row] of operationRows)if(!ids.has(id)){row.section.remove();operationRows.delete(id);operationSections.delete(id);}
   for(const item of items){
+    const signature=JSON.stringify(item),previous=operationRows.get(item.id);
+    if(previous?.signature===signature){
+      if(Date.now()>=item.expires_unix_ms)for(const button of previous.section.querySelectorAll('button'))button.disabled=true;
+      sections.push(previous.section);continue;
+    }
+    if(previous)previous.section.remove();operationSections.delete(item.id);
     const section=node('section',undefined,'operation');section.append(node('h4',(item.node_id?'Node '+item.node_id+' · ':'')+(item.tool==='run_process'?'Command':item.tool)+' · '+item.state));
     const meta=node('details');meta.append(node('summary','Operation '+item.id),node('pre','Workspace: '+item.workspace_id+'\nExpires: '+new Date(item.expires_unix_ms).toISOString()+'\nController: '+(item.decision_actor||'Awaiting decision')),node('pre',item.arguments_json));section.append(meta);
     let reviewable=true;
@@ -187,7 +195,27 @@ function operations(items){
       const detail=node('details');detail.append(node('summary','Outcome'),node('pre',item.result_json));section.append(detail);
     }
     if(item.tool==='run_process'&&item.state==='uncertain')section.append(node('p','Possible command effects remain uncertain. Further effects in this workspace and through this profile are blocked; xMind will not retry the command.','inspection-note'));
-    byId('operations').append(section);
+    operationExtras(section,item);operationRows.set(item.id,{signature,section});sections.push(section);
+  }
+  for(const [index,section] of sections.entries())if(container.children[index]!==section)container.insertBefore(section,container.children[index]||null);
+}
+function operationExtras(section,item){
+  if(item.tool==='mcp_tool'){
+    try{const plan=JSON.parse(item.arguments_json);section.append(node('p','External tool: '+plan.server_config_id+' / '+plan.peer_tool+' · configuration '+plan.config_revision));}catch{}
+    if(item.state==='awaiting_approval')section.append(node('p','The external server can perform effects beyond this workspace. Its read-only hints do not grant permission.'));
+    if(item.state==='uncertain')section.append(node('p','The external effect is uncertain. Further effects in this workspace and on this configured server remain blocked.','inspection-note'));
+    if(item.state==='succeeded')section.append(node('p','The external server acknowledged this result. xMind has not independently verified its effect.'));
+  }
+  if(item.tool==='replace_file'&&item.state==='uncertain'){
+    operationSections.set(item.id,section);section.append(node('p','This edit is uncertain. Further edits in this workspace remain blocked.','inspection-note'));
+    const button=node('button','Inspect actual file');button.onclick=()=>api.postMessage({type:'inspect-edit',id:item.id});section.append(button);
+  }
+  if(['replace_file','create_file'].includes(item.tool)&&item.state==='awaiting_approval'){
+    const button=node('button','Compare changes');button.disabled=Date.now()>=item.expires_unix_ms;button.onclick=()=>api.postMessage({type:'review',id:item.id});section.append(button);
+  }
+  if(item.tool==='create_file'){
+    section.append(node('p','New file. The backend must still verify the recorded parent and absence of this name.'));
+    if(item.state==='uncertain')section.append(node('p','Creation is uncertain. Further effects in this workspace remain blocked; the operation will not replay.','inspection-note'));
   }
 }
 const graphRows=new Map();let observedGraph,displayedGraph,workflowExecutable=false;
@@ -414,30 +442,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='draft')byId('prompt').value=m.text;
   else if(m.type==='event'){const event=m.event;byId('events').textContent+=JSON.stringify(event)+'\n';if(event.kind==='run.failed')runFailure(event.data);else if(event.kind==='process.output')processOutput(event.data);else if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
   else if(m.type==='operations'){
-    operationSections.clear();
     operations(m.operations);
-    for(const [index,item] of m.operations.entries())if(item.tool==='mcp_tool'){
-      const section=byId('operations').children[index];
-      try{const plan=JSON.parse(item.arguments_json);section.append(node('p','External tool: '+plan.server_config_id+' / '+plan.peer_tool+' · configuration '+plan.config_revision));}catch{}
-      if(item.state==='awaiting_approval')section.append(node('p','The external server can perform effects beyond this workspace. Its read-only hints do not grant permission.'));
-      if(item.state==='uncertain')section.append(node('p','The external effect is uncertain. Further effects in this workspace and on this configured server remain blocked.','inspection-note'));
-      if(item.state==='succeeded')section.append(node('p','The external server acknowledged this result. xMind has not independently verified its effect.'));
-    }
-    for(const [index,item] of m.operations.entries())if(item.tool==='replace_file'&&item.state==='uncertain'){
-      const section=byId('operations').children[index];operationSections.set(item.id,section);
-      section.append(node('p','This edit is uncertain. Further edits in this workspace remain blocked.','inspection-note'));
-      const button=node('button','Inspect actual file');button.onclick=()=>api.postMessage({type:'inspect-edit',id:item.id});section.append(button);
-    }
-    for(const [index,item] of m.operations.entries())if(['replace_file','create_file'].includes(item.tool)&&item.state==='awaiting_approval'){
-      const button=node('button','Compare changes');button.disabled=Date.now()>=item.expires_unix_ms;
-      button.onclick=()=>api.postMessage({type:'review',id:item.id});
-      byId('operations').children[index].append(button);
-    }
-    for(const [index,item] of m.operations.entries())if(item.tool==='create_file'){
-      const section=byId('operations').children[index];
-      section.append(node('p','New file. The backend must still verify the recorded parent and absence of this name.'));
-      if(item.state==='uncertain')section.append(node('p','Creation is uncertain. Further effects in this workspace remain blocked; the operation will not replay.','inspection-note'));
-    }
   }
   else if(m.type==='edit-inspection'){
     const section=operationSections.get(m.id);if(section){

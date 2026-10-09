@@ -17,8 +17,13 @@ and unchanged settings. A real isolated VS Code opened-folder host passed;
 four real providers passed native skill activation and companion reads, with
 the initial Claude formatting failure and successful retry retained. See the
 [installed/live receipt](evidence/native-skills-installed-live.json).
-Rendered acceptance and ordinary-window reload remain pending. The running
-browser version described below retains its earlier acceptance scope.
+The browser preview later replaced its runtime/assets with this accepted package,
+preserving exact saved API records and connection cookies. Rendered reload and
+skill metadata were observed; the approval interaction exposed a card-rebuild
+bug and was cancelled before an effect. The DOM-retention source fix awaits its
+complete view gate and installation. Ordinary VS Code window reload also remains
+pending. [Browser evidence](evidence/native-skills-browser-upgrade.json) retains
+these distinct scopes; the earlier checks below remain historical evidence.
 
 `Tools/ci-native.ps1` writes a successful gate receipt only after the exact
 registered contract set has passed. `Tools/ci-stage-runtime.mjs` binds that

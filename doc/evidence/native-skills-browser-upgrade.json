@@ -1,0 +1,71 @@
+{
+  "revision": "d767d5069f52e3e6b899ae7a3e8313ebcc0ecbaf",
+  "oldRevision": "60475f84ac2d1355dfe77736b187f7cb899f560f",
+  "workflowRunId": 37883217775,
+  "helperSha256": "7454ce3d8f181d4309fa0ab269c4df6ac4cc8742e5bcca70e2b3e24a1bd6bcb9",
+  "scope": "Actual owned preview replacement with exact saved-record/configuration comparison before any new UI admission; rendered reload and cancelled real skill-bound creation proposal",
+  "upgradePassed": true,
+  "origins": {
+    "browser": "http://127.0.0.1:60405/ui/",
+    "backend": "http://127.0.0.1:57447"
+  },
+  "preservedCounts": {
+    "sessionCount": 20,
+    "runCount": 27,
+    "historyCount": 57,
+    "operationsCount": 3,
+    "graphsCount": 2,
+    "graphChildrenCount": 2,
+    "delegatedChildrenCount": 2,
+    "dynamicChildrenCount": 0,
+    "planningRootsCount": 4,
+    "activeRuns": 0,
+    "activeClaims": 0
+  },
+  "allSavedRecordsAndConfigurationMatched": true,
+  "closedDatabaseBackup": true,
+  "durableCookiePreserved": true,
+  "sameOrigins": true,
+  "processOwnersVerified": true,
+  "gracefulShutdownClaimed": false,
+  "renderedReloadConnectedWithoutTokenEntry": true,
+  "openaiModelChoicesObserved": 20,
+  "layoutsObserved": [
+    {
+      "width": 319,
+      "height": 431,
+      "compactSidebar": true
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "rightSidebar": true
+    }
+  ],
+  "renderedSkillProposal": {
+    "runId": "616fc8d6fecf3b9163e6af2d31524def",
+    "operationId": "f69fdc429eb0ff6a10bbc2b3ad5ddd33",
+    "skillActivationVerified": true,
+    "proposalBoundToSkillSource": true,
+    "skillMetadataExpandedAndObserved": true,
+    "proposalState": "cancelled",
+    "resultFileAbsent": true,
+    "approvalAccepted": false,
+    "reason": "Polling rebuilt approval controls and collapsed the expanded guidance; a click opened Compare changes instead. Test cancelled before approval."
+  },
+  "fix": {
+    "implementedInSource": true,
+    "installed": false,
+    "rendererContractsPassed": 58,
+    "fullViewGatePending": true
+  },
+  "privateEvidenceHashes": {
+    ".agentflow/browser-ui/checkpoint-upgrade-recovery-0a4cdfc2-8c04-44b3-a35b-db95ee3b8cb7.json": "67d5f41a5aeb15dd882ebc5e46b78522ef016ce087cd7ae202f66cc0d67b80cf",
+    ".agentflow/browser-ui/skills-upgrade-manifest-7a536a06-056d-4414-97c8-30195c770f30.json": "eb694ebc12174a55a481657b2daec05171aac32213421d42c35798d276cc1960",
+    ".agentflow/browser-ui/skills-preflight-7a536a06-056d-4414-97c8-30195c770f30.json": "0bffe9bb164022f327cd71db7ea102bd82e6fd51c755dc9dcf08af8d316c3915",
+    ".agentflow/ci/preview-skills-d767-postflight-ad711fa7-62ff-4f99-8118-e3489fbb6e22.json": "e3afe3d31728ef2879c94dfde8a68b594e888b5c74f59ba2c91feb69073aac33",
+    ".agentflow/ci/browser-skill-fixture.json": "b0ae2f63c3a70e2871445f51d863fc0da037d135b518b2ae3322617a3d9c3860",
+    ".agentflow/ci/browser-skill-cancelled-records.json": "6c47b5583f7116fefb26ee7b18923bd76d976453eea624540306d3a4b6900674"
+  },
+  "backupMustNotRestoreAfterNewAdmissions": true
+}

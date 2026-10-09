@@ -302,6 +302,30 @@ test('file, command and MCP approvals render active skill bindings and fail clos
   r.dom.window.close();
 });
 
+test('approval polling preserves inspected nodes, focus and pending decisions while changed bindings replace the card',()=>{
+ const r=renderer(),doc=r.dom.window.document;
+ try{
+  const source={id:'fixture-guide',path:'.agents/skills/fixture/SKILL.md',workspace_id:'fixture-root',file_id:'fixture-file',content_sha256:'a'.repeat(64),byte_count:17},guidance={version:1,directory:'.',sources:[],skills:[source]};
+  for(const tool of ['create_file','replace_file','run_process','mcp_tool']){
+   const item=tool==='run_process'?processProposalFixture():{id:'stable-'+tool,tool,state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,result_json:'{}'};
+   const plan=tool==='run_process'?JSON.parse(item.arguments_json):tool==='mcp_tool'?{server_config_id:'fixture-peer',peer_tool:'fixture.write',config_revision:1,arguments_json:'{}'}:{path:'fixture.txt',before_content:'',after_content:'fixture'};
+   plan[tool==='mcp_tool'?'instructions':'repository_guidance']=guidance;item.arguments_json=JSON.stringify(plan);
+   r.send({type:'operations',operations:[item]});const card=doc.querySelector('#operations .operation'),detail=card.querySelector('.guidance-binding'),allow=[...card.querySelectorAll('button')].find(button=>button.textContent.startsWith('Allow'));
+   detail.open=true;allow.focus();const observer=new r.dom.window.MutationObserver(()=>{});observer.observe(doc.getElementById('operations'),{childList:true,subtree:true});
+   for(let i=0;i<5;i++)r.send({type:'operations',operations:[JSON.parse(JSON.stringify(item))]});
+   assert.equal(observer.takeRecords().length,0,'Unchanged polls must not detach approval controls');assert.equal(doc.querySelector('#operations .operation'),card);assert.equal(detail.open,true);assert.equal(doc.activeElement,allow);
+   const sibling={id:'stable-neighbor',tool:'create_file',workspace_id:'fixture-root',state:'cancelled',expires_unix_ms:item.expires_unix_ms,arguments_json:'{"path":"neighbor.txt","after_content":"fixture"}',result_json:'{}'};
+   r.send({type:'operations',operations:[item,sibling]});r.send({type:'operations',operations:[item,{...sibling,state:'failed'}]});assert.equal(doc.querySelector('#operations .operation'),card);assert.equal(detail.open,true);assert.equal(doc.activeElement,allow);assert.equal(card.querySelectorAll('.guidance-binding').length,1);
+   allow.click();const posted=r.posted.length;assert.equal(allow.disabled,true);r.send({type:'operations',operations:[item,sibling]});assert.equal(allow.disabled,true,'Polling must not reenable an in-flight decision');allow.click();assert.equal(r.posted.length,posted);assert.equal(r.posted.at(-1).id,item.id);
+   const field=tool==='mcp_tool'?'instructions':'repository_guidance',changed={...plan,[field]:{...guidance,skills:[{...source,content_sha256:'b'.repeat(64)}]}};r.send({type:'operations',operations:[{...item,arguments_json:JSON.stringify(changed)},sibling]});const replacement=doc.querySelector('#operations .operation');assert.notEqual(replacement,card);assert.equal(card.isConnected,false);assert.ok(replacement.textContent.includes('b'.repeat(64)));
+   const now=r.dom.window.Date.now;r.dom.window.Date.now=()=>item.expires_unix_ms+1;try{r.send({type:'operations',operations:[{...item,arguments_json:JSON.stringify(changed)},sibling]});assert.equal(doc.querySelector('#operations .operation'),replacement);assert.ok([...replacement.querySelectorAll('button')].every(button=>button.disabled));}finally{r.dom.window.Date.now=now;}
+   observer.disconnect();r.send({type:'operations',operations:[]});assert.equal(doc.querySelectorAll('#operations .operation').length,0);
+  }
+  const uncertain={id:'stable-inspection',tool:'replace_file',state:'uncertain',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:'{"path":"fixture.txt","before_content":"old","after_content":"new"}',result_json:'{}'};
+  r.send({type:'operations',operations:[uncertain]});r.send({type:'edit-inspection',id:uncertain.id,inspection:{match:'different',observed_unix_ms:1,same_file:true,observed:{path:'fixture.txt',size:7,content_sha256:'c'.repeat(64)}}});const inspection=doc.querySelector('.edit-inspection');r.send({type:'operations',operations:[uncertain]});assert.equal(doc.querySelector('.edit-inspection'),inspection);assert.match(inspection.textContent,/Differs from the recorded states/);
+ }finally{r.dom.window.close();}
+});
+
 test('malformed or expired command proposals cannot be allowed',()=>{
   const r=renderer(),doc=r.dom.window.document,operation=processProposalFixture();
   r.send({type:'operations',operations:[{...operation,arguments_json:'{"profile_id":"fixture-profile"}'}]});
