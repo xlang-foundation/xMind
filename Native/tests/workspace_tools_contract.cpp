@@ -179,6 +179,41 @@ int main(int argc,char** argv) {
         }
         require(root && nested && preview,"Literal search must return actual path/line matches");
         require(search.skipped_entries>=3 && search.truncated,"Search must report skipped and bounded coverage");
+        const auto regex=Json::parse(tools.invoke("search_files",R"({"query":"^NativeRegex item([0-9]+|XYZ)$","regex":true,"path":"search-fixtures/main.txt"})"));
+        require(regex["matches"].size()==2&&regex["matches"][0]["line"]==1&&regex["matches"][1]["line"]==2&&regex["matches"][0]["text"]=="NativeRegex item12"&&regex["scanned_files"]==1&&!regex["truncated"].get<bool>(),"Native regex alternation, classes and anchors must search an actual selected file with original line numbering");
+        require(Json::parse(tools.invoke("search_files",R"({"query":"^NativeRegex","path":"search-fixtures/main.txt"})"))["matches"].empty(),"Regex metacharacters must remain literal by default");
+        const auto folded=Json::parse(tools.invoke("search_files",R"({"query":"\u00e5ngstr\u00f6m","case_sensitive":false,"path":"search-fixtures/main.txt"})"));
+        require(folded["matches"].size()==1&&folded["matches"][0]["line"]==3,"Case-insensitive literal search must use native Unicode simple folding");
+        require(Json::parse(tools.invoke("search_files",R"({"query":"\u00e5ngstr\u00f6m","path":"search-fixtures/main.txt"})"))["matches"].empty(),"Case-sensitive default must preserve distinct Unicode case");
+        const auto large_search=Json::parse(tools.invoke("search_files",R"({"query":"^line (99999|100000) \u4e2d$","regex":true,"path":"range-large.txt"})"));
+        require(large_search["matches"].size()==2&&large_search["matches"][0]["line"]==99999&&large_search["matches"][1]["line"]==100000&&!large_search["truncated"].get<bool>(),"Content search must reach actual matching lines beyond the legacy one-MiB read limit");
+        const auto capped=Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex","path":"search-fixtures/main.txt","limit":1})"));
+        require(capped["matches"].size()==1&&capped["truncated"]==true&&std::find(capped["limits"].begin(),capped["limits"].end(),"result_limit")!=capped["limits"].end(),"Result truncation must be disclosed when an actual extra matching line is found");
+        const auto filtered=Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex","path":"search-fixtures","include":"main.txt"})"));
+        require(filtered["matches"].size()==2&&filtered["scanned_files"]==1&&filtered["matches"][0]["path"]=="search-fixtures/main.txt","Directory/include scopes must limit actual native file reads");
+        const auto explicit_ignored=Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex","path":"search-fixtures/ignored.txt","include":"*.cpp"})"));
+        require(explicit_ignored["matches"].size()==1,"Explicit file scope bypasses ignore/include discovery filters");
+        require(Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex hidden","path":"search-fixtures"})"))["matches"].empty(),"Hidden discovery is disabled by default");
+        require(Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex hidden","path":"search-fixtures","hidden":true})"))["matches"].size()==1,"Hidden discovery can be explicitly enabled");
+        require(Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex ignored","path":"search-fixtures"})"))["matches"].empty(),"Search honors scoped ignore rules");
+        require(Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex ignored","path":"search-fixtures","respect_ignore":false})"))["matches"].size()==1,"Ignore bypass enables public ignored content");
+        const auto invalid_tail=Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex","path":"search-fixtures/invalid-tail.txt"})"));
+        require(invalid_tail["matches"].empty()&&invalid_tail["skipped_entries"]==1&&invalid_tail["truncated"]==true,"Invalid UTF-8 after a matching prefix must reject the whole file before returning matches");
+        const auto aggregate=Json::parse(tools.invoke("search_files",R"({"query":"ByteBudgetNeedle","path":"search-byte-budget"})"));
+        require(aggregate["matches"].size()==1&&aggregate["matches"][0]["path"]=="search-byte-budget/c-small.txt"&&aggregate["scanned_files"]==1&&aggregate["skipped_entries"]==2&&aggregate["truncated"]==true,"Rejected binary reads must still consume the aggregate byte budget; later oversized files are skipped while smaller remaining files can be searched");
+        const auto pathological=Json::parse(tools.invoke("search_files",R"({"query":"^(a+)+$","regex":true,"path":"search-fixtures/pathological.txt"})"));
+        require(pathological["matches"].empty()&&pathological["scanned_files"]==1&&!pathological["truncated"].get<bool>(),"Native non-backtracking regex must finish an eight-MiB pathological nonmatch within the fixture process deadline");
+        const auto wire_search=tools.invoke("search_files",R"({"query":"NativeRegex","path":"search-fixtures/budget.txt","limit":1000})");const auto search_budget=Json::parse(wire_search);
+        require(wire_search.size()<=65536&&search_budget["matches"].size()>0&&search_budget["matches"].size()<100&&search_budget["truncated"]==true&&std::find(search_budget["limits"].begin(),search_budget["limits"].end(),"output_limit")!=search_budget["limits"].end(),"Escaped result text must respect the serialized output limit and disclose incomplete results");
+        for(const auto* query:{"[abc","(?=secret)","(a)\\1","a{100000000}"}){
+            try{tools.invoke("search_files",Json{{"query",query},{"regex",true},{"path","search-fixtures/main.txt"}}.dump());throw std::runtime_error("Invalid regex was accepted");}
+            catch(const std::invalid_argument& error){require(std::string(error.what())=="Search pattern is invalid, unsupported or exceeds regex memory limits","Regex rejection must provide a fixed diagnostic without pattern contents");}
+        }
+        for(const auto* source:{R"({"query":"x","regex":"true"})",R"({"query":"x","case_sensitive":0})",R"({"query":"x","hidden":null})",R"({"query":"x","respect_ignore":1})",R"({"query":"x","path":false})",R"({"query":"x","include":false})",R"({"query":"x","limit":0})",R"({"query":"x","limit":1001})",R"({"query":"x","limit":1.5})",R"({"query":"x","regex":true,"regex":false})",R"({"query":"x","include":"[abc"})"})rejects<std::invalid_argument>([&]{tools.invoke("search_files",source);});
+        rejects<std::invalid_argument>([&]{tools.search_files(std::string(4097,'x'));});
+        for(const auto* path:{".config/providers.yaml",".agentflow/owner.token","config-alias/providers.yaml","state-alias/owner.token","../workspace-other/secret.txt","outside-link/secret.txt","inside-link/inside.txt","hard-link.txt"}){
+            rejects<ToolAccessDenied>([&]{tools.invoke("search_files",Json{{"query",".*"},{"regex",true},{"hidden",true},{"respect_ignore",false},{"path",path}}.dump());});
+        }
         auto listed=tools.list_files();require(!listed.entries.empty(),"Root directory handle enumeration");
         require(std::none_of(listed.entries.begin(),listed.entries.end(),[](const auto& entry){return WorkspaceTools::backend_private_component(entry.name);}),"Root listing must not expose backend configuration entries");
         require(std::any_of(listed.entries.begin(),listed.entries.end(),[](const auto& entry){return entry.name==".git";}),"Existing public Git listing policy must remain unchanged");
@@ -236,6 +271,8 @@ int main(int argc,char** argv) {
         rejects<ToolCancelled>([&]{tools.snapshot_file("README.txt",cancelled.get_token());});
         rejects<ToolCancelled>([&]{tools.plan_replacement("README.txt","first","changed",1,cancelled.get_token());});
         rejects<ToolCancelled>([&]{tools.search_files("needle",cancelled.get_token());});
+        WorkspaceSearchOptions stopped_search;stopped_search.regex=true;stopped_search.path="search-fixtures/pathological.txt";
+        rejects<ToolCancelled>([&]{tools.search_files("(a+)+$",stopped_search,cancelled.get_token());});
         std::vector<std::future<void>> readers;
         for(int i=0;i<4;++i) readers.push_back(std::async(std::launch::async,[&]{for(int n=0;n<10;++n) require(tools.read_file("README.txt").content==read.content,"Concurrent read isolation");}));
         for(auto& reader:readers) reader.get();

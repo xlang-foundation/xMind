@@ -26,6 +26,23 @@ try {
   const ignoreNames=['main.cpp','root-only.cpp','drop.tmp','keep.tmp','trailing.cpp','#literal.cpp','!literal.cpp','literal{x}.cpp','info-drop.cpp','priority.cpp','drop.ignore.cpp','build/built.cpp','nested/item1.cpp','nested/item2.cpp','nested/local.hpp','children/keep.cpp','children/drop.cpp','blocked/inside.cpp','items/1.cpp','items/a.cpp'];
   for(const file of ignoreNames)await writeFile(join(ignored,file),'OwnedIgnoreNeedle '+file+'\n');
   await mkdir(join(root,'unsafe-ignore'));await writeFile(join(root,'unsafe-ignore','visible.cpp'),'');
+  await mkdir(join(root,'search-fixtures'));
+  await mkdir(join(root,'search-byte-budget'));
+  const budgetBlock=Buffer.alloc(33*1024*1024,0x61);
+  budgetBlock[budgetBlock.length-1]=0xff;
+  await writeFile(join(root,'search-byte-budget','a-invalid.txt'),budgetBlock);
+  budgetBlock.fill(0x61);Buffer.from('ByteBudgetNeedle\n').copy(budgetBlock,budgetBlock.length-17);
+  await writeFile(join(root,'search-byte-budget','b-large.txt'),budgetBlock);
+  await writeFile(join(root,'search-byte-budget','c-small.txt'),'ByteBudgetNeedle\n');
+  await Promise.all([
+    writeFile(join(root,'search-fixtures','.ignore'),'ignored.txt\n'),
+    writeFile(join(root,'search-fixtures','main.txt'),'NativeRegex item12\r\nNativeRegex itemXYZ\n\u00c5NGSTR\u00d6M\n'),
+    writeFile(join(root,'search-fixtures','ignored.txt'),'NativeRegex ignored\n'),
+    writeFile(join(root,'search-fixtures','.hidden.txt'),'NativeRegex hidden\n'),
+    writeFile(join(root,'search-fixtures','budget.txt'),('NativeRegex\t'+'\t'.repeat(2000)+'\n').repeat(100)),
+    writeFile(join(root,'search-fixtures','pathological.txt'),'a'.repeat(8*1024*1024)+'!\n'),
+    writeFile(join(root,'search-fixtures','invalid-tail.txt'),Buffer.concat([Buffer.from('NativeRegex must not leak\n'),Buffer.from([0xff])])),
+  ]);
   await Promise.all([
     writeFile(join(root,'README.txt'),'first\r\nalpha[.]needle 中\r\nlast\n'),
     writeFile(join(root,'edit.txt'),'original\n'),
@@ -70,6 +87,7 @@ try {
   // Windows junction creation does not need symlink privileges. Failure fails
   // the contract rather than silently skipping the boundary tests.
   await symlink(outside,join(root,'outside-link'),'junction');
+  await symlink(join(root,'sub'),join(root,'inside-link'),'junction');
   await symlink(join(root,'.config'),join(root,'config-alias'),'junction');
   await symlink(join(root,'.agentflow'),join(root,'state-alias'),'junction');
   await link(join(outside,'secret.txt'),join(root,'hard-link.txt'));

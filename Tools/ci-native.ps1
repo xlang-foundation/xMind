@@ -36,6 +36,7 @@ $ciNative=Join-Path $ciRoot 'build/native'
 $ciNode=(Get-Command node -ErrorAction Stop).Source
 Invoke-CiCommand 'native-schema-source-check' $ciNode @((Join-Path $ciRoot 'Tools/verify-jsoncons.mjs'))
 Invoke-CiCommand 'native-yaml-source-check' $ciNode @((Join-Path $ciRoot 'Tools/verify-yaml-cpp.mjs'))
+Invoke-CiCommand 'native-regex-source-check' $ciNode @((Join-Path $ciRoot 'Tools/verify-regex-dependencies.mjs'))
 $ciNpm=(Get-Command npm.cmd -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
 Invoke-CiCommand 'native-sdk-peer-install' $ciNpm @('ci','--prefix',(Join-Path $ciRoot 'Native/tests/sdk'),'--ignore-scripts','--no-audit','--no-fund')
 $ciOpenSsl=(Get-Command openssl -ErrorAction Stop).Source

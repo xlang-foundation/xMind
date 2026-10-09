@@ -37,6 +37,12 @@ struct WorkspaceSearch {
     std::size_t scanned_files=0,skipped_entries=0;
     std::size_t ignored_entries=0,ignore_files=0;
     bool truncated=false;
+    std::vector<std::string> limits;
+};
+struct WorkspaceSearchOptions {
+    std::string path=".",include;
+    bool regex=false,case_sensitive=true,hidden=false,respect_ignore=true;
+    std::size_t limit=100;
 };
 struct WorkspaceGlob {
     std::vector<std::string> paths,limits;
@@ -104,6 +110,7 @@ public:
     WorkspaceFingerprint fingerprint_file(const std::string& path,std::stop_token cancel={}) const;
     WorkspaceListing list_files(const std::string& path=".",std::stop_token cancel={}) const;
     WorkspaceSearch search_files(const std::string& query,std::stop_token cancel={}) const;
+    WorkspaceSearch search_files(const std::string& query,const WorkspaceSearchOptions& options,std::stop_token cancel={}) const;
     WorkspaceGlob glob_files(const std::string& pattern,const std::string& path=".",
         bool hidden=false,std::size_t limit=100,std::stop_token cancel={},bool respect_ignore=true) const;
     static std::vector<ModelToolDefinition> definitions();
@@ -113,7 +120,7 @@ private:
     WorkspaceGlob discover_files(const std::string& pattern,const std::string& path,bool hidden,
         std::size_t limit,std::stop_token cancel,bool respect_ignore,
         const std::function<bool(const std::string&)>& visitor={}) const;
-    WorkspaceSnapshot read_snapshot(const std::string& path,bool capture_version,std::stop_token cancel,bool require_text=true) const;
+    WorkspaceSnapshot read_snapshot(const std::string& path,bool capture_version,std::stop_token cancel,bool require_text=true,std::size_t max_bytes=1024*1024,std::size_t* bytes_read=nullptr) const;
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };

@@ -44,7 +44,9 @@ const peer=createServer((request,response)=>{
       }
       const last=body.messages.at(-1);
       if(last.role==='tool') {
-        if(prompt==='Find nonignored owned fixture paths'){
+        if(prompt==='Search the large native fixture by regex'){
+          const result=JSON.parse(last.content);assert.equal(result.matches.length,2);assert.deepEqual(result.matches.map(match=>[match.path,match.line,match.text]),[['large.txt',99999,'line 99999 中'],['large.txt',100000,'line 100000 中']]);assert.equal(result.scanned_files,1);assert.equal(result.skipped_entries,0);assert.equal(result.truncated,false);assert.deepEqual(result.limits,[]);
+        }else if(prompt==='Find nonignored owned fixture paths'){
           const result=JSON.parse(last.content);assert.deepEqual(result.paths,['ignore-http/keep.tmp','ignore-http/main.cpp']);assert.equal(result.truncated,false);assert.equal(result.ignore_files,1);assert.ok(result.ignored_entries>0);
         }else if(prompt==='Find filtered native content'){
           const result=JSON.parse(last.content);assert.deepEqual(result.matches.map(match=>match.path).sort(),['ignore-http/keep.tmp','ignore-http/main.cpp']);assert.ok(result.matches.every(match=>match.line===1&&match.text==='IgnoreHttpNeedle'));assert.equal(result.ignore_files,1);assert.ok(result.ignored_entries>0);
@@ -57,6 +59,10 @@ const peer=createServer((request,response)=>{
         }else assert.equal(JSON.parse(last.content).content,'Actual workspace content\n');
         send({choices:[{index:0,delta:{content:'Synthetic peer checked the actual workspace read.'},finish_reason:'stop'}]});
       } else {
+        if(prompt==='Search the large native fixture by regex'){
+          const schema=body.tools.find(tool=>tool.function.name==='search_files').function.parameters;assert.deepEqual(schema.required,['query']);assert.equal(schema.properties.regex.type,'boolean');assert.equal(schema.properties.case_sensitive.type,'boolean');assert.equal(schema.properties.limit.maximum,1000);
+          send({choices:[{index:0,delta:{tool_calls:[{index:0,id:`http-call-${requests}`,type:'function',function:{name:'search_files',arguments:JSON.stringify({query:'^line (99999|100000) 中$',regex:true,path:'large.txt',limit:10})}}]},finish_reason:'tool_calls'}]});response.end('data: [DONE]\n\n');return;
+        }
         const paged=prompt==='Read the last two lines of the large native fixture',discovery=prompt==='Discover actual native source paths';
         if(paged){const schema=body.tools.find(tool=>tool.function.name==='read_file').function.parameters;assert.equal(schema.properties.offset.minimum,1);assert.equal(schema.properties.limit.maximum,2000);assert.deepEqual(schema.required,['path']);}
         const ignored=prompt==='Find nonignored owned fixture paths',search=prompt==='Find filtered native content';
@@ -142,6 +148,7 @@ try {
   assert.ok(cli('events',pagedRun.id).some(event=>event.kind==='tool.completed'));
   await session('discovery');const discovered=cli('run','discovery','Discover actual native source paths');await terminal(discovered.id,'completed');const discoveryHistory=cli('history','discovery');assert.deepEqual(JSON.parse(discoveryHistory.find(message=>message.role==='tool').data.content).paths,['glob-src/main.cpp','glob-src/nested/header.hpp']);
   const ignoreHistories=new Map();for(const [id,prompt] of [['ignored','Find nonignored owned fixture paths'],['filtered','Find filtered native content']]){await session(id);const result=cli('run',id,prompt);await terminal(result.id,'completed');const saved=cli('history',id);assert.deepEqual(saved.map(message=>message.role),['user','assistant','tool','assistant']);ignoreHistories.set(id,saved);}
+  await session('regex');const regexRun=cli('run','regex','Search the large native fixture by regex');await terminal(regexRun.id,'completed');const regexHistory=cli('history','regex');assert.deepEqual(regexHistory.map(message=>message.role),['user','assistant','tool','assistant']);assert.equal(JSON.parse(regexHistory[2].data.content).matches.length,2);assert.equal(requestsByPrompt.get('Search the large native fixture by regex'),2);assert.ok(cli('events',regexRun.id).some(event=>event.kind==='tool.completed'));assert.deepEqual(cli('operations',regexRun.id),[]);
   const beforeChat=cli('sessions').length;assert.deepEqual(await chat('/exit\n'),[]);assert.equal(cli('sessions').length,beforeChat,'Leaving an empty chat must not create a session');
   const beforeInvalidRequests=requests,beforeInvalidRuns=cli('runs','coding').length;
   assert.deepEqual(await chatResult(1,'Read README\n/exit\n','coding','unavailable-fixture'),[],'An unavailable initial model must fail before emitting history or admitting work');
@@ -205,6 +212,7 @@ try {
   assert.deepEqual(cli('history','paged'),pagedHistory,'Exact native range results must survive embedded xlang3/SQLite restart');
   assert.deepEqual(cli('history','discovery'),discoveryHistory,'Native discovery results must survive embedded xlang3/SQLite restart');
   for(const [id,saved] of ignoreHistories)assert.deepEqual(cli('history',id),saved,'Native ignore-filtered results must persist exactly without replay');
+  assert.deepEqual(cli('history','regex'),regexHistory,'Exact native regex results must survive embedded xlang3/SQLite restart');assert.equal(requestsByPrompt.get('Search the large native fixture by regex'),2,'Restart cannot replay the recorded search');
   assert.equal(cli('history',chatSession).length,12,'Interactive CLI history must survive native restart');
   // Use the actual editor host client against the same native server; no IDE
   // rendering or VS Code SecretStorage behavior is claimed by this wire test.

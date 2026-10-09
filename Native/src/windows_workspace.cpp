@@ -1,6 +1,7 @@
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/path_glob.hpp"
 #include "agentflow/path_ignore.hpp"
+#include "agentflow/search_pattern.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <bcrypt.h>
@@ -57,10 +58,10 @@ std::string relative_path(const std::string& input) {
 bool valid_text(const std::string& value) {
     return value.find('\0')==std::string::npos && (value.empty() || MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0)>0);
 }
-std::string prefix(const std::string& value,std::size_t limit) {
-    if(value.size()<=limit) return value;
+std::string prefix(std::string_view value,std::size_t limit) {
+    if(value.size()<=limit) return std::string(value);
     auto size=limit;while(size && (static_cast<unsigned char>(value[size])&0xc0)==0x80) --size;
-    return value.substr(0,size);
+    return std::string(value.substr(0,size));
 }
 std::string file_identity(HANDLE handle) {
     FILE_ID_INFO info{};
@@ -425,7 +426,7 @@ WorkspaceSnapshot WorkspaceTools::apply_plan(const WorkspaceEditPlan& plan,std::
         throw;
     }
 }
-WorkspaceSnapshot WorkspaceTools::read_snapshot(const std::string& input,bool capture_version,std::stop_token cancel,bool require_text) const {
+WorkspaceSnapshot WorkspaceTools::read_snapshot(const std::string& input,bool capture_version,std::stop_token cancel,bool require_text,std::size_t max_bytes,std::size_t* bytes_read) const {
     check_cancel(cancel);const auto relative=relative_path(input);
     const auto workspace_id=capture_version?identity():std::string{};
     Handle file(CreateFileW(impl_->path(relative).c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN,nullptr));
@@ -433,16 +434,18 @@ WorkspaceSnapshot WorkspaceTools::read_snapshot(const std::string& input,bool ca
     BY_HANDLE_FILE_INFORMATION info{};
     if(!GetFileInformationByHandle(file.value,&info) || GetFileType(file.value)!=FILE_TYPE_DISK || (info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)) throw ToolFileError("Expected a regular workspace file");
     if(info.nNumberOfLinks>1) throw ToolAccessDenied("Hard-linked files require a separate explicit policy");
-    if(info.nFileSizeHigh || info.nFileSizeLow>1024*1024) throw ToolFileError("File exceeds the 1 MiB text limit");
+    if(info.nFileSizeHigh || info.nFileSizeLow>max_bytes) throw ToolFileError("File exceeds the configured text limit");
     std::string content;content.reserve(info.nFileSizeLow);std::array<char,8192> buffer{};
     for(;;) {
         check_cancel(cancel);DWORD read=0;
         if(!ReadFile(file.value,buffer.data(),static_cast<DWORD>(buffer.size()),&read,nullptr)) throw ToolFileError("Cannot read workspace file");
         if(!read) break;
-        if(read>1024*1024-content.size()) throw ToolFileError("File exceeds the 1 MiB text limit");
+        if(bytes_read)*bytes_read+=read;
+        if(read>max_bytes-content.size()) throw ToolFileError("File exceeds the configured text limit");
         content.append(buffer.data(),read);
     }
     if(require_text && !valid_text(content)) throw ToolFileError("File is binary or not UTF-8 text");
+    check_cancel(cancel);impl_->verify(file.value);
     if(capture_version) {
         check_cancel(cancel);impl_->verify(file.value);
         const auto id=file_identity(file.value),hash=content_hash(content);
@@ -574,26 +577,53 @@ WorkspaceGlob WorkspaceTools::discover_files(const std::string& pattern,const st
     result.ignore_files=ignores.source_files();std::sort(result.paths.begin(),result.paths.end());return result;
 }
 WorkspaceSearch WorkspaceTools::search_files(const std::string& query,std::stop_token cancel) const {
+    return search_files(query,WorkspaceSearchOptions{},cancel);
+}
+WorkspaceSearch WorkspaceTools::search_files(const std::string& query,const WorkspaceSearchOptions& options,std::stop_token cancel) const {
     if(query.empty() || query.size()>4096 || !valid_text(query)) throw std::invalid_argument("Search query must be UTF-8 text of 1-4096 bytes");
-    WorkspaceSearch result;std::size_t bytes=0;
-    const auto found=discover_files("!**/.git/**",".",false,10000,cancel,true,[&](const std::string& path){
+    if(!options.limit||options.limit>1000)throw std::invalid_argument("Search result limit must be 1-1000");
+    check_cancel(cancel);const SearchPattern pattern(query,options.regex,options.case_sensitive);
+    if(!options.include.empty())PathGlob validate(options.include.starts_with('!')?options.include.substr(1):options.include);
+    WorkspaceSearch result;std::size_t bytes=0,output_bytes=256;
+    const auto bounded=[&](const std::string& reason){result.truncated=true;if(std::find(result.limits.begin(),result.limits.end(),reason)==result.limits.end())result.limits.push_back(reason);};
+    const auto json_cost=[](std::string_view text){std::size_t size=0;for(const unsigned char byte:text)size+=byte<32?6:(byte=='"'||byte=='\\'?2:1);return size;};
+    const auto visit=[&](const std::string& path){
+            if(bytes>=64*1024*1024){bounded("byte_limit");return false;}
             WorkspaceFile file;
-            try {file=read_file(path,cancel);} catch(const ToolAccessDenied&) {++result.skipped_entries;result.truncated=true;return true;} catch(const ToolFileError&) {++result.skipped_entries;result.truncated=true;return true;}
+            try {auto read=read_snapshot(path,false,cancel,true,64*1024*1024-bytes,&bytes);file={std::move(read.path),std::move(read.content)};}
+            catch(const ToolAccessDenied&) {++result.skipped_entries;bounded("skipped_files");return true;} catch(const ToolFileError&) {++result.skipped_entries;bounded("skipped_files");return true;}
             ++result.scanned_files;
-            if(file.content.size()>64*1024*1024-bytes) {result.truncated=true;return false;}bytes+=file.content.size();
             std::size_t start=0;std::int64_t number=1;
             while(start<file.content.size()) {
                 check_cancel(cancel);auto end=file.content.find('\n',start);if(end==std::string::npos) end=file.content.size();
-                auto text=file.content.substr(start,end-start);if(!text.empty() && text.back()=='\r') text.pop_back();
-                if(text.find(query)!=std::string::npos) {
-                    if(result.matches.size()==100) {result.truncated=true;return false;}
-                    result.matches.push_back({path,prefix(text,4096),number,text.size()>4096});
+                auto text=std::string_view(file.content).substr(start,end-start);if(!text.empty() && text.back()=='\r') text.remove_suffix(1);
+                if(pattern.matches(text)) {
+                    if(result.matches.size()==options.limit) {bounded("result_limit");return false;}
+                    auto preview=prefix(text,4096);const auto cost=json_cost(path)+json_cost(preview)+96;
+                    if(output_bytes+cost>50*1024){bounded("output_limit");return false;}output_bytes+=cost;
+                    result.matches.push_back({path,std::move(preview),number,text.size()>4096});
                 }
                 start=end+1;++number;
             }
         return true;
-    });
-    result.truncated=result.truncated||found.truncated;result.skipped_entries+=found.skipped_entries;result.ignored_entries=found.ignored_entries;result.ignore_files=found.ignore_files;
+    };
+    const auto relative=relative_path(options.path),workspace=identity();
+    // Keep verified non-link parents alive for direct file targets too. The
+    // final target handle then prevents its leaf from being renamed/replaced
+    // while the content reader opens the same authorized object.
+    std::optional<Impl::CreationParent> anchor;
+    if(relative!=".")anchor.emplace(impl_->creation_parent(relative,cancel));
+    Handle target(CreateFileW(impl_->path(relative).c_str(),FILE_READ_ATTRIBUTES,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr));impl_->verify(target.value);BY_HANDLE_FILE_INFORMATION info{};
+    if(!GetFileInformationByHandle(target.value,&info))throw ToolFileError("Cannot inspect search target");
+    if(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)throw ToolAccessDenied("Search target cannot be a link");
+    if(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY){
+        const auto found=discover_files(options.include.empty()?"!**/.git/**":options.include,relative,options.hidden,10000,cancel,options.respect_ignore,visit);
+        result.truncated=result.truncated||found.truncated;result.skipped_entries+=found.skipped_entries;result.ignored_entries=found.ignored_entries;result.ignore_files=found.ignore_files;
+        for(const auto& reason:found.limits)bounded(reason);
+    }else{
+        if(GetFileType(target.value)!=FILE_TYPE_DISK||info.nNumberOfLinks!=1)throw ToolAccessDenied("Search requires a regular single-link file");visit(relative);
+    }
+    check_cancel(cancel);impl_->verify(target.value);if(identity()!=workspace)throw ToolAccessDenied("Workspace identity changed during search");
     return result;
 }
 }
