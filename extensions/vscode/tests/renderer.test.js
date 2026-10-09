@@ -283,6 +283,25 @@ test('approval displays bound guidance hashes and rejects malformed source metad
   plan.repository_guidance.sources=[];operation.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[operation]});assert.ok(doc.querySelector('.guidance-binding').textContent.includes('No AGENTS.md sources'));allow=[...doc.querySelectorAll('#operations button')].find(x=>x.textContent==='Allow command');assert.equal(allow.disabled,false);r.dom.window.close();
 });
 
+test('file, command and MCP approvals render active skill bindings and fail closed for malformed snapshots',()=>{
+  const r=renderer(),doc=r.dom.window.document;
+  const skill={id:'Review <script>fixtureAttack()</script>\u001b',path:'.agents/skills/review/SKILL.md',workspace_id:'fixture-root',file_id:'fixture-skill-file',content_sha256:'b'.repeat(64),byte_count:37};
+  for(const tool of ['replace_file','create_file','run_process','mcp_tool']){
+    const operation=tool==='run_process'?processProposalFixture():{id:'fixture-'+tool,tool,state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,result_json:'{}'};
+    const plan=tool==='run_process'?JSON.parse(operation.arguments_json):tool==='mcp_tool'?{server_config_id:'fixture-server',peer_tool:'fixture.write',config_revision:2,arguments_json:'{"body":"fixture"}'}:{path:'file.cpp',before_exists:tool!=='create_file',before_content:tool==='create_file'?'':'old',after_content:'new'};
+    const field=tool==='mcp_tool'?'instructions':'repository_guidance',label=tool==='run_process'?'Allow command':tool==='replace_file'?'Allow edit':tool==='create_file'?'Allow creation':'Allow tool';
+    const guidance={version:1,directory:'.',sources:[],skills:[skill]};plan[field]=guidance;operation.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[operation]});
+    const detail=doc.querySelector('.guidance-binding');assert.ok(detail);assert.match(detail.textContent,/Repository and skill guidance/);assert.ok(detail.textContent.includes(skill.content_sha256));assert.ok(detail.textContent.includes('37 bytes'));assert.ok(detail.textContent.includes('\\u001b'));assert.equal(detail.querySelector('script'),null);assert.equal(r.dom.window.fixtureAttack,undefined);assert.equal([...doc.querySelectorAll('#operations button')].find(button=>button.textContent===label).disabled,false);
+    for(const bad of [null,{...skill,id:''},{...skill,id:'x'.repeat(257)},{...skill,workspace_id:'other-root'},{...skill,content_sha256:'invalid'},{...skill,byte_count:16385}]){
+      guidance.skills=[bad];operation.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[operation]});const buttons=[...doc.querySelectorAll('#operations button')];assert.equal(buttons.find(button=>button.textContent===label).disabled,true);assert.equal(buttons.find(button=>button.textContent==='Deny').disabled,false);assert.ok(doc.querySelector('#operations').textContent.includes('binding is malformed'));
+    }
+    for(const skills of [{},Array(9).fill(skill)]){guidance.skills=skills;operation.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[operation]});assert.equal([...doc.querySelectorAll('#operations button')].find(button=>button.textContent===label).disabled,true);}
+    guidance.skills=[skill];operation.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[operation]});[...doc.querySelectorAll('#operations button')].find(button=>button.textContent===label).click();assert.equal(JSON.stringify(r.posted.at(-1)),JSON.stringify({type:'decide',id:operation.id,decision:'allow'}));
+    r.send({type:'operations',operations:[{...operation,state:'uncertain'}]});assert.ok(![...doc.querySelectorAll('#operations button')].some(button=>button.textContent===label||button.textContent==='Deny'));assert.ok(doc.querySelector('.guidance-binding').textContent.includes(skill.content_sha256));
+  }
+  r.dom.window.close();
+});
+
 test('malformed or expired command proposals cannot be allowed',()=>{
   const r=renderer(),doc=r.dom.window.document,operation=processProposalFixture();
   r.send({type:'operations',operations:[{...operation,arguments_json:'{"profile_id":"fixture-profile"}'}]});

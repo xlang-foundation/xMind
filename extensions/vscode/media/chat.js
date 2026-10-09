@@ -158,18 +158,20 @@ function operations(items){
     let reviewable=true;
     if(item.tool==='run_process')reviewable=processProposal(section,item);
     if(['replace_file','create_file'].includes(item.tool)){try{const plan=JSON.parse(item.arguments_json);section.append(node('strong',plan.path));for(const [label,key] of [['Before','before_content'],['After','after_content']])section.append(node('div',label),node('pre',plan[key],label.toLowerCase()));}catch{}}
-    if(['replace_file','create_file','run_process'].includes(item.tool)){
+    if(['replace_file','create_file','run_process','mcp_tool'].includes(item.tool)){
       try{
-        const guidance=JSON.parse(item.arguments_json).repository_guidance;
+        const proposal=JSON.parse(item.arguments_json),guidance=item.tool==='mcp_tool'?proposal.instructions:proposal.repository_guidance;
         if(guidance!==undefined){
-          if(!guidance || guidance.version!==1 || typeof guidance.directory!=='string' || !guidance.directory || guidance.directory.length>4096 || !Array.isArray(guidance.sources) || guidance.sources.length>33)throw new Error('Malformed guidance binding');
+          if(!guidance || guidance.version!==1 || typeof guidance.directory!=='string' || !guidance.directory || guidance.directory.length>4096 || !Array.isArray(guidance.sources) || guidance.sources.length>33 || (guidance.skills!==undefined&&(!Array.isArray(guidance.skills)||guidance.skills.length>8)))throw new Error('Malformed guidance binding');
           const lines=['Directory: '+guidanceLiteral(guidance.directory)];
-          for(const source of guidance.sources){
-            if(!source || typeof source.path!=='string' || !source.path || source.path.length>8192 || typeof source.file_id!=='string' || !source.file_id || typeof source.workspace_id!=='string' || !source.workspace_id || typeof source.content_sha256!=='string' || !/^[a-f0-9]{64}$/.test(source.content_sha256) || !Number.isSafeInteger(source.byte_count) || source.byte_count<0 || source.byte_count>16384)throw new Error('Malformed guidance source');
-            lines.push(guidanceLiteral(source.path)+' · '+source.byte_count+' bytes\nSHA-256: '+source.content_sha256);
-          }
+          const sourceLine=(source,skill)=>{
+            if(!source || typeof source.path!=='string' || !source.path || source.path.length>8192 || typeof source.file_id!=='string' || !source.file_id || typeof source.workspace_id!=='string' || source.workspace_id!==item.workspace_id || typeof source.content_sha256!=='string' || !/^[a-f0-9]{64}$/.test(source.content_sha256) || !Number.isSafeInteger(source.byte_count) || source.byte_count<0 || source.byte_count>16384 || (skill&&(typeof source.id!=='string'||!source.id||source.id.length>256)))throw new Error('Malformed guidance source');
+            return (skill?'Skill: '+guidanceLiteral(source.id)+'\n':'')+guidanceLiteral(source.path)+' · '+source.byte_count+' bytes\nSHA-256: '+source.content_sha256;
+          };
+          for(const source of guidance.sources)lines.push(sourceLine(source,false));
           if(!guidance.sources.length)lines.push('No AGENTS.md sources in this scope at proposal time.');
-          const detail=node('details',undefined,'guidance-binding');detail.append(node('summary','Repository guidance bound to approval'),node('pre',lines.join('\n\n')),node('p','The backend rechecks after approval. A mismatch retires this proposal without dispatch; a new call requires a new approval.'));section.append(detail);
+          for(const source of guidance.skills||[])lines.push(sourceLine(source,true));
+          const detail=node('details',undefined,'guidance-binding');detail.append(node('summary',guidance.skills?.length?'Repository and skill guidance bound to approval':'Repository guidance bound to approval'),node('pre',lines.join('\n\n')),node('p','The backend rechecks after approval. A mismatch retires this proposal without dispatch; a new call requires a new approval.'));section.append(detail);
         }
       }catch{reviewable=false;section.append(node('p','Repository guidance binding is malformed. Allow is unavailable; inspect the recorded operation.','inspection-note'));}
     }

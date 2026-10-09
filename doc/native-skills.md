@@ -121,6 +121,14 @@ Markdown files, nested `SKILL.md`, optional/custom display names, empty metadata
 case/space/Unicode and longer ids, duplicate-id refusal and changed flat-source
 approval snapshots. Configured source precedence and broader source providers
 still need implementation and acceptance.
+The shared browser/VS Code approval renderer now summarizes active skill ids,
+source paths, sizes and hashes alongside repository guidance. It recognizes MCP
+`instructions` and file/process `repository_guidance` metadata, disables Allow
+when those bindings are malformed and sends only the operation id and decision.
+Its new DOM contract covers all four effect adapters, safe literal rendering,
+workspace mismatch, bad hashes/ids/counts and inspection of uncertain outcomes
+without offering another approval. These view changes are source-only until the
+isolated view gate and installed/rendered acceptance pass.
 
 Delivery still requires the complete 90-contract native gate, frontend suites,
 browser/native integration, independently verified VSIX/runtime artifacts and
