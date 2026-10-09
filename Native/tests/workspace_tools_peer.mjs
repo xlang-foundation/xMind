@@ -8,11 +8,12 @@ import {createHash} from 'node:crypto';
 const execute=promisify(execFile),folder=await mkdtemp(join(tmpdir(),'xmind-workspace-'));
 const root=join(folder,'workspace'),outside=join(folder,'workspace-other');
 try {
-  await Promise.all([mkdir(join(root,'sub','.CoNfIg'),{recursive:true}),mkdir(join(root,'.config'),{recursive:true}),mkdir(join(root,'.configurable'),{recursive:true}),mkdir(join(root,'.git'),{recursive:true}),mkdir(join(root,'many'),{recursive:true}),mkdir(join(outside,'sub'),{recursive:true})]);
+  await Promise.all([mkdir(join(root,'sub','.CoNfIg'),{recursive:true}),mkdir(join(root,'.config'),{recursive:true}),mkdir(join(root,'.configurable'),{recursive:true}),mkdir(join(root,'.agentflow'),{recursive:true}),mkdir(join(root,'sub','.AgEnTfLoW'),{recursive:true}),mkdir(join(root,'.agentflow-guide'),{recursive:true}),mkdir(join(root,'.git'),{recursive:true}),mkdir(join(root,'many'),{recursive:true}),mkdir(join(outside,'sub'),{recursive:true})]);
   // Only disposable synthetic secret/guidance markers. No user configuration
   // is read, copied or passed to the native fixture.
   const privateRoot='api_key: SyntheticPrivateConfigValue-workspace-only\nalpha[.]needle private root\n';
   const privateNested='api_key: SyntheticPrivateConfigValue-workspace-only\nalpha[.]needle private nested\n';
+  const privateState='owner_token: SyntheticBackendStateValue-workspace-only\nalpha[.]needle private state\n';
   await Promise.all([
     writeFile(join(root,'README.txt'),'first\r\nalpha[.]needle 中\r\nlast\n'),
     writeFile(join(root,'edit.txt'),'original\n'),
@@ -23,6 +24,11 @@ try {
     writeFile(join(root,'sub','.CoNfIg','nested.yaml'),privateNested),
     writeFile(join(root,'sub','.CoNfIg','AGENTS.md'),'SyntheticPrivateConfigValue-workspace-only nested private guidance\n'),
     writeFile(join(root,'.configurable','visible.txt'),'Ordinary configuration documentation\n'),
+    writeFile(join(root,'.agentflow','owner.token'),privateState),
+    writeFile(join(root,'.agentflow','AGENTS.md'),'SyntheticBackendStateValue-workspace-only private state guidance\n'),
+    writeFile(join(root,'sub','.AgEnTfLoW','owner.token'),privateState),
+    writeFile(join(root,'sub','.AgEnTfLoW','AGENTS.md'),'SyntheticBackendStateValue-workspace-only nested state guidance\n'),
+    writeFile(join(root,'.agentflow-guide','visible.txt'),'Ordinary agent documentation\n'),
     writeFile(join(root,'.git','ignored.txt'),'alpha[.]needle excluded\n'),
     writeFile(join(root,'binary.bin'),Buffer.from([0,255,128])),
     writeFile(join(root,'too-large.txt'),'x'.repeat(1024*1024+1)),
@@ -33,6 +39,7 @@ try {
   // the contract rather than silently skipping the boundary tests.
   await symlink(outside,join(root,'outside-link'),'junction');
   await symlink(join(root,'.config'),join(root,'config-alias'),'junction');
+  await symlink(join(root,'.agentflow'),join(root,'state-alias'),'junction');
   await link(join(outside,'secret.txt'),join(root,'hard-link.txt'));
   for(let i=0;i<1001;i++) await writeFile(join(root,'many',`${i}.txt`),'');
   const expectedHash=createHash('sha256').update(await readFile(join(root,'README.txt'))).digest('hex');
@@ -40,6 +47,9 @@ try {
   const result=await execute(process.argv[2],[root,outside,expectedHash,expectedAfterHash],{windowsHide:true,timeout:20000});
   assert.equal(await readFile(join(root,'.config','providers.yaml'),'utf8'),privateRoot,'Rejected native access/edit attempts must preserve synthetic private configuration');
   assert.equal(await readFile(join(root,'sub','.CoNfIg','nested.yaml'),'utf8'),privateNested,'Nested private configuration must remain unchanged');
+  assert.equal(await readFile(join(root,'.agentflow','owner.token'),'utf8'),privateState,'Rejected native state reads/edits must preserve the synthetic owner-token fixture');
+  assert.equal(await readFile(join(root,'sub','.AgEnTfLoW','owner.token'),'utf8'),privateState,'Nested private state must remain unchanged');
+  await assert.rejects(readFile(join(root,'.agentflow','created.txt')),{code:'ENOENT'});
   const oldVersion=JSON.parse((await execute(process.argv[2],['--snapshot',root,'README.txt'],{windowsHide:true,timeout:5000})).stdout);
   await writeFile(join(root,'README.txt'),'Actual fixture changed after snapshot\n');
   const newVersion=JSON.parse((await execute(process.argv[2],['--snapshot',root,'README.txt'],{windowsHide:true,timeout:5000})).stdout);

@@ -22,10 +22,13 @@ Json arguments(const std::string& source,const std::string& field) {
 }
 bool WorkspaceTools::backend_private_component(std::string_view name) {
     while(!name.empty()&&(name.back()=='.'||name.back()==' '))name.remove_suffix(1);
-    constexpr std::string_view reserved=".config";
-    if(name.size()!=reserved.size())return false;
-    for(std::size_t i=0;i<name.size();++i){const auto byte=name[i];const auto lower=byte>='A'&&byte<='Z'?static_cast<char>(byte+('a'-'A')):byte;if(lower!=reserved[i])return false;}
-    return true;
+    for(const std::string_view reserved:{".config",".agentflow"}){
+        if(name.size()!=reserved.size())continue;
+        bool matches=true;
+        for(std::size_t i=0;i<name.size();++i){const auto byte=name[i];const auto lower=byte>='A'&&byte<='Z'?static_cast<char>(byte+('a'-'A')):byte;if(lower!=reserved[i]){matches=false;break;}}
+        if(matches)return true;
+    }
+    return false;
 }
 std::vector<ModelToolDefinition> WorkspaceTools::definitions() {
     return {
