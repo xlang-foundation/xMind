@@ -69,9 +69,11 @@ The other browser assets and the Native backend remain at their separately
 verified checkpoints. All 564 native source inputs still match source
 `60475f84` and its paired xlang3 SDK `ad8040f`.
 
-Rendered recovery acceptance and an updated installed VSIX remain pending
-while the independently running SDK benchmark keeps the local validation guard
-busy. The existing VS Code package still contains the compact-layout checkpoint.
+The later verified `516d918` VSIX is now installed in the existing VS Code
+profile after a fresh benchmark guard cleared. Complete on-disk package checks
+passed and settings bytes were unchanged. Window reload and rendered recovery
+acceptance remain pending; installation alone does not establish them.
+[Installation scope](evidence/native-ci-staging-installed.json).
 The full native workflow remains separate from this Node-only gate. This
 increment does not establish broad coding, provider or OpenCode parity.
 

@@ -37,7 +37,12 @@ total. Seven host files and five copied view sources were bound to the exact
 commit; two vendor copies matched their dependencies inside the same VSIX.
 
 [Independent package evidence](evidence/native-ci-staging-package.json) records
-that file-only scope. The package is verified but has not been installed or
-launched locally. The live preview still uses its previously accepted runtime.
-Local execution and installed acceptance remain deferred while the separate
-xlang3 benchmark is running. Later skill changes have separate pending gates.
+that file-only scope. Once a fresh process guard confirmed the separate benchmark
+was no longer running, the actual Code CLI installed this exact VSIX into the
+existing owned VS Code profile. All 1,861 runtime inventory files, 19 other
+package files and 12 browser-runtime files were verified after installation.
+Existing settings bytes were unchanged, and no workspace-trust bypass was
+requested. [Installation evidence](evidence/native-ci-staging-installed.json)
+records this scope. Window reload, rendered acceptance and native execution were
+not performed by this installation; the live browser preview retains its
+previously accepted runtime. Later skill changes have separate pending gates.

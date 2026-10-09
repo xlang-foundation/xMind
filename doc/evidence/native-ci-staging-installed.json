@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "sourceRevision": "516d91842f34a2009c26f7521f9fea66b5ae736b",
+  "scope": "Actual Code CLI installation into the existing persistent profile and complete on-disk package verification; no reload, rendered acceptance or native execution claimed",
+  "settingsBytesUnchanged": true,
+  "sourceFiles": 19,
+  "viewFiles": 12,
+  "runtimeInventoryFiles": 1861,
+  "nativeManifestSha256": "04bca8077b5373966acf2fca14ae78a5e85742c459ea1ee2ca42361a9e5b4dbb",
+  "windowReloadPending": true,
+  "trustBypassRequested": false,
+  "installed": true,
+  "nativeExecuted": false
+}
