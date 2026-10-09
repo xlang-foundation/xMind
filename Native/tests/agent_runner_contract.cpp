@@ -59,6 +59,10 @@ int main(int argc,char** argv) {
         bool started=false,completed=false;
         for(const auto& event:store.events("main").get()) {if(event.kind=="tool.started") started=true;if(event.kind=="tool.completed") completed=true;}
         require(started && completed,"Actual tool execution events must persist");
+        store.create_session("skill","Native skill execution fixture").get();auto skilled=settings;skilled.provider.endpoint=base+"/skill";AgentRunner skill_runner(store,skilled);skill_runner.start("skill","skill","Load the synthetic workspace skill and inspect its actual companion file");
+        require(skill_runner.execute("skill").state==RunState::completed,"Native skill loading must complete its actual model/tool loop");const auto skill_history=store.history("skill").get();require(skill_history.size()==7,"Actual skill turn and same-batch deferral must persist as one matched conversation");
+        const auto blocked=Json::parse(Json::parse(skill_history[3].json).at("content").get<std::string>());require(blocked.at("error").at("code")=="repository_instructions_required","Companion read in the activation batch must wait for delivered skill guidance");
+        const auto companion=Json::parse(Json::parse(skill_history[5].json).at("content").get<std::string>());require(companion.at("content")=="Actual native skill companion bytes\n","Delivered skill must use actual authorized native file reads");bool skill_binding=false;for(const auto& event:store.events("skill").get())if(event.kind=="agent.repository_scope"&&Json::parse(event.json).contains("skills"))skill_binding=true;require(skill_binding,"Actual run must retain Native skill snapshot metadata");
         rejects<Conflict>([&]{runner.execute("main");});
         require(store.history("main").get().size()==4,"Duplicate execute must not damage completed transcript");
         store.create_session("claim","Concurrent claim").get();auto claimed=settings;

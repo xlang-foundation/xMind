@@ -16,7 +16,7 @@ const [serverExe,cliExe,modules,stdlib]=process.argv.slice(2);
 const root=await mkdtemp(join(tmpdir(),'xmind-delegation-http-')),workspace=join(root,'workspace'),database=join(root,'state.sqlite');
 const token=randomBytes(32).toString('hex'),key='synthetic-delegation-provider-key',created='Actual native create after delegated file reads\n';
 const env={...process.env,XMIND_AUTH_TOKEN:token,XMIND_API_KEY:key};let child,port,peerError,requests=0;const calls=new Map(),joined=[];
-const reads=['read_repository_instructions','read_file','list_files','search_files'];
+const reads=['read_repository_instructions','read_file','list_files','search_files','list_skills','load_skill'];
 const call=(id,name,args)=>({index:0,id,type:'function',function:{name,arguments:JSON.stringify(args)}});
 const peer=createServer((request,response)=>{
  let source='';request.on('data',bytes=>source+=bytes);request.on('end',()=>{
@@ -54,7 +54,7 @@ function cli(command,...args){const result=spawnSync(cliExe,[String(port),comman
 try{
  await mkdir(workspace);for(const side of ['left','right'])await writeFile(join(workspace,side+'.txt'),'Actual '+side+' fixture bytes\n');await new Promise(yes=>peer.listen(0,'127.0.0.1',yes));await start();
  const client=new BackendClient('http://127.0.0.1:'+port,()=>token),health=await client.health();assert.equal(health.agent_delegation,true);assert.equal(health.owned_child_observation,true);
- const metadata=await client.delegation();assert.equal(metadata.enabled,true);assert.deepEqual(metadata.presets,[{id:'workspace.inspect',revision:1,readonly:true,tools:['read_file','list_files','search_files','read_repository_instructions']}]);assert.equal(metadata.limits.total_children,8);assert.equal(metadata.limits.parallel_children,2);assert.equal(metadata.limits.depth,1);assert.ok(!JSON.stringify(metadata).includes(workspace));
+ const metadata=await client.delegation();assert.equal(metadata.enabled,true);assert.deepEqual(metadata.presets,[{id:'workspace.inspect',revision:1,readonly:true,tools:['read_file','list_files','search_files','read_repository_instructions','list_skills','load_skill']}]);assert.equal(metadata.limits.total_children,8);assert.equal(metadata.limits.parallel_children,2);assert.equal(metadata.limits.depth,1);assert.ok(!JSON.stringify(metadata).includes(workspace));
  const session=await client.createSession('Actual Agent delegation contract'),run=await client.run(session.id,'Delegate two fixture investigations, observe both and create the reviewed file');assert.equal(run.graph_root,false);
  const pending=await wait(()=>client.operations(run.id),value=>value.some(item=>item.state==='awaiting_approval')),operation=pending.find(value=>value.state==='awaiting_approval');assert.equal(operation.tool,'create_file');await assert.rejects(readFile(join(workspace,'created.txt')),{code:'ENOENT'});
  const before=await client.ownedChildren(run.id);assert.equal(before.length,2);assert.ok(before.every(value=>value.kind==='delegated_leaf'&&value.run.state==='completed'&&value.run.parent_id===run.id&&value.run.session_id===session.id));assert.deepEqual(new Set(before.map(value=>value.run.id)),new Set(joined));

@@ -2,6 +2,7 @@
 #include "agentflow/mcp_client.hpp"
 #include "agentflow/permission_waiter.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include "agentflow/instruction_precondition.hpp"
 
 namespace agentflow {
 struct McpEffectUncertain : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -28,7 +29,7 @@ public:
     std::string approval_bindings_json() const;
     std::string invoke(const std::string& operation_id,const std::string& run_id,
         const std::string& alias,const std::string& arguments,std::int64_t approval_expiry,
-        McpStdioClient::Deadline deadline,std::stop_token cancel={});
+        McpStdioClient::Deadline deadline,std::stop_token cancel={},InstructionPrecondition guidance={});
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;

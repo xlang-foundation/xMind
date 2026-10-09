@@ -1,6 +1,7 @@
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/json_schema.hpp"
 #include "agentflow/xlang_sqlite.hpp"
+#include "agentflow/repository_instruction_context.hpp"
 #include "nlohmann/json.hpp"
 #include <filesystem>
 #include <fstream>
@@ -45,7 +46,8 @@ struct Task {
                 discovered_bindings.set_value(snapshot);
                 const auto alias=mode=="unknown-alias"?"fixture.write":definitions[0].name;
                 const auto deadline=std::chrono::steady_clock::now()+(mode=="stopped-before-dispatch"?1500ms:mode=="timeout"?1500ms:5s);
-                const auto output=registry.invoke(id,run,alias,arguments,expiry(),deadline,cancel.get_token());
+                InstructionPrecondition guidance;if(mode=="skill-changed"){RepositoryInstructionContext context(workspace,workspace.repository_instructions());context.prepare();context.skills().activate(R"({"id":"inspect"})");context.prepare();guidance=context.precondition(".");}
+                const auto output=registry.invoke(id,run,alias,arguments,expiry(),deadline,cancel.get_token(),std::move(guidance));
                 client.shutdown();require(client.status().exit_code==0,"Actual MCP peer must verify a valid exchange");
                 require(registry.approval_bindings_json()==snapshot,"Immutable approval metadata must remain inspectable without ready peer access after actual shutdown");return output;
             }catch(...){const auto error=std::current_exception();client.shutdown();require(client.status().exit_code==0,"Failure peer must accept the expected wire sequence and shutdown");std::rethrow_exception(error);}
@@ -61,6 +63,12 @@ int main(int argc,char** argv){
         std::filesystem::path uncertain_root,fault_root;
         {
             PersistenceService store(database,imports);
+            {
+                const std::string mode="skill-changed";const auto workspace=root(mode),skill=workspace/".agents"/"skills"/"inspect";std::filesystem::create_directories(skill);
+                auto guidance=[&](const std::string& body){std::ofstream out(skill/"SKILL.md",std::ios::binary|std::ios::trunc);out<<"---\nname: inspect\ndescription: Synthetic MCP guidance fixture\n---\n"<<body;out.close();require(bool(out),"Synthetic skill write must succeed");};guidance("Synthetic original skill guidance.\n");
+                start(store,mode);Task task(store,argv,workspace,mode,mode,mode);const auto proposal=proposed(store,mode);const auto payload=Json::parse(proposal.spec.arguments_json);require(payload.at("instructions").at("skills").size()==1&&contents(workspace/"effect.txt").empty(),"Actual MCP approval must bind active skill identity before any dispatch");
+                guidance("Synthetic changed skill guidance.\n");store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();rejects<ToolGuidanceChanged>([&]{task.result.get();});require(store.operation(mode).get().state==OperationState::failed&&contents(workspace/"effect.txt").empty()&&!std::filesystem::exists(workspace/"effect.marker"),"Changed approved guidance must retire its claimed MCP operation without any peer effect or replay");store.transition(mode,RunState::running,RunState::failed).get();
+            }
             for(const auto* mode:{"normal","legacy"}){
                 const auto workspace=root(mode);start(store,mode);Task task(store,argv,workspace,mode,mode,mode);const auto proposal=proposed(store,mode);
                 require(proposal.state==OperationState::awaiting_approval && contents(workspace/"effect.txt").empty(),"Untrusted readOnlyHint must never bypass real controller approval");

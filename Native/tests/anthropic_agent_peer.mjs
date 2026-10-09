@@ -61,7 +61,7 @@ const peer=createServer((request,response)=>{
   const source=Buffer.concat(chunks).toString('utf8');assert.equal(source.includes(key),false);assert.equal(source.includes('provider_context'),false);assert.equal(source.includes('provider_items'),false);assert.equal(source.includes('credential_id'),false);
   const body=JSON.parse(source);assert.deepEqual(Object.keys(body).sort(),['max_tokens','messages','model','stream','system','tools']);assert.equal(body.model,'fixture-claude');assert.equal(body.stream,true);assert.equal(body.max_tokens,64);
   assert.equal(body.system.length,1);assert.equal(body.system[0].type,'text');assert.ok(body.system[0].text.startsWith('Synthetic Claude native agent contract:'));
-  assert.deepEqual(body.tools.map(item=>item.name),['read_repository_instructions','read_file','list_files','search_files']);
+  assert.deepEqual(body.tools.map(item=>item.name),['read_repository_instructions','read_file','list_files','search_files','list_skills','load_skill']);
   if(request.url==='/main'){
    ++mainRequests;
    if(mainRequests===1){

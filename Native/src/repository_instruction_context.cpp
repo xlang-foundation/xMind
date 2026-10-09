@@ -17,7 +17,7 @@ std::string normalized_directory(const std::string& input){
     auto result=std::string(reinterpret_cast<const char*>(value.data()),value.size());while(result.size()>1 && result.back()=='/')result.pop_back();return result.empty()?".":result;
 }
 }
-RepositoryInstructionContext::RepositoryInstructionContext(WorkspaceTools& workspace,std::vector<WorkspaceSnapshot> root):workspace_(workspace){requested_["."]=std::move(root);}
+RepositoryInstructionContext::RepositoryInstructionContext(WorkspaceTools& workspace,std::vector<WorkspaceSnapshot> root):workspace_(workspace),skills_(workspace){requested_["."]=std::move(root);}
 std::string RepositoryInstructionContext::render(const Scopes& scopes){
     using Json=nlohmann::json;std::map<std::string,WorkspaceSnapshot> sources;auto selected=Json::array();std::size_t bytes=0;
     if(scopes.size()>32)throw ToolFileError("Agent guidance scope count exceeds 32");
@@ -32,15 +32,16 @@ std::string RepositoryInstructionContext::render(const Scopes& scopes){
 }
 std::string RepositoryInstructionContext::prepare(std::stop_token cancel){
     auto next=requested_;for(auto& [directory,files]:next)files=workspace_.repository_instructions(directory,cancel);
-    auto text=render(next);requested_=next;delivered_=std::move(next);return text;
+    auto text=render(next)+skills_.prepare(cancel);requested_=next;delivered_=std::move(next);return text;
 }
 std::string RepositoryInstructionContext::metadata() const {
     using Json=nlohmann::json;auto scopes=Json::array();
     for(const auto& [directory,files]:delivered_){auto sources=Json::array();for(const auto& file:files)sources.push_back({{"path",file.path},{"workspace_id",file.workspace_id},{"file_id",file.file_id},{"content_sha256",file.content_sha256},{"byte_count",file.content.size()}});scopes.push_back({{"directory",directory},{"sources",std::move(sources)}});}
-    return Json{{"snapshot","before_model_request"},{"scopes",std::move(scopes)}}.dump();
+    auto result=Json{{"snapshot","before_model_request"},{"scopes",std::move(scopes)}};const auto skills=Json::parse(skills_.metadata());if(!skills.empty())result["skills"]=skills;return result.dump();
 }
 bool RepositoryInstructionContext::ready(const std::string& input,std::stop_token cancel){
     const auto directory=normalized_directory(input);auto current=workspace_.repository_instructions(directory,cancel);
+    if(!skills_.ready(cancel))return false;
     if(const auto found=delivered_.find(directory);found!=delivered_.end() && same(found->second,current))return true;
     // A new directory with exactly the already delivered root-only guidance
     // needs no additional model round. Unsafe/missing directories were checked.
@@ -54,8 +55,10 @@ InstructionPrecondition RepositoryInstructionContext::precondition(const std::st
     const auto expected=found==delivered_.end()?root->second:found->second;
     auto sources=Json::array();for(const auto& file:expected)sources.push_back({{"path",file.path},{"workspace_id",file.workspace_id},{"file_id",file.file_id},{"content_sha256",file.content_sha256},{"byte_count",file.content.size()}});
     auto* workspace=&workspace_;
-    InstructionPrecondition result{Json{{"version",1},{"directory",directory},{"sources",std::move(sources)}}.dump(),[workspace,directory,expected](std::stop_token cancel){
+    const auto skill_condition=skills_.precondition();auto metadata=Json{{"version",1},{"directory",directory},{"sources",std::move(sources)}};const auto skills=Json::parse(skill_condition.metadata_json);if(!skills.empty())metadata["skills"]=skills;
+    InstructionPrecondition result{metadata.dump(),[workspace,directory,expected,skill_condition](std::stop_token cancel){
         if(!same(expected,workspace->repository_instructions(directory,cancel)))throw ToolGuidanceChanged("Repository guidance changed after proposal; effect was not dispatched");
+        skill_condition.verify(cancel);
     }};
     result.validate();auto candidate=requested_;candidate[directory]=expected;render(candidate);requested_=std::move(candidate);return result;
 }

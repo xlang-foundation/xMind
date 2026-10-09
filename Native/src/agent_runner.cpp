@@ -179,6 +179,7 @@ std::optional<DynamicPlanCapabilities> AgentRunner::execution_capabilities(const
         agent_authority_credentials(persistence_,settings_));
     DynamicPresetCapability inspect;inspect.id="workspace.inspect";
     for(const auto& definition:workspace_->definitions())inspect.tools.push_back(definition.name);
+    for(const auto& definition:SkillContext::definitions())inspect.tools.push_back(definition.name);
     caps.presets.push_back(inspect);
     if(settings_.approved_edits||process_||std::any_of(settings_.mcp_servers.begin(),settings_.mcp_servers.end(),[](const auto& server){return server.enabled;})){
         auto coding=inspect;coding.id="workspace.coding";coding.readonly=false;
@@ -264,7 +265,7 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     if(!settings_.instruction_policy.instructions.empty()){instructions.append(instruction_prefix);instructions+=settings_.instruction_policy.instructions;}
     if(instructions.size()>65536)throw ModelRequestCapacityExceeded("Current idle context instructions exceed limits");
     if(!instructions.empty())trusted.messages.push_back({MessageRole::system,std::move(instructions)});
-    if(workspace_)trusted.tools=workspace_->definitions();
+    if(workspace_){trusted.tools=workspace_->definitions();for(auto& definition:SkillContext::definitions())trusted.tools.push_back(std::move(definition));}
     if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());}
     if(process_)trusted.tools.push_back(process_->definition());
     struct McpRuntime {std::unique_ptr<McpStdioClient> client;std::unique_ptr<McpToolRegistry> registry;};
@@ -429,7 +430,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!settings_.context)for(const auto& stored:persistence_.run_history(id).get())request.messages.push_back(message(stored));
         };
         reload_history();
-        if(workspace_) request.tools=workspace_->definitions();
+        if(workspace_){request.tools=workspace_->definitions();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
         if(process_)request.tools.push_back(process_->definition());
@@ -611,6 +612,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 Json output;bool success=false;
                 try {
                     bool guidance_ready=true;InstructionPrecondition guidance;
+                    if(repository_context&&call.name!="list_skills"&&call.name!="load_skill")guidance_ready=repository_context->skills().ready(token);
                     if(repository_context && (call.name=="read_file" || call.name=="edit_file" || call.name=="create_file" || call.name=="list_files" || call.name=="run_process")){
                         Json args;try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid scoped tool JSON");}
                         const auto field=call.name=="run_process"?"workdir":"path";
@@ -618,10 +620,14 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         if(args.contains(field)){if(!args[field].is_string())throw std::invalid_argument("Invalid scoped tool path");scope=args[field].get<std::string>();}
                         else if(call.name!="run_process")throw std::invalid_argument("Scoped tool requires a path");
                         if(call.name!="run_process" && call.name!="list_files")scope=RepositoryInstructionContext::file_directory(scope);
-                        guidance_ready=repository_context->ready(scope,token);
+                        guidance_ready=guidance_ready&&repository_context->ready(scope,token);
                         if(guidance_ready && (call.name=="edit_file" || call.name=="create_file" || call.name=="run_process"))guidance=repository_context->precondition(scope);
                     }
-                    if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated scoped guidance will be supplied in the next model request; reconsider this call using it."}}}};}
+                    if(repository_context&&call.name=="load_skill")guidance_ready=repository_context->ready(repository_context->skills().activation_directory(call.arguments_json,token),token);
+                    if(repository_context&&mcp_tools.contains(call.name)){guidance_ready=guidance_ready&&repository_context->ready(".",token);if(guidance_ready)guidance=repository_context->precondition(".");}
+                    if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}}}};}
+                    else if(call.name=="list_skills"&&repository_context){try{if(mcp_compact_object(call.arguments_json)!="{}")throw std::invalid_argument("Skill listing takes no arguments");}catch(const McpProtocolError&){throw std::invalid_argument("Invalid skill listing arguments");}output=Json::parse(repository_context->skills().catalogue_json(token));}
+                    else if(call.name=="load_skill"&&repository_context){output=Json::parse(repository_context->skills().activate(call.arguments_json,token));}
                     else if(call.name=="edit_file" && settings_.approved_edits) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(EditExecutor(persistence_,*workspace_).invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance)));
@@ -636,7 +642,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         output=Json::parse(delegation_->invoke(id,call,reply.dump(),frozen,budget,token));
                     } else if(const auto registered=mcp_tools.find(call.name);registered!=mcp_tools.end()) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
-                        output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token));
+                        output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance)));
                     } else output=Json::parse(workspace_->invoke(call.name,call.arguments_json,token));
                     success=guidance_ready;
                 }

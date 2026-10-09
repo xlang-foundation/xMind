@@ -58,6 +58,9 @@ public:
     // Guidance reads retain verified directory handles, reject links, and
     // distinguish an absent final file from an unreadable/unsafe file.
     std::optional<WorkspaceSnapshot> instruction_file(const std::string& path,std::stop_token cancel={}) const;
+    // Optional guidance/skill directory, traversed using retained parent
+    // handles. Absence is distinct from links, unreadability and wrong types.
+    std::optional<std::string> instruction_directory_identity(const std::string& path,std::stop_token cancel={}) const;
     // Root-to-directory AGENTS.md snapshots; no home/global or sibling reads.
     std::vector<WorkspaceSnapshot> repository_instructions(const std::string& directory=".",std::stop_token cancel={}) const;
     // Build a reviewable literal replacement from actual file bytes. This

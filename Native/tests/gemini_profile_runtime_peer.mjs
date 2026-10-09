@@ -59,7 +59,7 @@ const peer=createServer((request,response)=>{
   }
   assert.equal(request.url,'/v1beta/models/fixture-gemini:streamGenerateContent?alt=sse');
   assert.deepEqual(Object.keys(body).sort(),['contents','generationConfig','systemInstruction','tools']);
-  assert.deepEqual(body.tools[0].functionDeclarations.map(tool=>tool.name),['read_repository_instructions','read_file','list_files','search_files','plan_tasks','revise_plan','inspect_plan']);
+  assert.deepEqual(body.tools[0].functionDeclarations.map(tool=>tool.name),['read_repository_instructions','read_file','list_files','search_files','list_skills','load_skill','plan_tasks','revise_plan','inspect_plan']);
   if(prompt==='Read the enrolled fixture file'){
    assert.deepEqual(body.contents,[{role:'user',parts:[{text:prompt}]}]);reply(response,callParts,7,2,'synthetic-profile-read');return;
   }

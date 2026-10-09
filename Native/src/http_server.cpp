@@ -405,7 +405,7 @@ struct HttpServer::Impl {
         server.Get("/v1/agent/delegation",guarded([this](const Request& request,Response& response){
             if(!request.params.empty())throw std::invalid_argument("Delegation metadata does not accept query parameters");
             const bool enabled=executor&&executor->supports_delegation();
-            auto presets=Json::array();if(enabled)presets.push_back({{"id","workspace.inspect"},{"revision",1},{"readonly",true},{"tools",{"read_file","list_files","search_files","read_repository_instructions"}}});
+            auto presets=Json::array();if(enabled)presets.push_back({{"id","workspace.inspect"},{"revision",1},{"readonly",true},{"tools",{"read_file","list_files","search_files","read_repository_instructions","list_skills","load_skill"}}});
             reply(response,{{"enabled",enabled},{"presets",std::move(presets)},{"limits",enabled?Json{{"tasks_per_batch",4},{"parallel_children",2},{"total_children",8},{"depth",1},{"model_calls",32},{"leaf_turns",4},{"child_result_bytes",32768},{"tool_result_bytes",65536}}:Json(nullptr)}});
         }));
         if(setup){

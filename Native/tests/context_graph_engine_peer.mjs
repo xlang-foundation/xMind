@@ -48,7 +48,7 @@ function inspect(body,raw,mode,model,kind){
   assert.ok(!userText(users[0]).includes(`graph-context-${other}`),'A sibling objective must not enter another child context');
   const trusted=body.input.filter(item=>item.role==='system'||item.role==='developer');assert.ok(trusted.length>=1);
   assert.equal(trusted[0].role,'system');assert.ok(userText(trusted[0]).includes('xMind'));
-  if(kind!=='compact')assert.deepEqual(body.tools.map(tool=>tool.name).sort(),['list_files','read_file','read_repository_instructions','search_files']);
+  if(kind!=='compact')assert.deepEqual(body.tools.map(tool=>tool.name).sort(),['list_files','list_skills','load_skill','read_file','read_repository_instructions','search_files']);
   if(canonical.has(model)&&mode==='main'&&body.input.some(item=>item.type==='compaction'))
     assert.ok(raw.includes(canonical.get(model).slice(1,-1)),'Whole canonical output and exact opaque/decimal/escaped metadata must be replayed unpruned');
   for(const item of body.input.filter(item=>item.type==='function_call_output')){

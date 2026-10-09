@@ -215,6 +215,19 @@ std::optional<WorkspaceSnapshot> WorkspaceTools::instruction_file(const std::str
     check_cancel(cancel);impl_->verify(file.value);if(identity()!=workspace)throw ToolAccessDenied("Workspace changed during guidance snapshot");
     return WorkspaceSnapshot{parent.relative,content,workspace,file_identity(file.value),content_hash(content)};
 }
+std::optional<std::string> WorkspaceTools::instruction_directory_identity(const std::string& input,std::stop_token cancel) const {
+    check_cancel(cancel);const auto relative=relative_path(input),workspace=identity();
+    std::vector<std::unique_ptr<Handle>> directories;directories.push_back(std::make_unique<Handle>(CreateFileW(impl_->base.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr)));
+    auto verify=[&](HANDLE directory){impl_->verify(directory);BY_HANDLE_FILE_INFORMATION info{};if(!GetFileInformationByHandle(directory,&info)||!(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Instruction directory is not a directory");if(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)throw ToolAccessDenied("Instruction directories do not traverse links");};
+    verify(directories.back()->value);if(file_identity(directories.back()->value)!=workspace)throw ToolAccessDenied("Instruction directory root changed");
+    for(const auto& component:std::filesystem::u8path(relative)){
+        if(component==L".")continue;check_cancel(cancel);if(directories.size()>=33)throw ToolFileError("Instruction directory depth exceeds 32");creation_component(component.wstring());
+        const auto opened=relative_file(directories.back()->value,component.wstring(),true,false,true);
+        if(!opened){check_cancel(cancel);if(identity()!=workspace)throw ToolAccessDenied("Instruction directory root changed");return std::nullopt;}
+        directories.push_back(std::make_unique<Handle>(opened));verify(directories.back()->value);
+    }
+    check_cancel(cancel);if(identity()!=workspace)throw ToolAccessDenied("Instruction directory root changed");return file_identity(directories.back()->value);
+}
 std::vector<WorkspaceSnapshot> WorkspaceTools::repository_instructions(const std::string& input,std::stop_token cancel) const {
     check_cancel(cancel);const auto directory=relative_path(input);std::vector<std::string> paths{"AGENTS.md"};std::string prefix;
     if(directory!=".")for(const auto& component:std::filesystem::u8path(directory)){

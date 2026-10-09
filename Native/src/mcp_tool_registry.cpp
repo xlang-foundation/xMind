@@ -74,13 +74,14 @@ std::string McpToolRegistry::approval_bindings_json() const {
     return bindings.dump();
 }
 std::string McpToolRegistry::invoke(const std::string& id,const std::string& run,const std::string& alias,const std::string& arguments,
-    std::int64_t expiry,McpStdioClient::Deadline deadline,std::stop_token cancel) {
+    std::int64_t expiry,McpStdioClient::Deadline deadline,std::stop_token cancel,InstructionPrecondition guidance) {
     auto& state=*impl_;const auto found=state.entries.find(alias);
     if(found==state.entries.end())throw std::invalid_argument("Tool is not registered on this backend");
     const auto& entry=found->second;SchemaWorker().evaluate(entry.description.input_schema_json,arguments,deadline,cancel);
     const auto approved=mcp_compact_object(arguments);
     if(!state.client.ready())throw McpEffectNotDispatched("MCP peer is unavailable before proposal");
     auto proposal=state.approval_binding(entry);proposal["arguments_json"]=approved;
+    guidance.validate();if(!guidance.metadata_json.empty())proposal["instructions"]=Json::parse(guidance.metadata_json);
     OperationSpec spec{run,state.workspace.identity(),"mcp_tool",proposal.dump(),{"mcp-server:"+state.config_id}};
     PermissionWaiter(state.store).acquire(id,spec,expiry,cancel);
     // Once claimed, even result-encoding/allocation failures must leave a
@@ -93,6 +94,9 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
     if(cancel.stop_requested() || std::chrono::steady_clock::now()>=deadline) {
         finish(OperationState::failed,R"({"reason":"stopped_before_mcp_dispatch"})");throw McpEffectNotDispatched("MCP operation stopped before dispatch");
     }
+    try{if(guidance.verify)guidance.verify(cancel);}
+    catch(const ToolGuidanceChanged&){finish(OperationState::failed,R"({"reason":"repository_instructions_changed_before_mcp_dispatch"})");throw;}
+    catch(...){finish(OperationState::failed,R"({"reason":"guidance_unavailable_before_mcp_dispatch"})");throw McpEffectNotDispatched("MCP guidance could not be verified before dispatch");}
     McpToolReply reply;
     try {reply=state.client.call_tool(entry.description.name,approved,deadline,cancel);}
     catch(const McpDispatchFailure& failure) {
@@ -122,6 +126,7 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
     }catch(const McpOutcomeUnrecorded&){throw;}
     catch(...){throw McpOutcomeUnrecorded("Acknowledged MCP outcome could not be encoded; recovery is required");}
     }catch(const McpOutcomeUnrecorded&){throw;}
+    catch(const ToolGuidanceChanged&){throw;}
     catch(const McpEffectUncertain&){throw;}
     catch(const McpEffectNotDispatched&){throw;}
     catch(...){throw McpOutcomeUnrecorded("Claimed MCP outcome could not be encoded or recorded; recovery is required");}

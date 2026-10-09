@@ -20,6 +20,11 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+Native workspace skill discovery, loading, context delivery and effect approval
+bindings are now implemented in source. The complete 90-contract gate and
+installed/live acceptance remain pending; this is not a verified equivalent
+OpenCode skill operation. [Skill scope and remaining delivery](native-skills.md).
+
 The later catalogue-recovery source passed its isolated hosted **175/35** view
 gate and its tested browser asset is published. Rendered recovery and an updated
 VSIX remain pending; the local benchmark guard has deferred further local
