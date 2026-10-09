@@ -13,6 +13,11 @@ At its 128-owner limit, a new root fails before launch; existing records are not
 evicted. This prevents implicit profile replacement, but does not migrate a live
 runtime to the new generation.
 
+The [native package verifier](native-runtime-generation.md) now checks the
+complete candidate inventory and exact loaded image using retained Windows
+handles. Its full 94-contract local gate passed. It is not wired into the owner
+controller/server yet and does not constitute a completed handoff.
+
 All 189 extension and 38 browser contracts passed locally with frozen inputs.
 A separate actual packaged C++/embedded-xlang3 SQLite check retained one process,
 origin, database, workspace authority and exact saved API records across a package

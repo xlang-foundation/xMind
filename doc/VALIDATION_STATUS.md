@@ -1,5 +1,15 @@
 # Current native validation
 
+The native runtime-package verifier passed all **94 local native contracts in
+183.90 seconds**, with 618 inputs unchanged. Actual Windows image identity,
+Unicode paths/names, inventory/hash checks and pinned-file protections passed.
+It also verified the complete 1,861-file previously accepted `c42a5c4` bundle
+without executing that candidate. This is a tested C++ component; production
+controller wiring, native retirement/bootstrap, legacy migration and installed
+VS Code writing remain pending.
+[Package-verification scope](native-runtime-generation.md),
+[exact local evidence](evidence/native-runtime-generation-local.json).
+
 The native persistence owner barrier passed the complete **93-contract local
 gate in 182.54 seconds**, with all 614 inputs unchanged. Queued and parallel
 admission races, receipt checks, publication/deferred-commit failure rollback,
@@ -11,6 +21,9 @@ not implemented by this increment. The installed `TestProj` owner was observed
 alive without approved edits; it remains read-only.
 [Owner barrier and limits](native-backend-owner.md),
 [exact gate and retained attempts](evidence/native-backend-owner-local.json).
+The exact `d489b21` hosted native workflow subsequently completed successfully,
+including its full gate, views, integration and packaging. Independent archive
+verification and installed acceptance of that checkpoint remain pending.
 
 The approval-based file-proposal source passed all **92 native contracts in
 178.43 seconds** and the complete **192 extension / 39 browser contracts**.
