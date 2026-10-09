@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+The CLI multiline/composer source checkpoint passed the complete **103 native
+contracts in 215.71 seconds**, with 2,390 unchanged mapped inputs, plus **222
+extension / 41 browser** fixture tests. Native contracts exercise composed
+agent/graph prompts and discard boundaries; provider responses are synthetic.
+The first complete attempt also passed 103 tests but its source-freeze wrapper
+correctly rejected a concurrent extension version change; a fresh gate passed.
+No installed 0.1.5 rendering or live-provider multiline acceptance is claimed.
+[Frozen evidence](evidence/native-compose-local.json).
+
+The next product direction is [Agent Runtime + Coding Harness + Model
+Gateway](runtime-product-design.md), with one primary `xmind` executable. The
+document distinguishes existing native execution from pending authoring,
+streaming, bootstrap and worker delivery.
+
 The audited **0.1.4 package** now runs in the existing TestProj VS Code profile,
 preserving all 22 messages and seven runs through the native upgrade. An actual
 OpenAI two-file patch opened comparison before effects, required two separate

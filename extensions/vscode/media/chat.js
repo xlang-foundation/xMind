@@ -425,7 +425,8 @@ byId('sessions').onchange=()=>{refreshRename();api.postMessage({type:'select',id
 byId('runs').onchange=()=>api.postMessage({type:'select-run',id:byId('runs').value});
 byId('model').onchange=()=>api.postMessage({type:'model',id:byId('model').value});
 byId('prompt').onkeydown=event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}};
-byId('prompt').oninput=()=>{byId('prompt').style.height='auto';byId('prompt').style.height=Math.min(180,byId('prompt').scrollHeight)+'px';};
+function resizePrompt(){const prompt=byId('prompt');prompt.style.height='auto';prompt.style.height=prompt.value?Math.min(180,prompt.scrollHeight)+'px':'';}
+byId('prompt').oninput=resizePrompt;
 const renameDialog=byId('rename-dialog');
 function refreshRename(){const selected=byId('sessions').selectedOptions[0];byId('rename').hidden=!renameCapability;byId('rename').disabled=!renameCapability||!selected?.dataset.sessionId;if(renameSnapshot&&(!renameCapability||renameSnapshot.id!==byId('sessions').value))renameDialog.close();}
 byId('rename').onclick=()=>{const selected=byId('sessions').selectedOptions[0];if(!renameCapability||!selected?.dataset.sessionId)return;renameSnapshot={id:selected.value,title:selected.textContent};byId('conversation-title').value=renameSnapshot.title;byId('rename-status').textContent='';byId('rename-save').disabled=false;renameDialog.showModal();byId('conversation-title').focus();};
@@ -469,7 +470,7 @@ window.addEventListener('message',event=>{
   const m=event.data;if(!m||typeof m.type!=='string')return;
   const scroll=byId('scroll'),follow=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<80;
   if(m.type==='workspace'){const root=byId('workspace-root');if(root&&typeof m.root==='string'&&m.root.length<=32760&&Array.isArray(m.roots)){currentWorkspaceRoot=m.root;root.textContent='Backend root: '+m.root+(m.roots.length>1?' · active root from '+m.roots.length+' workspace folders':'')+(m.backendChangePending===true?' · Backend changes pending; using saved backend':'');root.hidden=false;}}
-  else if(m.type==='workspace-clear'){currentWorkspaceRoot=undefined;operations([]);const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}const mode=byId('file-mode');if(mode){mode.textContent='';mode.hidden=true;}byId('prompt').value='';}
+  else if(m.type==='workspace-clear'){currentWorkspaceRoot=undefined;operations([]);const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}const mode=byId('file-mode');if(mode){mode.textContent='';mode.hidden=true;}byId('prompt').value='';resizePrompt();}
   else if(m.type==='graphs'){const select=byId('workflow');select.replaceChildren();const single=node('option','Agent (default)');single.value='';select.append(single);for(const graph of m.graphs){const option=node('option',graph.id+' · '+graph.node_count+' nodes'+(graph.executable?'':' · unavailable'));option.value=graph.id;option.disabled=!graph.executable;option.dataset.executable=graph.executable?'true':'';option.selected=graph.id===m.selected;select.append(option);}if(!m.selected)select.value='';workflowExecutable=!!m.graphs.find(g=>g.id===m.selected&&g.executable);byId('workflow-picker').hidden=!m.graphs.length;byId('send').disabled=!canExecute()||activeRun||sessionBusy;}
   else if(m.type==='graph-clear')clearGraph();
   else if(m.type==='skills')renderSkills(m);
@@ -501,13 +502,13 @@ window.addEventListener('message',event=>{
   else if(m.type==='provider-wire'){const label=byId('provider-mode');label.textContent=m.wire==='gemini-generate-content'?'Gemini GenerateContent':m.wire==='anthropic-messages'?'Claude Messages':providerWireLabel(m.wire)||'';label.hidden=!label.textContent;}
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
   else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;refreshRename();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
-  else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';byId('events').textContent='';}
-  else if(m.type==='draft')byId('prompt').value=m.text;
+  else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();byId('events').textContent='';}
+  else if(m.type==='draft'){byId('prompt').value=m.text;resizePrompt();}
   else if(m.type==='append-context'){
     if(!currentWorkspaceRoot||m.root!==currentWorkspaceRoot||typeof m.text!=='string'||!m.text||m.text.length>49152)return;
     const prompt=byId('prompt'),combined=prompt.value+(prompt.value?'\n\n':'')+m.text;
     if(combined.length>262144){byId('status').textContent='Context was not added: the draft is too large. Select a smaller range.';return;}
-    prompt.value=combined;prompt.focus();
+    prompt.value=combined;resizePrompt();prompt.focus();
   }
   else if(m.type==='event'){const event=m.event;byId('events').textContent+=JSON.stringify(event)+'\n';if(event.kind==='run.failed')runFailure(event.data);else if(event.kind==='process.output')processOutput(event.data);else if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
   else if(m.type==='operations'){

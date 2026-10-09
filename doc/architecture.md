@@ -1,5 +1,12 @@
 # xMind / AgentFlow architecture proposal
 
+The October 9 product decision defines three native components: **Agent
+Runtime + Coding Agent / Harness + AI Model Gateway**. One `xmind` executable
+provides backend and console modes; public authoring uses **Agent + Tool +
+Graph**, YAML/Markdown with optional xlang3 Python or a programming API.
+Planning is optional, and worker/IPC and shared UI SSE remain delivery work.
+See [the agreed product design and implementation boundaries](runtime-product-design.md).
+
 The initial `3fc4204` planning source also passed its [exact hosted gate](https://github.com/xlang-foundation/xMind/actions/runs/37808089507): **77 native / 119 extension / 26 browser** tests, all 16 successful steps, model-free integration and 18 verified VSIX assets. Downloaded archives and original logs match their recorded digests. Installation, rendered/live planning and editor acceptance remain separate. [Hosted source and scope evidence](evidence/native-dynamic-plan-hosted-provenance.json).
 
 ![Architecture](architecture.svg)

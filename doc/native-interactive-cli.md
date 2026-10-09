@@ -5,7 +5,34 @@ browser and VS Code. The backend owns agents, tools, permissions, sessions and
 SQLite through embedded xlang3. The CLI reads command/event contracts and does
 not access the database or run a separate agent.
 
-The current CLI source passed the complete **92 native contracts locally in
+## Multiline requests
+
+Use `/compose` to enter a multiline agent request, or `/compose GRAPH_ID` for
+an explicitly registered graph. End the block with `/send` or abandon it with
+`/discard`. Data lines retain their newline, including blank lines. `/exit` and
+other slash-prefixed lines inside the block are request text. To include the
+terminator lines literally, enter `//send` or `//discard`.
+
+```text
+xMind > /compose
+Review this function:
+
+int add(int a, int b) {
+    return a + b;
+}
+/send
+```
+
+The CLI submits one request through the existing authenticated backend. File
+effects still require their own approvals. EOF without `/send`, empty content,
+NUL-containing content and blocks over 1 MiB are discarded without creating a
+session or run. Unknown or unavailable graph selection does not fall back to
+single-agent execution. Validation of the new candidate is recorded separately
+from the historical checkpoints below.
+
+## Historical session-skill checkpoint
+
+The session-skill CLI source passed the complete **92 native contracts locally in
 175.20 seconds**, with all 612 frozen inputs unchanged and no excluded tests.
 It adds actual session skill inspection, attachment, removal and clearing through
 the authenticated native backend. Unicode arguments and snapshot files, stale

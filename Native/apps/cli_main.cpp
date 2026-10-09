@@ -319,6 +319,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(prompt=="/exit")return exit_status();
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
+            std::cerr<<"/compose [GRAPH_ID] collects a multiline request until /send; /discard cancels it. Use //send or //discard for those literal lines. Other slash lines remain request text. Unfinished EOF and blocks over 1 MiB are discarded without submission.\n";
             std::cerr<<"Context controls: context SESSION [MODEL], compact-context SESSION HEAD_REV REQUEST_ID [MODEL], context-request SESSION REQUEST_ID [MODEL]. Resume a ready closed graph with resume-graph ROOT CHECKPOINT_REV.\n";
             std::cerr<<"/runs lists recorded root runs in the selected conversation; use /watch or /graph-watch to attach one.\n";
             std::cerr<<"Agent /watch includes actual owned inspection or coding children and native plan questions when supported. Direct commands: children RUN, child-history PARENT CHILD, tree-events RUN [CURSOR], delegation, planning, inspect-plan RUN.\n";
@@ -475,13 +476,42 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             }
             continue;
         }
-        bool graphSubmission=false;std::string graphId;std::int64_t graphRevision=0;
-        if(prompt=="/graphs"||prompt.starts_with("/graph ")){
+        bool graphSubmission=false,composed=false;std::string graphId;std::int64_t graphRevision=0;
+        if(prompt=="/compose"||prompt.starts_with("/compose ")){
+            graphId=prompt=="/compose"?std::string{}:prompt.substr(9);
+            if(prompt!="/compose"&&(graphId.empty()||graphId.size()>64||graphId.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos)){
+                std::cerr<<"Use /compose or /compose GRAPH_ID.\n";continue;
+            }
+            std::cerr<<"Compose request: /send submits, /discard cancels.\n";
+            std::cout<<Json{{"type","compose_started"},{"graph_id",graphId}}.dump()<<'\n'<<std::flush;
+            prompt.clear();std::string line;bool submitted=false,discarded=false,invalid=false;
+            while(std::getline(std::cin,line)){
+                if(!line.empty()&&line.back()=='\r')line.pop_back();
+                if(line=="/send"){submitted=true;break;}
+                if(line=="/discard"){discarded=true;break;}
+                if(line=="//send"||line=="//discard")line.erase(0,1);
+                constexpr std::size_t limit=1024*1024;
+                if(invalid)continue;
+                if(line.find('\0')!=std::string::npos||line.size()>=limit||prompt.size()>limit-line.size()-1){invalid=true;prompt.clear();continue;}
+                prompt.append(line);prompt.push_back('\n');
+            }
+            const bool empty=prompt.find_first_not_of(" \t\r\n")==std::string::npos;
+            if(!submitted||invalid||empty){
+                const auto reason=discarded?"user":!submitted?"eof":invalid?"invalid_or_too_large":"empty";
+                std::cout<<Json{{"type","compose_discarded"},{"reason",reason}}.dump()<<'\n'<<std::flush;
+                std::cerr<<"Composed request discarded; no run was submitted.\n";
+                if(!submitted&&!discarded)break;
+                continue;
+            }
+            composed=true;
+        }
+        if((!composed&&(prompt=="/graphs"||prompt.starts_with("/graph ")))||(composed&&!graphId.empty())){
             const auto catalogue=request("/v1/graphs");
             if(!catalogue.is_object()||!catalogue.contains("graphs")||!catalogue["graphs"].is_array())throw std::runtime_error("Invalid backend graph catalogue");
-            if(prompt=="/graphs"){std::cout<<Json{{"type","graphs"},{"catalogue",catalogue}}.dump()<<'\n'<<std::flush;continue;}
-            const auto split=prompt.find(' ',7);graphId=split==std::string::npos?std::string{}:prompt.substr(7,split-7);
-            const auto task=split==std::string::npos?std::string{}:prompt.substr(split+1);
+            if(!composed&&prompt=="/graphs"){std::cout<<Json{{"type","graphs"},{"catalogue",catalogue}}.dump()<<'\n'<<std::flush;continue;}
+            const auto split=composed?std::string::npos:prompt.find(' ',7);
+            if(!composed)graphId=split==std::string::npos?std::string{}:prompt.substr(7,split-7);
+            const auto task=composed?prompt:split==std::string::npos?std::string{}:prompt.substr(split+1);
             if(graphId.empty()||graphId.size()>64||graphId.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||task.find_first_not_of(" \t\r\n")==std::string::npos){std::cerr<<"Use /graph GRAPH_ID REQUEST with a registered graph and nonempty request.\n";continue;}
             const auto& entries=catalogue["graphs"];const auto selected=std::find_if(entries.begin(),entries.end(),[&](const Json& item){return item.is_object()&&item.value("id",std::string{})==graphId;});
             if(selected==entries.end()){std::cerr<<"Graph was not found. Use /graphs to see registered graphs.\n";continue;}
@@ -489,7 +519,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             if(!(*selected)["executable"].get<bool>()){std::cerr<<"Graph cannot execute with the current backend configuration. Use /graphs to inspect availability.\n";continue;}
             graphRevision=(*selected)["revision"].get<std::int64_t>();graphSubmission=true;prompt=task;
         }
-        if(!graphSubmission&&prompt.front()=='/'){
+        if(!composed&&!graphSubmission&&prompt.front()=='/'){
             if(prompt.starts_with("//"))prompt.erase(0,1);
             else {std::cerr<<"Unknown chat command. Use /help, or // to send a literal slash request.\n";continue;}
         }
