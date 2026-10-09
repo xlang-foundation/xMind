@@ -1,0 +1,93 @@
+{
+  "observedAt": "2026-10-09T06:28:00.259Z",
+  "sourceRevision": "5d48bdd72713dcc23d5a1b15a0a08d3e3b7b1fd2",
+  "scope": "Actual installed xMind extension in the existing persistent VS Code profile, real OpenAI native workspace read, and rendered history after Developer: Reload Window. This window is an Extension Development Host solely because an owned workspace-opener test helper is loaded; xMind is the installed verified package.",
+  "packageEvidence": "native-approval-stability-hosted-package.json",
+  "vsixSha256": "85a171b8afc4d659c01b6ce342f9a003f67cf9defd5a98ba8aabcaf3026e73d4",
+  "nativeManifestSha256": "c387aa2e501cd7b16f4e0062a597005570aefab647c0c3eb53e0c46083055d75",
+  "workspace": {
+    "root": "D:\\CantorAI2026\\TestProj",
+    "openedFolder": true,
+    "workspaceFileRequired": false,
+    "userGrantedTrust": true,
+    "trustBypassRequested": false
+  },
+  "runId": "64816786995fbe4aa63b81adc25dbd7a",
+  "provider": "openai",
+  "route": "openai.responses",
+  "model": "gpt-6.1-sol",
+  "profileVersion": 2,
+  "request": {
+    "prompt": "Use read_file to read xmind-ui-check-8832f281-93c9-4df5-8ade-34bdd4f0b3d5.txt. Return only its exact file text, without commentary or code fences. Read no other files and request no effects.",
+    "expectedFileSha256": "ef5448dbe130d8829eb4fdcee6c281857c5d8f8e37abecdd36b826c60b1ccc33",
+    "markerAbsentFromPrompt": true
+  },
+  "observations": {
+    "completed": true,
+    "nativeToolResultPathMatched": true,
+    "exactMarkerMatched": true,
+    "rightSecondarySidebar": true,
+    "inlineBottomProviderAndModel": true,
+    "historyAfterWindowReload": true,
+    "sameRunAfterReload": true,
+    "sameRootAfterReload": true,
+    "modelSelectionAfterReload": true,
+    "tokenMetricsAfterReload": true,
+    "keysReentryRequired": false
+  },
+  "metrics": {
+    "toolRequest": {
+      "inputTokens": 1463,
+      "outputTokens": 48,
+      "totalTokens": 1511,
+      "cachedTokens": 0,
+      "reasoningTokens": 0,
+      "firstTokenSeconds": 1.83,
+      "elapsedSeconds": 2.39
+    },
+    "finalResponse": {
+      "inputTokens": 1593,
+      "outputTokens": 37,
+      "totalTokens": 1630,
+      "cachedTokens": 1460,
+      "reasoningTokens": 0,
+      "firstTokenSeconds": 2.38,
+      "elapsedSeconds": 2.95
+    },
+    "scope": "Values actually rendered from provider-reported usage and backend-measured timings; no estimates."
+  },
+  "managedNative": {
+    "pid": 32028,
+    "port": 65350,
+    "sameProcessObservedAfterReload": true,
+    "workspaceTestProj": true
+  },
+  "benchmarkGuard": {
+    "count": 0,
+    "checkedBeforeLiveRun": true
+  },
+  "fixture": {
+    "owned": true,
+    "removedAfterVerifiedExactContents": true
+  },
+  "retainedDiagnostic": {
+    "testHelperReloadError": "The optional xmind-check.xmind-workspace-opener helper failed activation with EEXIST while attempting to rewrite its historical environment receipt. xMind itself activated and restored the completed run. The reload accessibility observation retains this error.",
+    "productFailureObserved": false
+  },
+  "screenshot": {
+    "file": "native-vscode-trusted-workspace.jpg",
+    "sha256": "e00412ae5c232f0738070a270a065fa34ff65e25d195c728ba183a46bcba2563"
+  },
+  "privateObservationHashes": {
+    "completed-accessibility.txt": "07754380b14d6490e785172027f74d58b57fc7434a9f2489c11ca70e8f23a072",
+    "reload-accessibility.txt": "cea0ab56dcb64d0e0963b6c0edbdb181da1cd38d0d76874d90e9512c601317a9",
+    "final-accessibility.txt": "0c81c6e279f3a8e6d480b50ba1266a55ad363827cc077df09e682cb399ea9f3d",
+    "fixture.json": "d40a4a17bc20dd01772b905cca30dd410a16c9262b4f2337a6121ce8322a96ec",
+    "cleanup.json": "bdabd7c5dd478c610d4660b3f961eb55f32993087d1c077d0487614b42dc86d5"
+  },
+  "limits": [
+    "No raw authenticated API or database receipt was collected in this UI check.",
+    "This package remains schema12; schema13 persistence and the newer catalogue require separate package and installed acceptance.",
+    "This proves one rendered workspace read and reload, not rendered skills, all providers, edit approval, full OpenCode parity, or private Nexus delivery."
+  ]
+}

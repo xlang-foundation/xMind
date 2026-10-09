@@ -322,19 +322,41 @@ into private diagnostic storage, retaining all three files and failed records.
 
 This schema13 source is locally validated, not yet installed or packaged by the
 hosted workflow. The current persistent VS Code package and browser runtime use
-schema12. Delivery still requires normal VS Code rendered acceptance and window
-reload, installed schema13 acceptance, paused-run restoration checks, explicit
+schema12. The subsequent installed-package workspace-read UI check and window
+reload passed after the user granted trust; rendered skill activation remains
+separate. Delivery still requires installed schema13 acceptance, paused-run
+restoration checks, explicit
 manual activation and deactivation, configured/global/URL/embedded sources,
 skill management controls and CLI/view catalog controls. Pure Python scripts
 and dependencies must execute through xlang3; this checkpoint adds no interpreter
 fallback or xlang3 native API.
 
 The actual normal VS Code profile was inspected after the fixed schema12 package
-installation. Its `TestProj` window is in Restricted Mode. xMind's manifest
+installation. Its `TestProj` window was in Restricted Mode. xMind's manifest
 declares `untrustedWorkspaces.supported: false`, so VS Code disables its sidebar.
-The user must trust this folder through VS Code before ordinary-window xMind
-activation and rendered acceptance can continue; automation did not change trust
+The user subsequently trusted this folder through VS Code; automation did not change trust
 or other security settings. The
 [observed window](evidence/native-vscode-restricted-mode.jpg) records that boundary,
 not a rendered xMind result. The earlier isolated test host's trust-disabled
 test flag does not establish ordinary-window acceptance.
+
+After that user action, the installed `5d48bdd` package completed a real OpenAI
+native `read_file` request from the right secondary sidebar. The prompt contained
+only the owned filename; the response and expanded tool result matched the file's
+independent random marker. The effective backend root was
+`D:\CantorAI2026\TestProj`. The final response displayed 1,593 input and 37 output
+tokens, 1,460 cached tokens, first token at 2.38 seconds and elapsed time of 2.95
+seconds. Developer: Reload Window restored the same completed run, model, root,
+response and metrics without key re-entry. The same managed native process
+remained alive. The owned fixture was removed only after its path and exact
+contents were checked.
+
+[Rendered workspace and reload evidence](evidence/native-vscode-trusted-workspace.json)
+and its [actual screenshot](evidence/native-vscode-trusted-workspace.jpg) retain
+this bounded result. The persistent-profile window loads a separate development
+workspace-opener helper; xMind itself is the installed package. That optional
+helper reported `EEXIST` when it tried to recreate a historical environment
+receipt after reload; the observation retains the error, while xMind activated
+and restored its completed run. This check establishes one workspace-read UI
+path, not rendered skill activation, edit approvals, schema13 installation or
+full provider/parity acceptance.

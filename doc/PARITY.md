@@ -44,8 +44,14 @@ exact final response and reload with actual metrics. The fixed package at
 `5d48bdd72713dcc23d5a1b15a0a08d3e3b7b1fd2` subsequently passed its complete
 90-contract native workflow and replaced the normal VS Code profile's installed
 package. Its full runtime and view inventory was verified with unchanged
-settings. Ordinary-window reload and rendered acceptance remain pending;
-full skills remain incomplete.
+settings. After the user granted workspace trust, the installed package passed
+a real OpenAI `read_file` run in the right sidebar for `TestProj`. A VS Code
+window reload restored the same completed run, response, model, workspace root
+and actual token metrics without re-entering keys. This persistent-profile window
+loads a separate development workspace-opener helper; xMind is the installed
+package. This verifies one workspace-read UI path; rendered skills and full
+skills remain incomplete.
+[Trusted workspace acceptance](evidence/native-vscode-trusted-workspace.json).
 [Package and installation evidence](evidence/native-approval-stability-hosted-package.json).
 The subsequent schema13 source passed the exact full 91-contract local native
 gate and real OpenAI continued-session restoration after backend exit/restart,
@@ -59,8 +65,9 @@ Native catalogue inspection subsequently passed the exact 92-contract local
 gate and complete 178/36 view suites. It is available through the authenticated
 backend, native CLI and shared client, including scoped browser-cookie routing.
 Manual attachment/removal and rendered catalogue controls remain incomplete.
-The ordinary VS Code window was observed in Restricted Mode; its trust policy
-disables xMind, so that window has not passed rendered xMind acceptance.
+The ordinary VS Code window was initially observed in Restricted Mode, which
+disabled xMind. That historical boundary remains recorded; the user subsequently
+granted trust and the workspace-read UI acceptance above passed.
 [Catalogue and window-boundary evidence](evidence/native-skill-catalogue-local.json).
 [Browser evidence](evidence/native-skills-browser-upgrade.json).
 [Verified view gate](evidence/native-approval-stability-views-hosted.json),
