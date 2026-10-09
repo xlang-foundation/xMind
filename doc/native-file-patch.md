@@ -11,6 +11,15 @@ the effect phase and the rename API's Win32 error number. The delegation fixture
 prints actual durable parent/child states on timeout; its assertions and deadline
 are unchanged. These diagnostic changes require a new native build.
 
+The following [101-contract run](https://github.com/xlang-foundation/xMind/actions/runs/37978080333)
+at `a1ed50d4fc314f93a1a57fb7115cc106d8003008` also compiled but failed:
+97 contracts passed; MCP effect dispatch, per-file patch execution, patch batch
+coordination and workspace effects failed. Delegation passed in this run. The
+move failures still came from source predating the phase/Win32 diagnostics.
+The batch test now observes an already-terminal executor future while waiting
+for its next proposal, so its actual partial/uncertain report is printed instead
+of an unrelated five-second proposal timeout. No assertion or timeout was relaxed.
+
 General patch editing is being implemented in C++. OpenCode v2.0.16 is the
 behavior reference (`packages/core/src/tool/patch.txt` and the patch tool's input
 and operation declarations). No OpenCode implementation is embedded or copied.
