@@ -11,6 +11,8 @@ struct LocalSkill {
     std::string body;
     bool model_invocable=true;
     WorkspaceSnapshot source;
+    // Automatic suggestion policy is independent of explicit loading.
+    std::optional<bool> autoinvoke;
 };
 // Native per-run guidance, never an executable or an effect permission. Only
 // the already-authorized workspace's .agents/skills directory is discovered.

@@ -29,9 +29,12 @@ optional description and instruction catalogue filtering. Names use lower-case l
 and single hyphens, up to 64 bytes. Frontmatter supports bounded scalar fields
 and one scalar metadata map. Native rejects aliases, anchors, duplicate keys,
 tagged objects and sequences. Other scalar metadata grants no capability.
-`autoinvoke: false` and `disable-model-invocation: true` keep the guide out of
-the advertised model-invocable catalogue. User-driven activation of those guides
-is still pending.
+`autoinvoke: false` hides automatic suggestions while allowing explicit loading
+by an available id. The pinned reference's `metadata.opencode/autoinvoke` flag
+has the same meaning; its string value is trimmed and normalized. The native
+top-level alias accepts `true` or `false` and conflicting declarations fail
+explicitly. `disable-model-invocation: true` remains an explicit native loading
+prohibition. User-driven attachment controls for disabled guides are pending.
 
 `list_skills` returns current metadata. `load_skill` accepts an exact catalogue
 id and requests activation for the next model request. Skill bodies enter the
@@ -86,6 +89,10 @@ capacity and verifies a completed conversation after the rejected load, with no
 activated skill snapshot. The context fixture covers aggregate overflow while
 retaining two previously delivered guides. These later capacity tests and the
 optional-description change remain unvalidated.
+The later automatic-suggestion correction also remains unvalidated. Its native
+contract covers explicit loading with `autoinvoke: false`, the normalized pinned
+metadata flag and the separate explicit loading prohibition. It changes no
+effect authority or source snapshot verification.
 
 Delivery still requires the complete 90-contract native gate, frontend suites,
 browser/native integration, independently verified VSIX/runtime artifacts and
