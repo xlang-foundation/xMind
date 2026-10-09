@@ -5,7 +5,17 @@ browser and VS Code. The backend owns agents, tools, permissions, sessions and
 SQLite through embedded xlang3. The CLI reads command/event contracts and does
 not access the database or run a separate agent.
 
-Current source passed **65 native contracts locally in 113.16 seconds**, with
+The current CLI source passed the complete **92 native contracts locally in
+175.20 seconds**, with all 612 frozen inputs unchanged and no excluded tests.
+It adds actual session skill inspection, attachment, removal and clearing through
+the authenticated native backend. Unicode arguments and snapshot files, stale
+revision rejection and concurrent-client changes passed in both provider-enabled
+and model-free modes. These tests use synthetic guides/provider peers and admit
+no inference runs. Hosted packaging and installed CLI acceptance for these new
+commands remain pending.
+[Current CLI evidence](evidence/native-cli-user-skills-local.json).
+
+The earlier provider-profile checkpoint passed **65 native contracts locally in 113.16 seconds**, with
 the exact manifest matched, zero failures/skips and no post-build exclusions.
 The new provider-profile CLI contract passed in **4.23 seconds**, and actual
 browser/native integration passed again against the freshly rebuilt server.
@@ -27,6 +37,31 @@ Full interactive/TUI coding parity and live Gemini CLI/IDE acceptance remain
 incomplete; private team-server implementation belongs to Nexus.
 
 ## Conversations, observation and approvals
+
+Session skill controls use the same native API as the browser and VS Code.
+Their complete 92-contract local compile/execution gate passed. The first
+preflight deferred while a separate xlang3 benchmark was active; no native
+execution occurred during that attempt. A later gate passed 91 of 92 tests:
+the stale-write diagnostic omitted its HTTP status. The corrected product output
+reports HTTP 409 and no automatic retry; the full successful gate retains the
+original assertion. Both earlier attempts remain recorded in the evidence.
+
+Interactive commands are `/session-skills`, `/attach-skill ID`,
+`/remove-skill ID` and `/clear-skills`. An id can include spaces and Unicode and
+resolves through the backend catalogue. Attaching before the first prompt creates
+a real empty conversation. The console keeps its observed revision and workspace
+identity and does not replay a rejected stale write. Use `/session-skills` and
+`/skills` to inspect current state before retrying. A later acknowledged write
+clears the failed skill-command exit result; a read alone does not.
+
+Scripted clients can inspect `session-skills SESSION`, save its public JSON
+snapshot, then call `set-skills SESSION SNAPSHOT_JSON_FILE [ID...]`. An empty id
+list clears the observed selection. The snapshot contains public selection and
+workspace metadata, not provider configuration or keys. UTF-8 snapshots and
+Windows UTF-16LE snapshots with a BOM are supported by the new source. Snapshot
+session identity, bounds, duplicate fields, revision, workspace and acknowledgement
+are checked; a newer backend selection is never silently adopted. Windows CLI
+arguments use the Unicode entry point and explicit UTF-8 conversion.
 
 With `XMIND_AUTH_TOKEN` privately set, run:
 

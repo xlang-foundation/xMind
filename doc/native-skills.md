@@ -415,9 +415,22 @@ contents before removing the owned fixture.
 retains the initial HTTP error-mapping failure (91/92 passed) and the initial
 browser compatibility failures. Missing guidance now returns a bounded conflict
 instead of HTTP 500, and unsupported backends do not instantiate the new
-controller or publish after disposal. Hosted packaging and installed/rendered
-control acceptance remain required for this newer source. The real calls used
+controller or publish after disposal. The exact `c42a5c4` source subsequently
+passed its complete hosted native workflow and packaging, with independent
+archive, runtime inventory and packaged source verification.
+[Hosted package](evidence/native-user-skill-controls-hosted-package.json).
+Its isolated full 184/38 view gate also passed with source and asset verification.
+[Hosted views](evidence/native-user-skill-controls-views-hosted.json).
+Installed/rendered control acceptance remains required. The real calls used
 the locally tested build, not the currently installed schema12 UI package.
-CLI manual attachment commands, configured/global/URL/embedded discovery,
-skill source management and broader parity remain incomplete. The existing CLI
-`skills` and `/skills` commands inspect the current catalogue.
+Newer native CLI `session-skills` / `set-skills` and interactive
+`/session-skills`, `/attach-skill`, `/remove-skill`, `/clear-skills` passed the
+complete 92-contract local gate in 175.20 seconds. Actual Unicode Windows
+arguments, UTF-8/UTF-16LE snapshots, stale/concurrent selection conflicts and
+explicit recovery passed without inference runs.
+[CLI scope](evidence/native-cli-user-skills-local.json).
+Hosted/installed acceptance for these newer CLI commands, configured/global/URL/
+embedded discovery, skill source management and broader parity remain incomplete.
+Existing-profile upgrades must preserve saved state through a native runtime
+handoff; the current launcher creates a separate database for a new generation.
+[Handoff requirements](native-runtime-handoff.md).

@@ -1,5 +1,34 @@
 # Current native validation
 
+The latest native CLI skill controls passed all **92 local native contracts in
+175.20 seconds**, with all 612 input hashes unchanged. Exact registered and passed
+test names match the complete CI manifest. Unicode Windows arguments/snapshots,
+stale selection rejection, concurrent clients and explicit interactive recovery
+passed through the actual CLI and native backend. The fixtures use synthetic
+guides/provider peers and admit no inference runs. The benchmark deferral and
+earlier 91/92 diagnostic failure remain recorded.
+[CLI evidence](evidence/native-cli-user-skills-local.json).
+
+The preceding `c42a5c4` user-control source passed the complete hosted native
+workflow, 184 extension tests, 38 browser tests, integration and packaging.
+Independent archive/inventory/source checks verify that exact runtime and VSIX.
+Its isolated hosted 184/38 view gate also passed. These packages have not replaced
+the running previews. The newer CLI commands are absent from that package.
+[Package verification](evidence/native-user-skill-controls-hosted-package.json),
+[view verification](evidence/native-user-skill-controls-views-hosted.json).
+
+The normal persistent VS Code profile still runs the installed `5d48bdd` package
+against `TestProj`. After user-granted trust, it passed an actual OpenAI file read
+and window reload with the same saved run, response, model and actual metrics.
+The latest observation confirms that sidebar state and effective workspace.
+[Trusted-workspace acceptance](evidence/native-vscode-trusted-workspace.json).
+Rendered user skill controls and existing-profile upgrades remain incomplete:
+the launcher currently creates a separate database when runtime generation
+changes. [Required native handoff](native-runtime-handoff.md).
+
+The paragraphs below retain their historical checkpoint scope; they do not
+supersede these current source, package or installed-preview boundaries.
+
 The provider/conversation catalogue recovery source passed a complete isolated
 hosted gate: **175 extension and 35 browser tests**, with no failures/skips.
 Its source and generated assets were verified against the exact commit and

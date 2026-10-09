@@ -71,6 +71,21 @@ runs passed user attachment of model-disabled guidance, removal, persisted
 reattachment and fresh source/companion restoration after backend restart.
 Hosted packaging and installed/rendered acceptance remain separate.
 [User-control evidence](evidence/native-user-skill-controls-local.json).
+Its complete isolated hosted 184/38 view gate also passed. Independent archive,
+source and asset verification binds every tracked view input to `c42a5c4`.
+[Hosted view verification](evidence/native-user-skill-controls-views-hosted.json).
+That exact `c42a5c4` source also passed its complete hosted native workflow and
+packaging. Independent archive/source verification checks all native and packaged
+view files. It is not installed in the running previews.
+[Verified package](evidence/native-user-skill-controls-hosted-package.json).
+Newer CLI attachment/removal/clear controls passed all 92 native contracts locally
+in 175.20 seconds, including actual Unicode arguments and stale/concurrent
+selection rejection. Synthetic fixtures admit no inference runs; hosted and
+installed CLI acceptance remain separate.
+[CLI evidence](evidence/native-cli-user-skills-local.json).
+The managed launcher still needs a native generation handoff preserving the same
+profile database before existing-profile upgrade acceptance can be claimed.
+[Upgrade requirements](native-runtime-handoff.md).
 The ordinary VS Code window was initially observed in Restricted Mode, which
 disabled xMind. That historical boundary remains recorded; the user subsequently
 granted trust and the workspace-read UI acceptance above passed.

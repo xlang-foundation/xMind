@@ -13,8 +13,16 @@
 #include <vector>
 #include <algorithm>
 #include <string_view>
+#if defined(_WIN32)
+#include <windows.h>
+#endif
 
 namespace {
+#if defined(_WIN32)
+std::string utf8_argument(std::wstring_view value){
+    if(value.empty())return {};if(value.size()>32768)throw std::invalid_argument("Unicode CLI text exceeds limits");const auto length=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0,nullptr,nullptr);if(length<1)throw std::invalid_argument("Invalid Unicode CLI text");std::string result(static_cast<std::size_t>(length),'\0');if(WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),result.data(),length,nullptr,nullptr)!=length)throw std::invalid_argument("Invalid Unicode CLI text");return result;
+}
+#endif
 std::string provider_profile_identity(const std::string& value){
     if(value.empty()||value.size()>256||value.starts_with("sk-")||value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)
         throw std::invalid_argument("Invalid provider profile identity");
@@ -36,6 +44,31 @@ std::int64_t provider_revision(const std::string& source){
     const auto value=event_cursor(source);if(value>9007199254740991)throw std::invalid_argument("Invalid provider revision");return value;
 }
 std::int64_t plan_revision(const std::string& source){const auto value=provider_revision(source);if(value<1)throw std::invalid_argument("Plan revision and state sequence must be positive");return value;}
+void skill_ids(const nlohmann::json& value){
+    if(!value.is_array()||value.size()>8)throw std::invalid_argument("Select at most eight skills");std::set<std::string> unique;
+    for(const auto& item:value){if(!item.is_string())throw std::invalid_argument("Skill ids must be strings");const auto& id=item.get_ref<const std::string&>();if(id.empty()||id.size()>256||id=="."||id==".."||id.find_first_of("/\\:")!=std::string::npos||id.find('\0')!=std::string::npos||!unique.insert(id).second)throw std::invalid_argument("Invalid or duplicate skill id");}
+}
+void skill_snapshot(const nlohmann::json& value,const std::string& session){
+    if(!value.is_object()||value.size()!=7||value.value("session_id",std::string{})!=session||!value.contains("workspace_id")||!value["workspace_id"].is_string()||!value.contains("authority_id")||!value["authority_id"].is_string()||!value.contains("revision")||!value["revision"].is_number_integer()||value["revision"]<0||value["revision"]>9007199254740991LL||!value.contains("editable")||!value["editable"].is_boolean()||!value.contains("ids")||!value.contains("manual_ids"))throw std::invalid_argument("Invalid session skill snapshot");
+    const auto workspace=value["workspace_id"].get<std::string>(),authority=value["authority_id"].get<std::string>();if(workspace.empty()||workspace.size()>256||workspace.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos||authority.size()!=32||authority.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid skill workspace binding");
+    skill_ids(value["ids"]);skill_ids(value["manual_ids"]);for(const auto& id:value["manual_ids"])if(std::find(value["ids"].begin(),value["ids"].end(),id)==value["ids"].end())throw std::invalid_argument("Invalid skill attachment provenance");
+}
+nlohmann::json skill_change(const nlohmann::json& observed,const std::string& session,const nlohmann::json& ids){
+    skill_snapshot(observed,session);skill_ids(ids);if(observed["revision"]>=9007199254740991LL)throw std::invalid_argument("Session skill revision cannot advance");if(!observed["editable"].get<bool>())throw std::invalid_argument("Wait for this conversation to become idle before changing skills");
+    return {{"ids",ids},{"expected_revision",observed["revision"]},{"expected_workspace_id",observed["workspace_id"]},{"expected_workspace_authority_id",observed["authority_id"]}};
+}
+void skill_acknowledgement(const nlohmann::json& value,const std::string& session,const nlohmann::json& request){
+    skill_snapshot(value,session);if(value["workspace_id"]!=request["expected_workspace_id"]||value["authority_id"]!=request["expected_workspace_authority_id"]||value["revision"].get<std::int64_t>()!=request["expected_revision"].get<std::int64_t>()+1||value["ids"].size()!=request["ids"].size()||value["manual_ids"].size()!=request["ids"].size())throw std::runtime_error("Skill acknowledgement changed binding or selection");
+    for(const auto& id:request["ids"])if(std::find(value["ids"].begin(),value["ids"].end(),id)==value["ids"].end()||std::find(value["manual_ids"].begin(),value["manual_ids"].end(),id)==value["manual_ids"].end())throw std::runtime_error("Skill acknowledgement changed explicit attachment");
+}
+nlohmann::json read_skill_snapshot(const std::string& filename){
+    std::ifstream file(std::filesystem::u8path(filename),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read session skill snapshot file");std::string source;char byte;while(file.get(byte)){if(source.size()>=8192)throw std::invalid_argument("Session skill snapshot exceeds 8 KiB");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read session skill snapshot file");
+    try{
+#if defined(_WIN32)
+        if(source.size()>=2&&static_cast<unsigned char>(source[0])==255&&static_cast<unsigned char>(source[1])==254){if(source.size()%2)throw std::invalid_argument("Invalid UTF-16 snapshot");std::wstring wide;for(std::size_t i=2;i<source.size();i+=2)wide.push_back(static_cast<wchar_t>(static_cast<unsigned char>(source[i])|(static_cast<unsigned char>(source[i+1])<<8)));source=utf8_argument(wide);if(source.size()>8192)throw std::invalid_argument("Snapshot exceeds limits");}
+#endif
+        std::vector<std::set<std::string>> fields;return nlohmann::json::parse(source,[&](int depth,nlohmann::json::parse_event_t event,nlohmann::json& value){if(depth>4)throw std::invalid_argument("Invalid skill snapshot nesting");if(event==nlohmann::json::parse_event_t::object_start)fields.emplace_back();else if(event==nlohmann::json::parse_event_t::object_end)fields.pop_back();else if(event==nlohmann::json::parse_event_t::key&&!fields.back().insert(value.get<std::string>()).second)throw std::invalid_argument("Duplicate skill snapshot field");return true;});}catch(const std::exception&){throw std::invalid_argument("Invalid session skill snapshot JSON");}
+}
 void validate_plan_input(const std::string& source){
     if(source.empty()||source.size()>16384)throw std::invalid_argument("Plan input must contain at most 16384 bytes");
     using Json=nlohmann::json;std::vector<std::set<std::string>> objects;
@@ -259,6 +292,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
         if(response->status<200 || response->status>=300)throw std::runtime_error("Server rejected chat request (HTTP "+std::to_string(response->status)+")");
         return Json::parse(response->body);
     };
+    nlohmann::json observed_skills;
     const auto health=request("/v1/health");if(!health.is_object() || !health.contains("agent_execution") || !health["agent_execution"].is_boolean())throw std::runtime_error("Invalid backend chat capabilities");
     const bool profile_admission=health.value("provider_profile_admission",false)||health.value("graph_provider_profile_admission",false);
     auto provider_binding=profile_admission?provider_admission_binding(request("/v1/provider/profiles")):Json::object();
@@ -278,8 +312,8 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
                  <<Json{{"type","history"},{"session_id",session},{"history",history}}.dump()<<'\n'<<std::flush;
         if(!std::cout)throw std::runtime_error("Chat history output is unavailable");
     }
-    int last_result=0,profile_result=0;std::string prompt;
-    const auto exit_status=[&]{return last_result!=0?last_result:profile_result;};
+    int last_result=0,profile_result=0,skill_result=0;std::string prompt;
+    const auto exit_status=[&]{return last_result!=0?last_result:profile_result!=0?profile_result:skill_result;};
     while(std::cerr<<"xMind > "<<std::flush,std::getline(std::cin,prompt)) {
         if(!prompt.empty() && prompt.back()=='\r')prompt.pop_back();
         if(prompt=="/exit")return exit_status();
@@ -291,7 +325,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
             std::cerr<<"/profiles lists saved provider metadata without changing this chat's admission binding; /profile ID REVISION explicitly selects a shared profile and clears this chat's model override.\n";
-            std::cerr<<"/skills lists current workspace guide metadata without activating a guide.\n/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+            std::cerr<<"/skills lists current workspace guide metadata without activating a guide.\n/session-skills inspects current attachments; /attach-skill ID and /remove-skill ID change exact catalogue ids (spaces are part of the id); /clear-skills clears the observed selection. Native revisions prevent stale writes.\n/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
         }
         if(prompt.starts_with("/watch ")||prompt.starts_with("/graph-watch ")){
             const bool graphAttachment=prompt.starts_with("/graph-watch ");const auto id=prompt.substr(graphAttachment?13:7);
@@ -405,6 +439,28 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             if(!catalogue.is_object()||!catalogue.contains("skills")||!catalogue["skills"].is_array())throw std::runtime_error("Invalid native skill catalogue");
             std::cout<<Json{{"type","workspace_skills"},{"catalogue",catalogue}}.dump()<<'\n'<<std::flush;continue;
         }
+        if(prompt=="/session-skills"||prompt=="/clear-skills"||prompt.starts_with("/attach-skill ")||prompt.starts_with("/remove-skill ")){
+            const bool inspect=prompt=="/session-skills",clear=prompt=="/clear-skills",attach=prompt.starts_with("/attach-skill ");
+            if(!health.value("skill_controls",false)){skill_result=1;std::cerr<<"This backend has no session skill controls. Update the native backend.\n";continue;}
+            if(session.empty()){
+                if(!attach){std::cerr<<"Select a conversation or attach a skill to start one.\n";continue;}
+                const Json body={{"title","Workspace skills"}};const auto created=request("/v1/sessions",&body);if(!created.contains("id")||!created["id"].is_string())throw std::runtime_error("Invalid created skill conversation");session=created["id"].get<std::string>();if(session.empty()||session.size()>128||session.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid skill conversation identity");std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<std::flush;
+            }
+            const auto path="/v1/sessions/"+session+"/skills";
+            try{
+                if(inspect||!observed_skills.is_object()||observed_skills.value("session_id",std::string{})!=session)observed_skills=request(path);
+                skill_snapshot(observed_skills,session);
+                if(inspect){std::cout<<Json{{"type","session_skills"},{"selection",observed_skills}}.dump()<<'\n'<<std::flush;continue;}
+                auto ids=observed_skills["ids"];if(clear)ids=Json::array();else{
+                    const auto selected=prompt.substr(14);skill_ids(Json::array({selected}));const auto found=std::find(ids.begin(),ids.end(),selected);
+                    if(attach){if(found!=ids.end()){if(std::find(observed_skills["manual_ids"].begin(),observed_skills["manual_ids"].end(),selected)!=observed_skills["manual_ids"].end()){std::cerr<<"Skill is already explicitly attached. Use /session-skills to inspect it.\n";continue;}}else ids.push_back(selected);}else{if(found==ids.end()){std::cerr<<"Skill is not selected. Use /session-skills to inspect it.\n";continue;}ids.erase(found);}
+                }
+                const auto body=skill_change(observed_skills,session,ids);const auto response=client.Post(path,headers,body.dump(),"application/json");if(!response)throw std::runtime_error("Cannot reach xMind Server during skill change");
+                if(response->status==400||response->status==403||response->status==409){skill_result=1;observed_skills=Json();std::cerr<<"Skill change rejected (HTTP "<<response->status<<"). Use /session-skills and /skills to refresh before retrying; no write was replayed.\n";continue;}
+                if(response->status!=200)throw std::runtime_error("Server rejected session skill change");const auto acknowledged=Json::parse(response->body);skill_acknowledgement(acknowledged,session,body);observed_skills=acknowledged;skill_result=0;std::cout<<Json{{"type","session_skills"},{"selection",observed_skills}}.dump()<<'\n'<<std::flush;
+            }catch(const std::invalid_argument&){skill_result=1;std::cerr<<"Invalid skill selection or snapshot; use /session-skills to refresh and choose at most eight distinct catalogue ids.\n";}
+            continue;
+        }
         if(prompt=="/models" || prompt=="/model" || prompt.starts_with("/model ")){
             const auto catalogue=request("/v1/models");
             if(!catalogue.is_object() || !catalogue.contains("models") || !catalogue["models"].is_array() || !catalogue.contains("default_model") || !catalogue["default_model"].is_string())throw std::runtime_error("Invalid backend model catalogue");
@@ -474,9 +530,9 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
 }
 }
 
-int main(int argc,char** argv) {
+int cli_main(int argc,char** argv) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, skills, provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, inspect-plan ROOT, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, skills, session-skills SESSION, set-skills SESSION SNAPSHOT_JSON_FILE [ID...], provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, inspect-plan ROOT, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -513,6 +569,8 @@ int main(int argc,char** argv) {
         }
         else if(command=="models" && argc==3) path="/v1/models";
         else if(command=="skills" && argc==3) path="/v1/workspace/skills";
+        else if(command=="session-skills"&&argc==4)path="/v1/sessions/"+id(argv[3])+"/skills";
+        else if(command=="set-skills"&&argc>=5&&argc<=13){const auto session=id(argv[3]);const auto observed=read_skill_snapshot(argv[4]);auto ids=Json::array();for(int i=5;i<argc;i++)ids.push_back(argv[i]);body=skill_change(observed,session,ids);path="/v1/sessions/"+session+"/skills";post=true;}
         else if(command=="provider-profiles" && argc==3){path="/v1/provider/profiles";profile_operation=true;}
         else if(command=="profile-models" && (argc==6||argc==7)){
             const auto profile=provider_profile_identity(argv[3]),route=provider_profile_identity(argv[4]);const auto revision=provider_revision(argv[5]);
@@ -620,10 +678,19 @@ int main(int argc,char** argv) {
         if(!response) throw std::runtime_error("Cannot reach xMind Server");
         if(response->status<200 || response->status>=300) {
             if(profile_operation)std::cerr<<provider_rejection(response->body).dump()<<'\n'<<"Backend rejected provider profile request (HTTP "<<response->status<<"). No automatic retry or selection fallback.\n";
-            else std::cerr<<Json::parse(response->body).dump()<<'\n';
+            else {std::cerr<<Json::parse(response->body).dump()<<'\n';if(command=="set-skills")std::cerr<<"Backend rejected session skill change (HTTP "<<response->status<<"). No automatic retry.\n";}
             return 1;
         }
         const auto result=Json::parse(response->body);
+        if(command=="session-skills")skill_snapshot(result,id(argv[3]));
+        if(command=="set-skills")skill_acknowledgement(result,id(argv[3]),body);
         std::cout<<result.dump(2)<<'\n';return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }
+#if defined(_WIN32)
+int wmain(int argc,wchar_t** argv){
+    try{std::vector<std::string> arguments;arguments.reserve(argc);for(int i=0;i<argc;i++)arguments.push_back(utf8_argument(argv[i]));std::vector<char*> pointers;for(auto& value:arguments)pointers.push_back(value.data());return cli_main(argc,pointers.data());}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
+}
+#else
+int main(int argc,char** argv){return cli_main(argc,argv);}
+#endif
