@@ -1,0 +1,20 @@
+{
+  "sourceRevision": "293f66af8621121785123d75a7e544a5db4dc3ee",
+  "scope": "Single tested browser.js asset published from source-bound isolated CI; no local build, native restart, provider discovery or rendered acceptance. Hosted Windows checkout line endings are preserved.",
+  "runId": "37874177783",
+  "changedFiles": [
+    "assets/browser.js"
+  ],
+  "assetSha256": "384253a8ce13d402c731130942995a1feed37f396fb087f2172de5800d500111",
+  "nativePid": 33408,
+  "viewPid": 4832,
+  "nativeSourceRevision": "60475f84ac2d1355dfe77736b187f7cb899f560f",
+  "connectionBindingFileUnchanged": true,
+  "ownerTokenFileUnchanged": true,
+  "previousAssetRetained": true,
+  "localBuildPerformed": false,
+  "backendRestarted": false,
+  "providerRequests": 0,
+  "renderedAcceptancePending": true,
+  "updatedVsixPending": true
+}

@@ -1,0 +1,63 @@
+{
+  "sourceRevision": "293f66af8621121785123d75a7e544a5db4dc3ee",
+  "scope": "Source-bound hosted Node suites and single browser asset publication; no rendered recovery, updated VSIX or new native gate claimed",
+  "runs": [
+    {
+      "id": "37873743215",
+      "revision": "162ed430e96a9b5326e45422b96be2847de94d65",
+      "conclusion": "failure",
+      "extensionPassed": 164,
+      "extensionFailed": 11,
+      "browserPassed": 28,
+      "browserFailed": 7
+    },
+    {
+      "id": "37874025954",
+      "revision": "873b7dabdc52a6f11a922677fdc717ae694017d6",
+      "conclusion": "failure",
+      "extensionPassed": 174,
+      "extensionFailed": 1,
+      "browserPassed": 35,
+      "browserFailed": 0
+    },
+    {
+      "id": "37874177783",
+      "revision": "293f66af8621121785123d75a7e544a5db4dc3ee",
+      "conclusion": "success",
+      "extensionPassed": 175,
+      "extensionFailed": 0,
+      "browserPassed": 35,
+      "browserFailed": 0
+    }
+  ],
+  "artifacts": {
+    "native-model-catalogue-162ed43-gate.json": "7ded704a1fea5e00f3148b8de6559384aaa0f71781fef6c0c8d60018961e9f2a",
+    "native-model-catalogue-162ed43-extension.log": "42710179eba99555c8196d2449ee4d6bd2449cd281cfa6f47bebe4cec911842c",
+    "native-model-catalogue-162ed43-browser.log": "c833747ea143f359c2838d61d3829521f7ab478953c44da07955db684b05468f",
+    "native-model-catalogue-162ed43-source-before.json": "425b89845146803ca7efe25317cbb20d612f1144c309da1c601624ad657c6b62",
+    "native-model-catalogue-162ed43-source-after.json": "425b89845146803ca7efe25317cbb20d612f1144c309da1c601624ad657c6b62",
+    "native-model-catalogue-162ed43-artifact.json": "00642e7b5ff07516999cb683cc5d54a22d1bad4d95144207d513f57295ce1cfd",
+    "native-model-catalogue-873b7da-gate.json": "143c21e1e80055d089e4a3661edcc6e406a2f9fea26860cca581b5f3934f4ea2",
+    "native-model-catalogue-873b7da-extension.log": "ab82669d45269488dec8e31216e9c245693ee640282490639b202562089cae12",
+    "native-model-catalogue-873b7da-browser.log": "61ed2ccd2cf37506bd0516caf97de8217b7551380118e4176b85bc40db4f6028",
+    "native-model-catalogue-873b7da-source-before.json": "f8ed7b8fdac1a8a9520844dc79aec9d3bedee8716dd8ce74c9efceb7a94c3cf6",
+    "native-model-catalogue-873b7da-source-after.json": "f8ed7b8fdac1a8a9520844dc79aec9d3bedee8716dd8ce74c9efceb7a94c3cf6",
+    "native-model-catalogue-873b7da-artifact.json": "61ad70d5509eba5ea44258761e098a9bc7691400be2cb68a11101919997591d9",
+    "native-model-catalogue-293f66a-gate.json": "3b0eefc419dbb60b5c6fc639c6a18c7b4767d54e2f0cc9d542462859825d0834",
+    "native-model-catalogue-293f66a-extension.log": "a9412ec1b2af08ce9fed8b84d74b4e91351dcd8692ea607d3819c39432695643",
+    "native-model-catalogue-293f66a-browser.log": "a7193f2a4631c8c89e79f5b1eebd54b25da3bba5491f7edd45c71fc617055af0",
+    "native-model-catalogue-293f66a-source-before.json": "753e8f89cc53fc5639fdb0e74fd413351ad66e87ba3d376705bd274e6b8cf4bd",
+    "native-model-catalogue-293f66a-source-after.json": "753e8f89cc53fc5639fdb0e74fd413351ad66e87ba3d376705bd274e6b8cf4bd",
+    "native-model-catalogue-293f66a-artifact.json": "448599873b3dab60b5261a7be13c54f620994182a0a2239dfa524036e29bab0d",
+    "native-model-catalogue-source-verified.json": "ac903bb3326088d5a560c621a2a955ff93add5a77dd042aa72f64dea2b06346e",
+    "native-model-catalogue-publication.json": "cf693a6eca3efba16999ce0b3546c1d48375ecacc734b9c4318bde6d9ebce7bf",
+    "native-model-catalogue-baseline-failures.json": "6e6df141f9e81563043ab5c62a55bb978e39de9ba860be668db2d42e60e60921",
+    "native-model-catalogue-passing-ci-job.log": "b6841b166c19ac39ac3549d1e791bb4f1e2529e396dbdd27a55a3e8aff4251e4"
+  },
+  "privateConfigurationPublished": false,
+  "privateAuditPublished": false,
+  "secretScanPassed": true,
+  "localValidationDeferredByVerifiedBenchmark": true,
+  "updatedVsixPending": true,
+  "renderedAcceptancePending": true
+}

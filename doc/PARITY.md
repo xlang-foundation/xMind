@@ -20,6 +20,13 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+The later catalogue-recovery source passed its isolated hosted **175/35** view
+gate and its tested browser asset is published. Rendered recovery and an updated
+VSIX remain pending; the local benchmark guard has deferred further local
+validation. This fixes an adapter recovery path without claiming a new native
+gate or broader behavioral parity.
+[Catalogue recovery](model-catalogue-recovery.md).
+
 The latest native source `60475f84` passed its full 89-contract gate and real
 four-provider native workspace reads. Its installed browser upgrade preserved
 existing API records and passed actual four-provider rendered runs and refresh.

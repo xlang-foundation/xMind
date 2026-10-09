@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+Provider/conversation switching now has catalogue recovery in both adapters,
+with source-bound hosted **175/35** acceptance. Tests cover retired native
+selection acknowledgements, a second switch during recovery and the exact
+revision-bound submission fields. The tested browser asset is published;
+rendered recovery and updated VSIX installation await local validation after
+the independently running SDK benchmark clears.
+[Recovery scope and retained failures](model-catalogue-recovery.md).
+
 Compact-height browser/IDE styles now preserve conversation space. The actual
 319 × 431 pane gained 96 pixels of history space; long drafts and expanded
 context controls scroll without collapsing it. Complete 173/33 frontend suites,

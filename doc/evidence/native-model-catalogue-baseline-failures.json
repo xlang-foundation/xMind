@@ -1,0 +1,10 @@
+{
+  "scope": "Two pre-fix deterministic thin-adapter regressions; tool-captured failure summaries, not original byte-for-byte test logs",
+  "providerRepliesSynthetic": true,
+  "nativeExecuted": false,
+  "cases": [
+    {"adapter": "browser", "passed": 0, "failed": 1, "observed": "Native selection fixture published next at revision 5; no recovery discovery request occurred after conversation selection retired its acknowledgement"},
+    {"adapter": "VS Code host fixture", "passed": 0, "failed": 1, "observed": "Model list contained only next-current instead of next-current and next-alternate after the same retired acknowledgement"}
+  ],
+  "guardHandlingFailure": "The initial guard reported three live benchmark processes. These two brief Node-only regressions should have deferred but ran. Further test and build calls were deferred; no SDK benchmark result or performance conclusion is claimed."
+}

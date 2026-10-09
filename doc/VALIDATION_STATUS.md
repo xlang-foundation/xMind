@@ -1,5 +1,14 @@
 # Current native validation
 
+The provider/conversation catalogue recovery source passed a complete isolated
+hosted gate: **175 extension and 35 browser tests**, with no failures/skips.
+Its source and generated assets were verified against the exact commit and
+advertised artifact digest. The tested browser asset is published without a
+local build or backend restart. Rendered recovery and an updated installed VSIX
+remain pending while the local SDK benchmark is live. Both failed hosted
+attempts and the pre-fix regression summaries are retained.
+[Catalogue recovery and limits](model-catalogue-recovery.md).
+
 The subsequent compact-height CSS checkpoint passed 173 extension and 33
 browser tests, then actual short-pane rendering, long-draft and expanded-context
 checks. The 319 × 431 browser pane now retains 112 pixels for history, up from

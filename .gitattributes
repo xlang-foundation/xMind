@@ -3,6 +3,8 @@ doc/evidence/native-browser-preview-* -text
 doc/evidence/native-browser-preview-*.log whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-compact-sidebar-* -text
 doc/evidence/native-compact-sidebar-*.log whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-model-catalogue-* -text
+doc/evidence/native-model-catalogue-*.log whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-provider-workspace-* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 doc/evidence/native-model-eligibility-* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 doc/evidence/native-model-eligibility-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

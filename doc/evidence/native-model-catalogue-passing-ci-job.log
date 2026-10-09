@@ -1,0 +1,219 @@
+2026-10-09T02:21:25.1184411Z Current runner version: '2.337.0'
+2026-10-09T02:21:25.1205382Z ##[group]Runner Image Provisioner
+2026-10-09T02:21:25.1206025Z Hosted Compute Agent
+2026-10-09T02:21:25.1206496Z Version: 20260901.588
+2026-10-09T02:21:25.1207380Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-09T02:21:25.1207976Z Build Date: 2026-09-01T19:56:44Z
+2026-10-09T02:21:25.1208550Z Worker ID: {c87562d5-b5dc-4a5e-9f9a-e2408876a760}
+2026-10-09T02:21:25.1209073Z Azure Region: westus3
+2026-10-09T02:21:25.1209485Z ##[endgroup]
+2026-10-09T02:21:25.1210607Z ##[group]Operating System
+2026-10-09T02:21:25.1211083Z Microsoft Windows Server 2025
+2026-10-09T02:21:25.1211591Z 10.0.26100
+2026-10-09T02:21:25.1212015Z Datacenter
+2026-10-09T02:21:25.1212419Z ##[endgroup]
+2026-10-09T02:21:25.1212828Z ##[group]Runner Image
+2026-10-09T02:21:25.1213285Z Image: windows-2025-vs2026
+2026-10-09T02:21:25.1213730Z Version: 20260925.250.1
+2026-10-09T02:21:25.1214901Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20260925.250/images/windows/Windows2025-VS2026-Readme.md
+2026-10-09T02:21:25.1216127Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20260925.250
+2026-10-09T02:21:25.1216892Z ##[endgroup]
+2026-10-09T02:21:25.1217700Z ##[group]GITHUB_TOKEN Permissions
+2026-10-09T02:21:25.1219148Z Contents: read
+2026-10-09T02:21:25.1219594Z Metadata: read
+2026-10-09T02:21:25.1219994Z ##[endgroup]
+2026-10-09T02:21:25.1221541Z Secret source: Actions
+2026-10-09T02:21:25.1222313Z Cache mode: write
+2026-10-09T02:21:25.1222846Z Prepare workflow directory
+2026-10-09T02:21:25.1569321Z Prepare all required actions
+2026-10-09T02:21:25.1608189Z Getting action download info
+2026-10-09T02:21:25.4460390Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-10-09T02:21:25.5455654Z Download action repository 'actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38' (SHA:249970729cb0ef3589644e2896645e5dc5ba9c38)
+2026-10-09T02:21:25.6728918Z Download action repository 'actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f' (SHA:b7c566a772e6b6bfb58ed0dc250532a479d7789f)
+2026-10-09T02:21:25.9309811Z Complete job name: views
+2026-10-09T02:21:26.0892408Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-10-09T02:21:26.0893581Z with:
+2026-10-09T02:21:26.0894043Z   path: xmind
+2026-10-09T02:21:26.0894537Z   persist-credentials: false
+2026-10-09T02:21:26.0895142Z   repository: xlang-foundation/xMind
+2026-10-09T02:21:26.0900462Z   token: ***
+2026-10-09T02:21:26.0901007Z   ssh-strict: true
+2026-10-09T02:21:26.0901495Z   ssh-user: git
+2026-10-09T02:21:26.0901961Z   clean: true
+2026-10-09T02:21:26.0902452Z   sparse-checkout-cone-mode: true
+2026-10-09T02:21:26.0903062Z   fetch-depth: 1
+2026-10-09T02:21:26.0903559Z   fetch-tags: false
+2026-10-09T02:21:26.0904061Z   show-progress: true
+2026-10-09T02:21:26.0904550Z   lfs: false
+2026-10-09T02:21:26.0905008Z   submodules: false
+2026-10-09T02:21:26.0905547Z   set-safe-directory: true
+2026-10-09T02:21:26.0906120Z   allow-unsafe-pr-checkout: false
+2026-10-09T02:21:26.0906914Z ##[endgroup]
+2026-10-09T02:21:26.2213102Z Syncing repository: xlang-foundation/xMind
+2026-10-09T02:21:26.2215347Z ##[group]Getting Git version info
+2026-10-09T02:21:26.2216005Z Working directory is 'D:\a\xMind\xMind\xmind'
+2026-10-09T02:21:26.2827531Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-09T02:21:26.9579822Z git version 2.55.0.windows.5
+2026-10-09T02:21:26.9618912Z ##[endgroup]
+2026-10-09T02:21:26.9635092Z Temporarily overriding HOME='D:\a\_temp\f6a186b3-64fb-4b45-9161-27298bcfd956' before making global git config changes
+2026-10-09T02:21:26.9636556Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T02:21:26.9643671Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\xmind
+2026-10-09T02:21:27.0181327Z ##[group]Determining repository object format
+2026-10-09T02:21:27.0184927Z ##[endgroup]
+2026-10-09T02:21:27.0185945Z ##[group]Initializing the repository
+2026-10-09T02:21:27.0192308Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\xMind\xMind\xmind
+2026-10-09T02:21:27.1941151Z Initialized empty Git repository in D:/a/xMind/xMind/xmind/.git/
+2026-10-09T02:21:27.1980883Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/xlang-foundation/xMind
+2026-10-09T02:21:27.3109090Z ##[endgroup]
+2026-10-09T02:21:27.3109571Z ##[group]Disabling automatic garbage collection
+2026-10-09T02:21:27.3117161Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-09T02:21:27.3348075Z ##[endgroup]
+2026-10-09T02:21:27.3348475Z ##[group]Setting up auth
+2026-10-09T02:21:27.3348937Z Removing SSH command configuration
+2026-10-09T02:21:27.3358689Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T02:21:27.3591657Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-09T02:21:28.8635403Z Removing HTTP extra header
+2026-10-09T02:21:28.8645128Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T02:21:28.8878049Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-09T02:21:29.2907666Z Removing includeIf entries pointing to credentials config files
+2026-10-09T02:21:29.2916890Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T02:21:29.3148390Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-09T02:21:29.7039641Z [command]"C:\Program Files\Git\bin\git.exe" config --file D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-09T02:21:29.7279930Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/xmind/.git.path D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:29.7508252Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:29.7776863Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/xmind/.git.path /github/runner_temp/git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:29.8008304Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/xmind/.git/worktrees/*.path /github/runner_temp/git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:29.8238078Z ##[endgroup]
+2026-10-09T02:21:29.8238594Z ##[group]Fetching the repository
+2026-10-09T02:21:29.8249464Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +293f66af8621121785123d75a7e544a5db4dc3ee:refs/remotes/origin/checkpoint/native-persistence-m1
+2026-10-09T02:21:31.6606204Z From https://github.com/xlang-foundation/xMind
+2026-10-09T02:21:31.6607416Z  * [new ref]         293f66af8621121785123d75a7e544a5db4dc3ee -> origin/checkpoint/native-persistence-m1
+2026-10-09T02:21:31.6649096Z [command]"C:\Program Files\Git\bin\git.exe" branch --list --remote origin/checkpoint/native-persistence-m1
+2026-10-09T02:21:31.6943436Z   origin/checkpoint/native-persistence-m1
+2026-10-09T02:21:31.6985812Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse refs/remotes/origin/checkpoint/native-persistence-m1
+2026-10-09T02:21:31.7205086Z 293f66af8621121785123d75a7e544a5db4dc3ee
+2026-10-09T02:21:31.7229796Z ##[endgroup]
+2026-10-09T02:21:31.7230116Z ##[group]Determining the checkout info
+2026-10-09T02:21:31.7231514Z ##[endgroup]
+2026-10-09T02:21:31.7239299Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-09T02:21:31.7593114Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-09T02:21:31.7817050Z ##[group]Checking out the ref
+2026-10-09T02:21:31.7823903Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B checkpoint/native-persistence-m1 refs/remotes/origin/checkpoint/native-persistence-m1
+2026-10-09T02:21:32.1148877Z Switched to a new branch 'checkpoint/native-persistence-m1'
+2026-10-09T02:21:32.1203797Z branch 'checkpoint/native-persistence-m1' set up to track 'origin/checkpoint/native-persistence-m1'.
+2026-10-09T02:21:32.1249449Z ##[endgroup]
+2026-10-09T02:21:32.2215685Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-09T02:21:32.2447238Z 293f66af8621121785123d75a7e544a5db4dc3ee
+2026-10-09T02:21:32.2480216Z ##[group]Removing auth
+2026-10-09T02:21:32.2480635Z Removing SSH command configuration
+2026-10-09T02:21:32.2487796Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T02:21:32.2731389Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-09T02:21:32.8821426Z Removing HTTP extra header
+2026-10-09T02:21:32.8828592Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T02:21:32.9068293Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-09T02:21:33.3272241Z Removing includeIf entries pointing to credentials config files
+2026-10-09T02:21:33.3280582Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T02:21:33.3520088Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-09T02:21:33.3521042Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-09T02:21:33.3521514Z includeif.gitdir:/github/workspace/xmind/.git.path
+2026-10-09T02:21:33.3521961Z includeif.gitdir:/github/workspace/xmind/.git/worktrees/*.path
+2026-10-09T02:21:33.3555226Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-09T02:21:33.3767453Z D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:33.3803389Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:33.4032867Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-09T02:21:33.4230523Z D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:33.4260847Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:33.4492149Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/xmind/.git.path
+2026-10-09T02:21:33.4697406Z /github/runner_temp/git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:33.4732551Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/xmind/.git.path /github/runner_temp/git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:33.4966702Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/xmind/.git/worktrees/*.path
+2026-10-09T02:21:33.5162058Z /github/runner_temp/git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:33.5191128Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/xmind/.git/worktrees/*.path /github/runner_temp/git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:21:33.5421177Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-09T02:21:33.9582626Z Removing credentials config 'D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config'
+2026-10-09T02:21:33.9593337Z ##[endgroup]
+2026-10-09T02:21:33.9980305Z ##[group]Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+2026-10-09T02:21:33.9980658Z with:
+2026-10-09T02:21:33.9980814Z   node-version: 22
+2026-10-09T02:21:33.9980979Z   check-latest: false
+2026-10-09T02:21:33.9982763Z   token: ***
+2026-10-09T02:21:33.9982927Z   package-manager-cache: true
+2026-10-09T02:21:33.9983113Z ##[endgroup]
+2026-10-09T02:21:34.1401804Z Found in cache @ C:\hostedtoolcache\windows\node\22.23.3\x64
+2026-10-09T02:21:34.1406987Z ##[group]Environment details
+2026-10-09T02:21:37.9126965Z node: v22.23.3
+2026-10-09T02:21:37.9127271Z npm: 10.9.9
+2026-10-09T02:21:37.9127466Z yarn: 1.22.22
+2026-10-09T02:21:37.9128253Z ##[endgroup]
+2026-10-09T02:21:37.9392105Z ##[group]Run npm ci --prefix extensions/vscode --ignore-scripts --no-audit --no-fund
+2026-10-09T02:21:37.9392711Z [36;1mnpm ci --prefix extensions/vscode --ignore-scripts --no-audit --no-fund[0m
+2026-10-09T02:21:37.9393032Z [36;1mexit $LASTEXITCODE[0m
+2026-10-09T02:21:37.9813309Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-09T02:21:37.9813621Z ##[endgroup]
+2026-10-09T02:21:44.4001065Z npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+2026-10-09T02:21:45.3164926Z npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
+2026-10-09T02:21:50.2338889Z 
+2026-10-09T02:21:50.2339471Z added 325 packages in 12s
+2026-10-09T02:21:54.4183796Z ##[group]Run node views/browser/build.mjs build/view-assets
+2026-10-09T02:21:54.4184204Z [36;1mnode views/browser/build.mjs build/view-assets[0m
+2026-10-09T02:21:54.4184444Z [36;1mexit $LASTEXITCODE[0m
+2026-10-09T02:21:54.4240275Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-09T02:21:54.4240543Z ##[endgroup]
+2026-10-09T02:21:54.7270438Z Browser view assets built at D:\a\xMind\xMind\xmind\build\view-assets
+2026-10-09T02:21:54.7843792Z ##[group]Run node Tools/ci-views.mjs
+2026-10-09T02:21:54.7844133Z [36;1mnode Tools/ci-views.mjs[0m
+2026-10-09T02:21:54.7844332Z [36;1mexit $LASTEXITCODE[0m
+2026-10-09T02:21:54.7897812Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-09T02:21:54.7898183Z ##[endgroup]
+2026-10-09T02:21:59.2984497Z {"sourceRevision":"293f66af8621121785123d75a7e544a5db4dc3ee","scope":"Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance","sourceFiles":41,"trackedSourceFiles":39,"vendorFiles":2,"browserAssets":11,"sourceAndAssetBytesUnchanged":true,"extension":{"exitCode":0,"tests":175,"passed":175,"failed":0,"skipped":0,"cancelled":0},"browser":{"exitCode":0,"tests":35,"passed":35,"failed":0,"skipped":0,"cancelled":0},"providerRequests":0,"nativeExecuted":false,"cpythonExecuted":false,"passed":true}
+2026-10-09T02:21:59.3528822Z ##[group]Run actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+2026-10-09T02:21:59.3529192Z with:
+2026-10-09T02:21:59.3529628Z   name: view-contracts-evidence-293f66af8621121785123d75a7e544a5db4dc3ee
+2026-10-09T02:21:59.3529989Z   path: xmind/build/ci-evidence/views/
+xmind/build/view-assets/
+
+2026-10-09T02:21:59.3530250Z   if-no-files-found: warn
+2026-10-09T02:21:59.3530417Z   retention-days: 14
+2026-10-09T02:21:59.3530570Z   compression-level: 6
+2026-10-09T02:21:59.3530723Z   overwrite: false
+2026-10-09T02:21:59.3530888Z   include-hidden-files: false
+2026-10-09T02:21:59.3531061Z ##[endgroup]
+2026-10-09T02:21:59.5054438Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-09T02:21:59.5056584Z The least common ancestor is D:\a\xMind\xMind\xmind\build. This will be the root directory of the artifact
+2026-10-09T02:21:59.5057296Z With the provided path, there will be 18 files uploaded
+2026-10-09T02:21:59.5061565Z Artifact name is valid!
+2026-10-09T02:21:59.5062650Z Root directory input is valid!
+2026-10-09T02:21:59.8605110Z Beginning upload of artifact content to blob storage
+2026-10-09T02:22:00.2877807Z Uploaded bytes 98441
+2026-10-09T02:22:00.3502294Z Finished uploading artifact content to blob storage!
+2026-10-09T02:22:00.3503101Z SHA256 digest of uploaded artifact zip is 1032c2e1c05e62e4eadc11777d008b96f0a91ebce370f8405511527b0d9398d9
+2026-10-09T02:22:00.3505207Z Finalizing artifact upload
+2026-10-09T02:22:00.7130362Z Artifact view-contracts-evidence-293f66af8621121785123d75a7e544a5db4dc3ee.zip successfully finalized. Artifact ID 11591213147
+2026-10-09T02:22:00.7131492Z Artifact view-contracts-evidence-293f66af8621121785123d75a7e544a5db4dc3ee has been successfully uploaded! Final size is 98441 bytes. Artifact ID is 11591213147
+2026-10-09T02:22:00.7138655Z Artifact download URL: https://github.com/xlang-foundation/xMind/actions/runs/37874177783/artifacts/11591213147
+2026-10-09T02:22:00.7414608Z Post job cleanup.
+2026-10-09T02:22:00.8826449Z Post job cleanup.
+2026-10-09T02:22:01.0418911Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-09T02:22:01.0645508Z git version 2.55.0.windows.5
+2026-10-09T02:22:01.0704700Z Temporarily overriding HOME='D:\a\_temp\f57b665f-c89d-45a2-8f5d-f20f86b755b8' before making global git config changes
+2026-10-09T02:22:01.0705422Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T02:22:01.0713624Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\xmind
+2026-10-09T02:22:01.0984355Z Removing SSH command configuration
+2026-10-09T02:22:01.0994620Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T02:22:01.1292209Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-09T02:22:01.5710144Z Removing HTTP extra header
+2026-10-09T02:22:01.5719182Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T02:22:01.5979715Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-09T02:22:02.0119808Z Removing includeIf entries pointing to credentials config files
+2026-10-09T02:22:02.0130421Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T02:22:02.0370353Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-09T02:22:02.0370946Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-09T02:22:02.0402548Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-09T02:22:02.0604718Z D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:22:02.0640684Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:22:02.0881482Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-09T02:22:02.1090539Z D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:22:02.1127316Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config
+2026-10-09T02:22:02.1386316Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-09T02:22:02.5504780Z Removing credentials config 'D:\a\_temp\git-credentials-e8950719-dc89-44ab-a723-a151c01f6434.config'
+2026-10-09T02:22:02.5676807Z Cleaning up orphan processes
