@@ -5,6 +5,7 @@
 #include "agentflow/dynamic_plan.hpp"
 #include "agentflow/context_selection.hpp"
 #include "agentflow/responses_context.hpp"
+#include "agentflow/legacy_owner.hpp"
 #include <algorithm>
 #include <limits>
 #include <chrono>
@@ -19,6 +20,7 @@ BackendOwnerState decode_owner(const std::string&);
 std::optional<std::string> owner_record(XlangSqlite&);
 void require_bootstrap(XlangSqlite&,const BackendLease&,const BackendOwnerState&,const BackendOwnerBootstrap&);
 BackendOwnerState stage_backend_owner(XlangSqlite&,const BackendLease&,const std::string&,const BackendOwnerBootstrap*);
+BackendOwnerState stage_legacy_owner(XlangSqlite&,const BackendLease&,const std::string&,const LegacyOwnerBootstrap&);
 std::int64_t now_ms() {return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();}
 std::string object_json(const std::string& source,std::size_t limit=2*1024*1024) {
     if(source.size()>limit) throw std::invalid_argument("Operation JSON exceeds its limit");
@@ -456,7 +458,7 @@ struct Repository::Impl {
         changed_one(database.execute("UPDATE agent_budget_segments SET state='closed',active_elapsed_ms=?,remaining_active_ms=?,closed_event_seq=? WHERE root_run_id=? AND id=? AND state='open'",{elapsed,remaining,e.sequence,root,id}));return {root,id,"closed",integer(r[1]),elapsed,remaining,integer(r[4]),e.sequence};
     }
 };
-Repository::Repository(const std::string& file,const std::vector<std::string>& roots,const BackendLease* startup_lease,const BackendOwnerBootstrap* bootstrap,const std::string& startup_generation):impl_(std::make_unique<Impl>(file,roots)) {
+Repository::Repository(const std::string& file,const std::vector<std::string>& roots,const BackendLease* startup_lease,const BackendOwnerBootstrap* bootstrap,const std::string& startup_generation,const LegacyOwnerBootstrap* legacy):impl_(std::make_unique<Impl>(file,roots)) {
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
@@ -466,11 +468,14 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     // Reject a closed or malformed durable owner before schema writes. Direct
     // repository inspection does not claim startup ownership; PersistenceService
     // always supplies its actual worker-held lease here.
-    if(bootstrap&&!startup_lease)throw Conflict("Replacement startup requires a database lease");
+    if((bootstrap||legacy)&&!startup_lease)throw Conflict("Replacement startup requires a database lease");
+    if(bootstrap&&legacy)throw std::invalid_argument("Native and legacy replacement preconditions are distinct");
     if(startup_lease){
         if(!startup_lease->covers(file))throw Conflict("Startup requires this database lease");
         const auto prior=db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='information'").rows.empty()?std::optional<std::string>{}:owner_record(db);
-        if(bootstrap){if(!prior)throw Conflict("Replacement source owner is absent");require_bootstrap(db,*startup_lease,decode_owner(*prior),*bootstrap);}
+        if(legacy){require_legacy_owner_bootstrap(db,*startup_lease,*legacy);if(prior&&decode_owner(*prior).quiesced&&decode_owner(*prior).legacy_ticket_id!=legacy->ticket_id)throw Conflict("Closed native owner cannot be adopted by this legacy ticket");}
+        else if(legacy_owner_record(db))throw BackendQuiesced("Legacy operator migration is pending; ordinary startup cannot apply migrations");
+        else if(bootstrap){if(!prior)throw Conflict("Replacement source owner is absent");require_bootstrap(db,*startup_lease,decode_owner(*prior),*bootstrap);}
         else if(prior&&decode_owner(*prior).quiesced)throw BackendQuiesced("Durable native admission is closed; normal startup cannot apply migrations");
     }
     if(version==0) {
@@ -705,6 +710,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
     if(bootstrap)stage_backend_owner(db,*startup_lease,startup_generation,bootstrap);
+    if(legacy){verify_legacy_owner_saved_records(db);stage_legacy_owner(db,*startup_lease,startup_generation,*legacy);}
     transaction.commit(); db.execute("PRAGMA journal_mode=WAL"); db.execute("PRAGMA synchronous=FULL");
 }
 Repository::~Repository()=default;
@@ -1758,20 +1764,22 @@ Json receipt_json(const BackendOwnerReceipt& r){owner_identity(r.generation);own
 Json owner_json(const BackendOwnerState& s){
     owner_identity(s.generation);owner_revision(s.revision);
     if(s.quiesced)owner_identity(s.receipt_id);else if(!s.receipt_id.empty()||s.retirement_requested||s.replacement_prepared||s.replacement_target)throw std::invalid_argument("Active owner cannot retain closed lifecycle state");
-    if(s.replacement_prepared&&(!s.quiesced||s.retirement_requested||!s.replacement_target||!s.replacement_source))throw std::invalid_argument("Invalid prepared replacement state");
+    if(s.replacement_prepared&&(!s.quiesced||s.retirement_requested||!s.replacement_target||(!s.replacement_source&&s.legacy_ticket_id.empty())))throw std::invalid_argument("Invalid prepared replacement state");
     if(s.replacement_target){if(!s.retirement_requested&&!s.replacement_prepared)throw std::invalid_argument("Target requires closed handoff state");owner_text(s.database_path,32768);}else if(!s.database_path.empty()||s.replacement_source)throw std::invalid_argument("Unbound replacement state");
-    if(s.replacement_target&&!s.replacement_source)throw std::invalid_argument("Replacement target requires its native source receipt");
+    if(s.replacement_target&&!s.replacement_source&&s.legacy_ticket_id.empty())throw std::invalid_argument("Replacement target requires its native source receipt or operator ticket");
+    if(!s.legacy_ticket_id.empty()){owner_identity(s.legacy_ticket_id);if(!s.replacement_prepared||s.replacement_source||s.retirement_requested)throw std::invalid_argument("Invalid legacy prepared owner");}
     if(s.retirement_requested&&s.replacement_source&&(s.replacement_source->generation!=s.generation||s.replacement_source->receipt_id!=s.receipt_id||s.replacement_source->revision+1!=s.revision))throw std::invalid_argument("Retirement source differs from consumed native receipt");
-    if(s.replacement_prepared&&(s.replacement_source->generation==s.generation||s.replacement_source->revision>=s.revision-1))throw std::invalid_argument("Prepared replacement source is invalid");
-    Json result{{"version",s.replacement_prepared?4:s.replacement_target?3:s.retirement_requested?2:1},{"generation",s.generation},{"revision",s.revision},{"quiesced",s.quiesced},{"receipt_id",s.receipt_id}};
+    if(s.replacement_prepared&&s.replacement_source&&(s.replacement_source->generation==s.generation||s.replacement_source->revision>=s.revision-1))throw std::invalid_argument("Prepared replacement source is invalid");
+    Json result{{"version",!s.legacy_ticket_id.empty()?5:s.replacement_prepared?4:s.replacement_target?3:s.retirement_requested?2:1},{"generation",s.generation},{"revision",s.revision},{"quiesced",s.quiesced},{"receipt_id",s.receipt_id}};
     if(s.retirement_requested||s.replacement_prepared)result["retirement_requested"]=s.retirement_requested;
     if(s.replacement_target){result["replacement_target"]=target_json(*s.replacement_target);result["database_path"]=s.database_path;}
     if(s.replacement_source)result["replacement_source"]=receipt_json(*s.replacement_source);
     if(s.replacement_prepared)result["replacement_prepared"]=true;
+    if(!s.legacy_ticket_id.empty())result["legacy_ticket_id"]=s.legacy_ticket_id;
     return result;
 }
 BackendOwnerState decode_owner(const std::string& raw){
-    try {if(raw.size()>128*1024)throw std::invalid_argument("Owner record exceeds limits");const auto j=Json::parse(raw);BackendOwnerState s{j.at("generation").get<std::string>(),j.at("revision").get<std::int64_t>(),j.at("quiesced").get<bool>(),j.at("receipt_id").get<std::string>()};const auto version=j.at("version").get<int>();if(version>=2)s.retirement_requested=j.at("retirement_requested").get<bool>();if(version>=3){s.replacement_target=decode_target(j.at("replacement_target"));s.database_path=j.at("database_path").get<std::string>();const auto& r=j.at("replacement_source");s.replacement_source=BackendOwnerReceipt{r.at("generation").get<std::string>(),r.at("receipt_id").get<std::string>(),r.at("revision").get<std::int64_t>()};}if(version==4)s.replacement_prepared=j.at("replacement_prepared").get<bool>();if(owner_json(s).dump()!=raw)throw std::invalid_argument("Owner record differs from canonical typed state");return s;}
+    try {if(raw.size()>128*1024)throw std::invalid_argument("Owner record exceeds limits");const auto j=Json::parse(raw);BackendOwnerState s{j.at("generation").get<std::string>(),j.at("revision").get<std::int64_t>(),j.at("quiesced").get<bool>(),j.at("receipt_id").get<std::string>()};const auto version=j.at("version").get<int>();if(version>=2)s.retirement_requested=j.at("retirement_requested").get<bool>();if(version>=3){s.replacement_target=decode_target(j.at("replacement_target"));s.database_path=j.at("database_path").get<std::string>();if(version==5)s.legacy_ticket_id=j.at("legacy_ticket_id").get<std::string>();else{const auto& r=j.at("replacement_source");s.replacement_source=BackendOwnerReceipt{r.at("generation").get<std::string>(),r.at("receipt_id").get<std::string>(),r.at("revision").get<std::int64_t>()};}}if(version>=4)s.replacement_prepared=j.at("replacement_prepared").get<bool>();if(owner_json(s).dump()!=raw)throw std::invalid_argument("Owner record differs from canonical typed state");return s;}
     catch(...){throw DatabaseError("Saved native owner state is invalid");}
 }
 std::optional<std::string> owner_record(XlangSqlite& db){const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id='owner'",{std::string(backend_owner_category)}).rows;return rows.empty()?std::optional<std::string>{}:text(rows[0][0]);}
@@ -1811,7 +1819,14 @@ BackendOwnerState stage_backend_owner(XlangSqlite& db,const BackendLease& lease,
     if(bootstrap){current.quiesced=true;current.receipt_id=bootstrap->receipt.receipt_id;current.replacement_target=bootstrap->target;current.replacement_prepared=true;current.replacement_source=bootstrap->receipt;current.database_path=lease.canonical_database_path();}
     write_owner(db,current,previous);return current;
 }
+BackendOwnerState stage_legacy_owner(XlangSqlite& db,const BackendLease& lease,const std::string& generation,const LegacyOwnerBootstrap& legacy){
+    owner_identity(generation);require_legacy_owner_bootstrap(db,lease,legacy);const auto previous=owner_record(db);std::int64_t revision=1;
+    if(previous){const auto prior=decode_owner(*previous);if(prior.quiesced&&prior.legacy_ticket_id!=legacy.ticket_id)throw Conflict("Legacy operator ticket does not own the prepared generation");if(prior.generation==generation)throw Conflict("Legacy replacement must bind a fresh generation");revision=prior.revision+1;owner_revision(revision);}
+    BackendOwnerState current{generation,revision,true,generation};current.replacement_target=legacy.target;current.replacement_prepared=true;current.database_path=lease.canonical_database_path();current.legacy_ticket_id=legacy.ticket_id;write_owner(db,current,previous);return current;
 }
+}
+std::string encode_backend_owner_target(const BackendOwnerTarget& target){return target_json(target).dump();}
+BackendOwnerTarget decode_backend_owner_target(const std::string& raw){const auto target=decode_target(Json::parse(raw));if(target_json(target).dump()!=raw)throw std::invalid_argument("Native target differs from canonical typed state");return target;}
 BackendOwnerState Repository::open_backend_owner(const BackendLease& lease,const std::string& generation,const BackendOwnerBootstrap* bootstrap){
     if(!lease.covers(impl_->path))throw Conflict("Native owner requires this database lease");auto& db=impl_->database;Transaction tx(db);auto current=stage_backend_owner(db,lease,generation,bootstrap);tx.commit();return current;
 }
@@ -1835,11 +1850,11 @@ BackendOwnerState Repository::request_backend_retirement(const BackendLease& lea
 BackendOwnerState Repository::activate_backend_replacement(const BackendLease& lease,const BackendOwnerReceipt& expected,const BackendOwnerTarget& target){
     if(!lease.covers(impl_->path))throw Conflict("Activation requires this database lease");receipt_json(expected);target_json(target);auto& db=impl_->database;Transaction tx(db);const auto previous=owner_record(db);if(!previous)throw NotFound("Native owner is absent");const auto prior=decode_owner(*previous);
     if(!prior.quiesced||!prior.replacement_prepared||prior.retirement_requested||!prior.replacement_target||*prior.replacement_target!=target||prior.database_path!=lease.canonical_database_path()||BackendOwnerReceipt{prior.generation,prior.receipt_id,prior.revision}!=expected)throw Conflict("Prepared replacement precondition changed");
-    require_database_idle(db);owner_revision(prior.revision+1);BackendOwnerState active{prior.generation,prior.revision+1,false,{}};write_owner(db,active,previous);tx.commit();return active;
+    require_database_idle(db);if(!prior.legacy_ticket_id.empty()){verify_legacy_owner_saved_records(db);consume_legacy_owner_ticket(db,prior.legacy_ticket_id);}owner_revision(prior.revision+1);BackendOwnerState active{prior.generation,prior.revision+1,false,{}};write_owner(db,active,previous);tx.commit();return active;
 }
 void Repository::put_information(const std::string& category,const std::string& id,const std::string& json) {
     identifier(category); identifier(id);
-    if(category==backend_owner_category)throw std::invalid_argument("Use typed native owner control");
+    if(category==backend_owner_category||category==legacy_owner_category)throw std::invalid_argument("Use typed native owner control");
     if(category=="secrets" || category=="credentials") throw std::invalid_argument("Use the encrypted credential repository");
     Transaction transaction(impl_->database);
     changed_one(impl_->database.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO UPDATE SET payload=excluded.payload",{category,id,json}));
@@ -1847,6 +1862,7 @@ void Repository::put_information(const std::string& category,const std::string& 
 }
 void Repository::compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected) {
     identifier(category);identifier(id);
+    if(category==legacy_owner_category)throw std::invalid_argument("Use typed native owner control");
     if(category==backend_owner_category)throw std::invalid_argument("Use typed native owner control");
     if(category=="secrets"||category=="credentials")throw std::invalid_argument("Use the encrypted credential repository");
     Transaction transaction(impl_->database);

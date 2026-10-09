@@ -7,7 +7,8 @@
 
 namespace agentflow {
 namespace {std::string auth_binding(const std::string& token){if(token.size()<32||token.size()>256||std::any_of(token.begin(),token.end(),[](unsigned char c){return c<33||c>126;}))throw std::invalid_argument("Invalid native owner authentication");return context_digest("xMind.owner-auth.v1:"+token);}}
-BackendOwnerBootstrap qualify_backend_bootstrap(BackendOwnerReceipt receipt,VerifiedRuntimeGeneration& runtime,const WorkspaceTools& workspace,const std::string& token,bool edits){runtime.require_current_server();return {std::move(receipt),{runtime.binding(),workspace.root_path(),workspace.identity(),auth_binding(token),edits}};}
+BackendOwnerTarget qualify_backend_target(VerifiedRuntimeGeneration& runtime,const WorkspaceTools& workspace,const std::string& token,bool edits,bool current){if(current)runtime.require_current_server();else runtime.revalidate();return {runtime.binding(),workspace.root_path(),workspace.identity(),auth_binding(token),edits};}
+BackendOwnerBootstrap qualify_backend_bootstrap(BackendOwnerReceipt receipt,VerifiedRuntimeGeneration& runtime,const WorkspaceTools& workspace,const std::string& token,bool edits){return {std::move(receipt),qualify_backend_target(runtime,workspace,token,edits)};}
 BackendOwnerControl::BackendOwnerControl(PersistenceService& store,RunExecutor& executor,VerifiedRuntimeGeneration& runtime,GraphExecution* graphs,const std::string& token)
     :store_(store),executor_(executor),runtime_(runtime),graphs_(graphs){
     runtime_.require_current_server();if(!executor_.execution_workspace().configured)throw RunUnavailable("Native owner controls require a captured execution workspace");generation_=store_.backend_owner().get().generation;if(!token.empty())auth_binding_=auth_binding(token);

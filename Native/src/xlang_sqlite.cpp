@@ -71,7 +71,9 @@ struct XlangSqlite::Impl {
 XlangSqlite::XlangSqlite(const std::string& database,const std::vector<std::string>& roots) : impl_(std::make_unique<Impl>()) {
     if(database.empty() || database.find('\0')!=std::string::npos) throw std::invalid_argument("Invalid SQLite path");
     for(const auto& root:roots) impl_->runtime.AddImportRoot(root);
-    X::Module sqlite(impl_->runtime,"sqlite3");
+    // The SDK exports its native connection API as _sqlite3. Importing the
+    // pure sqlite3 facade must not depend on a host-installed standard library.
+    X::Module sqlite(impl_->runtime,"_sqlite3");
     std::vector<X::Value> args{X::Value(impl_->runtime,database)};
     const std::vector<std::pair<std::string,X::Value>> options{{"isolation_level",X::Value(nullptr)}};
     if(!sqlite["connect"].Call(args,options,impl_->connection)) throw DatabaseError(impl_->runtime.LastError());

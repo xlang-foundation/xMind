@@ -65,3 +65,8 @@ protocol. It cannot receive a fabricated receipt. Its explicit operator
 shutdown/migration path, independently accepted packaging, actual provider/
 history/metrics/skill continuity and rendered create/edit approvals remain
 required before writing is ready there.
+
+The later [native post-exit preparation increment](native-legacy-owner.md)
+passed 98 contracts and provides a distinct legacy operator ticket. It does
+not yet add legacy shutdown/adoption to this extension command or upgrade the
+installed preview.

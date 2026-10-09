@@ -57,7 +57,7 @@ int run_server(int argc,char** argv) {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt") || !options.emplace(key,argv[i+1]).second)
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket") || !options.emplace(key,argv[i+1]).second)
                 throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
@@ -70,7 +70,7 @@ int run_server(int argc,char** argv) {
         if(!token) throw std::invalid_argument("Set XMIND_AUTH_TOKEN for the local server");
         agentflow::validate_local_auth_token(token);
 #if !defined(_WIN32)
-        if(options.contains("--runtime-manifest-sha256")||options.contains("--owner-receipt"))throw std::invalid_argument("Native owner replacement currently requires Windows");
+        if(options.contains("--runtime-manifest-sha256")||options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Native owner replacement currently requires Windows");
         if(options.contains("--mcp-config"))throw std::invalid_argument("Native MCP configuration currently requires Windows");
         if(options.contains("--process-config"))throw std::invalid_argument("Native process configuration currently requires Windows");
         if(options.contains("--graphs-config"))throw std::invalid_argument("Native graph execution currently requires Windows");
@@ -96,23 +96,26 @@ int run_server(int argc,char** argv) {
         };
         const auto workers=capacity("--workers",2,16),queue=capacity("--queue-limit",128,4096);
         std::optional<agentflow::BackendOwnerBootstrap> bootstrap;
+        std::optional<agentflow::LegacyOwnerBootstrap> legacy;
 #if defined(_WIN32)
         std::unique_ptr<agentflow::VerifiedRuntimeGeneration> runtime_generation;
         std::unique_ptr<agentflow::WorkspaceTools> startup_workspace;
-        if(options.contains("--owner-receipt")&&!options.contains("--runtime-manifest-sha256"))throw std::invalid_argument("Replacement requires a verified native package");
+        if(options.contains("--owner-receipt")&&options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Native and legacy owner preconditions are distinct");
+        if((options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket"))&&!options.contains("--runtime-manifest-sha256"))throw std::invalid_argument("Replacement requires a verified native package");
         if(options.contains("--runtime-manifest-sha256")){
             if(!options.contains("--workspace"))throw std::invalid_argument("Native owner controls require an execution workspace");
             startup_workspace=std::make_unique<agentflow::WorkspaceTools>(options.at("--workspace"));
             runtime_generation=std::make_unique<agentflow::VerifiedRuntimeGeneration>(loaded_runtime_root(),options.at("--runtime-manifest-sha256"),startup_workspace->root_path());runtime_generation->require_current_server();
             const auto root=std::filesystem::u8path(runtime_generation->binding().root);
             if(std::filesystem::canonical(std::filesystem::u8path(options.at("--modules")))!=std::filesystem::canonical(root/"modules")||std::filesystem::canonical(std::filesystem::u8path(options.at("--stdlib")))!=std::filesystem::canonical(root/"stdlib"))throw std::invalid_argument("Qualified startup requires the verified package's import roots");
-            if(options.contains("--owner-receipt")){
+            if(options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket")){
                 for(const auto* key:{"--model","--model-endpoint","--provider-config","--mcp-config","--process-config","--instructions-config","--graphs-config"})if(options.contains(key))throw std::invalid_argument("Replacement startup retains saved configuration; startup overrides are not allowed");
-                bootstrap=agentflow::qualify_backend_bootstrap(startup_receipt(options.at("--owner-receipt")),*runtime_generation,*startup_workspace,auth,options.contains("--workspace-edits"));
+                if(options.contains("--owner-receipt"))bootstrap=agentflow::qualify_backend_bootstrap(startup_receipt(options.at("--owner-receipt")),*runtime_generation,*startup_workspace,auth,options.contains("--workspace-edits"));
+                else legacy=agentflow::LegacyOwnerBootstrap{options.at("--legacy-owner-ticket"),agentflow::qualify_backend_target(*runtime_generation,*startup_workspace,auth,options.contains("--workspace-edits"))};
             }
         }
 #endif
-        agentflow::PersistenceService persistence(options.at("--db"),{options.at("--modules"),options.at("--stdlib")},1024,bootstrap);
+        agentflow::PersistenceService persistence(options.at("--db"),{options.at("--modules"),options.at("--stdlib")},1024,bootstrap,legacy);
         agentflow::AgentInstructionStore instruction_configurations(persistence);agentflow::AgentInstructionPolicy instruction_policy;
         if(options.contains("--instructions-config")) {
             std::ifstream file(options.at("--instructions-config"),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted instruction configuration file");std::string source;char byte;
@@ -214,7 +217,7 @@ int run_server(int argc,char** argv) {
             add("gemini.generate-content","gemini","https://generativelanguage.googleapis.com/v1beta",agentflow::ProviderWire::gemini_generate_content,"https://generativelanguage.googleapis.com/v1beta/models",agentflow::ProviderCatalogueFormat::gemini);
             add("deepseek.chat","deepseek","https://api.deepseek.com/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.deepseek.com/models",agentflow::ProviderCatalogueFormat::openai,agentflow::ChatDialect::deepseek);
             auto configurable=std::make_unique<agentflow::ProviderProfileRuntime>(persistence,std::move(settings),std::move(policies),workers,queue);
-            if(!bootstrap)configurable->import_legacy_configuration();
+            if(!bootstrap&&!legacy)configurable->import_legacy_configuration();
             if(options.contains("--provider-config")){
                 try{configurable->import_yaml_configuration(std::filesystem::absolute(options.at("--provider-config")),configurable->configuration().revision);}
                 catch(...){throw std::runtime_error("Provider YAML configuration could not be imported");}

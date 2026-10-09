@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+Stopped legacy-owner preparation and qualified activation passed all **98 native
+contracts**, with 629 mapped inputs unchanged. Actual administration/server
+fixtures preserve the same database and keep admission closed until activation.
+The native SQLite import repair addresses the retained hosted handoff failure.
+View sources are unchanged from the previous 197/39 passing checkpoint.
+Product legacy shutdown, installed upgrade and rendered file-writing acceptance
+remain pending. [Scope and exact evidence](native-legacy-owner.md).
+
 Provider/conversation switching now has catalogue recovery in both adapters,
 with source-bound hosted **175/35** acceptance. Tests cover retired native
 selection acknowledgements, a second switch during recovery and the exact

@@ -16,6 +16,9 @@ struct BackendOwnerTarget {
     bool operator==(const BackendOwnerTarget&)const=default;
 };
 struct BackendOwnerBootstrap {BackendOwnerReceipt receipt;BackendOwnerTarget target;};
+// A native operator ticket published only after observing legacy process exit.
+// This is distinct from a receipt issued by live native quiescence.
+struct LegacyOwnerBootstrap {std::string ticket_id;BackendOwnerTarget target;};
 // Database-owner lifecycle, not a model tool or a workspace permission.
 // The authenticated transport must also validate the actual workspace authority
 // and runtime health/idle state before admitting quiescence.
@@ -31,6 +34,7 @@ struct BackendOwnerState {
     bool replacement_prepared=false;
     std::optional<BackendOwnerReceipt> replacement_source;
     std::string database_path;
+    std::string legacy_ticket_id;
 };
 struct BackendQuiesced : std::runtime_error {using std::runtime_error::runtime_error;};
 }

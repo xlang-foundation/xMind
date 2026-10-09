@@ -28,7 +28,7 @@ class Repository {
 public:
     Repository(const std::string& database,const std::vector<std::string>& import_roots,
         const BackendLease* startup_lease=nullptr,const BackendOwnerBootstrap* bootstrap=nullptr,
-        const std::string& startup_generation={});
+        const std::string& startup_generation={},const LegacyOwnerBootstrap* legacy=nullptr);
     ~Repository();
     Repository(const Repository&)=delete;
     Repository& operator=(const Repository&)=delete;

@@ -25,16 +25,16 @@ struct PersistenceService::Impl {
     BackendLease* owner_lease=nullptr;
     const std::string generation=owner_nonce();
 
-    Impl(std::string path,std::vector<std::string> roots,std::size_t max_pending,std::optional<BackendOwnerBootstrap> bootstrap):limit(max_pending) {
+    Impl(std::string path,std::vector<std::string> roots,std::size_t max_pending,std::optional<BackendOwnerBootstrap> bootstrap,std::optional<LegacyOwnerBootstrap> legacy):limit(max_pending) {
         if(limit==0) throw std::invalid_argument("Persistence queue capacity must be positive");
         std::promise<void> ready;auto initialized=ready.get_future();
-        worker=std::thread([this,path=std::move(path),roots=std::move(roots),bootstrap=std::move(bootstrap),ready=std::move(ready)]() mutable {
+        worker=std::thread([this,path=std::move(path),roots=std::move(roots),bootstrap=std::move(bootstrap),legacy=std::move(legacy),ready=std::move(ready)]() mutable {
             bool started=false;
             try {
                 BackendLease lease(path);
-                Repository repository(path,roots,&lease,bootstrap?&*bootstrap:nullptr,generation);
-                if(!bootstrap)repository.open_backend_owner(lease,generation);
-                if(!bootstrap)repository.recover_interrupted(lease);
+                Repository repository(path,roots,&lease,bootstrap?&*bootstrap:nullptr,generation,legacy?&*legacy:nullptr);
+                if(!bootstrap&&!legacy)repository.open_backend_owner(lease,generation);
+                if(!bootstrap&&!legacy)repository.recover_interrupted(lease);
                 owner_lease=&lease;
                 ready.set_value();started=true;
                 for(;;) {
@@ -88,8 +88,8 @@ struct PersistenceService::Impl {
     }
     template<class Function> auto observe(Function action){return submit(std::move(action),false);}
 };
-PersistenceService::PersistenceService(std::string database,std::vector<std::string> roots,std::size_t limit,std::optional<BackendOwnerBootstrap> bootstrap)
-    :impl_(std::make_unique<Impl>(std::move(database),std::move(roots),limit,std::move(bootstrap))) {}
+PersistenceService::PersistenceService(std::string database,std::vector<std::string> roots,std::size_t limit,std::optional<BackendOwnerBootstrap> bootstrap,std::optional<LegacyOwnerBootstrap> legacy)
+    :impl_(std::make_unique<Impl>(std::move(database),std::move(roots),limit,std::move(bootstrap),std::move(legacy))) {}
 PersistenceService::~PersistenceService()=default;
 void PersistenceService::close() {impl_->close();}
 std::future<BackendOwnerState> PersistenceService::backend_owner(){return impl_->observe([](Repository& r){return r.backend_owner();});}

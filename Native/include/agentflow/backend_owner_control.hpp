@@ -7,6 +7,8 @@
 namespace agentflow {
 class GraphExecution;
 class WorkspaceTools;
+BackendOwnerTarget qualify_backend_target(VerifiedRuntimeGeneration&,const WorkspaceTools&,
+    const std::string& auth_token,bool approved_edits,bool require_running_server=true);
 BackendOwnerBootstrap qualify_backend_bootstrap(BackendOwnerReceipt,VerifiedRuntimeGeneration&,
     const WorkspaceTools&,const std::string& auth_token,bool approved_edits);
 // Authenticated access adapters call this native boundary. Proof, persistence

@@ -4,6 +4,8 @@
 #include "agentflow/graph.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/owner_process.hpp"
+#include "agentflow/legacy_owner.hpp"
+#include "agentflow/backend_owner_control.hpp"
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
@@ -13,6 +15,10 @@
 #include <iostream>
 #include <map>
 #include <charconv>
+#include <random>
+#include <iomanip>
+#include <sstream>
+#include <vector>
 namespace {
 bool reflected(const nlohmann::json& value,const std::string& secret){
     const auto encoded=nlohmann::json(secret).dump();
@@ -23,8 +29,11 @@ bool reflected(const nlohmann::json& value,const std::string& secret){
     return false;
 }
 }
-int main(int argc,char** argv){
+int run_admin(int argc,char** argv){
     try {
+        if(argc==3&&std::string(argv[1])=="inspect-owner-process"){
+            const std::string input=argv[2];std::uint32_t pid=0;const auto parsed=std::from_chars(input.data(),input.data()+input.size(),pid);if(parsed.ec!=std::errc{}||parsed.ptr!=input.data()+input.size())throw std::invalid_argument("Invalid native process ID");std::cout<<nlohmann::json{{"process_id",pid},{"process_birth",agentflow::inspect_owner_process_birth(pid)}}.dump()<<'\n';return 0;
+        }
         if(argc==5&&std::string(argv[1])=="observe-owner-exit"){
             const auto number=[](const char* value){std::uint32_t out=0;const auto end=value+std::char_traits<char>::length(value);const auto parsed=std::from_chars(value,end,out);if(parsed.ec!=std::errc{}||parsed.ptr!=end)throw std::invalid_argument("Invalid owner process argument");return out;};
             const auto pid=number(argv[2]);const auto observed=agentflow::observe_owner_exit(pid,argv[3],number(argv[4]));
@@ -35,6 +44,19 @@ int main(int argc,char** argv){
             const std::string key=argv[command];if(command+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib") || !options.emplace(key,argv[command+1]).second)throw std::invalid_argument("Invalid native admin options");command+=2;
         }
         for(const auto* key:{"--db","--modules","--stdlib"})if(!options.contains(key))throw std::invalid_argument("Native admin requires --db FILE --modules DIR --stdlib DIR");
+        if(command<argc&&std::string(argv[command])=="prepare-legacy-owner"){
+            if(command+8!=argc)throw std::invalid_argument("prepare-legacy-owner requires TARGET_ROOT MANIFEST_SHA256 WORKSPACE PID PROCESS_BIRTH SOURCE_SERVER_SHA256 approved|read-only. The legacy owner must already be stopped by its operator.");
+            std::uint32_t pid=0;const std::string number=argv[command+4];const auto parsed=std::from_chars(number.data(),number.data()+number.size(),pid);if(parsed.ec!=std::errc{}||parsed.ptr!=number.data()+number.size())throw std::invalid_argument("Invalid legacy process ID");
+            const std::string edits=argv[command+7];if(edits!="approved"&&edits!="read-only")throw std::invalid_argument("Invalid legacy replacement policy");
+            const auto* auth=std::getenv("XMIND_AUTH_TOKEN");if(!auth)throw std::invalid_argument("Legacy preparation requires the existing native owner token");
+            agentflow::WorkspaceTools workspace(argv[command+3]);agentflow::VerifiedRuntimeGeneration target(argv[command+1],argv[command+2],workspace.root_path());
+            const auto qualified=agentflow::qualify_backend_target(target,workspace,auth,edits=="approved",false);
+            if(!agentflow::observe_owner_exit(pid,argv[command+5],0).exited)throw std::runtime_error("Legacy process is still running; no migration ticket was published");
+            agentflow::BackendLease lease(options.at("--db"));agentflow::XlangSqlite database(lease.canonical_database_path(),{options.at("--modules"),options.at("--stdlib")});
+            std::random_device random;std::ostringstream identity;identity<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)identity<<std::setw(8)<<random();
+            const agentflow::LegacyOwnerBootstrap boot{identity.str(),qualified};database.begin();try{const auto snapshot=agentflow::snapshot_legacy_database(database);agentflow::publish_legacy_owner_ticket(database,lease,boot,{pid,argv[command+5],argv[command+6]},snapshot);database.commit();}catch(...){database.rollback();throw;}
+            std::cout<<nlohmann::json{{"legacy_ticket_id",boot.ticket_id},{"admission_closed",true},{"quiescence_receipt",false},{"schema_migrated",false}}.dump()<<'\n';return 0;
+        }
         if(command>=argc)throw std::invalid_argument("Commands: import-graphs FILE; import-instructions FILE; import-processes FILE; import-mcp FILE; discover-mcp SERVER_ID WORKSPACE; put-mcp-credential SERVER_ID ENV_NAME SECRET_SOURCE_ENV. Run while the backend is stopped.");
         agentflow::PersistenceService store(options.at("--db"),{options.at("--modules"),options.at("--stdlib")});agentflow::McpConfigurationStore configurations(store);
         using Json=nlohmann::json;const std::string action=argv[command];
@@ -98,4 +120,9 @@ int main(int argc,char** argv){
         }else throw std::invalid_argument("Unknown native admin command or incorrect arguments");
         store.close();return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
+}
+int wmain(int argc,wchar_t** argv){
+    std::vector<std::string> values;std::vector<char*> pointers;
+    for(int i=0;i<argc;++i){const std::wstring value=argv[i];if(value.size()>32768)return 2;if(value.empty()){values.emplace_back();continue;}const int size=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0,nullptr,nullptr);if(size<=0)return 2;std::string utf8(size,'\0');if(WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),utf8.data(),size,nullptr,nullptr)!=size)return 2;values.push_back(std::move(utf8));}
+    for(auto& value:values)pointers.push_back(value.data());return run_admin(argc,pointers.data());
 }

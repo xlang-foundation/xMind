@@ -1,5 +1,18 @@
 # Current native validation
 
+Native post-exit legacy preparation, qualified closed bootstrap and exact
+activation passed **98 native contracts in 193.73 seconds**, with all 629
+mapped inputs unchanged. The actual CLI/server fixture rejected a live source,
+preserved a saved session and activated the same database after its owned idle
+fixture was killed by the test. Native history/credential/rollback checks also
+passed. This does not implement product legacy shutdown or installed migration.
+No provider or file effects occurred. The 39 view inputs are unchanged from the
+previous 197/39 passing checkpoint; those suites were not rerun. The earlier
+hosted 8e07ef0 handoff failure is retained, and native persistence now imports
+xlang3's existing `_sqlite3` binding explicitly. New hosted success remains
+unclaimed. [Preparation and limits](native-legacy-owner.md),
+[exact evidence](evidence/native-legacy-owner-local.json).
+
 The managed-owner adapter and native Windows process-exit observer passed
 **97 native contracts in 196.96 seconds**, with 626 mapped inputs unchanged.
 The actual production thin launcher completed same-database retirement,

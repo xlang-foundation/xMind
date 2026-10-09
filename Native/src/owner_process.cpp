@@ -4,6 +4,10 @@
 #include <charconv>
 #include <stdexcept>
 namespace agentflow {
+std::string inspect_owner_process_birth(std::uint32_t pid){
+    if(!pid)throw std::invalid_argument("Invalid native owner process ID");const auto process=OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION,FALSE,pid);if(!process)throw std::runtime_error("Cannot inspect native owner process");
+    struct Close{HANDLE value;~Close(){CloseHandle(value);}}close{process};FILETIME created{},ended{},kernel{},user{};if(!GetProcessTimes(process,&created,&ended,&kernel,&user))throw std::runtime_error("Cannot inspect native process identity");return std::to_string((static_cast<std::uint64_t>(created.dwHighDateTime)<<32)|created.dwLowDateTime);
+}
 OwnerProcessObservation observe_owner_exit(std::uint32_t pid,const std::string& birth,std::uint32_t timeout_ms){
     std::uint64_t expected=0;const auto parsed=std::from_chars(birth.data(),birth.data()+birth.size(),expected);
     if(!pid||timeout_ms>60000||birth.empty()||birth.size()>20||birth.front()=='0'||parsed.ec!=std::errc{}||parsed.ptr!=birth.data()+birth.size()||!expected)throw std::invalid_argument("Invalid native owner process precondition");

@@ -12,7 +12,8 @@ struct PersistenceBusy : std::runtime_error {using std::runtime_error::runtime_e
 class PersistenceService {
 public:
     PersistenceService(std::string database,std::vector<std::string> import_roots,
-        std::size_t max_pending=1024,std::optional<BackendOwnerBootstrap> bootstrap={});
+        std::size_t max_pending=1024,std::optional<BackendOwnerBootstrap> bootstrap={},
+        std::optional<LegacyOwnerBootstrap> legacy={});
     ~PersistenceService();
     PersistenceService(const PersistenceService&)=delete;
     PersistenceService& operator=(const PersistenceService&)=delete;
