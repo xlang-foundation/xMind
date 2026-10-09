@@ -4,6 +4,7 @@ const crypto = require('node:crypto');
 const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
+const {patchReview}=require('./patch-review');
 const { browserViewLauncher } = require('./browser-view');
 const { WorkspaceBackend,machineSetting } = require('./workspace-backend');
 const { resolveNativeRuntime } = require('./native-runtime');
@@ -372,7 +373,7 @@ async function activate(context) {
     contextReadyView=undefined;pendingEditorContexts=[];
     panel.webview.html = html(assetVersion, {
       source:panel.webview.cspSource,css:asset('media','chat.css'),script:asset('media','chat.js'),
-      marked:asset('node_modules','marked','lib','marked.umd.js'),purify:asset('node_modules','dompurify','dist','purify.min.js')
+      marked:asset('node_modules','marked','lib','marked.umd.js'),purify:asset('node_modules','dompurify','dist','purify.min.js'),patchReview:asset('patch-review.js')
     });
     const view = panel,workspaceEpoch=workspaceBackend.epoch;
     disposeSubscription?.dispose();receiveSubscription?.dispose();
@@ -571,6 +572,7 @@ async function activate(context) {
             throw new Error('The operation changed since review. Inspect its current state before deciding.');
           }
           if (message.type === 'review') {await showEditReview(current);return;}
+          if(message.decision==='allow'&&current.tool==='patch_file')patchReview(current);
           const decided = await client.decide(message.id, message.decision);
           if (panel !== view || version !== generation) return;
           reviewed.set(decided.id, decided);

@@ -1,5 +1,6 @@
 'use strict';
 const crypto=require('node:crypto');
+const {fileReview}=require('./patch-review');
 
 // Read-only proposal snapshots. Never reads or writes a workspace file, and
 // never treats opening a comparison as permission to execute the proposal.
@@ -10,22 +11,22 @@ function editReview(vscode,context) {
   }));
   context.subscriptions.push({dispose(){documents.clear();bytes=0;}});
   return async operation=>{
-    if(!['replace_file','create_file'].includes(operation.tool)) throw new Error('This operation does not contain a file change.');
-    const plan=JSON.parse(operation.arguments_json);
-    if(operation.tool==='create_file' && (plan.before_exists!==false || plan.before_content!==''))throw new Error('The creation proposal has no verified absent-file precondition.');
-    if(typeof plan.path!=='string' || typeof plan.before_content!=='string' || typeof plan.after_content!=='string')
-      throw new Error('The backend edit proposal has no comparable text snapshots.');
+    const plan=fileReview(operation);
     const size=Buffer.byteLength(plan.before_content)+Buffer.byteLength(plan.after_content);
     if(size>2097152) throw new Error('The edit proposal exceeds the comparison limit.');
     const identity=crypto.createHash('sha256').update(operation.id).update('\0').update(operation.arguments_json).digest('hex');
     const name=encodeURIComponent(plan.path.replaceAll('\\','/').split('/').at(-1)||'file');
     const before=vscode.Uri.parse(`xmind-review:/${identity}/before/${name}`);
-    const after=vscode.Uri.parse(`xmind-review:/${identity}/after/${name}`);
+    const afterName=encodeURIComponent((plan.destination_path||plan.path).replaceAll('\\','/').split('/').at(-1)||'file');
+    const after=vscode.Uri.parse(`xmind-review:/${identity}/after/${afterName}`);
     if(!documents.has(before.toString())) {
       if(documents.size>=64 || bytes+size>33554432) throw new Error('Comparison snapshot limit reached. Reload the xMind extension to release old snapshots.');
       documents.set(before.toString(),plan.before_content);documents.set(after.toString(),plan.after_content);bytes+=size;
     }
-    await vscode.commands.executeCommand('vscode.diff',before,after,`xMind proposed ${operation.tool==='create_file'?'new file':'edit'}: ${plan.path}`,{preview:true});
+    const action=operation.tool==='patch_file'?plan.action:operation.tool==='create_file'?'new file':'edit';
+    const detail=action==='move'?plan.path+' → '+plan.destination_path:plan.path;
+    const absence=action==='add'?' (before: absent)':action==='delete'?' (after: absent)':'';
+    await vscode.commands.executeCommand('vscode.diff',before,after,`xMind proposed ${action}: ${detail}${absence}`,{preview:true});
   };
 }
 module.exports={editReview};

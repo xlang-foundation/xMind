@@ -26,7 +26,7 @@ test('planning view allowlist exposes only scoped observation, human input and r
 });
 test('view forwards only allowed planning requests at the configured native origin and keeps durable cookie authentication',async()=>{
  const {createBrowserServer}=await import('../server.mjs'),directory=await mkdtemp(join(tmpdir(),'xmind-planning-view-')),observed=[];
- for(const name of ['index.html','browser.js','browser.css','chat.js','chat.css','client.js','marked.js','purify.js'])await writeFile(join(directory,name),'/* Synthetic access adapter asset */');
+ for(const name of ['patch-review.js','index.html','browser.js','browser.css','chat.js','chat.css','client.js','marked.js','purify.js'])await writeFile(join(directory,name),'/* Synthetic access adapter asset */');
  const master='synthetic-planning-view-master-'.padEnd(64,'x'),credential='a'.repeat(64)+'.'+'b'.repeat(64);let expectedOrigin,view;
  const peer=createServer(async(request,response)=>{
   let input='';for await(const chunk of request)input+=chunk;observed.push({path:request.url,method:request.method,authorization:request.headers.authorization,viewOrigin:request.headers['x-xmind-view-origin'],input});

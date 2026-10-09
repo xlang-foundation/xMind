@@ -7,6 +7,7 @@ const {JSDOM}=require('../../../extensions/vscode/node_modules/jsdom');
 const {browserHtml}=require('../page.cjs');
 const root=path.resolve(__dirname,'../../..');
 const sources={
+  '/ui/patch-review.js':'extensions/vscode/patch-review.js',
   '/ui/client.js':'extensions/vscode/client.js',
   '/ui/browser.js':'views/browser/browser.js',
   '/ui/marked.js':'extensions/vscode/node_modules/marked/lib/marked.umd.js',

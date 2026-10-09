@@ -1,5 +1,19 @@
 # Current native validation
 
+The shared patch-review client candidate passed **221 extension / 41 browser**
+contracts with all 44 input and 12 generated asset hashes unchanged. It renders
+all four per-file patch actions and uses revalidated read-only comparisons;
+malformed proposals cannot receive an Allow through either adapter. These are
+source/DOM checks, not installed or native patch acceptance.
+[Scope and evidence](patch-review.md).
+
+The earlier native patch primitive source `a7f484a` compiled on Windows but its
+complete gate failed: **97/99 contracts passed**, with failures in workspace
+move effects and the parallel delegation deadline. New diagnostics preserve
+the move phase/Win32 code and actual parent/child state on timeout. Current
+101-contract candidate execution remains pending; no patch release is accepted.
+[Exact failed job](https://github.com/xlang-foundation/xMind/actions/runs/37974972815).
+
 Native general-patch parsing/preparation and actual-workspace planning are source increments, with a new
 contracts included in the complete 101-contract native manifest. Compilation and
 execution are pending the isolated workflow. No patch model tool or filesystem
@@ -31,8 +45,9 @@ The shared sidebar approval-review candidate passed the complete isolated
 **217 extension / 39 browser** gate. A persistent review notice and bounded
 activity log address the installed test's offscreen proposal; pending review
 suppresses automatic scroll movement. Run/workspace reset clears old controls.
-These are source/DOM checks; this renderer has not been installed or visually
-accepted. [Behavior and validation scope](sidebar-approval-review.md).
+These are source/DOM checks. The renderer is installed in the recovery 0.1.3
+package, but live pending-approval layout/navigation acceptance remains pending.
+[Behavior and validation scope](sidebar-approval-review.md).
 
 The native regex-search implementation at exact source `5c8c918` passed its
 [isolated Windows workflow](https://github.com/xlang-foundation/xMind/actions/runs/37968627266):
@@ -56,8 +71,10 @@ OpenAI request proposed `hello.py`; approval through the installed sidebar led t
 independently on disk. Both responses displayed provider token metrics. This is
 installed 0.1.1 / native `5d8b175` writing acceptance, not acceptance of the newer
 regex-search candidate. [Exact evidence](evidence/vscode-file-creation-live.json).
-The recovery-message source passed 215/39 client
-contracts and was pushed as `471199e`; it has not been installed.
+The recovery-message source passed 215/39 client contracts and is now installed
+in client 0.1.3. Reload restored the completed run against the same native owner;
+a fresh conversation was observed ready at the correct root. No new inference
+or repair of the failed context receipts is claimed by that update.
 [Recovery and exact scope](saved-context-recovery.md).
 
 The local ignore-rule candidate passed **98 native contracts in 209.78 seconds**,

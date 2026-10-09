@@ -120,7 +120,11 @@ validation before the first effect, identity reuse, partial denial, cancellation
 stale later files, externally replaced owned folders and exact per-file receipts
 across an xlang3/SQLite restart. It independently reads actual files. These checks
 have not executed for this candidate. Batch-wide model guidance delivery and
-client review remain separate requirements.
+client live acceptance remain separate requirements. The shared client now
+renders native per-file patch review and opens revalidated read-only comparisons;
+its complete frozen adapter gate passed 221/41 contracts. It has not been
+installed or exercised with a native model-generated patch.
+[Client implementation and limits](patch-review.md).
 
 These increments do not expose a model tool or filesystem endpoint and perform
 no model-invokable filesystem effects. Delivery still requires model-call input and guidance

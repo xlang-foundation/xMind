@@ -1,5 +1,6 @@
 'use strict';
 const api=globalThis.xMindView||acquireVsCodeApi(),byId=id=>document.getElementById(id);
+const patchReview=globalThis.XMindPatchReview.patchReview;
 let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null;
 let renameCapability=false,renameSnapshot;
 let currentWorkspaceRoot;
@@ -208,7 +209,17 @@ function operations(items){
     let reviewable=true;
     if(item.tool==='run_process')reviewable=processProposal(section,item);
     if(['replace_file','create_file'].includes(item.tool)){try{const plan=JSON.parse(item.arguments_json);section.append(node('strong',plan.path));for(const [label,key] of [['Before','before_content'],['After','after_content']])section.append(node('div',label),node('pre',plan[key],label.toLowerCase()));}catch{}}
-    if(['replace_file','create_file','run_process','mcp_tool'].includes(item.tool)){
+    let patch;
+    if(item.tool==='patch_file'){
+      try{
+        patch=patchReview(item);section.append(node('strong',patch.action.toUpperCase()+': '+patch.path+(patch.action==='move'?' → '+patch.destination_path:'')));
+        for(const [label,key,exists]of [['Before','before_content',patch.before_exists],['After','after_content',patch.after_exists]])section.append(node('div',label+(exists?'':' · absent')),node('pre',patch[key],label.toLowerCase()));
+        section.append(node('p','File '+(patch.patch_index+1)+' of '+patch.patch_file_count+'. Each file requires its own approval. This batch is not atomic; completed changes remain if a later file fails or is denied.'));
+        if(patch.patch_files){const detail=node('details');detail.append(node('summary','Requested patch files'));const files=node('ol');for(const file of patch.patch_files)files.append(node('li',file.action.toUpperCase()+': '+file.path+(file.action==='move'?' → '+file.destination_path:'')));detail.append(files);section.append(detail);}
+        if(patch.create_directories?.length){section.append(node('p','This approval also creates these missing parent folders:'));const folders=node('ul');for(const folder of patch.create_directories)folders.append(node('li',folder));section.append(folders);}
+      }catch{reviewable=false;section.append(node('p','Patch review snapshots are malformed. Allow is unavailable; inspect the recorded operation.','inspection-note'));}
+    }
+    if(['replace_file','create_file','patch_file','run_process','mcp_tool'].includes(item.tool)){
       try{
         const proposal=JSON.parse(item.arguments_json),guidance=item.tool==='mcp_tool'?proposal.instructions:proposal.repository_guidance;
         if(guidance!==undefined){
@@ -227,7 +238,7 @@ function operations(items){
     }
     if(item.state==='awaiting_approval'){
       for(const decision of ['allow','deny']){
-        const labels={replace_file:'Allow edit',create_file:'Allow creation',run_process:'Allow command'};
+        const labels={replace_file:'Allow edit',create_file:'Allow creation',run_process:'Allow command',patch_file:({add:'Allow patch creation',update:'Allow patch edit',delete:'Allow deletion',move:'Allow move'})[patch?.action]||'Allow patch'};
         const button=node('button',decision==='allow'?(labels[item.tool]||'Allow tool'):'Deny',decision==='allow'?'primary':'');
         button.disabled=Date.now()>=item.expires_unix_ms||(decision==='allow'&&!reviewable);
         button.onclick=()=>{for(const control of section.querySelectorAll('button'))control.disabled=true;api.postMessage({type:'decide',id:item.id,decision});};section.append(button);
@@ -237,13 +248,13 @@ function operations(items){
       const detail=node('details');detail.append(node('summary','Outcome'),node('pre',item.result_json));section.append(detail);
     }
     if(item.tool==='run_process'&&item.state==='uncertain')section.append(node('p','Possible command effects remain uncertain. Further effects in this workspace and through this profile are blocked; xMind will not retry the command.','inspection-note'));
-    operationExtras(section,item);operationRows.set(item.id,{signature,section});sections.push(section);
+    operationExtras(section,item,reviewable);operationRows.set(item.id,{signature,section});sections.push(section);
   }
   for(const [index,section] of sections.entries())if(container.children[index]!==section)container.insertBefore(section,container.children[index]||null);
   pendingOperations=items.filter(item=>item.state==='awaiting_approval');
   refreshPendingApprovals();
 }
-function operationExtras(section,item){
+function operationExtras(section,item,reviewable=true){
   if(item.tool==='mcp_tool'){
     try{const plan=JSON.parse(item.arguments_json);section.append(node('p','External tool: '+plan.server_config_id+' / '+plan.peer_tool+' · configuration '+plan.config_revision));}catch{}
     if(item.state==='awaiting_approval')section.append(node('p','The external server can perform effects beyond this workspace. Its read-only hints do not grant permission.'));
@@ -254,9 +265,10 @@ function operationExtras(section,item){
     operationSections.set(item.id,section);section.append(node('p','This edit is uncertain. Further edits in this workspace remain blocked.','inspection-note'));
     const button=node('button','Inspect actual file');button.onclick=()=>api.postMessage({type:'inspect-edit',id:item.id});section.append(button);
   }
-  if(['replace_file','create_file'].includes(item.tool)&&item.state==='awaiting_approval'){
-    const button=node('button','Compare changes');button.disabled=Date.now()>=item.expires_unix_ms;button.onclick=()=>api.postMessage({type:'review',id:item.id});section.append(button);
+  if(['replace_file','create_file','patch_file'].includes(item.tool)&&item.state==='awaiting_approval'){
+    const button=node('button','Compare changes');button.disabled=!reviewable||Date.now()>=item.expires_unix_ms;button.onclick=()=>api.postMessage({type:'review',id:item.id});section.append(button);
   }
+  if(item.tool==='patch_file'&&item.state==='uncertain')section.append(node('p','This patch file effect is uncertain. Further effects in this workspace remain blocked; the operation will not replay.','inspection-note'));
   if(item.tool==='create_file'){
     try{const plan=JSON.parse(item.arguments_json);if(Array.isArray(plan.create_directories)&&plan.create_directories.length){section.append(node('p','This approval also creates these missing parent folders:'));const folders=node('ul');for(const directory of plan.create_directories)if(typeof directory==='string')folders.append(node('li',directory));section.append(folders);}}catch{}
     section.append(node('p','New file. The backend must still verify the recorded parent and absence of this name.'));

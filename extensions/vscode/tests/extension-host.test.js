@@ -79,7 +79,7 @@ function harness(options={}) {
     else if(target.pathname==='/v1/runs/finished') data={id:'finished',state:options.running?'running':'completed'};
     else if(options.graphChildren?.some(child=>target.pathname==='/v1/runs/'+child.id+'/operations'))data=operations;
     else if(target.pathname==='/v1/runs/finished/operations') data=operations;
-    else if(target.pathname==='/v1/operations/edit') data=pendingOperation?await pendingOperation:operations[0];
+    else if(target.pathname===`/v1/operations/${operations[0]?.id||'edit'}`) data=pendingOperation?await pendingOperation:operations[0];
     else if(target.pathname==='/v1/operations/edit/inspection') data=await options.inspection;
     else if(target.pathname==='/v1/operations/edit/decision') {
       const body=JSON.parse(requestOptions.body);decisions.push(body);
@@ -125,7 +125,7 @@ function harness(options={}) {
   const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext}:name==='./webview'?require('../webview'):require(name),
     setTimeout:callback=>{bootstrapTasks.push(callback);return 1;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
-  const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
+  const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
   return {token,commands,secrets,requests,views,intervals,state,errors,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
@@ -546,4 +546,20 @@ test('normal development bootstrap completes activation before resolving the sid
   h.bootstrapTasks[0]();await until(()=>h.ready.length===1);
   assert.equal(h.ready[0].location,'secondarySidebar');assert.equal(h.ready[0].origin,'http://127.0.0.1:8765');
   assert.ok(!JSON.stringify(h.ready).includes(h.token));assert.ok(!h.views[0].webview.html.includes(h.token));h.views[0].close();
+});
+
+test('all patch action comparisons use revalidated read-only backend snapshots and never grant',async()=>{
+ for(const action of ['add','update','delete','move']){
+  const plan={patch_id:'fixture-patch',patch_index:0,patch_file_count:1,action,path:'source.cpp',parent_id:'synthetic-parent',file_id:'synthetic-file',before_exists:action!=='add',after_exists:action!=='delete',before_content:action==='add'?'':'before\n',after_content:action==='delete'?'':'after\n',before_sha256:'a'.repeat(64),after_sha256:'b'.repeat(64)};
+  if(action==='add'||action==='move')plan.create_directories=[];if(action==='move'){plan.destination_path='moved.cpp';plan.destination_parent_id='synthetic-parent';}
+  const proposal={...pendingEdit,id:'fixture-patch-0',tool:'patch_file',arguments_json:JSON.stringify(plan)};
+  const h=harness({running:true,operations:[proposal]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.length));
+  view.receive({type:'review',id:proposal.id,after_content:'forged text'});await until(()=>h.comparisons.length===1);const [before,after,title]=h.comparisons[0];assert.equal(h.reviewText(before),plan.before_content);assert.equal(h.reviewText(after),plan.after_content);assert.match(title,new RegExp('proposed '+action));if(action==='move'){assert.match(after.toString(),/moved.cpp$/);assert.match(title,/source.cpp → moved.cpp/);}if(action==='delete')assert.match(title,/after: absent/);if(action==='add')assert.match(title,/before: absent/);assert.equal(h.decisions.length,0);view.close();
+ }
+});
+
+test('a forged Allow message cannot approve malformed backend patch snapshots',async()=>{
+ const proposal={...pendingEdit,id:'fixture-patch-0',tool:'patch_file',arguments_json:JSON.stringify({patch_id:'fixture-patch',patch_index:0,patch_file_count:1,action:'delete',path:'remove.cpp',parent_id:'synthetic-parent',file_id:'synthetic-file',before_exists:true,after_exists:false,before_content:'before',after_content:'unexpected nonempty deleted content',before_sha256:'a'.repeat(64)})};
+ const h=harness({running:true,operations:[proposal]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.length));
+ view.receive({type:'decide',id:proposal.id,decision:'allow'});await until(()=>view.posted.some(message=>message.type==='error'));assert.match(view.posted.findLast(message=>message.type==='error').text,/malformed/);assert.equal(h.decisions.length,0);view.close();
 });

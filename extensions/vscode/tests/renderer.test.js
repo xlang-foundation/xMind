@@ -16,7 +16,7 @@ function renderer(){
   dom.window.acquireVsCodeApi=()=>({postMessage:message=>posted.push(message)});
   dom.window.TextDecoder=TextDecoder;
   dom.window.TextEncoder=TextEncoder;
-  for(const file of ['node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
+  for(const file of ['patch-review.js','node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
 test('footer file-change mode follows native capability and never promises writes for unknown legacy policy',()=>{
@@ -599,4 +599,29 @@ test('footer workflow chooser enables a real advertised tool graph on a model-fr
 });
 test('graph join summary keeps full observed outputs expandable without fabricated aggregate metrics',()=>{
  const r=renderer(),doc=r.dom.window.document;r.send({type:'transcript',history:[{role:'assistant',data:{source:'graph_join',graph_id:'fixture.read',content:'Raw joined JSON text',nodes:[{id:'read',state:'completed',output:{content:'Observed fixture bytes'}}]}}]});const card=doc.querySelector('#history .message');assert.ok(card.textContent.includes('Completed graph fixture.read.'));assert.equal(card.querySelector('.metrics'),null);assert.equal(card.querySelector('details').open,false);assert.ok(card.querySelector('pre').textContent.includes('Observed fixture bytes'));assert.equal(card.querySelector('.markdown'),null);r.dom.window.close();
+});
+function patchFixture(action,index=0,count=1){
+ const plan={patch_id:'fixture-patch',patch_index:index,patch_file_count:count,action,path:'source.txt',parent_id:'synthetic-parent',file_id:'synthetic-file',before_exists:action!=='add',after_exists:action!=='delete',before_content:action==='add'?'':'before\n',after_content:action==='delete'?'':'after\n',before_sha256:'a'.repeat(64),after_sha256:'b'.repeat(64)};
+ if(action==='add'||action==='move')plan.create_directories=['new-parent'];if(action==='move'){plan.destination_path='new-parent/moved.txt';plan.destination_parent_id='synthetic-destination-parent';}
+ return {id:'fixture-patch-'+index,run_id:'synthetic-run',workspace_id:'synthetic-workspace',tool:'patch_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify(plan)};
+}
+test('patch review shows actual action, absent snapshots, move destination and non-atomic batch before any decision',()=>{
+ const r=renderer(),doc=r.dom.window.document;try{
+  const actions=['add','update','delete','move'],items=actions.map((action,index)=>patchFixture(action,index,4));
+  const manifest=items.map(item=>{const plan=JSON.parse(item.arguments_json);return {operation_id:item.id,action:plan.action,path:plan.path,...(plan.destination_path?{destination_path:plan.destination_path}:{})};});
+  for(const item of items){const plan=JSON.parse(item.arguments_json);plan.patch_files=manifest;item.arguments_json=JSON.stringify(plan);}
+  r.send({type:'operations',operations:items});const body=doc.getElementById('operations')||doc.getElementById('scroll');
+  for(const label of ['Allow patch creation','Allow patch edit','Allow deletion','Allow move'])assert.ok([...body.querySelectorAll('button')].some(button=>button.textContent===label&&!button.disabled));
+  assert.match(body.textContent,/Before · absent/);assert.match(body.textContent,/After · absent/);assert.match(body.textContent,/source.txt → new-parent\/moved.txt/);assert.match(body.textContent,/not atomic/);assert.match(body.textContent,/new-parent/);assert.ok(!r.posted.some(message=>message.type==='decide'));
+  const compare=[...body.querySelectorAll('button')].find(button=>button.textContent==='Compare changes');compare.click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'review',id:items[0].id});assert.ok(!r.posted.some(message=>message.type==='decide'));
+ }finally{r.dom.window.close();}
+});
+test('malformed patch identity, missing batch manifest, absence, hashes and destinations disable Allow and comparison but preserve Deny',()=>{
+ const r=renderer(),doc=r.dom.window.document;try{
+  for(const change of [plan=>plan.patch_index=1,plan=>plan.patch_file_count=2,plan=>plan.before_exists=true,plan=>plan.before_content='unexpected',plan=>plan.after_sha256='invalid',plan=>plan.path='../outside']){
+   const item=patchFixture('add'),plan=JSON.parse(item.arguments_json);change(plan);item.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[item]});
+   const buttons=[...doc.querySelectorAll('#scroll button')];assert.ok(buttons.find(button=>button.textContent==='Allow patch')?.disabled);assert.ok(buttons.find(button=>button.textContent==='Compare changes')?.disabled);assert.equal(buttons.find(button=>button.textContent==='Deny')?.disabled,false);
+  }
+  const item=patchFixture('move'),plan=JSON.parse(item.arguments_json);plan.destination_path='source.txt';item.arguments_json=JSON.stringify(plan);r.send({type:'operations',operations:[item]});assert.match(doc.getElementById('scroll').textContent,/malformed/);assert.ok(!r.posted.some(message=>message.type==='decide'||message.type==='review'));
+ }finally{r.dom.window.close();}
 });
