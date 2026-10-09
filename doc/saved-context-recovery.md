@@ -18,8 +18,13 @@ Recovery is to use **New conversation** in the xMind sidebar and send the coding
 request there. The earlier session and its history remain available in the
 history chooser. The observed fresh conversation showed **Ready**, root
 `D:\CantorAI2026\TestProj`, and **File changes require approval**. A creation
-request was prepared in its composer for the user to send. No successful
-installed-editor creation is claimed by this checkpoint.
+request was submitted there and produced a real native `create_file` proposal.
+Approval through the installed sidebar created `hello.py` with
+`print("Hello from xMind")` followed by a newline. The operation and run completed;
+the final response and provider token metrics were rendered. Independent disk
+inspection matched the proposed bytes. This establishes creation through the
+installed 0.1.1 preview, not the newer regex candidate or broader editor parity.
+See [installed writing evidence](evidence/vscode-file-creation-live.json).
 
 The shared renderer now explains `context_unavailable` and
 `context_binding_changed`, directs users to a fresh conversation, and states that

@@ -10,8 +10,11 @@ local ignore rules. Real OpenAI filtered search and an xlang3/SQLite history
 restart passed. Native `glob_files` supports recursive discovery for agents,
 read-only children and graph tools; `read_file` supports bounded line pages
 for files up to 64 MiB. The local VS Code preview has been migrated to an
-approval-enabled backend; installed end-to-end file-writing acceptance remains
-unverified. Saved model context from a different backend configuration can
+approval-enabled backend. A real OpenAI request in a fresh VS Code conversation
+proposed and, after UI approval, created `hello.py` in the opened TestProj workspace.
+The operation and run completed, with actual response token metrics displayed.
+[Installed writing evidence](doc/evidence/vscode-file-creation-live.json).
+Saved model context from a different backend configuration can
 require a fresh conversation; existing history is preserved.
 See [saved-context recovery](doc/saved-context-recovery.md),
 [ignore behavior and limits](doc/native-ignore.md),

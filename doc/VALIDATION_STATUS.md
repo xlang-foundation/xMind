@@ -11,9 +11,13 @@ while the separate xlang3 benchmark is active. [Candidate behavior and limits](n
 The VS Code preview's saved profile migration was observed complete, with an
 approval-enabled backend rooted at `D:\CantorAI2026\TestProj`. A subsequent
 old-conversation run failed with `context_unavailable` before provider execution;
-old and current authority bindings differed. A fresh conversation was observed
-Ready with a file-creation request drafted for the user, but no installed-editor
-writing acceptance is claimed. The recovery-message source passed 215/39 client
+old and current authority bindings differed. In the fresh conversation, an actual
+OpenAI request proposed `hello.py`; approval through the installed sidebar led to
+`create_file · succeeded` and a completed run. The file's exact bytes were checked
+independently on disk. Both responses displayed provider token metrics. This is
+installed 0.1.1 / native `5d8b175` writing acceptance, not acceptance of the newer
+regex-search candidate. [Exact evidence](evidence/vscode-file-creation-live.json).
+The recovery-message source passed 215/39 client
 contracts and was pushed as `471199e`; it has not been installed.
 [Recovery and exact scope](saved-context-recovery.md).
 

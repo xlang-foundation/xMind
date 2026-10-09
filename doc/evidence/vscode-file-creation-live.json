@@ -1,0 +1,40 @@
+{
+  "scope": "Actual installed VS Code sidebar, real OpenAI inference, UI-approved native file creation; independently checked resulting file bytes",
+  "observedDate": "2026-10-09",
+  "extensionVersion": "0.1.1",
+  "nativeRevision": "5d8b17572fabf56b7ddf477cba96626f954cc329",
+  "sdkRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+  "bridgeEnabled": false,
+  "runtimeManifestSha256": "2c54166484f2cbf1f62b26f831d5aeb20e75da5d40f6c445172cd2e53965e162",
+  "observedServerSha256": "4bef77ef02213df3e4f90ce881f4e78e32f87f9066bd8027403a146f0db65cfc",
+  "serverBytesMatchManifest": true,
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "recovery": "Fresh conversation following a saved-context authority mismatch; no old context was retagged or deleted",
+  "provider": "openai",
+  "wire": "openai.responses",
+  "model": "gpt-6.1-sol",
+  "runId": "8d6e0557a034a324acb48d16177c10ff",
+  "runStateObserved": "completed",
+  "operationId": "013b208504bd2595ed1540db212bf3b4",
+  "tool": "create_file",
+  "operationStateObserved": "succeeded",
+  "approval": "Allow creation clicked through the installed xMind sidebar after reviewing the proposal",
+  "fileAbsentBefore": true,
+  "file": "hello.py",
+  "expectedUtf8": "print(\"Hello from xMind\")\n",
+  "observedFileSha256": "65667c97e08fbafda450bd52669beb4663f2a965fb2393d4b7a0670ab7e33c59",
+  "renderedResponseMetrics": [
+    {"inputTokens": 1583, "outputTokens": 31, "totalTokens": 1614, "cachedTokens": 0, "reasoningTokens": 0},
+    {"inputTokens": 1730, "outputTokens": 22, "totalTokens": 1752, "cachedTokens": 1580, "reasoningTokens": 0}
+  ],
+  "limits": [
+    "One file creation in a fresh conversation; broader installed editing, command, graph and provider coverage is not established",
+    "The clearer saved-context recovery message remains source-only in the next renderer package",
+    "This is an observation of the existing installed runtime, not acceptance of current regex-search source",
+    "No backend restart or persistence replay test was performed for this run"
+  ],
+  "syntheticProvider": false,
+  "directFilesystemWriteByTestHarness": false,
+  "databaseMutationsByDiagnostic": false,
+  "cpythonExecuted": false
+}
