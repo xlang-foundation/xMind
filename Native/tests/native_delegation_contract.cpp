@@ -83,7 +83,17 @@ void actual_followup(PersistenceService& store,AgentSettings value){
 void actual_parallel(PersistenceService& store,const AgentSettings& value){
     store.create_session("parallel-a-session","First occupied actual parent worker").get();store.create_session("parallel-b-session","Second occupied actual parent worker").get();
     AgentService service(store,value,2,4);service.submit("parallel-a-root","parallel-a-session","fixture-parent-parallel-a: Investigate actual files through two independent leaves.");service.submit("parallel-b-root","parallel-b-session","fixture-parent-parallel-b: Investigate actual files through two independent leaves.");
-    eventually([&]{return service.idle();},"Two occupied real parent workers must not deadlock their separate bounded leaf pool");
+    try{eventually([&]{return service.idle();},"Two occupied real parent workers must not deadlock their separate bounded leaf pool");}
+    catch(...){
+        // Fixture-only observations of actual durable state. Keep the deadline
+        // and concurrency requirement intact; do not turn a timeout into success.
+        for(const auto* root:{"parallel-a-root","parallel-b-root"}){
+            std::cerr<<"parallel owner "<<root<<" state="<<static_cast<int>(store.run(root).get().state)<<'\n';
+            for(const auto& child:store.owned_children(root).get())std::cerr<<"parallel child "<<child.task_id<<" state="<<static_cast<int>(child.run.state)<<'\n';
+            for(const auto& event:store.events(root).get())if(event.kind=="run.failed"||event.kind=="delegation.child.admitted"||event.kind=="budget.model_call.started")std::cerr<<event.kind<<' '<<event.json<<'\n';
+        }
+        throw;
+    }
     for(const auto* root:{"parallel-a-root","parallel-b-root"}){require(store.run(root).get().state==RunState::completed&&store.owned_children(root).get().size()==2,"Each occupied parent must join only its two actual completed children");const auto budget=store.root_budget(root).get();require(budget.children_admitted==2&&budget.model_calls_reserved==6&&budget.parent_calls_held==0,"Concurrent roots must retain distinct shared parent/leaf call allowances");}
     service.close();
 }

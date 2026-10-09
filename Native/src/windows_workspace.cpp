@@ -495,17 +495,17 @@ WorkspaceSnapshot WorkspaceTools::apply_move(const WorkspaceMovePlan& plan,std::
     const auto current=read_effect_file(file.value,cancel);
     if(current!=before.content||content_hash(current)!=before.content_sha256)throw ToolContentConflict("Move source contents changed");
     check_cancel(cancel);if(identity()!=before.workspace_id)throw ToolAccessDenied("Workspace changed before move");
-    bool attempted=false;
+    bool attempted=false;const char* phase="create_parent";
     try{
         for(const auto& missing:target.missing){
             check_cancel(cancel);const auto leaf=std::filesystem::u8path(missing).filename().wstring();
             attempted=true;const auto created=relative_file(target.directories.back()->value,leaf,true,true,false,false,false,false,true);
             target.directories.push_back(std::make_unique<Handle>(created));impl_->verify_creation_directory(created);
         }
-        check_cancel(cancel);const auto directory=target.directories.back()->value;
+        phase="check_destination";check_cancel(cancel);const auto directory=target.directories.back()->value;
         const auto occupied=relative_file(directory,target.leaf,false,false,true);
         if(occupied){Handle owned(occupied);throw ToolContentConflict("Move destination appeared before dispatch");}
-        if(current!=destination.content){
+        phase="update_content";if(current!=destination.content){
             LARGE_INTEGER zero{};if(!SetFilePointerEx(file.value,zero,nullptr,FILE_BEGIN))throw ToolFileError("Cannot prepare move source content");
             for(std::size_t offset=0;offset<destination.content.size();){
                 check_cancel(cancel);impl_->verify(file.value);DWORD count=0;
@@ -515,27 +515,28 @@ WorkspaceSnapshot WorkspaceTools::apply_move(const WorkspaceMovePlan& plan,std::
             check_cancel(cancel);attempted=true;
             if(!SetEndOfFile(file.value)||!FlushFileBuffers(file.value))throw ToolFileError("Cannot finalize move source content");
         }
-        check_cancel(cancel);impl_->verify(file.value);impl_->verify_creation_directory(directory);
+        phase="verify_before_rename";check_cancel(cancel);impl_->verify(file.value);impl_->verify_creation_directory(directory);
         if(identity()!=before.workspace_id)throw ToolAccessDenied("Workspace changed before rename");
         const auto expected_path=final_path(directory)+L"\\"+target.leaf;
         const auto buffer_size=sizeof(FILE_RENAME_INFO)+target.leaf.size()*sizeof(wchar_t);
         auto storage=std::make_unique<unsigned char[]>(buffer_size);auto* rename=new(storage.get()) FILE_RENAME_INFO{};
         rename->ReplaceIfExists=FALSE;rename->RootDirectory=directory;rename->FileNameLength=static_cast<DWORD>(target.leaf.size()*sizeof(wchar_t));
         std::memcpy(rename->FileName,target.leaf.c_str(),(target.leaf.size()+1)*sizeof(wchar_t));
-        attempted=true;
-        if(!SetFileInformationByHandle(file.value,FileRenameInfo,rename,static_cast<DWORD>(buffer_size)))throw ToolFileError("Cannot move source to absent destination");
+        attempted=true;phase="rename";
+        if(!SetFileInformationByHandle(file.value,FileRenameInfo,rename,static_cast<DWORD>(buffer_size))){const auto code=GetLastError();throw ToolFileError("Cannot move source to absent destination; win32="+std::to_string(code));}
         // Inspect the actual renamed handle even if cancellation arrived.
-        impl_->verify(file.value);
+        phase="verify_renamed_handle";impl_->verify(file.value);
         if(!equal(final_path(file.value),expected_path)||file_identity(file.value)!=before.file_id)throw ToolFileError("Renamed file binding differs");
-        const auto actual=read_effect_file(file.value,{}),hash=content_hash(actual);
+        phase="verify_renamed_content";const auto actual=read_effect_file(file.value,{}),hash=content_hash(actual);
         if(actual!=destination.content||hash!=destination.content_sha256)throw ToolFileError("Renamed file content differs");
-        const auto remaining=relative_file(source_directory,source.leaf,false,false,true);
+        phase="verify_source_absent";const auto remaining=relative_file(source_directory,source.leaf,false,false,true);
         if(remaining){Handle owned(remaining);throw ToolFileError("Move source name is present after rename");}
         if(identity()!=before.workspace_id)throw ToolFileError("Workspace changed after move");
         WorkspaceSnapshot result{target.relative,actual,before.workspace_id,before.file_id,hash};
         for(std::size_t index=0;index<destination.create_directories.size();++index)result.created_directory_bindings.push_back({destination.create_directories[index],file_identity(target.directories[retained_count+index]->value)});
         return result;
-    }catch(...){if(attempted)throw ToolMutationUncertain("Move, content or directory effects were attempted; reconciliation is required");throw;}
+    }catch(const std::exception& error){if(attempted)throw ToolMutationUncertain(std::string("Move effect uncertain at ")+phase+": "+error.what());throw;}
+    catch(...){if(attempted)throw ToolMutationUncertain(std::string("Move effect uncertain at ")+phase);throw;}
 }
 WorkspaceSnapshot WorkspaceTools::apply_plan(const WorkspaceEditPlan& plan,std::stop_token cancel) const {
     check_cancel(cancel);

@@ -1,5 +1,16 @@
 # Native patch implementation
 
+## Hosted gate still failing
+
+Run [37974972815](https://github.com/xlang-foundation/xMind/actions/runs/37974972815)
+compiled revision `a7f484a809cc8b27b8b02d3f94dacfddf7def263` and passed
+97 of 99 contracts. The workspace effect fixture returned an uncertain move
+outcome, and the parallel delegation fixture exceeded its unchanged eight-second
+wait. This is a failed gate, not patch acceptance. Move diagnostics now retain
+the effect phase and the rename API's Win32 error number. The delegation fixture
+prints actual durable parent/child states on timeout; its assertions and deadline
+are unchanged. These diagnostic changes require a new native build.
+
 General patch editing is being implemented in C++. OpenCode v2.0.16 is the
 behavior reference (`packages/core/src/tool/patch.txt` and the patch tool's input
 and operation declarations). No OpenCode implementation is embedded or copied.
