@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+Native legacy publication failure after real termination now has accepted
+rollback/recovery coverage and clearer native/client diagnostics. All
+**98/198/39 local tests passed**. Actual failure, absent ticket, retained session
+and a separate operator preparation/activation were verified; rollback-call
+failure and installed writing remain unverified. The installed migration dialog
+still awaits the user's confirmation.
+[Fault scope and evidence](native-legacy-publication-fault.md).
+
 The verified **0.1.1** migration VSIX is installed in the existing normal
 TestProj profile. Fresh 98/198/39 gates, independent archive audit and actual
 complete-runtime smoke passed. Existing transcript/model/usage reconnected

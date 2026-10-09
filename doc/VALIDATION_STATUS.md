@@ -1,5 +1,16 @@
 # Current native validation
 
+Post-stop publication rollback and operator recovery passed **98 native
+contracts in 205.33 seconds**, with 631 inputs unchanged, plus **198 extension /
+39 browser tests**. The real source process exits before a deferred foreign-key
+publication failure; the CLI reports failure, native rollback leaves no ticket
+or fault row and saved sessions remain intact. An explicit fixture operator
+repair and separate preparation then permit exact bootstrap/activation. No
+successful stop response is fabricated. Rollback-call failure itself is not
+injected. The installed 0.1.1 confirmation remains pending and this source was
+not deployed over it. [Failure path and limits](native-legacy-publication-fault.md),
+[exact evidence](evidence/native-legacy-fault-local.json).
+
 Version **0.1.1** passed a fresh 98/198/39 local gate, independent 1,933-entry
 VSIX verification and actual complete-runtime server/session/retirement smoke.
 It is installed in the existing normal TestProj window; old transcript, selected

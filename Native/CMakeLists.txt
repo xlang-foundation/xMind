@@ -850,7 +850,7 @@ if(BUILD_TESTING)
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/backend_owner_http_contract.mjs" "$<TARGET_FILE:agentflow_backend_owner_http_contract>" "${AGENTFLOW_XLANG3_SHARED}" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_backend_owner_http_contract PROPERTIES TIMEOUT 60)
     add_test(NAME native_backend_handoff_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
-      "${CMAKE_CURRENT_SOURCE_DIR}/tests/backend_handoff_contract.mjs" "$<TARGET_FILE:xmind_server>" "${AGENTFLOW_XLANG3_SHARED}" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "$<TARGET_FILE:xmind_admin>")
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/backend_handoff_contract.mjs" "$<TARGET_FILE:xmind_server>" "${AGENTFLOW_XLANG3_SHARED}" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "$<TARGET_FILE:xmind_admin>" "$<TARGET_FILE:agentflow_legacy_owner_contract>")
     set_tests_properties(native_backend_handoff_contract PROPERTIES TIMEOUT 90)
   endif()
   if(WIN32)

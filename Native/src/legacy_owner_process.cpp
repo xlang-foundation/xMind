@@ -106,6 +106,11 @@ void VerifiedLegacyOwnerProcess::stop_and_prepare(const LegacyOwnerBootstrap& bo
         BackendLease lease(impl_->observed.database_path);
         File canonical(lease.canonical_database_path(),false);require(canonical.same(impl_->database));
         publish_legacy_owner_ticket(db,lease,boot,impl_->observed.source,snapshot);db.commit();
-    }catch(...){db.rollback();if(stopped)throw std::runtime_error("Legacy source was stopped, but migration preparation failed. Saved storage was retained; operator recovery is required and no automatic restart occurred.");throw;}
+    }catch(...){
+        const auto original=std::current_exception();bool rolled_back=false;try{db.rollback();rolled_back=true;}catch(...){}
+        if(stopped)throw std::runtime_error("Legacy source was stopped, but migration preparation is unverified. Saved storage was retained; operator recovery is required and no automatic restart occurred.");
+        if(!rolled_back)throw std::runtime_error("Legacy source was not stopped, but SQLite rollback failed. Saved storage was retained; operator recovery is required.");
+        std::rethrow_exception(original);
+    }
 }
 }

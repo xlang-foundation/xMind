@@ -268,7 +268,9 @@ class WorkspaceBackend {
     const token=await this.context.secrets.get(`xmind.auth:${owner.origin}`);
     if(typeof token!=='string'||!/^[\x21-\x7e]{32,256}$/.test(token)||await this.context.secrets.get(`xmind.auth:${pending.origin}`)!==token)throw new Error('Pending native upgrade authentication is unavailable.');
     if(legacy&&pending.phase==='stopping'){
-      const recovered=await this.deps.admin(runtime,['--db',path.win32.join(owner.privateDirectory,'state.sqlite'),'--modules',runtime.modules,'--stdlib',runtime.stdlib,'inspect-legacy-ticket',runtime.runtimeRoot,runtime.manifestSha256,owner.canonical,String(pending.state.process_id),pending.state.process_birth,pending.state.server_sha256,pending.ticketId,'read-only-inspection',pending.approvedEdits?'approved':'read-only'],token,this.deps.env);
+      let recovered;
+      try{recovered=await this.deps.admin(runtime,['--db',path.win32.join(owner.privateDirectory,'state.sqlite'),'--modules',runtime.modules,'--stdlib',runtime.stdlib,'inspect-legacy-ticket',runtime.runtimeRoot,runtime.manifestSha256,owner.canonical,String(pending.state.process_id),pending.state.process_birth,pending.state.server_sha256,pending.ticketId,'read-only-inspection',pending.approvedEdits?'approved':'read-only'],token,this.deps.env);}
+      catch{throw new Error('The legacy process exited, but its exact migration ticket is unavailable. Saved storage is retained; operator recovery is required. No stop was repeated and no replacement database or source restart was created.');}
       if(recovered.legacy_ticket_id!==pending.ticketId||recovered.admission_closed!==true||recovered.quiescence_receipt!==false||recovered.process_signalled!==false)throw new Error('Native legacy preparation outcome remains unverified. No stop command was repeated.');
       pending.phase='prepared';await this.saveOwner(owner);
     }

@@ -7,7 +7,22 @@ using namespace agentflow;
 void require(bool yes){if(!yes)throw std::runtime_error("Legacy owner contract failed");}
 template<class E,class F>void rejects(F f){try{f();}catch(const E&){return;}throw std::runtime_error("Expected legacy rejection is absent");}
 struct Directory{std::filesystem::path root,parent=std::filesystem::canonical(std::filesystem::temp_directory_path());Directory(){std::random_device r;for(int i=0;i<32;++i){const auto p=parent/("xmind-legacy-owner-"+std::to_string(r()));if(std::filesystem::create_directory(p)){root=std::filesystem::canonical(p);return;}}throw std::runtime_error("Cannot create owned fixture");}~Directory(){try{if(root.parent_path()==parent&&root.filename().string().starts_with("xmind-legacy-owner-")&&std::filesystem::canonical(root)==root&&!std::filesystem::is_symlink(root)){std::error_code e;std::filesystem::remove_all(root,e);}}catch(...){}}};
-int main(int argc,char** argv){if(argc!=3)return 2;try{
+int fault_fixture(int argc,char** argv){
+ require(argc==5);const std::string action=argv[1];require(action=="seed-stop-fault"||action=="verify-stop-fault"||action=="clear-stop-fault");
+ const auto file=std::filesystem::u8path(argv[2]),canonical=std::filesystem::canonical(file),parent=canonical.parent_path(),temp=std::filesystem::canonical(std::filesystem::temp_directory_path());
+ require(file.is_absolute()&&file==canonical&&!std::filesystem::is_symlink(file)&&parent.parent_path()==temp&&parent.filename().string().starts_with("xmind-handoff-")&&(canonical.filename()=="legacy-state.sqlite"||canonical.filename()=="legacy-fault-state.sqlite"));
+ XlangSqlite db(argv[2],{argv[3],argv[4]});require_legacy_database_idle(db);
+ require(db.execute("SELECT id FROM sessions WHERE id='legacy-saved'").rows.size()==1);
+ if(action=="seed-stop-fault"){
+  require(!legacy_owner_record(db));db.execute("CREATE TABLE legacy_stop_fault_rows(ref TEXT REFERENCES sessions(id) DEFERRABLE INITIALLY DEFERRED)");
+  db.execute("CREATE TRIGGER legacy_stop_fault AFTER INSERT ON information WHEN NEW.category='native-legacy-owner' BEGIN INSERT INTO legacy_stop_fault_rows(ref) VALUES('missing-fault-session'); END");
+ }else{
+  require(!legacy_owner_record(db));require(db.execute("SELECT * FROM legacy_stop_fault_rows").rows.empty());
+  if(action=="clear-stop-fault")db.execute("DROP TRIGGER legacy_stop_fault");
+ }
+ std::cout<<"Owned native embedded-xlang3 stop/publication fault fixture operation passed\n";return 0;
+}
+int main(int argc,char** argv){if(argc==5){try{return fault_fixture(argc,argv);}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}if(argc!=3)return 2;try{
  Directory dir;const auto file=(dir.root/"state.sqlite").string();const std::vector<std::string> roots{argv[1],argv[2]};
  // Target/dead-process metadata and prompts are explicitly synthetic here.
  // Real runtime qualification and OS observation belong to separate fixtures.
