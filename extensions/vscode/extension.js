@@ -7,6 +7,7 @@ const { editReview } = require('./edit-review');
 const { browserViewLauncher } = require('./browser-view');
 const { WorkspaceBackend,machineSetting } = require('./workspace-backend');
 const { resolveNativeRuntime } = require('./native-runtime');
+const { captureEditorSelection } = require('./editor-selection');
 
 async function activate(context) {
   const browserViews=browserViewLauncher(vscode,context);
@@ -37,6 +38,7 @@ async function activate(context) {
   let generation = 0;
   let opening;
   let receiveSubscription,disposeSubscription;
+  let contextReadyView,pendingEditorContexts=[];
   let messages = Promise.resolve();
   let reviewed = new Map();
   let modelCatalogue = {models:[],default_model:''};
@@ -367,13 +369,14 @@ async function activate(context) {
     panel.webview.options = { enableScripts: true, localResourceRoots: [context.extensionUri] };
     const assetVersion=crypto.randomBytes(16).toString('hex');
     const asset = (...parts) => panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, ...parts)).toString()+'?v='+assetVersion;
+    contextReadyView=undefined;pendingEditorContexts=[];
     panel.webview.html = html(assetVersion, {
       source:panel.webview.cspSource,css:asset('media','chat.css'),script:asset('media','chat.js'),
       marked:asset('node_modules','marked','lib','marked.umd.js'),purify:asset('node_modules','dompurify','dist','purify.min.js')
     });
     const view = panel,workspaceEpoch=workspaceBackend.epoch;
     disposeSubscription?.dispose();receiveSubscription?.dispose();
-    disposeSubscription=panel.onDidDispose(() => { if (panel === view) { profileController?.dispose();stop(); reviewed.clear(); providerSelection=undefined; panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
+    disposeSubscription=panel.onDidDispose(() => { if (panel === view) { contextReadyView=undefined;pendingEditorContexts=[];profileController?.dispose();stop(); reviewed.clear(); providerSelection=undefined; panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
     receiveSubscription=panel.webview.onDidReceiveMessage(message => {
       if(panel!==view||workspaceBackend.epoch!==workspaceEpoch)return;
       if(panel===view&&['model','select-provider'].includes(message?.type))contextController?.invalidate();
@@ -389,6 +392,8 @@ async function activate(context) {
         if (!message || typeof message.type !== 'string') return;
         if (message.type === 'ready') {
           post({type:'workspace',root:connection.metadata.root,roots:connection.roots,managed:!previewOrigin&&machineSetting(vscode,'backendMode')!=='external',backendChangePending:connection.backendChangePending===true});
+          contextReadyView=view;const pending=pendingEditorContexts;pendingEditorContexts=[];
+          for(const item of pending)if(item.view===view&&item.client===client&&item.generation===generation&&item.epoch===workspaceBackend.epoch)post(item.message);
           post({ type: 'capabilities', execution: health.agent_execution, renameSessions:health.session_rename===true, model:selectedModel, models:modelCatalogue.models });
           await refresh();
           if (sessionId) await selectSession(sessionId);
@@ -596,6 +601,7 @@ async function activate(context) {
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
   function disconnectWorkspace(){
+    contextReadyView=undefined;pendingEditorContexts=[];
     workspaceBackend.invalidate();stop();contextController?.dispose();contextController=undefined;profileController?.dispose();profileController=undefined;
     providerSelection=undefined;reviewed.clear();clearGraph();sessionId=undefined;runId=undefined;sessionRuns=[];client=undefined;
     modelCatalogue={models:[],default_model:''};selectedModel=undefined;graphCatalogue=[];selectedGraph=undefined;
@@ -626,12 +632,18 @@ async function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.selection', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
-    const text = editor.document.getText(editor.selection);
-    if (!text) { vscode.window.showInformationMessage('Select code to add it to an AgentFlow prompt.'); return; }
     try {
       await open();
-      const question = await vscode.window.showInputBox({ prompt: 'Ask about the selected code' });
-      if (question) post({ type: 'draft', text: `${question}\n\nFile: ${vscode.workspace.asRelativePath(editor.document.uri)}\n\n${text}` });
+      const target=client,view=panel,epoch=generation,owner=workspaceBackend.active;
+      if(!target||!view||!owner)throw new Error('Connect the workspace before adding editor context.');
+      const ticket=await workspaceBackend.prepare();workspaceBackend.assert(ticket);
+      if(ticket.origin!==target.baseUrl)throw new Error('The backend workspace changed.');
+      const isCurrent=()=>client===target&&panel===view&&generation===epoch&&(!vscode.window.activeTextEditor||vscode.window.activeTextEditor===editor);
+      const draft=await captureEditorSelection(editor,owner.metadata,{isCurrent});workspaceBackend.assert(ticket);
+      if(!isCurrent())throw new Error('The editor or sidebar changed. Select the code again.');
+      const message={type:'append-context',text:draft.text,root:owner.metadata.root};
+      if(contextReadyView===view)post(message);
+      else{if(pendingEditorContexts.length>=8)throw new Error('The sidebar is still opening. Wait before adding more selections.');pendingEditorContexts.push({view,client:target,generation:epoch,epoch:workspaceBackend.epoch,message});}
     } catch (error) { vscode.window.showErrorMessage(error.message); }
   }));
   context.subscriptions.push({ dispose:()=>{stop();workspaceBackend.dispose();receiveSubscription?.dispose();disposeSubscription?.dispose();} });

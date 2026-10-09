@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+Workspace-bound editor selection now appends exact, labelled buffer context
+to the existing sidebar draft without a question popup or automatic submission.
+Initial view readiness, stale editor/workspace state and retained-view
+reconnection have accepted source contracts. All **215/39 view tests** passed;
+actual filesystem metadata checks and the **0.1.3 VSIX** audit passed separately.
+The native runtime is unchanged. Installed/rendered acceptance awaits migration.
+[Behavior, artifact and limits](vscode-editor-selection.md).
+
 The local **0.1.2 VSIX** packages the accepted native file/folder-creation and
 Responses-diagnostic source. Complete archive/inventory and ten host/view
 source checks passed, as did 200/39 versioned client tests and a qualified

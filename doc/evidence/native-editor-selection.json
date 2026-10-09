@@ -1,0 +1,254 @@
+{
+  "scope": "Thin VS Code selected-buffer input adapter and shared composer rendering. Synthetic editor/controller/DOM tests plus separate actual filesystem metadata checks; no native inference, installed or rendered editor acceptance.",
+  "baseRevision": "b32595ad34743291f0a7184f2271dd398b1abfad",
+  "version": "0.1.3",
+  "views": {
+    "sourceRevision": "b32595ad34743291f0a7184f2271dd398b1abfad",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 43,
+    "trackedSourceFiles": 41,
+    "vendorFiles": 2,
+    "browserAssets": 11,
+    "sourceAndAssetBytesUnchanged": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 215,
+      "passed": 215,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 39,
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true,
+    "sourceHashes": {
+      "extensions/vscode/.vscodeignore": "fe8a6e48beb48a2c4be33c9dbcbc750a8369b7079a5bae5debdb55575f6d8ea3",
+      "extensions/vscode/LICENSE": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
+      "extensions/vscode/README.md": "8b2748b8e8e7e1e9a7bf75e2c4c00f17d9abb850d57ba4f60e45f0b9125abbc3",
+      "extensions/vscode/browser-view.js": "f5e47b3b60530b4ed1b98ff3254eb0debbb49c5fde860912abd09d4a1d05a1ea",
+      "extensions/vscode/client.js": "24a89672dfb91907f86116e10c904593103db2c14a050eac50bb2df86ac14b46",
+      "extensions/vscode/edit-review.js": "8afc5443fc2f7aedb5af57f2add361519b381b9c14baefaabf5c39702ad2c06e",
+      "extensions/vscode/editor-selection.js": "67dc79d02a3b5ed1d107a70570cade5e8c4b0b62461d2bd64329b136631ccd7d",
+      "extensions/vscode/extension.js": "8ce5301fe0f36c0689825bb96bc843e4a8259aa72a4beb0c44e3db9853cc3106",
+      "extensions/vscode/media/chat.css": "391eb2b3ea30aa140d2292a9434206881e92981cbec05cef129796f86827c3bd",
+      "extensions/vscode/media/chat.js": "1e38edd22a6ea75d45793d00b70d224a5162bca8d5d7c4467bd842aa3df305ae",
+      "extensions/vscode/media/xmind.svg": "45123fe1e365d6ca284a245029b4a3de12f511fdc42945bf6fe15c9f3cf18b7b",
+      "extensions/vscode/native-runtime.js": "8eb3b43cacaa8fe1d2cdad84cd70ea94ae489ad9ffdc9e24edbf39bb4e430304",
+      "extensions/vscode/package-lock.json": "c2a97780653e90b862acdb6a5223890ba1e0182a5ae025da4f25881fc568c307",
+      "extensions/vscode/package.json": "6a5901d9f3e502df8f339a2c04042da93507d7d60b65c2c43505e8a6ea2d99f0",
+      "extensions/vscode/scripts/package-native-runtime.mjs": "dbdd2aca335a947ce60749967f9b64db2e458a320c4a5498196e305981dd4bcd",
+      "extensions/vscode/tests/backend-smoke.js": "3c662b35158f596342c5bbf05a84377f8e25091e43eb8f9ede13957f254ceb0d",
+      "extensions/vscode/tests/browser-view.test.js": "21e89ece7e270a55719e40e8973b612afa3ca7facb66abf2d3031dd0fa93dbb4",
+      "extensions/vscode/tests/client-context.test.js": "8c90ba49708117f5be34c57e4a52bff0371512fcbc7f2f9d95fee028fe1d6cc9",
+      "extensions/vscode/tests/client-planning.test.js": "68dc4ea1ef5389aa78eb9bff0757d9ea6effa59b651d54260ea2322359922fc8",
+      "extensions/vscode/tests/client.test.js": "72c7a9e5444ce9af864fdf2b058e2a8b9d202b7708623adbca1639c2e38a0030",
+      "extensions/vscode/tests/editor-selection.test.js": "14a9e6c5f36d70696088ab3098b2b6c196d79b0f62744b6a04ba26a0d5fa0f50",
+      "extensions/vscode/tests/extension-host.test.js": "1f51902b7945f6dd4af4ea54aecc84eb1b05132b4858f5312eafbc3aaca5f76e",
+      "extensions/vscode/tests/native-runtime-package.test.js": "972459cee15617a36d76afe99ea4c400d382e7a1c43052eb73543f27a56bd77b",
+      "extensions/vscode/tests/native-runtime.test.js": "e07ba2085bb7a39ad579a0a04ff89ba94dcbe6d90ba67449f629b190acd2e08a",
+      "extensions/vscode/tests/plan-fixture.js": "89e8149512ae818236b1411078d2a86d704bdcbc109e6278bbc9c68705e3a3a4",
+      "extensions/vscode/tests/provider-profile-controller.test.js": "4968cd0de2a7e3717b461464c85bf5abfb6058678659ef704579b243b01c2105",
+      "extensions/vscode/tests/renderer.test.js": "98829c5222233bd35af5cc02688f9cf42612a58ef9d8d0105413b710a4a17e7b",
+      "extensions/vscode/tests/workspace-backend.test.js": "2b8f0bd1bc0a1c9dfa35989ab5c48075cbde72e70b9b6782248ef99f3a9f0602",
+      "extensions/vscode/webview.js": "fb2966eca9664fcfdce0b9580e7d1b659aa36102fc981d63be4a3c1b1a1153de",
+      "extensions/vscode/workspace-backend.js": "9e8629ac7301b610b2a7f02f5907041ea9db2504dfafd7add3c7660c5f17b9a6",
+      "views/browser/browser.css": "8cae13ebf6ff2700bbcbe1a7150315603fc5865ff8bdbe3c9e30c2cb3ca901dc",
+      "views/browser/browser.js": "0840ae1479031597f5ef2d662a2fda8643f2eab9a9cdcef0ab0c3ab951062cd8",
+      "views/browser/build.mjs": "dfe1470c5510607a3fbaffcca873f5f8b91c41d1339cfb978232acefc9ca0326",
+      "views/browser/page.cjs": "8042acc2d6ca6bc80ac58fb05e721e3b85c5db37bf0e6adc90bd9f8f7eaa2f28",
+      "views/browser/server.mjs": "a2ff70cb98714d000b109066964d08a0a90c891377c56c92cd30d2202c2ff8b5",
+      "views/browser/tests/classic-script.test.cjs": "98628213446f6ecdbdc6f4baa1c4e5f4b229cfd43115a554db3054094aacd5c8",
+      "views/browser/tests/connection.test.cjs": "804bede20c1cb12cb1c59188464f20f8e1e662a403e238e8594c4c5db0aa8444",
+      "views/browser/tests/controller.test.cjs": "6e048f731e6cf39c96db397929e9f955474d75b0fa69b0f18772cb72b732e298",
+      "views/browser/tests/native-contract.mjs": "a3f3c361b55247871c6c376a0a5571e1d6657f26099964e01344581a0e1b675b",
+      "views/browser/tests/planning-routes.test.cjs": "3d9043f52ee93be5c25dead3b77dc5792b24d97b8ddc98ab8c329c8831b62b2f",
+      "views/browser/tests/server.test.cjs": "e014f463a82dd6ff1902edd235087e47f7ef0ed9ebee7e3cbf80be363f196d29",
+      "extensions/vscode/node_modules/marked/lib/marked.umd.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+      "extensions/vscode/node_modules/dompurify/dist/purify.min.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2"
+    },
+    "assetHashes": {
+      "index.html": "2280e0c50659f4859f0ff6c23c687a3a72e7c95971c4872969954c846063f1db",
+      "chat.js": "1e38edd22a6ea75d45793d00b70d224a5162bca8d5d7c4467bd842aa3df305ae",
+      "chat.css": "391eb2b3ea30aa140d2292a9434206881e92981cbec05cef129796f86827c3bd",
+      "client.js": "24a89672dfb91907f86116e10c904593103db2c14a050eac50bb2df86ac14b46",
+      "marked.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+      "purify.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+      "browser.js": "0840ae1479031597f5ef2d662a2fda8643f2eab9a9cdcef0ab0c3ab951062cd8",
+      "browser.css": "8cae13ebf6ff2700bbcbe1a7150315603fc5865ff8bdbe3c9e30c2cb3ca901dc",
+      "licenses/marked.txt": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+      "licenses/dompurify.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "licenses/dompurify-MPL.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+    },
+    "guard": {
+      "count": 0,
+      "pids": [
+        null
+      ]
+    },
+    "helperSha256": "810c0b4b0bfc96c813ee90af7dbf8331e910ef17a51a740bdcad3d9d3ffe43f9",
+    "runnerSha256": "5839481bbb0188cb9d3896a2e715db5a000e59eee250a55185ed524eb85d3e7f",
+    "extensionLogSha256": "9c1b5f6ffb04b1a9943e93c3e12e63326c257fe436d9215fa72592d521bc48f3",
+    "browserLogSha256": "9f3fb412d21c151f638dde7b27af231fbd61bbaa435bc447435bc0009496cdfd"
+  },
+  "filesystem": {
+    "passed": true,
+    "scope": "Actual Windows filesystem canonical-path/stat/hard-link observations; editor document and backend metadata are explicitly synthetic. No installed IDE, native engine, provider or real credential was accessed.",
+    "actualRegularFile": true,
+    "actualCanonicalPath": true,
+    "exactUnicodeBufferPreserved": true,
+    "privatePathRejectedBeforeTextRead": true,
+    "actualHardLinkRejectedBeforeTextRead": true,
+    "sourceFixtureFilesWrittenByTest": true,
+    "editorAndBackendMetadataSynthetic": true,
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "cpythonExecuted": false,
+    "installed": false
+  },
+  "archive": {
+    "passed": true,
+    "scope": "Independent VSIX ZIP and staged-file integrity; no execution or installed acceptance",
+    "archive": {
+      "file": "xmind-0.1.3.vsix",
+      "sha256": "eea5dadd46f90d1087b2a53ab3f96d90a0277ec759fb8a542139f7b5ec47b527",
+      "bytes": 18669020,
+      "entries": 1934,
+      "expandedBytes": 67762606
+    },
+    "runtime": {
+      "manifestSha256": "2501be8046cc4f600763a93665b464e2fee26d9afc2e0f7fe9c02311e6f918aa",
+      "nativeRevision": "1bf6a2d7d9d98514b4cc811be18899907ce64610",
+      "sdkRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+      "inventoryFiles": 1899,
+      "nativeFiles": 8,
+      "pureSourceFiles": 1869,
+      "licenseFiles": 21,
+      "allArchiveBytesMatchManifest": true,
+      "manifestBytesMatchStaged": true,
+      "stagedInventoryVerified": true,
+      "nativeSha256": {
+        "xmind_server.exe": "8f9d6dac7bb427105aab6e17f422e83aa77adb3879e05e8d45219879d7ca65b0",
+        "xmind_schema_worker.exe": "4f4aa03c7acd91c5712127d5342a05c57f434a23480896556b133aa3ea25f540",
+        "xmind_cli.exe": "6c3bf39a23fe6f3501dd952325a2cae169a08625814e7104ce35cb6eef5dea1b",
+        "xmind_admin.exe": "8b0a7e6ca827a177b27e46cacc7501b1845b6ec4e5bc3caaeb307a92d0307f81",
+        "xlang3_runtime.dll": "4c0959726dfdaf8c12321188da524808e516cf224bab5ae590b3bd05a4349c07",
+        "xlang3.exe": "45e8581b7d235ad451b6fd1d5b3e1d31ac8ebe926c93f2eb9191cae8bef06e9b",
+        "modules/xlang_json.x3pkg.dll": "8b1c90c339e070f6633ecc465e6560b8e3a269f13bef481867e60359c093fbc0",
+        "modules/xlang_sqlite3.x3pkg.dll": "6d47f5185235817a016aa32b871bbc9f069fc66dd765bf0cda71e1c0084e1830"
+      }
+    },
+    "extensionSourceSha256": {
+      "workspace-backend.js": "9e8629ac7301b610b2a7f02f5907041ea9db2504dfafd7add3c7660c5f17b9a6",
+      "webview.js": "fb2966eca9664fcfdce0b9580e7d1b659aa36102fc981d63be4a3c1b1a1153de",
+      "package.json": "6a5901d9f3e502df8f339a2c04042da93507d7d60b65c2c43505e8a6ea2d99f0",
+      "native-runtime.js": "8eb3b43cacaa8fe1d2cdad84cd70ea94ae489ad9ffdc9e24edbf39bb4e430304",
+      "extension.js": "8ce5301fe0f36c0689825bb96bc843e4a8259aa72a4beb0c44e3db9853cc3106",
+      "editor-selection.js": "67dc79d02a3b5ed1d107a70570cade5e8c4b0b62461d2bd64329b136631ccd7d",
+      "client.js": "24a89672dfb91907f86116e10c904593103db2c14a050eac50bb2df86ac14b46",
+      "browser-view.js": "f5e47b3b60530b4ed1b98ff3254eb0debbb49c5fde860912abd09d4a1d05a1ea",
+      "scripts/package-native-runtime.mjs": "dbdd2aca335a947ce60749967f9b64db2e458a320c4a5498196e305981dd4bcd",
+      "media/chat.js": "1e38edd22a6ea75d45793d00b70d224a5162bca8d5d7c4467bd842aa3df305ae",
+      "media/chat.css": "391eb2b3ea30aa140d2292a9434206881e92981cbec05cef129796f86827c3bd"
+    },
+    "guards": {
+      "exactInventory": true,
+      "duplicateNames": false,
+      "symlinks": false,
+      "privateConfigurationFiles": false,
+      "cpythonExecutablesExtensionsOrBytecode": false
+    },
+    "nativeExecuted": false,
+    "sdkExecuted": false,
+    "configurationAccessed": false,
+    "providerCalls": 0,
+    "installed": false
+  },
+  "nativeReuse": {
+    "nativeRevision": "1bf6a2d7d9d98514b4cc811be18899907ce64610",
+    "sdkRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+    "runtimeManifestUnchanged": true,
+    "nativeSourceUnchanged": true,
+    "nativeGateRerun": false,
+    "priorNativeGatePassed": 98,
+    "priorPackagedSmokeEvidenceSha256": "803bf203b55a3361c70687bb40cf9c837cb10408968e0c0a6063931735d00f65"
+  },
+  "behavior": {
+    "sameActiveBackendRoot": true,
+    "relativeCanonicalPath": true,
+    "privateAndForeignPathsRejected": true,
+    "unsavedBufferExplicitlyLabelled": true,
+    "exactUnicodeText": true,
+    "staleDocumentSelectionAndWorkspaceRejected": true,
+    "existingDraftPreserved": true,
+    "noQuestionPopup": true,
+    "noAutomaticSubmission": true,
+    "initialReadyHandshakeRequired": true,
+    "contextDeliveredOnce": true,
+    "retainedSidebarReconnectionClearsPendingContext": true,
+    "nativeEffectsStillRequireNativePermission": true
+  },
+  "retainedAttempts": [
+    {
+      "scope": "Earlier helper/focus contracts and archive checks before ready-handshake review; no installed acceptance",
+      "folders": [
+        "editor-selection-views",
+        "editor-selection-vsix",
+        "editor-selection-final-views",
+        "editor-selection-final-vsix"
+      ]
+    },
+    {
+      "scope": "New queued-context reconnection fixture timed out because it incorrectly expected a second view; final fixture observes the retained view and retired callback",
+      "gate": {
+        "sourceRevision": "b32595ad34743291f0a7184f2271dd398b1abfad",
+        "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+        "sourceFiles": 43,
+        "trackedSourceFiles": 41,
+        "vendorFiles": 2,
+        "browserAssets": 11,
+        "sourceAndAssetBytesUnchanged": true,
+        "extension": {
+          "exitCode": 1,
+          "tests": 215,
+          "passed": 214,
+          "failed": 1,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "browser": {
+          "exitCode": 0,
+          "tests": 39,
+          "passed": 39,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0
+        },
+        "providerRequests": 0,
+        "nativeExecuted": false,
+        "cpythonExecuted": false,
+        "passed": false
+      },
+      "logSha256": "d86b17d5de1fac74c8b4095d0b3b6e7b2435600db8582899f20a4c0b6e37ebcc"
+    }
+  ],
+  "installed": false,
+  "installedVersionUnchanged": "0.1.1",
+  "installedProfileModified": false,
+  "migrationDialogObserved": "Stop and migrate",
+  "migrationButtonActivated": false,
+  "pendingQuestionRepeated": false,
+  "remaining": [
+    "User-confirmed migration and installed/rendered selection plus create/edit approval acceptance",
+    "Native structured file-context attachments and snapshot/staleness contracts across CLI/browser/editor",
+    "Full pinned OSS coding parity and private Nexus delivery"
+  ]
+}
