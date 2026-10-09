@@ -87,9 +87,32 @@ in a disposable test database, not a modification of a product database. This
 contract has not executed for the candidate source. It does not establish a model
 or client patch workflow.
 
+The native multi-file coordinator is now implemented in source. It validates
+every encoded proposal and guidance binding before requesting the first file,
+discloses the requested batch manifest in each approval, rejects reused operation
+identities and executes files sequentially. Its bounded report is derived from
+actual durable operation states/results, with earlier successes, denied/failed
+files and verified absence of requests for later files kept distinct. It stops on
+denial, cancellation, stale preconditions or uncertainty. An unrecorded/unresolved
+effect stops coordination rather than fabricating a summary or continuing.
+
+Creation/move receipts now capture actual identities of created directories while
+their handles remain retained. Later files may refresh only the already-created
+prefix belonging to this batch, after verifying those identities and the original
+ancestor. Remaining folder effects are disclosed in the new file's approval.
+Externally replaced or independently created folders do not become an implicit
+grant. This supports sibling files and moves sharing new folders, including
+Windows Unicode/case aliases, while preserving each file's immutable review.
+
+The batch contract source covers complete mixed-operation batches, shared folders,
+validation before the first effect, identity reuse, partial denial, cancellation,
+stale later files, externally replaced owned folders and exact per-file receipts
+across an xlang3/SQLite restart. It independently reads actual files. These checks
+have not executed for this candidate. Batch-wide model guidance delivery and
+client review remain separate requirements.
+
 These increments do not expose a model tool or filesystem endpoint and perform
-no model-invokable filesystem effects. Delivery still requires the multi-file
-coordinator, complete batch disclosure/outcomes, model-call input and guidance
+no model-invokable filesystem effects. Delivery still requires model-call input and guidance
 integration, recorded
 partial or uncertain outcomes, recovery without replay, model/graph integration,
 CLI/browser/VS Code review and real-provider acceptance. A multi-file patch must

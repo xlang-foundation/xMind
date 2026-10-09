@@ -199,6 +199,7 @@ struct WorkspaceTools::Impl {
 };
 WorkspaceTools::WorkspaceTools(const std::string& root):impl_(std::make_unique<Impl>(root)) {}
 WorkspaceTools::~WorkspaceTools()=default;
+bool WorkspaceTools::same_relative_path(const std::string& first,const std::string& second){const auto a=wide(relative_path(first)),b=wide(relative_path(second));return CompareStringOrdinal(a.data(),static_cast<int>(a.size()),b.data(),static_cast<int>(b.size()),TRUE)==CSTR_EQUAL;}
 std::string WorkspaceTools::creation_directory(const std::string& path,std::stop_token cancel) const {return impl_->creation_parent(path,cancel,true).existing_directory;}
 WorkspaceCreatePlan WorkspaceTools::plan_creation(const std::string& path,const std::string& content,std::stop_token cancel,bool create_parents) const {
     check_cancel(cancel);if(content.size()>1024*1024 || !valid_text(content))throw std::invalid_argument("Creation content must be bounded UTF-8 text");
@@ -211,6 +212,7 @@ WorkspaceSnapshot WorkspaceTools::apply_creation(const WorkspaceCreatePlan& plan
     check_cancel(cancel);if(plan.content.size()>1024*1024 || !valid_text(plan.content) || content_hash(plan.content)!=plan.content_sha256)throw std::invalid_argument("Invalid creation plan content or hash");
     if(identity()!=plan.workspace_id)throw ToolAccessDenied("Creation belongs to another workspace");
     auto parent=impl_->creation_parent(plan.path,cancel,!plan.create_directories.empty());const auto anchor=parent.directories.back()->value;
+    const auto retained_count=parent.directories.size();
     if(file_identity(anchor)!=plan.parent_id||parent.missing!=plan.create_directories)throw ToolContentConflict("Creation parent identity or absence changed");
     check_cancel(cancel);
     bool mutated=false;
@@ -228,7 +230,9 @@ WorkspaceSnapshot WorkspaceTools::apply_creation(const WorkspaceCreatePlan& plan
         LARGE_INTEGER zero{};if(!SetFilePointerEx(file.value,zero,nullptr,FILE_BEGIN))throw ToolFileError("Cannot inspect created file");
         std::string actual;std::array<char,8192> buffer{};for(;;){DWORD count=0;if(!ReadFile(file.value,buffer.data(),static_cast<DWORD>(buffer.size()),&count,nullptr))throw ToolFileError("Cannot read created file");if(!count)break;if(count>1024*1024-actual.size())throw ToolFileError("Created file exceeds limits");actual.append(buffer.data(),count);}
         impl_->verify(file.value);const auto hash=content_hash(actual),id=file_identity(file.value);if(actual!=plan.content || hash!=plan.content_sha256 || identity()!=plan.workspace_id || file_identity(anchor)!=plan.parent_id)throw ToolFileError("Created file readback differs from plan");
-        return {parent.relative,std::move(actual),plan.workspace_id,id,hash};
+        WorkspaceSnapshot result{parent.relative,std::move(actual),plan.workspace_id,id,hash};
+        for(std::size_t index=0;index<plan.create_directories.size();++index)result.created_directory_bindings.push_back({plan.create_directories[index],file_identity(parent.directories[retained_count+index]->value)});
+        return result;
     }catch(...){if(mutated)throw ToolMutationUncertain("File or directory creation occurred; its final state requires reconciliation");throw;}
 }
 std::string WorkspaceTools::identity() const {
@@ -477,6 +481,7 @@ WorkspaceSnapshot WorkspaceTools::apply_move(const WorkspaceMovePlan& plan,std::
     auto source=impl_->creation_parent(before.path,cancel,false,true);
     auto target=impl_->creation_parent(destination.path,cancel,!destination.create_directories.empty(),true);
     const auto source_directory=source.directories.back()->value,anchor=target.directories.back()->value;
+    const auto retained_count=target.directories.size();
     if(plan.parent_id.empty()||file_identity(source_directory)!=plan.parent_id||file_identity(anchor)!=destination.parent_id||target.missing!=destination.create_directories)throw ToolContentConflict("Move parent identity or absence changed");
     const auto source_name=wide(source.relative),target_name=wide(target.relative);
     if(CompareStringOrdinal(source_name.data(),static_cast<int>(source_name.size()),target_name.data(),static_cast<int>(target_name.size()),TRUE)==CSTR_EQUAL)throw ToolContentConflict("Move must name a distinct destination");
@@ -527,7 +532,9 @@ WorkspaceSnapshot WorkspaceTools::apply_move(const WorkspaceMovePlan& plan,std::
         const auto remaining=relative_file(source_directory,source.leaf,false,false,true);
         if(remaining){Handle owned(remaining);throw ToolFileError("Move source name is present after rename");}
         if(identity()!=before.workspace_id)throw ToolFileError("Workspace changed after move");
-        return {target.relative,actual,before.workspace_id,before.file_id,hash};
+        WorkspaceSnapshot result{target.relative,actual,before.workspace_id,before.file_id,hash};
+        for(std::size_t index=0;index<destination.create_directories.size();++index)result.created_directory_bindings.push_back({destination.create_directories[index],file_identity(target.directories[retained_count+index]->value)});
+        return result;
     }catch(...){if(attempted)throw ToolMutationUncertain("Move, content or directory effects were attempted; reconciliation is required");throw;}
 }
 WorkspaceSnapshot WorkspaceTools::apply_plan(const WorkspaceEditPlan& plan,std::stop_token cancel) const {

@@ -2,7 +2,7 @@
 #include "agentflow/edit_executor.hpp"
 
 namespace agentflow {
-struct PatchFileIdentity {std::string patch_id;std::size_t index=0,file_count=0;};
+struct PatchFileIdentity {std::string patch_id;std::size_t index=0,file_count=0;std::string manifest_json;};
 // One native, immutable per-file patch proposal/claim/outcome. Batch orchestration
 // must prepare every file before dispatch and retain earlier outcomes on failure.
 class PatchFileExecutor {

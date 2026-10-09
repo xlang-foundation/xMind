@@ -53,6 +53,7 @@ $ciExpected=@('model_stream_protocol_contract','model_request_contract','native_
 $ciExpected+='native_mcp_wire_contract'
 $ciExpected+='native_file_patch_contract'
 $ciExpected+='native_patch_file_executor_contract'
+$ciExpected+='native_patch_executor_contract'
 $ciExpected+='native_mcp_stdio_contract'
 $ciExpected+='native_mcp_handshake_contract'
 $ciExpected+='native_mcp_client_contract'

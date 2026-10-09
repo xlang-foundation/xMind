@@ -21,8 +21,10 @@ struct WorkspaceFilePage {
     std::optional<std::size_t> next_offset;
     std::vector<std::size_t> truncated_lines;
 };
+struct WorkspaceDirectoryBinding {std::string path,file_id;};
 struct WorkspaceSnapshot {
     std::string path,content,workspace_id,file_id,content_sha256;
+    std::vector<WorkspaceDirectoryBinding> created_directory_bindings;
 };
 struct WorkspaceEditPlan {
     WorkspaceSnapshot before;
@@ -75,6 +77,7 @@ public:
     // Backend configuration is outside model-visible workspace authority.
     // Component matching includes Windows case and trailing-dot/space aliases.
     static bool backend_private_component(std::string_view name);
+    static bool same_relative_path(const std::string& first,const std::string& second);
     // Verified public directory identity for native process workdir admission;
     // validates both caller spelling and the normalized opened handle path.
     std::string directory_identity(const std::string& path=".",std::stop_token cancel={}) const;

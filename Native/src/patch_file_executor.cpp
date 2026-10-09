@@ -28,6 +28,15 @@ OperationSpec PatchFileExecutor::proposal(const std::string& id,const std::strin
             }
         }
     },plan);
+    if(!identity.manifest_json.empty()){
+        if(identity.manifest_json.size()>65536)throw std::invalid_argument("Patch manifest exceeds bounds");
+        const auto manifest=Json::parse(identity.manifest_json);
+        if(!manifest.is_array()||manifest.size()!=identity.file_count)throw std::invalid_argument("Patch manifest differs from file count");
+        const auto& current=manifest.at(identity.index);
+        if(current.at("operation_id")!=id||current.at("action")!=payload.at("action")||current.at("path")!=payload.at("path"))throw std::invalid_argument("Patch manifest differs from file proposal");
+        if(payload.contains("destination_path")&&current.at("destination_path")!=payload.at("destination_path"))throw std::invalid_argument("Patch manifest differs from move destination");
+        payload["patch_files"]=manifest;
+    }
     if(guidance.verify)payload["repository_guidance"]=Json::parse(guidance.metadata_json);
     auto source=payload.dump();if(source.size()>2*1024*1024)throw std::invalid_argument("Encoded patch proposal exceeds the durable operation limit");
     return {run,workspace,"patch_file",std::move(source)};
@@ -54,6 +63,7 @@ std::string PatchFileExecutor::execute(const std::string& id,const std::string& 
                 else if constexpr(std::is_same_v<T,WorkspaceEditPlan>){observed=workspace_.apply_plan(file,cancel);action="update";}
                 else {observed=workspace_.apply_move(file,cancel);action="move";}
                 Json result={{"action",action},{"path",observed.path},{"workspace_id",observed.workspace_id},{"file_id",observed.file_id},{"after_exists",true},{"after_sha256",observed.content_sha256},{"size",observed.content.size()}};
+                result["created_directory_bindings"]=Json::array();for(const auto& directory:observed.created_directory_bindings)result["created_directory_bindings"].push_back(Json{{"path",directory.path},{"file_id",directory.file_id}});
                 if constexpr(std::is_same_v<T,WorkspaceMovePlan>){result["source_path"]=file.before.path;result["before_sha256"]=file.before.content_sha256;result["created_directories"]=file.destination.create_directories;}
                 else if constexpr(std::is_same_v<T,WorkspaceCreatePlan>)result["created_directories"]=file.create_directories;
                 else result["before_sha256"]=file.before.content_sha256;
