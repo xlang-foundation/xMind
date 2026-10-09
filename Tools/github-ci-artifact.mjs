@@ -1,4 +1,4 @@
-// Download this repository's exact-revision CI evidence/runtime, read-only.
+// Download this repository's exact-revision native or view CI artifacts, read-only.
 // Authentication stays in memory; redirects never receive Git credentials.
 import {spawnSync} from 'node:child_process';
 import {mkdir,writeFile} from 'node:fs/promises';

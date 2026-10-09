@@ -143,7 +143,7 @@ test('VS Code conversation selection recovers discovery when native provider pub
  const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];
  try{view.receive({type:'ready'});await until(()=>view.posted.findLast(m=>m.type==='model-list')?.models.length===2);view.receive({type:'select-provider',id:'next'});await until(()=>selections.length===1);view.receive({type:'select',id:'saved'});release(registry);await until(()=>view.posted.findLast(m=>m.type==='status')?.text==='completed');await new Promise(resolve=>setImmediate(resolve));
   assert.deepEqual(selections,[{id:'next',expected_revision:4}]);assert.deepEqual(writes,[]);assert.deepEqual(view.posted.findLast(m=>m.type==='model-list').models,[{id:'next-current'},{id:'next-alternate'}]);assert.equal(view.posted.findLast(m=>m.type==='provider-profiles').active,'next');assert.equal(h.requests.filter(p=>p==='/v1/provider/profiles/models').length,2);assert.ok(!h.requests.includes('/v1/runs'));assert.ok(view.posted.some(m=>m.type==='history'));
-  view.receive({type:'send',prompt:'Synthetic explicit submission after observed provider recovery'});await until(()=>admissions.length===1);assert.equal(admissions[0].provider_profile_id,'next');assert.equal(admissions[0].expected_provider_revision,5);assert.equal(admissions[0].model,'next-current');assert.deepEqual(writes,[]);
+  view.receive({type:'send',prompt:'Synthetic explicit submission after observed provider recovery'});await until(()=>admissions.length===1);assert.equal(admissions[0].provider_profile_id,'next');assert.equal(admissions[0].expected_provider_revision,5);assert.equal(admissions[0].model_id,'next-current');assert.deepEqual(writes,[]);
  }finally{view.close();}
 });
 
