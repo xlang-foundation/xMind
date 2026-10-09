@@ -8,6 +8,13 @@ parent identities, destination absence, private/link paths, Unicode collisions,
 overlapping targets and aggregate review bounds. Approval/effect integration remains
 required. [Implementation and remaining delivery](native-file-patch.md).
 
+Backend-only deletion and move effects are implemented in source, with exclusive
+handle/snapshot checks, no-overwrite rename, post-effect verification and explicit
+uncertainty handling. Disposable-filesystem contract source covers actual delete,
+rename/content update, missing folders and rejected stale/private/link operations.
+Compilation and execution remain pending. No model tool, approval journal or
+installed patch acceptance is claimed.
+
 The shared sidebar approval-review candidate passed the complete isolated
 **217 extension / 39 browser** gate. A persistent review notice and bounded
 activity log address the installed test's offscreen proposal; pending review

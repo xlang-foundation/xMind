@@ -33,6 +33,7 @@ struct WorkspaceEditPlan {
 struct WorkspaceCreatePlan {std::string path,workspace_id,parent_id,content,content_sha256;std::vector<std::string> create_directories;};
 struct WorkspaceRemovalPlan {WorkspaceSnapshot before;std::string parent_id;};
 struct WorkspaceMovePlan {WorkspaceSnapshot before;std::string parent_id;WorkspaceCreatePlan destination;};
+struct WorkspaceRemovalResult {std::string path,workspace_id,file_id,removed_sha256;std::size_t removed_size;};
 using WorkspacePatchFilePlan=std::variant<WorkspaceCreatePlan,WorkspaceEditPlan,WorkspaceRemovalPlan,WorkspaceMovePlan>;
 struct WorkspacePatchPlan {std::string workspace_id;std::vector<WorkspacePatchFilePlan> files;};
 struct WorkspaceFingerprint {std::string path,workspace_id,file_id,content_sha256;std::size_t size;};
@@ -101,6 +102,10 @@ public:
     // All file sections are prepared from actual snapshots before any proposal
     // or effect. Delete/move plans are data, not callable mutation primitives.
     WorkspacePatchPlan plan_patch(const std::vector<FilePatch>& files,std::stop_token cancel={},bool create_parents=false) const;
+    // Backend-only effects. Require a matching durable claim from an executor;
+    // failure after any disposition/write/directory/rename attempt is uncertain.
+    WorkspaceRemovalResult apply_removal(const WorkspaceRemovalPlan& plan,std::stop_token cancel={}) const;
+    WorkspaceSnapshot apply_move(const WorkspaceMovePlan& plan,std::stop_token cancel={}) const;
     // Backend effect primitive, not a model-invokable tool. The caller must
     // hold a matching durable operation claim and record the actual outcome.
     // In-place application is not atomic replacement. After writes begin, any

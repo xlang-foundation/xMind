@@ -15,6 +15,8 @@
 #include <sstream>
 #include <functional>
 #include <utility>
+#include <cstring>
+#include <new>
 
 namespace agentflow {
 namespace {
@@ -22,7 +24,8 @@ void check_cancel(std::stop_token cancel) {if(cancel.stop_requested()) throw Too
 struct Handle {
     HANDLE value;
     explicit Handle(HANDLE input):value(input) {if(value==INVALID_HANDLE_VALUE) throw ToolFileError("Workspace file or directory unavailable (code "+std::to_string(GetLastError())+")");}
-    ~Handle() {CloseHandle(value);}
+    ~Handle() {if(value!=INVALID_HANDLE_VALUE)CloseHandle(value);}
+    void close(){if(value!=INVALID_HANDLE_VALUE){if(!CloseHandle(value))throw ToolFileError("Cannot close verified file handle");value=INVALID_HANDLE_VALUE;}}
     Handle(const Handle&)=delete;
 };
 std::wstring wide(const std::string& text) {
@@ -90,15 +93,16 @@ struct NativeFiles {
 };
 // One literal component relative to the already opened parent. Never parses a
 // model-supplied absolute NT/DOS namespace and never follows final reparses.
-HANDLE relative_file(HANDLE parent,std::wstring name,bool directory,bool creating,bool absent_ok=false,bool read_content=false){
+HANDLE relative_file(HANDLE parent,std::wstring name,bool directory,bool creating,bool absent_ok=false,bool read_content=false,bool delete_access=false,bool write_content=false,bool parent_write_share=false){
     static const NativeFiles api;
     if(name.empty() || name.size()>32767 || name.find_first_of(L"\\/:")!=std::wstring::npos)throw std::invalid_argument("Invalid relative file component");
     UNICODE_STRING text{};text.Buffer=name.data();text.Length=static_cast<USHORT>(name.size()*sizeof(wchar_t));text.MaximumLength=text.Length;
     OBJECT_ATTRIBUTES attributes{};attributes.Length=sizeof(attributes);attributes.RootDirectory=parent;attributes.ObjectName=&text;attributes.Attributes=OBJ_CASE_INSENSITIVE;
     IO_STATUS_BLOCK outcome{};HANDLE file=nullptr;
-    const auto access=creating?(GENERIC_READ|GENERIC_WRITE|SYNCHRONIZE):(FILE_READ_ATTRIBUTES|SYNCHRONIZE|(directory?FILE_LIST_DIRECTORY|FILE_TRAVERSE:0)|(read_content?FILE_READ_DATA:0));
-    const auto flags=FILE_SYNCHRONOUS_IO_NONALERT|FILE_OPEN_REPARSE_POINT|(directory?FILE_DIRECTORY_FILE:0)|(creating?FILE_WRITE_THROUGH|(directory?0:FILE_NON_DIRECTORY_FILE):0);
-    const auto status=api.create(&file,access,&attributes,&outcome,nullptr,FILE_ATTRIBUTE_NORMAL,creating?0:FILE_SHARE_READ,creating?FILE_CREATE:FILE_OPEN,flags,nullptr,0);
+    const auto access=write_content?(GENERIC_READ|GENERIC_WRITE|DELETE|SYNCHRONIZE):creating?(GENERIC_READ|GENERIC_WRITE|SYNCHRONIZE):(FILE_READ_ATTRIBUTES|SYNCHRONIZE|(directory?FILE_LIST_DIRECTORY|FILE_TRAVERSE:0)|(read_content?FILE_READ_DATA:0)|(delete_access?DELETE:0));
+    const auto flags=FILE_SYNCHRONOUS_IO_NONALERT|FILE_OPEN_REPARSE_POINT|(directory?FILE_DIRECTORY_FILE:0)|((creating||write_content)?FILE_WRITE_THROUGH|(directory?0:FILE_NON_DIRECTORY_FILE):0);
+    const auto sharing=directory&&parent_write_share?FILE_SHARE_READ|FILE_SHARE_WRITE:(creating||delete_access||write_content)?0:FILE_SHARE_READ;
+    const auto status=api.create(&file,access,&attributes,&outcome,nullptr,FILE_ATTRIBUTE_NORMAL,sharing,creating?FILE_CREATE:FILE_OPEN,flags,nullptr,0);
     if(status<0){const auto code=api.error(status);if(file && file!=INVALID_HANDLE_VALUE)CloseHandle(file);
         if(!creating && absent_ok && code==ERROR_FILE_NOT_FOUND)return nullptr;
         if(creating && (code==ERROR_FILE_EXISTS || code==ERROR_ALREADY_EXISTS))throw ToolContentConflict("Creation target already exists");
@@ -114,6 +118,18 @@ void creation_component(const std::wstring& name){
     for(const auto character:name)if(character<32 || std::wstring_view(L"<>:\"/\\|?*").find(character)!=std::wstring_view::npos)throw ToolAccessDenied("Invalid creation file component");
     auto stem=name.substr(0,name.find(L'.'));for(auto& character:stem)if(character>=L'a' && character<=L'z')character-=L'a'-L'A';
     if(stem==L"CON" || stem==L"PRN" || stem==L"AUX" || stem==L"NUL" || (stem.size()==4 && (stem.starts_with(L"COM") || stem.starts_with(L"LPT")) && stem[3]>=L'1' && stem[3]<=L'9'))throw ToolAccessDenied("Device names are not creation targets");
+}
+void regular_effect_file(HANDLE file){
+    BY_HANDLE_FILE_INFORMATION info{};
+    if(!GetFileInformationByHandle(file,&info)||GetFileType(file)!=FILE_TYPE_DISK||(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Effect source is not a regular file");
+    if((info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)||info.nNumberOfLinks!=1)throw ToolAccessDenied("Effect source cannot be linked");
+    if(info.dwFileAttributes&FILE_ATTRIBUTE_READONLY)throw ToolAccessDenied("Effect source is read-only");
+}
+std::string read_effect_file(HANDLE file,std::stop_token cancel){
+    LARGE_INTEGER zero{};if(!SetFilePointerEx(file,zero,nullptr,FILE_BEGIN))throw ToolFileError("Cannot inspect effect source");
+    std::string content;std::array<char,8192> buffer{};
+    for(;;){check_cancel(cancel);DWORD count=0;if(!ReadFile(file,buffer.data(),static_cast<DWORD>(buffer.size()),&count,nullptr))throw ToolFileError("Cannot read effect source");if(!count)break;if(count>1024*1024-content.size())throw ToolFileError("Effect source exceeds its text bound");content.append(buffer.data(),count);}
+    return content;
 }
 }
 struct WorkspaceTools::Impl {
@@ -164,17 +180,17 @@ struct WorkspaceTools::Impl {
     }
     struct CreationParent {std::vector<std::unique_ptr<Handle>> directories;std::vector<std::string> missing;std::wstring leaf;std::string relative,existing_directory=".";};
     void verify_creation_directory(HANDLE directory) const {verify(directory);BY_HANDLE_FILE_INFORMATION info{};if(!GetFileInformationByHandle(directory,&info) || !(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Creation parent is not a directory");if(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)throw ToolAccessDenied("Creation does not traverse directory links");}
-    CreationParent creation_parent(const std::string& input,std::stop_token cancel,bool allow_missing=false) const {
+    CreationParent creation_parent(const std::string& input,std::stop_token cancel,bool allow_missing=false,bool parent_write_share=false) const {
         check_cancel(cancel);CreationParent result;result.relative=relative_path(input);
         std::vector<std::wstring> components;for(const auto& part:std::filesystem::u8path(result.relative)){const auto name=part.wstring();creation_component(name);components.push_back(name);}
         if(components.empty())throw ToolAccessDenied("A creation target must name a file");result.leaf=components.back();
         if(allow_missing&&components.size()>33)throw ToolAccessDenied("Creation supports at most 32 parent directories");
-        result.directories.push_back(std::make_unique<Handle>(CreateFileW(base.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr)));
+        result.directories.push_back(std::make_unique<Handle>(CreateFileW(base.c_str(),GENERIC_READ,FILE_SHARE_READ|(parent_write_share?FILE_SHARE_WRITE:0),nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr)));
         if(file_identity(result.directories.back()->value)!=file_identity(root.value))throw ToolAccessDenied("Creation root identity changed");
         verify_creation_directory(result.directories.back()->value);std::string prefix;
         for(std::size_t i=0;i+1<components.size();++i){check_cancel(cancel);if(!prefix.empty())prefix+='/';prefix+=utf8(components[i]);
             if(!result.missing.empty()){result.missing.push_back(prefix);continue;}
-            const auto opened=relative_file(result.directories.back()->value,components[i],true,false,allow_missing);
+            const auto opened=relative_file(result.directories.back()->value,components[i],true,false,allow_missing,false,false,false,parent_write_share);
             if(!opened){result.missing.push_back(prefix);continue;}
             result.directories.push_back(std::make_unique<Handle>(opened));verify_creation_directory(opened);result.existing_directory=prefix;
         }
@@ -424,6 +440,95 @@ WorkspacePatchPlan WorkspaceTools::plan_patch(const std::vector<FilePatch>& file
         }else throw std::invalid_argument("Unsupported patch action");
     }
     check_cancel(cancel);if(identity()!=plan.workspace_id)throw ToolAccessDenied("Workspace changed while planning patch");return plan;
+}
+WorkspaceRemovalResult WorkspaceTools::apply_removal(const WorkspaceRemovalPlan& plan,std::stop_token cancel) const {
+    check_cancel(cancel);
+    const auto& before=plan.before;
+    if(before.content.size()>1024*1024||!valid_text(before.content))throw std::invalid_argument("Invalid removal contents");
+    if(content_hash(before.content)!=before.content_sha256)throw ToolContentConflict("Removal snapshot hash differs");
+    if(identity()!=before.workspace_id)throw ToolAccessDenied("Removal belongs to another workspace");
+    auto parent=impl_->creation_parent(before.path,cancel);const auto directory=parent.directories.back()->value;
+    if(plan.parent_id.empty()||file_identity(directory)!=plan.parent_id)throw ToolContentConflict("Removal parent identity changed");
+    Handle file(relative_file(directory,parent.leaf,false,false,false,true,true));
+    impl_->verify(file.value);regular_effect_file(file.value);
+    if(file_identity(file.value)!=before.file_id)throw ToolContentConflict("Removal source identity changed");
+    const auto bytes=read_effect_file(file.value,cancel);
+    if(bytes!=before.content||content_hash(bytes)!=before.content_sha256)throw ToolContentConflict("Removal source contents changed");
+    WorkspaceRemovalResult result{parent.relative,before.workspace_id,before.file_id,before.content_sha256,bytes.size()};
+    check_cancel(cancel);impl_->verify(file.value);
+    if(identity()!=before.workspace_id)throw ToolAccessDenied("Workspace changed before removal");
+    // From this point an error must not be classified as a no-effect failure.
+    try{
+        FILE_DISPOSITION_INFO disposition{};disposition.DeleteFile=TRUE;
+        if(!SetFileInformationByHandle(file.value,FileDispositionInfo,&disposition,sizeof(disposition)))throw ToolFileError("Cannot mark removal source for deletion");
+        file.close(); // Deletion on close, not a path-based delete or a replay.
+        const auto remaining=relative_file(directory,parent.leaf,false,false,true);
+        if(remaining){Handle owned(remaining);throw ToolFileError("Removal source name is present after deletion");}
+        impl_->verify_creation_directory(directory);
+        if(identity()!=before.workspace_id)throw ToolFileError("Workspace changed after removal");
+        return result;
+    }catch(...){throw ToolMutationUncertain("Removal was attempted; its final state requires reconciliation");}
+}
+WorkspaceSnapshot WorkspaceTools::apply_move(const WorkspaceMovePlan& plan,std::stop_token cancel) const {
+    check_cancel(cancel);const auto& before=plan.before;const auto& destination=plan.destination;
+    if(before.content.size()>1024*1024||destination.content.size()>1024*1024||!valid_text(before.content)||!valid_text(destination.content))throw std::invalid_argument("Invalid move contents");
+    if(content_hash(before.content)!=before.content_sha256||content_hash(destination.content)!=destination.content_sha256)throw ToolContentConflict("Move plan hashes differ");
+    if(identity()!=before.workspace_id||destination.workspace_id!=before.workspace_id)throw ToolAccessDenied("Move belongs to another workspace");
+    auto source=impl_->creation_parent(before.path,cancel,false,true);
+    auto target=impl_->creation_parent(destination.path,cancel,!destination.create_directories.empty(),true);
+    const auto source_directory=source.directories.back()->value,anchor=target.directories.back()->value;
+    if(plan.parent_id.empty()||file_identity(source_directory)!=plan.parent_id||file_identity(anchor)!=destination.parent_id||target.missing!=destination.create_directories)throw ToolContentConflict("Move parent identity or absence changed");
+    const auto source_name=wide(source.relative),target_name=wide(target.relative);
+    if(CompareStringOrdinal(source_name.data(),static_cast<int>(source_name.size()),target_name.data(),static_cast<int>(target_name.size()),TRUE)==CSTR_EQUAL)throw ToolContentConflict("Move must name a distinct destination");
+    if(target.missing.empty()){
+        const auto existing=relative_file(anchor,target.leaf,false,false,true);
+        if(existing){Handle owned(existing);throw ToolContentConflict("Move destination already exists");}
+    }
+    Handle file(relative_file(source_directory,source.leaf,false,false,false,true,true,true));
+    impl_->verify(file.value);regular_effect_file(file.value);
+    if(file_identity(file.value)!=before.file_id)throw ToolContentConflict("Move source identity changed");
+    const auto current=read_effect_file(file.value,cancel);
+    if(current!=before.content||content_hash(current)!=before.content_sha256)throw ToolContentConflict("Move source contents changed");
+    check_cancel(cancel);if(identity()!=before.workspace_id)throw ToolAccessDenied("Workspace changed before move");
+    bool attempted=false;
+    try{
+        for(const auto& missing:target.missing){
+            check_cancel(cancel);const auto leaf=std::filesystem::u8path(missing).filename().wstring();
+            attempted=true;const auto created=relative_file(target.directories.back()->value,leaf,true,true,false,false,false,false,true);
+            target.directories.push_back(std::make_unique<Handle>(created));impl_->verify_creation_directory(created);
+        }
+        check_cancel(cancel);const auto directory=target.directories.back()->value;
+        const auto occupied=relative_file(directory,target.leaf,false,false,true);
+        if(occupied){Handle owned(occupied);throw ToolContentConflict("Move destination appeared before dispatch");}
+        if(current!=destination.content){
+            LARGE_INTEGER zero{};if(!SetFilePointerEx(file.value,zero,nullptr,FILE_BEGIN))throw ToolFileError("Cannot prepare move source content");
+            for(std::size_t offset=0;offset<destination.content.size();){
+                check_cancel(cancel);impl_->verify(file.value);DWORD count=0;
+                const auto amount=static_cast<DWORD>(std::min<std::size_t>(8192,destination.content.size()-offset));attempted=true;
+                if(!WriteFile(file.value,destination.content.data()+offset,amount,&count,nullptr)||!count||count>amount)throw ToolFileError("Cannot update move source content");offset+=count;
+            }
+            check_cancel(cancel);attempted=true;
+            if(!SetEndOfFile(file.value)||!FlushFileBuffers(file.value))throw ToolFileError("Cannot finalize move source content");
+        }
+        check_cancel(cancel);impl_->verify(file.value);impl_->verify_creation_directory(directory);
+        if(identity()!=before.workspace_id)throw ToolAccessDenied("Workspace changed before rename");
+        const auto expected_path=final_path(directory)+L"\\"+target.leaf;
+        const auto buffer_size=sizeof(FILE_RENAME_INFO)+target.leaf.size()*sizeof(wchar_t);
+        auto storage=std::make_unique<unsigned char[]>(buffer_size);auto* rename=new(storage.get()) FILE_RENAME_INFO{};
+        rename->ReplaceIfExists=FALSE;rename->RootDirectory=directory;rename->FileNameLength=static_cast<DWORD>(target.leaf.size()*sizeof(wchar_t));
+        std::memcpy(rename->FileName,target.leaf.c_str(),(target.leaf.size()+1)*sizeof(wchar_t));
+        attempted=true;
+        if(!SetFileInformationByHandle(file.value,FileRenameInfo,rename,static_cast<DWORD>(buffer_size)))throw ToolFileError("Cannot move source to absent destination");
+        // Inspect the actual renamed handle even if cancellation arrived.
+        impl_->verify(file.value);
+        if(!equal(final_path(file.value),expected_path)||file_identity(file.value)!=before.file_id)throw ToolFileError("Renamed file binding differs");
+        const auto actual=read_effect_file(file.value,{}),hash=content_hash(actual);
+        if(actual!=destination.content||hash!=destination.content_sha256)throw ToolFileError("Renamed file content differs");
+        const auto remaining=relative_file(source_directory,source.leaf,false,false,true);
+        if(remaining){Handle owned(remaining);throw ToolFileError("Move source name is present after rename");}
+        if(identity()!=before.workspace_id)throw ToolFileError("Workspace changed after move");
+        return {target.relative,actual,before.workspace_id,before.file_id,hash};
+    }catch(...){if(attempted)throw ToolMutationUncertain("Move, content or directory effects were attempted; reconciliation is required");throw;}
 }
 WorkspaceSnapshot WorkspaceTools::apply_plan(const WorkspaceEditPlan& plan,std::stop_token cancel) const {
     check_cancel(cancel);

@@ -23,6 +23,39 @@ template<class Error,class Function> void rejects(Function action) {
 int main(int argc,char** argv) {
     if(argc!=3 && argc!=4 && argc!=5) return 2;
     try {
+        if(std::string(argv[1])=="--patch-effects") {
+            WorkspaceTools tools(argv[2]);
+            const auto files=parse_file_patch("*** Begin Patch\n*** Add File: new-parent/deep/added.txt\n+added\n*** Update File: update-source.txt\n@@\n-before\n+after\n*** Update File: move-source.txt\n*** Move to: move-parent/moved.txt\n@@\n-old move\n+new move\n*** Delete File: delete-source.txt\n*** End Patch\n");
+            const auto plan=tools.plan_patch(files,{},true);
+            const auto& added=std::get<WorkspaceCreatePlan>(plan.files[0]);const auto& edited=std::get<WorkspaceEditPlan>(plan.files[1]);const auto& moved=std::get<WorkspaceMovePlan>(plan.files[2]);const auto& removed=std::get<WorkspaceRemovalPlan>(plan.files[3]);
+            auto bad_remove=removed;bad_remove.parent_id="changed-parent";rejects<ToolContentConflict>([&]{tools.apply_removal(bad_remove);});
+            bad_remove=removed;bad_remove.before.file_id="changed-file";rejects<ToolContentConflict>([&]{tools.apply_removal(bad_remove);});
+            bad_remove=removed;bad_remove.before.workspace_id="changed-workspace";rejects<ToolAccessDenied>([&]{tools.apply_removal(bad_remove);});
+            bad_remove=removed;bad_remove.before.content_sha256="changed-hash";rejects<ToolContentConflict>([&]{tools.apply_removal(bad_remove);});
+            for(const auto& path:{".config/providers.yaml","outside-link/secret.txt","inside-link/delete-source.txt","hard-link.txt"}){bad_remove=removed;bad_remove.before.path=path;rejects<ToolAccessDenied>([&]{tools.apply_removal(bad_remove);});}
+            auto bad_move=moved;bad_move.parent_id="changed-parent";rejects<ToolContentConflict>([&]{tools.apply_move(bad_move);});
+            bad_move=moved;bad_move.before.file_id="changed-file";rejects<ToolContentConflict>([&]{tools.apply_move(bad_move);});
+            bad_move=moved;bad_move.destination.content_sha256="changed-hash";rejects<ToolContentConflict>([&]{tools.apply_move(bad_move);});
+            bad_move=moved;bad_move.destination.workspace_id="changed-workspace";rejects<ToolAccessDenied>([&]{tools.apply_move(bad_move);});
+            bad_move=moved;bad_move.destination.path="update-source.txt";bad_move.destination.create_directories.clear();rejects<ToolContentConflict>([&]{tools.apply_move(bad_move);});
+            for(const auto& path:{".config/moved.txt","outside-link/moved.txt","inside-link/moved.txt"}){bad_move=moved;bad_move.destination.path=path;rejects<ToolAccessDenied>([&]{tools.apply_move(bad_move);});}
+            auto fixture_write=[&](const std::string& name,const std::string& bytes){std::ofstream output(std::filesystem::path(argv[2])/name,std::ios::binary|std::ios::trunc);output.write(bytes.data(),bytes.size());output.close();require(bool(output),"Actual stale-source fixture write failed");};
+            fixture_write("delete-source.txt","changed after removal plan\n");rejects<ToolContentConflict>([&]{tools.apply_removal(removed);});require(tools.read_file("delete-source.txt").content=="changed after removal plan\n","Stale removal must preserve actual changed bytes");fixture_write("delete-source.txt",removed.before.content);
+            fixture_write("move-source.txt","changed after move plan\n");rejects<ToolContentConflict>([&]{tools.apply_move(moved);});require(tools.read_file("move-source.txt").content=="changed after move plan\n","Stale move must preserve actual changed bytes");fixture_write("move-source.txt",moved.before.content);
+            std::stop_source stopped;stopped.request_stop();rejects<ToolCancelled>([&]{tools.apply_move(moved,stopped.get_token());});rejects<ToolCancelled>([&]{tools.apply_removal(removed,stopped.get_token());});
+            require(tools.read_file("move-source.txt").content==moved.before.content&&tools.read_file("delete-source.txt").content==removed.before.content&&tools.read_file("update-source.txt").content==edited.before.content,"Rejected effects must preserve all source files");
+            const auto delete_path=std::filesystem::path(argv[2])/"delete-source.txt";
+            require(SetFileAttributesW(delete_path.c_str(),FILE_ATTRIBUTE_READONLY),"Read-only fixture setup failed");
+            try{rejects<ToolAccessDenied>([&]{tools.apply_removal(removed);});}catch(...){SetFileAttributesW(delete_path.c_str(),FILE_ATTRIBUTE_NORMAL);throw;}
+            require(SetFileAttributesW(delete_path.c_str(),FILE_ATTRIBUTE_NORMAL),"Read-only fixture reset failed");
+            // Backend primitive effects on a disposable fixture, not proof of
+            // model admission, durable approval or a working patch model tool.
+            const auto created=tools.apply_creation(added),updated=tools.apply_plan(edited),renamed=tools.apply_move(moved);
+            const auto deleted=tools.apply_removal(removed);
+            require(renamed.file_id==moved.before.file_id&&renamed.path==moved.destination.path&&renamed.content==moved.destination.content,"Rename must preserve source identity and exact destination bytes");
+            require(deleted.file_id==removed.before.file_id&&deleted.removed_sha256==removed.before.content_sha256&&deleted.removed_size==removed.before.content.size(),"Removal must report the verified removed source");
+            std::cout<<Json{{"created_sha256",created.content_sha256},{"updated_sha256",updated.content_sha256},{"moved_sha256",renamed.content_sha256},{"move_identity_preserved",renamed.file_id==moved.before.file_id},{"removed_size",deleted.removed_size},{"scope","actual disposable workspace primitive effects; no model or permission journal"}}.dump()<<'\n';return 0;
+        }
         if(std::string(argv[1])=="--patch-plan") {
             WorkspaceTools tools(argv[2]);
             const auto files=parse_file_patch("*** Begin Patch\n*** Add File: new-parent/deep/added.txt\n+added\n*** Update File: update-source.txt\n@@\n-before\n+after\n*** Update File: move-source.txt\n*** Move to: move-parent/moved.txt\n@@\n-old move\n+new move\n*** Delete File: delete-source.txt\n*** End Patch\n");

@@ -39,11 +39,36 @@ Expanded actual-filesystem contract source covers all four plan types, untouched
 source/private files, destination absence, Unicode aliases, overlapping paths,
 occupied move targets, aggregate bounds, cancellation and private/link boundaries.
 These contracts have not yet executed for this source. Planning has no mutations;
-delete/move execution is still unavailable.
+model-driven delete/move execution is still unavailable.
+
+Backend-only removal and move effect primitives are now implemented in source.
+They reopen sources relative to retained parents, take exclusive file handles,
+reject links/read-only targets, and recheck source identity and exact contents.
+Removal marks the verified handle for deletion, explicitly closes it and checks
+absence while the parent remains retained. Move validates source/destination
+bindings before creating disclosed parents or updating source content. It then
+renames the same handle to the absent destination, preserves file identity,
+checks the final handle path/content and verifies source-name absence. Directory
+handles needed for rename allow write sharing while excluding delete sharing.
+There is no path-based delete, overwrite fallback or copy/delete move fallback.
+
+The implementation uses Windows [SetFileInformationByHandle](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfileinformationbyhandle)
+with disposition/rename information. [FILE_RENAME_INFO](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_rename_info)
+defines the directory-relative destination and the no-replacement flag. Rename
+allocation, disposition/close, directory creation, source writes, and final
+verification are covered by uncertainty handling after an effect attempt. No
+cancellation check hides an effect already completed; failures never replay.
+
+Expanded filesystem contract source exercises actual deletion, same-identity
+rename/content update and disclosed directory creation in a disposable workspace.
+It also tests changed bytes after planning, wrong file/parent/workspace/hash
+bindings, occupied destinations, private/link targets, cancellation and read-only
+removal refusal. Independent Node fixture reads check the actual resulting bytes,
+hashes and absence of old names. These tests have not executed for this source;
+they do not establish model admission, durable approval or journal recovery.
 
 This increment does not expose a model tool or filesystem endpoint and performs
-no filesystem effects. Delivery still requires delete/move effect primitives,
-durable per-file effect ownership and
+no model-invokable filesystem effects. Delivery still requires durable per-file effect ownership and
 approval, disclosed missing parents, changed-guidance/file checks, recorded
 partial or uncertain outcomes, recovery without replay, model/graph integration,
 CLI/browser/VS Code review and real-provider acceptance. A multi-file patch must

@@ -127,6 +127,11 @@ try {
   for(const [name,text] of Object.entries(patchSources))assert.equal(await readFile(join(patchRoot,name),'utf8'),text,'Patch preparation/rejections must have no effects');
   for(const [field,name] of [['updated_before_sha256','update-source.txt'],['moved_before_sha256','move-source.txt'],['removed_before_sha256','delete-source.txt']])assert.equal(patchPlan[field],createHash('sha256').update(patchSources[name]).digest('hex'));
   await assert.rejects(readFile(join(patchRoot,'new-parent','deep','added.txt')),{code:'ENOENT'});await assert.rejects(readFile(join(patchRoot,'move-parent','moved.txt')),{code:'ENOENT'});
+  const patchEffects=JSON.parse((await execute(process.argv[2],['--patch-effects',patchRoot],{windowsHide:true,timeout:10000})).stdout);
+  for(const [field,name,expected] of [['created_sha256','new-parent/deep/added.txt','added\n'],['updated_sha256','update-source.txt','after\n'],['moved_sha256','move-parent/moved.txt','new move\n']]){const actual=await readFile(join(patchRoot,name));assert.equal(actual.toString('utf8'),expected);assert.equal(patchEffects[field],createHash('sha256').update(actual).digest('hex'));}
+  assert.equal(patchEffects.move_identity_preserved,true);assert.equal(patchEffects.removed_size,Buffer.byteLength(patchSources['delete-source.txt']));
+  for(const name of ['move-source.txt','delete-source.txt'])await assert.rejects(readFile(join(patchRoot,name)),{code:'ENOENT'});
+  assert.equal(await readFile(join(patchRoot,'.config/providers.yaml'),'utf8'),patchSources['.config/providers.yaml']);assert.equal(await readFile(join(outside,'secret.txt'),'utf8'),'outside marker\n');
   const moved=join(folder,'moved-workspace');
   // Both directory-move targets are checked against this task's exact temp
   // fixture parent before moving the tree. No user workspace is moved.
