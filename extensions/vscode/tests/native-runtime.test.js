@@ -7,7 +7,7 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { resolveNativeRuntime, verifyNativeRuntime, validateManifest, REQUIRED_NATIVE, REQUIRED_STDLIB, MANIFEST_NAME } = require('../native-runtime');
+const { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, REQUIRED_NATIVE, REQUIRED_STDLIB, MANIFEST_NAME } = require('../native-runtime');
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 async function fixture(t) {
   // Positive inputs must be canonical even when a Windows runner's TEMP uses
@@ -30,6 +30,20 @@ test('packaged native discovery binds every listed byte and returns paths withou
   assert.equal(resolved.stdlib, path.join(f.runtime, 'stdlib')); assert.equal(resolved.providerConfig, config); assert.equal(resolved.privateStateRoot, f.context.globalStorageUri.fsPath);
   assert.equal(resolved.manifestSha256, digest(await fs.readFile(path.join(f.runtime, MANIFEST_NAME))));
   await assert.rejects(fs.lstat(config), { code: 'ENOENT' });
+});
+
+test('retained generation uses verified private inventory and reuses exact bytes without overwriting',async t=>{
+ const f=await fixture(t);await fs.mkdir(f.context.globalStorageUri.fsPath);const runtime=await resolveNativeRuntime(f.context,f.host);
+ const retained=await retainNativeRuntime(runtime,f.context.globalStorageUri.fsPath);assert.equal(retained.manifestSha256,runtime.manifestSha256);assert.notEqual(retained.runtimeRoot,runtime.runtimeRoot);assert.equal(path.dirname(retained.runtimeRoot),path.join(f.context.globalStorageUri.fsPath,'runtime-generations'));
+ assert.equal((await retainNativeRuntime(runtime,f.context.globalStorageUri.fsPath)).runtimeRoot,retained.runtimeRoot);
+ await fs.appendFile(path.join(retained.runtimeRoot,'xmind_server.exe'),'changed fixture');await assert.rejects(retainNativeRuntime(runtime,f.context.globalStorageUri.fsPath),/verification failed/);
+ assert.ok((await fs.readFile(path.join(retained.runtimeRoot,'xmind_server.exe'),'utf8')).endsWith('changed fixture'));
+});
+
+test('managed generation refuses unqualified pure-source override without creating runtime storage',async t=>{
+ const f=await fixture(t);await fs.mkdir(f.context.globalStorageUri.fsPath);const runtime=await resolveNativeRuntime(f.context,f.host);
+ await assert.rejects(retainNativeRuntime({...runtime,qualified:false},f.context.globalStorageUri.fsPath),/bundled pure library/);
+ assert.deepEqual(await fs.readdir(f.context.globalStorageUri.fsPath),[]);
 });
 test('explicit machine runtime and pure source paths do not search the repository or configuration', async t => {
   const f = await fixture(t), other = path.join(f.root, 'pure-source'); await fs.mkdir(other);

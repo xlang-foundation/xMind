@@ -5,7 +5,9 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const crypto=require('node:crypto');
 const net=require('node:net');
-const {spawn}=require('node:child_process');
+const {spawn,execFile}=require('node:child_process');
+const {promisify}=require('node:util');
+const {retainNativeRuntime}=require('./native-runtime');
 
 function canonicalPath(value){
   if(typeof value!=='string'||!value||value.length>32760||/[\x00-\x1f]/.test(value))throw new Error('Invalid local workspace path.');
@@ -34,11 +36,23 @@ function loopbackPort(){return new Promise((resolve,reject)=>{
     const port=server.address().port;server.close(error=>error?reject(error):resolve(port));
   });
 });}
+function nativeOwnerState(value){
+  const hex=v=>typeof v==='string'&&/^[a-f0-9]{32}$/.test(v);
+  if(!value||!hex(value.generation)||!Number.isSafeInteger(value.revision)||value.revision<1||typeof value.quiesced!=='boolean'||typeof value.retirement_requested!=='boolean'||typeof value.replacement_prepared!=='boolean'||typeof value.retirement_supported!=='boolean'||!Number.isSafeInteger(value.process_id)||value.process_id<1||value.process_id>0xffffffff||typeof value.process_birth!=='string'||!/^[1-9][0-9]{0,19}$/.test(value.process_birth)||!((value.quiesced&&hex(value.receipt_id))||(!value.quiesced&&value.receipt_id==='')))throw new Error('Invalid native backend owner observation.');
+  return value;
+}
+const sameReceipt=(left,right)=>left&&right&&left.generation===right.generation&&left.revision===right.revision&&left.receipt_id===right.receipt_id;
+async function observeNativeExit(runtime,state){
+  const {stdout}=await promisify(execFile)(path.win32.join(runtime.runtimeRoot,'xmind_admin.exe'),['observe-owner-exit',String(state.process_id),state.process_birth,'10000'],{windowsHide:true,timeout:15000,maxBuffer:4096});
+  const result=JSON.parse(stdout);
+  if(result.process_id!==state.process_id||result.process_birth!==state.process_birth||typeof result.exited!=='boolean'||typeof result.identity_matches!=='boolean')throw new Error('Invalid native process-exit observation.');
+  return result.exited;
+}
 
 class WorkspaceBackend {
   constructor(vscode,context,resolveRuntime,dependencies={}){
     this.vscode=vscode;this.context=context;this.resolveRuntime=resolveRuntime;
-    this.deps={fs,spawn,fetch:(...args)=>fetch(...args),port:loopbackPort,random:()=>crypto.randomBytes(32).toString('hex'),uuid:()=>crypto.randomUUID(),sleep:ms=>new Promise(resolve=>setTimeout(resolve,ms)),now:()=>Date.now(),platform:process.platform,arch:process.arch,env:process.env,...dependencies};
+    this.deps={fs,spawn,retainRuntime:retainNativeRuntime,observeExit:observeNativeExit,fetch:(...args)=>fetch(...args),port:loopbackPort,random:()=>crypto.randomBytes(32).toString('hex'),uuid:()=>crypto.randomUUID(),sleep:ms=>new Promise(resolve=>setTimeout(resolve,ms)),now:()=>Date.now(),platform:process.platform,arch:process.arch,env:process.env,...dependencies};
     this.epoch=0;this.owners=new Map();this.active=undefined;this.disposed=false;this.connecting=undefined;
   }
   signature(){return JSON.stringify((this.vscode.workspace.workspaceFolders||[]).map(folder=>folder.uri.toString()));}
@@ -75,7 +89,7 @@ class WorkspaceBackend {
     const scope=crypto.createHash('sha256').update(keyPath(canonical)).digest('hex');
     const config={runtimeDirectory:machineSetting(this.vscode,'runtimeDirectory'),stdlibSource:machineSetting(this.vscode,'stdlibSource'),providerConfigPath:machineSetting(this.vscode,'providerConfigPath')};
     const launchConfiguration=JSON.stringify({...config,workspaceEdits:machineSetting(this.vscode,'workspaceEdits')===true});
-    const runtime=await this.resolveRuntime(this.context,{platform:this.deps.platform,arch:this.deps.arch,remoteName:this.vscode.env?.remoteName??null},config);
+    let runtime=await this.resolveRuntime(this.context,{platform:this.deps.platform,arch:this.deps.arch,remoteName:this.vscode.env?.remoteName??null},config);
     if(!current())throw new Error('Workspace changed while preparing its backend.');
     const retained=this.owners.get(scope);
     // A package/settings change cannot implicitly replace a workspace's profile
@@ -84,6 +98,7 @@ class WorkspaceBackend {
     const reconnect=async prior=>{
       if(!/^http:\/\/127\.0\.0\.1:[0-9]{1,5}$/.test(prior.origin)||keyPath(prior.canonical)!==keyPath(canonical))throw new Error('Invalid retained workspace owner; existing storage was preserved.');
       if(!await this.ownerStorageSafe(prior,canonicalRoots))throw new Error('Existing backend storage is unavailable or inside a workspace folder. Narrow the opened folder set before reconnecting; no replacement database was created.');
+      if(prior.upgrade)return this.completeUpgrade(prior,selection,current);
       const owner={...prior,metadata:workspaceMetadata(prior.metadata)};
       try{await this.observe(owner);}catch{throw new Error('Cannot verify the existing workspace backend. Restore its connection before continuing; no replacement database was created.');}
       if(!current())throw new Error('Workspace changed while reconnecting.');
@@ -111,12 +126,16 @@ class WorkspaceBackend {
     if(canonicalRoots.some(root=>contained(root,privateRoot)))throw new Error('Private backend storage must be outside the workspace folders.');
     await this.deps.fs.mkdir(privateRoot,{recursive:true});privateRoot=canonicalPath(await this.deps.fs.realpath(privateRoot));
     if(canonicalRoots.some(root=>contained(root,privateRoot)))throw new Error('Private backend storage resolves inside a workspace folder.');
+    const generationParent=path.win32.join(privateRoot,'runtime-generations');
+    if(canonicalRoots.some(root=>contained(root,generationParent)||contained(generationParent,root)))throw new Error('Native generation storage overlaps a workspace folder.');
+    runtime=await this.deps.retainRuntime(runtime,privateRoot);
+    if(canonicalRoots.some(root=>contained(root,runtime.runtimeRoot)))throw new Error('Native generation storage is inside a workspace folder.');
     let directory=path.win32.join(privateRoot,'workspace-backends',scope,this.deps.uuid());
     await this.deps.fs.mkdir(directory,{recursive:true});
     directory=canonicalPath(await this.deps.fs.realpath(directory));
     if(!contained(privateRoot,directory)||canonicalRoots.some(root=>contained(root,directory)))throw new Error('Private backend directory escaped its verified storage root.');
     const port=await this.deps.port(),origin=`http://127.0.0.1:${port}`,token=this.deps.random();
-    const args=['--db',path.win32.join(directory,'state.sqlite'),'--modules',runtime.modules,'--stdlib',runtime.stdlib,'--port',String(port),'--workspace',canonical];
+    const args=['--db',path.win32.join(directory,'state.sqlite'),'--modules',runtime.modules,'--stdlib',runtime.stdlib,'--port',String(port),'--workspace',canonical,'--runtime-manifest-sha256',runtime.manifestSha256];
     if(runtime.providerConfig!==undefined)args.push('--provider-config',runtime.providerConfig);
     if(machineSetting(this.vscode,'workspaceEdits')===true)args.push('--workspace-edits','approved');
     if(!current())throw new Error('Workspace changed before starting its backend.');
@@ -124,7 +143,7 @@ class WorkspaceBackend {
     for(const key of Object.keys(childEnv))if(key.startsWith('XMIND_UI_'))delete childEnv[key];
     const child=this.deps.spawn(runtime.nativeProgram,args,{cwd:canonical,env:childEnv,detached:true,windowsHide:true,stdio:'ignore'});
     let exited=false,spawnError=false;child.once('exit',()=>{exited=true;});child.once('error',()=>{spawnError=true;});child.unref?.();
-    const owner={origin,canonical,scope,child,pid:child.pid,metadata:undefined,runtimeManifest:runtime.manifestSha256,launchConfiguration,privateDirectory:directory};
+    const owner={origin,canonical,scope,child,pid:child.pid,metadata:undefined,runtimeManifest:runtime.manifestSha256,runtimeRoot:runtime.runtimeRoot,launchConfiguration,privateDirectory:directory};
     const alive=()=>!exited&&!spawnError&&Number.isSafeInteger(owner.pid)&&owner.pid>0&&child.exitCode==null;
     try{
       const deadline=this.deps.now()+15000;let observed;
@@ -136,7 +155,7 @@ class WorkspaceBackend {
       owner.metadata=observed;
       await this.context.secrets.store(`xmind.auth:${origin}`,token);
       this.owners.set(scope,owner);
-      const record={origin,canonical,scope,metadata:observed,runtimeManifest:runtime.manifestSha256,launchConfiguration,privateDirectory:directory};
+      const record={origin,canonical,scope,metadata:observed,runtimeManifest:runtime.manifestSha256,runtimeRoot:runtime.runtimeRoot,launchConfiguration,privateDirectory:directory};
       if(this.context.globalState){const records=saved.filter(value=>value?.origin!==origin);await this.context.globalState.update('xmind.nativeWorkspaceOwners',[...records,record]);}
       // Folder changes never terminate a ready Native owner or its work.
       if(!current())throw new Error('Workspace changed while its backend became ready.');
@@ -152,6 +171,103 @@ class WorkspaceBackend {
     const response=await this.deps.fetch(origin+'/v1/workspace',{headers:{Authorization:`Bearer ${token}`},redirect:'error',signal:AbortSignal.timeout(2000)});
     if(!response.ok)throw new Error('Cannot verify the local native workspace.');
     return workspaceMetadata(await response.json());
+  }
+  async ownerRequest(origin,token,route,body){
+    const response=await this.deps.fetch(origin+route,{method:body===undefined?'GET':'POST',headers:{Authorization:`Bearer ${token}`,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(10000)});
+    if(!response.ok){const error=new Error(response.status===404?'This legacy backend requires an explicit operator migration; it cannot issue a native retirement receipt.':'Native backend upgrade command was rejected. Existing storage was preserved.');error.status=response.status;throw error;}
+    const result=await response.json();if(Buffer.byteLength(JSON.stringify(result))>8*1024*1024)throw new Error('Native upgrade observation exceeds its limit.');return result;
+  }
+  async saveOwner(owner){
+    const records=this.context.globalState?.get('xmind.nativeWorkspaceOwners');if(!Array.isArray(records))throw new Error('Saved workspace ownership is invalid.');
+    const {child,...record}=owner;delete record.epoch;delete record.signature;delete record.roots;delete record.backendChangePending;
+    await this.context.globalState.update('xmind.nativeWorkspaceOwners',[...records.filter(v=>v?.scope!==owner.scope),JSON.parse(JSON.stringify(record))]);this.owners.set(owner.scope,owner);
+  }
+  async snapshotOwner(owner,token,paths){
+    if(!paths){const sessions=await this.ownerRequest(owner.origin,token,'/v1/sessions');if(!Array.isArray(sessions)||sessions.length>1024||sessions.some(s=>typeof s.id!=='string'||!/^[A-Za-z0-9_-]{1,256}$/.test(s.id)))throw new Error('Cannot capture saved native sessions.');paths=['/v1/sessions','/v1/provider/profiles','/v1/models',...sessions.flatMap(s=>['/history','/runs','/skills'].map(part=>'/v1/sessions/'+s.id+part))];}
+    const result={};for(const route of paths){if(!/^\/v1\/(sessions(\/[A-Za-z0-9_-]{1,256}\/(history|runs|skills))?|provider\/profiles|models)$/.test(route))throw new Error('Invalid saved upgrade observation route.');const record=await this.ownerRequest(owner.origin,token,route);if(route.endsWith('/skills'))delete record.authority_id;result[route]=crypto.createHash('sha256').update(JSON.stringify(record)).digest('hex');}return result;
+  }
+  async upgrade(){
+    if(this.upgrading)throw new Error('A native backend upgrade is already in progress.');
+    const selected=await this.selectedFolder(false),selectedPath=canonicalPath(await this.deps.fs.realpath(selected.folder.uri.fsPath));
+    const selectedScope=crypto.createHash('sha256').update(keyPath(selectedPath)).digest('hex');
+    const previous=this.owners.get(selectedScope)??this.context.globalState?.get('xmind.nativeWorkspaceOwners')?.findLast?.(v=>v?.scope===selectedScope);
+    const owner=await this.connect();if(owner.upgrade)return owner;
+    if(previous?.upgrade)return owner; // connect completed the already-dispatched handoff.
+    const selection=await this.selectedFolder(false),epoch=this.epoch,current=()=>!this.disposed&&this.vscode.workspace.isTrusted&&epoch===this.epoch&&selection.signature===this.signature();
+    if(owner.privateDirectory===undefined)throw new Error('External backends are upgraded by their operator.');
+    const token=await this.context.secrets.get(`xmind.auth:${owner.origin}`);await this.observe(owner);
+    const config={runtimeDirectory:machineSetting(this.vscode,'runtimeDirectory'),stdlibSource:machineSetting(this.vscode,'stdlibSource'),providerConfigPath:machineSetting(this.vscode,'providerConfigPath')};
+    let runtime=await this.resolveRuntime(this.context,{platform:this.deps.platform,arch:this.deps.arch,remoteName:this.vscode.env?.remoteName??null},config);
+    const roots=await Promise.all(selection.roots.map(async r=>canonicalPath(await this.deps.fs.realpath(r.fsPath))));
+    const privateRoot=path.win32.dirname(path.win32.dirname(path.win32.dirname(owner.privateDirectory)));
+    const generationParent=path.win32.join(privateRoot,'runtime-generations');
+    if(roots.some(root=>contained(root,generationParent)||contained(generationParent,root)))throw new Error('Native generation storage overlaps a workspace folder.');
+    runtime=await this.deps.retainRuntime(runtime,privateRoot);
+    if(roots.some(r=>contained(r,runtime.runtimeRoot))||!await this.ownerStorageSafe(owner,roots)||!current())throw new Error('Workspace or private storage changed before upgrade.');
+    let state=nativeOwnerState(await this.ownerRequest(owner.origin,token,'/v1/backend/owner'));
+    if(!state.retirement_supported||state.retirement_requested||state.replacement_prepared)throw new Error('This backend cannot begin a new native upgrade.');
+    const fields={expected_workspace_id:owner.metadata.workspace_id,expected_workspace_authority_id:owner.metadata.authority_id};
+    this.upgrading=true;
+    try{
+      if(!state.quiesced)state=nativeOwnerState(await this.ownerRequest(owner.origin,token,'/v1/backend/owner/quiesce',{...fields,expected_generation:state.generation,expected_revision:state.revision}));
+      const source={generation:state.generation,revision:state.revision,receipt_id:state.receipt_id};
+      const port=await this.deps.port(),origin=`http://127.0.0.1:${port}`;
+      const pending={phase:'quiesced',source,state,target:{runtimeRoot:runtime.runtimeRoot,manifestSha256:runtime.manifestSha256},origin,approvedEdits:machineSetting(this.vscode,'workspaceEdits')===true,launchConfiguration:JSON.stringify({...config,workspaceEdits:machineSetting(this.vscode,'workspaceEdits')===true})};
+      owner.upgrade=pending;await this.context.secrets.store(`xmind.auth:${origin}`,token);await this.saveOwner(owner);
+      pending.records=await this.snapshotOwner(owner,token);if(!current())throw new Error('Workspace changed while the native backend was quiesced.');
+      pending.phase='retiring';await this.saveOwner(owner);
+      // Dispatch once. A lost response is resolved by actual process exit and
+      // Native's persisted target/source checks, never by replaying retirement.
+      try{const retired=nativeOwnerState(await this.ownerRequest(owner.origin,token,'/v1/backend/owner/retire',{...fields,expected_generation:source.generation,expected_revision:source.revision,receipt_id:source.receipt_id,target_runtime_root:runtime.runtimeRoot,target_manifest_sha256:runtime.manifestSha256,approved_edits:pending.approvedEdits}));if(!sameReceipt(retired.bootstrap_receipt,source))throw new Error('Native retirement source changed.');}catch(error){if(error.status||!['TypeError','TimeoutError','AbortError'].includes(error.name))throw error;}
+      return await this.completeUpgrade(owner,selection,current);
+    }finally{this.upgrading=false;}
+  }
+  async completeUpgrade(owner,selection,current){
+    const pending=owner.upgrade;
+    if(!pending||!['retiring','prepared','activating'].includes(pending.phase)||typeof pending.approvedEdits!=='boolean'||!/^http:\/\/127\.0\.0\.1:[0-9]{1,5}$/.test(pending.origin)||!pending.records||Object.keys(pending.records).length>3075)throw new Error('Upgrade needs operator recovery before replacement startup. Existing storage was preserved.');
+    nativeOwnerState(pending.state);const source=pending.source;if(source.generation!==pending.state.generation||source.revision!==pending.state.revision||source.receipt_id!==pending.state.receipt_id)throw new Error('Saved native upgrade receipt changed.');
+    const config={runtimeDirectory:pending.target.runtimeRoot};const runtime=await this.resolveRuntime(this.context,{platform:this.deps.platform,arch:this.deps.arch,remoteName:this.vscode.env?.remoteName??null},config);
+    if(runtime.manifestSha256!==pending.target.manifestSha256||!runtime.qualified||!current())throw new Error('Pending native target or workspace changed.');
+    if(!await this.deps.observeExit(runtime,pending.state))throw new Error('The retiring native process is still running. Upgrade remains pending; no replacement was started.');
+    const token=await this.context.secrets.get(`xmind.auth:${owner.origin}`);
+    if(typeof token!=='string'||!/^[\x21-\x7e]{32,256}$/.test(token)||await this.context.secrets.get(`xmind.auth:${pending.origin}`)!==token)throw new Error('Pending native upgrade authentication is unavailable.');
+    let actual;
+    try{actual=await this.readWorkspace(pending.origin,token);}catch{}
+    if(!actual){
+      if(pending.phase==='activating')throw new Error('Activation outcome is unavailable. Restore the accepted owner; no source receipt was replayed.');
+      const args=['--db',path.win32.join(owner.privateDirectory,'state.sqlite'),'--modules',runtime.modules,'--stdlib',runtime.stdlib,'--workspace',owner.canonical,'--port',new URL(pending.origin).port,'--runtime-manifest-sha256',runtime.manifestSha256,'--owner-receipt',`${source.generation}:${source.revision}:${source.receipt_id}`];if(pending.approvedEdits)args.push('--workspace-edits','approved');
+      if(!current())throw new Error('Workspace changed before replacement startup.');
+      const env={...this.deps.env,XMIND_AUTH_TOKEN:token};for(const key of Object.keys(env))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY')delete env[key];
+      const child=this.deps.spawn(runtime.nativeProgram,args,{cwd:owner.canonical,env,detached:true,windowsHide:true,stdio:'ignore'});child.unref?.();let failed=false;child.once('error',()=>{failed=true;});child.once('exit',()=>{failed=true;});
+      const deadline=this.deps.now()+15000;while(this.deps.now()<deadline&&!failed){try{actual=await this.readWorkspace(pending.origin,token);break;}catch{await this.deps.sleep(100);}}
+      if(!actual)throw new Error('Qualified native replacement did not become ready. Admission remains closed; saved storage was preserved.');
+    }
+    if(!actual.configured||actual.workspace_id!==owner.metadata.workspace_id||actual.authority_id===owner.metadata.authority_id||keyPath(actual.root)!==keyPath(owner.canonical)||!current())throw new Error('Prepared native workspace differs from the saved owner.');
+    const prepared=nativeOwnerState(await this.ownerRequest(pending.origin,token,'/v1/backend/owner'));
+    if(!prepared.replacement_prepared&&!prepared.quiesced&&pending.phase==='activating'){
+      if(prepared.generation!==pending.prepared?.generation||prepared.revision!==pending.prepared.revision+1)throw new Error('Accepted native activation identity changed.');
+    }else{
+      if(!prepared.quiesced||!prepared.replacement_prepared||!sameReceipt(prepared.bootstrap_receipt,source))throw new Error('Native replacement did not retain its exact source receipt.');
+      const observed=await this.snapshotOwner({origin:pending.origin},token,Object.keys(pending.records));if(JSON.stringify(observed)!==JSON.stringify(pending.records))throw new Error('Saved native records changed during upgrade. Admission remains closed.');
+      pending.phase='activating';pending.prepared=prepared;await this.saveOwner(owner);if(!current())throw new Error('Workspace changed before native activation.');
+      await this.ownerRequest(pending.origin,token,'/v1/backend/owner/activate',{expected_generation:prepared.generation,expected_revision:prepared.revision,receipt_id:prepared.receipt_id,expected_workspace_id:actual.workspace_id,expected_workspace_authority_id:actual.authority_id});
+    }
+    const accepted=nativeOwnerState(await this.ownerRequest(pending.origin,token,'/v1/backend/owner'));if(accepted.quiesced||accepted.generation!==prepared.generation)throw new Error('Native activation remains unverified.');
+    const health=await this.ownerRequest(pending.origin,token,'/v1/health');if(health.file_edit_proposals!==pending.approvedEdits)throw new Error('Native edit policy differs from the accepted target.');
+    for(const key of ['agentflow.session','xmind.model','xmind.observedRun','xmind.workflow']){const prior=this.context.workspaceState.get(key);if(prior?.url===owner.origin)await this.context.workspaceState.update(key,{...prior,url:pending.origin});}
+    const replacement={origin:pending.origin,canonical:owner.canonical,scope:owner.scope,metadata:actual,privateDirectory:owner.privateDirectory,runtimeManifest:runtime.manifestSha256,runtimeRoot:runtime.runtimeRoot,launchConfiguration:pending.launchConfiguration};
+    await this.saveOwner(replacement);this.active={...replacement,epoch:this.epoch,signature:selection.signature,roots:selection.roots};return this.active;
+  }
+  async cancelUpgrade(){
+    if(this.upgrading)throw new Error('Wait for the in-flight native upgrade command.');
+    const selection=await this.selectedFolder(false),canonical=canonicalPath(await this.deps.fs.realpath(selection.folder.uri.fsPath));
+    const scope=crypto.createHash('sha256').update(keyPath(canonical)).digest('hex');
+    const records=this.context.globalState?.get('xmind.nativeWorkspaceOwners');const owner=Array.isArray(records)?records.findLast(v=>v?.scope===scope):undefined;
+    if(!owner?.upgrade)throw new Error('This workspace has no pending native upgrade.');
+    await this.observe(owner);const token=await this.context.secrets.get(`xmind.auth:${owner.origin}`),state=nativeOwnerState(await this.ownerRequest(owner.origin,token,'/v1/backend/owner'));
+    if(state.retirement_requested||state.replacement_prepared||!sameReceipt(state,owner.upgrade.source))throw new Error('Native retirement was consumed or its receipt changed; cancellation cannot restore the old owner.');
+    const resumed=nativeOwnerState(await this.ownerRequest(owner.origin,token,'/v1/backend/owner/resume',{expected_generation:state.generation,expected_revision:state.revision,receipt_id:state.receipt_id,expected_workspace_id:owner.metadata.workspace_id,expected_workspace_authority_id:owner.metadata.authority_id}));
+    if(resumed.quiesced)throw new Error('Native owner resume remains unverified.');delete owner.upgrade;await this.saveOwner(owner);this.active=undefined;return this.connect();
   }
   async ownerStorageSafe(owner,canonicalRoots){
     try{const actual=canonicalPath(await this.deps.fs.realpath(canonicalPath(owner.privateDirectory)));return keyPath(actual)===keyPath(owner.privateDirectory)&&!canonicalRoots.some(root=>contained(root,actual));}catch{return false;}
@@ -174,7 +290,7 @@ class WorkspaceBackend {
   }
   assert(ticket){
     const active=this.active;
-    if(this.disposed||!this.vscode.workspace.isTrusted||this.vscode.env?.remoteName||!active||ticket.owner!==active.scope||ticket.epoch!==this.epoch||ticket.origin!==active.origin||ticket.signature!==this.signature())throw new Error('The selected workspace changed before admission.');
+    if(this.upgrading||this.disposed||!this.vscode.workspace.isTrusted||this.vscode.env?.remoteName||!active||ticket.owner!==active.scope||ticket.epoch!==this.epoch||ticket.origin!==active.origin||ticket.signature!==this.signature())throw new Error('The selected workspace changed before admission.');
   }
   async prepare(){
     const active=this.active;if(!active)throw new Error('Connect the opened workspace before submitting work.');

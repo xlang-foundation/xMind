@@ -1,5 +1,19 @@
 # Current native validation
 
+The managed-owner adapter and native Windows process-exit observer passed
+**97 native contracts in 196.96 seconds**, with 626 mapped inputs unchanged.
+The actual production thin launcher completed same-database retirement,
+qualified startup and activation using the real OS observer, including a
+deliberately lost response without resending retirement and a host reload.
+VS Code state/environment and deployment metadata remain fixtures; no provider
+or file effects were tested. All **197 extension and 39 browser checks** passed
+with 39 view inputs unchanged. The isolated SDK follow-up is pinned to pushed
+`7b8b32ae`; its full 11-case performance gate passed and its two baseline
+correctness failures remain retained. Installed legacy migration, accepted
+packaging and rendered file writing remain pending.
+[Managed upgrade commands and limits](native-owner-upgrade-client.md),
+[exact evidence](evidence/native-owner-adapter-local.json).
+
 Target-bound retirement and qualified replacement startup passed **96 native
 contracts in 198.23 seconds**, with all 623 mapped inputs unchanged and every
 registered contract included. The actual production server retired and exited;

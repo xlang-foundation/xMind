@@ -15,8 +15,8 @@ function harness(options={}){
   const store=map=>({get:key=>map.get(key),update:async(key,value)=>map.set(key,value)});
   const context={workspaceState:store(state),globalState:store(globalState),secrets:{get:async key=>secrets.get(key),store:async(key,value)=>secrets.set(key,value)}};
   let time=0,nextPort=19000;
-  const runtime={nativeProgram:'C:\\Runtime\\xmind_server.exe',modules:'C:\\Runtime\\modules',stdlib:'C:\\Runtime\\stdlib',providerConfig:settings.providerConfigPath,privateStateRoot:options.storage||'C:\\Private',manifestSha256:'a'.repeat(64)};
-  const deps={platform:'win32',arch:'x64',env:{PATH:'synthetic-host-path',LOCALAPPDATA:'C:\\Local',XMIND_UI_BOOTSTRAP_TOKEN:'synthetic-stale-bootstrap'},uuid:()=>`owned-${nextPort}`,random:()=>`synthetic-auth-${nextPort}`.padEnd(64,'x'),port:async()=>++nextPort,now:()=>time,sleep:async ms=>{time+=ms;},fs:{realpath:async value=>options.alias?.(value)||value,mkdir:async value=>directories.push(value)},spawn:(program,args,config)=>{
+  const runtime={nativeProgram:'C:\\Runtime\\xmind_server.exe',runtimeRoot:'C:\\Runtime',qualified:true,modules:'C:\\Runtime\\modules',stdlib:'C:\\Runtime\\stdlib',providerConfig:settings.providerConfigPath,privateStateRoot:options.storage||'C:\\Private',manifestSha256:'a'.repeat(64)};
+  const deps={platform:'win32',arch:'x64',retainRuntime:async value=>value,env:{PATH:'synthetic-host-path',LOCALAPPDATA:'C:\\Local',XMIND_UI_BOOTSTRAP_TOKEN:'synthetic-stale-bootstrap'},uuid:()=>`owned-${nextPort}`,random:()=>`synthetic-auth-${nextPort}`.padEnd(64,'x'),port:async()=>++nextPort,now:()=>time,sleep:async ms=>{time+=ms;},fs:{realpath:async value=>options.alias?.(value)||value,mkdir:async value=>directories.push(value)},spawn:(program,args,config)=>{
     const child=new EventEmitter();child.pid=nextPort;child.exitCode=null;child.kills=0;child.unref=()=>{};child.kill=()=>{child.kills++;child.exitCode=0;child.emit('exit',0);};
     launches.push({program,args,config,child});return child;
   },fetch:async(url,request)=>{
@@ -135,4 +135,49 @@ test('folder change during token await blocks dispatch; changed native generatio
 });
 test('revoked workspace trust prevents every mutation while preserving the backend owner',async()=>{
  const h=harness();const active=await h.manager.connect();h.vscode.workspace.isTrusted=false;await assert.rejects(h.manager.prepare(),/changed/);assert.equal(h.launches[0].child.kills,0);assert.equal(active.metadata.configured,true);
+});
+
+async function upgradeHarness(options={}){
+ const h=harness(),first=await h.manager.connect(),posts=[];let source={generation:'a'.repeat(32),revision:1,quiesced:false,receipt_id:'',retirement_requested:false,replacement_prepared:false,retirement_supported:true,process_id:first.pid,process_birth:'1337',bootstrap_receipt:null},receipt;
+ const prepared=()=>({generation:'c'.repeat(32),revision:4,quiesced:true,receipt_id:'b'.repeat(32),retirement_requested:false,replacement_prepared:true,retirement_supported:true,process_id:19002,process_birth:'2337',bootstrap_receipt:receipt});let activated=false;
+ h.deps.observeExit=h.manager.deps.observeExit=async()=>!options.live;
+ h.manager.deps.fetch=async(url,request)=>{
+   const newer=new URL(url).origin!==first.origin,route=new URL(url).pathname,input=request.body&&JSON.parse(request.body);
+   if(input)posts.push({route,input});let value;
+   if(route==='/v1/workspace'){if(newer&&h.launches.length<2)throw new TypeError('Synthetic replacement has not started');value={...first.metadata,authority_id:newer?'c'.repeat(32):first.metadata.authority_id};}
+   else if(route==='/v1/backend/owner'){if(options.legacy)return {ok:false,status:404};value=newer?(activated?{...prepared(),revision:5,quiesced:false,receipt_id:'',replacement_prepared:false,bootstrap_receipt:null}:prepared()):source;}
+   else if(route.endsWith('/quiesce')){source={...source,revision:2,quiesced:true,receipt_id:'b'.repeat(32)};receipt={receipt_id:source.receipt_id,revision:source.revision,generation:source.generation};value=source;}
+   else if(route.endsWith('/retire')){source={...source,revision:3,retirement_requested:true,bootstrap_receipt:receipt};value=source;if(options.lost)throw new TypeError('Synthetic lost retirement response');}
+   else if(route.endsWith('/activate')){activated=true;value={...prepared(),revision:5,quiesced:false,receipt_id:'',replacement_prepared:false,bootstrap_receipt:null};}
+   else if(route.endsWith('/resume')){source={...source,revision:3,quiesced:false,receipt_id:''};value=source;}
+   else if(route==='/v1/sessions')value=[{id:'saved',title:newer&&options.changed?'changed':'fixture'}];
+   else if(route.endsWith('/skills'))value={authority_id:newer?'c'.repeat(32):first.metadata.authority_id,ids:[],manual_ids:[],revision:0,editable:true};
+   else if(route.endsWith('/history'))value=[{role:'assistant',usage:{input:4,output:3}}];
+   else if(route==='/v1/health')value={file_edit_proposals:newer};
+   else value=[];
+   return {ok:true,json:async()=>JSON.parse(JSON.stringify(value))};
+ };
+ h.settings.workspaceEdits=true;h.runtime.manifestSha256='d'.repeat(64);h.manager.invalidate();
+ h.manager.resolveRuntime=async()=>h.runtime;
+ h.state.set('agentflow.session',{url:first.origin,id:'saved'});h.state.set('xmind.model',{url:first.origin,id:'synthetic-model'});
+ return {...h,resolver:async()=>h.runtime,first,posts,isActivated:()=>activated};
+}
+
+test('explicit upgrade carries issued receipt, saved profile and selections; lost retirement reply is never replayed',async()=>{
+ for(const lost of [false,true]){
+  const h=await upgradeHarness({lost});const second=await h.manager.upgrade();assert.equal(second.privateDirectory,h.first.privateDirectory);assert.notEqual(second.origin,h.first.origin);
+  assert.deepEqual(h.posts.map(p=>p.route),['/v1/backend/owner/quiesce','/v1/backend/owner/retire','/v1/backend/owner/activate']);
+  assert.equal(h.launches.length,2);assert.equal(h.launches[0].child.kills,0);const args=h.launches[1].args;assert.equal(args[args.indexOf('--owner-receipt')+1],'a'.repeat(32)+':2:'+'b'.repeat(32));assert.ok(!args.includes('--provider-config'));assert.equal(h.state.get('agentflow.session').url,second.origin);assert.equal(h.state.get('xmind.model').id,'synthetic-model');assert.equal(h.globalState.get('xmind.nativeWorkspaceOwners').length,1);assert.equal(h.globalState.get('xmind.nativeWorkspaceOwners')[0].upgrade,undefined);
+ }
+});
+
+test('live old process and changed saved records keep replacement admission closed without killing or duplicate retirement',async()=>{
+ for(const options of [{live:true},{changed:true}]){
+  const h=await upgradeHarness(options);await assert.rejects(h.manager.upgrade(),options.live?/still running/:/records changed/);assert.equal(h.isActivated(),false);assert.equal(h.posts.filter(p=>p.route.endsWith('/retire')).length,1);assert.equal(h.posts.filter(p=>p.route.endsWith('/activate')).length,0);assert.ok(h.globalState.get('xmind.nativeWorkspaceOwners')[0].upgrade);assert.equal(h.launches[0].child.kills,0);
+  const reloaded=new WorkspaceBackend(h.vscode,h.context,h.resolver,{...h.deps,fetch:h.manager.deps.fetch});await assert.rejects(reloaded.connect());assert.equal(h.posts.filter(p=>p.route.endsWith('/retire')).length,1);
+ }
+});
+
+test('legacy owner cannot fabricate retirement or replace its database through the native upgrade command',async()=>{
+ const h=await upgradeHarness({legacy:true});const records=JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners'));await assert.rejects(h.manager.upgrade(),/legacy backend/);assert.equal(h.posts.length,0);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,0);assert.equal(JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),records);
 });

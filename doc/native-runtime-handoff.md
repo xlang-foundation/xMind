@@ -1,5 +1,13 @@
 # Managed local runtime upgrades
 
+The newer [managed upgrade adapter](native-owner-upgrade-client.md) now retains
+private runtime generations, launches qualified owners, observes actual native
+process exit and completes target-bound bootstrap/activation. All 97 native and
+197/39 view checks passed locally. Its actual native fixture uses synthetic
+VS Code state and deployment inputs; installed legacy migration, live provider
+continuity and rendered writing remain pending. The design/earlier component
+scopes below are superseded only by that documented validation.
+
 The [native replacement protocol](native-owner-replacement.md) now implements
 target-bound retirement/shutdown, actual process exit, qualified closed startup
 and explicit activation. Its complete local gate passed **96 native contracts

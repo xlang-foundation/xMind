@@ -3,6 +3,7 @@
 #include "agentflow/agent_instructions.hpp"
 #include "agentflow/graph.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
+#include "agentflow/owner_process.hpp"
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
@@ -11,6 +12,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <charconv>
 namespace {
 bool reflected(const nlohmann::json& value,const std::string& secret){
     const auto encoded=nlohmann::json(secret).dump();
@@ -23,6 +25,11 @@ bool reflected(const nlohmann::json& value,const std::string& secret){
 }
 int main(int argc,char** argv){
     try {
+        if(argc==5&&std::string(argv[1])=="observe-owner-exit"){
+            const auto number=[](const char* value){std::uint32_t out=0;const auto end=value+std::char_traits<char>::length(value);const auto parsed=std::from_chars(value,end,out);if(parsed.ec!=std::errc{}||parsed.ptr!=end)throw std::invalid_argument("Invalid owner process argument");return out;};
+            const auto pid=number(argv[2]);const auto observed=agentflow::observe_owner_exit(pid,argv[3],number(argv[4]));
+            std::cout<<nlohmann::json{{"exited",observed.exited},{"identity_matches",observed.identity_matches},{"process_id",pid},{"process_birth",argv[3]}}.dump()<<'\n';return 0;
+        }
         std::map<std::string,std::string> options;int command=1;
         while(command<argc && std::string(argv[command]).starts_with("--")){
             const std::string key=argv[command];if(command+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib") || !options.emplace(key,argv[command+1]).second)throw std::invalid_argument("Invalid native admin options");command+=2;

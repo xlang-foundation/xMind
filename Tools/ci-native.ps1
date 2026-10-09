@@ -11,7 +11,7 @@ function Invoke-CiCommand([string]$Name,[string]$Executable,[string[]]$Arguments
     if($LASTEXITCODE -ne 0){throw ($Name+' failed with exit code '+$LASTEXITCODE)}
 }
 $ciRevision=(& git -C $ciRuntime rev-parse HEAD).Trim()
-if($LASTEXITCODE -ne 0 -or $ciRevision -ne '5e86144cce2730b06e0de11c155097cf71b84a58'){throw 'xlang3 source does not match the pinned runtime.'}
+if($LASTEXITCODE -ne 0 -or $ciRevision -ne '7b8b32ae3a0e6a99fac7babd97362736099448fb'){throw 'xlang3 source does not match the pinned runtime.'}
 if((& git -C $ciRuntime status --porcelain)){throw 'Pinned runtime checkout must be clean.'}
 $ciStdlibRevision=(& git -C (Split-Path $ciStdlib -Parent) rev-parse HEAD).Trim()
 if($LASTEXITCODE -ne 0 -or $ciStdlibRevision -ne 'ebf955df7a89ed0c7968f79faec1de49f61ed7cb'){throw 'Standard-library source differs from the pinned CPython 3.14.0 source.'}
@@ -126,6 +126,7 @@ $ciExpected+='native_backend_owner_contract'
 $ciExpected+='native_runtime_generation_contract'
 $ciExpected+='native_backend_owner_http_contract'
 $ciExpected+='native_backend_handoff_contract'
+$ciExpected+='native_owner_process_contract'
 $ciActual=($ciTests|ConvertFrom-Json).tests.name
 if(@($ciActual).Count -ne $ciExpected.Count -or (Compare-Object ($ciActual|Sort-Object) ($ciExpected|Sort-Object))){throw 'The complete expected native contract set was not registered; refusing a partial green build.'}
 Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error')

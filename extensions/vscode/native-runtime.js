@@ -105,6 +105,38 @@ async function resolveNativeRuntime(context, hostEnv, userSettings = {}, depende
   // encrypted storage and import; no workspace file search or key access here.
   const providerConfig = userSettings.providerConfigPath ? absolute(userSettings.providerConfigPath, 'Provider configuration') : undefined;
   return { nativeProgram: path.join(verified.runtimeRoot, 'xmind_server.exe'), modules: path.join(verified.runtimeRoot, 'modules'), stdlib,
-    providerConfig, privateStateRoot, runtimeRoot: verified.runtimeRoot, manifestSha256: verified.manifestSha256 };
+    providerConfig, privateStateRoot, runtimeRoot: verified.runtimeRoot, manifestSha256: verified.manifestSha256,
+    qualified: samePath(stdlib,path.join(verified.runtimeRoot,'stdlib')) };
 }
-module.exports = { resolveNativeRuntime, verifyNativeRuntime, validateManifest, relativeFile, runtimeFileKind, REQUIRED_NATIVE, REQUIRED_STDLIB, MANIFEST_NAME };
+async function retainNativeRuntime(runtime, privateRoot, { io=fs, uuid=()=>crypto.randomUUID() }={}) {
+  check(runtime.qualified===true,'Managed owner upgrades require the verified package’s bundled pure library sources. Clear the machine stdlibSource override or use an external development server.');
+  const source=await verifyNativeRuntime(runtime.runtimeRoot,{io});
+  check(source.manifestSha256===runtime.manifestSha256,'The selected native runtime changed.');
+  await regular(privateRoot,true,io);
+  const parent=path.join(privateRoot,'runtime-generations');await io.mkdir(parent,{recursive:true});await regular(parent,true,io);
+  let output;
+  const verifyOutput=async()=>{const result=await verifyNativeRuntime(output,{io});check(result.manifestSha256===source.manifestSha256,'The retained native generation changed.');return {...runtime,runtimeRoot:output,nativeProgram:path.join(output,'xmind_server.exe'),modules:path.join(output,'modules'),stdlib:path.join(output,'stdlib')};};
+  const entries=await io.readdir(parent,{withFileTypes:true});check(entries.length<=4096,'Retained native generation inventory exceeds its limit.');
+  for(const entry of entries.sort((a,b)=>a.name.localeCompare(b.name))){
+    if(!entry.name.startsWith(source.manifestSha256+'-'))continue;
+    check(entry.isDirectory()&&!entry.isSymbolicLink(),'Retained native generation is aliased.');output=path.join(parent,entry.name);
+    try{await regular(path.join(output,MANIFEST_NAME),false,io);}catch(error){if(error.code==='ENOENT')continue;throw error;}
+    return verifyOutput();
+  }
+  const identifier=uuid();check(/^[a-f0-9-]{36}$/.test(identifier),'Invalid native generation publication identifier.');
+  output=path.join(parent,source.manifestSha256+'-'+identifier);await io.mkdir(output,{recursive:false});await regular(output,true,io);
+  // Copy only the verified inventory. No workspace/configuration/database files
+  // are read, and an existing live generation is never overwritten or removed.
+  for(const [name,digest]of Object.entries(source.manifest.files)){
+    const data=await io.readFile(path.join(source.runtimeRoot,...name.split('/')));
+    check(crypto.createHash('sha256').update(data).digest('hex')===digest,'Native source changed during retention.');
+    const target=path.join(output,...name.split('/'));await io.mkdir(path.dirname(target),{recursive:true});await io.writeFile(target,data,{flag:'wx'});
+  }
+  const raw=await io.readFile(path.join(source.runtimeRoot,MANIFEST_NAME));check(crypto.createHash('sha256').update(raw).digest('hex')===source.manifestSha256,'Native manifest changed during retention.');
+  // Native pins ancestor identities while a generation is live. Publish in a
+  // fresh final directory without renaming beneath those handles. The complete
+  // verified manifest is written last; an incomplete directory is never reused.
+  await io.writeFile(path.join(output,MANIFEST_NAME),raw,{flag:'wx'});
+  return verifyOutput();
+}
+module.exports = { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, relativeFile, runtimeFileKind, REQUIRED_NATIVE, REQUIRED_STDLIB, MANIFEST_NAME };

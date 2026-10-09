@@ -611,6 +611,12 @@ async function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.selectWorkspaceRoot',async()=>{
     try{await reconnectWorkspace(true);}catch(error){vscode.window.showErrorMessage(error.message);}
   }));
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.upgradeBackend',async()=>{
+    try{if(previewOrigin||machineSetting(vscode,'backendMode')==='external')throw new Error('External backends are upgraded by their operator.');stop();post({type:'status',text:'Upgrading the local backend while preserving its profile…'});await workspaceBackend.upgrade();await reconnectWorkspace();vscode.window.showInformationMessage('xMind’s local backend was upgraded. Saved sessions, models and history were retained.');}catch(error){vscode.window.showErrorMessage(error.message);}
+  }));
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.cancelBackendUpgrade',async()=>{
+    try{if(previewOrigin||machineSetting(vscode,'backendMode')==='external')throw new Error('External backends are upgraded by their operator.');stop();await workspaceBackend.cancelUpgrade();await reconnectWorkspace();}catch(error){vscode.window.showErrorMessage(error.message);}
+  }));
   if(vscode.workspace.onDidChangeWorkspaceFolders)context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(()=>{
     reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
   }));

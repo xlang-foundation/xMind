@@ -62,6 +62,14 @@
       {
         "command": "agentflow.selectWorkspaceRoot",
         "title": "xMind: Select Active Workspace Root"
+      },
+      {
+        "command": "agentflow.upgradeBackend",
+        "title": "xMind: Upgrade Local Backend (Preserve Profile)"
+      },
+      {
+        "command": "agentflow.cancelBackendUpgrade",
+        "title": "xMind: Cancel Pending Backend Upgrade"
       }
     ],
     "configuration": {
