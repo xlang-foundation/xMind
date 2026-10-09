@@ -23,9 +23,11 @@ transport prerequisite, not integrated agent-worker or performance acceptance.
 [IPC evidence](evidence/xlang3-ipc-foundation-local.json) and
 [worker design](native-ipc-worker-design.md).
 
-The installed client still uses its existing 0.1.4 runtime generation. A
-consolidated package/manifest, verified owner migration and automatic console
-bootstrap remain pending, along with UI SSE, authoring APIs and agent workers.
+The installed client still uses its existing 0.1.4 runtime generation. The new
+package uses one `xmind.exe` and will be validated with a fresh local profile;
+legacy-profile migration is excluded by the product decision. Fresh installed
+acceptance and automatic console bootstrap remain pending, along with UI SSE,
+authoring APIs and agent workers.
 
 The CLI multiline/composer source checkpoint passed the complete **103 native
 contracts in 215.71 seconds**, with 2,390 unchanged mapped inputs, plus **222

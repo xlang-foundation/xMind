@@ -33,13 +33,13 @@ if($Action -eq 'Build') {
 if($Port -lt 0 -or $Port -gt 65535 -or ($Action -in @('Client','Chat') -and $Port -eq 0)) {throw 'Invalid port.'}
 if($Action -eq 'Serve' -and $ModelWire -eq 'responses' -and (-not $Model -or -not $ModelEndpoint)){throw 'Responses startup requires -Model and -ModelEndpoint.'}
 if(-not $BinaryDirectory){$BinaryDirectory=Join-Path $projectRoot 'build\native\Release'}
-$binary=Join-Path ([System.IO.Path]::GetFullPath($BinaryDirectory)) $(if($Action -eq 'Serve') {'xmind_server.exe'} else {'xmind_cli.exe'})
+$binary=Join-Path ([System.IO.Path]::GetFullPath($BinaryDirectory)) 'xmind.exe'
 if(-not (Test-Path -LiteralPath $binary)) {throw 'Build the native xMind targets first with -Action Build.'}
 if($Action -eq 'Serve') {
     if(-not $Database) {$Database=Join-Path $projectRoot '.agentflow\native\state.sqlite'}
     $Database=[System.IO.Path]::GetFullPath($Database)
     New-Item -ItemType Directory -Force -Path (Split-Path $Database -Parent) | Out-Null
-    $serverArguments=@('--db',$Database,'--modules',(Join-Path $RuntimeDirectory 'modules'),'--stdlib',$PythonLibSource,'--port',"$Port")
+    $serverArguments=@('serve','--db',$Database,'--modules',(Join-Path $RuntimeDirectory 'modules'),'--stdlib',$PythonLibSource,'--port',"$Port")
     if($ProviderConfig -and $Model){throw 'Provider YAML requires configurable provider profiles; omit -Model.'}
     if(-not $ProviderConfig -and -not $Model){
         $providerTemplate=Join-Path $projectRoot '.config/providers.yaml'
@@ -67,8 +67,8 @@ if($Action -eq 'Serve') {
     $chatArguments=@('chat')
     if($Session){$chatArguments+=$Session}
     if($Model){$chatArguments+=$Model}
-    & $binary $Port @chatArguments
+    & $binary --port $Port @chatArguments
 } else {
-    & $binary $Port @ClientArguments
+    & $binary --port $Port @ClientArguments
 }
 exit $LASTEXITCODE

@@ -20,8 +20,9 @@ in the existing TestProj profile, preserving all 22 messages and seven runs.
 The launcher retains the profile database and explicitly rejects unknown owner
 outcomes. [Installed evidence](native-file-patch.md) and the
 [runtime handoff contract](native-runtime-handoff.md) record the verified scope.
-The new unified executable still needs its own installed package/manifest and
-owner-migration acceptance; the older installation is not evidence of that step.
+The new unified executable needs its own installed acceptance with a fresh
+local profile. It uses one current package format and requires no legacy-profile
+migration; the older installation is not evidence of the new package.
 
 ## xMind OSS specification — revised 2026-10-07
 

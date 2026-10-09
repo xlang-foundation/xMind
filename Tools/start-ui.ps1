@@ -35,14 +35,14 @@ if(Test-Path -LiteralPath (Join-Path $uiState 'active.json')){
 }
 if(Get-NetTCPConnection -State Listen -LocalPort $DebugPort -ErrorAction SilentlyContinue){throw 'The selected development-host debug port is already in use.'}
 if(-not (Test-Path -LiteralPath $CodeExecutable)) {throw 'Select an installed VS Code executable or unpack the official portable ZIP under .agentflow/ui-host/vscode.'}
-$uiServer=Join-Path $uiProject 'build\native\Release\xmind_server.exe'
+$uiServer=Join-Path $uiProject 'build\native\Release\xmind.exe'
 $uiBuildProvenance=$null
 if($BundleDirectory){
     if($RuntimeDirectory){throw 'Select a complete native bundle or a runtime directory, not both.'}
     $uiBundle=(Resolve-Path -LiteralPath $BundleDirectory).Path
-    $uiServer=Join-Path $uiBundle 'xmind_server.exe'
+    $uiServer=Join-Path $uiBundle 'xmind.exe'
     $uiModules=Join-Path $uiBundle 'modules'
-    foreach($uiRequired in @('xmind_server.exe','xmind_cli.exe','xlang3_runtime.dll','modules/xlang_json.x3pkg.dll','modules/xlang_sqlite3.x3pkg.dll','provenance.json')){
+    foreach($uiRequired in @('xmind.exe','xlang3_runtime.dll','modules/xlang_json.x3pkg.dll','modules/xlang_sqlite3.x3pkg.dll','provenance.json')){
         if(-not(Test-Path -LiteralPath (Join-Path $uiBundle $uiRequired))){throw ('Incomplete native development bundle: '+$uiRequired)}
     }
     $uiBuildProvenance=Get-Content -LiteralPath (Join-Path $uiBundle 'provenance.json') -Raw|ConvertFrom-Json
@@ -57,13 +57,13 @@ if(-not $BundleDirectory){
     # Load a private immutable snapshot instead of locking the build directory.
     $uiSnapshot=Join-Path $uiState ('runtime-'+[Guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory -Path (Join-Path $uiSnapshot 'modules') -Force|Out-Null
-    foreach($uiBinary in @('xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe','xlang3_runtime.dll')){
+    foreach($uiBinary in @('xmind.exe','xlang3_runtime.dll')){
         Copy-Item -LiteralPath (Join-Path (Split-Path $uiServer -Parent) $uiBinary) -Destination (Join-Path $uiSnapshot $uiBinary)
     }
     foreach($uiModule in Get-ChildItem -LiteralPath $uiModules -File -Filter '*.dll'){
         Copy-Item -LiteralPath $uiModule.FullName -Destination (Join-Path $uiSnapshot 'modules')
     }
-    $uiServer=Join-Path $uiSnapshot 'xmind_server.exe';$uiModules=Join-Path $uiSnapshot 'modules'
+    $uiServer=Join-Path $uiSnapshot 'xmind.exe';$uiModules=Join-Path $uiSnapshot 'modules'
 }
 $uiAccess=[Convert]::ToHexString([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
 $uiOriginalAuth=$env:XMIND_AUTH_TOKEN
@@ -79,7 +79,7 @@ try {
     $uiLog=Join-Path $uiState 'backend.log'
     $uiErrorLog=Join-Path $uiState 'backend-error.log'
     $uiReady=Join-Path $uiState ('opened-'+[Guid]::NewGuid().ToString('N')+'.json')
-    $uiArgs=@('--db',('"'+$uiDatabase+'"'),'--modules',('"'+$uiModules+'"'),'--stdlib',('"'+$StdlibSource+'"'),'--port','0')
+    $uiArgs=@('serve','--db',('"'+$uiDatabase+'"'),'--modules',('"'+$uiModules+'"'),'--stdlib',('"'+$StdlibSource+'"'),'--port','0')
     if(-not $ProviderConfig -and -not $Model){
         $uiProviderTemplate=Join-Path $uiProject '.config/providers.yaml'
         if(Test-Path -LiteralPath $uiProviderTemplate -PathType Leaf){$ProviderConfig=$uiProviderTemplate}

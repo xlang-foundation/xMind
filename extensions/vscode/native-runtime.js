@@ -7,8 +7,7 @@ const crypto = require('node:crypto');
 
 const MANIFEST_NAME = 'native-runtime-manifest.json';
 const REQUIRED_NATIVE = Object.freeze([
-  'xmind_server.exe', 'xmind_schema_worker.exe', 'xmind_cli.exe', 'xmind_admin.exe',
-  'xlang3_runtime.dll', 'xlang3.exe',
+  'xmind.exe', 'xlang3_runtime.dll', 'xlang3.exe',
   'modules/xlang_json.x3pkg.dll', 'modules/xlang_sqlite3.x3pkg.dll'
 ]);
 const REQUIRED_STDLIB = Object.freeze(['os.py', 'json/__init__.py', 'encodings/__init__.py', 'importlib/__init__.py']);
@@ -46,15 +45,15 @@ function validateManifest(manifest) {
     manifest.platform === 'win32' && manifest.arch === 'x64' && manifest.bridgeEnabled === false &&
     /^[a-f0-9]{40}$/.test(manifest.nativeRevision) && /^[a-f0-9]{40}$/.test(manifest.sdkRevision) &&
     /^[a-f0-9]{64}$/.test(manifest.sourceManifestSha256), 'The native runtime manifest is incompatible.');
-  const files = manifest.files;
-  check(files && typeof files === 'object' && !Array.isArray(files) && Object.keys(files).length >= REQUIRED_NATIVE.length + REQUIRED_STDLIB.length &&
+  const files = manifest.files, native = REQUIRED_NATIVE;
+  check(files && typeof files === 'object' && !Array.isArray(files) && Object.keys(files).length >= native.length + REQUIRED_STDLIB.length &&
     Object.keys(files).length <= 20000, 'The native runtime file inventory is invalid.');
   const names = new Set();
   for (const [name, digest] of Object.entries(files)) {
     check(relativeFile(name) && runtimeFileKind(name) && /^[a-f0-9]{64}$/.test(digest) && !names.has(name.toLowerCase()), 'The native runtime file inventory is invalid.');
     names.add(name.toLowerCase());
   }
-  check(REQUIRED_NATIVE.every(name => Object.hasOwn(files, name)) && REQUIRED_STDLIB.every(name => Object.hasOwn(files, 'stdlib/' + name)), 'The native runtime or pure standard-library source is incomplete.');
+  check(native.every(name => Object.hasOwn(files, name)) && REQUIRED_STDLIB.every(name => Object.hasOwn(files, 'stdlib/' + name)), 'The native runtime or pure standard-library source is incomplete.');
   check(Object.keys(files).some(name => name.startsWith('licenses/')), 'The native runtime license notices are missing.');
   return manifest;
 }
@@ -104,9 +103,10 @@ async function resolveNativeRuntime(context, hostEnv, userSettings = {}, depende
   // Pass the ONE explicit user/machine-owned path only. Native owns parsing,
   // encrypted storage and import; no workspace file search or key access here.
   const providerConfig = userSettings.providerConfigPath ? absolute(userSettings.providerConfigPath, 'Provider configuration') : undefined;
-  return { nativeProgram: path.join(verified.runtimeRoot, 'xmind_server.exe'), modules: path.join(verified.runtimeRoot, 'modules'), stdlib,
+  const program = 'xmind.exe';
+  return { nativeProgram: path.join(verified.runtimeRoot, program), modules: path.join(verified.runtimeRoot, 'modules'), stdlib,
     providerConfig, privateStateRoot, runtimeRoot: verified.runtimeRoot, manifestSha256: verified.manifestSha256,
-    serverSha256: verified.manifest.files['xmind_server.exe'],
+    serverSha256: verified.manifest.files[program],
     qualified: samePath(stdlib,path.join(verified.runtimeRoot,'stdlib')) };
 }
 async function retainNativeRuntime(runtime, privateRoot, { io=fs, uuid=()=>crypto.randomUUID() }={}) {
@@ -116,7 +116,7 @@ async function retainNativeRuntime(runtime, privateRoot, { io=fs, uuid=()=>crypt
   await regular(privateRoot,true,io);
   const parent=path.join(privateRoot,'runtime-generations');await io.mkdir(parent,{recursive:true});await regular(parent,true,io);
   let output;
-  const verifyOutput=async()=>{const result=await verifyNativeRuntime(output,{io});check(result.manifestSha256===source.manifestSha256,'The retained native generation changed.');return {...runtime,runtimeRoot:output,nativeProgram:path.join(output,'xmind_server.exe'),modules:path.join(output,'modules'),stdlib:path.join(output,'stdlib')};};
+  const verifyOutput=async()=>{const result=await verifyNativeRuntime(output,{io});check(result.manifestSha256===source.manifestSha256,'The retained native generation changed.');return {...runtime,runtimeRoot:output,nativeProgram:path.join(output,'xmind.exe'),modules:path.join(output,'modules'),stdlib:path.join(output,'stdlib')};};
   const entries=await io.readdir(parent,{withFileTypes:true});check(entries.length<=4096,'Retained native generation inventory exceeds its limit.');
   for(const entry of entries.sort((a,b)=>a.name.localeCompare(b.name))){
     if(!entry.name.startsWith(source.manifestSha256+'-'))continue;
@@ -140,4 +140,8 @@ async function retainNativeRuntime(runtime, privateRoot, { io=fs, uuid=()=>crypt
   await io.writeFile(path.join(output,MANIFEST_NAME),raw,{flag:'wx'});
   return verifyOutput();
 }
-module.exports = { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, relativeFile, runtimeFileKind, REQUIRED_NATIVE, REQUIRED_STDLIB, MANIFEST_NAME };
+function nativeProgramEntry(runtime, role) {
+  check(['serve', 'admin', 'console', 'schema-worker'].includes(role), 'Unsupported native entry role.');
+  return {program:path.join(runtime.runtimeRoot,'xmind.exe'),arguments:role==='console'?[]:[role]};
+}
+module.exports = { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, relativeFile, runtimeFileKind, nativeProgramEntry, REQUIRED_NATIVE, REQUIRED_STDLIB, MANIFEST_NAME };

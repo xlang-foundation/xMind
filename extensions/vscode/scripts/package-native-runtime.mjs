@@ -18,12 +18,13 @@ async function bytes(path,max=128*1024*1024){const info=await regular(path);need
 async function absent(path){try{await lstat(path);}catch(error){if(error.code==='ENOENT')return;throw error;}throw Error('Native package output must be a fresh directory.');}
 function sourceManifest(value){
   need(value&&value.schemaVersion===1&&value.platform==='win32'&&value.arch==='x64'&&value.bridgeEnabled===false&&/^[a-f0-9]{40}$/.test(value.nativeRevision)&&/^[a-f0-9]{40}$/.test(value.sdkRevision),'A verified Windows x64 native source manifest is required.');
-  need(value.files&&typeof value.files==='object'&&!Array.isArray(value.files)&&Object.keys(value.files).length>=REQUIRED_NATIVE.length&&Object.keys(value.files).length<=128,'The native source inventory is invalid.');
+  const native=REQUIRED_NATIVE;
+  need(value.files&&typeof value.files==='object'&&!Array.isArray(value.files)&&Object.keys(value.files).length>=native.length&&Object.keys(value.files).length<=128,'The native source inventory is invalid.');
   const seen=new Set();
   for(const [name,digest]of Object.entries(value.files)){
     need(relativeFile(name)&&['native','license','metadata'].includes(runtimeFileKind(name))&&/^[a-f0-9]{64}$/.test(digest)&&!seen.has(name.toLowerCase()),'The native source inventory contains an unsupported file.');seen.add(name.toLowerCase());
   }
-  need(REQUIRED_NATIVE.every(name=>Object.hasOwn(value.files,name))&&Object.keys(value.files).some(name=>name.startsWith('licenses/')),'The native source files or notices are incomplete.');return value;
+  need(native.every(name=>Object.hasOwn(value.files,name))&&Object.keys(value.files).some(name=>name.startsWith('licenses/')),'The native source files or notices are incomplete.');return value;
 }
 async function pureSources(root,prefix=''){
   const found=[];
@@ -61,7 +62,7 @@ export async function stageNativeRuntime(options={}){
   for(const name of pureNames)need((await bytes(join(pureRoot,...name.split('/')),8*1024*1024)).equals(inputs.get('stdlib/'+name)),'A pure source changed during staging.');need(license.equals(await bytes(licensePath,1024*1024)),'The source license changed during staging.');
   await mkdir(output,{recursive:false});const files={};
   for(const [name,value]of inputs){const target=join(output,...name.split('/'));need(inside(output,target),'Native package output path escaped.');await mkdir(dirname(target),{recursive:true});await writeFile(target,value,{flag:'wx',mode:0o600});files[name]=sha(value);}
-  const manifest={schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:source.nativeRevision,sdkRevision:source.sdkRevision,sourceManifestSha256:bundleManifestSha256,stdlib:'Bundled pure Python3.14 source only; no CPython execution, executable, extension or bytecode',files};
+  const manifest={schemaVersion:source.schemaVersion,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:source.nativeRevision,sdkRevision:source.sdkRevision,sourceManifestSha256:bundleManifestSha256,stdlib:'Bundled pure Python3.14 source only; no CPython execution, executable, extension or bytecode',files};
   await writeFile(join(output,MANIFEST_NAME),JSON.stringify(manifest,null,2)+'\n',{flag:'wx',mode:0o600});const verified=await verifyNativeRuntime(output);
   return {output,manifestSha256:verified.manifestSha256,nativeFiles:REQUIRED_NATIVE.length,pureSourceFiles:pureNames.length,files:Object.keys(files).length,nativeExecuted:false,configAccessed:false,installed:false};
 }

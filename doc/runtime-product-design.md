@@ -162,11 +162,12 @@ console bootstrap, HTTP SSE for the shared UI event feed (currently 500 ms
 polling; A2A streaming is separate), unified YAML/Markdown/Python authoring,
 reusable nested super-agents, shared scheduling/worker placement, xlang3 IPC,
 Local/Nexus connection integration and remaining provider/coding parity.
-The existing runtime packaging and installed owner must be migrated and
-verified before the old product binaries are retired.
+The new package contains one `xmind.exe` product executable. Validate it with a
+fresh local profile; old installations remain intact. No legacy-format or
+existing-profile migration is required.
 
 Required acceptance covers the actual consolidated server/console, existing
-native contracts, client adapters and installed profile migration, then stream
+native contracts, client adapters and a fresh installed profile, then stream
 disconnect/replay, equivalent declarative/code registration and real worker
 crash/cancellation/effect reconciliation. A passing parser or dispatcher fixture
 does not establish those product boundaries.

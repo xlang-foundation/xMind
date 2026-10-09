@@ -89,11 +89,12 @@ SecretStorage. A wrong root or unavailable workspace identity blocks submission.
 development-preview scope; they are not proof of managed folder binding.
 
 The VSIX's `native-runtime` directory must contain a verified manifest,
-`xmind_server.exe`, `xmind_schema_worker.exe`, `xmind_cli.exe`, `xmind_admin.exe`,
-`xlang3_runtime.dll`, `xlang3.exe`, `modules/xlang_json.x3pkg.dll` and
+`xmind.exe`, `xlang3_runtime.dll`, `xlang3.exe`, `modules/xlang_json.x3pkg.dll` and
 `modules/xlang_sqlite3.x3pkg.dll`. Stage only an already accepted paired Native
 and SDK build. The source manifest supplies their exact hashes and native/license
 inventory, Windows x64 platform, bridge-disabled status and revision bindings.
+Use a fresh local profile for this package; no legacy package or profile
+migration is supported. Existing installations remain intact.
 Add pure standard-library source and its license separately:
 
 ```powershell

@@ -113,7 +113,7 @@ try {
   assert.ok(second.id);
   if(process.platform==='win32') {
     const launcher=fileURLToPath(new URL('../../Tools/agentflow.ps1',import.meta.url));
-    const launched=spawnSync('pwsh',['-NoProfile','-File',launcher,'-Action','Client','-Port',String(port),'sessions'],{env,encoding:'utf8',timeout:15000,windowsHide:true});
+    const launched=spawnSync('pwsh',['-NoProfile','-File',launcher,'-Action','Client','-BinaryDirectory',dirname(serverExe),'-Port',String(port),'sessions'],{env,encoding:'utf8',timeout:15000,windowsHide:true});
     assert.equal(launched.status,0,launched.stderr);assert.equal(JSON.parse(launched.stdout).length,2);
   }
   const writes = await Promise.all(Array.from({length: 12}, (_, i) => request('/v1/sessions/shared/messages', {role: 'user', data: {content: `message ${i}`}})));

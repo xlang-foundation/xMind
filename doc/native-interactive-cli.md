@@ -8,8 +8,8 @@ not access the database or run a separate agent.
 The [product design](runtime-product-design.md) consolidates these roles into
 `xmind serve` and `xmind [--port PORT] [COMMAND ...]`. The native `xmind` target
 now shares the existing server/console/admin/schema handlers. Existing installed
-packages still use the older launchers pending a verified manifest and owner
-migration. Automatic console discovery/start and worker execution remain pending;
+packages still use older launchers. The new package uses a fresh profile with
+one `xmind.exe` and requires no migration. Automatic console discovery/start and worker execution remain pending;
 the current console needs an existing authenticated backend.
 
 ## Multiline requests
@@ -100,7 +100,7 @@ arguments use the Unicode entry point and explicit UTF-8 conversion.
 With `XMIND_AUTH_TOKEN` privately set, run:
 
 ```text
-xmind_cli PORT chat [SESSION [MODEL]]
+xmind --port PORT chat [SESSION [MODEL]]
 ```
 
 Chat validates a supplied session and optional backend-enabled model, then
@@ -151,11 +151,11 @@ from an individual profile's saved version. Model identities retain the exact
 discovered resource, including Gemini's `models/<id>` prefix.
 
 ```text
-xmind_cli PORT provider-profiles
-xmind_cli PORT profile-models ID ROUTE REVISION [KEY_ENV]
-xmind_cli PORT save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate]
-xmind_cli PORT select-profile ID REVISION
-xmind_cli PORT provider-models
+xmind --port PORT provider-profiles
+xmind --port PORT profile-models ID ROUTE REVISION [KEY_ENV]
+xmind --port PORT save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate]
+xmind --port PORT select-profile ID REVISION
+xmind --port PORT provider-models
 ```
 
 `provider-profiles` reads actual public metadata: registry revision, active ID,

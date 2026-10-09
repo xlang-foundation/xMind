@@ -33,23 +33,33 @@ test('staging preserves accepted native bytes and pure source while excluding in
   for(const name of ['python.exe','synthetic.pyc','synthetic.pyd'])await fs.writeFile(path.join(f.options.stdlibSource,name),'Synthetic excluded bytes');
   for(const directory of ['__pycache__','site-packages','.config']){await fs.mkdir(path.join(f.options.stdlibSource,directory));await fs.writeFile(path.join(f.options.stdlibSource,directory,'hidden.py'),'Synthetic excluded bytes');}
   const result=await(await packager).stageNativeRuntime(f.options);
-  assert.equal(result.nativeFiles,8);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,15);assert.equal(result.nativeExecuted,false);assert.equal(result.configAccessed,false);assert.equal(result.installed,false);
+  assert.equal(result.nativeFiles,5);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,12);assert.equal(result.nativeExecuted,false);assert.equal(result.configAccessed,false);assert.equal(result.installed,false);
   const verified=await verifyNativeRuntime(f.options.out);assert.equal(verified.manifest.sourceManifestSha256,f.options.bundleManifestSha256);
   for(const name of REQUIRED_NATIVE)assert.deepEqual(await fs.readFile(path.join(f.options.out,name)),await fs.readFile(path.join(f.options.bundle,name)));
   assert.deepEqual(await fs.readFile(path.join(f.options.out,'stdlib/synthetic_extra.py')),Buffer.from('# Synthetic source synthetic_extra.py\r\n'));
   for(const name of ['stdlib/python.exe','stdlib/synthetic.pyc','stdlib/synthetic.pyd','stdlib/.config/hidden.py'])await assert.rejects(fs.stat(path.join(f.options.out,name)),{code:'ENOENT'});
 });
+
+test('unified staging binds one product executable and rejects legacy launcher injection',async t=>{
+ const f=await fixture(t);const result=await(await packager).stageNativeRuntime(f.options);
+ assert.equal(result.nativeFiles,5);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,12);
+ const verified=await verifyNativeRuntime(f.options.out);assert.equal(verified.manifest.schemaVersion,1);
+ assert.equal(verified.manifest.files['xmind.exe'],f.manifest.files['xmind.exe']);
+ for(const name of ['xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe'])await assert.rejects(fs.stat(path.join(f.options.out,name)),{code:'ENOENT'});
+ const mixed=await fixture(t);const bytes=Buffer.from('Synthetic unwanted legacy launcher');await fs.writeFile(path.join(mixed.options.bundle,'xmind_server.exe'),bytes);mixed.manifest.files['xmind_server.exe']=hash(bytes);await mixed.save();
+ await assert.rejects((await packager).stageNativeRuntime(mixed.options),/unsupported/);await assert.rejects(fs.stat(mixed.options.out),{code:'ENOENT'});
+});
 test('unbound or changed native source manifests never publish output',async t=>{
   const f=await fixture(t),stage=(await packager).stageNativeRuntime;
   await assert.rejects(stage({...f.options,explicitStage:false}),/Explicit/);
   await assert.rejects(stage({...f.options,bundleManifestSha256:'f'.repeat(64)}),/manifest changed/);
-  await fs.writeFile(path.join(f.options.bundle,'xmind_server.exe'),'Tampered synthetic native bytes');
+  await fs.writeFile(path.join(f.options.bundle,'xmind.exe'),'Tampered synthetic native bytes');
   await assert.rejects(stage(f.options),/bundle file changed/);await assert.rejects(fs.stat(f.options.out),{code:'ENOENT'});
 });
 test('source inventory cannot include a Python executable or missing native file',async t=>{
   const f=await fixture(t),stage=(await packager).stageNativeRuntime;
   f.manifest.files['python.exe']='c'.repeat(64);await f.save();await assert.rejects(stage(f.options),/unsupported file/);
-  delete f.manifest.files['python.exe'];delete f.manifest.files['xmind_admin.exe'];await f.save();await assert.rejects(stage(f.options),/incomplete/);
+  delete f.manifest.files['python.exe'];delete f.manifest.files['xmind.exe'];await f.save();await assert.rejects(stage(f.options),/incomplete/);
   await assert.rejects(fs.stat(f.options.out),{code:'ENOENT'});
 });
 test('missing pure source, license output collision and reused output fail before publication',async t=>{

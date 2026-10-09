@@ -7,7 +7,7 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, REQUIRED_NATIVE, REQUIRED_STDLIB, MANIFEST_NAME } = require('../native-runtime');
+const { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, REQUIRED_NATIVE, nativeProgramEntry, REQUIRED_STDLIB, MANIFEST_NAME } = require('../native-runtime');
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 async function fixture(t) {
   // Positive inputs must be canonical even when a Windows runner's TEMP uses
@@ -19,25 +19,45 @@ async function fixture(t) {
   for (const name of [...REQUIRED_NATIVE, ...REQUIRED_STDLIB.map(name => 'stdlib/' + name), 'licenses/SYNTHETIC-LICENSE']) {
     const bytes = Buffer.from('Synthetic inventory only: ' + name); await fs.mkdir(path.dirname(path.join(runtime, name)), { recursive: true }); await fs.writeFile(path.join(runtime, name), bytes); files[name] = digest(bytes);
   }
-  const manifest = { schemaVersion: 1, platform: 'win32', arch: 'x64', bridgeEnabled: false, nativeRevision: 'a'.repeat(40), sdkRevision: 'b'.repeat(40), sourceManifestSha256: 'c'.repeat(64), files };
+  const manifest = { schemaVersion:1, platform: 'win32', arch: 'x64', bridgeEnabled: false, nativeRevision: 'a'.repeat(40), sdkRevision: 'b'.repeat(40), sourceManifestSha256: 'c'.repeat(64), files };
   const save = () => fs.writeFile(path.join(runtime, MANIFEST_NAME), JSON.stringify(manifest)); await save();
   return { root, runtime, manifest, save, context: { extensionUri: { fsPath: path.join(root, 'extension') }, globalStorageUri: { fsPath: path.join(root, 'private') } }, host: { platform: 'win32', arch: 'x64', remoteName: undefined } };
 }
 test('packaged native discovery binds every listed byte and returns paths without launching', async t => {
   const f = await fixture(t), config = path.join(f.root, 'not-created/.config/providers.yaml');
   const resolved = await resolveNativeRuntime(f.context, f.host, { providerConfigPath: config });
-  assert.equal(resolved.nativeProgram, path.join(f.runtime, 'xmind_server.exe')); assert.equal(resolved.modules, path.join(f.runtime, 'modules'));
+  assert.equal(resolved.nativeProgram, path.join(f.runtime, 'xmind.exe')); assert.equal(resolved.modules, path.join(f.runtime, 'modules'));
   assert.equal(resolved.stdlib, path.join(f.runtime, 'stdlib')); assert.equal(resolved.providerConfig, config); assert.equal(resolved.privateStateRoot, f.context.globalStorageUri.fsPath);
   assert.equal(resolved.manifestSha256, digest(await fs.readFile(path.join(f.runtime, MANIFEST_NAME))));
   await assert.rejects(fs.lstat(config), { code: 'ENOENT' });
+});
+
+test('unified package resolves fixed entry modes and retains the exact primary executable',async t=>{
+ const f=await fixture(t);await fs.mkdir(f.context.globalStorageUri.fsPath);
+ const runtime=await resolveNativeRuntime(f.context,f.host);assert.equal((await verifyNativeRuntime(f.runtime)).manifest.schemaVersion,1);
+ assert.equal(runtime.nativeProgram,path.join(f.runtime,'xmind.exe'));assert.equal(runtime.serverSha256,f.manifest.files['xmind.exe']);
+ for(const role of ['serve','admin','console','schema-worker'])assert.deepEqual(nativeProgramEntry(runtime,role),{program:runtime.nativeProgram,arguments:role==='console'?[]:[role]});
+ const retained=await retainNativeRuntime(runtime,f.context.globalStorageUri.fsPath);
+ assert.equal(retained.nativeProgram,path.join(retained.runtimeRoot,'xmind.exe'));
+ assert.deepEqual(await fs.readFile(retained.nativeProgram),await fs.readFile(runtime.nativeProgram));
+ assert.equal((await retainNativeRuntime(runtime,f.context.globalStorageUri.fsPath)).runtimeRoot,retained.runtimeRoot);
+ await fs.appendFile(retained.nativeProgram,'changed fixture');await assert.rejects(verifyNativeRuntime(retained.runtimeRoot),/verification failed/);
+});
+
+test('one format rejects missing primary executables, legacy launchers and unsupported schemas',async t=>{
+ const f=await fixture(t);
+ for(const name of ['xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe'])assert.throws(()=>validateManifest({...f.manifest,files:{...f.manifest.files,[name]:'d'.repeat(64)}}),/inventory/);
+ const missing=structuredClone(f.manifest);delete missing.files['xmind.exe'];assert.throws(()=>validateManifest(missing),/incomplete|inventory/);
+ assert.throws(()=>validateManifest({...f.manifest,schemaVersion:2}),/incompatible/);
+ assert.throws(()=>nativeProgramEntry({runtimeRoot:f.runtime},'worker'),/Unsupported/);
 });
 
 test('retained generation uses verified private inventory and reuses exact bytes without overwriting',async t=>{
  const f=await fixture(t);await fs.mkdir(f.context.globalStorageUri.fsPath);const runtime=await resolveNativeRuntime(f.context,f.host);
  const retained=await retainNativeRuntime(runtime,f.context.globalStorageUri.fsPath);assert.equal(retained.manifestSha256,runtime.manifestSha256);assert.notEqual(retained.runtimeRoot,runtime.runtimeRoot);assert.equal(path.dirname(retained.runtimeRoot),path.join(f.context.globalStorageUri.fsPath,'runtime-generations'));
  assert.equal((await retainNativeRuntime(runtime,f.context.globalStorageUri.fsPath)).runtimeRoot,retained.runtimeRoot);
- await fs.appendFile(path.join(retained.runtimeRoot,'xmind_server.exe'),'changed fixture');await assert.rejects(retainNativeRuntime(runtime,f.context.globalStorageUri.fsPath),/verification failed/);
- assert.ok((await fs.readFile(path.join(retained.runtimeRoot,'xmind_server.exe'),'utf8')).endsWith('changed fixture'));
+ await fs.appendFile(path.join(retained.runtimeRoot,'xmind.exe'),'changed fixture');await assert.rejects(retainNativeRuntime(runtime,f.context.globalStorageUri.fsPath),/verification failed/);
+ assert.ok((await fs.readFile(path.join(retained.runtimeRoot,'xmind.exe'),'utf8')).endsWith('changed fixture'));
 });
 
 test('managed generation refuses unqualified pure-source override without creating runtime storage',async t=>{
@@ -60,7 +80,7 @@ test('unsupported host or remote execution is rejected before filesystem access'
   assert.equal(reads, 0);
 });
 test('binary tampering and missing pure-source inventory are rejected', async t => {
-  const f = await fixture(t); await fs.writeFile(path.join(f.runtime, 'xmind_server.exe'), 'Changed synthetic bytes');
+  const f = await fixture(t); await fs.writeFile(path.join(f.runtime, 'xmind.exe'), 'Changed synthetic bytes');
   await assert.rejects(verifyNativeRuntime(f.runtime), /verification failed/);
   delete f.manifest.files['stdlib/os.py']; assert.throws(() => validateManifest(f.manifest), /incomplete/);
 });
@@ -69,7 +89,7 @@ test('manifest forbids unknown executables, native Python extensions, traversal 
   for (const name of ['python.exe', 'stdlib/_sqlite3.pyd', 'stdlib/os.pyc', '../escape', 'stdlib/.config/private.py', 'stdlib/.GIT/private.py', 'stdlib/site-packages/private.py', 'modules/extra.dll']) {
     assert.throws(() => validateManifest({ ...f.manifest, files: { ...f.manifest.files, [name]: 'f'.repeat(64) } }), /inventory/);
   }
-  assert.throws(() => validateManifest({ ...f.manifest, files: { ...f.manifest.files, 'XMIND_SERVER.EXE': 'f'.repeat(64) } }), /inventory/);
+  assert.throws(() => validateManifest({ ...f.manifest, files: { ...f.manifest.files, 'XMIND.EXE': 'f'.repeat(64) } }), /inventory/);
   assert.throws(() => validateManifest({ ...f.manifest, bridgeEnabled: true }), /incompatible/);
 });
 test('unexpected files are rejected even when every expected hash is unchanged', async t => {

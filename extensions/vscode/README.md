@@ -35,8 +35,11 @@ backends and their running or paused work alive. Returning to a retained
 authenticated generation reconnects observation. A changed machine-level
 launch configuration or package retains the authenticated saved owner and
 reports pending backend changes. Its actual capabilities remain effective until
-an explicit migration preserves its profile. Only a newly spawned backend that fails startup before authenticated
-readiness is eligible for startup cleanup.
+an explicit upgrade using the current owner protocol preserves its profile.
+The new package contains one `xmind.exe` and accepts one current runtime format.
+Use a fresh local profile for the new installation; legacy-profile migration
+is excluded. Existing installations remain intact. Only a newly spawned backend
+that fails startup before authenticated readiness is eligible for startup cleanup.
 
 ## Machine configuration and packaging
 
@@ -49,7 +52,7 @@ paths are read from machine/global settings, never selected-project settings.
 | `agentflow.runtimeDirectory` | Optional absolute directory containing a verified `native-runtime-manifest.json`; otherwise use the extension's bundled runtime. |
 | `agentflow.stdlibSource` | Optional trusted pure standard-library source directory for development; otherwise use bundled source. |
 | `agentflow.providerConfigPath` | The **one** explicit absolute provider YAML path imported by Native. The extension does not read its contents or search opened projects for configuration. |
-| `agentflow.workspaceEdits` | Default `true` for newly started managed backends: file creation/edit proposals require native approval before writing. Explicit `false` starts a read-only owner. Existing owners retain their startup policy until migrated. |
+| `agentflow.workspaceEdits` | Default `true` for newly started managed backends: file creation/edit proposals require native approval before writing. Explicit `false` starts a read-only owner. Existing owners retain their startup policy until explicitly upgraded using the current owner protocol. |
 | `agentflow.backendUrl` | External mode's explicitly configured loopback origin. |
 
 An unset provider path starts Native unconfigured so Settings can enroll a

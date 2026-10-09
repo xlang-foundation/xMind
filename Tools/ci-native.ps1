@@ -145,8 +145,9 @@ Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release'
 # binds this receipt to the exact registered set, test log and source revision.
 @{schemaVersion=1;sourceRevision=$ciProvenance.xmind;expectedContracts=$ciExpected;contractsSha256=(Get-FileHash -LiteralPath (Join-Path $ciEvidence 'contracts.json') -Algorithm SHA256).Hash.ToLowerInvariant();ctestSha256=(Get-FileHash -LiteralPath (Join-Path $ciEvidence 'native-ctest.log') -Algorithm SHA256).Hash.ToLowerInvariant();exitCode=0}|ConvertTo-Json -Depth 4|Set-Content (Join-Path $ciEvidence 'native-gate.json')
 $ciBundle=Join-Path $ciRoot 'build/native-distribution'
+if(Test-Path -LiteralPath $ciBundle){throw 'Fresh native distribution directory required; do not mix old and unified binaries.'}
 New-Item -ItemType Directory -Force -Path (Join-Path $ciBundle 'modules'),(Join-Path $ciBundle 'licenses')|Out-Null
-foreach($ciBinary in @('xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe','xlang3_runtime.dll')){
+foreach($ciBinary in @('xmind.exe','xlang3_runtime.dll')){
     Copy-Item -LiteralPath (Join-Path $ciNative ('Release/'+$ciBinary)) -Destination $ciBundle
 }
 foreach($ciModule in @('xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll')){
@@ -169,6 +170,6 @@ foreach($ciThirdParty in @(@{path=(Join-Path $ciRoot 'Native/third_party');label
 }
 @('Native xMind Windows development bundle. See provenance.json for exact source/toolchain.',
   'Provide allowed Python 3.14 standard-library source to --stdlib; no CPython executable/native extension is required.',
-  'Run xmind_server.exe --db FILE --modules modules --stdlib LIB_SOURCE --port PORT with private XMIND_AUTH_TOKEN.',
+  'Run xmind.exe serve --db FILE --modules modules --stdlib LIB_SOURCE --port PORT with private XMIND_AUTH_TOKEN.',
   'Provider credentials belong in private backend configuration. No live provider credentials or conversations are packaged.',
   'This bundle is contract-tested development output, not evidence of full coding/provider/protocol/team completion.')|Set-Content (Join-Path $ciBundle 'README.txt')
