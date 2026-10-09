@@ -167,6 +167,37 @@ void plain_history_contract(const ChatProviderConfig& config){
     const auto tool=Json::parse(serialize_responses_request(config,request)).at("input");require(tool.size()==4&&tool[1]["content"][0]["type"]=="output_text"&&!tool[1].contains("id")&&tool[2]["type"]=="function_call"&&tool[2]["arguments"]==arguments&&tool[3]["call_id"]=="plain_call");
     request.messages[1].content.clear();const auto empty=Json::parse(serialize_responses_request(config,request)).at("input");require(empty.size()==3&&empty[1]["type"]=="function_call"&&empty[1]["arguments"]==arguments);
 }
+void provider_failure_contract(){
+    const Json created={{"type","response.created"},{"response",{{"id","resp_failure"},{"model","synthetic"},{"status","in_progress"}}}};
+    const Json usage={{"input_tokens",17},{"output_tokens",8},{"total_tokens",25},{"input_tokens_details",{{"cached_tokens",5},{"cache_write_tokens",2},{"private","DO_NOT_ECHO"}}},{"output_tokens_details",{{"reasoning_tokens",3}}},{"private","DO_NOT_ECHO"}};
+    for(const auto* type:{"response.incomplete","response.failed","error"})for(const auto* reason:{"max_output_tokens","content_filter","server_error","rate_limit_exceeded","DO_NOT_ECHO"}){
+        const bool incomplete=std::string_view(type)=="response.incomplete";
+        Json response={{"id","resp_failure"},{"model","synthetic"},{"status",incomplete?"incomplete":"failed"},{"usage",usage},{"output","DO_NOT_ECHO"}};
+        response[incomplete?"incomplete_details":"error"]={{incomplete?"reason":"code",reason},{"message","DO_NOT_ECHO"}};
+        const Json failure=std::string_view(type)=="error"?Json{{"type",type},{"code",reason},{"message","DO_NOT_ECHO"}}:Json{{"type",type},{"response",response}};
+        std::vector<ModelEvent> observed;bool failed=false;std::string code;
+        try{decode(wire({created,failure}),1,&observed);}catch(const ModelProtocolError& error){code=model_protocol_diagnostic(error);failed=true;}require(failed);
+        const std::string expected=incomplete&&std::string_view(reason)=="max_output_tokens"?"responses_output_token_limit"
+            :incomplete&&std::string_view(reason)=="content_filter"?"responses_content_filter"
+            :!incomplete&&std::string_view(reason)=="server_error"?"responses_server_error"
+            :!incomplete&&std::string_view(reason)=="rate_limit_exceeded"?"responses_rate_limit":"responses_provider_incomplete";
+        require(code==expected&&observed.size()==(std::string_view(type)=="error"?1:2));
+        require(observed[0].kind=="model.protocol_diagnostic");const auto diagnostic=Json::parse(observed[0].json);
+        require(diagnostic.size()==4&&diagnostic["code"]=="responses_provider_incomplete"&&diagnostic["event"]==type&&diagnostic["usage_state"]==(std::string_view(type)=="error"?"absent":"supplied"));
+        for(const auto& event:observed){require(event.json.find("DO_NOT_ECHO")==std::string::npos);require(event.kind!="model.done"&&event.kind!="model.finish");}
+        if(observed.size()==2){const auto actual=Json::parse(observed[1].json);require(observed[1].kind=="model.usage"&&actual["prompt_tokens"]==17&&actual["completion_tokens"]==8&&actual["total_tokens"]==25&&actual["prompt_tokens_details"]["cache_write_tokens"]==2&&actual["completion_tokens_details"]["reasoning_tokens"]==3);}
+    }
+    Json terminal={{"type","response.incomplete"},{"response",{{"id","resp_failure"},{"model","synthetic"},{"status","incomplete"},{"incomplete_details",{{"reason","max_output_tokens"}}},{"usage",usage}}}};
+    for(const auto& invalid:std::vector<Json>{Json(nullptr),Json::object(),Json{{"input_tokens",-1},{"output_tokens",8},{"total_tokens",7}},Json{{"input_tokens",17},{"output_tokens",8},{"total_tokens",24}},Json{{"input_tokens",17},{"output_tokens",8},{"total_tokens",25},{"output_tokens_details",{{"reasoning_tokens",9}}}}}){
+        auto altered=terminal;altered["response"]["usage"]=invalid;std::vector<ModelEvent> observed;rejected([&]{decode(wire({created,altered}),7,&observed);});require(observed.size()==1&&Json::parse(observed[0].json)["usage_state"]==(invalid.is_null()?"unavailable":"invalid"));
+    }
+    const Json added={{"type","response.output_item.added"},{"output_index",0},{"item",{{"id","fc_partial"},{"type","function_call"},{"call_id","call_partial"},{"name","edit_file"},{"arguments",""}}}};
+    const Json delta={{"type","response.function_call_arguments.delta"},{"output_index",0},{"item_id","fc_partial"},{"delta","{\"path\":"}};
+    const Json done={{"type","response.output_item.done"},{"output_index",0},{"item",{{"id","fc_partial"},{"type","function_call"},{"status","incomplete"},{"arguments","{\"path\":"}}}};
+    std::vector<ModelEvent> observed;bool classified=false;try{decode(wire({created,added,delta,done,terminal}),7,&observed);}catch(const ModelProtocolError& error){classified=model_protocol_diagnostic(error)=="responses_output_token_limit";}require(classified&&observed.size()==3&&observed[0].kind=="model.tool_delta"&&observed[1].kind=="model.protocol_diagnostic"&&observed[2].kind=="model.usage");
+    auto false_success=terminal;false_success["type"]="response.completed";false_success["response"]["status"]="completed";false_success["response"]["output"]=Json::array({done["item"]});observed.clear();rejected([&]{decode(wire({created,added,delta,done,false_success}),7,&observed);});require(observed.size()==1);
+    for(const auto* field:{"id","model","status"}){auto altered=terminal;altered["response"][field]="wrong";observed.clear();rejected([&]{decode(wire({created,altered}),7,&observed);});require(observed.empty());}
+}
 int main(){try{
     const auto fixture=events();const auto bytes=wire(fixture);const auto result=decode(bytes);require(result.content=="Hello \xf0\x9f\x8c\x8d"&&result.tool_calls.size()==1&&result.finish_reason=="tool_calls");require(result.tool_calls[0].id=="call_test");const auto usage=Json::parse(result.usage_json);require(usage["prompt_tokens"]==12&&usage["completion_tokens"]==7&&usage["prompt_tokens_details"]["cached_tokens"]==4&&usage["completion_tokens_details"]["reasoning_tokens"]==3);
     for(std::size_t size:{2,7,129,4096})require(decode(bytes,size).provider_items_json==result.provider_items_json);
@@ -200,6 +231,7 @@ int main(){try{
     const auto reasoningBody=Json::parse(serialize_responses_request(config,request));require(reasoningBody["reasoning"]["effort"]=="high"&&!reasoningBody.contains("reasoning_effort"));config.reasoning_effort.reset();
     rejected([&]{serialize_chat_request(config,request);});auto changed=request;changed.messages[1].content="changed";rejected([&]{serialize_responses_request(config,changed);});changed=request;changed.messages.pop_back();rejected([&]{serialize_responses_request(config,changed);});
     plain_history_contract(config);
+    provider_failure_contract();
     ModelRequest authored;authored.messages={{MessageRole::user,"Question"},{MessageRole::assistant,"Previous plain text"},{MessageRole::user,"Next"}};const auto authored_body=Json::parse(serialize_responses_request(config,authored));require(authored_body["input"][1]["role"]=="assistant"&&authored_body["input"][1]["content"][0]["type"]=="output_text");authored.messages[1].refusal="Refusal without provider items";rejected([&]{serialize_responses_request(config,authored);});
     require(model_protocol_diagnostic(ModelProtocolError("Responses final arguments differ from deltas"))=="responses_arguments_mismatch");
     require(model_protocol_diagnostic(ModelProtocolError("Incomplete Responses stream"))=="responses_stream_incomplete");

@@ -36,7 +36,7 @@ void identity(const std::string& value){if(value.empty()||value.size()>256||valu
 }
 struct ResponsesStream::Impl {
     struct Part {std::string type,value;bool done=false;};
-    struct Item {std::string id,type,call_id,name,arguments;std::map<int,Part> parts,summaries;Json final;bool done=false,args_done=false;};
+    struct Item {std::string id,type,call_id,name,arguments;std::map<int,Part> parts,summaries;Json final;bool done=false,args_done=false,incomplete=false;};
     ChatCompletionStream::Sink sink;std::map<int,Item> items;std::set<std::string> ids,calls;
     std::string line,data,event_name,response_id,model;std::int64_t sequence=-1;std::size_t bytes=0;
     bool skip_lf=false,first_line=true,has_data=false,created=false,done=false,failed=false;
@@ -68,6 +68,10 @@ struct ResponsesStream::Impl {
     void response_identity(const Json& response){if(!response.is_object()||text(response,"id")!=response_id)throw ModelProtocolError("Responses response identity changed");if(response.contains("model")){const auto current=text(response,"model");if(!model.empty()&&model!=current)throw ModelProtocolError("Responses model identity changed");model=current;}}
     void final_item(Item& current,const Json& value){
         if(text(value,"id")!=current.id||text(value,"type")!=current.type)throw ModelProtocolError("Responses final item identity changed");
+        // A truncated item can precede response.incomplete. Retain its lifecycle
+        // boundary so the terminal event can explain the failure; never convert
+        // partial arguments, text or reasoning into an executable completion.
+        if(value.value("status",Json{})=="incomplete"){current.final=value;current.incomplete=true;current.done=true;return;}
         if(value.contains("status")&&value["status"]!="completed")throw ModelProtocolError("Responses item did not complete");
         if(current.type=="message"){
             if(value.value("role",Json{})!="assistant"||!value.contains("content")||!value["content"].is_array()||value["content"].size()!=current.parts.size())throw ModelProtocolError("Responses final message differs from stream");
@@ -102,10 +106,65 @@ struct ResponsesStream::Impl {
         for(const auto& [position,current]:items){(void)position;if(separator)bounded_append(",");separator=true;bounded_append(current.final.dump());}
         bounded_append("]");return result;
     }
+    Json failure_usage(const Json* supplied){
+        if(!supplied||supplied->is_null())return nullptr;
+        if(!supplied->is_object())return nullptr;
+        const auto valid=[](const Json& count){return count.is_number_integer()&&count>=0&&count<=9007199254740991LL;};
+        Json usage=Json::object();
+        for(const auto* key:{"input_tokens","output_tokens","total_tokens"}){
+            const auto* count=member(supplied,key);if(!count||!valid(*count))return nullptr;usage[key]=*count;
+        }
+        const auto input=usage["input_tokens"].get<std::int64_t>(),output=usage["output_tokens"].get<std::int64_t>();
+        if(usage["total_tokens"].get<std::int64_t>()!=input+output)return nullptr;
+        for(const auto* group:{"input_tokens_details","output_tokens_details"}){
+            const auto* details=member(supplied,group);if(!details||details->is_null())continue;if(!details->is_object())return nullptr;
+            for(const auto* key:{"cached_tokens","cache_write_tokens","reasoning_tokens"}){
+                if((std::string_view(group)=="output_tokens_details")!=(std::string_view(key)=="reasoning_tokens"))continue;
+                const auto* count=member(details,key);if(!count)continue;
+                if(!valid(*count)||count->get<std::int64_t>()>(std::string_view(group)=="input_tokens_details"?input:output))return nullptr;
+                usage[group][key]=*count;
+            }
+        }
+        usage["prompt_tokens"]=usage["input_tokens"];usage["completion_tokens"]=usage["output_tokens"];
+        if(usage.contains("input_tokens_details"))usage["prompt_tokens_details"]=usage["input_tokens_details"];
+        if(usage.contains("output_tokens_details"))usage["completion_tokens_details"]=usage["output_tokens_details"];
+        return usage;
+    }
+    void provider_failure(const Json& event,const std::string& type){
+        const Json* response=nullptr;const Json* supplied=nullptr;
+        const char* reason="unspecified";const char* message="Provider response failed or was incomplete";
+        if(type!="error"){
+            response=member(&event,"response");if(!response)throw ModelProtocolError("Invalid Responses failure event");
+            response_identity(*response);
+            if(response->value("status",Json{})!=(type=="response.failed"?"failed":"incomplete"))throw ModelProtocolError("Invalid Responses failure event");
+            supplied=member(response,"usage");
+        }
+        const auto* classification=type=="response.incomplete"?member(member(response,"incomplete_details"),"reason")
+            :type=="response.failed"?member(member(response,"error"),"code"):member(&event,"code");
+        if(classification&&classification->is_string()){
+            reason="other";
+            if(type=="response.incomplete"){
+                for(const auto* known:{"max_output_tokens","max_messages","content_filter","steered"})if(*classification==known)reason=known;
+                if(std::string_view(reason)=="max_output_tokens")message="Responses output token limit reached";
+                else if(std::string_view(reason)=="content_filter")message="Responses provider content filter stopped output";
+            }else{
+                for(const auto* known:{"server_error","rate_limit_exceeded","invalid_prompt"})if(*classification==known)reason=known;
+                if(std::string_view(reason)=="server_error")message="Responses provider server error";
+                else if(std::string_view(reason)=="rate_limit_exceeded")message="Responses provider rate limit reached";
+            }
+        }
+        const auto usage=failure_usage(supplied);
+        // Publish only native constants and validated provider counts. Error
+        // messages, unknown codes, IDs, prompts and output are never reflected.
+        emit("model.protocol_diagnostic",{{"code","responses_provider_incomplete"},{"event",type},{"reason",reason},
+            {"usage_state",!supplied?"absent":supplied->is_null()?"unavailable":usage.is_null()?"invalid":"supplied"}});
+        if(!usage.is_null())emit("model.usage",usage);
+        throw ModelProtocolError(message);
+    }
     void terminal(const Json& event){
         const auto& response=event.at("response");response_identity(response);
         if(response.value("status",Json{})!="completed"||(response.contains("error")&&!response["error"].is_null())||!response.contains("output")||!response["output"].is_array()||response["output"].size()!=items.size())throw ModelProtocolError("Responses turn did not complete");
-        for(std::size_t i=0;i<response["output"].size();++i){const auto found=items.find(static_cast<int>(i));if(found==items.end()||!found->second.done||!terminal_matches(found->second,response["output"][i])){terminal_diagnostic(i,found==items.end()?nullptr:&found->second,response["output"][i]);throw ModelProtocolError("Responses terminal output differs from completed items");}const auto& current=found->second;
+        for(std::size_t i=0;i<response["output"].size();++i){const auto found=items.find(static_cast<int>(i));if(found!=items.end()&&found->second.incomplete)throw ModelProtocolError("Responses item did not complete");if(found==items.end()||!found->second.done||!terminal_matches(found->second,response["output"][i])){terminal_diagnostic(i,found==items.end()?nullptr:&found->second,response["output"][i]);throw ModelProtocolError("Responses terminal output differs from completed items");}const auto& current=found->second;
             if(current.type=="message")for(const auto& [pos,part]:current.parts){(void)pos;append(part.type=="output_text"?completion.content:completion.refusal,part.value);}
             else if(current.type=="function_call")completion.tool_calls.push_back({current.call_id,current.name,current.arguments});
         }
@@ -127,7 +186,7 @@ struct ResponsesStream::Impl {
         if(type=="response.created"){if(created)throw ModelProtocolError("Duplicate Responses creation");const auto& response=value.at("response");response_id=text(response,"id");identity(response_id);created=true;response_identity(response);if(response.value("status",Json{})!="in_progress")throw ModelProtocolError("Responses creation state is unsupported");return;}
         if(!created)throw ModelProtocolError("Responses event before creation");
         if(type=="response.in_progress"){response_identity(value.at("response"));if(value.at("response").value("status",Json{})!="in_progress")throw ModelProtocolError("Invalid Responses progress");return;}
-        if(type=="response.failed"||type=="response.incomplete"||type=="error")throw ModelProtocolError("Provider response failed or was incomplete");
+        if(type=="response.failed"||type=="response.incomplete"||type=="error")provider_failure(value,type);
         if(type=="response.completed"){terminal(value);return;}
         if(type=="response.output_item.added"){
             const auto pos=index(value,"output_index");const auto& added=value.at("item");Item current;current.id=text(added,"id");identity(current.id);current.type=text(added,"type");if(items.contains(pos)||!ids.insert(current.id).second)throw ModelProtocolError("Duplicate Responses output item");

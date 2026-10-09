@@ -1,5 +1,14 @@
 # Reviewable milestones
 
+Real OpenAI native CLI file creation, editing and denial passed with actual
+approval operations, filesystem hashes and six supplied response-usage events.
+Responses failures now retain explicit native classifications and validated
+usage, with actionable shared client messages. All **98 native, 199 extension
+and 39 browser tests passed**. The earlier unclassified provider failure and
+corrected acceptance-driver errors are retained. Installed VS Code writing
+and its migration remain separate and unverified.
+[Implementation, live evidence and limits](native-responses-failures.md).
+
 Native legacy publication failure after real termination now has accepted
 rollback/recovery coverage and clearer native/client diagnostics. All
 **98/198/39 local tests passed**. Actual failure, absent ticket, retained session

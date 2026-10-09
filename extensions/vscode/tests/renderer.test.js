@@ -442,6 +442,15 @@ test('unknown historical usage stays unavailable and malicious Markdown is sanit
   const card=r.dom.window.document.querySelector('.message');assert.equal(card.querySelectorAll('script,iframe,[onerror]').length,0);assert.equal(card.querySelectorAll('a[href^="javascript:"]').length,0);
   assert.equal(card.querySelector('.metrics').textContent,'Input —Output —Total —');r.dom.window.close();
 });
+test('provider failure codes render actionable messages and exact failed-response usage',()=>{
+ const r=renderer(),doc=r.dom.window.document;
+ const messages={responses_server_error:/provider reported a server error/,responses_output_token_limit:/reached its output token limit/,responses_content_filter:/content filter/,responses_rate_limit:/reported a rate limit/};
+ for(const [code,expected] of Object.entries(messages)){
+  r.send({type:'reset-run'});r.send({type:'event',event:{kind:'model.usage',data:{prompt_tokens:17,completion_tokens:8,total_tokens:25}}});r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code:code,private:'DO_NOT_ECHO'}}});
+  assert.match(doc.getElementById('run-failure').textContent,expected);assert.ok(doc.getElementById('run-failure').textContent.includes(code));assert.match(doc.querySelector('#live .metrics').textContent,/Input 17Output 8Total 25/);assert.ok(!doc.getElementById('run-failure').textContent.includes('DO_NOT_ECHO'));
+ }
+ r.dom.window.close();
+});
 test('live token badges use model usage events and reset when the persisted transcript arrives',()=>{
   const r=renderer();r.send({type:'event',event:{kind:'model.text',data:{text:'Synthetic renderer fixture'}}});r.send({type:'event',event:{kind:'model.usage',data:{prompt_tokens:8,completion_tokens:0,total_tokens:8}}});
   assert.equal(r.dom.window.document.querySelector('#live .metrics').textContent,'Input 8Output 0Total 8');

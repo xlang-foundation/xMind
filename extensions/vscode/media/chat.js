@@ -137,6 +137,7 @@ const protocolDiagnosticCodes=new Set([
   'responses_reasoning_incomplete','responses_item_incomplete','responses_turn_incomplete',
   'responses_item_lifecycle_invalid','responses_function_lifecycle_invalid','responses_function_start_invalid',
   'provider_json_invalid','responses_json_invalid','responses_stream_incomplete','responses_provider_incomplete',
+  'responses_output_token_limit','responses_content_filter','responses_server_error','responses_rate_limit','responses_failure_event_invalid',
   'responses_sequence_invalid','responses_event_type_mismatch','responses_item_identity_mismatch',
   'responses_identity_mismatch','responses_model_identity_mismatch','responses_final_identity_mismatch',
   'responses_message_mismatch','responses_text_mismatch','responses_summary_mismatch',
@@ -150,6 +151,14 @@ function runFailure(data){
     ?'The model provider returned HTTP '+status+'. This run stopped before completing its response.'
     :data?.reason==='incompatible_provider_history'
     ?'This conversation contains provider history that the selected model’s wire cannot use. Start a new conversation or select a model using the previous wire. The recorded history is preserved.'
+    :data?.reason==='model_protocol_error'&&data.protocol_error_code==='responses_server_error'
+    ?'The model provider reported a server error. This run stopped before completing its response. Review recorded tool outcomes before trying again.'
+    :data?.reason==='model_protocol_error'&&data.protocol_error_code==='responses_output_token_limit'
+    ?'The model provider reached its output token limit. This response is incomplete; partial tool requests were not executed.'
+    :data?.reason==='model_protocol_error'&&data.protocol_error_code==='responses_content_filter'
+    ?'The model provider stopped this response with its content filter. Partial tool requests were not executed.'
+    :data?.reason==='model_protocol_error'&&data.protocol_error_code==='responses_rate_limit'
+    ?'The model provider reported a rate limit. This run stopped before completing its response. Try again when provider capacity is available.'
     :data?.reason==='model_protocol_error'
     ?'The model response could not be validated, so this run stopped. Review the recorded tool outcomes before starting another run.'
     :'Execution failed. Inspect the selected run activity for the recorded reason.'));

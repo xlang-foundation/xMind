@@ -34,6 +34,18 @@ const peer=createServer((request,response)=>{let raw='';request.on('data',bytes=
   assert.deepEqual(body.input.filter(item=>item.type==='reasoning'),[],'Plain history acquires no invented opaque receipt');for(const item of body.input.filter(item=>item.type==='message'&&item.role!=='assistant'))assert.equal(item.content[0].type,'input_text');
   output(response,id,[reasoning,{id:'msg_'+number,type:'message',status:'completed',role:'assistant',content:[{type:'output_text',text:'Synthetic validated persisted plain assistant.',annotations:[]}]}]);return;
  }
+ if(prompt==='provider-server-error'){
+  response.write(`data: ${JSON.stringify({type:'response.created',sequence_number:0,response:{id,model:body.model,status:'in_progress'}})}\n\n`);
+  response.end(`data: ${JSON.stringify({type:'response.failed',sequence_number:1,response:{id,model:body.model,status:'failed',error:{code:'server_error',message:'DO_NOT_ECHO_RESPONSES_ERROR'},usage:{input_tokens:17,output_tokens:8,total_tokens:25}}})}\n\n`);return;
+ }
+ if(prompt==='partial-tool-incomplete'){
+  const send=(type,sequence_number,fields)=>response.write(`data: ${JSON.stringify({type,sequence_number,...fields})}\n\n`);
+  send('response.created',0,{response:{id,model:body.model,status:'in_progress'}});
+  send('response.output_item.added',1,{output_index:0,item:{id:'fc_partial',type:'function_call',call_id:'call_partial',name:'read_file',arguments:''}});
+  send('response.function_call_arguments.delta',2,{output_index:0,item_id:'fc_partial',delta:'{"path":'});
+  send('response.output_item.done',3,{output_index:0,item:{id:'fc_partial',type:'function_call',status:'incomplete',arguments:'{"path":'}});
+  send('response.incomplete',4,{response:{id,model:body.model,status:'incomplete',incomplete_details:{reason:'max_output_tokens'},usage:{input_tokens:17,output_tokens:8,total_tokens:25}}});response.end();return;
+ }
  if(prompt==='incomplete'){output(response,id,[{id:'msg_'+number,type:'message',status:'completed',role:'assistant',content:[{type:'output_text',text:'Synthetic partial answer',annotations:[]}]}],{incomplete:true});return;}
  const opaqueLeaf=prompt.startsWith('[opaque-leaf-left]')?'left':prompt.startsWith('[opaque-leaf-right]')?'right':undefined;
  if(prompt==='terminal-opaque'||opaqueLeaf){
@@ -115,8 +127,10 @@ try{
   const before=requests.length,value=command('run',session,prompt);await until(()=>api('/v1/runs/'+value.id),record=>record.state==='completed');assert.equal(requests.length,before+1,'One real inference continues each reopened plain-history session');const recorded=command('history',session);assert.deepEqual(recorded.slice(0,prior.length),prior,'Serialization never rewrites the actual persisted original history');assert.equal(recorded.at(-1).data.content,'Synthetic validated persisted plain assistant.');assert.equal(recorded.at(-1).data.usage.prompt_tokens,17);assert.equal(recorded.at(-1).data.usage.completion_tokens,8);assert.ok(recorded.at(-1).data.elapsed_ms>=0&&recorded.at(-1).data.first_token_ms>=0);assert.deepEqual(command('operations',value.id),[]);assert.deepEqual(await api('/v1/runs/'+value.id+'/children'),[]);assert.equal(command('events',value.id).filter(item=>item.kind==='model.done').length,1);continuedPlain.push({session,recorded});
  }
  await stop();await start();for(const item of continuedPlain)assert.deepEqual(command('history',item.session),item.recorded,'Both real plain-history continuations reopen without replay');assert.equal(legacyChatRequests.length,1);
- for(const prompt of ['unknown-tool','incomplete','http-error']){const before=requests.length,value=await run(prompt,prompt,'failed');assert.equal(requests.length,before+1,'Failed/partial Responses must not silently retry');const events=command('events',value.id);assert.ok(!events.some(item=>item.kind==='tool.started'));assert.ok(!JSON.stringify(events).includes('DO_NOT_ECHO_RESPONSES_ERROR'));assert.equal(command('history',prompt).filter(item=>item.role==='assistant').length,0);
+ for(const prompt of ['unknown-tool','incomplete','http-error','provider-server-error','partial-tool-incomplete']){const before=requests.length,value=await run(prompt,prompt,'failed');assert.equal(requests.length,before+1,'Failed/partial Responses must not silently retry');const events=command('events',value.id);assert.ok(!events.some(item=>item.kind==='tool.started'));assert.ok(!JSON.stringify(events).includes('DO_NOT_ECHO_RESPONSES_ERROR'));assert.equal(command('history',prompt).filter(item=>item.role==='assistant').length,0);
   if(prompt==='incomplete'){const failure=events.find(item=>item.kind==='run.failed');assert.equal(failure.data.reason,'model_protocol_error');assert.equal(failure.data.protocol_error_code,'responses_provider_incomplete');}
+  if(prompt==='provider-server-error'){assert.deepEqual(events.find(item=>item.kind==='model.protocol_diagnostic').data,{code:'responses_provider_incomplete',event:'response.failed',reason:'server_error',usage_state:'supplied'});assert.equal(events.find(item=>item.kind==='run.failed').data.protocol_error_code,'responses_server_error');assert.deepEqual(events.find(item=>item.kind==='model.usage').data,{input_tokens:17,output_tokens:8,total_tokens:25,prompt_tokens:17,completion_tokens:8});assert.deepEqual(command('operations',value.id),[]);}
+  if(prompt==='partial-tool-incomplete'){assert.equal(events.find(item=>item.kind==='model.protocol_diagnostic').data.reason,'max_output_tokens');assert.equal(events.find(item=>item.kind==='run.failed').data.protocol_error_code,'responses_output_token_limit');assert.deepEqual(command('operations',value.id),[]);}
  }
  assert.equal((await api('/v1/health')).agent_delegation,true);
  const opaqueBefore=requests.length,opaqueRun=await run('terminal-opaque','terminal-opaque');assert.equal(requests.length,opaqueBefore+6,'One parent and two real read-only leaves each perform two model calls');assert.equal(opaqueRun.graph_root,false);
