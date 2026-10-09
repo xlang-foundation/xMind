@@ -38,7 +38,7 @@ else()
   target_compile_options(agentflow_core PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 # Production persistence must call SQLite through embedded xlang3.
-add_library(agentflow_models STATIC src/model_stream.cpp src/model_request.cpp src/responses_stream.cpp src/responses_request.cpp src/responses_context.cpp src/anthropic_request.cpp src/anthropic_stream.cpp src/anthropic_history.cpp src/gemini_request.cpp src/gemini_stream.cpp src/gemini_history.cpp src/gemini_model_policy.cpp src/deepseek_request.cpp src/deepseek_model_policy.cpp)
+add_library(agentflow_models STATIC src/model_stream.cpp src/model_request.cpp src/responses_stream.cpp src/responses_request.cpp src/responses_context.cpp src/anthropic_request.cpp src/anthropic_stream.cpp src/anthropic_history.cpp src/gemini_request.cpp src/gemini_stream.cpp src/gemini_history.cpp src/gemini_model_policy.cpp src/deepseek_request.cpp src/deepseek_model_policy.cpp src/provider_model_policy.cpp)
 target_include_directories(agentflow_models PUBLIC include PRIVATE third_party)
 target_link_libraries(agentflow_core PRIVATE agentflow_models)
 add_library(agentflow_mcp_wire STATIC src/mcp_wire.cpp src/mcp_requests.cpp src/mcp_handshake.cpp)
@@ -634,6 +634,15 @@ if(BUILD_TESTING)
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/deepseek_profile_runtime_peer.mjs" "$<TARGET_FILE:agentflow_deepseek_profile_runtime_contract>"
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_deepseek_profile_runtime_contract PROPERTIES TIMEOUT 90)
+    add_executable(agentflow_provider_model_policy_runtime_contract tests/provider_model_policy_runtime_contract.cpp)
+    target_include_directories(agentflow_provider_model_policy_runtime_contract PRIVATE third_party third_party/cpp-httplib)
+    target_link_libraries(agentflow_provider_model_policy_runtime_contract PRIVATE agentflow_runtime agentflow_http)
+    add_custom_command(TARGET agentflow_provider_model_policy_runtime_contract POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_provider_model_policy_runtime_contract>")
+    add_test(NAME native_provider_model_policy_runtime_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/provider_model_policy_runtime_peer.mjs" "$<TARGET_FILE:agentflow_provider_model_policy_runtime_contract>"
+      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+    set_tests_properties(native_provider_model_policy_runtime_contract PROPERTIES TIMEOUT 90)
     target_include_directories(agentflow_anthropic_provider_contract PRIVATE third_party)
     target_link_libraries(agentflow_anthropic_provider_contract PRIVATE agentflow_chat_provider)
     if(AGENTFLOW_NODE_EXECUTABLE)

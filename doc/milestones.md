@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+The native OpenAI model eligibility policy passed **89/89 contracts in 172.73
+seconds**, with all 564 inputs unchanged. Discovery, enrollment and startup now
+use explicit route/model declarations; current GPT-6 tool restrictions and
+reasoning requirements are enforced before publication or execution. The 39
+frontend inputs are unchanged from the 173/33 checkpoint. Package, installed
+host and live-account checks for this new source remain separate.
+[Model eligibility scope](native-model-eligibility.md).
+
 The latest native provider checkpoint passed real workspace reads and exact
 replies from OpenAI, Claude, Gemini and DeepSeek using the existing single YAML
 configuration. The Claude direct-caller protocol fix passed 88 native tests;

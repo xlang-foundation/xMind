@@ -183,8 +183,10 @@ int main(int argc,char** argv) {
                 routes.push_back(route);policies.push_back({std::move(route),std::move(configuration),agentflow::ProviderCataloguePolicy{std::move(catalogue),format},std::move(tools)});
             };
             add("openai.chat","openai","https://api.openai.com/v1/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.openai.com/v1/models",agentflow::ProviderCatalogueFormat::openai);
+            policies.back().model_capabilities=agentflow::documented_openai_model_policy(agentflow::ProviderWire::chat_completions);
             add("openai.responses","openai","https://api.openai.com/v1/responses",agentflow::ProviderWire::responses,"https://api.openai.com/v1/models",agentflow::ProviderCatalogueFormat::openai);
             policies.back().context=agentflow::documented_openai_context_policy();
+            policies.back().model_capabilities=agentflow::documented_openai_model_policy(agentflow::ProviderWire::responses);
             add("anthropic.messages","anthropic","https://api.anthropic.com/v1/messages",agentflow::ProviderWire::anthropic_messages,"https://api.anthropic.com/v1/models",agentflow::ProviderCatalogueFormat::anthropic);
             add("gemini.generate-content","gemini","https://generativelanguage.googleapis.com/v1beta",agentflow::ProviderWire::gemini_generate_content,"https://generativelanguage.googleapis.com/v1beta/models",agentflow::ProviderCatalogueFormat::gemini);
             add("deepseek.chat","deepseek","https://api.deepseek.com/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.deepseek.com/models",agentflow::ProviderCatalogueFormat::openai,agentflow::ChatDialect::deepseek);

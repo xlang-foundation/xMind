@@ -1,4 +1,5 @@
 #include "agentflow/model_provider.hpp"
+#include "agentflow/provider_model_policy.hpp"
 #include "nlohmann/json.hpp"
 #include <iostream>
 #include <initializer_list>
@@ -14,6 +15,37 @@ template<class Function> void rejects(Function action) {
 }
 int main() {
     try {
+        for(const auto wire:{ProviderWire::responses,ProviderWire::chat_completions}){
+            const auto policy=documented_openai_model_policy(wire);validate_provider_model_policy(policy);
+            ChatProviderConfig selected;selected.endpoint="https://fixture.example.invalid/owned";selected.wire=wire;
+            const auto bound=bind_provider_model_policy(policy,selected,"gpt-6-sol",true);
+            require(bound.endpoint==selected.endpoint&&bound.wire==wire&&bound.model=="gpt-6-sol"&&bound.tools==Capability::supported,"Policy must preserve the owned route and bind exact native capabilities");
+            require(bound.reasoning_effort==(wire==ProviderWire::chat_completions?std::optional{ReasoningEffort::none}:std::nullopt),"Only the documented Chat tool route requires explicit none reasoning");
+            ModelRequest probe{{{MessageRole::user,"Synthetic declared model request"}},{{"inspect","Synthetic inspection",R"({"type":"object"})"}}};
+            probe.include_usage=true;probe.max_output_tokens=64;
+            const auto payload=Json::parse(wire==ProviderWire::responses?serialize_responses_request(bound,probe):serialize_chat_request(bound,probe));
+            require(payload.at("model")=="gpt-6-sol"&&payload.at("tools").size()==1,"Bound model must serialize actual native tool requests");
+            if(wire==ProviderWire::chat_completions)require(payload.at("reasoning_effort")=="none","Chat tool requirement must reach the actual request serializer");
+            else require(!payload.contains("reasoning")&&!payload.contains("reasoning_effort"),"Responses reasoning remains omitted unless configured");
+            for(const auto* id:{"gpt-6-astra","gpt-6.1-sol"}){
+                const auto plain=bind_provider_model_policy(policy,selected,id,false);
+                require(plain.tools==(wire==ProviderWire::responses?Capability::supported:Capability::unsupported),"Responses-only tools cannot become Chat tools");
+                if(wire==ProviderWire::chat_completions)rejects([&]{bind_provider_model_policy(policy,selected,id,true);});
+                else require(bind_provider_model_policy(policy,selected,id,true).tools==Capability::supported,"Current flagship Responses tools stay available");
+                auto none=selected;none.reasoning_effort=ReasoningEffort::none;rejects([&]{bind_provider_model_policy(policy,none,id,false);});
+            }
+            auto high=selected;high.reasoning_effort=ReasoningEffort::high;
+            if(wire==ProviderWire::chat_completions)rejects([&]{bind_provider_model_policy(policy,high,"gpt-6-sol",true);});
+            else require(bind_provider_model_policy(policy,high,"gpt-6-sol",true).reasoning_effort==ReasoningEffort::high,"Responses must preserve explicit supported reasoning");
+            rejects([&]{bind_provider_model_policy(policy,high,"gpt-4.1",false);});
+            for(const auto* id:{"gpt-6-sol-audio","gpt-6.2-future","gpt-image-1","text-embedding-3-small","ft:gpt-4.1:unknown","gpt-4.1-2099-01-01"})
+                rejects([&]{bind_provider_model_policy(policy,selected,id,false);});
+            auto wrong=selected;wrong.wire=wire==ProviderWire::responses?ProviderWire::chat_completions:ProviderWire::responses;rejects([&]{bind_provider_model_policy(policy,wrong,"gpt-4.1",false);});
+            auto invalid=policy;invalid.models.at("gpt-4.1").tools=static_cast<Capability>(99);rejects([&]{validate_provider_model_policy(invalid);});
+            invalid=policy;invalid.models.at("gpt-4.1").tool_reasoning_effort=ReasoningEffort::max;rejects([&]{validate_provider_model_policy(invalid);});
+            auto declared=policy;declared.models.emplace("fixture-explicit-deployment",declared.models.at("gpt-4.1"));
+            validate_provider_model_policy(declared);require(bind_provider_model_policy(declared,selected,"fixture-explicit-deployment",true).model=="fixture-explicit-deployment","Trusted backend declarations support custom identities without guessing from names");
+        }
         ChatProviderConfig config{"https://provider.example.invalid/v1/chat/completions","configured-deployment"};
         ModelRequest request{{{MessageRole::user,"A real caller's text"}}};
         auto plain=Json::parse(serialize_chat_request(config,request));

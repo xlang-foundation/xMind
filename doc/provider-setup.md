@@ -1,5 +1,12 @@
 # Native provider setup
 
+Default OpenAI profile routes now filter account discovery through the native
+streamed-text model policy. Workspace mode excludes models without tool support
+on the chosen wire. GPT-6 Astra and GPT-6.1 Sol use Responses for tools; Chat
+tools for GPT-6 Sol/Luna require explicit `none` reasoning. Saved keys continue
+to belong to their existing route. Discovery does not rotate credentials or
+activate a model. [Policy, declarations and validation](native-model-eligibility.md).
+
 ## Local YAML configuration: native integration in progress
 
 The new source accepts a trusted local `--provider-config FILE` using native

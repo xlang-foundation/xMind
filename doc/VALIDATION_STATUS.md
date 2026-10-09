@@ -1,5 +1,13 @@
 # Current native validation
 
+The latest model eligibility source passed **89/89 native contracts in 172.73
+seconds**, with 564 inputs unchanged and no exclusions/skips. It adds exact
+OpenAI wire/model capability declarations and preserves inactive Gemini text
+profiles beside active coding profiles. Unchanged frontend inputs retain their
+separate prior 173/33 results. New-source package and live acceptance remain
+separate from the previous four-provider checkpoint below.
+[Current model policy and retained failures](native-model-eligibility.md).
+
 Current source `d69a681886ebabcc38174985292fcd88dd7fc7ee` passed **88/88
 native tests in 174.89 seconds**, **173 extension tests** and **33 browser
 tests**. All four configured providers separately passed real native workspace

@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "baselineRevision": "2bc6135",
+  "native": {
+    "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+    "sdkAcceptanceSha256": "a9dcd9da55ba2b74abade95b90559ae30699347271962f18e968ec28e8e9d767",
+    "nativePassed": 89,
+    "nativeRegistered": 89,
+    "nativeExpected": 89,
+    "excluded": [],
+    "sourceFilesMatched": 564,
+    "bridgeEnabled": false,
+    "pythonExecutable": "OFF",
+    "sdkCorrectnessSelected": 42,
+    "sdkCorrectnessPassed": 41,
+    "sdkCorrectnessFailed": 1,
+    "sdkCorrectnessRegistered": 52,
+    "sdkCorrectnessNativeSelected": 28,
+    "sdkCorrectnessAuditedCliSelected": 14,
+    "sdkCorrectnessExcluded": 10,
+    "sdkKnownBaselineFailureCount": 1,
+    "durationSeconds": 172.73,
+    "sourceBeforeAfterIdentical": true,
+    "providerReplies": "Independent synthetic fixtures; actual native filesystem/HTTP/SQLite"
+  },
+  "priorAttempts": [
+    {
+      "state": "compile_failed",
+      "nativeTestsExecuted": false,
+      "cause": "New fixture empty SecretBytes constructor"
+    },
+    {
+      "state": "87/89",
+      "durationSeconds": 173.07,
+      "failed": [
+        "native_provider_cli_contract",
+        "native_gemini_profile_runtime_contract"
+      ],
+      "newModelPolicyRuntimePassed": true
+    }
+  ],
+  "frontend": {
+    "sourceFilesUnchanged": 39,
+    "extensionPassed": 173,
+    "browserPassed": 33,
+    "newSuitesRun": false,
+    "scope": "Prior separate Node contract checkpoint; unchanged inputs"
+  },
+  "sourceFreezeSha256": "301c494cdc8b20b1c4273e3285cbf8319a8feea1b491a5024e4e7a996c437984",
+  "gateScriptSha256": "97ac9740f0b9c8a48664030441d3e70e04f094453cc3161369e2b2df22639d2b",
+  "defaultOpenAIModelDeclarations": 21,
+  "liveProviderCalls": 0,
+  "installedAcceptance": false,
+  "browserPreviewUpgraded": false,
+  "cpythonExecuted": false,
+  "files": {
+    "doc/evidence/native-model-eligibility-ctest.log": {
+      "bytes": 12390,
+      "sha256": "63402820cf2bc170407254056a3174b7061c4dac357636fa907ba7a332d00eff"
+    },
+    "doc/evidence/native-model-eligibility-source.json": {
+      "bytes": 70920,
+      "sha256": "7420770ec366843535ba779631b26037fb5e9a45c13d140963b8a590780efdc9"
+    },
+    "doc/evidence/native-model-eligibility-expected-contracts.json": {
+      "bytes": 3432,
+      "sha256": "4f51a16edf62b103565b494721ef2de7cc0765c2f88d3c3ec8a231cb48926741"
+    },
+    "doc/evidence/native-model-eligibility-failed-ctest.log": {
+      "bytes": 14579,
+      "sha256": "2192276e22f95ab460c0d352e42b9a83211eefeaee103f1148f5836ecaa6e704"
+    },
+    "doc/evidence/native-model-eligibility-failed-build.log": {
+      "bytes": 22780,
+      "sha256": "58b9217100ff6511f352358152955faf8aecc67ec916a103daf9786d20d02526"
+    }
+  }
+}

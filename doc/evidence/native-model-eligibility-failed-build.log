@@ -1,0 +1,189 @@
+MSBuild version 18.9.1+a81b43525 for .NET Framework
+
+  Checking File Globs
+  agentflow_mcp_wire.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_mcp_wire.lib
+  agentflow_secrets.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_secrets.lib
+  agentflow_workspace.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_workspace.lib
+  agentflow_provider_transport.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_provider_transport.lib
+  agentflow_mcp_stdio.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_mcp_stdio.lib
+  provider_model_policy.cpp
+  agentflow_process.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_process.lib
+  agentflow_json_schema.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_json_schema.lib
+  xmind_schema_worker.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\xmind_schema_worker.exe
+  agentflow_schema_worker.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_schema_worker.lib
+  Scanning sources for module dependencies...
+  yaml-cpp.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\third_party\yaml-cpp\Release\yaml-cpp.lib
+  agentflow_mcp_client_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_mcp_client_contract.exe
+  agentflow_json_schema_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_json_schema_contract.exe
+  agentflow_mcp_handshake_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_mcp_handshake_contract.exe
+  agentflow_mcp_stdio_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_mcp_stdio_contract.exe
+  agentflow_mcp_wire_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_mcp_wire_contract.exe
+  agentflow_process_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_process_contract.exe
+  agentflow_schema_budget_fixture.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_schema_budget_fixture.exe
+  agentflow_secret_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_secret_contract.exe
+  agentflow_schema_worker_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_schema_worker_contract.exe
+  xmind_cli.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\xmind_cli.exe
+  agentflow_workspace_tools_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_workspace_tools_contract.exe
+  agentflow_models.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_models.lib
+  agentflow_chat_provider.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_chat_provider.lib
+  agentflow_model_stream_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_model_stream_contract.exe
+  agentflow_responses_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_responses_contract.exe
+  model_request_contract.cpp
+  agentflow_gemini_stream_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_gemini_stream_contract.exe
+  agentflow_http_stream_transport_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_http_stream_transport_contract.exe
+  agentflow_gemini_history_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_gemini_history_contract.exe
+  agentflow_gemini_request_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_gemini_request_contract.exe
+  agentflow_anthropic_request_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_anthropic_request_contract.exe
+  agentflow_anthropic_stream_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_anthropic_stream_contract.exe
+  agentflow_anthropic_history_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_anthropic_history_contract.exe
+  agentflow_responses_context_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_responses_context_contract.exe
+  agentflow_gemini_provider_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_gemini_provider_contract.exe
+  agentflow_core.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_core.lib
+  agentflow_anthropic_provider_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_anthropic_provider_contract.exe
+  agentflow_chat_provider_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_chat_provider_contract.exe
+  agentflow_a2a.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_a2a.lib
+  agentflow_task_list_repository_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_task_list_repository_contract.exe
+  xmind_persistence_demo.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\xmind_persistence_demo.exe
+  agentflow_instruction_configuration.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_instruction_configuration.lib
+  agentflow_xlang_sqlite_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_xlang_sqlite_contract.exe
+  agentflow_credential_repository_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_credential_repository_contract.exe
+  agentflow_repository_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_repository_contract.exe
+  agentflow_context_selection_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_context_selection_contract.exe
+  agentflow_view_sessions.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_view_sessions.lib
+  agentflow_instruction_configuration_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_instruction_configuration_contract.exe
+  agentflow_persistence_service_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_persistence_service_contract.exe
+  agentflow_operation_repository_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_operation_repository_contract.exe
+  agentflow_incoming_repository_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_incoming_repository_contract.exe
+  agentflow_model_request_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_model_request_contract.exe
+  agentflow_dynamic_plan_repository_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_dynamic_plan_repository_contract.exe
+  agentflow_dynamic_plan_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_dynamic_plan_contract.exe
+  agentflow_context_repository_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_context_repository_contract.exe
+  agentflow_graph.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_graph.lib
+  agentflow_mcp_configuration.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_mcp_configuration.lib
+  agentflow_policy.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_policy.lib
+  agentflow_edits.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_edits.lib
+  agentflow_mcp_effects.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_mcp_effects.lib
+  agentflow_process_effects.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_process_effects.lib
+  agentflow_permission_waiter_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_permission_waiter_contract.exe
+  agentflow_edit_executor_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_edit_executor_contract.exe
+  agentflow_create_executor_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_create_executor_contract.exe
+  agentflow_mcp_effect_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_mcp_effect_contract.exe
+  agentflow_process_configuration.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_process_configuration.lib
+  agentflow_graph_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_graph_contract.exe
+  agentflow_process_executor_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_process_executor_contract.exe
+  agentflow_http.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_http.lib
+  agentflow_process_configuration_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_process_configuration_contract.exe
+  xmind_admin.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\xmind_admin.exe
+  agentflow_agent.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_agent.lib
+  agentflow_mcp_configuration_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_mcp_configuration_contract.exe
+  agentflow_graph_checkpoint_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_graph_checkpoint_contract.exe
+  agentflow_planning_http_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_planning_http_contract.exe
+  agentflow_approved_edit_http_fixture.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_approved_edit_http_fixture.exe
+  agentflow_graph_execution.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_graph_execution.lib
+  agentflow_dynamic_plan_engine_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_dynamic_plan_engine_contract.exe
+  agentflow_deepseek_provider_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_deepseek_provider_contract.exe
+  agentflow_agent_authority_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_agent_authority_contract.exe
+  agentflow_native_child_executor_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_native_child_executor_contract.exe
+  agentflow_agent_runner_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_agent_runner_contract.exe
+  agentflow_context_engine_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_context_engine_contract.exe
+  agentflow_agent_service_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_agent_service_contract.exe
+  agentflow_graph_mcp_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_graph_mcp_contract.exe
+  agentflow_context_graph_engine_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_context_graph_engine_contract.exe
+  agentflow_anthropic_agent_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_anthropic_agent_contract.exe
+  agentflow_context_control_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_context_control_contract.exe
+  agentflow_dynamic_plan_mcp_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_dynamic_plan_mcp_contract.exe
+  agentflow_gemini_agent_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_gemini_agent_contract.exe
+  agentflow_graph_children_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_graph_children_contract.exe
+  agentflow_native_delegation_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_native_delegation_contract.exe
+  agentflow_graph_runner_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_graph_runner_contract.exe
+  provider_profile_legacy_setup.cpp
+  provider_profile_runtime.cpp
+  Generating Code...
+  agentflow_runtime.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_runtime.lib
+  deepseek_profile_runtime_contract.cpp
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  server_main.cpp
+  provider_model_policy_runtime_contract.cpp
+D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(63,75): error C2512: 'agentflow::SecretBytes': no appropriate default constructor available [D:\CantorAI2026\xMind\build\vscode-workspace-native\agentflow_provider_model_policy_runtime_contract.vcxproj]
+      D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(63,75):
+      'agentflow::SecretBytes::SecretBytes': no appropriate default constructor available
+          D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(63,75):
+          while trying to match the argument list '()'
+  
+D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(63,25): error C2660: 'agentflow::ProviderProfileRuntime::discover_models': function does not take 3 arguments [D:\CantorAI2026\xMind\build\vscode-workspace-native\agentflow_provider_model_policy_runtime_contract.vcxproj]
+      D:\CantorAI2026\xMind\Native\include\agentflow\provider_profile_runtime.hpp(33,30):
+      see declaration of 'agentflow::ProviderProfileRuntime::discover_models'
+      D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(63,25):
+      while trying to match the argument list '(const char [7], const char [12], int)'
+  
+D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(63,80): error C2088: built-in operator '==' cannot be applied to an operand of type 'std::vector<std::string,std::allocator<std::string>>' [D:\CantorAI2026\xMind\build\vscode-workspace-native\agentflow_provider_model_policy_runtime_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(64,107): error C2512: 'agentflow::SecretBytes': no appropriate default constructor available [D:\CantorAI2026\xMind\build\vscode-workspace-native\agentflow_provider_model_policy_runtime_contract.vcxproj]
+      D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(64,107):
+      'agentflow::SecretBytes::SecretBytes': no appropriate default constructor available
+          D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(64,107):
+          while trying to match the argument list '()'
+  
+D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(64,52): error C2660: 'agentflow::ProviderProfileRuntime::discover_models': function does not take 3 arguments [D:\CantorAI2026\xMind\build\vscode-workspace-native\agentflow_provider_model_policy_runtime_contract.vcxproj]
+      D:\CantorAI2026\xMind\Native\include\agentflow\provider_profile_runtime.hpp(33,30):
+      see declaration of 'agentflow::ProviderProfileRuntime::discover_models'
+      D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(64,52):
+      while trying to match the argument list '(const char [7], const char [17], int)'
+  
+D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,93): error C2512: 'agentflow::SecretBytes': no appropriate default constructor available [D:\CantorAI2026\xMind\build\vscode-workspace-native\agentflow_provider_model_policy_runtime_contract.vcxproj]
+      D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,93):
+      'agentflow::SecretBytes::SecretBytes': no appropriate default constructor available
+          D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,93):
+          while trying to match the argument list '()'
+  
+D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,34): error C2664: 'agentflow::ProviderProfileRuntimeMetadata agentflow::ProviderProfileRuntime::save_profile(std::string,std::string,std::string,agentflow::SecretBytes,int64_t,bool)': cannot convert argument 4 from 'int' to 'agentflow::SecretBytes' [D:\CantorAI2026\xMind\build\vscode-workspace-native\agentflow_provider_model_policy_runtime_contract.vcxproj]
+      D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,96):
+      'agentflow::SecretBytes::SecretBytes': no overloaded function could convert all the argument types
+          D:\CantorAI2026\xMind\Native\include\agentflow\secret_protection.hpp(16,5):
+          could be 'agentflow::SecretBytes::SecretBytes(agentflow::SecretBytes &&) noexcept'
+              D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,96):
+              'agentflow::SecretBytes::SecretBytes(agentflow::SecretBytes &&) noexcept': cannot convert argument 1 from 'int' to 'agentflow::SecretBytes &&'
+                  D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,96):
+                  Reason: cannot convert from 'int' to 'agentflow::SecretBytes'
+                  D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,96):
+                  Conversion requires a second user-defined-conversion operator or constructor
+          D:\CantorAI2026\xMind\Native\include\agentflow\secret_protection.hpp(14,5):
+          or       'agentflow::SecretBytes::SecretBytes(const agentflow::SecretBytes &)'
+              D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,96):
+              'agentflow::SecretBytes::SecretBytes(const agentflow::SecretBytes &)': cannot convert argument 1 from 'int' to 'const agentflow::SecretBytes &'
+                  D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,96):
+                  Reason: cannot convert from 'int' to 'const agentflow::SecretBytes'
+                  D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,96):
+                  Conversion requires a second user-defined-conversion operator or constructor
+          D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,96):
+          while trying to match the argument list '(int)'
+      D:\CantorAI2026\xMind\Native\include\agentflow\provider_profile_runtime.hpp(35,36):
+      see declaration of 'agentflow::ProviderProfileRuntime::save_profile'
+      D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(71,34):
+      while trying to match the argument list '(const char [7], const char [12], const char [10], int, bool)'
+  
+D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(95,84): error C2512: 'agentflow::SecretBytes': no appropriate default constructor available [D:\CantorAI2026\xMind\build\vscode-workspace-native\agentflow_provider_model_policy_runtime_contract.vcxproj]
+      D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(95,84):
+      'agentflow::SecretBytes::SecretBytes': no appropriate default constructor available
+          D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(95,84):
+          while trying to match the argument list '()'
+  
+D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(95,26): error C2660: 'agentflow::ProviderProfileRuntime::discover_models': function does not take 3 arguments [D:\CantorAI2026\xMind\build\vscode-workspace-native\agentflow_provider_model_policy_runtime_contract.vcxproj]
+      D:\CantorAI2026\xMind\Native\include\agentflow\provider_profile_runtime.hpp(33,30):
+      see declaration of 'agentflow::ProviderProfileRuntime::discover_models'
+      D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(95,26):
+      while trying to match the argument list '(const char [10], const char [17], int)'
+  
+D:\CantorAI2026\xMind\Native\tests\provider_model_policy_runtime_contract.cpp(95,89): error C2088: built-in operator '==' cannot be applied to an operand of type 'std::vector<std::string,std::allocator<std::string>>' [D:\CantorAI2026\xMind\build\vscode-workspace-native\agentflow_provider_model_policy_runtime_contract.vcxproj]
+  provider_yaml_config_contract.cpp
+  xmind_server.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\xmind_server.exe
+  provider_profile_runtime_contract.cpp
+  agentflow_provider_yaml_config_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_provider_yaml_config_contract.exe
+  provider_profile_cli_contract.cpp
+  agentflow_deepseek_profile_runtime_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_deepseek_profile_runtime_contract.exe
+  agentflow_provider_profiles_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_provider_profiles_contract.exe
+  agentflow_provider_setup_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_provider_setup_contract.exe
+  gemini_profile_runtime_contract.cpp
+  agentflow_provider_profile_cli_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_provider_profile_cli_contract.exe
+  agentflow_gemini_catalogue_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_gemini_catalogue_contract.exe
+  agentflow_provider_profile_runtime_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_provider_profile_runtime_contract.exe
+  agentflow_gemini_profile_runtime_contract.vcxproj -> D:\CantorAI2026\xMind\build\vscode-workspace-native\Release\agentflow_gemini_profile_runtime_contract.exe

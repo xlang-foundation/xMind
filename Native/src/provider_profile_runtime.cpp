@@ -33,6 +33,10 @@ std::string model_identity(const ProviderProfileRoute& route,const std::string& 
 }
 Capability model_tools(const ProviderProfileExecutionPolicy& policy,const std::string& model){
     const auto canonical=model_identity(policy.route,model);
+    if(policy.model_capabilities){
+        const auto found=policy.model_capabilities->models.find(canonical);
+        return found==policy.model_capabilities->models.end()?Capability::unknown:found->second.tools;
+    }
     if(const auto found=policy.model_tools.find(canonical);found!=policy.model_tools.end())return found->second;
     if(policy.route.wire==ProviderWire::gemini_generate_content){
         if(const auto found=policy.model_tools.find(canonical.substr(7));found!=policy.model_tools.end())return found->second;
@@ -41,6 +45,8 @@ Capability model_tools(const ProviderProfileExecutionPolicy& policy,const std::s
 }
 void validate_execution(const ProviderProfileExecutionPolicy& policy,const AgentSettings& base,const std::string& model,bool allow_empty=false){
     validate_model(policy.route,model,allow_empty);
+    if(policy.model_capabilities&&!(allow_empty&&model.empty()))
+        (void)bind_provider_model_policy(*policy.model_capabilities,policy.provider,model_identity(policy.route,model),base.workspace.has_value());
     if((policy.route.wire==ProviderWire::gemini_generate_content||policy.provider.chat_dialect==ChatDialect::deepseek)&&!model.empty()&&base.workspace&&model_tools(policy,model)!=Capability::supported)
         throw std::invalid_argument("Workspace agent requires declared model tool capability");
 }
@@ -63,6 +69,11 @@ std::vector<ProviderProfileRoute> routes(const std::vector<ProviderProfileExecut
             throw std::invalid_argument("Provider catalogue policy differs from route wire");
         if(value.context&&value.route.wire!=ProviderWire::responses)
             throw std::invalid_argument("Context strategy differs from provider route wire");
+        if(value.model_capabilities){
+            validate_provider_model_policy(*value.model_capabilities);
+            if(value.model_capabilities->wire!=value.route.wire||!value.model_tools.empty())
+                throw std::invalid_argument("Native model capabilities conflict with execution route or legacy tools policy");
+        }
         // Validate the backend-owned base even before a key-only import or
         // empty registry, without selecting an executable model.
         validate_model(value.route,"xmind-policy-validation");
@@ -93,10 +104,15 @@ struct ProviderProfileRuntime::Impl {
         try{
             for(const auto& profile:state.profiles){
                 const auto& allowed=route(profile.route_id);validate_model(allowed.route,profile.model,true);
+                // Validate inactive streamed-text identities without applying
+                // the active workspace's tool requirements to another profile.
+                // Activation still goes through prepare/validate_execution.
+                if(allowed.model_capabilities&&!profile.model.empty())
+                    (void)bind_provider_model_policy(*allowed.model_capabilities,allowed.provider,model_identity(allowed.route,profile.model),false);
                 auto owned=store.resolve_credential(allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose).get();
                 validate_public_identity(profile.id,profile.model,owned);
             }
-        }catch(const std::invalid_argument&){throw DatabaseError("Stored provider profile has an invalid public identity");}
+        }catch(const std::invalid_argument&){throw DatabaseError("Stored provider profile identity or native model policy is invalid");}
         if(!state.active.empty()){
             auto owned=profiles.credential(state.active);
             const auto selected=std::find_if(state.profiles.begin(),state.profiles.end(),[&](const auto& value){return value.id==state.active;});
@@ -127,6 +143,7 @@ struct ProviderProfileRuntime::Impl {
             return platform(std::move(settings));
         }
         auto settings=base;settings.provider=allowed.provider;settings.provider.model=profile.model;
+        if(allowed.model_capabilities)settings.provider=bind_provider_model_policy(*allowed.model_capabilities,settings.provider,model_identity(allowed.route,profile.model),base.workspace.has_value());
         if(settings.provider.wire==ProviderWire::anthropic_messages&&!settings.max_output_tokens)settings.max_output_tokens=4096;
         settings.context=allowed.context;
         settings.provider.tools=model_tools(allowed,profile.model);
@@ -191,6 +208,8 @@ std::vector<std::string> ProviderProfileRuntime::discover_models(std::string id,
     {
         std::lock_guard lock(impl_->mutex);if(expected!=impl_->state.revision||impl_->profiles.snapshot().revision!=expected)throw Conflict("Provider profile changed during model discovery");
         const auto& allowed=impl_->route(route_id);
+        if(allowed.model_capabilities)
+            std::erase_if(result,[&](const auto& model){try{validate_execution(allowed,impl_->base,model);return false;}catch(const std::invalid_argument&){return true;}});
         if(impl_->base.workspace&&(allowed.route.wire==ProviderWire::gemini_generate_content||allowed.provider.chat_dialect==ChatDialect::deepseek))
             std::erase_if(result,[&](const auto& model){return model_tools(allowed,model)!=Capability::supported;});
     }

@@ -1,5 +1,7 @@
 # Preserve vendored upstream bytes and the documented header hashes.
 doc/evidence/native-provider-workspace-* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+doc/evidence/native-model-eligibility-* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+doc/evidence/native-model-eligibility-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-vscode-opened-workspace-* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 Native/third_party/** -text
 # yaml-cpp retains upstream whitespace as part of its verified original bytes.

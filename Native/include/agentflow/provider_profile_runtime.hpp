@@ -3,6 +3,7 @@
 #include "agentflow/provider_profiles.hpp"
 #include "agentflow/provider_catalogue.hpp"
 #include "agentflow/provider_profile_setup.hpp"
+#include "agentflow/provider_model_policy.hpp"
 #include <filesystem>
 #include <map>
 namespace agentflow {
@@ -16,6 +17,9 @@ struct ProviderProfileExecutionPolicy {
     // account catalogue metadata. Unknown models retain provider.tools.
     std::map<std::string,Capability> model_tools;
     std::optional<ContextRuntimePolicy> context;
+    // Optional exact native streamed-text declarations for this execution wire.
+    // An enrolled route with this policy rejects unlisted models in every path.
+    std::optional<ProviderModelPolicy> model_capabilities;
 };
 // Shared single/graph execution platform with backend-owned model profiles.
 // Connection profiles (Local/Nexus) belong to a separate transport boundary.

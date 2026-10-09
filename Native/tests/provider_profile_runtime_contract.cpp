@@ -223,7 +223,7 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
     }
     for(const auto* name:{"startup-valid","startup-repair"}){
         PersistenceService store((std::filesystem::u8path(argv[1])/(std::string(name)+".sqlite")).string(),imports);
-        ProviderRuntime legacy(store,base,1,8);legacy.configure("fixture-startup",key("runtime-openai-fixture-key"),0);
+        ProviderRuntime legacy(store,base,1,8);legacy.configure("gpt-4.1",key("runtime-openai-fixture-key"),0);
         if(std::string(name)=="startup-repair"){auto record=Json::parse(store.information("native-provider","active").get());record["model"]="sk-invalid-legacy-model";store.put_information("native-provider","active",record.dump()).get();}
     }
     {
