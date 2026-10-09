@@ -37,9 +37,15 @@ retains the initial Claude formatting and harness cleanup failures and the
 successful Claude retry. The browser preview subsequently upgraded to the same
 accepted runtime with exact saved-record comparison. Reload and real skill
 metadata rendering passed, but a moving approval-card interaction failed and
-was cancelled before an effect. A DOM-retention fix passed 58 renderer contracts;
-its full 177/35 gate and installed interaction remain pending.
+was cancelled before an effect. The DOM-retention fix subsequently passed its
+complete isolated 177/35 gate and is published in the browser preview. A real
+retry passed expanded-guidance retention, sidebar approval, native file creation,
+exact final response and reload with actual metrics. The normal VS Code profile
+still needs this script update and rendered acceptance; full skills remain
+incomplete.
 [Browser evidence](evidence/native-skills-browser-upgrade.json).
+[Verified view gate](evidence/native-approval-stability-views-hosted.json),
+[actual approval retry](evidence/native-approval-stability-live.json).
 
 The later catalogue-recovery source passed its isolated hosted **175/35** view
 gate and its tested browser asset is published. Rendered recovery and an updated

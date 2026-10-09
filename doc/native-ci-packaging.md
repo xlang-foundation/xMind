@@ -20,10 +20,16 @@ the initial Claude formatting failure and successful retry retained. See the
 The browser preview later replaced its runtime/assets with this accepted package,
 preserving exact saved API records and connection cookies. Rendered reload and
 skill metadata were observed; the approval interaction exposed a card-rebuild
-bug and was cancelled before an effect. The DOM-retention source fix awaits its
-complete view gate and installation. Ordinary VS Code window reload also remains
-pending. [Browser evidence](evidence/native-skills-browser-upgrade.json) retains
-these distinct scopes; the earlier checks below remain historical evidence.
+bug and was cancelled before an effect. The DOM-retention fix subsequently
+passed its complete isolated 177/35 view gate, was verified and published as the
+preview's `chat.js`. An actual browser retry passed guidance retention, approval,
+native file creation and completed-response reload. Neither preview process
+restarted for this script update. The persistent VS Code profile still needs
+the fixed script/package and ordinary-window rendered acceptance.
+[Browser upgrade evidence](evidence/native-skills-browser-upgrade.json),
+[isolated view evidence](evidence/native-approval-stability-views-hosted.json) and
+[live retry evidence](evidence/native-approval-stability-live.json) retain these
+distinct scopes; the earlier checks below remain historical evidence.
 
 `Tools/ci-native.ps1` writes a successful gate receipt only after the exact
 registered contract set has passed. `Tools/ci-stage-runtime.mjs` binds that

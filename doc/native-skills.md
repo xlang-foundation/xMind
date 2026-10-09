@@ -6,8 +6,8 @@ native gate and hosted packaging. Independent verification binds the tested
 runtime and VSIX to that source. The package is installed in the persistent
 VS Code profile, passed a real isolated opened-folder host and passed skill
 activation/companion reads with four real providers. The browser preview now
-uses this runtime and preserved its saved records during replacement. Rendered
-approval acceptance and full skill delivery remain
+uses this runtime and preserved its saved records during replacement. Normal
+VS Code rendered acceptance and full skill delivery remain
 pending; this does not establish OpenCode skill parity.
 
 The behavior reference is the pinned OpenCode `v2.0.16` source, commit
@@ -225,14 +225,34 @@ keyboard focus and in-flight decision controls across polls. Changed native
 bindings replace the card, and cached expired approvals are still disabled.
 Uncertain-file inspection results also survive identical updates. The renderer's
 58 contracts passed, including a new regression case covering file, command and
-MCP cards. The complete expected extension suite increases to 177; the full
-view gate, installation and another real approval interaction are pending.
+MCP cards. Source `5d48bdd72713dcc23d5a1b15a0a08d3e3b7b1fd2` then passed
+[the complete 177-extension / 35-browser workflow](https://github.com/xlang-foundation/xMind/actions/runs/37886895004).
+[Independent view evidence](evidence/native-approval-stability-views-hosted.json)
+verifies the advertised archive digest, every evidence file, raw suite counters,
+39 pinned Git sources, two vendor copies and all 11 tested assets. The verified
+`chat.js` replaced the preview's script; its other ten assets matched the same
+gate. A validated complete page load refreshed the adapter's asset snapshot,
+and the served script matched the tested digest. Neither process restarted.
 [Browser upgrade and cancelled-proposal receipt](evidence/native-skills-browser-upgrade.json)
 retains both the successful state-preserving upgrade and the UI failure. New
 test admission has occurred; the pre-upgrade database backup must not replace
 the current database.
 
-Delivery still requires rendered acceptance and normal-window reload. Durable activation restoration across resumed or new
+The actual browser retry passed. Skill details stayed expanded across native
+polling; clicking Allow creation approved the intended owned proposal. The
+native operation succeeded, the created file contained the exact companion
+bytes and the real OpenAI run completed with the exact marker. Reload restored
+that completed run, its response, actual usage/timings and all 20 model choices
+without entering a token. The guide, companion and created result were removed
+only after verifying their exact owned paths and contents.
+[Live approval evidence](evidence/native-approval-stability-live.json) retains
+the original cancelled run alongside the successful retry. The
+[completed-page screenshot](evidence/native-skill-browser-completed.png) shows
+the actual compact sidebar response. This does not update the persistent
+VS Code profile's older script or establish rendered IDE acceptance.
+
+Delivery still requires normal VS Code rendered acceptance and window reload.
+Durable activation restoration across resumed or new
 runs, explicit manual activation and deactivation, configured/global/URL/embedded
 sources, skill management events and CLI/view catalog controls remain work toward
 the full skill experience. Pure Python scripts and dependencies must execute

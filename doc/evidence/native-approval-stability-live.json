@@ -1,0 +1,66 @@
+{
+  "passed": true,
+  "nativeRevision": "d767d5069f52e3e6b899ae7a3e8313ebcc0ecbaf",
+  "viewRevision": "5d48bdd72713dcc23d5a1b15a0a08d3e3b7b1fd2",
+  "viewWorkflowRunId": 37886895004,
+  "scope": "Actual browser/native/provider skill activation, expanded guidance retained across polling, sidebar approval, native file creation and exact final marker; no normal VS Code rendered acceptance",
+  "initialCancelledRunId": "616fc8d6fecf3b9163e6af2d31524def",
+  "runId": "85d4468465c074a02657ff8c5b69f498",
+  "operationId": "ac35e6a3bb2e96a45de5d4fa3c2a4394",
+  "runState": "completed",
+  "operationState": "succeeded",
+  "provider": "openai",
+  "model": "gpt-6.1-sol",
+  "syntheticProvider": false,
+  "guideAutoinvoke": false,
+  "guideSha256": "3d0f05111ec595b2eb57ee55a51bdcaf8d391e5388ea16d63890866949d4c09f",
+  "skillActivationVerified": true,
+  "deliveredSourceBindingVerified": true,
+  "expandedGuidanceRetainedAcrossPolling": true,
+  "approvalMadeThroughActualBrowser": true,
+  "resultFileAbsentBeforeApproval": true,
+  "nativeCreatedBytesVerified": true,
+  "resultFileSha256": "ea2066e8df68f9a222ca00cb7c7bb8f053e2bf9ac83375851d2c08ff48568ccd",
+  "exactFinalReplyVerified": true,
+  "usage": {
+    "completion_tokens": 36,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "input_tokens": 7322,
+    "input_tokens_details": {
+      "cache_write_tokens": 7319,
+      "cached_tokens": 0
+    },
+    "output_tokens": 36,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 7322,
+    "prompt_tokens_details": {
+      "cache_write_tokens": 7319,
+      "cached_tokens": 0
+    },
+    "total_tokens": 7358
+  },
+  "elapsedMs": 1939,
+  "firstTokenMs": 1408,
+  "allPublishedAssetsMatched": 11,
+  "servedScriptSha256": "31593d44accb9ef41430a13838c4b092c49c1b72545c954e7179fac7a2c50b91",
+  "processesRestartedForViewFix": false,
+  "existingVsCodeProfileUpdated": false,
+  "privateRecordsSha256": "0eeb15c4fbe7c2dbf19b4f076b5c531825fa957b8df169b8f1cea29f6bc38d49",
+  "privateRawRecordsPublished": false,
+  "renderedReloadAcceptancePending": false,
+  "fixtureCleanupPending": false,
+  "renderedReloadConnectedWithoutTokenEntry": true,
+  "renderedSavedCompletedRunVerified": true,
+  "renderedActualUsageAndTimingsVerified": true,
+  "modelChoicesAfterReload": 20,
+  "ownedGuideCompanionAndNativeResultRemoved": true,
+  "screenshot": {
+    "path": "native-skill-browser-completed.png",
+    "sha256": "ee7f0a1f2965495d89f91ef8f523b158c72dfa4e3871c26532b7ac72b9068e9d",
+    "scope": "Actual compact sidebar screenshot after reload, showing the completed run and its native response"
+  }
+}
