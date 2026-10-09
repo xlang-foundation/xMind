@@ -442,6 +442,11 @@ test('unknown historical usage stays unavailable and malicious Markdown is sanit
   const card=r.dom.window.document.querySelector('.message');assert.equal(card.querySelectorAll('script,iframe,[onerror]').length,0);assert.equal(card.querySelectorAll('a[href^="javascript:"]').length,0);
   assert.equal(card.querySelector('.metrics').textContent,'Input —Output —Total —');r.dom.window.close();
 });
+test('file creation approval discloses parent directory effects as escaped paths',()=>{
+ const r=renderer(),doc=r.dom.window.document;
+ r.send({type:'operations',operations:[{id:'nested-create',tool:'create_file',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:JSON.stringify({path:'src/deep/file.ts',before_content:'',after_content:'new file',create_directories:['src','src/<script>fixtureAttack()</script>']}),result_json:'{}'}]});
+ assert.match(doc.getElementById('operations').textContent,/also creates these missing parent folders/);assert.deepEqual([...doc.querySelectorAll('#operations li')].map(e=>e.textContent),['src','src/<script>fixtureAttack()</script>']);assert.equal(doc.querySelectorAll('#operations script').length,0);assert.ok([...doc.querySelectorAll('#operations button')].some(e=>e.textContent==='Allow creation'));r.dom.window.close();
+});
 test('provider failure codes render actionable messages and exact failed-response usage',()=>{
  const r=renderer(),doc=r.dom.window.document;
  const messages={responses_server_error:/provider reported a server error/,responses_output_token_limit:/reached its output token limit/,responses_content_filter:/content filter/,responses_rate_limit:/reported a rate limit/};

@@ -1,0 +1,303 @@
+{
+  "ciOnlySourceDelta": {
+    "file": "Tools/ci-views.mjs",
+    "liveHash": "861c19fc0fe037c890995251301aae7ccb84162adda3974e4991001794e9022c",
+    "finalGateHash": "4e1b5a7454a0d855690edfc6ae871fd371029f7c4e8885f0e422abca9e4de990",
+    "reason": "Update CI expected extension count from 198 to 200; no native or view product source changed after live acceptance."
+  },
+  "scope": "Real OpenAI provider, authenticated native server/CLI and embedded-xlang3 SQLite in an owned isolated workspace; not installed IDE writing acceptance",
+  "passed": true,
+  "sessionId": "16477198703901e90d8f8d93927d9cb7",
+  "model": "gpt-6.1-sol",
+  "actualCreation": true,
+  "actualEdit": true,
+  "actualDenialPreservedFile": true,
+  "actualDeniedCreationPreservedDirectoryAbsence": true,
+  "adapterWroteTestFile": false,
+  "providerConfigReadByAdapter": false,
+  "cpythonExecuted": false,
+  "testProjModified": false,
+  "installedIdeWriting": false,
+  "buildHashes": {
+    "xmind_server.exe": "8f9d6dac7bb427105aab6e17f422e83aa77adb3879e05e8d45219879d7ca65b0",
+    "xmind_cli.exe": "6c3bf39a23fe6f3501dd952325a2cae169a08625814e7104ce35cb6eef5dea1b",
+    "xlang3_runtime.dll": "4c0959726dfdaf8c12321188da524808e516cf224bab5ae590b3bd05a4349c07"
+  },
+  "reusedLibraryManifestSha256": "2c54166484f2cbf1f62b26f831d5aeb20e75da5d40f6c445172cd2e53965e162",
+  "turns": [
+    {
+      "runId": "13b6f06e7bc78e740675dc5e892e688f",
+      "state": "completed",
+      "providerContext": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 2,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "operationId": "acf58f4198ceeaad6a767f35153d073e",
+      "operationTool": "create_file",
+      "operationState": "succeeded",
+      "path": "cli-proof-d598d258-fc83-4437-86e3-c98466f06040/deep/proof.md",
+      "observedFileSha256": "4b751e76f0191ce989b0e7c2088755dae69bf8272b540f1ad05ae82f9ae91e68",
+      "plannedDirectories": [
+        "cli-proof-d598d258-fc83-4437-86e3-c98466f06040",
+        "cli-proof-d598d258-fc83-4437-86e3-c98466f06040/deep"
+      ],
+      "createdDirectories": [
+        "cli-proof-d598d258-fc83-4437-86e3-c98466f06040",
+        "cli-proof-d598d258-fc83-4437-86e3-c98466f06040/deep"
+      ],
+      "providerUsage": [
+        {
+          "completion_tokens": 79,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 1688,
+          "input_tokens_details": {
+            "cache_write_tokens": 1685,
+            "cached_tokens": 0
+          },
+          "output_tokens": 79,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 1688,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 1685,
+            "cached_tokens": 0
+          },
+          "total_tokens": 1767
+        },
+        {
+          "completion_tokens": 6,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 1907,
+          "input_tokens_details": {
+            "cache_write_tokens": 219,
+            "cached_tokens": 1685
+          },
+          "output_tokens": 6,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 1907,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 219,
+            "cached_tokens": 1685
+          },
+          "total_tokens": 1913
+        }
+      ],
+      "recordSha256": "2f9ce8c24900b4e0ee435cf1b001f66332141c6a68059dbd878a4ba013322c2f"
+    },
+    {
+      "runId": "a611ea5f619e01521d1e45a62653ed6a",
+      "state": "completed",
+      "providerContext": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 2,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "operationId": "f780c0eba09fd88827ba2761498448c7",
+      "operationTool": "replace_file",
+      "operationState": "succeeded",
+      "path": "cli-proof-d598d258-fc83-4437-86e3-c98466f06040/deep/proof.md",
+      "observedFileSha256": "be15596b41db2b05b191670f3135cd4a7ff2224e249449796a23643e82611f67",
+      "providerUsage": [
+        {
+          "completion_tokens": 110,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 2048,
+          "input_tokens_details": {
+            "cache_write_tokens": 141,
+            "cached_tokens": 1904
+          },
+          "output_tokens": 110,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 2048,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 141,
+            "cached_tokens": 1904
+          },
+          "total_tokens": 2158
+        },
+        {
+          "completion_tokens": 6,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 2325,
+          "input_tokens_details": {
+            "cache_write_tokens": 2322,
+            "cached_tokens": 0
+          },
+          "output_tokens": 6,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 2325,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 2322,
+            "cached_tokens": 0
+          },
+          "total_tokens": 2331
+        }
+      ],
+      "recordSha256": "d2873aa037bb123d7c3971d3ba33df92c986b76c43974ff27e719dcdca7566cc"
+    },
+    {
+      "runId": "aca69da4bd292807de0a54603852fb29",
+      "state": "completed",
+      "providerContext": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 2,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "operationId": "5ba6983925977ca83371ebdfc6a88ef9",
+      "operationTool": "replace_file",
+      "operationState": "denied",
+      "path": "cli-proof-d598d258-fc83-4437-86e3-c98466f06040/deep/proof.md",
+      "observedFileSha256": "be15596b41db2b05b191670f3135cd4a7ff2224e249449796a23643e82611f67",
+      "providerUsage": [
+        {
+          "completion_tokens": 88,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 2412,
+          "input_tokens_details": {
+            "cache_write_tokens": 364,
+            "cached_tokens": 2045
+          },
+          "output_tokens": 88,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 2412,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 364,
+            "cached_tokens": 2045
+          },
+          "total_tokens": 2500
+        },
+        {
+          "completion_tokens": 6,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 2565,
+          "input_tokens_details": {
+            "cache_write_tokens": 240,
+            "cached_tokens": 2322
+          },
+          "output_tokens": 6,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 2565,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 240,
+            "cached_tokens": 2322
+          },
+          "total_tokens": 2571
+        }
+      ],
+      "recordSha256": "350a7d1b55ac596c6e1562d169c5d9cec0399949efdaf029192b26dfea686d4a"
+    },
+    {
+      "runId": "e6ea42dd641bbe87d975e4cec682fc39",
+      "state": "completed",
+      "providerContext": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 2,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "operationId": "42627cfcff4a399e5e8662be352f7929",
+      "operationTool": "create_file",
+      "operationState": "denied",
+      "path": "denied-40e39761-1fc2-4ec0-8be9-64be7b0e5547/deep/proof.md",
+      "observedFileSha256": null,
+      "plannedDirectories": [
+        "denied-40e39761-1fc2-4ec0-8be9-64be7b0e5547",
+        "denied-40e39761-1fc2-4ec0-8be9-64be7b0e5547/deep"
+      ],
+      "providerUsage": [
+        {
+          "completion_tokens": 63,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 2619,
+          "input_tokens_details": {
+            "cache_write_tokens": 207,
+            "cached_tokens": 2409
+          },
+          "output_tokens": 63,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 2619,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 207,
+            "cached_tokens": 2409
+          },
+          "total_tokens": 2682
+        },
+        {
+          "completion_tokens": 6,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "input_tokens": 2716,
+          "input_tokens_details": {
+            "cache_write_tokens": 97,
+            "cached_tokens": 2616
+          },
+          "output_tokens": 6,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens": 2716,
+          "prompt_tokens_details": {
+            "cache_write_tokens": 97,
+            "cached_tokens": 2616
+          },
+          "total_tokens": 2722
+        }
+      ],
+      "recordSha256": "c7824eda9d74c41fa9c40d1b00ac43d68a1d708c80d0561bf15e6329507fa01b"
+    }
+  ],
+  "retainedDriverFailure": {
+    "cause": "The acceptance driver incorrectly expected edit_file instead of the native replace_file approval operation; it cancelled without approving the edit.",
+    "artifactSha256": "be7fbb4de456f44f10073fba5b10ec34dd1b86948bbdaf261e7a304597e24bc3",
+    "actualOperationStates": [
+      {
+        "tool": "create_file",
+        "state": "succeeded"
+      },
+      {
+        "tool": "replace_file",
+        "state": "cancelled"
+      }
+    ]
+  }
+}

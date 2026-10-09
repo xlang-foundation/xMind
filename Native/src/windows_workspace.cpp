@@ -92,7 +92,7 @@ HANDLE relative_file(HANDLE parent,std::wstring name,bool directory,bool creatin
     OBJECT_ATTRIBUTES attributes{};attributes.Length=sizeof(attributes);attributes.RootDirectory=parent;attributes.ObjectName=&text;attributes.Attributes=OBJ_CASE_INSENSITIVE;
     IO_STATUS_BLOCK outcome{};HANDLE file=nullptr;
     const auto access=creating?(GENERIC_READ|GENERIC_WRITE|SYNCHRONIZE):(FILE_READ_ATTRIBUTES|SYNCHRONIZE|(directory?FILE_LIST_DIRECTORY|FILE_TRAVERSE:0)|(read_content?FILE_READ_DATA:0));
-    const auto flags=FILE_SYNCHRONOUS_IO_NONALERT|FILE_OPEN_REPARSE_POINT|(directory?FILE_DIRECTORY_FILE:0)|(creating?FILE_NON_DIRECTORY_FILE|FILE_WRITE_THROUGH:0);
+    const auto flags=FILE_SYNCHRONOUS_IO_NONALERT|FILE_OPEN_REPARSE_POINT|(directory?FILE_DIRECTORY_FILE:0)|(creating?FILE_WRITE_THROUGH|(directory?0:FILE_NON_DIRECTORY_FILE):0);
     const auto status=api.create(&file,access,&attributes,&outcome,nullptr,FILE_ATTRIBUTE_NORMAL,creating?0:FILE_SHARE_READ,creating?FILE_CREATE:FILE_OPEN,flags,nullptr,0);
     if(status<0){const auto code=api.error(status);if(file && file!=INVALID_HANDLE_VALUE)CloseHandle(file);
         if(!creating && absent_ok && code==ERROR_FILE_NOT_FOUND)return nullptr;
@@ -132,45 +132,58 @@ struct WorkspaceTools::Impl {
         auto suffix=wide(relative);std::replace(suffix.begin(),suffix.end(),L'/',L'\\');
         return base+L"\\"+suffix;
     }
-    struct CreationParent {std::vector<std::unique_ptr<Handle>> directories;std::wstring leaf;std::string relative;};
-    CreationParent creation_parent(const std::string& input,std::stop_token cancel) const {
+    struct CreationParent {std::vector<std::unique_ptr<Handle>> directories;std::vector<std::string> missing;std::wstring leaf;std::string relative,existing_directory=".";};
+    void verify_creation_directory(HANDLE directory) const {verify(directory);BY_HANDLE_FILE_INFORMATION info{};if(!GetFileInformationByHandle(directory,&info) || !(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Creation parent is not a directory");if(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)throw ToolAccessDenied("Creation does not traverse directory links");}
+    CreationParent creation_parent(const std::string& input,std::stop_token cancel,bool allow_missing=false) const {
         check_cancel(cancel);CreationParent result;result.relative=relative_path(input);
         std::vector<std::wstring> components;for(const auto& part:std::filesystem::u8path(result.relative)){const auto name=part.wstring();creation_component(name);components.push_back(name);}
         if(components.empty())throw ToolAccessDenied("A creation target must name a file");result.leaf=components.back();
+        if(allow_missing&&components.size()>33)throw ToolAccessDenied("Creation supports at most 32 parent directories");
         result.directories.push_back(std::make_unique<Handle>(CreateFileW(base.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr)));
         if(file_identity(result.directories.back()->value)!=file_identity(root.value))throw ToolAccessDenied("Creation root identity changed");
-        auto verify_directory=[&](HANDLE directory){verify(directory);BY_HANDLE_FILE_INFORMATION info{};if(!GetFileInformationByHandle(directory,&info) || !(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Creation parent is not a directory");if(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)throw ToolAccessDenied("Creation does not traverse directory links");};
-        verify_directory(result.directories.back()->value);
-        for(std::size_t i=0;i+1<components.size();++i){check_cancel(cancel);result.directories.push_back(std::make_unique<Handle>(relative_file(result.directories.back()->value,components[i],true,false)));verify_directory(result.directories.back()->value);}
+        verify_creation_directory(result.directories.back()->value);std::string prefix;
+        for(std::size_t i=0;i+1<components.size();++i){check_cancel(cancel);if(!prefix.empty())prefix+='/';prefix+=utf8(components[i]);
+            if(!result.missing.empty()){result.missing.push_back(prefix);continue;}
+            const auto opened=relative_file(result.directories.back()->value,components[i],true,false,allow_missing);
+            if(!opened){result.missing.push_back(prefix);continue;}
+            result.directories.push_back(std::make_unique<Handle>(opened));verify_creation_directory(opened);result.existing_directory=prefix;
+        }
         return result;
     }
 };
 WorkspaceTools::WorkspaceTools(const std::string& root):impl_(std::make_unique<Impl>(root)) {}
 WorkspaceTools::~WorkspaceTools()=default;
-WorkspaceCreatePlan WorkspaceTools::plan_creation(const std::string& path,const std::string& content,std::stop_token cancel) const {
+std::string WorkspaceTools::creation_directory(const std::string& path,std::stop_token cancel) const {return impl_->creation_parent(path,cancel,true).existing_directory;}
+WorkspaceCreatePlan WorkspaceTools::plan_creation(const std::string& path,const std::string& content,std::stop_token cancel,bool create_parents) const {
     check_cancel(cancel);if(content.size()>1024*1024 || !valid_text(content))throw std::invalid_argument("Creation content must be bounded UTF-8 text");
-    const auto workspace=identity();auto parent=impl_->creation_parent(path,cancel);const auto directory=parent.directories.back()->value;
-    const auto existing=relative_file(directory,parent.leaf,false,false,true);if(existing){Handle owned(existing);throw ToolContentConflict("Creation target already exists");}
+    const auto workspace=identity();auto parent=impl_->creation_parent(path,cancel,create_parents);const auto directory=parent.directories.back()->value;
+    if(parent.missing.empty()){const auto existing=relative_file(directory,parent.leaf,false,false,true);if(existing){Handle owned(existing);throw ToolContentConflict("Creation target already exists");}}
     check_cancel(cancel);if(identity()!=workspace)throw ToolAccessDenied("Workspace changed while planning creation");
-    return {parent.relative,workspace,file_identity(directory),content,content_hash(content)};
+    return {parent.relative,workspace,file_identity(directory),content,content_hash(content),std::move(parent.missing)};
 }
 WorkspaceSnapshot WorkspaceTools::apply_creation(const WorkspaceCreatePlan& plan,std::stop_token cancel) const {
     check_cancel(cancel);if(plan.content.size()>1024*1024 || !valid_text(plan.content) || content_hash(plan.content)!=plan.content_sha256)throw std::invalid_argument("Invalid creation plan content or hash");
     if(identity()!=plan.workspace_id)throw ToolAccessDenied("Creation belongs to another workspace");
-    auto parent=impl_->creation_parent(plan.path,cancel);const auto directory=parent.directories.back()->value;
-    if(file_identity(directory)!=plan.parent_id)throw ToolContentConflict("Creation parent identity changed");
+    auto parent=impl_->creation_parent(plan.path,cancel,!plan.create_directories.empty());const auto anchor=parent.directories.back()->value;
+    if(file_identity(anchor)!=plan.parent_id||parent.missing!=plan.create_directories)throw ToolContentConflict("Creation parent identity or absence changed");
     check_cancel(cancel);
-    Handle file(relative_file(directory,parent.leaf,false,true)); // Atomic create-new; never open/overwrite.
+    bool mutated=false;
     try {
+        for(const auto& missing:parent.missing){check_cancel(cancel);const auto leaf=std::filesystem::u8path(missing).filename().wstring();
+            const auto created=relative_file(parent.directories.back()->value,leaf,true,true);mutated=true;
+            parent.directories.push_back(std::make_unique<Handle>(created));impl_->verify_creation_directory(created);
+        }
+        check_cancel(cancel);const auto directory=parent.directories.back()->value;
+        Handle file(relative_file(directory,parent.leaf,false,true));mutated=true; // Atomic create-new; never open/overwrite.
         impl_->verify(file.value);BY_HANDLE_FILE_INFORMATION info{};
         if(!GetFileInformationByHandle(file.value,&info) || GetFileType(file.value)!=FILE_TYPE_DISK || (info.dwFileAttributes&(FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_REPARSE_POINT)) || info.nNumberOfLinks!=1)throw ToolFileError("Created file identity is not regular and exclusive");
         std::size_t offset=0;while(offset<plan.content.size()){check_cancel(cancel);DWORD count=0;const auto amount=static_cast<DWORD>(std::min<std::size_t>(8192,plan.content.size()-offset));if(!WriteFile(file.value,plan.content.data()+offset,amount,&count,nullptr) || !count || count>amount)throw ToolFileError("Cannot write created file");offset+=count;}
         check_cancel(cancel);if(!FlushFileBuffers(file.value))throw ToolFileError("Cannot finalize created file");
         LARGE_INTEGER zero{};if(!SetFilePointerEx(file.value,zero,nullptr,FILE_BEGIN))throw ToolFileError("Cannot inspect created file");
         std::string actual;std::array<char,8192> buffer{};for(;;){DWORD count=0;if(!ReadFile(file.value,buffer.data(),static_cast<DWORD>(buffer.size()),&count,nullptr))throw ToolFileError("Cannot read created file");if(!count)break;if(count>1024*1024-actual.size())throw ToolFileError("Created file exceeds limits");actual.append(buffer.data(),count);}
-        impl_->verify(file.value);const auto hash=content_hash(actual),id=file_identity(file.value);if(actual!=plan.content || hash!=plan.content_sha256 || identity()!=plan.workspace_id || file_identity(directory)!=plan.parent_id)throw ToolFileError("Created file readback differs from plan");
+        impl_->verify(file.value);const auto hash=content_hash(actual),id=file_identity(file.value);if(actual!=plan.content || hash!=plan.content_sha256 || identity()!=plan.workspace_id || file_identity(anchor)!=plan.parent_id)throw ToolFileError("Created file readback differs from plan");
         return {parent.relative,std::move(actual),plan.workspace_id,id,hash};
-    }catch(...){throw ToolMutationUncertain("Creation occurred; its final file state requires reconciliation");}
+    }catch(...){if(mutated)throw ToolMutationUncertain("File or directory creation occurred; its final state requires reconciliation");throw;}
 }
 std::string WorkspaceTools::identity() const {
     auto current=final_path(impl_->root.value);

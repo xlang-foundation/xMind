@@ -620,7 +620,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         std::string scope=".";
                         if(args.contains(field)){if(!args[field].is_string())throw std::invalid_argument("Invalid scoped tool path");scope=args[field].get<std::string>();}
                         else if(call.name!="run_process")throw std::invalid_argument("Scoped tool requires a path");
-                        if(call.name!="run_process" && call.name!="list_files")scope=RepositoryInstructionContext::file_directory(scope);
+                        if(call.name=="create_file"&&args.contains("create_parents")&&!args["create_parents"].is_boolean())throw std::invalid_argument("Invalid creation parent option");
+                        if(call.name=="create_file"&&args.value("create_parents",false))scope=workspace_->creation_directory(scope,token);
+                        else if(call.name!="run_process" && call.name!="list_files")scope=RepositoryInstructionContext::file_directory(scope);
                         guidance_ready=guidance_ready&&repository_context->ready(scope,token);
                         if(guidance_ready && (call.name=="edit_file" || call.name=="create_file" || call.name=="run_process"))guidance=repository_context->precondition(scope);
                     }

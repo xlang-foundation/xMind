@@ -20,7 +20,7 @@ struct WorkspaceEditPlan {
     std::string after_content,after_sha256;
     std::size_t replaced_occurrences;
 };
-struct WorkspaceCreatePlan {std::string path,workspace_id,parent_id,content,content_sha256;};
+struct WorkspaceCreatePlan {std::string path,workspace_id,parent_id,content,content_sha256;std::vector<std::string> create_directories;};
 struct WorkspaceFingerprint {std::string path,workspace_id,file_id,content_sha256;std::size_t size;};
 struct WorkspaceEntry {std::string name,kind;};
 struct WorkspaceListing {std::vector<WorkspaceEntry> entries;bool truncated=false;};
@@ -73,9 +73,12 @@ public:
     // In-place application is not atomic replacement. After writes begin, any
     // failure/cancellation is uncertain and must not be retried blindly.
     WorkspaceSnapshot apply_plan(const WorkspaceEditPlan& plan,std::stop_token cancel={}) const;
-    // Existing parent, absent final entry. Captures identity/bytes only; no file
-    // is created until the owning executor has a matching durable claim.
-    WorkspaceCreatePlan plan_creation(const std::string& path,const std::string& content,std::stop_token cancel={}) const;
+    // Existing ancestor, absent final entry. Optional parent creation binds each
+    // missing directory. Planning has no effects; application needs a durable claim.
+    WorkspaceCreatePlan plan_creation(const std::string& path,const std::string& content,std::stop_token cancel={},bool create_parents=false) const;
+    // Existing ancestor guidance for an optional missing-parent creation. The
+    // actual proposal separately binds that ancestor and every absent directory.
+    std::string creation_directory(const std::string& path,std::stop_token cancel={}) const;
     // Handle-relative create-new never overwrites an existing entry. Creation
     // itself is an effect, including an empty file; subsequent failures are uncertain.
     WorkspaceSnapshot apply_creation(const WorkspaceCreatePlan& plan,std::stop_token cancel={}) const;

@@ -1,5 +1,14 @@
 # Reviewable milestones
 
+Native file creation now supports approval-backed missing parent folders,
+with existing ancestor guidance, disclosed directory effects and create-new
+checks. Real OpenAI CLI creation/editing and both edit/creation denial passed;
+denied creation left its folders absent. The final **98 native / 200 extension
+/ 39 browser** gates passed. The stale committed CI view count was corrected,
+and earlier attempts remain retained. Installed/rendered folder approval
+acceptance remains separate.
+[Implementation, live receipts and limits](native-parent-creation.md).
+
 Real OpenAI native CLI file creation, editing and denial passed with actual
 approval operations, filesystem hashes and six supplied response-usage events.
 Responses failures now retain explicit native classifications and validated

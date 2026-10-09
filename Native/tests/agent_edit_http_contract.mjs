@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {spawn,spawnSync} from 'node:child_process';
-import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,rm,stat} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname} from 'node:path';
 import {randomBytes,createHash} from 'node:crypto';
@@ -33,8 +33,8 @@ const peer=createServer((request,response)=>{
         }else{assert.ok(outcome.operation_id && outcome.content_sha256);continuations.set(prompt,outcome);delta={content:'Synthetic approval-bound continuation after actual effect'};finish='stop';}
       }else if(prompt.startsWith('scope-')){
         const step=(scopeSteps.get(prompt)??0)+1;scopeSteps.set(prompt,step);
-        const creation=prompt==='scope-create',path=`${prompt}/target.txt`;
-        const call=index=>({index,id:`${prompt}-${step}-${index}`,type:'function',function:{name:creation?'create_file':'edit_file',arguments:JSON.stringify(creation?{path,content:'scope create applied\n'}:{path,old_text:'original',new_text:'scope edit applied'})}});
+        const parents=prompt==='scope-create-parents',creation=prompt==='scope-create'||parents,path=`${prompt}/${parents?'new/deep/':''}target.txt`;
+        const call=index=>({index,id:`${prompt}-${step}-${index}`,type:'function',function:{name:creation?'create_file':'edit_file',arguments:JSON.stringify(creation?{path,content:'scope create applied\n',...(parents?{create_parents:true}:{})}:{path,old_text:'original',new_text:'scope edit applied'})}});
         if(step===1){delta={tool_calls:[call(0),call(1)]};finish='tool_calls';}
         else if(JSON.parse(tool.content).error?.code==='repository_instructions_required'){
           const tail=body.messages.slice(-2);assert.equal(tail.length,2);for(const result of tail){assert.equal(result.role,'tool');assert.equal(JSON.parse(result.content).error.code,'repository_instructions_required','Every call in the same batch must remain deferred');}
@@ -183,15 +183,16 @@ try {
     else await assert.rejects(readFile(join(workspace,`${name}.txt`)),{code:'ENOENT'});
     const history=cli('history',name);assert.equal(history.length,name==='create-cancelled'?1:4);
   }
-  for(const name of ['scope-edit','scope-create','scope-refresh']){
+  for(const name of ['scope-edit','scope-create','scope-refresh','scope-create-parents']){
     await mkdir(join(workspace,name));await writeFile(join(workspace,name,'AGENTS.md'),`Synthetic nested instruction for ${name}`);
-    if(name!=='scope-create')await writeFile(join(workspace,name,'target.txt'),'original\n');
+    const parents=name==='scope-create-parents',creation=name==='scope-create'||parents;if(!creation)await writeFile(join(workspace,name,'target.txt'),'original\n');
     await api('/v1/sessions',{id:name,title:'Synthetic inference, actual scoped delivery and approved effect'});const run=cli('run',name,name);
     const operations=await scopedApproval(run.id,name);assert.equal(operations.length,1);const [proposal]=operations;
+    if(parents){assert.deepEqual(JSON.parse(proposal.arguments_json).create_directories,[name+'/new',name+'/new/deep']);assert.equal(JSON.parse(proposal.arguments_json).repository_guidance.directory,name);await assert.rejects(stat(join(workspace,name,'new')),{code:'ENOENT'});}
     const events=cli('events',run.id);const deferred=events.filter(event=>event.kind==='tool.failed' && event.data.data.error?.code==='repository_instructions_required');assert.equal(deferred.length,name==='scope-refresh'?4:2);
     const scopes=events.filter(event=>event.kind==='agent.repository_scope');assert.ok(scopes.length>=2);assert.equal(JSON.stringify(scopes).includes('Synthetic nested instruction'),false);assert.equal(JSON.stringify(scopes).includes('Refreshed nested instruction'),false);
     cli('decide',proposal.id,'allow');await until(()=>api(`/v1/runs/${run.id}`),value=>value.state==='completed');
-    assert.equal(await readFile(join(workspace,name,'target.txt'),'utf8'),name==='scope-create'?'scope create applied\n':'scope edit applied\n');assert.equal((await api(`/v1/operations/${proposal.id}`)).state,'succeeded');assert.equal(scopeSteps.get(name),name==='scope-refresh'?4:3);
+    assert.equal(await readFile(join(workspace,name,parents?'new/deep/target.txt':'target.txt'),'utf8'),creation?'scope create applied\n':'scope edit applied\n');assert.equal((await api(`/v1/operations/${proposal.id}`)).state,'succeeded');assert.equal(scopeSteps.get(name),name==='scope-refresh'?4:3);
   }
   for(const name of ['approval-edit','approval-create','approval-added','approval-removed']){
     await mkdir(join(workspace,name));const guidancePath=join(workspace,name,'AGENTS.md');if(name!=='approval-added')await writeFile(guidancePath,`Original approval guidance ${name}`);
@@ -228,7 +229,8 @@ try {
   const retired=await fetch(`http://127.0.0.1:${port}/v1/operations/${interrupted.id}/decision`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({decision:'allow'}),signal:AbortSignal.timeout(5000)});
   assert.equal(retired.status,409,'Restart must not grant an unused approval to a retired owner');
   const additionalConsoleRequests=1 /* resumed denial continuation */ + 1 /* new cancellation case */;
-  assert.equal(requests,48+additionalConsoleRequests,'Original scenario baseline plus individually checked console-control calls');if(peerError) throw peerError;
+  const parentCreationRequests=3;assert.equal(scopeSteps.get('scope-create-parents'),parentCreationRequests,'New parent creation has exactly guidance discovery, one effect request and actual continuation');
+  assert.equal(requests,48+additionalConsoleRequests+parentCreationRequests,'Original scenario baseline plus checked console-control and parent-creation calls');if(peerError) throw peerError;
   console.log('Compiled native agent edit loop passed: real approved edits, denial, stale content, cancellation, actual tool-result continuation and pending-approval restart recovery. Inference is synthetic.');
 } finally {
   await stop();
