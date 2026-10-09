@@ -1,5 +1,22 @@
 # Current native validation
 
+The native regex-search implementation was introduced in candidate `2e127c7`
+and is being reviewed further for scoped-directory behavior. Its
+[isolated Windows workflow](https://github.com/xlang-foundation/xMind/actions/workflows/native-windows.yml)
+must validate the final candidate revision; compilation and native execution
+have not yet been established for these changes. The source adds real filesystem/HTTP regressions and pins RE2
+and Abseil, with exact dependency bytes verified. Local builds remain deferred
+while the separate xlang3 benchmark is active. [Candidate behavior and limits](native-content-search.md).
+
+The VS Code preview's saved profile migration was observed complete, with an
+approval-enabled backend rooted at `D:\CantorAI2026\TestProj`. A subsequent
+old-conversation run failed with `context_unavailable` before provider execution;
+old and current authority bindings differed. A fresh conversation was observed
+Ready with a file-creation request drafted for the user, but no installed-editor
+writing acceptance is claimed. The recovery-message source passed 215/39 client
+contracts and was pushed as `471199e`; it has not been installed.
+[Recovery and exact scope](saved-context-recovery.md).
+
 The local ignore-rule candidate passed **98 native contracts in 209.78 seconds**,
 with all 637 mapped inputs unchanged and exact expected/registered/passed
 manifests matched. **215 extension / 39 browser** contracts passed separately.

@@ -138,6 +138,7 @@ int main(int argc,char** argv) {
         const auto classes=tools.glob_files("nested/item[!2].?pp","glob-src");require(classes.paths==std::vector<std::string>{"glob-src/nested/item1.cpp"},"Character classes and question marks must match relative to the selected directory");
         const auto unicode=tools.glob_files("nested/???.[ch]pp","glob-src");require(unicode.paths==std::vector<std::string>{"glob-src/nested/\xe4\xb8\xad\xe6\x96\x87\xf0\x9f\x98\x80.cpp"},"Question marks count Unicode scalars rather than bytes or surrogate halves");
         require(tools.glob_files("*.hpp","glob-src").paths==std::vector<std::string>{"glob-src/main.hpp","glob-src/nested/item2.hpp"},"Basename patterns must find nested files");
+        require(tools.glob_files("*.hpp","glob-src/").paths==tools.glob_files("*.hpp","glob-src").paths,"Directory discovery accepts a trailing separator without an empty child component");
         require(tools.glob_files("**/hidden.cpp").paths.empty(),"Hidden directories are excluded by default");
         require(tools.glob_files("**/hidden.cpp",".",true).paths==std::vector<std::string>{".glob-hidden/hidden.cpp"},"Explicit hidden discovery includes public hidden files");
         require(SetFileAttributesW((std::filesystem::path(argv[1])/L"windows-hidden.cpp").c_str(),FILE_ATTRIBUTE_HIDDEN)!=0,"Fixture must set actual Windows hidden attribute");
@@ -191,6 +192,8 @@ int main(int argc,char** argv) {
         require(capped["matches"].size()==1&&capped["truncated"]==true&&std::find(capped["limits"].begin(),capped["limits"].end(),"result_limit")!=capped["limits"].end(),"Result truncation must be disclosed when an actual extra matching line is found");
         const auto filtered=Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex","path":"search-fixtures","include":"main.txt"})"));
         require(filtered["matches"].size()==2&&filtered["scanned_files"]==1&&filtered["matches"][0]["path"]=="search-fixtures/main.txt","Directory/include scopes must limit actual native file reads");
+        require(Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex","path":"search-fixtures/","include":"main.txt"})"))==filtered,"Search accepts a directory trailing separator and retains workspace-relative result paths");
+        rejects<ToolFileError>([&]{tools.invoke("search_files",R"({"query":"first","path":"README.txt/"})");});
         const auto explicit_ignored=Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex","path":"search-fixtures/ignored.txt","include":"*.cpp"})"));
         require(explicit_ignored["matches"].size()==1,"Explicit file scope bypasses ignore/include discovery filters");
         require(Json::parse(tools.invoke("search_files",R"({"query":"NativeRegex hidden","path":"search-fixtures"})"))["matches"].empty(),"Hidden discovery is disabled by default");

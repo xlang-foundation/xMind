@@ -9,13 +9,21 @@ contracts**. Native discovery and literal content search now share hierarchical
 local ignore rules. Real OpenAI filtered search and an xlang3/SQLite history
 restart passed. Native `glob_files` supports recursive discovery for agents,
 read-only children and graph tools; `read_file` supports bounded line pages
-for files up to 64 MiB. The installed legacy
-VS Code preview still needs migration before approval-based file writing is
-ready. See [ignore behavior and limits](doc/native-ignore.md),
+for files up to 64 MiB. The local VS Code preview has been migrated to an
+approval-enabled backend; installed end-to-end file-writing acceptance remains
+unverified. Saved model context from a different backend configuration can
+require a fresh conversation; existing history is preserved.
+See [saved-context recovery](doc/saved-context-recovery.md),
+[ignore behavior and limits](doc/native-ignore.md),
 [discovery behavior](doc/native-glob.md),
 [file-page behavior](doc/native-file-pages.md),
 [current validation](doc/VALIDATION_STATUS.md) and the
 [replacement protocol](doc/native-owner-replacement.md) for exact scope.
+
+The [native regex-search candidate](doc/native-content-search.md) adds scoped
+content search, case folding and charged aggregate read budgets. Compilation
+and execution acceptance are pending on the isolated Windows workflow; earlier
+passing checks do not establish this feature's runtime behavior.
 
 ## OSS deployment scope
 

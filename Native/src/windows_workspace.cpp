@@ -494,7 +494,9 @@ WorkspaceGlob WorkspaceTools::glob_files(const std::string& pattern,const std::s
     return discover_files(pattern,input,hidden,limit,cancel,respect_ignore);
 }
 WorkspaceGlob WorkspaceTools::discover_files(const std::string& pattern,const std::string& input,bool hidden,std::size_t limit,std::stop_token cancel,bool respect_ignore,const std::function<bool(const std::string&)>& visitor) const {
-    const bool negative=pattern.starts_with('!');const PathGlob compiled(negative?pattern.substr(1):pattern);check_cancel(cancel);const auto relative=relative_path(input),workspace=identity();PathIgnore ignores;
+    const bool negative=pattern.starts_with('!');const PathGlob compiled(negative?pattern.substr(1):pattern);check_cancel(cancel);
+    auto relative=relative_path(input);while(relative.size()>1&&relative.back()=='/')relative.pop_back();
+    const auto workspace=identity();PathIgnore ignores;
     // Retain every search-root ancestor. Unlike pathname recursion this cannot
     // traverse a junction substituted between directory admission and opening.
     std::vector<std::unique_ptr<Handle>> anchors;
@@ -607,13 +609,14 @@ WorkspaceSearch WorkspaceTools::search_files(const std::string& query,const Work
             }
         return true;
     };
-    const auto relative=relative_path(options.path),workspace=identity();
+    const auto supplied=relative_path(options.path),workspace=identity();auto relative=supplied;
+    while(relative.size()>1&&relative.back()=='/')relative.pop_back();
     // Keep verified non-link parents alive for direct file targets too. The
     // final target handle then prevents its leaf from being renamed/replaced
     // while the content reader opens the same authorized object.
     std::optional<Impl::CreationParent> anchor;
     if(relative!=".")anchor.emplace(impl_->creation_parent(relative,cancel));
-    Handle target(CreateFileW(impl_->path(relative).c_str(),FILE_READ_ATTRIBUTES,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr));impl_->verify(target.value);BY_HANDLE_FILE_INFORMATION info{};
+    Handle target(CreateFileW(impl_->path(supplied).c_str(),FILE_READ_ATTRIBUTES,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr));impl_->verify(target.value);BY_HANDLE_FILE_INFORMATION info{};
     if(!GetFileInformationByHandle(target.value,&info))throw ToolFileError("Cannot inspect search target");
     if(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)throw ToolAccessDenied("Search target cannot be a link");
     if(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY){
@@ -621,6 +624,7 @@ WorkspaceSearch WorkspaceTools::search_files(const std::string& query,const Work
         result.truncated=result.truncated||found.truncated;result.skipped_entries+=found.skipped_entries;result.ignored_entries=found.ignored_entries;result.ignore_files=found.ignore_files;
         for(const auto& reason:found.limits)bounded(reason);
     }else{
+        if(supplied.ends_with('/'))throw ToolFileError("A directory search path must name a directory");
         if(GetFileType(target.value)!=FILE_TYPE_DISK||info.nNumberOfLinks!=1)throw ToolAccessDenied("Search requires a regular single-link file");visit(relative);
     }
     check_cancel(cancel);impl_->verify(target.value);if(identity()!=workspace)throw ToolAccessDenied("Workspace identity changed during search");
