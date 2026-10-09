@@ -2615,5 +2615,14 @@
     "No actual provider multiline inference, installed 0.1.5 UI rendering or packaged 0.1.5 acceptance is claimed.",
     "Existing installed 0.1.4 patch evidence remains separate.",
     "Unified executable, UI SSE, authoring APIs and agent workers are later implementation work."
-  ]
+  ],
+  "postGateMetadataAdjustments": [
+    {
+      "path": ".gitattributes",
+      "beforeSha256": "65ab2b6510afb1e9674b95422a2141a2d84d0bbc232f43198de50198ad013d75",
+      "afterSha256": "b328a1ad41379471d8f8c8ea3d8313f68d5eaa92498473286895d74c84010c10",
+      "reason": "Only raw evidence-log attributes changed after the completed gate to prevent Git CRLF normalization. Runtime/client source and tested binaries are unchanged by this metadata correction."
+    }
+  ],
+  "rawEvidencePreservedInGit": true
 }
