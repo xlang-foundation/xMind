@@ -1,0 +1,332 @@
+{
+  "passed": true,
+  "scope": "Real OpenAI packaged native CLI mixed patch and partial denial with controller decisions and independent disk hashes; exact xlang3 SQLite history across actual restart",
+  "nativeRevision": "622c9d1b7780d38ca4fd0ae5b86db332ff525839",
+  "sdkRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+  "manifestSha256": "db1e0a21575c4574547f583ccd35066832ce4297f41d79f417e2119172bff141",
+  "model": "gpt-6.1-sol",
+  "runIds": [
+    "c1829e8eb8aee4cf92f35d77bb2c67f2",
+    "defd87d4b3b0026168307759c2aeb089"
+  ],
+  "patchReports": [
+    {
+      "atomic": false,
+      "not_requested": [],
+      "outcomes": [
+        {
+          "action": "add",
+          "create_directories": [
+            "created"
+          ],
+          "index": 0,
+          "operation_id": "a8af9937d6a02957e5f37c7292674f9a-0",
+          "path": "created/first.txt",
+          "result": {
+            "action": "add",
+            "after_exists": true,
+            "after_sha256": "b640e840b19d378660b32fb51ae18d67dccb4a8596a29e7bd72c1b2ae5928f41",
+            "created_directories": [
+              "created"
+            ],
+            "created_directory_bindings": [
+              {
+                "file_id": "windows-local-file-v1:fec0809ac0805ab3:226f0600000065000000000000000000",
+                "path": "created"
+              }
+            ],
+            "file_id": "windows-local-file-v1:fec0809ac0805ab3:236f06000000ae000000000000000000",
+            "operation_id": "a8af9937d6a02957e5f37c7292674f9a-0",
+            "patch_id": "a8af9937d6a02957e5f37c7292674f9a",
+            "patch_index": 0,
+            "path": "created/first.txt",
+            "size": 6,
+            "state": "succeeded",
+            "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:5e6e060000008e000000000000000000"
+          },
+          "state": "succeeded"
+        },
+        {
+          "action": "update",
+          "index": 1,
+          "operation_id": "a8af9937d6a02957e5f37c7292674f9a-1",
+          "path": "update.txt",
+          "result": {
+            "action": "update",
+            "after_exists": true,
+            "after_sha256": "7b9a72466d3960eb2aacccfc848939453490db0678bd4725def3f789b891c919",
+            "before_sha256": "9160d4be34c8695bd172a76c7c7966587ea5a4d991ad22c87b2b91af54aa9ebb",
+            "created_directory_bindings": [],
+            "file_id": "windows-local-file-v1:fec0809ac0805ab3:1d6f06000000e9000000000000000000",
+            "operation_id": "a8af9937d6a02957e5f37c7292674f9a-1",
+            "patch_id": "a8af9937d6a02957e5f37c7292674f9a",
+            "patch_index": 1,
+            "path": "update.txt",
+            "size": 6,
+            "state": "succeeded",
+            "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:5e6e060000008e000000000000000000"
+          },
+          "state": "succeeded"
+        },
+        {
+          "action": "move",
+          "create_directories": [],
+          "destination_path": "dest/moved.txt",
+          "index": 2,
+          "operation_id": "a8af9937d6a02957e5f37c7292674f9a-2",
+          "path": "src/source.txt",
+          "result": {
+            "action": "move",
+            "after_exists": true,
+            "after_sha256": "32ff26beddb756b29702e29677ad34a06b10023f1c6a55893a9c9311e2706f9d",
+            "before_sha256": "5f30c85c248ee151e91979734fd0587aac9e7bb0ca4f0e5d1d09669bd5791a76",
+            "created_directories": [],
+            "created_directory_bindings": [],
+            "file_id": "windows-local-file-v1:fec0809ac0805ab3:206f0600000057000000000000000000",
+            "operation_id": "a8af9937d6a02957e5f37c7292674f9a-2",
+            "patch_id": "a8af9937d6a02957e5f37c7292674f9a",
+            "patch_index": 2,
+            "path": "dest/moved.txt",
+            "size": 11,
+            "source_path": "src/source.txt",
+            "state": "succeeded",
+            "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:5e6e060000008e000000000000000000"
+          },
+          "state": "succeeded"
+        },
+        {
+          "action": "delete",
+          "index": 3,
+          "operation_id": "a8af9937d6a02957e5f37c7292674f9a-3",
+          "path": "delete.txt",
+          "result": {
+            "action": "delete",
+            "after_exists": false,
+            "file_id": "windows-local-file-v1:fec0809ac0805ab3:216f060000008c000000000000000000",
+            "operation_id": "a8af9937d6a02957e5f37c7292674f9a-3",
+            "patch_id": "a8af9937d6a02957e5f37c7292674f9a",
+            "patch_index": 3,
+            "path": "delete.txt",
+            "removed_sha256": "8b7e3b523c27641976a222f2a6f6a7c4024a1f91c8efb253bcbec1459b212f8c",
+            "removed_size": 19,
+            "state": "succeeded",
+            "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:5e6e060000008e000000000000000000"
+          },
+          "state": "succeeded"
+        }
+      ],
+      "patch_id": "a8af9937d6a02957e5f37c7292674f9a",
+      "requested_files": 4,
+      "state": "succeeded",
+      "stop_reason": "",
+      "succeeded_files": 4
+    },
+    {
+      "atomic": false,
+      "not_requested": [],
+      "outcomes": [
+        {
+          "action": "add",
+          "create_directories": [],
+          "index": 0,
+          "operation_id": "a9b57c063065bf940c48cf609be272de-0",
+          "path": "allow-first.txt",
+          "result": {
+            "action": "add",
+            "after_exists": true,
+            "after_sha256": "fda0c6dbbd27bb4682f2931877d6c3e6b408e65b07feb9b4c1e9cc29b1a2cda2",
+            "created_directories": [],
+            "created_directory_bindings": [],
+            "file_id": "windows-local-file-v1:fec0809ac0805ab3:216f060000008e000000000000000000",
+            "operation_id": "a9b57c063065bf940c48cf609be272de-0",
+            "patch_id": "a9b57c063065bf940c48cf609be272de",
+            "patch_index": 0,
+            "path": "allow-first.txt",
+            "size": 8,
+            "state": "succeeded",
+            "workspace_id": "windows-local-file-v1:fec0809ac0805ab3:5e6e060000008e000000000000000000"
+          },
+          "state": "succeeded"
+        },
+        {
+          "action": "add",
+          "create_directories": [],
+          "index": 1,
+          "operation_id": "a9b57c063065bf940c48cf609be272de-1",
+          "path": "deny-second.txt",
+          "result": {},
+          "state": "denied"
+        }
+      ],
+      "patch_id": "a9b57c063065bf940c48cf609be272de",
+      "requested_files": 2,
+      "state": "partial",
+      "stop_reason": "permission_denied",
+      "succeeded_files": 1
+    }
+  ],
+  "providerUsage": [
+    [
+      {
+        "completion_tokens": 93,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 2394,
+        "input_tokens_details": {
+          "cache_write_tokens": 154,
+          "cached_tokens": 2237
+        },
+        "output_tokens": 93,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 2394,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 154,
+          "cached_tokens": 2237
+        },
+        "total_tokens": 2487
+      },
+      {
+        "completion_tokens": 103,
+        "completion_tokens_details": {
+          "reasoning_tokens": 33
+        },
+        "input_tokens": 2708,
+        "input_tokens_details": {
+          "cache_write_tokens": 299,
+          "cached_tokens": 2406
+        },
+        "output_tokens": 103,
+        "output_tokens_details": {
+          "reasoning_tokens": 33
+        },
+        "prompt_tokens": 2708,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 299,
+          "cached_tokens": 2406
+        },
+        "total_tokens": 2811
+      },
+      {
+        "completion_tokens": 93,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 3565,
+        "input_tokens_details": {
+          "cache_write_tokens": 857,
+          "cached_tokens": 2705
+        },
+        "output_tokens": 93,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 3565,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 857,
+          "cached_tokens": 2705
+        },
+        "total_tokens": 3658
+      },
+      {
+        "completion_tokens": 47,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 4855,
+        "input_tokens_details": {
+          "cache_write_tokens": 1290,
+          "cached_tokens": 3562
+        },
+        "output_tokens": 47,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 4855,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 1290,
+          "cached_tokens": 3562
+        },
+        "total_tokens": 4902
+      }
+    ],
+    [
+      {
+        "completion_tokens": 49,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 2336,
+        "input_tokens_details": {
+          "cache_write_tokens": 96,
+          "cached_tokens": 2237
+        },
+        "output_tokens": 49,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 2336,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 96,
+          "cached_tokens": 2237
+        },
+        "total_tokens": 2385
+      },
+      {
+        "completion_tokens": 37,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 2746,
+        "input_tokens_details": {
+          "cache_write_tokens": 410,
+          "cached_tokens": 2333
+        },
+        "output_tokens": 37,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 2746,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 410,
+          "cached_tokens": 2333
+        },
+        "total_tokens": 2783
+      }
+    ]
+  ],
+  "fileHashes": {
+    "created/first.txt": "b640e840b19d378660b32fb51ae18d67dccb4a8596a29e7bd72c1b2ae5928f41",
+    "update.txt": "7b9a72466d3960eb2aacccfc848939453490db0678bd4725def3f789b891c919",
+    "dest/moved.txt": "32ff26beddb756b29702e29677ad34a06b10023f1c6a55893a9c9311e2706f9d",
+    "allow-first.txt": "fda0c6dbbd27bb4682f2931877d6c3e6b408e65b07feb9b4c1e9cc29b1a2cda2"
+  },
+  "workspace": "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-live-patch-aA0R2C",
+  "restartHistoryExact": true,
+  "earlierSuccessPreservedAfterDenial": true,
+  "deniedFileAbsent": true,
+  "initialFixturesWrittenByDriver": [
+    "AGENTS.md",
+    "src/AGENTS.md",
+    "dest/AGENTS.md",
+    "update.txt",
+    "src/source.txt",
+    "delete.txt"
+  ],
+  "testedEffectsWrittenByDriver": false,
+  "providerConfigReadByDriver": false,
+  "cpythonExecuted": false,
+  "installedIdeAccepted": false,
+  "firstInvalidDriverAttempts": [
+    {
+      "reason": "Wrong patch-index property plus closed-stdin handling",
+      "passingClaim": false
+    },
+    {
+      "reason": "Multiline CLI request was sent as separate per-line requests",
+      "passingClaim": false
+    }
+  ]
+}

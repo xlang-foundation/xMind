@@ -35,8 +35,13 @@ tracked sources were bound to that commit, and 12 generated assets were checked
 against the archive and unchanged gate maps. This is client acceptance only.
 [Independently verified hosted evidence](evidence/patch-guidance-hosted.json).
 
-The installed VS Code client remains the separately verified 0.1.3 recovery
-package. This patch client change has not been installed. The native patch
-candidate now includes model/guidance, CLI and graph integration in source,
-and still requires a passing complete gate and real-provider approval acceptance. The earlier
-99-contract hosted gate failed; see [native implementation](native-file-patch.md).
+The 0.1.4 client is now installed with the separately audited native patch
+runtime. Actual TestProj review displayed a real-model two-file addition,
+opened its proposed comparison while the folder remained absent and required
+two separate approvals. Both actual creations and receipts matched independent
+file hashes; the completed run retained real token metrics.
+[Installed evidence and limits](evidence/vscode-patch-installed.json).
+Mixed update/move/delete and partial denial were accepted separately through
+the packaged CLI. Installed/browser coverage for those review cases remains
+open, as does compact composer reset after long requests.
+[Native implementation and broader scope](native-file-patch.md).

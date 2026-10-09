@@ -2,7 +2,7 @@
   "name": "agentflow",
   "displayName": "xMind",
   "description": "Shared native xMind agent sessions and coding workflows in VS Code.",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "agentflow-local",
   "repository": {
     "type": "git",
@@ -17,7 +17,9 @@
     "Other"
   ],
   "main": "./extension.js",
-  "activationEvents": ["onStartupFinished"],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "capabilities": {
     "untrustedWorkspaces": {
       "supported": false
@@ -76,23 +78,37 @@
       "title": "xMind",
       "properties": {
         "agentflow.backendMode": {
-          "type": "string", "enum": ["managed", "external"], "default": "managed", "scope": "machine",
+          "type": "string",
+          "enum": [
+            "managed",
+            "external"
+          ],
+          "default": "managed",
+          "scope": "machine",
           "description": "Managed starts an independent local native backend for the opened folder. External attaches to an explicitly configured backend only when its actual workspace matches."
         },
         "agentflow.runtimeDirectory": {
-          "type": "string", "default": "", "scope": "machine",
+          "type": "string",
+          "default": "",
+          "scope": "machine",
           "description": "Optional absolute directory containing a verified xMind native-runtime-manifest.json. Defaults to the extension's bundled runtime."
         },
         "agentflow.stdlibSource": {
-          "type": "string", "default": "", "scope": "machine",
+          "type": "string",
+          "default": "",
+          "scope": "machine",
           "description": "Optional trusted machine-level pure standard-library directory for a development native runtime."
         },
         "agentflow.providerConfigPath": {
-          "type": "string", "default": "", "scope": "machine",
+          "type": "string",
+          "default": "",
+          "scope": "machine",
           "description": "Absolute path to the single provider YAML configuration imported by Native. The extension never reads its contents or loads a project-local configuration automatically."
         },
         "agentflow.workspaceEdits": {
-          "type": "boolean", "default": true, "scope": "machine",
+          "type": "boolean",
+          "default": true,
+          "scope": "machine",
           "description": "Enable native file-create and file-edit proposals for managed coding workspaces. Each change requires native approval. Setting false starts new workspaces in read-only mode; existing owners retain their policy until an explicit backend handoff."
         },
         "agentflow.backendUrl": {

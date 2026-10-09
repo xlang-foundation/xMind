@@ -1,0 +1,136 @@
+{
+  "observedAt": "2026-10-09T20:28:57.524Z",
+  "scope": "Actual installed VS Code 0.1.4 and upgraded native backend; real OpenAI two-file patch, rendered comparison and per-file UI approvals with actual disk/journal receipts",
+  "extensionVersion": "0.1.4",
+  "nativeRevision": "622c9d1b7780d38ca4fd0ae5b86db332ff525839",
+  "sdkRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+  "manifestSha256": "db1e0a21575c4574547f583ccd35066832ce4297f41d79f417e2119172bff141",
+  "vsixSha256": "5cf03c5b2965178efe133d1177af16cee1c921c4749ac6fa4742f74ac00e16b8",
+  "backendPid": 19396,
+  "oldBackendPid": 25608,
+  "workspace": "D:/CantorAI2026/TestProj",
+  "migration": {
+    "messagesPreserved": 22,
+    "runsPreserved": 7,
+    "historyExact": true,
+    "providerKeyPrompt": false
+  },
+  "runId": "170cd27b2a66551d29f28e26c042d2eb",
+  "sessionId": "0334cbee1ddff631c1f9f5b45a254875",
+  "state": "completed",
+  "provider": "openai",
+  "model": "gpt-6.1-sol",
+  "comparisonBeforeApproval": true,
+  "targetFolderAbsentAfterComparison": true,
+  "secondFileAbsentAfterFirstApproval": true,
+  "files": [
+    {
+      "operationId": "54c6aad62eb25e93e30b067916ceef17-0",
+      "state": "succeeded",
+      "path": "xmind-patch-proof-622c9d1/first.txt",
+      "bytes": 27,
+      "sha256": "b32e012a32976c2fb9b21ae28b2c4f2ab76dee4b5a13c36c47a0914b31e5a3b7",
+      "receipt": {
+        "action": "add",
+        "after_exists": true,
+        "after_sha256": "b32e012a32976c2fb9b21ae28b2c4f2ab76dee4b5a13c36c47a0914b31e5a3b7",
+        "created_directories": [
+          "xmind-patch-proof-622c9d1"
+        ],
+        "created_directory_bindings": [
+          {
+            "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:00000000000000001a9b070000000000",
+            "path": "xmind-patch-proof-622c9d1"
+          }
+        ],
+        "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:02000000000000001a9b070000000000",
+        "operation_id": "54c6aad62eb25e93e30b067916ceef17-0",
+        "patch_id": "54c6aad62eb25e93e30b067916ceef17",
+        "patch_index": 0,
+        "path": "xmind-patch-proof-622c9d1/first.txt",
+        "size": 27,
+        "state": "succeeded",
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000"
+      }
+    },
+    {
+      "operationId": "54c6aad62eb25e93e30b067916ceef17-1",
+      "state": "succeeded",
+      "path": "xmind-patch-proof-622c9d1/second.txt",
+      "bytes": 28,
+      "sha256": "f7ebfe935d4f3ee09508235c4db4ae2c29998e4116a61407c058df1c19447b16",
+      "receipt": {
+        "action": "add",
+        "after_exists": true,
+        "after_sha256": "f7ebfe935d4f3ee09508235c4db4ae2c29998e4116a61407c058df1c19447b16",
+        "created_directories": [],
+        "created_directory_bindings": [],
+        "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:03000000000000001a9b070000000000",
+        "operation_id": "54c6aad62eb25e93e30b067916ceef17-1",
+        "patch_id": "54c6aad62eb25e93e30b067916ceef17",
+        "patch_index": 1,
+        "path": "xmind-patch-proof-622c9d1/second.txt",
+        "size": 28,
+        "state": "succeeded",
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000"
+      }
+    }
+  ],
+  "providerUsage": [
+    {
+      "completion_tokens": 83,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "input_tokens": 2299,
+      "input_tokens_details": {
+        "cache_write_tokens": 2296,
+        "cached_tokens": 0
+      },
+      "output_tokens": 83,
+      "output_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "prompt_tokens": 2299,
+      "prompt_tokens_details": {
+        "cache_write_tokens": 2296,
+        "cached_tokens": 0
+      },
+      "total_tokens": 2382
+    },
+    {
+      "completion_tokens": 82,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "input_tokens": 3092,
+      "input_tokens_details": {
+        "cache_write_tokens": 3089,
+        "cached_tokens": 0
+      },
+      "output_tokens": 82,
+      "output_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "prompt_tokens": 3092,
+      "prompt_tokens_details": {
+        "cache_write_tokens": 3089,
+        "cached_tokens": 0
+      },
+      "total_tokens": 3174
+    }
+  ],
+  "diagnosticDatabaseMode": "query_only",
+  "diagnosticDatabaseMutated": false,
+  "cpythonExecuted": false,
+  "screenshot": {
+    "file": "vscode-patch-installed.jpg",
+    "sha256": "f2c32323f81ac0050385381e9c59b4441bf92b0d77cdeb23f2901ed68ecc810c"
+  },
+  "limits": [
+    "Installed acceptance covers two additions and per-file review; mixed update/move/delete and denial were verified separately through the packaged CLI.",
+    "The composer retains its expanded height after a long request; UI follow-up remains.",
+    "The separate older browser preview was not upgraded here.",
+    "Full coding parity, CLI multiline input and generic Nexus profiles remain incomplete."
+  ]
+}

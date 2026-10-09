@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+The audited **0.1.4 package** now runs in the existing TestProj VS Code profile,
+preserving all 22 messages and seven runs through the native upgrade. An actual
+OpenAI two-file patch opened comparison before effects, required two separate
+UI approvals and completed with matching native receipts, disk hashes and
+provider metrics. The packaged interactive CLI separately passed real mixed
+add/update/move/delete and partial denial, plus exact restart history. The
+archive audit checked 1,938 entries and 1,901 runtime files; the versioned
+client suites passed 222/41. Older browser-preview coverage, composer-height
+reset, CLI multiline input and full coding parity remain incomplete.
+[Package and live/installed evidence](native-file-patch.md).
+
 Native multi-file patch execution now passes the complete **103-contract local
 gate** in 211.24 seconds after correcting the Windows handle-relative rename
 call and a missing synthetic routing asset. All 2,390 mapped source inputs

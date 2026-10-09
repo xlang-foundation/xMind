@@ -1,0 +1,71 @@
+{
+  "observedAt": "2026-10-09T20:28:57.527Z",
+  "scope": "Verified 0.1.4 distribution; exact complete ZIP and source-byte audit, model-free 222/41 views, real packaged CLI and separate installed UI receipts",
+  "version": "0.1.4",
+  "archive": {
+    "passed": true,
+    "scope": "Independent exact ZIP inventory, all native/runtime/source/asset bytes and generated metadata bounds; not installed acceptance",
+    "version": "0.1.4",
+    "vsixSha256": "5cf03c5b2965178efe133d1177af16cee1c921c4749ac6fa4742f74ac00e16b8",
+    "archiveEntries": 1938,
+    "expandedBytes": 68683258,
+    "runtimeManifestSha256": "db1e0a21575c4574547f583ccd35066832ce4297f41d79f417e2119172bff141",
+    "nativeRevision": "622c9d1b7780d38ca4fd0ae5b86db332ff525839",
+    "runtimeFiles": 1901,
+    "pureSources": 1869,
+    "nativeProgramsPackages": 8,
+    "licenseFiles": 23,
+    "nonRuntimeByteBindings": 34,
+    "sourceFiles": 14,
+    "browserAssets": 12,
+    "duplicateNames": false,
+    "symlinks": false,
+    "privateState": false,
+    "cpythonExecutablesExtensionsBytecode": false,
+    "installed": false
+  },
+  "views": {
+    "sourceRevision": "622c9d1b7780d38ca4fd0ae5b86db332ff525839",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 44,
+    "trackedSourceFiles": 42,
+    "vendorFiles": 2,
+    "browserAssets": 12,
+    "sourceAndAssetBytesUnchanged": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 222,
+      "passed": 222,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 41,
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true,
+    "documentationChangedAfterGate": [
+      "extensions/vscode/README.md"
+    ],
+    "allProductCodeBytesStillMatchGate": true
+  },
+  "liveEvidence": "native-patch-cli-live.json",
+  "installedEvidence": "vscode-patch-installed.json",
+  "rejectedPackagingAttempt": {
+    "vsixSha256": "571ca93652d1f60a9b7d927c504ed432c2e2fa9c8d6c97c14a054fc117b5ec61",
+    "reason": "--no-dependencies omitted renderer libraries; artifact rejected before installation"
+  },
+  "nativeRevision": "622c9d1b7780d38ca4fd0ae5b86db332ff525839",
+  "metadataDelta": "Extension version 0.1.3 to 0.1.4 only; README separately updated; native source and binaries are unchanged from the complete 103-contract gate",
+  "nativeCompilerRerunForMetadata": false,
+  "cpythonExecuted": false,
+  "privateStatePackaged": false
+}

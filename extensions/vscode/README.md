@@ -55,7 +55,7 @@ paths are read from machine/global settings, never selected-project settings.
 An unset provider path starts Native unconfigured so Settings can enroll a
 provider. With a configured path, every new managed backend imports that same
 file through Native; the host does not copy keys into arguments, conversations
-or workspace state. [Provider setup](../../doc/provider-setup.md).
+or workspace state. [Provider setup](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/provider-setup.md).
 
 External mode requires its actual backend root to match the selected folder.
 Unknown workspace metadata, a different root or a changed generation blocks
@@ -69,7 +69,7 @@ manifest/digest and standard-library/license inputs. `npm run package` builds
 the browser assets and verifies the complete staged Native inventory before
 creating a VSIX. There is no unverified executable/PATH discovery fallback.
 Install it with **Extensions: Install from VSIX**. No Marketplace publication
-is implied. [Build and bundle instructions](../../doc/DEVELOPMENT.md).
+is implied. [Build and bundle instructions](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/DEVELOPMENT.md).
 
 ## Coding controls and validation scope
 
@@ -87,26 +87,24 @@ Changing the setting does not enable writing in an already-running owner.
 Older backends do not advertise this field, so the view leaves the indicator
 hidden rather than assuming their permissions.
 
-The current policy source passed 92 native contracts and the complete 192
-extension / 39 browser synthetic suites. The running normal-profile `TestProj`
-owner still uses its older read-only startup policy. Writing from that installed
-window and a history-preserving upgrade remain pending.
-[Policy evidence](../../doc/evidence/native-file-proposal-policy-local.json),
-[runtime handoff](../../doc/native-runtime-handoff.md).
+The native patch checkpoint passed all 103 native contracts, and the shared
+client passed 222 extension / 41 browser contracts. A real OpenAI packaged CLI
+run completed an approved add/update/move/delete patch, preserved its first
+creation after a later denial, and retained exact history across restart.
+The installed 0.1.3 TestProj client separately completed approved file creation
+and a fresh workspace read. Installed patch review for this 0.1.4 package remains
+a separate acceptance step. [Patch implementation and scope](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/native-file-patch.md),
+[runtime handoff](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/native-runtime-handoff.md).
 
 **Open Browser View (Copy Connection Token)** opens the selected backend's
 browser access adapter and copies its connection token for Connect. Closing
-that access view does not stop Native execution. [Browser details](../../doc/browser-view.md).
+that access view does not stop Native execution. [Browser details](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/browser-view.md).
 
-The workspace-binding source passed **171 extension and 32 browser Node
-contracts**, with no failures or skips. These use synthetic host, process,
-filesystem, HTTP and DOM fixtures; they do not establish installation or an
-actual TestProj managed-backend/IDE result. The subsequent source-matched Native
-gate passed all 88 contracts, and the packaged extension passed the actual
-opened-folder VS Code test on TestProj. The normal persistent window retains
-VS Code's folder-trust requirement. [Opened-folder evidence](../../doc/vscode-opened-workspace.md).
-Earlier actual
-preview and editor evidence belongs to its recorded runtime and remains
-separate. [Validation status](../../doc/VALIDATION_STATUS.md),
-[graph/editor history](../../doc/vscode-graph-workflows.md),
-[actual diff-host evidence](../../doc/evidence/vscode-native-diff.json).
+Client tests use labelled synthetic host, process, HTTP and DOM fixtures. Live
+and installed results are reported separately and do not establish complete
+coding feature parity. The persistent window retains VS Code's folder-trust
+requirement. [Opened-folder evidence](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/vscode-opened-workspace.md).
+Earlier preview and editor evidence belongs to its recorded runtime.
+[Validation status](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/VALIDATION_STATUS.md),
+[graph/editor history](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/vscode-graph-workflows.md),
+[actual diff-host evidence](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/evidence/vscode-native-diff.json).

@@ -1,5 +1,38 @@
 # Native patch implementation
 
+## Packaged and installed checkpoint
+
+The **0.1.4 VSIX** contains the locally tested native revision `622c9d1` and
+the pinned xlang3 runtime. Independent verification checked its exact 1,938 ZIP
+entries, all 1,901 runtime files and 34 client/asset byte bindings, with no
+private state, CPython executable, native CPython extension or bytecode.
+The versioned client gate passed **222/41** tests; only README documentation
+changed afterward. The native compiler was not rerun for version/documentation
+changes. [Package evidence and limits](evidence/native-patch-package.json).
+
+Real OpenAI `gpt-6.1-sol` through the packaged interactive CLI completed one
+four-file add/update/move/delete patch with actual per-file approvals. A second
+patch preserved the first creation when the second was denied. Independent disk
+hashes matched the native receipts, and actual restart preserved exact history
+without replay. Two earlier invalid acceptance-driver attempts remain recorded;
+they are not passing product results. [Live CLI evidence](evidence/native-patch-cli-live.json).
+
+The existing TestProj VS Code profile now runs this package and native runtime.
+Its upgrade preserved all 22 messages and seven runs exactly, without another
+provider-key prompt. A fresh real-model two-file addition showed the patch
+manifest, missing-folder disclosure and per-file approval. Comparison opened
+before approval while the folder remained absent. Approving file one left file
+two absent until its separate approval; both final receipts match actual bytes.
+The completed view displayed actual provider usage.
+[Installed receipts, migration and limits](evidence/vscode-patch-installed.json),
+[actual comparison/sidebar frame](evidence/vscode-patch-installed.jpg).
+
+Installed acceptance covers additions; mixed effects and partial denial were
+verified separately through the CLI. The older independent browser preview is
+unchanged. The composer keeps its expanded height after a long sent request,
+and CLI input remains one request per line. These UI/CLI gaps, fuzzy patch
+matching, broader provider/editor coverage and full coding parity remain open.
+
 The local candidate now compiles with the pinned xlang3 SDK. Its first local
 build exposed an incorrect fixture enum name (`PermissionDecision`); replacing
 it with the repository's actual `OperationDecision` resolved compilation without
@@ -194,11 +227,12 @@ refresh, own-guidance partial results, agent/CLI mixed effects and independent
 file hashes, denial, read-only catalogue and exact SQLite history across restart.
 The existing graph contract now also covers direct patch approvals and denial.
 Provider replies/usage and controller fixture decisions are synthetic. These new
-C++ paths now compile and the focused contracts above pass. No installed or
-real-provider patch acceptance is claimed.
+C++ paths compile and pass the complete local gate. The packaged CLI and
+installed two-file addition acceptance are reported above; real-provider graph
+patch execution and installed mixed-effect review remain separate requirements.
 
-Delivery still requires hosted artifact verification,
-installed CLI/browser/VS Code review and real-provider acceptance. A multi-file patch must
+Broader delivery still requires hosted artifact verification and installed
+browser/mixed-effect review. A multi-file patch must
 report actual outcomes for each file; it must not claim an atomic filesystem
 transaction or hide earlier effects when a later file fails. Fuzzy matching and
 full upstream patch semantics remain explicit parity gaps.
