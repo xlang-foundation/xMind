@@ -83,8 +83,11 @@ that access view does not stop Native execution. [Browser details](../../doc/bro
 The workspace-binding source passed **171 extension and 32 browser Node
 contracts**, with no failures or skips. These use synthetic host, process,
 filesystem, HTTP and DOM fixtures; they do not establish installation or an
-actual TestProj managed-backend/IDE result. That acceptance is pending the
-source-matched Native gate, packaging and real VS Code check. Earlier actual
+actual TestProj managed-backend/IDE result. The subsequent source-matched Native
+gate passed all 88 contracts, and the packaged extension passed the actual
+opened-folder VS Code test on TestProj. The normal persistent window retains
+VS Code's folder-trust requirement. [Opened-folder evidence](../../doc/vscode-opened-workspace.md).
+Earlier actual
 preview and editor evidence belongs to its recorded runtime and remains
 separate. [Validation status](../../doc/VALIDATION_STATUS.md),
 [graph/editor history](../../doc/vscode-graph-workflows.md),

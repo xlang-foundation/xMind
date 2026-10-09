@@ -1,0 +1,53 @@
+{
+  "passed": true,
+  "scope": "Independent VSIX ZIP and staged-file integrity; no execution or installed acceptance",
+  "archive": {
+    "file": "xmind-workspace-0.1.0.vsix",
+    "sha256": "77049db2836dd817cd61e797be6fc0aa0861eeb94be49f1894b0c67484fe14fb",
+    "bytes": 18346665,
+    "entries": 1924,
+    "expandedBytes": 66734722
+  },
+  "runtime": {
+    "manifestSha256": "df84013a674ba833732017962543c3f63e51dbb0f5d06fa819f2dfdb734127c6",
+    "nativeRevision": "1e3d4ae84044fd934882ced3114526b44aa445db",
+    "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+    "inventoryFiles": 1890,
+    "nativeFiles": 8,
+    "pureSourceFiles": 1869,
+    "licenseFiles": 13,
+    "allArchiveBytesMatchManifest": true,
+    "manifestBytesMatchStaged": true,
+    "stagedInventoryVerified": true,
+    "nativeSha256": {
+      "xmind_server.exe": "8b74ec625cb3c974c225aaeaacedc48417a1c99c394cb5b52fe604da659917d2",
+      "xmind_schema_worker.exe": "4149d02b1fe319076d3a13b1c7331833442c9fef0e19f1c817231b869a5b293e",
+      "xmind_cli.exe": "567a93476a5c16d68850b74eb7a758918e45a41a0389b65b9c3cac99686977d5",
+      "xmind_admin.exe": "41f14808e08a5d205362ba6d95d2b841a95e0d5b8b71f3fef02b605c604395d2",
+      "xlang3_runtime.dll": "64883ab20bd54f7ea5d051a1af6ff88e5ac4b4152e013ec44e13227283695445",
+      "xlang3.exe": "7c62d0646bf275fcc55fb114634f2f3a5bcec88b9b63f5f2b10392276d0dcb49",
+      "modules/xlang_json.x3pkg.dll": "e3f045d31e46fafb778e896c163def74e4a4d965a57d11894f359374e823ec67",
+      "modules/xlang_sqlite3.x3pkg.dll": "d0d874d7d8444b8c1c011789ad49fa41bf72a25ca4df111eeced3e56da21e908"
+    }
+  },
+  "extensionSourceSha256": {
+    "workspace-backend.js": "926a7703c232886a3731440bea98709d2742ec2a50ba2544f73ac277a39bccd4",
+    "package.json": "17412ae3adb3c192d19d4a0e43f75f0e63f3b25627d2e5cd891eabc31c076c2f",
+    "native-runtime.js": "0fe700c4fecbd8a790ac8d9ad792a72aeb482f6511c6e2436673be9207b7dbce",
+    "extension.js": "efb247a44a266e3ff4fc209e335a907aa4bfc821a97548320e610955452c24cf",
+    "client.js": "e84bdda6908df4785766551b950ae86ba0a61249e17fe3db63ce0479f79a7eed",
+    "scripts/package-native-runtime.mjs": "dbdd2aca335a947ce60749967f9b64db2e458a320c4a5498196e305981dd4bcd"
+  },
+  "guards": {
+    "exactInventory": true,
+    "duplicateNames": false,
+    "symlinks": false,
+    "privateConfigurationFiles": false,
+    "cpythonExecutablesExtensionsOrBytecode": false
+  },
+  "nativeExecuted": false,
+  "sdkExecuted": false,
+  "configurationAccessed": false,
+  "providerCalls": 0,
+  "installed": false
+}

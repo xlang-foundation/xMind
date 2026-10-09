@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "source": "Actual VS Code extension host APIs and authenticated native workspace metadata",
+  "openedFolders": [
+    {
+      "scheme": "file",
+      "path": "d:\\CantorAI2026\\TestProj"
+    }
+  ],
+  "requiresCodeWorkspace": false,
+  "backend": {
+    "origin": "http://127.0.0.1:52471",
+    "authority_id": "0728e74517bbc0f9f9fc19f50675f159",
+    "configured": true,
+    "root": "D:\\CantorAI2026\\TestProj",
+    "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000"
+  },
+  "providerConfigPassedByPathOnly": true,
+  "keysReadOrPrinted": false,
+  "modelInferenceTested": false,
+  "screenshotVerified": false,
+  "time": "2026-10-09T00:30:37.795Z"
+}

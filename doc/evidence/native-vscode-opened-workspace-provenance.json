@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "nativeRevision": "1e3d4ae84044fd934882ced3114526b44aa445db",
+  "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+  "native": {
+    "passed": 88,
+    "registered": 88,
+    "excluded": [],
+    "durationSeconds": 176.44,
+    "sourceFilesUnchanged": 560,
+    "modelTransports": "Synthetic fixture peers; real filesystem/SQLite/HTTP/guard contracts",
+    "sdkKnownBaselineFailures": 1
+  },
+  "node": [
+    {
+      "suite": "extension",
+      "tests": 171,
+      "passed": 171,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "browser",
+      "tests": 32,
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "actualInstalledVsCode": {
+    "passed": true,
+    "openedFolder": "D:\\CantorAI2026\\TestProj",
+    "requiresCodeWorkspace": false,
+    "manualServerTokenRequired": false,
+    "isolatedTestProfile": true,
+    "workspaceTrustDisabledInTestOnly": true,
+    "modelInferenceTested": false,
+    "screenshotVerified": false
+  },
+  "ordinaryPersistentWindow": {
+    "installed": true,
+    "openedFolder": "D:\\CantorAI2026\\TestProj",
+    "trustSettingsUnchanged": true,
+    "isTrustedAtLaunch": false,
+    "userTrustChoicePending": true
+  },
+  "package": {
+    "sha256": "77049db2836dd817cd61e797be6fc0aa0861eeb94be49f1894b0c67484fe14fb",
+    "bytes": 18346665,
+    "runtimeManifestSha256": "df84013a674ba833732017962543c3f63e51dbb0f5d06fa819f2dfdb734127c6",
+    "inventoryFiles": 1890,
+    "allInventoryBytesMatched": true
+  },
+  "cpythonExecuted": false,
+  "files": {
+    "doc/evidence/native-vscode-opened-workspace-ctest.log": {
+      "sha256": "45305d81162bc588759fb18cead343ac78ce46052b0796cfac5458181a0f058d",
+      "bytes": 11887
+    },
+    "doc/evidence/native-vscode-opened-workspace-extension.log": {
+      "sha256": "bfb261aad90280c9a7e5ad89ffb81ca56426ed70cc696368895bf889a00e060b",
+      "bytes": 46349
+    },
+    "doc/evidence/native-vscode-opened-workspace-browser.log": {
+      "sha256": "ad7219e7adc7122ef69d3c2f969cc9d3472054a6f2da250c2572f182e051f32e",
+      "bytes": 8572
+    },
+    "doc/evidence/native-vscode-opened-workspace-host.json": {
+      "sha256": "aabc3cd236fa3ce201b1360ee3e46d5dd352c8f18617d1f09a1a3e62b52d65d6",
+      "bytes": 704
+    },
+    "doc/evidence/native-vscode-opened-workspace-vsix.json": {
+      "sha256": "66bd1d2b79f7b4ea16a76dd5e0cc899035b440f68cad372643fd8b915938ac0c",
+      "bytes": 2515
+    }
+  }
+}

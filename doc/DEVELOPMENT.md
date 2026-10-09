@@ -74,8 +74,10 @@ folder automatically and starts a separate local Native owner for it. No
 A multi-root workspace retains its folder set but currently needs one explicitly
 selected active Native root. Ready owners and accepted work survive view closure,
 extension deactivation and folder changes; the sidebar shows the verified
-effective root. Actual installation and TestProj managed IDE acceptance remain
-pending; Node adapter tests alone do not establish them.
+effective root. The packaged extension passed an actual opened-folder acceptance
+on TestProj after the 88-contract native gate; its normal persistent window
+retains VS Code's folder-trust requirement. Node adapter tests alone do not
+establish that acceptance. See [opened-folder evidence](vscode-opened-workspace.md).
 
 Configure `agentflow.runtimeDirectory`, optional `agentflow.stdlibSource` and
 the one `agentflow.providerConfigPath` in machine/global User settings. Native

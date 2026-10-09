@@ -14,8 +14,8 @@ owners and their sessions survive view closure and folder switching.
 
 Validation on 2026-10-08:
 
-- Fresh Windows Release configure/build and all 88 registered native contracts
-  passed (177.60 seconds). The provider runtime contract includes two actual
+- Windows Release configure/build and all 88 registered native contracts
+  passed after the final lease fix (176.44 seconds). The provider runtime contract includes two actual
   filesystem roots, cross-root/stale-generation rejection, junction retargeting,
   and the default Claude output limit. Model transports in this contract are
   synthetic; these results do not establish live provider inference.
@@ -28,6 +28,25 @@ Validation on 2026-10-08:
   `xmind/windows-native-file-longpaths`. The CPython bridge and Python executable
   were disabled. Only pure Python standard-library source is reused.
 
-The actual packaged VS Code acceptance on `D:\CantorAI2026\TestProj` is pending
-at this source checkpoint. Installation, rendered UI, and live model behavior
-must be recorded separately after execution.
+The final native ownership fix also addresses a real VS Code startup failure:
+its private database path was 254 characters, and the `.backend-lock` suffix made
+the lock path 267 characters. The backend now uses extended Windows spelling
+only for opening that lock. Its public database identity and exclusive ownership
+remain unchanged. The existing repository contract verifies this exact boundary,
+ordinary/extended alias contention, lease release/reopen, and retained SQLite
+history and information.
+
+The packaged extension was installed and passed an actual VS Code extension-host
+acceptance on `D:\CantorAI2026\TestProj`. The actual workspace API reported one
+opened folder and no `.code-workspace` file; authenticated Native metadata
+confirmed that exact physical execution root. The accepted runtime contains eight
+native artifacts, 1,869 pure standard-library source files and 13 license notices.
+All 1,890 inventory hashes and the six checked extension source files matched the
+actual VSIX archive. Its native source revision is
+`1e3d4ae84044fd934882ced3114526b44aa445db`.
+
+This acceptance used a fresh isolated test profile with the standard
+`--disable-workspace-trust` test flag. The normal persistent VS Code profile was
+also installed and opened on TestProj with its trust settings unchanged. It
+reported Restricted Mode and awaits the user's folder-trust choice. No rendered
+screenshot or live inference is claimed for this checkpoint.

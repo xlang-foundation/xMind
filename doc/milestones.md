@@ -1,5 +1,14 @@
 # Reviewable milestones
 
+VS Code opened-folder checkpoint: the packaged extension passed actual host API
+and authenticated Native identity checks on `D:\CantorAI2026\TestProj`, with no
+`.code-workspace` file or manually entered server token. All 88 native contracts
+passed after correcting Windows long lock paths; 171 extension and 32 browser
+contracts also passed. The normal persistent window was installed and opened
+with its trust settings unchanged and awaits the user's folder-trust choice.
+[Scope and evidence](vscode-opened-workspace.md). No new screenshot or live model
+inference is claimed for this checkpoint.
+
 Current schema-v12 context, YAML import and DeepSeek source passed a complete
 local gate. The first full 86-contract attempt passed **81 and failed five**;
 the second full 88-contract attempt passed **85 and failed three in 162.98
