@@ -50,3 +50,11 @@ This acceptance used a fresh isolated test profile with the standard
 also installed and opened on TestProj with its trust settings unchanged. It
 reported Restricted Mode and awaits the user's folder-trust choice. No rendered
 screenshot or live inference is claimed for this checkpoint.
+
+The later accepted `516d918` package passed another actual VS Code host check
+on `D:\CantorAI2026\TestProj`, with one opened folder, no `.code-workspace` and
+authenticated native metadata bound to that exact physical root. Its runtime
+manifest and complete inventory were verified before launch. The host exited
+successfully. The fresh isolated test profile used the standard workspace-trust
+test flag; model inference and rendered screenshot acceptance were not performed.
+[Current package host evidence](evidence/native-ci-staging-vscode-opened-folder.json).

@@ -46,3 +46,13 @@ requested. [Installation evidence](evidence/native-ci-staging-installed.json)
 records this scope. Window reload, rendered acceptance and native execution were
 not performed by this installation; the live browser preview retains its
 previously accepted runtime. Later skill changes have separate pending gates.
+
+A subsequent fresh VS Code test host loaded this verified package, opened
+`D:\CantorAI2026\TestProj` directly and passed its real extension-host workspace
+API and authenticated native root checks. It required no `.code-workspace` and
+passed provider configuration by path only. The isolated test profile used the
+standard workspace-trust test flag; no normal-profile trust override was
+requested. [Opened-folder evidence](evidence/native-ci-staging-vscode-opened-folder.json)
+binds the successful host exit and accepted runtime manifest. This verifies
+native startup and folder attachment; model inference, screenshot verification
+and reload of the ordinary persistent window remain separate acceptance work.

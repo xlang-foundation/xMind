@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "source": "Actual VS Code extension host APIs and authenticated native workspace metadata",
+  "openedFolders": [
+    {
+      "scheme": "file",
+      "path": "d:\\CantorAI2026\\TestProj"
+    }
+  ],
+  "requiresCodeWorkspace": false,
+  "backend": {
+    "origin": "http://127.0.0.1:57354",
+    "authority_id": "f4e143123f800eb695d778796e61c14e",
+    "configured": true,
+    "root": "D:\\CantorAI2026\\TestProj",
+    "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000"
+  },
+  "providerConfigPassedByPathOnly": true,
+  "keysReadOrPrinted": false,
+  "modelInferenceTested": false,
+  "screenshotVerified": false,
+  "time": "2026-10-09T04:29:38.658Z",
+  "nativeRevision": "516d91842f34a2009c26f7521f9fea66b5ae736b",
+  "nativeManifestSha256": "04bca8077b5373966acf2fca14ae78a5e85742c459ea1ee2ca42361a9e5b4dbb",
+  "isolatedTestProfile": true,
+  "workspaceTrustDisabledInTestOnly": true,
+  "normalProfileTrustOverrideRequested": false,
+  "hostExitCode": 0,
+  "nativeExecuted": true,
+  "evidenceHashes": {
+    "result.json": "2d024ebdef3ea5717aba048848f42fc14f74de14ead901c7403e3f8de685c848",
+    "runtime-proof.json": "3b822b5cb2038d2a54df0a59a3196ab015182486b0dbd260c3f31465fbccaf8c",
+    "exit.json": "0c5dba33244bc15ca98740da41f465ecd48c9091a00a3b4f99311c7d3af2e3cc",
+    "launch.json": "14f53bb82887687fc896f566151dd67066c17ce76d470fa6390ac4b8a600f376",
+    "install.log": "2b12a2e01066d0924f2d3f3048dc05ecb882930a0daa166b7c93206ad09f4789"
+  },
+  "scope": "Actual VS Code host APIs, native startup and authenticated physical opened-folder binding using the verified installed package; no model inference or rendered screenshot claim"
+}
