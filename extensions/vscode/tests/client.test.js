@@ -9,6 +9,11 @@ test('provider enrollment accepts only matching approved OpenAI wire and endpoin
   for(const changed of [{wire:'responses'},{endpoint:'https://api.openai.com/v1/responses'},{wire:'unknown'},{endpoint:'https://unapproved.invalid/v1/responses',wire:'responses'},{revision:-1}])assert.throws(()=>providerEnrollmentWire({...base,...changed}),/policy/);
 });
 const token = 'native-client-contract-token-32-bytes';
+test('workspace skill inspection uses the native read-only catalogue without inventing activation',async()=>{
+ const catalogue={workspace_id:'synthetic-workspace',authority_id:'a'.repeat(32),skills:[{id:'disabled',model_invocable:false}]},sent=[];
+ const client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{sent.push({url,options});return {ok:true,json:async()=>catalogue};});
+ assert.deepEqual(await client.skills(),catalogue);assert.equal(sent.length,1);assert.equal(sent[0].url,'http://127.0.0.1:8765/v1/workspace/skills');assert.equal(sent[0].options.method,'GET');assert.equal(sent[0].options.body,undefined);
+});
 test('owned-child client keeps parent scope and validates the committed tree cursor',async()=>{
  const sent=[],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{sent.push({url,options});return {ok:true,json:async()=>[]};});
  await client.ownedChildren('parent');await client.ownedChildHistory('parent','opaque/child');await client.treeEvents('parent',12);await client.delegation();

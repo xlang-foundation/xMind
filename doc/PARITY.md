@@ -55,6 +55,13 @@ session/workspace or child run. Initial constructor-check and live harness
 configuration failures are retained in
 [local persistence evidence](evidence/native-skill-state-local.json).
 Hosted packaging and installed/rendered schema13 acceptance remain pending.
+Native catalogue inspection subsequently passed the exact 92-contract local
+gate and complete 178/36 view suites. It is available through the authenticated
+backend, native CLI and shared client, including scoped browser-cookie routing.
+Manual attachment/removal and rendered catalogue controls remain incomplete.
+The ordinary VS Code window was observed in Restricted Mode; its trust policy
+disables xMind, so that window has not passed rendered xMind acceptance.
+[Catalogue and window-boundary evidence](evidence/native-skill-catalogue-local.json).
 [Browser evidence](evidence/native-skills-browser-upgrade.json).
 [Verified view gate](evidence/native-approval-stability-views-hosted.json),
 [actual approval retry](evidence/native-approval-stability-live.json).

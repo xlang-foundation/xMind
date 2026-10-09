@@ -14,6 +14,8 @@ public:
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
     std::vector<std::string> models() const override;
     ExecutionWorkspaceMetadata execution_workspace()const override;
+    bool supports_skill_catalogue()const override;
+    WorkspaceSkillCatalogue workspace_skills()const override;
     Run submit_workspace(std::string id,std::string session,std::string prompt,std::string model,
         WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile={})override;
     Run submit_graph_workspace(std::string id,std::string session,std::string graph,std::int64_t revision,

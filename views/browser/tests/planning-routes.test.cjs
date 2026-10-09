@@ -1,4 +1,10 @@
 'use strict';
+const workspaceSkillRouteTest=require('node:test'),workspaceSkillRouteAssert=require('node:assert/strict');
+workspaceSkillRouteTest('workspace skill catalogue is an exact read-only browser route',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs');
+ for(const route of ['/v1/workspace','/v1/workspace/skills']){workspaceSkillRouteAssert.equal(allowedApiRoute(route,'GET'),true);for(const method of ['POST','PUT','DELETE'])workspaceSkillRouteAssert.equal(allowedApiRoute(route,method),false);}
+ for(const route of ['/v1/workspace/skills/load','/v1/workspace/skills/../credentials','/v1/workspace/skills/'])workspaceSkillRouteAssert.equal(allowedApiRoute(route,'GET'),false);
+});
 // Explicit synthetic native peer/assets: only thin view routing and durable
 // access forwarding are tested. No native SQLite, model or agent execution.
 const test=require('node:test'),assert=require('node:assert/strict');

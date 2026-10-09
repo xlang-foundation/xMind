@@ -291,7 +291,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
             std::cerr<<"/profiles lists saved provider metadata without changing this chat's admission binding; /profile ID REVISION explicitly selects a shared profile and clears this chat's model override.\n";
-            std::cerr<<"/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+            std::cerr<<"/skills lists current workspace guide metadata without activating a guide.\n/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
         }
         if(prompt.starts_with("/watch ")||prompt.starts_with("/graph-watch ")){
             const bool graphAttachment=prompt.starts_with("/graph-watch ");const auto id=prompt.substr(graphAttachment?13:7);
@@ -400,6 +400,11 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
             if(!saved.is_array())throw std::runtime_error("Invalid session history");
             std::cout<<Json{{"type","history"},{"session_id",session},{"history",saved}}.dump()<<'\n'<<std::flush;continue;
         }
+        if(prompt=="/skills"){
+            const auto catalogue=request("/v1/workspace/skills");
+            if(!catalogue.is_object()||!catalogue.contains("skills")||!catalogue["skills"].is_array())throw std::runtime_error("Invalid native skill catalogue");
+            std::cout<<Json{{"type","workspace_skills"},{"catalogue",catalogue}}.dump()<<'\n'<<std::flush;continue;
+        }
         if(prompt=="/models" || prompt=="/model" || prompt.starts_with("/model ")){
             const auto catalogue=request("/v1/models");
             if(!catalogue.is_object() || !catalogue.contains("models") || !catalogue["models"].is_array() || !catalogue.contains("default_model") || !catalogue["default_model"].is_string())throw std::runtime_error("Invalid backend model catalogue");
@@ -471,7 +476,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
 
 int main(int argc,char** argv) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, inspect-plan ROOT, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, skills, provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, inspect-plan ROOT, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -507,6 +512,7 @@ int main(int argc,char** argv) {
             path="/v1/operations/"+id(argv[3])+"/decision";body={{"decision",decision}};post=true;
         }
         else if(command=="models" && argc==3) path="/v1/models";
+        else if(command=="skills" && argc==3) path="/v1/workspace/skills";
         else if(command=="provider-profiles" && argc==3){path="/v1/provider/profiles";profile_operation=true;}
         else if(command=="profile-models" && (argc==6||argc==7)){
             const auto profile=provider_profile_identity(argv[3]),route=provider_profile_identity(argv[4]);const auto revision=provider_revision(argv[5]);

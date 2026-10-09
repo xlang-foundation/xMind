@@ -109,6 +109,7 @@ class BackendClient {
     return validateProviderProfiles(await this.request('/v1/provider/profiles/select',{id,expected_revision}));
   }
   sessions() { return this.request('/v1/sessions'); }
+  skills() { return this.request('/v1/workspace/skills'); }
   createSession(title) { return this.request('/v1/sessions', { title }); }
   renameSession(id,title,expectedTitle) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/title`,{title,expected_title:expectedTitle}); }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }

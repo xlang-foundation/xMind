@@ -1,4 +1,5 @@
 #include "agentflow/provider_profile_runtime.hpp"
+#include "agentflow/skill_context.hpp"
 #include "agentflow/gemini_provider.hpp"
 #include "agentflow/provider_yaml_config.hpp"
 #include <algorithm>
@@ -342,6 +343,12 @@ Run ProviderProfileRuntime::submit_profile(std::string id,std::string session,st
 Run ProviderProfileRuntime::submit_graph_profile(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
 Run ProviderProfileRuntime::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){std::lock_guard lock(impl_->mutex);return impl_->service->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
 ExecutionWorkspaceMetadata ProviderProfileRuntime::execution_workspace()const{std::lock_guard lock(impl_->mutex);return impl_->workspace_metadata();}
+bool ProviderProfileRuntime::supports_skill_catalogue()const{std::lock_guard lock(impl_->mutex);return static_cast<bool>(impl_->workspace_binding);}
+WorkspaceSkillCatalogue ProviderProfileRuntime::workspace_skills()const{
+    std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Workspace skill inspection requires an opened root");
+    const auto workspace=impl_->workspace_metadata();const auto catalogue=SkillContext(*impl_->workspace_binding).catalogue_json();
+    validate_workspace_admission({workspace.workspace_id,workspace.authority_id},impl_->workspace_metadata());return {workspace,catalogue};
+}
 Run ProviderProfileRuntime::submit_workspace(std::string id,std::string session,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile){
     std::lock_guard lock(impl_->mutex);validate_workspace_admission(expected,impl_->workspace_metadata());if(profile)impl_->admission(*profile);
     return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));

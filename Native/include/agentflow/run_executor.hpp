@@ -12,6 +12,7 @@ struct ProviderProfileAdmission {std::string id;std::int64_t revision=0;};
 // Public workspace-generation binding. This nonce is not the private authority
 // digest used by planning/context and contains no settings or credential data.
 struct ExecutionWorkspaceMetadata {bool configured=false;std::string root,workspace_id,authority_id;};
+struct WorkspaceSkillCatalogue {ExecutionWorkspaceMetadata workspace;std::string catalogue_json;};
 struct WorkspaceAdmission {std::string workspace_id,authority_id;};
 inline void validate_workspace_admission(const WorkspaceAdmission& expected,const ExecutionWorkspaceMetadata& actual){
     if(expected.workspace_id.empty()||expected.workspace_id.size()>256||expected.authority_id.size()!=32||
@@ -27,6 +28,8 @@ public:
     virtual Run submit(std::string id,std::string session_id,std::string prompt)=0;
     virtual std::vector<std::string> models() const {return {};}
     virtual ExecutionWorkspaceMetadata execution_workspace()const{return {};}
+    virtual bool supports_skill_catalogue()const{return false;}
+    virtual WorkspaceSkillCatalogue workspace_skills()const{throw RunUnavailable("Workspace skill inspection is unavailable");}
     virtual Run submit_workspace(std::string,std::string,std::string,std::string,WorkspaceAdmission,
         std::optional<ProviderProfileAdmission> = {}){throw RunUnavailable("Workspace-bound admission is unavailable");}
     virtual bool supports_profile_admission()const{return false;}

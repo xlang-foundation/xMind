@@ -1,4 +1,5 @@
 #include "agentflow/execution_platform.hpp"
+#include "agentflow/skill_context.hpp"
 #include <algorithm>
 #include <random>
 #include <sstream>
@@ -20,6 +21,13 @@ Run ExecutionPlatform::submit_model(std::string id,std::string session,std::stri
 Run ExecutionPlatform::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){if(const auto replay=store_.incoming_message(message,context,identity,content).get())return *replay;if(!agents_||!healthy())throw RunUnavailable("Incoming agent execution is unavailable");return agents_->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
 ExecutionWorkspaceMetadata ExecutionPlatform::execution_workspace()const{
     if(!workspace_binding_)return {};return {true,workspace_binding_->root_path(),workspace_binding_->identity(),workspace_authority_};
+}
+bool ExecutionPlatform::supports_skill_catalogue()const{return static_cast<bool>(workspace_binding_);}
+WorkspaceSkillCatalogue ExecutionPlatform::workspace_skills()const{
+    if(!workspace_binding_)throw RunUnavailable("Workspace skill inspection requires an opened root");
+    const auto workspace=execution_workspace();const auto catalogue=SkillContext(*workspace_binding_).catalogue_json();
+    validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
+    return {workspace,catalogue};
 }
 Run ExecutionPlatform::submit_workspace(std::string id,std::string session,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile){
     validate_workspace_admission(expected,execution_workspace());if(profile)throw RunUnavailable("Provider profile admission is unavailable");

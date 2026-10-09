@@ -255,6 +255,30 @@ the persistent VS Code profile. Its complete installed inventory matched and
 settings remained unchanged; no trust bypass was requested.
 [Package and installation evidence](evidence/native-approval-stability-hosted-package.json).
 
+## Native catalogue inspection
+
+The subsequent source exposes `GET /v1/workspace/skills`, `xmind_cli PORT skills`
+and `/skills` in console chat. The shared view client has a `skills()` method;
+the browser adapter forwards the exact GET route using its scoped native view
+credential. Native discovers current metadata through the retained workspace
+handle and includes its workspace/generation identities. This works before
+provider enrollment or model selection. It returns names, descriptions and
+invocation flags, without guide bodies, activation, effects or provider access.
+Malformed or ambiguous sources reject the whole inspection instead of
+returning a partial catalogue. Query parameters and browser writes to this
+route are rejected. Manual attachment/removal and rendered catalogue controls
+remain pending. The exact complete 92-contract local native suite and the
+178-extension / 36-browser local suites passed with unchanged source maps.
+The catalogue contract exercises actual native configured/unconfigured-provider
+roots, the CLI command and console chat, current metadata, malformed/ambiguous
+source rejection and scoped native/browser cookie access. Its guide content,
+endpoint and unrendered adapter assets are explicitly synthetic fixtures;
+there is no inference or rendered UI claim. Two earlier harness failures are
+retained: `fetch` normalized an empty query away, and a later assertion queried
+a nonexistent global run-list route. The final test uses raw HTTP for that exact
+query target and checks the actual session-list API before and after inspection.
+[Catalogue evidence](evidence/native-skill-catalogue-local.json).
+
 ## Durable native selections
 
 Schema13 adds typed session/workspace and run skill selections. It stores only
@@ -293,7 +317,8 @@ which rotated provider authority and caused `context_unavailable` before any
 new provider request. The corrected harness reused its persisted configuration;
 both attempts remain in [local evidence](evidence/native-skill-state-local.json).
 The successful retry's owned sources and files were removed after verification;
-the failed attempt's isolated fixtures remain for diagnostics.
+the failed attempt's isolated fixture was subsequently moved from `TestProj`
+into private diagnostic storage, retaining all three files and failed records.
 
 This schema13 source is locally validated, not yet installed or packaged by the
 hosted workflow. The current persistent VS Code package and browser runtime use
@@ -303,3 +328,13 @@ manual activation and deactivation, configured/global/URL/embedded sources,
 skill management controls and CLI/view catalog controls. Pure Python scripts
 and dependencies must execute through xlang3; this checkpoint adds no interpreter
 fallback or xlang3 native API.
+
+The actual normal VS Code profile was inspected after the fixed schema12 package
+installation. Its `TestProj` window is in Restricted Mode. xMind's manifest
+declares `untrustedWorkspaces.supported: false`, so VS Code disables its sidebar.
+The user must trust this folder through VS Code before ordinary-window xMind
+activation and rendered acceptance can continue; automation did not change trust
+or other security settings. The
+[observed window](evidence/native-vscode-restricted-mode.jpg) records that boundary,
+not a rendered xMind result. The earlier isolated test host's trust-disabled
+test flag does not establish ordinary-window acceptance.

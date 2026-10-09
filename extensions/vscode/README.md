@@ -14,6 +14,10 @@ launch or manual server-token prompt is required. Managed local execution
 currently requires a local Windows x64 extension host. Remote and virtual
 workspace folders are rejected rather than passed to a local backend.
 
+VS Code must trust the opened folder before enabling xMind. In Restricted Mode,
+VS Code disables this extension; trust only a folder whose contents you intend
+to allow the agent to inspect and work with, then run **xMind: Open Workspace**.
+
 A VS Code workspace can contain several folders. The extension retains that
 folder set, but Native currently executes against **one active root**. For a
 multi-root workspace, choose it explicitly when prompted or use **xMind:

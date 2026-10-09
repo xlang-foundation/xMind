@@ -574,6 +574,9 @@ if(BUILD_TESTING)
     add_test(NAME native_skill_state_contract COMMAND agentflow_skill_state_contract
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_skill_state_contract PROPERTIES TIMEOUT 30)
+    add_test(NAME native_skill_catalogue_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/skill_catalogue_contract.mjs"
+      "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+    set_tests_properties(native_skill_catalogue_contract PROPERTIES TIMEOUT 90)
     add_executable(agentflow_create_executor_contract tests/create_executor_contract.cpp)
     target_include_directories(agentflow_create_executor_contract PRIVATE third_party)
     target_link_libraries(agentflow_create_executor_contract PRIVATE agentflow_edits)
