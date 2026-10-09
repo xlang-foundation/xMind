@@ -60,3 +60,14 @@ OpenAI model eligibility filtering, preview migration and broader coding/MCP/A2A
 parity remain incomplete.
 
 [Source, live-run and package evidence](evidence/native-provider-workspace-provenance.json).
+
+The subsequent installed `516d918` package passed another fresh four-provider
+native acceptance on `TestProj`. OpenAI, Claude, Gemini and DeepSeek discovered
+their actual catalogues, invoked native `read_file` on a new random-marker
+fixture and completed with its exact contents. Per-response supplied usage and
+measured timings were retained without manufacturing absent counters. No
+effect-operation events occurred. The client supplied the single configuration
+path and did not read provider keys. The fixture was verified and removed.
+[Installed-package live evidence](evidence/native-ci-staging-live-providers.json)
+has its own exact runtime scope; it does not establish rendered interaction,
+the later native skills checkpoint or broader provider/coding parity.

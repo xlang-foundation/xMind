@@ -56,3 +56,14 @@ requested. [Opened-folder evidence](evidence/native-ci-staging-vscode-opened-fol
 binds the successful host exit and accepted runtime manifest. This verifies
 native startup and folder attachment; model inference, screenshot verification
 and reload of the ordinary persistent window remain separate acceptance work.
+
+The installed `516d918` runtime also passed fresh real OpenAI, Claude, Gemini
+and DeepSeek catalogue/inference checks through its production controller.
+Each provider read an owned random-marker file in `TestProj` using native
+`read_file` and returned the exact text. All four runs completed with actual
+usage counters and measured response timings, and no effect-operation events.
+The marker fixture was removed after verification. Native imported the single
+provider configuration path; the adapter read no provider keys.
+[Live installed-package evidence](evidence/native-ci-staging-live-providers.json)
+binds the runtime and SDK revisions and the private run-record hashes. This is
+native/controller acceptance, with no rendered browser or IDE claim.
