@@ -2,18 +2,33 @@
 #include "agentflow/records.hpp"
 #include "agentflow/context_control.hpp"
 #include <utility>
+#include <optional>
 #include <vector>
 
 namespace agentflow {
 struct RunBusy : std::runtime_error {using std::runtime_error::runtime_error;};
 struct RunUnavailable : std::runtime_error {using std::runtime_error::runtime_error;};
 struct ProviderProfileAdmission {std::string id;std::int64_t revision=0;};
+// Public workspace-generation binding. This nonce is not the private authority
+// digest used by planning/context and contains no settings or credential data.
+struct ExecutionWorkspaceMetadata {bool configured=false;std::string root,workspace_id,authority_id;};
+struct WorkspaceAdmission {std::string workspace_id,authority_id;};
+inline void validate_workspace_admission(const WorkspaceAdmission& expected,const ExecutionWorkspaceMetadata& actual){
+    if(expected.workspace_id.empty()||expected.workspace_id.size()>256||expected.authority_id.size()!=32||
+       expected.authority_id.find_first_not_of("0123456789abcdef")!=std::string::npos)
+        throw std::invalid_argument("Invalid workspace admission binding");
+    if(!actual.configured||expected.workspace_id!=actual.workspace_id||expected.authority_id!=actual.authority_id)
+        throw Conflict("Execution workspace changed before admission");
+}
 // Transport-neutral backend execution boundary; HTTP/CLI do not own run state.
 class RunExecutor {
 public:
     virtual ~RunExecutor()=default;
     virtual Run submit(std::string id,std::string session_id,std::string prompt)=0;
     virtual std::vector<std::string> models() const {return {};}
+    virtual ExecutionWorkspaceMetadata execution_workspace()const{return {};}
+    virtual Run submit_workspace(std::string,std::string,std::string,std::string,WorkspaceAdmission,
+        std::optional<ProviderProfileAdmission> = {}){throw RunUnavailable("Workspace-bound admission is unavailable");}
     virtual bool supports_profile_admission()const{return false;}
     virtual bool supports_delegation()const{return false;}
     virtual bool supports_dynamic_planning()const{return false;}

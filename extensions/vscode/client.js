@@ -18,15 +18,26 @@ function validateToken(token) {
 }
 class BackendClient {
   #tokenProvider;
+  #workspaceGuard;
   constructor(baseUrl, tokenProvider, fetchImpl = (...args) => fetch(...args)) {
     this.baseUrl = backendOrigin(baseUrl);
     if (typeof tokenProvider !== 'function') throw new Error('Server authentication is required.');
     this.#tokenProvider = tokenProvider;
     this.fetch = fetchImpl;
   }
+  bindWorkspace(guard) {
+    if(!guard||typeof guard.prepare!=='function'||typeof guard.assert!=='function')throw new Error('Invalid workspace admission guard.');
+    this.#workspaceGuard=guard;return this;
+  }
 
   async request(path, body, timeoutMs=15000) {
+    const ticket=body!==undefined&&this.#workspaceGuard?await this.#workspaceGuard.prepare():undefined;
     const token = validateToken(await this.#tokenProvider());
+    if(ticket){
+      if(ticket.origin!==this.baseUrl)throw new Error('The selected workspace backend changed before admission.');
+      this.#workspaceGuard.assert(ticket);
+      if(path==='/v1/runs'||path==='/v1/graph-runs')body={...body,...ticket.fields};
+    }
     const response = await this.fetch(this.baseUrl + path, {
       method: body === undefined ? 'GET' : 'POST',
       headers: { Authorization: `Bearer ${token}`, ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
@@ -39,6 +50,7 @@ class BackendClient {
     return data;
   }
   health() { return this.request('/v1/health'); }
+  async workspace() { return validateWorkspace(await this.request('/v1/workspace')); }
   models() { return this.request('/v1/models'); }
   graphs() { return this.request('/v1/graphs'); }
   delegation() { return this.request('/v1/agent/delegation'); }
@@ -115,6 +127,14 @@ class BackendClient {
     if (decision !== 'allow' && decision !== 'deny') throw new Error('Decision must be allow or deny.');
     return this.request(`/v1/operations/${encodeURIComponent(id)}/decision`, { decision });
   }
+}
+
+function validateWorkspace(value){
+  exactFields(value,['configured','root','workspace_id','authority_id']);
+  if(typeof value.configured!=='boolean')throw new Error('Invalid backend workspace metadata.');
+  if(!value.configured){if(value.root!==null||value.workspace_id!==null||value.authority_id!==null)throw new Error('Invalid backend workspace metadata.');}
+  else if(typeof value.root!=='string'||!value.root||value.root.length>32760||/[\x00-\x1f]/.test(value.root)||typeof value.workspace_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(value.workspace_id)||typeof value.authority_id!=='string'||!/^[a-f0-9]{32}$/.test(value.authority_id))throw new Error('Invalid backend workspace identity.');
+  return value;
 }
 
 // Observation only. Events are read before owners so concurrent admission is

@@ -5,9 +5,11 @@
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <thread>
 #include <future>
+#include <tuple>
 using namespace agentflow;using Json=nlohmann::json;
 namespace {
 void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
@@ -45,6 +47,57 @@ void provenance(PersistenceService& store,const std::string& session,const std::
     const auto runs=store.runs(session).get();require(runs.size()==1&&Json::parse(runs[0].provider_context_json)==expected,"Run descriptor must project its own saved admission context");
     for(const auto& message:history){const auto record=Json::parse(message.json);require(record.at("provider_context")==expected,"Durable provenance must retain the profile version and actual selected model");require(message.json.find("runtime-openai-fixture-key")==std::string::npos&&message.json.find("runtime-claude-fixture-key")==std::string::npos&&message.json.find("credential_id")==std::string::npos&&message.json.find("endpoint")==std::string::npos,"Public provenance cannot contain credentials or destinations");}
 }
+void workspace_binding_contract(const std::filesystem::path& owned,const std::vector<std::string>& imports,const std::string& origin){
+    const auto left_root=owned/"workspace-left",right_root=owned/"workspace-right";
+    std::filesystem::create_directory(left_root);std::filesystem::create_directory(right_root);
+    for(const auto& [directory,text]:std::vector<std::pair<std::filesystem::path,std::string>>{{left_root,"Actual workspace LEFT file\n"},{right_root,"Actual workspace RIGHT file\n"}}){std::ofstream file(directory/"README.md",std::ios::binary);file<<text;require(static_cast<bool>(file),"Synthetic owned workspace must contain its real native file");}
+    auto policies=policy(origin);for(auto& entry:policies)if(entry.route.wire==ProviderWire::anthropic_messages){entry.route.endpoint=origin+"/workspace-messages";entry.provider.endpoint=entry.route.endpoint;}
+    const auto left_database=(owned/"workspace-left.sqlite").string(),right_database=(owned/"workspace-right.sqlite").string();Json previous_left;
+    const httplib::Headers auth{{"Authorization","Bearer synthetic-profile-runtime-server-access-token"}};
+    const auto metadata=[&](httplib::Client& client){const auto result=client.Get("/v1/workspace",auth);require(result&&result->status==200,"Configured owner must expose authenticated effective workspace metadata");const auto value=Json::parse(result->body);require(value.size()==4&&value.contains("configured")&&value.contains("root")&&value.contains("workspace_id")&&value.contains("authority_id")&&value["configured"]==true&&value["root"].is_string()&&value["workspace_id"].is_string()&&value["authority_id"].is_string(),"Workspace DTO must contain only the four actual public fields");const auto nonce=value["authority_id"].get<std::string>();require(nonce.size()==32&&nonce.find_first_not_of("0123456789abcdef")==std::string::npos&&result->body.find("backend_identity")==std::string::npos&&result->body.find("credential_id")==std::string::npos&&result->body.find("runtime-claude-fixture-key")==std::string::npos,"Workspace authority must be an opaque public nonce without settings or keys");return value;};
+    const auto bind=[](Json request,const Json& workspace){request["expected_workspace_id"]=workspace["workspace_id"];request["expected_workspace_authority_id"]=workspace["authority_id"];return request;};
+    const auto graph_catalog=R"({"graphs":[{"id":"read-local","spec":{"nodes":[{"id":"read","type":"tool","tool":"read_file","arguments":{"path":"README.md"}}]}}]})";
+    {
+        PersistenceService left(left_database,imports),right(right_database,imports);GraphCatalogStore(left).apply(graph_catalog);GraphCatalogStore(right).apply(graph_catalog);
+        AgentSettings left_base,right_base;const auto startup_alias=owned/"workspace-startup-alias";left_base.workspace=startup_alias.string();right_base.workspace=right_root.string();
+        ProviderProfileRuntime left_runtime(left,left_base,policies,1,8),right_runtime(right,right_base,policies,1,8);
+        const auto captured=left_runtime.execution_workspace();require(captured.workspace_id!=right_runtime.execution_workspace().workspace_id,"Startup alias must initially capture the left physical root");
+        std::cout<<"fixture-workspace-alias-captured\n"<<std::flush;std::string retargeted;
+        require(static_cast<bool>(std::getline(std::cin,retargeted))&&retargeted=="fixture-workspace-alias-retargeted","Independent peer must retarget the actual owned junction");
+        WorkspaceTools changed_alias(startup_alias.string());require(changed_alias.identity()==right_runtime.execution_workspace().workspace_id&&left_runtime.execution_workspace().workspace_id==captured.workspace_id,"Actual alias retarget must not rebind the runtime root handle");
+        left_runtime.save_profile("claude","anthropic.messages","fixture-claude",key("runtime-claude-fixture-key"),0,true);right_runtime.save_profile("claude","anthropic.messages","fixture-claude",key("runtime-claude-fixture-key"),0,true);
+        Access left_access(left,left_runtime),right_access(right,right_runtime);httplib::Client left_client("127.0.0.1",left_access.port),right_client("127.0.0.1",right_access.port);left_client.set_read_timeout(5);right_client.set_read_timeout(5);
+        const auto anonymous=left_client.Get("/v1/workspace");require(anonymous&&anonymous->status==401,"Workspace path metadata requires actual owner authentication");const auto query=left_client.Get("/v1/workspace?extra=1",auth);require(query&&query->status==400,"Workspace metadata must reject arbitrary query inputs");
+        const auto lm=metadata(left_client),rm=metadata(right_client);previous_left=lm;
+        require(std::filesystem::u8path(lm["root"].get<std::string>()).lexically_normal()==std::filesystem::canonical(left_root).lexically_normal()&&std::filesystem::u8path(rm["root"].get<std::string>()).lexically_normal()==std::filesystem::canonical(right_root).lexically_normal(),"Effective roots must identify the actual opened directories rather than a requested path");
+        require(lm["workspace_id"]!=rm["workspace_id"]&&lm["authority_id"]!=rm["authority_id"],"Independent physical roots must have distinct identities and authority generations");
+        require(select(left_runtime,"claude",1).revision==2&&metadata(left_client)==lm,"Provider selection must not replace the immutable workspace generation");
+        left.create_session("workspace-rejected","Rejected wrong-root admission").get();
+        const auto run=Json{{"id","workspace-rejected-run"},{"session_id","workspace-rejected"},{"prompt","Wrong-root work must not start"},{"provider_profile_id","claude"},{"expected_provider_revision",2}};
+        auto graph=run;graph["graph_id"]="read-local";graph["graph_revision"]=1;
+        for(const auto& [path,request]:std::vector<std::pair<std::string,Json>>{{"/v1/runs",run},{"/v1/graph-runs",graph}}){
+            for(const auto& expected:std::vector<Json>{rm,Json{{"workspace_id",lm["workspace_id"]},{"authority_id",rm["authority_id"]}}}){const auto rejected=left_client.Post(path,auth,bind(request,expected).dump(),"application/json");require(rejected&&rejected->status==409,"Wrong physical root or authority must reject before any native admission");}
+            for(int mode=0;mode<4;++mode){auto malformed=bind(request,lm);if(mode==0)malformed.erase("expected_workspace_id");if(mode==1)malformed.erase("expected_workspace_authority_id");if(mode==2)malformed["expected_workspace_authority_id"]=17;if(mode==3)malformed["expected_workspace_authority_id"]="invalid";const auto rejected=left_client.Post(path,auth,malformed.dump(),"application/json");require(rejected&&rejected->status==400,"Half or malformed workspace bindings must reject before native work");}
+            auto stale_profile=bind(request,lm);stale_profile["expected_provider_revision"]=1;const auto rejected=left_client.Post(path,auth,stale_profile.dump(),"application/json");require(rejected&&rejected->status==409,"Valid workspace binding cannot bypass the same atomic provider CAS");
+        }
+        require(left.runs("workspace-rejected").get().empty()&&left.history("workspace-rejected").get().empty(),"Rejected workspace/profile guards cannot create roots, child work or prompts");rejects<NotFound>([&]{left.run("workspace-rejected-run").get();});
+        for(const auto& [name,store,runtime,client,workspace,expected_revision]:std::vector<std::tuple<std::string,PersistenceService*,ProviderProfileRuntime*,httplib::Client*,Json,std::int64_t>>{{"left",&left,&left_runtime,&left_client,lm,2},{"right",&right,&right_runtime,&right_client,rm,1}}){
+            const auto session="workspace-agent-"+name,id="workspace-agent-run-"+name;store->create_session(session,"Real bound workspace read").get();const auto request=bind(Json{{"id",id},{"session_id",session},{"prompt","Workspace binding fixture:"+name},{"provider_profile_id","claude"},{"expected_provider_revision",expected_revision}},workspace);
+            const auto admitted=client->Post("/v1/runs",auth,request.dump(),"application/json");require(admitted&&admitted->status==202,"Matching selected-root authority must admit the actual provider/tool loop");wait(*store,id,RunState::completed);
+            const auto history=store->history(session).get();require(history.size()==4&&history[2].role=="tool"&&Json::parse(Json::parse(history[2].json).at("content").get<std::string>())==Json{{"path","README.md"},{"content",name=="left"?"Actual workspace LEFT file\n":"Actual workspace RIGHT file\n"}},"Each owner must read only the actual bytes from its own opened root");require(store->operations(id).get().empty(),"Workspace read binding cannot invent an approved effect");
+            const auto graph_session="workspace-graph-"+name,graph_id="workspace-graph-run-"+name;store->create_session(graph_session,"Real bound native graph read").get();const auto graph_request=bind(Json{{"id",graph_id},{"session_id",graph_session},{"graph_id","read-local"},{"graph_revision",1},{"prompt","Read only the selected root"},{"provider_profile_id","claude"},{"expected_provider_revision",expected_revision}},workspace);
+            const auto graph_admitted=client->Post("/v1/graph-runs",auth,graph_request.dump(),"application/json");require(graph_admitted&&graph_admitted->status==202,"Graph admission must use the same bound root and provider generation");wait(*store,graph_id,RunState::completed);require(Json::parse(store->graph_run(graph_id).get().checkpoint_json).at("nodes").at(0).at("output").at("content")== (name=="left"?"Actual workspace LEFT file\n":"Actual workspace RIGHT file\n"),"Bound graph must read its own root without another provider request");
+        }
+    }
+    {
+        PersistenceService left(left_database,imports);AgentSettings settings;settings.workspace=left_root.string();ProviderProfileRuntime runtime(left,settings,policies,1,8);Access access(left,runtime);httplib::Client client("127.0.0.1",access.port);client.set_read_timeout(5);const auto fresh=metadata(client);
+        require(fresh["workspace_id"]==previous_left["workspace_id"]&&fresh["root"]==previous_left["root"]&&fresh["authority_id"]!=previous_left["authority_id"],"Restart retains physical root but mints a fresh public admission generation");
+        left.create_session("workspace-stale","Stale workspace generation").get();const auto request=Json{{"id","workspace-stale-run"},{"session_id","workspace-stale"},{"graph_id","read-local"},{"graph_revision",1},{"prompt","Read after restart"},{"provider_profile_id","claude"},{"expected_provider_revision",2}};
+        const auto stale=client.Post("/v1/graph-runs",auth,bind(request,previous_left).dump(),"application/json");require(stale&&stale->status==409&&left.runs("workspace-stale").get().empty()&&left.history("workspace-stale").get().empty(),"Stale generation must reject without restoring or changing owned data");const auto admitted=client.Post("/v1/graph-runs",auth,bind(request,fresh).dump(),"application/json");require(admitted&&admitted->status==202,"Refreshed same-root generation may admit new actual graph work");wait(left,"workspace-stale-run",RunState::completed);
+        require(left.history("workspace-agent-left").get().size()==4&&left.credentials("server").get().size()==1&&left.operations("workspace-stale-run").get().empty(),"Generation refresh must preserve prior history/encrypted credentials and require no provider replay");
+    }
+}
+
 }
 int main(int argc,char** argv){if(argc!=5)return 2;try{
     const auto database=(std::filesystem::u8path(argv[1])/"profile-runtime.sqlite").string();const std::vector<std::string> imports{argv[2],argv[3]};const std::string origin=argv[4];
@@ -180,5 +233,37 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         const auto health=client.Get("/v1/health",auth);require(health&&health->status==200&&Json::parse(health->body).at("provider_profile_admission")==true&&Json::parse(health->body).at("graph_provider_profile_admission")==true,"Backend must advertise its actual profile admission support");
         store.create_session("bound-review","Model-free bound graph fixture").get();const auto accepted=client.Post("/v1/graph-runs",auth,R"({"id":"bound-review-run","session_id":"bound-review","graph_id":"review","graph_revision":1,"prompt":"Review","provider_profile_id":"","expected_provider_revision":0})","application/json");require(accepted&&accepted->status==202,"Empty active-profile binding must preserve real model-free graph execution");wait(store,"bound-review-run",RunState::paused);const auto graph=store.graph_run("bound-review-run").get();runtime.human_input("bound-review-run","review",R"({"approved":true})","fixture-controller",graph.checkpoint_revision);wait(store,"bound-review-run",RunState::completed);
     }
-    std::cout<<"Native profile runtime passed actual OpenAI/Claude wire and key isolation, SQL failure preservation, active/paused-graph ownership, active-profile update, restart and encrypted-reference migration; peers are synthetic, no live account or UI enrollment tested\n";return 0;
+    // A saved Claude profile must prepare an explicit request budget even when
+    // the backend base omits it. Existing 64-token cases above prove overrides.
+    const auto default_database=(std::filesystem::u8path(argv[1])/"claude-default-output.sqlite").string();
+    std::vector<Message> default_history;std::string default_registry;
+    {
+        PersistenceService store(default_database,imports);AgentSettings default_base;
+        ProviderProfileRuntime runtime(store,default_base,policy(origin),1,8);
+        const auto enrolled=runtime.save_profile("claude","anthropic.messages","fixture-claude",key("runtime-claude-fixture-key"),0,true);
+        require(enrolled.revision==1&&enrolled.active=="claude"&&runtime.available(),"Default-output Claude must activate its real saved profile");
+        store.create_session("claude-default","Synthetic default output-budget profile").get();
+        Access access(store,runtime);httplib::Client client("127.0.0.1",access.port);client.set_read_timeout(5);
+        const httplib::Headers authorized{{"Authorization","Bearer synthetic-profile-runtime-server-access-token"}};
+        const auto admitted=client.Post("/v1/runs",authorized,R"({"id":"claude-default-run","session_id":"claude-default","prompt":"Claude profile default output fixture","provider_profile_id":"claude","expected_provider_revision":1})","application/json");
+        require(admitted&&admitted->status==202,"Absent base output limit must admit a real authenticated Claude profile run");
+        wait(store,"claude-default-run",RunState::completed);reply(store,"claude-default","Actual Claude fixture reply");provenance(store,"claude-default","claude",1,"fixture-claude");
+        default_history=store.history("claude-default").get();default_registry=store.information("native-provider-profiles","registry").get();
+        const auto response=Json::parse(default_history.back().json);
+        require(response.at("usage").at("input_tokens")==3&&response.at("usage").at("output_tokens")==4&&response.at("provider_items").at(0).at("type")=="anthropic_content","Default Claude request must return actual native stream metrics and its original receipt");
+        require(store.credentials("server").get().size()==1&&store.operations("claude-default-run").get().empty(),"Default output policy cannot rotate credentials or invent effects");
+    }
+    {
+        PersistenceService store(default_database,imports);AgentSettings default_base;
+        ProviderProfileRuntime runtime(store,default_base,policy(origin),1,8);
+        require(runtime.configuration().revision==1&&runtime.configuration().active=="claude"&&store.credentials("server").get().size()==1&&store.information("native-provider-profiles","registry").get()==default_registry,"Default output policy must reopen the same saved registry/key without publication");
+        const auto restored=store.history("claude-default").get();require(restored.size()==default_history.size(),"Default-output restart must preserve both conversation rows");
+        for(std::size_t index=0;index<restored.size();++index)require(restored[index].sequence==default_history[index].sequence&&restored[index].role==default_history[index].role&&restored[index].json==default_history[index].json,"Default-output restart must preserve exact history bytes");
+        store.create_session("claude-default-reopened","Synthetic reopened default output-budget profile").get();
+        runtime.submit("claude-default-reopened-run","claude-default-reopened","Claude profile reopened default output fixture");
+        wait(store,"claude-default-reopened-run",RunState::completed);reply(store,"claude-default-reopened","Actual Claude fixture reply");provenance(store,"claude-default-reopened","claude",1,"fixture-claude");
+        require(store.operations("claude-default-reopened-run").get().empty()&&store.information("native-provider-profiles","registry").get()==default_registry,"Reopened default request cannot alter the saved provider or dispatch effects");
+    }
+    workspace_binding_contract(std::filesystem::u8path(argv[1]),imports,origin);
+    std::cout<<"Native profile runtime passed actual OpenAI/Claude wire and key isolation, actual two-root workspace metadata/bound native reads/atomic CAS/restart rejection, explicit 64-token output override and saved-profile default4096 authenticated inference/reopen, SQL failure preservation, active/paused-graph ownership, active-profile update, restart and encrypted-reference migration; peers are synthetic, no live account or UI enrollment tested\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

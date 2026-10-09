@@ -11,14 +11,12 @@ function Invoke-CiCommand([string]$Name,[string]$Executable,[string[]]$Arguments
     if($LASTEXITCODE -ne 0){throw ($Name+' failed with exit code '+$LASTEXITCODE)}
 }
 $ciRevision=(& git -C $ciRuntime rev-parse HEAD).Trim()
-if($LASTEXITCODE -ne 0 -or $ciRevision -ne '4aea7d8fb24da9ba86f9d7eeb92820794f213d29'){throw 'xlang3 source does not match the pinned runtime.'}
-if((& git -C $ciRuntime status --porcelain)){throw 'Runtime checkout must be clean before applying the reviewed SQLite prerequisite.'}
+if($LASTEXITCODE -ne 0 -or $ciRevision -ne 'ad8040ffb8aba6eeabeb09053a8e222df09a4e7a'){throw 'xlang3 source does not match the pinned runtime.'}
+if((& git -C $ciRuntime status --porcelain)){throw 'Pinned runtime checkout must be clean.'}
 $ciStdlibRevision=(& git -C (Split-Path $ciStdlib -Parent) rev-parse HEAD).Trim()
 if($LASTEXITCODE -ne 0 -or $ciStdlibRevision -ne 'ebf955df7a89ed0c7968f79faec1de49f61ed7cb'){throw 'Standard-library source differs from the pinned CPython 3.14.0 source.'}
-$ciPatch=Join-Path $ciRoot 'doc/runtime-prerequisites/sqlite-xlang3.patch'
-Invoke-CiCommand 'sqlite-patch-check' 'git' @('-C',$ciRuntime,'apply','--check',$ciPatch)
-Invoke-CiCommand 'runtime-isolated-branch' 'git' @('-C',$ciRuntime,'checkout','-b','xmind-ci-sqlite')
-Invoke-CiCommand 'sqlite-patch-apply' 'git' @('-C',$ciRuntime,'apply',$ciPatch)
+# This pinned runtime includes the reviewed SQLite transaction/text prerequisite
+# and native Windows path support; applying the historical overlay again fails.
 $ciVsWhere=Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
 $ciVisualStudio=(& $ciVsWhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -format json|ConvertFrom-Json)|Select-Object -First 1
 if($LASTEXITCODE -ne 0 -or -not $ciVisualStudio){throw 'No supported MSVC x64 toolchain is installed.'}
@@ -28,7 +26,7 @@ $ciCmake=Join-Path $ciVisualStudio.installationPath 'Common7/IDE/CommonExtension
 if(-not(Test-Path -LiteralPath $ciCmake)){$ciCmake=(Get-Command cmake -ErrorAction Stop).Source}
 $ciCtest=Join-Path (Split-Path $ciCmake -Parent) 'ctest.exe'
 if(-not(Test-Path -LiteralPath $ciCtest)){throw 'Matching CTest executable is missing.'}
-$ciProvenance=@{xmind=(& git -C $ciRoot rev-parse HEAD).Trim();xlang3=$ciRevision;stdlib_source=$ciStdlibRevision;sqlite_patch_sha256=(Get-FileHash -LiteralPath $ciPatch -Algorithm SHA256).Hash;runtime='Native xlang3; no CPython execution or bridge';toolchain=$ciGenerator;toolchain_version=$ciVisualStudio.installationVersion}
+$ciProvenance=@{xmind=(& git -C $ciRoot rev-parse HEAD).Trim();xlang3=$ciRevision;stdlib_source=$ciStdlibRevision;sqlite_prerequisite='Included in pinned xlang3 source; no overlay applied';runtime='Native xlang3; no CPython execution or bridge';toolchain=$ciGenerator;toolchain_version=$ciVisualStudio.installationVersion}
 $ciProvenance|ConvertTo-Json|Set-Content (Join-Path $ciEvidence 'provenance.json')
 $ciRuntimeBuild=Join-Path $ciRuntime 'build'
 Invoke-CiCommand 'runtime-configure' $ciCmake @('-S',$ciRuntime,'-B',$ciRuntimeBuild,'-G',$ciGenerator,'-A','x64','-DXLANG3_BUILD_CPYTHON_BRIDGE=OFF','-DXLANG3_PYTHON314_EXECUTABLE:FILEPATH=OFF')

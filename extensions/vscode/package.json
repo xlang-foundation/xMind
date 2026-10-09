@@ -58,21 +58,46 @@
       {
         "command": "agentflow.openBrowser",
         "title": "xMind: Open Browser View (Copy Connection Token)"
+      },
+      {
+        "command": "agentflow.selectWorkspaceRoot",
+        "title": "xMind: Select Active Workspace Root"
       }
     ],
     "configuration": {
       "title": "xMind",
       "properties": {
+        "agentflow.backendMode": {
+          "type": "string", "enum": ["managed", "external"], "default": "managed", "scope": "machine",
+          "description": "Managed starts an independent local native backend for the opened folder. External attaches to an explicitly configured backend only when its actual workspace matches."
+        },
+        "agentflow.runtimeDirectory": {
+          "type": "string", "default": "", "scope": "machine",
+          "description": "Optional absolute directory containing a verified xMind native-runtime-manifest.json. Defaults to the extension's bundled runtime."
+        },
+        "agentflow.stdlibSource": {
+          "type": "string", "default": "", "scope": "machine",
+          "description": "Optional trusted machine-level pure standard-library directory for a development native runtime."
+        },
+        "agentflow.providerConfigPath": {
+          "type": "string", "default": "", "scope": "machine",
+          "description": "Absolute path to the single provider YAML configuration imported by Native. The extension never reads its contents or loads a project-local configuration automatically."
+        },
+        "agentflow.workspaceEdits": {
+          "type": "boolean", "default": false, "scope": "machine",
+          "description": "Enable native file-edit proposals in new managed workspace backends. Each effect still requires its native approval."
+        },
         "agentflow.backendUrl": {
           "type": "string",
           "default": "http://127.0.0.1:8765",
-          "description": "Local native xMind Server origin. Authentication is stored separately in SecretStorage."
+          "scope": "machine",
+          "description": "Explicit external native xMind Server origin used only in external mode. Its workspace must match the selected folder; authentication is stored separately in SecretStorage."
         }
       }
     }
   },
   "scripts": {
-    "vscode:prepublish": "node ../../views/browser/build.mjs browser-runtime/assets browser-runtime/server.mjs",
+    "vscode:prepublish": "node ../../views/browser/build.mjs browser-runtime/assets browser-runtime/server.mjs && node scripts/package-native-runtime.mjs --verify",
     "test": "node --test tests/*.test.js",
     "package": "vsce package --allow-missing-repository"
   },

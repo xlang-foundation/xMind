@@ -1,54 +1,91 @@
 # xMind for VS Code
 
-Use the [provider setup](../../doc/provider-setup.md) and
-[development guide](../../doc/DEVELOPMENT.md) for current configuration.
-The [validation status](../../doc/VALIDATION_STATUS.md) distinguishes hosted
-adapter tests, actual browser acceptance and rendered IDE acceptance. Test
-counts, earlier Chat-only enrollment and preview descriptions below retain
-their original checkpoint scope; they are not the current release summary.
-The latest published adapter gate passed 103 extension contracts, while installed
-VS Code delegation acceptance remains unverified.
+xMind uses a dedicated right-hand secondary sidebar, with Explorer on the left
+and the composer and model chooser at the bottom. C++ owns execution,
+permissions and SQLite persistence; the extension observes its authenticated
+command/event API. VS Code 1.140 or newer is required.
 
-Use **xMind: Open Browser View (Copy Connection Token)** to open an HTML view of the currently selected native server. Paste the copied connection token into Connect once. The browser then uses that server's model configuration and persistent history; no provider key or database is copied. Its loopback access server is owned by the extension host. Closing the extension ends that view transport while native execution remains independent. Shared-launcher host tests and real native history/catalogue contracts pass; invoking this new command in an actual IDE is still pending.
+## Opened folders and backend ownership
 
-The packaged extension includes the browser access adapter, renderer assets and vendor license notices. The sidebar's SVG connection controls, cancellable dialog and remembered draggable divider are validated in the actual browser. [Browser view details](../../doc/browser-view.md).
+Open a local folder and run **xMind: Open Workspace**. Managed mode uses the
+actual VS Code `workspaceFolders` and extension-host environment. A single
+folder is selected automatically; no `.code-workspace` file, separate server
+launch or manual server-token prompt is required. Managed local execution
+currently requires a local Windows x64 extension host. Remote and virtual
+workspace folders are rejected rather than passed to a local backend.
 
-Graph-capable backends expose a footer workflow chooser, durable human-input forms, isolated child transcripts/streams and per-response token metrics. Child effects retain exact proposal review and approvals. **60 local extension contracts** pass. The actual isolated `graph-ui` IDE preview completed a human/tool workflow against the real repository file and retained its root/transcript on reload. Actual IDE agent-node inference/metrics and graph-effect approvals remain unverified. See [workflow behavior, evidence and remaining scope](../../doc/vscode-graph-workflows.md).
+A VS Code workspace can contain several folders. The extension retains that
+folder set, but Native currently executes against **one active root**. For a
+multi-root workspace, choose it explicitly when prompted or use **xMind:
+Select Active Workspace Root**. It does not silently treat the first folder as
+the whole workspace. The sidebar displays the actual Native backend root.
 
-Choose models directly from the list in the sidebar footer. The top-right **Settings** button opens an in-sidebar dialog with a password field for the OpenAI key. **Fetch models** uses the native backend to retrieve the account's model IDs; choosing a returned ID in the footer saves the configuration and encrypts the key on the backend. A saved backend key populates the list automatically. There is no separate model picker or manual ID prompt.
+Each selected root gets an independent Native backend, private SQLite state
+outside all opened roots, a loopback port and fresh authentication held in
+SecretStorage. The host verifies the canonical root and Native workspace and
+generation identities before allowing mutations. Run and graph admission
+also carry those identities for an atomic backend check.
 
-The new key travels once from the password field to the extension host and then the authenticated backend discovery request. The field is cleared immediately; the host never echoes the key into the view, editor state, conversations or logs. Until a model is selected, an unsaved key remains only in host memory for up to five minutes and is discarded when the view closes or refreshes. Closing Settings does not cancel an already submitted discovery request. Fetching a list proves model discovery access, not inference support for every returned model; the current execution adapter uses Chat Completions. All **49 local extension contracts** pass ([output](../../doc/evidence/vscode-sidebar-settings-tests.log)). Actual development-host inspection found the top-right Settings control, footer model list with **135 backend-returned entries**, and the retained conversation transcript. No inference was submitted by these UI checks. See [provider setup](../../doc/provider-setup.md).
+Closing the view, deactivating the extension or switching folders leaves ready
+backends and their running or paused work alive. Returning to a retained
+authenticated generation reconnects observation. A changed machine-level
+launch configuration creates a separate generation without stopping the old
+owner. Only a newly spawned backend that fails startup before authenticated
+readiness is eligible for startup cleanup.
 
-Earlier adapter verification: **34 local extension contracts pass**, including exact command proposal review and separate stdout/stderr with observed exit/timing/count fields. [Complete output](../../doc/evidence/vscode-process-review.log). Process renderer checks use labeled DOM fixtures; native process configuration and populated model/server/editor execution remain pending. Uncertain commands offer no retry, malformed proposals cannot be allowed, and raw result evidence remains accessible. See [native process scope](../../doc/native-process-tools.md).
+## Machine configuration and packaging
 
-Latest adapter verification: **20** client/host/renderer contracts pass ([evidence](../../doc/evidence/vscode-preview-persistence.log)). The interactive preview now uses a normal extension development host, allowing VS Code SecretStorage/session state to persist. An actual close/reopen authenticated against the same backend with the stored token and no new bootstrap token ([evidence](../../doc/evidence/vscode-preview-reopen.json), [screenshot](../../doc/evidence/vscode-persistent-sidebar.png)). `--extensionTestsPath` is reserved for tests because that mode uses an in-memory storage database. Earlier checkpoint counts below retain their original scope.
+Configure these in VS Code's **User** settings. Executable, library and provider
+paths are read from machine/global settings, never selected-project settings.
 
-Native integration checkpoint: model-invoked edits, configured model selection and stored usage/timings passed [nineteen hosted native contracts](../../doc/evidence/native-model-edit-ci-ctest.log); all twenty adapter contracts passed there too ([CI test output](../../doc/evidence/vscode-model-edit-ci.log)). Earlier source-pending paragraphs below describe the prior checkpoint. The current local preview still uses its earlier native binary, has no model, and has not displayed a live agent edit or response.
+| Setting | Behavior |
+| --- | --- |
+| `agentflow.backendMode` | `managed` by default; `external` explicitly attaches to an existing loopback backend. |
+| `agentflow.runtimeDirectory` | Optional absolute directory containing a verified `native-runtime-manifest.json`; otherwise use the extension's bundled runtime. |
+| `agentflow.stdlibSource` | Optional trusted pure standard-library source directory for development; otherwise use bundled source. |
+| `agentflow.providerConfigPath` | The **one** explicit absolute provider YAML path imported by Native. The extension does not read its contents or search opened projects for configuration. |
+| `agentflow.workspaceEdits` | Enables native edit proposals in newly started managed backends; each effect retains its separate native approval. Default `false`. |
+| `agentflow.backendUrl` | External mode's explicitly configured loopback origin. |
 
-This thin extension host adapter connects to the native C++ xMind Server. It uses a dedicated right-hand secondary sidebar, with Explorer on the left and the composer/model selector at the bottom. It does not run an agent or access its database inside VS Code. **xMind: Open Workspace** creates/selects sessions, submits prompts, reads durable run events and requests cancellation. **xMind: Ask About Selection** adds selected code to a draft prompt for review before sending. The secondary-sidebar contribution requires the currently verified VS Code 1.140 host or newer.
+An unset provider path starts Native unconfigured so Settings can enroll a
+provider. With a configured path, every new managed backend imports that same
+file through Native; the host does not copy keys into arguments, conversations
+or workspace state. [Provider setup](../../doc/provider-setup.md).
 
-Historical provider-setup checkpoints used native VS Code input boxes. The current sidebar Settings dialog and footer list replace those controls; backend credential encryption and configuration revision checks are retained.
+External mode requires its actual backend root to match the selected folder.
+Unknown workspace metadata, a different root or a changed generation blocks
+submission. Configure that server's authentication with **xMind: Configure
+Server Token**; external mode never silently falls back to managed mode.
 
-Current adapter checkpoint: **19** client/host/renderer contracts pass ([evidence](../../doc/evidence/vscode-reconnect.log)). Refresh rechecks backend capabilities and restores conversation observation without resubmitting work. Selected configured models persist by backend origin; retired IDs fall back to the backend default. Pending file approvals offer **Compare changes**, opening exact revalidated backend snapshots in VS Code's native read-only diff editor. Opening a comparison neither grants permission nor writes a file. These adapter tests use labeled fixtures; live model-driven comparison remains unverified.
+A distribution includes verified native binaries/modules, pure standard-library
+source and license notices. For development packaging, stage an already accepted
+bundle using `scripts/package-native-runtime.mjs --stage` with explicit source
+manifest/digest and standard-library/license inputs. `npm run package` builds
+the browser assets and verifies the complete staged Native inventory before
+creating a VSIX. There is no unverified executable/PATH discovery fallback.
+Install it with **Extensions: Install from VSIX**. No Marketplace publication
+is implied. [Build and bundle instructions](../../doc/DEVELOPMENT.md).
 
-`Tools/test-vscode-review.ps1` also passed in an actual VS Code 1.140.0 host: the product adapter opened a native diff tab, supplied exact documents and rejected both typing and filesystem writes to the snapshot. [Actual-host evidence](../../doc/evidence/vscode-native-diff.json). It uses labeled proposal bytes in an isolated test profile; no live provider, approval grant or workspace file effect is claimed.
+## Coding controls and validation scope
 
-Start the backend separately with `Tools/agentflow.ps1 -Action Serve -Model MODEL_ID -ModelEndpoint CHAT_COMPLETIONS_URL -ModelTools supported -Workspace YOUR_PROJECT`. Set the server's `XMIND_AUTH_TOKEN` privately. Model credentials are configured on the backend with `XMIND_API_KEY` or a stored credential reference. Set `agentflow.backendUrl` if the port differs. The current server accepts IPv4 loopback HTTP; remote/team access remains pending.
+The footer offers backend-advertised model IDs and registered workflows.
+**Ask About Selection** adds selected code to a draft for review before sending.
+Sessions and run details come from the selected backend. History renders
+sanitized Markdown/code and actual per-response provider usage/timing; absent
+metrics remain unavailable. Human questions, context controls and approvals
+retain their native ownership and revision checks. Comparing an edit does not
+grant it, and uncertain effects offer no retry.
 
-On first connection, enter that server access token in the VS Code password prompt, or run **xMind: Configure Server Token**. The extension stores it under the canonical server origin in VS Code SecretStorage, obtains it for each host request and does not send it to the webview or save it in workspace settings. This uses the official [VS Code secret storage API](https://code.visualstudio.com/api/references/vscode-api#SecretStorage). A server without a configured model supports session inspection but disables prompt submission.
+**Open Browser View (Copy Connection Token)** opens the selected backend's
+browser access adapter and copies its connection token for Connect. Closing
+that access view does not stop Native execution. [Browser details](../../doc/browser-view.md).
 
-Build a VSIX with `npm install` and `npm run package`, then use **Extensions: Install from VSIX**. The publisher name is local packaging metadata, not a registered Marketplace identity. No Marketplace publication has occurred.
-
-Sessions are shared with CLI and persist on the backend. Closing the view disconnects observation; accepted execution continues on the server. Reopening restores the selected session and observes its latest run. Terminal/tool-turn checkpoints refresh the persisted conversation without dropping the next live response prefix. History uses sanitized Markdown, fenced code blocks with copy actions, clear message roles and collapsible tool details. Each assistant response displays provider-reported input/output/total tokens, optional cache/reasoning tokens, and recorded backend timings/model identity. Missing values remain unavailable; they are never estimated. The approval view shows exact recorded payloads and before/after text with allow/deny controls. Model-invoked writes, native per-run model selection and new persisted metrics are implemented in the pending native worktree but await build/execution verification. Live diff/approval integration, graph inspection and complete coding UI remain required.
-
-Fifteen client/host/DOM-renderer contracts passed, covering authentication, lifecycle/disposal, exact reviewed payload binding, Markdown sanitization/code copy, exact usage badges, unavailable historical metrics, checkpoint/live-prefix preservation and backend-advertised model IDs. These tests use explicitly labeled fixtures and do not populate the interactive preview. The actual Microsoft-signed portable VS Code host was opened against the compiled native backend: its real window screenshot and DOM geometry verify Explorer left, xMind secondary sidebar right and the bottom composer. The preview has actual persistent storage but no configured model, so history is empty and execution/model selection are disabled. No live inference or coding completion is claimed. Evidence: [renderer/host tests](../../doc/evidence/vscode-sidebar-renderer.log), [actual UI capture](../../doc/evidence/vscode-right-sidebar.png), and earlier [native approval integration](../../doc/evidence/native-approval-api-ctest.log).
-
-`Tools/start-ui.ps1` starts an isolated real development host with private token bootstrap into VS Code SecretStorage, a persistent preview database and its own VS Code profile. It requires an installed/selected Code executable; this machine's official portable ZIP resides under ignored `.agentflow/ui-host/vscode`. `Tools/reopen-ui.ps1` reuses the active preview origin, and `Tools/inspect-ui.mjs` captures this task's own development host through its loopback debug port. To enable actual execution, supply `-Model MODEL_ID -ModelEndpoint CHAT_COMPLETIONS_URL`, with a provider key privately set in `OPENAI_API_KEY` (or select another variable with `-ProviderKeyEnvironment`). The launcher passes the key only to the native backend, which encrypts it in its xlang3-backed credential repository. An existing backend credential can instead be selected with `-CredentialId`. Add `-ModelTools supported -Workspace YOUR_PROJECT` for native workspace tools; `-ApprovedEdits` enables separately approved file writes. Stop the existing preview backend before launching against its database. No synthetic conversations are inserted. Model selector choices come from `/v1/models`; they never grant arbitrary endpoints or credentials. Older native servers without that endpoint continue using their configured default, with unknown identity retained as unknown. Provider setup now uses backend model discovery and private key input; successful live provider acceptance is tracked in the scope above.
-
-## Approval host client
-
-**Run details** lists the selected conversation's backend runs. Choosing an older run restores its events and recorded operations while retaining the full conversation transcript. Selection persists by server origin and conversation; the host rejects run IDs outside that conversation. Changing runs invalidates pending inspection/approval responses. Observation continues while any conversation run remains active, and both the renderer and host block another submission until that active work finishes. This uses the native run-list/status APIs; it creates no lifecycle transitions or fabricated history. [Twenty-seven adapter contracts](../../doc/evidence/vscode-run-history.log) verify history selection, persistence, older uncertain-operation access and active-run handling with labeled fixtures.
-
-Uncertain file edits offer **Inspect actual file**. The host calls the backend's read-only inspection endpoint using the recorded operation ID, validates the selected run/workspace/exact proposal and displays observed hash, size, file identity comparison and timestamp. Matching before/after bytes do not establish attribution or release quarantine; the UI retains the uncertain state and never offers allow/deny for that operation. A model-free recovery server can be started with `--inspection-workspace DIR`. Host/DOM fixtures cover escaped observations, unreviewed/changed records and selection during a pending response; the native CI contract verifies the client against the production server. Native inspection integration is pending its hosted run; it is not yet in the currently running preview bundle.
-
-`BackendClient.operations(runId)`, `operation(operationId)` and `decide(operationId, 'allow' | 'deny')` use the native local approval API with the same host-only authentication. Exact proposal arguments are retained as `arguments_json`, not reserialized into a grant. The native approval HTTP contract verifies these methods against actual approved file effects, without a model. Local decisions are attributed by the server to its authenticated `local-owner`; team scopes remain pending. Before sending a view decision, the host re-fetches the displayed proposal and checks its identity, selected run, workspace, tool, exact argument bytes, expiry and pending state. View messages cannot supply an actor or replacement arguments. Closing/changing the view during this revalidation prevents a late grant. The UI displays payload/file data using text nodes, never evaluated content. Model-invoked write tools remain pending. See [native approval API](../../doc/native-server.md).
+The workspace-binding source passed **171 extension and 32 browser Node
+contracts**, with no failures or skips. These use synthetic host, process,
+filesystem, HTTP and DOM fixtures; they do not establish installation or an
+actual TestProj managed-backend/IDE result. That acceptance is pending the
+source-matched Native gate, packaging and real VS Code check. Earlier actual
+preview and editor evidence belongs to its recorded runtime and remains
+separate. [Validation status](../../doc/VALIDATION_STATUS.md),
+[graph/editor history](../../doc/vscode-graph-workflows.md),
+[actual diff-host evidence](../../doc/evidence/vscode-native-diff.json).

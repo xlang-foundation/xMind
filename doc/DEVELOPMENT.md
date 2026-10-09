@@ -68,13 +68,55 @@ and [interactive CLI](native-interactive-cli.md).
 ## Clients and verification
 
 Use the [VS Code guide](../extensions/vscode/README.md) or the
-[browser guide](browser-view.md). `Tools/start-ui.ps1` launches the local
-development host; client views observe backend state and do not own execution.
+[browser guide](browser-view.md). Managed VS Code mode uses the actual opened
+folder automatically and starts a separate local Native owner for it. No
+`.code-workspace` file or manual backend token is needed for a single folder.
+A multi-root workspace retains its folder set but currently needs one explicitly
+selected active Native root. Ready owners and accepted work survive view closure,
+extension deactivation and folder changes; the sidebar shows the verified
+effective root. Actual installation and TestProj managed IDE acceptance remain
+pending; Node adapter tests alone do not establish them.
+
+Configure `agentflow.runtimeDirectory`, optional `agentflow.stdlibSource` and
+the one `agentflow.providerConfigPath` in machine/global User settings. Native
+alone imports provider YAML; the extension neither reads keys nor auto-loads
+selected-project configuration. An explicit external connection uses
+`agentflow.backendMode=external` and `agentflow.backendUrl`, with its token in
+SecretStorage. A wrong root or unavailable workspace identity blocks submission.
+`Tools/start-ui.ps1` and its external-origin bootstrap retain their separate
+development-preview scope; they are not proof of managed folder binding.
+
+The VSIX's `native-runtime` directory must contain a verified manifest,
+`xmind_server.exe`, `xmind_schema_worker.exe`, `xmind_cli.exe`, `xmind_admin.exe`,
+`xlang3_runtime.dll`, `xlang3.exe`, `modules/xlang_json.x3pkg.dll` and
+`modules/xlang_sqlite3.x3pkg.dll`. Stage only an already accepted paired Native
+and SDK build. The source manifest supplies their exact hashes and native/license
+inventory, Windows x64 platform, bridge-disabled status and revision bindings.
+Add pure standard-library source and its license separately:
+
+```powershell
+node extensions/vscode/scripts/package-native-runtime.mjs --stage `
+  --bundle D:\path\to\accepted-bundle `
+  --bundle-manifest D:\path\to\accepted-source-manifest.json `
+  --bundle-manifest-sha ACCEPTED_MANIFEST_SHA256 `
+  --stdlib-source C:\Python\Python314\Lib `
+  --stdlib-license C:\Python\Python314\LICENSE.txt `
+  --out D:\path\to\xMind\extensions\vscode\native-runtime
+```
+
+The output must be fresh. This file-only packager verifies/copies accepted
+binaries, pure `.py` sources and notices; it never runs Native or CPython.
+Required source includes `os.py`, `json/__init__.py`, `encodings/__init__.py` and
+`importlib/__init__.py`. Accepted bundle notices belong under `licenses/`, and
+the explicit standard-library notice becomes `licenses/Python-STDLIB-LICENSE`.
+`npm run package` verifies the staged runtime during prepublish after building
+browser assets. It fails if the bundle is absent, incomplete or changed.
 
 The latest published native acceptance and its limitations are recorded in
 [validation status](VALIDATION_STATUS.md), [Responses continuation](native-responses-reasoning.md)
 and the [milestone ledger](milestones.md). Test counts belong to exact source
-revisions. Uncommitted dynamic-plan work is not a validated release.
+revisions. A build or adapter gate does not establish installed-preview or live
+provider acceptance.
 
 The obsolete Python/FastAPI bootstrap, package lock, probe and prototype HTTP
 MCP peer have been removed. Pure-Python reuse under xlang3 remains allowed;

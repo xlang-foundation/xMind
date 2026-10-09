@@ -42,6 +42,9 @@ public:
     // view's path spelling. Shared servers must namespace it by trusted worker
     // identity. Changed root path requires reopening the runtime.
     std::string identity() const;
+    // Canonical public spelling of the same opened root, never the caller's
+    // startup spelling. Revalidates its handle identity before observation.
+    std::string root_path() const;
     // Backend configuration is outside model-visible workspace authority.
     // Component matching includes Windows case and trailing-dot/space aliases.
     static bool backend_private_component(std::string_view name);

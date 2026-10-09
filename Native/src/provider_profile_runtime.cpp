@@ -4,9 +4,13 @@
 #include <algorithm>
 #include <mutex>
 #include <set>
+#include <random>
+#include <sstream>
+#include <iomanip>
 #include "nlohmann/json.hpp"
 namespace agentflow {
 namespace {
+std::string workspace_nonce(){std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)value<<std::setw(8)<<random();return value.str();}
 ProviderCatalogueFormat catalogue_format(ProviderWire wire){
     switch(wire){
         case ProviderWire::chat_completions:
@@ -80,9 +84,11 @@ struct ProviderProfileRuntime::Impl {
     PersistenceService& store;AgentSettings base;std::vector<ProviderProfileExecutionPolicy> policy;
     std::size_t workers,capacity;ProviderProfiles profiles;ProviderProfileSnapshot state;
     std::unique_ptr<ExecutionPlatform> service;mutable std::mutex mutex;
+    std::unique_ptr<WorkspaceTools> workspace_binding;std::string workspace_authority;
     Impl(PersistenceService& persistence,AgentSettings settings,std::vector<ProviderProfileExecutionPolicy> allowed,std::size_t count,std::size_t limit)
         :store(persistence),base(std::move(settings)),policy(std::move(allowed)),workers(count),capacity(limit),profiles(store,routes(policy)){
         if(count<1||count>16||limit<1||limit>4096)throw std::invalid_argument("Invalid provider execution capacity");
+        if(base.workspace){workspace_binding=std::make_unique<WorkspaceTools>(*base.workspace);base.workspace=workspace_binding->root_path();workspace_authority=workspace_nonce();}
         state=profiles.snapshot();
         try{
             for(const auto& profile:state.profiles){
@@ -97,12 +103,20 @@ struct ProviderProfileRuntime::Impl {
             try{service=prepare(*selected);}catch(const std::invalid_argument&){throw DatabaseError("Stored active provider profile is incompatible with native execution policy");}
         }else{
             auto unconfigured=base;unconfigured.provider.model.clear();unconfigured.selectable_models.clear();unconfigured.credential.reset();unconfigured.provider_identity.reset();
-            service=std::make_unique<ExecutionPlatform>(store,std::move(unconfigured),workers,capacity);
+            service=platform(std::move(unconfigured));
         }
     }
     const ProviderProfileExecutionPolicy& route(const std::string& id)const{
         const auto found=std::find_if(policy.begin(),policy.end(),[&](const auto& value){return value.route.id==id;});
         if(found==policy.end())throw std::invalid_argument("Provider execution route is not allowed");return *found;
+    }
+    std::unique_ptr<ExecutionPlatform> platform(AgentSettings settings){
+        auto candidate=std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
+        const auto actual=candidate->execution_workspace();
+        if(workspace_binding){
+            if(!actual.configured||actual.workspace_id!=workspace_binding->identity())throw ToolAccessDenied("Prepared provider workspace differs from captured root");
+        }else if(actual.configured)throw ToolAccessDenied("Prepared provider has an uncaptured workspace");
+        return candidate;
     }
     std::unique_ptr<ExecutionPlatform> prepare(const SavedProviderProfile& profile){
         const auto& allowed=route(profile.route_id);validate_execution(allowed,base,profile.model,true);
@@ -110,9 +124,10 @@ struct ProviderProfileRuntime::Impl {
         validate_public_identity(profile.id,profile.model,owned);
         if(profile.model.empty()){
             auto settings=base;settings.provider.model.clear();settings.selectable_models.clear();settings.credential.reset();settings.provider_identity.reset();
-            return std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
+            return platform(std::move(settings));
         }
         auto settings=base;settings.provider=allowed.provider;settings.provider.model=profile.model;
+        if(settings.provider.wire==ProviderWire::anthropic_messages&&!settings.max_output_tokens)settings.max_output_tokens=4096;
         settings.context=allowed.context;
         settings.provider.tools=model_tools(allowed,profile.model);
         settings.selectable_models.clear();settings.credential=CredentialReference{allowed.route.credential_scope,profile.credential_id,allowed.route.credential_purpose};
@@ -128,7 +143,10 @@ struct ProviderProfileRuntime::Impl {
             if(!settings.max_output_tokens&&found!=settings.context->model_capacities.end()&&found->second.verified&&found->second.output_tokens)
                 settings.max_output_tokens=*found->second.output_tokens;
         }
-        return std::make_unique<ExecutionPlatform>(store,std::move(settings),workers,capacity);
+        return platform(std::move(settings));
+    }
+    ExecutionWorkspaceMetadata workspace_metadata()const{
+        if(!workspace_binding)return {};return {true,workspace_binding->root_path(),workspace_binding->identity(),workspace_authority};
     }
     void mutable_state(std::int64_t expected)const{
         if(expected<0||expected!=state.revision)throw Conflict("Provider profile runtime revision changed");
@@ -304,6 +322,15 @@ Run ProviderProfileRuntime::submit_model(std::string id,std::string session,std:
 Run ProviderProfileRuntime::submit_profile(std::string id,std::string session,std::string prompt,std::string model,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));}
 Run ProviderProfileRuntime::submit_graph_profile(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
 Run ProviderProfileRuntime::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){std::lock_guard lock(impl_->mutex);return impl_->service->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
+ExecutionWorkspaceMetadata ProviderProfileRuntime::execution_workspace()const{std::lock_guard lock(impl_->mutex);return impl_->workspace_metadata();}
+Run ProviderProfileRuntime::submit_workspace(std::string id,std::string session,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile){
+    std::lock_guard lock(impl_->mutex);validate_workspace_admission(expected,impl_->workspace_metadata());if(profile)impl_->admission(*profile);
+    return impl_->service->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));
+}
+Run ProviderProfileRuntime::submit_graph_workspace(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile){
+    std::lock_guard lock(impl_->mutex);validate_workspace_admission(expected,impl_->workspace_metadata());if(profile)impl_->admission(*profile);
+    return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));
+}
 std::vector<std::string> ProviderProfileRuntime::models()const{std::lock_guard lock(impl_->mutex);return impl_->service->models();}
 void ProviderProfileRuntime::cancel(const std::string& id){std::lock_guard lock(impl_->mutex);impl_->service->cancel(id);}
 bool ProviderProfileRuntime::healthy()const{std::lock_guard lock(impl_->mutex);return impl_->service->healthy();}

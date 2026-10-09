@@ -1,7 +1,12 @@
 #include "agentflow/execution_platform.hpp"
 #include <algorithm>
+#include <random>
+#include <sstream>
+#include <iomanip>
 namespace agentflow {
+namespace {std::string workspace_nonce(){std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)value<<std::setw(8)<<random();return value.str();}}
 ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings settings,std::size_t workers,std::size_t capacity):store_(store) {
+    if(settings.workspace){workspace_binding_=std::make_unique<WorkspaceTools>(*settings.workspace);settings.workspace=workspace_binding_->root_path();workspace_authority_=workspace_nonce();}
     if(!settings.provider.model.empty())agents_=std::make_unique<AgentService>(store,settings,workers,capacity);
     graphs_=std::make_unique<GraphService>(store,std::move(settings),std::min<std::size_t>(workers,8),capacity);
 }
@@ -13,6 +18,17 @@ Run ExecutionPlatform::submit_model(std::string id,std::string session,std::stri
     return agents_->submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));
 }
 Run ExecutionPlatform::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){if(const auto replay=store_.incoming_message(message,context,identity,content).get())return *replay;if(!agents_||!healthy())throw RunUnavailable("Incoming agent execution is unavailable");return agents_->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
+ExecutionWorkspaceMetadata ExecutionPlatform::execution_workspace()const{
+    if(!workspace_binding_)return {};return {true,workspace_binding_->root_path(),workspace_binding_->identity(),workspace_authority_};
+}
+Run ExecutionPlatform::submit_workspace(std::string id,std::string session,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile){
+    validate_workspace_admission(expected,execution_workspace());if(profile)throw RunUnavailable("Provider profile admission is unavailable");
+    return submit_model(std::move(id),std::move(session),std::move(prompt),std::move(model));
+}
+Run ExecutionPlatform::submit_graph_workspace(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile){
+    validate_workspace_admission(expected,execution_workspace());if(profile)throw RunUnavailable("Graph provider profile admission is unavailable");
+    return submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));
+}
 std::vector<std::string> ExecutionPlatform::models() const{return agents_?agents_->models():std::vector<std::string>{};}
 bool ExecutionPlatform::supports_delegation()const{return agents_&&healthy()&&agents_->supports_delegation();}
 bool ExecutionPlatform::supports_dynamic_planning()const{return agents_&&healthy()&&agents_->supports_dynamic_planning();}

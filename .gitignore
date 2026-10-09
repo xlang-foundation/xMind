@@ -8,3 +8,4 @@ build/
 node_modules/
 *.vsix
 /extensions/vscode/browser-runtime/
+/extensions/vscode/native-runtime/

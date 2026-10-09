@@ -16,7 +16,7 @@ function harness(options={}) {
   let pendingHistory;
   let pendingOperation;
   let operations=options.operations||[];
-  let sidebarProvider;
+  let sidebarProvider,folderListener;const backendOwners=[];
   const renameRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const fetchImpl=async (url,requestOptions)=>{
@@ -93,7 +93,7 @@ function harness(options={}) {
   const vscode={
     ExtensionMode:{Development:2},ConfigurationTarget:{Global:1},
     Uri:{joinPath:(root,...parts)=>[root,...parts].join('/'),parse:value=>({toString:()=>value})},
-    workspace:{isTrusted:true,getConfiguration:()=>({get:()=> 'http://localhost:8765',update:async()=>{}}),registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
+    workspace:{isTrusted:true,workspaceFolders:[{name:'TestProj',uri:{fsPath:'D:\\TestProj',toString:()=> 'file:///D:/TestProj'}}],onDidChangeWorkspaceFolders:callback=>{folderListener=callback;return {dispose(){}};},getConfiguration:()=>({get:()=> 'http://localhost:8765',update:async()=>{}}),registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
       executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(['workbench.view.extension.xmind','workbench.view.explorer'].includes(name))return;assert.equal(name,'xmind.workspace.focus');sidebarProvider.resolveWebviewView(makeView());}},
@@ -109,14 +109,27 @@ function harness(options={}) {
   const context={extensionMode:options.bootstrap?2:1,extensionUri:'https://fixture-extension',subscriptions:[],secrets:{get:async key=>secrets.get(key),store:async (key,value)=>{secrets.set(key,value);}},
     workspaceState:{get:key=>state.get(key),update:async (key,value)=>{state.set(key,value);}}};
   state.set('agentflow.session',{url:'http://127.0.0.1:8765',id:'saved'});
+  // Native ownership is a separate mock boundary here. Its actual host lifecycle
+  // and authenticated HTTP admission races are exercised in workspace-backend.
+  class TestWorkspaceBackend{
+    constructor(){this.epoch=0;this.active=undefined;}
+    invalidate(){this.epoch++;this.active=undefined;}
+    dispose(){this.invalidate();}
+    async selectedFolder(){return {};}
+    async connect(){const root=vscode.workspace.workspaceFolders[0].uri.fsPath;let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,roots:vscode.workspace.workspaceFolders.map(value=>({fsPath:value.uri.fsPath})),epoch:this.epoch};return this.active;}
+    async attach(){return this.connect();}
+    async prepare(){if(!this.active)throw new Error('Workspace disconnected');return {origin:this.active.origin,epoch:this.epoch,fields:{expected_workspace_id:this.active.metadata.workspace_id,expected_workspace_authority_id:this.active.metadata.authority_id}};}
+    assert(ticket){if(!this.active||ticket.epoch!==this.epoch||ticket.origin!==this.active.origin)throw new Error('Workspace changed');}
+  }
   let intervalID=0;
   const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext}:name==='./webview'?require('../webview'):require(name),
     setTimeout:callback=>{bootstrapTasks.push(callback);return 1;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
-  const originalRequire=sandbox.require;sandbox.require=name=>name==='./browser-view'?require('../browser-view'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
+  const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./browser-view'?require('../browser-view'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
   return {token,commands,secrets,requests,views,intervals,state,errors,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+    backendOwners,changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
     pauseOperation(promise) {pendingOperation=promise;},
@@ -131,6 +144,27 @@ test('VS Code retains saved-profile discovery after Settings close and conversat
   const metadataReads=h.requests.filter(path=>path==='/v1/provider/profiles').length;view.receive({type:'discardProviderKey'});await until(()=>h.requests.filter(path=>path==='/v1/provider/profiles').length>metadataReads);await new Promise(resolve=>setImmediate(resolve));assert.equal(view.posted.findLast(m=>m.type==='model-list').models.length,135);assert.equal(writes.length,0);
   view.receive({type:'select',id:'saved'});await until(()=>view.posted.findLast(m=>m.type==='status')?.text==='completed');await new Promise(resolve=>setImmediate(resolve));view.receive({type:'model',id:'discovered-134'});await until(()=>writes.length===1);assert.equal(writes[0].model,'discovered-134');assert.equal(writes[0].expected_revision,4);assert.equal(Object.hasOwn(writes[0],'api_key'),false);await until(()=>view.posted.findLast(m=>m.type==='model-list')?.model==='discovered-134');assert.equal(view.posted.findLast(m=>m.type==='model-list').models.length,135);
   registry={...registry,revision:6,profiles:[{...registry.profiles[0],revision:3,model:'externally-selected'}]};options.catalogue={models:[{id:'externally-selected'}],default_model:'externally-selected'};view.receive({type:'model',id:'discovered-133'});await until(()=>view.posted.some(m=>m.type==='error'&&/settings changed/.test(m.text)));assert.equal(writes.length,1);assert.equal(view.posted.findLast(m=>m.type==='capabilities').model,'externally-selected');assert.ok(!h.requests.includes('/v1/runs'));
+ }finally{view.close();}
+});
+test('opened folder changes rebind the existing sidebar to its own backend and clear the old draft/observations without cancelling execution',async()=>{
+ const h=harness({running:true});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+ try{
+  await until(()=>view.posted.some(message=>message.type==='workspace'&&message.root==='D:\\TestProj'));const priorReceiver=view.receive;
+  h.changeWorkspace('D:\\OtherProject');await until(()=>h.backendOwners.length===2&&view.receive!==priorReceiver);view.receive({type:'ready'});
+  await until(()=>view.posted.some(message=>message.type==='workspace'&&message.root==='D:\\OtherProject'));
+  assert.equal(h.backendOwners[0].metadata.root,'D:\\TestProj');assert.equal(h.backendOwners[1].origin,'http://127.0.0.1:8766');
+  assert.ok(view.posted.some(message=>message.type==='workspace-clear'));assert.ok(!h.requests.some(value=>value.endsWith('/cancel')));
+  assert.equal(h.inputPrompts.length,0,'Single-folder managed startup never asks for a server token');
+  assert.equal(h.views.length,1,'The right sidebar stays the same view');assert.ok(!JSON.stringify(view.posted).includes(h.token));
+ }finally{view.close();}
+});
+test('an accepted old-folder run survives a delayed reply without becoming the new folder observation',async()=>{
+ let finish;const admission=new Promise(resolve=>{finish=resolve;});const submissions=[];
+ const h=harness({onAdmission:body=>{submissions.push(body);return admission;}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+ try{await until(()=>view.posted.some(message=>message.type==='status'&&message.text==='completed'));view.receive({type:'send',prompt:'Old folder task'});await until(()=>submissions.length===1);const priorReceiver=view.receive;
+  h.changeWorkspace('D:\\OtherProject');finish({ok:true,json:async()=>({id:'accepted-old-folder',session_id:'saved',state:'running'})});
+  await until(()=>h.backendOwners.length===2&&view.receive!==priorReceiver);view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='workspace'&&message.root==='D:\\OtherProject'));
+  assert.equal(submissions.length,1);assert.equal(submissions[0].expected_workspace_id,'windows-local-file-v1:1:0');assert.ok(!h.requests.some(route=>route.includes('accepted-old-folder')));assert.ok(!h.requests.some(route=>route.endsWith('/cancel')));
  }finally{view.close();}
 });
 async function until(predicate) {
@@ -287,7 +321,7 @@ test('graph child approval retains exact current operation review and uses the s
 });
 test('graph catalog allows model-free tool graphs and rejects arbitrary view plans or graph IDs',async()=>{
  const options=graphFixture();options.runs=[];options.health={agent_execution:false,status:'ok'};const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graphs'));
- view.receive({type:'graph-select',id:'forged'});await until(()=>view.posted.some(m=>m.type==='error'));assert.equal(h.graphRequests.length,0);view.receive({type:'graph-select',id:'fixture.flow'});view.receive({type:'send',prompt:'Actual requested task',spec:{nodes:[]},graph_revision:99});await until(()=>h.graphRequests.length===1);assert.deepEqual(h.graphRequests,[{session_id:'saved',graph_id:'fixture.flow',graph_revision:2,prompt:'Actual requested task'}]);view.close();
+ view.receive({type:'graph-select',id:'forged'});await until(()=>view.posted.some(m=>m.type==='error'));assert.equal(h.graphRequests.length,0);view.receive({type:'graph-select',id:'fixture.flow'});view.receive({type:'send',prompt:'Actual requested task',spec:{nodes:[]},graph_revision:99});await until(()=>h.graphRequests.length===1);assert.deepEqual(h.graphRequests,[{session_id:'saved',graph_id:'fixture.flow',graph_revision:2,prompt:'Actual requested task',expected_workspace_id:'windows-local-file-v1:1:0',expected_workspace_authority_id:'b'.repeat(32)}]);view.close();
 });
 test('workflow choice persists for the same backend and restores only an advertised executable graph',async()=>{
  const options=graphFixture();options.runs=[];const h=harness(options);await h.commands.get('agentflow.open')();let view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graphs'));view.receive({type:'graph-select',id:'fixture.flow'});await until(()=>h.state.get('xmind.workflow')?.id==='fixture.flow');assert.equal(h.state.get('xmind.workflow').url,'http://127.0.0.1:8765');view.close();await h.commands.get('agentflow.open')();view=h.views[1];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='graphs'));assert.equal(view.posted.find(m=>m.type==='graphs').selected,'fixture.flow');view.close();

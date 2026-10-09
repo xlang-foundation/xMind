@@ -47,6 +47,11 @@ public:
     Run submit_model(std::string id,std::string session,std::string prompt,std::string model) override;
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
     std::vector<std::string> models() const override;
+    ExecutionWorkspaceMetadata execution_workspace()const override;
+    Run submit_workspace(std::string id,std::string session,std::string prompt,std::string model,
+        WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile={})override;
+    Run submit_graph_workspace(std::string id,std::string session,std::string graph,std::int64_t revision,
+        std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile={})override;
     bool supports_profile_admission()const override{return true;}
     bool supports_delegation()const override;
     bool supports_dynamic_planning()const override;

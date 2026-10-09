@@ -17,17 +17,18 @@ pinned; workflow permissions are read-only.
 
 The current inputs are:
 
-- xlang3 source `4aea7d8fb24da9ba86f9d7eeb92820794f213d29`, checked clean.
-- Reviewed SQLite patch `runtime-prerequisites/sqlite-xlang3.patch`, checked
-  before application on an isolated branch.
+- xlang3 source `ad8040ffb8aba6eeabeb09053a8e222df09a4e7a`, checked clean.
+  It includes the reviewed SQLite transaction/text changes and native Windows
+  long-path support. The historical SQLite patch is not applied again.
 - Standard-library source `ebf955df7a89ed0c7968f79faec1de49f61ed7cb`
   (CPython 3.14.0 `Lib/` sources only).
 
-The job builds native xlang3 with `XLANG3_BUILD_CPYTHON_BRIDGE=OFF`, including
+The job builds native xlang3 with `XLANG3_BUILD_CPYTHON_BRIDGE=OFF` and
+`XLANG3_PYTHON314_EXECUTABLE:FILEPATH=OFF`, including
 its JSON and SQLite modules. It never executes CPython or installs CPython
 native extension binaries.
 
-`Tools/ci-native.ps1` records source/patch/toolchain provenance, discovers the
+`Tools/ci-native.ps1` records source/toolchain provenance, discovers the
 runner's supported Visual Studio installation, verifies vendored schema sources,
 installs pinned Node SDK fixtures with `--ignore-scripts`, builds all native
 targets and runs CTest. The registered tests must exactly match its expected

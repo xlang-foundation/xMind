@@ -20,6 +20,8 @@ public:
     virtual ~GraphExecution()=default;
     virtual std::vector<GraphExecutionMetadata> graphs() const=0;
     virtual bool supports_graph_profile_admission()const{return false;}
+    virtual Run submit_graph_workspace(std::string,std::string,std::string,std::int64_t,std::string,std::string,
+        WorkspaceAdmission,std::optional<ProviderProfileAdmission> = {}){throw RunUnavailable("Graph workspace-bound admission is unavailable");}
     virtual Run submit_graph_profile(std::string,std::string,std::string,std::int64_t,std::string,std::string,ProviderProfileAdmission){throw RunUnavailable("Graph provider profile admission is unavailable");}
     virtual Run submit_graph(std::string id,std::string session,std::string graph,
         std::int64_t revision,std::string prompt,std::string model={})=0;

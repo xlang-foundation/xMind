@@ -76,6 +76,16 @@ std::optional<ProviderProfileAdmission> profile_admission(const Json& value){
     if(id.size()>256||id.starts_with("sk-")||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)throw std::invalid_argument("Invalid provider profile admission identity");
     return ProviderProfileAdmission{id,value["expected_provider_revision"].get<std::int64_t>()};
 }
+std::optional<WorkspaceAdmission> workspace_admission(const Json& value){
+    const bool named=value.contains("expected_workspace_id"),versioned=value.contains("expected_workspace_authority_id");
+    if(named!=versioned)throw std::invalid_argument("Workspace identity and authority must be supplied together");
+    if(!named)return {};
+    const auto id=string_field(value,"expected_workspace_id",256),authority=string_field(value,"expected_workspace_authority_id",32);
+    if(id.empty()||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos||
+       authority.size()!=32||authority.find_first_not_of("0123456789abcdef")!=std::string::npos)
+        throw std::invalid_argument("Invalid workspace admission identity");
+    return WorkspaceAdmission{id,authority};
+}
 std::string identifier(const std::string& value) {
     if(value.empty() || value.size()>128) throw std::invalid_argument("Invalid ID");
     for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
@@ -277,7 +287,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|models|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace|models|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && std::regex_match(request.path,view_route) && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))){
@@ -381,6 +391,12 @@ struct HttpServer::Impl {
             const auto models=executor?executor->models():std::vector<std::string>{};
             reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"agent_execution",executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
         }));
+        server.Get("/v1/workspace",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Workspace metadata does not accept query parameters");
+            const auto actual=executor?executor->execution_workspace():ExecutionWorkspaceMetadata{};
+            reply(response,{{"configured",actual.configured},{"root",actual.configured?Json(actual.root):Json(nullptr)},
+                {"workspace_id",actual.configured?Json(actual.workspace_id):Json(nullptr)},{"authority_id",actual.configured?Json(actual.authority_id):Json(nullptr)}});
+        }));
         server.Get("/v1/agent/planning",guarded([this](const Request& request,Response& response){
             if(!request.params.empty())throw std::invalid_argument("Planning metadata does not accept query parameters");
             const bool enabled=executor&&executor->supports_dynamic_planning();
@@ -453,13 +469,13 @@ struct HttpServer::Impl {
                 reply(response,{{"graphs",entries}});
             }));
             server.Post("/v1/graph-runs",guarded([graphs](const Request& request,Response& response){
-                if(!request.params.empty())throw std::invalid_argument("Graph admission does not accept query parameters");
-                const auto value=body(request,{"id","session_id","graph_id","graph_revision","prompt","model_id","provider_profile_id","expected_provider_revision"});
+                if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Graph admission does not accept query parameters");
+                const auto value=body(request,{"id","session_id","graph_id","graph_revision","prompt","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id"});
                 const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
                 const auto model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};
-                const auto binding=profile_admission(value);
+                const auto binding=profile_admission(value);const auto workspace=workspace_admission(value);
                 const auto session=identifier(string_field(value,"session_id",128)),graph=string_field(value,"graph_id",64),prompt=string_field(value,"prompt",1024*1024);const auto revision=graph_revision(value,"graph_revision");
-                reply(response,encode(binding?graphs->submit_graph_profile(id,session,graph,revision,prompt,model,*binding):graphs->submit_graph(id,session,graph,revision,prompt,model)),202);
+                reply(response,encode(workspace?graphs->submit_graph_workspace(id,session,graph,revision,prompt,model,*workspace,binding):binding?graphs->submit_graph_profile(id,session,graph,revision,prompt,model,*binding):graphs->submit_graph(id,session,graph,revision,prompt,model)),202);
             }));
             server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+))",guarded([this,graphs](const Request& request,Response& response){
                 if(!request.params.empty())throw std::invalid_argument("Graph detail does not accept query parameters");
@@ -658,11 +674,12 @@ struct HttpServer::Impl {
                 reply(response,encode(executor->resume_plan(root,"local-owner",revision,sequence)),202);
             }));
             server.Post("/v1/runs",guarded([this](const Request& request,Response& response) {
-                const auto value=body(request,{"id","session_id","prompt","model_id","provider_profile_id","expected_provider_revision"});
+                if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Run admission does not accept query parameters");
+                const auto value=body(request,{"id","session_id","prompt","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id"});
                 const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
                 const auto model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};
-                const auto binding=profile_admission(value);const auto session=identifier(string_field(value,"session_id",128)),prompt=string_field(value,"prompt",1024*1024);
-                reply(response,encode(binding?executor->submit_profile(id,session,prompt,model,*binding):executor->submit_model(id,session,prompt,model)),202);
+                const auto binding=profile_admission(value);const auto workspace=workspace_admission(value);const auto session=identifier(string_field(value,"session_id",128)),prompt=string_field(value,"prompt",1024*1024);
+                reply(response,encode(workspace?executor->submit_workspace(id,session,prompt,model,*workspace,binding):binding?executor->submit_profile(id,session,prompt,model,*binding):executor->submit_model(id,session,prompt,model)),202);
             }));
             server.Post(R"(/v1/runs/([A-Za-z0-9_-]+)/cancel)",guarded([this](const Request& request,Response& response) {
                 body(request,{});const auto id=identifier(request.matches[1]);executor->cancel(id);

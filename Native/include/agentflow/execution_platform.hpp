@@ -13,6 +13,11 @@ public:
     Run submit_model(std::string id,std::string session,std::string prompt,std::string model) override;
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
     std::vector<std::string> models() const override;
+    ExecutionWorkspaceMetadata execution_workspace()const override;
+    Run submit_workspace(std::string id,std::string session,std::string prompt,std::string model,
+        WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile={})override;
+    Run submit_graph_workspace(std::string id,std::string session,std::string graph,std::int64_t revision,
+        std::string prompt,std::string model,WorkspaceAdmission expected,std::optional<ProviderProfileAdmission> profile={})override;
     bool supports_delegation() const override;
     bool supports_dynamic_planning() const override;
     bool supports_context() const override;
@@ -37,6 +42,8 @@ public:
     GraphContextMetadata graph_context(const std::string& root)const override;
 private:
     PersistenceService& store_;
+    std::unique_ptr<WorkspaceTools> workspace_binding_;
+    std::string workspace_authority_;
     std::unique_ptr<AgentService> agents_;
     std::unique_ptr<GraphService> graphs_;
 };

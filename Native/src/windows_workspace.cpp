@@ -178,6 +178,15 @@ std::string WorkspaceTools::identity() const {
     if(!equal(current,impl_->base)) throw ToolAccessDenied("Workspace root identity changed");
     return file_identity(impl_->root.value);
 }
+std::string WorkspaceTools::root_path() const {
+    const auto before=identity();auto path=final_path(impl_->root.value);
+    while(!path.empty()&&path.back()==L'\\')path.pop_back();
+    if(!equal(path,impl_->base)||identity()!=before)throw ToolAccessDenied("Workspace root identity changed");
+    if(path.starts_with(L"\\\\?\\UNC\\"))path=L"\\\\"+path.substr(8);
+    else if(path.starts_with(L"\\\\?\\"))path.erase(0,4);
+    if(path.size()==2&&path[1]==L':')path+=L'\\';
+    return utf8(path);
+}
 std::string WorkspaceTools::directory_identity(const std::string& input,std::stop_token cancel) const {
     check_cancel(cancel);const auto relative=relative_path(input);const auto workspace=identity();
     Handle directory(CreateFileW(impl_->path(relative).c_str(),FILE_READ_ATTRIBUTES|FILE_TRAVERSE,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr));

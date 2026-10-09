@@ -5,9 +5,12 @@ const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,Prov
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const { browserViewLauncher } = require('./browser-view');
+const { WorkspaceBackend,machineSetting } = require('./workspace-backend');
+const { resolveNativeRuntime } = require('./native-runtime');
 
 async function activate(context) {
   const browserViews=browserViewLauncher(vscode,context);
+  const workspaceBackend=new WorkspaceBackend(vscode,context,resolveNativeRuntime);
   // Interactive preview uses a normal development host. VS Code test hosts
   // deliberately use in-memory storage and cannot verify reconnect persistence.
   let previewReady,previewOrigin;
@@ -32,6 +35,7 @@ async function activate(context) {
   let polling = false;
   let generation = 0;
   let opening;
+  let receiveSubscription,disposeSubscription;
   let messages = Promise.resolve();
   let reviewed = new Map();
   let modelCatalogue = {models:[],default_model:''};
@@ -279,7 +283,7 @@ async function activate(context) {
   }
 
   function configuredOrigin() {
-    return backendOrigin(vscode.workspace.getConfiguration('agentflow').get('backendUrl'));
+    return workspaceBackend.active?.origin??backendOrigin(machineSetting(vscode,'backendUrl')??'http://127.0.0.1:8765');
   }
   const secretKey = origin => `xmind.auth:${origin}`;
   async function configureToken(initialToken) {
@@ -327,18 +331,24 @@ async function activate(context) {
     if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before using AgentFlow.');
     if (panel) { panel.show(); return; }
     await messages;
-    const origin = configuredOrigin();
-    const bootstrapToken = typeof process !== 'undefined' ? process.env.XMIND_UI_BOOTSTRAP_TOKEN : undefined;
-    if (!await context.secrets.get(secretKey(origin)) && !await configureToken(bootstrapToken)) return;
+    let connection;
+    if(previewOrigin||machineSetting(vscode,'backendMode')==='external'){
+      const externalOrigin=previewOrigin??configuredOrigin();
+      if(!await context.secrets.get(secretKey(externalOrigin))&&!await configureToken())return;
+      connection=await workspaceBackend.attach(externalOrigin,await context.secrets.get(secretKey(externalOrigin)));
+    }else connection=await workspaceBackend.connect();
+    const origin=connection.origin,connectionEpoch=workspaceBackend.epoch;
+    const connectionCurrent=()=>workspaceBackend.epoch===connectionEpoch&&workspaceBackend.active?.origin===origin;
     contextController?.dispose();contextController=undefined;profileController?.dispose();client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
+    client.bindWorkspace(workspaceBackend);
     const profileTarget=client;profileController=new ProviderProfileController(client,post,()=>!!panel&&client===profileTarget&&configuredOrigin()===profileTarget.baseUrl);
-    const initial=await capabilities();let health=initial.health;modelCatalogue=initial.catalogue;
+    const initial=await capabilities();if(!connectionCurrent())throw new Error('Workspace changed while opening the sidebar.');let health=initial.health;modelCatalogue=initial.catalogue;
     const savedModel=context.workspaceState.get(modelStateKey);
     selectedModel=chooseModel(modelCatalogue,savedModel?.url===client.baseUrl?savedModel.id:undefined);
     const savedGraph=context.workspaceState.get(graphStateKey);selectedGraph=savedGraph?.url===client.baseUrl?savedGraph.id:undefined;
     const saved = context.workspaceState.get(stateKey);
     sessionId = saved?.url === client.baseUrl ? saved.id : undefined;
-    panel = await acquireSidebar();
+    const availableView=await acquireSidebar();if(!connectionCurrent())throw new Error('Workspace changed while opening the sidebar.');panel=availableView;
     panel.webview.options = { enableScripts: true, localResourceRoots: [context.extensionUri] };
     const assetVersion=crypto.randomBytes(16).toString('hex');
     const asset = (...parts) => panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, ...parts)).toString()+'?v='+assetVersion;
@@ -346,9 +356,11 @@ async function activate(context) {
       source:panel.webview.cspSource,css:asset('media','chat.css'),script:asset('media','chat.js'),
       marked:asset('node_modules','marked','lib','marked.umd.js'),purify:asset('node_modules','dompurify','dist','purify.min.js')
     });
-    const view = panel;
-    panel.onDidDispose(() => { if (panel === view) { profileController?.dispose();stop(); reviewed.clear(); providerSelection=undefined; panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
-    panel.webview.onDidReceiveMessage(message => {
+    const view = panel,workspaceEpoch=workspaceBackend.epoch;
+    disposeSubscription?.dispose();receiveSubscription?.dispose();
+    disposeSubscription=panel.onDidDispose(() => { if (panel === view) { profileController?.dispose();stop(); reviewed.clear(); providerSelection=undefined; panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
+    receiveSubscription=panel.webview.onDidReceiveMessage(message => {
+      if(panel!==view||workspaceBackend.epoch!==workspaceEpoch)return;
       if(panel===view&&['model','select-provider'].includes(message?.type))contextController?.invalidate();
       // Selection intent invalidates an in-flight approval immediately, before
       // its queued selection handler can run behind that network request.
@@ -358,9 +370,10 @@ async function activate(context) {
       // Serialize view commands so overlapping selections/submissions cannot
       // overwrite the observed session or display one session's response in another.
       messages = messages.then(async () => { try {
-        if (panel !== view) return;
+        if (panel !== view||workspaceBackend.epoch!==workspaceEpoch) return;
         if (!message || typeof message.type !== 'string') return;
         if (message.type === 'ready') {
+          post({type:'workspace',root:connection.metadata.root,roots:connection.roots,managed:!previewOrigin&&machineSetting(vscode,'backendMode')!=='external'});
           post({ type: 'capabilities', execution: health.agent_execution, renameSessions:health.session_rename===true, model:selectedModel, models:modelCatalogue.models });
           await refresh();
           if (sessionId) await selectSession(sessionId);
@@ -465,10 +478,12 @@ async function activate(context) {
           const binding=(graph?health.graph_provider_profile_admission:health.provider_profile_admission)===true?await profileController.admission():undefined;
           if(panel!==view||admissionVersion!==generation||configuredOrigin()!==client.baseUrl)return;
           if (!sessionId) {
-            const session = await client.createSession(message.prompt.slice(0, 80));
-            if (panel !== view) return;
+            const submissionClient=client;
+            const session = await submissionClient.createSession(message.prompt.slice(0, 80));
+            if (panel !== view||generation!==admissionVersion||client!==submissionClient) return;
             await selectSession(session.id);
             await refresh();
+            if(panel!==view||client!==submissionClient)return;
           }
           if (panel !== view) return;
           if(busySession()) throw new Error('This conversation still has an active run. Stop or finish it before submitting another prompt.');
@@ -488,11 +503,11 @@ async function activate(context) {
             }
             throw error;
           }
-          if (panel !== view) return; // Accepted backend execution survives view closure.
+          if (panel !== view||generation!==runVersion||client!==admissionClient) return; // Accepted execution survives view/folder changes.
           stop();clearGraph();runId = run.id; cursor = 0;
           sessionRuns=[...sessionRuns,run];presentRuns();
           await context.workspaceState.update(runStateKey,{url:client.baseUrl,session_id:sessionId,id:run.id});
-          if(panel!==view) return;
+          if(panel!==view||client!==admissionClient) return;
           reviewed.clear(); post({ type: 'operations', operations: [] });
           post({ type: 'user', text: message.prompt });
           timer = setInterval(poll, 500);
@@ -536,8 +551,8 @@ async function activate(context) {
           post({ type: 'operations', operations: [...reviewed.values()].map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id})) });
           await poll();
         }
-      } catch (error) { if (panel === view) post({ type: 'error', text: error.message }); }
-        finally{if(panel===view)await readContext().catch(error=>post({type:'error',text:error.message}));} });
+      } catch (error) { if (panel === view&&workspaceBackend.epoch===workspaceEpoch) post({ type: 'error', text: error.message }); }
+        finally{if(panel===view&&workspaceBackend.epoch===workspaceEpoch)await readContext().catch(error=>{if(workspaceBackend.epoch===workspaceEpoch)post({type:'error',text:error.message});});} });
     }, null, context.subscriptions);
   }
   function open() {
@@ -554,10 +569,32 @@ async function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.openBrowser',async()=>{
     try{
       if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before connecting a browser view.');
-      const origin=configuredOrigin();if(!await context.secrets.get(secretKey(origin))&&!await configureToken())return;
+      await open();const origin=configuredOrigin();if(!workspaceBackend.active)throw new Error('Connect the opened workspace before opening its browser.');
       let token=await context.secrets.get(secretKey(origin));
       try{const target=new BackendClient(origin,()=>token);await target.health();if(origin!==configuredOrigin())throw new Error('Backend changed while opening the browser. Try again.');await browserViews.open(origin,token);vscode.window.showInformationMessage('xMind Browser uses this server’s models and history. Paste the copied server token into Connect once.');}finally{token=undefined;}
     }catch(error){vscode.window.showErrorMessage(error.message);}
+  }));
+  function disconnectWorkspace(){
+    workspaceBackend.invalidate();stop();contextController?.dispose();contextController=undefined;profileController?.dispose();profileController=undefined;
+    providerSelection=undefined;reviewed.clear();clearGraph();sessionId=undefined;runId=undefined;sessionRuns=[];client=undefined;
+    modelCatalogue={models:[],default_model:''};selectedModel=undefined;graphCatalogue=[];selectedGraph=undefined;
+    receiveSubscription?.dispose();receiveSubscription=undefined;disposeSubscription?.dispose();disposeSubscription=undefined;
+    post({type:'workspace-clear'});post({type:'history',history:[]});post({type:'sessions',sessions:[]});post({type:'runs',runs:[],busy:false});post({type:'graphs',graphs:[]});post({type:'operations',operations:[]});post({type:'capabilities',execution:false,models:[]});post({type:'status',text:'Connecting the opened workspace…'});panel=undefined;
+  }
+  async function reconnectWorkspace(forcePick=false){
+    const shown=!!panel||!!sidebarView;disconnectWorkspace();
+    if(opening)await opening.catch(()=>{});
+    if(forcePick)await workspaceBackend.selectedFolder(true);
+    if(shown)await open();
+  }
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.selectWorkspaceRoot',async()=>{
+    try{await reconnectWorkspace(true);}catch(error){vscode.window.showErrorMessage(error.message);}
+  }));
+  if(vscode.workspace.onDidChangeWorkspaceFolders)context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(()=>{
+    reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
+  }));
+  if(vscode.workspace.onDidChangeConfiguration)context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event=>{
+    if(['backendMode','backendUrl','runtimeDirectory','stdlibSource','providerConfigPath','workspaceEdits'].some(key=>event.affectsConfiguration('agentflow.'+key)))reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
   }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.selection', async () => {
     const editor = vscode.window.activeTextEditor;
@@ -570,7 +607,7 @@ async function activate(context) {
       if (question) post({ type: 'draft', text: `${question}\n\nFile: ${vscode.workspace.asRelativePath(editor.document.uri)}\n\n${text}` });
     } catch (error) { vscode.window.showErrorMessage(error.message); }
   }));
-  context.subscriptions.push({ dispose: stop });
+  context.subscriptions.push({ dispose:()=>{stop();workspaceBackend.dispose();receiveSubscription?.dispose();disposeSubscription?.dispose();} });
   if(previewReady) {
     // View resolution waits for extension activation. Opening synchronously
     // inside activation would wait on itself in a normal development host.
@@ -582,6 +619,10 @@ async function activate(context) {
     },0);
     context.subscriptions.push({dispose:()=>clearTimeout(bootstrap)});
   }
+  // Public observation API for real IDE acceptance/reconnection tooling. It
+  // only re-reads the authenticated Native DTO; it does not start work or expose
+  // owner tokens, provider configuration contents or private storage paths.
+  return {workspaceStatus:()=>workspaceBackend.status()};
 }
 
 module.exports = { activate };

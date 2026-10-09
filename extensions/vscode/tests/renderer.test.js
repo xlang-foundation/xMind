@@ -12,6 +12,11 @@ function renderer(){
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
 
+test('effective backend root uses plain text and folder switch clears the old draft',()=>{
+ const r=renderer(),doc=r.dom.window.document;
+ try{r.send({type:'workspace',root:'D:\\<img onerror=malicious>\\TestProj',roots:[{},{}]});const label=doc.getElementById('workspace-root');assert.equal(label.hidden,false);assert.equal(label.querySelector('img'),null);assert.ok(label.textContent.includes('active root from 2 workspace folders'));doc.getElementById('prompt').value='old workspace draft';r.send({type:'workspace-clear'});assert.equal(label.hidden,true);assert.equal(doc.getElementById('prompt').value,'');}finally{r.dom.window.close();}
+});
+
 test('footer saved-provider chooser uses public profiles, preserves actual selection until acknowledgement and never opens key settings',()=>{
  const r=renderer(),doc=r.dom.window.document,select=doc.querySelector('footer #footer-provider');
  const profiles=[{id:'openai-saved',provider:'openai',model:'fixture-openai'},{id:'claude-key-only',provider:'anthropic',model:''},{id:'gemini-saved',provider:'gemini',model:'models/fixture'},{id:'deepseek-saved',provider:'deepseek',model:'deepseek-flash'}],routes=[];
