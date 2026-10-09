@@ -1,5 +1,14 @@
 # Reviewable milestones
 
+Native editor-view adapter candidate: the host now delegates startup/storage
+to C++ and scopes saved UI choices to the native workspace/profile. All **217
+extension fixture / 41 browser fixture** checks pass. Native acceptance is
+**pending**: the first probe timed out preparing the backend; the second started
+it but the view failed before readiness. Diagnostic reporting is prepared.
+Further native builds/probes were deferred for a separate live xlang3 performance
+run. No working installed connection, native 110-test gate or UI rendering is
+claimed. [Contract and remaining acceptance](native-view-adapter.md).
+
 Native automatic console profiles now start or reconnect to one persistent
 workspace backend without a manual port/token setup. The controller verifies
 the actual native process and authenticated workspace, seals its rendezvous

@@ -352,7 +352,9 @@ struct HttpServer::Impl {
             }
         }
         server.Post("/v1/view-sessions",guarded([this](const Request& request,Response& response){
-            const auto input=body(request,{"origin"});const auto session=view_sessions->issue(string_field(input,"origin",256));
+            const auto input=body(request,{"origin","process_id","process_birth"});std::uint32_t pid=0;std::string birth;
+            if(input.contains("process_id")||input.contains("process_birth")){if(!input.contains("process_id")||!input.at("process_id").is_number_unsigned()||input.at("process_id")==0||input.at("process_id").get<std::uint64_t>()>0xffffffff)throw std::invalid_argument("Invalid view process identity");pid=input.at("process_id").get<std::uint32_t>();birth=string_field(input,"process_birth",20);}
+            const auto session=view_sessions->issue(string_field(input,"origin",256),pid,birth);
             reply(response,{{"credential",session.credential},{"expires_unix_ms",session.expires_unix_ms},{"max_age_seconds",session.max_age_seconds}});
         }));
         server.Post("/v1/view-sessions/current",guarded([this](const Request& request,Response& response){

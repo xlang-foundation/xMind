@@ -1,4 +1,5 @@
 #include "agentflow/view_sessions.hpp"
+#include "agentflow/owner_process.hpp"
 #include "nlohmann/json.hpp"
 #include <array>
 #include <charconv>
@@ -30,29 +31,38 @@ void check_origin(const std::string& origin){
 }
 bool parse(std::string_view credential){return credential.size()==129 && credential[64]=='.' && credential.substr(0,64).find_first_not_of("0123456789abcdef")==std::string_view::npos && credential.substr(65).find_first_not_of("0123456789abcdef")==std::string_view::npos;}
 bool secret_matches(const SecretBytes& expected,std::string_view supplied){auto bytes=expected.view();std::size_t difference=bytes.size()^supplied.size();for(std::size_t i=0;i<bytes.size();++i)difference|=bytes[i]^(i<supplied.size()?static_cast<unsigned char>(supplied[i]):0);return difference==0;}
+bool live(const Json& record){
+    const bool pid=record.contains("process_id"),birth=record.contains("process_birth");
+    if(pid!=birth)return false;
+    if(!pid)return record.size()==3;
+    if(record.size()!=5||!record.at("process_id").is_number_unsigned()||record.at("process_id").get<std::uint64_t>()>MAXDWORD||record.at("process_id")==0||!record.at("process_birth").is_string())return false;
+    return !observe_owner_exit(record.at("process_id").get<std::uint32_t>(),record.at("process_birth").get<std::string>(),0).exited;
+}
 bool accepted(PersistenceService& store,const std::string& purpose,std::string_view credential,const std::string& origin){
     if(!parse(credential))return false;
     const auto id=std::string(credential.substr(0,64));
     try{
         const auto record=Json::parse(store.information(scope,id).get());
-        if(record.size()!=3||record.at("origin")!=origin||record.at("binding")!=purpose||!record.at("expires_unix_ms").is_number_integer()||record.at("expires_unix_ms").get<std::int64_t>()<=now())return false;
+        if(!live(record)||record.at("origin")!=origin||record.at("binding")!=purpose||!record.at("expires_unix_ms").is_number_integer()||record.at("expires_unix_ms").get<std::int64_t>()<=now())return false;
         const auto secret=store.resolve_credential(scope,id,purpose).get();return secret_matches(secret,credential.substr(65));
     }catch(const NotFound&){return false;}catch(const Json::exception&){return false;}
 }
 }
 ViewSessions::ViewSessions(PersistenceService& store,std::string_view authority,std::chrono::seconds lifetime):store_(store),binding_(binding(authority)),lifetime_(lifetime){if(lifetime.count()<1||lifetime>std::chrono::hours(8))throw std::invalid_argument("Invalid view session lifetime");}
-ViewSession ViewSessions::issue(const std::string& origin){
+ViewSession ViewSessions::issue(const std::string& origin,std::uint32_t process_id,const std::string& process_birth){
+    if((process_id==0)!=process_birth.empty()||(process_id&&inspect_owner_process_birth(process_id)!=process_birth))throw std::invalid_argument("View process identity does not match");
     check_origin(origin);std::lock_guard lock(mutex_);
     auto credentials=store_.credentials(scope).get();std::size_t active=0;
     for(const auto& metadata:credentials){
-        bool keep=false;try{const auto record=Json::parse(store_.information(scope,metadata.id).get());keep=record.at("binding")==binding_ && record.at("expires_unix_ms").get<std::int64_t>()>now();}catch(const NotFound&){}catch(const Json::exception&){}
+        bool keep=false;try{const auto record=Json::parse(store_.information(scope,metadata.id).get());keep=live(record) && record.at("binding")==binding_ && record.at("expires_unix_ms").get<std::int64_t>()>now();}catch(const NotFound&){}catch(const Json::exception&){}
         if(keep)++active;else store_.delete_credential(scope,metadata.id,metadata.revision).get();
     }
     if(active>=32)throw Conflict("Too many active view sessions");
     const auto id=random_token();auto token=random_token();struct Wipe {std::string& text;~Wipe(){SecureZeroMemory(text.data(),text.size());}} wipe{token};
     const auto expires=now()+std::chrono::duration_cast<std::chrono::milliseconds>(lifetime_).count();
     store_.put_credential(scope,id,binding_,"Browser access session",SecretBytes(std::span(reinterpret_cast<const std::uint8_t*>(token.data()),token.size())),0).get();
-    store_.put_information(scope,id,Json{{"origin",origin},{"binding",binding_},{"expires_unix_ms",expires}}.dump()).get();
+    Json record{{"origin",origin},{"binding",binding_},{"expires_unix_ms",expires}};if(process_id){record["process_id"]=process_id;record["process_birth"]=process_birth;}
+    store_.put_information(scope,id,record.dump()).get();
     return {id+"."+token,expires,lifetime_.count()};
 }
 bool ViewSessions::accepts(std::string_view credential,const std::string& origin){check_origin(origin);std::lock_guard lock(mutex_);return accepted(store_,binding_,credential,origin);}

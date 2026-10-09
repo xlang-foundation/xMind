@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/persistence_service.hpp"
 #include <chrono>
+#include <cstdint>
 #include <mutex>
 #include <string_view>
 
@@ -12,7 +13,7 @@ class ViewSessions {
 public:
     ViewSessions(PersistenceService& store,std::string_view authority,
         std::chrono::seconds lifetime=std::chrono::hours(8));
-    ViewSession issue(const std::string& origin);
+    ViewSession issue(const std::string& origin,std::uint32_t process_id=0,const std::string& process_birth={});
     bool accepts(std::string_view credential,const std::string& origin);
     void revoke(std::string_view credential,const std::string& origin);
 private:

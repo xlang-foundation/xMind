@@ -1,0 +1,85 @@
+{
+  "observedAt": "2026-10-09T23:40:59.933Z",
+  "sourceBaseRevision": "11efb9e314aeb16dcc75d7befda88d8c592b77e5",
+  "qualification": "Unaccepted native-view source candidate. Source hashes bind the current source; earlier successful compilation does not include the latest private error-reporting changes. The prior native-profile checkpoint remains the last accepted native baseline.",
+  "candidateSourceHashes": {
+    "Native/apps/local_view_main.cpp": "f93d49da1c1fa50c1386c05296c49b675e231fee236b8a4bc13dd0cde8834fde",
+    "Native/tests/local_view_contract.mjs": "780188986f3f61c36008dae640a60a0385e7543e049706c46d69830d93d952b1",
+    "Native/CMakeLists.txt": "9eed0a036bed0e1b09103445312675450e7515742e61b0c5b8ee6ac1827f0478",
+    "Native/apps/xmind_main.cpp": "782165cad00ec3dee3eb41b4b39fff6918932d21c84d2a291859954d258a23da",
+    "Native/include/agentflow/local_profile.hpp": "0398e1144036b7f556f3a6489070448d3a3e23b70b2acc468f6cee11d62bcf94",
+    "Native/include/agentflow/program_entries.hpp": "5483efc61c9dabbce067f2cd091af336f1e31526802f2a09fac26787fa1d24a5",
+    "Native/include/agentflow/view_sessions.hpp": "c7a7800edc8db6c9eddaebb444892ee5717cb10ad897ba5c0e5937eb0e30520a",
+    "Native/src/http_server.cpp": "8ead97234e5b8ecb2d37eff999da993257362b8a34e9128a3440744f305fb272",
+    "Native/src/local_profile.cpp": "7857633e58e98003e55efe0ecd4ab148fb219e269cb5fb9f11ef02044d6891d3",
+    "Native/src/view_sessions.cpp": "d98d60809c4256369c05a630d6d3f3d555170eddd074179fd9f0c5639a780c27",
+    "Tools/ci-native.ps1": "6444b52349b0b65d07a96b7b76740e5e958aa296f9b6d74119a9a2f05b9f5450",
+    "Tools/ci-views.mjs": "8b113e230a332b59e84d95f8346593bb71b702f17122614e19a1dea4c34ebb34",
+    "extensions/vscode/README.md": "02b372a8f728b5f091c878c0ba1c22243770e98a5962067bd1fe9cf3a4a62b7d",
+    "extensions/vscode/extension.js": "d33080365027e882f58622b66fd5985c63ec34543a5174620518c23d51d6197d",
+    "extensions/vscode/package.json": "f917d36fd9e98114a2f3c4f381b39b1e3cc09f9af5687b87482874d8e2a93497",
+    "extensions/vscode/tests/extension-host.test.js": "02967a26f8c88cf2cf93cce9b93a9c67f901444323e493befab27d261f7b51a6",
+    "extensions/vscode/tests/workspace-backend.test.js": "bd774f4258299d0e429b9fbbbeaa5129ff3fd521d5482bbe8dbf15085bc3af8e",
+    "extensions/vscode/workspace-backend.js": "e052eaf95d79cf53723e8e56918752b3698008f9889367546d03127143d954e0"
+  },
+  "rawLogHashes": {
+    "native-unified-view-candidate-build-first.log": "5f27b7c417d628bccc596f8cf53338fe4377d3ce56e8ee6b9b26e69af2dea403",
+    "native-unified-view-candidate-build-third.log": "399c6a83eca35bf141c32bf6cc0aa4281c38c4c117066865591dc7fe06c0f71d",
+    "native-unified-view-candidate-probe-first.log": "47f3b9343ac828e6367f0cdaa8d9ef46ef331aea28faa24c75036d3b4366dc73",
+    "native-unified-view-candidate-probe-second.log": "4258f393b051d9f4745611ba5afd5ec890530d0b2f0751dd1f469073f49cd7ec",
+    "native-unified-view-candidate-extension-failed.log": "a4efb241c0f3d9a30cd28e24239d089a60c1d7908c19b0b5b7fc750cad3d242f",
+    "native-unified-view-candidate-extension.log": "d01b719821c82aa93321ca839477f00f219f54e8a4b5f83cde9c32fa0024e903",
+    "native-unified-view-candidate-browser-failed.log": "6976b460a27db97b5cfc8950f9804600a25257eebc0dd3af3a817e12ca89ffdf",
+    "native-unified-view-candidate-browser.log": "7ddc860b3e7ede08eaf250c2bd782e8f465a4c460f10cb6da22d0c2dc8f80bc1"
+  },
+  "extension": {
+    "tests": 217,
+    "passed": 217,
+    "failed": 0,
+    "scope": "VS Code API/process/filesystem/HTTP fixtures and client state scope only. The retired JavaScript owner/upgrade fixtures were replaced by native-view host access fixtures; native owner-control contracts remain separate."
+  },
+  "browser": {
+    "tests": 41,
+    "passed": 41,
+    "failed": 0,
+    "scope": "Browser adapter and renderer fixtures with synthetic access peers; no rendered UI or native-provider acceptance."
+  },
+  "native": {
+    "candidateAccepted": false,
+    "requiredContractCount": 110,
+    "fullGatePassed": false,
+    "latestSourceRebuilt": false,
+    "earlierCandidateCompiled": true,
+    "probes": [
+      {
+        "attempt": 1,
+        "accepted": false,
+        "reason": "Driver timed out during fresh backend preparation; fixture retained."
+      },
+      {
+        "attempt": 2,
+        "accepted": false,
+        "reason": "Fresh backend started, then the production editor host reported view readiness failure; exact native reason still unobserved."
+      }
+    ],
+    "nextProbe": "Rebuild current source and read the new PID-attributed private startup error/stderr; resolve failure before the frozen complete gate.",
+    "lastAcceptedRevision": "11efb9e314aeb16dcc75d7befda88d8c592b77e5",
+    "lastAcceptedContractCount": 109
+  },
+  "subsequentNativePhasesDeferred": {
+    "reason": "Separate live xlang3 97-case performance run",
+    "observedRunnerProcessId": 8220,
+    "notTerminated": true,
+    "primarySdkNotModified": true
+  },
+  "initialFixtureFailures": [
+    "Browser fixtures first ran without generated patch-review.js; assets rebuilt and complete 41-test rerun passed.",
+    "The private-error fixture initially changed the pre-construction dependency object rather than the manager dependency; corrected injection and complete 217-test rerun passed."
+  ],
+  "realProviderRequests": 0,
+  "cpythonExecutedByThisWork": false,
+  "installedPackageUpdated": false,
+  "installedIdeAccepted": false,
+  "renderedUiAccepted": false,
+  "migrationImplemented": false
+}

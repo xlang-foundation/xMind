@@ -20,6 +20,7 @@ void help(){
         "  xmind [--workspace DIR] [--profile-root DIR] [--config FILE] [COMMAND ARGS...]\n"
         "  xmind --port PORT [--workspace DIR] [COMMAND ARGS...]\n"
         "  xmind [local profile options] profile-info\n"
+        "  xmind view --ready-file FILE [local profile options]\n"
         "  xmind admin [native administration arguments]\n"
         "  xmind schema-worker   (private bounded schema protocol)\n\n"
         "Without --port, the console discovers or starts its persistent local workspace profile.\n"
@@ -44,6 +45,7 @@ int dispatch(int argc,char** argv){
         else if(mode=="schema-worker")entry=run_schema_worker;
 #if defined(_WIN32)
         else if(mode=="admin")entry=run_admin;
+        else if(mode=="view")entry=run_local_view;
 #endif
         if(entry){std::vector<char*> forwarded{argv[0]};for(int i=2;i<argc;++i)forwarded.push_back(argv[i]);forwarded.push_back(nullptr);return entry(static_cast<int>(forwarded.size()-1),forwarded.data());}
         if(mode=="worker")throw std::invalid_argument("Agent worker execution is not implemented yet");

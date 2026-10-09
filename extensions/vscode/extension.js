@@ -56,6 +56,8 @@ async function activate(context) {
   const modelStateKey = 'xmind.model';
   const runStateKey = 'xmind.observedRun';
   const graphStateKey = 'xmind.workflow';
+  const connectionState=()=>({url:client.baseUrl,...(workspaceBackend.stateFields?.()||{})});
+  const savedConnection=record=>{const scope=workspaceBackend.stateFields?.();return scope?record?.workspace_id===scope.workspace_id&&record?.profile_directory===scope.profile_directory:record?.url===client.baseUrl;};
 
   const post = message => panel?.webview.postMessage(message.type==='capabilities'?{...message,fileEditProposals:client?health?.file_edit_proposals:undefined}:message);
   async function readSkills(){
@@ -228,7 +230,7 @@ async function activate(context) {
     reviewed.clear();
     post({ type: 'operations', operations: [] });
     cursor = 0;
-    await context.workspaceState.update(stateKey, { url: client.baseUrl, id });
+    await context.workspaceState.update(stateKey, { ...connectionState(), id });
     if (version !== generation || !panel) return;
     const history = await client.history(id);
     if (version !== generation || !panel) return;
@@ -249,11 +251,11 @@ async function activate(context) {
     if(previousProfile&&!retainedCatalogue&&profileController?.state?.active){try{await configureModel();}catch{}}
     if(version!==generation||!panel)return;
     const savedRun=context.workspaceState.get(runStateKey);
-    const selected=savedRun?.url===client.baseUrl && savedRun.session_id===id?sessionRuns.find(run=>run.id===savedRun.id):undefined;
+    const selected=savedConnection(savedRun) && savedRun.session_id===id?sessionRuns.find(run=>run.id===savedRun.id):undefined;
     const latest = selected||runs.at(-1);
     if (latest) {
       runId = latest.id;presentRuns();
-      await context.workspaceState.update(runStateKey,{url:client.baseUrl,session_id:id,id:runId});
+      await context.workspaceState.update(runStateKey,{...connectionState(),session_id:id,id:runId});
       if(version!==generation || !panel) return;
       // History already includes completed messages; replay events in a separate log.
       timer = setInterval(poll, 500);
@@ -270,7 +272,7 @@ async function activate(context) {
     if(!runs.some(run=>run.id===id)) throw new Error('Run does not belong to the selected conversation.');
     clearGraph();sessionRuns=runs;runId=id;cursor=0;reviewed.clear();presentRuns();
     post({type:'operations',operations:[]});post({type:'reset-run'});
-    await context.workspaceState.update(runStateKey,{url:client.baseUrl,session_id:sessionId,id});
+    await context.workspaceState.update(runStateKey,{...connectionState(),session_id:sessionId,id});
     if(version!==generation || !panel) return;
     timer=setInterval(poll,500);await poll();
   }
@@ -362,10 +364,10 @@ async function activate(context) {
     const profileTarget=client;profileController=new ProviderProfileController(client,post,()=>!!panel&&client===profileTarget&&configuredOrigin()===profileTarget.baseUrl);
     const initial=await capabilities();if(!connectionCurrent())throw new Error('Workspace changed while opening the sidebar.');health=initial.health;modelCatalogue=initial.catalogue;
     const savedModel=context.workspaceState.get(modelStateKey);
-    selectedModel=chooseModel(modelCatalogue,savedModel?.url===client.baseUrl?savedModel.id:undefined);
-    const savedGraph=context.workspaceState.get(graphStateKey);selectedGraph=savedGraph?.url===client.baseUrl?savedGraph.id:undefined;
+    selectedModel=chooseModel(modelCatalogue,savedConnection(savedModel)?savedModel.id:undefined);
+    const savedGraph=context.workspaceState.get(graphStateKey);selectedGraph=savedConnection(savedGraph)?savedGraph.id:undefined;
     const saved = context.workspaceState.get(stateKey);
-    sessionId = saved?.url === client.baseUrl ? saved.id : undefined;
+    sessionId = savedConnection(saved) ? saved.id : undefined;
     const availableView=await acquireSidebar();if(!connectionCurrent())throw new Error('Workspace changed while opening the sidebar.');panel=availableView;
     panel.webview.options = { enableScripts: true, localResourceRoots: [context.extensionUri] };
     const assetVersion=crypto.randomBytes(16).toString('hex');
@@ -417,7 +419,7 @@ async function activate(context) {
           const version=generation;if(!await profileController.select(message.id)||panel!==view||version!==generation)return;
           const current=await capabilities();if(panel!==view||version!==generation||configuredOrigin()!==client.baseUrl)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);
           post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
-          await context.workspaceState.update(modelStateKey,{url:client.baseUrl,id:selectedModel});await configureModel();
+          await context.workspaceState.update(modelStateKey,{...connectionState(),id:selectedModel});await configureModel();
         } else if (message.type === 'refresh') {
           providerSelection=undefined;
           const version=generation;
@@ -459,13 +461,13 @@ async function activate(context) {
             post({type:'status',text:'Model configured · send a message to verify provider access'});
           }else if (!modelCatalogue.models.some(model => model.id === message.id)) throw new Error('Fetch models in Settings before choosing this model.');
           selectedModel = message.id;
-          await context.workspaceState.update(modelStateKey,{url:client.baseUrl,id:selectedModel});
+          await context.workspaceState.update(modelStateKey,{...connectionState(),id:selectedModel});
           await refreshGraphs();
         }
         else if(message.type==='graph-select'){
           if(message.id && !graphCatalogue.some(g=>g.id===message.id&&g.executable))throw new Error('Select an executable graph registered by this backend.');
           selectedGraph=message.id||undefined;post({type:'graphs',graphs:graphCatalogue,selected:selectedGraph});
-          await context.workspaceState.update(graphStateKey,{url:client.baseUrl,id:selectedGraph});
+          await context.workspaceState.update(graphStateKey,{...connectionState(),id:selectedGraph});
         }else if(message.type==='graph-input'){
           if(!vscode.workspace.isTrusted || !graphSnapshot || graphSnapshot.run.id!==runId || message.root!==runId || !['paused','running'].includes(graphSnapshot.run.state))throw new Error('Select an active graph before providing input.');
           if(message.revision!==graphSnapshot.checkpoint_revision || !graphSnapshot.checkpoint.nodes.some(n=>n.id===message.node&&n.state==='waiting_human'))throw new Error('Human input changed. Refresh the current graph before answering.');
@@ -524,7 +526,7 @@ async function activate(context) {
               const current=await capabilities();if(panel!==view||generation!==runVersion||client!==admissionClient)return;
               health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);
               post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
-              await refreshGraphs();await context.workspaceState.update(modelStateKey,{url:client.baseUrl,id:selectedModel});
+              await refreshGraphs();await context.workspaceState.update(modelStateKey,{...connectionState(),id:selectedModel});
               if(panel!==view||generation!==runVersion||client!==admissionClient)return;
               throw new Error('Provider settings changed in another view. Review the current profile and submit again. Your draft has been kept.');
             }
@@ -533,7 +535,7 @@ async function activate(context) {
           if (panel !== view||generation!==runVersion||client!==admissionClient) return; // Accepted execution survives view/folder changes.
           stop();clearGraph();runId = run.id; cursor = 0;
           sessionRuns=[...sessionRuns,run];presentRuns();
-          await context.workspaceState.update(runStateKey,{url:client.baseUrl,session_id:sessionId,id:run.id});
+          await context.workspaceState.update(runStateKey,{...connectionState(),session_id:sessionId,id:run.id});
           if(panel!==view||client!==admissionClient) return;
           reviewed.clear(); post({ type: 'operations', operations: [] });
           post({ type: 'user', text: message.prompt });
@@ -618,12 +620,6 @@ async function activate(context) {
   }
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.selectWorkspaceRoot',async()=>{
     try{await reconnectWorkspace(true);}catch(error){vscode.window.showErrorMessage(error.message);}
-  }));
-  context.subscriptions.push(vscode.commands.registerCommand('agentflow.upgradeBackend',async()=>{
-    try{if(previewOrigin||machineSetting(vscode,'backendMode')==='external')throw new Error('External backends are upgraded by their operator.');stop();post({type:'status',text:'Upgrading the local backend while preserving its profile…'});await workspaceBackend.upgrade();await reconnectWorkspace();vscode.window.showInformationMessage('xMind’s local backend was upgraded. Saved sessions, models and history were retained.');}catch(error){vscode.window.showErrorMessage(error.message);}
-  }));
-  context.subscriptions.push(vscode.commands.registerCommand('agentflow.cancelBackendUpgrade',async()=>{
-    try{if(previewOrigin||machineSetting(vscode,'backendMode')==='external')throw new Error('External backends are upgraded by their operator.');stop();await workspaceBackend.cancelUpgrade();await reconnectWorkspace();}catch(error){vscode.window.showErrorMessage(error.message);}
   }));
   if(vscode.workspace.onDidChangeWorkspaceFolders)context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(()=>{
     reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));

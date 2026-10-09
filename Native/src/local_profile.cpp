@@ -346,8 +346,7 @@ std::string default_root() {
 }
 void shape(const Json &value, const Store &store, const WorkspaceTools &workspace) {
     require(value.is_object() && value.contains("schema") && value.at("schema").is_number_integer() &&
-            value.at("schema") == 1 &&
-            value.value("workspace", std::string{}) == workspace.root_path() &&
+            value.at("schema") == 1 && value.value("workspace", std::string{}) == workspace.root_path() &&
             value.value("workspace_id", std::string{}) == workspace.identity() &&
             value.value("directory", std::string{}) == text(store.directory) &&
             hex(value.value("auth", std::string{}), 64) && hex(value.value("manifest", std::string{}), 64) &&
@@ -462,7 +461,8 @@ Child launch(Store &store, Json &state) {
             SetHandleInformation(log.value, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT) != 0);
     std::array<HANDLE, 2> inherited_handles{input.value, log.value};
     require(UpdateProcThreadAttribute(attributes, 0, PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
-                                      inherited_handles.data(), sizeof(inherited_handles), nullptr, nullptr) != 0);
+                                      inherited_handles.data(), sizeof(inherited_handles), nullptr,
+                                      nullptr) != 0);
     const auto runtime = absolute(state.at("runtime").get<std::string>()), program = runtime / L"xmind.exe";
     std::vector<std::wstring> args{program.native(),
                                    L"serve",
@@ -585,6 +585,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
     auto lock = store.lock();
     Json state;
     bool started = false;
+    std::unique_ptr<VerifiedRuntimeGeneration> source_generation, runtime;
     if (fs::exists(store.directory / L"profile.state")) {
         state = store.state();
         shape(state, store, workspace);
@@ -603,8 +604,8 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         const auto source = absolute(loaded_root());
         const auto raw = file_bytes(source / L"native-runtime-manifest.json", 4 * 1024 * 1024),
                    digest = context_digest(raw);
-        VerifiedRuntimeGeneration verified(text(source), digest);
-        verified.require_current_server();
+        source_generation = std::make_unique<VerifiedRuntimeGeneration>(text(source), digest);
+        source_generation->require_current_server();
         const auto target = store.directory / (L"runtime-" + wide(random_id()));
         state = {
             {"schema", 1},
@@ -629,8 +630,10 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         const auto raw = file_bytes(source / L"native-runtime-manifest.json", 4 * 1024 * 1024);
         require(context_digest(raw) == state.at("manifest").get<std::string>(),
                 "Prepared profile belongs to a different accepted package; operator recovery is required");
-        VerifiedRuntimeGeneration verified(text(source), state.at("manifest").get<std::string>());
-        verified.require_current_server();
+        if (!source_generation)
+            source_generation = std::make_unique<VerifiedRuntimeGeneration>(
+                text(source), state.at("manifest").get<std::string>());
+        source_generation->require_current_server();
         const auto target = store.directory / (L"runtime-" + wide(random_id()));
         Store destination(target, true);
         state["runtime"] = text(destination.directory);
@@ -646,12 +649,14 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         std::ofstream output(destination.directory / L"native-runtime-manifest.json", std::ios::binary);
         output.write(raw.data(), static_cast<std::streamsize>(raw.size()));
         output.close();
-        VerifiedRuntimeGeneration retained(text(destination.directory),
-                                           state.at("manifest").get<std::string>(), workspace.root_path());
-        retained.revalidate();
+        runtime = std::make_unique<VerifiedRuntimeGeneration>(
+            text(destination.directory), state.at("manifest").get<std::string>(), workspace.root_path());
+        runtime->revalidate();
     }
-    VerifiedRuntimeGeneration runtime(state.at("runtime").get<std::string>(),
-                                      state.at("manifest").get<std::string>(), workspace.root_path());
+    if (!runtime)
+        runtime = std::make_unique<VerifiedRuntimeGeneration>(state.at("runtime").get<std::string>(),
+                                                              state.at("manifest").get<std::string>(),
+                                                              workspace.root_path());
     std::unique_ptr<Child> child;
     const auto pid = state.at("pid").get<std::uint32_t>();
     bool exited = pid == 0;
@@ -710,5 +715,22 @@ void publish_local_profile_ready(const std::string &state_file, int port, const 
     state["port"] = port;
     state["phase"] = "ready";
     store.write(state);
+}
+void publish_local_view_ready(const std::string &file, const std::string &metadata,
+                              const std::string &workspace_root) {
+    const auto target = absolute(file);
+    WorkspaceTools workspace(workspace_root);
+    require(!contains(absolute(workspace.root_path()), target.parent_path()) &&
+                !contains(target.parent_path(), absolute(workspace.root_path())),
+            "View rendezvous overlaps the selected workspace");
+    Store store(target.parent_path(), true);
+    const auto value = parse(metadata);
+    require(value.is_object() && !value.contains("auth") && !value.contains("token") &&
+            metadata.size() <= 16384);
+    auto output = store.open(target.filename().c_str(), GENERIC_WRITE, CREATE_NEW);
+    DWORD written = 0;
+    require(
+        WriteFile(output.value, metadata.data(), static_cast<DWORD>(metadata.size()), &written, nullptr) &&
+        written == metadata.size() && FlushFileBuffers(output.value));
 }
 } // namespace agentflow

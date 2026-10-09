@@ -1,5 +1,11 @@
 # Managed native owner upgrades
 
+Historical checkpoint: the JavaScript owner registry and editor upgrade/cancel
+commands described below have been removed from the current source. Native
+owner-control contracts remain available to operators; this document is not a
+current editor command guide. The replacement
+[native view adapter](native-view-adapter.md) is pending acceptance.
+
 The command now also handles authenticated legacy owners through
 [native stop and ticket adoption](native-legacy-stop.md), with explicit product
 confirmation, source-package verification and native writer-fenced termination.

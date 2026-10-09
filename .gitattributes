@@ -47,3 +47,6 @@ doc/evidence/native-responses-diagnostic-*.log -text whitespace=blank-at-eol,bla
 doc/evidence/native-responses-diagnostic-hosted-ci-job.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-responses-reasoning-*.log -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 doc/evidence/native-responses-reasoning-hosted-ci-job.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+# Preserve emitted compiler/failed-assertion whitespace in the original evidence.
+doc/evidence/native-unified-view-candidate-build-first.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-unified-view-candidate-extension-failed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

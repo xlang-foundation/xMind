@@ -1,5 +1,10 @@
 # xMind for VS Code
 
+The native shared-profile view adapter is a candidate whose native readiness
+probe is still failing. The installed 0.1.5 package is unchanged. See
+[acceptance boundary](../../doc/native-view-adapter.md) before building/installing
+a package from this source.
+
 xMind uses a dedicated right-hand secondary sidebar, with Explorer on the left
 and the composer and model chooser at the bottom. C++ owns execution,
 permissions and SQLite persistence; the extension observes its authenticated
@@ -24,22 +29,19 @@ multi-root workspace, choose it explicitly when prompted or use **xMind:
 Select Active Workspace Root**. It does not silently treat the first folder as
 the whole workspace. The sidebar displays the actual Native backend root.
 
-Each selected root gets an independent Native backend, private SQLite state
-outside all opened roots, a loopback port and fresh authentication held in
-SecretStorage. The host verifies the canonical root and Native workspace and
-generation identities before allowing mutations. Run and graph admission
-also carry those identities for an atomic backend check.
+Managed source now launches a native view adapter that connects through the
+shared local workspace profile controller. CLI and editor are intended to
+observe one backend and SQLite profile. The editor holds only its view credential;
+the native adapter retains backend authentication. Native owns startup and process
+recovery. The editor verifies returned workspace authority before admission.
 
-Closing the view, deactivating the extension or switching folders leaves ready
-backends and their running or paused work alive. Returning to a retained
-authenticated generation reconnects observation. A changed machine-level
-launch configuration or package retains the authenticated saved owner and
-reports pending backend changes. Its actual capabilities remain effective until
-an explicit upgrade using the current owner protocol preserves its profile.
-The new package contains one `xmind.exe` and accepts one current runtime format.
-Use a fresh local profile for the new installation; legacy-profile migration
-is excluded. Existing installations remain intact. Only a newly spawned backend
-that fails startup before authenticated readiness is eligible for startup cleanup.
+Closing the host closes its adapters and should leave backend work alive.
+Selections are scoped to the native workspace/profile, so an adapter port change
+does not reset conversation/model choices. The JavaScript owner registry and
+upgrade commands are removed. Native owner-control contracts remain separate
+from UI access; no legacy installation/profile conversion is required.
+
+These are implementation contracts pending native/installed acceptance.
 
 ## Machine configuration and packaging
 
@@ -52,7 +54,7 @@ paths are read from machine/global settings, never selected-project settings.
 | `agentflow.runtimeDirectory` | Optional absolute directory containing a verified `native-runtime-manifest.json`; otherwise use the extension's bundled runtime. |
 | `agentflow.stdlibSource` | Optional trusted pure standard-library source directory for development; otherwise use bundled source. |
 | `agentflow.providerConfigPath` | The **one** explicit absolute provider YAML path imported by Native. The extension does not read its contents or search opened projects for configuration. |
-| `agentflow.workspaceEdits` | Default `true` for newly started managed backends: file creation/edit proposals require native approval before writing. Explicit `false` starts a read-only owner. Existing owners retain their startup policy until explicitly upgraded using the current owner protocol. |
+| `agentflow.workspaceEdits` | Default `true` for newly started managed backends: file creation/edit proposals require native approval before writing. Explicit `false` starts a read-only owner. Existing profiles retain their native startup policy; changed explicit launch options are rejected. |
 | `agentflow.backendUrl` | External mode's explicitly configured loopback origin. |
 
 An unset provider path starts Native unconfigured so Settings can enroll a

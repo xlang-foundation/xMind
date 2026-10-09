@@ -116,6 +116,7 @@ function harness(options={}) {
     invalidate(){this.epoch++;this.active=undefined;}
     dispose(){this.invalidate();}
     async selectedFolder(){return {};}
+    stateFields(){return options.stateScope;}
     async connect(){const root=vscode.workspace.workspaceFolders[0].uri.fsPath;let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,roots:vscode.workspace.workspaceFolders.map(value=>({fsPath:value.uri.fsPath})),epoch:this.epoch,backendChangePending:options.backendChangePending===true};return this.active;}
     async attach(){return this.connect();}
     async prepare(){if(!this.active)throw new Error('Workspace disconnected');return {origin:this.active.origin,epoch:this.epoch,fields:{expected_workspace_id:this.active.metadata.workspace_id,expected_workspace_authority_id:this.active.metadata.authority_id}};}
@@ -562,4 +563,15 @@ test('a forged Allow message cannot approve malformed backend patch snapshots',a
  const proposal={...pendingEdit,id:'fixture-patch-0',tool:'patch_file',arguments_json:JSON.stringify({patch_id:'fixture-patch',patch_index:0,patch_file_count:1,action:'delete',path:'remove.cpp',parent_id:'synthetic-parent',file_id:'synthetic-file',before_exists:true,after_exists:false,before_content:'before',after_content:'unexpected nonempty deleted content',before_sha256:'a'.repeat(64)})};
  const h=harness({running:true,operations:[proposal]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.length));
  view.receive({type:'decide',id:proposal.id,decision:'allow'});await until(()=>view.posted.some(message=>message.type==='error'));assert.match(view.posted.findLast(message=>message.type==='error').text,/malformed/);assert.equal(h.decisions.length,0);view.close();
+});
+
+
+test('managed model choice survives an adapter-port change using native workspace/profile scope',async()=>{
+ const scope={workspace_id:'windows-local-file-v1:1:2',profile_directory:'C:\\Private\\profile-a'},h=harness({stateScope:scope});
+ h.state.set('xmind.model',{url:'http://127.0.0.1:19000',id:'synthetic-host-alternate',...scope});await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='capabilities'&&m.model==='synthetic-host-alternate'));}finally{view.close();}
+});
+test('a different native profile cannot restore a foreign saved model even at the same adapter URL',async()=>{
+ const h=harness({stateScope:{workspace_id:'windows-local-file-v1:1:2',profile_directory:'C:\\Private\\profile-b'}});h.state.set('xmind.model',{url:'http://127.0.0.1:8765',id:'synthetic-host-alternate',workspace_id:'windows-local-file-v1:1:2',profile_directory:'C:\\Private\\profile-a'});await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='capabilities'&&m.model==='synthetic-host-default'));assert.ok(!view.posted.some(m=>m.type==='capabilities'&&m.model==='synthetic-host-alternate'));}finally{view.close();}
 });

@@ -1,0 +1,10 @@
+{"retainedFixture":"C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-local-view-z533f0"}
+D:\CantorAI2026\xMind\extensions\vscode\workspace-backend.js:111
+      if(failed||!metadata)throw new Error('The native view did not become ready. Its backend/profile was preserved; reconnect to inspect the same owner.');
+                                 ^
+
+Error: The native view did not become ready. Its backend/profile was preserved; reconnect to inspect the same owner.
+    at WorkspaceBackend.open (D:\CantorAI2026\xMind\extensions\vscode\workspace-backend.js:111:34)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs:34:29
+
+Node.js v22.19.0

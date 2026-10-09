@@ -1,0 +1,21 @@
+{"retainedFixture":"C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-local-view-jDzDnq"}
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+null !== 0
+
+    at command (file:///D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs:18:72)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs:33:14 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: null,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0

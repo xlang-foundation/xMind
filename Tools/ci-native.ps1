@@ -39,6 +39,9 @@ Invoke-CiCommand 'native-yaml-source-check' $ciNode @((Join-Path $ciRoot 'Tools/
 Invoke-CiCommand 'native-regex-source-check' $ciNode @((Join-Path $ciRoot 'Tools/verify-regex-dependencies.mjs'))
 $ciNpm=(Get-Command npm.cmd -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
 Invoke-CiCommand 'native-sdk-peer-install' $ciNpm @('ci','--prefix',(Join-Path $ciRoot 'Native/tests/sdk'),'--ignore-scripts','--no-audit','--no-fund')
+# The real local-view contract builds the shared browser assets before the later
+# editor suite, so its locked host dependencies must already exist.
+Invoke-CiCommand 'native-view-host-install' $ciNpm @('ci','--prefix',(Join-Path $ciRoot 'extensions/vscode'),'--ignore-scripts','--no-audit','--no-fund')
 $ciOpenSsl=(Get-Command openssl -ErrorAction Stop).Source
 Invoke-CiCommand 'native-configure' $ciCmake @('-S',(Join-Path $ciRoot 'Native'),'-B',$ciNative,'-G',$ciGenerator,'-A','x64',('-DAGENTFLOW_XLANG3_SOURCE='+$ciRuntime),('-DAGENTFLOW_XLANG3_RUNTIME_DIR='+$ciRelease),('-DAGENTFLOW_PYTHON_LIB_SOURCE='+$ciStdlib),('-DAGENTFLOW_NODE_EXECUTABLE='+$ciNode),('-DAGENTFLOW_OPENSSL_EXECUTABLE='+$ciOpenSsl))
 # Build the actual process contract and its production dependencies first. This
@@ -137,6 +140,7 @@ $ciExpected+='native_legacy_owner_contract'
 $ciExpected+='native_unified_program_contract'
 $ciExpected+='native_console_workspace_contract'
 $ciExpected+='native_local_profile_contract'
+$ciExpected+='native_local_view_contract'
 $ciExpected+='native_unified_patch_http_contract'
 $ciExpected+='native_unified_graph_http_contract'
 $ciExpected+='native_unified_mcp_http_contract'

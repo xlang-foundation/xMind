@@ -64,14 +64,6 @@
       {
         "command": "agentflow.selectWorkspaceRoot",
         "title": "xMind: Select Active Workspace Root"
-      },
-      {
-        "command": "agentflow.upgradeBackend",
-        "title": "xMind: Upgrade Local Backend (Preserve Profile)"
-      },
-      {
-        "command": "agentflow.cancelBackendUpgrade",
-        "title": "xMind: Cancel Pending Backend Upgrade"
       }
     ],
     "configuration": {
@@ -85,7 +77,7 @@
           ],
           "default": "managed",
           "scope": "machine",
-          "description": "Managed starts an independent local native backend for the opened folder. External attaches to an explicitly configured backend only when its actual workspace matches."
+          "description": "Managed connects the opened folder to its shared native local profile through a native view adapter. Console and editor share backend execution and SQLite. External attaches to an explicitly configured matching workspace."
         },
         "agentflow.runtimeDirectory": {
           "type": "string",
@@ -109,7 +101,7 @@
           "type": "boolean",
           "default": true,
           "scope": "machine",
-          "description": "Enable native file-create and file-edit proposals for managed coding workspaces. Each change requires native approval. Setting false starts new workspaces in read-only mode; existing owners retain their policy until an explicit backend handoff."
+          "description": "Enable native approval-based file proposals in new managed profiles. False selects an initial read-only profile; existing profiles retain their native policy."
         },
         "agentflow.backendUrl": {
           "type": "string",

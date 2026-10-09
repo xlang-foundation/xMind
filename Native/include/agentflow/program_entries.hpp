@@ -11,3 +11,7 @@ int run_schema_worker(int argc,char** argv);
 #if defined(_WIN32)
 int run_admin(int argc,char** argv);
 #endif
+
+#if defined(_WIN32)
+int run_local_view(int argc, char** argv);
+#endif
