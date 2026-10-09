@@ -227,6 +227,7 @@ template<class Handler> auto guarded(Handler handler) {
         catch(const Conflict& error) {reply(response,{{"detail",error.what()}},409);}
         catch(const PersistenceBusy&) {reply(response,{{"detail","Backend busy; retry later"}},503);}
         catch(const PersistenceClosed&) {reply(response,{{"detail","Backend shutting down"}},503);}
+        catch(const BackendQuiesced&) {reply(response,{{"detail","Native backend is quiesced; admission is closed"}},503);}
         catch(const RunBusy&) {reply(response,{{"detail","Agent queue is full"}},503);}
         catch(const RunUnavailable&) {reply(response,{{"detail","Agent executor is unavailable"}},503);}
         catch(const ProviderHttpError& error) {

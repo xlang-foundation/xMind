@@ -1,7 +1,10 @@
 # Managed local runtime upgrades
 
 This is a required delivery design, not an implemented or validated upgrade
-protocol. The launcher now retains its latest authenticated workspace owner
+protocol. The [native persistence owner barrier](native-backend-owner.md) now
+implements durable queued-mutation fencing and same-live-generation receipt
+resume. It passed all 93 local native contracts; transport admission, retirement
+and target-generation startup remain pending. The launcher retains its latest authenticated workspace owner
 across package/settings changes and host reloads. It reports pending backend
 changes while continuing to use that owner's capabilities and saved state.
 Invalid/unreachable owners, unavailable credentials, changed authority or unsafe

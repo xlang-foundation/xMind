@@ -1,5 +1,17 @@
 # Current native validation
 
+The native persistence owner barrier passed the complete **93-contract local
+gate in 182.54 seconds**, with all 614 inputs unchanged. Queued and parallel
+admission races, receipt checks, publication/deferred-commit failure rollback,
+active run/context ownership, unresolved effect rejection, encrypted credential
+retention and actual database reopen passed. This is the C++ persistence part
+of runtime handoff. Authenticated transport controls, runtime health/idle
+checks, retirement, target-generation admission and installed migration are
+not implemented by this increment. The installed `TestProj` owner was observed
+alive without approved edits; it remains read-only.
+[Owner barrier and limits](native-backend-owner.md),
+[exact gate and retained attempts](evidence/native-backend-owner-local.json).
+
 The approval-based file-proposal source passed all **92 native contracts in
 178.43 seconds** and the complete **192 extension / 39 browser contracts**.
 Native health advertises its actual startup policy. New managed owners default
@@ -11,6 +23,9 @@ covered by the final view gate. These are local source checks, not installed
 writing acceptance. The current normal-profile `TestProj` owner still runs its
 older read-only startup policy; preserving its history through an upgrade
 remains pending. [Policy evidence](evidence/native-file-proposal-policy-local.json).
+The exact `ba3d109` isolated hosted 192/39 view gate also passed; independent
+archive, pinned-source and generated-asset verification is complete.
+[Hosted view verification](evidence/native-file-proposal-policy-views-hosted.json).
 
 The latest owner-retention source passed all **189 extension and 38 browser
 contracts locally**, with 42 inputs frozen and generated asset hashes retained. A package or
@@ -31,6 +46,8 @@ including packaging; independent verification of its archives and
 installed/rendered retention remain pending. Native generation migration
 remains unimplemented.
 [Owner-retention evidence](evidence/native-workspace-owner-continuity-local.json).
+Its exact isolated hosted 189/38 view archive and source/assets are independently
+verified. [Hosted retention views](evidence/native-workspace-owner-continuity-views-hosted.json).
 
 The latest native CLI skill controls passed all **92 local native contracts in
 175.20 seconds**, with all 612 input hashes unchanged. Exact registered and passed

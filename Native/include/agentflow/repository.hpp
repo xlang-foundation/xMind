@@ -7,6 +7,7 @@
 #include "agentflow/context_records.hpp"
 #include "agentflow/graph_context_records.hpp"
 #include "agentflow/skill_records.hpp"
+#include "agentflow/backend_owner.hpp"
 #include <memory>
 #include <vector>
 #include <optional>
@@ -29,6 +30,11 @@ public:
     ~Repository();
     Repository(const Repository&)=delete;
     Repository& operator=(const Repository&)=delete;
+    // Native owner control; each mutation verifies the actual exclusive lease.
+    BackendOwnerState open_backend_owner(const BackendLease&,const std::string& generation);
+    BackendOwnerState backend_owner();
+    BackendOwnerState quiesce_backend_owner(const BackendLease&,const BackendOwnerPrecondition&,const std::string& receipt);
+    BackendOwnerState resume_backend_owner(const BackendLease&,const BackendOwnerReceipt&);
     Session create_session(const std::string& id,const std::string& title);
     Session rename_session(const std::string& id,const std::string& title,const std::string& expected_title);
     Session session(const std::string& id);

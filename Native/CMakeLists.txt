@@ -780,6 +780,15 @@ if(BUILD_TESTING)
   add_test(NAME persistence_service_contract COMMAND agentflow_persistence_service_contract
     "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
   set_tests_properties(persistence_service_contract PROPERTIES TIMEOUT 60)
+  add_executable(agentflow_backend_owner_contract tests/backend_owner_contract.cpp)
+  target_link_libraries(agentflow_backend_owner_contract PRIVATE agentflow_core)
+  if(WIN32)
+    add_custom_command(TARGET agentflow_backend_owner_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_backend_owner_contract>")
+  endif()
+  add_test(NAME native_backend_owner_contract COMMAND agentflow_backend_owner_contract
+    "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+  set_tests_properties(native_backend_owner_contract PROPERTIES TIMEOUT 60)
   if(WIN32)
     add_executable(agentflow_credential_repository_contract tests/credential_repository_contract.cpp)
     add_executable(agentflow_provider_profiles_contract tests/provider_profiles_contract.cpp)

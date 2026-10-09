@@ -1,0 +1,60 @@
+{
+  "independentVerifierAttempts": [
+    {
+      "passed": false,
+      "scope": "Read-only independent archive verifier; not the hosted product test gate",
+      "cause": "The verifier selected a nonexistent file-policy test title. The original verifier remains in the private receipt directory."
+    },
+    {
+      "passed": true,
+      "scope": "Same archive and pinned sources; exact actual footer-policy test title and unchanged full-suite assertions",
+      "actualTitle": "footer file-change mode follows native capability and never promises writes for unknown legacy policy"
+    }
+  ],
+  "successfulWorkflow": {
+    "sourceRevision": "ba3d109cd6a8c2447cc04cfecef5c7d547659d9f",
+    "workflowRunId": "37904971313",
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/37904971313",
+    "workflowConclusion": "success",
+    "gatePassed": true,
+    "scope": "Independent file/source verification of complete isolated synthetic Node view suites; no native execution, live provider, installation or rendered editor acceptance",
+    "artifact": {
+      "id": 11603559714,
+      "digest": "sha256:e1195b9ecef7d7f0e8903c9740da216d8e210ecc53be2552ce5479d9763f1d0d",
+      "bytes": 102097
+    },
+    "sourceFiles": 41,
+    "trackedSourcesMatchedToGit": 39,
+    "vendorCopiesMatched": 2,
+    "testedBrowserAssets": 11,
+    "sourceAndAssetBytesUnchanged": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 192,
+      "passed": 192,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 39,
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "evidenceHashes": {
+      "gate": "2905ee946faf7790031058ffe009d4769892301d2c36e060bb0bc6558725b77d",
+      "sourceBefore": "ede7943396f8e61274e5f0ababb224836009306b0b56bb50d75e7d09498482fa",
+      "sourceAfter": "ede7943396f8e61274e5f0ababb224836009306b0b56bb50d75e7d09498482fa",
+      "assetBefore": "ee79062d9b05dac18cd5fde981bf833832a8541225468c4ce1fb7c8ea330d6b6",
+      "assetAfter": "ee79062d9b05dac18cd5fde981bf833832a8541225468c4ce1fb7c8ea330d6b6",
+      "extension": "3147e51e3aaf11d5d0e82040f8938651fd16676a7931cb5399e8ec052ffa2bce",
+      "browser": "b1a41023f9c714000cd499339bced0d7fb72d65acd33d591b208d1cf040e3fe5"
+    },
+    "nativeExecuted": false,
+    "installed": false,
+    "liveRuntimeChanged": false
+  }
+}

@@ -1729,8 +1729,55 @@ std::vector<Message> Repository::history(const std::string& id) {
         result.push_back({integer(row[0]),text(row[1]),text(row[2])});
     return result;
 }
+namespace {
+constexpr const char* backend_owner_category="native-backend-owner";
+void owner_identity(const std::string& value){if(value.size()!=32||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid native owner identity");}
+void owner_revision(std::int64_t value){if(value<1||value>=9007199254740991LL)throw std::invalid_argument("Invalid native owner revision");}
+Json owner_json(const BackendOwnerState& s){owner_identity(s.generation);owner_revision(s.revision);if(s.quiesced)owner_identity(s.receipt_id);else if(!s.receipt_id.empty())throw std::invalid_argument("Active owner cannot retain a quiescence receipt");return {{"version",1},{"generation",s.generation},{"revision",s.revision},{"quiesced",s.quiesced},{"receipt_id",s.receipt_id}};}
+BackendOwnerState decode_owner(const std::string& raw){
+    try {if(raw.size()>1024)throw std::invalid_argument("Owner record exceeds limits");const auto j=Json::parse(raw);BackendOwnerState s{j.at("generation").get<std::string>(),j.at("revision").get<std::int64_t>(),j.at("quiesced").get<bool>(),j.at("receipt_id").get<std::string>()};if(owner_json(s).dump()!=raw)throw std::invalid_argument("Owner record differs from canonical typed state");return s;}
+    catch(...){throw DatabaseError("Saved native owner state is invalid");}
+}
+std::optional<std::string> owner_record(XlangSqlite& db){const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id='owner'",{std::string(backend_owner_category)}).rows;return rows.empty()?std::optional<std::string>{}:text(rows[0][0]);}
+void write_owner(XlangSqlite& db,const BackendOwnerState& s,const std::optional<std::string>& previous){const auto raw=owner_json(s).dump();const auto written=previous?db.execute("UPDATE information SET payload=? WHERE category=? AND id='owner' AND payload=?",{raw,std::string(backend_owner_category),*previous}):db.execute("INSERT INTO information(category,id,payload) VALUES(?,'owner',?) ON CONFLICT(category,id) DO NOTHING",{std::string(backend_owner_category),raw});if(written.affected_rows!=1)throw Conflict("Native owner changed before publication");}
+void require_database_idle(XlangSqlite& db){
+    // All predicates are native literals. Include unfinished effect and context
+    // ownership even if a corrupt/failed root claims to be terminal.
+    for(const auto* sql:{
+        "SELECT id FROM runs WHERE state IN ('queued','running','paused') LIMIT 1",
+        "SELECT id FROM operations WHERE state IN ('awaiting_approval','ready','executing','uncertain') LIMIT 1",
+        "SELECT attempt_id FROM agent_model_call_reservations WHERE state IN ('reserved','started') LIMIT 1",
+        "SELECT id FROM delegation_batches WHERE state IN ('accepted','working') LIMIT 1",
+        "SELECT id FROM dynamic_plans WHERE state IN ('active','waiting_human','uncertain') LIMIT 1",
+        "SELECT label FROM dynamic_plan_nodes WHERE state IN ('claimed','waiting_human','uncertain') LIMIT 1",
+        "SELECT id FROM dynamic_plan_calls WHERE state IN ('accepted','report_ready') LIMIT 1",
+        "SELECT id FROM agent_budget_segments WHERE state='open' LIMIT 1",
+        "SELECT root_run_id FROM dynamic_owner_pauses WHERE state='paused' LIMIT 1",
+        "SELECT id FROM context_idle_owners WHERE state='active' LIMIT 1",
+        "SELECT id FROM context_compactions WHERE state IN ('reserved','started','received') LIMIT 1",
+        "SELECT id FROM context_manual_requests WHERE state IN ('pending','claimed') LIMIT 1",
+        "SELECT id FROM context_measures WHERE state IN ('reserved','started') LIMIT 1",
+        "SELECT id FROM inference_steps WHERE state IN ('reserved','started') LIMIT 1"
+    })if(!db.execute(sql).rows.empty())throw Conflict("Native execution or maintenance ownership is still active");
+}
+}
+BackendOwnerState Repository::open_backend_owner(const BackendLease& lease,const std::string& generation){
+    if(!lease.covers(impl_->path))throw Conflict("Native owner requires this database lease");owner_identity(generation);auto& db=impl_->database;Transaction tx(db);const auto previous=owner_record(db);std::int64_t revision=1;
+    if(previous){const auto prior=decode_owner(*previous);if(prior.quiesced)throw BackendQuiesced("A durable native quiescence receipt requires explicit generation handoff; normal startup cannot reopen admission");owner_revision(prior.revision+1);revision=prior.revision+1;}
+    BackendOwnerState current{generation,revision,false,{}};write_owner(db,current,previous);tx.commit();return current;
+}
+BackendOwnerState Repository::backend_owner(){const auto raw=owner_record(impl_->database);if(!raw)throw NotFound("Native database owner is not initialized");return decode_owner(*raw);}
+BackendOwnerState Repository::quiesce_backend_owner(const BackendLease& lease,const BackendOwnerPrecondition& expected,const std::string& receipt){
+    if(!lease.covers(impl_->path))throw Conflict("Quiescence requires this database lease");owner_identity(expected.generation);owner_revision(expected.revision);owner_identity(receipt);auto& db=impl_->database;Transaction tx(db);const auto previous=owner_record(db);if(!previous)throw NotFound("Native owner is absent");auto current=decode_owner(*previous);
+    if(current.generation!=expected.generation||current.revision!=expected.revision||current.quiesced)throw Conflict("Native quiescence precondition changed");require_database_idle(db);owner_revision(current.revision+1);++current.revision;current.quiesced=true;current.receipt_id=receipt;write_owner(db,current,previous);tx.commit();return current;
+}
+BackendOwnerState Repository::resume_backend_owner(const BackendLease& lease,const BackendOwnerReceipt& expected){
+    if(!lease.covers(impl_->path))throw Conflict("Resume requires this database lease");owner_identity(expected.generation);owner_identity(expected.receipt_id);owner_revision(expected.revision);auto& db=impl_->database;Transaction tx(db);const auto previous=owner_record(db);if(!previous)throw NotFound("Native owner is absent");auto current=decode_owner(*previous);
+    if(!current.quiesced||current.generation!=expected.generation||current.receipt_id!=expected.receipt_id||current.revision!=expected.revision)throw Conflict("Native resume receipt changed");require_database_idle(db);owner_revision(current.revision+1);++current.revision;current.quiesced=false;current.receipt_id.clear();write_owner(db,current,previous);tx.commit();return current;
+}
 void Repository::put_information(const std::string& category,const std::string& id,const std::string& json) {
     identifier(category); identifier(id);
+    if(category==backend_owner_category)throw std::invalid_argument("Use typed native owner control");
     if(category=="secrets" || category=="credentials") throw std::invalid_argument("Use the encrypted credential repository");
     Transaction transaction(impl_->database);
     changed_one(impl_->database.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO UPDATE SET payload=excluded.payload",{category,id,json}));
@@ -1738,6 +1785,7 @@ void Repository::put_information(const std::string& category,const std::string& 
 }
 void Repository::compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected) {
     identifier(category);identifier(id);
+    if(category==backend_owner_category)throw std::invalid_argument("Use typed native owner control");
     if(category=="secrets"||category=="credentials")throw std::invalid_argument("Use the encrypted credential repository");
     Transaction transaction(impl_->database);
     const auto result=expected

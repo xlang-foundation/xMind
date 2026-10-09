@@ -19,6 +19,13 @@ public:
     // Stop accepting, drain accepted requests, join and release ownership.
     // Safe for concurrent callers; the object must outlive all callers.
     void close();
+    // A serialized durable admission fence. Reads remain available; pending
+    // mutations check the fence on the worker, including requests already queued.
+    // Only this live generation can resume its exact quiescence receipt. A
+    // stopped quiesced generation cannot be reopened by normal startup.
+    std::future<BackendOwnerState> backend_owner();
+    std::future<BackendOwnerState> quiesce_backend(BackendOwnerPrecondition);
+    std::future<BackendOwnerState> resume_backend(BackendOwnerReceipt);
     std::future<Session> create_session(std::string id,std::string title);
     std::future<Session> rename_session(std::string id,std::string title,std::string expected_title);
     std::future<Session> session(std::string id);
