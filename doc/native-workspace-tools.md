@@ -1,5 +1,10 @@
 # Native workspace tools
 
+The later [private-state boundary checkpoint](native-private-state.md) closes
+direct `.agentflow` access as well as `.config`, with a complete hosted native
+gate at its stated scope. Its full workflow failed packaging and it is not yet
+installed. Later skill source has separate pending validation.
+
 The C++ Windows workspace implementation provides actual file reading, one-directory listing and literal text search, plus typed model tool definitions and exact argument-shape validation. The native agent loop invokes these tools and persists their actual results. The filesystem adapter has no model response generator or simulated effect; HTTP execution stays in the separate server adapter.
 
 The root is an opened directory handle. File handles are opened, checked against the root's normalized path and then read. Strict normalized path casing avoids treating a case-distinct sibling as the authorized root. Caller paths must be relative; absolute paths, parent traversal, stream/drive syntax and embedded NUL are rejected. Windows extended paths use native separators. Hard-linked files are denied pending a separate explicit alias policy.

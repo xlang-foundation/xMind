@@ -1,0 +1,49 @@
+{
+  "sourceRevision": "3dc25b8c09ea792bd08bb20a10ab4b1d09f7e603",
+  "workflowRunId": "37875761154",
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37875761154",
+  "workflowConclusion": "failure",
+  "failureStep": "Package and verify shared browser assets",
+  "artifact": {
+    "id": 11592962732,
+    "digest": "sha256:376721279cf8552e3d4d672e70daf188ae52163ed9d56d1c6454c94f13c3efe8",
+    "bytes": 33441
+  },
+  "runtime": {
+    "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+    "stdlibSourceRevision": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "bridgeEnabled": false,
+    "cpythonExecuted": false
+  },
+  "native": {
+    "registered": 89,
+    "passed": 89,
+    "failed": 0,
+    "completeExpectedSetMatched": true,
+    "elapsedSeconds": 268.34
+  },
+  "browser": {
+    "tests": 35,
+    "passed": 35,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "extension": {
+    "stepConclusion": "success",
+    "scope": "Hosted workflow step metadata; no extension count claimed from this artifact"
+  },
+  "nativeBrowserIntegration": {
+    "stepConclusion": "success",
+    "scope": "Model-free contract using disposable actual native processes"
+  },
+  "installed": false,
+  "liveRuntimeChanged": false,
+  "sourceBytesFrozen": false,
+  "evidenceHashes": {
+    "contracts": "f3b4cbe37d28c50d2863feab31053218e7169697d96888e86887d163bed2d6d0",
+    "ctest": "90dee2892c7e13c9f620a22aa37d215b807a0bb6a3e32a6f040ac49007812791",
+    "browser": "17ae770ec661d06d35c20120b5d457ed73259048ad7000b35933a2bf27591836"
+  },
+  "scope": "Native private-state boundary test checkpoint within a failed packaging workflow; later skill source and full product parity are not covered"
+}

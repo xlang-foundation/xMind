@@ -5,6 +5,7 @@
 #include "yaml-cpp/eventhandler.h"
 #include "yaml-cpp/exceptions.h"
 #include <sstream>
+#include <iterator>
 #include <algorithm>
 namespace agentflow {
 namespace {

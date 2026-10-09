@@ -1,6 +1,7 @@
 // Download this repository's exact-revision native or view CI artifacts, read-only.
 // Authentication stays in memory; redirects never receive Git credentials.
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 const [id,revision,kind='evidence']=process.argv.slice(2);
@@ -23,12 +24,14 @@ const run=await runResponse.json();if(run.head_sha!==revision||run.status!=='com
 const artifactsResponse=await get(`${base}/actions/runs/${id}/artifacts`);if(!artifactsResponse.ok)throw new Error(`Artifacts HTTP ${artifactsResponse.status}`);
 const data=await artifactsResponse.json();const name=kind==='views'?`view-contracts-evidence-${revision}`:`native-windows-${kind}-${revision}`;
 const artifact=data.artifacts.find(item=>item.name===name&&!item.expired);
-if(!artifact||artifact.size_in_bytes>268435456)throw new Error('Exact-revision artifact absent, expired or too large');
+if(!artifact||artifact.size_in_bytes>268435456||!/^sha256:[a-f0-9]{64}$/.test(artifact.digest||''))throw new Error('Exact-revision artifact absent, expired, too large or missing its advertised digest');
 const redirect=await get(artifact.archive_download_url);if(redirect.status!==302)throw new Error(`Artifact archive HTTP ${redirect.status}`);
 const location=new URL(redirect.headers.get('location'));
 if(location.protocol!=='https:'||!['.blob.core.windows.net','.githubusercontent.com','.actions.githubusercontent.com'].some(suffix=>location.hostname.endsWith(suffix)))throw new Error('Unexpected artifact redirect');
 const download=await fetch(location,{signal:AbortSignal.timeout(60000)});if(!download.ok)throw new Error(`Artifact download HTTP ${download.status}`);
 const chunks=[];let bytes=0;for await(const chunk of download.body){bytes+=chunk.length;if(bytes>268435456)throw new Error('Artifact exceeded download limit');chunks.push(chunk);}
+const archive=Buffer.concat(chunks),digest='sha256:'+createHash('sha256').update(archive).digest('hex');
+if(digest!==artifact.digest||bytes!==artifact.size_in_bytes)throw new Error('Artifact archive differs from the advertised digest or size');
 const folder=new URL('../.agentflow/ci/artifacts/',import.meta.url);await mkdir(folder,{recursive:true});const target=new URL(name+'.zip',folder);
-await writeFile(target,Buffer.concat(chunks));
-console.log(JSON.stringify({run:id,revision,conclusion:run.conclusion,artifact:artifact.id,name,bytes,path:fileURLToPath(target)}));
+await writeFile(target,archive);
+console.log(JSON.stringify({run:id,revision,conclusion:run.conclusion,artifact:artifact.id,name,bytes,digest,digestVerified:true,path:fileURLToPath(target)}));
