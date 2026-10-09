@@ -1,0 +1,31 @@
+// Isolated, model-free host/controller validation. No native backend, xlang3,
+// interpreter, provider credentials or installed editor is executed/accessed.
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {spawn,execFileSync} from 'node:child_process';
+import {resolve,join} from 'node:path';
+if(process.env.GITHUB_ACTIONS!=='true')throw new Error('Run view contracts on an isolated GitHub runner; use a benchmark-guarded launcher on the development machine.');
+const root=resolve(import.meta.dirname,'..'),out=join(root,'build/ci-evidence/views');
+await mkdir(out,{recursive:true});
+const tracked=execFileSync('git',['ls-files','--','extensions/vscode','views/browser'],{cwd:root,encoding:'utf8'}).trim().split(/\r?\n/);
+const files=[...tracked,'extensions/vscode/node_modules/marked/lib/marked.umd.js','extensions/vscode/node_modules/dompurify/dist/purify.min.js'];
+if(tracked.length!==39||files.length!==41||new Set(files).size!==files.length)throw new Error('View source inventory differs; review and update the complete manifest.');
+const sha=b=>createHash('sha256').update(b).digest('hex');
+const freeze=async()=>Object.fromEntries(await Promise.all(files.map(async p=>[p,sha(await readFile(join(root,p)))])));
+const before=await freeze();
+await writeFile(join(out,'source-before.json'),JSON.stringify(before,null,2)+'\n');
+const run=(name,args,cwd)=>new Promise((yes,no)=>{
+ const child=spawn(process.execPath,args,{cwd,windowsHide:true,stdio:['ignore','pipe','pipe']});let log='';
+ child.stdout.on('data',b=>log+=b);child.stderr.on('data',b=>log+=b);child.on('error',no);
+ child.on('close',async code=>{try{await writeFile(join(out,name+'.log'),log);const number=p=>Number(log.match(new RegExp('# '+p+' (\\d+)'))?.[1]);yes({exitCode:code,tests:number('tests'),passed:number('pass'),failed:number('fail'),skipped:number('skipped'),cancelled:number('cancelled')});}catch(e){no(e);}});
+});
+const [extension,browser]=await Promise.all([
+ run('extension',['--test','tests/*.test.js'],join(root,'extensions/vscode')),
+ run('browser',['--test','views/browser/tests/*.test.cjs'],root)
+]);
+const after=await freeze();await writeFile(join(out,'source-after.json'),JSON.stringify(after,null,2)+'\n');
+const unchanged=JSON.stringify(before)===JSON.stringify(after);
+const passed=unchanged&&extension.exitCode===0&&browser.exitCode===0&&extension.tests===175&&extension.passed===175&&browser.tests===35&&browser.passed===35&&[extension,browser].every(r=>r.failed===0&&r.skipped===0&&r.cancelled===0);
+const report={sourceRevision:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),scope:'Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance',sourceFiles:files.length,sourceBytesUnchanged:unchanged,extension,browser,providerRequests:0,nativeExecuted:false,cpythonExecuted:false,passed};
+await writeFile(join(out,'gate.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
+if(!passed)process.exitCode=1;

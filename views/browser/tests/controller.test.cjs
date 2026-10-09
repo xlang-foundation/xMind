@@ -1,6 +1,29 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController}=require('../browser.js');
 const {planFixture,inputMessage}=require('../../../extensions/vscode/tests/plan-fixture');
 
+test('conversation selection recovers the new provider catalogue after its native selection acknowledgement is retired',async()=>{
+ let state={revision:4,active:'first',profiles:[{id:'first',provider:'openai',route_id:'openai.responses',model:'first-current',revision:1},{id:'next',provider:'anthropic',route_id:'anthropic.messages',model:'next-current',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]};
+ let release;const acknowledgement=new Promise(resolve=>release=resolve),calls=[],posted=[];
+ const client={providerProfiles:async()=>state,discoverProfileModels:async(...args)=>{calls.push(['discover',...args]);return {models:[{id:state.active+'-current'},{id:state.active+'-alternate'}]};},selectProviderProfile:async(...args)=>{calls.push(['select',...args]);state={...state,revision:5,active:args[0]};return acknowledgement;},saveProviderProfile:async()=>{throw new Error('No automatic model write permitted');},health:async()=>({agent_execution:true}),models:async()=>({models:[{id:state.active+'-current'}],default_model:state.active+'-current'}),graphs:async()=>({graphs:[]}),sessions:async()=>[{id:'older'}],history:async()=>[{role:'assistant',data:{content:'Retained synthetic history'}}],runs:async()=>[]};
+ const view=new BrowserController(client,value=>posted.push(value));
+ try{await view.discover();const selection=view.handle({type:'select-provider',id:'next'});for(let n=0;n<50&&!calls.some(c=>c[0]==='select');n++)await new Promise(resolve=>setImmediate(resolve));assert.equal(calls.filter(c=>c[0]==='select').length,1);
+  const conversation=view.handle({type:'select',id:'older'});release(state);await Promise.all([selection,conversation]);
+  assert.deepEqual(calls,[['discover','first','openai.responses',undefined,4],['select','next',4],['discover','next','anthropic.messages',undefined,5]]);
+  assert.equal(view.model,'next-current');assert.equal(view.session,'older');assert.equal(posted.findLast(m=>m.type==='history').history[0].data.content,'Retained synthetic history');assert.deepEqual(posted.findLast(m=>m.type==='model-list').models,[{id:'next-current'},{id:'next-alternate'}]);assert.equal(posted.findLast(m=>m.type==='provider-profiles').active,'next');
+ }finally{view.dispose();}
+});
+
+test('a second conversation/profile observation rejects the retired recovery catalogue and publishes only its current native binding',async()=>{
+ const profiles=['first','next','last'].map(id=>({id,provider:'openai',route_id:'openai.responses',model:id+'-current',revision:1}));let state={revision:4,active:'first',profiles,routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};
+ let release;const pending=new Promise(resolve=>release=resolve),calls=[],posted=[];
+ const client={providerProfiles:async()=>state,discoverProfileModels:async(...args)=>{calls.push(args);return args[0]==='next'?pending:{models:[{id:args[0]+'-current'},{id:args[0]+'-alternate'}]};},health:async()=>({agent_execution:true}),models:async()=>({models:[{id:state.active+'-current'}],default_model:state.active+'-current'}),graphs:async()=>({graphs:[]}),sessions:async()=>[{id:'older'},{id:'latest'}],history:async id=>[{role:'assistant',data:{content:'Synthetic history for '+id}}],runs:async()=>[]};
+ const view=new BrowserController(client,value=>posted.push(value));
+ try{await view.discover();state={...state,revision:5,active:'next'};const older=view.handle({type:'select',id:'older'});for(let n=0;n<50&&!calls.some(c=>c[0]==='next');n++)await new Promise(resolve=>setImmediate(resolve));assert.equal(calls.filter(c=>c[0]==='next').length,1);
+  state={...state,revision:6,active:'last'};const latest=view.handle({type:'select',id:'latest'});release({models:[{id:'retired-next-only'}]});await Promise.all([older,latest]);
+  assert.deepEqual(calls,[['first','openai.responses',undefined,4],['next','openai.responses',undefined,5],['last','openai.responses',undefined,6]]);assert.equal(view.session,'latest');assert.equal(view.model,'last-current');assert.ok(!posted.some(m=>m.type==='model-list'&&m.models.some(x=>x.id==='retired-next-only')));assert.deepEqual(posted.findLast(m=>m.type==='model-list').models,[{id:'last-current'},{id:'last-alternate'}]);assert.equal(posted.findLast(m=>m.type==='history').history[0].data.content,'Synthetic history for latest');
+ }finally{view.dispose();}
+});
+
 test('browser imported key-only profiles guide the footer selection without a new-key error or provider calls',async()=>{
  const state={revision:1,active:'',profiles:[{id:'saved-openai',provider:'openai',route_id:'openai.responses',model:'',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]},calls=[],posted=[];
  const view=new BrowserController({providerProfiles:async()=>state,discoverProfileModels:async()=>{calls.push('discover');},selectProviderProfile:async()=>{calls.push('select');},saveProviderProfile:async()=>{calls.push('save');},providerConfiguration:async()=>{calls.push('legacy');}},value=>posted.push(value));

@@ -27,6 +27,7 @@ async function activate(context) {
   let sidebarView;
   let resolveSidebar;
   let client;
+  let health;
   let sessionId;
   let runId;
   let sessionRuns=[];
@@ -227,10 +228,16 @@ async function activate(context) {
     const previousProfile=profileController?.state;await profileController?.refresh();
     if(version!==generation||!panel)return;
     if(previousProfile&&(previousProfile.revision!==profileController.state?.revision||previousProfile.active!==profileController.state?.active)){
-      const current=await capabilities();if(version!==generation||!panel)return;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);post({type:'capabilities',execution:current.health.agent_execution,renameSessions:current.health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
+      const current=await capabilities();if(version!==generation||!panel)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
     }
-    profileController?.models(selectedModel);
+    const retainedCatalogue=profileController?.models(selectedModel);
     sessionRuns=runs;
+    presentRuns();
+    // Native may have published a provider after its acknowledgement was
+    // retired by a conversation switch. Re-discover that observed saved
+    // profile without replaying selection or enrolling a model.
+    if(previousProfile&&!retainedCatalogue&&profileController?.state?.active){try{await configureModel();}catch{}}
+    if(version!==generation||!panel)return;
     const savedRun=context.workspaceState.get(runStateKey);
     const selected=savedRun?.url===client.baseUrl && savedRun.session_id===id?sessionRuns.find(run=>run.id===savedRun.id):undefined;
     const latest = selected||runs.at(-1);
@@ -342,7 +349,7 @@ async function activate(context) {
     contextController?.dispose();contextController=undefined;profileController?.dispose();client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
     client.bindWorkspace(workspaceBackend);
     const profileTarget=client;profileController=new ProviderProfileController(client,post,()=>!!panel&&client===profileTarget&&configuredOrigin()===profileTarget.baseUrl);
-    const initial=await capabilities();if(!connectionCurrent())throw new Error('Workspace changed while opening the sidebar.');let health=initial.health;modelCatalogue=initial.catalogue;
+    const initial=await capabilities();if(!connectionCurrent())throw new Error('Workspace changed while opening the sidebar.');health=initial.health;modelCatalogue=initial.catalogue;
     const savedModel=context.workspaceState.get(modelStateKey);
     selectedModel=chooseModel(modelCatalogue,savedModel?.url===client.baseUrl?savedModel.id:undefined);
     const savedGraph=context.workspaceState.get(graphStateKey);selectedGraph=savedGraph?.url===client.baseUrl?savedGraph.id:undefined;

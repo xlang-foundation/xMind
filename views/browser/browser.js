@@ -29,8 +29,14 @@ class BrowserController {
   async select(id,preferred){this.stop();const version=this.generation;this.session=id;this.runId=undefined;this.children.clear();this.graph=undefined;this.operations.clear();this.post({type:'graph-clear'});this.post({type:'operations',operations:[]});this.post({type:'reset-run'});const history=await this.client.history(id),runs=await this.client.runs(id);if(!this.current(version))return;
     const previousProfile=this.profileController?.state;await this.profileController?.refresh();if(!this.current(version))return;
     if(previousProfile&&(previousProfile.revision!==this.profileController.state?.revision||previousProfile.active!==this.profileController.state?.active))await this.refreshCapabilities();
-    if(!this.current(version))return;this.profileController?.models(this.model);
-    this.runs=runs;this.post({type:'history',history});const selected=runs.find(run=>run.id===preferred)||runs.at(-1);this.runId=selected?.id;this.cursor=0;this.present();this.remember();await this.refreshSessions();if(this.runId){await this.poll();this.watch();}else this.post({type:'status',text:'Ready'});}
+    if(!this.current(version))return;const retainedCatalogue=this.profileController?.models(this.model);
+    this.runs=runs;this.post({type:'history',history});const selected=runs.find(run=>run.id===preferred)||runs.at(-1);this.runId=selected?.id;this.cursor=0;this.present();this.remember();await this.refreshSessions();
+    // A selection acknowledgement or discovery can be retired by the immediate
+    // conversation intent guard after Native has already changed profiles.
+    // Recover with the freshly observed saved profile; never replay the CAS or
+    // carry an unsaved key across the conversation change.
+    if(this.current(version)&&previousProfile&&!retainedCatalogue&&this.profileController?.state?.active){try{await this.discover();}catch{}}
+    if(!this.current(version))return;if(this.runId){await this.poll();this.watch();}else this.post({type:'status',text:'Ready'});}
   watch(){clearInterval(this.timer);if(this.busy()||this.pendingTreeEvents||this.pendingPlanObservation)this.timer=setInterval(()=>this.poll(),500);}
   async refreshSessions(){const version=this.generation,sessions=await this.client.sessions();if(this.current(version))this.post({type:'sessions',sessions,selected:this.session});}
   async poll(){if(this.polling||!this.runId)return;this.polling=true;const version=this.generation,id=this.runId;try{

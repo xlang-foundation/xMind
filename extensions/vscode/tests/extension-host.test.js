@@ -33,7 +33,7 @@ function harness(options={}) {
     else if(options.plan&&target.pathname===`/v1/runs/${options.plan.run.id}/plan/resume`){planResumes.push(JSON.parse(requestOptions.body));data={...options.plan.run,state:'running'};}
     else if(target.pathname==='/v1/provider/profiles')return options.profileRegistry?{ok:true,json:async()=>requestOptions.method==='POST'?options.profileSave(JSON.parse(requestOptions.body)):options.profileRegistry()}:{ok:false,status:404,json:async()=>({detail:'Legacy backend has no profile API'})};
     if(data!==undefined)return {ok:true,json:async()=>data};
-    if(target.pathname==='/v1/provider/profiles/models')return {ok:true,json:async()=>({models:options.profileModels||options.catalogue.models})};
+    if(target.pathname==='/v1/provider/profiles/models')return {ok:true,json:async()=>({models:options.profileDiscovery?await options.profileDiscovery(JSON.parse(requestOptions.body)):options.profileModels||options.catalogue.models})};
     if(target.pathname==='/v1/provider/profiles/select')return {ok:true,json:async()=>options.profileSelect(JSON.parse(requestOptions.body))};
     if(target.pathname==='/v1/runs'&&options.onAdmission)return options.onAdmission(JSON.parse(requestOptions.body));
     if(target.pathname==='/v1/health') data=options.health||{agent_execution:true,status:'ok'};
@@ -135,6 +135,28 @@ function harness(options={}) {
     pauseOperation(promise) {pendingOperation=promise;},
     pauseHistory(promise) {pendingHistory=promise;}};
 }
+
+test('VS Code conversation selection recovers discovery when native provider publication outlives its retired acknowledgement',async()=>{
+ let registry={revision:4,active:'first',profiles:[{id:'first',route_id:'openai.responses',provider:'openai',model:'',revision:1},{id:'next',route_id:'anthropic.messages',provider:'anthropic',model:'next-current',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]};
+ let release;const acknowledgement=new Promise(resolve=>release=resolve),selections=[],writes=[],admissions=[];
+ const options={health:{agent_execution:false},catalogue:{models:[],default_model:''},profileModels:[{id:'first-current'},{id:'first-alternate'}],profileRegistry:()=>registry,profileSelect:body=>{selections.push(body);registry={...registry,revision:5,active:body.id};options.health={agent_execution:true};options.catalogue={models:[{id:'next-current'}],default_model:'next-current'};options.profileModels=[{id:'next-current'},{id:'next-alternate'}];return acknowledgement;},profileSave:body=>{writes.push(body);throw new Error('No model enrollment expected');},onAdmission:body=>{admissions.push(body);return {ok:true,json:async()=>({id:'finished',state:'completed'})};}};
+ const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{view.receive({type:'ready'});await until(()=>view.posted.findLast(m=>m.type==='model-list')?.models.length===2);view.receive({type:'select-provider',id:'next'});await until(()=>selections.length===1);view.receive({type:'select',id:'saved'});release(registry);await until(()=>view.posted.findLast(m=>m.type==='status')?.text==='completed');await new Promise(resolve=>setImmediate(resolve));
+  assert.deepEqual(selections,[{id:'next',expected_revision:4}]);assert.deepEqual(writes,[]);assert.deepEqual(view.posted.findLast(m=>m.type==='model-list').models,[{id:'next-current'},{id:'next-alternate'}]);assert.equal(view.posted.findLast(m=>m.type==='provider-profiles').active,'next');assert.equal(h.requests.filter(p=>p==='/v1/provider/profiles/models').length,2);assert.ok(!h.requests.includes('/v1/runs'));assert.ok(view.posted.some(m=>m.type==='history'));
+  view.receive({type:'send',prompt:'Synthetic explicit submission after observed provider recovery'});await until(()=>admissions.length===1);assert.equal(admissions[0].provider_profile_id,'next');assert.equal(admissions[0].expected_provider_revision,5);assert.equal(admissions[0].model,'next-current');assert.deepEqual(writes,[]);
+ }finally{view.close();}
+});
+
+test('VS Code recovery discards a late catalogue after another conversation intent and reads the current profile without writes',async()=>{
+ const profiles=['first','next','last'].map(id=>({id,provider:'openai',route_id:'openai.responses',model:id+'-current',revision:1}));let registry={revision:4,active:'first',profiles,routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};
+ let release;const pending=new Promise(resolve=>release=resolve),discoveries=[],writes=[];
+ const options={health:{agent_execution:true},runs:[],catalogue:{models:[{id:'first-current'}],default_model:'first-current'},profileRegistry:()=>registry,profileDiscovery:body=>{discoveries.push(body);return body.id==='next'?pending:[{id:body.id+'-current'},{id:body.id+'-alternate'}];},profileSave:body=>{writes.push(body);throw new Error('No enrollment expected');}};
+ const h=harness(options);await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{view.receive({type:'ready'});await until(()=>view.posted.findLast(m=>m.type==='model-list')?.models.length===2);registry={...registry,revision:5,active:'next'};options.catalogue={models:[{id:'next-current'}],default_model:'next-current'};view.receive({type:'select',id:'saved'});await until(()=>discoveries.some(x=>x.id==='next'));
+  registry={...registry,revision:6,active:'last'};options.catalogue={models:[{id:'last-current'}],default_model:'last-current'};view.receive({type:'select',id:'saved'});release([{id:'retired-next-only'}]);await until(()=>view.posted.findLast(m=>m.type==='model-list')?.models.some(x=>x.id==='last-alternate'));
+  assert.deepEqual(discoveries.map(x=>({id:x.id,revision:x.expected_revision,hasKey:Object.hasOwn(x,'api_key')})),[{id:'first',revision:4,hasKey:false},{id:'next',revision:5,hasKey:false},{id:'last',revision:6,hasKey:false}]);assert.deepEqual(writes,[]);assert.ok(!view.posted.some(m=>m.type==='model-list'&&m.models.some(x=>x.id==='retired-next-only')));assert.equal(view.posted.findLast(m=>m.type==='provider-profiles').active,'last');assert.ok(!h.requests.includes('/v1/runs'));
+ }finally{view.close();}
+});
 
 test('VS Code retains saved-profile discovery after Settings close and conversation selection, and rejects another-view stale catalogue',async()=>{
  let registry={revision:4,active:'first',profiles:[{id:'first',route_id:'openai.responses',provider:'openai',model:'fixture-current',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true}]};const writes=[];

@@ -1,0 +1,53 @@
+name: Browser and VS Code contracts
+on:
+  push:
+    branches: [main, 'checkpoint/**']
+    paths: ['extensions/vscode/**', 'views/browser/**', 'Tools/ci-views.mjs', '.github/workflows/view-contracts.yml']
+  pull_request:
+    paths: ['extensions/vscode/**', 'views/browser/**', 'Tools/ci-views.mjs', '.github/workflows/view-contracts.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: view-contracts-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  views:
+    runs-on: windows-2025
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: xmind
+    steps:
+      - name: Check out xMind
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: xmind
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+      - name: Install locked view dependencies without lifecycle scripts
+        run: |
+          npm ci --prefix extensions/vscode --ignore-scripts --no-audit --no-fund
+          exit $LASTEXITCODE
+      - name: Run complete browser and extension contract sets
+        run: |
+          node Tools/ci-views.mjs
+          exit $LASTEXITCODE
+      - name: Build browser assets
+        run: |
+          node views/browser/build.mjs build/view-assets
+          exit $LASTEXITCODE
+      - name: Preserve view diagnostics
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: view-contracts-evidence-${{ github.sha }}
+          path: |
+            xmind/build/ci-evidence/views/
+            xmind/build/view-assets/
+          if-no-files-found: warn
+          retention-days: 14
