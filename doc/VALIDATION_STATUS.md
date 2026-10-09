@@ -1,7 +1,7 @@
 # Current native validation
 
 Native general-patch parsing/preparation and actual-workspace planning are source increments, with a new
-contract included in the complete 99-contract native manifest. Compilation and
+contracts included in the complete 100-contract native manifest. Compilation and
 execution are pending the isolated workflow. No patch model tool or filesystem
 effects are exposed by these increments. Expanded filesystem tests cover source/
 parent identities, destination absence, private/link paths, Unicode collisions,
@@ -14,6 +14,13 @@ uncertainty handling. Disposable-filesystem contract source covers actual delete
 rename/content update, missing folders and rejected stale/private/link operations.
 Compilation and execution remain pending. No model tool, approval journal or
 installed patch acceptance is claimed.
+
+The new per-file patch executor now binds immutable batch/file proposals to the
+native permission waiter, claim and outcome journal. Contract source covers actual
+approved effects and xlang3/SQLite receipts, caller-mutation resistance, denial,
+changed guidance, stale sources, deliberate journal failure and restart quarantine
+without replay. Execution is pending. The multi-file coordinator and model/client
+patch delivery remain incomplete.
 
 The shared sidebar approval-review candidate passed the complete isolated
 **217 extension / 39 browser** gate. A persistent review notice and bounded

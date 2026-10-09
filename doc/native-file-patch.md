@@ -67,9 +67,30 @@ removal refusal. Independent Node fixture reads check the actual resulting bytes
 hashes and absence of old names. These tests have not executed for this source;
 they do not establish model admission, durable approval or journal recovery.
 
-This increment does not expose a model tool or filesystem endpoint and performs
-no model-invokable filesystem effects. Delivery still requires durable per-file effect ownership and
-approval, disclosed missing parents, changed-guidance/file checks, recorded
+`PatchFileExecutor` now connects each prepared file to the existing native
+permission waiter and operation journal. The executor owns a copy of the plan
+while it is reviewed. Its immutable `patch_file` proposal contains the batch ID,
+file index/count, exact before/after bytes, source/destination bindings and folder
+effects. It waits for an explicit decision, acquires the durable claim, rechecks
+guidance and invokes the corresponding workspace primitive. Known pre-effect
+failures are recorded as failed; uncertain effects are quarantined. A failed
+outcome write leaves the claim available to startup recovery and raises a fail-stop
+error instead of continuing or replaying. Dynamic child authority maps this adapter
+only to a sealed `apply_patch` capability; current presets do not expose it yet.
+
+The new executor contract source uses actual disposable files and embedded xlang3
+SQLite to exercise explicit allow/deny/cancellation, immutable review despite
+caller changes, changed guidance, stale sources, all four effect kinds, exact
+persisted receipts, rejected identity reuse, a deliberately injected journal-write
+failure, restart quarantine and blocked further effects. The fault is a trigger
+in a disposable test database, not a modification of a product database. This
+contract has not executed for the candidate source. It does not establish a model
+or client patch workflow.
+
+These increments do not expose a model tool or filesystem endpoint and perform
+no model-invokable filesystem effects. Delivery still requires the multi-file
+coordinator, complete batch disclosure/outcomes, model-call input and guidance
+integration, recorded
 partial or uncertain outcomes, recovery without replay, model/graph integration,
 CLI/browser/VS Code review and real-provider acceptance. A multi-file patch must
 report actual outcomes for each file; it must not claim an atomic filesystem

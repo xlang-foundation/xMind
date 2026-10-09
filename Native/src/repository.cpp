@@ -315,6 +315,7 @@ void dynamic_effect_authority(const OperationSpec& spec,const DynamicPlanRecord&
     // Only these native mappings exist; a model/preset cannot define another.
     std::string model_tool;
     if(spec.tool=="replace_file")model_tool="edit_file";
+    else if(spec.tool=="patch_file")model_tool="apply_patch";
     else if(spec.tool=="create_file"||spec.tool=="run_process")model_tool=spec.tool;
     else if(spec.tool=="mcp_tool"){
         const auto proposal=Json::parse(spec.arguments_json);
