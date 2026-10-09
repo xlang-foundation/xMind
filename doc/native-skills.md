@@ -77,6 +77,11 @@ compiled successfully and passed 84 of 90 native contracts. The new skill
 context, agent activation/delivery barrier and changed-skill MCP approval
 contracts passed. The complete gate failed: dynamic-plan MCP, delegation,
 DeepSeek provider, agent MCP HTTP and both upstream MCP SDK contracts failed.
+[Verified failed-gate receipt](evidence/native-skills-initial-hosted.json) binds
+the archive digest, pinned build sources, exact complete test registration and
+original log hashes. The [90-result projection](evidence/native-skills-initial-test-results.json)
+contains parsed test names, statuses and timings; it is explicitly a projection,
+not a copy of raw diagnostic output or evidence for later fixes.
 The HTTP/SDK shared fixture, delegated-leaf catalogue and DeepSeek engine
 fixture still expected the former four native reads. Their strict expectations
 now include the two skill tools, preserving the existing effect and protocol

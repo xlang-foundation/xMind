@@ -1,0 +1,47 @@
+{
+  "sourceRevision": "045779e3c8c487e01b1512bdd7a86f45b5bf477a",
+  "workflowRunId": "37879098352",
+  "workflowJobId": 113655833261,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/37879098352",
+  "workflowConclusion": "failure",
+  "failureStep": "Build native xlang3 and xMind; run complete contract set",
+  "artifact": {
+    "id": 11594940365,
+    "digest": "sha256:a57ac1d5615cf9f25373f0b5dac3074393499c894d744f135230e730dde0e421",
+    "bytes": 31904
+  },
+  "runtime": {
+    "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+    "stdlibSourceRevision": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "bridgeEnabled": false,
+    "cpythonExecuted": false
+  },
+  "native": {
+    "expected": 90,
+    "registered": 90,
+    "passed": 84,
+    "failed": 6,
+    "completeExpectedSetMatched": true,
+    "failures": [
+      "native_agent_mcp_http_contract",
+      "native_deepseek_provider_contract",
+      "native_delegation_contract",
+      "native_dynamic_plan_mcp_contract",
+      "native_mcp_sdk_legacy_contract",
+      "native_mcp_sdk_modern_contract"
+    ],
+    "elapsedSeconds": 272.18
+  },
+  "evidenceHashes": {
+    "contracts": "74a0a52a187c6f11e78fdbd05b43c00de4a4700bcb29f356b63b137bfb3913c8",
+    "ctest": "2f76e1b6a5de594eb5c6dab6647920424ab0c2413f36ce73ad75b163fdc183c2",
+    "lastTestsFailed": "0fce19c10318994c36f297c0800c80d87f72536af28a94c73943481e3df18311",
+    "nativeBuild": "dc4d75b3fe6d2f0981a823f50a96c7672431aeafed441eb08b1ff4ec42d94ef3",
+    "provenance": "4a7a3772e5dd371262340feb3576c395dc564f0185365b2f2b7708e73af54d76",
+    "publishedProjection": "0b22bbc91138329b21d405fd8be85f6437c3134b1edf3609a897fcdc63aea8f5"
+  },
+  "scope": "Verified failed hosted native skills checkpoint; later fixes and full product parity are not validated by this run",
+  "localNativeExecuted": false,
+  "installed": false,
+  "liveRuntimeChanged": false
+}
