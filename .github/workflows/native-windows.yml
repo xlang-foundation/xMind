@@ -63,6 +63,9 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node views/browser/tests/native-contract.mjs build/native/Release/xmind_server.exe ../xlang3/build/Release/modules ../stdlib-source/Lib build/browser-assets > build/ci-evidence/browser-native.log
           exit $LASTEXITCODE
+      - name: Stage the contract-tested native runtime and pinned pure library source
+        working-directory: xmind
+        run: node Tools/ci-stage-runtime.mjs
       - name: Package and verify shared browser assets
         working-directory: xmind/extensions/vscode
         run: |
