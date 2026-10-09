@@ -14,19 +14,26 @@ URL and embedded sources and skill catalog events, which remain unfinished here.
 
 ## Current source behavior
 
-Native discovers `.agents/skills/<id>/SKILL.md` inside the already authorized
-workspace. It uses retained Windows directory handles for optional discovery and
+Native discovers root Markdown guides and nested `SKILL.md` files under
+`.agents/skills` inside the already authorized workspace. Root `<id>.md` files
+use the filename stem as their id; a nested `SKILL.md` uses its containing
+directory's name. A root `SKILL.md` uses `skills`. It uses retained Windows
+directory handles for optional discovery and
 verified file snapshots for content. Missing skill roots are empty catalogues;
 unreadable, linked, malformed or oversized sources are explicit errors. Backend
 private directories remain outside workspace authority. Discovery does not
 execute files, import scripts, read provider configuration or grant effects.
 
-A skill has YAML frontmatter with `name` matching its directory and an optional
-`description`, followed by a Markdown body. An absent description stays absent in
+A skill has YAML frontmatter with optional `name` and `description`, followed by
+a Markdown body. The display name defaults to its file-derived id and may differ
+from that id. An empty frontmatter document uses those defaults. An absent description stays absent in
 catalogue metadata and excludes the guide from automatic suggestions; explicit
 loading by an available id remains supported. This follows the pinned schema's
-optional description and instruction catalogue filtering. Names use lower-case letters, digits
-and single hyphens, up to 64 bytes. Frontmatter supports bounded scalar fields
+optional description and instruction catalogue filtering. Catalogue ids retain
+the actual source spelling, including case, spaces and Unicode, up to 256 UTF-8
+bytes. Ids resolve through the discovered catalogue and never become a caller's
+filesystem path. Display names have the existing 1,024-byte scalar bound.
+Frontmatter supports bounded scalar fields
 and one scalar metadata map. Native rejects aliases, anchors, duplicate keys,
 tagged objects and sequences. Other scalar metadata grants no capability.
 `autoinvoke: false` hides automatic suggestions while allowing explicit loading
@@ -52,7 +59,11 @@ native permissions or satisfy an approval. Skills are available to ordinary
 agents and bounded agent children; deterministic graph tools retain their own
 execution contracts.
 
-Limits are 64 catalogue entries, 16 KiB per source, 8 KiB of frontmatter, 1,024
+Limits are 64 catalogue entries, 512 visited directories, 8,192 enumerated entries
+and 30 nested directory levels. Discovery rejects truncation and duplicate ids
+explicitly; it does not silently select one conflicting source. Other retained
+workspace path and private-state checks remain applicable. Additional limits are
+16 KiB per source, 8 KiB of frontmatter, 1,024
 bytes per scalar, eight active guides and 32 KiB of active body text. Serialized
 catalogue, guidance and combined instruction limits also apply. Oversized
 catalogues fail explicitly instead of silently returning a partial set.
@@ -105,6 +116,11 @@ The later automatic-suggestion correction also remains unvalidated. Its native
 contract covers explicit loading with `autoinvoke: false`, the normalized pinned
 metadata flag and the separate explicit loading prohibition. It changes no
 effect authority or source snapshot verification.
+The subsequent format correction adds unvalidated contract cases for root
+Markdown files, nested `SKILL.md`, optional/custom display names, empty metadata,
+case/space/Unicode and longer ids, duplicate-id refusal and changed flat-source
+approval snapshots. Configured source precedence and broader source providers
+still need implementation and acceptance.
 
 Delivery still requires the complete 90-contract native gate, frontend suites,
 browser/native integration, independently verified VSIX/runtime artifacts and

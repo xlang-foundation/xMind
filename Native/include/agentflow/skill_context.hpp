@@ -13,6 +13,7 @@ struct LocalSkill {
     WorkspaceSnapshot source;
     // Automatic suggestion policy is independent of explicit loading.
     std::optional<bool> autoinvoke;
+    std::string name;
 };
 // Native per-run guidance, never an executable or an effect permission. Only
 // the already-authorized workspace's .agents/skills directory is discovered.
@@ -20,7 +21,7 @@ class SkillContext {
 public:
     explicit SkillContext(WorkspaceTools& workspace):workspace_(workspace){}
     static std::vector<ModelToolDefinition> definitions();
-    static LocalSkill parse(WorkspaceSnapshot source,const std::string& directory_name);
+    static LocalSkill parse(WorkspaceSnapshot source,const std::string& skill_id);
     std::string prepare(std::stop_token cancel={});
     std::string catalogue_json(std::stop_token cancel={}) const;
     std::string activate(const std::string& arguments,std::stop_token cancel={},std::size_t instruction_budget=49152);

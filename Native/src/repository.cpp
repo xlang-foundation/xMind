@@ -283,7 +283,7 @@ void dynamic_mcp_instruction_snapshot(const Json& value,const std::string& works
             !text(source,"content_sha256",64)||source["content_sha256"].get_ref<const std::string&>().size()!=64||
             source["content_sha256"].get_ref<const std::string&>().find_first_not_of("0123456789abcdef")!=std::string::npos||
             !source.contains("byte_count")||!source["byte_count"].is_number_integer()||source["byte_count"]<0||source["byte_count"]>65536||
-            (skill&&!text(source,"id",64)))throw Conflict("Dynamic MCP instruction source differs from its native snapshot shape");
+            (skill&&!text(source,"id",256)))throw Conflict("Dynamic MCP instruction source differs from its native snapshot shape");
     };
     for(const auto& source:value["sources"])validate(source,false);
     if(value.contains("skills"))for(const auto& source:value["skills"])validate(source,true);
