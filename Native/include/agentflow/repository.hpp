@@ -27,16 +27,18 @@ struct CredentialMetadata {
 class Repository {
 public:
     Repository(const std::string& database,const std::vector<std::string>& import_roots,
-        const BackendLease* startup_lease=nullptr);
+        const BackendLease* startup_lease=nullptr,const BackendOwnerBootstrap* bootstrap=nullptr,
+        const std::string& startup_generation={});
     ~Repository();
     Repository(const Repository&)=delete;
     Repository& operator=(const Repository&)=delete;
     // Native owner control; each mutation verifies the actual exclusive lease.
-    BackendOwnerState open_backend_owner(const BackendLease&,const std::string& generation);
+    BackendOwnerState open_backend_owner(const BackendLease&,const std::string& generation,const BackendOwnerBootstrap* bootstrap=nullptr);
     BackendOwnerState backend_owner();
     BackendOwnerState quiesce_backend_owner(const BackendLease&,const BackendOwnerPrecondition&,const std::string& receipt);
     BackendOwnerState resume_backend_owner(const BackendLease&,const BackendOwnerReceipt&);
-    BackendOwnerState request_backend_retirement(const BackendLease&,const BackendOwnerReceipt&);
+    BackendOwnerState request_backend_retirement(const BackendLease&,const BackendOwnerReceipt&,std::optional<BackendOwnerTarget> target={});
+    BackendOwnerState activate_backend_replacement(const BackendLease&,const BackendOwnerReceipt&,const BackendOwnerTarget&);
     Session create_session(const std::string& id,const std::string& title);
     Session rename_session(const std::string& id,const std::string& title,const std::string& expected_title);
     Session session(const std::string& id);

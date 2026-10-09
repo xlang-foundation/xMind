@@ -1,5 +1,30 @@
 # Current native validation
 
+Target-bound retirement and qualified replacement startup passed **96 native
+contracts in 198.23 seconds**, with all 623 mapped inputs unchanged and every
+registered contract included. The actual production server retired and exited;
+its replacement opened the same database with admission closed, retained saved
+sessions and activated using its new receipt and workspace authority. Actual
+Unicode workspace/package paths passed. Native schema migration and prepared
+owner publication roll back together on commit failure. Fixture package
+metadata and unused members remain synthetic; no provider calls or file
+effects occurred. The production server supports the owner protocol when
+started with an independently accepted runtime-manifest digest. Thin-client
+adoption, explicit legacy migration and installed VS Code writing are still
+pending. The installed `TestProj` backend remains read-only.
+[Replacement protocol and limits](native-owner-replacement.md),
+[exact evidence and retained attempts](evidence/native-owner-replacement-local.json).
+
+The required SDK fix is committed and pushed on `xmind/windows-import-root-utf8`
+as `5e86144cce2730b06e0de11c155097cf71b84a58`. Its Release build, three focused
+checks and all 11 default performance cases passed. Of 53 allowed SDK checks,
+51 passed and two failures reproduced with the unchanged baseline. Five
+CPython peer checks were excluded; no CPython interpreter or bridge was used.
+Both the native workflow and runtime staging now select this exact SDK pin.
+
+The following entries describe earlier checkpoint scopes; their pending
+components are superseded only where the replacement validation above applies.
+
 The durable retirement request and pre-migration startup refusal passed all
 **95 local native contracts in 193.41 seconds**, with 622 inputs unchanged.
 Actual SQLite commit rollback, a resume/retirement race, same-generation resume

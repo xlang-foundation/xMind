@@ -1,5 +1,12 @@
 # Native owner control transport
 
+The newer [replacement protocol](native-owner-replacement.md) enables qualified
+production-server retirement and activation and passed the complete 96-contract
+local gate. The 95-contract scope below records the earlier optional-controller
+checkpoint, which reports `retirement_supported: false` without an owner-token
+binding. Installed legacy owners remain separate and are not upgraded by this
+component validation.
+
 The C++ `BackendOwnerControl` joins the durable persistence barrier to the
 actual execution workspace, runtime health/idleness and verified loaded
 package. It can be attached to `HttpServer` only when it covers that exact

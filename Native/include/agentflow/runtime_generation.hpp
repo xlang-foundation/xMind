@@ -8,6 +8,7 @@ struct RuntimeGenerationDenied : std::runtime_error {using std::runtime_error::r
 struct RuntimeGenerationBinding {
     std::string root,root_identity,manifest_sha256,native_revision,sdk_revision,
         source_manifest_sha256,server_sha256;
+    bool operator==(const RuntimeGenerationBinding&)const=default;
 };
 // Owner-controlled deployment input, never a model tool. Windows file handles
 // pin the exact verified inventory against writes/deletion for this lifetime.

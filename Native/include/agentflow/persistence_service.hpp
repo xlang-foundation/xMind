@@ -12,7 +12,7 @@ struct PersistenceBusy : std::runtime_error {using std::runtime_error::runtime_e
 class PersistenceService {
 public:
     PersistenceService(std::string database,std::vector<std::string> import_roots,
-        std::size_t max_pending=1024);
+        std::size_t max_pending=1024,std::optional<BackendOwnerBootstrap> bootstrap={});
     ~PersistenceService();
     PersistenceService(const PersistenceService&)=delete;
     PersistenceService& operator=(const PersistenceService&)=delete;
@@ -28,7 +28,8 @@ public:
     std::future<BackendOwnerState> resume_backend(BackendOwnerReceipt);
     // Consumes quiescence; same-generation resume is permanently rejected.
     // Transport shutdown, observed exit and replacement startup are separate.
-    std::future<BackendOwnerState> request_backend_retirement(BackendOwnerReceipt);
+    std::future<BackendOwnerState> request_backend_retirement(BackendOwnerReceipt,std::optional<BackendOwnerTarget> target={});
+    std::future<BackendOwnerState> activate_backend_replacement(BackendOwnerReceipt,BackendOwnerTarget);
     std::future<Session> create_session(std::string id,std::string title);
     std::future<Session> rename_session(std::string id,std::string title,std::string expected_title);
     std::future<Session> session(std::string id);

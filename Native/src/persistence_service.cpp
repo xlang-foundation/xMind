@@ -25,16 +25,16 @@ struct PersistenceService::Impl {
     BackendLease* owner_lease=nullptr;
     const std::string generation=owner_nonce();
 
-    Impl(std::string path,std::vector<std::string> roots,std::size_t max_pending):limit(max_pending) {
+    Impl(std::string path,std::vector<std::string> roots,std::size_t max_pending,std::optional<BackendOwnerBootstrap> bootstrap):limit(max_pending) {
         if(limit==0) throw std::invalid_argument("Persistence queue capacity must be positive");
         std::promise<void> ready;auto initialized=ready.get_future();
-        worker=std::thread([this,path=std::move(path),roots=std::move(roots),ready=std::move(ready)]() mutable {
+        worker=std::thread([this,path=std::move(path),roots=std::move(roots),bootstrap=std::move(bootstrap),ready=std::move(ready)]() mutable {
             bool started=false;
             try {
                 BackendLease lease(path);
-                Repository repository(path,roots,&lease);
-                repository.open_backend_owner(lease,generation);
-                repository.recover_interrupted(lease);
+                Repository repository(path,roots,&lease,bootstrap?&*bootstrap:nullptr,generation);
+                if(!bootstrap)repository.open_backend_owner(lease,generation);
+                if(!bootstrap)repository.recover_interrupted(lease);
                 owner_lease=&lease;
                 ready.set_value();started=true;
                 for(;;) {
@@ -88,8 +88,8 @@ struct PersistenceService::Impl {
     }
     template<class Function> auto observe(Function action){return submit(std::move(action),false);}
 };
-PersistenceService::PersistenceService(std::string database,std::vector<std::string> roots,std::size_t limit)
-    :impl_(std::make_unique<Impl>(std::move(database),std::move(roots),limit)) {}
+PersistenceService::PersistenceService(std::string database,std::vector<std::string> roots,std::size_t limit,std::optional<BackendOwnerBootstrap> bootstrap)
+    :impl_(std::make_unique<Impl>(std::move(database),std::move(roots),limit,std::move(bootstrap))) {}
 PersistenceService::~PersistenceService()=default;
 void PersistenceService::close() {impl_->close();}
 std::future<BackendOwnerState> PersistenceService::backend_owner(){return impl_->observe([](Repository& r){return r.backend_owner();});}
@@ -103,9 +103,13 @@ std::future<BackendOwnerState> PersistenceService::resume_backend(BackendOwnerRe
     auto result=r.resume_backend_owner(*impl_->owner_lease,expected);
     return result;
 });}
-std::future<BackendOwnerState> PersistenceService::request_backend_retirement(BackendOwnerReceipt expected){return impl_->observe([this,expected=std::move(expected)](Repository& r){
+std::future<BackendOwnerState> PersistenceService::request_backend_retirement(BackendOwnerReceipt expected,std::optional<BackendOwnerTarget> target){return impl_->observe([this,expected=std::move(expected),target=std::move(target)](Repository& r){
     if(expected.generation!=impl_->generation)throw Conflict("Backend owner generation changed");
-    return r.request_backend_retirement(*impl_->owner_lease,expected);
+    return r.request_backend_retirement(*impl_->owner_lease,expected,target);
+});}
+std::future<BackendOwnerState> PersistenceService::activate_backend_replacement(BackendOwnerReceipt expected,BackendOwnerTarget target){return impl_->observe([this,expected=std::move(expected),target=std::move(target)](Repository& r){
+    if(expected.generation!=impl_->generation)throw Conflict("Backend owner generation changed");
+    return r.activate_backend_replacement(*impl_->owner_lease,expected,target);
 });}
 std::future<DynamicPlanCapabilities> PersistenceService::dynamic_capabilities(std::string root) {return impl_->observe([root=std::move(root)](Repository& repository){return repository.dynamic_capabilities(root);});}
 std::future<DynamicPlanCapabilities> PersistenceService::finalize_dynamic_capabilities(std::string root,std::string backend_identity,std::string catalogue_json,std::vector<DynamicPresetCapability> presets) {return impl_->submit([root=std::move(root),backend_identity=std::move(backend_identity),catalogue_json=std::move(catalogue_json),presets=std::move(presets)](Repository& repository){return repository.finalize_dynamic_capabilities(root,backend_identity,catalogue_json,presets);});}

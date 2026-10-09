@@ -21,12 +21,17 @@
 #include "agentflow/execution_platform.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/process_configuration.hpp"
+#include "agentflow/backend_owner_control.hpp"
+#include "agentflow/workspace_tools.hpp"
+#include <filesystem>
 #define NOMINMAX
 #include <windows.h>
 #include <bcrypt.h>
 namespace {
 std::mutex control_mutex;
 agentflow::HttpServer* active_server=nullptr;
+std::string loaded_runtime_root(){std::wstring image(32768,L'\0');const auto count=GetModuleFileNameW(nullptr,image.data(),static_cast<DWORD>(image.size()));if(!count||count>=image.size())throw std::runtime_error("Cannot qualify native process image");image.resize(count);const auto value=std::filesystem::path(image).parent_path().u8string();return {reinterpret_cast<const char*>(value.data()),value.size()};}
+agentflow::BackendOwnerReceipt startup_receipt(const std::string& value){const auto first=value.find(':'),last=value.rfind(':');if(first!=32||last==first||last+33!=value.size())throw std::invalid_argument("Invalid native replacement receipt");std::int64_t revision=0;const auto parsed=std::from_chars(value.data()+first+1,value.data()+last,revision);const auto generation=value.substr(0,first),id=value.substr(last+1);if(parsed.ec!=std::errc{}||parsed.ptr!=value.data()+last||revision<1||revision>=9007199254740991LL||generation.find_first_not_of("0123456789abcdef")!=std::string::npos||id.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid native replacement receipt");return {generation,id,revision};}
 std::string provider_purpose(const std::string& endpoint,const char* domain="provider:chat:") {
     BCRYPT_ALG_HANDLE algorithm=nullptr;std::array<UCHAR,32> hash{};
     if(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)<0) throw std::runtime_error("Cannot bind provider credential context");
@@ -47,12 +52,12 @@ BOOL WINAPI control(DWORD event) {
 }
 }
 #endif
-int main(int argc,char** argv) {
+int run_server(int argc,char** argv) {
     try {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config") || !options.emplace(key,argv[i+1]).second)
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt") || !options.emplace(key,argv[i+1]).second)
                 throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
@@ -65,6 +70,7 @@ int main(int argc,char** argv) {
         if(!token) throw std::invalid_argument("Set XMIND_AUTH_TOKEN for the local server");
         agentflow::validate_local_auth_token(token);
 #if !defined(_WIN32)
+        if(options.contains("--runtime-manifest-sha256")||options.contains("--owner-receipt"))throw std::invalid_argument("Native owner replacement currently requires Windows");
         if(options.contains("--mcp-config"))throw std::invalid_argument("Native MCP configuration currently requires Windows");
         if(options.contains("--process-config"))throw std::invalid_argument("Native process configuration currently requires Windows");
         if(options.contains("--graphs-config"))throw std::invalid_argument("Native graph execution currently requires Windows");
@@ -89,7 +95,24 @@ int main(int argc,char** argv) {
             if(parsed.ec!=std::errc{} || parsed.ptr!=input.data()+input.size() || result==0 || result>limit) throw std::invalid_argument("Invalid executor capacity");return result;
         };
         const auto workers=capacity("--workers",2,16),queue=capacity("--queue-limit",128,4096);
-        agentflow::PersistenceService persistence(options.at("--db"),{options.at("--modules"),options.at("--stdlib")});
+        std::optional<agentflow::BackendOwnerBootstrap> bootstrap;
+#if defined(_WIN32)
+        std::unique_ptr<agentflow::VerifiedRuntimeGeneration> runtime_generation;
+        std::unique_ptr<agentflow::WorkspaceTools> startup_workspace;
+        if(options.contains("--owner-receipt")&&!options.contains("--runtime-manifest-sha256"))throw std::invalid_argument("Replacement requires a verified native package");
+        if(options.contains("--runtime-manifest-sha256")){
+            if(!options.contains("--workspace"))throw std::invalid_argument("Native owner controls require an execution workspace");
+            startup_workspace=std::make_unique<agentflow::WorkspaceTools>(options.at("--workspace"));
+            runtime_generation=std::make_unique<agentflow::VerifiedRuntimeGeneration>(loaded_runtime_root(),options.at("--runtime-manifest-sha256"),startup_workspace->root_path());runtime_generation->require_current_server();
+            const auto root=std::filesystem::u8path(runtime_generation->binding().root);
+            if(std::filesystem::canonical(std::filesystem::u8path(options.at("--modules")))!=std::filesystem::canonical(root/"modules")||std::filesystem::canonical(std::filesystem::u8path(options.at("--stdlib")))!=std::filesystem::canonical(root/"stdlib"))throw std::invalid_argument("Qualified startup requires the verified package's import roots");
+            if(options.contains("--owner-receipt")){
+                for(const auto* key:{"--model","--model-endpoint","--provider-config","--mcp-config","--process-config","--instructions-config","--graphs-config"})if(options.contains(key))throw std::invalid_argument("Replacement startup retains saved configuration; startup overrides are not allowed");
+                bootstrap=agentflow::qualify_backend_bootstrap(startup_receipt(options.at("--owner-receipt")),*runtime_generation,*startup_workspace,auth,options.contains("--workspace-edits"));
+            }
+        }
+#endif
+        agentflow::PersistenceService persistence(options.at("--db"),{options.at("--modules"),options.at("--stdlib")},1024,bootstrap);
         agentflow::AgentInstructionStore instruction_configurations(persistence);agentflow::AgentInstructionPolicy instruction_policy;
         if(options.contains("--instructions-config")) {
             std::ifstream file(options.at("--instructions-config"),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted instruction configuration file");std::string source;char byte;
@@ -191,7 +214,7 @@ int main(int argc,char** argv) {
             add("gemini.generate-content","gemini","https://generativelanguage.googleapis.com/v1beta",agentflow::ProviderWire::gemini_generate_content,"https://generativelanguage.googleapis.com/v1beta/models",agentflow::ProviderCatalogueFormat::gemini);
             add("deepseek.chat","deepseek","https://api.deepseek.com/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.deepseek.com/models",agentflow::ProviderCatalogueFormat::openai,agentflow::ChatDialect::deepseek);
             auto configurable=std::make_unique<agentflow::ProviderProfileRuntime>(persistence,std::move(settings),std::move(policies),workers,queue);
-            configurable->import_legacy_configuration();
+            if(!bootstrap)configurable->import_legacy_configuration();
             if(options.contains("--provider-config")){
                 try{configurable->import_yaml_configuration(std::filesystem::absolute(options.at("--provider-config")),configurable->configuration().revision);}
                 catch(...){throw std::runtime_error("Provider YAML configuration could not be imported");}
@@ -206,6 +229,10 @@ int main(int argc,char** argv) {
 #else
         if(options.contains("--inspection-workspace")) throw std::invalid_argument("Native file inspection currently requires Windows");
 #endif
+#if defined(_WIN32)
+        std::unique_ptr<agentflow::BackendOwnerControl> owner_control;
+        if(runtime_generation){runtime_generation->require_current_server();const auto actual=executor->execution_workspace();if(actual.root!=startup_workspace->root_path()||actual.workspace_id!=startup_workspace->identity())throw std::runtime_error("Qualified execution workspace changed during startup");owner_control=std::make_unique<agentflow::BackendOwnerControl>(persistence,*executor,*runtime_generation,graph_execution,auth);}
+#endif
         agentflow::HttpServer server(persistence,auth,executor.get()
 #if defined(_WIN32)
             ,recovery.get(),std::move(mcp_metadata),std::move(process_metadata)
@@ -213,6 +240,9 @@ int main(int argc,char** argv) {
             ,nullptr,{},{}
 #endif
             ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()},provider_setup,graph_execution,provider_profiles
+#if defined(_WIN32)
+            ,owner_control.get()
+#endif
         );const auto bound=server.bind(port);
 #if defined(_WIN32)
         {std::lock_guard lock(control_mutex);active_server=&server;}
@@ -227,3 +257,8 @@ int main(int argc,char** argv) {
         return ok?0:1;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }
+#if defined(_WIN32)
+int wmain(int argc,wchar_t** argv){std::vector<std::string> values;std::vector<char*> pointers;for(int i=0;i<argc;++i){const std::wstring value=argv[i];if(value.size()>32768)return 2;const int size=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0,nullptr,nullptr);if(size<=0)return 2;std::string utf8(size,'\0');if(WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),utf8.data(),size,nullptr,nullptr)!=size)return 2;values.push_back(std::move(utf8));}for(auto& value:values)pointers.push_back(value.data());return run_server(argc,pointers.data());}
+#else
+int main(int argc,char** argv){return run_server(argc,argv);}
+#endif

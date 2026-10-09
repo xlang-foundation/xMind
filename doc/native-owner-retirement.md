@@ -1,5 +1,12 @@
 # Native retirement request
 
+The newer [target-bound replacement protocol](native-owner-replacement.md) adds
+qualified shutdown, closed startup and activation and passed all 96 native
+contracts locally. Its target-bound retiring/prepared states use canonical
+versions 3/4. The version 2 request and 95-contract scope below describe the
+earlier unqualified retirement checkpoint. Neither checkpoint migrates the
+installed legacy VS Code owner.
+
 `PersistenceService::request_backend_retirement(receipt)` consumes an exact
 quiescence receipt while retaining the closed admission fence. It verifies the
 actual database lease, live generation, receipt ID, revision and idle persisted

@@ -1,11 +1,14 @@
 # Managed local runtime upgrades
 
-This is a required delivery design, not an implemented or validated upgrade
-protocol. The [native persistence owner barrier](native-backend-owner.md) now
-implements durable queued-mutation fencing and same-live-generation receipt
-resume. It passed all 93 local native contracts; the optional native transport
-controller is documented below. Retirement shutdown and target-generation
-startup remain pending. The launcher retains its latest authenticated workspace owner
+The [native replacement protocol](native-owner-replacement.md) now implements
+target-bound retirement/shutdown, actual process exit, qualified closed startup
+and explicit activation. Its complete local gate passed **96 native contracts
+in 198.23 seconds**, with all 623 mapped inputs unchanged. Actual production
+server, embedded-xlang3 SQLite and Unicode workspace/package paths were tested.
+Package metadata/unused members remain fixtures; no provider or installed editor
+was tested. Thin-client adoption, explicit legacy migration, provider/history
+continuity and rendered file writing remain required before this delivery is
+complete. The launcher retains its latest authenticated workspace owner
 across package/settings changes and host reloads. It reports pending backend
 changes while continuing to use that owner's capabilities and saved state.
 Invalid/unreachable owners, unavailable credentials, changed authority or unsafe
@@ -16,19 +19,20 @@ runtime to the new generation.
 
 The [native package verifier](native-runtime-generation.md) now checks the
 complete candidate inventory and exact loaded image using retained Windows
-handles. Its full 94-contract local gate passed. The production server has not
-enabled that capability, and it does not constitute a completed handoff.
-The newer [optional native owner controller](native-owner-control.md) now uses
+handles. Its earlier full 94-contract local gate passed. The production server
+now enables that capability when supplied with an independently accepted
+runtime-manifest digest; package integrity alone does not establish a complete
+installed handoff. The [native owner controller](native-owner-control.md) uses
 that verifier and exposes authenticated inspection/quiescence/same-generation
 resume through `HttpServer`, with shared admission guards and an exclusive
-owner boundary. All 95 native contracts passed locally. The production server
-does not enable it until retirement and replacement startup are implemented;
-an inspection/quiescence receipt alone is not an upgrade acknowledgement.
+owner boundary. Its earlier 95-contract gate passed locally. An
+inspection/quiescence receipt alone is not an upgrade acknowledgement.
 The [durable retirement request](native-owner-retirement.md) now consumes an
 exact quiescence receipt without reopening admission. Same-generation resume
 is rejected after consumption, and ordinary startup checks closed/malformed
-owner state before migrations. Actual shutdown, target qualification and
-receipt-controlled replacement startup remain pending.
+owner state before migrations. The newer replacement protocol binds the target
+and performs qualified bootstrap before schema writes; the client must still
+observe actual exit and verify saved records before activation.
 
 All 189 extension and 38 browser contracts passed locally with frozen inputs.
 A separate actual packaged C++/embedded-xlang3 SQLite check retained one process,

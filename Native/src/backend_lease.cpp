@@ -80,6 +80,7 @@ BackendLease::BackendLease(const std::string& input) : impl_(std::make_unique<Im
     }
 #endif
 }
+std::string BackendLease::canonical_database_path()const{const auto value=impl_->database.u8string();return {reinterpret_cast<const char*>(value.data()),value.size()};}
 BackendLease::~BackendLease()=default;
 bool BackendLease::covers(const std::string& input) const {
     const auto path=database_path(input);

@@ -4,6 +4,12 @@ xMind is being built as a general-purpose single-agent and graph platform with a
 
 OpenCode 2 is the coding feature reference; LiteLLM is the provider coverage reference. Their implementations are not the engine. See the [architecture](doc/architecture.md), [SVG](doc/architecture.svg), [pinned parity baseline](doc/PARITY.md) and [provider requirements](doc/MODEL_SUPPORT.md).
 
+The latest local checkpoint passed all **96 native contracts**, including
+target-bound runtime retirement and replacement startup against the same
+SQLite database. The installed legacy VS Code preview still needs migration
+before approval-based file writing is ready. See [current validation](doc/VALIDATION_STATUS.md)
+and the [replacement protocol](doc/native-owner-replacement.md) for exact scope.
+
 ## OSS deployment scope
 
 Run xMind locally with the VS Code plugin, webpage UI and native CLI. SQLite is the OSS database; C++ owns repository and encryption contracts, and embedded xlang3 performs SQLite I/O. Team-server features, PostgreSQL, WebRTC and the standalone Electron IDE belong to the separate closed-source Nexus project. See the [current OSS specification](doc/architecture.md).

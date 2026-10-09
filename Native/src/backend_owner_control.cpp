@@ -1,11 +1,16 @@
 #include "agentflow/backend_owner_control.hpp"
 #include "agentflow/graph_service.hpp"
+#include "agentflow/workspace_tools.hpp"
+#include "agentflow/context_records.hpp"
+#include <algorithm>
 #include <mutex>
 
 namespace agentflow {
-BackendOwnerControl::BackendOwnerControl(PersistenceService& store,RunExecutor& executor,VerifiedRuntimeGeneration& runtime,GraphExecution* graphs)
+namespace {std::string auth_binding(const std::string& token){if(token.size()<32||token.size()>256||std::any_of(token.begin(),token.end(),[](unsigned char c){return c<33||c>126;}))throw std::invalid_argument("Invalid native owner authentication");return context_digest("xMind.owner-auth.v1:"+token);}}
+BackendOwnerBootstrap qualify_backend_bootstrap(BackendOwnerReceipt receipt,VerifiedRuntimeGeneration& runtime,const WorkspaceTools& workspace,const std::string& token,bool edits){runtime.require_current_server();return {std::move(receipt),{runtime.binding(),workspace.root_path(),workspace.identity(),auth_binding(token),edits}};}
+BackendOwnerControl::BackendOwnerControl(PersistenceService& store,RunExecutor& executor,VerifiedRuntimeGeneration& runtime,GraphExecution* graphs,const std::string& token)
     :store_(store),executor_(executor),runtime_(runtime),graphs_(graphs){
-    runtime_.require_current_server();if(!executor_.execution_workspace().configured)throw RunUnavailable("Native owner controls require a captured execution workspace");generation_=store_.backend_owner().get().generation;
+    runtime_.require_current_server();if(!executor_.execution_workspace().configured)throw RunUnavailable("Native owner controls require a captured execution workspace");generation_=store_.backend_owner().get().generation;if(!token.empty())auth_binding_=auth_binding(token);
 }
 BackendOwnerState BackendOwnerControl::status()const{auto result=store_.backend_owner().get();if(result.generation!=generation_)throw Conflict("Native owner generation changed");return result;}
 std::shared_lock<std::shared_mutex> BackendOwnerControl::admit(){std::shared_lock lock(admission_,std::try_to_lock);if(!lock.owns_lock())throw PersistenceBusy("Native owner command is in flight");if(status().quiesced)throw BackendQuiesced("Native backend admission is closed");return lock;}
@@ -14,4 +19,6 @@ void BackendOwnerControl::idle()const{if(!executor_.healthy()||!executor_.idle()
 BackendOwnerState BackendOwnerControl::quiesce(BackendOwnerPrecondition expected,WorkspaceAdmission authority){std::unique_lock lock(admission_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Native admission is in flight");workspace(authority);idle();runtime_.require_current_server();if(expected.generation!=generation_)throw Conflict("Native owner generation changed");return store_.quiesce_backend(std::move(expected)).get();}
 BackendOwnerState BackendOwnerControl::resume(BackendOwnerReceipt expected,WorkspaceAdmission authority){std::unique_lock lock(admission_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Native admission is in flight");workspace(authority);idle();runtime_.require_current_server();if(expected.generation!=generation_)throw Conflict("Native owner generation changed");return store_.resume_backend(std::move(expected)).get();}
 BackendOwnerState BackendOwnerControl::request_retirement(BackendOwnerReceipt expected,WorkspaceAdmission authority){std::unique_lock lock(admission_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Native admission is in flight");workspace(authority);idle();runtime_.require_current_server();if(expected.generation!=generation_)throw Conflict("Native owner generation changed");return store_.request_backend_retirement(std::move(expected)).get();}
+BackendOwnerState BackendOwnerControl::retire_to(BackendOwnerReceipt expected,WorkspaceAdmission authority,VerifiedRuntimeGeneration& target,bool edits){std::unique_lock lock(admission_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Native admission is in flight");workspace(authority);idle();runtime_.require_current_server();target.revalidate();if(!replacement_supported())throw RunUnavailable("Native replacement authentication is unavailable");if(expected.generation!=generation_)throw Conflict("Native owner generation changed");const auto ws=executor_.execution_workspace();return store_.request_backend_retirement(std::move(expected),BackendOwnerTarget{target.binding(),ws.root,ws.workspace_id,auth_binding_,edits}).get();}
+BackendOwnerState BackendOwnerControl::activate_replacement(BackendOwnerReceipt expected,WorkspaceAdmission authority){std::unique_lock lock(admission_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Native admission is in flight");workspace(authority);idle();runtime_.require_current_server();if(!replacement_supported())throw RunUnavailable("Native replacement authentication is unavailable");if(expected.generation!=generation_)throw Conflict("Native owner generation changed");const auto ws=executor_.execution_workspace();return store_.activate_backend_replacement(std::move(expected),BackendOwnerTarget{runtime_.binding(),ws.root,ws.workspace_id,auth_binding_,executor_.supports_file_edit_proposals()}).get();}
 }

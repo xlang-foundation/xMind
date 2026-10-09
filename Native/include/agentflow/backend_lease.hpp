@@ -12,6 +12,7 @@ public:
     BackendLease(const BackendLease&) = delete;
     BackendLease& operator=(const BackendLease&) = delete;
     bool covers(const std::string& database_path) const;
+    std::string canonical_database_path()const;
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
