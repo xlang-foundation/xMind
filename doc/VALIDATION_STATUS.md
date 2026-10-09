@@ -5,7 +5,12 @@ seconds**, with 564 inputs unchanged and no exclusions/skips. It adds exact
 OpenAI wire/model capability declarations and preserves inactive Gemini text
 profiles beside active coding profiles. Unchanged frontend inputs retain their
 separate prior 173/33 results. New-source package and live acceptance remain
-separate from the previous four-provider checkpoint below.
+separate from the previous four-provider checkpoint below: source `60475f8`
+passed real native reads/replies with all four configured providers, including
+GPT-6.1 Sol, and returned 20 eligible OpenAI IDs. Its package passed independent
+ZIP integrity and actual installed VS Code opened-folder binding. The ordinary
+window needs a reload; rendered model interaction and browser migration remain
+pending.
 [Current model policy and retained failures](native-model-eligibility.md).
 
 Current source `d69a681886ebabcc38174985292fcd88dd7fc7ee` passed **88/88

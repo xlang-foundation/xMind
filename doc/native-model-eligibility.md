@@ -72,5 +72,24 @@ browser** passing checkpoint. Those unchanged suites were not rerun for this
 native change. The SDK remains the accepted isolated xlang3 branch at
 `ad8040ffb8aba6eeabeb09053a8e222df09a4e7a`, including its recorded 41/42
 selected-correctness baseline failure. No CPython was run. The older browser
-preview is unchanged. New package and live model acceptance remain separate.
+preview is unchanged. Package and live model acceptance are separate below.
 [Native source and retained-attempt evidence](evidence/native-model-eligibility-provenance.json).
+
+Source `60475f84ac2d1355dfe77736b187f7cb899f560f` subsequently passed
+real native file reads and exact marker replies in `TestProj` with
+GPT-6.1 Sol, Claude Haiku 4.5, Gemini 3.5 Flash and DeepSeek Flash. The account's
+OpenAI Responses discovery returned **20 eligible IDs**, compared with 135
+unfiltered IDs in the preceding live checkpoint. The client used the production
+provider/workspace controller and did not read keys; Native imported the single
+YAML path. Each run's actual tool/history correlation, supplied usage and timing
+were retained. This establishes those four tested models, not all 21 declarations
+or a rendered IDE/browser interaction.
+
+The resulting VSIX passed independent integrity checks for 1,924 entries,
+1,890 runtime files and six extension source files. The installed package
+passed actual VS Code host APIs and authenticated native workspace binding to
+the opened `TestProj` folder. That isolated test disabled trust only in its own
+profile and exercised no model inference. Installation in the normal profile
+preserved its settings and trust configuration. Its existing window still needs
+a reload; its last observed trust state was false. The browser preview was not
+upgraded. [Live runs and package evidence](evidence/native-model-eligibility-live-package.json).

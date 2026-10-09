@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "nativeRevision": "60475f84ac2d1355dfe77736b187f7cb899f560f",
+  "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+  "live": {
+    "realProviders": true,
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "passed": 4,
+    "openaiModel": "gpt-6.1-sol",
+    "eligibleOpenAIIds": 20,
+    "allActualReadsAndExactRepliesVerified": true,
+    "keysReadByClient": false,
+    "renderedInteractionTested": false
+  },
+  "package": {
+    "sha256": "6ad95ac137431123ec1b3b20329e8ce70f718bbf722a3ba5f38145208a2e53d5",
+    "entries": 1924,
+    "runtimeFiles": 1890,
+    "manifestSha256": "56cd0487728f339a5a386ffaaec0de38247c2a45e72a2ce5e6d86ebe66830f60",
+    "allArchiveBytesMatchManifest": true
+  },
+  "installedHost": {
+    "actualVsCodeApi": true,
+    "openedFolder": "D:\\CantorAI2026\\TestProj",
+    "requiresCodeWorkspace": false,
+    "manualTokenRequired": false,
+    "isolatedTestTrustDisabled": true,
+    "modelInferenceTested": false,
+    "screenshotVerified": false
+  },
+  "normalProfile": {
+    "installed": true,
+    "settingsUnchanged": true,
+    "trustConfigurationUnchanged": true,
+    "existingWindowReloadPending": true,
+    "lastObservedIsTrusted": false
+  },
+  "browserPreviewUpgraded": false,
+  "cpythonExecuted": false,
+  "files": {
+    "doc/evidence/native-model-eligibility-live.json": {
+      "bytes": 3685,
+      "sha256": "0282d8118d6b48a94a78b076008dbe8b2d5c8e168d27ff91a35e6aa26b03fe9f"
+    },
+    "doc/evidence/native-model-eligibility-vsix.json": {
+      "bytes": 2512,
+      "sha256": "f48f0dafd4f34ae11e45f9b093ee8d7ee0f6160b36eb946cfb9073a92ca9cee6"
+    },
+    "doc/evidence/native-model-eligibility-installed-host.json": {
+      "bytes": 704,
+      "sha256": "9ec650b40b3bc27f983770850fbff4838c45110db5213d6a5fb83e8f2dee1a73"
+    },
+    "doc/evidence/native-model-eligibility-normal-install.json": {
+      "bytes": 328,
+      "sha256": "d534293809f1636f93839aea06e935629f35f94f967452ef187a4312a4fffad0"
+    }
+  }
+}

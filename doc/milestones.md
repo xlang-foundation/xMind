@@ -4,8 +4,12 @@ The native OpenAI model eligibility policy passed **89/89 contracts in 172.73
 seconds**, with all 564 inputs unchanged. Discovery, enrollment and startup now
 use explicit route/model declarations; current GPT-6 tool restrictions and
 reasoning requirements are enforced before publication or execution. The 39
-frontend inputs are unchanged from the 173/33 checkpoint. Package, installed
-host and live-account checks for this new source remain separate.
+frontend inputs are unchanged from the 173/33 checkpoint. The subsequent native
+live check passed all four configured providers, including GPT-6.1 Sol, and
+OpenAI discovery returned 20 eligible IDs. The new package passed ZIP integrity
+and actual installed VS Code opened-folder binding, then was installed in the
+normal profile. Rendered model interaction and the older browser upgrade remain
+pending.
 [Model eligibility scope](native-model-eligibility.md).
 
 The latest native provider checkpoint passed real workspace reads and exact
