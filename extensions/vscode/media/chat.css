@@ -12,3 +12,20 @@ input{font:inherit;color:var(--vscode-input-foreground);background:var(--vscode-
 .context-view{border-top:1px solid var(--vscode-panel-border);padding:5px 0;margin-bottom:5px;max-height:180px;overflow:auto}.context-view summary{cursor:pointer;color:var(--vscode-descriptionForeground)}.context-view p{margin:4px 0;overflow-wrap:anywhere}.context-view .metrics{margin:5px 0}
 #plan-view h3{font-size:13px;overflow-wrap:anywhere}.plan-summary,.plan-call{padding:6px 0}.plan-ledger{font-size:11px}.plan-ledger pre,.plan-node pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:240px;overflow:auto}.plan-objective{font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}.plan-dependencies{display:flex;flex-wrap:wrap;gap:4px;font-size:11px;margin:8px 0}.plan-edge{font-size:11px;padding:3px 6px}.plan-input textarea{display:block;width:100%;min-height:80px;box-sizing:border-box;background:var(--vscode-input-background);border:1px solid var(--vscode-input-border,var(--vscode-panel-border));padding:6px;margin:6px 0}.plan-input-error{color:var(--vscode-errorForeground);font-size:11px}.plan-node .inspection-note,.plan-summary .inspection-note,.plan-call .inspection-note{font-size:11px;color:var(--vscode-descriptionForeground);overflow-wrap:anywhere}#plan-resume{margin:8px 0}
 .composer-bar #footer-provider{min-width:0;max-width:34%;flex:1;border:0;font-size:11px;padding:4px;background:transparent}.composer-bar #footer-provider:not([hidden])+#model{max-width:42%;flex:1}
+/* Reserve a usable history viewport in short browser/IDE panels. Expanded
+   context controls and long drafts scroll inside the footer instead of taking
+   all the space from responses. Keep the same controls and keyboard behavior. */
+@media(max-height:560px){
+  header{padding:6px 8px;gap:6px;flex:none}
+  #status{padding:3px 8px;flex:none}
+  .run-picker{padding:0 8px 4px;flex:none}
+  .run-context{padding:0 8px 4px;flex:none;max-height:38px;overflow:auto}
+  main{min-height:min(112px,30vh);padding:0 8px 8px}
+  footer{flex:0 1 auto;min-height:96px;max-height:45%;overflow:auto;padding:6px 8px}
+  .workflow-picker{margin-bottom:4px}
+  .composer{padding:6px}
+  .composer textarea{min-height:40px;max-height:64px}
+  .composer-bar{margin-top:4px}
+  .hint{margin-top:3px}
+  .context-view{max-height:100px}
+}
