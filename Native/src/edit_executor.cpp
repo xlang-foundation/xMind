@@ -61,6 +61,7 @@ WorkspaceSnapshot EditExecutor::execute(const std::string& id,const std::string&
         {"before_content",plan.before.content},{"before_sha256",plan.before.content_sha256},
         {"after_content",plan.after_content},{"after_sha256",plan.after_sha256},
         {"replaced_occurrences",plan.replaced_occurrences}}.dump()};
+    if(!plan.parent_id.empty()){auto payload=Json::parse(spec.arguments_json);payload["parent_id"]=plan.parent_id;spec.arguments_json=payload.dump();}
     guidance.validate();if(guidance.verify){auto payload=Json::parse(spec.arguments_json);payload["repository_guidance"]=Json::parse(guidance.metadata_json);spec.arguments_json=payload.dump();}
     PermissionWaiter(store_).acquire(id,spec,expiry,cancel);
     auto finish=[&](OperationState outcome,const std::string& result) {

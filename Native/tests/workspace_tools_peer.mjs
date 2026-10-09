@@ -117,6 +117,16 @@ try {
   assert.equal(applied.raw_size,3);
   assert.equal(await readFile(join(outside,'secret.txt'),'utf8'),'outside marker\n','Outside fixture must remain unchanged');
   const before=await execute(process.argv[2],['--identity',root],{windowsHide:true,timeout:5000});
+  const patchRoot=join(folder,'patch-workspace');await mkdir(join(patchRoot,'.config'),{recursive:true});
+  const patchSources={'update-source.txt':'before\n','move-source.txt':'old move\n','delete-source.txt':'remove me\n','.config/providers.yaml':'synthetic-private-config\n'};
+  await Promise.all(Object.entries(patchSources).map(([name,text])=>writeFile(join(patchRoot,name),text)));
+  await Promise.all(Array.from({length:5},(_,index)=>writeFile(join(patchRoot,'large'+index+'.txt'),'x'.repeat(900000))));
+  await symlink(outside,join(patchRoot,'outside-link'),'junction');await symlink(patchRoot,join(patchRoot,'inside-link'),'junction');await link(join(outside,'secret.txt'),join(patchRoot,'hard-link.txt'));
+  const patchPlan=JSON.parse((await execute(process.argv[2],['--patch-plan',patchRoot],{windowsHide:true,timeout:10000})).stdout);
+  assert.equal(patchPlan.files,4);assert.equal(patchPlan.planning_only,true);
+  for(const [name,text] of Object.entries(patchSources))assert.equal(await readFile(join(patchRoot,name),'utf8'),text,'Patch preparation/rejections must have no effects');
+  for(const [field,name] of [['updated_before_sha256','update-source.txt'],['moved_before_sha256','move-source.txt'],['removed_before_sha256','delete-source.txt']])assert.equal(patchPlan[field],createHash('sha256').update(patchSources[name]).digest('hex'));
+  await assert.rejects(readFile(join(patchRoot,'new-parent','deep','added.txt')),{code:'ENOENT'});await assert.rejects(readFile(join(patchRoot,'move-parent','moved.txt')),{code:'ENOENT'});
   const moved=join(folder,'moved-workspace');
   // Both directory-move targets are checked against this task's exact temp
   // fixture parent before moving the tree. No user workspace is moved.

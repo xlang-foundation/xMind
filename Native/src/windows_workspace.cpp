@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <sstream>
 #include <functional>
+#include <utility>
 
 namespace agentflow {
 namespace {
@@ -375,6 +376,55 @@ WorkspaceFingerprint WorkspaceTools::fingerprint_file(const std::string& path,st
     auto value=read_snapshot(path,true,cancel,false);
     return {std::move(value.path),std::move(value.workspace_id),std::move(value.file_id),std::move(value.content_sha256),value.content.size()};
 }
+WorkspacePatchPlan WorkspaceTools::plan_patch(const std::vector<FilePatch>& files,std::stop_token cancel,bool create_parents) const {
+    check_cancel(cancel);
+    if(files.empty()||files.size()>128)throw std::invalid_argument("Invalid patch file count");
+    WorkspacePatchPlan plan{identity(),{}};std::vector<std::wstring> names;std::set<std::string> identities;std::size_t review_bytes=0;
+    auto bounded=[&](std::size_t bytes){if(bytes>4*1024*1024-review_bytes)throw ToolFileError("Patch review exceeds its aggregate text limit");review_bytes+=bytes;};
+    auto name=[&](const std::string& path){
+        auto normalized=wide(relative_path(path));
+        for(const auto& existing:names){
+            const auto common=std::min(existing.size(),normalized.size());
+            if(CompareStringOrdinal(existing.data(),static_cast<int>(common),normalized.data(),static_cast<int>(common),TRUE)==CSTR_EQUAL&&
+                (existing.size()==normalized.size()||(existing.size()>common&&existing[common]==L'/')||(normalized.size()>common&&normalized[common]==L'/')))
+                throw std::invalid_argument("Patch targets duplicate or overlap a file path");
+        }
+        names.push_back(std::move(normalized));
+    };
+    auto source=[&](const std::string& path){
+        auto parent=impl_->creation_parent(path,cancel);Handle held(relative_file(parent.directories.back()->value,parent.leaf,false,false,false,true));
+        impl_->verify(held.value);BY_HANDLE_FILE_INFORMATION info{};
+        if(!GetFileInformationByHandle(held.value,&info)||GetFileType(held.value)!=FILE_TYPE_DISK||(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Patch source is not a regular file");
+        if((info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)||info.nNumberOfLinks!=1)throw ToolAccessDenied("Patch sources cannot be links");
+        auto snapshot=snapshot_file(parent.relative,cancel);
+        if(snapshot.file_id!=file_identity(held.value)||snapshot.workspace_id!=plan.workspace_id)throw ToolContentConflict("Patch source changed during planning");
+        if(!identities.insert(snapshot.file_id).second)throw ToolContentConflict("Patch source identity is used more than once");
+        bounded(snapshot.content.size());return std::pair{std::move(snapshot),file_identity(parent.directories.back()->value)};
+    };
+    for(const auto& file:files){
+        check_cancel(cancel);name(file.path);if(!file.move_to.empty())name(file.move_to);
+        if(file.action==PatchAction::add){
+            if(!file.move_to.empty()||!file.chunks.empty())throw std::invalid_argument("Invalid added-file patch");
+            bounded(file.content.size());plan.files.emplace_back(plan_creation(file.path,file.content,cancel,create_parents));
+        }else if(file.action==PatchAction::remove){
+            if(!file.move_to.empty()||!file.chunks.empty()||!file.content.empty())throw std::invalid_argument("Invalid removed-file patch");
+            auto [before,parent]=source(file.path);plan.files.emplace_back(WorkspaceRemovalPlan{std::move(before),std::move(parent)});
+        }else if(file.action==PatchAction::update){
+            if(!file.content.empty())throw std::invalid_argument("Invalid updated-file patch");
+            auto [before,parent]=source(file.path);std::string after;
+            try{after=prepare_patch_update(before.content,file,cancel);}catch(const PatchConflict&){throw ToolContentConflict("Patch source context does not match uniquely");}catch(const PatchCancelled&){throw ToolCancelled("Patch preparation cancelled");}
+            bounded(after.size());
+            if(file.move_to.empty()){
+                if(before.content==after)throw ToolContentConflict("Patch update makes no change");
+                const auto hash=content_hash(after);plan.files.emplace_back(WorkspaceEditPlan{std::move(before),std::move(after),hash,file.chunks.size(),std::move(parent)});
+            }else{
+                auto destination=plan_creation(file.move_to,after,cancel,create_parents);
+                plan.files.emplace_back(WorkspaceMovePlan{std::move(before),std::move(parent),std::move(destination)});
+            }
+        }else throw std::invalid_argument("Unsupported patch action");
+    }
+    check_cancel(cancel);if(identity()!=plan.workspace_id)throw ToolAccessDenied("Workspace changed while planning patch");return plan;
+}
 WorkspaceSnapshot WorkspaceTools::apply_plan(const WorkspaceEditPlan& plan,std::stop_token cancel) const {
     check_cancel(cancel);
     if(plan.before.content.size()>1024*1024 || plan.after_content.size()>1024*1024 || !valid_text(plan.before.content) || !valid_text(plan.after_content)) throw std::invalid_argument("Invalid edit plan contents");
@@ -382,6 +432,11 @@ WorkspaceSnapshot WorkspaceTools::apply_plan(const WorkspaceEditPlan& plan,std::
     if(content_hash(plan.before.content)!=plan.before.content_sha256 || content_hash(plan.after_content)!=plan.after_sha256) throw ToolContentConflict("Edit plan hashes differ from contents");
     if(identity()!=plan.before.workspace_id) throw ToolAccessDenied("Edit belongs to another workspace");
     const auto relative=relative_path(plan.before.path);
+    std::optional<Impl::CreationParent> parent;
+    if(!plan.parent_id.empty()){
+        parent.emplace(impl_->creation_parent(relative,cancel));
+        if(file_identity(parent->directories.back()->value)!=plan.parent_id)throw ToolContentConflict("Edit parent identity changed");
+    }
     Handle file(CreateFileW(impl_->path(relative).c_str(),GENERIC_READ|GENERIC_WRITE,0,nullptr,OPEN_EXISTING,FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_WRITE_THROUGH,nullptr));
     impl_->verify(file.value);BY_HANDLE_FILE_INFORMATION info{};
     if(!GetFileInformationByHandle(file.value,&info) || GetFileType(file.value)!=FILE_TYPE_DISK || (info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)) throw ToolFileError("Expected a regular edit target");

@@ -1,9 +1,11 @@
 #pragma once
 #include "agentflow/model_provider.hpp"
+#include "agentflow/file_patch.hpp"
 #include <memory>
 #include <optional>
 #include <string_view>
 #include <functional>
+#include <variant>
 
 namespace agentflow {
 struct ToolAccessDenied : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -26,8 +28,13 @@ struct WorkspaceEditPlan {
     WorkspaceSnapshot before;
     std::string after_content,after_sha256;
     std::size_t replaced_occurrences;
+    std::string parent_id;
 };
 struct WorkspaceCreatePlan {std::string path,workspace_id,parent_id,content,content_sha256;std::vector<std::string> create_directories;};
+struct WorkspaceRemovalPlan {WorkspaceSnapshot before;std::string parent_id;};
+struct WorkspaceMovePlan {WorkspaceSnapshot before;std::string parent_id;WorkspaceCreatePlan destination;};
+using WorkspacePatchFilePlan=std::variant<WorkspaceCreatePlan,WorkspaceEditPlan,WorkspaceRemovalPlan,WorkspaceMovePlan>;
+struct WorkspacePatchPlan {std::string workspace_id;std::vector<WorkspacePatchFilePlan> files;};
 struct WorkspaceFingerprint {std::string path,workspace_id,file_id,content_sha256;std::size_t size;};
 struct WorkspaceEntry {std::string name,kind;};
 struct WorkspaceListing {std::vector<WorkspaceEntry> entries;bool truncated=false;};
@@ -91,6 +98,9 @@ public:
     // executor that revalidates its exact snapshot preconditions.
     WorkspaceEditPlan plan_replacement(const std::string& path,const std::string& old_text,
         const std::string& new_text,std::size_t expected_occurrences=1,std::stop_token cancel={}) const;
+    // All file sections are prepared from actual snapshots before any proposal
+    // or effect. Delete/move plans are data, not callable mutation primitives.
+    WorkspacePatchPlan plan_patch(const std::vector<FilePatch>& files,std::stop_token cancel={},bool create_parents=false) const;
     // Backend effect primitive, not a model-invokable tool. The caller must
     // hold a matching durable operation claim and record the actual outcome.
     // In-place application is not atomic replacement. After writes begin, any

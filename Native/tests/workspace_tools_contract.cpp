@@ -23,6 +23,27 @@ template<class Error,class Function> void rejects(Function action) {
 int main(int argc,char** argv) {
     if(argc!=3 && argc!=4 && argc!=5) return 2;
     try {
+        if(std::string(argv[1])=="--patch-plan") {
+            WorkspaceTools tools(argv[2]);
+            const auto files=parse_file_patch("*** Begin Patch\n*** Add File: new-parent/deep/added.txt\n+added\n*** Update File: update-source.txt\n@@\n-before\n+after\n*** Update File: move-source.txt\n*** Move to: move-parent/moved.txt\n@@\n-old move\n+new move\n*** Delete File: delete-source.txt\n*** End Patch\n");
+            rejects<ToolFileError>([&]{tools.plan_patch(files);});
+            const auto plan=tools.plan_patch(files,{},true);require(plan.files.size()==4&&plan.workspace_id==tools.identity(),"Patch planning must bind actual workspace");
+            const auto& added=std::get<WorkspaceCreatePlan>(plan.files[0]);const auto& edited=std::get<WorkspaceEditPlan>(plan.files[1]);const auto& moved=std::get<WorkspaceMovePlan>(plan.files[2]);const auto& removed=std::get<WorkspaceRemovalPlan>(plan.files[3]);
+            require(added.content=="added\n"&&added.create_directories==std::vector<std::string>{"new-parent","new-parent/deep"},"Patch creation must disclose all missing parents");
+            require(edited.before.content=="before\n"&&edited.after_content=="after\n"&&!edited.parent_id.empty(),"Patch edit must use actual before/after and parent binding");
+            require(moved.before.content=="old move\n"&&moved.destination.content=="new move\n"&&moved.destination.path=="move-parent/moved.txt"&&!moved.parent_id.empty(),"Patch move must bind source and destination");
+            require(removed.before.content=="remove me\n"&&!removed.parent_id.empty(),"Patch removal must bind actual source");
+            auto bad=edited;bad.parent_id="different-parent";rejects<ToolContentConflict>([&]{tools.apply_plan(bad);});
+            for(const auto& path:{".config/providers.yaml","outside-link/secret.txt","hard-link.txt","inside-link/update-source.txt"}){
+                const auto unsafe=parse_file_patch("*** Begin Patch\n*** Delete File: "+std::string(path)+"\n*** End Patch\n");rejects<ToolAccessDenied>([&]{tools.plan_patch(unsafe);});
+            }
+            const auto collision=parse_file_patch("*** Begin Patch\n*** Add File: \xc3\x85.txt\n+a\n*** Add File: \xc3\xa5.txt\n+b\n*** End Patch\n");rejects<std::invalid_argument>([&]{tools.plan_patch(collision);});
+            const auto overlap=parse_file_patch("*** Begin Patch\n*** Add File: new-file\n+a\n*** Add File: new-file/child.txt\n+b\n*** End Patch\n");rejects<std::invalid_argument>([&]{tools.plan_patch(overlap,{},true);});
+            const auto occupied=parse_file_patch("*** Begin Patch\n*** Update File: move-source.txt\n*** Move to: update-source.txt\n@@\n-old move\n+new move\n*** End Patch\n");rejects<ToolContentConflict>([&]{tools.plan_patch(occupied);});
+            std::string oversized="*** Begin Patch\n";for(int n=0;n<5;++n)oversized+="*** Delete File: large"+std::to_string(n)+".txt\n";oversized+="*** End Patch\n";const auto large=parse_file_patch(oversized);rejects<ToolFileError>([&]{tools.plan_patch(large);});
+            std::stop_source stopped;stopped.request_stop();rejects<ToolCancelled>([&]{tools.plan_patch(files,stopped.get_token(),true);});
+            std::cout<<Json{{"files",plan.files.size()},{"workspace_id",plan.workspace_id},{"updated_before_sha256",edited.before.content_sha256},{"removed_before_sha256",removed.before.content_sha256},{"moved_before_sha256",moved.before.content_sha256},{"planning_only",true}}.dump()<<'\n';return 0;
+        }
         if(std::string(argv[1])=="--guidance") {WorkspaceTools tools(argv[2]);std::cout<<tools.invoke("read_repository_instructions",Json{{"directory",argv[3]}}.dump())<<'\n';return 0;}
         if(std::string(argv[1])=="--guidance-context") {
             WorkspaceTools tools(argv[2]);RepositoryInstructionContext context(tools,tools.repository_instructions());

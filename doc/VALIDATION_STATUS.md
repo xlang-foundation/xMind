@@ -1,9 +1,11 @@
 # Current native validation
 
-Native general-patch parsing/preparation is now a source increment, with a new
+Native general-patch parsing/preparation and actual-workspace planning are source increments, with a new
 contract included in the complete 99-contract native manifest. Compilation and
 execution are pending the isolated workflow. No patch model tool or filesystem
-effects are exposed by this increment. Approval/effect integration remains
+effects are exposed by these increments. Expanded filesystem tests cover source/
+parent identities, destination absence, private/link paths, Unicode collisions,
+overlapping targets and aggregate review bounds. Approval/effect integration remains
 required. [Implementation and remaining delivery](native-file-patch.md).
 
 The shared sidebar approval-review candidate passed the complete isolated
