@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+Legacy migration now has native writer-fenced operator termination and managed
+extension adoption/recovery. Complete local checks passed **98 native, 198
+extension and 39 browser tests**. Actual server/admin/adapter fixtures retain
+the same database and saved sessions, consume the exact ticket on activation,
+recover lost stop output without replay and reconnect on host reload. Installed
+migration and rendered coding remain pending.
+[Implementation, evidence and limits](native-legacy-stop.md).
+
 Native legacy preflight now authenticates the workspace and verifies actual
 listener PID/birth, executable/hash and database/workspace command line before
 migration. All **98 contracts passed**, with 631 mapped inputs unchanged.

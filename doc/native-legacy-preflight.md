@@ -24,7 +24,7 @@ PID/birth, image hash and canonical image/database paths, with explicit
 
 The caller must obtain the expected image hash from its trusted source-package
 inventory and the workspace/authority from its saved authenticated owner. A
-successful observation is not a reusable shutdown authorization. A future
+successful observation is not a reusable shutdown authorization. The native
 native stop operation must revalidate these bindings and protect idle database
 ownership while stopping; it cannot authorize termination using stale JSON
 returned by this command.
@@ -42,9 +42,11 @@ browser passing checkpoint; those suites were not rerun for this native change.
 [complete CTest output](evidence/native-legacy-preflight-local-ctest.log).
 
 This adds the native verification prerequisite to the
-[stopped-owner preparation](native-legacy-owner.md). Product shutdown, extension
-adoption/recovery, verified installation and rendered coding approvals remain
-required before the installed read-only TestProj backend can write files.
+[stopped-owner preparation](native-legacy-owner.md). The subsequent
+[native stop/adoption increment](native-legacy-stop.md) implements the operator
+operation and extension recovery. Verified installation and rendered coding
+approvals remain required before the installed read-only TestProj backend can
+write files.
 
 Windows API references: [owner-PID TCP rows](https://learn.microsoft.com/en-us/windows/win32/api/tcpmib/ns-tcpmib-mib_tcprow_owner_pid),
 [process command-line metadata](https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/CIMWin32Prov/win32-process.md).

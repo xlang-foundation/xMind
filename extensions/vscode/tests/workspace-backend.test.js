@@ -178,6 +178,18 @@ test('live old process and changed saved records keep replacement admission clos
  }
 });
 
-test('legacy owner cannot fabricate retirement or replace its database through the native upgrade command',async()=>{
- const h=await upgradeHarness({legacy:true});const records=JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners'));await assert.rejects(h.manager.upgrade(),/legacy backend/);assert.equal(h.posts.length,0);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,0);assert.equal(JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),records);
+test('legacy owner cannot fabricate retirement or replace its database without native preflight',async()=>{
+ const h=await upgradeHarness({legacy:true});h.manager.deps.admin=async()=>{throw new Error('Legacy native preflight unavailable in this synthetic fixture');};const records=JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners'));await assert.rejects(h.manager.upgrade(),/preflight unavailable/);assert.equal(h.posts.length,0);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,0);assert.equal(JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),records);
+});
+test('legacy migration cancellation and a changed source package prevent stop dispatch and profile replacement',async()=>{
+ for(const changed of [false,true]){
+  const h=await upgradeHarness({legacy:true}),calls=[],records=JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners'));
+  const prior={...h.runtime,manifestSha256:'a'.repeat(64),serverSha256:changed?'f'.repeat(64):'e'.repeat(64)};
+  h.runtime={...h.runtime,runtimeRoot:'C:\\Next',nativeProgram:'C:\\Next\\xmind_server.exe',modules:'C:\\Next\\modules',stdlib:'C:\\Next\\stdlib'};
+  h.manager.resolveRuntime=async(_ctx,_host,config)=>config.runtimeDirectory==='C:\\Runtime'?prior:h.runtime;
+  h.manager.deps.confirmLegacyStop=async()=>false;
+  h.manager.deps.admin=async(_runtime,args)=>{calls.push(args[0]);const value={process_id:19001,process_birth:'1337',image_path:'C:\\Runtime\\xmind_server.exe',server_sha256:'e'.repeat(64)};if(args[0]==='inspect-legacy-listener')return value;assert.equal(args[0],'inspect-legacy-owner');return {...value,authenticated:true,database_command_line_verified:true,process_signalled:false,migration_ticket_created:false};};
+  await assert.rejects(h.manager.upgrade(),changed?/source differs/:/migration cancelled/);
+  assert.ok(!calls.some(v=>v==='stop-and-prepare-legacy-owner'));assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,0);assert.equal(JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),records);
+ }
 });

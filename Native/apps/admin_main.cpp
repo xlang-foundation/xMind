@@ -32,6 +32,9 @@ bool reflected(const nlohmann::json& value,const std::string& secret){
 }
 int run_admin(int argc,char** argv){
     try {
+        if(argc==3&&std::string(argv[1])=="inspect-legacy-listener"){
+            const std::string input=argv[2];std::uint32_t port=0;const auto parsed=std::from_chars(input.data(),input.data()+input.size(),port);if(parsed.ec!=std::errc{}||parsed.ptr!=input.data()+input.size()||port==0||port>65535)throw std::invalid_argument("Invalid legacy listener port");const auto result=agentflow::discover_legacy_listener(static_cast<std::uint16_t>(port));std::cout<<nlohmann::json{{"process_id",result.source.process_id},{"process_birth",result.source.process_birth},{"image_path",result.image_path},{"server_sha256",result.source.server_sha256},{"authenticated",false},{"process_signalled",false}}.dump()<<'\n';return 0;
+        }
         if(argc==9&&std::string(argv[1])=="inspect-legacy-owner"){
             const std::string input=argv[2];std::uint32_t port=0;const auto parsed=std::from_chars(input.data(),input.data()+input.size(),port);if(parsed.ec!=std::errc{}||parsed.ptr!=input.data()+input.size()||port==0||port>65535)throw std::invalid_argument("Invalid legacy listener port");
             const auto* raw=std::getenv("XMIND_AUTH_TOKEN");if(!raw)throw std::invalid_argument("Existing legacy owner authentication is required");const std::string_view value(raw);agentflow::SecretBytes token(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(value.data()),value.size()));
@@ -51,6 +54,29 @@ int run_admin(int argc,char** argv){
             const std::string key=argv[command];if(command+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib") || !options.emplace(key,argv[command+1]).second)throw std::invalid_argument("Invalid native admin options");command+=2;
         }
         for(const auto* key:{"--db","--modules","--stdlib"})if(!options.contains(key))throw std::invalid_argument("Native admin requires --db FILE --modules DIR --stdlib DIR");
+        if(command<argc&&std::string(argv[command])=="stop-and-prepare-legacy-owner"){
+            if(command+14!=argc||std::string(argv[command+13])!="confirmed-stop")throw std::invalid_argument("Explicit confirmed-stop is required for legacy migration");
+            const auto number=[](const char* value){std::uint32_t out=0;const auto end=value+std::char_traits<char>::length(value);const auto parsed=std::from_chars(value,end,out);if(parsed.ec!=std::errc{}||parsed.ptr!=end)throw std::invalid_argument("Invalid legacy operator argument");return out;};
+            const auto port=number(argv[command+4]),pid=number(argv[command+9]);if(port==0||port>65535||pid==0)throw std::invalid_argument("Invalid legacy owner port or process ID");const std::string edits=argv[command+12];if(edits!="approved"&&edits!="read-only")throw std::invalid_argument("Invalid legacy replacement policy");
+            const auto* auth=std::getenv("XMIND_AUTH_TOKEN");if(!auth)throw std::invalid_argument("Existing legacy owner authentication is required");const std::string_view value(auth);agentflow::SecretBytes token(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(value.data()),value.size()));
+            agentflow::VerifiedRuntimeGeneration runtime(argv[command+1],argv[command+2],argv[command+3]);agentflow::WorkspaceTools workspace(argv[command+3]);
+            const auto qualified=agentflow::qualify_backend_target(runtime,workspace,auth,edits=="approved",false);
+            if(options.at("--modules")!=qualified.runtime.root+"/modules"&&options.at("--modules")!=qualified.runtime.root+"\\modules")throw std::invalid_argument("Legacy migration requires the target package modules");
+            if(options.at("--stdlib")!=qualified.runtime.root+"/stdlib"&&options.at("--stdlib")!=qualified.runtime.root+"\\stdlib")throw std::invalid_argument("Legacy migration requires the target package library source");
+            agentflow::VerifiedLegacyOwnerProcess owner(static_cast<std::uint16_t>(port),argv[command+5],argv[command+6],options.at("--db"),argv[command+3],argv[command+7],argv[command+8],token);
+            if(owner.observation().source.process_id!=pid||owner.observation().source.process_birth!=argv[command+10])throw std::runtime_error("Legacy process changed after its preflight");
+            const agentflow::LegacyOwnerBootstrap boot{argv[command+11],qualified};owner.stop_and_prepare(boot,{options.at("--modules"),options.at("--stdlib")});
+            std::cout<<nlohmann::json{{"legacy_ticket_id",boot.ticket_id},{"admission_closed",true},{"quiescence_receipt",false},{"schema_migrated",false},{"source_terminated",true},{"process_id",pid},{"process_birth",owner.observation().source.process_birth}}.dump()<<'\n';return 0;
+        }
+        if(command<argc&&std::string(argv[command])=="inspect-legacy-ticket"){
+            if(command+10!=argc)throw std::invalid_argument("Invalid legacy ticket inspection arguments");
+            const auto* auth=std::getenv("XMIND_AUTH_TOKEN");if(!auth)throw std::invalid_argument("Existing legacy owner authentication is required");const std::string edits=argv[command+9];if(edits!="approved"&&edits!="read-only")throw std::invalid_argument("Invalid legacy replacement policy");
+            const std::string number=argv[command+4];std::uint32_t pid=0;const auto parsed=std::from_chars(number.data(),number.data()+number.size(),pid);if(parsed.ec!=std::errc{}||parsed.ptr!=number.data()+number.size()||!agentflow::observe_owner_exit(pid,argv[command+5],0).exited)throw std::runtime_error("Legacy source exit is unverified");
+            agentflow::VerifiedRuntimeGeneration runtime(argv[command+1],argv[command+2],argv[command+3]);agentflow::WorkspaceTools workspace(argv[command+3]);const auto qualified=agentflow::qualify_backend_target(runtime,workspace,auth,edits=="approved",false);
+            agentflow::BackendLease lease(options.at("--db"));agentflow::XlangSqlite database(lease.canonical_database_path(),{options.at("--modules"),options.at("--stdlib")});const agentflow::LegacyOwnerBootstrap boot{argv[command+7],qualified};
+            if(std::string(argv[command+8])!="read-only-inspection")throw std::invalid_argument("Invalid legacy ticket inspection mode");database.begin();try{agentflow::require_legacy_owner_bootstrap(database,lease,boot);const auto record=nlohmann::json::parse(*agentflow::legacy_owner_record(database));if(record.at("source")!=nlohmann::json{{"process_id",pid},{"process_birth",argv[command+5]},{"server_sha256",argv[command+6]}})throw std::runtime_error("Legacy ticket source changed");database.commit();}catch(...){database.rollback();throw;}
+            std::cout<<nlohmann::json{{"legacy_ticket_id",boot.ticket_id},{"admission_closed",true},{"quiescence_receipt",false},{"process_signalled",false}}.dump()<<'\n';return 0;
+        }
         if(command<argc&&std::string(argv[command])=="prepare-legacy-owner"){
             if(command+8!=argc)throw std::invalid_argument("prepare-legacy-owner requires TARGET_ROOT MANIFEST_SHA256 WORKSPACE PID PROCESS_BIRTH SOURCE_SERVER_SHA256 approved|read-only. The legacy owner must already be stopped by its operator.");
             std::uint32_t pid=0;const std::string number=argv[command+4];const auto parsed=std::from_chars(number.data(),number.data()+number.size(),pid);if(parsed.ec!=std::errc{}||parsed.ptr!=number.data()+number.size())throw std::invalid_argument("Invalid legacy process ID");

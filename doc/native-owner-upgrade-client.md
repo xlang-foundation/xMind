@@ -1,5 +1,12 @@
 # Managed native owner upgrades
 
+The command now also handles authenticated legacy owners through
+[native stop and ticket adoption](native-legacy-stop.md), with explicit product
+confirmation, source-package verification and native writer-fenced termination.
+The 98/198/39 local gate passed; the installed TestProj preview has not yet been
+upgraded. The modern receipt path described below remains in use for qualified
+owners.
+
 The thin extension now starts new managed owners with the verified runtime
 manifest digest. It retains a complete generation in private storage outside
 opened folders and the extension installation directory. An extension update

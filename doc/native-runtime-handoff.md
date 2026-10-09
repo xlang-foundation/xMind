@@ -1,5 +1,11 @@
 # Managed local runtime upgrades
 
+The latest [legacy stop/adoption increment](native-legacy-stop.md) passed
+98/198/39 local checks. Native verifies the actual source, holds the SQLite
+writer fence, stops an idle legacy process and prepares its exact ticket;
+the extension recovers lost output without repeating stop and activates the
+same database. Installed acceptance and rendered writing remain pending.
+
 The newer [managed upgrade adapter](native-owner-upgrade-client.md) now retains
 private runtime generations, launches qualified owners, observes actual native
 process exit and completes target-bound bootstrap/activation. All 97 native and

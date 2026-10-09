@@ -106,6 +106,7 @@ async function resolveNativeRuntime(context, hostEnv, userSettings = {}, depende
   const providerConfig = userSettings.providerConfigPath ? absolute(userSettings.providerConfigPath, 'Provider configuration') : undefined;
   return { nativeProgram: path.join(verified.runtimeRoot, 'xmind_server.exe'), modules: path.join(verified.runtimeRoot, 'modules'), stdlib,
     providerConfig, privateStateRoot, runtimeRoot: verified.runtimeRoot, manifestSha256: verified.manifestSha256,
+    serverSha256: verified.manifest.files['xmind_server.exe'],
     qualified: samePath(stdlib,path.join(verified.runtimeRoot,'stdlib')) };
 }
 async function retainNativeRuntime(runtime, privateRoot, { io=fs, uuid=()=>crypto.randomUUID() }={}) {

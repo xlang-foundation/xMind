@@ -48,11 +48,19 @@ async function observeNativeExit(runtime,state){
   if(result.process_id!==state.process_id||result.process_birth!==state.process_birth||typeof result.exited!=='boolean'||typeof result.identity_matches!=='boolean')throw new Error('Invalid native process-exit observation.');
   return result.exited;
 }
+async function callNativeAdmin(runtime,args,token,environment){
+  const env={...environment,XMIND_AUTH_TOKEN:token};for(const key of Object.keys(env))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY')delete env[key];
+  const {stdout}=await promisify(execFile)(path.win32.join(runtime.runtimeRoot,'xmind_admin.exe'),args,{env,windowsHide:true,timeout:30000,maxBuffer:16384});return JSON.parse(stdout);
+}
+function legacyProcess(value){
+  if(!value||!Number.isSafeInteger(value.process_id)||value.process_id<1||value.process_id>0xffffffff||typeof value.process_birth!=='string'||!/^[1-9][0-9]{0,19}$/.test(value.process_birth)||typeof value.server_sha256!=='string'||!/^[a-f0-9]{64}$/.test(value.server_sha256))throw new Error('Invalid native legacy process observation.');return value;
+}
 
 class WorkspaceBackend {
   constructor(vscode,context,resolveRuntime,dependencies={}){
     this.vscode=vscode;this.context=context;this.resolveRuntime=resolveRuntime;
-    this.deps={fs,spawn,retainRuntime:retainNativeRuntime,observeExit:observeNativeExit,fetch:(...args)=>fetch(...args),port:loopbackPort,random:()=>crypto.randomBytes(32).toString('hex'),uuid:()=>crypto.randomUUID(),sleep:ms=>new Promise(resolve=>setTimeout(resolve,ms)),now:()=>Date.now(),platform:process.platform,arch:process.arch,env:process.env,...dependencies};
+    this.deps={fs,spawn,retainRuntime:retainNativeRuntime,observeExit:observeNativeExit,admin:callNativeAdmin,fetch:(...args)=>fetch(...args),port:loopbackPort,random:()=>crypto.randomBytes(32).toString('hex'),uuid:()=>crypto.randomUUID(),sleep:ms=>new Promise(resolve=>setTimeout(resolve,ms)),now:()=>Date.now(),platform:process.platform,arch:process.arch,env:process.env,...dependencies};
+    this.deps.confirmLegacyStop=dependencies.confirmLegacyStop??(async owner=>await vscode.window.showWarningMessage(`Stop the legacy xMind backend and migrate the saved profile for ${owner.canonical}? Native checks require idle execution. File changes will still require approval.`,{modal:true},'Stop and migrate')==='Stop and migrate');
     this.epoch=0;this.owners=new Map();this.active=undefined;this.disposed=false;this.connecting=undefined;
   }
   signature(){return JSON.stringify((this.vscode.workspace.workspaceFolders||[]).map(folder=>folder.uri.toString()));}
@@ -204,7 +212,8 @@ class WorkspaceBackend {
     if(roots.some(root=>contained(root,generationParent)||contained(generationParent,root)))throw new Error('Native generation storage overlaps a workspace folder.');
     runtime=await this.deps.retainRuntime(runtime,privateRoot);
     if(roots.some(r=>contained(r,runtime.runtimeRoot))||!await this.ownerStorageSafe(owner,roots)||!current())throw new Error('Workspace or private storage changed before upgrade.');
-    let state=nativeOwnerState(await this.ownerRequest(owner.origin,token,'/v1/backend/owner'));
+    let state;
+    try{state=nativeOwnerState(await this.ownerRequest(owner.origin,token,'/v1/backend/owner'));}catch(error){if(error.status!==404)throw error;return this.upgradeLegacy(owner,selection,current,runtime,token,config);}
     if(!state.retirement_supported||state.retirement_requested||state.replacement_prepared)throw new Error('This backend cannot begin a new native upgrade.');
     const fields={expected_workspace_id:owner.metadata.workspace_id,expected_workspace_authority_id:owner.metadata.authority_id};
     this.upgrading=true;
@@ -222,20 +231,52 @@ class WorkspaceBackend {
       return await this.completeUpgrade(owner,selection,current);
     }finally{this.upgrading=false;}
   }
+  async upgradeLegacy(owner,selection,current,runtime,token,config){
+    this.upgrading=true;
+    try{
+      const discovered=legacyProcess(await this.deps.admin(runtime,['inspect-legacy-listener',new URL(owner.origin).port],token,this.deps.env));
+      canonicalPath(discovered.image_path);
+      const prior=await this.resolveRuntime(this.context,{platform:this.deps.platform,arch:this.deps.arch,remoteName:this.vscode.env?.remoteName??null},{runtimeDirectory:path.win32.dirname(discovered.image_path)});
+      if(prior.manifestSha256!==owner.runtimeManifest||prior.serverSha256!==discovered.server_sha256||keyPath(prior.nativeProgram)!==keyPath(discovered.image_path)||!current())throw new Error('Legacy source differs from the saved verified package. No process was stopped.');
+      const checked=legacyProcess(await this.deps.admin(runtime,['inspect-legacy-owner',new URL(owner.origin).port,prior.nativeProgram,prior.serverSha256,path.win32.join(owner.privateDirectory,'state.sqlite'),owner.canonical,owner.metadata.workspace_id,owner.metadata.authority_id],token,this.deps.env));
+      if(checked.process_id!==discovered.process_id||checked.process_birth!==discovered.process_birth||checked.server_sha256!==discovered.server_sha256||checked.authenticated!==true||checked.database_command_line_verified!==true||checked.process_signalled!==false||checked.migration_ticket_created!==false)throw new Error('Native legacy preflight changed. No process was stopped.');
+      if(!await this.deps.confirmLegacyStop(owner))throw new Error('Legacy backend migration cancelled; its process and saved profile were preserved.');
+      if(!current())throw new Error('Workspace changed before legacy migration.');
+      await this.observe(owner);
+      const ticketId=this.deps.uuid().replaceAll('-','');if(!/^[a-f0-9]{32}$/.test(ticketId))throw new Error('Invalid legacy migration request identity.');
+      const origin=`http://127.0.0.1:${await this.deps.port()}`,approvedEdits=machineSetting(this.vscode,'workspaceEdits')===true;
+      const pending={kind:'legacy',phase:'stopping',state:checked,ticketId,target:{runtimeRoot:runtime.runtimeRoot,manifestSha256:runtime.manifestSha256},origin,approvedEdits,records:{},launchConfiguration:JSON.stringify({...config,workspaceEdits:approvedEdits})};
+      owner.upgrade=pending;await this.context.secrets.store(`xmind.auth:${origin}`,token);await this.saveOwner(owner);
+      if(!current())throw new Error('Workspace changed before native legacy stop dispatch.');
+      const args=['--db',path.win32.join(owner.privateDirectory,'state.sqlite'),'--modules',runtime.modules,'--stdlib',runtime.stdlib,'stop-and-prepare-legacy-owner',runtime.runtimeRoot,runtime.manifestSha256,owner.canonical,new URL(owner.origin).port,prior.nativeProgram,prior.serverSha256,owner.metadata.workspace_id,owner.metadata.authority_id,String(checked.process_id),checked.process_birth,ticketId,approvedEdits?'approved':'read-only','confirmed-stop'];
+      // Dispatch once. Reload/lost stdout recovery reads the exact native ticket;
+      // a missing ticket or live source never authorizes another stop dispatch.
+      try{const prepared=await this.deps.admin(runtime,args,token,this.deps.env);if(prepared.legacy_ticket_id!==ticketId||prepared.source_terminated!==true||prepared.quiescence_receipt!==false||prepared.admission_closed!==true||prepared.process_id!==checked.process_id||prepared.process_birth!==checked.process_birth)throw new Error('Native legacy stop outcome is unverified.');pending.phase='prepared';await this.saveOwner(owner);}
+      catch(error){if(!await this.deps.observeExit(runtime,checked))throw error;}
+      return this.completeUpgrade(owner,selection,current);
+    }finally{this.upgrading=false;}
+  }
   async completeUpgrade(owner,selection,current){
     const pending=owner.upgrade;
-    if(!pending||!['retiring','prepared','activating'].includes(pending.phase)||typeof pending.approvedEdits!=='boolean'||!/^http:\/\/127\.0\.0\.1:[0-9]{1,5}$/.test(pending.origin)||!pending.records||Object.keys(pending.records).length>3075)throw new Error('Upgrade needs operator recovery before replacement startup. Existing storage was preserved.');
-    nativeOwnerState(pending.state);const source=pending.source;if(source.generation!==pending.state.generation||source.revision!==pending.state.revision||source.receipt_id!==pending.state.receipt_id)throw new Error('Saved native upgrade receipt changed.');
+    if(!pending||!['stopping','retiring','prepared','activating'].includes(pending.phase)||typeof pending.approvedEdits!=='boolean'||!/^http:\/\/127\.0\.0\.1:[0-9]{1,5}$/.test(pending.origin)||!pending.records||Object.keys(pending.records).length>3075)throw new Error('Upgrade needs operator recovery before replacement startup. Existing storage was preserved.');
+    const legacy=pending.kind==='legacy',source=pending.source;
+    if(legacy){legacyProcess(pending.state);if(typeof pending.ticketId!=='string'||!/^[a-f0-9]{32}$/.test(pending.ticketId))throw new Error('Invalid saved legacy operator ticket.');}
+    else{nativeOwnerState(pending.state);if(source.generation!==pending.state.generation||source.revision!==pending.state.revision||source.receipt_id!==pending.state.receipt_id)throw new Error('Saved native upgrade receipt changed.');}
     const config={runtimeDirectory:pending.target.runtimeRoot};const runtime=await this.resolveRuntime(this.context,{platform:this.deps.platform,arch:this.deps.arch,remoteName:this.vscode.env?.remoteName??null},config);
     if(runtime.manifestSha256!==pending.target.manifestSha256||!runtime.qualified||!current())throw new Error('Pending native target or workspace changed.');
     if(!await this.deps.observeExit(runtime,pending.state))throw new Error('The retiring native process is still running. Upgrade remains pending; no replacement was started.');
     const token=await this.context.secrets.get(`xmind.auth:${owner.origin}`);
     if(typeof token!=='string'||!/^[\x21-\x7e]{32,256}$/.test(token)||await this.context.secrets.get(`xmind.auth:${pending.origin}`)!==token)throw new Error('Pending native upgrade authentication is unavailable.');
+    if(legacy&&pending.phase==='stopping'){
+      const recovered=await this.deps.admin(runtime,['--db',path.win32.join(owner.privateDirectory,'state.sqlite'),'--modules',runtime.modules,'--stdlib',runtime.stdlib,'inspect-legacy-ticket',runtime.runtimeRoot,runtime.manifestSha256,owner.canonical,String(pending.state.process_id),pending.state.process_birth,pending.state.server_sha256,pending.ticketId,'read-only-inspection',pending.approvedEdits?'approved':'read-only'],token,this.deps.env);
+      if(recovered.legacy_ticket_id!==pending.ticketId||recovered.admission_closed!==true||recovered.quiescence_receipt!==false||recovered.process_signalled!==false)throw new Error('Native legacy preparation outcome remains unverified. No stop command was repeated.');
+      pending.phase='prepared';await this.saveOwner(owner);
+    }
     let actual;
     try{actual=await this.readWorkspace(pending.origin,token);}catch{}
     if(!actual){
       if(pending.phase==='activating')throw new Error('Activation outcome is unavailable. Restore the accepted owner; no source receipt was replayed.');
-      const args=['--db',path.win32.join(owner.privateDirectory,'state.sqlite'),'--modules',runtime.modules,'--stdlib',runtime.stdlib,'--workspace',owner.canonical,'--port',new URL(pending.origin).port,'--runtime-manifest-sha256',runtime.manifestSha256,'--owner-receipt',`${source.generation}:${source.revision}:${source.receipt_id}`];if(pending.approvedEdits)args.push('--workspace-edits','approved');
+      const args=['--db',path.win32.join(owner.privateDirectory,'state.sqlite'),'--modules',runtime.modules,'--stdlib',runtime.stdlib,'--workspace',owner.canonical,'--port',new URL(pending.origin).port,'--runtime-manifest-sha256',runtime.manifestSha256,...(legacy?['--legacy-owner-ticket',pending.ticketId]:['--owner-receipt',`${source.generation}:${source.revision}:${source.receipt_id}`])];if(pending.approvedEdits)args.push('--workspace-edits','approved');
       if(!current())throw new Error('Workspace changed before replacement startup.');
       const env={...this.deps.env,XMIND_AUTH_TOKEN:token};for(const key of Object.keys(env))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY')delete env[key];
       const child=this.deps.spawn(runtime.nativeProgram,args,{cwd:owner.canonical,env,detached:true,windowsHide:true,stdio:'ignore'});child.unref?.();let failed=false;child.once('error',()=>{failed=true;});child.once('exit',()=>{failed=true;});
@@ -247,8 +288,8 @@ class WorkspaceBackend {
     if(!prepared.replacement_prepared&&!prepared.quiesced&&pending.phase==='activating'){
       if(prepared.generation!==pending.prepared?.generation||prepared.revision!==pending.prepared.revision+1)throw new Error('Accepted native activation identity changed.');
     }else{
-      if(!prepared.quiesced||!prepared.replacement_prepared||!sameReceipt(prepared.bootstrap_receipt,source))throw new Error('Native replacement did not retain its exact source receipt.');
-      const observed=await this.snapshotOwner({origin:pending.origin},token,Object.keys(pending.records));if(JSON.stringify(observed)!==JSON.stringify(pending.records))throw new Error('Saved native records changed during upgrade. Admission remains closed.');
+      if(!prepared.quiesced||!prepared.replacement_prepared||(legacy?(prepared.legacy_ticket_id!==pending.ticketId||prepared.bootstrap_receipt!==null):!sameReceipt(prepared.bootstrap_receipt,source)))throw new Error('Native replacement did not retain its exact source receipt or legacy ticket.');
+      if(!legacy){const observed=await this.snapshotOwner({origin:pending.origin},token,Object.keys(pending.records));if(JSON.stringify(observed)!==JSON.stringify(pending.records))throw new Error('Saved native records changed during upgrade. Admission remains closed.');}
       pending.phase='activating';pending.prepared=prepared;await this.saveOwner(owner);if(!current())throw new Error('Workspace changed before native activation.');
       await this.ownerRequest(pending.origin,token,'/v1/backend/owner/activate',{expected_generation:prepared.generation,expected_revision:prepared.revision,receipt_id:prepared.receipt_id,expected_workspace_id:actual.workspace_id,expected_workspace_authority_id:actual.authority_id});
     }
@@ -264,6 +305,7 @@ class WorkspaceBackend {
     const scope=crypto.createHash('sha256').update(keyPath(canonical)).digest('hex');
     const records=this.context.globalState?.get('xmind.nativeWorkspaceOwners');const owner=Array.isArray(records)?records.findLast(v=>v?.scope===scope):undefined;
     if(!owner?.upgrade)throw new Error('This workspace has no pending native upgrade.');
+    if(owner.upgrade.kind==='legacy')throw new Error('Legacy stop dispatch cannot be rolled back by a view. Complete native ticket recovery or use operator recovery; no old owner was restarted.');
     await this.observe(owner);const token=await this.context.secrets.get(`xmind.auth:${owner.origin}`),state=nativeOwnerState(await this.ownerRequest(owner.origin,token,'/v1/backend/owner'));
     if(state.retirement_requested||state.replacement_prepared||!sameReceipt(state,owner.upgrade.source))throw new Error('Native retirement was consumed or its receipt changed; cancellation cannot restore the old owner.');
     const resumed=nativeOwnerState(await this.ownerRequest(owner.origin,token,'/v1/backend/owner/resume',{expected_generation:state.generation,expected_revision:state.revision,receipt_id:state.receipt_id,expected_workspace_id:owner.metadata.workspace_id,expected_workspace_authority_id:owner.metadata.authority_id}));

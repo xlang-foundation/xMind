@@ -5,9 +5,9 @@ xMind is being built as a general-purpose single-agent and graph platform with a
 OpenCode 2 is the coding feature reference; LiteLLM is the provider coverage reference. Their implementations are not the engine. See the [architecture](doc/architecture.md), [SVG](doc/architecture.svg), [pinned parity baseline](doc/PARITY.md) and [provider requirements](doc/MODEL_SUPPORT.md).
 
 The latest local checkpoint passed all **98 native contracts**, including
-authenticated legacy preflight, post-exit preparation and qualified activation against the same SQLite
-database. Unchanged view sources retain the previous **197 extension / 39 browser**
-passing checkpoint. The installed
+authenticated legacy stop, preparation and qualified activation against the same
+SQLite database through the managed upgrade adapter. All **198 extension and
+39 browser tests** passed. The installed
 legacy VS Code preview still needs migration
 before approval-based file writing is ready. See [current validation](doc/VALIDATION_STATUS.md)
 and the [replacement protocol](doc/native-owner-replacement.md) for exact scope.

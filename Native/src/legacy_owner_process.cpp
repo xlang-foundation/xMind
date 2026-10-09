@@ -1,6 +1,7 @@
 #include "agentflow/legacy_owner_process.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #include "agentflow/context_records.hpp"
+#include "agentflow/owner_process.hpp"
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <winsock2.h>
@@ -77,8 +78,34 @@ struct VerifiedLegacyOwnerProcess::Impl {
         require(WaitForSingleObject(process.value,0)==WAIT_TIMEOUT&&listener(port)==pid&&birth(process.value)==observed.source.process_birth);
     }
 };
+LegacyOwnerProcessObservation discover_legacy_listener(std::uint16_t port){
+    const auto pid=listener(port);Handle process(OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,pid));require(WaitForSingleObject(process.value,0)==WAIT_TIMEOUT);
+    File image(image_path(process.value),true);const auto created=birth(process.value);const auto hash=image.digest();require(listener(port)==pid&&WaitForSingleObject(process.value,0)==WAIT_TIMEOUT&&birth(process.value)==created);
+    return {{pid,created,hash},image.path(),{}};
+}
 VerifiedLegacyOwnerProcess::VerifiedLegacyOwnerProcess(std::uint16_t port,const std::string& image,const std::string& hash,const std::string& db,const std::string& ws,const std::string& id,const std::string& authority,const SecretBytes& token):impl_(std::make_unique<Impl>(port,image,hash,db,ws,id,authority,token)){}
 VerifiedLegacyOwnerProcess::~VerifiedLegacyOwnerProcess()=default;
 const LegacyOwnerProcessObservation& VerifiedLegacyOwnerProcess::observation()const{return impl_->observed;}
 void VerifiedLegacyOwnerProcess::revalidate()const{impl_->revalidate();}
+void VerifiedLegacyOwnerProcess::stop_and_prepare(const LegacyOwnerBootstrap& boot,const std::vector<std::string>& roots){
+    require(boot.target.workspace_id==impl_->workspace_id);
+    File target_workspace(boot.target.workspace_root,false,true);require(target_workspace.same(impl_->workspace));
+    const auto bytes=impl_->token.view();std::string auth(reinterpret_cast<const char*>(bytes.data()),bytes.size());
+    const auto binding=context_digest("xMind.owner-auth.v1:"+auth);SecureZeroMemory(auth.data(),auth.size());require(binding==boot.target.auth_binding);
+    // Validate every ticket/target field before opening a termination handle.
+    require(hex(boot.ticket_id,32));encode_backend_owner_target(boot.target);
+    XlangSqlite db(impl_->observed.database_path,roots);db.begin();bool stopped=false;
+    try{
+        require_legacy_database_idle(db);require(!legacy_owner_record(db));const auto snapshot=snapshot_legacy_database(db);
+        impl_->revalidate();
+        Handle termination(OpenProcess(PROCESS_TERMINATE|SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,impl_->pid));
+        require(birth(termination.value)==impl_->observed.source.process_birth&&WaitForSingleObject(termination.value,0)==WAIT_TIMEOUT);
+        File actual(image_path(termination.value),true);require(actual.same(impl_->image)&&actual.digest()==impl_->hash);
+        require(TerminateProcess(termination.value,0x584d0001)!=0);stopped=true;
+        require(WaitForSingleObject(termination.value,10000)==WAIT_OBJECT_0&&observe_owner_exit(impl_->pid,impl_->observed.source.process_birth,0).exited);
+        BackendLease lease(impl_->observed.database_path);
+        File canonical(lease.canonical_database_path(),false);require(canonical.same(impl_->database));
+        publish_legacy_owner_ticket(db,lease,boot,impl_->observed.source,snapshot);db.commit();
+    }catch(...){db.rollback();if(stopped)throw std::runtime_error("Legacy source was stopped, but migration preparation failed. Saved storage was retained; operator recovery is required and no automatic restart occurred.");throw;}
+}
 }

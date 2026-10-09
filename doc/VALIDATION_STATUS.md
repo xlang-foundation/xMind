@@ -1,5 +1,18 @@
 # Current native validation
 
+Native legacy stop and managed adapter adoption passed **98 contracts in 196.55
+seconds**, with all 631 mapped inputs unchanged. Actual production fixtures
+authenticate and revalidate a legacy source, stop it under an embedded-xlang3
+SQLite writer fence, publish/recover its exact ticket and activate the same
+database. The thin adapter dispatches stop once, recovers after deliberately
+lost stdout and reconnects on host reload. All **198 extension and 39 browser
+tests** passed with unchanged view/asset bytes. Package provenance, confirmation
+choice and VS Code storage are fixtures; no providers, installed migration or
+file effects were tested. The installed TestProj source remains read-only.
+Verified packaging/installation, live continuity and rendered create/edit
+approvals remain pending. [Native stop/adoption and limits](native-legacy-stop.md),
+[exact evidence and retained failure](evidence/native-legacy-stop-local.json).
+
 Authenticated native legacy-owner preflight passed **98 contracts in 188.46
 seconds**, with 631 mapped inputs unchanged. Actual listener/process handles,
 source image/hash, database/workspace command line and authenticated workspace

@@ -56,7 +56,8 @@ Persistence now imports xlang3's existing native `_sqlite3` export directly.
 The local complete gate includes that repair. A new hosted success is not yet
 claimed. [Original failed CTest](evidence/native-owner-replacement-hosted-failure-ctest.log).
 
-Connecting authenticated legacy preflight to explicit shutdown, thin-client
-adoption/recovery, independently verified installation and real rendered
-create/edit approvals are still required before the installed TestProj preview
-can write files. Its running backend and profile were left unchanged.
+The later [native stop/adoption increment](native-legacy-stop.md) connects
+authenticated preflight to explicit writer-fenced termination and extension
+recovery. Independently verified installation and real rendered create/edit
+approvals are still required before the installed TestProj preview can write
+files. Its running backend and profile were left unchanged.
