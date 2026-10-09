@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+The local **0.1.2 VSIX** packages the accepted native file/folder-creation and
+Responses-diagnostic source. Complete archive/inventory and ten host/view
+source checks passed, as did 200/39 versioned client tests and a qualified
+packaged-server/xlang3 SQLite/session/retirement smoke. It contains no private
+state or CPython executable/extension/bytecode. The existing installed profile
+and pending migration were not replaced; installed writing remains unverified.
+[Artifact, hashes and scope](native-parent-package.md).
+
 Native file creation now supports approval-backed missing parent folders,
 with existing ancestor guidance, disclosed directory effects and create-new
 checks. Real OpenAI CLI creation/editing and both edit/creation denial passed;

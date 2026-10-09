@@ -1,0 +1,195 @@
+{
+  "scope": "Versioned distribution of the recorded native source and live CLI checkpoint. Separate complete archive/source audit, client suites and model-free qualified packaged-runtime smoke. No installed or rendered writing acceptance.",
+  "version": "0.1.2",
+  "nativeRevision": "1bf6a2d7d9d98514b4cc811be18899907ce64610",
+  "sdkRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+  "bridgeEnabled": false,
+  "cpythonExecuted": false,
+  "archive": {
+    "passed": true,
+    "scope": "Independent VSIX ZIP and staged-file integrity; no execution or installed acceptance",
+    "archive": {
+      "file": "xmind-0.1.2.vsix",
+      "sha256": "2c586c3ca2d70ac421bcb8d860b6510481eec5c5381180265175eb00bd999e02",
+      "bytes": 18666474,
+      "entries": 1933,
+      "expandedBytes": 67755966
+    },
+    "runtime": {
+      "manifestSha256": "2501be8046cc4f600763a93665b464e2fee26d9afc2e0f7fe9c02311e6f918aa",
+      "nativeRevision": "1bf6a2d7d9d98514b4cc811be18899907ce64610",
+      "sdkRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+      "inventoryFiles": 1899,
+      "nativeFiles": 8,
+      "pureSourceFiles": 1869,
+      "licenseFiles": 21,
+      "allArchiveBytesMatchManifest": true,
+      "manifestBytesMatchStaged": true,
+      "stagedInventoryVerified": true,
+      "nativeSha256": {
+        "xmind_server.exe": "8f9d6dac7bb427105aab6e17f422e83aa77adb3879e05e8d45219879d7ca65b0",
+        "xmind_schema_worker.exe": "4f4aa03c7acd91c5712127d5342a05c57f434a23480896556b133aa3ea25f540",
+        "xmind_cli.exe": "6c3bf39a23fe6f3501dd952325a2cae169a08625814e7104ce35cb6eef5dea1b",
+        "xmind_admin.exe": "8b0a7e6ca827a177b27e46cacc7501b1845b6ec4e5bc3caaeb307a92d0307f81",
+        "xlang3_runtime.dll": "4c0959726dfdaf8c12321188da524808e516cf224bab5ae590b3bd05a4349c07",
+        "xlang3.exe": "45e8581b7d235ad451b6fd1d5b3e1d31ac8ebe926c93f2eb9191cae8bef06e9b",
+        "modules/xlang_json.x3pkg.dll": "8b1c90c339e070f6633ecc465e6560b8e3a269f13bef481867e60359c093fbc0",
+        "modules/xlang_sqlite3.x3pkg.dll": "6d47f5185235817a016aa32b871bbc9f069fc66dd765bf0cda71e1c0084e1830"
+      }
+    },
+    "extensionSourceSha256": {
+      "workspace-backend.js": "9e8629ac7301b610b2a7f02f5907041ea9db2504dfafd7add3c7660c5f17b9a6",
+      "webview.js": "fb2966eca9664fcfdce0b9580e7d1b659aa36102fc981d63be4a3c1b1a1153de",
+      "package.json": "2d1b3e7dc2658385a5418dfeaffb4cf20e655142b7c7d69fbd3d1bb1a73d36ce",
+      "native-runtime.js": "8eb3b43cacaa8fe1d2cdad84cd70ea94ae489ad9ffdc9e24edbf39bb4e430304",
+      "extension.js": "1466984e5e7540d9000cc2aea16d9f716ba76e28e6f7450c7309bd329fc41276",
+      "client.js": "24a89672dfb91907f86116e10c904593103db2c14a050eac50bb2df86ac14b46",
+      "browser-view.js": "f5e47b3b60530b4ed1b98ff3254eb0debbb49c5fde860912abd09d4a1d05a1ea",
+      "scripts/package-native-runtime.mjs": "dbdd2aca335a947ce60749967f9b64db2e458a320c4a5498196e305981dd4bcd",
+      "media/chat.js": "a52df97abd12bd4e41a24e3185c74009ff5ca8ef1c792063dc86ff5ce0fe2266",
+      "media/chat.css": "391eb2b3ea30aa140d2292a9434206881e92981cbec05cef129796f86827c3bd"
+    },
+    "guards": {
+      "exactInventory": true,
+      "duplicateNames": false,
+      "symlinks": false,
+      "privateConfigurationFiles": false,
+      "cpythonExecutablesExtensionsOrBytecode": false
+    },
+    "nativeExecuted": false,
+    "sdkExecuted": false,
+    "configurationAccessed": false,
+    "providerCalls": 0,
+    "installed": false
+  },
+  "staging": {
+    "manifestSha256": "2501be8046cc4f600763a93665b464e2fee26d9afc2e0f7fe9c02311e6f918aa",
+    "nativeFiles": 8,
+    "pureSourceFiles": 1869,
+    "inventoryFiles": 1899,
+    "metadataDeltas": {
+      "extensions/vscode/package-lock.json": {
+        "nativeGateHash": "43fc3c7d05ee4c64c85ff83f05401fb953cd670b2b6e2352aaf3374287cb34ac",
+        "packageHash": "aba03d9a5ae29e4b4963919277027f7d8f2972c7a1a02386b26cd28ac5996e92"
+      },
+      "extensions/vscode/package.json": {
+        "nativeGateHash": "fe18f0387ad54af12493518e5fbdde97bd725965c262839730f02ee795ad06fc",
+        "packageHash": "2d1b3e7dc2658385a5418dfeaffb4cf20e655142b7c7d69fbd3d1bb1a73d36ce"
+      }
+    },
+    "previousProjectStageRetained": true
+  },
+  "nativeGate": {
+    "passed": 98,
+    "seconds": 203.59,
+    "evidenceSha256": "cfee4c4bce35290e4525ad7b738fa843abe9615902f7c8ec743d4649be28cab6",
+    "sourceGateUnchangedExceptExplicitVersionMetadata": true,
+    "compilerRerunForVersionMetadata": false
+  },
+  "liveNativeWriting": {
+    "evidenceSha256": "dd1a98af5b2d9d8d7fa510f27b2cc785b09b890d007b43960af9cfa5f6b71016",
+    "scope": "Prior source-built actual OpenAI CLI create/edit/deny sequence; packaged writing is not inferred from it"
+  },
+  "views": {
+    "sourceRevision": "1bf6a2d7d9d98514b4cc811be18899907ce64610",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 41,
+    "trackedSourceFiles": 39,
+    "vendorFiles": 2,
+    "browserAssets": 11,
+    "sourceAndAssetBytesUnchanged": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 200,
+      "passed": 200,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 39,
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true,
+    "sourceHashes": {
+      "extensions/vscode/.vscodeignore": "fe8a6e48beb48a2c4be33c9dbcbc750a8369b7079a5bae5debdb55575f6d8ea3",
+      "extensions/vscode/LICENSE": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
+      "extensions/vscode/README.md": "8b2748b8e8e7e1e9a7bf75e2c4c00f17d9abb850d57ba4f60e45f0b9125abbc3",
+      "extensions/vscode/browser-view.js": "f5e47b3b60530b4ed1b98ff3254eb0debbb49c5fde860912abd09d4a1d05a1ea",
+      "extensions/vscode/client.js": "24a89672dfb91907f86116e10c904593103db2c14a050eac50bb2df86ac14b46",
+      "extensions/vscode/edit-review.js": "8afc5443fc2f7aedb5af57f2add361519b381b9c14baefaabf5c39702ad2c06e",
+      "extensions/vscode/extension.js": "1466984e5e7540d9000cc2aea16d9f716ba76e28e6f7450c7309bd329fc41276",
+      "extensions/vscode/media/chat.css": "391eb2b3ea30aa140d2292a9434206881e92981cbec05cef129796f86827c3bd",
+      "extensions/vscode/media/chat.js": "a52df97abd12bd4e41a24e3185c74009ff5ca8ef1c792063dc86ff5ce0fe2266",
+      "extensions/vscode/media/xmind.svg": "45123fe1e365d6ca284a245029b4a3de12f511fdc42945bf6fe15c9f3cf18b7b",
+      "extensions/vscode/native-runtime.js": "8eb3b43cacaa8fe1d2cdad84cd70ea94ae489ad9ffdc9e24edbf39bb4e430304",
+      "extensions/vscode/package-lock.json": "aba03d9a5ae29e4b4963919277027f7d8f2972c7a1a02386b26cd28ac5996e92",
+      "extensions/vscode/package.json": "2d1b3e7dc2658385a5418dfeaffb4cf20e655142b7c7d69fbd3d1bb1a73d36ce",
+      "extensions/vscode/scripts/package-native-runtime.mjs": "dbdd2aca335a947ce60749967f9b64db2e458a320c4a5498196e305981dd4bcd",
+      "extensions/vscode/tests/backend-smoke.js": "3c662b35158f596342c5bbf05a84377f8e25091e43eb8f9ede13957f254ceb0d",
+      "extensions/vscode/tests/browser-view.test.js": "21e89ece7e270a55719e40e8973b612afa3ca7facb66abf2d3031dd0fa93dbb4",
+      "extensions/vscode/tests/client-context.test.js": "8c90ba49708117f5be34c57e4a52bff0371512fcbc7f2f9d95fee028fe1d6cc9",
+      "extensions/vscode/tests/client-planning.test.js": "68dc4ea1ef5389aa78eb9bff0757d9ea6effa59b651d54260ea2322359922fc8",
+      "extensions/vscode/tests/client.test.js": "72c7a9e5444ce9af864fdf2b058e2a8b9d202b7708623adbca1639c2e38a0030",
+      "extensions/vscode/tests/extension-host.test.js": "07bb0cea144513a876ea02c211c079602e01cf9255e553612ae654281e1dd018",
+      "extensions/vscode/tests/native-runtime-package.test.js": "972459cee15617a36d76afe99ea4c400d382e7a1c43052eb73543f27a56bd77b",
+      "extensions/vscode/tests/native-runtime.test.js": "e07ba2085bb7a39ad579a0a04ff89ba94dcbe6d90ba67449f629b190acd2e08a",
+      "extensions/vscode/tests/plan-fixture.js": "89e8149512ae818236b1411078d2a86d704bdcbc109e6278bbc9c68705e3a3a4",
+      "extensions/vscode/tests/provider-profile-controller.test.js": "4968cd0de2a7e3717b461464c85bf5abfb6058678659ef704579b243b01c2105",
+      "extensions/vscode/tests/renderer.test.js": "82d511a2f6ec883bde48e58dc1a7a1d566ba6efea93092fec7a2794ed834fd01",
+      "extensions/vscode/tests/workspace-backend.test.js": "2b8f0bd1bc0a1c9dfa35989ab5c48075cbde72e70b9b6782248ef99f3a9f0602",
+      "extensions/vscode/webview.js": "fb2966eca9664fcfdce0b9580e7d1b659aa36102fc981d63be4a3c1b1a1153de",
+      "extensions/vscode/workspace-backend.js": "9e8629ac7301b610b2a7f02f5907041ea9db2504dfafd7add3c7660c5f17b9a6",
+      "views/browser/browser.css": "8cae13ebf6ff2700bbcbe1a7150315603fc5865ff8bdbe3c9e30c2cb3ca901dc",
+      "views/browser/browser.js": "0840ae1479031597f5ef2d662a2fda8643f2eab9a9cdcef0ab0c3ab951062cd8",
+      "views/browser/build.mjs": "dfe1470c5510607a3fbaffcca873f5f8b91c41d1339cfb978232acefc9ca0326",
+      "views/browser/page.cjs": "8042acc2d6ca6bc80ac58fb05e721e3b85c5db37bf0e6adc90bd9f8f7eaa2f28",
+      "views/browser/server.mjs": "a2ff70cb98714d000b109066964d08a0a90c891377c56c92cd30d2202c2ff8b5",
+      "views/browser/tests/classic-script.test.cjs": "98628213446f6ecdbdc6f4baa1c4e5f4b229cfd43115a554db3054094aacd5c8",
+      "views/browser/tests/connection.test.cjs": "804bede20c1cb12cb1c59188464f20f8e1e662a403e238e8594c4c5db0aa8444",
+      "views/browser/tests/controller.test.cjs": "6e048f731e6cf39c96db397929e9f955474d75b0fa69b0f18772cb72b732e298",
+      "views/browser/tests/native-contract.mjs": "a3f3c361b55247871c6c376a0a5571e1d6657f26099964e01344581a0e1b675b",
+      "views/browser/tests/planning-routes.test.cjs": "3d9043f52ee93be5c25dead3b77dc5792b24d97b8ddc98ab8c329c8831b62b2f",
+      "views/browser/tests/server.test.cjs": "e014f463a82dd6ff1902edd235087e47f7ef0ed9ebee7e3cbf80be363f196d29",
+      "extensions/vscode/node_modules/marked/lib/marked.umd.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+      "extensions/vscode/node_modules/dompurify/dist/purify.min.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2"
+    },
+    "extensionLogSha256": "6e5fdd1a9a15e74e40a1906bc45f5cd9ef5c926a97f4363ef5a85c48e83978c3",
+    "browserLogSha256": "10d09677769f4c97e156fae3e70ba8f7981171599b95b3f402f17d9050378af9"
+  },
+  "packagedRuntimeSmoke": {
+    "passed": true,
+    "completeRuntimeFiles": 1899,
+    "manifestSha256": "2501be8046cc4f600763a93665b464e2fee26d9afc2e0f7fe9c02311e6f918aa",
+    "actualQualifiedServer": true,
+    "actualBundledXlangSqlite": true,
+    "approvalProposalsEnabled": true,
+    "actualSessionPersistence": true,
+    "actualNativeRetirementAndExit": true,
+    "providerRequests": 0,
+    "installed": false,
+    "fileWriting": false
+  },
+  "browserAssets": {
+    "required": 18,
+    "verified": true,
+    "logSha256": "015afec5ba4dd4f9c6bac772f2f03403d661d769b75174aecc164b2dcabb7be9"
+  },
+  "installed": false,
+  "installedVersionUnchanged": "0.1.1",
+  "installedProfileModified": false,
+  "pendingMigrationTargetReplaced": false,
+  "originalLegacyPid": 32028,
+  "remaining": [
+    "User-confirmed existing profile migration",
+    "Installed/rendered file and folder creation/edit/deny acceptance",
+    "Broader real-provider coding and pinned OSS parity"
+  ]
+}
