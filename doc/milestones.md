@@ -1,5 +1,11 @@
 # Reviewable milestones
 
+Editor startup selection fix: a folder change during pending preparation now
+waits for stale cleanup and connects the latest root; trust revocation prevents
+new native startup. The complete **219 extension fixture checks** pass.
+[Scoped source and original output](evidence/view-startup-selection-race-local.json).
+Native view readiness and installed acceptance remain pending.
+
 Native editor-view adapter candidate: the host now delegates startup/storage
 to C++ and scopes saved UI choices to the native workspace/profile. All **217
 extension fixture / 41 browser fixture** checks pass. Native acceptance is

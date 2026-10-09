@@ -61,13 +61,24 @@ class WorkspaceBackend {
     this.context.secrets.delete?.('xmind.auth:'+owner.origin).catch(()=>{});
   }
   async connect(forcePick=false){
-    if(this.disposed)throw new Error('Workspace connection closed.');
-    if(this.connecting)return this.connecting;
-    this.connecting=this.open(forcePick).finally(()=>{this.connecting=undefined;});return this.connecting;
+    for(;;){
+      if(this.disposed)throw new Error('Workspace connection closed.');
+      const pending=this.connecting;
+      if(pending){
+        if(pending.epoch===this.epoch&&!forcePick)return pending.promise;
+        // Complete stale startup cleanup before connecting the current root.
+        // Its rejection must not consume a later folder-selection request.
+        try{await pending.promise;}catch{}
+        continue;
+      }
+      const operation={epoch:this.epoch,promise:undefined};
+      operation.promise=this.open(forcePick).finally(()=>{if(this.connecting===operation)this.connecting=undefined;});
+      this.connecting=operation;return operation.promise;
+    }
   }
   async open(forcePick){
     const epoch=this.epoch,selection=await this.selectedFolder(forcePick);
-    const current=()=>!this.disposed&&this.epoch===epoch&&selection.signature===this.signature();
+    const current=()=>!this.disposed&&this.vscode.workspace.isTrusted&&!this.vscode.env?.remoteName&&this.epoch===epoch&&selection.signature===this.signature();
     const canonical=canonicalPath(await this.deps.fs.realpath(selection.folder.uri.fsPath));
     const roots=await Promise.all(selection.roots.map(async root=>canonicalPath(await this.deps.fs.realpath(root.fsPath))));
     const scope=crypto.createHash('sha256').update(keyPath(canonical)).digest('hex');

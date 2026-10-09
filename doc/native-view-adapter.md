@@ -40,7 +40,9 @@ separate delivery requirements.
 
 ## Evidence and outstanding work
 
-All **217 extension fixture checks** and **41 browser fixture checks** pass.
+The initial candidate passed **217 extension fixture checks** and **41 browser
+fixture checks**. A later startup-selection fix passed **219 extension checks**:
+[scoped race evidence](evidence/view-startup-selection-race-local.json).
 These prove access-adapter/controller behavior at the fixture boundary, not an
 installed IDE, rendered sidebar, native execution or live model response.
 

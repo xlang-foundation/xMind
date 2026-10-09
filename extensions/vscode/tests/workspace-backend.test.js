@@ -70,3 +70,16 @@ test('private native startup errors are accepted only for the spawned adapter PI
   await assert.rejects(h.manager.connect(),foreign?/did not become ready/:/could not be issued/);assert.equal(h.launches.length,1);assert.equal(h.secrets.size,0);
  }
 });
+
+
+test('a folder switch during preparation connects the latest folder after stale startup cleanup',async()=>{
+ const h=harness();let release,entered;const arrived=new Promise(resolve=>entered=resolve),paused=new Promise(resolve=>release=resolve);let calls=0;
+ h.manager.resolveRuntime=async()=>{if(++calls===1){entered();await paused;}return h.runtime;};
+ const initial=h.manager.connect(),oldResult=assert.rejects(initial,/changed/);await arrived;
+ h.vscode.workspace.workspaceFolders=[folder('New root','D:\\Latest')];h.manager.invalidate();const current=h.manager.connect();release();await oldResult;
+ const owner=await current;assert.equal(owner.canonical,'D:\\Latest');assert.equal(h.launches.length,1);assert.equal(h.launches[0].config.cwd,'D:\\Latest');assert.equal(h.manager.active.origin,owner.origin);
+});
+test('trust revocation during preparation prevents native startup without cancelling existing work',async()=>{
+ const h=harness();let release,entered;const arrived=new Promise(resolve=>entered=resolve),paused=new Promise(resolve=>release=resolve);
+ h.manager.resolveRuntime=async()=>{entered();await paused;return h.runtime;};const opening=h.manager.connect(),refusal=assert.rejects(opening,/changed/);await arrived;h.vscode.workspace.isTrusted=false;release();await refusal;assert.equal(h.launches.length,0);assert.equal(h.secrets.size,0);
+});

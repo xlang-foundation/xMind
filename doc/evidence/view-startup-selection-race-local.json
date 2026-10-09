@@ -1,0 +1,34 @@
+{
+  "observedAt": "2026-10-09T23:51:46.999Z",
+  "sourceBaseRevision": "48aa77277ed88ea2e682c35408215634ddcc2260",
+  "qualification": "Editor startup-race source candidate bound by current source hashes. Actual native view acceptance remains pending; this receipt does not establish a working native/editor connection.",
+  "scope": "Synthetic trusted VS Code API, process/filesystem and HTTP host observations; no native execution or rendered IDE.",
+  "sourceHashes": {
+    "extensions/vscode/workspace-backend.js": "7e3d22032509a5e0a7b3ae813376532ce7084803ba03377d560dfaa7179d2b91",
+    "extensions/vscode/tests/workspace-backend.test.js": "710168e13c6eec6e52e513838ace4d67d52256ff143c646d8268582f3b0007a5",
+    "Tools/ci-views.mjs": "0c2e008727f837583d4c1d7dfc2fd0c1e9e281215761fdd0a45e65fafbcbb3bd"
+  },
+  "extension": {
+    "tests": 219,
+    "passed": 219,
+    "failed": 0
+  },
+  "verified": [
+    "A later folder connection waits for stale startup cleanup and then opens the latest selected root",
+    "Trust revoked during preparation prevents spawning the adapter",
+    "Native workspace/profile state remains scoped independently of the adapter port"
+  ],
+  "rawLogHashes": {
+    "native-unified-view-selection-race-extension.log": "a7604e81c32597082b2546f707898eeb745c3d6255c05a98976e98f495495bb7"
+  },
+  "nativeAccepted": false,
+  "installedPackageUpdated": false,
+  "renderedIdeAccepted": false,
+  "realProviderRequests": 0,
+  "ongoingNativeCi": {
+    "runId": 38005698078,
+    "jobId": 114073862283,
+    "sourceRevision": "48aa77277ed88ea2e682c35408215634ddcc2260",
+    "lastObservedStatus": "in_progress"
+  }
+}
