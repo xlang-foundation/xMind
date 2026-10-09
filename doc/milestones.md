@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+The verified **0.1.1** migration VSIX is installed in the existing normal
+TestProj profile. Fresh 98/198/39 gates, independent archive audit and actual
+complete-runtime smoke passed. Existing transcript/model/usage reconnected
+without another key prompt. The old runtime was repaired after VS Code cleanup
+using its verified copy; native migration awaits the user's confirmation and
+actual create/edit acceptance remains pending.
+[Package and installed evidence](native-legacy-package.md).
+
 Legacy migration now has native writer-fenced operator termination and managed
 extension adoption/recovery. Complete local checks passed **98 native, 198
 extension and 39 browser tests**. Actual server/admin/adapter fixtures retain

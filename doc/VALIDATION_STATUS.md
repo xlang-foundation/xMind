@@ -1,5 +1,16 @@
 # Current native validation
 
+Version **0.1.1** passed a fresh 98/198/39 local gate, independent 1,933-entry
+VSIX verification and actual complete-runtime server/session/retirement smoke.
+It is installed in the existing normal TestProj window; old transcript, selected
+OpenAI model and supplied usage remain visible without another key prompt.
+VS Code's obsolete-directory cleanup required restoring the old runtime name
+and missing files from its verified pre-update copy; original native PID/birth
+and database remain unchanged. Installed native migration is awaiting the
+user's **Stop and migrate** confirmation. Rendered writing remains unverified.
+[Package, repair and installed scope](native-legacy-package.md),
+[exact evidence](evidence/native-legacy-package-local.json).
+
 Native legacy stop and managed adapter adoption passed **98 contracts in 196.55
 seconds**, with all 631 mapped inputs unchanged. Actual production fixtures
 authenticate and revalidate a legacy source, stop it under an embedded-xlang3
