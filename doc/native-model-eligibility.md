@@ -71,8 +71,10 @@ All 39 frontend sources still match the separate prior **173 extension / 33
 browser** passing checkpoint. Those unchanged suites were not rerun for this
 native change. The SDK remains the accepted isolated xlang3 branch at
 `ad8040ffb8aba6eeabeb09053a8e222df09a4e7a`, including its recorded 41/42
-selected-correctness baseline failure. No CPython was run. The older browser
-preview is unchanged. Package and live model acceptance are separate below.
+selected-correctness baseline failure. No CPython was run. At that source-gate
+checkpoint the older browser preview was unchanged. Package and live model
+acceptance are separate below; the subsequent browser upgrade is recorded in
+[the browser checkpoint](browser-preview-upgrade.md).
 [Native source and retained-attempt evidence](evidence/native-model-eligibility-provenance.json).
 
 Source `60475f84ac2d1355dfe77736b187f7cb899f560f` subsequently passed
@@ -92,4 +94,7 @@ the opened `TestProj` folder. That isolated test disabled trust only in its own
 profile and exercised no model inference. Installation in the normal profile
 preserved its settings and trust configuration. Its existing window still needs
 a reload; its last observed trust state was false. The browser preview was not
-upgraded. [Live runs and package evidence](evidence/native-model-eligibility-live-package.json).
+upgraded during that package checkpoint. It was subsequently upgraded and passed
+actual four-provider rendered runs and refresh acceptance, as recorded in
+[the browser checkpoint](browser-preview-upgrade.md).
+[Live runs and package evidence](evidence/native-model-eligibility-live-package.json).

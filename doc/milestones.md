@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+The local browser preview now runs source `60475f8` with its matching assets
+and paired xlang3 SDK. The upgrade preserved existing API records, configuration
+and browser authentication. A disposable schema 10 → 12 → 10 fixture and fresh
+model-free native/browser integration passed. All four configured providers
+completed real rendered sidebar runs with supplied metrics. Refresh retained
+the session/provider/model without reconnecting or admitting another run.
+Desktop right-sidebar layout was checked; compact-height rendering and normal
+VS Code rendered interaction remain pending.
+[Browser upgrade, live UI evidence and limits](browser-preview-upgrade.md).
+
 The native OpenAI model eligibility policy passed **89/89 contracts in 172.73
 seconds**, with all 564 inputs unchanged. Discovery, enrollment and startup now
 use explicit route/model declarations; current GPT-6 tool restrictions and
@@ -8,8 +18,8 @@ frontend inputs are unchanged from the 173/33 checkpoint. The subsequent native
 live check passed all four configured providers, including GPT-6.1 Sol, and
 OpenAI discovery returned 20 eligible IDs. The new package passed ZIP integrity
 and actual installed VS Code opened-folder binding, then was installed in the
-normal profile. Rendered model interaction and the older browser upgrade remain
-pending.
+normal profile. Rendered VS Code interaction remains pending; the subsequent
+browser upgrade and actual sidebar runs are recorded above.
 [Model eligibility scope](native-model-eligibility.md).
 
 The latest native provider checkpoint passed real workspace reads and exact

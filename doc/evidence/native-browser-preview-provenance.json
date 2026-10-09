@@ -1,0 +1,18 @@
+{
+  "scope": "Sanitized local browser checkpoint; source gates and SDK baseline limitations are recorded separately",
+  "sourceRevision": "60475f84ac2d1355dfe77736b187f7cb899f560f",
+  "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+  "artifacts": {
+    "native-browser-preview-upgrade.json": "e3f91ed7b51745b7ff12573465cbe03f330e6d2324ea77876fb52a944eceae27",
+    "native-browser-preview-fixture.json": "bfa1b242e44ee5db9d9482655660bfdc3bf1c39bb82f3d38f26aa02a94c44b87",
+    "native-browser-preview-ui.json": "f6e36a4297c6db1aa864df6b778261e26ae6339a18520003d5dc37a2310550eb",
+    "native-browser-preview-integration.json": "af2edb29a2972f2b5fe619b361f21c9995016035da234a302a10c63daa05e686",
+    "native-browser-preview-retained-failure.json": "25ffb1239c61573fe1f80b210a84517f4f4159906da2d2fed1aea0947aee39d0",
+    "native-browser-preview-integration.log": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693",
+    "native-browser-preview-desktop.jpg": "22db24edac2b1c39d7f93ed8ea53e51625c0c91e44b567bf316aca84ffb0ec1b"
+  },
+  "releaseBindingSha256": "15de66f61d22cd0cc55d803f785b1cb98a1ecfa6849bcc7aa40f3fb0d769748d",
+  "privateUserConfigurationPublished": false,
+  "privateAuditPublished": false,
+  "secretScanPassed": true
+}

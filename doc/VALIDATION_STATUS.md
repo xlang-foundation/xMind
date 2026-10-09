@@ -1,5 +1,16 @@
 # Current native validation
 
+The browser preview is now upgraded to source `60475f8` and the paired xlang3
+SDK `ad8040f`, at its existing local addresses. Its live API records and cookie
+were preserved; a separate disposable schema 10 → 12 → 10 fixture passed,
+with its earlier failed negative probe retained. Fresh model-free native/browser
+integration passed in 1,159 ms. Actual rendered Claude, OpenAI, Gemini and
+DeepSeek runs completed with supplied token metrics. Refresh restored the
+selected session/provider/model without a token prompt or new run. Desktop
+right-sidebar layout passed; compact-height layout and rendered normal-profile
+VS Code interaction remain pending.
+[Browser checkpoint and limits](browser-preview-upgrade.md).
+
 The latest model eligibility source passed **89/89 native contracts in 172.73
 seconds**, with 564 inputs unchanged and no exclusions/skips. It adds exact
 OpenAI wire/model capability declarations and preserves inactive Gemini text
@@ -9,8 +20,8 @@ separate from the previous four-provider checkpoint below: source `60475f8`
 passed real native reads/replies with all four configured providers, including
 GPT-6.1 Sol, and returned 20 eligible OpenAI IDs. Its package passed independent
 ZIP integrity and actual installed VS Code opened-folder binding. The ordinary
-window needs a reload; rendered model interaction and browser migration remain
-pending.
+window needs a reload; rendered VS Code model interaction remains pending.
+The later browser upgrade and rendered runs are recorded above.
 [Current model policy and retained failures](native-model-eligibility.md).
 
 Current source `d69a681886ebabcc38174985292fcd88dd7fc7ee` passed **88/88
@@ -18,8 +29,8 @@ native tests in 174.89 seconds**, **173 extension tests** and **33 browser
 tests**. All four configured providers separately passed real native workspace
 reads and exact replies. The packaged extension passed actual VS Code Open
 Folder binding and was installed in the normal profile; existing-window reload
-and folder trust remain user-visible prerequisites. The old browser preview is
-unchanged. The isolated xlang3 long-path branch is implemented and pushed, with
+and folder trust remain user-visible prerequisites. At that checkpoint the old
+browser preview was unchanged. The isolated xlang3 long-path branch is implemented and pushed, with
 its known SDK baseline failure retained. Older paragraphs below describe their
 original checkpoint and do not supersede these results.
 [Current acceptance and limits](native-provider-workspace-acceptance.md).

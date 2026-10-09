@@ -1,0 +1,11 @@
+{
+  "fixture": "fixture-CDWCD5",
+  "passed": false,
+  "failure": "fixture_old_binary_did_not_reject_v12",
+  "actualStderr": "Set XMIND_AUTH_TOKEN for the local server",
+  "recoveryPhase": "rolled_back",
+  "livePreviewChanged": false,
+  "correction": "Supply an independent synthetic owner token to the old-binary negative startup probe; assertions and product authentication unchanged",
+  "subsequentFixture": "fixture-SslF86",
+  "subsequentPassed": true
+}

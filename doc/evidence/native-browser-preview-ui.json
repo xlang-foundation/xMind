@@ -1,0 +1,196 @@
+{
+  "scope": "Actual rendered browser provider/model selection, live replies, supplied metrics and authenticated refresh; no tool/coding execution or IDE interaction claimed",
+  "nativeRevision": "60475f84ac2d1355dfe77736b187f7cb899f560f",
+  "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+  "providerRepliesSynthetic": false,
+  "runs": [
+    {
+      "runId": "4833bed580a73855c3460cd7a474cb63",
+      "sessionId": "02e33551685c4ca78d8ef30c07e4dd30",
+      "state": "completed",
+      "providerContext": {
+        "model_id": "claude-haiku-4-5-20251001",
+        "profile_id": "claude",
+        "profile_revision": 1,
+        "provider": "anthropic",
+        "route_id": "anthropic.messages",
+        "wire": "anthropic-messages"
+      },
+      "reply": "xMind browser is working.",
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 10,
+        "input_tokens": 7814,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 10,
+        "prompt_tokens": 7814,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "firstTokenMs": 594,
+      "elapsedMs": 673,
+      "historyRows": 2,
+      "operations": 0,
+      "renderedReplyAndMetricsObserved": true
+    },
+    {
+      "runId": "3e01ce5fe65dc79f0d5effa08527c0f5",
+      "sessionId": "79133fc4e72f0e754a149699a5b67208",
+      "state": "completed",
+      "providerContext": {
+        "model_id": "gpt-6.1-sol",
+        "profile_id": "openai",
+        "profile_revision": 4,
+        "provider": "openai",
+        "route_id": "openai.responses",
+        "wire": "responses"
+      },
+      "reply": "OpenAI browser is working.",
+      "usage": {
+        "completion_tokens": 10,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 4762,
+        "input_tokens_details": {
+          "cache_write_tokens": 4759,
+          "cached_tokens": 0
+        },
+        "output_tokens": 10,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 4762,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 4759,
+          "cached_tokens": 0
+        },
+        "total_tokens": 4772
+      },
+      "firstTokenMs": 1427,
+      "elapsedMs": 1701,
+      "historyRows": 2,
+      "operations": 0,
+      "renderedReplyAndMetricsObserved": true
+    },
+    {
+      "runId": "081881363241adf23a57d9ff692156e5",
+      "sessionId": "0ddf530f4b046c683dfcbd283f879840",
+      "state": "completed",
+      "providerContext": {
+        "model_id": "models/gemini-3.5-flash",
+        "profile_id": "gemini",
+        "profile_revision": 1,
+        "provider": "gemini",
+        "route_id": "gemini.generate-content",
+        "wire": "gemini-generate-content"
+      },
+      "reply": "Gemini browser is working. Do not call tools or change files.",
+      "usage": {
+        "candidatesTokenCount": 14,
+        "completion_tokens": 14,
+        "completion_tokens_details": {
+          "reasoning_tokens": 40
+        },
+        "input_tokens": 6371,
+        "output_tokens": 14,
+        "output_tokens_details": {
+          "reasoning_tokens": 40
+        },
+        "promptTokenCount": 6371,
+        "prompt_tokens": 6371,
+        "thoughtsTokenCount": 40,
+        "totalTokenCount": 6425,
+        "total_tokens": 6425
+      },
+      "firstTokenMs": 913,
+      "elapsedMs": 971,
+      "historyRows": 2,
+      "operations": 0,
+      "renderedReplyAndMetricsObserved": true
+    },
+    {
+      "runId": "08e7c589ad375137b8e4baf0e410f500",
+      "sessionId": "91d71b464bf4dc9048098c5ccc7317db",
+      "state": "completed",
+      "providerContext": {
+        "model_id": "deepseek-flash",
+        "profile_id": "deepseek",
+        "profile_revision": 2,
+        "provider": "deepseek",
+        "route_id": "deepseek.chat",
+        "wire": "chat-completions"
+      },
+      "reply": "DeepSeek browser is working today.\n\n(Echoed verbatim as requested — this is a quote, not a verified status report; I performed no checks.)",
+      "usage": {
+        "completion_tokens": 266,
+        "completion_tokens_details": {
+          "reasoning_tokens": 233
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 7043,
+        "prompt_tokens": 7043,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 7309
+      },
+      "firstTokenMs": 786,
+      "elapsedMs": 2095,
+      "historyRows": 2,
+      "operations": 0,
+      "renderedReplyAndMetricsObserved": true
+    }
+  ],
+  "modelChooser": "Native select elements in sidebar footer; no model popup, typed model ID or repeated key entry",
+  "observedCatalogues": {
+    "openai": 20,
+    "gemini": 11,
+    "deepseek": 2
+  },
+  "refresh": {
+    "before": {
+      "sessionCount": 20,
+      "rootRunCount": 27,
+      "activeRuns": 0,
+      "runFingerprint": "3937aeaa9857f23da674ec046fec634b2257aa194ae14eb5e98b8ac13629fe34"
+    },
+    "after": {
+      "sessionCount": 20,
+      "rootRunCount": 27,
+      "activeRuns": 0,
+      "runFingerprint": "3937aeaa9857f23da674ec046fec634b2257aa194ae14eb5e98b8ac13629fe34"
+    },
+    "sameRunSetAndStates": true,
+    "selectedSessionAndProviderRestored": true,
+    "tokenPromptShown": false
+  },
+  "layout": {
+    "desktopViewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "sidebar": {
+      "x": 708,
+      "width": 572,
+      "height": 848
+    },
+    "historyHeight": 500.458,
+    "temporaryViewportReset": true,
+    "narrowViewport": {
+      "width": 319,
+      "height": 431,
+      "historyHeight": 16,
+      "limitation": "Short embedded pane leaves insufficient history space; compact-height layout remains pending"
+    }
+  },
+  "exactEchoFollowed": {
+    "claude": true,
+    "openai": true,
+    "gemini": false,
+    "deepseek": false
+  },
+  "echoScope": "Echo text is provider output, not model-generated verification. Completion was checked against authenticated Native records and the rendered UI."
+}

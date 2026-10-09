@@ -1,0 +1,13 @@
+{
+  "scope": "Model-free native/browser HTTP, authentication, durable cookie, owned filesystem graph and reconnect integration; host launcher callbacks are fixtures",
+  "exitCode": 0,
+  "durationMs": 1159,
+  "nativeRevision": "60475f84ac2d1355dfe77736b187f7cb899f560f",
+  "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+  "nativeSourceFilesUnchanged": 564,
+  "frontendSourceFilesUnchanged": 39,
+  "providerRequests": 0,
+  "userConfigRead": false,
+  "managedPreviewChanged": false,
+  "passed": true
+}
