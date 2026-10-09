@@ -1,5 +1,16 @@
 # Current native validation
 
+Current source `d69a681886ebabcc38174985292fcd88dd7fc7ee` passed **88/88
+native tests in 174.89 seconds**, **173 extension tests** and **33 browser
+tests**. All four configured providers separately passed real native workspace
+reads and exact replies. The packaged extension passed actual VS Code Open
+Folder binding and was installed in the normal profile; existing-window reload
+and folder trust remain user-visible prerequisites. The old browser preview is
+unchanged. The isolated xlang3 long-path branch is implemented and pushed, with
+its known SDK baseline failure retained. Older paragraphs below describe their
+original checkpoint and do not supersede these results.
+[Current acceptance and limits](native-provider-workspace-acceptance.md).
+
 The bounded native JSON POST foundation passed the complete guarded local
 **78-contract gate in 193.91 seconds**, with all **427 frozen inputs** and
 accepted xlang3 runtime files verified unchanged. The extended transport

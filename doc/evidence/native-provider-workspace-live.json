@@ -1,0 +1,125 @@
+{
+  "scope": "Actual Native provider inference and workspace reads using the production host controller; not a rendered IDE/browser test",
+  "nativeRevision": "d69a681886ebabcc38174985292fcd88dd7fc7ee",
+  "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+  "fixtureFile": "xmind-provider-proof-a5201a58-f6bb-44ae-9d0d-0864aea43743.txt",
+  "keysReadByClient": false,
+  "syntheticProvider": false,
+  "results": [
+    {
+      "provider": "openai",
+      "model": "gpt-5.6-sol",
+      "catalogueCount": 135,
+      "runId": "18f42158de17a4d8a872032a273e6733",
+      "state": "completed",
+      "workspaceRoot": "D:\\CantorAI2026\\TestProj",
+      "actualReadVerified": true,
+      "exactMarkerReply": true,
+      "usage": {
+        "completion_tokens": 39,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "input_tokens": 1507,
+        "input_tokens_details": {
+          "cache_write_tokens": 125,
+          "cached_tokens": 1379
+        },
+        "output_tokens": 39,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 1507,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 125,
+          "cached_tokens": 1379
+        },
+        "total_tokens": 1546
+      },
+      "elapsedMs": 1446,
+      "firstTokenMs": 1116,
+      "error": null
+    },
+    {
+      "provider": "claude",
+      "model": "claude-haiku-4-5-20251001",
+      "catalogueCount": 13,
+      "runId": "c2fedbd1ec2485e3cac374dda26a4bb7",
+      "state": "completed",
+      "workspaceRoot": "D:\\CantorAI2026\\TestProj",
+      "actualReadVerified": true,
+      "exactMarkerReply": true,
+      "usage": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "completion_tokens": 40,
+        "input_tokens": 3188,
+        "input_tokens_scope": "uncached",
+        "output_tokens": 40,
+        "prompt_tokens": 3188,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "elapsedMs": 632,
+      "firstTokenMs": 489,
+      "error": null
+    },
+    {
+      "provider": "gemini",
+      "model": "models/gemini-3.5-flash",
+      "catalogueCount": 11,
+      "runId": "5d4a9a12c6b49583d4352eb59d53d10a",
+      "state": "completed",
+      "workspaceRoot": "D:\\CantorAI2026\\TestProj",
+      "actualReadVerified": true,
+      "exactMarkerReply": true,
+      "usage": {
+        "candidatesTokenCount": 49,
+        "completion_tokens": 49,
+        "completion_tokens_details": {
+          "reasoning_tokens": 69
+        },
+        "input_tokens": 2653,
+        "output_tokens": 49,
+        "output_tokens_details": {
+          "reasoning_tokens": 69
+        },
+        "promptTokenCount": 2653,
+        "prompt_tokens": 2653,
+        "thoughtsTokenCount": 69,
+        "totalTokenCount": 2771,
+        "total_tokens": 2771
+      },
+      "elapsedMs": 1028,
+      "firstTokenMs": 903,
+      "error": null
+    },
+    {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "catalogueCount": 2,
+      "runId": "9fa0e7eb077d210d135f80c21a52b481",
+      "state": "completed",
+      "workspaceRoot": "D:\\CantorAI2026\\TestProj",
+      "actualReadVerified": true,
+      "exactMarkerReply": true,
+      "usage": {
+        "completion_tokens": 98,
+        "completion_tokens_details": {
+          "reasoning_tokens": 60
+        },
+        "prompt_cache_hit_tokens": 2560,
+        "prompt_cache_miss_tokens": 178,
+        "prompt_tokens": 2738,
+        "prompt_tokens_details": {
+          "cached_tokens": 2560
+        },
+        "total_tokens": 2836
+      },
+      "elapsedMs": 1270,
+      "firstTokenMs": 795,
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "scope": "Independent live provider wire diagnostic; no filesystem effect or product inference claim",
+  "status": 200,
+  "contentType": "text/event-stream; charset=utf-8",
+  "bytes": 2050,
+  "sha256": "e09cab3d101a3f9d8d75a6825e0fd554026faa18743c9a733832863feeab62fe",
+  "keyPrintedOrRetained": false,
+  "frames": [
+    "message_start",
+    "content_block_start",
+    "ping",
+    "content_block_delta",
+    "content_block_delta",
+    "content_block_delta",
+    "content_block_delta",
+    "content_block_delta",
+    "content_block_delta",
+    "content_block_stop",
+    "message_delta",
+    "message_stop"
+  ],
+  "blocks": [
+    {
+      "type": "tool_use",
+      "fields": [
+        "type",
+        "id",
+        "name",
+        "input",
+        "caller"
+      ],
+      "caller": {
+        "type": "direct"
+      }
+    }
+  ]
+}

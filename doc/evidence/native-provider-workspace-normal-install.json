@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "scope": "Code CLI installation and on-disk runtime/source identity; existing window not reloaded, no rendered interaction claimed",
+  "nativeRevision": "d69a681886ebabcc38174985292fcd88dd7fc7ee",
+  "settingsUnchanged": true,
+  "trustConfigurationUnchanged": true,
+  "installedClientMatchesSource": true
+}

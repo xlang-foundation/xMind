@@ -1,5 +1,14 @@
 # Reviewable milestones
 
+The latest native provider checkpoint passed real workspace reads and exact
+replies from OpenAI, Claude, Gemini and DeepSeek using the existing single YAML
+configuration. The Claude direct-caller protocol fix passed 88 native tests;
+saved-provider UI guidance passed 173 extension and 33 browser tests. The new
+package passed ZIP integrity and actual VS Code opened-folder binding and was
+installed in the normal profile, which needs a window reload. The older browser
+preview and broad model eligibility remain pending.
+[Current scope and evidence](native-provider-workspace-acceptance.md).
+
 VS Code opened-folder checkpoint: the packaged extension passed actual host API
 and authenticated Native identity checks on `D:\CantorAI2026\TestProj`, with no
 `.code-workspace` file or manually entered server token. All 88 native contracts

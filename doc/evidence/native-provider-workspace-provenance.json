@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "timezone": "America/Los_Angeles",
+  "nativeRevision": "d69a681886ebabcc38174985292fcd88dd7fc7ee",
+  "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+  "native": {
+    "sdkRevision": "ad8040ffb8aba6eeabeb09053a8e222df09a4e7a",
+    "sdkAcceptanceSha256": "a9dcd9da55ba2b74abade95b90559ae30699347271962f18e968ec28e8e9d767",
+    "nativePassed": 88,
+    "nativeRegistered": 88,
+    "nativeExpected": 88,
+    "excluded": [],
+    "sourceFilesMatched": 560,
+    "bridgeEnabled": false,
+    "pythonExecutable": "OFF",
+    "sdkCorrectnessSelected": 42,
+    "sdkCorrectnessPassed": 41,
+    "sdkCorrectnessFailed": 1,
+    "sdkCorrectnessRegistered": 52,
+    "sdkCorrectnessNativeSelected": 28,
+    "sdkCorrectnessAuditedCliSelected": 14,
+    "sdkCorrectnessExcluded": 10,
+    "sdkKnownBaselineFailureCount": 1,
+    "durationSeconds": 174.89,
+    "sourceBeforeAfterIdentical": true,
+    "contractProviderReplies": "Synthetic"
+  },
+  "node": {
+    "sourceFiles": 39,
+    "sourceUnchanged": true,
+    "suites": [
+      {
+        "suite": "extension",
+        "exitCode": 0,
+        "tests": 173,
+        "passed": 173,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "durationMs": 1938.2415,
+        "logSha256": "e356b64a965616c3acac1400e1aeb0792d2807835b8ab7e9ed62ab63011abd62"
+      },
+      {
+        "suite": "browser",
+        "exitCode": 0,
+        "tests": 33,
+        "passed": 33,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "durationMs": 965.5239,
+        "logSha256": "cb01ab5529af7b3032a33eb3320acd29fa809b709c5e9ad2dda431cf849707ce"
+      }
+    ],
+    "scope": "Synthetic host/controller/renderer and file-integrity contracts; live Native provider acceptance is recorded separately"
+  },
+  "live": {
+    "realProviderCalls": true,
+    "testedModels": [
+      {
+        "provider": "openai",
+        "model": "gpt-5.6-sol",
+        "actualReadVerified": true,
+        "exactMarkerReply": true
+      },
+      {
+        "provider": "claude",
+        "model": "claude-haiku-4-5-20251001",
+        "actualReadVerified": true,
+        "exactMarkerReply": true
+      },
+      {
+        "provider": "gemini",
+        "model": "models/gemini-3.5-flash",
+        "actualReadVerified": true,
+        "exactMarkerReply": true
+      },
+      {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "actualReadVerified": true,
+        "exactMarkerReply": true
+      }
+    ],
+    "keysReadByClient": false,
+    "renderedInteractionTested": false
+  },
+  "claudeDiagnostic": {
+    "sameCapturedBytes": true,
+    "sha256": "e09cab3d101a3f9d8d75a6825e0fd554026faa18743c9a733832863feeab62fe",
+    "beforeDecoderExit": 1,
+    "afterDecoderExit": 0,
+    "initialProviderRunFailed": true
+  },
+  "installedHost": {
+    "actualVsCodeApi": true,
+    "isolatedTestTrustDisabled": true,
+    "modelInferenceTested": false,
+    "screenshotVerified": false
+  },
+  "normalProfile": {
+    "installed": true,
+    "settingsUnchanged": true,
+    "trustConfigurationUnchanged": true,
+    "existingWindowReloadPending": true,
+    "lastObservedIsTrusted": false
+  },
+  "browserPreviewUpgraded": false,
+  "cpythonExecuted": false,
+  "files": {
+    "doc/evidence/native-provider-workspace-ctest.log": {
+      "sha256": "076065a84a8ac5ffe3e949014ca73b1c6f0a51238a40b6fa2d05a1a9d3825056",
+      "bytes": 11887
+    },
+    "doc/evidence/native-provider-workspace-native-source.json": {
+      "sha256": "f4848e0a64dd4b1a38a057ae58c2f318f47c1ff6291de7c7061d4ab5bc41f841",
+      "bytes": 70428
+    },
+    "doc/evidence/native-provider-workspace-expected-contracts.json": {
+      "sha256": "a7a47bf4b27e827bfe0f8be154b36231cc7ac90ea405aaf2e16222450410ade0",
+      "bytes": 3380
+    },
+    "doc/evidence/native-provider-workspace-extension.log": {
+      "sha256": "e356b64a965616c3acac1400e1aeb0792d2807835b8ab7e9ed62ab63011abd62",
+      "bytes": 46839
+    },
+    "doc/evidence/native-provider-workspace-browser.log": {
+      "sha256": "cb01ab5529af7b3032a33eb3320acd29fa809b709c5e9ad2dda431cf849707ce",
+      "bytes": 8847
+    },
+    "doc/evidence/native-provider-workspace-ui-source.json": {
+      "sha256": "3f8ac8f5ce6c626e01199fa68c18981867677ec12271c5f04a098f450e5b8e03",
+      "bytes": 4313
+    },
+    "doc/evidence/native-provider-workspace-live.json": {
+      "sha256": "037014fcdd1c547f89712860c4fb6188e7df452bf8b84f8b33ca1d75c83594eb",
+      "bytes": 3683
+    },
+    "doc/evidence/native-provider-workspace-initial-live.json": {
+      "sha256": "6194500fde898d06762cf306d66d211faf383712f82b47d6b226dd7fa545cc6a",
+      "bytes": 3341
+    },
+    "doc/evidence/native-provider-workspace-wire-diagnostic.json": {
+      "sha256": "9faa29ba0ab34698703a88ab41cca0abd6c7e0d015a09f5f2057adc7d2d3c345",
+      "bytes": 830
+    },
+    "doc/evidence/native-provider-workspace-vsix.json": {
+      "sha256": "a4f6ecca9cd1bb7209f59e06bf9348c4c031e575df00118b88d5291eb08028ad",
+      "bytes": 2515
+    },
+    "doc/evidence/native-provider-workspace-installed-host.json": {
+      "sha256": "96bb3f6e1c7631e5fd242cbbe592b0e8c3cd3545dc2e9b4c13c196368daeadb8",
+      "bytes": 704
+    },
+    "doc/evidence/native-provider-workspace-normal-install.json": {
+      "sha256": "f1affa2f2e365b81c8813fdcd06d4734c566b96f83c0596ba19b98d85312d92c",
+      "bytes": 328
+    }
+  }
+}
