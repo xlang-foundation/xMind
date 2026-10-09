@@ -29,6 +29,8 @@ The [hosted job](https://github.com/xlang-foundation/xMind/actions/runs/37875761
 remains a failed packaging workflow; these results establish the boundary's
 test scope, not a successful release, source-byte freeze or live deployment.
 
-The subsequent staging fix is undergoing hosted validation. The later native
-skill source has its separate pending 90-contract gate. Neither changes the
-installed preview until its package and installation checks have passed.
+The subsequent [staging fix](native-ci-packaging.md) passed its complete hosted
+workflow and independent package inspection, producing a verified VSIX that
+includes this boundary. It has not been installed. The later native skill source
+has its separate pending 90-contract gate. Installed/live acceptance remains
+separate from those source and file-verification results.

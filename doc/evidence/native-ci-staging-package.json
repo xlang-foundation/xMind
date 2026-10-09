@@ -1,0 +1,24 @@
+{
+  "sourceRevision": "516d91842f34a2009c26f7521f9fea66b5ae736b",
+  "workflowRunId": "37876565394",
+  "workflowConclusion": "success",
+  "scope": "Independent file/artifact/source verification; no native execution, local acceptance, installation or live model test",
+  "archives": {
+    "evidence": "sha256:95cf4669f712a20426c8723807dda0d3a57a97ddd4760d7b32714f819c06d583",
+    "runtime": "sha256:d9505374d1233a097304f96c73cb215953160046f36a4a796416a4ec4ddb62c5"
+  },
+  "nativeContracts": 89,
+  "nativeFiles": 8,
+  "pureSourceFiles": 1830,
+  "runtimeInventoryFiles": 1861,
+  "vsixEntries": 1895,
+  "hostSourcesBoundToCommit": 7,
+  "viewSourcesBoundToCommit": 5,
+  "vendorCopiesMatched": 2,
+  "sourceManifestSha256": "af44c1de8b47a55c2fdb7392fffe8145245da3a86641df8413a8eb4328aa759f",
+  "runtimeManifestSha256": "04bca8077b5373966acf2fca14ae78a5e85742c459ea1ee2ca42361a9e5b4dbb",
+  "vsixSha256": "f45b393062da6822b5e9844dd4986bf62fab52b5ed3619a55b7bc38d524ae7f1",
+  "runtimeRoot": "D:\\CantorAI2026\\xMind\\.agentflow\\ci\\native-hosted-516d918-37876565394\\runtime-from-vsix",
+  "installed": false,
+  "nativeExecuted": false
+}

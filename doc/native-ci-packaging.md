@@ -26,8 +26,18 @@ VSIX packaging because the runtime had not been staged. That workflow is a
 failed packaging gate, not a successful release. See the
 [failed hosted run](https://github.com/xlang-foundation/xMind/actions/runs/37874177687).
 
-The new staging step has passed local JavaScript and PowerShell syntax checks.
-End-to-end validation of this staging change remains pending in hosted CI; it
-has not yet produced or installed a newly verified VSIX. The live preview still
-uses its previously accepted runtime. Local execution gates remain deferred
-while the separate xlang3 benchmark is running.
+Exact source `516d91842f34a2009c26f7521f9fea66b5ae736b` subsequently passed
+[the complete hosted workflow](https://github.com/xlang-foundation/xMind/actions/runs/37876565394),
+including its 89-contract native gate, extension/browser checks, native browser
+integration, staging, VSIX verification and runtime artifact publication.
+Independent inspection verified both downloaded archive digests, all accepted
+native bundle files and the complete VSIX runtime inventory: eight native
+artifacts, 1,830 pinned pure-library source files and 1,861 inventory files in
+total. Seven host files and five copied view sources were bound to the exact
+commit; two vendor copies matched their dependencies inside the same VSIX.
+
+[Independent package evidence](evidence/native-ci-staging-package.json) records
+that file-only scope. The package is verified but has not been installed or
+launched locally. The live preview still uses its previously accepted runtime.
+Local execution and installed acceptance remain deferred while the separate
+xlang3 benchmark is running. Later skill changes have separate pending gates.

@@ -50,6 +50,10 @@ Limits are 64 catalogue entries, 16 KiB per source, 8 KiB of frontmatter, 1,024
 bytes per scalar, eight active guides and 32 KiB of active body text. Serialized
 catalogue, guidance and combined instruction limits also apply. Oversized
 catalogues fail explicitly instead of silently returning a partial set.
+Activation validates the prospective active body total, serialized guidance and
+remaining combined native instruction budget before changing the requested set.
+A rejected load preserves existing delivered guidance and lets the agent handle
+the tool error. Source changes after activation are still rechecked separately.
 
 ## Validation and remaining delivery
 
@@ -61,6 +65,10 @@ effect contract gains a changed-skill-after-approval case with an actual peer an
 durable operation retirement. Host fixtures assert the complete new tool
 catalogue; existing effect and protocol assertions remain in place. These tests
 have not run yet, so their presence is not evidence that the feature works.
+The agent fixture also covers a guide larger than its remaining instruction
+capacity and verifies a completed conversation after the rejected load, with no
+activated skill snapshot. The context fixture covers aggregate overflow while
+retaining two previously delivered guides. These additions remain unvalidated.
 
 Delivery still requires the complete 90-contract native gate, frontend suites,
 browser/native integration, independently verified VSIX/runtime artifacts and

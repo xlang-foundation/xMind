@@ -9,7 +9,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 const [executable,modules,stdlib]=process.argv.slice(2),execute=promisify(execFile);
 const folder=await mkdtemp(join(tmpdir(),'xmind-agent-')),workspace=join(folder,'workspace');
-let failure,requests=0,skillRequests=0;
+let failure,requests=0,skillRequests=0,skillCapacityRequests=0;
 const server=createServer((request,response)=>{
   let source='';request.on('data',data=>{source+=data;});request.on('end',()=>{
     try {
@@ -19,6 +19,12 @@ const server=createServer((request,response)=>{
       assert.deepEqual(body.tools.map(item=>item.function.name),['read_repository_instructions','read_file','list_files','search_files','list_skills','load_skill']);
       if(request.url==='/error') {response.writeHead(429,{'Content-Type':'application/json'});response.end('{"error":"do-not-log-provider-body"}');return;}
       response.writeHead(200,{'Content-Type':'text/event-stream'});
+      if(request.url==='/skill-capacity'){
+        const turn=++skillCapacityRequests;assert.ok(body.messages[0].content.length<=65536);assert.ok(!body.messages[0].content.includes('Synthetic oversized active skill body'));
+        let delta,finish;if(turn===1){delta={tool_calls:[{index:0,id:'reject-large-skill',type:'function',function:{name:'load_skill',arguments:'{"id":"large"}'}}]};finish='tool_calls';}
+        else {assert.equal(turn,2);assert.equal(JSON.parse(body.messages.at(-1).content).error.code,'file_unavailable');delta={content:'Synthetic model continued after the rejected guide load.'};finish='stop';}
+        response.write('data: '+JSON.stringify({choices:[{index:0,delta,finish_reason:finish}]})+'\n\n');response.end('data: [DONE]\n\n');return;
+      }
       if(request.url==='/skill'){
         const turn=++skillRequests;let delta,finish;
         if(turn===1){assert.ok(body.messages[0].content.includes('Synthetic skill catalogue description'));assert.ok(!body.messages[0].content.includes('Synthetic active skill body'));
@@ -46,7 +52,8 @@ const server=createServer((request,response)=>{
 try {
   await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual file content written by fixture\n');
   await mkdir(join(workspace,'.agents','skills','inspect'),{recursive:true});await writeFile(join(workspace,'.agents','skills','inspect','SKILL.md'),'---\nname: inspect\ndescription: Synthetic skill catalogue description\n---\nSynthetic active skill body: inspect the actual companion bytes.\n');await writeFile(join(workspace,'.agents','skills','inspect','helper.txt'),'Actual native skill companion bytes\n');
+  await mkdir(join(workspace,'.agents','skills','large'));await writeFile(join(workspace,'.agents','skills','large','SKILL.md'),'---\nname: large\ndescription: Synthetic instruction budget fixture\n---\nSynthetic oversized active skill body '+ 'x'.repeat(14500));
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:30000});
-  if(failure) throw failure;assert.equal(requests,12);assert.equal(skillRequests,3);process.stdout.write(result.stdout);
+  if(failure) throw failure;assert.equal(requests,14);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);process.stdout.write(result.stdout);
 } finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await rm(folder,{recursive:true,force:true});}

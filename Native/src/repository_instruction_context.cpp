@@ -34,6 +34,11 @@ std::string RepositoryInstructionContext::prepare(std::stop_token cancel){
     auto next=requested_;for(auto& [directory,files]:next)files=workspace_.repository_instructions(directory,cancel);
     auto text=render(next)+skills_.prepare(cancel);requested_=next;delivered_=std::move(next);return text;
 }
+std::string RepositoryInstructionContext::activate_skill(const std::string& arguments,std::size_t base_instruction_bytes,std::stop_token cancel){
+    const auto repository_bytes=render(requested_).size();
+    if(base_instruction_bytes>65536||repository_bytes>65536-base_instruction_bytes)throw ToolFileError("Combined native instructions exceed their limit");
+    return skills_.activate(arguments,cancel,65536-base_instruction_bytes-repository_bytes);
+}
 std::string RepositoryInstructionContext::metadata() const {
     using Json=nlohmann::json;auto scopes=Json::array();
     for(const auto& [directory,files]:delivered_){auto sources=Json::array();for(const auto& file:files)sources.push_back({{"path",file.path},{"workspace_id",file.workspace_id},{"file_id",file.file_id},{"content_sha256",file.content_sha256},{"byte_count",file.content.size()}});scopes.push_back({{"directory",directory},{"sources",std::move(sources)}});}

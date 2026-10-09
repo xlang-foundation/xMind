@@ -14,6 +14,7 @@ public:
     bool ready(const std::string& directory,std::stop_token cancel={});
     InstructionPrecondition precondition(const std::string& directory);
     SkillContext& skills(){return skills_;}
+    std::string activate_skill(const std::string& arguments,std::size_t base_instruction_bytes,std::stop_token cancel={});
     static std::string file_directory(const std::string& path);
 private:
     using Scopes=std::map<std::string,std::vector<WorkspaceSnapshot>>;
