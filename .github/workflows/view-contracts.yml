@@ -33,13 +33,13 @@ jobs:
         run: |
           npm ci --prefix extensions/vscode --ignore-scripts --no-audit --no-fund
           exit $LASTEXITCODE
-      - name: Run complete browser and extension contract sets
-        run: |
-          node Tools/ci-views.mjs
-          exit $LASTEXITCODE
       - name: Build browser assets
         run: |
           node views/browser/build.mjs build/view-assets
+          exit $LASTEXITCODE
+      - name: Run complete browser and extension contract sets
+        run: |
+          node Tools/ci-views.mjs
           exit $LASTEXITCODE
       - name: Preserve view diagnostics
         if: always()

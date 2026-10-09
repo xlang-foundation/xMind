@@ -4,7 +4,7 @@ import {spawnSync} from 'node:child_process';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 const [id,revision,kind='evidence']=process.argv.slice(2);
-if(!/^\d+$/.test(id||'')||!/^[0-9a-f]{40}$/.test(revision||'')||!['evidence','runtime'].includes(kind))throw new Error('Supply run ID, exact revision and evidence/runtime');
+if(!/^\d+$/.test(id||'')||!/^[0-9a-f]{40}$/.test(revision||'')||!['evidence','runtime','views'].includes(kind))throw new Error('Supply run ID, exact revision and evidence/runtime/views');
 const base='https://api.github.com/repos/xlang-foundation/xMind';let token;
 async function get(url){
   if(!url.startsWith(base+'/'))throw new Error('Artifact API URL escaped the repository');
@@ -21,7 +21,7 @@ async function get(url){
 const runResponse=await get(`${base}/actions/runs/${id}`);if(!runResponse.ok)throw new Error(`Run metadata HTTP ${runResponse.status}`);
 const run=await runResponse.json();if(run.head_sha!==revision||run.status!=='completed'||(kind==='runtime'&&run.conclusion!=='success'))throw new Error('Run revision/status does not qualify for the requested artifact');
 const artifactsResponse=await get(`${base}/actions/runs/${id}/artifacts`);if(!artifactsResponse.ok)throw new Error(`Artifacts HTTP ${artifactsResponse.status}`);
-const data=await artifactsResponse.json();const name=`native-windows-${kind}-${revision}`;
+const data=await artifactsResponse.json();const name=kind==='views'?`view-contracts-evidence-${revision}`:`native-windows-${kind}-${revision}`;
 const artifact=data.artifacts.find(item=>item.name===name&&!item.expired);
 if(!artifact||artifact.size_in_bytes>268435456)throw new Error('Exact-revision artifact absent, expired or too large');
 const redirect=await get(artifact.archive_download_url);if(redirect.status!==302)throw new Error(`Artifact archive HTTP ${redirect.status}`);

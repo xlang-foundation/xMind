@@ -10,8 +10,10 @@ const crypto = require('node:crypto');
 const { resolveNativeRuntime, verifyNativeRuntime, validateManifest, REQUIRED_NATIVE, REQUIRED_STDLIB, MANIFEST_NAME } = require('../native-runtime');
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 async function fixture(t) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'xmind-native-runtime-files-'));
-  t.after(async () => { const resolved = path.resolve(root); assert.equal(path.dirname(resolved).toLowerCase(), path.resolve(os.tmpdir()).toLowerCase()); assert.match(path.basename(resolved), /^xmind-native-runtime-files-/); await fs.rm(resolved, { recursive: true }); });
+  // Positive inputs must be canonical even when a Windows runner's TEMP uses
+  // a short-name alias. Production canonical-path rejection is preserved.
+  const temp = await fs.realpath(os.tmpdir()), root = await fs.mkdtemp(path.join(temp, 'xmind-native-runtime-files-'));
+  t.after(async () => { const resolved = path.resolve(root); assert.equal(path.dirname(resolved).toLowerCase(), temp.toLowerCase()); assert.match(path.basename(resolved), /^xmind-native-runtime-files-/); await fs.rm(resolved, { recursive: true }); });
   const runtime = path.join(root, 'extension/native-runtime'), files = {};
   await fs.mkdir(runtime, { recursive: true });
   for (const name of [...REQUIRED_NATIVE, ...REQUIRED_STDLIB.map(name => 'stdlib/' + name), 'licenses/SYNTHETIC-LICENSE']) {

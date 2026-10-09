@@ -12,8 +12,10 @@ const {REQUIRED_NATIVE,REQUIRED_STDLIB,verifyNativeRuntime,MANIFEST_NAME}=requir
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const packager=import(pathToFileURL(path.join(__dirname,'../scripts/package-native-runtime.mjs')).href);
 async function fixture(t){
-  const root=await fs.mkdtemp(path.join(os.tmpdir(),'xmind-native-package-files-'));
-  t.after(async()=>{const target=path.resolve(root);assert.equal(path.dirname(target).toLowerCase(),path.resolve(os.tmpdir()).toLowerCase());assert.match(path.basename(target),/^xmind-native-package-files-/);await fs.rm(target,{recursive:true});});
+  // Windows runners can expose an 8.3 alias in TEMP. Positive fixtures use the
+  // canonical parent; intentional alias-rejection cases remain unchanged.
+  const temp=await fs.realpath(os.tmpdir()),root=await fs.mkdtemp(path.join(temp,'xmind-native-package-files-'));
+  t.after(async()=>{const target=path.resolve(root);assert.equal(path.dirname(target).toLowerCase(),temp.toLowerCase());assert.match(path.basename(target),/^xmind-native-package-files-/);await fs.rm(target,{recursive:true});});
   const bundle=path.join(root,'accepted-bundle'),stdlibSource=path.join(root,'pure-source'),out=path.join(root,'packaged-runtime');
   await fs.mkdir(bundle);await fs.mkdir(stdlibSource);
   const files={};
