@@ -25,7 +25,7 @@ public:
     VerifiedRuntimeGeneration& operator=(const VerifiedRuntimeGeneration&)=delete;
     const RuntimeGenerationBinding& binding()const;
     void revalidate()const;
-    // Require the loaded process image to be this inventory's xmind_server.exe,
+    // Require the loaded process image to be this inventory's xmind.exe,
     // using actual OS file identity rather than a caller-provided executable name.
     void require_current_server()const;
 private:

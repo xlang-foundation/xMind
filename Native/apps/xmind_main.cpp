@@ -15,7 +15,7 @@ void help(){
     std::cout<<"xMind Runtime, Coding Harness and AI Model Gateway\n"
         "Usage:\n"
         "  xmind serve --db FILE --modules DIR --stdlib DIR [server options]\n"
-        "  xmind [--port PORT] [chat [SESSION [MODEL]] | COMMAND ARGS...]\n"
+        "  xmind [--port PORT] [--workspace DIR] [chat [SESSION [MODEL]] | COMMAND ARGS...]\n"
         "  xmind admin [native administration arguments]\n"
         "  xmind schema-worker   (private bounded schema protocol)\n\n"
         "The console attaches to an authenticated local backend (default port 8765).\n"
@@ -43,16 +43,17 @@ int dispatch(int argc,char** argv){
         if(entry){std::vector<char*> forwarded{argv[0]};for(int i=2;i<argc;++i)forwarded.push_back(argv[i]);forwarded.push_back(nullptr);return entry(static_cast<int>(forwarded.size()-1),forwarded.data());}
         if(mode=="worker")throw std::invalid_argument("Agent worker execution is not implemented yet");
     }
-    int first=1;std::string port="8765";
-    if(argc>1&&std::string_view(argv[1])=="--port"){
-        if(argc<3)throw std::invalid_argument("--port requires a port number");
-        port=std::to_string(port_number(argv[2]));first=3;
+    int first=1;std::string port="8765",workspace;bool named_port=false,named_workspace=false;
+    while(first<argc&&(std::string_view(argv[first])=="--port"||std::string_view(argv[first])=="--workspace")){
+        const std::string_view option=argv[first++];if(first==argc)throw std::invalid_argument("Console option requires a value");
+        if(option=="--port"){if(named_port)throw std::invalid_argument("Duplicate console port");named_port=true;port=std::to_string(port_number(argv[first++]));}
+        else{if(named_workspace||!*argv[first])throw std::invalid_argument("Invalid or duplicate console workspace");named_workspace=true;workspace=argv[first++];}
     }
     std::string chat="chat";
     std::vector<char*> forwarded{argv[0],port.data()};
     if(first==argc)forwarded.push_back(chat.data());
     else for(int i=first;i<argc;++i)forwarded.push_back(argv[i]);
-    forwarded.push_back(nullptr);return cli_main(static_cast<int>(forwarded.size()-1),forwarded.data());
+    forwarded.push_back(nullptr);return cli_main(static_cast<int>(forwarded.size()-1),forwarded.data(),workspace);
 }
 int guarded(int argc,char** argv){try{return dispatch(argc,argv);}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 2;}}
 }

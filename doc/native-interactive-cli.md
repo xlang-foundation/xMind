@@ -12,6 +12,27 @@ packages still use older launchers. The new package uses a fresh profile with
 one `xmind.exe` and requires no migration. Automatic console discovery/start and worker execution remain pending;
 the current console needs an existing authenticated backend.
 
+## Selected workspace connection
+
+Use an explicit workspace when attaching the console to a local backend:
+
+```powershell
+xmind --port 8765 --workspace D:\Projects\Example sessions
+xmind --workspace D:\Projects\Example --port 8765 chat
+```
+
+The native console opens that directory and pins its OS file identity and
+canonical root. Before each request it reads authenticated backend workspace
+metadata and verifies the selected root and the originally observed authority.
+A different root, malformed metadata or changed authority rejects the command;
+the console does not silently adopt the replacement backend. Agent and graph
+requests also carry the pinned workspace and authority for atomic backend
+admission. Client exit still leaves backend execution alive.
+
+This connection check is a prerequisite for managed profile discovery and
+startup. It does not implement automatic bootstrap. Explicit `--port` commands
+without `--workspace` retain the operator-selected backend behavior.
+
 ## Multiline requests
 
 Use `/compose` to enter a multiline agent request, or `/compose GRAPH_ID` for

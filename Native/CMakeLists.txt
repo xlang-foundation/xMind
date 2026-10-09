@@ -181,9 +181,15 @@ target_link_libraries(xmind_server PRIVATE agentflow_http agentflow_instruction_
 if(WIN32)
   target_link_libraries(xmind_server PRIVATE agentflow_runtime agentflow_process_configuration bcrypt)
 endif()
+add_library(agentflow_console_transport STATIC src/console_transport.cpp)
+target_include_directories(agentflow_console_transport PUBLIC include third_party/cpp-httplib PRIVATE third_party)
+target_link_libraries(agentflow_console_transport PUBLIC Threads::Threads)
+if(WIN32)
+  target_link_libraries(agentflow_console_transport PRIVATE agentflow_workspace ws2_32 crypt32)
+endif()
 add_executable(xmind_cli apps/cli_main.cpp)
 target_include_directories(xmind_cli PRIVATE third_party/cpp-httplib third_party)
-target_link_libraries(xmind_cli PRIVATE Threads::Threads)
+target_link_libraries(xmind_cli PRIVATE agentflow_console_transport Threads::Threads)
 if(WIN32)
   target_link_libraries(xmind_cli PRIVATE ws2_32 crypt32)
   add_custom_command(TARGET xmind_server POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
@@ -191,12 +197,12 @@ if(WIN32)
 endif()
 add_executable(xmind_persistence_demo demos/persistence_demo.cpp)
 
-# Primary product executable. Transitional launchers remain while installed
-# runtime manifests/client ownership are migrated; these share the same handlers.
+# Primary product executable. Separate handlers remain for internal contracts;
+# the production distribution contains only xmind and xlang3 dependencies.
 add_executable(xmind apps/xmind_main.cpp apps/server_main.cpp apps/cli_main.cpp apps/schema_worker_main.cpp)
 target_compile_definitions(xmind PRIVATE XMIND_UNIFIED_EXECUTABLE)
 target_include_directories(xmind PRIVATE include third_party/cpp-httplib third_party)
-target_link_libraries(xmind PRIVATE agentflow_http agentflow_instruction_configuration agentflow_json_schema agentflow_mcp_wire Threads::Threads)
+target_link_libraries(xmind PRIVATE agentflow_console_transport agentflow_http agentflow_instruction_configuration agentflow_json_schema agentflow_mcp_wire Threads::Threads)
 if(WIN32)
   target_sources(xmind PRIVATE apps/admin_main.cpp)
   target_link_libraries(xmind PRIVATE agentflow_runtime agentflow_process_configuration agentflow_mcp_configuration agentflow_mcp_effects agentflow_graph agentflow_owner_process agentflow_backend_owner_control agentflow_legacy_owner_process bcrypt ws2_32 crypt32)
@@ -828,6 +834,10 @@ if(BUILD_TESTING)
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_mcp_http_contract.mjs" "$<TARGET_FILE:xmind>" "$<TARGET_FILE:xmind>" "$<TARGET_FILE:xmind>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "" "unified")
       set_tests_properties(native_unified_program_contract native_unified_patch_http_contract native_unified_graph_http_contract native_unified_mcp_http_contract PROPERTIES TIMEOUT 90)
+      add_test(NAME native_console_workspace_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/console_workspace_contract.mjs" "$<TARGET_FILE:xmind>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      set_tests_properties(native_console_workspace_contract PROPERTIES TIMEOUT 90)
     endif()
   else()
     message(WARNING "Node.js is required to run the independent HTTP/CLI contract")

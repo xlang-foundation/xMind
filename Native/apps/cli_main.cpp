@@ -1,3 +1,5 @@
+#include "agentflow/console_transport.hpp"
+#include "agentflow/program_entries.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <charconv>
@@ -110,13 +112,13 @@ nlohmann::json provider_key_fields(const std::string& variable,const std::string
 // Native catalogue discovery has a bounded 30-second provider deadline. Keep
 // its client wait large enough, without extending later chat/watch requests.
 struct ProviderDiscoveryTimeout {
-    httplib::Client& client;
-    explicit ProviderDiscoveryTimeout(httplib::Client& value):client(value){client.set_read_timeout(35,0);}
+    agentflow::ConsoleTransport& client;
+    explicit ProviderDiscoveryTimeout(agentflow::ConsoleTransport& value):client(value){client.set_read_timeout(35,0);}
     ~ProviderDiscoveryTimeout(){client.set_read_timeout(15,0);}
     ProviderDiscoveryTimeout(const ProviderDiscoveryTimeout&)=delete;
     ProviderDiscoveryTimeout& operator=(const ProviderDiscoveryTimeout&)=delete;
 };
-auto provider_discovery_request(httplib::Client& client,const httplib::Headers& headers,const std::string& path,const nlohmann::json& body){
+auto provider_discovery_request(agentflow::ConsoleTransport& client,const httplib::Headers& headers,const std::string& path,const nlohmann::json& body){
     ProviderDiscoveryTimeout timeout(client);return client.Post(path,headers,body.dump(),"application/json");
 }
 nlohmann::json provider_rejection(const std::string& source){
@@ -149,7 +151,7 @@ nlohmann::json provider_rejection(const std::string& source){
 // Observation only: ending this client never grants, cancels or owns execution.
 // Each flushed NDJSON record is an actual persisted backend event. Its seq can
 // be supplied on reconnect; process-output hex is never written as terminal code.
-int watch_run(httplib::Client& client,const httplib::Headers& headers,const std::string& run,std::int64_t cursor,bool graph=false,bool interactive=false) {
+int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& headers,const std::string& run,std::int64_t cursor,bool graph=false,bool interactive=false) {
     using Json=nlohmann::json;const auto path="/v1/runs/"+run;
     auto read=[&](const std::string& route) {
         auto response=client.Get(route,headers);if(!response)throw std::runtime_error("Cannot reach xMind Server during observation");
@@ -284,7 +286,7 @@ int watch_run(httplib::Client& client,const httplib::Headers& headers,const std:
 }
 // Interactive access client, not a second agent engine. Every request, tool
 // result, approval and response remains owned by the shared native server.
-int chat_session(httplib::Client& client,const httplib::Headers& headers,std::string session,std::string model) {
+int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& headers,std::string session,std::string model) {
     using Json=nlohmann::json;
     auto request=[&](const std::string& path,const Json* body=nullptr){
         auto response=body?client.Post(path,headers,body->dump(),"application/json"):client.Get(path,headers);
@@ -560,7 +562,7 @@ int chat_session(httplib::Client& client,const httplib::Headers& headers,std::st
 }
 }
 
-int cli_main(int argc,char** argv) {
+int cli_main(int argc,char** argv,const std::string& workspace) {
     try {
         if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, skills, session-skills SESSION, set-skills SESSION SNAPSHOT_JSON_FILE [ID...], provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, inspect-plan ROOT, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
@@ -678,7 +680,7 @@ int cli_main(int argc,char** argv) {
         else throw std::invalid_argument("Unknown command or incorrect arguments");
         const auto* token=std::getenv("XMIND_AUTH_TOKEN");
         if(!token) throw std::invalid_argument("Set XMIND_AUTH_TOKEN for the local client");
-        httplib::Client client("127.0.0.1",port);
+        agentflow::ConsoleTransport client(port,workspace);
         client.set_connection_timeout(5,0);client.set_read_timeout(15,0);client.set_write_timeout(5,0);client.set_follow_location(false);
         const httplib::Headers headers{{"Authorization",std::string("Bearer ")+token}};
         if(chat)return chat_session(client,headers,path,chat_model);

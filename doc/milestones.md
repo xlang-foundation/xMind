@@ -1,5 +1,21 @@
 # Reviewable milestones
 
+Native console workspace pinning now accepts `--workspace DIR`, checks the
+selected OS directory identity and authenticated backend authority before each
+request, and sends the pinned pair in agent/graph admission. The actual native
+server rejects a stale-authority race before creating a run. The complete local
+**108 native contracts** and eight focused checks pass with frozen source.
+The first focused test had an incorrect stderr assertion; its original log is
+retained and the corrected test checks the native HTTP status and stored state.
+[Console connection evidence](evidence/native-console-workspace-local.json).
+Automatic profile discovery/start remains pending.
+
+The verified **0.1.5** VSIX is installed in a fresh dedicated VS Code profile;
+its runtime and 25 client/browser assets match their accepted hashes. First-run
+sign-in is awaiting user handling. No fresh rendered-sidebar or installed-model
+acceptance is claimed. The older installation is intact.
+[Installed file evidence](evidence/vscode-unified-fresh-installed-files.json).
+
 The single-format package checkpoint **6adb9a1** removes the client legacy-profile
 migration path and accepts only `xmind.exe` plus xlang3 dependencies. The complete
 local **107 native / 225 extension / 41 browser** suites pass. The first native
