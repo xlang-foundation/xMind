@@ -432,5 +432,7 @@ explicit recovery passed without inference runs.
 Hosted/installed acceptance for these newer CLI commands, configured/global/URL/
 embedded discovery, skill source management and broader parity remain incomplete.
 Existing-profile upgrades must preserve saved state through a native runtime
-handoff; the current launcher creates a separate database for a new generation.
+handoff; the newer launcher retains the existing authenticated owner and reports
+pending changes. This avoids implicit profile replacement while the actual
+native migration protocol remains incomplete.
 [Handoff requirements](native-runtime-handoff.md).

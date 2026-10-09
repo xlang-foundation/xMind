@@ -388,7 +388,7 @@ async function activate(context) {
         if (panel !== view||workspaceBackend.epoch!==workspaceEpoch) return;
         if (!message || typeof message.type !== 'string') return;
         if (message.type === 'ready') {
-          post({type:'workspace',root:connection.metadata.root,roots:connection.roots,managed:!previewOrigin&&machineSetting(vscode,'backendMode')!=='external'});
+          post({type:'workspace',root:connection.metadata.root,roots:connection.roots,managed:!previewOrigin&&machineSetting(vscode,'backendMode')!=='external',backendChangePending:connection.backendChangePending===true});
           post({ type: 'capabilities', execution: health.agent_execution, renameSessions:health.session_rename===true, model:selectedModel, models:modelCatalogue.models });
           await refresh();
           if (sessionId) await selectSession(sessionId);

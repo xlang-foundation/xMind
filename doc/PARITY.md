@@ -86,6 +86,13 @@ installed CLI acceptance remain separate.
 The managed launcher still needs a native generation handoff preserving the same
 profile database before existing-profile upgrade acceptance can be claimed.
 [Upgrade requirements](native-runtime-handoff.md).
+Newer owner-retention source passed complete local 189/38 view suites. It keeps
+the authenticated existing backend across package/settings changes and fails
+explicitly on an unknown owner instead of creating an empty replacement profile.
+An actual model-free native API comparison retained saved records and one process;
+its cleanup-receipt defect and benchmark-deferred correction are recorded.
+This is not native runtime migration or installed/rendered upgrade acceptance.
+[Retention scope](evidence/native-workspace-owner-continuity-local.json).
 The ordinary VS Code window was initially observed in Restricted Mode, which
 disabled xMind. That historical boundary remains recorded; the user subsequently
 granted trust and the workspace-read UI acceptance above passed.

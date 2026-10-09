@@ -78,22 +78,30 @@ class WorkspaceBackend {
     const runtime=await this.resolveRuntime(this.context,{platform:this.deps.platform,arch:this.deps.arch,remoteName:this.vscode.env?.remoteName??null},config);
     if(!current())throw new Error('Workspace changed while preparing its backend.');
     const retained=this.owners.get(scope);
-    if(retained&&retained.runtimeManifest===runtime.manifestSha256&&retained.launchConfiguration===launchConfiguration&&await this.ownerStorageSafe(retained,canonicalRoots)){await this.observe(retained);if(!current())throw new Error('Workspace changed while connecting.');this.active={...retained,epoch,signature:selection.signature,roots:selection.roots};return this.active;}
-    // Reconnect only to a generation this extension previously authenticated.
-    // A stopped/unreachable owner is left intact; a new generation gets its own DB.
-    const saved=this.context.globalState?.get('xmind.nativeWorkspaceOwners')||[];
+    // A package/settings change cannot implicitly replace a workspace's profile
+    // with an empty database. Retain the authenticated native owner until Native
+    // supplies an explicit state-preserving generation handoff.
+    const reconnect=async prior=>{
+      if(!/^http:\/\/127\.0\.0\.1:[0-9]{1,5}$/.test(prior.origin)||keyPath(prior.canonical)!==keyPath(canonical))throw new Error('Invalid retained workspace owner; existing storage was preserved.');
+      if(!await this.ownerStorageSafe(prior,canonicalRoots))throw new Error('Existing backend storage is unavailable or inside a workspace folder. Narrow the opened folder set before reconnecting; no replacement database was created.');
+      const owner={...prior,metadata:workspaceMetadata(prior.metadata)};
+      try{await this.observe(owner);}catch{throw new Error('Cannot verify the existing workspace backend. Restore its connection before continuing; no replacement database was created.');}
+      if(!current())throw new Error('Workspace changed while reconnecting.');
+      this.owners.set(scope,owner);
+      this.active={...owner,epoch,signature:selection.signature,roots:selection.roots,backendChangePending:owner.runtimeManifest!==runtime.manifestSha256||owner.launchConfiguration!==launchConfiguration};
+      return this.active;
+    };
+    if(retained)return reconnect(retained);
+    // Reconnect only to the latest generation this extension authenticated.
+    // An unavailable owner is an unknown outcome, never proof of safe migration.
+    const stored=this.context.globalState?.get('xmind.nativeWorkspaceOwners');
+    const saved=stored===undefined?[]:stored;
+    if(!Array.isArray(saved))throw new Error('Saved workspace ownership is invalid; existing storage was preserved.');
     if(Array.isArray(saved)){
-      const prior=saved.findLast(value=>value?.scope===scope&&value.runtimeManifest===runtime.manifestSha256&&value.launchConfiguration===launchConfiguration);
-      if(prior){
-        try{
-          if(!/^http:\/\/127\.0\.0\.1:[0-9]{1,5}$/.test(prior.origin)||keyPath(prior.canonical)!==keyPath(canonical))throw new Error('Invalid retained owner.');
-          if(!await this.ownerStorageSafe(prior,canonicalRoots))throw new Error('Retained private storage is inside this workspace.');
-          prior.metadata=workspaceMetadata(prior.metadata);await this.observe(prior);
-          if(!current())throw new Error('Workspace changed while reconnecting.');
-          this.owners.set(scope,prior);this.active={...prior,epoch,signature:selection.signature,roots:selection.roots};return this.active;
-        }catch(error){if(!current())throw error;}
-      }
+      const prior=saved.findLast(value=>value?.scope===scope);
+      if(prior)return reconnect(prior);
     }
+    if(saved.length>=128)throw new Error('Local workspace owner limit reached. Reconnect an existing workspace; no existing profile was removed.');
     let privateRoot=canonicalPath(runtime.privateStateRoot);
     if(canonicalRoots.some(root=>contained(root,privateRoot))){
       const fallback=this.deps.env.LOCALAPPDATA;
@@ -129,7 +137,7 @@ class WorkspaceBackend {
       await this.context.secrets.store(`xmind.auth:${origin}`,token);
       this.owners.set(scope,owner);
       const record={origin,canonical,scope,metadata:observed,runtimeManifest:runtime.manifestSha256,launchConfiguration,privateDirectory:directory};
-      if(this.context.globalState){const records=Array.isArray(saved)?saved.filter(value=>value?.origin!==origin).slice(-127):[];await this.context.globalState.update('xmind.nativeWorkspaceOwners',[...records,record]);}
+      if(this.context.globalState){const records=saved.filter(value=>value?.origin!==origin);await this.context.globalState.update('xmind.nativeWorkspaceOwners',[...records,record]);}
       // Folder changes never terminate a ready Native owner or its work.
       if(!current())throw new Error('Workspace changed while its backend became ready.');
       this.active={...owner,epoch,signature:selection.signature,roots:selection.roots};return this.active;

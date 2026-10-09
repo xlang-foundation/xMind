@@ -1,11 +1,25 @@
 # Managed local runtime upgrades
 
 This is a required delivery design, not an implemented or validated upgrade
-protocol. The current launcher retains authenticated owners across folder changes
-and host reloads, but matches them by runtime manifest and launch configuration.
-When that match changes, it creates a new private database directory. Previous
-records and owners remain stored and alive; the upgraded view does not thereby
-inherit their sessions. That is a gap in managed upgrade continuity.
+protocol. The launcher now retains its latest authenticated workspace owner
+across package/settings changes and host reloads. It reports pending backend
+changes while continuing to use that owner's capabilities and saved state.
+Invalid/unreachable owners, unavailable credentials, changed authority or unsafe
+storage fail explicitly instead of creating an empty replacement database.
+At its 128-owner limit, a new root fails before launch; existing records are not
+evicted. This prevents implicit profile replacement, but does not migrate a live
+runtime to the new generation.
+
+All 189 extension and 38 browser contracts passed locally with frozen inputs.
+A separate actual packaged C++/embedded-xlang3 SQLite check retained one process,
+origin, database, workspace authority and exact saved API records across a package
+change and adapter host reload. VS Code storage/configuration APIs and the user
+message are test fixtures; no provider calls, installed editor or migration were
+tested. Its original cleanup receipt incorrectly reports a stopped signal-exit
+process as false. The receipt is preserved with a later independent observation
+of the absent process/workspace. The corrected helper's fresh execution deferred
+at preflight while a separate SDK benchmark was active.
+[Exact verification and retained failures](evidence/native-workspace-owner-continuity-local.json).
 
 An upgrade must preserve the existing local profile's SQLite database, credentials,
 sessions, transcript, events, provider configuration and completed run metadata.

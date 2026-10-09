@@ -58,8 +58,8 @@ test('case-sensitive canonical siblings keep independent backend authority',asyn
 test('no trusted provider path starts unconfigured and never imports a project file',async()=>{
  const h=harness({settings:{providerConfigPath:undefined}});await h.manager.connect();assert.ok(!h.launches[0].args.includes('--provider-config'));assert.ok(!h.launches[0].args.some(value=>value===undefined));
 });
-test('explicit machine launch settings change creates a new owner without stopping the prior generation',async()=>{
- const h=harness();const first=await h.manager.connect();h.settings.workspaceEdits=true;h.manager.invalidate();const second=await h.manager.connect();assert.notEqual(first.origin,second.origin);assert.ok(h.launches[1].args.includes('--workspace-edits'));assert.equal(h.launches[0].child.kills,0);h.settings.workspaceEdits=false;h.manager.invalidate();assert.equal((await h.manager.connect()).origin,first.origin);assert.equal(h.launches.length,2);
+test('machine launch settings stay pending on the same authenticated owner without replacing saved state',async()=>{
+ const h=harness();const first=await h.manager.connect(),records=JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners'));h.settings.workspaceEdits=true;h.settings.providerConfigPath='D:\\Changed\\providers.yaml';h.manager.invalidate();const second=await h.manager.connect();assert.equal(first.origin,second.origin);assert.equal(second.backendChangePending,true);assert.equal(second.privateDirectory,first.privateDirectory);assert.equal(h.launches.length,1);assert.ok(!h.launches[0].args.includes('--workspace-edits'));assert.equal(h.launches[0].child.kills,0);assert.equal(JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),records);h.settings.workspaceEdits=false;h.settings.providerConfigPath='D:\\Trusted\\providers.yaml';h.manager.invalidate();assert.equal((await h.manager.connect()).backendChangePending,false);
 });
 test('ready owner remains alive if folder changes during authenticated readiness',async()=>{
   let h;h=harness({fetch:async()=>{h.vscode.workspace.workspaceFolders=[folder('Other','D:\\Other')];h.manager.invalidate();return {ok:true,json:async()=>({configured:true,root:'D:\\CantorAI2026\\TestProj',workspace_id:'windows-local-file-v1:1:2',authority_id:'b'.repeat(32)})};}});
@@ -75,10 +75,39 @@ test('private storage inside a folder uses external fallback and rejects a direc
   const bad=harness({alias:value=>value.includes('workspace-backends')?'D:\\CantorAI2026\\TestProj\\aliased':value});await assert.rejects(bad.manager.connect(),/escaped/);assert.equal(bad.launches.length,0);
   assert.equal(canonicalPath('\\\\?\\UNC\\server\\share\\folder'),'\\\\server\\share\\folder');
 });
-test('new broader folder set cannot reuse a retained backend whose private DB directory is now inside the workspace',async()=>{
+test('broader folder set cannot expose private storage or silently replace the retained profile database',async()=>{
  const h=harness({storage:'D:\\Private'});const first=await h.manager.connect();
- h.vscode.workspace.workspaceFolders.push(folder('Broad root','D:\\'));h.manager.invalidate();const second=await h.manager.connect();
- assert.notEqual(first.origin,second.origin);assert.ok(h.launches[1].args[1].startsWith('C:\\Local\\xMind\\NativeWorkspaces\\'));assert.equal(h.launches[0].child.kills,0);
+ h.vscode.workspace.workspaceFolders.push(folder('Broad root','D:\\'));h.manager.invalidate();await assert.rejects(h.manager.connect(),/no replacement database/);
+ assert.equal(h.manager.active,undefined);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,0);h.vscode.workspace.workspaceFolders.pop();h.manager.invalidate();assert.equal((await h.manager.connect()).origin,first.origin);
+});
+
+test('package changes and host reload retain the original authenticated database and native admission identity',async()=>{
+ const h=harness();const first=await h.manager.connect(),directoryCount=h.directories.length,records=JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),secrets=[...h.secrets];h.runtime.manifestSha256='c'.repeat(64);h.manager.invalidate();
+ const changed=await h.manager.connect();assert.equal(changed.origin,first.origin);assert.equal(changed.privateDirectory,first.privateDirectory);assert.equal(changed.runtimeManifest,first.runtimeManifest);assert.equal(changed.backendChangePending,true);
+ h.manager.dispose();const reloaded=new WorkspaceBackend(h.vscode,h.context,h.resolver,h.deps),restored=await reloaded.connect();assert.equal(restored.origin,first.origin);assert.equal(restored.backendChangePending,true);assert.equal(h.launches.length,1);assert.equal(h.directories.length,directoryCount);assert.equal(h.launches[0].child.kills,0);assert.deepEqual([...h.secrets],secrets);assert.equal(JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),records);
+ const writes=[],client=new BackendClient(restored.origin,()=>h.secrets.get('xmind.auth:'+restored.origin),async(url,options)=>{writes.push({url,body:JSON.parse(options.body)});return {ok:true,json:async()=>({id:'synthetic-admitted'})};}).bindWorkspace(reloaded);await client.run('saved-conversation','synthetic requested task');assert.equal(writes.length,1);assert.equal(new URL(writes[0].url).origin,first.origin);assert.equal(writes[0].body.expected_workspace_authority_id,first.metadata.authority_id);assert.equal(writes[0].body.expected_workspace_id,first.metadata.workspace_id);
+});
+
+test('unavailable credentials, HTTP or changed authority never create a competing owner or empty database',async()=>{
+ for(const failure of ['credentials','unreachable','authority']){
+  const h=harness();const first=await h.manager.connect(),records=JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),directories=h.directories.length;h.manager.dispose();h.runtime.manifestSha256='c'.repeat(64);
+  if(failure==='credentials')h.secrets.clear();else h.deps.fetch=async()=>failure==='unreachable'?{ok:false}:{ok:true,json:async()=>({...first.metadata,authority_id:'d'.repeat(32)})};
+  const reloaded=new WorkspaceBackend(h.vscode,h.context,h.resolver,h.deps);await assert.rejects(reloaded.connect(),/no replacement database/);assert.equal(reloaded.active,undefined);assert.equal(h.launches.length,1);assert.equal(h.directories.length,directories);assert.equal(h.launches[0].child.kills,0);assert.equal(JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),records);
+ }
+});
+
+test('latest persisted generation failures cannot fall back to older owners or unsafe storage',async()=>{
+ for(const failure of ['latest-origin','storage','metadata','registry','falsy-registry']){
+  const h=harness();const first=await h.manager.connect(),records=h.globalState.get('xmind.nativeWorkspaceOwners');h.manager.dispose();
+  if(failure==='registry')h.globalState.set('xmind.nativeWorkspaceOwners',{invalid:records});else if(failure==='falsy-registry')h.globalState.set('xmind.nativeWorkspaceOwners',false);else{const latest={...records[0]};if(failure==='latest-origin')latest.origin='https://untrusted.invalid';if(failure==='storage')latest.privateDirectory='D:\\CantorAI2026\\TestProj\\private';if(failure==='metadata')latest.metadata={...latest.metadata,authority_id:'invalid'};h.globalState.set('xmind.nativeWorkspaceOwners',[...records,latest]);}
+  const prior=JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),directories=h.directories.length,reloaded=new WorkspaceBackend(h.vscode,h.context,h.resolver,h.deps);await assert.rejects(reloaded.connect());assert.equal(reloaded.active,undefined);assert.equal(h.launches.length,1);assert.equal(h.directories.length,directories);assert.equal(h.launches[0].child.kills,0);assert.equal(JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),prior);assert.equal(first.metadata.configured,true);
+ }
+});
+
+test('owner registry capacity never evicts saved profiles or starts an unpublished replacement',async()=>{
+ const h=harness();const first=await h.manager.connect(),record=h.globalState.get('xmind.nativeWorkspaceOwners')[0];const retained=[record,...Array.from({length:127},(_,i)=>({...record,scope:'synthetic-distinct-scope-'+i,origin:'http://127.0.0.1:'+(20000+i)}))];h.globalState.set('xmind.nativeWorkspaceOwners',retained);const previous=JSON.stringify(retained),directories=h.directories.length;
+ h.vscode.workspace.workspaceFolders=[folder('New root','D:\\NewRoot')];h.manager.invalidate();await assert.rejects(h.manager.connect(),/owner limit/);assert.equal(h.launches.length,1);assert.equal(h.directories.length,directories);assert.equal(JSON.stringify(h.globalState.get('xmind.nativeWorkspaceOwners')),previous);assert.equal(h.launches[0].child.kills,0);
+ h.vscode.workspace.workspaceFolders=[folder('TestProj','D:\\CantorAI2026\\TestProj')];h.manager.invalidate();assert.equal((await h.manager.connect()).origin,first.origin);assert.equal(h.launches.length,1);
 });
 test('malformed public authority is never accepted as authenticated readiness',async()=>{
  const h=harness({fetch:async()=>({ok:true,json:async()=>({configured:true,root:'D:\\CantorAI2026\\TestProj',workspace_id:'windows-local-file-v1:1:2',authority_id:'arbitrary-text'})})});await assert.rejects(h.manager.connect(),/ready/);assert.equal(h.launches[0].child.kills,1);

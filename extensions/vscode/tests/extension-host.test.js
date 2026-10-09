@@ -116,7 +116,7 @@ function harness(options={}) {
     invalidate(){this.epoch++;this.active=undefined;}
     dispose(){this.invalidate();}
     async selectedFolder(){return {};}
-    async connect(){const root=vscode.workspace.workspaceFolders[0].uri.fsPath;let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,roots:vscode.workspace.workspaceFolders.map(value=>({fsPath:value.uri.fsPath})),epoch:this.epoch};return this.active;}
+    async connect(){const root=vscode.workspace.workspaceFolders[0].uri.fsPath;let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,roots:vscode.workspace.workspaceFolders.map(value=>({fsPath:value.uri.fsPath})),epoch:this.epoch,backendChangePending:options.backendChangePending===true};return this.active;}
     async attach(){return this.connect();}
     async prepare(){if(!this.active)throw new Error('Workspace disconnected');return {origin:this.active.origin,epoch:this.epoch,fields:{expected_workspace_id:this.active.metadata.workspace_id,expected_workspace_authority_id:this.active.metadata.authority_id}};}
     assert(ticket){if(!this.active||ticket.epoch!==this.epoch||ticket.origin!==this.active.origin)throw new Error('Workspace changed');}
@@ -135,6 +135,11 @@ function harness(options={}) {
     pauseOperation(promise) {pendingOperation=promise;},
     pauseHistory(promise) {pendingHistory=promise;}};
 }
+
+test('pending backend changes are disclosed without replacing the saved conversation or replaying its run',async()=>{
+ const h=harness({backendChangePending:true});await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{view.receive({type:'ready'});await until(()=>view.posted.findLast(m=>m.type==='status')?.text==='completed');const workspace=view.posted.findLast(m=>m.type==='workspace');assert.equal(workspace.backendChangePending,true);assert.equal(workspace.root,'D:\\TestProj');assert.ok(view.posted.some(m=>m.type==='history'&&m.history.some(row=>row.data?.content==='Persisted synthetic response')));assert.ok(!h.requests.includes('/v1/runs'));assert.ok(!h.requests.some(p=>p.endsWith('/cancel')));assert.equal(h.backendOwners.length,1);assert.ok(!JSON.stringify(workspace).includes(h.token));}finally{view.close();}
+});
 
 test('VS Code conversation selection recovers discovery when native provider publication outlives its retired acknowledgement',async()=>{
  let registry={revision:4,active:'first',profiles:[{id:'first',route_id:'openai.responses',provider:'openai',model:'',revision:1},{id:'next',route_id:'anthropic.messages',provider:'anthropic',model:'next-current',revision:1}],routes:[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}]};

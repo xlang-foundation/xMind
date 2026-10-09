@@ -20,7 +20,7 @@ test('skill chooser stays in the sidebar footer, retains focus, and sends revisi
 
 test('effective backend root uses plain text and folder switch clears the old draft',()=>{
  const r=renderer(),doc=r.dom.window.document;
- try{r.send({type:'workspace',root:'D:\\<img onerror=malicious>\\TestProj',roots:[{},{}]});const label=doc.getElementById('workspace-root');assert.equal(label.hidden,false);assert.equal(label.querySelector('img'),null);assert.ok(label.textContent.includes('active root from 2 workspace folders'));doc.getElementById('prompt').value='old workspace draft';r.send({type:'workspace-clear'});assert.equal(label.hidden,true);assert.equal(doc.getElementById('prompt').value,'');}finally{r.dom.window.close();}
+ try{r.send({type:'workspace',root:'D:\\<img onerror=malicious>\\TestProj',roots:[{},{}],backendChangePending:true});const label=doc.getElementById('workspace-root');assert.equal(label.hidden,false);assert.equal(label.querySelector('img'),null);assert.ok(label.textContent.includes('active root from 2 workspace folders'));assert.ok(label.textContent.includes('Backend changes pending; using saved backend'));r.send({type:'workspace',root:'D:\\TestProj',roots:[{}],backendChangePending:'<img onerror=unsafe>'});assert.ok(!label.textContent.includes('pending'));assert.equal(label.querySelector('img'),null);doc.getElementById('prompt').value='old workspace draft';r.send({type:'workspace-clear'});assert.equal(label.hidden,true);assert.equal(doc.getElementById('prompt').value,'');}finally{r.dom.window.close();}
 });
 
 test('footer saved-provider chooser uses public profiles, preserves actual selection until acknowledgement and never opens key settings',()=>{

@@ -1,0 +1,266 @@
+{
+  "baseRevision": "42142936c3a2ece082c51336c953a0834c6eb8ee",
+  "scope": "Preserve a known authenticated workspace owner when package/settings change. Full local synthetic view suites and a separate actual packaged native/embedded-xlang3 SQLite API comparison. Its signal-exit cleanup receipt has a false flag, retained with a later independent absence observation; a corrected receipt run was deferred before native execution. No installed/rendered upgrade, runtime migration, live inference or OpenCode equivalent operation.",
+  "views": {
+    "passed": true,
+    "baseRevision": "42142936c3a2ece082c51336c953a0834c6eb8ee",
+    "scope": "Complete local synthetic Node host/controller/DOM suites. No native execution, interpreter, provider configuration access, live provider or installed/rendered acceptance.",
+    "extension": {
+      "exitCode": 0,
+      "tests": 189,
+      "pass": 189,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 38,
+      "pass": 38,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "sourceFiles": 42,
+    "trackedViewFiles": 39,
+    "sourceBytesUnchanged": true,
+    "assetHashes": {
+      "index.html": "9dbd1f11b9c3355fceaddf081f1e6175a4dfe294cc701f47e866e9d7ba69dc0e",
+      "chat.js": "0ff5de42148ffa8baa4ae759814e6e70f0d8b3dd42c61118e2d5bd6f322ef9cb",
+      "chat.css": "391eb2b3ea30aa140d2292a9434206881e92981cbec05cef129796f86827c3bd",
+      "client.js": "24a89672dfb91907f86116e10c904593103db2c14a050eac50bb2df86ac14b46",
+      "marked.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+      "purify.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+      "browser.js": "7f889c56cd806812e39282c2dfeb35b23616983b27548c7ba358e54086c3d288",
+      "browser.css": "8cae13ebf6ff2700bbcbe1a7150315603fc5865ff8bdbe3c9e30c2cb3ca901dc",
+      "licenses/marked.txt": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+      "licenses/dompurify.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "licenses/dompurify-MPL.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+    },
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "cpythonExecuted": false,
+    "sourceHashes": {
+      "Tools/ci-views.mjs": "5af80d8e76976f83930944e252ef448b9db0d92ebcec0215ebb4a3ec8f284cfa",
+      "extensions/vscode/.vscodeignore": "fe8a6e48beb48a2c4be33c9dbcbc750a8369b7079a5bae5debdb55575f6d8ea3",
+      "extensions/vscode/LICENSE": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
+      "extensions/vscode/README.md": "2d3a40e3bf66295adf5fcd5e32c683ab2a3b7649d4ee58f7ed8a800f35e5f0be",
+      "extensions/vscode/browser-view.js": "f5e47b3b60530b4ed1b98ff3254eb0debbb49c5fde860912abd09d4a1d05a1ea",
+      "extensions/vscode/client.js": "24a89672dfb91907f86116e10c904593103db2c14a050eac50bb2df86ac14b46",
+      "extensions/vscode/edit-review.js": "8afc5443fc2f7aedb5af57f2add361519b381b9c14baefaabf5c39702ad2c06e",
+      "extensions/vscode/extension.js": "78a8586330239aac71f1404b6d4f993d50a5aab725089d55a04e02a2c53d743f",
+      "extensions/vscode/media/chat.css": "391eb2b3ea30aa140d2292a9434206881e92981cbec05cef129796f86827c3bd",
+      "extensions/vscode/media/chat.js": "0ff5de42148ffa8baa4ae759814e6e70f0d8b3dd42c61118e2d5bd6f322ef9cb",
+      "extensions/vscode/media/xmind.svg": "45123fe1e365d6ca284a245029b4a3de12f511fdc42945bf6fe15c9f3cf18b7b",
+      "extensions/vscode/native-runtime.js": "0fe700c4fecbd8a790ac8d9ad792a72aeb482f6511c6e2436673be9207b7dbce",
+      "extensions/vscode/node_modules/dompurify/dist/purify.min.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+      "extensions/vscode/node_modules/marked/lib/marked.umd.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+      "extensions/vscode/package-lock.json": "c24f907b381145cd1de6fd64ce86515f5e1879189216ceb1390498c49407b661",
+      "extensions/vscode/package.json": "17412ae3adb3c192d19d4a0e43f75f0e63f3b25627d2e5cd891eabc31c076c2f",
+      "extensions/vscode/scripts/package-native-runtime.mjs": "dbdd2aca335a947ce60749967f9b64db2e458a320c4a5498196e305981dd4bcd",
+      "extensions/vscode/tests/backend-smoke.js": "3c662b35158f596342c5bbf05a84377f8e25091e43eb8f9ede13957f254ceb0d",
+      "extensions/vscode/tests/browser-view.test.js": "21e89ece7e270a55719e40e8973b612afa3ca7facb66abf2d3031dd0fa93dbb4",
+      "extensions/vscode/tests/client-context.test.js": "8c90ba49708117f5be34c57e4a52bff0371512fcbc7f2f9d95fee028fe1d6cc9",
+      "extensions/vscode/tests/client-planning.test.js": "68dc4ea1ef5389aa78eb9bff0757d9ea6effa59b651d54260ea2322359922fc8",
+      "extensions/vscode/tests/client.test.js": "72c7a9e5444ce9af864fdf2b058e2a8b9d202b7708623adbca1639c2e38a0030",
+      "extensions/vscode/tests/extension-host.test.js": "c6bf013e5f8b8feb115d64858f6031e94327d23a79194f4beb4b323e04e61878",
+      "extensions/vscode/tests/native-runtime-package.test.js": "972459cee15617a36d76afe99ea4c400d382e7a1c43052eb73543f27a56bd77b",
+      "extensions/vscode/tests/native-runtime.test.js": "b14e7f7bcb8bac92a145b91ddf1827a8261e16e5207fd2c875d819d59b27d49c",
+      "extensions/vscode/tests/plan-fixture.js": "89e8149512ae818236b1411078d2a86d704bdcbc109e6278bbc9c68705e3a3a4",
+      "extensions/vscode/tests/provider-profile-controller.test.js": "4968cd0de2a7e3717b461464c85bf5abfb6058678659ef704579b243b01c2105",
+      "extensions/vscode/tests/renderer.test.js": "6c2bc37ea9127d49034c9e985a6a96a058acd2d229e2e5f2a9101fd4478a0cad",
+      "extensions/vscode/tests/workspace-backend.test.js": "7b77245b97894e3656f6d9170cf4bf00f5be066adfd355917897e79629cde7d1",
+      "extensions/vscode/webview.js": "4a608416079b0fc5e27a385ef1ae534ae5709274ea04dc557638592b66f31bd5",
+      "extensions/vscode/workspace-backend.js": "42924e671ab6b8cbaa54ec7b66e4df5126723d87ade64d54f1524a57743b1fe1",
+      "views/browser/browser.css": "8cae13ebf6ff2700bbcbe1a7150315603fc5865ff8bdbe3c9e30c2cb3ca901dc",
+      "views/browser/browser.js": "7f889c56cd806812e39282c2dfeb35b23616983b27548c7ba358e54086c3d288",
+      "views/browser/build.mjs": "dfe1470c5510607a3fbaffcca873f5f8b91c41d1339cfb978232acefc9ca0326",
+      "views/browser/page.cjs": "8042acc2d6ca6bc80ac58fb05e721e3b85c5db37bf0e6adc90bd9f8f7eaa2f28",
+      "views/browser/server.mjs": "a2ff70cb98714d000b109066964d08a0a90c891377c56c92cd30d2202c2ff8b5",
+      "views/browser/tests/classic-script.test.cjs": "98628213446f6ecdbdc6f4baa1c4e5f4b229cfd43115a554db3054094aacd5c8",
+      "views/browser/tests/connection.test.cjs": "804bede20c1cb12cb1c59188464f20f8e1e662a403e238e8594c4c5db0aa8444",
+      "views/browser/tests/controller.test.cjs": "c99c569a33e58796d191114977c247e1e06c36ac20a2d3bf8f6331e1a0ed5afa",
+      "views/browser/tests/native-contract.mjs": "a3f3c361b55247871c6c376a0a5571e1d6657f26099964e01344581a0e1b675b",
+      "views/browser/tests/planning-routes.test.cjs": "3d9043f52ee93be5c25dead3b77dc5792b24d97b8ddc98ab8c329c8831b62b2f",
+      "views/browser/tests/server.test.cjs": "e014f463a82dd6ff1902edd235087e47f7ef0ed9ebee7e3cbf80be363f196d29"
+    },
+    "fileHashes": {
+      "browser.log": "3922d46560cff9c4c326234c940245734df1edada43fccc94a5c0d5ef8d4952e",
+      "build.log": "9913e7894f6309958e7c9ec5a3136fbacb77807d051a1f567cb4dd41bd5a0bb3",
+      "extension.log": "06d720ef54e4907eb0913b827d5361c87873467588c5617fa799c5632143ecd1",
+      "gate.json": "ffc8534275e8e337513e29bddd2158bc9b429c4229a54ab20c2de07257416c14",
+      "guard.jsonl": "e43bc06d3b4bad36aa56aca08b55a0ea3b78ee222b6c0ef33f801fe4467dc4cb",
+      "source-after.json": "39c8f9a49030193ed98f2a17a0896e2a7c0241bff4f3b7e5bc36d176d73f6308",
+      "source-before.json": "39c8f9a49030193ed98f2a17a0896e2a7c0241bff4f3b7e5bc36d176d73f6308"
+    },
+    "guards": [
+      {
+        "stage": "preflight",
+        "count": 0,
+        "pids": []
+      },
+      {
+        "stage": "build",
+        "count": 0,
+        "pids": []
+      },
+      {
+        "stage": "extension",
+        "count": 0,
+        "pids": []
+      },
+      {
+        "stage": "browser",
+        "count": 0,
+        "pids": []
+      }
+    ]
+  },
+  "nativeOwnerRetention": {
+    "passed": true,
+    "scope": "Actual native packaged backend, embedded-xlang3 SQLite and current thin WorkspaceBackend adapter. VS Code storage/configuration are in-memory fixtures; model-free synthetic user message only. No installed/rendered acceptance or runtime migration.",
+    "baseRevision": "42142936c3a2ece082c51336c953a0834c6eb8ee",
+    "sourceMapSha256": "39c8f9a49030193ed98f2a17a0896e2a7c0241bff4f3b7e5bc36d176d73f6308",
+    "oldRuntimeRevision": "5d48bdd72713dcc23d5a1b15a0a08d3e3b7b1fd2",
+    "desiredRuntimeRevision": "c42a5c4000678c22c8eb0ae260545d79ff8f6354",
+    "oldRuntimeManifestSha256": "c387aa2e501cd7b16f4e0062a597005570aefab647c0c3eb53e0c46083055d75",
+    "desiredRuntimeManifestSha256": "097c169d172c591f89ccf13c88e3488d01d956e5148e7e94639003debff3d360",
+    "sourceBytesUnchanged": true,
+    "ownerPid": 26576,
+    "nativeLaunches": 1,
+    "sameAuthenticatedOrigin": true,
+    "sameDatabaseDirectory": true,
+    "sameWorkspaceAuthority": true,
+    "sameSavedRecords": true,
+    "persistedOwnerRecordUnchanged": true,
+    "hostReloadReconnected": true,
+    "settingsRemainPending": true,
+    "providerRequests": 0,
+    "inferenceRuns": 0,
+    "providerKeysAccessed": false,
+    "cpythonExecuted": false,
+    "recordsSha256": "6787fd7e1a7ebdfa072f909e08514be6494b819219cb2fcb6f54c74fe2504561",
+    "fullCleanupReceiptAccepted": false,
+    "cleanup": {
+      "ownedFixtureProcessStopped": false,
+      "emptyOwnedWorkspaceRemoved": true,
+      "databaseEvidencePreserved": true,
+      "normalProfileUntouched": true
+    },
+    "cleanupObservation": {
+      "scope": "Independent later read-only process and filesystem observation; does not replace the original false receipt or fabricate an exit event.",
+      "ownedProcesses": {
+        "count": 0,
+        "pids": []
+      },
+      "ownedWorkspaceAbsent": true,
+      "originalCleanupFlag": false,
+      "correctedReceiptRunPending": true,
+      "normalProfileUntouched": true,
+      "observedAt": "2026-10-09T07:48:06.054Z"
+    },
+    "fileHashes": {
+      "cleanup-observation.json": "7a3dd695f3864fae8a0624bd9a7d2d5449af683a831828ed2e0f33a08a16874d",
+      "cleanup.json": "81063be958d40b7c11c665363771f83e8c2cb087854152e666ea66e3e2f5dd83",
+      "guard.jsonl": "b98b234b4ae3209f435a9a140a3e634e7f302e34519cd07003f5c72c3746502b",
+      "native-startup.log": "646998af7d2927eaf76930b9d4fea77cfc2993020bea2cde7d0506ca0643ad32",
+      "records.json": "6787fd7e1a7ebdfa072f909e08514be6494b819219cb2fcb6f54c74fe2504561",
+      "result.json": "cb74f433bb8ddce343c255ed7473a60ad0b82592bfbb2800fcd4ebbed82dfd98"
+    },
+    "guards": [
+      {
+        "stage": "preflight",
+        "count": 0,
+        "pids": []
+      },
+      {
+        "stage": "native-owner-start",
+        "count": 0,
+        "pids": []
+      }
+    ]
+  },
+  "behavior": [
+    "Retain the existing origin, database and native workspace authority across package/settings changes and host reload.",
+    "Disclose pending backend changes while keeping saved history available; capability negotiation stays bound to the actual older owner.",
+    "Fail explicitly on unknown/invalid/unreachable owner, missing authentication, altered authority or unsafe storage instead of creating an empty competing database.",
+    "Retain the latest stored generation without falling back to an older profile; do not evict existing records at the 128-owner limit."
+  ],
+  "retainedHarnessFailures": [
+    {
+      "attempt": "initial",
+      "nativeReady": false,
+      "originalDiagnosticCaptured": false,
+      "scope": "The launcher reported native startup failure and the owned fixture process was observed stopped. Original stdout/stderr were discarded by the host spawn adapter; no more specific cause is asserted.",
+      "fileHashes": {
+        "cleanup.json": "d0b35e99df98028191468b8a377520c333d1bbcf18f964fb44b50fd4475997ef",
+        "guard.jsonl": "b98b234b4ae3209f435a9a140a3e634e7f302e34519cd07003f5c72c3746502b"
+      }
+    },
+    {
+      "attempt": "diagnostic retry",
+      "nativeReady": false,
+      "cause": "The disposable workspace was under .agentflow, which Native correctly rejects as private configuration. The fixture was moved under TestProj without changing product behavior.",
+      "fileHashes": {
+        "cleanup.json": "d0b35e99df98028191468b8a377520c333d1bbcf18f964fb44b50fd4475997ef",
+        "failure.json": "1b869311b274c7691478b00efe35293c309c85ee013828cf3829666ab21cbf71",
+        "guard.jsonl": "b98b234b4ae3209f435a9a140a3e634e7f302e34519cd07003f5c72c3746502b",
+        "native-startup.log": "724748ce17bd834cce6b36bac5fb5a67d696569616e3edc2d002c6af2096a3e7"
+      }
+    },
+    {
+      "attempt": "cleanup interrupted",
+      "terminalSuccess": false,
+      "cause": "Awaiting the owned child exit after unref did not keep Node alive. The native comparison records exist, but no completed result was published. Cleanup independently observed no owned native process and removed only the verified empty fixture; the helper now refs its owned child before observing exit.",
+      "fileHashes": {
+        "cleanup-recovery.json": "785902c05045dc3a212932d9fc8f65150d7c21c46898ec09b6b8d6f91a46eda8",
+        "guard.jsonl": "b98b234b4ae3209f435a9a140a3e634e7f302e34519cd07003f5c72c3746502b",
+        "native-startup.log": "28c2494e236cd21e828f0857076bc39eb035e6ab02302c35658d66b9609a24d2",
+        "records.json": "389b1743bc363b46caea8104e2b3b711ccf6b406e314ad93ea003918e982704f"
+      }
+    },
+    {
+      "attempt": "signal-exit receipt correction deferred",
+      "nativeExecuted": false,
+      "cause": "The completed comparison helper used exitCode != null for its stop flag, which is false for a signal exit despite observing the exit promise. The corrected helper records the actual exit event; its fresh preflight deferred on benchmark PID 32512. No corrected cleanup receipt is claimed.",
+      "guards": [
+        {
+          "stage": "preflight",
+          "count": 1,
+          "pids": [
+            32512
+          ]
+        }
+      ],
+      "fileHashes": {
+        "guard.jsonl": "6f6b6ab237f9d29fd1857d128be0b16f2018d30fdc6fa7fc959a476b9d7e5788"
+      }
+    }
+  ],
+  "earlierScope": {
+    "scope": "A complete earlier 188/38 view gate and native-owner comparisons passed before the final malformed-registry/capacity changes. Their cleanup flag has the same signal-exit bookkeeping defect. They are separate from the final gate above.",
+    "viewFileHashes": {
+      "browser.log": "9c5ce39523b4710ed59f6c0a75e4e6ca6d750a1ac80583fc6369ca33572af6ae",
+      "build.log": "668ab32686b6f56d126a0a3747a07a44159a388f2ef39bde1659d6d58864a7ee",
+      "extension.log": "2041ca615a1ac3906ad54eb6e2b68b584cc497a7f2c44071cbd79e98377ca700",
+      "gate.json": "28ee35b0988ba25efa30e185f9d8b24571532477e899e803bc519bf12519ec63",
+      "guard.jsonl": "e43bc06d3b4bad36aa56aca08b55a0ea3b78ee222b6c0ef33f801fe4467dc4cb",
+      "source-after.json": "586cb620244dc7bdf4a88faa58e5fe388b7360023c2f19f23c3b0aa9f0067e2f",
+      "source-before.json": "586cb620244dc7bdf4a88faa58e5fe388b7360023c2f19f23c3b0aa9f0067e2f"
+    },
+    "nativeFileHashes": {
+      "cleanup.json": "81063be958d40b7c11c665363771f83e8c2cb087854152e666ea66e3e2f5dd83",
+      "guard.jsonl": "b98b234b4ae3209f435a9a140a3e634e7f302e34519cd07003f5c72c3746502b",
+      "native-startup.log": "f9b9c6b33107e683be218a192a11738e072f181aca0a8d672869fddd0817241d",
+      "records.json": "047c870765abb5463a8b82d04e49d909d9d2c9ce15244dc1ba87edf6fa7a5db2",
+      "result.json": "074a1947405b605069982789374e0f98bf426c76c8f4c768b6ff1134c254dc1b"
+    }
+  },
+  "remaining": [
+    "Fresh corrected cleanup-receipt acceptance after the separate benchmark clears.",
+    "Native atomic quiescence, durable retirement and same-database generation migration.",
+    "Immutable runtime deployment outside workspaces and loaded generation files.",
+    "Hosted packaging and actual installed/rendered owner-retention acceptance for this source.",
+    "Legacy owner recovery/operator shutdown path, cross-host/connection profiles and full coding parity."
+  ]
+}

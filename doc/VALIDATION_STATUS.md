@@ -1,5 +1,20 @@
 # Current native validation
 
+The latest owner-retention source passed all **189 extension and 38 browser
+contracts locally**, with 42 inputs frozen and generated asset hashes retained. A package or
+machine-setting change keeps the authenticated existing workspace backend and
+reports pending changes; missing/unsafe/changed owners fail explicitly without a
+replacement database. Existing owner records are not evicted at the 128 limit.
+A separate actual packaged native/embedded-xlang3 SQLite API comparison retained
+one process, origin, database and exact saved records across a package change and
+adapter host reload. It used model-free fixtures, not an installed editor. Its
+signal-exit cleanup flag is false due to a helper defect; the original receipt
+and later independent absent-process/workspace observation remain recorded.
+A fresh corrected receipt run deferred before execution on SDK benchmark PID
+32512. Hosted packaging, installed/rendered retention and native generation
+migration remain pending.
+[Owner-retention evidence](evidence/native-workspace-owner-continuity-local.json).
+
 The latest native CLI skill controls passed all **92 local native contracts in
 175.20 seconds**, with all 612 input hashes unchanged. Exact registered and passed
 test names match the complete CI manifest. Unicode Windows arguments/snapshots,
@@ -23,8 +38,8 @@ and window reload with the same saved run, response, model and actual metrics.
 The latest observation confirms that sidebar state and effective workspace.
 [Trusted-workspace acceptance](evidence/native-vscode-trusted-workspace.json).
 Rendered user skill controls and existing-profile upgrades remain incomplete:
-the launcher currently creates a separate database when runtime generation
-changes. [Required native handoff](native-runtime-handoff.md).
+the newer launcher retains the existing owner while the package change is
+pending. [Required native handoff](native-runtime-handoff.md).
 
 The paragraphs below retain their historical checkpoint scope; they do not
 supersede these current source, package or installed-preview boundaries.
