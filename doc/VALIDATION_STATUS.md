@@ -1,5 +1,17 @@
 # Current native validation
 
+The approval-based file-proposal source passed all **92 native contracts in
+178.43 seconds** and the complete **192 extension / 39 browser contracts**.
+Native health advertises its actual startup policy. New managed owners default
+to approval-required file creation/editing; explicit read-only settings and
+workspace trust still apply. Both views show the actual policy when advertised.
+The initial 19 view-fixture failures are retained alongside the corrected full
+gate. Native inputs remained frozen; the later fixture-only correction is
+covered by the final view gate. These are local source checks, not installed
+writing acceptance. The current normal-profile `TestProj` owner still runs its
+older read-only startup policy; preserving its history through an upgrade
+remains pending. [Policy evidence](evidence/native-file-proposal-policy-local.json).
+
 The latest owner-retention source passed all **189 extension and 38 browser
 contracts locally**, with 42 inputs frozen and generated asset hashes retained. A package or
 machine-setting change keeps the authenticated existing workspace backend and
@@ -11,8 +23,13 @@ adapter host reload. It used model-free fixtures, not an installed editor. Its
 signal-exit cleanup flag is false due to a helper defect; the original receipt
 and later independent absent-process/workspace observation remain recorded.
 A fresh corrected receipt run deferred before execution on SDK benchmark PID
-32512. Hosted packaging, installed/rendered retention and native generation
-migration remain pending.
+32512. A subsequent fresh run passed the real native/SQLite owner comparison
+and observed exit before exact owned cleanup; both earlier failures remain
+retained. [Corrected receipt](evidence/native-workspace-owner-continuity-cleanup-corrected.json).
+The exact `a02cdb0` hosted native workflow subsequently completed successfully,
+including packaging; independent verification of its archives and
+installed/rendered retention remain pending. Native generation migration
+remains unimplemented.
 [Owner-retention evidence](evidence/native-workspace-owner-continuity-local.json).
 
 The latest native CLI skill controls passed all **92 local native contracts in

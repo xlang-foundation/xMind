@@ -10,7 +10,8 @@ const folder=(name,fsPath)=>({name,uri:{scheme:'file',authority:'',fsPath,toStri
 function harness(options={}){
   const state=new Map(),globalState=new Map(),secrets=new Map(),launches=[],directories=[],fetches=[],picks=[];
   const settings={providerConfigPath:'D:\\Trusted\\providers.yaml',workspaceEdits:false,...options.settings};
-  const vscode={env:{remoteName:options.remote},workspace:{isTrusted:options.trusted!==false,workspaceFolders:options.folders||[folder('TestProj','D:\\CantorAI2026\\TestProj')],getConfiguration:()=>({inspect:key=>({globalValue:settings[key],workspaceValue:'untrusted-project-value'})})},window:{showQuickPick:async items=>{picks.push(items);return items[options.pick??0];}}};
+  const defaults=require('../package.json').contributes.configuration.properties;
+  const vscode={env:{remoteName:options.remote},workspace:{isTrusted:options.trusted!==false,workspaceFolders:options.folders||[folder('TestProj','D:\\CantorAI2026\\TestProj')],getConfiguration:()=>({inspect:key=>({globalValue:settings[key],defaultValue:defaults['agentflow.'+key]?.default,workspaceValue:'untrusted-project-value'})})},window:{showQuickPick:async items=>{picks.push(items);return items[options.pick??0];}}};
   const store=map=>({get:key=>map.get(key),update:async(key,value)=>map.set(key,value)});
   const context={workspaceState:store(state),globalState:store(globalState),secrets:{get:async key=>secrets.get(key),store:async(key,value)=>secrets.set(key,value)}};
   let time=0,nextPort=19000;
@@ -23,10 +24,15 @@ function harness(options={}){
     const port=Number(new URL(url).port),launch=launches.find(value=>value.args[value.args.indexOf('--port')+1]===String(port));
     return {ok:true,json:async()=>({configured:true,root:launch?.args[launch.args.indexOf('--workspace')+1]||'D:\\CantorAI2026\\TestProj',workspace_id:'windows-local-file-v1:1:'+port,authority_id:'b'.repeat(32)})};
   }};
-  const resolver=async(ctx,host,config)=>{assert.equal(config.providerConfigPath,settings.providerConfigPath);assert.equal(config.runtimeDirectory,undefined);return runtime;};
+  const resolver=async(ctx,host,config)=>{assert.equal(config.providerConfigPath,settings.providerConfigPath??defaults['agentflow.providerConfigPath']?.default);assert.equal(config.runtimeDirectory,settings.runtimeDirectory??defaults['agentflow.runtimeDirectory']?.default);return runtime;};
   const manager=new WorkspaceBackend(vscode,context,resolver,deps);
   return {manager,vscode,context,deps,runtime,launches,fetches,picks,directories,secrets,state,globalState,settings,resolver};
 }
+test('managed coding default passes approval-based file proposals and preserves explicit read-only and trust boundaries',async()=>{
+ const h=harness({settings:{workspaceEdits:undefined}});await h.manager.connect();const args=h.launches[0].args;assert.equal(args.filter(v=>v==='--workspace-edits').length,1);assert.equal(args[args.indexOf('--workspace-edits')+1],'approved');
+ const readonly=harness({settings:{workspaceEdits:false}});await readonly.manager.connect();assert.ok(!readonly.launches[0].args.includes('--workspace-edits'));const untrusted=harness({trusted:false,settings:{workspaceEdits:undefined}});await assert.rejects(untrusted.manager.connect(),/Trust/);assert.equal(untrusted.launches.length,0);
+});
+
 test('single opened folder starts isolated Native with host cwd/environment and one explicit config path',async()=>{
   const h=harness();const active=await h.manager.connect(),launch=h.launches[0];
   assert.equal(h.picks.length,0);assert.equal(active.metadata.root,'D:\\CantorAI2026\\TestProj');

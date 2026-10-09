@@ -26,6 +26,7 @@ async function start(mode,extra){exited=false;const log=await fs.open(path.join(
 try{
  for(const [mode,extra]of [['profile',[]],['platform',['--model','synthetic-catalogue-model','--model-endpoint','http://127.0.0.1:1/chat/completions','--model-tools','supported']]]){
   const origin=await start(mode,extra),headers={Authorization:'Bearer '+token},client=new BackendClient(origin,()=>token),binding=await client.workspace();assert.equal(binding.configured,true);
+  assert.equal((await client.health()).file_edit_proposals,false,'A configured model must not imply native file-effect permission');
   assert.equal((await fetch(origin+'/v1/workspace/skills')).status,401);
   const catalogue=await client.skills();assert.equal(catalogue.workspace_id,binding.workspace_id);assert.equal(catalogue.authority_id,binding.authority_id);assert.equal(catalogue.skills.length,2);
   assert.equal(catalogue.skills.find(s=>s.id==='explicit').autoinvoke,false);assert.equal(catalogue.skills.find(s=>s.id==='disabled').model_invocable,false);assert.ok(!JSON.stringify(catalogue).includes('Synthetic body'));assert.ok(!JSON.stringify(catalogue).includes('Synthetic disabled body'));assert.ok(catalogue.skills.every(s=>!Object.hasOwn(s,'content')&&!Object.hasOwn(s,'body')));
@@ -78,6 +79,9 @@ try{
   await fs.unlink(unicodeGuide);
   assert.deepEqual(await client.runs(session.id),[],'Manual selection must not simulate inference or admit runs');
   await stop();
+ }
+ for(const [mode,extra]of [['profile-approved',['--workspace-edits','approved']],['platform-approved',['--workspace-edits','approved','--model','synthetic-catalogue-model','--model-endpoint','http://127.0.0.1:1/chat/completions','--model-tools','supported']]]){
+  const origin=await start(mode,extra),client=new BackendClient(origin,()=>token);assert.equal((await client.health()).file_edit_proposals,true,'Native must report its actual captured policy in both execution platforms');assert.deepEqual(await client.sessions(),[],'Policy observation must not admit inference or a conversation');await stop();
  }
  // No configured root must fail explicitly rather than choosing a directory.
  exited=false;const noRoot=spawn(server,['--db',path.join(root,'unbound.sqlite'),'--modules',modules,'--stdlib',stdlib,'--port','0'],{env,windowsHide:true,stdio:['ignore','pipe','pipe']});child=noRoot;exitPromise=new Promise((yes,no)=>{noRoot.once('error',no);noRoot.once('exit',()=>{exited=true;yes();});});

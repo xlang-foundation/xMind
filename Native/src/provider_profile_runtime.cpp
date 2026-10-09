@@ -368,6 +368,7 @@ Run ProviderProfileRuntime::submit_graph_workspace(std::string id,std::string se
 std::vector<std::string> ProviderProfileRuntime::models()const{std::lock_guard lock(impl_->mutex);return impl_->service->models();}
 void ProviderProfileRuntime::cancel(const std::string& id){std::lock_guard lock(impl_->mutex);impl_->service->cancel(id);}
 bool ProviderProfileRuntime::healthy()const{std::lock_guard lock(impl_->mutex);return impl_->service->healthy();}
+bool ProviderProfileRuntime::supports_file_edit_proposals()const{std::lock_guard lock(impl_->mutex);return impl_->workspace_binding&&impl_->base.approved_edits;}
 bool ProviderProfileRuntime::supports_delegation()const{std::lock_guard lock(impl_->mutex);return impl_->service->supports_delegation();}
 bool ProviderProfileRuntime::supports_dynamic_planning()const{std::lock_guard lock(impl_->mutex);return impl_->service->supports_dynamic_planning();}
 bool ProviderProfileRuntime::supports_context()const{std::lock_guard lock(impl_->mutex);return impl_->service->supports_context();}

@@ -105,6 +105,7 @@ async function stop() {
 try {
   await mkdir(workspace);await Promise.all(['allowed','denied','stale','cancelled','interrupted'].map(name=>writeFile(join(workspace,`${name}.txt`),'original\n')));
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));await start();
+  assert.equal((await api('/v1/health')).file_edit_proposals,true,'Advertised native permission must match the actual create/edit tool catalogue and approval execution below');
   assert.deepEqual(cli('models'),{default_model:'synthetic-edit-protocol-model',models:[{id:'synthetic-edit-protocol-model'},{id:'synthetic-edit-alternate'}]});
   for(const [name,decision] of [['allowed','allow'],['denied','deny']]){
     const records=await approvedChat(name,decision),proposal=records.find(record=>record.type==='operation_review').operation;

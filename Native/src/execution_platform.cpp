@@ -8,6 +8,7 @@ namespace agentflow {
 namespace {std::string workspace_nonce(){std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)value<<std::setw(8)<<random();return value.str();}}
 ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings settings,std::size_t workers,std::size_t capacity):store_(store) {
     if(settings.workspace){workspace_binding_=std::make_unique<WorkspaceTools>(*settings.workspace);settings.workspace=workspace_binding_->root_path();workspace_authority_=workspace_nonce();}
+    file_edit_proposals_=workspace_binding_&&settings.approved_edits;
     if(!settings.provider.model.empty())agents_=std::make_unique<AgentService>(store,settings,workers,capacity);
     graphs_=std::make_unique<GraphService>(store,std::move(settings),std::min<std::size_t>(workers,8),capacity);
 }

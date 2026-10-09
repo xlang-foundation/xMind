@@ -33,8 +33,9 @@ also carry those identities for an atomic backend check.
 Closing the view, deactivating the extension or switching folders leaves ready
 backends and their running or paused work alive. Returning to a retained
 authenticated generation reconnects observation. A changed machine-level
-launch configuration creates a separate generation without stopping the old
-owner. Only a newly spawned backend that fails startup before authenticated
+launch configuration or package retains the authenticated saved owner and
+reports pending backend changes. Its actual capabilities remain effective until
+an explicit migration preserves its profile. Only a newly spawned backend that fails startup before authenticated
 readiness is eligible for startup cleanup.
 
 ## Machine configuration and packaging
@@ -48,7 +49,7 @@ paths are read from machine/global settings, never selected-project settings.
 | `agentflow.runtimeDirectory` | Optional absolute directory containing a verified `native-runtime-manifest.json`; otherwise use the extension's bundled runtime. |
 | `agentflow.stdlibSource` | Optional trusted pure standard-library source directory for development; otherwise use bundled source. |
 | `agentflow.providerConfigPath` | The **one** explicit absolute provider YAML path imported by Native. The extension does not read its contents or search opened projects for configuration. |
-| `agentflow.workspaceEdits` | Enables native edit proposals in newly started managed backends; each effect retains its separate native approval. Default `false`. |
+| `agentflow.workspaceEdits` | Default `true` for newly started managed backends: file creation/edit proposals require native approval before writing. Explicit `false` starts a read-only owner. Existing owners retain their startup policy until migrated. |
 | `agentflow.backendUrl` | External mode's explicitly configured loopback origin. |
 
 An unset provider path starts Native unconfigured so Settings can enroll a
@@ -79,6 +80,19 @@ sanitized Markdown/code and actual per-response provider usage/timing; absent
 metrics remain unavailable. Human questions, context controls and approvals
 retain their native ownership and revision checks. Comparing an edit does not
 grant it, and uncertain effects offer no retry.
+
+The footer displays the backend's actual file policy when Native advertises it:
+**File changes require approval** or **Read only: file changes disabled**.
+Changing the setting does not enable writing in an already-running owner.
+Older backends do not advertise this field, so the view leaves the indicator
+hidden rather than assuming their permissions.
+
+The current policy source passed 92 native contracts and the complete 192
+extension / 39 browser synthetic suites. The running normal-profile `TestProj`
+owner still uses its older read-only startup policy. Writing from that installed
+window and a history-preserving upgrade remain pending.
+[Policy evidence](../../doc/evidence/native-file-proposal-policy-local.json),
+[runtime handoff](../../doc/native-runtime-handoff.md).
 
 **Open Browser View (Copy Connection Token)** opens the selected backend's
 browser access adapter and copies its connection token for Connect. Closing

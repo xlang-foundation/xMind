@@ -54,7 +54,7 @@ async function activate(context) {
   const runStateKey = 'xmind.observedRun';
   const graphStateKey = 'xmind.workflow';
 
-  const post = message => panel?.webview.postMessage(message);
+  const post = message => panel?.webview.postMessage(message.type==='capabilities'?{...message,fileEditProposals:client?health?.file_edit_proposals:undefined}:message);
   async function readSkills(){
     if(!panel||!client)return;const target=client,version=generation;
     if(health?.skill_controls!==true){if(skillController)skillController.invalidate();return;}

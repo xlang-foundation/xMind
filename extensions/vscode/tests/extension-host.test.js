@@ -136,6 +136,10 @@ function harness(options={}) {
     pauseHistory(promise) {pendingHistory=promise;}};
 }
 
+test('sidebar reports actual native file-proposal policy and clears it when switching to a legacy backend',async()=>{
+ const h=harness({health:{agent_execution:true,file_edit_proposals:false}});await h.commands.get('agentflow.open')();const view=h.views[0];try{view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='capabilities'&&m.fileEditProposals===false));h.configureBackend({agent_execution:true,file_edit_proposals:true},{models:[{id:'synthetic-host-default'}],default_model:'synthetic-host-default'});view.receive({type:'refresh'});await until(()=>view.posted.findLast(m=>m.type==='capabilities')?.fileEditProposals===true);h.configureBackend({agent_execution:true},{models:[{id:'synthetic-host-default'}],default_model:'synthetic-host-default'});view.receive({type:'refresh'});await until(()=>view.posted.findLast(m=>m.type==='capabilities')?.fileEditProposals===undefined);assert.ok(!h.requests.includes('/v1/runs'));assert.ok(!h.requests.some(p=>p.endsWith('/decision')));}finally{view.close();}
+});
+
 test('pending backend changes are disclosed without replacing the saved conversation or replaying its run',async()=>{
  const h=harness({backendChangePending:true});await h.commands.get('agentflow.open')();const view=h.views[0];
  try{view.receive({type:'ready'});await until(()=>view.posted.findLast(m=>m.type==='status')?.text==='completed');const workspace=view.posted.findLast(m=>m.type==='workspace');assert.equal(workspace.backendChangePending,true);assert.equal(workspace.root,'D:\\TestProj');assert.ok(view.posted.some(m=>m.type==='history'&&m.history.some(row=>row.data?.content==='Persisted synthetic response')));assert.ok(!h.requests.includes('/v1/runs'));assert.ok(!h.requests.some(p=>p.endsWith('/cancel')));assert.equal(h.backendOwners.length,1);assert.ok(!JSON.stringify(workspace).includes(h.token));}finally{view.close();}

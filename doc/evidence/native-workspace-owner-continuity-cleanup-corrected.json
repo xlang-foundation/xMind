@@ -1,0 +1,63 @@
+{
+  "sourceRevision": "a02cdb08c9749cca1877bd133a7354fd1c65a345",
+  "scope": "Corrected fixture cleanup and the same actual model-free packaged native owner retention comparison. VS Code storage APIs are fixtures; no installed/rendered acceptance or runtime migration.",
+  "result": {
+    "passed": true,
+    "scope": "Actual native packaged backend, embedded-xlang3 SQLite and current thin WorkspaceBackend adapter. VS Code storage/configuration are in-memory fixtures; model-free synthetic user message only. No installed/rendered acceptance or runtime migration.",
+    "baseRevision": "42142936c3a2ece082c51336c953a0834c6eb8ee",
+    "sourceMapSha256": "39c8f9a49030193ed98f2a17a0896e2a7c0241bff4f3b7e5bc36d176d73f6308",
+    "oldRuntimeRevision": "5d48bdd72713dcc23d5a1b15a0a08d3e3b7b1fd2",
+    "desiredRuntimeRevision": "c42a5c4000678c22c8eb0ae260545d79ff8f6354",
+    "oldRuntimeManifestSha256": "c387aa2e501cd7b16f4e0062a597005570aefab647c0c3eb53e0c46083055d75",
+    "desiredRuntimeManifestSha256": "097c169d172c591f89ccf13c88e3488d01d956e5148e7e94639003debff3d360",
+    "sourceBytesUnchanged": true,
+    "ownerPid": 36668,
+    "nativeLaunches": 1,
+    "sameAuthenticatedOrigin": true,
+    "sameDatabaseDirectory": true,
+    "sameWorkspaceAuthority": true,
+    "sameSavedRecords": true,
+    "persistedOwnerRecordUnchanged": true,
+    "hostReloadReconnected": true,
+    "settingsRemainPending": true,
+    "providerRequests": 0,
+    "inferenceRuns": 0,
+    "providerKeysAccessed": false,
+    "cpythonExecuted": false,
+    "recordsSha256": "c372a48826ea28a41001f4f0a37e330d5c83ece2fdcc17d80820f32a903a4344"
+  },
+  "cleanup": {
+    "ownedFixtureProcessStopped": true,
+    "ownedProcessOutcome": {
+      "code": null,
+      "signal": "SIGTERM"
+    },
+    "ownedProcessPid": 36668,
+    "emptyOwnedWorkspaceRemoved": true,
+    "databaseEvidencePreserved": true,
+    "normalProfileUntouched": true
+  },
+  "guards": [
+    {
+      "stage": "preflight",
+      "count": 0,
+      "pids": []
+    },
+    {
+      "stage": "native-owner-start",
+      "count": 0,
+      "pids": []
+    }
+  ],
+  "sourceMapSha256": "39c8f9a49030193ed98f2a17a0896e2a7c0241bff4f3b7e5bc36d176d73f6308",
+  "fileHashes": {
+    "result.json": "b09306792cd39c6f5b952d0263e892e3c3b4771e6b485ff4eced49221d9ed613",
+    "cleanup.json": "bef7d0d639166bb9b76e90bb683a242e2a4c4945f4356881e3bd09466d9180a9",
+    "records.json": "c372a48826ea28a41001f4f0a37e330d5c83ece2fdcc17d80820f32a903a4344",
+    "guard.jsonl": "b98b234b4ae3209f435a9a140a3e634e7f302e34519cd07003f5c72c3746502b",
+    "native-startup.log": "8e34d6313acb167f0e3fa5c33867f32ff7cab1fec4b17f6621415b2c456fd39d"
+  },
+  "retainedPriorEvidence": "native-workspace-owner-continuity-local.json",
+  "cpythonExecuted": false,
+  "providerKeysAccessed": false
+}

@@ -18,8 +18,21 @@ message are test fixtures; no provider calls, installed editor or migration were
 tested. Its original cleanup receipt incorrectly reports a stopped signal-exit
 process as false. The receipt is preserved with a later independent observation
 of the absent process/workspace. The corrected helper's fresh execution deferred
-at preflight while a separate SDK benchmark was active.
+at preflight while a separate SDK benchmark was active. A subsequent fresh
+corrected run passed the same actual native/SQLite comparison and observed
+the child exit before completing exact owned-workspace cleanup. The original
+failed flag and benchmark deferral remain retained.
 [Exact verification and retained failures](evidence/native-workspace-owner-continuity-local.json).
+[Corrected cleanup execution](evidence/native-workspace-owner-continuity-cleanup-corrected.json).
+
+The newer managed launch policy enables approval-based file proposals by
+default for newly started owners and advertises the actual immutable policy
+through native health. This does not change an existing owner's startup policy.
+The running `TestProj` owner was started without approved edits and remains
+read-only until an explicit migration; creating an empty replacement profile
+is not an acceptable shortcut. The policy source passed all 92 native and
+192/39 view contracts locally; installed writing acceptance remains pending.
+[Coding-policy evidence](evidence/native-file-proposal-policy-local.json).
 
 An upgrade must preserve the existing local profile's SQLite database, credentials,
 sessions, transcript, events, provider configuration and completed run metadata.

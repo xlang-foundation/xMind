@@ -30,6 +30,7 @@ public:
     virtual Run submit(std::string id,std::string session_id,std::string prompt)=0;
     virtual std::vector<std::string> models() const {return {};}
     virtual ExecutionWorkspaceMetadata execution_workspace()const{return {};}
+    virtual bool supports_file_edit_proposals()const{return false;}
     virtual bool supports_skill_catalogue()const{return false;}
     virtual bool supports_session_skills()const{return false;}
     virtual WorkspaceSkillCatalogue workspace_skills()const{throw RunUnavailable("Workspace skill inspection is unavailable");}

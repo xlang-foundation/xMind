@@ -37,6 +37,7 @@ public:
     void cancel(const std::string& id) override;
     bool healthy() const override;
     bool available() const override;
+    bool supports_file_edit_proposals()const override{return file_edit_proposals_;}
     bool idle() const;
     std::vector<GraphExecutionMetadata> graphs() const override;
     Run submit_graph(std::string id,std::string session,std::string graph,std::int64_t revision,
@@ -47,6 +48,7 @@ public:
     GraphContextMetadata graph_context(const std::string& root)const override;
 private:
     PersistenceService& store_;
+    bool file_edit_proposals_=false;
     std::unique_ptr<WorkspaceTools> workspace_binding_;
     std::string workspace_authority_;
     std::unique_ptr<AgentService> agents_;
