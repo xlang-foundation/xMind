@@ -1,5 +1,18 @@
 # VS Code opened-folder checkpoint
 
+## Current live development host — 2026-10-10
+
+The live preview launchers no longer disable VS Code workspace trust. A fresh
+normal development host opened `D:\CantorAI2026\TestProj`; the actual extension
+completed `open()` and wrote its `secondarySidebar` readiness record after
+attaching to the native backend launched for the same root. The exact native
+executable SHA-256 was
+`6C64FAD7909F755A8610D1B34F2AA6158088D456CD10D62F98DB71EB995BE858`.
+Agent execution was unconfigured and no provider request was made. The shared
+VS Code suite passed **262/262**. A stale Windows UI window handle prevented
+screenshot inspection, so this does not claim visual composition or a
+model-backed coding action. [Exact live evidence](evidence/vscode-live-opened-workspace-20261010.json).
+
 The extension defaults to a managed local backend for the folder supplied by the
 actual VS Code workspace API. Opening one local folder is sufficient; a
 `.code-workspace` file and a manually entered server token are unnecessary.

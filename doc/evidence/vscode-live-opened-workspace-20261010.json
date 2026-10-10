@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-10",
+  "sourceRevision": "7f4fa79",
+  "scope": "Model-free live VS Code development host and backend attachment; visual screenshot acceptance was not completed.",
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "workspaceTrust": {
+    "liveLaunchersDisableTrust": false,
+    "extensionOpenedTrustedWorkspace": true
+  },
+  "backend": {
+    "origin": "http://127.0.0.1:57031",
+    "pid": 37600,
+    "executableSha256": "6C64FAD7909F755A8610D1B34F2AA6158088D456CD10D62F98DB71EB995BE858",
+    "commandWorkspace": "D:\\CantorAI2026\\TestProj",
+    "agentExecutionConfigured": false,
+    "providerRequests": 0
+  },
+  "extensionHost": {
+    "preview": "live-vscode-openroot",
+    "debugPort": 57238,
+    "opened": true,
+    "location": "secondarySidebar",
+    "readyFile": ".agentflow/live-vscode-openroot/opened-c8548eabd4364f759fa2869118b6e688.json",
+    "meaning": "The real extension open() call completed against this backend and opened the actual secondary-sidebar view. No model inference was performed."
+  },
+  "validation": {
+    "extensionTests": "262 passed, 0 failed",
+    "launcherPowerShellParse": "passed",
+    "limitations": [
+      "The Windows UI automation returned the same stale VS Code window-handle error twice.",
+      "No screenshot-based visual review or model-backed editor task is claimed."
+    ]
+  }
+}
