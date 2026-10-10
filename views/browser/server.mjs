@@ -54,7 +54,8 @@ export async function createBrowserServer({backend,assetRoot}){
    }
    if(url.pathname==='/ui/workspaces'||url.pathname==='/ui/workspaces/select'){
     const selecting=url.pathname.endsWith('/select');
-    if(url.search||request.headers.origin!==viewOrigin||request.method!==(selecting?'POST':'GET')||(selecting&&request.headers['content-type']!=='application/json')){reply(403,{detail:'Same-origin workspace access required'});return;}
+    const originMatches=request.headers.origin===viewOrigin,originAbsent=request.headers.origin===undefined;
+    if(url.search||(selecting?!originMatches:!originAbsent&&!originMatches)||request.method!==(selecting?'POST':'GET')||(selecting&&request.headers['content-type']!=='application/json')){reply(403,{detail:'Same-origin workspace access required'});return;}
     const credential=sessionFor(request);if(!credential){reply(401,{detail:'Connect to a native xMind Server first'});return;}
     let body={};if(selecting){let raw='';for await(const chunk of request){raw+=chunk.toString('utf8');if(Buffer.byteLength(raw)>4096){reply(413,{detail:'Workspace selection exceeds limits'});return;}}try{body=JSON.parse(raw);}catch{reply(400,{detail:'Invalid workspace selection'});return;}if(!body||Array.isArray(body)||Object.keys(body).length!==1||typeof body.workspace_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(body.workspace_id)){reply(400,{detail:'Select a workspace from the native catalogue'});return;}}
     const selected=await nativeJson('/v1/workspaces'+(selecting?'/select':''),selecting?'POST': 'GET',viewHeaders(credential),selecting?body:undefined);

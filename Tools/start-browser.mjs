@@ -1,23 +1,87 @@
-// Dedicated local view/runtime preview. User VS Code profiles are not touched.
-import {spawn} from 'node:child_process';import {mkdir,readFile,writeFile,copyFile,readdir,open,stat} from 'node:fs/promises';import {randomBytes,randomUUID} from 'node:crypto';
-import {resolve,join} from 'node:path';import {fileURLToPath} from 'node:url';import {createBrowserServer} from '../views/browser/server.mjs';
-const root=fileURLToPath(new URL('../',import.meta.url)),options=new Map();for(let i=2;i<process.argv.length;i+=2){if(!['--backend','--state','--assets','--server','--modules','--stdlib','--port','--provider-config'].includes(process.argv[i])||!process.argv[i+1]||options.has(process.argv[i]))throw new Error('Invalid browser launcher arguments');options.set(process.argv[i],process.argv[i+1]);}
-if(options.has('--backend')&&options.has('--provider-config'))throw new Error('Provider YAML is imported by a newly launched native backend');
-const state=resolve(options.get('--state')||join(root,'.agentflow/browser-ui')),assets=resolve(options.get('--assets')||join(root,'.agentflow/browser-assets'));await mkdir(state,{recursive:true});let origin=options.get('--backend'),pid;
-if(!origin){
- const native=resolve(options.get('--server')||join(root,'build/skill-state-native/Release/xmind.exe')),modules=resolve(options.get('--modules')||join(root,'../xlang3/build/Release/modules')),stdlib=resolve(options.get('--stdlib')||'C:/Python/Python314/Lib');
- const activePath=join(state,'active.json');let existing;try{existing=JSON.parse(await readFile(activePath,'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
- if(existing){const token=await readFile(join(state,'auth.token'),'utf8');try{const response=await fetch(existing.backend,{headers:{Authorization:'Bearer '+token},signal:AbortSignal.timeout(1500)});if(response.status===404){const health=await fetch(existing.backend+'/v1/health',{headers:{Authorization:'Bearer '+token},signal:AbortSignal.timeout(1500)});if(health.ok){origin=existing.backend;pid=existing.nativePid;}}}catch{}
-  if(!origin)throw new Error('Existing browser runtime is unavailable. Inspect its recorded native PID before restarting; the launcher will not replace its state automatically.');
- }
- if(!origin){
-  const token=randomBytes(32).toString('hex'),runtime=join(state,'runtime-'+randomUUID());await mkdir(join(runtime,'modules'),{recursive:true});for(const file of ['xmind.exe','xlang3_runtime.dll'])await copyFile(join(resolve(native,'..'),file),join(runtime,file));for(const file of await readdir(modules))if(file.endsWith('.dll'))await copyFile(join(modules,file),join(runtime,'modules',file));await writeFile(join(state,'auth.token'),token,{mode:0o600});
-  const stderr=await open(join(state,'native-error.log'),'a'),stdout=await open(join(state,'native.log'),'a');const env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
-  const args=['--db',join(state,'state.sqlite'),'--modules',join(runtime,'modules'),'--stdlib',stdlib,'--port','0','--workspace',root,'--model-tools','supported','--graphs-config',join(root,'doc/examples/read-repository-file.graphs.json')];
-  let providerConfig=options.get('--provider-config');
-  if(!providerConfig){const candidate=join(root,'.config/providers.yaml');try{if((await stat(candidate)).isFile())providerConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
-  if(providerConfig)args.push('--provider-config',resolve(providerConfig));
-  const child=spawn(join(runtime,'xmind.exe'),['serve',...args],{env,detached:true,windowsHide:true,stdio:['ignore','pipe',stderr.fd]});await stderr.close();pid=child.pid;let source='';origin=await new Promise((yes,no)=>{const timer=setTimeout(()=>no(new Error('Native browser runtime readiness timed out')),15000);child.once('error',error=>{clearTimeout(timer);no(error);});child.once('exit',code=>{clearTimeout(timer);no(new Error('Native browser runtime exited '+code));});child.stdout.on('data',bytes=>{stdout.write(bytes);source+=bytes;const match=/listening on (http:\/\/127\.0\.0\.1:\d+)/.exec(source);if(match){clearTimeout(timer);yes(match[1]);}});});child.unref();
- }
+// Start the profile-aware native local view and its loopback HTML adapter.
+// The browser connects to the same managed local profiles as the VS Code host.
+import {spawn} from 'node:child_process';
+import {mkdir,readFile,writeFile,lstat,realpath,stat} from 'node:fs/promises';
+import {createHash,randomBytes,randomUUID} from 'node:crypto';
+import {resolve,join,relative,isAbsolute} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createBrowserServer} from '../views/browser/server.mjs';
+import {verifyNativeRuntime} from '../extensions/vscode/native-runtime.js';
+
+const root=fileURLToPath(new URL('../',import.meta.url));
+const options=new Map();
+for(let i=2;i<process.argv.length;i+=2){
+  if(!['--backend','--state','--assets','--runtime','--workspace','--profile-root','--ready-root','--port','--provider-config'].includes(process.argv[i])||!process.argv[i+1]||options.has(process.argv[i]))throw new Error('Invalid browser launcher arguments');
+  options.set(process.argv[i],process.argv[i+1]);
 }
-const view=await createBrowserServer({backend:origin,assetRoot:assets}),url=await view.listen(Number(options.get('--port')||0))+'/ui/';await writeFile(join(state,'active.json'),JSON.stringify({url,backend:origin,nativePid:pid,viewPid:process.pid,assets,credentialFile:origin&&!options.has('--backend')?join(state,'auth.token'):undefined},null,2));console.log('xMind Browser ready at '+url);console.log('Native runtime '+origin+' · browser access token remains in the private launch-state directory.');
+if(options.has('--backend')&&['--runtime','--workspace','--profile-root','--ready-root','--provider-config'].some(name=>options.has(name)))throw new Error('--backend cannot be combined with native profile launch options');
+const env=process.env;
+const localAppData=env.LOCALAPPDATA||join(env.USERPROFILE||root,'AppData','Local');
+const state=resolve(options.get('--state')||join(localAppData,'xMind','BrowserView'));
+const assets=resolve(options.get('--assets')||join(root,'.agentflow','browser-assets'));
+const viewOrigin=options.get('--backend');
+const port=Number(options.get('--port')||60405);
+if(!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid browser view port');
+await mkdir(state,{recursive:true});
+
+let backend=viewOrigin,nativePid,tokenFile;
+if(!backend){
+  const runtime=resolve(options.get('--runtime')||join(root,'extensions','vscode','native-runtime'));
+  const verified=await verifyNativeRuntime(runtime);
+  const builtServer=join(root,'build','skill-state-native','Release','xmind.exe');
+  try{
+    const builtHash=createHash('sha256').update(await readFile(builtServer)).digest('hex');
+    if(verified.manifest.files['xmind.exe']!==builtHash)throw new Error('The selected verified runtime does not match the current native build. Package the current xmind.exe into a verified runtime and pass it with --runtime.');
+  }catch(error){if(error.code!=='ENOENT')throw error;}
+  const workspace=await realpath(resolve(options.get('--workspace')||root));
+  if(!(await stat(workspace)).isDirectory())throw new Error('The selected workspace is not a directory');
+  let profileRoot=resolve(options.get('--profile-root')||join(env.USERPROFILE||localAppData,'.xMind','p'));
+  try{profileRoot=await realpath(profileRoot);}catch(error){if(error.code!=='ENOENT')throw error;}
+  const readyRoot=resolve(options.get('--ready-root')||env.TEMP||join(localAppData,'Temp'));
+  await mkdir(readyRoot,{recursive:true});
+  const readyDirectory=join(readyRoot,'browser-view-'+randomUUID());
+  const readyFile=join(readyDirectory,'ready.json');
+  const token=randomBytes(32).toString('hex');
+  tokenFile=join(state,'auth.token');
+  await writeFile(tokenFile,token,{flag:'w',mode:0o600});
+  const runtimeRoot=verified.runtimeRoot;
+  const args=['view','--workspace',workspace,'--profile-root',profileRoot,'--ready-file',readyFile];
+  let providerConfig=options.get('--provider-config');
+  if(!providerConfig){const candidate=join(root,'.config','providers.yaml');try{if((await stat(candidate)).isFile())providerConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
+  if(providerConfig)args.push('--config',resolve(providerConfig));
+  const childEnv={...env,XMIND_VIEW_TOKEN:token};
+  for(const key of Object.keys(childEnv))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY'||key==='XMIND_AUTH_TOKEN')delete childEnv[key];
+  const child=spawn(join(runtimeRoot,'xmind.exe'),args,{cwd:workspace,env:childEnv,windowsHide:true,detached:true,stdio:['ignore','ignore','pipe']});
+  nativePid=child.pid;
+  child.unref();
+  let failed,nativeError='';
+  child.stderr.on('data',bytes=>{if(nativeError.length<8192)nativeError+=bytes.toString('utf8').slice(0,8192-nativeError.length);});
+  child.once('error',error=>{failed=error;});
+  child.once('exit',(code,signal)=>{failed=new Error(`Native view exited before readiness (${code??signal??'unknown'}).`);});
+  const deadline=Date.now()+60000;
+  let metadata;
+  while(Date.now()<deadline&&!metadata&&!failed){
+    try{
+      const info=await lstat(readyFile);
+      if(!info.isFile()||info.isSymbolicLink()||info.nlink!==1||info.size>16384)throw new Error('Invalid native view metadata file.');
+      metadata=JSON.parse(await readFile(readyFile,'utf8'));
+    }catch(error){
+      if(error.code!=='ENOENT'&&error.code!=='EACCES'&&error.code!=='EPERM'&&error.code!=='EBUSY'&&!(error instanceof SyntaxError))throw error;
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+  }
+  if(failed||!metadata){
+    let detail=failed?.message||'Native view readiness timed out.';
+    if(nativeError.trim())detail+=' '+nativeError.trim().slice(0,1024);
+    try{const error=JSON.parse(await readFile(join(readyDirectory,'error.json'),'utf8'));if(error.process_id===nativePid&&typeof error.detail==='string')detail=error.detail;}catch{}
+    throw new Error(detail);
+  }
+  if(metadata.process_id!==nativePid||typeof metadata.origin!=='string'||!/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}$/.test(metadata.origin)||metadata.workspace?.configured!==true||typeof metadata.workspace.root!=='string'||metadata.workspace.root.toLowerCase()!==workspace.toLowerCase())throw new Error('Native view metadata does not match the selected workspace.');
+  backend=metadata.origin;
+}
+
+const view=await createBrowserServer({backend,assetRoot:assets});
+const url=await view.listen(port)+'/ui/';
+await writeFile(join(state,'active.json'),JSON.stringify({url,backend,nativePid,viewPid:process.pid,assets,credentialFile:tokenFile},null,2),{mode:0o600});
+console.log('xMind Browser ready at '+url);
+console.log(tokenFile?'Native profile-aware view '+backend+' · its local browser access token is stored in the private launch-state directory.':'Attached to the existing native view '+backend+'.');
