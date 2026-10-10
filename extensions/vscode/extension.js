@@ -1,7 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
-const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController } = require('./client');
+const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,EventStreamSubscription } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const {patchReview}=require('./patch-review');
@@ -34,8 +34,8 @@ async function activate(context) {
   let runId;
   let sessionRuns=[];
   let cursor = 0;
-  let timer;
-  let polling = false;
+  let eventSubscription,snapshotTimer,snapshotPromise;
+  let pendingTreeEvents=false;
   let generation = 0;
   let opening;
   let receiveSubscription,disposeSubscription;
@@ -66,7 +66,23 @@ async function activate(context) {
     if(!skillController||skillController.client!==target)skillController=new SkillViewController(target,post,()=>({session:sessionId,generation,enabled:!!panel&&client===target&&health?.skill_controls===true}));
     try{await skillController.read();}catch(error){if(client===target&&version===generation)post({type:'skills-error',text:error.message});}
   }
-  const stop = () => { clearInterval(timer); timer = undefined; generation++;contextController?.invalidate();skillController?.invalidate();profileController?.invalidate(); };
+  const stop = () => { clearTimeout(snapshotTimer);snapshotTimer=undefined;eventSubscription?.stop();generation++;contextController?.invalidate();skillController?.invalidate();profileController?.invalidate(); };
+  const streamCurrent=pin=>!!panel&&panel===pin.view&&generation===pin.generation&&client===pin.client&&sessionId===pin.session&&configuredOrigin()===pin.origin;
+  function watch(){
+    const active=value=>['queued','running','paused'].includes(value.state);
+    const run=sessionRuns.find(value=>value.id===runId&&active(value))||sessionRuns.find(active)||((pendingTreeEvents||pendingPlanRead)&&sessionRuns.find(value=>value.id===runId));
+    if(!panel||!client||!sessionId||!run){eventSubscription?.stop();return;}
+    eventSubscription??=new EventStreamSubscription({current:streamCurrent,onObservation:async(value,pin)=>{if(streamCurrent(pin))await poll();},onEvent:async(event,pin)=>{
+      if(!streamCurrent(pin))return;
+      if(pin.root===runId&&event.seq>cursor){
+        if(event.run_id!==runId&&!graphChildren.has(event.run_id))await poll();
+        if(!streamCurrent(pin))return;
+        if(event.seq>cursor){const child=graphChildren.get(event.run_id);if(event.run_id!==runId&&!child)throw new Error('Refresh the owned child before displaying its event');const accepted=await post({type:event.run_id===runId?'event':pin.scope==='graph'?'graph-event':'owned-event',event,node_id:child?.node_id,child_id:event.run_id});if(!streamCurrent(pin))return;if(accepted===false)throw new Error('Sidebar did not accept the committed event');cursor=event.seq;}
+      }
+      if(!snapshotTimer)snapshotTimer=setTimeout(()=>{snapshotTimer=undefined;if(streamCurrent(pin))poll().then(()=>{if(streamCurrent(pin))watch();});},100);
+    },onEnd:async(result,pin)=>{if(!streamCurrent(pin))return;await poll();if(streamCurrent(pin))watch();},onError:(error,pin)=>{if(streamCurrent(pin))post({type:'error',text:error.message});}});
+    eventSubscription.watch({client,root:run.id,session:sessionId,scope:run.graph_root?'graph':ownedObservation?'tree':'run',generation,view:panel,origin:client.baseUrl,after:run.id===runId?cursor:0});
+  }
   async function readContext(){
     if(!panel||!client)return;
     if(!contextObservation){if(contextController?.record)contextController.invalidate();return;}
@@ -78,7 +94,7 @@ async function activate(context) {
   let contextProfileAdmission=false;
   const busySession=()=>sessionRuns.some(run=>['queued','running','paused'].includes(run.state));
   const observedOperation=id=>id===runId || graphChildren.has(id);
-  const clearGraph=()=>{planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
+  const clearGraph=()=>{pendingTreeEvents=false;planReadConflicts=0;pendingPlanRead=false;planSnapshot=undefined;post({type:'plan-clear'});graphSnapshot=undefined;graphChildren.clear();childHistory.clear();post({type:'graph-clear'});post({type:'owned-clear'});};
   const presentRuns=()=>post({type:'runs',runs:sessionRuns,selected:runId,busy:busySession()});
   context.subscriptions.push(vscode.window.registerWebviewViewProvider('xmind.workspace', {
     resolveWebviewView(view) {
@@ -113,26 +129,28 @@ async function activate(context) {
     const definitions=new Map(root.spec.nodes.map(n=>[n.id,n]));
     for(const child of children){
       if(definitions.get(child.node_id)?.type!=='agent')continue;
-      const previous=childHistory.get(child.id);
-      if(!previous || previous.state!==child.state || events.some(e=>e.run_id===child.id&&['conversation.assistant','conversation.tool_turn','model.done'].includes(e.kind))){
-        const history=await client.graphChildHistory(id,child.id);if(version!==generation || !panel)return;childHistory.set(child.id,{state:child.state,history});
-      }
+      const history=await client.graphChildHistory(id,child.id);if(version!==generation || !panel)return;childHistory.set(child.id,{state:child.state,history});
     }
     const operations=[];for(const child of children){operations.push(...await client.operations(child.id));if(version!==generation || !panel)return;}
     graphSnapshot=root;graphChildren=owned;reviewed=new Map(operations.map(o=>[o.id,o]));
     post({type:'graph',record:root,children,histories:Object.fromEntries([...childHistory].filter(([child])=>owned.has(child)).map(([child,value])=>[child,value.history]))});
-    for(const event of events){post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
+    for(const event of events){if(event.seq<=cursor)continue;post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
     post({type:'operations',operations:operations.map(operation=>({...operation,node_id:owned.get(operation.run_id)?.node_id}))});post({type:'status',text:root.run.state});
     sessionRuns=await client.runs(sessionId);if(version!==generation || !panel)return;presentRuns();
     if(['completed','failed','cancelled'].includes(root.run.state)){
       const finalEvents=await client.graphEvents(id,cursor);if(version!==generation || !panel)return;
-      for(const event of finalEvents){if(event.run_id!==id&&!owned.has(event.run_id))throw new Error('Final event does not belong to the observed graph.');post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
-      const history=await client.history(sessionId);if(version!==generation || !panel)return;post({type:'transcript',history});if(!busySession())stop();
+      for(const event of finalEvents){if(event.seq<=cursor)continue;if(event.run_id!==id&&!owned.has(event.run_id))throw new Error('Final event does not belong to the observed graph.');post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
+      const history=await client.history(sessionId);if(version!==generation || !panel)return;post({type:'transcript',history});
     }
   }
   async function poll() {
-    if (polling || !runId) return;
-    polling = true;
+    const version=generation;
+    while(snapshotPromise){await snapshotPromise;if(version!==generation||!panel)return;}
+    if(!runId||version!==generation||!panel)return;
+    const pending=pollSnapshot();snapshotPromise=pending;
+    try{await pending;}finally{if(snapshotPromise===pending)snapshotPromise=undefined;}
+  }
+  async function pollSnapshot() {
     const id = runId;
     const version = generation;
     try {
@@ -141,10 +159,11 @@ async function activate(context) {
       const events = await client.events(id, cursor);
       if (version !== generation) return;
       for (const event of events) {
+        if(event.seq<=cursor)continue;
         post({ type: 'event', event });
         cursor = event.seq;
       }
-      if (events.some(event => ['conversation.assistant','conversation.tool_turn'].includes(event.kind))) {
+      {
         const history = await client.history(sessionId);
         if (version !== generation) return;
         post({ type:'transcript',history,preserveLive:true });
@@ -163,14 +182,14 @@ async function activate(context) {
         // A terminal transition can occur between the event query and status query.
         const finalEvents = await client.events(id, cursor);
         if (version !== generation) return;
-        for (const event of finalEvents) { post({ type: 'event', event }); cursor = event.seq; }
+        for (const event of finalEvents) { if(event.seq<=cursor)continue;post({ type: 'event', event }); cursor = event.seq; }
         const history = await client.history(sessionId);
         if (version !== generation) return;
         post({ type: 'transcript', history });
-        if(!busySession()) stop();
+
       }
     } catch (error) { if (version === generation) post({ type: 'error', text: error.message }); }
-    finally { polling = false;if(!busySession())await readSkills();await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});}); }
+    finally { if(version===generation&&panel){if(!busySession())await readSkills();await readContext().catch(error=>{if(version===generation)post({type:'error',text:error.message});});watch();} }
   }
 
   async function pollOwned(id,version){
@@ -180,7 +199,7 @@ async function activate(context) {
       graphChildren=new Map(snapshot.children.map(child=>[child.run.id,child.run]));
       reviewed=new Map(snapshot.operations.map(operation=>[operation.id,operation]));
       post({type:'owned-children',parent:run,children:snapshot.children,histories:snapshot.histories});
-      for(const event of snapshot.events){post({type:event.run_id===id?'event':'owned-event',event,child_id:event.run_id});cursor=event.seq;}
+      for(const event of snapshot.events){if(event.seq<=cursor)continue;post({type:event.run_id===id?'event':'owned-event',event,child_id:event.run_id});cursor=event.seq;}
       post({type:'operations',operations:snapshot.operations.map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id}))});
     };
     let snapshot=await observeOwnedRun(client,run,sessionId,cursor);if(version!==generation||!panel)return;publish(snapshot);
@@ -190,7 +209,7 @@ async function activate(context) {
     await readPlan(id,version);if(version!==generation||!panel)return;
     const history=await client.history(sessionId),runs=await client.runs(sessionId);if(version!==generation||!panel)return;
     sessionRuns=runs;presentRuns();post({type:'transcript',history,preserveLive:['queued','running','paused'].includes(run.state)});post({type:'status',text:run.state});
-    if(!busySession()&&snapshot.caughtUp&&!pendingPlanRead)stop();
+    pendingTreeEvents=!snapshot.caughtUp;
   }
 
   async function readPlan(root,version){
@@ -217,7 +236,7 @@ async function activate(context) {
     else if(!readyPlan(fresh))throw new Error('The selected owner is no longer ready to resume.');
     const result=answer?await target.planInput(root,question.id,message.input_json,message.expected_revision,message.expected_state_sequence):await target.resumePlan(root,message.expected_revision,message.expected_state_sequence);
     if(!current())return;if(result.id!==root||result.session_id!==session||result.parent_id||result.graph_root)throw new Error('Plan controller result identity changed');await poll();
-    if(!timer&&busySession())timer=setInterval(poll,500);
+    watch();
   }
 
   async function selectSession(id) {
@@ -258,7 +277,7 @@ async function activate(context) {
       await context.workspaceState.update(runStateKey,{...connectionState(),session_id:id,id:runId});
       if(version!==generation || !panel) return;
       // History already includes completed messages; replay events in a separate log.
-      timer = setInterval(poll, 500);
+      watch();
       await poll();
     } else {presentRuns();post({ type: 'status', text: 'Ready' });}
     await readSkills();
@@ -274,7 +293,7 @@ async function activate(context) {
     post({type:'operations',operations:[]});post({type:'reset-run'});
     await context.workspaceState.update(runStateKey,{...connectionState(),session_id:sessionId,id});
     if(version!==generation || !panel) return;
-    timer=setInterval(poll,500);await poll();
+    await poll();watch();
   }
 
   async function refresh() {
@@ -481,7 +500,7 @@ async function activate(context) {
           let fresh;try{fresh=await target.graph(root);}catch(error){if(error.status===409&&current()){graphSnapshot=undefined;post({type:'graph-clear'});}throw error;}if(!current())return;
           if(fresh.run.id!==root||fresh.run.session_id!==session||fresh.checkpoint_revision!==message.revision||!validateGraphContext(fresh.context,fresh.run).resumable)throw new Error('Graph changed. Refresh before resuming.');
           const result=await target.resumeGraph(root,message.revision);if(!current())return;if(result.id!==root||result.session_id!==session||result.graph_root!==true)throw new Error('Graph resume ownership changed');await poll();
-          if(!timer&&busySession())timer=setInterval(poll,500);
+          watch();
         }
         else if(message.type==='context-compact'){
           if(!vscode.workspace.isTrusted||!contextObservation)throw new Error('The current backend has no available context controls.');await readContext();await contextController.compact(message);
@@ -539,7 +558,7 @@ async function activate(context) {
           if(panel!==view||client!==admissionClient) return;
           reviewed.clear(); post({ type: 'operations', operations: [] });
           post({ type: 'user', text: message.prompt });
-          timer = setInterval(poll, 500);
+          watch();
           await poll();
         } else if (message.type === 'cancel' && runId) {
           await client.cancel(runId); await poll();

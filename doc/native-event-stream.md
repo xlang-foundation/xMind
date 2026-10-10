@@ -2,8 +2,8 @@
 
 Candidate transport implementation. **New native compilation/integration is
 pending.** The accepted `689404e` installation remains unchanged. The existing
-VS Code controller still uses polling. The browser adoption described below is
-a tested candidate; actual native and installed/rendered acceptance remain.
+browser and VS Code adoption described below are tested candidates; actual
+native and installed/rendered acceptance remain.
 
 The shared `BackendClient.eventStream` reader is now implemented and passes
 synthetic parser/ownership/abort contracts. Actual native-reader integration,
@@ -78,7 +78,7 @@ unavailability and HTTP 503 receive up to three bounded retries. Authentication,
 protocol and consumer failures stop explicitly; a consumer `TypeError` cannot
 be mistaken for a network failure. The complete **238 extension / 43 browser**
 fixture suites pass. Actual native subscription is prepared in the view
-contract but has not run; VS Code controller adoption is still pending.
+contract but has not run; the controller candidates are described below.
 [Subscription candidate and original evidence](evidence/native-event-stream-subscription-candidate.json).
 
 The browser now uses that actual shared subscription for run, graph and owned
@@ -95,8 +95,22 @@ pass with all 2421 tracked inputs unchanged. This is synthetic controller
 evidence, not actual native or installed/rendered streaming acceptance.
 [Browser adoption scope and original evidence](evidence/native-event-stream-browser-adoption-candidate.json).
 
+The production VS Code host now uses the same subscription, pinned additionally
+to its actual view and configured backend origin. Periodic run polling is
+removed; read-only snapshots serialize and refresh on observation/events/end.
+Direct committed delivery awaits the webview acknowledgement. Child histories
+refresh even when the SSE callback has already advanced the displayed cursor.
+Selecting a completed historical run observes the active same-session feed
+for metadata updates without displaying that other run's live events. Selection
+intent, workspace changes and disposal abort only observation and invalidate
+queued callbacks. Complete **241 extension / 47 browser** synthetic suites pass
+with unchanged tracked inputs. The new host checks use a labelled transport
+fixture around the actual shared subscription and production extension code;
+they do not prove native, rendered editor or live model execution.
+[VS Code candidate and original evidence](evidence/native-event-stream-vscode-adoption-candidate.json).
+
 Remaining acceptance includes the complete native gate, actual incremental
 delivery while a run continues, authorization revocation/expiry, saturated
-streams, disconnect/reconnect and backend restart without replay, shared UI
-adoption and fresh installed/rendered coding. Provider gateway streaming and
+streams, disconnect/reconnect and backend restart without replay, actual shared
+UI integration and fresh installed/rendered coding. Provider gateway streaming and
 A2A streaming remain separate contracts.

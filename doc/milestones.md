@@ -1,5 +1,18 @@
 # Reviewable milestones
 
+VS Code subscription adoption candidate: the actual extension host now uses
+the same scoped committed-event subscription as the browser. Periodic run
+polling is removed. Event-triggered snapshots preserve history, approvals,
+plans and owned children; graph child transcripts refresh after direct events.
+Direct streamed delivery awaits the webview acknowledgement. Selection,
+workspace/view changes and disposal retire observation without cancelling runs.
+All **241 extension / 47 browser** synthetic checks pass with all 2421 tracked
+inputs unchanged. New host fixtures cover delivery and coalesced metadata,
+retired callbacks and graph child transcript refresh; historical-run selection
+now follows the active feed. Native streaming and fresh installed/rendered
+acceptance remain pending.
+[Candidate and original evidence](evidence/native-event-stream-vscode-adoption-candidate.json).
+
 Browser subscription adoption candidate: the browser controller now observes
 the shared committed-event feed, with no periodic HTTP timer. Read-only
 run/graph/approval/plan/history snapshots refresh on observation, committed

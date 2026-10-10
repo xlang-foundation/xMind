@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-native-and-installed-validation-pending",
+  "parentRevision": "c773ff5a9ad48a8fe7f966ac96b9d6fd41d1bea9",
+  "scope": "VS Code host controller and actual shared subscription under complete synthetic Node suites; no native/provider or installed/rendered UI execution",
+  "sourceFiles": 2421,
+  "sourceUnchangedAcrossSuites": true,
+  "suites": {
+    "extension": {
+      "tests": 241,
+      "pass": 241,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "tests": 47,
+      "pass": 47,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  "vscode": {
+    "observation": "Shared scoped SSE subscription; no periodic HTTP timer",
+    "metadata": "Read-only snapshots on observation, committed event and terminal end; coalesced 100 ms event refresh",
+    "concurrency": "Serialized snapshots and overlapping REST/SSE cursor deduplication; child transcripts refresh after direct events",
+    "retirement": "Conversation/generation change and disposal detach only observation and refuse delayed callbacks"
+  },
+  "pending": [
+    "Complete native gate and actual stream integration",
+    "Actual native browser and VS Code controller streaming",
+    "Native disconnect/revocation/capacity/restart acceptance",
+    "Fresh installed/rendered coding acceptance"
+  ],
+  "providerRequests": 0,
+  "nativeExecuted": false,
+  "currentInstallationChanged": false,
+  "rawEvidence": {
+    "doc/evidence/native-unified-event-stream-vscode-adoption-extension.log": "3e08c02f460f2591f2dc93c4650bfdd2280ce6d8eb1f4e4325fc85732925aca3",
+    "doc/evidence/native-unified-event-stream-vscode-adoption-browser.log": "145df36ab85847d02a4a5c06849bc12a0595701140fd63c1caa7fbdb0e1ebc7f",
+    "doc/evidence/native-unified-event-stream-vscode-adoption-source-before.json": "83b9c67691102857bd84e55e33b2e0726f5707eb2fb8150348ee215651303e1b",
+    "doc/evidence/native-unified-event-stream-vscode-adoption-source-after.json": "83b9c67691102857bd84e55e33b2e0726f5707eb2fb8150348ee215651303e1b"
+  }
+}
