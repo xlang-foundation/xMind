@@ -4,6 +4,9 @@ External attachment now rechecks workspace trust and host location after native
 workspace verification, before accepting the connection. The regression failed
 on the previous code; all **221 extension fixture checks** pass after the fix.
 [Failure and complete rerun](evidence/view-attach-trust-local.json).
+The same pushed source passed the complete hosted **221 extension / 41 browser**
+gate with all 44 source/vendor files and 12 generated assets unchanged.
+[Downloaded original evidence and independently checked asset digests](evidence/view-attach-trust-hosted.json).
 This does not establish native or installed-editor acceptance.
 
 The first hosted native-view gate completed with **107/110 passed**. The two
@@ -188,7 +191,9 @@ to the existing sidebar draft without a question popup or automatic submission.
 Initial view readiness, stale editor/workspace state and retained-view
 reconnection have accepted source contracts. All **215/39 view tests** passed;
 actual filesystem metadata checks and the **0.1.3 VSIX** audit passed separately.
-The native runtime is unchanged. Installed/rendered acceptance awaits migration.
+The native runtime was unchanged at this checkpoint. Installed/rendered
+acceptance remains pending for a fresh current-format installation; no migration
+is required.
 [Behavior, artifact and limits](vscode-editor-selection.md).
 
 The local **0.1.2 VSIX** packages the accepted native file/folder-creation and
@@ -229,8 +234,9 @@ The verified **0.1.1** migration VSIX is installed in the existing normal
 TestProj profile. Fresh 98/198/39 gates, independent archive audit and actual
 complete-runtime smoke passed. Existing transcript/model/usage reconnected
 without another key prompt. The old runtime was repaired after VS Code cleanup
-using its verified copy; native migration awaits the user's confirmation and
-actual create/edit acceptance remains pending.
+using its verified copy. This historical migration package is superseded by
+the current-format fresh installation; no migration confirmation is required.
+Actual create/edit acceptance remains pending.
 [Package and installed evidence](native-legacy-package.md).
 
 Legacy migration now has native writer-fenced operator termination and managed

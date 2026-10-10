@@ -83,6 +83,7 @@ assets from current source and using a fresh evidence directory passed.
 [Exact source/runtime maps and limits](evidence/native-legacy-stop-local.json),
 [native output](evidence/native-legacy-stop-local-ctest.log).
 
-The later [versioned package increment](native-legacy-package.md) is installed
-in the normal TestProj profile and is awaiting its migration confirmation.
-Installed file-writing acceptance is still pending.
+The later [versioned package increment](native-legacy-package.md) was installed
+in the normal TestProj profile at that historical checkpoint. Its migration
+flow is superseded by the current-format fresh installation; no migration
+confirmation is required. Installed file-writing acceptance is still pending.

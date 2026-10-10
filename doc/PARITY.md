@@ -45,7 +45,8 @@ by an actual OpenAI read of a 4.29 MB file and xlang3/SQLite history restart.
 Path-only complete reads retain their existing 1 MiB limit. This is partial
 read-tool parity: directory paging, images/PDFs, omitted long-line suffix
 recovery and full coding parity remain incomplete. Installed VS Code writing
-still awaits the existing migration confirmation. [Exact behavior and limits](native-file-pages.md),
+still requires acceptance of a fresh installation of the current format;
+no migration or migration approval is required. [Exact behavior and limits](native-file-pages.md),
 [local evidence](evidence/native-file-pages-local.json).
 
 Native workspace skill discovery, loading, context delivery and effect approval

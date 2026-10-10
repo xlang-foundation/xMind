@@ -138,8 +138,9 @@ It is installed in the existing normal TestProj window; old transcript, selected
 OpenAI model and supplied usage remain visible without another key prompt.
 VS Code's obsolete-directory cleanup required restoring the old runtime name
 and missing files from its verified pre-update copy; original native PID/birth
-and database remain unchanged. Installed native migration is awaiting the
-user's **Stop and migrate** confirmation. Rendered writing remains unverified.
+and database remained unchanged at that historical checkpoint. The former
+migration path is superseded by the current-format fresh installation; no
+migration confirmation is required. Rendered writing remains unverified.
 [Package, repair and installed scope](native-legacy-package.md),
 [exact evidence](evidence/native-legacy-package-local.json).
 

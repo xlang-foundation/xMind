@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "787bff0b58dc7e18ba73c700b2730ae853b45434",
+  "run": 38008529329,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/38008529329",
+  "artifact": 11652431935,
+  "downloadedArtifactSha256": "d148e0f245df7a6dfac2d5c0717d7b9ece3041c14a5c8e03fa421c820ae782d8",
+  "evidence": {
+    "gate.json": {
+      "file": "doc/evidence/native-unified-hosted-787bff0-gate.json",
+      "sha256": "1f5c7c83ff8f4a020b0c3426285702dbf92e7056b791480152013b3d871e2e1d"
+    },
+    "source-before.json": {
+      "file": "doc/evidence/native-unified-hosted-787bff0-source-before.json",
+      "sha256": "cba0149e8221e348122eae86d3a8447f367d8ee79511754096a1ec9122d8ce7b"
+    },
+    "source-after.json": {
+      "file": "doc/evidence/native-unified-hosted-787bff0-source-after.json",
+      "sha256": "cba0149e8221e348122eae86d3a8447f367d8ee79511754096a1ec9122d8ce7b"
+    },
+    "assets-before.json": {
+      "file": "doc/evidence/native-unified-hosted-787bff0-assets-before.json",
+      "sha256": "36d6098b65bfffd42aa194081dd3ed90b304af91239fca93531e0c69661f6a7a"
+    },
+    "assets-after.json": {
+      "file": "doc/evidence/native-unified-hosted-787bff0-assets-after.json",
+      "sha256": "36d6098b65bfffd42aa194081dd3ed90b304af91239fca93531e0c69661f6a7a"
+    },
+    "extension.log": {
+      "file": "doc/evidence/native-unified-hosted-787bff0-extension.log",
+      "sha256": "1069f8c395af52a0e8a8932142f99431a8fb81703224983b3325cb2b2dc54aee"
+    },
+    "browser.log": {
+      "file": "doc/evidence/native-unified-hosted-787bff0-browser.log",
+      "sha256": "33dd301ff43a3b228b219e177e25e3d17e3064329e7b747b8a70bf82b47f589d"
+    }
+  },
+  "verification": {
+    "sourceRevision": "787bff0b58dc7e18ba73c700b2730ae853b45434",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 44,
+    "trackedSourceFiles": 42,
+    "vendorFiles": 2,
+    "browserAssets": 12,
+    "sourceAndAssetBytesUnchanged": true,
+    "extension": {
+      "exitCode": 0,
+      "tests": 221,
+      "passed": 221,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 41,
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "independentChecks": {
+    "rawSourceMapsEqual": true,
+    "rawAssetMapsEqual": true,
+    "all12DownloadedAssetsMatchRecordedDigests": true
+  },
+  "limits": [
+    "Synthetic adapter/controller suites only.",
+    "Native gate and installed/rendered/sidebar/live provider acceptance remain pending."
+  ]
+}
