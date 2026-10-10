@@ -8,6 +8,10 @@ fixture checks pass, including collision and alias refusal; the real native test
 now checks that the host leaves the leaf absent before launch. Native rerun,
 the full 110-contract gate and installed acceptance remain pending.
 [Original failure, before-fix regression and candidate evidence](evidence/native-rendezvous-owner-candidate.json).
+The same pushed source passed hosted **224 extension / 41 browser** checks with
+all 44 source/vendor files and 12 generated assets unchanged. Downloaded asset
+bytes match the original gate digests. This does not prove native startup.
+[Original hosted gate and independent artifact checks](evidence/native-rendezvous-owner-hosted-views.json).
 
 The local native launcher now detects the actual Python benchmark parent as well
 as its workers, and rechecks before configure, compile and contracts. The previous
