@@ -102,12 +102,21 @@ int run_server(int argc,char** argv) {
 #if defined(_WIN32)
         std::unique_ptr<agentflow::VerifiedRuntimeGeneration> runtime_generation;
         std::unique_ptr<agentflow::WorkspaceTools> startup_workspace;
+        if(options.contains("--profile-state")&&!options.contains("--runtime-manifest-sha256"))throw std::invalid_argument("Managed profile state requires a qualified native package");
         if(options.contains("--owner-receipt")&&options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Native and legacy owner preconditions are distinct");
+        if(options.contains("--profile-state")&&(options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket")))throw std::invalid_argument("Managed profile startup cannot replace an existing owner");
         if((options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket"))&&!options.contains("--runtime-manifest-sha256"))throw std::invalid_argument("Replacement requires a verified native package");
         if(options.contains("--runtime-manifest-sha256")){
             if(!options.contains("--workspace"))throw std::invalid_argument("Native owner controls require an execution workspace");
             startup_workspace=std::make_unique<agentflow::WorkspaceTools>(options.at("--workspace"));
-            runtime_generation=std::make_unique<agentflow::VerifiedRuntimeGeneration>(loaded_runtime_root(),options.at("--runtime-manifest-sha256"),startup_workspace->root_path());runtime_generation->require_current_server();
+            const auto runtime_root=loaded_runtime_root();
+            if(options.contains("--profile-state")){
+                agentflow::validate_local_profile_launch(options.at("--profile-state"),startup_workspace->root_path(),runtime_root,options.at("--runtime-manifest-sha256"),auth);
+                runtime_generation=std::make_unique<agentflow::VerifiedRuntimeGeneration>(agentflow::VerifiedRuntimeGeneration::managed_profile_copy(runtime_root,options.at("--runtime-manifest-sha256"),startup_workspace->root_path()));
+                runtime_generation->require_loaded_server_image();
+            }else{
+                runtime_generation=std::make_unique<agentflow::VerifiedRuntimeGeneration>(runtime_root,options.at("--runtime-manifest-sha256"),startup_workspace->root_path());runtime_generation->require_current_server();
+            }
             const auto root=std::filesystem::u8path(runtime_generation->binding().root);
             if(std::filesystem::canonical(std::filesystem::u8path(options.at("--modules")))!=std::filesystem::canonical(root/"modules")||std::filesystem::canonical(std::filesystem::u8path(options.at("--stdlib")))!=std::filesystem::canonical(root/"stdlib"))throw std::invalid_argument("Qualified startup requires the verified package's import roots");
             if(options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket")){
@@ -236,7 +245,7 @@ int run_server(int argc,char** argv) {
 #endif
 #if defined(_WIN32)
         std::unique_ptr<agentflow::BackendOwnerControl> owner_control;
-        if(runtime_generation){runtime_generation->require_current_server();const auto actual=executor->execution_workspace();if(actual.root!=startup_workspace->root_path()||actual.workspace_id!=startup_workspace->identity())throw std::runtime_error("Qualified execution workspace changed during startup");owner_control=std::make_unique<agentflow::BackendOwnerControl>(persistence,*executor,*runtime_generation,graph_execution,auth);}
+        if(runtime_generation){const bool managed_profile=options.contains("--profile-state");if(managed_profile)runtime_generation->require_loaded_server_image();else runtime_generation->require_current_server();const auto actual=executor->execution_workspace();if(actual.root!=startup_workspace->root_path()||actual.workspace_id!=startup_workspace->identity())throw std::runtime_error("Qualified execution workspace changed during startup");owner_control=std::make_unique<agentflow::BackendOwnerControl>(persistence,*executor,*runtime_generation,graph_execution,auth,managed_profile);}
         auto mcp_oauth=std::make_unique<agentflow::McpOAuthService>(persistence,mcp_settings);
 #endif
         agentflow::HttpServer server(persistence,auth,executor.get()

@@ -23,6 +23,11 @@ struct LocalWorkspaceProfile {
 // Native machine-local process rendezvous. Agent state and all SQLite I/O remain
 // in the backend. A failed/unknown owner never authorizes a new empty profile.
 LocalProfileConnection connect_local_profile(const LocalProfileOptions &options);
+// Authenticate a freshly spawned profile server against its owner-controlled
+// DPAPI profile record before allowing the managed-copy runtime fast path.
+void validate_local_profile_launch(const std::string &state_file,const std::string &workspace,
+                                   const std::string &runtime,const std::string &manifest,
+                                   const std::string &auth_token);
 // Returns only validated profiles already present under the user-local profile
 // root. This never opens a client-supplied path or creates profile storage.
 std::vector<LocalWorkspaceProfile> list_local_workspace_profiles(const std::string &profile_root = {});

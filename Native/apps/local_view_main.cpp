@@ -69,7 +69,7 @@ void verify_client_image() {
     require(manifest.size() <= 4 * 1024 * 1024, "Native view manifest exceeds its limit");
     // The retained backend and this client must each qualify their own image.
     agentflow::VerifiedRuntimeGeneration generation(directory, agentflow::context_digest(manifest));
-    generation.require_current_server();
+    generation.require_loaded_server_image();
 }
 } // namespace
 

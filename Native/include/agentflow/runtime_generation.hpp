@@ -18,6 +18,11 @@ class VerifiedRuntimeGeneration {
 public:
     VerifiedRuntimeGeneration(const std::string& root,const std::string& manifest_sha256,
         const std::string& excluded_workspace_root={});
+    // Used only after the protected local-profile record has been validated.
+    // This fast path confirms the complete inventory and loaded executable;
+    // full file hashing remains available through revalidate().
+    static VerifiedRuntimeGeneration managed_profile_copy(const std::string& root,
+        const std::string& manifest_sha256,const std::string& excluded_workspace_root);
     ~VerifiedRuntimeGeneration();
     VerifiedRuntimeGeneration(VerifiedRuntimeGeneration&&) noexcept;
     VerifiedRuntimeGeneration& operator=(VerifiedRuntimeGeneration&&) noexcept;
@@ -25,10 +30,16 @@ public:
     VerifiedRuntimeGeneration& operator=(const VerifiedRuntimeGeneration&)=delete;
     const RuntimeGenerationBinding& binding()const;
     void revalidate()const;
+    // Confirm this process image is the already hashed, pinned xmind.exe.
+    // This avoids rescanning a large inventory immediately before an exact
+    // package copy; callers must keep this generation alive through the copy.
+    void require_loaded_server_image()const;
     // Require the loaded process image to be this inventory's xmind.exe,
     // using actual OS file identity rather than a caller-provided executable name.
     void require_current_server()const;
 private:
+    VerifiedRuntimeGeneration(const std::string& root,const std::string& manifest_sha256,
+        const std::string& excluded_workspace_root,bool managed_profile_copy);
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };

@@ -665,7 +665,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         const auto raw = file_bytes(source / L"native-runtime-manifest.json", 4 * 1024 * 1024),
                    digest = context_digest(raw);
         source_generation = std::make_unique<VerifiedRuntimeGeneration>(text(source), digest);
-        source_generation->require_current_server();
+        source_generation->require_loaded_server_image();
         const auto target = store.directory / (L"runtime-" + wide(random_id()));
         state = {
             {"schema", 1},
@@ -690,10 +690,11 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         const auto raw = file_bytes(source / L"native-runtime-manifest.json", 4 * 1024 * 1024);
         require(context_digest(raw) == state.at("manifest").get<std::string>(),
                 "Prepared profile belongs to a different accepted package; operator recovery is required");
-        if (!source_generation)
+        if (!source_generation) {
             source_generation = std::make_unique<VerifiedRuntimeGeneration>(
                 text(source), state.at("manifest").get<std::string>());
-        source_generation->require_current_server();
+            source_generation->require_loaded_server_image();
+        }
         const auto target = store.directory / (L"runtime-" + wide(random_id()));
         Store destination(target, true);
         state["runtime"] = text(destination.directory);
@@ -722,13 +723,14 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         CloseHandle(output.value);
         output.value = INVALID_HANDLE_VALUE;
         runtime = std::make_unique<VerifiedRuntimeGeneration>(
-            text(destination.directory), state.at("manifest").get<std::string>(), workspace.root_path());
-        runtime->revalidate();
+            VerifiedRuntimeGeneration::managed_profile_copy(text(destination.directory),
+                                                            state.at("manifest").get<std::string>(),
+                                                            workspace.root_path()));
     }
     if (!runtime)
-        runtime = std::make_unique<VerifiedRuntimeGeneration>(state.at("runtime").get<std::string>(),
-                                                              state.at("manifest").get<std::string>(),
-                                                              workspace.root_path());
+        runtime = std::make_unique<VerifiedRuntimeGeneration>(VerifiedRuntimeGeneration::managed_profile_copy(
+            state.at("runtime").get<std::string>(), state.at("manifest").get<std::string>(),
+            workspace.root_path()));
     std::unique_ptr<Child> child;
     const auto pid = state.at("pid").get<std::uint32_t>();
     bool exited = pid == 0;
@@ -767,6 +769,22 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             state.at("pid").get<std::uint32_t>(),
             started,
             SecretBytes({reinterpret_cast<const std::uint8_t *>(auth.data()), auth.size()})};
+}
+void validate_local_profile_launch(const std::string &state_file,const std::string &workspace_root,
+                                   const std::string &runtime_root,const std::string &manifest,
+                                   const std::string &auth_token) {
+    const auto path=absolute(state_file);
+    require(path.filename()==L"profile.state"&&hex(manifest,64)&&hex(auth_token,64));
+    Store store(path.parent_path());
+    WorkspaceTools workspace(workspace_root);
+    const auto state=store.state();
+    shape(state,store,workspace);
+    const auto pid=GetCurrentProcessId();
+    require(state.at("phase")=="starting"&&state.at("pid")==pid&&
+                state.at("birth")==inspect_owner_process_birth(pid)&&
+                state.at("runtime")==text(absolute(runtime_root))&&
+                state.at("manifest")==manifest&&state.at("auth")==auth_token,
+            "Managed profile runtime does not match its protected startup record");
 }
 void publish_local_profile_ready(const std::string &state_file, int port, const std::string &token,
                                  const std::string &workspace_root, const std::string &workspace_id,

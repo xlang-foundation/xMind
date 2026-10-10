@@ -17,7 +17,7 @@ BackendOwnerBootstrap qualify_backend_bootstrap(BackendOwnerReceipt,VerifiedRunt
 class BackendOwnerControl {
 public:
     BackendOwnerControl(PersistenceService&,RunExecutor&,VerifiedRuntimeGeneration&,GraphExecution* = nullptr,
-        const std::string& auth_token={});
+        const std::string& auth_token={},bool verified_managed_profile_startup=false);
     std::shared_lock<std::shared_mutex> admit();
     BackendOwnerState status()const;
     bool covers(PersistenceService& store,RunExecutor* executor,GraphExecution* graphs)const{return &store==&store_&&executor==&executor_&&graphs==graphs_;}
