@@ -1,0 +1,5 @@
+Exception: D:\CantorAI2026\xMind\Tools\ci-oauth-certificate.ps1:10
+Line |
+  10 |      throw 'OAuth certificate provisioning requires an isolated GitHub …
+     |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | OAuth certificate provisioning requires an isolated GitHub-hosted Windows runner.

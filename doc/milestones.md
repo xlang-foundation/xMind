@@ -1,6 +1,6 @@
 # Reviewable milestones
 
-The rebuilt single-use refresh/startup candidate passes the complete **116/116**
+The native checkpoint `6afaaf7` passes the complete **116/116**
 local native gate in **382.06 seconds**, with all **2462** frozen inputs unchanged.
 The unchanged original managed-profile contract passes in the full gate, and
 the two focused refresh contracts pass. Client source is unchanged from the
@@ -13,7 +13,9 @@ The registered-callback hosted gate at `6708269` passed **115 of 116** native
 contracts in **407.85 seconds**. The trusted contract stopped before native login:
 test-certificate import into `CurrentUser\Root` rejected noninteractive use.
 The downloaded artifact digest, exact inventory and original logs are verified.
-Trusted acceptance remains unproved and the test provisioning repair is pending.
+Trusted acceptance remains unproved. The subsequent test-only repair uses the
+elevated isolated runner's LocalMachine Root store, preserving exact CA ownership
+and verified removal. Actual hosted execution of that repair remains pending.
 [Original hosted failure](evidence/native-oauth-registered-hosted-6708269.json).
 
 The native single-use refresh exchange primitive compiles and passes two focused

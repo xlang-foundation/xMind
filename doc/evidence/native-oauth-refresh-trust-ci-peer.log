@@ -1,0 +1,1 @@
+Independent synthetic OAuth/MCP peer passed real HTTPS with explicit CA verification, default untrusted-TLS rejection, metadata/challenge, authorization faults, independently checked S256 code exchange and authenticated MCP responses. No native login or Windows trust provisioning executed.

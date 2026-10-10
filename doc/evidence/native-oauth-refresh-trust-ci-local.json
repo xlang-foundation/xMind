@@ -1,0 +1,48 @@
+{
+  "observedAt": "2026-10-10T07:38:33.752Z",
+  "sourceBaseRevision": "6afaaf7591e618156be2b16220e169256a65aeaa",
+  "scope": "Test-only isolated hosted-runner certificate provisioning uses LocalMachine/Root with elevated identity and exact owned test CA checks. Driver checks reported store and arms cleanup before parsing the installation receipt. Real hosted import and trusted native login remain unverified.",
+  "changedAcceptedInputs": [
+    "Native/tests/mcp_oauth_trusted_peer.mjs",
+    "Tools/ci-oauth-certificate.ps1"
+  ],
+  "unchangedAcceptedInputs": 2460,
+  "compiledNativeCodeUnchanged": true,
+  "compiledBinariesUnchanged": true,
+  "priorNativeGate": {
+    "sourceRevision": "6afaaf7591e618156be2b16220e169256a65aeaa",
+    "contracts": 116,
+    "seconds": 382.06,
+    "evidence": "doc/evidence/native-oauth-refresh-local.json"
+  },
+  "nativeGateRerun": false,
+  "boundary": {
+    "desktopInstall": "rejected",
+    "hostedImportExecuted": false,
+    "parser": "passed",
+    "desktopRemove": "rejected",
+    "noRunnerVariablesChanged": true,
+    "sourceSha256": "b86c772d184e1266615ab5e65a13a38d301d95bc2c49f41acb3fc1208ce8629b",
+    "bothRootStores": "unchanged",
+    "desktopCertificateImportExecuted": false
+  },
+  "independentHttpsPeerPassed": true,
+  "hostedRequiredContracts": 117,
+  "hostedImportVerified": false,
+  "nativeTrustedLoginVerified": false,
+  "nativeTrustedRefreshVerified": false,
+  "sourceHashes": {
+    "Native/tests/mcp_oauth_trusted_peer.mjs": "cbb2f82093b43b55773db57aa2c78fc67e9ffa19172fabede7de5fb31bf80e54",
+    "Tools/ci-oauth-certificate.ps1": "b86c772d184e1266615ab5e65a13a38d301d95bc2c49f41acb3fc1208ce8629b"
+  },
+  "normalizedSourceHashes": {
+    "Native/tests/mcp_oauth_trusted_peer.mjs": "cbb2f82093b43b55773db57aa2c78fc67e9ffa19172fabede7de5fb31bf80e54",
+    "Tools/ci-oauth-certificate.ps1": "b86c772d184e1266615ab5e65a13a38d301d95bc2c49f41acb3fc1208ce8629b"
+  },
+  "rawHashes": {
+    "doc/evidence/native-oauth-refresh-trust-ci-boundary.log": "c8a090ac31ecfbf4e17ec958939f9a305b7181f3d9d9346d12bc8fa749dc8a61",
+    "doc/evidence/native-oauth-refresh-trust-ci-Install.log": "cf86518c0efb29f8323f77ce13f80af94ff4ca7ee74c24f42329238b3d48b65e",
+    "doc/evidence/native-oauth-refresh-trust-ci-Remove.log": "cf86518c0efb29f8323f77ce13f80af94ff4ca7ee74c24f42329238b3d48b65e",
+    "doc/evidence/native-oauth-refresh-trust-ci-peer.log": "33430edcd174918b5aa9963cf4b919da48821af75e4729e79244a5d931297196"
+  }
+}

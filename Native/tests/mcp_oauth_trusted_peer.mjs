@@ -79,7 +79,7 @@ async function hosted(){
   await execute(openssl,['req','-newkey','rsa:2048','-nodes','-keyout',join(directory,'server-key.pem'),'-out',join(directory,'server.csr'),'-subj','/CN=localhost'],{windowsHide:true});
   await writeFile(join(directory,'leaf.cnf'),'basicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\nsubjectAltName=IP:127.0.0.1,DNS:localhost\n');
   await execute(openssl,['x509','-req','-in',join(directory,'server.csr'),'-CA',join(directory,'ca.pem'),'-CAkey',join(directory,'ca-key.pem'),'-CAcreateserial','-out',join(directory,'server.pem'),'-days','1','-sha256','-extfile',join(directory,'leaf.cnf')],{windowsHide:true});
-  const installedResult=JSON.parse((await provision('Install')).stdout);assert.equal(installedResult.thumbprint,thumbprint);installed=true;
+  const installedOutput=await provision('Install');installed=true;const installedResult=JSON.parse(installedOutput.stdout);assert.equal(installedResult.thumbprint,thumbprint);assert.equal(installedResult.store,'LocalMachine/Root');
   registeredReservation=createTcpServer(socket=>socket.destroy());occupiedReservation=createTcpServer(socket=>socket.destroy());
   await new Promise(resolve=>registeredReservation.listen(0,'127.0.0.1',resolve));await new Promise(resolve=>occupiedReservation.listen(0,'127.0.0.1',resolve));
   const registeredPort=registeredReservation.address().port,occupiedPort=occupiedReservation.address().port;assert.notEqual(registeredPort,occupiedPort);await new Promise(resolve=>registeredReservation.close(resolve));registeredReservation=undefined;
@@ -111,7 +111,7 @@ async function hosted(){
  }finally{
   clearTimeout(timer);if(child&&child.exitCode===null&&child.signalCode===null){child.kill();await exited;}if(peer)await peer.close();
   for(const reservation of [registeredReservation,occupiedReservation])if(reservation?.listening)await new Promise(resolve=>reservation.close(resolve));
-  if(installed){const removed=JSON.parse((await provision('Remove')).stdout);assert.equal(removed.thumbprint,thumbprint);process.stdout.write('Owned isolated-runner OAuth root certificate removed and absence confirmed.\n');}
+  if(installed){const removed=JSON.parse((await provision('Remove')).stdout);assert.equal(removed.thumbprint,thumbprint);assert.equal(removed.store,'LocalMachine/Root');process.stdout.write('Owned isolated-runner OAuth machine-root certificate removed and absence confirmed.\n');}
   assert.equal(dirname(await realpath(directory)),tempRoot);await rm(directory,{recursive:true,force:true});
  }
 }

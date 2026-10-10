@@ -68,6 +68,10 @@ requires exactly one request per owner and zero forwarded requests. These are
 synthetic protocol inputs, separate from the actual login service/grant tests.
 Hosted native refresh remains unverified; even a pass will not prove durable
 refresh publication, automatic renewal, real authority or installed acceptance.
+The local complete gate identifies native checkpoint `6afaaf7`. A subsequent
+test-only provisioning repair changes the hosted certificate store and cleanup
+assertions; it does not change compiled native product code. Its successful
+hosted execution is still required.
 
 ## Required production integration
 

@@ -39,7 +39,15 @@ browser-launch/rendered acceptance implied.
 Both native WinHTTP and the Node browser driver keep certificate verification
 enabled. The hosted fixture creates a short-lived CA and signed loopback leaf.
 The certificate helper installs only that owned CA in the isolated runner's
-CurrentUser Root store, checks its fingerprint and confirms removal afterward.
+LocalMachine Root store, checks its fingerprint and confirms removal afterward.
+It requires an elevated identity in addition to the isolated-runner checks.
+The machine store avoids the CurrentUser Root consent UI that rejected the first
+hosted run; no certificate provisioning is permitted on the development PC.
+[Repair boundary evidence](evidence/native-oauth-refresh-trust-ci-local.json)
+records helper parsing, desktop Install/Remove rejection, unchanged user/machine
+root stores and the independent HTTPS peer. Compiled native code and binaries
+are unchanged from `6afaaf7`; the complete native gate was not rerun for this
+test-only repair. These checks do not prove hosted import or native trusted login.
 It requires real GitHub-hosted Windows runner variables, an exact owned path
 under `RUNNER_TEMP`, a generated subject and matching certificate fingerprint.
 It rejects development PCs and self-hosted runners. Never impersonate those
@@ -47,6 +55,8 @@ environment variables or disable verification to run it locally.
 
 This uses the [documented certificate import store](https://learn.microsoft.com/en-us/powershell/module/pki/import-certificate?view=windowsserver2025-ps)
 and [GitHub runner environment indicators](https://docs.github.com/en/actions/reference/workflows-and-actions/variables).
+[Microsoft's noninteractive CI guidance](https://github.com/microsoft/PowerToys/blob/main/.github/skills/ui-tests-local-vm/references/shell-extensions-and-signing.md)
+describes machine-root import and the user-root consent limitation.
 An import/verification failure rejects the test; it cannot become a skipped or
 successful OAuth result. The PowerShell helper also rolls back a failed import
 after it has confirmed no preexisting matching certificate.
