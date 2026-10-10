@@ -343,6 +343,15 @@ Run ProviderProfileRuntime::submit_profile(std::string id,std::string session,st
 Run ProviderProfileRuntime::submit_graph_profile(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
 Run ProviderProfileRuntime::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){std::lock_guard lock(impl_->mutex);return impl_->service->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
 ExecutionWorkspaceMetadata ProviderProfileRuntime::execution_workspace()const{std::lock_guard lock(impl_->mutex);return impl_->workspace_metadata();}
+bool ProviderProfileRuntime::supports_workspace_browsing()const{std::lock_guard lock(impl_->mutex);return static_cast<bool>(impl_->workspace_binding);}
+WorkspaceListing ProviderProfileRuntime::browse_workspace_files(const std::string& path)const{
+    std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Workspace browsing requires an opened root");
+    const auto workspace=impl_->workspace_metadata();auto listing=impl_->workspace_binding->browse_files(path);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},impl_->workspace_metadata());return listing;
+}
+WorkspaceFile ProviderProfileRuntime::browse_workspace_file(const std::string& path)const{
+    std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Workspace file preview requires an opened root");
+    const auto workspace=impl_->workspace_metadata();auto file=impl_->workspace_binding->browse_file(path);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},impl_->workspace_metadata());return file;
+}
 bool ProviderProfileRuntime::supports_skill_catalogue()const{std::lock_guard lock(impl_->mutex);return static_cast<bool>(impl_->workspace_binding);}
 WorkspaceSkillCatalogue ProviderProfileRuntime::workspace_skills()const{
     std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Workspace skill inspection requires an opened root");

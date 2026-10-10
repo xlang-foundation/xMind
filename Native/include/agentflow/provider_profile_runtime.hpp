@@ -52,6 +52,9 @@ public:
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
     std::vector<std::string> models() const override;
     ExecutionWorkspaceMetadata execution_workspace()const override;
+    bool supports_workspace_browsing()const override;
+    WorkspaceListing browse_workspace_files(const std::string& path)const override;
+    WorkspaceFile browse_workspace_file(const std::string& path)const override;
     bool supports_skill_catalogue()const override;
     bool supports_session_skills()const override{return supports_skill_catalogue();}
     bool supports_agent_selection()const override{return true;}

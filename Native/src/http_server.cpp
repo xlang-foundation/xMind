@@ -129,6 +129,13 @@ std::string strict_context_model_query(const Request& request) {
         throw std::invalid_argument("Invalid context model query");
     return model;
 }
+std::string workspace_browse_path(const Request& request){
+    const auto marker=request.target.find('?');if(marker==std::string::npos){if(!request.params.empty())throw std::invalid_argument("Invalid workspace browsing query");return ".";}
+    const auto query=std::string_view(request.target).substr(marker+1);
+    if(query.size()<6||query.size()>393216||!query.starts_with("path=")||query.find('&')!=std::string_view::npos||query.find('=',5)!=std::string_view::npos||
+       request.params.size()!=1||!request.has_param("path"))throw std::invalid_argument("Invalid workspace browsing query");
+    auto path=request.get_param_value("path");if(path.empty()||path.size()>131072||path.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid workspace browsing path");return path;
+}
 std::int64_t graph_revision(const Json& value,const char* field) {
     if(!value.contains(field) || !value[field].is_number_integer() || value[field]<1 || value[field]>9007199254740991)throw std::invalid_argument("Invalid graph revision");
     return value[field].get<std::int64_t>();
@@ -372,8 +379,8 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/skills)?|models|agents|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
-            static const std::regex owned_read_route(R"(^/v1/(workspace/skills|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|models|agents|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
+            static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
             const bool stream=std::regex_match(request.path,stream_route);
@@ -533,6 +540,17 @@ struct HttpServer::Impl {
             const auto actual=executor?executor->execution_workspace():ExecutionWorkspaceMetadata{};
             reply(response,{{"configured",actual.configured},{"root",actual.configured?Json(actual.root):Json(nullptr)},
                 {"workspace_id",actual.configured?Json(actual.workspace_id):Json(nullptr)},{"authority_id",actual.configured?Json(actual.authority_id):Json(nullptr)}});
+        }));
+        server.Get("/v1/workspace/files",guarded([this](const Request& request,Response& response){
+            const auto path=workspace_browse_path(request);if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Workspace browsing requires an opened root");
+            const auto workspace=executor->execution_workspace();const auto listing=executor->browse_workspace_files(path);auto entries=Json::array();
+            for(const auto& entry:listing.entries)entries.push_back({{"name",entry.name},{"kind",entry.kind}});
+            reply(response,{{"path",path},{"workspace_id",workspace.workspace_id},{"entries",std::move(entries)},{"truncated",listing.truncated}});
+        }));
+        server.Get("/v1/workspace/file",guarded([this](const Request& request,Response& response){
+            const auto path=workspace_browse_path(request);if(path==".")throw std::invalid_argument("Workspace file path is required");if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Workspace file preview requires an opened root");
+            const auto workspace=executor->execution_workspace();const auto file=executor->browse_workspace_file(path);
+            reply(response,{{"path",file.path},{"workspace_id",workspace.workspace_id},{"content",file.content}});
         }));
         server.Get("/v1/workspace/skills",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Skill catalogue does not accept query parameters");

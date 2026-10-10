@@ -24,6 +24,16 @@ Run ExecutionPlatform::submit_message(std::string id,std::string context,std::st
 ExecutionWorkspaceMetadata ExecutionPlatform::execution_workspace()const{
     if(!workspace_binding_)return {};return {true,workspace_binding_->root_path(),workspace_binding_->identity(),workspace_authority_};
 }
+WorkspaceListing ExecutionPlatform::browse_workspace_files(const std::string& path)const{
+    if(!workspace_binding_)throw RunUnavailable("Workspace browsing requires an opened root");
+    const auto workspace=execution_workspace();auto listing=workspace_binding_->browse_files(path);
+    validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());return listing;
+}
+WorkspaceFile ExecutionPlatform::browse_workspace_file(const std::string& path)const{
+    if(!workspace_binding_)throw RunUnavailable("Workspace file preview requires an opened root");
+    const auto workspace=execution_workspace();auto file=workspace_binding_->browse_file(path);
+    validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());return file;
+}
 bool ExecutionPlatform::supports_skill_catalogue()const{return static_cast<bool>(workspace_binding_);}
 WorkspaceSkillCatalogue ExecutionPlatform::workspace_skills()const{
     if(!workspace_binding_)throw RunUnavailable("Workspace skill inspection requires an opened root");

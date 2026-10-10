@@ -59,6 +59,16 @@ std::string relative_path(const std::string& input) {
     const auto normalized=path.lexically_normal().generic_u8string();
     return {reinterpret_cast<const char*>(normalized.data()),normalized.size()};
 }
+bool git_component(std::string_view value){
+    while(!value.empty()&&(value.back()=='.'||value.back()==' '))value.remove_suffix(1);
+    if(value.size()!=4)return false;
+    return value[0]=='.'&&(value[1]=='g'||value[1]=='G')&&(value[2]=='i'||value[2]=='I')&&(value[3]=='t'||value[3]=='T');
+}
+std::string browse_path(const std::string& input){
+    const auto relative=relative_path(input);
+    for(const auto& part:std::filesystem::u8path(relative))if(git_component(utf8(part.native())))throw ToolAccessDenied("Git metadata is outside workspace browsing authority");
+    return relative;
+}
 bool valid_text(const std::string& value) {
     return value.find('\0')==std::string::npos && (value.empty() || MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0)>0);
 }
@@ -670,6 +680,13 @@ WorkspaceListing WorkspaceTools::list_files(const std::string& input,std::stop_t
         if(result.truncated) break;
     }
     std::sort(result.entries.begin(),result.entries.end(),[](const auto& a,const auto& b){return a.name<b.name;});return result;
+}
+WorkspaceListing WorkspaceTools::browse_files(const std::string& input,std::stop_token cancel) const {
+    const auto relative=browse_path(input);auto listing=list_files(relative,cancel);
+    std::erase_if(listing.entries,[](const WorkspaceEntry& entry){return git_component(entry.name);});return listing;
+}
+WorkspaceFile WorkspaceTools::browse_file(const std::string& input,std::stop_token cancel) const {
+    return read_file(browse_path(input),cancel);
 }
 WorkspaceGlob WorkspaceTools::glob_files(const std::string& pattern,const std::string& input,bool hidden,std::size_t limit,std::stop_token cancel,bool respect_ignore) const {
     if(!limit||limit>1000)throw std::invalid_argument("Glob result limit must be 1-1000");

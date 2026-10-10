@@ -17,9 +17,11 @@ and in the rendered browser view.
 
 xMind has a local HTML view using the same sidebar renderer and native API client as the VS Code extension. The desktop layout places the agent sidebar on the right, Settings at its top, and the discovered-model selector beside the composer at the bottom. Drag the divider to resize it; arrow keys, Shift+arrows, Home and End also resize a focused divider. Its width is remembered as a non-secret appearance preference in localStorage. Narrow windows use the available width.
 
-Connect and Disconnect are accessible SVG icon buttons. Connect first restores or establishes the same-origin browser session. A browser launched locally by xMind or its VS Code extension is enrolled by the adapter's private local credential, so it never asks for a server token. When manually attached to another server, the token popup appears only if that server rejects session access. It supports Cancel, its close button and Escape. Cancelling keeps an established connection and its session; with no connection it closes the popup and leaves the view disconnected. A rejected replacement token or a late response after Cancel cannot clear the existing conversation.
+Connect and Disconnect are accessible SVG icon buttons. The OSS page connects directly to the xMind runtime on the same computer; it has no server-token field. The local launcher enrolls the browser session with its private credential, while the durable session stays in an HttpOnly cookie. If the local runtime cannot enroll the page, the dialog explains how to reopen it from xMind or VS Code. It never asks for a server token. Cancel, close and Escape leave an established session intact; a failed reconnect does not clear the current conversation. Team and remote authentication belong to private Nexus.
 
 The C++ server owns execution, tools, graphs, permissions, providers and history. SQLite I/O remains in embedded xlang3. The Node HTTP adapter serves validated view-asset snapshots and forwards a finite allowlist of API requests to a configured loopback native server. A page reload loads a complete new snapshot from its configured asset directory without restarting the adapter or losing its authenticated sessions. Boundary, route, size and CSP restrictions still apply; a rejected bundle does not revoke backend access. Closing the view does not cancel execution. This is a local HTTP transport. Team deployment, WebRTC and the standalone Electron IDE belong to private Nexus.
+
+The left workspace canvas browses the active native root and previews UTF-8 files through workspace-handle reads. Directory links and Git metadata are omitted; backend-private `.config` and `.agentflow` paths remain denied. The view is read-only: agent edits still appear as approval proposals, and full editor, multi-file diff and recovery workflows remain open coding-parity work.
 
 ## Workspace selection
 
@@ -75,14 +77,14 @@ node Tools/start-browser.mjs --runtime D:\path\to\verified\native-runtime --port
 
 The runtime must be verified and contain the same `xmind.exe` as the current native build; the launcher rejects stale packages. It starts `xmind view` with the shared local profile root and a protected native ready file, then attaches the HTML adapter to that profile-aware host. Do not point `--backend` at generic `xmind serve` when workspace selection is expected. To attach the adapter to a view host already running, pass that host's loopback origin with `--backend`.
 
-The profile-aware local launcher keeps its generated access token in the private launch-state directory and enrolls the page server-side. The VS Code launcher passes its already authenticated local credential directly to the loopback adapter in memory. Neither route sends the server token to page JavaScript, the URL, clipboard or browser storage. The adapter returns the durable native view credential as an HttpOnly, SameSite=Strict cookie. Reload reconnects with that cookie, which lasts up to eight hours across browser close/reopen and same-origin adapter/backend restarts. Expiry, authority rotation or explicit Disconnect revokes access; Disconnect does not cancel native execution. Only selected session/run/model/workflow IDs are saved in sessionStorage; keys and conversation content are not stored there.
+The profile-aware local launcher keeps its generated access credential in the private launch-state directory and enrolls the page server-side. The VS Code launcher passes its already authenticated local credential directly to the loopback adapter in memory. The page never receives the server credential in JavaScript, a URL, clipboard or browser storage, and users do not enter one. The adapter returns the durable native view credential as an HttpOnly, SameSite=Strict cookie. Reload reconnects with that cookie, which lasts up to eight hours across browser close/reopen and same-origin adapter/backend restarts. Expiry, authority rotation or explicit Disconnect revokes access; Disconnect does not cancel native execution. Only selected session/run/model/workflow IDs are saved in sessionStorage; keys and conversation content are not stored there.
 
 The standalone page attempts cookie-session restoration when it loads. This
 uses the same-origin session endpoint without an Authorization header. When
 launched by the local xMind or VS Code host, the adapter enrolls a fresh browser
-session using its private in-memory local credential; when attached manually
-to another backend, it prompts for that server's token. The native token never
-reaches page JavaScript.
+session using its private in-memory local credential. If the browser has no
+valid local enrollment, the page reports that the local runtime needs to be
+reopened from xMind or VS Code; the user is never asked for a server token.
 
 Live browser smoke verification used the actual native profile-aware host and rendered both `xMind` and `TestProj` in the selector. Switching to `TestProj` changed the selected backend and cleared its session list; switching back restored the xMind workspace. No model request or file effect was issued. The smoke test also caught and fixed same-origin GET handling: browsers omit `Origin` on same-origin catalogue reads, so the adapter allows that read while workspace-changing POST still requires the exact view origin. The in-app browser's fetch rejected one abort-signal wrapper; the view retries only that specific pre-request compatibility error without the signal, while normal browsers retain cancellation and timeouts. Workspace timeout and cancellation signals use `AbortController` directly so implementations whose `AbortSignal` static helpers throw `Illegal invocation` still allow profile switches; a browser regression contract exercises that failure mode.
 
@@ -92,7 +94,7 @@ from the current build; its exact scope remains in the
 [initial live evidence](evidence/browser-workspace-live-20261010.json). A later
 run used the current `xmind.exe` hash and the real standalone webpage at a
 648-pixel viewport. After a page refresh, its HttpOnly session restored without
-re-entering the server token. **Add workspace** opened the workspace dialog,
+entering any server token. **Add workspace** opened the workspace dialog,
 registered `D:\CantorAI2026\xMind` alongside `TestProj`, and selected it. The
 selector then switched back to `TestProj`; the picker re-enabled and the page
 showed the TestProj native workspace. The Add and Connect controls remained

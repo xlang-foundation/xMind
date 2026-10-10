@@ -122,13 +122,20 @@ async function chatResult(expectedExit,input,...args){
 const chat=(input,...args)=>chatResult(0,input,...args);
 try {
   await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual workspace content\n');
+  await mkdir(join(workspace,'.config'));await writeFile(join(workspace,'.config','providers.yaml'),'private provider configuration\n');
+  await mkdir(join(workspace,'.agentflow'));await writeFile(join(workspace,'.agentflow','state.sqlite'),'private AgentFlow state\n');
   await writeFile(join(workspace,'large.txt'),Array.from({length:100000},(_,i)=>`line ${i+1} 中\r\n`).join(''));
   await mkdir(join(workspace,'glob-src','nested'),{recursive:true});await writeFile(join(workspace,'glob-src','main.cpp'),'');await writeFile(join(workspace,'glob-src','nested','header.hpp'),'');
-  await mkdir(join(workspace,'ignore-http','.git'),{recursive:true});await mkdir(join(workspace,'ignore-http','build'));await writeFile(join(workspace,'ignore-http','.gitignore'),'build/\n*.tmp\n!keep.tmp\n');
+  await mkdir(join(workspace,'ignore-http','.git'),{recursive:true});await writeFile(join(workspace,'ignore-http','.git','config'),'private Git configuration\n');await mkdir(join(workspace,'ignore-http','build'));await writeFile(join(workspace,'ignore-http','.gitignore'),'build/\n*.tmp\n!keep.tmp\n');
   for(const name of ['main.cpp','keep.tmp','drop.tmp','build/skip.cpp'])await writeFile(join(workspace,'ignore-http',name),'IgnoreHttpNeedle\n');
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
   await start(true);
   assert.equal(cli('health').agent_execution,true);
+  const directory=await api('/v1/workspace/files?path=.');assert.equal(directory.status,200);assert.deepEqual(directory.data.path,'.');assert.equal(directory.data.workspace_id,(await api('/v1/workspace')).data.workspace_id);assert.equal(directory.data.truncated,false);const names=directory.data.entries.map(entry=>entry.name);assert.ok(names.includes('README.md'));assert.ok(!names.includes('.config'));assert.ok(!names.includes('.agentflow'));
+  const nestedGit=await api('/v1/workspace/files?path=ignore-http');assert.equal(nestedGit.status,200);assert.ok(!nestedGit.data.entries.some(entry=>entry.name==='.git'));
+  const preview=await api('/v1/workspace/file?path=README.md');assert.equal(preview.status,200);assert.deepEqual(preview.data,{path:'README.md',workspace_id:directory.data.workspace_id,content:'Actual workspace content\n'});
+  for(const path of ['ignore-http/.git/config','.config/providers.yaml','.agentflow/state.sqlite','../outside'])assert.equal((await api('/v1/workspace/file?path='+encodeURIComponent(path))).status,403,`Browser workspace preview must reject ${path}`);
+  assert.equal((await api('/v1/workspace/files?path=.&path=.')).status,400,'Duplicate browser browsing paths are rejected');
   await session('coding');
   const run=cli('run','coding','Read the actual README.md');
   assert.equal(run.state,'queued');await terminal(run.id,'completed');

@@ -82,6 +82,10 @@ public:
     // validates both caller spelling and the normalized opened handle path.
     std::string directory_identity(const std::string& path=".",std::stop_token cancel={}) const;
     WorkspaceFile read_file(const std::string& path,std::stop_token cancel={}) const;
+    // Public editor browsing uses the same verified root handles while
+    // excluding Git metadata in addition to backend-private directories.
+    WorkspaceListing browse_files(const std::string& path=".",std::stop_token cancel={}) const;
+    WorkspaceFile browse_file(const std::string& path,std::stop_token cancel={}) const;
     // A bounded UTF-8 line page, not an edit snapshot. Offsets are 1-based.
     // Preserves source bytes/line endings except explicitly clipped lines.
     WorkspaceFilePage read_file_page(const std::string& path,std::size_t offset=1,
