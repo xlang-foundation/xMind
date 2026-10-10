@@ -1,5 +1,21 @@
 # Reviewable milestones
 
+Native SSE transport accepted at `7a148ff`: the isolated hosted build passed
+all **110 native contracts** in **371.87 seconds**, then **224 extension /
+43 browser** fixtures, actual browser/native integration and package checks.
+The executed native view contract compares completed real tool-graph run,
+graph and owned-tree streams with persisted REST records, verifies
+Last-Event-ID replay/cursor rejection and the scoped browser-cookie feed.
+Independent artifact verification checked all 29 bundle/1860 runtime file
+digests, the exact native contract set, 16 packaged host/view source mappings,
+generated browser HTML and vendor copies. Native source compiled; no local
+native execution or installation change occurred. Production reader,
+subscription/controller adoption and active-feed/capacity/revocation assertions
+were added later and remain unverified natively. Fresh installed/rendered
+streaming remains pending.
+[Exact scope](evidence/native-event-stream-hosted-7a148ff-scope.json),
+[verified package](evidence/native-event-stream-hosted-7a148ff-package.json).
+
 Full webpage streaming fixture: the complete emitted classic-script order,
 cookie connection bridge, actual shared reader/subscription and renderer now
 run together in JSDOM. Synthetic committed frames render live text and exact

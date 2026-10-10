@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "7a148ffd7918d2ebb8f8c5d83db1841502249c0d",
+  "run": 38015971891,
+  "job": 114106172713,
+  "status": "passed-native-transport-gate",
+  "scope": "Actual compiled native SSE persisted replay and native-view/browser forwarding on completed real tool graph; independent package verification",
+  "nativeContracts": 110,
+  "extensionFixtures": 224,
+  "browserFixtures": 43,
+  "nativeSeconds": 371.87,
+  "actual": [
+    "Completed actual tool graph run/graph/tree feeds equal persisted native REST records",
+    "Last-Event-ID replay and invalid/future/conflicting cursor rejection",
+    "Scoped browser-cookie feed equals the same durable records",
+    "Native adapters compiled and passed complete original contract set"
+  ],
+  "notCovered": [
+    "Shared production reader/subscription and UI controller adoption added after this source",
+    "Incremental active-run delivery, paused reconnect and stream capacity/revocation assertions added later",
+    "Fresh installed/rendered streaming and live inference"
+  ],
+  "localNativeExecuted": false,
+  "currentInstallationChanged": false,
+  "rawHashes": {
+    "doc/evidence/native-unified-hosted-7a148ff-native-gate.json": "5a6a2411ea3068ab93a68ea678d9f9d7c6ebc7a13f07589b90bde71d3efd07c3",
+    "doc/evidence/native-unified-hosted-7a148ff-contracts.json": "c9809aa0e0ff5144144870a99c48bb05f4ec6414a33cd11a1ad1ca779236cd32",
+    "doc/evidence/native-unified-hosted-7a148ff-native-ctest.log": "55f7435e46181a823b995523197318dc91c78ca2b97c297a82f50e76fb9da4d7",
+    "doc/evidence/native-unified-hosted-7a148ff-native-view-early-ctest.log": "670ebd9b229b74deb3ac13ce7c5bfadb5c4597fe0dd131b1ca679b36166e1b3e",
+    "doc/evidence/native-unified-hosted-7a148ff-provenance.json": "0e3216bdffa1037b017f84051a6715c8b80bcdbf64eecdb991499a7fbb41c271",
+    "doc/evidence/native-unified-hosted-7a148ff-accepted-source-manifest.json": "ffe93cd73c484c86a63aa18c27d9e75abc1669720da14a794192151f3d07a99d",
+    "doc/evidence/native-unified-hosted-7a148ff-runtime-staging.json": "59cc15a46b87edccae8b13da3998e3a1eca60dc5cca671871cc5596067bf57c4",
+    "doc/evidence/native-unified-hosted-7a148ff-browser-controller.log": "be9070b6222568aa9cdbc7f19c16f29ceac186b3eb1e366d3a43b26da0a7b022",
+    "doc/evidence/native-unified-hosted-7a148ff-browser-native.log": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693",
+    "doc/evidence/native-unified-hosted-7a148ff-browser-package-verification.log": "0156111ab9409f090c7f2314c622d66878215dc84f776dc2b547198865cd7ca2"
+  },
+  "jobLogSha256": "4a47a9e669dd93587fed5104a0d0548b438d3a443d99cc39205730597f22fa5a"
+}

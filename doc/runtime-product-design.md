@@ -175,10 +175,11 @@ unified YAML/Markdown/Python authoring, reusable nested super-agents,
 shared scheduling/worker placement, xlang3 IPC, Local/Nexus connection integration
 and remaining provider/coding parity.
 
-The [committed event transport candidate](native-event-stream.md) adds actual
-persisted feed routes and incremental access-adapter forwarding. Its native
-integration and shared UI adoption are still pending; it does not establish
-completion of the SSE delivery requirement above.
+The [committed event transport](native-event-stream.md) passed the complete
+native gate at `7a148ff`, including actual completed tool-graph replay through
+native and scoped browser adapters. Later reader/subscription/controller
+integration and active-feed/capacity/revocation checks remain pending. This
+does not establish completion of the shared UI SSE requirement above.
 
 Required acceptance covers the actual consolidated server/console, existing
 native contracts, client adapters and a fresh installed profile, then stream

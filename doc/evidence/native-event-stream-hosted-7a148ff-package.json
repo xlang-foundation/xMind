@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "7a148ffd7918d2ebb8f8c5d83db1841502249c0d",
+  "run": 38015971891,
+  "job": 114106172713,
+  "scope": "Independent downloaded gate, bundle and VSIX byte/source verification; no local native execution or installed/rendered UI acceptance",
+  "nativeContracts": 110,
+  "extensionContracts": 224,
+  "browserContracts": 43,
+  "sourceBundleFiles": 29,
+  "runtimeFiles": 1860,
+  "pureSourceFiles": 1830,
+  "vsixEntries": 1897,
+  "binaries": [
+    "modules/xlang_json.x3pkg.dll",
+    "modules/xlang_sqlite3.x3pkg.dll",
+    "xlang3.exe",
+    "xlang3_runtime.dll",
+    "xmind.exe"
+  ],
+  "textNewlineComparisons": [
+    {
+      "file": "extensions/vscode/package.json",
+      "packagedSha256": "7b6626730c006dae09f4e26a534054fd799e1427398351b3dee65b5c716a4906",
+      "gitBlobSha256": "f917d36fd9e98114a2f3c4f381b39b1e3cc09f9af5687b87482874d8e2a93497",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/extension.js",
+      "packagedSha256": "a9d7411a7b94116f97a6fa6151e704e969b8f6e687976cd8b7c2fd906679ba35",
+      "gitBlobSha256": "371e7df73cf48a5b4760fe207a5f20f7f50a7af9e828e82104427c4120c85547",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/client.js",
+      "packagedSha256": "6918281b04240580bcb7c77c96ea26a0bcf14c31919cae87fafd10e888a55475",
+      "gitBlobSha256": "24a89672dfb91907f86116e10c904593103db2c14a050eac50bb2df86ac14b46",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/workspace-backend.js",
+      "packagedSha256": "cb3dcc32ee6d680e5e1c4638d2af886d6c77c4e672e92e04bf3fc051fb915d5b",
+      "gitBlobSha256": "19f2cb67498348a4088d9d1eec51b960d49a32d6b33e04923fd463910f3fdeaf",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/native-runtime.js",
+      "packagedSha256": "e53335c510e8ed457c2c44f15c1a1ef9c3f2e702170417cd4e241a9824f90cdb",
+      "gitBlobSha256": "4b10a833cedc93fc4364a80ddd08d20a4e8ead7134ecc0f052c2b1c4bc635b58",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/browser-view.js",
+      "packagedSha256": "ac025e3e2fb0f12cbd2de3915de8b8c1951d38f4892d8cc9bd2b92b65701cee1",
+      "gitBlobSha256": "f5e47b3b60530b4ed1b98ff3254eb0debbb49c5fde860912abd09d4a1d05a1ea",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.js",
+      "packagedSha256": "3b4ed94cfd4aa2c25eca1a34710c1d48a4c56356071b1b4fcf85ce876e42778c",
+      "gitBlobSha256": "8305db924538888e9e390f244ed968e21ac122816f3609f95aca018b97ec11a7",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.css",
+      "packagedSha256": "4bc89edf03e09585ec0fda84ac0cf51bd1808b080d3445c856cc1c37856c4201",
+      "gitBlobSha256": "bee0171c6440a16314b179cdfe2062a69f6eb447779cc11d7f0d59a92b20966d",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/patch-review.js",
+      "packagedSha256": "4e5fd0d6e61f3846c72cc420c0268314e1979cc49983bb0754e0a124ef68397e",
+      "gitBlobSha256": "8f748febcfa7517088490799361c7105ffdb5f136fb08fc58544a29981fff681",
+      "exactBytes": false
+    },
+    {
+      "file": "views/browser/server.mjs",
+      "packagedSha256": "3fc1619ae354c5d9c0bd9c06c5d2889a624b72bae80e6a8dcf44075550a34cb7",
+      "gitBlobSha256": "e7e8b0dc31096aafc956e1a047559a3413554156fb07c666cbf02f2c7740ba70",
+      "exactBytes": false
+    },
+    {
+      "file": "views/browser/browser.js",
+      "packagedSha256": "9429ef6a67d2e8df9557bcaa647741ff9bbe352c34549d69144e5a29f4b26f8d",
+      "gitBlobSha256": "c65b9311ce62861c81395338e6a35e46972120ecd4cd8ca59d8423b066471c95",
+      "exactBytes": false
+    },
+    {
+      "file": "views/browser/browser.css",
+      "packagedSha256": "90f4ef9e268d9a128e4c4398c8e944426330070ab6b435189ee989b69ea381fd",
+      "gitBlobSha256": "8cae13ebf6ff2700bbcbe1a7150315603fc5865ff8bdbe3c9e30c2cb3ca901dc",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.js",
+      "packagedSha256": "3b4ed94cfd4aa2c25eca1a34710c1d48a4c56356071b1b4fcf85ce876e42778c",
+      "gitBlobSha256": "8305db924538888e9e390f244ed968e21ac122816f3609f95aca018b97ec11a7",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.css",
+      "packagedSha256": "4bc89edf03e09585ec0fda84ac0cf51bd1808b080d3445c856cc1c37856c4201",
+      "gitBlobSha256": "bee0171c6440a16314b179cdfe2062a69f6eb447779cc11d7f0d59a92b20966d",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/client.js",
+      "packagedSha256": "6918281b04240580bcb7c77c96ea26a0bcf14c31919cae87fafd10e888a55475",
+      "gitBlobSha256": "24a89672dfb91907f86116e10c904593103db2c14a050eac50bb2df86ac14b46",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/patch-review.js",
+      "packagedSha256": "4e5fd0d6e61f3846c72cc420c0268314e1979cc49983bb0754e0a124ef68397e",
+      "gitBlobSha256": "8f748febcfa7517088490799361c7105ffdb5f136fb08fc58544a29981fff681",
+      "exactBytes": false
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11656838409,
+      "sha256": "2b11a06b51dfa1b858fbebed1205bdec234bf9dd7adcf06ae064f74f65a6b361"
+    },
+    {
+      "id": 11656743537,
+      "sha256": "3f8c9af75b84e6f6b031b6c4c2cf0fbcaf9ea6b78cd27e38f6ea390d7619e38d"
+    }
+  ],
+  "vsixSha256": "4e9b2928f71bb33e614a9d12aca219d0572f43c90a427ca103b0c6ff8c663f0d",
+  "sourceManifestSha256": "ffe93cd73c484c86a63aa18c27d9e75abc1669720da14a794192151f3d07a99d",
+  "runtimeManifestSha256": "44c3c5d4d477b884e0414936327715510cf552900f2a8ed4a002b61b569c5998",
+  "evidenceHashes": {
+    "native-gate.json": "5a6a2411ea3068ab93a68ea678d9f9d7c6ebc7a13f07589b90bde71d3efd07c3",
+    "contracts.json": "c9809aa0e0ff5144144870a99c48bb05f4ec6414a33cd11a1ad1ca779236cd32",
+    "native-ctest.log": "55f7435e46181a823b995523197318dc91c78ca2b97c297a82f50e76fb9da4d7",
+    "native-view-early-ctest.log": "670ebd9b229b74deb3ac13ce7c5bfadb5c4597fe0dd131b1ca679b36166e1b3e",
+    "provenance.json": "0e3216bdffa1037b017f84051a6715c8b80bcdbf64eecdb991499a7fbb41c271",
+    "accepted-source-manifest.json": "ffe93cd73c484c86a63aa18c27d9e75abc1669720da14a794192151f3d07a99d",
+    "runtime-staging.json": "59cc15a46b87edccae8b13da3998e3a1eca60dc5cca671871cc5596067bf57c4",
+    "browser-controller.log": "be9070b6222568aa9cdbc7f19c16f29ceac186b3eb1e366d3a43b26da0a7b022",
+    "browser-native.log": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693",
+    "browser-package-verification.log": "0156111ab9409f090c7f2314c622d66878215dc84f776dc2b547198865cd7ca2"
+  },
+  "installed": false,
+  "localNativeExecuted": false,
+  "liveModelRequests": 0
+}

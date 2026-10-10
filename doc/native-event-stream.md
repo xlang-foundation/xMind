@@ -1,5 +1,15 @@
 # Committed native event feeds
 
+Native transport source `7a148ff` passed the complete hosted **110-contract**
+gate and package verification. Its executed native view assertions compare
+completed actual tool-graph graph/tree/run streams to persisted records,
+Last-Event-ID replay/cursor rejection and scoped browser-cookie forwarding.
+Downloaded artifacts independently verify the exact contract set and packaged
+bytes/sources. Later production reader/subscription/controller, active-feed and
+capacity/revocation assertions have not run natively. The installed `689404e`
+profile is preserved; actual installed/rendered streaming remains pending.
+[Accepted transport scope](evidence/native-event-stream-hosted-7a148ff-scope.json).
+
 Browser transport correction: the original page session subclass overrode JSON
 requests but inherited bearer-authenticated streaming. It therefore could not
 open a production browser feed. The shared reader now obtains its response
@@ -22,8 +32,9 @@ container and the native normalized usage fields. This remains JSDOM/synthetic
 transport evidence, not actual native or rendered-browser acceptance.
 [Full-page fixture scope and original logs](evidence/native-event-stream-browser-page-candidate.json).
 
-Candidate transport implementation. **New native compilation/integration is
-pending.** The accepted `689404e` installation remains unchanged. The existing
+Transport compilation and scoped replay integration passed at `7a148ff`.
+**New controller and active-feed integration is pending.** The accepted
+`689404e` installation remains unchanged. The existing
 browser and VS Code adoption described below are tested candidates; actual
 native and installed/rendered acceptance remain.
 
