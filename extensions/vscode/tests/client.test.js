@@ -34,6 +34,47 @@ test('provider enrollment accepts only matching approved OpenAI wire and endpoin
   for(const changed of [{wire:'responses'},{endpoint:'https://api.openai.com/v1/responses'},{wire:'unknown'},{endpoint:'https://unapproved.invalid/v1/responses',wire:'responses'},{revision:-1}])assert.throws(()=>providerEnrollmentWire({...base,...changed}),/policy/);
 });
 const token = 'native-client-contract-token-32-bytes';
+// Synthetic native SSE frames: parser/ownership/cursor behavior only.
+// No native runtime, provider or agent execution is supplied by these fixtures.
+const streamRoot=(changed={})=>({id:'root',session_id:'session',state:'completed',parent_id:'',node_id:'',graph_root:false,...changed});
+const streamEvent=(seq,run_id='root')=>({seq,run_id,kind:'model.text',data:{text:'Synthetic stream 雪'}});
+const streamFrame=(type,data,id)=>`${id===undefined?'':'id: '+id+'\n'}event: ${type}\ndata: ${JSON.stringify(data)}\n\n`;
+const streamWire=(events=[],{scope='run',after=0,run=streamRoot(),reason='terminal'}={})=>streamFrame('observation',{run,scope,after})+events.map(e=>streamFrame('committed',e,e.seq)).join('')+streamFrame('end',{reason,after:events.at(-1)?.seq??after});
+function streamResponse(text,step=7){const bytes=new TextEncoder().encode(text);return new Response(new ReadableStream({start(controller){for(let i=0;i<bytes.length;i+=step)controller.enqueue(bytes.subarray(i,i+step));controller.close();}}),{headers:{'Content-Type':'text/event-stream'}});}
+test('committed stream reader handles split UTF-8 and CRLF using one authenticated read-only request',async()=>{
+ const observed=[],sent=[],events=[streamEvent(1),streamEvent(2)],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{sent.push({url,options});return streamResponse(': keepalive\r\n\r\n'+streamWire(events).replaceAll('\n','\r\n'),1);});
+ const result=await client.eventStream('root',{session_id:'session',onEvent:e=>observed.push(e)});assert.deepEqual(observed,events);assert.equal(result.reason,'terminal');assert.equal(result.cursor,2);assert.equal(result.observation.run.id,'root');assert.equal(sent.length,1);assert.equal(sent[0].url,'http://127.0.0.1:8765/v1/runs/root/events/stream?after=0');assert.equal(sent[0].options.method,'GET');assert.equal(sent[0].options.headers.Authorization,'Bearer '+token);assert.equal(sent[0].options.body,undefined);assert.equal(sent[0].options.redirect,'error');
+});
+test('graph stream validates owned child conversation before delivering its event',async()=>{
+ const sent=[],observed=[],events=[streamEvent(1,'child')],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{sent.push({url,options});if(url.endsWith('/children'))return new Response(JSON.stringify([streamRoot({id:'child',parent_id:'root',node_id:'worker'})]),{headers:{'Content-Type':'application/json'}});return streamResponse(streamWire(events,{scope:'graph',run:streamRoot({graph_root:true})}));});
+ assert.equal((await client.eventStream('root',{scope:'graph',session_id:'session',onEvent:e=>observed.push(e)})).cursor,1);assert.deepEqual(observed,events);assert.deepEqual(sent.map(s=>new URL(s.url).pathname),['/v1/graph-runs/root/events/stream','/v1/graph-runs/root/children']);assert.ok(sent.every(s=>s.options.method==='GET'&&s.options.body===undefined));
+ for(const children of [[],[streamRoot({id:'child',parent_id:'foreign',node_id:'worker'})],[streamRoot({id:'child',parent_id:'root',session_id:'foreign',node_id:'worker'})]]){const delivered=[],invalid=new BackendClient('http://localhost:8765',()=>token,async url=>url.endsWith('/children')?new Response(JSON.stringify(children)):streamResponse(streamWire(events,{scope:'graph',run:streamRoot({graph_root:true})})));await assert.rejects(invalid.eventStream('root',{scope:'graph',session_id:'session',onEvent:e=>delivered.push(e)}),error=>/Unowned|identity/.test(error.message)&&error.eventCursor===0);assert.deepEqual(delivered,[]);}
+});
+test('stream rejects changed root/session/scope and events without an initial observation',async()=>{
+ for(const source of [streamWire([streamEvent(1)],{run:streamRoot({id:'foreign'})}),streamWire([streamEvent(1)],{run:streamRoot({session_id:'foreign'})}),streamWire([streamEvent(1)],{scope:'tree'}),streamFrame('committed',streamEvent(1),1)]){const events=[],client=new BackendClient('http://localhost:8765',()=>token,async()=>streamResponse(source));await assert.rejects(client.eventStream('root',{session_id:'session',onEvent:e=>events.push(e)}),error=>/identity|observation/.test(error.message)&&error.eventCursor===0);assert.deepEqual(events,[]);}
+});
+test('stream cursor advances only after delivery and rejects duplicate IDs and conflicting end cursors',async()=>{
+ const initial=streamFrame('observation',{run:streamRoot(),scope:'run',after:0});
+ for(const [source,cursor,count]of [[initial+streamFrame('committed',streamEvent(1),'01'),0,0],[initial+streamFrame('committed',streamEvent(1),2),0,0],[streamWire([streamEvent(1),streamEvent(1)]),1,1],[initial+streamFrame('committed',streamEvent(1),1)+streamFrame('end',{reason:'terminal',after:4}),1,1]]){let delivered=0;const client=new BackendClient('http://localhost:8765',()=>token,async()=>streamResponse(source));await assert.rejects(client.eventStream('root',{session_id:'session',onEvent:()=>delivered++}),error=>/cursor/.test(error.message)&&error.eventCursor===cursor);assert.equal(delivered,count);}
+});
+test('stream validates admission values and an abort during token lookup cannot send a request',async()=>{
+ let fetched=0,tokens=0;const client=new BackendClient('http://localhost:8765',()=>{tokens++;return token;},async()=>{fetched++;throw Error('No request permitted');});
+ for(const changed of [{after:-1},{after:1.5},{after:Number.MAX_SAFE_INTEGER+1},{scope:'unknown'},{session_id:'foreign/session'}])await assert.rejects(client.eventStream('root',{session_id:'session',onEvent(){},...changed}));assert.equal(tokens,0);assert.equal(fetched,0);
+ let release;const lookup=new Promise(yes=>release=yes),abort=new AbortController(),pendingClient=new BackendClient('http://localhost:8765',()=>lookup,async()=>{fetched++;throw Error('Retired connection must not fetch');}),pending=pendingClient.eventStream('root',{session_id:'session',signal:abort.signal,onEvent(){}});abort.abort();release(token);await assert.rejects(pending,{name:'AbortError'});assert.equal(fetched,0);
+});
+test('stream detach preserves delivered cursor and a rejected callback never acknowledges its event',async()=>{
+ const abort=new AbortController(),sent=[],source=streamWire([streamEvent(1),streamEvent(2)]),client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{sent.push({url,options});return streamResponse(source);});let delivered=0;
+ await assert.rejects(client.eventStream('root',{session_id:'session',signal:abort.signal,onEvent(){delivered++;abort.abort();}}),error=>error.name==='AbortError'&&error.eventCursor===1);assert.equal(delivered,1);assert.equal(sent.length,1);assert.equal(sent[0].options.method,'GET');
+ await assert.rejects(client.eventStream('root',{session_id:'session',onEvent(){throw Error('Consumer rejected delivery');}}),error=>error.message==='Consumer rejected delivery'&&error.eventCursor===0);assert.equal(sent.length,2);
+});
+test('EOF, malformed JSON and unsupported frames retain the last accepted cursor',async()=>{
+ const initial=streamFrame('observation',{run:streamRoot(),scope:'run',after:0}),committed=streamFrame('committed',streamEvent(1),1);
+ for(const tail of ['', 'event: committed\ndata: {\n\n','event: unknown\ndata: {}\n\n','event: end\nevent: end\ndata: {}\n\n']){const events=[],client=new BackendClient('http://localhost:8765',()=>token,async()=>streamResponse(initial+committed+tail));await assert.rejects(client.eventStream('root',{session_id:'session',onEvent:e=>events.push(e)}),error=>error.eventCursor===1);assert.equal(events.length,1);}
+});
+test('resume uses the accepted scoped cursor and HTTP rejection does not trigger a fallback or command',async()=>{
+ const sent=[],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{sent.push({url,options});return streamResponse(streamWire([streamEvent(8)],{scope:'tree',after:7,reason:'reconnect'}));});const result=await client.eventStream('root',{session_id:'session',scope:'tree',after:7,onEvent(){}});assert.equal(result.reason,'reconnect');assert.equal(result.cursor,8);assert.equal(sent[0].url,'http://127.0.0.1:8765/v1/runs/root/tree-events/stream?after=7');
+ let rejectedCalls=0;const rejected=new BackendClient('http://localhost:8765',()=>token,async()=>{rejectedCalls++;return new Response(JSON.stringify({detail:'Stream busy'}),{status:503,headers:{'Content-Type':'application/json'}});});await assert.rejects(rejected.eventStream('root',{session_id:'session',onEvent(){throw Error('No event permitted');}}),error=>error.status===503);assert.equal(rejectedCalls,1);
+});
 test('workspace skill inspection uses the native read-only catalogue without inventing activation',async()=>{
  const catalogue={workspace_id:'synthetic-workspace',authority_id:'a'.repeat(32),skills:[{id:'disabled',model_invocable:false}]},sent=[];
  const client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{sent.push({url,options});return {ok:true,json:async()=>catalogue};});

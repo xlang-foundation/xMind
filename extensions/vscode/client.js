@@ -122,6 +122,22 @@ class BackendClient {
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
   run(session_id, prompt, model_id,binding) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}),...profileBindingFields(binding) }); }
   events(id, after) { return this.request(`/v1/runs/${encodeURIComponent(id)}/events?after=${after}`); }
+  async eventStream(id,{after=0,scope='run',session_id,signal,onEvent,onObservation}={}) {
+    executionIdentity(id);executionIdentity(session_id);planInteger(after);
+    if(!['run','tree','graph'].includes(scope)||typeof onEvent!=='function'||onObservation!==undefined&&typeof onObservation!=='function')throw new Error('Invalid event stream observer');
+    signal?.throwIfAborted();const token=validateToken(await this.#tokenProvider());signal?.throwIfAborted();
+    const route=scope==='graph'?`/v1/graph-runs/${id}/events/stream`:`/v1/runs/${id}/${scope==='tree'?'tree-events':'events'}/stream`;
+    const response=await this.fetch(this.baseUrl+route+'?after='+after,{method:'GET',headers:{Authorization:`Bearer ${token}`,Accept:'text/event-stream'},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(35000)]):AbortSignal.timeout(35000),redirect:'error'});
+    if(!response.ok){const value=await response.json();const error=new Error(typeof value.detail==='string'?value.detail:'Native event observation unavailable');error.status=response.status;throw error;}
+    const known=new Set([id]);
+    return readCommittedEventStream(response,{root:id,session:session_id,scope,after,signal,onEvent,onObservation,authorizeEvent:async event=>{
+      if(known.has(event.run_id))return true;
+      const children=scope==='graph'?await this.graphChildren(id):await this.ownedChildren(id);signal?.throwIfAborted();
+      if(!Array.isArray(children)||children.length>4096)throw new Error('Invalid owned stream children');
+      const seen=new Set();for(const record of children){const child=scope==='graph'?record:record.run;validateRunDTO(child);if(child.id===id||seen.has(child.id)||child.parent_id!==id||child.session_id!==session_id||child.graph_root)throw new Error('Owned stream child identity changed');seen.add(child.id);known.add(child.id);}
+      return known.has(event.run_id);
+    }});
+  }
   ownedChildren(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/children`); }
   ownedChildHistory(parent,child) { return this.request(`/v1/runs/${encodeURIComponent(parent)}/children/${encodeURIComponent(child)}/history`); }
   treeEvents(id,after=0) { if(!Number.isSafeInteger(after)||after<0)throw new Error('Invalid tree event cursor');return this.request(`/v1/runs/${encodeURIComponent(id)}/tree-events?after=${after}`); }
@@ -196,6 +212,49 @@ class SkillViewController {
     if(selection.workspace_id!==observed.catalogue.workspace_id||selection.authority_id!==observed.catalogue.authority_id||selection.revision!==observed.selection.revision+1||selection.ids.length!==message.ids.length||message.ids.some(id=>!selection.ids.includes(id))||selection.manual_ids.length!==message.ids.length||message.ids.some(id=>!selection.manual_ids.includes(id)))throw new Error('Backend skill acknowledgement changed scope or selection.');
     this.record={scope,catalogue:observed.catalogue,selection,catalogueError:observed.catalogueError};this.post({type:'skills',catalogue:observed.catalogue,selection,catalogueError:observed.catalogueError});return this.record;
   }
+}
+async function readCommittedEventStream(response,{root,session,scope,after,signal,onEvent,onObservation,authorizeEvent}){
+  if(response.headers?.get('content-type')!=='text/event-stream'||!response.body?.getReader){try{await response.body?.cancel();}catch{}throw new Error('Invalid native event stream response');}
+  const reader=response.body.getReader(),decoder=new TextDecoder('utf-8',{fatal:true});let pending='',cursor=after,observation,total=0;
+  const detach=()=>{reader.cancel().catch(()=>{});};signal?.addEventListener('abort',detach,{once:true});
+  const frame=async text=>{
+    if(new TextEncoder().encode(text).byteLength>16*1024*1024+1024)throw new Error('Event stream frame exceeds its limit');
+    const fields={data:[]};for(const line of text.split('\n')){
+      if(!line||line.startsWith(':'))continue;const split=line.indexOf(':'),key=split<0?line:line.slice(0,split);let value=split<0?'':line.slice(split+1);if(value.startsWith(' '))value=value.slice(1);
+      if(!['id','event','data'].includes(key))throw new Error('Invalid native event stream field');
+      if(key==='data')fields.data.push(value);else {if(Object.hasOwn(fields,key))throw new Error('Duplicate native event stream field');fields[key]=value;}
+    }
+    if(!fields.data.length){if(fields.id!==undefined||fields.event!==undefined)throw new Error('Incomplete native event stream frame');return;}
+    const data=JSON.parse(fields.data.join('\n'));signal?.throwIfAborted();
+    if(fields.event==='observation'){
+      planFields(data,['run','after','scope']);validateRunDTO(data.run);
+      if(observation||fields.id!==undefined||data.run.id!==root||data.run.session_id!==session||data.scope!==scope||data.after!==after||scope!=='run'&&data.run.parent_id!==''||scope==='graph'&&!data.run.graph_root)throw new Error('Native event stream identity changed');
+      observation=data;await onObservation?.(data);signal?.throwIfAborted();return;
+    }
+    if(!observation)throw new Error('Native event stream observation is missing');
+    if(fields.event==='committed'){
+      planFields(data,['seq','run_id','kind','data']);planInteger(data.seq,1);executionIdentity(data.run_id);
+      if(fields.id!==String(data.seq)||data.seq<=cursor||typeof data.kind!=='string'||!data.kind.length||data.kind.length>256)throw new Error('Invalid committed event cursor or payload');
+      if(scope==='run'&&data.run_id!==root||data.run_id!==root&&!await authorizeEvent?.(data))throw new Error('Unowned committed stream event');
+      signal?.throwIfAborted();await onEvent(data,observation);cursor=data.seq;signal?.throwIfAborted();return;
+    }
+    if(fields.event==='end'){
+      planFields(data,['reason','after']);if(fields.id!==undefined||data.after!==cursor||!['terminal','reconnect','reauthenticate','interrupted'].includes(data.reason))throw new Error('Invalid event stream end cursor');
+      return {reason:data.reason,cursor,observation};
+    }
+    throw new Error('Unknown native event stream frame');
+  };
+  try{
+    while(true){
+      signal?.throwIfAborted();const chunk=await reader.read();signal?.throwIfAborted();
+      if(chunk.done){pending+=decoder.decode();throw new Error('Native event stream ended without a complete end frame');}
+      if(!ArrayBuffer.isView(chunk.value))throw new Error('Invalid event stream bytes');total+=chunk.value.byteLength;if(total>64*1024*1024)throw new Error('Event stream exceeds its connection limit');
+      pending+=decoder.decode(chunk.value,{stream:true});pending=pending.replace(/\r\n/g,'\n');
+      let end;while((end=pending.indexOf('\n\n'))!==-1){if(end>16*1024*1024+1024)throw new Error('Event stream frame exceeds its limit');const value=await frame(pending.slice(0,end));pending=pending.slice(end+2);if(value)return value;}
+      if(pending.length>16*1024*1024+1024)throw new Error('Event stream frame exceeds its limit');
+    }
+  }catch(error){if(error&&typeof error==='object')error.eventCursor=cursor;throw error;}
+  finally{signal?.removeEventListener('abort',detach);try{await reader.cancel();}catch{}reader.releaseLock();}
 }
 function executionIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(value))throw new Error('Invalid execution identity');return value;}
 function providerCallIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.:-]{1,256}$/.test(value))throw new Error('Invalid provider call identity');return value;}

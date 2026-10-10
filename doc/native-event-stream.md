@@ -2,8 +2,13 @@
 
 Candidate transport implementation. **New native compilation/integration is
 pending.** The accepted `689404e` installation remains unchanged. The existing
-browser and VS Code controllers still use polling; shared client parsing,
+browser and VS Code controllers still use polling; actual reader integration,
 reconnection and controller adoption are the next integration steps.
+
+The shared `BackendClient.eventStream` reader is now implemented and passes
+synthetic parser/ownership/abort contracts. Actual native-reader integration,
+reconnection management and controller adoption remain pending.
+[Reader candidate and exact verification](evidence/native-event-stream-client-candidate.json).
 
 | Read-only endpoint | Persisted scope |
 | --- | --- |
@@ -51,6 +56,18 @@ The real native view contract now compares single/graph/tree replay with actual
 saved records, checks invalid cursors and exercises browser-cookie streaming.
 Those new assertions have not executed yet.
 [Candidate and exact verification scope](evidence/native-event-stream-transport-candidate.json).
+
+The production reader uses authenticated read-only GET, fatal incremental UTF-8
+decode, exact root/session/scope metadata and canonical increasing committed
+IDs. New child events require matching native child metadata before delivery.
+The cursor advances only after the consumer accepts the event. Abort, invalid
+frames, EOF and consumer rejection detach the feed and retain the last delivered
+cursor; they do not send commands or start a fallback connection. A native end
+frame must acknowledge that exact cursor. Connection/frame limits and transport
+timeouts bound parsing. The complete **232 extension / 43 browser** fixture
+suites pass with all 2421 tracked native/tool/view inputs unchanged. The real
+native view contract now also exercises this production reader and scoped
+resume, but those new assertions remain unexecuted.
 
 Remaining acceptance includes the complete native gate, actual incremental
 delivery while a run continues, authorization revocation/expiry, saturated

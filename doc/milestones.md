@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+Shared event reader candidate: `BackendClient.eventStream` validates root,
+conversation, scope, committed IDs and owned-child metadata, decodes split UTF-8
+and CRLF, preserves consumer-acknowledged cursors and detaches on abort/protocol
+failure without sending commands or fallback requests. All **232 extension /
+43 browser** fixture checks pass with all 2421 tracked inputs unchanged.
+Production-reader replay/resume checks are added to the real native view contract
+but have not run yet. Native integration, subscription/controller adoption and
+installed/rendered streaming remain pending; the accepted installation is
+unchanged. [Candidate scope and original evidence](evidence/native-event-stream-client-candidate.json).
+
 Committed-event transport candidate: native run/graph/owned-tree SSE endpoints,
 scoped cursor replay, bounded connection/stream leases and incremental native
 view/browser forwarding are implemented. The complete local **224 extension /

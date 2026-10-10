@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-native-validation-pending",
+  "acceptedInstalledSource": "689404eeeae8c0b83a7859b7efba584100a46edb",
+  "transportCandidateSource": "7a148ffd7918d2ebb8f8c5d83db1841502249c0d",
+  "scope": "Production shared BackendClient reader under complete synthetic Node suites; no actual new native stream or installed UI execution",
+  "sourceFiles": 2421,
+  "sourceUnchangedAcrossSuites": true,
+  "suites": {
+    "extension": {
+      "tests": 232,
+      "passed": 232,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "sha256": "436214fb31c1df3a518f5b81534d37b7194b131c2dcbb1b36f83108c1ea56a54"
+    },
+    "browser": {
+      "tests": 43,
+      "passed": 43,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "sha256": "539f1bbfb01c98063aa266af2092d1a06a0a2615b00b8cc9056a9a6fc68a1f73"
+    }
+  },
+  "reader": {
+    "method": "BackendClient.eventStream",
+    "sharedClassicBrowserAndNodeSource": true,
+    "utf8": "Fatal incremental decode; split UTF-8 and CRLF tested",
+    "cursor": "Canonical ID equals actual event seq; acknowledge only after consumer delivery",
+    "ownership": "Root/session/scope pinned; new child events require actual owned-child metadata",
+    "disconnect": "Abort closes only observation; no automatic command, model request or fallback",
+    "bounds": "35-second transport timeout, 16 MiB frame plus 1 KiB envelope, 64 MiB connection",
+    "errorReceipt": "Last delivered eventCursor retained on protocol/consumer interruption"
+  },
+  "tests": [
+    "Split UTF-8 and CRLF authenticated GET",
+    "Graph-child ownership and foreign conversation refusal",
+    "Changed root/session/scope and missing observation refusal",
+    "Duplicate/crossed IDs and end cursor mismatch refusal",
+    "Input validation and token-lookup abort without fetch",
+    "Detach cursor and rejected callback acknowledgement",
+    "EOF/malformed JSON/unknown frame retain cursor",
+    "Scoped reconnect receipt and HTTP rejection without fallback"
+  ],
+  "pending": [
+    "Real production reader graph replay and resume added to native view integration contract",
+    "New complete native gate and package",
+    "Browser/VS Code controller subscription adoption",
+    "Actual native incremental/disconnect/revocation/capacity/restart and installed/rendered acceptance"
+  ],
+  "providerRequests": 0,
+  "nativeExecuted": false,
+  "currentInstallationChanged": false,
+  "rawEvidence": {
+    "doc/evidence/native-unified-event-stream-client-extension.log": "436214fb31c1df3a518f5b81534d37b7194b131c2dcbb1b36f83108c1ea56a54",
+    "doc/evidence/native-unified-event-stream-client-browser.log": "539f1bbfb01c98063aa266af2092d1a06a0a2615b00b8cc9056a9a6fc68a1f73",
+    "doc/evidence/native-unified-event-stream-client-source-before.json": "fd42b2d3641b1d8add14dd788d17e81df7b6e5306b5687999bd05bb50782b32f",
+    "doc/evidence/native-unified-event-stream-client-source-after.json": "fd42b2d3641b1d8add14dd788d17e81df7b6e5306b5687999bd05bb50782b32f"
+  }
+}
