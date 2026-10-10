@@ -287,7 +287,8 @@ int run_local_view(int argc, char **argv) {
                         entries.push_back({{"workspace_id", profile.workspace_id}, {"root", profile.root},
                                            {"name", profile.name}});
                     output.status = 200;
-                    output.set_content(Json{{"selected_workspace_id", workspace_id},
+                    output.set_content(Json{{"can_add", true},
+                                            {"selected_workspace_id", workspace_id},
                                             {"workspaces", std::move(entries)}}.dump(),
                                        "application/json");
                     return;
@@ -375,6 +376,120 @@ int run_local_view(int argc, char **argv) {
                             return;
                         }
                         workspaces.emplace(requested_id, target);
+                        browser_sessions.erase(previous);
+                        browser_sessions.emplace(replacement,
+                                                 SessionBinding{requested_id, browser_origin});
+                    }
+                    output.status = 200;
+                    output.set_content(Json{{"credential", replacement},
+                                            {"expires_unix_ms", issued.at("expires_unix_ms")},
+                                            {"max_age_seconds", issued.at("max_age_seconds")},
+                                            {"workspace", Json::parse(metadata->body)}}.dump(),
+                                       "application/json");
+                    return;
+                }
+                if (request.path == "/v1/workspaces/add" && request.method == "POST") {
+                    if (host || request.target != request.path ||
+                        request.get_header_value_count("X-XMind-View-Origin") != 1 ||
+                        request.get_header_value("Content-Type") != "application/json") {
+                        response(output, 400, "Invalid workspace registration request");
+                        return;
+                    }
+                    std::lock_guard switch_lock(browser_switch_mutex);
+                    const auto [current_id, current] = browser_workspace(supplied, browser_origin);
+                    if (!validate_browser_session(supplied, current, browser_origin)) {
+                        response(output, 401, "Browser view session expired or was revoked");
+                        return;
+                    }
+                    std::set<std::string> keys;
+                    const auto selection = Json::parse(body, [&](int depth, Json::parse_event_t event, Json &value) {
+                        require(depth <= 2, "Invalid workspace registration");
+                        if (event == Json::parse_event_t::key)
+                            require(keys.insert(value.get<std::string>()).second, "Duplicate workspace registration field");
+                        return true;
+                    });
+                    require(selection.is_object() && selection.size() == 1 && selection.contains("root") &&
+                                selection.at("root").is_string(),
+                            "Workspace registration requires one absolute folder path");
+                    const auto requested_root = selection.at("root").get<std::string>();
+                    const bool drive_path = requested_root.size() >= 3 &&
+                                            ((requested_root[0] >= 'A' && requested_root[0] <= 'Z') ||
+                                             (requested_root[0] >= 'a' && requested_root[0] <= 'z')) &&
+                                            requested_root[1] == ':' &&
+                                            (requested_root[2] == '\\' || requested_root[2] == '/');
+                    const bool unc_path = requested_root.starts_with("\\\\");
+                    require(!requested_root.empty() && requested_root.size() <= 32760 &&
+                                std::none_of(requested_root.begin(), requested_root.end(), [](unsigned char c) { return c < 32; }) &&
+                                (drive_path || unc_path),
+                            "Workspace folder must be an absolute local or UNC path");
+                    std::unique_ptr<agentflow::WorkspaceTools> requested_workspace;
+                    try {
+                        requested_workspace = std::make_unique<agentflow::WorkspaceTools>(requested_root);
+                    } catch (...) {
+                        response(output, 400,
+                                 "Choose an existing accessible folder outside xMind's private profile storage");
+                        return;
+                    }
+                    const auto requested_id = requested_workspace->identity();
+                    const auto canonical_root = requested_workspace->root_path();
+                    std::shared_ptr<agentflow::LocalProfileConnection> target;
+                    {
+                        std::lock_guard lock(browser_state_mutex);
+                        const auto existing = workspaces.find(requested_id);
+                        if (existing != workspaces.end())
+                            target = existing->second;
+                        else if (workspaces.size() >= 32) {
+                            response(output, 429, "Too many workspaces are attached to this browser view");
+                            return;
+                        }
+                    }
+                    if (!target) {
+                    auto selected = options;
+                    selected.workspace = canonical_root;
+                    selected.profile_root = profile_root_utf8;
+                    selected.provider_config.clear();
+                    selected.graphs_config.clear();
+                    selected.approved_edits.reset();
+                    selected.require_existing_profile = false;
+                    try {
+                        target = std::make_shared<agentflow::LocalProfileConnection>(
+                            agentflow::connect_local_profile(selected));
+                    } catch (const std::invalid_argument &) {
+                        response(output, 400,
+                                 "Choose an existing accessible folder outside xMind's private profile storage");
+                        return;
+                    }
+                    }
+                    require(agentflow::WorkspaceTools(target->workspace).identity() == requested_id,
+                            "Native workspace identity changed during registration");
+                    const auto issued = issue_browser_session(target, browser_origin);
+                    const auto replacement = issued.at("credential").get<std::string>();
+                    httplib::Client metadata_client("127.0.0.1", target->port);
+                    configure(metadata_client);
+                    const auto metadata = metadata_client.Get(
+                        "/v1/workspace", httplib::Headers{{"Authorization", "View " + replacement},
+                                                           {"X-XMind-View-Origin", browser_origin}});
+                    if (!metadata || metadata->status != 200 ||
+                        Json::parse(metadata->body).value("workspace_id", std::string{}) != requested_id) {
+                        revoke_browser_session(replacement, target, browser_origin);
+                        response(output, 503, "Added native workspace is unavailable");
+                        return;
+                    }
+                    {
+                        std::lock_guard lock(browser_state_mutex);
+                        const auto previous = browser_sessions.find(supplied.substr(5));
+                        if (previous == browser_sessions.end() || previous->second.workspace_id != current_id ||
+                            previous->second.browser_origin != browser_origin) {
+                            revoke_browser_session(replacement, target, browser_origin);
+                            response(output, 409, "Browser workspace changed during registration");
+                            return;
+                        }
+                        if (!revoke_browser_session(supplied.substr(5), current, browser_origin)) {
+                            revoke_browser_session(replacement, target, browser_origin);
+                            response(output, 503, "Previous browser workspace could not be detached");
+                            return;
+                        }
+                        workspaces.insert_or_assign(requested_id, target);
                         browser_sessions.erase(previous);
                         browser_sessions.emplace(replacement,
                                                  SessionBinding{requested_id, browser_origin});

@@ -16,30 +16,41 @@ The C++ server owns execution, tools, graphs, permissions, providers and history
 
 ## Workspace selection
 
-The browser shows its active server workspace and offers a selector for other
-local profiles the native host already owns. Unlike VS Code, a browser tab has
-no opened-folder context. The selector is populated from the native protected
-profile catalogue and displays the workspace name and root.
+The browser shows its active server workspace, offers a selector for other
+local profiles and provides **Add workspace** for an existing folder. Unlike VS
+Code, a browser tab has no opened-folder context. The selector is populated
+from the native protected profile catalogue and displays the workspace name
+and root. The native catalogue advertises whether the running server supports
+registration; the button remains disabled until a server with this capability
+is attached.
 
 Workspace selection must be owned by the native host. The browser sends an
-opaque workspace selection, never an arbitrary filesystem path. The host
-resolves and canonicalizes that selection, checks it against its permitted local
-roots, and binds it to a workspace-specific backend and profile before exposing
-sessions or admitting work. A workspace change must refresh the view's session,
+opaque workspace selection for switching and a user-entered folder path for
+registration. The host resolves and canonicalizes both on the native side,
+checks them against its protected profile-storage boundary, and binds the view
+to a workspace-specific backend and profile before exposing sessions or
+admitting work. A workspace change must refresh the view's session,
 run, model and workflow observations against the new authority; it must not
 retarget an already admitted run. A browser directory picker cannot grant the
 server access to the browser user's local files. For a Nexus connection, choices
 must come from server-authorized workspaces, not the client machine. `xmind
-workspaces` and the local view API enumerate previously created, valid profiles
-under the protected profile root. The native host validates each DPAPI record,
-workspace identity and storage boundary; missing or damaged profiles are
-omitted. Selecting a profile attaches its own backend, rotates the browser's
-HttpOnly session, and reloads that profile's sessions, runs, models and graphs.
+workspaces` and the local view API enumerate valid profiles under the protected
+profile root. The native host validates each DPAPI record, workspace identity
+and storage boundary; missing or damaged profiles are omitted. **Add workspace**
+accepts one absolute local or UNC folder path over the same-origin browser
+session. The native host opens and canonicalizes the existing directory,
+rejects inaccessible roots and overlap with private profile storage, creates or
+reuses its protected local profile, then rotates the browser's HttpOnly
+credential onto that workspace. Registration and profile switching are only
+available through the view adapter, which keeps the rotated credential out of
+page JavaScript. The local web UI cannot browse the client's filesystem; the
+submitted path refers to the machine running the native host. Selecting a
+profile attaches its own backend and reloads that profile's sessions, runs,
+models and graphs.
 The VS Code view remains bound to its original workspace, and runs already
 admitted on either backend stay there. Native two-profile switching and stale
-credential rejection pass the local-view contract; browser selector and cookie
-rotation pass the webpage contract. Opening a never-before-seen folder from the
-browser is not part of the local profile catalogue flow.
+credential rejection pass the local-view contract; browser selection,
+registration routing and cookie rotation pass the webpage contract.
 
 ## Start
 

@@ -634,8 +634,8 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
     WorkspaceTools workspace(options.workspace.empty() ? text(fs::current_path()) : options.workspace);
     const auto base = absolute(options.profile_root.empty() ? default_root() : options.profile_root),
                selected = absolute(workspace.root_path());
-    require(!contains(selected, base) && !contains(base, selected),
-            "Profile storage overlaps the selected workspace");
+    if (contains(selected, base) || contains(base, selected))
+        throw std::invalid_argument("Profile storage overlaps the selected workspace");
     Store root(base, !options.require_existing_profile);
     const auto profile_directory = root.directory / wide(context_digest(workspace.identity()));
     if (options.require_existing_profile)
