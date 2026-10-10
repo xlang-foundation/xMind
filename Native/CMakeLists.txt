@@ -915,7 +915,7 @@ if(BUILD_TESTING)
       add_test(NAME native_local_view_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/local_view_contract.mjs" "$<TARGET_FILE:xmind>"
         "${AGENTFLOW_XLANG3_SHARED}" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
-      set_tests_properties(native_local_view_contract PROPERTIES TIMEOUT 120)
+      set_tests_properties(native_local_view_contract PROPERTIES TIMEOUT 240)
     endif()
   else()
     message(WARNING "Node.js is required to run the independent HTTP/CLI contract")

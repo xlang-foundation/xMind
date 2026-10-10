@@ -1,4 +1,5 @@
 #include "agentflow/program_entries.hpp"
+#include "agentflow/local_profile.hpp"
 #include "nlohmann/json.hpp"
 #include <charconv>
 #include <cstdlib>
@@ -20,6 +21,7 @@ void help(){
         "  xmind [--workspace DIR] [--profile-root DIR] [--config FILE] [COMMAND ARGS...]\n"
         "  xmind --port PORT [--workspace DIR] [COMMAND ARGS...]\n"
         "  xmind [local profile options] profile-info\n"
+        "  xmind [local profile options] workspaces\n"
         "  xmind [connection options] mcp-auth\n"
         "  xmind [connection options] mcp-login SERVER\n"
         "  xmind [connection options] mcp-login-status REQUEST_ID\n"
@@ -78,6 +80,13 @@ int dispatch(int argc,char** argv){
     if(first<argc&&std::string_view(argv[first])=="profile-info"){
         if(named_port||first+1!=argc)throw std::invalid_argument("profile-info requires a managed local profile and no command arguments");
         const auto connected=profile();std::cout<<nlohmann::json{{"origin","http://127.0.0.1:"+std::to_string(connected.port)},{"workspace",connected.workspace},{"profile_directory",connected.directory},{"process_id",connected.process_id},{"started",connected.started}}.dump()<<'\n';return 0;
+    }
+    if(first<argc&&std::string_view(argv[first])=="workspaces"){
+        if(named_port||first+1!=argc)throw std::invalid_argument("workspaces requires local profile storage and no command arguments");
+        auto workspaces=nlohmann::json::array();
+        for(const auto& value:agentflow::list_local_workspace_profiles(options.profile_root))
+            workspaces.push_back({{"workspace_id",value.workspace_id},{"root",value.root},{"name",value.name}});
+        std::cout<<nlohmann::json{{"workspaces",std::move(workspaces)}}.dump()<<'\n';return 0;
     }
     std::string chat="chat";
     std::vector<char*> forwarded{argv[0],port.data()};

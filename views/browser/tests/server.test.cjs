@@ -50,6 +50,26 @@ test('browser adapter forwards durable native view credentials across restart wi
     assert.ok(observed.every(item=>!item.input.includes(master)),'Master token cannot enter session JSON');
   }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
 });
+test('workspace catalogue and switch stay native and rotate the HttpOnly profile credential',async()=>{
+ const {createBrowserServer}=await import('../server.mjs'),assetRoot=resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets');
+ const master='workspace-switch-master-token'.padEnd(64,'x'),first='1'.repeat(64)+'.'+'2'.repeat(64),second='3'.repeat(64)+'.'+'4'.repeat(64),idA='windows-local-file-v1:alpha',idB='windows-local-file-v1:beta';let active=first,selected=idA,view;
+ const profiles=[{workspace_id:idA,name:'Alpha',root:'D:\\Projects\\Alpha'},{workspace_id:idB,name:'Beta',root:'D:\\Projects\\Beta'}];
+ const peer=createServer(async(request,response)=>{let input='';for await(const chunk of request)input+=chunk;const reply=(status,data)=>{response.writeHead(status,{'Content-Type':'application/json'});response.end(JSON.stringify(data));};
+  if(request.url==='/v1/view-sessions'){if(request.headers.authorization!=='Bearer '+master){reply(401,{});return;}active=first;reply(200,{credential:first,expires_unix_ms:Date.now()+28800000,max_age_seconds:28800});return;}
+  if(request.headers.authorization!=='View '+active||request.headers['x-xmind-view-origin']!==viewOrigin){reply(401,{});return;}
+  if(request.url==='/v1/workspaces'&&request.method==='GET'){reply(200,{selected_workspace_id:selected,workspaces:profiles});return;}
+  if(request.url==='/v1/workspaces/select'&&request.method==='POST'){const body=JSON.parse(input);assert.equal(Object.keys(body).length,1);if(body.workspace_id!==idB){reply(404,{});return;}selected=idB;active=second;reply(200,{credential:second,expires_unix_ms:Date.now()+28800000,max_age_seconds:28800,workspace:{configured:true,root:profiles[1].root,workspace_id:idB,authority_id:'b'.repeat(32)}});return;}
+  if(request.url==='/v1/health'){reply(200,{status:'ok'});return;}if(request.url==='/v1/view-sessions/revoke'){reply(200,{revoked:true});return;}reply(404,{});
+ });let viewOrigin;
+ try{await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));view=await createBrowserServer({backend:'http://127.0.0.1:'+peer.address().port,assetRoot});viewOrigin=await view.listen();
+  const base={Origin:viewOrigin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'},login=await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...base,Authorization:'Bearer '+master},body:'{}'});assert.equal(login.status,200);let cookie=login.headers.get('set-cookie').split(';')[0];
+  const list=await fetch(viewOrigin+'/ui/workspaces',{headers:{Cookie:cookie,Origin:viewOrigin,'Sec-Fetch-Site':'same-origin'}});assert.equal(list.status,200);assert.deepEqual(await list.json(),{selected_workspace_id:idA,workspaces:profiles});
+  const switched=await fetch(viewOrigin+'/ui/workspaces/select',{method:'POST',headers:{...base,Cookie:cookie},body:JSON.stringify({workspace_id:idB})});assert.equal(switched.status,200);const result=await switched.json();assert.deepEqual(result,{connected:true,workspace:{configured:true,root:profiles[1].root,workspace_id:idB,authority_id:'b'.repeat(32)}});assert.ok(!JSON.stringify(result).includes(second));const replacement=switched.headers.get('set-cookie');assert.match(replacement,/HttpOnly; SameSite=Strict/);cookie=replacement.split(';')[0];
+  assert.equal((await fetch(viewOrigin+'/v1/health',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,200);
+  assert.equal((await fetch(viewOrigin+'/v1/health',{headers:{Cookie:login.headers.get('set-cookie').split(';')[0],'Sec-Fetch-Site':'same-origin'}})).status,401);
+  assert.equal((await fetch(viewOrigin+'/ui/workspaces/select',{method:'POST',headers:{...base,Cookie:cookie},body:JSON.stringify({workspace_id:'windows-local-file-v1:unknown'})})).status,404);
+ }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
+});
 test('event stream routes are read-only and exclude foreign path encodings',async()=>{
  const {allowedApiRoute}=await import('../server.mjs');
  for(const route of ['/v1/runs/root/events/stream','/v1/runs/root/tree-events/stream','/v1/graph-runs/root/events/stream'])for(const method of ['GET','POST','HEAD','PUT','DELETE'])assert.equal(allowedApiRoute(route,method),method==='GET');

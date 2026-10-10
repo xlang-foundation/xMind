@@ -14,6 +14,33 @@ Connect and Disconnect are accessible SVG icon buttons. The connection popup sup
 
 The C++ server owns execution, tools, graphs, permissions, providers and history. SQLite I/O remains in embedded xlang3. The Node HTTP adapter serves validated view-asset snapshots and forwards a finite allowlist of API requests to a configured loopback native server. A page reload loads a complete new snapshot from its configured asset directory without restarting the adapter or losing its authenticated sessions. Boundary, route, size and CSP restrictions still apply; a rejected bundle does not revoke backend access. Closing the view does not cancel execution. This is a local HTTP transport. Team deployment, WebRTC and the standalone Electron IDE belong to private Nexus.
 
+## Workspace selection
+
+The browser shows its active server workspace and offers a selector for other
+local profiles the native host already owns. Unlike VS Code, a browser tab has
+no opened-folder context. The selector is populated from the native protected
+profile catalogue and displays the workspace name and root.
+
+Workspace selection must be owned by the native host. The browser sends an
+opaque workspace selection, never an arbitrary filesystem path. The host
+resolves and canonicalizes that selection, checks it against its permitted local
+roots, and binds it to a workspace-specific backend and profile before exposing
+sessions or admitting work. A workspace change must refresh the view's session,
+run, model and workflow observations against the new authority; it must not
+retarget an already admitted run. A browser directory picker cannot grant the
+server access to the browser user's local files. For a Nexus connection, choices
+must come from server-authorized workspaces, not the client machine. `xmind
+workspaces` and the local view API enumerate previously created, valid profiles
+under the protected profile root. The native host validates each DPAPI record,
+workspace identity and storage boundary; missing or damaged profiles are
+omitted. Selecting a profile attaches its own backend, rotates the browser's
+HttpOnly session, and reloads that profile's sessions, runs, models and graphs.
+The VS Code view remains bound to its original workspace, and runs already
+admitted on either backend stay there. Native two-profile switching and stale
+credential rejection pass the local-view contract; browser selector and cookie
+rotation pass the webpage contract. Opening a never-before-seen folder from the
+browser is not part of the local profile catalogue flow.
+
 ## Start
 
 In the updated VS Code extension, run **xMind: Open Browser View (Copy Connection Token)**. It validates the selected backend, starts a loopback view adapter for that same origin, copies its connection token to the clipboard and opens a credential-free browser URL. Paste the token into Connect once. Models and history remain on the same server as the editor. This command does not create a second database or copy provider credentials. The launcher reuses its view for the same backend and closes the old access adapter when the configured backend changes. Actual IDE invocation of this newly added command remains pending; host contracts, native sharing and packaged assets are verified.

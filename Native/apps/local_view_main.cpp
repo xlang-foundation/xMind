@@ -2,11 +2,13 @@
 #include "agentflow/context_records.hpp"
 #include "agentflow/owner_process.hpp"
 #include "agentflow/runtime_generation.hpp"
+#include "agentflow/workspace_tools.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
 
+#include <algorithm>
 #include <chrono>
 #include <atomic>
 #include <cstdlib>
@@ -14,12 +16,14 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <string>
 
 namespace {
 using Json = nlohmann::json;
+struct Unauthorized : std::runtime_error { using std::runtime_error::runtime_error; };
 std::atomic<httplib::Server *> active_view = nullptr;
 BOOL WINAPI stop_view(DWORD event) {
     if (event == CTRL_C_EVENT || event == CTRL_BREAK_EVENT || event == CTRL_CLOSE_EVENT) {
@@ -111,7 +115,19 @@ int run_local_view(int argc, char **argv) {
         }
         agentflow::validate_local_view_ready(ready, options.workspace);
         verify_client_image();
-        auto connection = agentflow::connect_local_profile(options);
+        auto connection = std::make_shared<agentflow::LocalProfileConnection>(
+            agentflow::connect_local_profile(options));
+        const auto profile_root =
+            std::filesystem::path(connection->directory).parent_path().u8string();
+        const std::string profile_root_utf8(reinterpret_cast<const char *>(profile_root.data()),
+                                            profile_root.size());
+        const auto selected_workspace_id = agentflow::WorkspaceTools(connection->workspace).identity();
+        std::mutex browser_state_mutex;
+        std::mutex browser_switch_mutex;
+        std::map<std::string, std::shared_ptr<agentflow::LocalProfileConnection>> workspaces;
+        struct SessionBinding { std::string workspace_id, browser_origin; };
+        std::map<std::string, SessionBinding> browser_sessions;
+        workspaces.emplace(selected_workspace_id, connection);
         httplib::Server server;
         server.new_task_queue = [] { return new httplib::ThreadPool(4, 4, 32); };
         server.set_payload_max_length(1024 * 1024);
@@ -121,8 +137,8 @@ int run_local_view(int argc, char **argv) {
         const int port = server.bind_to_any_port("127.0.0.1");
         require(port > 0, "Cannot bind native view adapter");
         const auto origin = "http://127.0.0.1:" + std::to_string(port);
-        const std::string master(reinterpret_cast<const char *>(connection.auth.view().data()),
-                                 connection.auth.view().size());
+        const std::string master(reinterpret_cast<const char *>(connection->auth.view().data()),
+                                 connection->auth.view().size());
         std::mutex credential_mutex;
         std::string credential;
         std::int64_t expires = 0;
@@ -133,7 +149,7 @@ int run_local_view(int argc, char **argv) {
             client.set_follow_location(false);
         };
         const auto issue = [&] {
-            httplib::Client client("127.0.0.1", connection.port);
+            httplib::Client client("127.0.0.1", connection->port);
             configure(client);
             const auto lease =
                 Json{{"origin", origin},
@@ -154,6 +170,69 @@ int run_local_view(int argc, char **argv) {
             credential = replacement;
             expires = value.at("expires_unix_ms").get<std::int64_t>();
             require(expires > now(), "Native view session already expired");
+        };
+        const auto browser_workspace = [&](const std::string &supplied, const std::string &browser_origin) {
+            require(supplied.starts_with("View ") && supplied.size() == 134 &&
+                        supplied[69] == '.' && supplied.substr(5, 64).find_first_not_of("0123456789abcdef") == std::string::npos &&
+                        supplied.substr(70).find_first_not_of("0123456789abcdef") == std::string::npos,
+                    "Invalid browser view session");
+            const auto token = supplied.substr(5);
+            std::lock_guard lock(browser_state_mutex);
+            const auto binding = browser_sessions.find(token);
+            if (binding == browser_sessions.end() || binding->second.browser_origin != browser_origin)
+                throw Unauthorized("Browser view session is no longer active");
+            const auto target = workspaces.find(binding->second.workspace_id);
+            if (target == workspaces.end())
+                throw Unauthorized("Browser workspace is no longer available");
+            return std::pair<std::string, std::shared_ptr<agentflow::LocalProfileConnection>>{
+                binding->second.workspace_id, target->second};
+        };
+        const auto validate_browser_session = [&](const std::string &supplied,
+                                                  const std::shared_ptr<agentflow::LocalProfileConnection> &target,
+                                                  const std::string &browser_origin) {
+            httplib::Client client("127.0.0.1", target->port);
+            configure(client);
+            const auto current = client.Post("/v1/view-sessions/current",
+                                             {{"Authorization", supplied},
+                                              {"X-XMind-View-Origin", browser_origin}}, "{}", "application/json");
+            return current && current->status == 200;
+        };
+        const auto issue_browser_session = [&](const std::shared_ptr<agentflow::LocalProfileConnection> &target,
+                                               const std::string &browser_origin) {
+            httplib::Client client("127.0.0.1", target->port);
+            configure(client);
+            const auto lease =
+                Json{{"origin", browser_origin},
+                     {"process_id", GetCurrentProcessId()},
+                     {"process_birth", agentflow::inspect_owner_process_birth(GetCurrentProcessId())}}
+                    .dump();
+            auto auth = std::string(reinterpret_cast<const char *>(target->auth.view().data()),
+                                    target->auth.view().size());
+            const auto issued = client.Post("/v1/view-sessions", {{"Authorization", "Bearer " + auth}},
+                                            lease, "application/json");
+            if (!auth.empty())
+                SecureZeroMemory(auth.data(), auth.size());
+            require(issued && issued->status == 200, "Native workspace rejected browser access");
+            const auto value = Json::parse(issued->body);
+            const auto token = value.at("credential").get<std::string>();
+            require(token.size() == 129 && token[64] == '.' &&
+                        token.find_first_not_of("0123456789abcdef.") == std::string::npos &&
+                        value.at("expires_unix_ms").get<std::int64_t>() > now() &&
+                        value.at("max_age_seconds").get<std::int64_t>() > 0 &&
+                        value.at("max_age_seconds").get<std::int64_t>() <= 28800,
+                    "Native workspace returned an invalid browser session");
+            return value;
+        };
+        const auto revoke_browser_session = [&](const std::string &token,
+                                                const std::shared_ptr<agentflow::LocalProfileConnection> &target,
+                                                const std::string &browser_origin) {
+            httplib::Client client("127.0.0.1", target->port);
+            configure(client);
+            const auto revoked = client.Post("/v1/view-sessions/revoke",
+                                             {{"Authorization", "View " + token},
+                                              {"X-XMind-View-Origin", browser_origin}},
+                                             "{}", "application/json");
+            return revoked && (revoked->status == 200 || revoked->status == 401);
         };
         issue();
         server.set_pre_routing_handler([&](const httplib::Request &request, httplib::Response &output) {
@@ -190,6 +269,124 @@ int run_local_view(int argc, char **argv) {
             try {
                 httplib::Headers headers;
                 std::string body = request.body;
+                std::string requested_browser_origin;
+                const std::string browser_origin = request.get_header_value("X-XMind-View-Origin");
+                if (request.path == "/v1/workspaces" && request.method == "GET") {
+                    if (host || request.target != request.path ||
+                        request.get_header_value_count("X-XMind-View-Origin") != 1) {
+                        response(output, 400, "Invalid workspace catalogue request");
+                        return;
+                    }
+                    const auto [workspace_id, target] = browser_workspace(supplied, browser_origin);
+                    if (!validate_browser_session(supplied, target, browser_origin)) {
+                        response(output, 401, "Browser view session expired or was revoked");
+                        return;
+                    }
+                    Json entries = Json::array();
+                    for (const auto &profile : agentflow::list_local_workspace_profiles(profile_root_utf8))
+                        entries.push_back({{"workspace_id", profile.workspace_id}, {"root", profile.root},
+                                           {"name", profile.name}});
+                    output.status = 200;
+                    output.set_content(Json{{"selected_workspace_id", workspace_id},
+                                            {"workspaces", std::move(entries)}}.dump(),
+                                       "application/json");
+                    return;
+                }
+                if (request.path == "/v1/workspaces/select" && request.method == "POST") {
+                    if (host || request.target != request.path ||
+                        request.get_header_value_count("X-XMind-View-Origin") != 1 ||
+                        request.get_header_value("Content-Type") != "application/json") {
+                        response(output, 400, "Invalid workspace selection request");
+                        return;
+                    }
+                    std::lock_guard switch_lock(browser_switch_mutex);
+                    const auto [current_id, current] = browser_workspace(supplied, browser_origin);
+                    if (!validate_browser_session(supplied, current, browser_origin)) {
+                        response(output, 401, "Browser view session expired or was revoked");
+                        return;
+                    }
+                    std::set<std::string> keys;
+                    const auto selection = Json::parse(body, [&](int depth, Json::parse_event_t event, Json &value) {
+                        require(depth <= 2, "Invalid workspace selection");
+                        if (event == Json::parse_event_t::key)
+                            require(keys.insert(value.get<std::string>()).second, "Duplicate workspace selection field");
+                        return true;
+                    });
+                    require(selection.is_object() && selection.size() == 1 &&
+                                selection.contains("workspace_id") && selection.at("workspace_id").is_string() &&
+                                selection.at("workspace_id").get_ref<const std::string &>().size() <= 256,
+                            "Workspace selection requires one opaque workspace ID");
+                    const auto requested_id = selection.at("workspace_id").get<std::string>();
+                    const auto catalogue = agentflow::list_local_workspace_profiles(profile_root_utf8);
+                    const auto chosen = std::find_if(catalogue.begin(), catalogue.end(),
+                                                     [&](const auto &item) { return item.workspace_id == requested_id; });
+                    if (chosen == catalogue.end()) {
+                        response(output, 404, "Workspace is not in the native local profile catalogue");
+                        return;
+                    }
+                    std::shared_ptr<agentflow::LocalProfileConnection> target;
+                    {
+                        std::lock_guard lock(browser_state_mutex);
+                        const auto found = workspaces.find(requested_id);
+                        if (found != workspaces.end())
+                            target = found->second;
+                        else if (workspaces.size() >= 32) {
+                            response(output, 429, "Too many workspaces are attached to this browser view");
+                            return;
+                        }
+                    }
+                    if (!target) {
+                        auto selected = options;
+                        selected.workspace = chosen->root;
+                        selected.profile_root = profile_root_utf8;
+                        selected.provider_config.clear();
+                        selected.graphs_config.clear();
+                        selected.approved_edits.reset();
+                        selected.require_existing_profile = true;
+                        target = std::make_shared<agentflow::LocalProfileConnection>(
+                            agentflow::connect_local_profile(selected));
+                    }
+                    require(agentflow::WorkspaceTools(target->workspace).identity() == requested_id,
+                            "Native profile resolved to a different workspace");
+                    const auto issued = issue_browser_session(target, browser_origin);
+                    const auto replacement = issued.at("credential").get<std::string>();
+                    httplib::Client metadata_client("127.0.0.1", target->port);
+                    configure(metadata_client);
+                    const auto metadata = metadata_client.Get(
+                        "/v1/workspace", httplib::Headers{{"Authorization", "View " + replacement},
+                                                           {"X-XMind-View-Origin", browser_origin}});
+                    if (!metadata || metadata->status != 200) {
+                        revoke_browser_session(replacement, target, browser_origin);
+                        response(output, 503, "Selected native workspace is unavailable");
+                        return;
+                    }
+                    {
+                        std::lock_guard lock(browser_state_mutex);
+                        const auto previous = browser_sessions.find(supplied.substr(5));
+                        if (previous == browser_sessions.end() || previous->second.workspace_id != current_id ||
+                            previous->second.browser_origin != browser_origin) {
+                            revoke_browser_session(replacement, target, browser_origin);
+                            response(output, 409, "Browser workspace changed during selection");
+                            return;
+                        }
+                        if (!revoke_browser_session(supplied.substr(5), current, browser_origin)) {
+                            revoke_browser_session(replacement, target, browser_origin);
+                            response(output, 503, "Previous browser workspace could not be detached");
+                            return;
+                        }
+                        workspaces.emplace(requested_id, target);
+                        browser_sessions.erase(previous);
+                        browser_sessions.emplace(replacement,
+                                                 SessionBinding{requested_id, browser_origin});
+                    }
+                    output.status = 200;
+                    output.set_content(Json{{"credential", replacement},
+                                            {"expires_unix_ms", issued.at("expires_unix_ms")},
+                                            {"max_age_seconds", issued.at("max_age_seconds")},
+                                            {"workspace", Json::parse(metadata->body)}}.dump(),
+                                       "application/json");
+                    return;
+                }
                 if (host && request.path == "/v1/view-sessions" && request.method == "POST") {
                     // A trusted host may open the existing browser adapter.
                     std::set<std::string> keys;
@@ -205,6 +402,7 @@ int run_local_view(int argc, char **argv) {
                                 input.at("origin").is_string(),
                             "Browser session requires only its origin");
                     auto lease = input;
+                    requested_browser_origin = input.at("origin").get<std::string>();
                     lease["process_id"] = GetCurrentProcessId();
                     lease["process_birth"] =
                         agentflow::inspect_owner_process_birth(GetCurrentProcessId());
@@ -217,6 +415,11 @@ int run_local_view(int argc, char **argv) {
                     headers.emplace("Authorization", "View " + credential);
                     headers.emplace("X-XMind-View-Origin", origin);
                 } else {
+                    if (request.get_header_value_count("X-XMind-View-Origin") != 1) {
+                        response(output, 403, "Browser view origin required");
+                        return;
+                    }
+                    (void)browser_workspace(supplied, browser_origin);
                     headers.emplace("Authorization", supplied);
                         headers.emplace("X-XMind-View-Origin",
                                         request.get_header_value("X-XMind-View-Origin"));
@@ -226,7 +429,12 @@ int run_local_view(int argc, char **argv) {
                     require(request.get_header_value_count("Last-Event-ID")==1,"Duplicate stream cursor");
                     headers.emplace("Last-Event-ID",request.get_header_value("Last-Event-ID"));
                 }
-                httplib::Client client("127.0.0.1", connection.port);
+                std::shared_ptr<agentflow::LocalProfileConnection> browser_target;
+                if (!host) {
+                    browser_target = browser_workspace(supplied, browser_origin).second;
+                }
+                const auto backend_port = host ? connection->port : browser_target->port;
+                httplib::Client client("127.0.0.1", backend_port);
                 configure(client);
                 if(streaming){
                     auto stream=std::make_shared<httplib::ClientImpl::StreamHandle>(client.open_stream("GET",request.target,{},headers));
@@ -251,6 +459,23 @@ int run_local_view(int argc, char **argv) {
                     response(output, 503,
                              "Native backend observation unavailable; reconnect this profile");
                 else {
+                    if (host && request.path == "/v1/view-sessions" && request.method == "POST" &&
+                        result->status == 200) {
+                        const auto issued = Json::parse(result->body);
+                        const auto token = issued.at("credential").get<std::string>();
+                        const auto requested_origin = requested_browser_origin;
+                        require(token.size() == 129 && token[64] == '.' &&
+                                    !requested_origin.empty(),
+                                "Native server returned an invalid browser credential");
+                        std::lock_guard lock(browser_state_mutex);
+                        require(browser_sessions.size() < 128, "Browser session registry is full");
+                        browser_sessions.emplace(token,
+                                                 SessionBinding{selected_workspace_id, requested_origin});
+                    } else if (!host && request.path == "/v1/view-sessions/revoke" &&
+                               request.method == "POST" && result->status == 200) {
+                        std::lock_guard lock(browser_state_mutex);
+                        browser_sessions.erase(supplied.substr(5));
+                    }
                     output.status = result->status;
                     output.set_content(result->body, result->get_header_value("Content-Type"));
                 }
@@ -258,13 +483,15 @@ int run_local_view(int argc, char **argv) {
                 response(output, 400, "Invalid view request");
             } catch (const Json::exception &) {
                 response(output, 400, "Invalid view request");
+            } catch (const Unauthorized &) {
+                response(output, 401, "Browser view session is no longer active");
             } catch (...) {
                 response(output, 503, "Native view observation unavailable");
             }
         };
         server.Get(R"(/v1/.*)", forward);
         server.Post(R"(/v1/.*)", forward);
-        httplib::Client metadata_client("127.0.0.1", connection.port);
+        httplib::Client metadata_client("127.0.0.1", connection->port);
         configure(metadata_client);
         const auto metadata =
             metadata_client.Get("/v1/workspace", httplib::Headers{{"Authorization", "View " + credential},
@@ -277,18 +504,18 @@ int run_local_view(int argc, char **argv) {
                  {"workspace", workspace},
                  {"process_id", GetCurrentProcessId()},
                  {"process_birth", agentflow::inspect_owner_process_birth(GetCurrentProcessId())},
-                 {"backend_origin", "http://127.0.0.1:" + std::to_string(connection.port)},
-                 {"backend_process_id", connection.process_id},
-                 {"profile_directory", connection.directory},
-                 {"started_backend", connection.started}}
+                 {"backend_origin", "http://127.0.0.1:" + std::to_string(connection->port)},
+                 {"backend_process_id", connection->process_id},
+                 {"profile_directory", connection->directory},
+                 {"started_backend", connection->started}}
                 .dump(),
-            connection.workspace);
+            connection->workspace);
         active_view = &server;
         SetConsoleCtrlHandler(stop_view, TRUE);
         const auto ok = server.listen_after_bind();
         SetConsoleCtrlHandler(stop_view, FALSE);
         active_view = nullptr;
-        httplib::Client cleanup("127.0.0.1", connection.port);
+        httplib::Client cleanup("127.0.0.1", connection->port);
         configure(cleanup);
         cleanup.Post("/v1/view-sessions/revoke",
                      {{"Authorization", "View " + credential}, {"X-XMind-View-Origin", origin}}, "{}",

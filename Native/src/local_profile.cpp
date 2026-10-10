@@ -577,14 +577,71 @@ bool authenticated(const Json &state) {
     }
 }
 } // namespace
+std::vector<LocalWorkspaceProfile> list_local_workspace_profiles(const std::string &profile_root) {
+    const auto configured = absolute(profile_root.empty() ? default_root() : profile_root);
+    if (!fs::exists(configured))
+        return {};
+    Store root(configured, false);
+    std::vector<LocalWorkspaceProfile> result;
+    std::size_t examined = 0;
+    bool exceeded_result_limit = false;
+    for (const auto &entry : fs::directory_iterator(root.directory)) {
+        require(++examined <= 4096, "Local workspace catalogue exceeds its entry limit");
+        const auto name = entry.path().filename().native();
+        std::string encoded_name;
+        try {
+            encoded_name = utf8(name);
+        } catch (...) {
+            continue;
+        }
+        if (!hex(encoded_name, 64))
+            continue;
+        try {
+            Store store(root.directory / name, false);
+            auto state = store.state();
+            struct WipeAuth {
+                Json &state;
+                ~WipeAuth() {
+                    if (state.is_object() && state.contains("auth") && state["auth"].is_string()) {
+                        auto &value = state["auth"].get_ref<std::string &>();
+                        if (!value.empty())
+                            SecureZeroMemory(value.data(), value.size());
+                    }
+                }
+            } wipe{state};
+            WorkspaceTools workspace(state.at("workspace").get<std::string>());
+            shape(state, store, workspace);
+            if (encoded_name != context_digest(workspace.identity()))
+                continue;
+            if (result.size() == 256) {
+                exceeded_result_limit = true;
+                break;
+            }
+            result.push_back({workspace.identity(), workspace.root_path(),
+                              utf8(fs::u8path(workspace.root_path()).filename().native())});
+        } catch (...) {
+            // A damaged, stale, or inaccessible sibling profile must not make
+            // a different valid workspace disappear from the catalogue.
+        }
+    }
+    require(!exceeded_result_limit, "Local workspace catalogue exceeds its result limit");
+    std::sort(result.begin(), result.end(), [](const auto &left, const auto &right) {
+        return left.workspace_id < right.workspace_id;
+    });
+    return result;
+}
 LocalProfileConnection connect_local_profile(const LocalProfileOptions &options) {
     WorkspaceTools workspace(options.workspace.empty() ? text(fs::current_path()) : options.workspace);
     const auto base = absolute(options.profile_root.empty() ? default_root() : options.profile_root),
                selected = absolute(workspace.root_path());
     require(!contains(selected, base) && !contains(base, selected),
             "Profile storage overlaps the selected workspace");
-    Store root(base, true);
-    Store store(root.directory / wide(context_digest(workspace.identity())), true);
+    Store root(base, !options.require_existing_profile);
+    const auto profile_directory = root.directory / wide(context_digest(workspace.identity()));
+    if (options.require_existing_profile)
+        require(fs::exists(profile_directory / L"profile.state"),
+                "Workspace is not present in the existing local profile catalogue");
+    Store store(profile_directory, !options.require_existing_profile);
     auto lock = store.lock();
     Json state;
     bool started = false;
