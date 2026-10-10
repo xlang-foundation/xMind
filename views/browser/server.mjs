@@ -84,7 +84,7 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
    // A new page load picks up a complete validated view snapshot. UI releases
    // do not restart the access adapter or invalidate its authenticated sessions.
    if(url.pathname==='/ui/'&&request.method==='GET')files=await readAssets();
-   const file=files.get(url.pathname);if(file&&(request.method==='GET'||request.method==='HEAD')){const bytes=url.pathname==='/ui/'?Buffer.from(file.bytes.toString('utf8').replace('<body>',`<body data-xmind-local-access="${localAccessToken!==undefined?'true':'false'}">`)):file.bytes;response.writeHead(200,{'Content-Type':file.mime,'Content-Security-Policy':csp,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer'});response.end(request.method==='HEAD'?undefined:bytes);return;}
+   const file=files.get(url.pathname);if(file&&(request.method==='GET'||request.method==='HEAD')){response.writeHead(200,{'Content-Type':file.mime,'Content-Security-Policy':csp,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer'});response.end(request.method==='HEAD'?undefined:file.bytes);return;}
    if(!allowedApiRoute(url.pathname,request.method)){reply(404,{detail:'View route not found'});return;}
    if(request.method==='POST'&&request.headers.origin!==viewOrigin){reply(403,{detail:'Same-origin browser access required'});return;}
    let access;const authorization=request.headers.authorization;
