@@ -69,6 +69,8 @@ async function activate(context) {
   const stop = () => { clearTimeout(snapshotTimer);snapshotTimer=undefined;eventSubscription?.stop();generation++;contextController?.invalidate();skillController?.invalidate();profileController?.invalidate(); };
   const streamCurrent=pin=>!!panel&&panel===pin.view&&generation===pin.generation&&client===pin.client&&sessionId===pin.session&&configuredOrigin()===pin.origin;
   function watch(){
+    const pin=eventSubscription?.pin,selected=sessionRuns.find(value=>value.id===runId);
+    if(pin&&selected&&['completed','failed','cancelled'].includes(selected.state)&&!eventSubscription.finished&&pin.root===selected.id&&streamCurrent(pin))return;
     const active=value=>['queued','running','paused'].includes(value.state);
     const run=sessionRuns.find(value=>value.id===runId&&active(value))||sessionRuns.find(active)||((pendingTreeEvents||pendingPlanRead)&&sessionRuns.find(value=>value.id===runId));
     if(!panel||!client||!sessionId||!run){eventSubscription?.stop();return;}

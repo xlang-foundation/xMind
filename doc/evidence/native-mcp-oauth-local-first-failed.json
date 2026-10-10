@@ -1,0 +1,18 @@
+{
+  "contractsPassed": 108,
+  "contractsFailed": 2,
+  "seconds": 359.55,
+  "failures": [
+    "Local profile first startup hit 60-second child timeout before result",
+    "Browser passed; actual production sidebar prematurely retired its feed before incremental completion frames"
+  ],
+  "sourceBaseRevision": "ad5a363d24c95345a2f6759672801895ac08bef5",
+  "scope": "Complete native gate failed. Current native MCP HTTP effect and OAuth transport components passed at their test scopes; full product acceptance is not established.",
+  "rawHashes": {
+    "doc/evidence/native-mcp-oauth-local-first-failed-build.log": "d71ac5bac32fd07dba2804fb954154d4b5f6612fa3534c359fa7f24f495e4944",
+    "doc/evidence/native-mcp-oauth-local-first-failed-ctest.log": "ff3d60c7da17def408c9703390cca35ed6f187848a80f2fe898d46e1184e7e98",
+    "doc/evidence/native-mcp-oauth-local-first-failed-contracts.json": "8f31919e960b6c9403f17bd5a19e821b15c533f7f0df3a9535c3b38f5d593608",
+    "doc/evidence/native-mcp-oauth-local-first-failed-source-before.json": "0f48b33c3cff603cc7084e6c8894a2826ca0063da455c835dccc1df76b71984f",
+    "doc/evidence/native-mcp-oauth-local-first-failed-details.log": "cb0fd8a0d7a0a30d895a15b2dc440c35fb42ae8df91f391df9ebbe2ffbbca9f6"
+  }
+}

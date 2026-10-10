@@ -1,0 +1,54 @@
+Start testing: Oct 09 21:02 Pacific Daylight Time
+----------------------------------------------------------
+90/110 Testing: native_local_profile_contract
+90/110 Test: native_local_profile_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/local_profile_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/xlang3_runtime.dll" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_local_profile_contract" start time: Oct 09 21:02 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualManagedNativeStartup":true,"authenticatedNativeOwnerVerified":true,"concurrentReattachmentSameOwner":true,"encryptedRendezvous":true,"consoleDetachKeepsOwner":true,"changedPolicyAndDamagedRecordRefused":true,"actualToolGraph":true,"sameSqliteProfileAfterObservedExit":true,"historyExactAfterRestart":true,"privateStorageExclusion":true,"providerRequests":0,"releasePackage":false,"installedIde":false}
+<end of output>
+Test time =  74.42 sec
+----------------------------------------------------------
+Test Passed.
+"native_local_profile_contract" end time: Oct 09 21:03 Pacific Daylight Time
+"native_local_profile_contract" time elapsed: 00:01:14
+----------------------------------------------------------
+
+91/110 Testing: native_local_view_contract
+91/110 Test: native_local_view_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/xlang3_runtime.dll" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_local_view_contract" start time: Oct 09 21:03 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"retainedFixture":"C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-local-view-KAOvH3"}
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(feeds.flatMap(feed=>feed.events).some(event=>event.seq>before.at(-1).seq))
+
+    at exerciseNativeSidebar (file:///D:/CantorAI2026/xMind/Native/tests/native_sidebar_subscription.mjs:40:183)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs:86:366 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+<end of output>
+Test time =  71.29 sec
+----------------------------------------------------------
+Test Failed.
+"native_local_view_contract" end time: Oct 09 21:04 Pacific Daylight Time
+"native_local_view_contract" time elapsed: 00:01:11
+----------------------------------------------------------
+
+End testing: Oct 09 21:04 Pacific Daylight Time

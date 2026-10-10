@@ -20,14 +20,18 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
-Native MCP HTTP remains unfinished. The production approval registry now has
-a shared native client interface implemented by stdio; its new compilation and
-effect-contract acceptance are pending. The native HTTP owner, incremental
-decoder, metadata projection, shared result validation and official HTTP SDK
-effect assertions are also unexecuted. Native configuration/factory now route
-agents, graph tools and admin discovery through stdio or HTTP, with protected
-endpoint-bound bearer references. That source and expanded persistence/authority
-assertions await acceptance; OAuth and broader HTTP lifecycle remain unfinished.
+Native MCP HTTP remains partial. The native owner, decoder, metadata projection,
+shared result validation and configured factory have compiled. The actual
+official HTTP SDK effect contract passes approved JSON/SSE writes, denial,
+duplicate rejection, lost-reply uncertainty and xlang3 SQLite restart. Native
+configuration/authority assertions and OAuth metadata/challenge/401/TLS-negative
+fixtures pass. The complete revised local gate passes **110/110** in **371.74
+seconds**, with **2438** unchanged inputs and full **244/54** synthetic client
+suites. [Exact component scope and raw evidence](evidence/native-mcp-oauth-local.json).
+Hosted packaging and installed public agent/graph workflows remain separate
+verification requirements. Positive OAuth
+discovery/login/token exchange, broader protocol support and older HTTP lifecycle
+remain unfinished.
 [Scope and pinned protocols](native-mcp-http.md).
 
 Native file discovery and literal content search now interpret hierarchical

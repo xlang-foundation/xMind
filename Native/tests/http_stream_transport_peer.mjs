@@ -16,6 +16,13 @@ const jsonPostReply='{"input_tokens":19,"opaque":"synthetic 🌍"}';
 const wire='data: '+JSON.stringify({choices:[{index:0,delta:{content:'transport fixture'},finish_reason:'stop'}]})+'\n\ndata: [DONE]\n\n';
 function handler(request,response) {
   requests++;
+  if(request.url==='/oauth-auth'){
+    mcpRequests.set(request.url,(mcpRequests.get(request.url)??0)+1);
+    assert.equal(request.method,'POST');assert.equal(request.headers.authorization,'Bearer transport-test-token-not-a-real-key');
+    assert.equal(request.headers['mcp-method'],'server/discover');
+    request.resume();response.writeHead(401,{'WWW-Authenticate':['Basic realm="ignored, challenge"','Bearer resource_metadata="https://resource.example.test/metadata?tenant=one", scope="files:read"'],'Content-Type':'application/json'});
+    response.end('{"private":"must not enter model context"}');return;
+  }
   if(request.url.startsWith('/mcp/')){
     mcpRequests.set(request.url,(mcpRequests.get(request.url)??0)+1);
     assert.equal(request.method,'POST');assert.equal(request.headers.accept,'application/json, text/event-stream');assert.equal(request.headers['content-type'],'application/json');
@@ -110,7 +117,7 @@ try {
   await Promise.all([new Promise(resolve=>plain.listen(0,'127.0.0.1',resolve)),new Promise(resolve=>tls.listen(0,'127.0.0.1',resolve))]);
   const result=await execute(executable,[`http://127.0.0.1:${plain.address().port}`,`https://127.0.0.1:${tls.address().port}`],{timeout:20000,windowsHide:true});
   assert.equal(redirected,0,'Credentials must not be forwarded by a followed redirect');
-  assert.deepEqual(Object.fromEntries(mcpRequests),{'/mcp/json':1,'/mcp/sse':1,'/mcp/error':1,'/mcp/auth':1,'/mcp/legacy':1,'/mcp/notification':1,'/mcp/bad-ack':1,'/mcp/redirect':1,'/mcp/wrong-media':1,'/mcp/delay':2,'/mcp/after-failure':1},'Native MCP POST requests must reach sockets exactly once; invalid metadata/pre-cancel/TLS must not reach a peer');
+  assert.deepEqual(Object.fromEntries(mcpRequests),{'/mcp/json':1,'/mcp/sse':1,'/mcp/error':1,'/mcp/auth':1,'/mcp/legacy':1,'/mcp/notification':1,'/mcp/bad-ack':1,'/mcp/redirect':1,'/mcp/wrong-media':1,'/mcp/delay':2,'/mcp/after-failure':1,'/oauth-auth':1},'Native MCP POST requests must reach sockets exactly once; invalid metadata/pre-cancel/TLS and retired OAuth owners must not reach a peer');
   assert.deepEqual(Object.fromEntries(credentialRequests),{'/auth/api-key':1,'/json-auth/api-key':1,'/auth/api-key/redirect':1,'/auth/google-key':1,'/json-auth/google-key':1,'/auth/google-key/redirect':1},'Only selected-header requests reach the wire; missing/injected credentials are rejected before sending');
   assert.deepEqual(Object.fromEntries(jsonPostRequests),{'/post-json/bearer':1,'/post-json/api-key':1,'/post-json/google-key':1,'/post-json/claude-protocol':1,'/post-json/boundary':2,'/post-json/large':1,'/post-json/oversized':1,'/post-json/wrong-media':1,'/post-json/redirect':1,'/post-json/diagnostic':1,'/post-json/delay':2,'/post-json/stall':1,'/post-json/after-failure':1},'Exact native JSON POST requests reach the wire once; invalid requests, TLS failure and pre-cancellation never dispatch');
   assert.ok(requests>=9,'Protocol cases must reach real native sockets');

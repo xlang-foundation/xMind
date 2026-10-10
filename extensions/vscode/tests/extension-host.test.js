@@ -150,6 +150,13 @@ test('sidebar renders committed subscription events and refreshes metadata witho
  }finally{view.close();}
 });
 
+test('sidebar terminal snapshot retains queued completion frames until native stream acknowledgement',async()=>{
+ const h=harness({running:true});await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='operations'));const feed=h.streams[0];await feed.options.onEvent({seq:2,run_id:'finished',kind:'model.text',data:{text:'Synthetic pending completion'}});const task=h.scheduledTasks.findLast(t=>t.delay===100);h.configureRuns([{id:'finished',state:'completed'}]);task.callback();await until(()=>view.posted.findLast(m=>m.type==='status')?.text==='completed');assert.equal(feed.options.signal.aborted,false,'A faster snapshot must drain its owned event stream');
+  await feed.options.onEvent({seq:3,run_id:'finished',kind:'run.completed',data:{}});assert.equal(view.posted.filter(m=>m.type==='event'&&m.event.seq===3).length,1);feed.resolve({reason:'terminal',cursor:3});await until(()=>feed.options.signal.aborted);assert.equal(h.streams.length,1);assert.ok(!h.requests.some(route=>route.endsWith('/cancel')));
+ }finally{view.close();}
+});
+
 test('sidebar selection retires its feed, delayed events and queued metadata refresh',async()=>{
  const h=harness({running:true});await h.commands.get('agentflow.open')();const view=h.views[0];
  try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='operations'));const old=h.streams[0];await old.options.onEvent({seq:2,run_id:'finished',kind:'model.text',data:{text:'Before selection'}});const task=h.scheduledTasks.findLast(t=>t.delay===100);

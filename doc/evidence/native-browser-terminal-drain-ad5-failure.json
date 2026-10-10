@@ -1,0 +1,15 @@
+{
+  "revision": "ad5a363d24c95345a2f6759672801895ac08bef5",
+  "run": 38021120602,
+  "job": 114124406277,
+  "artifact": 11658799411,
+  "conclusion": "failure",
+  "failedStage": "Early native local view; complete native gate not reached",
+  "failure": "No incremental committed event after human input",
+  "qualification": "This source predates both terminal-feed retention fixes and stronger sidebar terminal/cursor acceptance. Current candidate passed its complete local 110-contract gate; no hosted current-source pass is claimed.",
+  "rawHashes": {
+    "doc/evidence/native-unified-hosted-ad5a363-native-view-early-ctest.log": "78b18bcbd60c99cc39c485111100b5db8f596c081cd29697c94e8ba22a7ecfdb",
+    "doc/evidence/native-unified-hosted-ad5a363-provenance.json": "ff8ea7474897ea39e588432c9e6f581a61764f79bd047364192ad418f7f9d3f4",
+    "doc/evidence/native-unified-hosted-ad5a363-failed.log": "238923616acae164ec03fcaecbe5c51abea18f6e4da0b3b9836942e43ebe2baa"
+  }
+}

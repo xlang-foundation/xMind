@@ -24,6 +24,16 @@ test('browser uses committed feed callbacks and stays idle without periodic obse
   run={...run,state:'completed'};streams[0].resolve({reason:'terminal',cursor:1});await new Promise(resolve=>setTimeout(resolve,20));assert.equal(posted.findLast(m=>m.type==='status').text,'completed');assert.equal(view.subscription.pin,undefined);assert.equal(view.timer,undefined);
  }finally{view.dispose();}
 });
+test('browser terminal command snapshot drains its current feed before retiring observation',async()=>{
+ const posted=[],streams=[],running={id:'root',session_id:'session',state:'running',parent_id:'',node_id:'',graph_root:false};let run=running;
+ const client={baseUrl:'http://127.0.0.1:8765',status:async()=>run,events:async()=>[],operations:async()=>[],history:async()=>[],runs:async()=>[run],eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))};
+ const view=new BrowserController(client,m=>posted.push(m));view.session='session';view.runId='root';view.runs=[run];view.health={owned_child_observation:false};
+ try{view.watch();await new Promise(resolve=>setImmediate(resolve));assert.equal(streams.length,1);run={...run,state:'completed'};await view.poll();view.watch();assert.equal(streams[0].options.signal.aborted,false,'A terminal snapshot must not cancel queued native SSE frames');assert.equal(view.subscription.pin.root,'root');
+  await streams[0].options.onEvent({seq:1,run_id:'root',kind:'run.completed',data:{}});assert.equal(view.subscription.cursor,1);assert.equal(posted.filter(message=>message.type==='event'&&message.event.seq===1).length,1);
+  streams[0].resolve({reason:'terminal',cursor:1});for(let n=0;n<30&&view.subscription.pin;n++)await new Promise(resolve=>setImmediate(resolve));assert.equal(view.subscription.pin,undefined);assert.equal(posted.findLast(message=>message.type==='status').text,'completed');assert.equal(streams.length,1);
+ }finally{view.dispose();}
+});
+
 test('browser selection retirement aborts the feed and rejects late events from that conversation',async()=>{
  const posted=[],streams=[],client={baseUrl:'http://127.0.0.1:8765',eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))},view=new BrowserController(client,m=>posted.push(m));view.session='session';view.runId='root';view.runs=[{id:'root',state:'running'}];view.health={};
  try{view.watch();await new Promise(resolve=>setImmediate(resolve));view.stop();view.session='next-session';view.runId='next-root';view.runs=[{id:'next-root',state:'running'}];view.watch();await new Promise(resolve=>setImmediate(resolve));assert.equal(streams.length,2);assert.equal(streams[0].options.signal.aborted,true);const count=posted.length;await assert.rejects(streams[0].options.onEvent({seq:1,run_id:'root',kind:'model.text',data:{text:'Retired fixture'}}),/retired/);streams[0].resolve({reason:'terminal',cursor:0});await new Promise(resolve=>setImmediate(resolve));assert.equal(posted.length,count);assert.equal(view.cursor,0);

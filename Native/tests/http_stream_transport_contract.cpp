@@ -1,6 +1,8 @@
 #include "agentflow/http_stream_transport.hpp"
 #include "agentflow/model_stream.hpp"
 #include "agentflow/mcp_http_transport.hpp"
+#include "agentflow/mcp_oauth.hpp"
+#include "agentflow/mcp_http_client.hpp"
 #include <iostream>
 #include <thread>
 #include <utility>
@@ -178,6 +180,35 @@ int main(int argc,char** argv) {
          require(sent==0,"Invalid metadata, pre-cancellation and remote plaintext must stop before the send boundary");
          input.url=tls+"/mcp/json";rejects<TransportError>([&]{call();});require(sent<=1,"Invalid configuration must not dispatch; untrusted TLS may cross the conservative send boundary");}
         {const auto [head,body]=exchange(mcpInput("after-failure"));require(head.status==200 && body==mcpReply,"Fresh native MCP POST must survive prior cancellation and TLS failures");}
-        std::cout<<"Native provider and MCP POST byte transport contracts passed against synthetic peers; no MCP approval/client integration, OAuth or live model was verified\n";return 0;
+        const auto resourceUrls=mcp_oauth_resource_metadata_urls("https://resource.example.test/public/mcp");require(resourceUrls==std::vector<std::string>{"https://resource.example.test/.well-known/oauth-protected-resource/public/mcp","https://resource.example.test/.well-known/oauth-protected-resource"},"Resource metadata must use path insertion before root fallback");
+        const auto issuerUrls=mcp_oauth_authorization_metadata_urls("https://issuer.example.test/tenant");require(issuerUrls==std::vector<std::string>{"https://issuer.example.test/.well-known/oauth-authorization-server/tenant","https://issuer.example.test/.well-known/openid-configuration/tenant","https://issuer.example.test/tenant/.well-known/openid-configuration"},"OAuth and both OpenID path forms must preserve discovery priority");
+        require(mcp_oauth_authorization_metadata_urls("https://issuer.example.test").size()==2,"Root issuer must have two distinct discovery candidates");
+        const auto resource=mcp_oauth_resource_metadata(R"({"resource":"https://resource.example.test/mcp","authorization_servers":["https://issuer.example.test/tenant"],"scopes_supported":["files:read"],"bearer_methods_supported":["header"]})","https://resource.example.test/mcp");require(resource.authorization_servers.size()==1 && resource.scopes==std::vector<std::string>{"files:read"},"Resource metadata must retain distinct issuer and scope identities");
+        const std::string authorization=R"({"issuer":"https://issuer.example.test/tenant","authorization_endpoint":"https://issuer.example.test/authorize","token_endpoint":"https://issuer.example.test/token","response_types_supported":["code"],"code_challenge_methods_supported":["S256"],"token_endpoint_auth_methods_supported":["none"],"authorization_response_iss_parameter_supported":true,"client_id_metadata_document_supported":true})";
+        const auto metadata=mcp_oauth_server_metadata(authorization,"https://issuer.example.test/tenant");require(metadata.response_issuer_required && metadata.client_id_metadata_supported && metadata.token_auth_methods==std::vector<std::string>{"none"},"Validated metadata must preserve issuer validation and registration capabilities");
+        rejects<McpProtocolError>([&]{mcp_oauth_server_metadata(authorization,"https://ISSUER.example.test/tenant");});
+        rejects<McpProtocolError>([&]{mcp_oauth_server_metadata(authorization,"https://issuer.example.test/tenant/");});
+        rejects<McpProtocolError>([&]{mcp_oauth_resource_metadata(R"({"resource":"https://other.example.test/mcp","authorization_servers":["https://issuer.example.test"]})","https://resource.example.test/mcp");});
+        rejects<McpProtocolError>([&]{mcp_oauth_resource_metadata(R"({"resource":"https://resource.example.test/mcp","authorization_servers":[]})","https://resource.example.test/mcp");});
+        rejects<McpProtocolError>([&]{mcp_oauth_server_metadata(R"({"issuer":"https://issuer.example.test","authorization_endpoint":"https://issuer.example.test/auth","token_endpoint":"https://issuer.example.test/token","response_types_supported":["code"],"code_challenge_methods_supported":["plain"]})","https://issuer.example.test");});
+        const auto challenge=mcp_oauth_bearer_challenge(R"(Basic realm="not, bearer", charset="UTF-8", bEaReR resource_metadata="https://resource.example.test/.well-known/oauth-protected-resource", scope="files:read files:write", error="insufficient_scope")");
+        require(challenge && challenge->metadata_url && challenge->scopes==std::vector<std::string>{"files:read","files:write"} && challenge->error=="insufficient_scope","Bearer challenge must distinguish quoted commas and alternative authentication schemes");
+        require(!mcp_oauth_bearer_challenge("Negotiate opaque-token=="),"Non-Bearer token challenges must not create OAuth authority");
+        for(const auto* bad:{"Bearer scope=\"files:read\", Scope=\"files:write\"","Bearer scope=\"files:read\", Bearer scope=\"files:write\"","Bearer scope=\"unterminated","Bearer scope=\"invalid\\\\scope\"","Bearer scope=\"read\"\r\nInjected: bad"})rejects<McpProtocolError>([&]{mcp_oauth_bearer_challenge(bad);});
+        rejects<McpProtocolError>([&]{mcp_oauth_authorization_metadata_urls("http://127.0.0.1/issuer");});
+        rejects<McpProtocolError>([&]{mcp_oauth_authorization_metadata_urls("https://issuer.example.test/tenant?redirect=other");});
+        require(mcp_oauth_bearer_challenge(R"(Bearer resource_metadata="https://resource.example.test/metadata?tenant=one")")->metadata_url=="https://resource.example.test/metadata?tenant=one","Protected resource metadata URL query must retain its exact identity");
+        {
+            SecretBytes credential({reinterpret_cast<const std::uint8_t*>(synthetic.data()),synthetic.size()});
+            McpHttpClient owner(base+"/oauth-auth",std::move(credential));bool required=false;
+            try{owner.connect(std::chrono::steady_clock::now()+5s);}
+            catch(const McpOAuthAuthorizationRequired& error){required=true;require(error.challenge && error.challenge->metadata_url=="https://resource.example.test/metadata?tenant=one" && error.challenge->scopes==std::vector<std::string>{"files:read"},"Native owner must retain Bearer challenge after a separate Basic field");}
+            require(required && !owner.ready(),"401 must retire the owner without consuming or displaying private error body");
+            rejects<McpProtocolError>([&]{owner.connect(std::chrono::steady_clock::now()+5s);});
+        }
+        {std::stop_source cancel;cancel.request_stop();rejects<McpTransportCancelled>([&]{discover_mcp_oauth("https://resource.example.test/mcp",{},std::chrono::steady_clock::now()+5s,cancel.get_token());});}
+        rejects<McpTransportTimeout>([&]{discover_mcp_oauth("https://resource.example.test/mcp",{},std::chrono::steady_clock::now());});
+        rejects<TransportError>([&]{discover_mcp_oauth(tls+"/mcp",{},std::chrono::steady_clock::now()+5s);});
+        std::cout<<"Native provider/MCP POST byte transport and OAuth metadata fixtures passed; TLS/pre-cancel/deadline discovery failures checked. No OAuth login/token exchange, live model or complete MCP support verified\n";return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }

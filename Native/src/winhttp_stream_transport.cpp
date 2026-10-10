@@ -99,17 +99,22 @@ Endpoint endpoint(const std::string& input) {
     result.path.assign(parts.lpszUrlPath,parts.dwUrlPathLength);if(result.path.empty())result.path=L"/";
     if(parts.dwExtraInfoLength)result.path.append(parts.lpszExtraInfo,parts.dwExtraInfoLength);return result;
 }
-std::optional<std::string> response_field(HINTERNET request,const wchar_t* name) {
-    std::array<wchar_t,8192> buffer{};DWORD size=static_cast<DWORD>(sizeof(buffer));
-    if(!WinHttpQueryHeaders(request,WINHTTP_QUERY_CUSTOM,name,buffer.data(),&size,WINHTTP_NO_HEADER_INDEX)) {
-        if(GetLastError()==ERROR_WINHTTP_HEADER_NOT_FOUND)return std::nullopt;
-        throw TransportError("Missing or oversized MCP HTTP response metadata");
+std::optional<std::string> response_field(HINTERNET request,const wchar_t* name,bool combine=false) {
+    std::array<wchar_t,8192> buffer{};DWORD index=0;std::optional<std::string> result;
+    for(std::size_t count=0;;++count) {
+        DWORD size=static_cast<DWORD>(sizeof(buffer));
+        if(!WinHttpQueryHeaders(request,WINHTTP_QUERY_CUSTOM,name,buffer.data(),&size,&index)) {
+            if(GetLastError()==ERROR_WINHTTP_HEADER_NOT_FOUND)return result;
+            throw TransportError("Missing or oversized MCP HTTP response metadata");
+        }
+        if(count>=16 || size%sizeof(wchar_t) || size>=sizeof(buffer) || (result && !combine))throw TransportError("Ambiguous or oversized MCP HTTP response metadata");
+        if(!result)result.emplace();else *result+=", ";
+        for(const auto c:std::wstring_view(buffer.data(),size/sizeof(wchar_t))) {
+            if(c!=L'\t' && (c<32 || c>126))throw TransportError("Invalid MCP HTTP response metadata");
+            result->push_back(static_cast<char>(c));
+        }
+        if(result->size()>8192)throw TransportError("Oversized MCP HTTP response metadata");
     }
-    std::string result;for(const auto c:std::wstring_view(buffer.data())) {
-        if(c!=L'\t' && (c<32 || c>126))throw TransportError("Invalid MCP HTTP response metadata");
-        result.push_back(static_cast<char>(c));
-    }
-    return result;
 }
 }
 static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
@@ -250,7 +255,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     if(mcp) {
         McpHttpResponseHead head;head.status=static_cast<int>(status);
         for(auto c:media){if(c<32 || c>126)throw TransportError("Invalid MCP response content type");head.media_type+=static_cast<char>(c);}
-        head.legacy_session=response_field(request.value,L"Mcp-Session-Id");head.authenticate=response_field(request.value,L"WWW-Authenticate");
+        head.legacy_session=response_field(request.value,L"Mcp-Session-Id");head.authenticate=response_field(request.value,L"WWW-Authenticate",true);
         on_head(head);
         if(status==200 && media!=L"application/json" && media!=L"text/event-stream")throw TransportError("Unexpected MCP response content type");
     } else if(media!=(json?L"application/json":L"text/event-stream")) throw TransportError("Unexpected provider response content type");

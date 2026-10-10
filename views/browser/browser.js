@@ -55,6 +55,11 @@ class BrowserController {
     if(this.current(version)&&previousProfile&&!retainedCatalogue&&this.profileController?.state?.active){try{await this.discover();}catch{}}
     if(!this.current(version))return;if(this.runId){await this.poll();this.watch();}else this.post({type:'status',text:'Ready'});await this.readSkills();}
   watch(){
+    // A faster command snapshot may already show completion while the owned
+    // stream still has committed frames in flight. Drain that stream through
+    // its terminal acknowledgement before retiring observation or switching.
+    const pin=this.subscription?.pin,selected=this.runs.find(value=>value.id===this.runId);
+    if(pin&&selected&&['completed','failed','cancelled'].includes(selected.state)&&!this.subscription.finished&&pin.root===selected.id&&pin.session===this.session&&pin.client===this.client&&pin.generation===this.generation)return;
     const run=this.runs.find(value=>value.id===this.runId&&['queued','running','paused'].includes(value.state))||this.runs.find(value=>['queued','running','paused'].includes(value.state))||((this.pendingTreeEvents||this.pendingPlanObservation)&&this.runs.find(value=>value.id===this.runId));
     if(!run||!this.session||this.disposed){this.subscription?.stop();return;}
     this.subscription??=this.subscriptionFactory({current:pin=>this.current(pin.generation)&&this.client===pin.client&&this.session===pin.session,onObservation:async(value,pin)=>{if(this.current(pin.generation))await this.poll();},onEvent:async(event,pin)=>{

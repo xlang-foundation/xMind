@@ -1,0 +1,404 @@
+TAP version 13
+# Subtest: sidebar renders committed subscription events and refreshes metadata without a periodic timer
+ok 1 - sidebar renders committed subscription events and refreshes metadata without a periodic timer
+  ---
+  duration_ms: 47.5689
+  type: 'test'
+  ...
+# Subtest: sidebar terminal snapshot retains queued completion frames until native stream acknowledgement
+not ok 2 - sidebar terminal snapshot retains queued completion frames until native stream acknowledgement
+  ---
+  duration_ms: 3.2387
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\extensions\\vscode\\tests\\extension-host.test.js:153:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    A faster snapshot must drain its owned event stream
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (D:\CantorAI2026\xMind\extensions\vscode\tests\extension-host.test.js:155:467)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: sidebar selection retires its feed, delayed events and queued metadata refresh
+ok 3 - sidebar selection retires its feed, delayed events and queued metadata refresh
+  ---
+  duration_ms: 3.5673
+  type: 'test'
+  ...
+# Subtest: sidebar graph stream refreshes child transcript after direct committed delivery
+ok 4 - sidebar graph stream refreshes child transcript after direct committed delivery
+  ---
+  duration_ms: 3.0955
+  type: 'test'
+  ...
+# Subtest: selection command appends a backend-bound sidebar draft without a question popup or inference
+ok 5 - selection command appends a backend-bound sidebar draft without a question popup or inference
+  ---
+  duration_ms: 2.2308
+  type: 'test'
+  ...
+# Subtest: selection rejected by its source adapter adds no draft and submits no model request
+ok 6 - selection rejected by its source adapter adds no draft and submits no model request
+  ---
+  duration_ms: 1.1219
+  type: 'test'
+  ...
+# Subtest: sidebar focus can clear the active editor without discarding the captured document
+ok 7 - sidebar focus can clear the active editor without discarding the captured document
+  ---
+  duration_ms: 2.957
+  type: 'test'
+  ...
+# Subtest: a workspace change while selection capture is pending discards its context
+ok 8 - a workspace change while selection capture is pending discards its context
+  ---
+  duration_ms: 2.1295
+  type: 'test'
+  ...
+# Subtest: context queued before sidebar readiness is discarded on workspace reconnection
+ok 9 - context queued before sidebar readiness is discarded on workspace reconnection
+  ---
+  duration_ms: 1.8007
+  type: 'test'
+  ...
+# Subtest: sidebar reports actual native file-proposal policy and clears it when switching to a legacy backend
+ok 10 - sidebar reports actual native file-proposal policy and clears it when switching to a legacy backend
+  ---
+  duration_ms: 2.5565
+  type: 'test'
+  ...
+# Subtest: pending backend changes are disclosed without replacing the saved conversation or replaying its run
+ok 11 - pending backend changes are disclosed without replacing the saved conversation or replaying its run
+  ---
+  duration_ms: 2.3035
+  type: 'test'
+  ...
+# Subtest: VS Code conversation selection recovers discovery when native provider publication outlives its retired acknowledgement
+ok 12 - VS Code conversation selection recovers discovery when native provider publication outlives its retired acknowledgement
+  ---
+  duration_ms: 3.338
+  type: 'test'
+  ...
+# Subtest: VS Code recovery discards a late catalogue after another conversation intent and reads the current profile without writes
+ok 13 - VS Code recovery discards a late catalogue after another conversation intent and reads the current profile without writes
+  ---
+  duration_ms: 2.3226
+  type: 'test'
+  ...
+# Subtest: VS Code retains saved-profile discovery after Settings close and conversation selection, and rejects another-view stale catalogue
+ok 14 - VS Code retains saved-profile discovery after Settings close and conversation selection, and rejects another-view stale catalogue
+  ---
+  duration_ms: 3.2616
+  type: 'test'
+  ...
+# Subtest: opened folder changes rebind the existing sidebar to its own backend and clear the old draft/observations without cancelling execution
+ok 15 - opened folder changes rebind the existing sidebar to its own backend and clear the old draft/observations without cancelling execution
+  ---
+  duration_ms: 1.6113
+  type: 'test'
+  ...
+# Subtest: an accepted old-folder run survives a delayed reply without becoming the new folder observation
+ok 16 - an accepted old-folder run survives a delayed reply without becoming the new folder observation
+  ---
+  duration_ms: 1.5333
+  type: 'test'
+  ...
+# Subtest: VS Code footer provider command selects a saved key-only profile via native CAS, then discovers without a key and waits for explicit model choice
+ok 17 - VS Code footer provider command selects a saved key-only profile via native CAS, then discovers without a key and waits for explicit model choice
+  ---
+  duration_ms: 1.8892
+  type: 'test'
+  ...
+# Subtest: VS Code context control uses actual observed head and keeps the request acknowledgement separate from completed execution
+ok 18 - VS Code context control uses actual observed head and keeps the request acknowledgement separate from completed execution
+  ---
+  duration_ms: 2.4642
+  type: 'test'
+  ...
+# Subtest: VS Code graph Resume is bound to selected root and freshly observed checkpoint/eligibility
+ok 19 - VS Code graph Resume is bound to selected root and freshly observed checkpoint/eligibility
+  ---
+  duration_ms: 1.7519
+  type: 'test'
+  ...
+# Subtest: VS Code Agent observes scoped leaf histories and tree events without inventing a graph or resubmitting work
+ok 20 - VS Code Agent observes scoped leaf histories and tree events without inventing a graph or resubmitting work
+  ---
+  duration_ms: 1.919
+  type: 'test'
+  ...
+# Subtest: native admission profile conflict updates the sidebar account/model without task replay
+ok 21 - native admission profile conflict updates the sidebar account/model without task replay
+  ---
+  duration_ms: 1.5989
+  type: 'test'
+  ...
+# Subtest: native terminal state refreshes transcript and stops polling with durable operation inspection
+ok 22 - native terminal state refreshes transcript and stops polling with durable operation inspection
+  ---
+  duration_ms: 2.8565
+  type: 'test'
+  ...
+# Subtest: saved Responses enrollment restores discovery and reports the native wire
+ok 23 - saved Responses enrollment restores discovery and reports the native wire
+  ---
+  duration_ms: 1.6046
+  type: 'test'
+  ...
+# Subtest: extension answers only a displayed and freshly owned question with exact raw input/CAS, without changing approval authority
+ok 24 - extension answers only a displayed and freshly owned question with exact raw input/CAS, without changing approval authority
+  ---
+  duration_ms: 4.0431
+  type: 'test'
+  ...
+# Subtest: extension rejects forged question fields, duplicate input keys and stale fresh-head observations before POST
+ok 25 - extension rejects forged question fields, duplicate input keys and stale fresh-head observations before POST
+  ---
+  duration_ms: 2.1023
+  type: 'test'
+  ...
+# Subtest: extension final-human-only ready paused owner exposes authenticated explicit resume with the observed preconditions
+ok 26 - extension final-human-only ready paused owner exposes authenticated explicit resume with the observed preconditions
+  ---
+  duration_ms: 2.6999
+  type: 'test'
+  ...
+# Subtest: extension close during fresh plan revalidation cannot post an answer or publish its obsolete observation
+ok 27 - extension close during fresh plan revalidation cannot post an answer or publish its obsolete observation
+  ---
+  duration_ms: 1.928
+  type: 'test'
+  ...
+# Subtest: extension plan-read conflict clears the old action projection and never retries its input mutation
+ok 28 - extension plan-read conflict clears the old action projection and never retries its input mutation
+  ---
+  duration_ms: 2.9945
+  type: 'test'
+  ...
+# Subtest: settings key fetches a sidebar list; only a separate model selection saves encrypted backend settings
+ok 29 - settings key fetches a sidebar list; only a separate model selection saves encrypted backend settings
+  ---
+  duration_ms: 3.3187
+  type: 'test'
+  ...
+# Subtest: sidebar selection rejects an ID outside the actual discovery response
+ok 30 - sidebar selection rejects an ID outside the actual discovery response
+  ---
+  duration_ms: 1.4043
+  type: 'test'
+  ...
+# Subtest: sidebar rename binds selected session and original title, refreshes metadata and reports conflicts without inference
+ok 31 - sidebar rename binds selected session and original title, refreshes metadata and reports conflicts without inference
+  ---
+  duration_ms: 2.2332
+  type: 'test'
+  ...
+# Subtest: invalid keys and unsupported provider destinations never transmit credentials
+ok 32 - invalid keys and unsupported provider destinations never transmit credentials
+  ---
+  duration_ms: 2.0257
+  type: 'test'
+  ...
+# Subtest: discovery errors and malformed or empty catalogs never save provider settings
+ok 33 - discovery errors and malformed or empty catalogs never save provider settings
+  ---
+  duration_ms: 3.4035
+  type: 'test'
+  ...
+# Subtest: closing during discovery prevents publishing a list or saving a credential
+ok 34 - closing during discovery prevents publishing a list or saving a credential
+  ---
+  duration_ms: 1.2352
+  type: 'test'
+  ...
+# Subtest: saved key populates the sidebar automatically and changes models without a key popup
+ok 35 - saved key populates the sidebar automatically and changes models without a key popup
+  ---
+  duration_ms: 1.3153
+  type: 'test'
+  ...
+# Subtest: rejected saved key shows settings guidance and replacement uses the same sidebar selection
+ok 36 - rejected saved key shows settings guidance and replacement uses the same sidebar selection
+  ---
+  duration_ms: 1.8209
+  type: 'test'
+  ...
+# Subtest: graph observation keeps child transcript and usage out of the root stream
+ok 37 - graph observation keeps child transcript and usage out of the root stream
+  ---
+  duration_ms: 1.4034
+  type: 'test'
+  ...
+# Subtest: human input binds observed root, waiting node and exact checkpoint; raw JSON reaches the backend
+ok 38 - human input binds observed root, waiting node and exact checkpoint; raw JSON reaches the backend
+  ---
+  duration_ms: 3.0383
+  type: 'test'
+  ...
+# Subtest: selection intent invalidates queued human input before another conversation is displayed
+ok 39 - selection intent invalidates queued human input before another conversation is displayed
+  ---
+  duration_ms: 1.5927
+  type: 'test'
+  ...
+# Subtest: graph child approval retains exact current operation review and uses the shared decision endpoint
+ok 40 - graph child approval retains exact current operation review and uses the shared decision endpoint
+  ---
+  duration_ms: 2.1849
+  type: 'test'
+  ...
+# Subtest: graph catalog allows model-free tool graphs and rejects arbitrary view plans or graph IDs
+ok 41 - graph catalog allows model-free tool graphs and rejects arbitrary view plans or graph IDs
+  ---
+  duration_ms: 1.669
+  type: 'test'
+  ...
+# Subtest: workflow choice persists for the same backend and restores only an advertised executable graph
+ok 42 - workflow choice persists for the same backend and restores only an advertised executable graph
+  ---
+  duration_ms: 1.3908
+  type: 'test'
+  ...
+# Subtest: older run inspection remains accessible and selected run persists across view reopening
+ok 43 - older run inspection remains accessible and selected run persists across view reopening
+  ---
+  duration_ms: 1.9591
+  type: 'test'
+  ...
+# Subtest: run selection rejects IDs outside the selected conversation before fetching their details
+ok 44 - run selection rejects IDs outside the selected conversation before fetching their details
+  ---
+  duration_ms: 1.2149
+  type: 'test'
+  ...
+# Subtest: older terminal run keeps observing an active conversation and rejects another submission
+ok 45 - older terminal run keeps observing an active conversation and rejects another submission
+  ---
+  duration_ms: 3.1861
+  type: 'test'
+  ...
+# Subtest: uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+ok 46 - uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+  ---
+  duration_ms: 1.3316
+  type: 'test'
+  ...
+# Subtest: inspection rejects a different backend operation and discards observations after selection changes
+ok 47 - inspection rejects a different backend operation and discards observations after selection changes
+  ---
+  duration_ms: 2.1829
+  type: 'test'
+  ...
+# Subtest: only a reviewed pending operation can be decided and payload stays backend-owned
+ok 48 - only a reviewed pending operation can be decided and payload stays backend-owned
+  ---
+  duration_ms: 1.506
+  type: 'test'
+  ...
+# Subtest: closing the view during proposal revalidation cannot send an approval
+ok 49 - closing the view during proposal revalidation cannot send an approval
+  ---
+  duration_ms: 1.5556
+  type: 'test'
+  ...
+# Subtest: changed proposal bytes invalidate the displayed review
+ok 50 - changed proposal bytes invalidate the displayed review
+  ---
+  duration_ms: 2.3439
+  type: 'test'
+  ...
+# Subtest: session selection intent invalidates an in-flight approval before queued selection runs
+ok 51 - session selection intent invalidates an in-flight approval before queued selection runs
+  ---
+  duration_ms: 1.3317
+  type: 'test'
+  ...
+# Subtest: closing a panel during history loading cannot start a detached poller
+ok 52 - closing a panel during history loading cannot start a detached poller
+  ---
+  duration_ms: 1.0691
+  type: 'test'
+  ...
+# Subtest: older native servers without a catalogue keep default execution without invented model IDs
+ok 53 - older native servers without a catalogue keep default execution without invented model IDs
+  ---
+  duration_ms: 1.3833
+  type: 'test'
+  ...
+# Subtest: edit comparison opens exact revalidated backend snapshots without granting or writing
+ok 54 - edit comparison opens exact revalidated backend snapshots without granting or writing
+  ---
+  duration_ms: 3.0644
+  type: 'test'
+  ...
+# Subtest: creation comparison opens absent-to-proposed snapshots without creating a file or granting
+ok 55 - creation comparison opens absent-to-proposed snapshots without creating a file or granting
+  ---
+  duration_ms: 1.4347
+  type: 'test'
+  ...
+# Subtest: refresh reloads backend execution capabilities and history without submitting a run
+ok 56 - refresh reloads backend execution capabilities and history without submitting a run
+  ---
+  duration_ms: 1.6198
+  type: 'test'
+  ...
+# Subtest: selected configured model survives view reopening and retired models fall back on refresh
+ok 57 - selected configured model survives view reopening and retired models fall back on refresh
+  ---
+  duration_ms: 1.8509
+  type: 'test'
+  ...
+# Subtest: normal development bootstrap completes activation before resolving the sidebar and clears private environment
+ok 58 - normal development bootstrap completes activation before resolving the sidebar and clears private environment
+  ---
+  duration_ms: 1.8956
+  type: 'test'
+  ...
+# Subtest: all patch action comparisons use revalidated read-only backend snapshots and never grant
+ok 59 - all patch action comparisons use revalidated read-only backend snapshots and never grant
+  ---
+  duration_ms: 4.7569
+  type: 'test'
+  ...
+# Subtest: a forged Allow message cannot approve malformed backend patch snapshots
+ok 60 - a forged Allow message cannot approve malformed backend patch snapshots
+  ---
+  duration_ms: 1.4369
+  type: 'test'
+  ...
+# Subtest: managed model choice survives an adapter-port change using native workspace/profile scope
+ok 61 - managed model choice survives an adapter-port change using native workspace/profile scope
+  ---
+  duration_ms: 0.9786
+  type: 'test'
+  ...
+# Subtest: a different native profile cannot restore a foreign saved model even at the same adapter URL
+ok 62 - a different native profile cannot restore a foreign saved model even at the same adapter URL
+  ---
+  duration_ms: 0.9939
+  type: 'test'
+  ...
+# Subtest: folder switching before the first sidebar exists reopens the latest workspace after stale startup
+ok 63 - folder switching before the first sidebar exists reopens the latest workspace after stale startup
+  ---
+  duration_ms: 1.4631
+  type: 'test'
+  ...
+1..63
+# tests 63
+# suites 0
+# pass 62
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 185.7146

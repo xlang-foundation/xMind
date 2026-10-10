@@ -68,3 +68,10 @@ doc/evidence/native-unified-hosted-e6032d9-failed.log -text whitespace=-blank-at
 doc/evidence/native-unified-graph-snapshot-*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 # Preserve the original failing Node TAP diagnostic's emitted blank-line spaces.
 doc/evidence/native-unified-graph-snapshot-old-source-regression.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+# Preserve original native compiler/CTest and regression diagnostics for OAuth.
+doc/evidence/native-mcp-oauth-* -text
+doc/evidence/native-mcp-oauth-*.log whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+# CTest's original JSON includes emitted trailing spaces and CRLF; retain bytes.
+doc/evidence/native-mcp-oauth-local*contracts.json -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-unified-hosted-298da66-failed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-unified-hosted-ad5a363-failed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

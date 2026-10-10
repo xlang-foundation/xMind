@@ -3,6 +3,7 @@
 #include "agentflow/mcp_http_stream.hpp"
 #include "agentflow/mcp_tool_codec.hpp"
 #include "agentflow/http_stream_transport.hpp"
+#include "agentflow/mcp_oauth.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <map>
@@ -47,6 +48,7 @@ struct McpHttpClient::Impl {
         std::optional<McpCorrelatedReply> result;std::unique_ptr<McpHttpMessageStream> decoder;
         try {
             post_mcp_http(input,bearer?&*bearer:nullptr,[&](const auto& head){
+                if(head.status==401 || head.status==403)throw McpOAuthAuthorizationRequired(head.authenticate?mcp_oauth_bearer_challenge(*head.authenticate):std::nullopt);
                 if(expected.empty()) {
                     if(head.status!=202)throw McpProtocolError("MCP notification did not receive an empty acknowledgement");
                     return;

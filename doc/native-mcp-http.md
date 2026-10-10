@@ -1,9 +1,12 @@
 # Native MCP HTTP transport
 
-HTTP acceptance and OAuth are unfinished. Native source now accepts stdio/HTTP
-configuration and selects the corresponding owner, but the latest accepted
-package predates this implementation. Do not advertise unexecuted source as a
-verified working HTTP integration.
+The configured native HTTP tool component has passed actual approved JSON/SSE
+effects, denial, lost-reply uncertainty and SQLite restart against an official
+SDK peer. OAuth discovery metadata and challenge parsing have passed the native
+transport contract. Full MCP HTTP/OAuth, current installed-view acceptance and
+hosted packaging remain separate requirements. The complete revised local gate
+passes **110/110** in **371.74 seconds** with **2438** unchanged inputs. The installed
+package predates this implementation. [Raw evidence and exact scope](evidence/native-mcp-oauth-local.json).
 
 The implementation now separates `McpToolClient` from `McpStdioClient`.
 The existing production `McpToolRegistry` receives the transport-neutral owner;
@@ -16,8 +19,8 @@ no approval authority, outcome setter or automatic request replay.
 The existing actual MCP effect contract now passes its real stdio peer through
 that interface. Compile-time assertions require an abstract base, a shared
 deadline type, noncopyable stdio ownership and no public tool dispatch on either
-type. Whitespace/source checks pass; native compilation and execution of these
-changes are pending. The accepted native `977e945` package predates this change.
+type. Native compilation and the actual stdio/HTTP effect contract pass. The
+earlier accepted `977e945` package predates this change.
 
 ## Protocol and ownership
 
@@ -36,15 +39,14 @@ SSE. Those mechanisms cannot be silently mixed into a modern request.
 bytes and validates tool parameter header declarations. Values preserve exact
 property paths, Unicode/control/whitespace encoding, boolean spelling and safe
 integer precision without a floating-point round trip. Null/absent values omit
-headers. Invalid declarations throw before projection; the future HTTP client
-must catch declaration rejection per tool and omit that tool from discovery.
+headers. Invalid declarations throw before projection; the HTTP owner catches
+declaration rejection per tool and omits that tool from discovery.
 Existing stdio discovery remains unchanged. Byte/header-count limits are xMind
 implementation limits. This component is linked into the actual MCP wire target
-and has additions to its existing native contract, but has not been compiled
-or executed yet. Network dispatch, discovery filtering and HTTP ownership are
-still unfinished.
+and its expanded native wire contract passes. Full protocol coverage remains
+unfinished.
 
-The native Windows POST candidate now reuses the existing async WinHTTP
+The native Windows POST implementation reuses the existing async WinHTTP
 transport's certificate, redirect, credential-wiping and deadline machinery.
 It adds a typed MCP boundary: actual request/schema-derived headers, explicit
 older session input, JSON/SSE response selection, response status/session/auth
@@ -55,8 +57,8 @@ authority is added. Its existing real-socket transport contract now requires
 exact request counts, UTF-8/raw-decimal preservation, both response media,
 older session metadata, 400 RPC errors, 401 challenges, empty/invalid 202,
 cancellation, deadlines, invalid metadata and certificate rejection. The peer
-is synthetic and does not establish official MCP SDK interoperability. Only
-Node syntax and whitespace/source checks have run; native execution is pending.
+is synthetic; the separate effect contract establishes the scoped official SDK
+interoperability below. These real-socket assertions pass natively.
 The source now also has `McpHttpClient`, implementing `McpToolClient` with the
 same private dispatch boundary as stdio. Its incremental JSON/SSE decoder uses
 the strict existing JSON-RPC envelope codec and retains literal result tokens.
@@ -64,8 +66,8 @@ It negotiates modern discovery and structured older fallback, caches immutable
 tool bindings, filters invalid header declarations and projects actual calls
 before the send boundary. Changed cached bindings retire the owner. Interrupted
 calls preserve observed response bytes and possibly-sent attribution; neither
-stream IDs nor retry fields trigger request replay. All source is unverified
-natively. The native configuration/factory now select both bindings in agent
+stream IDs nor retry fields trigger request replay. Native compilation and the
+configured owner/effect assertions pass. The configuration/factory select both bindings in agent
 execution, idle context preparation, direct graph tools and admin discovery.
 HTTP uses a backend-owned endpoint and optional encrypted server-scope bearer
 reference. Its credential purpose binds exact endpoint, configuration identity
@@ -76,7 +78,8 @@ scopes, remote plaintext URLs, embedded credentials, fragments and controls are
 rejected. Admin catalogue reflection checks retain private wiping credential
 copies; clients/models receive no token. Existing revision/retirement and SQLite
 ownership rules apply. Configuration, authority and actual HTTP effect assertions
-now require these paths; they remain unexecuted natively.
+exercise these paths and pass natively. Full public agent/graph HTTP-MCP workflows
+and installed/rendered connection controls remain required.
 
 The existing native effect contract now adds a pinned official SDK HTTP host
 (`@modelcontextprotocol/server` 2.3.1 / Zod 4.2.0). It requires actual remote
@@ -84,9 +87,10 @@ JSON/SSE writes after durable native approval, denial without dispatch, duplicat
 operation rejection, lost-reply uncertainty and xlang3 SQLite restart records.
 The host independently compares peer disk bytes and dispatch counts. Existing
 stdio effects remain in the same contract; the exact contract count is unchanged.
-Only Node syntax, source/whitespace inspection and a separate SDK-only handler
-probe have run. The probe checks fixture schema annotations and SDK JSON/SSE
-shape; it does not execute C++, sockets, approvals or persistence.
+The actual native contract passes through persisted configuration, encrypted
+credential resolution and the production factory. The independent SDK host
+verifies peer disk bytes and exact tool-call counts. This establishes neither
+live model execution nor rendered UI acceptance.
 
 OAuth, empty/non-JSON older discovery fallback, older server-request replies,
 resumable GET/DELETE, notification subscription ownership and graphical connection
@@ -108,10 +112,10 @@ protocol support:
   stream closure cannot be treated as automatic resumable observation. UI
   disconnection detaches the viewer; it must not close runtime-owned MCP work.
 - The factory selects and connects the actual transport before registry
-  discovery. Current source routes through it; hosted compilation and actual
-  execution must establish acceptance before the HTTP configuration is verified.
+  discovery. The configured native factory/approval/effect path is verified;
+  hosted packaging and installed public workflows remain required separately.
 
-## Native configuration candidate
+## Native configuration
 
 Trusted startup/offline-admin input can describe an HTTP server as:
 
@@ -139,24 +143,37 @@ xMind will own authorization state and encrypted access/refresh credentials
 behind embedded-xlang3 SQLite. Reference purposes must bind the server/config,
 resource, issuer and account. Browser and VS Code views initiate the user flow
 through native commands and receive public status; they do not retain refresh
-tokens or replace effect approval. OAuth discovery, callback/state/PKCE,
-registration, expiry/refresh/revocation and user-facing connection controls are
-all unfinished.
+tokens or replace effect approval.
+
+`mcp_oauth.cpp` provides bounded native resource/authorization-server metadata
+discovery and Bearer challenge parsing. It derives path-specific/root resource
+URLs and OAuth/OpenID issuer candidates, accepts only HTTPS authorization
+endpoints, verifies exact resource/issuer identities and requires advertised
+`S256` and authorization-code support. Metadata is fetched without credentials;
+only a 404 advances to the next candidate. Expected issuers are not normalized.
+Quoted commas and separate `WWW-Authenticate` fields are parsed together, with
+bounds and duplicate-parameter rejection. Ambiguous multiple Bearer challenges
+are explicitly rejected. A native 401/403 retires the owner with a typed
+authorization requirement; it cannot automatically replay a tool call.
+
+Native acceptance covers metadata/challenge fixtures, a real socket 401 with
+Basic and Bearer in separate fields, exact challenge/query retention and owner
+retirement, pre-cancellation/deadline checks and OS rejection of an untrusted TLS
+certificate. No positive HTTPS discovery against a trusted authorization server,
+registration, callback/state/PKCE exchange, token storage/refresh/revocation or
+user-facing login flow has been verified. Those remain required.
 
 ## Acceptance still required
 
-- Compile the shared interface and run the complete existing native gate,
-  including actual stdio effect and official SDK interoperability contracts.
-- Test actual native HTTP with independent official SDK peers: initialize,
-  JSON/SSE response variants, notifications, tool discovery, schema validation,
-  explicit approvals and independently observed peer effects/receipts.
-- Verify modern metadata/header agreement, safe parameter projection and
-  per-tool rejection, concurrent request isolation and cancellation/deadlines.
-  Verify older session headers, resumable GET, expiry and DELETE separately.
-- Lose a reply around a peer effect; require recorded uncertainty and no
-  duplicate tool dispatch after reconnect or backend restart.
-- Exercise TLS/authentication, OAuth discovery/PKCE/issuer/resource binding,
-  token rotation and client view lifecycle without exposing credentials.
+- Verify hosted packaging, installed public agent/graph HTTP-MCP workflows and
+  rendered approval UI against the current source.
+- Expand resources/prompts, server-request replies and notification/subscription
+  ownership. Verify older initialization/session expiry, resumable GET and
+  DELETE separately; empty/non-JSON discovery fallback remains unfinished.
+- Verify concurrent independent HTTP owners and credential/destination isolation.
+- Exercise positive trusted HTTPS OAuth discovery, registration, callback/state,
+  PKCE exchange, resource/issuer/account binding, token storage/rotation and
+  user-facing login controls without exposing credentials or replaying effects.
 
-None of these checks is completed by UI SSE, a source-only abstract interface,
-a provider HTTP helper or a successful stdio peer.
+UI SSE, a source-only interface, provider HTTP helpers and successful stdio peers
+do not establish those remaining HTTP/OAuth behaviors.

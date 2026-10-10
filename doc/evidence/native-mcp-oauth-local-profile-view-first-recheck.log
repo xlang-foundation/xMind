@@ -1,0 +1,34 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 90: native_local_profile_contract
+1/2 Test #90: native_local_profile_contract ....   Passed   74.42 sec
+    Start 91: native_local_view_contract
+2/2 Test #91: native_local_view_contract .......***Failed   71.29 sec
+{"retainedFixture":"C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-local-view-KAOvH3"}
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(feeds.flatMap(feed=>feed.events).some(event=>event.seq>before.at(-1).seq))
+
+    at exerciseNativeSidebar (file:///D:/CantorAI2026/xMind/Native/tests/native_sidebar_subscription.mjs:40:183)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs:86:366 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+
+50% tests passed, 1 tests failed out of 2
+
+Total Test time (real) = 145.73 sec
+
+The following tests FAILED:
+	 91 - native_local_view_contract (Failed)
+Errors while running CTest

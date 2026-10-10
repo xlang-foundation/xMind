@@ -1,5 +1,52 @@
 # Reviewable milestones
 
+Native MCP HTTP/OAuth and terminal-feed checkpoint passed the complete local
+**110-contract** gate in **371.74 seconds**, with **2438** unchanged mapped inputs,
+the pinned native xlang3 runtime and no CPython interpreter/bridge. The complete
+**244 extension / 54 browser** synthetic suites also pass. Source and binary
+hashes, exact contract names and original detailed outputs are retained.
+[Complete local acceptance](evidence/native-mcp-oauth-local.json).
+The native configured HTTP owner/approval registry passes actual official SDK
+JSON/SSE file effects, denial with zero dispatch, duplicate rejection, lost-reply
+uncertainty and xlang3 SQLite restart. Native metadata/challenge fixtures,
+separate Basic/Bearer response headers, typed 401 retirement, cancellation,
+deadline and untrusted-TLS rejection pass. No positive OAuth HTTPS discovery,
+registration/login/token exchange, refresh or graphical setup is delivered.
+[Implementation and remaining scope](native-mcp-http.md).
+
+The older hosted `298da66` view gate failed before the complete native suite:
+after human input, no committed event arrived incrementally. Browser and VS Code
+could stop their owned feed when a faster command snapshot already showed
+completion. Both now retain the selected feed through its native terminal
+acknowledgement. Original prior-source regressions reproduce both defects; all
+**244 extension / 54 browser** synthetic contracts pass. Selection/disposal still
+retires observation. The actual native view contract passes in **78.32 seconds**,
+including real sidebar creation, exact approval/receipt/disk checks and terminal
+stream cursor validation. This exercises the production extension/controller with
+VS Code API fixtures; it is not rendered or installed IDE acceptance.
+[View regression and hosted failure](evidence/native-browser-terminal-drain-candidate.json),
+[native view follow-up](evidence/native-mcp-oauth-local-view-drain-recheck.log).
+
+The first complete local native attempt passed **108/110** in **359.55 seconds**.
+It retained a 60-second first-profile startup timeout and the sidebar race.
+Fresh profile acceptance subsequently passed in **74.42 seconds** with no timeout
+increase or native profile-code change. The original startup timing failure is
+not attributed to a proven root cause. The sidebar check now waits for the actual
+terminal protocol acknowledgement and exact final cursor before retaining its
+independent incremental-event/history/effect assertions. The complete revised
+gate subsequently passed as recorded above; the original startup timing failure
+still has no proven root cause. Hosted packaging and installed/rendered current
+coding acceptance remain pending. Earlier source-only statements below are
+historical checkpoints superseded by this scoped local result.
+[Original failed gate](evidence/native-mcp-oauth-local-first-failed.json),
+[profile/view first follow-up](evidence/native-mcp-oauth-local-profile-view-first-recheck.log).
+
+The later hosted `ad5a363` also failed the same early browser incremental-event
+assertion before reaching its complete native gate. It predates both terminal
+feed-retention fixes. Its original log/provenance are retained separately;
+the current local result is not advertised as a hosted or installed pass.
+[Hosted failure provenance](evidence/native-browser-terminal-drain-ad5-failure.json).
+
 Native early view acceptance failed at `e6032d9`: its actual browser resume
 reported `Unowned graph event`, so the full native gate was not reached. Original
 hosted failure/provenance/job output is retained. The browser snapshot fetched

@@ -1,0 +1,29 @@
+Test project D:/a/xMind/xMind/xmind/build/native
+    Start 91: native_local_view_contract
+1/1 Test #91: native_local_view_contract .......***Failed   24.03 sec
+{"retainedFixture":"C:\\Users\\runneradmin\\AppData\\Local\\Temp\\xmind-local-view-igorWs"}
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: A committed event must arrive incrementally after human input
+    at file:///D:/a/xMind/xMind/xmind/Native/tests/local_view_contract.mjs:83:168
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v22.23.3
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =  24.05 sec
+
+The following tests FAILED:
+	 91 - native_local_view_contract (Failed)
+Errors while running CTest

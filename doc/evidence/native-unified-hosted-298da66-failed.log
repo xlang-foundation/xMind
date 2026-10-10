@@ -1,0 +1,1814 @@
+﻿2026-10-10T03:28:30.7659983Z Current runner version: '2.337.0'
+2026-10-10T03:28:30.7693597Z ##[group]Runner Image Provisioner
+2026-10-10T03:28:30.7694456Z Hosted Compute Agent
+2026-10-10T03:28:30.7695315Z Version: 20260901.588
+2026-10-10T03:28:30.7695913Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-10T03:28:30.7696617Z Build Date: 2026-09-01T19:56:44Z
+2026-10-10T03:28:30.7697255Z Worker ID: {65742fae-838c-4614-8e88-008a6b50820b}
+2026-10-10T03:28:30.7697935Z Azure Region: centralus
+2026-10-10T03:28:30.7698464Z ##[endgroup]
+2026-10-10T03:28:30.7699879Z ##[group]Operating System
+2026-10-10T03:28:30.7700543Z Microsoft Windows Server 2025
+2026-10-10T03:28:30.7701160Z 10.0.26100
+2026-10-10T03:28:30.7701658Z Datacenter
+2026-10-10T03:28:30.7702142Z ##[endgroup]
+2026-10-10T03:28:30.7702640Z ##[group]Runner Image
+2026-10-10T03:28:30.7703287Z Image: windows-2025-vs2026
+2026-10-10T03:28:30.7703857Z Version: 20260925.250.1
+2026-10-10T03:28:30.7705423Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20260925.250/images/windows/Windows2025-VS2026-Readme.md
+2026-10-10T03:28:30.7707044Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20260925.250
+2026-10-10T03:28:30.7708034Z ##[endgroup]
+2026-10-10T03:28:30.7709072Z ##[group]GITHUB_TOKEN Permissions
+2026-10-10T03:28:30.7711117Z Contents: read
+2026-10-10T03:28:30.7711695Z Metadata: read
+2026-10-10T03:28:30.7712232Z ##[endgroup]
+2026-10-10T03:28:30.7714463Z Secret source: Actions
+2026-10-10T03:28:30.7715679Z Cache mode: write
+2026-10-10T03:28:30.7716398Z Prepare workflow directory
+2026-10-10T03:28:30.8136037Z Prepare all required actions
+2026-10-10T03:28:30.8204054Z Getting action download info
+2026-10-10T03:28:31.0674549Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-10-10T03:28:31.2004877Z Download action repository 'actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38' (SHA:249970729cb0ef3589644e2896645e5dc5ba9c38)
+2026-10-10T03:28:31.3593510Z Download action repository 'actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f' (SHA:b7c566a772e6b6bfb58ed0dc250532a479d7789f)
+2026-10-10T03:28:31.7113587Z Complete job name: contracts
+2026-10-10T03:28:31.8557361Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-10-10T03:28:31.8558935Z with:
+2026-10-10T03:28:31.8559476Z   path: xmind
+2026-10-10T03:28:31.8560041Z   persist-credentials: false
+2026-10-10T03:28:31.8560725Z   repository: xlang-foundation/xMind
+2026-10-10T03:28:31.8565451Z   token: ***
+2026-10-10T03:28:31.8565887Z   ssh-strict: true
+2026-10-10T03:28:31.8566333Z   ssh-user: git
+2026-10-10T03:28:31.8566754Z   clean: true
+2026-10-10T03:28:31.8567206Z   sparse-checkout-cone-mode: true
+2026-10-10T03:28:31.8567739Z   fetch-depth: 1
+2026-10-10T03:28:31.8568178Z   fetch-tags: false
+2026-10-10T03:28:31.8568625Z   show-progress: true
+2026-10-10T03:28:31.8569071Z   lfs: false
+2026-10-10T03:28:31.8569490Z   submodules: false
+2026-10-10T03:28:31.8569962Z   set-safe-directory: true
+2026-10-10T03:28:31.8570549Z   allow-unsafe-pr-checkout: false
+2026-10-10T03:28:31.8571288Z ##[endgroup]
+2026-10-10T03:28:32.0221020Z Syncing repository: xlang-foundation/xMind
+2026-10-10T03:28:32.0222899Z ##[group]Getting Git version info
+2026-10-10T03:28:32.0223571Z Working directory is 'D:\a\xMind\xMind\xmind'
+2026-10-10T03:28:32.1133476Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-10T03:28:32.4134674Z git version 2.55.0.windows.5
+2026-10-10T03:28:32.4191597Z ##[endgroup]
+2026-10-10T03:28:32.4211855Z Temporarily overriding HOME='D:\a\_temp\06f29c1a-f9ae-46ab-a087-5bf9e6d16936' before making global git config changes
+2026-10-10T03:28:32.4213746Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T03:28:32.4222380Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\xmind
+2026-10-10T03:28:32.4800637Z ##[group]Determining repository object format
+2026-10-10T03:28:32.4806857Z ##[endgroup]
+2026-10-10T03:28:32.4808187Z ##[group]Initializing the repository
+2026-10-10T03:28:32.4818041Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\xMind\xMind\xmind
+2026-10-10T03:28:32.5575313Z Initialized empty Git repository in D:/a/xMind/xMind/xmind/.git/
+2026-10-10T03:28:32.5634895Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/xlang-foundation/xMind
+2026-10-10T03:28:32.6197824Z ##[endgroup]
+2026-10-10T03:28:32.6199329Z ##[group]Disabling automatic garbage collection
+2026-10-10T03:28:32.6205694Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-10T03:28:32.6491824Z ##[endgroup]
+2026-10-10T03:28:32.6493767Z ##[group]Setting up auth
+2026-10-10T03:28:32.6494933Z Removing SSH command configuration
+2026-10-10T03:28:32.6504181Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T03:28:32.6790433Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-10T03:28:34.0206596Z Removing HTTP extra header
+2026-10-10T03:28:34.0215978Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T03:28:34.0510566Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-10T03:28:34.5775856Z Removing includeIf entries pointing to credentials config files
+2026-10-10T03:28:34.5786624Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T03:28:34.6083704Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-10T03:28:35.1614768Z [command]"C:\Program Files\Git\bin\git.exe" config --file D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-10T03:28:35.1915750Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/xmind/.git.path D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:35.2274847Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:35.2642188Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/xmind/.git.path /github/runner_temp/git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:35.2959287Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/xmind/.git/worktrees/*.path /github/runner_temp/git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:35.3274413Z ##[endgroup]
+2026-10-10T03:28:35.3275111Z ##[group]Fetching the repository
+2026-10-10T03:28:35.3288526Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +298da660383472892c15a89de6aa721fd85416cd:refs/remotes/origin/checkpoint/native-persistence-m1
+2026-10-10T03:28:37.0330657Z From https://github.com/xlang-foundation/xMind
+2026-10-10T03:28:37.0331529Z  * [new ref]         298da660383472892c15a89de6aa721fd85416cd -> origin/checkpoint/native-persistence-m1
+2026-10-10T03:28:37.0388772Z [command]"C:\Program Files\Git\bin\git.exe" branch --list --remote origin/checkpoint/native-persistence-m1
+2026-10-10T03:28:37.0800728Z   origin/checkpoint/native-persistence-m1
+2026-10-10T03:28:37.0846944Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse refs/remotes/origin/checkpoint/native-persistence-m1
+2026-10-10T03:28:37.1113210Z 298da660383472892c15a89de6aa721fd85416cd
+2026-10-10T03:28:37.1145329Z ##[endgroup]
+2026-10-10T03:28:37.1145687Z ##[group]Determining the checkout info
+2026-10-10T03:28:37.1147409Z ##[endgroup]
+2026-10-10T03:28:37.1155895Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-10T03:28:37.1577383Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-10T03:28:37.1873259Z ##[group]Checking out the ref
+2026-10-10T03:28:37.1882827Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B checkpoint/native-persistence-m1 refs/remotes/origin/checkpoint/native-persistence-m1
+2026-10-10T03:28:38.2354139Z Updating files:  95% (3207/3352)
+2026-10-10T03:28:38.2460723Z Updating files:  96% (3218/3352)
+2026-10-10T03:28:38.2546332Z Updating files:  97% (3252/3352)
+2026-10-10T03:28:38.2653145Z Updating files:  98% (3285/3352)
+2026-10-10T03:28:38.2756828Z Updating files:  99% (3319/3352)
+2026-10-10T03:28:38.2757561Z Updating files: 100% (3352/3352)
+2026-10-10T03:28:38.2757950Z Updating files: 100% (3352/3352), done.
+2026-10-10T03:28:38.2937627Z Switched to a new branch 'checkpoint/native-persistence-m1'
+2026-10-10T03:28:38.3028866Z branch 'checkpoint/native-persistence-m1' set up to track 'origin/checkpoint/native-persistence-m1'.
+2026-10-10T03:28:38.3094951Z ##[endgroup]
+2026-10-10T03:28:38.3517504Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-10T03:28:38.3801222Z 298da660383472892c15a89de6aa721fd85416cd
+2026-10-10T03:28:38.3844446Z ##[group]Removing auth
+2026-10-10T03:28:38.3845216Z Removing SSH command configuration
+2026-10-10T03:28:38.3852765Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T03:28:38.4168209Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-10T03:28:38.9627853Z Removing HTTP extra header
+2026-10-10T03:28:38.9637818Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T03:28:38.9940554Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-10T03:28:39.5646686Z Removing includeIf entries pointing to credentials config files
+2026-10-10T03:28:39.5653768Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T03:28:39.5909683Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-10T03:28:39.5910361Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-10T03:28:39.5910982Z includeif.gitdir:/github/workspace/xmind/.git.path
+2026-10-10T03:28:39.5911494Z includeif.gitdir:/github/workspace/xmind/.git/worktrees/*.path
+2026-10-10T03:28:39.5957791Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-10T03:28:39.6257615Z D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:39.6306637Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:39.6626530Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-10T03:28:39.6884584Z D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:39.6924605Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:39.7222963Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/xmind/.git.path
+2026-10-10T03:28:39.7488236Z /github/runner_temp/git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:39.7531305Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/xmind/.git.path /github/runner_temp/git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:39.7836005Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/xmind/.git/worktrees/*.path
+2026-10-10T03:28:39.8099580Z /github/runner_temp/git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:39.8141167Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/xmind/.git/worktrees/*.path /github/runner_temp/git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:28:39.8480384Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-10T03:28:40.3944049Z Removing credentials config 'D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config'
+2026-10-10T03:28:40.3957520Z ##[endgroup]
+2026-10-10T03:28:40.4389663Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-10-10T03:28:40.4390079Z with:
+2026-10-10T03:28:40.4390266Z   repository: CantorAI/xlang3
+2026-10-10T03:28:40.4390526Z   ref: 7b8b32ae3a0e6a99fac7babd97362736099448fb
+2026-10-10T03:28:40.4390787Z   path: xlang3
+2026-10-10T03:28:40.4390970Z   persist-credentials: false
+2026-10-10T03:28:40.4393484Z   token: ***
+2026-10-10T03:28:40.4393663Z   ssh-strict: true
+2026-10-10T03:28:40.4393842Z   ssh-user: git
+2026-10-10T03:28:40.4394014Z   clean: true
+2026-10-10T03:28:40.4394209Z   sparse-checkout-cone-mode: true
+2026-10-10T03:28:40.4394456Z   fetch-depth: 1
+2026-10-10T03:28:40.4394634Z   fetch-tags: false
+2026-10-10T03:28:40.4394818Z   show-progress: true
+2026-10-10T03:28:40.4395003Z   lfs: false
+2026-10-10T03:28:40.4395168Z   submodules: false
+2026-10-10T03:28:40.4395360Z   set-safe-directory: true
+2026-10-10T03:28:40.4395583Z   allow-unsafe-pr-checkout: false
+2026-10-10T03:28:40.4395844Z ##[endgroup]
+2026-10-10T03:28:40.5508212Z Syncing repository: CantorAI/xlang3
+2026-10-10T03:28:40.5517810Z ##[group]Getting Git version info
+2026-10-10T03:28:40.5518742Z Working directory is 'D:\a\xMind\xMind\xlang3'
+2026-10-10T03:28:40.6371185Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-10T03:28:40.6642616Z git version 2.55.0.windows.5
+2026-10-10T03:28:40.6698711Z ##[endgroup]
+2026-10-10T03:28:40.6721414Z Temporarily overriding HOME='D:\a\_temp\579ab9d8-7ec7-441f-a713-67d71afdb750' before making global git config changes
+2026-10-10T03:28:40.6722592Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T03:28:40.6733211Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\xlang3
+2026-10-10T03:28:40.7028808Z ##[group]Determining repository object format
+2026-10-10T03:28:40.7032154Z ##[endgroup]
+2026-10-10T03:28:40.7032566Z ##[group]Initializing the repository
+2026-10-10T03:28:40.7041953Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\xMind\xMind\xlang3
+2026-10-10T03:28:40.7405661Z Initialized empty Git repository in D:/a/xMind/xMind/xlang3/.git/
+2026-10-10T03:28:40.7464289Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/CantorAI/xlang3
+2026-10-10T03:28:40.7860753Z ##[endgroup]
+2026-10-10T03:28:40.7861382Z ##[group]Disabling automatic garbage collection
+2026-10-10T03:28:40.7870883Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-10T03:28:40.8239028Z ##[endgroup]
+2026-10-10T03:28:40.8239561Z ##[group]Setting up auth
+2026-10-10T03:28:40.8241552Z Removing SSH command configuration
+2026-10-10T03:28:40.8253023Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T03:28:40.8565461Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-10T03:28:41.3862351Z Removing HTTP extra header
+2026-10-10T03:28:41.3873854Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T03:28:41.4222263Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-10T03:28:41.9594698Z Removing includeIf entries pointing to credentials config files
+2026-10-10T03:28:41.9607344Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T03:28:41.9911215Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-10T03:28:42.5186133Z [command]"C:\Program Files\Git\bin\git.exe" config --file D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-10T03:28:42.5484634Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/xlang3/.git.path D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:42.5770582Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:42.6063550Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/xlang3/.git.path /github/runner_temp/git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:42.6353890Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/xlang3/.git/worktrees/*.path /github/runner_temp/git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:42.6643241Z ##[endgroup]
+2026-10-10T03:28:42.6643795Z ##[group]Fetching the repository
+2026-10-10T03:28:42.6655991Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 7b8b32ae3a0e6a99fac7babd97362736099448fb
+2026-10-10T03:28:45.9302216Z From https://github.com/CantorAI/xlang3
+2026-10-10T03:28:45.9302955Z  * branch            7b8b32ae3a0e6a99fac7babd97362736099448fb -> FETCH_HEAD
+2026-10-10T03:28:45.9356482Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse --verify --quiet 7b8b32ae3a0e6a99fac7babd97362736099448fb^{object}
+2026-10-10T03:28:45.9618126Z 7b8b32ae3a0e6a99fac7babd97362736099448fb
+2026-10-10T03:28:45.9652163Z ##[endgroup]
+2026-10-10T03:28:45.9652797Z ##[group]Determining the checkout info
+2026-10-10T03:28:45.9654614Z ##[endgroup]
+2026-10-10T03:28:45.9663407Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-10T03:28:46.0002552Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-10T03:28:46.0290082Z ##[group]Checking out the ref
+2026-10-10T03:28:46.0299289Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force 7b8b32ae3a0e6a99fac7babd97362736099448fb
+2026-10-10T03:28:47.8793588Z Updating files:  51% (3039/5862)
+2026-10-10T03:28:47.9067350Z Updating files:  52% (3049/5862)
+2026-10-10T03:28:47.9253757Z Updating files:  53% (3107/5862)
+2026-10-10T03:28:47.9450960Z Updating files:  54% (3166/5862)
+2026-10-10T03:28:47.9615853Z Updating files:  55% (3225/5862)
+2026-10-10T03:28:47.9833889Z Updating files:  56% (3283/5862)
+2026-10-10T03:28:48.0623149Z Updating files:  57% (3342/5862)
+2026-10-10T03:28:48.0698078Z Updating files:  58% (3400/5862)
+2026-10-10T03:28:48.0773678Z Updating files:  58% (3428/5862)
+2026-10-10T03:28:48.0896650Z Updating files:  59% (3459/5862)
+2026-10-10T03:28:48.1019013Z Updating files:  60% (3518/5862)
+2026-10-10T03:28:48.1136483Z Updating files:  61% (3576/5862)
+2026-10-10T03:28:48.1247137Z Updating files:  62% (3635/5862)
+2026-10-10T03:28:48.1360753Z Updating files:  63% (3694/5862)
+2026-10-10T03:28:48.1473829Z Updating files:  64% (3752/5862)
+2026-10-10T03:28:48.1592274Z Updating files:  65% (3811/5862)
+2026-10-10T03:28:48.1710178Z Updating files:  66% (3869/5862)
+2026-10-10T03:28:48.1821959Z Updating files:  67% (3928/5862)
+2026-10-10T03:28:48.1942908Z Updating files:  68% (3987/5862)
+2026-10-10T03:28:48.2076983Z Updating files:  69% (4045/5862)
+2026-10-10T03:28:48.2205238Z Updating files:  70% (4104/5862)
+2026-10-10T03:28:48.2317811Z Updating files:  71% (4163/5862)
+2026-10-10T03:28:48.2431755Z Updating files:  72% (4221/5862)
+2026-10-10T03:28:48.2544001Z Updating files:  73% (4280/5862)
+2026-10-10T03:28:48.2660432Z Updating files:  74% (4338/5862)
+2026-10-10T03:28:48.2775146Z Updating files:  75% (4397/5862)
+2026-10-10T03:28:48.2885213Z Updating files:  76% (4456/5862)
+2026-10-10T03:28:48.3003714Z Updating files:  77% (4514/5862)
+2026-10-10T03:28:48.3119065Z Updating files:  78% (4573/5862)
+2026-10-10T03:28:48.3225787Z Updating files:  79% (4631/5862)
+2026-10-10T03:28:48.3336645Z Updating files:  80% (4690/5862)
+2026-10-10T03:28:48.3437760Z Updating files:  81% (4749/5862)
+2026-10-10T03:28:48.3538753Z Updating files:  82% (4807/5862)
+2026-10-10T03:28:48.3648226Z Updating files:  83% (4866/5862)
+2026-10-10T03:28:48.3750256Z Updating files:  84% (4925/5862)
+2026-10-10T03:28:48.3849866Z Updating files:  85% (4983/5862)
+2026-10-10T03:28:48.3952319Z Updating files:  86% (5042/5862)
+2026-10-10T03:28:48.4072411Z Updating files:  87% (5100/5862)
+2026-10-10T03:28:48.4221165Z Updating files:  88% (5159/5862)
+2026-10-10T03:28:48.4408185Z Updating files:  89% (5218/5862)
+2026-10-10T03:28:48.4571917Z Updating files:  90% (5276/5862)
+2026-10-10T03:28:48.5356264Z Updating files:  91% (5335/5862)
+2026-10-10T03:28:48.5502605Z Updating files:  92% (5394/5862)
+2026-10-10T03:28:48.5641363Z Updating files:  93% (5452/5862)
+2026-10-10T03:28:48.5788862Z Updating files:  94% (5511/5862)
+2026-10-10T03:28:48.5936442Z Updating files:  95% (5569/5862)
+2026-10-10T03:28:48.6191860Z Updating files:  96% (5628/5862)
+2026-10-10T03:28:48.6357684Z Updating files:  97% (5687/5862)
+2026-10-10T03:28:48.6550795Z Updating files:  98% (5745/5862)
+2026-10-10T03:28:48.6807741Z Updating files:  99% (5804/5862)
+2026-10-10T03:28:48.6808481Z Updating files: 100% (5862/5862)
+2026-10-10T03:28:48.6808838Z Updating files: 100% (5862/5862), done.
+2026-10-10T03:28:48.6963647Z Note: switching to '7b8b32ae3a0e6a99fac7babd97362736099448fb'.
+2026-10-10T03:28:48.6964119Z 
+2026-10-10T03:28:48.6964376Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-10T03:28:48.6964900Z changes and commit them, and you can discard any commits you make in this
+2026-10-10T03:28:48.6965384Z state without impacting any branches by switching back to a branch.
+2026-10-10T03:28:48.6965665Z 
+2026-10-10T03:28:48.6965850Z If you want to create a new branch to retain commits you create, you may
+2026-10-10T03:28:48.6966309Z do so (now or later) by using -c with the switch command. Example:
+2026-10-10T03:28:48.6966566Z 
+2026-10-10T03:28:48.6966681Z   git switch -c <new-branch-name>
+2026-10-10T03:28:48.6966863Z 
+2026-10-10T03:28:48.6966955Z Or undo this operation with:
+2026-10-10T03:28:48.6967115Z 
+2026-10-10T03:28:48.6967188Z   git switch -
+2026-10-10T03:28:48.6967305Z 
+2026-10-10T03:28:48.6967516Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-10T03:28:48.6967837Z 
+2026-10-10T03:28:48.6968090Z HEAD is now at 7b8b32a Preserve UTF-8 working-directory and system path metadata
+2026-10-10T03:28:48.7149074Z ##[endgroup]
+2026-10-10T03:28:48.7483918Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-10T03:28:48.7748265Z 7b8b32ae3a0e6a99fac7babd97362736099448fb
+2026-10-10T03:28:48.7789483Z ##[group]Removing auth
+2026-10-10T03:28:48.7790135Z Removing SSH command configuration
+2026-10-10T03:28:48.7802229Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T03:28:48.8102695Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-10T03:28:49.3913858Z Removing HTTP extra header
+2026-10-10T03:28:49.3924119Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T03:28:49.4221172Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-10T03:28:49.9279898Z Removing includeIf entries pointing to credentials config files
+2026-10-10T03:28:49.9288624Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T03:28:49.9554279Z includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path
+2026-10-10T03:28:49.9554979Z includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path
+2026-10-10T03:28:49.9555615Z includeif.gitdir:/github/workspace/xlang3/.git.path
+2026-10-10T03:28:49.9556225Z includeif.gitdir:/github/workspace/xlang3/.git/worktrees/*.path
+2026-10-10T03:28:49.9598826Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path
+2026-10-10T03:28:49.9860629Z D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:49.9903689Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:50.0212945Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path
+2026-10-10T03:28:50.0474131Z D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:50.0515034Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:50.0824326Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/xlang3/.git.path
+2026-10-10T03:28:50.1102684Z /github/runner_temp/git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:50.1142688Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/xlang3/.git.path /github/runner_temp/git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:50.1445333Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/xlang3/.git/worktrees/*.path
+2026-10-10T03:28:50.1698770Z /github/runner_temp/git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:50.1740498Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/xlang3/.git/worktrees/*.path /github/runner_temp/git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:28:50.2040239Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-10T03:28:50.7087528Z Removing credentials config 'D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config'
+2026-10-10T03:28:50.7099358Z ##[endgroup]
+2026-10-10T03:28:50.7475558Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-10-10T03:28:50.7475984Z with:
+2026-10-10T03:28:50.7476171Z   repository: python/cpython
+2026-10-10T03:28:50.7476432Z   ref: ebf955df7a89ed0c7968f79faec1de49f61ed7cb
+2026-10-10T03:28:50.7476703Z   path: stdlib-source
+2026-10-10T03:28:50.7476917Z   sparse-checkout: Lib
+
+2026-10-10T03:28:50.7477138Z   persist-credentials: false
+2026-10-10T03:28:50.7479636Z   token: ***
+2026-10-10T03:28:50.7479818Z   ssh-strict: true
+2026-10-10T03:28:50.7480003Z   ssh-user: git
+2026-10-10T03:28:50.7480170Z   clean: true
+2026-10-10T03:28:50.7480356Z   sparse-checkout-cone-mode: true
+2026-10-10T03:28:50.7480588Z   fetch-depth: 1
+2026-10-10T03:28:50.7480773Z   fetch-tags: false
+2026-10-10T03:28:50.7480954Z   show-progress: true
+2026-10-10T03:28:50.7481136Z   lfs: false
+2026-10-10T03:28:50.7481300Z   submodules: false
+2026-10-10T03:28:50.7481483Z   set-safe-directory: true
+2026-10-10T03:28:50.7481751Z   allow-unsafe-pr-checkout: false
+2026-10-10T03:28:50.7481987Z ##[endgroup]
+2026-10-10T03:28:50.8552548Z Syncing repository: python/cpython
+2026-10-10T03:28:50.8560938Z ##[group]Getting Git version info
+2026-10-10T03:28:50.8561854Z Working directory is 'D:\a\xMind\xMind\stdlib-source'
+2026-10-10T03:28:50.9388555Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-10T03:28:50.9748134Z git version 2.55.0.windows.5
+2026-10-10T03:28:50.9803758Z ##[endgroup]
+2026-10-10T03:28:50.9823455Z Temporarily overriding HOME='D:\a\_temp\3a04a7b4-36ab-4600-a24c-35b51677ecea' before making global git config changes
+2026-10-10T03:28:50.9824654Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T03:28:50.9835833Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\stdlib-source
+2026-10-10T03:28:51.0208565Z ##[group]Determining repository object format
+2026-10-10T03:28:51.0212947Z ##[endgroup]
+2026-10-10T03:28:51.0213520Z ##[group]Initializing the repository
+2026-10-10T03:28:51.0223162Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\xMind\xMind\stdlib-source
+2026-10-10T03:28:51.0597727Z Initialized empty Git repository in D:/a/xMind/xMind/stdlib-source/.git/
+2026-10-10T03:28:51.0646586Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/python/cpython
+2026-10-10T03:28:51.0966100Z ##[endgroup]
+2026-10-10T03:28:51.0966744Z ##[group]Disabling automatic garbage collection
+2026-10-10T03:28:51.0976353Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-10T03:28:51.1262358Z ##[endgroup]
+2026-10-10T03:28:51.1262696Z ##[group]Setting up auth
+2026-10-10T03:28:51.1264660Z Removing SSH command configuration
+2026-10-10T03:28:51.1276604Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T03:28:51.1562842Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-10T03:28:51.7063213Z Removing HTTP extra header
+2026-10-10T03:28:51.7072821Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T03:28:51.7379083Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-10T03:28:52.2757813Z Removing includeIf entries pointing to credentials config files
+2026-10-10T03:28:52.2773131Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T03:28:52.3079320Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-10T03:28:52.8344197Z [command]"C:\Program Files\Git\bin\git.exe" config --file D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-10T03:28:52.8655330Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:28:52.8946739Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:28:52.9234460Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/stdlib-source/.git.path /github/runner_temp/git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:28:52.9530913Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/stdlib-source/.git/worktrees/*.path /github/runner_temp/git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:28:52.9818371Z ##[endgroup]
+2026-10-10T03:28:52.9818925Z ##[group]Fetching the repository
+2026-10-10T03:28:52.9831783Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin ebf955df7a89ed0c7968f79faec1de49f61ed7cb
+2026-10-10T03:28:53.4016139Z From https://github.com/python/cpython
+2026-10-10T03:28:53.4016808Z  * branch            ebf955df7a89ed0c7968f79faec1de49f61ed7cb -> FETCH_HEAD
+2026-10-10T03:28:53.4068578Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse --verify --quiet ebf955df7a89ed0c7968f79faec1de49f61ed7cb^{object}
+2026-10-10T03:28:53.4334348Z ebf955df7a89ed0c7968f79faec1de49f61ed7cb
+2026-10-10T03:28:53.4366570Z ##[endgroup]
+2026-10-10T03:28:53.4367190Z ##[group]Determining the checkout info
+2026-10-10T03:28:53.4368744Z ##[endgroup]
+2026-10-10T03:28:53.4369429Z ##[group]Setting up sparse checkout
+2026-10-10T03:28:53.4377007Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout set Lib
+2026-10-10T03:28:53.4705751Z ##[endgroup]
+2026-10-10T03:28:53.4706105Z ##[group]Checking out the ref
+2026-10-10T03:28:53.4713872Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force ebf955df7a89ed0c7968f79faec1de49f61ed7cb
+2026-10-10T03:28:57.7673235Z Updating files:   0% (1/2406)
+2026-10-10T03:28:57.7764628Z Updating files:   1% (25/2406)
+2026-10-10T03:28:57.7843407Z Updating files:   2% (49/2406)
+2026-10-10T03:28:57.7917837Z Updating files:   3% (73/2406)
+2026-10-10T03:28:57.7994071Z Updating files:   4% (97/2406)
+2026-10-10T03:28:57.8074319Z Updating files:   5% (121/2406)
+2026-10-10T03:28:57.8162639Z Updating files:   6% (145/2406)
+2026-10-10T03:28:57.8240130Z Updating files:   7% (169/2406)
+2026-10-10T03:28:57.8306295Z Updating files:   8% (193/2406)
+2026-10-10T03:28:57.8381111Z Updating files:   9% (217/2406)
+2026-10-10T03:28:57.8435977Z Updating files:  10% (241/2406)
+2026-10-10T03:28:57.8502400Z Updating files:  11% (265/2406)
+2026-10-10T03:28:57.8565976Z Updating files:  12% (289/2406)
+2026-10-10T03:28:57.8704033Z Updating files:  13% (313/2406)
+2026-10-10T03:28:57.8798506Z Updating files:  14% (337/2406)
+2026-10-10T03:28:57.8867307Z Updating files:  15% (361/2406)
+2026-10-10T03:28:57.8947559Z Updating files:  16% (385/2406)
+2026-10-10T03:28:57.9010917Z Updating files:  17% (410/2406)
+2026-10-10T03:28:57.9071330Z Updating files:  18% (434/2406)
+2026-10-10T03:28:57.9132137Z Updating files:  19% (458/2406)
+2026-10-10T03:28:57.9200249Z Updating files:  20% (482/2406)
+2026-10-10T03:28:57.9275874Z Updating files:  21% (506/2406)
+2026-10-10T03:28:57.9372526Z Updating files:  22% (530/2406)
+2026-10-10T03:28:57.9444916Z Updating files:  23% (554/2406)
+2026-10-10T03:28:57.9549877Z Updating files:  24% (578/2406)
+2026-10-10T03:28:57.9657809Z Updating files:  25% (602/2406)
+2026-10-10T03:28:57.9750140Z Updating files:  26% (626/2406)
+2026-10-10T03:28:57.9832543Z Updating files:  27% (650/2406)
+2026-10-10T03:28:57.9894486Z Updating files:  28% (674/2406)
+2026-10-10T03:28:57.9946370Z Updating files:  29% (698/2406)
+2026-10-10T03:28:58.0000055Z Updating files:  30% (722/2406)
+2026-10-10T03:28:58.0092968Z Updating files:  31% (746/2406)
+2026-10-10T03:28:58.0181585Z Updating files:  32% (770/2406)
+2026-10-10T03:28:58.0271343Z Updating files:  33% (794/2406)
+2026-10-10T03:28:58.0339005Z Updating files:  34% (819/2406)
+2026-10-10T03:28:58.0401312Z Updating files:  35% (843/2406)
+2026-10-10T03:28:58.0497561Z Updating files:  36% (867/2406)
+2026-10-10T03:28:58.0578253Z Updating files:  37% (891/2406)
+2026-10-10T03:28:58.0658880Z Updating files:  38% (915/2406)
+2026-10-10T03:28:58.0734086Z Updating files:  39% (939/2406)
+2026-10-10T03:28:58.0809332Z Updating files:  40% (963/2406)
+2026-10-10T03:28:58.0880431Z Updating files:  41% (987/2406)
+2026-10-10T03:28:58.0949790Z Updating files:  42% (1011/2406)
+2026-10-10T03:28:58.1045634Z Updating files:  43% (1035/2406)
+2026-10-10T03:28:58.1132428Z Updating files:  44% (1059/2406)
+2026-10-10T03:28:58.1230350Z Updating files:  45% (1083/2406)
+2026-10-10T03:28:58.1304961Z Updating files:  46% (1107/2406)
+2026-10-10T03:28:58.1391130Z Updating files:  47% (1131/2406)
+2026-10-10T03:28:58.1475688Z Updating files:  48% (1155/2406)
+2026-10-10T03:28:58.1550939Z Updating files:  49% (1179/2406)
+2026-10-10T03:28:58.1616684Z Updating files:  50% (1203/2406)
+2026-10-10T03:28:58.1674771Z Updating files:  51% (1228/2406)
+2026-10-10T03:28:58.1747017Z Updating files:  52% (1252/2406)
+2026-10-10T03:28:58.1843441Z Updating files:  53% (1276/2406)
+2026-10-10T03:28:58.1903783Z Updating files:  54% (1300/2406)
+2026-10-10T03:28:58.1953152Z Updating files:  55% (1324/2406)
+2026-10-10T03:28:58.2007869Z Updating files:  56% (1348/2406)
+2026-10-10T03:28:58.2092819Z Updating files:  57% (1372/2406)
+2026-10-10T03:28:58.2179609Z Updating files:  58% (1396/2406)
+2026-10-10T03:28:58.2245821Z Updating files:  59% (1420/2406)
+2026-10-10T03:28:58.2317034Z Updating files:  60% (1444/2406)
+2026-10-10T03:28:58.2397728Z Updating files:  61% (1468/2406)
+2026-10-10T03:28:58.2477008Z Updating files:  62% (1492/2406)
+2026-10-10T03:28:58.2530307Z Updating files:  63% (1516/2406)
+2026-10-10T03:28:58.2590754Z Updating files:  64% (1540/2406)
+2026-10-10T03:28:58.2659321Z Updating files:  65% (1564/2406)
+2026-10-10T03:28:58.2731392Z Updating files:  66% (1588/2406)
+2026-10-10T03:28:58.2796220Z Updating files:  67% (1613/2406)
+2026-10-10T03:28:58.2898409Z Updating files:  68% (1637/2406)
+2026-10-10T03:28:58.2958557Z Updating files:  69% (1661/2406)
+2026-10-10T03:28:58.3070402Z Updating files:  70% (1685/2406)
+2026-10-10T03:28:58.3146400Z Updating files:  71% (1709/2406)
+2026-10-10T03:28:58.3268659Z Updating files:  72% (1733/2406)
+2026-10-10T03:28:58.3351704Z Updating files:  73% (1757/2406)
+2026-10-10T03:28:58.3422632Z Updating files:  74% (1781/2406)
+2026-10-10T03:28:58.3516697Z Updating files:  75% (1805/2406)
+2026-10-10T03:28:58.3616488Z Updating files:  76% (1829/2406)
+2026-10-10T03:28:58.3710021Z Updating files:  77% (1853/2406)
+2026-10-10T03:28:58.3822771Z Updating files:  78% (1877/2406)
+2026-10-10T03:28:58.3897647Z Updating files:  79% (1901/2406)
+2026-10-10T03:28:58.3949697Z Updating files:  80% (1925/2406)
+2026-10-10T03:28:58.3999476Z Updating files:  81% (1949/2406)
+2026-10-10T03:28:58.4046321Z Updating files:  82% (1973/2406)
+2026-10-10T03:28:58.4102777Z Updating files:  83% (1997/2406)
+2026-10-10T03:28:58.4187026Z Updating files:  84% (2022/2406)
+2026-10-10T03:28:58.4273100Z Updating files:  85% (2046/2406)
+2026-10-10T03:28:58.4354338Z Updating files:  86% (2070/2406)
+2026-10-10T03:28:58.4433559Z Updating files:  87% (2094/2406)
+2026-10-10T03:28:58.4512453Z Updating files:  88% (2118/2406)
+2026-10-10T03:28:58.4594185Z Updating files:  89% (2142/2406)
+2026-10-10T03:28:58.4647098Z Updating files:  90% (2166/2406)
+2026-10-10T03:28:58.4749167Z Updating files:  91% (2190/2406)
+2026-10-10T03:28:58.4789766Z Updating files:  92% (2214/2406)
+2026-10-10T03:28:58.4836713Z Updating files:  93% (2238/2406)
+2026-10-10T03:28:58.4913057Z Updating files:  94% (2262/2406)
+2026-10-10T03:28:58.4988248Z Updating files:  95% (2286/2406)
+2026-10-10T03:28:58.5059498Z Updating files:  96% (2310/2406)
+2026-10-10T03:28:58.5135956Z Updating files:  97% (2334/2406)
+2026-10-10T03:28:58.5210290Z Updating files:  98% (2358/2406)
+2026-10-10T03:28:58.5278351Z Updating files:  99% (2382/2406)
+2026-10-10T03:28:58.5383415Z Updating files:  99% (2400/2406)
+2026-10-10T03:28:58.5383843Z Updating files: 100% (2406/2406)
+2026-10-10T03:28:58.5384202Z Updating files: 100% (2406/2406), done.
+2026-10-10T03:28:58.5534467Z Note: switching to 'ebf955df7a89ed0c7968f79faec1de49f61ed7cb'.
+2026-10-10T03:28:58.5534952Z 
+2026-10-10T03:28:58.5535165Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-10T03:28:58.5535639Z changes and commit them, and you can discard any commits you make in this
+2026-10-10T03:28:58.5536111Z state without impacting any branches by switching back to a branch.
+2026-10-10T03:28:58.5536406Z 
+2026-10-10T03:28:58.5536577Z If you want to create a new branch to retain commits you create, you may
+2026-10-10T03:28:58.5537008Z do so (now or later) by using -c with the switch command. Example:
+2026-10-10T03:28:58.5537255Z 
+2026-10-10T03:28:58.5537354Z   git switch -c <new-branch-name>
+2026-10-10T03:28:58.5537514Z 
+2026-10-10T03:28:58.5537607Z Or undo this operation with:
+2026-10-10T03:28:58.5537753Z 
+2026-10-10T03:28:58.5537832Z   git switch -
+2026-10-10T03:28:58.5537941Z 
+2026-10-10T03:28:58.5538154Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-10T03:28:58.5538455Z 
+2026-10-10T03:28:58.5538546Z HEAD is now at ebf955d Python 3.14.0
+2026-10-10T03:28:58.5615287Z ##[endgroup]
+2026-10-10T03:28:58.5940605Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-10T03:28:58.6207320Z ebf955df7a89ed0c7968f79faec1de49f61ed7cb
+2026-10-10T03:28:58.6248988Z ##[group]Removing auth
+2026-10-10T03:28:58.6249667Z Removing SSH command configuration
+2026-10-10T03:28:58.6257458Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T03:28:58.6559332Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-10T03:28:59.2439607Z Removing HTTP extra header
+2026-10-10T03:28:59.2449268Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T03:28:59.2753361Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-10T03:28:59.8165030Z Removing includeIf entries pointing to credentials config files
+2026-10-10T03:28:59.8174172Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T03:28:59.8432452Z includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path
+2026-10-10T03:28:59.8433245Z includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path
+2026-10-10T03:28:59.8434005Z includeif.gitdir:/github/workspace/stdlib-source/.git.path
+2026-10-10T03:28:59.8434763Z includeif.gitdir:/github/workspace/stdlib-source/.git/worktrees/*.path
+2026-10-10T03:28:59.8478399Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path
+2026-10-10T03:28:59.8740321Z D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:28:59.8790355Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:28:59.9111667Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path
+2026-10-10T03:28:59.9377891Z D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:28:59.9435459Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:28:59.9748044Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/stdlib-source/.git.path
+2026-10-10T03:29:00.0006834Z /github/runner_temp/git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:29:00.0058069Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/stdlib-source/.git.path /github/runner_temp/git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:29:00.0378253Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/stdlib-source/.git/worktrees/*.path
+2026-10-10T03:29:00.0631400Z /github/runner_temp/git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:29:00.0675128Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/stdlib-source/.git/worktrees/*.path /github/runner_temp/git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:29:00.0973412Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-10T03:29:00.6267987Z Removing credentials config 'D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config'
+2026-10-10T03:29:00.6279368Z ##[endgroup]
+2026-10-10T03:29:00.6609145Z ##[group]Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+2026-10-10T03:29:00.6609581Z with:
+2026-10-10T03:29:00.6609770Z   node-version: 22
+2026-10-10T03:29:00.6609963Z   check-latest: false
+2026-10-10T03:29:00.6612429Z   token: ***
+2026-10-10T03:29:00.6612631Z   package-manager-cache: true
+2026-10-10T03:29:00.6612872Z ##[endgroup]
+2026-10-10T03:29:00.8375798Z Found in cache @ C:\hostedtoolcache\windows\node\22.23.3\x64
+2026-10-10T03:29:00.8382059Z ##[group]Environment details
+2026-10-10T03:29:04.9689424Z node: v22.23.3
+2026-10-10T03:29:04.9689745Z npm: 10.9.9
+2026-10-10T03:29:04.9689917Z yarn: 1.22.22
+2026-10-10T03:29:04.9690347Z ##[endgroup]
+2026-10-10T03:29:04.9985088Z ##[group]Run ./xmind/Tools/ci-native.ps1 -RuntimeSource ./xlang3 -StdlibSource ./stdlib-source/Lib
+2026-10-10T03:29:04.9986306Z [36;1m./xmind/Tools/ci-native.ps1 -RuntimeSource ./xlang3 -StdlibSource ./stdlib-source/Lib[0m
+2026-10-10T03:29:05.0721391Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-10T03:29:05.0721838Z ##[endgroup]
+2026-10-10T03:29:16.0499086Z -- The C compiler identification is MSVC 19.51.36260.0
+2026-10-10T03:29:17.3978519Z -- The CXX compiler identification is MSVC 19.51.36260.0
+2026-10-10T03:29:17.5353476Z -- Detecting C compiler ABI info
+2026-10-10T03:29:18.5682642Z -- Detecting C compiler ABI info - done
+2026-10-10T03:29:18.5983541Z -- Check for working C compiler: C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe - skipped
+2026-10-10T03:29:18.6173601Z -- Detecting C compile features
+2026-10-10T03:29:18.6226829Z -- Detecting C compile features - done
+2026-10-10T03:29:18.6992849Z -- Detecting CXX compiler ABI info
+2026-10-10T03:29:19.4007650Z -- Detecting CXX compiler ABI info - done
+2026-10-10T03:29:19.4225557Z -- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe - skipped
+2026-10-10T03:29:19.4230916Z -- Detecting CXX compile features
+2026-10-10T03:29:19.4245772Z -- Detecting CXX compile features - done
+2026-10-10T03:29:19.6510868Z -- Looking for sys/types.h
+2026-10-10T03:29:20.4962871Z -- Looking for sys/types.h - found
+2026-10-10T03:29:20.4964494Z -- Looking for stdint.h
+2026-10-10T03:29:21.1678294Z -- Looking for stdint.h - found
+2026-10-10T03:29:21.1679450Z -- Looking for stddef.h
+2026-10-10T03:29:21.8383383Z -- Looking for stddef.h - found
+2026-10-10T03:29:21.8384241Z -- Check size of off64_t
+2026-10-10T03:29:22.7971359Z -- Check size of off64_t - failed
+2026-10-10T03:29:22.7973085Z -- Looking for fseeko
+2026-10-10T03:29:23.4738651Z -- Looking for fseeko - not found
+2026-10-10T03:29:23.4739526Z -- Looking for stdarg.h
+2026-10-10T03:29:24.1459506Z -- Looking for stdarg.h - found
+2026-10-10T03:29:24.1462601Z -- Looking for unistd.h
+2026-10-10T03:29:24.8986980Z -- Looking for unistd.h - not found
+2026-10-10T03:29:24.8987824Z -- Performing Test HAVE___ATTR__VIS_HIDDEN
+2026-10-10T03:29:25.4299635Z -- Performing Test HAVE___ATTR__VIS_HIDDEN - Failed
+2026-10-10T03:29:25.6182834Z -- The ASM_MASM compiler identification is MSVC
+2026-10-10T03:29:25.6233710Z -- Found assembler: C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/ml64.exe
+2026-10-10T03:29:25.6796439Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+2026-10-10T03:29:26.1913203Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+2026-10-10T03:29:26.1914130Z -- Looking for pthread_create in pthreads
+2026-10-10T03:29:26.7872777Z -- Looking for pthread_create in pthreads - not found
+2026-10-10T03:29:26.7873523Z -- Looking for pthread_create in pthread
+2026-10-10T03:29:27.3646209Z -- Looking for pthread_create in pthread - not found
+2026-10-10T03:29:27.3759175Z -- Found Threads: TRUE
+2026-10-10T03:29:27.3926312Z -- Configuring done (20.2s)
+2026-10-10T03:29:28.2798657Z -- Generating done (0.9s)
+2026-10-10T03:29:28.2811734Z -- Build files have been written to: D:/a/xMind/xMind/xlang3/build
+2026-10-10T03:29:28.4400699Z MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+2026-10-10T03:29:28.4779213Z 
+2026-10-10T03:29:28.7005444Z   Checking File Globs
+2026-10-10T03:29:28.8492903Z   1>Checking Build System
+2026-10-10T03:29:29.2209583Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-10T03:29:29.4620173Z   blocksort.c
+2026-10-10T03:29:29.5963032Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-10T03:29:29.7279807Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-10T03:29:29.7711632Z   runtime_lock.cpp
+2026-10-10T03:29:29.7737252Z   thread_module.cpp
+2026-10-10T03:29:29.7832075Z   thread_objects.cpp
+2026-10-10T03:29:29.8003202Z   Building Custom Rule D:/a/xMind/xMind/xlang3/modules/ctypes/CMakeLists.txt
+2026-10-10T03:29:29.8319858Z   Building Custom Rule D:/a/xMind/xMind/xlang3/third_party/zlib/CMakeLists.txt
+2026-10-10T03:29:29.8606044Z   Assembling D:\a\xMind\xMind\xlang3\modules\cffi\libffi\win64.asm...
+2026-10-10T03:29:30.6290769Z   adler32.c
+2026-10-10T03:29:30.6518859Z   task_module.cpp
+2026-10-10T03:29:30.6521940Z   task_objects.cpp
+2026-10-10T03:29:30.6554619Z   compress.c
+2026-10-10T03:29:30.6653910Z   crc32.c
+2026-10-10T03:29:30.6872524Z   deflate.c
+2026-10-10T03:29:30.7293277Z   gzclose.c
+2026-10-10T03:29:30.8740858Z   gzlib.c
+2026-10-10T03:29:30.9019598Z   gzread.c
+2026-10-10T03:29:30.9638735Z   gzwrite.c
+2026-10-10T03:29:31.0376135Z   inflate.c
+2026-10-10T03:29:31.0603571Z   infback.c
+2026-10-10T03:29:31.0826462Z   inftrees.c
+2026-10-10T03:29:31.1150747Z   inffast.c
+2026-10-10T03:29:31.1359690Z   trees.c
+2026-10-10T03:29:31.1619550Z   uncompr.c
+2026-10-10T03:29:31.1715416Z   zutil.c
+2026-10-10T03:29:31.1998467Z   Generating Code...
+2026-10-10T03:29:33.2801644Z   huffman.c
+2026-10-10T03:29:33.6380320Z   ctypes_ffi.cpp
+2026-10-10T03:29:33.9280397Z   crctable.c
+2026-10-10T03:29:34.4765363Z   zlibstatic.vcxproj -> D:\a\xMind\xMind\xlang3\build\third_party\zlib\Release\zs.lib
+2026-10-10T03:29:34.5992308Z   randtable.c
+2026-10-10T03:29:35.0317355Z   compress.c
+2026-10-10T03:29:35.2665744Z   xlang3_task_runtime.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\xlang3_task_runtime.lib
+2026-10-10T03:29:35.4267533Z   decompress.c
+2026-10-10T03:29:35.5829233Z   xlang3_thread_runtime.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\xlang3_thread_runtime.lib
+2026-10-10T03:29:35.7015539Z   bzlib.c
+2026-10-10T03:29:35.9611212Z   Generating Code...
+2026-10-10T03:29:37.9151679Z   ffi.c
+2026-10-10T03:29:37.9381728Z   prep_cif.c
+2026-10-10T03:29:37.9549901Z   types.c
+2026-10-10T03:29:37.9682127Z   Generating Code...
+2026-10-10T03:29:38.1110393Z   xlang3_ctypes_ffi.vcxproj -> D:\a\xMind\xMind\xlang3\build\modules\ctypes\Release\xlang3_ctypes_ffi.lib
+2026-10-10T03:29:39.0837097Z   bzip2static.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\bzip2static.lib
+2026-10-10T03:29:39.1358730Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-10T03:29:39.2696704Z   abc_module.cpp
+2026-10-10T03:29:39.2713548Z   ast_module.cpp
+2026-10-10T03:29:39.2714625Z   atexit_module.cpp
+2026-10-10T03:29:39.2716111Z   binascii_module.cpp
+2026-10-10T03:29:41.2042063Z   bisect_module.cpp
+2026-10-10T03:29:41.2833027Z   bz2_module.cpp
+2026-10-10T03:29:41.2985088Z   cmath_module.cpp
+2026-10-10T03:29:41.8993043Z   decimal_module.cpp
+2026-10-10T03:29:43.0577425Z   codecs_module.cpp
+2026-10-10T03:29:43.2301824Z   locale_module.cpp
+2026-10-10T03:29:43.7883390Z   multibytecodec_module.cpp
+2026-10-10T03:29:43.9302599Z   collections_module.cpp
+2026-10-10T03:29:45.1477604Z   contextvars_module.cpp
+2026-10-10T03:29:45.9708664Z   asyncio_module.cpp
+2026-10-10T03:29:46.2297665Z   asyncio_future.cpp
+2026-10-10T03:29:46.4517855Z   asyncio_task.cpp
+2026-10-10T03:29:47.3151119Z   csv_module.cpp
+2026-10-10T03:29:48.1854703Z   ctypes_module.cpp
+2026-10-10T03:29:48.4649998Z   errno_module.cpp
+2026-10-10T03:29:48.5394558Z   faulthandler_module.cpp
+2026-10-10T03:29:49.3729466Z   functools_module.cpp
+2026-10-10T03:29:50.3257513Z   gc_module.cpp
+2026-10-10T03:29:50.5182476Z   lsprof_module.cpp
+2026-10-10T03:29:50.7276362Z   array_module.cpp
+2026-10-10T03:29:51.3097284Z   imp_module.cpp
+2026-10-10T03:29:52.3086565Z   importlib_module.cpp
+2026-10-10T03:29:52.6087992Z   interpreters_module.cpp
+2026-10-10T03:29:52.6328501Z   itertools_module.cpp
+2026-10-10T03:29:53.1739814Z   io_module.cpp
+2026-10-10T03:29:54.5787936Z   json_module.cpp
+2026-10-10T03:29:54.6905551Z   marshal_module.cpp
+2026-10-10T03:29:55.2049982Z   msvcrt_module.cpp
+2026-10-10T03:29:55.5116669Z   multiprocessing_module.cpp
+2026-10-10T03:29:56.7495895Z   opcode_module.cpp
+2026-10-10T03:29:57.0127008Z   operator_module.cpp
+2026-10-10T03:29:57.5229235Z   os_module.cpp
+2026-10-10T03:29:57.7531794Z   overlapped_module.cpp
+2026-10-10T03:29:58.6512892Z   pickle_module.cpp
+2026-10-10T03:29:58.9959645Z   pyexpat_module.cpp
+2026-10-10T03:30:00.4165413Z   queue_module.cpp
+2026-10-10T03:30:00.7293496Z   random_module.cpp
+2026-10-10T03:30:00.8416154Z   signal_module.cpp
+2026-10-10T03:30:01.0437732Z   sha2_module.cpp
+2026-10-10T03:30:02.4034861Z   socket_select_module.cpp
+2026-10-10T03:30:02.6869363Z   sre_module.cpp
+2026-10-10T03:30:02.9459020Z   source_encoding.cpp
+2026-10-10T03:30:03.5632751Z   stat_module.cpp
+2026-10-10T03:30:04.1617597Z   string_module.cpp
+2026-10-10T03:30:05.2115604Z   struct_module.cpp
+2026-10-10T03:30:05.4263368Z   sysconfig_native_module.cpp
+2026-10-10T03:30:06.0294337Z   sys_module.cpp
+2026-10-10T03:30:06.0629244Z   time_module.cpp
+2026-10-10T03:30:07.2098623Z   tokenize_module.cpp
+2026-10-10T03:30:07.2483185Z   typing_module.cpp
+2026-10-10T03:30:08.9361047Z   unicodedata_module.cpp
+2026-10-10T03:30:09.1964446Z   weakref_module.cpp
+2026-10-10T03:30:09.2697659Z   warnings_module.cpp
+2026-10-10T03:30:09.5234611Z   winapi_module.cpp
+2026-10-10T03:30:10.8261104Z   posix_process_module.cpp
+2026-10-10T03:30:11.0987048Z   winreg_module.cpp
+2026-10-10T03:30:12.1121213Z   zlib_module.cpp
+2026-10-10T03:30:12.1202626Z   zip_archive.cpp
+2026-10-10T03:30:12.6598922Z   zipimport_module.cpp
+2026-10-10T03:30:15.9107084Z   xlang3_system_runtime.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\xlang3_system_runtime.lib
+2026-10-10T03:30:15.9994290Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-10T03:30:16.1385898Z   builtins.cpp
+2026-10-10T03:30:16.1387007Z   builtin_modules.cpp
+2026-10-10T03:30:16.1772753Z   exception_builtins.cpp
+2026-10-10T03:30:16.1789419Z   functional_builtins.cpp
+2026-10-10T03:30:17.9662815Z   io_builtins.cpp
+2026-10-10T03:30:18.1079763Z   math_module.cpp
+2026-10-10T03:30:22.3099142Z   object_type_builtins.cpp
+2026-10-10T03:30:24.0398633Z   raw_block_builtins.cpp
+2026-10-10T03:30:26.1606014Z   sequence_builtins.cpp
+2026-10-10T03:30:27.3905699Z   ipc_runtime.cpp
+2026-10-10T03:30:33.1375996Z   shared_memory_block_stream.cpp
+2026-10-10T03:30:35.7710707Z   shared_memory_transport.cpp
+2026-10-10T03:30:37.9002978Z   block_stream.cpp
+2026-10-10T03:30:38.1739374Z   ipc_value_marshal.cpp
+2026-10-10T03:30:38.6973457Z   xlang_stream.cpp
+2026-10-10T03:30:39.5149345Z   c_api_bridge.cpp
+2026-10-10T03:30:39.7417648Z   exceptions.cpp
+2026-10-10T03:30:40.3775585Z   expression.cpp
+2026-10-10T03:30:40.6810497Z   functional_iterators.cpp
+2026-10-10T03:30:42.8251560Z   generator.cpp
+2026-10-10T03:30:42.8589369Z   attribute.cpp
+2026-10-10T03:30:46.0398429Z   list_methods.cpp
+2026-10-10T03:30:46.3811237Z   dict_methods.cpp
+2026-10-10T03:30:46.8449355Z   file_methods.cpp
+2026-10-10T03:30:47.4960229Z   int_methods.cpp
+2026-10-10T03:30:50.7166851Z   set_methods.cpp
+2026-10-10T03:30:51.6976850Z   string_methods.cpp
+2026-10-10T03:30:52.3845912Z   tuple_methods.cpp
+2026-10-10T03:30:54.9186439Z   bytes_methods.cpp
+2026-10-10T03:30:55.7710848Z   iterator_methods.cpp
+2026-10-10T03:30:56.1451594Z   property_methods.cpp
+2026-10-10T03:31:01.2162111Z   x3_bucket_allocator.cpp
+2026-10-10T03:31:02.8870565Z   x3_memory.cpp
+2026-10-10T03:31:02.9531256Z   x3_object_pool.cpp
+2026-10-10T03:31:03.0186899Z   x3_page_allocator.cpp
+2026-10-10T03:31:03.2025983Z   x3_runtime_memory.cpp
+2026-10-10T03:31:04.0398852Z   x3_temp_arena.cpp
+2026-10-10T03:31:04.2403137Z   perf_counters.cpp
+2026-10-10T03:31:04.2752470Z   interpreter_events.cpp
+2026-10-10T03:31:04.4086341Z   bigint.cpp
+2026-10-10T03:31:04.6326043Z   value.cpp
+2026-10-10T03:31:04.6763539Z   value_hash.cpp
+2026-10-10T03:31:06.5318075Z   object_model.cpp
+2026-10-10T03:31:06.6537876Z   sequence.cpp
+2026-10-10T03:31:07.8352081Z   mapping.cpp
+2026-10-10T03:31:16.6559072Z   set_object.cpp
+2026-10-10T03:31:16.7332444Z   module_object.cpp
+2026-10-10T03:31:16.9314774Z   module_slots.cpp
+2026-10-10T03:31:20.1233270Z   runtime.cpp
+2026-10-10T03:31:21.6000304Z   unicode_data.cpp
+2026-10-10T03:31:23.7417474Z   unicode_names.cpp
+2026-10-10T03:31:25.4711007Z   vfs.cpp
+2026-10-10T03:31:31.9707470Z   source_cursor.cpp
+2026-10-10T03:31:32.7040798Z   lexer.cpp
+2026-10-10T03:31:33.1234553Z   parser.cpp
+2026-10-10T03:31:36.2701318Z   scope_analysis.cpp
+2026-10-10T03:31:40.0782691Z   xlang_module_globals.cpp
+2026-10-10T03:31:41.5813330Z   lower.cpp
+2026-10-10T03:31:41.8132934Z   codec.cpp
+2026-10-10T03:31:43.7821506Z   xlang_interpreter.cpp
+2026-10-10T03:31:46.1560797Z   xlang_vm_attr.cpp
+2026-10-10T03:31:46.4534513Z   xlang_vm_loop.cpp
+2026-10-10T03:31:52.1150929Z   object_table.cpp
+2026-10-10T03:31:54.2918323Z   memory_file_store.cpp
+2026-10-10T03:31:57.4679689Z   shared_memory_transport_win32.cpp
+2026-10-10T03:31:59.2929128Z   debug_session.cpp
+2026-10-10T03:32:03.7377996Z   dap_session.cpp
+2026-10-10T03:32:05.4763024Z   dump.cpp
+2026-10-10T03:32:08.8552739Z   c_api.cpp
+2026-10-10T03:32:12.4736945Z   buffer_api.cpp
+2026-10-10T03:32:17.4711046Z   tensor_storage.cpp
+2026-10-10T03:32:18.7604791Z   tensor_serialization.cpp
+2026-10-10T03:32:23.3373642Z   tensor_graph.cpp
+2026-10-10T03:32:23.4466257Z   tensor_cpu.cpp
+2026-10-10T03:32:24.2266579Z   tensor_module.cpp
+2026-10-10T03:32:29.0683854Z   tensor_api.cpp
+2026-10-10T03:32:29.2114156Z   protocol_api.cpp
+2026-10-10T03:32:30.7590586Z   stream_api.cpp
+2026-10-10T03:32:32.0595330Z   native_serialization_api.cpp
+2026-10-10T03:32:32.1344988Z   ipc_api.cpp
+2026-10-10T03:32:33.2171990Z   value_graph_writer.cpp
+2026-10-10T03:32:34.2433505Z   value_graph_reader.cpp
+2026-10-10T03:32:34.2503417Z   value_graph_lifetime.cpp
+2026-10-10T03:32:38.2495704Z   import_loader.cpp
+2026-10-10T03:32:39.4862438Z   native_package_loader.cpp
+2026-10-10T03:32:45.3312794Z   Auto build dll exports
+2026-10-10T03:32:45.7362472Z   xlang3_thread_runtime.lib(thread_module.obj) : MSIL .netmodule or module compiled with /GL found; restarting link with /LTCG; add /LTCG to the link command line to improve linker performance
+2026-10-10T03:32:47.7133677Z      Creating library D:/a/xMind/xMind/xlang3/build/Release/xlang3_runtime.lib and object D:/a/xMind/xMind/xlang3/build/Release/xlang3_runtime.exp
+2026-10-10T03:32:47.9594170Z   Generating code
+2026-10-10T03:34:00.9408076Z   Finished generating code
+2026-10-10T03:34:01.8735460Z   xlang3_runtime.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\xlang3_runtime.dll
+2026-10-10T03:34:01.9348561Z   Building Custom Rule D:/a/xMind/xMind/xlang3/CMakeLists.txt
+2026-10-10T03:34:02.0248407Z   xlang3.cpp
+2026-10-10T03:34:07.1464004Z   xlang3.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\xlang3.exe
+2026-10-10T03:34:07.3175178Z MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+2026-10-10T03:34:07.3543447Z 
+2026-10-10T03:34:07.5657448Z   Checking File Globs
+2026-10-10T03:34:07.7689962Z   Building Custom Rule D:/a/xMind/xMind/xlang3/modules/json/CMakeLists.txt
+2026-10-10T03:34:07.9038364Z   main.cpp
+2026-10-10T03:34:08.5262212Z   json_package.cpp
+2026-10-10T03:34:10.5777901Z   json_convert.cpp
+2026-10-10T03:34:12.3890084Z   Generating Code...
+2026-10-10T03:34:15.6015889Z      Creating library D:/a/xMind/xMind/xlang3/build/Release/modules/xlang_json.x3pkg.lib and object D:/a/xMind/xMind/xlang3/build/Release/modules/xlang_json.x3pkg.exp
+2026-10-10T03:34:15.6923392Z   xlang_json_native_package.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\modules\xlang_json.x3pkg.dll
+2026-10-10T03:34:15.8329277Z MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+2026-10-10T03:34:15.8706175Z 
+2026-10-10T03:34:16.0698635Z   Checking File Globs
+2026-10-10T03:34:16.2709968Z   Building Custom Rule D:/a/xMind/xMind/xlang3/modules/sqlite/CMakeLists.txt
+2026-10-10T03:34:16.4085478Z   main.cpp
+2026-10-10T03:34:17.0320025Z   sqlite_package.cpp
+2026-10-10T03:34:18.2356848Z   sqlite_values.cpp
+2026-10-10T03:34:18.8689964Z   sqlite_handles.cpp
+2026-10-10T03:34:19.4893289Z   Generating Code...
+2026-10-10T03:34:20.2999908Z   sqlite3.c
+2026-10-10T03:34:40.8531140Z      Creating library D:/a/xMind/xMind/xlang3/build/Release/modules/xlang_sqlite3.x3pkg.lib and object D:/a/xMind/xMind/xlang3/build/Release/modules/xlang_sqlite3.x3pkg.exp
+2026-10-10T03:34:40.9473539Z   xlang_sqlite3_native_package.vcxproj -> D:\a\xMind\xMind\xlang3\build\Release\modules\xlang_sqlite3.x3pkg.dll
+2026-10-10T03:34:41.1109601Z Pinned jsoncons native source and license hashes verified: 176 files
+2026-10-10T03:34:41.1958009Z Pinned yaml-cpp native source and license verified: 101 exact upstream files
+2026-10-10T03:34:41.2890727Z Pinned re2 native source and license verified: 131 exact upstream files
+2026-10-10T03:34:41.4955832Z Pinned abseil-cpp native source and license verified: 1602 exact upstream files
+2026-10-10T03:34:47.1949654Z 
+2026-10-10T03:34:47.1951467Z added 97 packages in 5s
+2026-10-10T03:34:50.6331199Z [31;1mnpm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation[0m
+2026-10-10T03:34:51.8453042Z [31;1mnpm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.[0m
+2026-10-10T03:34:59.9415843Z 
+2026-10-10T03:34:59.9417990Z added 325 packages in 12s
+2026-10-10T03:35:01.0805179Z -- The C compiler identification is MSVC 19.51.36260.0
+2026-10-10T03:35:01.8152667Z -- The CXX compiler identification is MSVC 19.51.36260.0
+2026-10-10T03:35:01.8400045Z -- Detecting C compiler ABI info
+2026-10-10T03:35:02.5520835Z -- Detecting C compiler ABI info - done
+2026-10-10T03:35:02.5717027Z -- Check for working C compiler: C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe - skipped
+2026-10-10T03:35:02.5721410Z -- Detecting C compile features
+2026-10-10T03:35:02.5730002Z -- Detecting C compile features - done
+2026-10-10T03:35:02.5845412Z -- Detecting CXX compiler ABI info
+2026-10-10T03:35:03.2963083Z -- Detecting CXX compiler ABI info - done
+2026-10-10T03:35:03.3162260Z -- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe - skipped
+2026-10-10T03:35:03.3167212Z -- Detecting CXX compile features
+2026-10-10T03:35:03.3181019Z -- Detecting CXX compile features - done
+2026-10-10T03:35:03.4198587Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+2026-10-10T03:35:03.9444548Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+2026-10-10T03:35:03.9445445Z -- Looking for pthread_create in pthreads
+2026-10-10T03:35:04.5372732Z -- Looking for pthread_create in pthreads - not found
+2026-10-10T03:35:04.5373983Z -- Looking for pthread_create in pthread
+2026-10-10T03:35:05.1711398Z -- Looking for pthread_create in pthread - not found
+2026-10-10T03:35:05.1725843Z -- Found Threads: TRUE
+2026-10-10T03:35:08.4887774Z -- Configuring done (8.5s)
+2026-10-10T03:35:12.5174564Z -- Generating done (4.0s)
+2026-10-10T03:35:12.5189372Z -- Build files have been written to: D:/a/xMind/xMind/xmind/build/native
+2026-10-10T03:35:12.7466919Z MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+2026-10-10T03:35:12.7841690Z 
+2026-10-10T03:35:13.0159096Z   Checking File Globs
+2026-10-10T03:35:13.1673781Z   1>Checking Build System
+2026-10-10T03:35:13.7403675Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+2026-10-10T03:35:13.7545326Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+2026-10-10T03:35:14.0299121Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+2026-10-10T03:35:14.0748254Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/time/CMakeLists.txt
+2026-10-10T03:35:14.2749262Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/types/CMakeLists.txt
+2026-10-10T03:35:14.3318362Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+2026-10-10T03:35:16.3494672Z   utf8_for_code_point.cc
+2026-10-10T03:35:16.6056729Z   log_severity.cc
+2026-10-10T03:35:16.7892152Z   hardening.cc
+2026-10-10T03:35:17.8037176Z   civil_time_detail.cc
+2026-10-10T03:35:17.9551498Z   source_location.cc
+2026-10-10T03:35:18.5450387Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/profiling/CMakeLists.txt
+2026-10-10T03:35:18.6453927Z   exponential_biased.cc
+2026-10-10T03:35:20.8598801Z   absl_exponential_biased.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\profiling\Release\absl_exponential_biased.lib
+2026-10-10T03:35:20.8610453Z   spinlock_wait.cc
+2026-10-10T03:35:20.8801254Z   absl_utf8_for_code_point.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_utf8_for_code_point.lib
+2026-10-10T03:35:20.8853904Z   absl_hardening.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_hardening.lib
+2026-10-10T03:35:21.5815115Z   absl_spinlock_wait.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_spinlock_wait.lib
+2026-10-10T03:35:22.0755898Z   absl_log_severity.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_log_severity.lib
+2026-10-10T03:35:22.2127686Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/time/CMakeLists.txt
+2026-10-10T03:35:22.2730634Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+2026-10-10T03:35:22.2901340Z   raw_logging.cc
+2026-10-10T03:35:22.4175448Z   time_zone_fixed.cc
+2026-10-10T03:35:22.4188670Z   absl_civil_time.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\time\Release\absl_civil_time.lib
+2026-10-10T03:35:23.0298172Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+2026-10-10T03:35:23.4246185Z   leak_check.cc
+2026-10-10T03:35:23.6245604Z   absl_leak_check.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_leak_check.lib
+2026-10-10T03:35:23.8594415Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+2026-10-10T03:35:23.8995114Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+2026-10-10T03:35:23.9167400Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:35:23.9404753Z   absl_raw_logging_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_raw_logging_internal.lib
+2026-10-10T03:35:23.9743261Z   nullguard.cc
+2026-10-10T03:35:24.7291904Z   strerror.cc
+2026-10-10T03:35:24.7375389Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:35:24.7461885Z   mcp_wire.cpp
+2026-10-10T03:35:28.4022064Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:35:28.7648156Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:35:29.3178472Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:35:29.6051622Z   time_zone_format.cc
+2026-10-10T03:35:29.6512656Z   model_stream.cpp
+2026-10-10T03:35:29.7679911Z   secret_protection.cpp
+2026-10-10T03:35:29.9420809Z   file_patch.cpp
+2026-10-10T03:35:30.2208683Z   absl_strerror.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_strerror.lib
+2026-10-10T03:35:30.3713628Z   agentflow_secrets.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_secrets.lib
+2026-10-10T03:35:30.3959939Z   time_zone_if.cc
+2026-10-10T03:35:30.4428884Z   commandlineflag.cc
+2026-10-10T03:35:30.4484233Z   absl_log_internal_nullguard.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_nullguard.lib
+2026-10-10T03:35:30.4685539Z   agentflow_file_patch.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_file_patch.lib
+2026-10-10T03:35:37.6093762Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:35:40.8407214Z   time_zone_impl.cc
+2026-10-10T03:35:40.8689398Z   time_zone_info.cc
+2026-10-10T03:35:40.9167884Z   mcp_requests.cpp
+2026-10-10T03:35:40.9580839Z   model_request.cpp
+2026-10-10T03:35:40.9943300Z   mcp_handshake.cpp
+2026-10-10T03:35:41.0043445Z   windows_process.cpp
+2026-10-10T03:35:41.0096194Z   agentflow_process.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process.lib
+2026-10-10T03:35:41.0119945Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/yaml-cpp/CMakeLists.txt
+2026-10-10T03:35:41.0335257Z   Scanning sources for module dependencies...
+2026-10-10T03:35:41.0371653Z   binary.cpp
+2026-10-10T03:35:41.0687217Z   convert.cpp
+2026-10-10T03:35:43.7186660Z   directives.cpp
+2026-10-10T03:36:14.7828761Z   depthguard.cpp
+2026-10-10T03:36:18.4196037Z   emitfromevents.cpp
+2026-10-10T03:36:18.5658759Z   emit.cpp
+2026-10-10T03:36:21.1499998Z   emitter.cpp
+2026-10-10T03:36:21.6033229Z   emitterstate.cpp
+2026-10-10T03:36:21.6369524Z   emitterutils.cpp
+2026-10-10T03:36:21.7144647Z   exp.cpp
+2026-10-10T03:36:21.7387221Z   fptostring.cpp
+2026-10-10T03:36:21.7540778Z   exceptions.cpp
+2026-10-10T03:36:21.7663401Z   node_data.cpp
+2026-10-10T03:36:21.7789935Z   memory.cpp
+2026-10-10T03:36:21.8039570Z   node.cpp
+2026-10-10T03:36:21.8052714Z   nodebuilder.cpp
+2026-10-10T03:36:21.8055223Z   null.cpp
+2026-10-10T03:36:21.8067012Z   parse.cpp
+2026-10-10T03:36:21.8067892Z   ostream_wrapper.cpp
+2026-10-10T03:36:21.8068978Z   nodeevents.cpp
+2026-10-10T03:36:21.8069763Z   responses_stream.cpp
+2026-10-10T03:36:21.8070548Z   time_zone_libc.cc
+2026-10-10T03:36:21.8072013Z   absl_source_location.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\types\Release\absl_source_location.lib
+2026-10-10T03:36:21.8074123Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+2026-10-10T03:36:21.8076735Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+2026-10-10T03:36:21.8078532Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+2026-10-10T03:36:21.8079877Z   address_is_readable.cc
+2026-10-10T03:36:21.8081499Z   elf_mem_image.cc
+2026-10-10T03:36:21.8082576Z   vdso_support.cc
+2026-10-10T03:36:21.8083674Z   Generating Code...
+2026-10-10T03:36:21.8097297Z   absl_debugging_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_debugging_internal.lib
+2026-10-10T03:36:21.8123597Z   time_zone_lookup.cc
+2026-10-10T03:36:21.8172404Z   mcp_http_metadata.cpp
+2026-10-10T03:36:21.8175094Z   throw_delegate.cc
+2026-10-10T03:36:21.8177908Z   absl_throw_delegate.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_throw_delegate.lib
+2026-10-10T03:36:21.8179756Z   time_zone_posix.cc
+2026-10-10T03:36:21.8180874Z   scanner.cpp
+2026-10-10T03:36:21.8182302Z   parser.cpp
+2026-10-10T03:36:21.8183673Z   regex_yaml.cpp
+2026-10-10T03:36:21.8185335Z   scanscalar.cpp
+2026-10-10T03:36:21.8186439Z   singledocparser.cpp
+2026-10-10T03:36:21.8187224Z   scantag.cpp
+2026-10-10T03:36:21.8187952Z   scantoken.cpp
+2026-10-10T03:36:21.8188629Z   simplekey.cpp
+2026-10-10T03:36:21.8189294Z   stream.cpp
+2026-10-10T03:36:21.8190448Z   tag.cpp
+2026-10-10T03:36:21.8191113Z   cordz_functions.cc
+2026-10-10T03:36:21.8191734Z   zone_info_source.cc
+2026-10-10T03:36:21.8192417Z   Compiling...
+2026-10-10T03:36:21.8193138Z   binary.cpp
+2026-10-10T03:36:21.8193759Z   convert.cpp
+2026-10-10T03:36:21.8195169Z   directives.cpp
+2026-10-10T03:36:21.8195848Z   depthguard.cpp
+2026-10-10T03:36:21.8196513Z   responses_request.cpp
+2026-10-10T03:36:21.8197221Z   mcp_http_stream.cpp
+2026-10-10T03:36:21.8197874Z   emitfromevents.cpp
+2026-10-10T03:36:21.8198860Z   emit.cpp
+2026-10-10T03:36:21.8199537Z   emitterstate.cpp
+2026-10-10T03:36:21.8200218Z   emitter.cpp
+2026-10-10T03:36:21.8200865Z   emitterutils.cpp
+2026-10-10T03:36:21.8201554Z   fptostring.cpp
+2026-10-10T03:36:21.8228347Z   exceptions.cpp
+2026-10-10T03:36:21.8229103Z   exp.cpp
+2026-10-10T03:36:21.8231172Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(234,47): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8236727Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(238,47): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8255048Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(195,36): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8285165Z       D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(195,36):
+2026-10-10T03:36:21.8307808Z       the template instantiation context (the oldest one first) is
+2026-10-10T03:36:21.8308730Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(234,33):
+2026-10-10T03:36:21.8322913Z           see reference to function template instantiation 'std::string YAML::detail::fp_formatting::FpToString<float>(T,int)' being compiled
+2026-10-10T03:36:21.8324735Z           with
+2026-10-10T03:36:21.8325103Z           [
+2026-10-10T03:36:21.8332408Z               T=float
+2026-10-10T03:36:21.8332769Z           ]
+2026-10-10T03:36:21.8333453Z   
+2026-10-10T03:36:21.8337246Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(195,36): warning C4267: 'initializing': conversion from 'size_t' to 'const int', possible loss of data [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8344080Z   responses_context.cpp
+2026-10-10T03:36:21.8393966Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(3008,29): warning C4267: '+=': conversion from 'size_t' to 'DecimalExponentType', possible loss of data [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8500450Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(3008,29): warning C4267:         with [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8504468Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(3008,29): warning C4267:         [ [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8541762Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(3008,29): warning C4267:             DecimalExponentType=YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>::compute_nearest::decimal_exponent_type_ [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8545893Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(3008,29): warning C4267:         ] [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8547911Z   (compiling source file '../../../../Native/third_party/yaml-cpp/src/fptostring.cpp')
+2026-10-10T03:36:21.8553047Z       D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(3008,29):
+2026-10-10T03:36:21.8554146Z       the template instantiation context (the oldest one first) is
+2026-10-10T03:36:21.8555158Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(238,33):
+2026-10-10T03:36:21.8558010Z           see reference to function template instantiation 'std::string YAML::detail::fp_formatting::FpToString<double>(T,int)' being compiled
+2026-10-10T03:36:21.8559526Z           with
+2026-10-10T03:36:21.8560165Z           [
+2026-10-10T03:36:21.8560559Z               T=double
+2026-10-10T03:36:21.8561175Z           ]
+2026-10-10T03:36:21.8561867Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(93,28):
+2026-10-10T03:36:21.8566242Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned __int64,int,true,false> YAML::jkj::dragonbox::to_decimal<T,YAML::jkj::dragonbox::default_float_bit_carrier_conversion_traits<Float>,YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>,>(Float) noexcept' being compiled
+2026-10-10T03:36:21.8569413Z           with
+2026-10-10T03:36:21.8569755Z           [
+2026-10-10T03:36:21.8570102Z               T=double,
+2026-10-10T03:36:21.8570508Z               Float=double
+2026-10-10T03:36:21.8570908Z           ]
+2026-10-10T03:36:21.8571657Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4163,20):
+2026-10-10T03:36:21.8574133Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned __int64,int,true,false> YAML::jkj::dragonbox::to_decimal_ex<FormatTraits,int,>(YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,ExponentBits) noexcept' being compiled
+2026-10-10T03:36:21.8576092Z           with
+2026-10-10T03:36:21.8576709Z           [
+2026-10-10T03:36:21.8577695Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>,
+2026-10-10T03:36:21.8619218Z               ExponentBits=int
+2026-10-10T03:36:21.8620186Z           ]
+2026-10-10T03:36:21.8621805Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4146,35):
+2026-10-10T03:36:21.8629710Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned __int64,int,true,false> YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t::delegate<YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,YAML::jkj::dragonbox::detail::to_decimal_dispatcher<FormatTraits,YAML::jkj::dragonbox::to_decimal_ex::policy_holder>,YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,ExponentBits>(SignedSignificandBits,Func,YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,ExponentBits) noexcept' being compiled
+2026-10-10T03:36:21.8711822Z           with
+2026-10-10T03:36:21.8712278Z           [
+2026-10-10T03:36:21.8713360Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>,
+2026-10-10T03:36:21.8714463Z               ExponentBits=int,
+2026-10-10T03:36:21.8715973Z               SignedSignificandBits=YAML::jkj::dragonbox::signed_significand_bits<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>,
+2026-10-10T03:36:21.8718644Z               Func=YAML::jkj::dragonbox::detail::to_decimal_dispatcher<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>,YAML::jkj::dragonbox::to_decimal_ex::policy_holder>
+2026-10-10T03:36:21.8720319Z           ]
+2026-10-10T03:36:21.8721055Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2483,32):
+2026-10-10T03:36:21.8725347Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned __int64,int,true,false> YAML::jkj::dragonbox::detail::to_decimal_dispatcher<FormatTraits,YAML::jkj::dragonbox::to_decimal_ex::policy_holder>::operator ()<_Ty>(IntervalTypeProvider,YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,int) noexcept' being compiled
+2026-10-10T03:36:21.8728001Z           with
+2026-10-10T03:36:21.8728398Z           [
+2026-10-10T03:36:21.8730589Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>,
+2026-10-10T03:36:21.8732124Z               _Ty=YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t,
+2026-10-10T03:36:21.8733448Z               IntervalTypeProvider=YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t
+2026-10-10T03:36:21.8734391Z           ]
+2026-10-10T03:36:21.8735132Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4108,61):
+2026-10-10T03:36:21.8740169Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned __int64,int,true,false> YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>::compute_nearest<YAML::jkj::dragonbox::policy::sign::return_sign_t,YAML::jkj::dragonbox::policy::trailing_zero::remove_t,_Ty,YAML::jkj::dragonbox::policy::binary_to_decimal_rounding::to_even_t,YAML::jkj::dragonbox::policy::cache::full_t,YAML::jkj::dragonbox::policy::preferred_integer_types::match_t>(YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,int) noexcept' being compiled
+2026-10-10T03:36:21.8745418Z           with
+2026-10-10T03:36:21.8745839Z           [
+2026-10-10T03:36:21.8746573Z               _Ty=YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t,
+2026-10-10T03:36:21.8747972Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>
+2026-10-10T03:36:21.8749417Z           ]
+2026-10-10T03:36:21.8750199Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(3353,69):
+2026-10-10T03:36:21.8755529Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned __int64,YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>::compute_nearest::decimal_exponent_type_,false,false> YAML::jkj::dragonbox::policy::trailing_zero::remove_t::on_trailing_zeros<YAML::jkj::dragonbox::ieee754_binary64,unsigned __int64,YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>::compute_nearest::decimal_exponent_type_>(DecimalSignificand,DecimalExponentType) noexcept' being compiled
+2026-10-10T03:36:21.8760059Z           with
+2026-10-10T03:36:21.8760432Z           [
+2026-10-10T03:36:21.8760911Z               DecimalSignificand=unsigned __int64,
+2026-10-10T03:36:21.8763057Z               DecimalExponentType=YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>::compute_nearest::decimal_exponent_type_
+2026-10-10T03:36:21.8764696Z           ]
+2026-10-10T03:36:21.8765414Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2379,51):
+2026-10-10T03:36:21.8768781Z           see reference to class template instantiation 'YAML::jkj::dragonbox::remove_trailing_zeros_traits<YAML::jkj::dragonbox::policy::trailing_zero::remove_t,YAML::jkj::dragonbox::ieee754_binary64,unsigned __int64,YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>::compute_nearest::decimal_exponent_type_>' being compiled
+2026-10-10T03:36:21.8771866Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2978,13):
+2026-10-10T03:36:21.8775673Z           while compiling class template member function 'void YAML::jkj::dragonbox::remove_trailing_zeros_traits<YAML::jkj::dragonbox::policy::trailing_zero::remove_t,YAML::jkj::dragonbox::ieee754_binary64,unsigned __int64,YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>::compute_nearest::decimal_exponent_type_>::remove_trailing_zeros(uint_least64_t &,DecimalExponentType &) noexcept'
+2026-10-10T03:36:21.8778751Z           with
+2026-10-10T03:36:21.8779435Z           [
+2026-10-10T03:36:21.8782068Z               DecimalExponentType=YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>::compute_nearest::decimal_exponent_type_
+2026-10-10T03:36:21.8784048Z           ]
+2026-10-10T03:36:21.8784799Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2379,72):
+2026-10-10T03:36:21.8788767Z               see the first reference to 'YAML::jkj::dragonbox::remove_trailing_zeros_traits<YAML::jkj::dragonbox::policy::trailing_zero::remove_t,YAML::jkj::dragonbox::ieee754_binary64,unsigned __int64,YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>::compute_nearest::decimal_exponent_type_>::remove_trailing_zeros' in 'YAML::jkj::dragonbox::policy::trailing_zero::remove_t::on_trailing_zeros'
+2026-10-10T03:36:21.8792274Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(3353,69):
+2026-10-10T03:36:21.8794660Z               see the first reference to 'YAML::jkj::dragonbox::policy::trailing_zero::remove_t::on_trailing_zeros' in 'YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>::compute_nearest'
+2026-10-10T03:36:21.8796835Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4108,25):
+2026-10-10T03:36:21.8799876Z               see the first reference to 'YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>>::compute_nearest' in 'YAML::jkj::dragonbox::detail::to_decimal_dispatcher<FormatTraits,YAML::jkj::dragonbox::to_decimal_ex::policy_holder>::operator ()'
+2026-10-10T03:36:21.8802027Z           with
+2026-10-10T03:36:21.8802429Z           [
+2026-10-10T03:36:21.8803945Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>
+2026-10-10T03:36:21.8805075Z           ]
+2026-10-10T03:36:21.8805872Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2483,25):
+2026-10-10T03:36:21.8809024Z               see the first reference to 'YAML::jkj::dragonbox::detail::to_decimal_dispatcher<FormatTraits,YAML::jkj::dragonbox::to_decimal_ex::policy_holder>::operator ()' in 'YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t::delegate'
+2026-10-10T03:36:21.8810930Z           with
+2026-10-10T03:36:21.8811753Z           [
+2026-10-10T03:36:21.8812753Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary64,uint_least64_t,int>
+2026-10-10T03:36:21.8814146Z           ]
+2026-10-10T03:36:21.8814972Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4146,35):
+2026-10-10T03:36:21.8816718Z               see the first reference to 'YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t::delegate' in 'YAML::jkj::dragonbox::to_decimal_ex'
+2026-10-10T03:36:21.8818357Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4163,20):
+2026-10-10T03:36:21.8819858Z               see the first reference to 'YAML::jkj::dragonbox::to_decimal_ex' in 'YAML::jkj::dragonbox::to_decimal'
+2026-10-10T03:36:21.8821126Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(93,28):
+2026-10-10T03:36:21.8822476Z               see the first reference to 'YAML::jkj::dragonbox::to_decimal' in 'YAML::detail::fp_formatting::FpToString'
+2026-10-10T03:36:21.8844360Z   
+2026-10-10T03:36:21.8846471Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2970,29): warning C4267: '+=': conversion from 'size_t' to 'DecimalExponentType', possible loss of data [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8850353Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2970,29): warning C4267:         with [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8852948Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2970,29): warning C4267:         [ [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8856987Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2970,29): warning C4267:             DecimalExponentType=YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>::compute_nearest::decimal_exponent_type_ [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8862026Z D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2970,29): warning C4267:         ] [D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\yaml-cpp.vcxproj]
+2026-10-10T03:36:21.8864129Z   (compiling source file '../../../../Native/third_party/yaml-cpp/src/fptostring.cpp')
+2026-10-10T03:36:21.8865325Z       D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2970,29):
+2026-10-10T03:36:21.8866377Z       the template instantiation context (the oldest one first) is
+2026-10-10T03:36:21.8867413Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(234,33):
+2026-10-10T03:36:21.8869274Z           see reference to function template instantiation 'std::string YAML::detail::fp_formatting::FpToString<float>(T,int)' being compiled
+2026-10-10T03:36:21.8870393Z           with
+2026-10-10T03:36:21.8870764Z           [
+2026-10-10T03:36:21.8871118Z               T=float
+2026-10-10T03:36:21.8871507Z           ]
+2026-10-10T03:36:21.8872212Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(93,28):
+2026-10-10T03:36:21.8874921Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned int,int,true,false> YAML::jkj::dragonbox::to_decimal<T,YAML::jkj::dragonbox::default_float_bit_carrier_conversion_traits<Float>,YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>,>(Float) noexcept' being compiled
+2026-10-10T03:36:21.8877234Z           with
+2026-10-10T03:36:21.8877624Z           [
+2026-10-10T03:36:21.8877991Z               T=float,
+2026-10-10T03:36:21.8878439Z               Float=float
+2026-10-10T03:36:21.8878827Z           ]
+2026-10-10T03:36:21.8879520Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4163,20):
+2026-10-10T03:36:21.8903320Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned int,int,true,false> YAML::jkj::dragonbox::to_decimal_ex<FormatTraits,int,>(YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,ExponentBits) noexcept' being compiled
+2026-10-10T03:36:21.8905424Z           with
+2026-10-10T03:36:21.8905882Z           [
+2026-10-10T03:36:21.8917621Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>,
+2026-10-10T03:36:21.8919031Z               ExponentBits=int
+2026-10-10T03:36:21.8919529Z           ]
+2026-10-10T03:36:21.8920266Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4146,35):
+2026-10-10T03:36:21.8925772Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned int,int,true,false> YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t::delegate<YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,YAML::jkj::dragonbox::detail::to_decimal_dispatcher<FormatTraits,YAML::jkj::dragonbox::to_decimal_ex::policy_holder>,YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,ExponentBits>(SignedSignificandBits,Func,YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,ExponentBits) noexcept' being compiled
+2026-10-10T03:36:21.8929787Z           with
+2026-10-10T03:36:21.8930167Z           [
+2026-10-10T03:36:21.8931141Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>,
+2026-10-10T03:36:21.8932195Z               ExponentBits=int,
+2026-10-10T03:36:21.8933719Z               SignedSignificandBits=YAML::jkj::dragonbox::signed_significand_bits<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>,
+2026-10-10T03:36:21.8936441Z               Func=YAML::jkj::dragonbox::detail::to_decimal_dispatcher<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>,YAML::jkj::dragonbox::to_decimal_ex::policy_holder>
+2026-10-10T03:36:21.8938032Z           ]
+2026-10-10T03:36:21.8938771Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2483,32):
+2026-10-10T03:36:21.8941939Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned int,int,true,false> YAML::jkj::dragonbox::detail::to_decimal_dispatcher<FormatTraits,YAML::jkj::dragonbox::to_decimal_ex::policy_holder>::operator ()<_Ty>(IntervalTypeProvider,YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,int) noexcept' being compiled
+2026-10-10T03:36:21.8944868Z           with
+2026-10-10T03:36:21.8945245Z           [
+2026-10-10T03:36:21.8946576Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>,
+2026-10-10T03:36:21.8948006Z               _Ty=YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t,
+2026-10-10T03:36:21.8949293Z               IntervalTypeProvider=YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t
+2026-10-10T03:36:21.8950183Z           ]
+2026-10-10T03:36:21.8950881Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4108,61):
+2026-10-10T03:36:21.8955817Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned int,int,true,false> YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>::compute_nearest<YAML::jkj::dragonbox::policy::sign::return_sign_t,YAML::jkj::dragonbox::policy::trailing_zero::remove_t,_Ty,YAML::jkj::dragonbox::policy::binary_to_decimal_rounding::to_even_t,YAML::jkj::dragonbox::policy::cache::full_t,YAML::jkj::dragonbox::policy::preferred_integer_types::match_t>(YAML::jkj::dragonbox::signed_significand_bits<FormatTraits>,int) noexcept' being compiled
+2026-10-10T03:36:21.8959988Z           with
+2026-10-10T03:36:21.8960377Z           [
+2026-10-10T03:36:21.8961090Z               _Ty=YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t,
+2026-10-10T03:36:21.8962466Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>
+2026-10-10T03:36:21.8963862Z           ]
+2026-10-10T03:36:21.8964610Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(3353,69):
+2026-10-10T03:36:21.8969752Z           see reference to function template instantiation 'YAML::jkj::dragonbox::decimal_fp<unsigned int,YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>::compute_nearest::decimal_exponent_type_,false,false> YAML::jkj::dragonbox::policy::trailing_zero::remove_t::on_trailing_zeros<YAML::jkj::dragonbox::ieee754_binary32,unsigned int,YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>::compute_nearest::decimal_exponent_type_>(DecimalSignificand,DecimalExponentType) noexcept' being compiled
+2026-10-10T03:36:21.8974706Z           with
+2026-10-10T03:36:21.8975120Z           [
+2026-10-10T03:36:21.8975906Z               DecimalSignificand=unsigned int,
+2026-10-10T03:36:21.8977680Z               DecimalExponentType=YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>::compute_nearest::decimal_exponent_type_
+2026-10-10T03:36:21.8979192Z           ]
+2026-10-10T03:36:21.8979948Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2379,51):
+2026-10-10T03:36:21.8983912Z           see reference to class template instantiation 'YAML::jkj::dragonbox::remove_trailing_zeros_traits<YAML::jkj::dragonbox::policy::trailing_zero::remove_t,YAML::jkj::dragonbox::ieee754_binary32,unsigned int,YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>::compute_nearest::decimal_exponent_type_>' being compiled
+2026-10-10T03:36:21.8987059Z           D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2946,13):
+2026-10-10T03:36:21.8990874Z           while compiling class template member function 'void YAML::jkj::dragonbox::remove_trailing_zeros_traits<YAML::jkj::dragonbox::policy::trailing_zero::remove_t,YAML::jkj::dragonbox::ieee754_binary32,unsigned int,YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>::compute_nearest::decimal_exponent_type_>::remove_trailing_zeros(uint_least32_t &,DecimalExponentType &) noexcept'
+2026-10-10T03:36:21.8995431Z           with
+2026-10-10T03:36:21.9020463Z           [
+2026-10-10T03:36:21.9024359Z               DecimalExponentType=YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>::compute_nearest::decimal_exponent_type_
+2026-10-10T03:36:21.9026303Z           ]
+2026-10-10T03:36:21.9027100Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2379,72):
+2026-10-10T03:36:21.9031076Z               see the first reference to 'YAML::jkj::dragonbox::remove_trailing_zeros_traits<YAML::jkj::dragonbox::policy::trailing_zero::remove_t,YAML::jkj::dragonbox::ieee754_binary32,unsigned int,YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>::compute_nearest::decimal_exponent_type_>::remove_trailing_zeros' in 'YAML::jkj::dragonbox::policy::trailing_zero::remove_t::on_trailing_zeros'
+2026-10-10T03:36:21.9035292Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(3353,69):
+2026-10-10T03:36:21.9038244Z               see the first reference to 'YAML::jkj::dragonbox::policy::trailing_zero::remove_t::on_trailing_zeros' in 'YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>::compute_nearest'
+2026-10-10T03:36:21.9041277Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4108,25):
+2026-10-10T03:36:21.9044176Z               see the first reference to 'YAML::jkj::dragonbox::detail::impl<YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>>::compute_nearest' in 'YAML::jkj::dragonbox::detail::to_decimal_dispatcher<FormatTraits,YAML::jkj::dragonbox::to_decimal_ex::policy_holder>::operator ()'
+2026-10-10T03:36:21.9046923Z           with
+2026-10-10T03:36:21.9047336Z           [
+2026-10-10T03:36:21.9048346Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>
+2026-10-10T03:36:21.9049366Z           ]
+2026-10-10T03:36:21.9050104Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(2483,25):
+2026-10-10T03:36:21.9052858Z               see the first reference to 'YAML::jkj::dragonbox::detail::to_decimal_dispatcher<FormatTraits,YAML::jkj::dragonbox::to_decimal_ex::policy_holder>::operator ()' in 'YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t::delegate'
+2026-10-10T03:36:21.9054734Z           with
+2026-10-10T03:36:21.9055067Z           [
+2026-10-10T03:36:21.9055991Z               FormatTraits=YAML::jkj::dragonbox::ieee754_binary_traits<YAML::jkj::dragonbox::ieee754_binary32,uint_least32_t,int>
+2026-10-10T03:36:21.9056995Z           ]
+2026-10-10T03:36:21.9057710Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4146,35):
+2026-10-10T03:36:21.9059857Z               see the first reference to 'YAML::jkj::dragonbox::policy::decimal_to_binary_rounding::nearest_to_even_t::delegate' in 'YAML::jkj::dragonbox::to_decimal_ex'
+2026-10-10T03:36:21.9061600Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\contrib\dragonbox.h(4163,20):
+2026-10-10T03:36:21.9062974Z               see the first reference to 'YAML::jkj::dragonbox::to_decimal_ex' in 'YAML::jkj::dragonbox::to_decimal'
+2026-10-10T03:36:21.9064228Z               D:\a\xMind\xMind\xmind\Native\third_party\yaml-cpp\src\fptostring.cpp(93,28):
+2026-10-10T03:36:21.9065556Z               see the first reference to 'YAML::jkj::dragonbox::to_decimal' in 'YAML::detail::fp_formatting::FpToString'
+2026-10-10T03:36:21.9066522Z   
+2026-10-10T03:36:21.9066900Z   mcp_tool_codec.cpp
+2026-10-10T03:36:21.9067360Z   memory.cpp
+2026-10-10T03:36:21.9067748Z   nodebuilder.cpp
+2026-10-10T03:36:21.9068149Z   node_data.cpp
+2026-10-10T03:36:21.9068886Z   node.cpp
+2026-10-10T03:36:21.9069259Z   nodeevents.cpp
+2026-10-10T03:36:21.9069628Z   null.cpp
+2026-10-10T03:36:21.9070087Z   ostream_wrapper.cpp
+2026-10-10T03:36:21.9071276Z   absl_cordz_functions.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_functions.lib
+2026-10-10T03:36:21.9072454Z   parse.cpp
+2026-10-10T03:36:21.9072832Z   parser.cpp
+2026-10-10T03:36:21.9073230Z   regex_yaml.cpp
+2026-10-10T03:36:21.9073649Z   Generating Code...
+2026-10-10T03:36:21.9074130Z   anthropic_request.cpp
+2026-10-10T03:36:21.9074600Z   time_zone_name_win.cc
+2026-10-10T03:36:21.9075075Z   Generating Code...
+2026-10-10T03:36:21.9075504Z   scanner.cpp
+2026-10-10T03:36:21.9075887Z   scanscalar.cpp
+2026-10-10T03:36:21.9076297Z   scantag.cpp
+2026-10-10T03:36:21.9076692Z   scantoken.cpp
+2026-10-10T03:36:21.9077127Z   simplekey.cpp
+2026-10-10T03:36:21.9077544Z   singledocparser.cpp
+2026-10-10T03:36:21.9077959Z   stream.cpp
+2026-10-10T03:36:21.9101358Z   tag.cpp
+2026-10-10T03:36:21.9102496Z   absl_time_zone.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\time\Release\absl_time_zone.lib
+2026-10-10T03:36:21.9103566Z   anthropic_stream.cpp
+2026-10-10T03:36:21.9104422Z   yaml-cpp.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\Release\yaml-cpp.lib
+2026-10-10T03:36:21.9106347Z   absl_flags_commandlineflag_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag_internal.lib
+2026-10-10T03:36:21.9164076Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+2026-10-10T03:36:24.1022954Z   casts.cc
+2026-10-10T03:36:27.1419912Z   anthropic_history.cpp
+2026-10-10T03:36:28.4132154Z   agentflow_mcp_wire.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_wire.lib
+2026-10-10T03:36:29.3375371Z   cycleclock.cc
+2026-10-10T03:36:30.9868957Z   gemini_request.cpp
+2026-10-10T03:36:31.8785703Z   spinlock.cc
+2026-10-10T03:36:33.4912530Z   sysinfo.cc
+2026-10-10T03:36:35.4272354Z   gemini_stream.cpp
+2026-10-10T03:36:35.5205720Z   thread_identity.cc
+2026-10-10T03:36:37.2482375Z   unscaledcycleclock.cc
+2026-10-10T03:36:37.5031921Z   Generating Code...
+2026-10-10T03:36:37.9416674Z   absl_base.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_base.lib
+2026-10-10T03:36:38.2785700Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+2026-10-10T03:36:38.2995930Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+2026-10-10T03:36:38.3015887Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/hash/CMakeLists.txt
+2026-10-10T03:36:38.3437465Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/numeric/CMakeLists.txt
+2026-10-10T03:36:38.4469599Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+2026-10-10T03:36:38.5045062Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+2026-10-10T03:36:38.5152649Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:36:38.5966727Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/base/CMakeLists.txt
+2026-10-10T03:36:44.4703621Z   conditions.cc
+2026-10-10T03:36:45.5153444Z   decode_rust_punycode.cc
+2026-10-10T03:36:46.9989763Z   absl_decode_rust_punycode.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_decode_rust_punycode.lib
+2026-10-10T03:36:47.1339988Z   low_level_alloc.cc
+2026-10-10T03:36:47.1470693Z   int128.cc
+2026-10-10T03:36:47.1556680Z   absl_malloc_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_malloc_internal.lib
+2026-10-10T03:36:47.3065957Z   city.cc
+2026-10-10T03:36:47.3502751Z   ostringstream.cc
+2026-10-10T03:36:47.4662191Z   utf8.cc
+2026-10-10T03:36:47.5200424Z   escaping.cc
+2026-10-10T03:36:47.5718581Z   gemini_history.cpp
+2026-10-10T03:36:47.5758612Z   Generating Code...
+2026-10-10T03:36:47.5773195Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+2026-10-10T03:36:47.5781547Z   absl_log_internal_conditions.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_conditions.lib
+2026-10-10T03:36:47.5828334Z   absl_int128.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\numeric\Release\absl_int128.lib
+2026-10-10T03:36:47.5911021Z   absl_strings_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_strings_internal.lib
+2026-10-10T03:36:47.5918706Z   demangle_rust.cc
+2026-10-10T03:36:47.5993437Z   absl_city.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\hash\Release\absl_city.lib
+2026-10-10T03:36:47.6008076Z   absl_demangle_rust.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_rust.lib
+2026-10-10T03:36:49.5714015Z   cpu_detect.cc
+2026-10-10T03:36:49.5736550Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+2026-10-10T03:36:53.7381821Z   demangle.cc
+2026-10-10T03:36:53.7549454Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/synchronization/CMakeLists.txt
+2026-10-10T03:36:53.7852201Z   absl_base_cpu_detect.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_base_cpu_detect.lib
+2026-10-10T03:36:53.8197419Z   tracing.cc
+2026-10-10T03:36:53.8539543Z   gemini_model_policy.cpp
+2026-10-10T03:36:53.8589851Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+2026-10-10T03:36:53.8665249Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/crc/CMakeLists.txt
+2026-10-10T03:36:53.9186349Z   graphcycles.cc
+2026-10-10T03:36:54.0252920Z   crc.cc
+2026-10-10T03:36:54.1073986Z   deepseek_request.cpp
+2026-10-10T03:36:54.1087901Z   absl_demangle_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_internal.lib
+2026-10-10T03:36:54.1095837Z   absl_graphcycles_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\synchronization\Release\absl_graphcycles_internal.lib
+2026-10-10T03:36:54.1134121Z   ascii.cc
+2026-10-10T03:36:54.1150852Z   crc_x86_arm_combined.cc
+2026-10-10T03:36:54.1179599Z   charconv.cc
+2026-10-10T03:36:54.1187809Z   Generating Code...
+2026-10-10T03:36:54.1191737Z   absl_crc_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\crc\Release\absl_crc_internal.lib
+2026-10-10T03:36:54.1228715Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+2026-10-10T03:36:54.2572753Z   absl_tracing_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_tracing_internal.lib
+2026-10-10T03:36:54.4333388Z   stacktrace.cc
+2026-10-10T03:36:54.6728024Z   escaping.cc
+2026-10-10T03:36:56.1242210Z   absl_stacktrace.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_stacktrace.lib
+2026-10-10T03:36:56.2270812Z   deepseek_model_policy.cpp
+2026-10-10T03:36:56.7519922Z   charconv_bigint.cc
+2026-10-10T03:36:58.2381172Z   charconv_parse.cc
+2026-10-10T03:36:58.8492452Z   provider_model_policy.cpp
+2026-10-10T03:36:59.3629594Z   damerau_levenshtein_distance.cc
+2026-10-10T03:37:00.1685012Z   memutil.cc
+2026-10-10T03:37:01.1327615Z   stringify_sink.cc
+2026-10-10T03:37:01.5204277Z   Generating Code...
+2026-10-10T03:37:05.4289515Z   match.cc
+2026-10-10T03:37:05.4298219Z   numbers.cc
+2026-10-10T03:37:10.4322066Z   str_cat.cc
+2026-10-10T03:37:10.8866168Z   str_replace.cc
+2026-10-10T03:37:15.8314041Z   str_split.cc
+2026-10-10T03:37:15.9441969Z   substitute.cc
+2026-10-10T03:37:19.4820459Z   Generating Code...
+2026-10-10T03:37:23.6622340Z   absl_strings.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_strings.lib
+2026-10-10T03:37:29.5953833Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:37:34.3442275Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:37:39.7472780Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+2026-10-10T03:37:45.0320029Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/time/CMakeLists.txt
+2026-10-10T03:37:47.9142720Z   civil_time.cc
+2026-10-10T03:37:47.9367883Z   clock.cc
+2026-10-10T03:37:47.9419495Z   arg.cc
+2026-10-10T03:37:48.7982170Z   bind.cc
+2026-10-10T03:37:48.8395196Z   extension.cc
+2026-10-10T03:37:48.8402813Z   float_conversion.cc
+2026-10-10T03:37:48.8460258Z   fnmatch.cc
+2026-10-10T03:37:48.8463636Z   duration.cc
+2026-10-10T03:37:48.8466264Z   proto.cc
+2026-10-10T03:37:48.8468816Z   absl_log_internal_fnmatch.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_fnmatch.lib
+2026-10-10T03:37:48.8471709Z   output.cc
+2026-10-10T03:37:48.8474217Z   absl_log_internal_proto.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_proto.lib
+2026-10-10T03:37:48.8477317Z   format.cc
+2026-10-10T03:37:48.8479471Z   time.cc
+2026-10-10T03:37:48.8482097Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+2026-10-10T03:37:48.8484469Z   commandlineflag.cc
+2026-10-10T03:37:48.8732068Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:37:48.8892961Z   parser.cc
+2026-10-10T03:37:48.8899930Z   Generating Code...
+2026-10-10T03:37:49.0273266Z   absl_str_format_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_str_format_internal.lib
+2026-10-10T03:37:52.5821640Z   Generating Code...
+2026-10-10T03:37:52.6235306Z   structured_proto.cc
+2026-10-10T03:37:52.6268662Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+2026-10-10T03:37:52.7464156Z   absl_flags_commandlineflag.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag.lib
+2026-10-10T03:37:52.8020180Z   absl_log_internal_structured_proto.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_structured_proto.lib
+2026-10-10T03:37:52.8071948Z   absl_time.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\time\Release\absl_time.lib
+2026-10-10T03:37:52.9285003Z   marshalling.cc
+2026-10-10T03:37:52.9665754Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/crc/CMakeLists.txt
+2026-10-10T03:37:59.7642283Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/hash/CMakeLists.txt
+2026-10-10T03:37:59.7697595Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+2026-10-10T03:37:59.7704864Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/synchronization/CMakeLists.txt
+2026-10-10T03:37:59.7712999Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:37:59.7749081Z   crc32c.cc
+2026-10-10T03:37:59.7797464Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:37:59.7802708Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+2026-10-10T03:37:59.7808400Z   log_entry.cc
+2026-10-10T03:37:59.7809813Z   crc_memcpy_fallback.cc
+2026-10-10T03:37:59.7813646Z   symbolize.cc
+2026-10-10T03:38:01.0336156Z   absl_flags_marshalling.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_marshalling.lib
+2026-10-10T03:38:01.0439818Z   kernel_timeout.cc
+2026-10-10T03:38:01.0455878Z   crc_memcpy_x86_arm_combined.cc
+2026-10-10T03:38:01.0569352Z   absl_log_entry.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_entry.lib
+2026-10-10T03:38:01.1041605Z   agentflow_models.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_models.lib
+2026-10-10T03:38:01.2339475Z   globals.cc
+2026-10-10T03:38:01.2400390Z   absl_symbolize.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_symbolize.lib
+2026-10-10T03:38:01.2589065Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:38:04.9090916Z   hash.cc
+2026-10-10T03:38:04.9361196Z   private_handle_accessor.cc
+2026-10-10T03:38:04.9586329Z   absl_log_internal_globals.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_globals.lib
+2026-10-10T03:38:04.9836176Z   absl_kernel_timeout_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\synchronization\Release\absl_kernel_timeout_internal.lib
+2026-10-10T03:38:05.1748587Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:38:05.2154718Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:38:05.2509156Z   log_format.cc
+2026-10-10T03:38:05.3381874Z   absl_flags_private_handle_accessor.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_private_handle_accessor.lib
+2026-10-10T03:38:05.4813604Z   backend_lease.cpp
+2026-10-10T03:38:05.5154739Z   crc_non_temporal_memcpy.cc
+2026-10-10T03:38:05.5513064Z D:\a\xMind\xMind\xmind\Native\src\backend_lease.cpp(21,72): warning C4996: 'std::filesystem::u8path': warning STL4021: The std::filesystem::u8path() overloads are deprecated in C++20. The constructors of std::filesystem::path provide equivalent functionality via construction from u8string, u8string_view, or iterators with value_type char8_t. You can define _SILENCE_CXX20_U8PATH_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [D:\a\xMind\xMind\xmind\build\native\agentflow_core.vcxproj]
+2026-10-10T03:38:05.6386611Z   Generating Code...
+2026-10-10T03:38:05.7523888Z   log_sink.cc
+2026-10-10T03:38:05.7871400Z   absl_crc32c.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\crc\Release\absl_crc32c.lib
+2026-10-10T03:38:05.8224123Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/synchronization/CMakeLists.txt
+2026-10-10T03:38:05.8557479Z   xlang_sqlite.cpp
+2026-10-10T03:38:06.3931876Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/debugging/CMakeLists.txt
+2026-10-10T03:38:08.2902983Z   examine_stack.cc
+2026-10-10T03:38:08.2959569Z C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Tools\MSVC\14.51.36231\include\memory(3997,10): warning C4996: 'std::atomic_store_explicit': warning STL4029: std::atomic_*() overloads for shared_ptr are deprecated in C++20. The shared_ptr specialization of std::atomic provides superior functionality. You can define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [D:\a\xMind\xMind\xmind\build\native\agentflow_core.vcxproj]
+2026-10-10T03:38:08.3280605Z   (compiling source file '../../../../../../Native/src/xlang_sqlite.cpp')
+2026-10-10T03:38:08.3528694Z       C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Tools\MSVC\14.51.36231\include\memory(3997,10):
+2026-10-10T03:38:08.4883820Z       the template instantiation context (the oldest one first) is
+2026-10-10T03:38:08.5417047Z           D:\a\xMind\xMind\xlang3\sdk\xlang3\cpp\package.h(49,23):
+2026-10-10T03:38:08.5873779Z           see reference to function template instantiation 'void std::atomic_store<X::detail::InstanceEvents>(std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents>)' being compiled
+2026-10-10T03:38:08.5950044Z   
+2026-10-10T03:38:08.6161246Z   repository.cpp
+2026-10-10T03:38:08.6232816Z   absl_examine_stack.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_examine_stack.lib
+2026-10-10T03:38:08.6310795Z   absl_log_internal_format.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_format.lib
+2026-10-10T03:38:08.6453528Z   barrier.cc
+2026-10-10T03:38:08.6747777Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/crc/CMakeLists.txt
+2026-10-10T03:38:08.8180033Z   absl_log_sink.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_sink.lib
+2026-10-10T03:38:08.9976796Z   crc_cord_state.cc
+2026-10-10T03:38:11.7187116Z   blocking_counter.cc
+2026-10-10T03:38:11.8459980Z   absl_hash.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\hash\Release\absl_hash.lib
+2026-10-10T03:38:12.0453082Z   absl_crc_cord_state.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\crc\Release\absl_crc_cord_state.lib
+2026-10-10T03:38:12.2887259Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+2026-10-10T03:38:12.3884818Z   cord_internal.cc
+2026-10-10T03:38:15.3487594Z D:\a\xMind\xMind\xmind\Native\src\repository.cpp(2038,176): warning C4457: declaration of 'owner' hides function parameter [D:\a\xMind\xMind\xmind\build\native\agentflow_core.vcxproj]
+2026-10-10T03:38:15.3493421Z   create_thread_identity.cc
+2026-10-10T03:38:15.3500810Z       D:\a\xMind\xMind\xmind\Native\src\repository.cpp(2025,65):
+2026-10-10T03:38:15.3504105Z       see declaration of 'owner'
+2026-10-10T03:38:15.3505344Z   
+2026-10-10T03:38:16.6291817Z   cord_rep_btree.cc
+2026-10-10T03:38:17.6089920Z   futex_waiter.cc
+2026-10-10T03:38:18.6973253Z   legacy_owner.cpp
+2026-10-10T03:38:20.1066471Z   per_thread_sem.cc
+2026-10-10T03:38:20.1141362Z   cord_rep_btree_navigator.cc
+2026-10-10T03:38:22.6169388Z   pthread_waiter.cc
+2026-10-10T03:38:22.6287398Z   sem_waiter.cc
+2026-10-10T03:38:22.6558347Z   stdcpp_waiter.cc
+2026-10-10T03:38:23.4103142Z   cord_rep_btree_reader.cc
+2026-10-10T03:38:24.0207567Z   persistence_service.cpp
+2026-10-10T03:38:25.1897116Z   waiter_base.cc
+2026-10-10T03:38:26.8538471Z   cord_rep_crc.cc
+2026-10-10T03:38:27.8691978Z   win32_waiter.cc
+2026-10-10T03:38:30.1606384Z   cord_rep_consume.cc
+2026-10-10T03:38:30.7236379Z   notification.cc
+2026-10-10T03:38:31.7807331Z   graph.cpp
+2026-10-10T03:38:33.4457840Z   mutex.cc
+2026-10-10T03:38:33.4786498Z   Generating Code...
+2026-10-10T03:38:34.5560402Z   absl_cord_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cord_internal.lib
+2026-10-10T03:38:36.4516205Z   Generating Code...
+2026-10-10T03:38:37.3096062Z   absl_synchronization.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\synchronization\Release\absl_synchronization.lib
+2026-10-10T03:38:37.3700371Z   dynamic_plan.cpp
+2026-10-10T03:38:37.4279609Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+2026-10-10T03:38:37.4281638Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+2026-10-10T03:38:37.5392564Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/container/CMakeLists.txt
+2026-10-10T03:38:41.3939899Z   program_name.cc
+2026-10-10T03:38:41.4062144Z   hashtablez_sampler.cc
+2026-10-10T03:38:41.4077372Z   cordz_handle.cc
+2026-10-10T03:38:41.4131937Z   hashtablez_sampler_force_weak_definition.cc
+2026-10-10T03:38:41.4185576Z   absl_flags_program_name.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_program_name.lib
+2026-10-10T03:38:41.4582598Z   absl_cordz_handle.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_handle.lib
+2026-10-10T03:38:41.5506688Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:38:41.6801280Z   vlog_config.cc
+2026-10-10T03:38:42.4991955Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+2026-10-10T03:38:46.2207274Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+2026-10-10T03:38:46.2245836Z   context_digest.cpp
+2026-10-10T03:38:46.2250797Z   usage_config.cc
+2026-10-10T03:38:46.2253920Z   Generating Code...
+2026-10-10T03:38:46.2257622Z   cordz_info.cc
+2026-10-10T03:38:46.2259597Z   context_selection.cpp
+2026-10-10T03:38:46.2315623Z   absl_hashtablez_sampler.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\container\Release\absl_hashtablez_sampler.lib
+2026-10-10T03:38:46.3929932Z   absl_vlog_config_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_vlog_config_internal.lib
+2026-10-10T03:38:47.1726312Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:38:47.1801128Z   globals.cc
+2026-10-10T03:38:47.1849765Z   absl_flags_config.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_config.lib
+2026-10-10T03:38:52.7198564Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+2026-10-10T03:38:53.7643954Z   Generating Code...
+2026-10-10T03:38:53.7701146Z   flag.cc
+2026-10-10T03:38:53.7736878Z   absl_cordz_info.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_info.lib
+2026-10-10T03:38:53.7873428Z   absl_log_globals.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_globals.lib
+2026-10-10T03:38:54.5112047Z   absl_flags_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_internal.lib
+2026-10-10T03:38:54.5168455Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:38:54.5188393Z   log_sink_set.cc
+2026-10-10T03:38:54.5276646Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/strings/CMakeLists.txt
+2026-10-10T03:38:58.2627918Z   cord.cc
+2026-10-10T03:39:08.1552699Z   absl_log_internal_log_sink_set.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_log_sink_set.lib
+2026-10-10T03:39:14.0424386Z   cord_analysis.cc
+2026-10-10T03:39:14.0426898Z   Generating Code...
+2026-10-10T03:39:14.1177295Z   absl_cord.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cord.lib
+2026-10-10T03:39:14.2586258Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/container/CMakeLists.txt
+2026-10-10T03:39:14.3653187Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:39:14.5050037Z   raw_hash_set.cc
+2026-10-10T03:39:14.5425076Z   log_message.cc
+2026-10-10T03:39:26.2309569Z   absl_log_internal_message.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_message.lib
+2026-10-10T03:39:26.4220161Z   absl_raw_hash_set.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\container\Release\absl_raw_hash_set.lib
+2026-10-10T03:39:34.0245069Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/log/CMakeLists.txt
+2026-10-10T03:39:35.9248967Z   check_op.cc
+2026-10-10T03:39:35.9418394Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/abseil-cpp/absl/flags/CMakeLists.txt
+2026-10-10T03:39:36.1029292Z   reflection.cc
+2026-10-10T03:39:38.8413372Z   absl_log_internal_check_op.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_check_op.lib
+2026-10-10T03:39:38.9110011Z   agentflow_core.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_core.lib
+2026-10-10T03:39:38.9959669Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:39:39.1159925Z   permission_waiter.cpp
+2026-10-10T03:39:41.5822497Z   absl_flags_reflection.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_reflection.lib
+2026-10-10T03:39:41.7115529Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/third_party/re2/CMakeLists.txt
+2026-10-10T03:39:41.8955200Z   bitmap256.cc
+2026-10-10T03:39:42.7091602Z   agentflow_policy.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_policy.lib
+2026-10-10T03:39:44.3201357Z   bitstate.cc
+2026-10-10T03:39:46.6379488Z   compile.cc
+2026-10-10T03:39:49.8107559Z   dfa.cc
+2026-10-10T03:39:53.1455437Z   filtered_re2.cc
+2026-10-10T03:39:56.1446894Z   mimics_pcre.cc
+2026-10-10T03:39:58.3924095Z   nfa.cc
+2026-10-10T03:40:00.8727149Z   onepass.cc
+2026-10-10T03:40:03.4285814Z   parse.cc
+2026-10-10T03:40:05.8331949Z   perl_groups.cc
+2026-10-10T03:40:05.8438973Z   prefilter.cc
+2026-10-10T03:40:08.3576374Z   prefilter_tree.cc
+2026-10-10T03:40:11.5702658Z   prog.cc
+2026-10-10T03:40:14.1305436Z   re2.cc
+2026-10-10T03:40:16.7282603Z   regexp.cc
+2026-10-10T03:40:20.0640682Z   set.cc
+2026-10-10T03:40:22.5579782Z   simplify.cc
+2026-10-10T03:40:24.9330681Z   tostring.cc
+2026-10-10T03:40:27.4039346Z   unicode_casefold.cc
+2026-10-10T03:40:27.4168085Z   unicode_groups.cc
+2026-10-10T03:40:27.4413035Z   Generating Code...
+2026-10-10T03:40:36.3161843Z   Compiling...
+2026-10-10T03:40:36.3162941Z   rune.cc
+2026-10-10T03:40:36.3377477Z   strutil.cc
+2026-10-10T03:40:36.8546999Z   Generating Code...
+2026-10-10T03:40:37.0806320Z   re2.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\re2\Release\re2.lib
+2026-10-10T03:40:37.2164973Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:40:37.3784235Z   workspace_tools.cpp
+2026-10-10T03:40:41.4368297Z   windows_workspace.cpp
+2026-10-10T03:40:44.7277949Z   path_glob.cpp
+2026-10-10T03:40:46.9687657Z   path_ignore.cpp
+2026-10-10T03:40:48.9690271Z   search_pattern.cpp
+2026-10-10T03:40:50.1234461Z   repository_instruction_context.cpp
+2026-10-10T03:40:53.8943680Z   skill_context.cpp
+2026-10-10T03:40:57.8842561Z   Generating Code...
+2026-10-10T03:41:12.7968189Z   agentflow_workspace.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_workspace.lib
+2026-10-10T03:41:12.9330508Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:41:13.0947883Z   process_executor.cpp
+2026-10-10T03:41:21.3577789Z   agentflow_process_effects.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_effects.lib
+2026-10-10T03:41:21.4609721Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:41:21.5862549Z   process_executor_contract.cpp
+2026-10-10T03:41:31.6228975Z   agentflow_process_executor_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_executor_contract.exe
+2026-10-10T03:41:31.8780553Z MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+2026-10-10T03:41:31.9179634Z 
+2026-10-10T03:41:32.1543983Z   Checking File Globs
+2026-10-10T03:41:32.7563991Z   absl_civil_time.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\time\Release\absl_civil_time.lib
+2026-10-10T03:41:32.9267523Z   absl_exponential_biased.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\profiling\Release\absl_exponential_biased.lib
+2026-10-10T03:41:32.9283923Z   absl_spinlock_wait.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_spinlock_wait.lib
+2026-10-10T03:41:33.1306025Z   absl_utf8_for_code_point.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_utf8_for_code_point.lib
+2026-10-10T03:41:33.2064029Z   absl_hardening.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_hardening.lib
+2026-10-10T03:41:33.4892551Z   absl_source_location.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\types\Release\absl_source_location.lib
+2026-10-10T03:41:33.6683791Z   absl_time_zone.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\time\Release\absl_time_zone.lib
+2026-10-10T03:41:34.1070058Z   absl_flags_commandlineflag_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag_internal.lib
+2026-10-10T03:41:34.1207560Z   absl_leak_check.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_leak_check.lib
+2026-10-10T03:41:34.5358693Z   absl_log_internal_nullguard.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_nullguard.lib
+2026-10-10T03:41:34.7229275Z   absl_strerror.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_strerror.lib
+2026-10-10T03:41:34.8792697Z   agentflow_mcp_wire.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_wire.lib
+2026-10-10T03:41:34.9980478Z   absl_log_severity.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_log_severity.lib
+2026-10-10T03:41:35.0006243Z   agentflow_models.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_models.lib
+2026-10-10T03:41:35.0010589Z   agentflow_file_patch.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_file_patch.lib
+2026-10-10T03:41:35.0017812Z   agentflow_secrets.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_secrets.lib
+2026-10-10T03:41:35.4279410Z   Scanning sources for module dependencies...
+2026-10-10T03:41:35.6421321Z   yaml-cpp.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\Release\yaml-cpp.lib
+2026-10-10T03:41:35.6480047Z   agentflow_process.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process.lib
+2026-10-10T03:41:35.7200509Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:41:36.0128710Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:41:36.0604516Z   windows_mcp_stdio.cpp
+2026-10-10T03:41:36.0658935Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:41:37.7398928Z   json_schema.cpp
+2026-10-10T03:41:37.8523003Z   winhttp_stream_transport.cpp
+2026-10-10T03:41:37.9919546Z   absl_raw_logging_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_raw_logging_internal.lib
+2026-10-10T03:41:38.0068832Z   agentflow_core.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_core.lib
+2026-10-10T03:41:38.2562069Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:41:38.6719678Z   absl_debugging_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_debugging_internal.lib
+2026-10-10T03:41:38.6783230Z   absl_cordz_functions.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_functions.lib
+2026-10-10T03:41:38.7060722Z   absl_throw_delegate.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_throw_delegate.lib
+2026-10-10T03:41:40.2902782Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:41:40.3098863Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:41:40.3523537Z   agentflow_policy.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_policy.lib
+2026-10-10T03:41:40.3665390Z   a2a_task_control.cpp
+2026-10-10T03:41:57.9668998Z   mcp_client.cpp
+2026-10-10T03:42:04.3277656Z   Generating Code...
+2026-10-10T03:42:07.4659629Z   agentflow_provider_transport.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_provider_transport.lib
+2026-10-10T03:42:20.4041924Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:20.6961336Z   runtime_generation.cpp
+2026-10-10T03:42:20.9771479Z   agentflow_mcp_stdio.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_stdio.lib
+2026-10-10T03:42:20.9804386Z   graph_catalog.cpp
+2026-10-10T03:42:20.9813792Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:20.9882551Z   agentflow_a2a.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_a2a.lib
+2026-10-10T03:42:20.9900955Z   agent_instructions.cpp
+2026-10-10T03:42:21.0168151Z   agentflow_json_schema.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_json_schema.lib
+2026-10-10T03:42:21.0927503Z   agentflow_runtime_generation.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_runtime_generation.lib
+2026-10-10T03:42:21.1554059Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:21.3241565Z   owner_process.cpp
+2026-10-10T03:42:21.3980950Z   chat_provider.cpp
+2026-10-10T03:42:21.4737883Z   agentflow_graph.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph.lib
+2026-10-10T03:42:21.5894844Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:21.9312211Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:22.1649502Z   mcp_configuration.cpp
+2026-10-10T03:42:22.6481382Z   schema_worker_main.cpp
+2026-10-10T03:42:23.8602110Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:27.4363067Z   gemini_provider.cpp
+2026-10-10T03:42:27.8219361Z   agentflow_instruction_configuration.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_instruction_configuration.lib
+2026-10-10T03:42:31.8506100Z   legacy_owner_process.cpp
+2026-10-10T03:42:32.5541734Z   responses_context_transport.cpp
+2026-10-10T03:42:32.9900026Z   agentflow_owner_process.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_owner_process.lib
+2026-10-10T03:42:33.4344017Z   absl_base.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_base.lib
+2026-10-10T03:42:33.5214325Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:33.5623752Z   absl_int128.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\numeric\Release\absl_int128.lib
+2026-10-10T03:42:33.5987895Z   absl_tracing_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_tracing_internal.lib
+2026-10-10T03:42:33.6365498Z   absl_base_cpu_detect.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_base_cpu_detect.lib
+2026-10-10T03:42:33.6692015Z   xmind_schema_worker.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind_schema_worker.exe
+2026-10-10T03:42:33.7029741Z   view_sessions.cpp
+2026-10-10T03:42:34.4475476Z   absl_log_internal_conditions.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_conditions.lib
+2026-10-10T03:42:35.0326420Z   absl_city.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\hash\Release\absl_city.lib
+2026-10-10T03:42:35.0700829Z   absl_malloc_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_malloc_internal.lib
+2026-10-10T03:42:36.8883948Z   Generating Code...
+2026-10-10T03:42:40.0534860Z   absl_crc_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\crc\Release\absl_crc_internal.lib
+2026-10-10T03:42:40.0889601Z   absl_decode_rust_punycode.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_decode_rust_punycode.lib
+2026-10-10T03:42:40.1228815Z   absl_demangle_rust.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_rust.lib
+2026-10-10T03:42:40.2381570Z   absl_demangle_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_internal.lib
+2026-10-10T03:42:40.8363197Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:41.0608958Z   absl_stacktrace.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_stacktrace.lib
+2026-10-10T03:42:41.0623944Z   absl_graphcycles_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\synchronization\Release\absl_graphcycles_internal.lib
+2026-10-10T03:42:41.0630221Z   schema_worker.cpp
+2026-10-10T03:42:41.2604226Z   agentflow_chat_provider.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_chat_provider.lib
+2026-10-10T03:42:41.3445274Z   absl_strings_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_strings_internal.lib
+2026-10-10T03:42:41.7426756Z   absl_strings.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_strings.lib
+2026-10-10T03:42:41.7806477Z   absl_log_internal_fnmatch.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_fnmatch.lib
+2026-10-10T03:42:41.8266002Z   absl_log_internal_proto.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_proto.lib
+2026-10-10T03:42:45.2341639Z   agentflow_view_sessions.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_view_sessions.lib
+2026-10-10T03:42:45.3422602Z   absl_symbolize.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_symbolize.lib
+2026-10-10T03:42:45.4875508Z   absl_str_format_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_str_format_internal.lib
+2026-10-10T03:42:45.5503000Z   absl_hash.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\hash\Release\absl_hash.lib
+2026-10-10T03:42:45.8688233Z   absl_flags_marshalling.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_marshalling.lib
+2026-10-10T03:42:45.9011319Z   absl_crc32c.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\crc\Release\absl_crc32c.lib
+2026-10-10T03:42:45.9346042Z   absl_crc_cord_state.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\crc\Release\absl_crc_cord_state.lib
+2026-10-10T03:42:46.1255826Z   absl_cord_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cord_internal.lib
+2026-10-10T03:42:46.3438121Z   absl_examine_stack.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_examine_stack.lib
+2026-10-10T03:42:46.4229959Z   absl_log_internal_structured_proto.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_structured_proto.lib
+2026-10-10T03:42:46.4400389Z   absl_time.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\time\Release\absl_time.lib
+2026-10-10T03:42:51.4244303Z   absl_flags_commandlineflag.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag.lib
+2026-10-10T03:42:51.5198444Z   absl_kernel_timeout_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\synchronization\Release\absl_kernel_timeout_internal.lib
+2026-10-10T03:42:51.6213402Z   absl_log_entry.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_entry.lib
+2026-10-10T03:42:51.7087653Z   absl_log_internal_globals.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_globals.lib
+2026-10-10T03:42:54.0942249Z   agentflow_schema_worker.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_schema_worker.lib
+2026-10-10T03:42:54.2140109Z   absl_log_internal_format.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_format.lib
+2026-10-10T03:42:54.3435138Z   absl_log_sink.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_sink.lib
+2026-10-10T03:42:54.4237804Z   absl_flags_private_handle_accessor.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_private_handle_accessor.lib
+2026-10-10T03:42:54.4924600Z   absl_synchronization.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\synchronization\Release\absl_synchronization.lib
+2026-10-10T03:42:54.7668203Z   absl_cordz_handle.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_handle.lib
+2026-10-10T03:42:54.7680422Z   absl_hashtablez_sampler.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\container\Release\absl_hashtablez_sampler.lib
+2026-10-10T03:42:54.7686435Z   absl_vlog_config_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_vlog_config_internal.lib
+2026-10-10T03:42:54.7699484Z   absl_flags_program_name.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_program_name.lib
+2026-10-10T03:42:55.0312414Z   absl_flags_config.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_config.lib
+2026-10-10T03:42:55.1819799Z   absl_log_globals.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_globals.lib
+2026-10-10T03:42:55.3553841Z   absl_log_internal_log_sink_set.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_log_sink_set.lib
+2026-10-10T03:42:55.4925581Z   absl_cordz_info.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_info.lib
+2026-10-10T03:42:55.4937522Z   absl_flags_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_internal.lib
+2026-10-10T03:42:55.6212352Z   absl_log_internal_message.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_message.lib
+2026-10-10T03:42:55.7643897Z   absl_cord.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cord.lib
+2026-10-10T03:42:55.8287224Z   absl_log_internal_check_op.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_check_op.lib
+2026-10-10T03:42:55.9846572Z   absl_raw_hash_set.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\container\Release\absl_raw_hash_set.lib
+2026-10-10T03:42:56.0418016Z   agentflow_mcp_configuration.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_configuration.lib
+2026-10-10T03:42:56.1384266Z   absl_flags_reflection.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_reflection.lib
+2026-10-10T03:42:56.2266760Z   agentflow_legacy_owner_process.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_legacy_owner_process.lib
+2026-10-10T03:42:56.3554867Z   re2.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\re2\Release\re2.lib
+2026-10-10T03:42:56.5714591Z   agentflow_workspace.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_workspace.lib
+2026-10-10T03:42:56.7543909Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:56.7631417Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:56.8046251Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:56.8476752Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:56.9711960Z   backend_owner_control.cpp
+2026-10-10T03:42:56.9717213Z   local_profile.cpp
+2026-10-10T03:42:56.9892873Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:42:57.7088096Z   console_transport.cpp
+2026-10-10T03:42:58.4417683Z   agentflow_process_effects.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_effects.lib
+2026-10-10T03:42:58.5130067Z   edit_executor.cpp
+2026-10-10T03:43:02.4709363Z   mcp_tool_registry.cpp
+2026-10-10T03:43:03.1893315Z   agentflow_backend_owner_control.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_backend_owner_control.lib
+2026-10-10T03:43:03.4175625Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:43:24.7315532Z   create_executor.cpp
+2026-10-10T03:43:24.7759002Z   process_configuration.cpp
+2026-10-10T03:43:24.7842670Z   patch_file_executor.cpp
+2026-10-10T03:43:24.8134382Z   agentflow_mcp_effects.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_effects.lib
+2026-10-10T03:43:24.8182117Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:43:24.9319371Z   agentflow_process_configuration.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_configuration.lib
+2026-10-10T03:43:25.2048350Z   http_server.cpp
+2026-10-10T03:43:25.8147102Z   patch_executor.cpp
+2026-10-10T03:43:26.1368443Z   agentflow_local_profile.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_local_profile.lib
+2026-10-10T03:43:31.6123557Z   patch_tool.cpp
+2026-10-10T03:43:40.8666600Z   Generating Code...
+2026-10-10T03:44:09.7070756Z   agentflow_edits.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_edits.lib
+2026-10-10T03:44:11.7937105Z   agentflow_http.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_http.lib
+2026-10-10T03:44:11.9037662Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:44:12.1084176Z   agent_runner.cpp
+2026-10-10T03:44:12.3380555Z   agentflow_console_transport.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_console_transport.lib
+2026-10-10T03:44:18.5164639Z   agent_service.cpp
+2026-10-10T03:44:23.0840223Z   root_execution_budget.cpp
+2026-10-10T03:44:25.7602140Z   delegation_executor.cpp
+2026-10-10T03:44:29.9754577Z   agent_authority.cpp
+2026-10-10T03:44:34.8724021Z   native_child_executor.cpp
+2026-10-10T03:44:37.5473598Z   dynamic_plan_executor.cpp
+2026-10-10T03:44:41.8615786Z   context_manager.cpp
+2026-10-10T03:44:46.2505668Z   context_model_policy.cpp
+2026-10-10T03:44:48.8641629Z   Generating Code...
+2026-10-10T03:45:38.4854406Z   agentflow_agent.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_agent.lib
+2026-10-10T03:45:38.6574172Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:45:38.8380815Z   graph_runner.cpp
+2026-10-10T03:45:44.4454218Z   graph_service.cpp
+2026-10-10T03:45:48.9191024Z   Generating Code...
+2026-10-10T03:46:19.6613613Z   agentflow_graph_execution.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph_execution.lib
+2026-10-10T03:46:19.8320422Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:46:20.0070364Z   provider_setup.cpp
+2026-10-10T03:46:24.9847031Z   provider_profiles.cpp
+2026-10-10T03:46:29.5209610Z   provider_profile_runtime.cpp
+2026-10-10T03:46:34.4554022Z   provider_profile_legacy_setup.cpp
+2026-10-10T03:46:37.7027944Z   provider_catalogue.cpp
+2026-10-10T03:46:41.0860498Z   execution_platform.cpp
+2026-10-10T03:46:44.0248621Z   provider_yaml_config.cpp
+2026-10-10T03:46:46.9665904Z   Generating Code...
+2026-10-10T03:47:01.7594752Z   agentflow_runtime.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_runtime.lib
+2026-10-10T03:47:01.8798504Z   Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+2026-10-10T03:47:02.0563515Z   xmind_main.cpp
+2026-10-10T03:47:05.6643305Z   server_main.cpp
+2026-10-10T03:47:09.5832166Z   cli_main.cpp
+2026-10-10T03:47:17.3299362Z   schema_worker_main.cpp
+2026-10-10T03:47:21.1608340Z   admin_main.cpp
+2026-10-10T03:47:26.5138618Z   local_view_main.cpp
+2026-10-10T03:47:33.7890012Z   Generating Code...
+2026-10-10T03:48:10.9689494Z   xmind.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind.exe
+2026-10-10T03:48:11.2474315Z Test project D:/a/xMind/xMind/xmind/build/native
+2026-10-10T03:48:11.2692149Z     Start 91: native_local_view_contract
+2026-10-10T03:48:35.2999542Z 1/1 Test #91: native_local_view_contract .......***Failed   24.03 sec
+2026-10-10T03:48:35.3000792Z {"retainedFixture":"C:\\Users\\runneradmin\\AppData\\Local\\Temp\\xmind-local-view-igorWs"}
+2026-10-10T03:48:35.3001742Z node:internal/modules/run_main:123
+2026-10-10T03:48:35.3002371Z     triggerUncaughtException(
+2026-10-10T03:48:35.3003369Z     ^
+2026-10-10T03:48:35.3005094Z 
+2026-10-10T03:48:35.3007255Z AssertionError [ERR_ASSERTION]: A committed event must arrive incrementally after human input
+2026-10-10T03:48:35.3008582Z     at file:///D:/a/xMind/xMind/xmind/Native/tests/local_view_contract.mjs:83:168
+2026-10-10T03:48:35.3009809Z     at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+2026-10-10T03:48:35.3010726Z   generatedMessage: false,
+2026-10-10T03:48:35.3011617Z   code: 'ERR_ASSERTION',
+2026-10-10T03:48:35.3013654Z   actual: false,
+2026-10-10T03:48:35.3014962Z   expected: true,
+2026-10-10T03:48:35.3018975Z   operator: '==',
+2026-10-10T03:48:35.3020121Z   diff: 'simple'
+2026-10-10T03:48:35.3021499Z }
+2026-10-10T03:48:35.3022584Z 
+2026-10-10T03:48:35.3023915Z Node.js v22.23.3
+2026-10-10T03:48:35.3025270Z 
+2026-10-10T03:48:35.3026217Z 
+2026-10-10T03:48:35.3027911Z 0% tests passed, 1 tests failed out of 1
+2026-10-10T03:48:35.3028836Z 
+2026-10-10T03:48:35.3029936Z Total Test time (real) =  24.05 sec
+2026-10-10T03:48:35.3031012Z 
+2026-10-10T03:48:35.3033947Z The following tests FAILED:
+2026-10-10T03:48:35.3035060Z 	 91 - native_local_view_contract (Failed)
+2026-10-10T03:48:35.3490956Z [31;1mErrors while running CTest[0m
+2026-10-10T03:48:35.4578539Z [31;1mException: [0mD:\a\xMind\xMind\xmind\Tools\ci-native.ps1:11[0m
+2026-10-10T03:48:35.4579485Z [31;1m[0m[36;1mLine |[0m
+2026-10-10T03:48:35.4581663Z [31;1m[0m[36;1m[36;1m  11 | [0m … XITCODE -ne 0){[36;1mthrow ($Name+' failed with exit code '+$LASTEXITCODE)[0m}[0m
+2026-10-10T03:48:35.4582978Z [31;1m[0m[36;1m[36;1m[0m[36;1m[0m[36;1m     | [31;1m                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+2026-10-10T03:48:35.4583962Z [31;1m[0m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m     | [31;1mnative-view-early-ctest failed with exit code 8[0m
+2026-10-10T03:48:35.4823028Z ##[error]Process completed with exit code 1.
+2026-10-10T03:48:35.5094242Z ##[group]Run actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+2026-10-10T03:48:35.5094829Z with:
+2026-10-10T03:48:35.5095222Z   name: native-windows-evidence-298da660383472892c15a89de6aa721fd85416cd
+2026-10-10T03:48:35.5095764Z   path: xmind/build/ci-evidence/
+xmind/build/native/Testing/
+
+2026-10-10T03:48:35.5096159Z   retention-days: 14
+2026-10-10T03:48:35.5096440Z   if-no-files-found: warn
+2026-10-10T03:48:35.5096734Z   compression-level: 6
+2026-10-10T03:48:35.5097013Z   overwrite: false
+2026-10-10T03:48:35.5097274Z   include-hidden-files: false
+2026-10-10T03:48:35.5097575Z ##[endgroup]
+2026-10-10T03:48:35.7167752Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-10T03:48:35.7169270Z The least common ancestor is D:\a\xMind\xMind\xmind\build. This will be the root directory of the artifact
+2026-10-10T03:48:35.7169943Z With the provided path, there will be 14 files uploaded
+2026-10-10T03:48:35.7170657Z Artifact name is valid!
+2026-10-10T03:48:35.7171296Z Root directory input is valid!
+2026-10-10T03:48:35.9844475Z Beginning upload of artifact content to blob storage
+2026-10-10T03:48:36.1717245Z Uploaded bytes 13562
+2026-10-10T03:48:36.2127311Z Finished uploading artifact content to blob storage!
+2026-10-10T03:48:36.2128712Z SHA256 digest of uploaded artifact zip is 330bdf4be0aa41196aa141b8cbe2635a8b25f012323c69f82dba24e52623c8bc
+2026-10-10T03:48:36.2131136Z Finalizing artifact upload
+2026-10-10T03:48:36.5206160Z Artifact native-windows-evidence-298da660383472892c15a89de6aa721fd85416cd.zip successfully finalized. Artifact ID 11658682616
+2026-10-10T03:48:36.5208529Z Artifact native-windows-evidence-298da660383472892c15a89de6aa721fd85416cd has been successfully uploaded! Final size is 13562 bytes. Artifact ID is 11658682616
+2026-10-10T03:48:36.5228214Z Artifact download URL: https://github.com/xlang-foundation/xMind/actions/runs/38020387667/artifacts/11658682616
+2026-10-10T03:48:36.5603630Z Post job cleanup.
+2026-10-10T03:48:36.7600113Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-10T03:48:36.7887947Z git version 2.55.0.windows.5
+2026-10-10T03:48:36.7955229Z Temporarily overriding HOME='D:\a\_temp\0948bad6-de11-4143-9baa-a1aac433667d' before making global git config changes
+2026-10-10T03:48:36.7956141Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T03:48:36.7966603Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\stdlib-source
+2026-10-10T03:48:36.8276943Z Removing SSH command configuration
+2026-10-10T03:48:36.8288327Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T03:48:36.8613934Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-10T03:48:37.4184329Z Removing HTTP extra header
+2026-10-10T03:48:37.4196287Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T03:48:37.4512848Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-10T03:48:37.9894067Z Removing includeIf entries pointing to credentials config files
+2026-10-10T03:48:37.9905854Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T03:48:38.0176042Z includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path
+2026-10-10T03:48:38.0176994Z includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path
+2026-10-10T03:48:38.0217641Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path
+2026-10-10T03:48:38.0477118Z D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:48:38.0520851Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git.path D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:48:38.0830034Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path
+2026-10-10T03:48:38.1091770Z D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:48:38.1133167Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/stdlib-source/.git/worktrees/*.path D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config
+2026-10-10T03:48:38.1436983Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-10T03:48:38.6932140Z Removing credentials config 'D:\a\_temp\git-credentials-dab8355a-a2c9-4cc8-aeb5-2a66fe9c8e69.config'
+2026-10-10T03:48:38.7330066Z Post job cleanup.
+2026-10-10T03:48:38.9369778Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-10T03:48:38.9653209Z git version 2.55.0.windows.5
+2026-10-10T03:48:38.9722584Z Temporarily overriding HOME='D:\a\_temp\8ca18266-e08a-4387-b319-a1b299b5d227' before making global git config changes
+2026-10-10T03:48:38.9725770Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T03:48:38.9734499Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\xlang3
+2026-10-10T03:48:39.0039085Z Removing SSH command configuration
+2026-10-10T03:48:39.0051320Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T03:48:39.0368531Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-10T03:48:39.6155310Z Removing HTTP extra header
+2026-10-10T03:48:39.6164906Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T03:48:39.6486424Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-10T03:48:40.1774469Z Removing includeIf entries pointing to credentials config files
+2026-10-10T03:48:40.1787152Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T03:48:40.2041233Z includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path
+2026-10-10T03:48:40.2041788Z includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path
+2026-10-10T03:48:40.2079730Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path
+2026-10-10T03:48:40.2333826Z D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:48:40.2376712Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xlang3/.git.path D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:48:40.2672738Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path
+2026-10-10T03:48:40.2923163Z D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:48:40.2962618Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xlang3/.git/worktrees/*.path D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config
+2026-10-10T03:48:40.3252999Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-10T03:48:40.8805250Z Removing credentials config 'D:\a\_temp\git-credentials-2caed4ef-6b3a-4d3f-9d38-001cc4527d54.config'
+2026-10-10T03:48:40.9186083Z Post job cleanup.
+2026-10-10T03:48:41.1628159Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-10T03:48:41.1923749Z git version 2.55.0.windows.5
+2026-10-10T03:48:41.2001868Z Temporarily overriding HOME='D:\a\_temp\2ef0416e-4e71-48ee-b909-7e26181ee524' before making global git config changes
+2026-10-10T03:48:41.2003278Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T03:48:41.2015061Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\xMind\xMind\xmind
+2026-10-10T03:48:41.2344036Z Removing SSH command configuration
+2026-10-10T03:48:41.2356380Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T03:48:41.2700086Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-10T03:48:41.8444274Z Removing HTTP extra header
+2026-10-10T03:48:41.8456442Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T03:48:41.8835672Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-10T03:48:42.4716380Z Removing includeIf entries pointing to credentials config files
+2026-10-10T03:48:42.4729859Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T03:48:42.5025159Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-10T03:48:42.5026296Z includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-10T03:48:42.5078924Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path
+2026-10-10T03:48:42.5395687Z D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:48:42.5450536Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git.path D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:48:42.5870537Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path
+2026-10-10T03:48:42.6195356Z D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:48:42.6249168Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/xMind/xMind/xmind/.git/worktrees/*.path D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config
+2026-10-10T03:48:42.6629994Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-10T03:48:43.2784037Z Removing credentials config 'D:\a\_temp\git-credentials-2fe8cbe2-fdfe-4131-8ae7-13dc6637d320.config'
+2026-10-10T03:48:43.3004764Z Cleaning up orphan processes
+2026-10-10T03:48:43.3224150Z Terminate orphan process: pid (5752) (vctip)
+2026-10-10T03:48:43.3299754Z Terminate orphan process: pid (10232) (MSBuild)
+2026-10-10T03:48:43.3420497Z Terminate orphan process: pid (6896) (MSBuild)
+2026-10-10T03:48:43.3651440Z Terminate orphan process: pid (9136) (MSBuild)
