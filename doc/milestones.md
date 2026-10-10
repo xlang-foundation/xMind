@@ -1,5 +1,12 @@
 # Reviewable milestones
 
+The local native launcher now detects the actual Python benchmark parent as well
+as its workers, and rechecks before configure, compile and contracts. The previous
+guard missed live parent PID 8220; a real launch after the fix exited with deferral
+code 3 before creating a build directory. The benchmark was not changed and no
+native test pass is claimed. Isolated native CI continues independently.
+[Actual parent observation and launcher refusal](evidence/native-benchmark-parent-guard-local.json).
+
 Hosted source `faab16f` compiled and finished its full native test run with
 **107/110 passed** in 310.95 seconds. The same license-staging and removed editor
 upgrade-API failures blocked it; the actual local-view regression did not run.

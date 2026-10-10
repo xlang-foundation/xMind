@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "sourceBase": "f9faceddf66ebac496c1c378dccec1960af555b9",
+  "sourceFile": "Tools/native-milestone.ps1",
+  "sourceSha256": "460f51cc85c601ee936b9b97908a13afee9661ce48224af58ccf39d94595db42",
+  "change": "Apply benchmark matching to parent Python and xlang3 workers equally, including scratch/performance launcher paths; recheck before native configure, compile and contract phases.",
+  "observedRegression": "The actual live Python parent PID 8220 did not match the prior launcher guard. It can remain active between child workers.",
+  "actualRefusalProbe": {
+    "ObservedParentPid": 8220,
+    "ObservedParentName": "python.exe",
+    "PreviousGuardMatchedParent": false,
+    "CurrentGuardMatchedParent": true,
+    "PublicLauncherExitCode": 3,
+    "BuildDirectoryCreated": false,
+    "NativeCompiled": false,
+    "NativeContractExecuted": false
+  },
+  "originalOutput": {
+    "file": "doc/evidence/native-unified-benchmark-parent-refusal.log",
+    "sha256": "b6277fea5afd5683d762826fa949fd58983ec53e54102614fba3ace26f01122f"
+  },
+  "verification": {
+    "publicLauncherSyntaxPassed": true,
+    "preparedPrivateLauncherSyntaxPassed": true,
+    "nativeBuildDirectoryNotCreated": true,
+    "nativeCompiled": false,
+    "nativeContractExecuted": false,
+    "providerRequests": 0
+  },
+  "scope": "Actual current Windows process metadata and refusal of the public build launcher; not native runtime, agent execution or installed UI acceptance.",
+  "limits": [
+    "The separate benchmark remains active and was not terminated or modified.",
+    "Current isolated native CI continues independently.",
+    "No native test pass is claimed from this refusal."
+  ]
+}

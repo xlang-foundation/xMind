@@ -10,15 +10,18 @@ param(
 $ErrorActionPreference='Stop'
 $projectRoot=Split-Path $PSScriptRoot -Parent
 $nativeBuild=if($BuildDirectory){[System.IO.Path]::GetFullPath($BuildDirectory)}else{Join-Path $projectRoot 'build\native'}
-if($Action -eq 'Build') {
+function Assert-NativePhaseAvailable([string]$Stage) {
     $benchmarks=@(Get-CimInstance Win32_Process | Where-Object {
-        ($_.Name -eq 'xlang3.exe' -and $_.CommandLine -match 'pyperformance|run_benchmark\.py|benchmarks[\\/]') -or
-        ($_.Name -in @('python.exe','pythonw.exe','xlang3.exe') -and $_.CommandLine -match 'run_pyperformance_xlang3_shimmed\.py|benchmarks[\\/]check_regression\.py|benchmarks[\\/]diagnostics[\\/]compare_subscription_dispatch\.py')
+        $_.Name -in @('python.exe','pythonw.exe','xlang3.exe') -and
+        $_.CommandLine -match 'pyperformance|run_benchmark\.py|run_pyperformance_xlang3_shimmed\.py|benchmarks[\\/]|scratch[\\/]performance[\\/]run-'
     })
     if($benchmarks.Count -gt 0) {
-        Write-Host "Build deferred: live xlang3 benchmark processes $($benchmarks.ProcessId -join ', ')."
+        Write-Host "Native phase deferred ($Stage): live benchmark processes $($benchmarks.ProcessId -join ', ')."
         exit 3
     }
+}
+if($Action -eq 'Build') {
+    Assert-NativePhaseAvailable 'preflight'
     & node (Join-Path $projectRoot 'Tools/verify-jsoncons.mjs')
     if($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
     & node (Join-Path $projectRoot 'Tools/verify-yaml-cpp.mjs')
@@ -28,11 +31,14 @@ if($Action -eq 'Build') {
     if($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
     $cmakeExecutable='C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe'
     if(-not (Test-Path -LiteralPath $cmakeExecutable)) { $cmakeExecutable=(Get-Command cmake -ErrorAction Stop).Source }
+    Assert-NativePhaseAvailable 'configure'
     & $cmakeExecutable -S (Join-Path $projectRoot 'Native') -B $nativeBuild -G 'Visual Studio 18 2026' -A x64 "-DAGENTFLOW_XLANG3_SOURCE=$RuntimeSource" "-DAGENTFLOW_XLANG3_RUNTIME_DIR=$RuntimeDirectory" "-DAGENTFLOW_PYTHON_LIB_SOURCE=$PythonLibSource"
     if($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
+    Assert-NativePhaseAvailable 'compile'
     & $cmakeExecutable --build $nativeBuild --config Release --parallel 1
     if($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
     $ctestExecutable=Join-Path (Split-Path $cmakeExecutable -Parent) 'ctest.exe'
+    Assert-NativePhaseAvailable 'contracts'
     & $ctestExecutable --test-dir $nativeBuild -C Release --output-on-failure
     exit $LASTEXITCODE
 }
