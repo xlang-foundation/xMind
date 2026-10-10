@@ -1,5 +1,6 @@
 #include "agentflow/mcp_oauth_callback.hpp"
 #include "agentflow/mcp_wire.hpp"
+#include "agentflow/mcp_oauth_loopback.hpp"
 #include "httplib.h"
 #include <condition_variable>
 #include <exception>
@@ -20,8 +21,7 @@ struct McpOAuthLoopbackCallback::Impl {
     std::string path,host,uri;
     bool consumed=false;
     explicit Impl(std::string value,std::uint16_t requested):path(std::move(value)) {
-        if(path.empty()||path.size()>128||path.front()!='/')throw std::invalid_argument("Invalid native OAuth callback path");
-        for(unsigned char c:path)if(!((c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='0'&&c<='9')||c=='/'||c=='_'||c=='-'))throw std::invalid_argument("Invalid native OAuth callback path");
+        validate_mcp_oauth_loopback_path(path);
         server.new_task_queue=[] {return new httplib::ThreadPool(1,1,4);};
         server.set_socket_options([](socket_t socket){
             // Windows SO_REUSEADDR permits another process to steal a bound

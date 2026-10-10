@@ -50,6 +50,8 @@ int main(){try{
         auto changed=oauth;changed.mcp_servers.front().oauth->client_id+="-other";require(identity(changed,versions(changed))!=selected,"OAuth public client must bind credential purpose and authority");
         changed=oauth;changed.mcp_servers.front().oauth->issuer+="/other";require(identity(changed,versions(changed))!=selected,"OAuth selected issuer must bind authority");
         changed=oauth;changed.mcp_servers.front().oauth->id+="-other";require(identity(changed,versions(changed))!=selected,"OAuth account credential reference must bind authority");
+        changed=oauth;changed.mcp_servers.front().oauth->callback.path="/oauth2redirect/registered-client";require(identity(changed,versions(changed))!=selected,"OAuth registered callback path must bind authority");
+        changed=oauth;changed.mcp_servers.front().oauth->callback.port=43210;require(identity(changed,versions(changed))!=selected,"OAuth registered callback port must bind authority");
         changed=oauth;changed.mcp_servers.front().bearer=McpBearerCredential{"server","ambiguous"};rejected([&]{identity(changed,versions(changed));});
     }
     require(agent_authority_identity(base,"","synthetic-workspace-object",metadata)==bound,"Default model admission changed authority");

@@ -1,11 +1,13 @@
 # Native MCP login service and client controls
 
 The shared native service now also has [native console commands](native-mcp-console.md).
-The complete **114/114** local native and **257 extension / 55 browser** gates pass;
-actual console-to-service acceptance covers metadata, admission, observation and
-terminal cancellation with an untrusted TLS peer. Trusted HTTPS positive login
-and actual browser launch remain unverified.
-[Exact current checkpoint](evidence/native-oauth-cli-local.json).
+The registered-callback source passes the complete **115/115** native gate in
+**388.83 seconds**, with **2460** unchanged inputs. Client inputs are unchanged
+from their prior complete **257 extension / 55 browser** suites; those suites
+were not rerun for this source. Actual console-to-service acceptance covers
+metadata, admission, observation and terminal cancellation with an untrusted TLS
+peer. Trusted HTTPS positive login and actual browser launch remain unverified.
+[Exact current checkpoint](evidence/native-oauth-registered-local.json).
 
 The C++ backend owns asynchronous OAuth discovery, callback receipt, code
 exchange and encrypted grant publication. Browser and VS Code Settings expose
@@ -37,7 +39,7 @@ usable. Rotation/revocation of running owners is separate unfinished work.
 
 The production owner probes the real MCP HTTP endpoint without a bearer,
 validates protected-resource/issuer metadata, creates PKCE and state, binds an
-exclusive ephemeral IPv4 loopback listener and exchanges a valid callback over
+exclusive IPv4 loopback listener and exchanges a valid callback over
 native HTTPS. It checks the persisted configuration again before saving the
 complete encrypted grant with its expected credential revision. Publication and
 cancellation share the service lock; persistence also fences native owner
@@ -70,9 +72,12 @@ commands against the native service. Synthetic client, DOM and VS Code API
 fixtures separately verify links, owner binding, lost-reply observation and view
 disposal. These scopes do not establish a successful OAuth login.
 
-The current flow uses a backend-configured, pre-registered **public** client ID
-whose registration must allow the native loopback redirect/ephemeral port.
-Registration selection, fixed redirect configuration, CIMD/DCR, positive trusted
+The current flow uses a backend-configured, pre-registered **public** client ID.
+The candidate adds [registered callback path/port settings](native-mcp-registered-callback.md)
+with exact binding and no occupied-port fallback. Configuration/grant, receiver
+and authority contracts pass locally; successful registered native login and
+service-level occupied-port rejection still require hosted acceptance.
+Registration selection, CIMD/DCR, positive trusted
 HTTPS login, automatic refresh, revocation, coordination of running MCP owners,
 full graphical connector configuration remain unfinished.
 Fresh packaged/installed/rendered current UI acceptance is also required.

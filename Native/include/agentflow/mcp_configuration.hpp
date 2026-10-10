@@ -1,11 +1,12 @@
 #pragma once
 #include "agentflow/persistence_service.hpp"
+#include "agentflow/mcp_oauth_loopback.hpp"
 #include <optional>
 
 namespace agentflow {
 struct McpEnvironmentCredential {std::string name,scope,id;};
 struct McpBearerCredential {std::string scope,id;};
-struct McpOAuthCredential {std::string scope,id,issuer,client_id;};
+struct McpOAuthCredential {std::string scope,id,issuer,client_id;McpOAuthLoopbackSetting callback;};
 struct McpServerSetting {
     std::string id,executable,working_directory;
     std::int64_t revision=0;

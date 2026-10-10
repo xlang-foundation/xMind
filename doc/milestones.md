@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+The registered-callback candidate adds backend-owned OAuth callback path/port
+configuration, exact exclusive binding and credential/agent authority checks.
+The complete rebuilt **115/115** native gate passes in **388.83 seconds**, with
+**2460** unchanged mapped inputs. Focused checks also pass **four** selected
+contracts, including **13** real-socket callback cases and actual xlang3 SQLite
+configuration/grant reopen. The unchanged clients retain their prior complete
+**257 extension / 55 browser** results; their suites were not rerun here. The
+strengthened trusted-login fixture compiles; hosted positive native OAuth
+acceptance remains pending.
+[Implementation and verification boundary](native-mcp-registered-callback.md).
+[Exact local evidence](evidence/native-oauth-registered-local.json).
+
 The trusted OAuth candidate passed the complete **115/115** local native gate
 in **386.74 seconds**, plus **257 extension / 55 browser** checks, with **2459**
 unchanged mapped inputs. The new independent HTTPS authority contract passes;

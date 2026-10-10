@@ -193,7 +193,10 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
         if(server.transport=="http") {
             entry["endpoint"]=server.endpoint;
             entry["bearer_reference"]=server.bearer?Json{{"scope",server.bearer->scope},{"id",server.bearer->id}}:Json(nullptr);
-            if(server.oauth)entry["oauth_reference"]={{"scope",server.oauth->scope},{"id",server.oauth->id},{"issuer",server.oauth->issuer},{"client_id",server.oauth->client_id}};
+            if(server.oauth){
+                entry["oauth_reference"]={{"scope",server.oauth->scope},{"id",server.oauth->id},{"issuer",server.oauth->issuer},{"client_id",server.oauth->client_id}};
+                if(server.oauth->callback.path!="/oauth/callback"||server.oauth->callback.port)entry["oauth_reference"]["callback"]={{"path",server.oauth->callback.path},{"port",server.oauth->callback.port}};
+            }
         }else {entry["executable"]=server.executable;entry["working_directory"]=server.working_directory;entry["arguments"]=server.arguments;entry["credential_references"]=std::move(references);}
         encoded["mcp_servers"].push_back(std::move(entry));
     }

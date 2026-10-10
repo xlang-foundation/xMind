@@ -20,13 +20,16 @@ int finish(const std::string& mode){
 }
 }
 int main(int argc,char** argv){
-    if(argc!=2)return 2;
+    if(argc!=2&&argc!=3)return 2;
     try {
         const std::string mode=argv[1];
-        McpOAuthLoopbackCallback receiver("/oauth/callback/native-test");
+        unsigned requested=0;
+        if(mode=="fixed"){require(argc==3,"Fixed-port fixture requires its independently selected port");const std::string argument=argv[2];const auto parsed=std::from_chars(argument.data(),argument.data()+argument.size(),requested);require(parsed.ec==std::errc{}&&parsed.ptr==argument.data()+argument.size()&&requested>0&&requested<=65535,"Fixed-port fixture requires an exact valid port");}
+        McpOAuthLoopbackCallback receiver(mode=="fixed"?"/oauth2redirect/registered-client":"/oauth/callback/native-test",static_cast<std::uint16_t>(requested));
         const auto redirect=receiver.redirect_uri();
         const auto start=redirect.find(':',7)+1,end=redirect.find('/',start);unsigned port=0;
         require(std::from_chars(redirect.data()+start,redirect.data()+end,port).ec==std::errc{},"Fixture redirect must have a port");
+        if(mode=="fixed")require(port==requested,"Native receiver must bind exactly the registered port");
         rejects<McpTransportError>([&]{McpOAuthLoopbackCallback duplicate("/oauth/callback/native-test",static_cast<std::uint16_t>(port));});
         for(const auto* path:{"relative","/bad?query","/regex.*","/fragment#","/bad%2Fpath"})rejects<std::invalid_argument>([&]{McpOAuthLoopbackCallback invalid(path);});
         McpOAuthDiscovery discovery{{"https://resource.example.test/mcp",{"https://issuer.example.test"},{}},{"https://issuer.example.test","https://issuer.example.test/authorize","https://issuer.example.test/token",{}, {},{"none"},true,false,true,true}};
@@ -37,7 +40,7 @@ int main(int argc,char** argv){
         std::jthread canceller;
         if(mode=="cancel")canceller=std::jthread([&]{std::this_thread::sleep_for(150ms);stop.request_stop();});
         if(mode=="pre-cancel")stop.request_stop();
-        if(mode=="valid") {receiver.receive(attempt,expiry,stop.get_token());require(attempt.ready(),"Real socket callback must admit the native exchange");rejects<McpProtocolError>([&]{receiver.receive(attempt,expiry);});require(attempt.ready(),"Receiver reuse must not destroy a separately admitted exchange");attempt.cancel();}
+        if(mode=="valid"||mode=="fixed") {receiver.receive(attempt,expiry,stop.get_token());require(attempt.ready(),"Real socket callback must admit the native exchange");rejects<McpProtocolError>([&]{receiver.receive(attempt,expiry);});require(attempt.ready(),"Receiver reuse must not destroy a separately admitted exchange");attempt.cancel();}
         else if(mode=="denial") {try{receiver.receive(attempt,expiry);}catch(const McpOAuthAuthorizationDenied& error){require(error.reason=="access_denied","Native validated denial must keep exact allowlisted reason");require(!attempt.ready(),"Denial must clear authority");return finish(mode);}throw std::runtime_error("Expected actual browser denial");}
         else if(mode=="bad"||mode=="binding"||mode=="duplicate"||mode=="missing-issuer"||mode=="encoded-target")rejects<McpProtocolError>([&]{receiver.receive(attempt,expiry);});
         else if(mode=="cancel"||mode=="pre-cancel")rejects<McpTransportCancelled>([&]{receiver.receive(attempt,expiry,stop.get_token());});

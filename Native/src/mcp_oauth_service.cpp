@@ -66,7 +66,7 @@ struct McpOAuthService::Impl {
             catch(const McpOAuthAuthorizationRequired& required){challenge=required.challenge;}
             auto discovery=discover_mcp_oauth(entry->config.endpoint,challenge?challenge->metadata_url:std::nullopt,network_deadline(),stop,entry->config.oauth->issuer);
             const auto scopes=challenge&&!challenge->scopes.empty()?challenge->scopes:discovery.resource.scopes;
-            McpOAuthLoopbackCallback callback;
+            McpOAuthLoopbackCallback callback(entry->config.oauth->callback.path,entry->config.oauth->callback.port);
             McpOAuthAuthorizationAttempt attempt(discovery,{entry->config.oauth->issuer,entry->config.oauth->client_id,callback.redirect_uri()},scopes,entry->deadline);
             phase(entry,"awaiting_callback",attempt.authorization_url());
             callback.receive(attempt,entry->deadline,stop);

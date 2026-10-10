@@ -53,8 +53,16 @@ McpServerSetting setting(const Json& value,bool stored) {
         }
         if(value.contains("oauth")){
             if(result.bearer)throw std::invalid_argument("MCP HTTP requires one credential method");
-            const auto& oauth=value["oauth"];fields(oauth,{"scope","id","issuer","client_id"});
+            const auto& oauth=value["oauth"];fields(oauth,{"scope","id","issuer","client_id","callback"});
             result.oauth=McpOAuthCredential{text(oauth,"scope",128),text(oauth,"id",256),text(oauth,"issuer",8192),text(oauth,"client_id",2048)};
+            if(oauth.contains("callback")){
+                const auto& callback=oauth["callback"];fields(callback,{"path","port"});
+                if(callback.contains("path"))result.oauth->callback.path=text(callback,"path",128);
+                if(callback.contains("port")){
+                    if(!callback["port"].is_number_integer()||callback["port"]<0||callback["port"]>65535)throw std::invalid_argument("Invalid native OAuth callback port");
+                    result.oauth->callback.port=callback["port"].get<std::uint16_t>();
+                }
+            }
             (void)mcp_credential_purpose(result,"OAUTH");
         }
     }
@@ -76,7 +84,10 @@ Json encode(const McpServerSetting& value,bool stored=true) {
     if(value.transport=="http"){
         result["endpoint"]=value.endpoint;
         if(value.bearer)result["credential"]={{"scope",value.bearer->scope},{"id",value.bearer->id}};
-        if(value.oauth)result["oauth"]={{"scope",value.oauth->scope},{"id",value.oauth->id},{"issuer",value.oauth->issuer},{"client_id",value.oauth->client_id}};
+        if(value.oauth){
+            result["oauth"]={{"scope",value.oauth->scope},{"id",value.oauth->id},{"issuer",value.oauth->issuer},{"client_id",value.oauth->client_id}};
+            if(value.oauth->callback.path!="/oauth/callback"||value.oauth->callback.port)result["oauth"]["callback"]={{"path",value.oauth->callback.path},{"port",value.oauth->callback.port}};
+        }
     }else {result["executable"]=value.executable;result["working_directory"]=value.working_directory;result["arguments"]=value.arguments;result["credentials"]=std::move(credentials);}
     if(stored)result["revision"]=value.revision;return result;
 }
@@ -117,8 +128,11 @@ std::string mcp_credential_purpose(const McpServerSetting& setting,const std::st
             const auto secure=[](std::string url){for(auto& c:url)if(c>='A'&&c<='Z')c=static_cast<char>(c-'A'+'a');return url.starts_with("https://");};
             if(!secure(setting.endpoint)||!secure(setting.oauth->issuer)||setting.oauth->issuer.find('?')!=std::string::npos)throw std::invalid_argument("MCP OAuth requires HTTPS resource and issuer");
             for(unsigned char c:setting.oauth->client_id)if(c<0x20||c==0x7f)throw std::invalid_argument("Invalid MCP OAuth client identity");
+            validate_mcp_oauth_loopback_path(setting.oauth->callback.path);
             identity(setting.id);
-            source=Json{{"id",setting.id},{"transport","http"},{"resource",setting.endpoint},{"issuer",setting.oauth->issuer},{"client_id",setting.oauth->client_id}}.dump();
+            Json binding{{"id",setting.id},{"transport","http"},{"resource",setting.endpoint},{"issuer",setting.oauth->issuer},{"client_id",setting.oauth->client_id}};
+            if(setting.oauth->callback.path!="/oauth/callback"||setting.oauth->callback.port)binding["callback"]={{"path",setting.oauth->callback.path},{"port",setting.oauth->callback.port}};
+            source=binding.dump();
         }else if(name=="BEARER"&&!setting.oauth)source=Json{{"id",setting.id},{"transport","http"},{"endpoint",setting.endpoint},{"header","Authorization: Bearer"}}.dump();
         else throw std::invalid_argument("Invalid HTTP MCP credential target");
     }else if(setting.transport=="stdio")source=Json{{"id",setting.id},{"executable",setting.executable},{"directory",setting.working_directory},{"arguments",setting.arguments},{"environment",environment_name(name)}}.dump();

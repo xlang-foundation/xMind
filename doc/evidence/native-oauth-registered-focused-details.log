@@ -1,0 +1,80 @@
+Start testing: Oct 09 23:38 Pacific Daylight Time
+----------------------------------------------------------
+14/115 Testing: native_agent_authority_contract
+14/115 Test: native_agent_authority_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_authority_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_authority_contract" start time: Oct 09 23:38 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native private agent authority bindings passed (synthetic settings and credential metadata; no key resolution, peer or provider execution).
+<end of output>
+Test time =   0.18 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_authority_contract" end time: Oct 09 23:38 Pacific Daylight Time
+"native_agent_authority_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+49/115 Testing: native_mcp_oauth_credentials_contract
+49/115 Test: native_mcp_oauth_credentials_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_oauth_credentials_contract.exe" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_mcp_oauth_credentials_contract" start time: Oct 09 23:38 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native OAuth grant storage passed actual xlang3 SQLite encryption/reopen, atomic snapshot/rotation/rollback, resource/issuer/client/server binding, expiry/clock-rollback and factory pre-connect rejection, malformed/ciphertext relocation rejection and retired identity checks. Synthetic tokens; no trusted HTTPS login, refresh/revocation request or UI setup verified
+<end of output>
+Test time =   0.29 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_credentials_contract" end time: Oct 09 23:38 Pacific Daylight Time
+"native_mcp_oauth_credentials_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+52/115 Testing: native_mcp_oauth_trusted_peer_contract
+52/115 Test: native_mcp_oauth_trusted_peer_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_oauth_trusted_peer_contract.mjs" "C:/Program Files/Git/usr/bin/openssl.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_mcp_oauth_trusted_peer_contract" start time: Oct 09 23:38 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Independent synthetic OAuth/MCP peer passed real HTTPS with explicit CA verification, default untrusted-TLS rejection, metadata/challenge, authorization faults, independently checked S256 code exchange and authenticated MCP responses. No native login or Windows trust provisioning executed.
+<end of output>
+Test time =   0.25 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_trusted_peer_contract" end time: Oct 09 23:38 Pacific Daylight Time
+"native_mcp_oauth_trusted_peer_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+80/115 Testing: native_mcp_oauth_callback_contract
+80/115 Test: native_mcp_oauth_callback_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_oauth_callback_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_oauth_callback_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_mcp_oauth_callback_contract" start time: Oct 09 23:38 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Actual native loopback callback passed valid; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed fixed; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed bad; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed duplicate; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed missing-issuer; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed encoded-target; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed denial; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed cancel; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed pre-cancel; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed timeout; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed owner-expiry; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed binding; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed deadline; exclusive binding and socket retirement checked while the native process stayed alive.
+Synthetic browser redirects exercised the production native listener/authorization owner. No trusted HTTPS login, token exchange, persistence or product UI integration verified.
+<end of output>
+Test time =   0.99 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_callback_contract" end time: Oct 09 23:38 Pacific Daylight Time
+"native_mcp_oauth_callback_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 09 23:38 Pacific Daylight Time

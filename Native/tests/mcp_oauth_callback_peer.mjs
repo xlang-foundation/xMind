@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {request} from 'node:http';
 import {once} from 'node:events';
+import {createServer} from 'node:net';
 
 const executable=process.argv[2];
 const call=(url,options={})=>new Promise((resolve,reject)=>{
@@ -9,8 +10,10 @@ const call=(url,options={})=>new Promise((resolve,reject)=>{
     let body='';response.setEncoding('utf8');response.on('data',chunk=>{body+=chunk;assert.ok(body.length<8192);});response.on('end',()=>resolve({status:response.statusCode,headers:response.headers,body}));
   });outgoing.on('error',reject);outgoing.setTimeout(2000,()=>outgoing.destroy(new Error('Callback fixture request timeout')));outgoing.end();
 });
-for(const mode of ['valid','bad','duplicate','missing-issuer','encoded-target','denial','cancel','pre-cancel','timeout','owner-expiry','binding','deadline']){
-  const child=spawn(executable,[mode],{windowsHide:true,stdio:['pipe','pipe','pipe']});
+for(const mode of ['valid','fixed','bad','duplicate','missing-issuer','encoded-target','denial','cancel','pre-cancel','timeout','owner-expiry','binding','deadline']){
+  let fixedPort;
+  if(mode==='fixed'){const reservation=createServer();await new Promise(resolve=>reservation.listen(0,'127.0.0.1',resolve));fixedPort=reservation.address().port;await new Promise(resolve=>reservation.close(resolve));}
+  const child=spawn(executable,[mode,...(fixedPort?[String(fixedPort)]:[])],{windowsHide:true,stdio:['pipe','pipe','pipe']});
   let stdout='',stderr='',settled=false;let lineResolve,lineReject,retiredResolve,retiredReject;
   const firstLine=new Promise((resolve,reject)=>{lineResolve=resolve;lineReject=reject;});
   const retired=new Promise((resolve,reject)=>{retiredResolve=resolve;retiredReject=reject;});
@@ -22,9 +25,9 @@ for(const mode of ['valid','bad','duplicate','missing-issuer','encoded-target','
   try {
     const metadata=await firstLine;
     const redirect=new URL(metadata.redirect),authorize=new URL(metadata.authorization_url);
-    assert.equal(redirect.hostname,'127.0.0.1');assert.equal(redirect.pathname,'/oauth/callback/native-test');
+    assert.equal(redirect.hostname,'127.0.0.1');assert.equal(redirect.pathname,mode==='fixed'?'/oauth2redirect/registered-client':'/oauth/callback/native-test');if(mode==='fixed')assert.equal(Number(redirect.port),fixedPort);
     const state=authorize.searchParams.get('state');assert.equal(state.length,43);
-    if(['valid','bad','duplicate','missing-issuer','encoded-target','denial'].includes(mode)){
+    if(['valid','fixed','bad','duplicate','missing-issuer','encoded-target','denial'].includes(mode)){
       for(const [url,options,expected] of [[redirect,{headers:{Host:'attacker.example.test'}},400],[redirect,{headers:{Origin:'https://attacker.example.test'}},400],[redirect,{headers:{Authorization:'Bearer synthetic-unrelated-credential'}},400],[new URL('/wrong-path',redirect),{},404],[redirect,{method:'POST'},404]]){
         const rejected=await call(url,options);assert.equal(rejected.status,expected);assert.ok(!rejected.body.includes(state));
       }
@@ -35,7 +38,7 @@ for(const mode of ['valid','bad','duplicate','missing-issuer','encoded-target','
       if(mode==='denial'){callback.searchParams.set('error','access_denied');callback.searchParams.set('error_description','synthetic-private-description-never-reflect');}
       else callback.searchParams.set('code','synthetic-private-code+&=');
       const response=await call(callback);
-      assert.equal(response.status,mode==='valid'?200:400);
+      assert.equal(response.status,['valid','fixed'].includes(mode)?200:400);
       assert.equal(response.headers['cache-control'],'no-store');assert.equal(response.headers['referrer-policy'],'no-referrer');assert.equal(response.headers['x-content-type-options'],'nosniff');
       assert.ok(response.headers['content-security-policy'].includes("default-src 'none'"));
       for(const value of [state,'synthetic-private-code','synthetic-private-description'])assert.ok(!response.body.includes(value),'Callback response must not reflect private query fields');
