@@ -1,5 +1,16 @@
 # Committed native event feeds
 
+Production extension-host acceptance is now prepared inside the native view
+contract. It runs the actual `extension.js`, shared reader/subscription and
+`WorkspaceBackend` against the compiled native executable. Only the VS Code
+workspace/webview API is a fixture; backend replies are actual HTTP results.
+Assertions require a paused graph's committed replay, sidebar close/reopen
+without cancellation, rejection of input from the retired view, explicit
+checkpoint-bound input from the current view, one real file-read child and
+exact terminal persisted history. A periodic run timer is rejected by the
+fixture. Syntax/whitespace checks pass; these assertions have not executed.
+This will not establish installed/rendered IDE or live-provider acceptance.
+
 Clean frame-boundary EOF is now classified as transport unavailability after
 preserving the last consumer-accepted cursor. The standalone reader still
 rejects the absent native acknowledgement; the shared subscription can retry

@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+Actual production VS Code controller acceptance prepared: the native view
+contract now imports a host fixture that executes production `extension.js`,
+`WorkspaceBackend`, client and subscription against the real compiled backend.
+It requires paused replay, sidebar disposal/reopening, rejection of a retired
+view's human input, current checkpoint-bound input, exactly one actual tool
+child and persisted terminal history. Native transport is instrumented for
+observation only; no domain replies are fabricated. Only syntax/whitespace
+checks pass so far. Native execution and installed/rendered IDE acceptance
+remain pending. [Acceptance scope](native-event-stream.md).
+
 Clean frame-boundary EOF recovery candidate: the shared committed reader still
 rejects a missing native end acknowledgement, but now marks a clean connection
 EOF as transport unavailability. The subscription retries at the last accepted
