@@ -1,6 +1,7 @@
 param([Parameter(Mandatory)][string]$RuntimeSource,[Parameter(Mandatory)][string]$StdlibSource)
 $ErrorActionPreference='Stop'
 if($env:GITHUB_ACTIONS -ne 'true'){throw 'This build helper is for isolated GitHub runners. Use the guarded native-milestone launcher on the development machine.'}
+if($env:RUNNER_ENVIRONMENT -ne 'github-hosted' -or $env:RUNNER_OS -ne 'Windows'){throw 'Trusted OAuth acceptance requires the isolated GitHub-hosted Windows runner.'}
 $ciRoot=Split-Path $PSScriptRoot -Parent
 $ciRuntime=(Resolve-Path -LiteralPath $RuntimeSource).Path
 $ciStdlib=(Resolve-Path -LiteralPath $StdlibSource).Path
@@ -47,7 +48,7 @@ Invoke-CiCommand 'native-sdk-peer-install' $ciNpm @('ci','--prefix',(Join-Path $
 # editor suite, so its locked host dependencies must already exist.
 Invoke-CiCommand 'native-view-host-install' $ciNpm @('ci','--prefix',(Join-Path $ciRoot 'extensions/vscode'),'--ignore-scripts','--no-audit','--no-fund')
 $ciOpenSsl=(Get-Command openssl -ErrorAction Stop).Source
-Invoke-CiCommand 'native-configure' $ciCmake @('-S',(Join-Path $ciRoot 'Native'),'-B',$ciNative,'-G',$ciGenerator,'-A','x64',('-DAGENTFLOW_XLANG3_SOURCE='+$ciRuntime),('-DAGENTFLOW_XLANG3_RUNTIME_DIR='+$ciRelease),('-DAGENTFLOW_PYTHON_LIB_SOURCE='+$ciStdlib),('-DAGENTFLOW_NODE_EXECUTABLE='+$ciNode),('-DAGENTFLOW_OPENSSL_EXECUTABLE='+$ciOpenSsl))
+Invoke-CiCommand 'native-configure' $ciCmake @('-S',(Join-Path $ciRoot 'Native'),'-B',$ciNative,'-G',$ciGenerator,'-A','x64',('-DAGENTFLOW_XLANG3_SOURCE='+$ciRuntime),('-DAGENTFLOW_XLANG3_RUNTIME_DIR='+$ciRelease),('-DAGENTFLOW_PYTHON_LIB_SOURCE='+$ciStdlib),('-DAGENTFLOW_NODE_EXECUTABLE='+$ciNode),('-DAGENTFLOW_OPENSSL_EXECUTABLE='+$ciOpenSsl),'-DAGENTFLOW_HOSTED_OAUTH_TRUST_CONTRACT=ON')
 # Build the actual process contract and unified product before unrelated test
 # executables, then exercise native profile/view startup and the real thin host.
 # A focused success is diagnostic only: the full build and exact complete
@@ -64,6 +65,8 @@ $ciExpected+='native_mcp_oauth_callback_contract'
 $ciExpected+='native_mcp_oauth_credentials_contract'
 $ciExpected+='native_mcp_oauth_service_contract'
 $ciExpected+='native_mcp_authorization_cli_contract'
+$ciExpected+='native_mcp_oauth_trusted_peer_contract'
+$ciExpected+='native_mcp_oauth_trusted_contract'
 $ciExpected+='native_file_patch_contract'
 $ciExpected+='native_patch_file_executor_contract'
 $ciExpected+='native_patch_executor_contract'

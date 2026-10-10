@@ -77,6 +77,11 @@ HTTPS login, automatic refresh, revocation, coordination of running MCP owners,
 full graphical connector configuration remain unfinished.
 Fresh packaged/installed/rendered current UI acceptance is also required.
 
+The separately prepared [trusted HTTPS acceptance](native-mcp-trusted-acceptance.md)
+requires actual successful native login on an isolated Windows runner, encrypted
+grant reopen and production factory bearer use. Local peer verification and
+compilation do not establish that positive native result.
+
 The complete checkpoint gate and its original failures are recorded in
 [local evidence](evidence/native-oauth-service-local.json). The protocol and
 transport boundary remains in [native MCP HTTP](native-mcp-http.md).

@@ -1,0 +1,340 @@
+TAP version 13
+# Subtest: full webpage script order streams through the cookie bridge, renders real fixture metrics and detaches without commands
+ok 1 - full webpage script order streams through the cookie bridge, renders real fixture metrics and detaches without commands
+  ---
+  duration_ms: 1355.7664
+  type: 'test'
+  ...
+# Subtest: production browser footer drives the same saved-provider CAS and explicit model enrollment using public metadata only
+ok 2 - production browser footer drives the same saved-provider CAS and explicit model enrollment using public metadata only
+  ---
+  duration_ms: 139.7908
+  type: 'test'
+  ...
+# Subtest: production classic scripts share a realm without collisions and restore owned history through the browser bridge
+ok 3 - production classic scripts share a realm without collisions and restore owned history through the browser bridge
+  ---
+  duration_ms: 67.2439
+  type: 'test'
+  ...
+# Subtest: native session protocol mismatch explains the required update and preserves the existing connection
+ok 4 - native session protocol mismatch explains the required update and preserves the existing connection
+  ---
+  duration_ms: 442.3838
+  type: 'test'
+  ...
+# Subtest: Cancel and Escape preserve an existing connection and do not logout or cancel execution
+ok 5 - Cancel and Escape preserve an existing connection and do not logout or cancel execution
+  ---
+  duration_ms: 65.4577
+  type: 'test'
+  ...
+# Subtest: a failed replacement token keeps the existing conversation connected
+ok 6 - a failed replacement token keeps the existing conversation connected
+  ---
+  duration_ms: 68.6334
+  type: 'test'
+  ...
+# Subtest: cancelling an in-flight reconnect prevents late popup or conversation changes
+ok 7 - cancelling an in-flight reconnect prevents late popup or conversation changes
+  ---
+  duration_ms: 46.8366
+  type: 'test'
+  ...
+# Subtest: Cancel aborts pending network work and immediate retry stays owned by the new attempt
+ok 8 - Cancel aborts pending network work and immediate retry stays owned by the new attempt
+  ---
+  duration_ms: 74.756
+  type: 'test'
+  ...
+# Subtest: sidebar divider supports drag, keyboard bounds and remembered width
+ok 9 - sidebar divider supports drag, keyboard bounds and remembered width
+  ---
+  duration_ms: 80.9973
+  type: 'test'
+  ...
+# Subtest: browser session client shares the committed parser using cookies without bearer access
+ok 10 - browser session client shares the committed parser using cookies without bearer access
+  ---
+  duration_ms: 94.0451
+  type: 'test'
+  ...
+# Subtest: browser cookie stream refuses invalid scope and pre-abort before fetch and reports expired access
+ok 11 - browser cookie stream refuses invalid scope and pre-abort before fetch and reports expired access
+  ---
+  duration_ms: 1.6473
+  type: 'test'
+  ...
+# Subtest: browser uses committed feed callbacks and stays idle without periodic observation requests
+ok 12 - browser uses committed feed callbacks and stays idle without periodic observation requests
+  ---
+  duration_ms: 808.2233
+  type: 'test'
+  ...
+# Subtest: browser terminal command snapshot drains its current feed before retiring observation
+ok 13 - browser terminal command snapshot drains its current feed before retiring observation
+  ---
+  duration_ms: 2.5484
+  type: 'test'
+  ...
+# Subtest: browser selection retirement aborts the feed and rejects late events from that conversation
+ok 14 - browser selection retirement aborts the feed and rejects late events from that conversation
+  ---
+  duration_ms: 16.7743
+  type: 'test'
+  ...
+# Subtest: browser event arriving during a snapshot does not render that committed record twice
+ok 15 - browser event arriving during a snapshot does not render that committed record twice
+  ---
+  duration_ms: 2.48
+  type: 'test'
+  ...
+# Subtest: browser resolves new graph child ownership after an older snapshot finishes
+ok 16 - browser resolves new graph child ownership after an older snapshot finishes
+  ---
+  duration_ms: 3.2132
+  type: 'test'
+  ...
+# Subtest: browser graph initial snapshot reads committed events before child ownership
+ok 17 - browser graph initial snapshot reads committed events before child ownership
+  ---
+  duration_ms: 1.126
+  type: 'test'
+  ...
+# Subtest: browser graph terminal snapshot reads committed events before child ownership
+ok 18 - browser graph terminal snapshot reads committed events before child ownership
+  ---
+  duration_ms: 0.8498
+  type: 'test'
+  ...
+# Subtest: browser graph snapshot still rejects an event without owned child metadata
+ok 19 - browser graph snapshot still rejects an event without owned child metadata
+  ---
+  duration_ms: 0.9665
+  type: 'test'
+  ...
+# Subtest: browser forwards actual native file-proposal policy and clears unsupported legacy metadata without writes
+ok 20 - browser forwards actual native file-proposal policy and clears unsupported legacy metadata without writes
+  ---
+  duration_ms: 1.1705
+  type: 'test'
+  ...
+# Subtest: browser user skill commands use the selected session and stop publishing after disposal
+ok 21 - browser user skill commands use the selected session and stop publishing after disposal
+  ---
+  duration_ms: 4.7161
+  type: 'test'
+  ...
+# Subtest: conversation selection recovers the new provider catalogue after its native selection acknowledgement is retired
+ok 22 - conversation selection recovers the new provider catalogue after its native selection acknowledgement is retired
+  ---
+  duration_ms: 10.3479
+  type: 'test'
+  ...
+# Subtest: a second conversation/profile observation rejects the retired recovery catalogue and publishes only its current native binding
+ok 23 - a second conversation/profile observation rejects the retired recovery catalogue and publishes only its current native binding
+  ---
+  duration_ms: 29.0724
+  type: 'test'
+  ...
+# Subtest: browser imported key-only profiles guide the footer selection without a new-key error or provider calls
+ok 24 - browser imported key-only profiles guide the footer selection without a new-key error or provider calls
+  ---
+  duration_ms: 0.8647
+  type: 'test'
+  ...
+# Subtest: browser saved catalogue remains usable after settings close, new conversation and selection without automatic profile writes
+ok 25 - browser saved catalogue remains usable after settings close, new conversation and selection without automatic profile writes
+  ---
+  duration_ms: 3.6791
+  type: 'test'
+  ...
+# Subtest: browser footer provider command uses native profile CAS and saved-key discovery, with no automatic model enrollment
+ok 26 - browser footer provider command uses native profile CAS and saved-key discovery, with no automatic model enrollment
+  ---
+  duration_ms: 21.1352
+  type: 'test'
+  ...
+# Subtest: browser graph resume requires displayed and freshly verified backend eligibility/CAS and never retries conflicts
+ok 27 - browser graph resume requires displayed and freshly verified backend eligibility/CAS and never retries conflicts
+  ---
+  duration_ms: 1.2587
+  type: 'test'
+  ...
+# Subtest: browser context control uses actual discovery and discards a stale session/model generation before compaction
+ok 28 - browser context control uses actual discovery and discards a stale session/model generation before compaction
+  ---
+  duration_ms: 2.0255
+  type: 'test'
+  ...
+# Subtest: browser binds raw human input and explicit final-human resume to actual displayed and freshly observed plan identities
+ok 29 - browser binds raw human input and explicit final-human resume to actual displayed and freshly observed plan identities
+  ---
+  duration_ms: 5.9275
+  type: 'test'
+  ...
+# Subtest: browser rejects stale CAS, changed question identity, duplicate keys, foreign roots and observation conflicts before any controller mutation
+ok 30 - browser rejects stale CAS, changed question identity, duplicate keys, foreign roots and observation conflicts before any controller mutation
+  ---
+  duration_ms: 4.8572
+  type: 'test'
+  ...
+# Subtest: browser generation change during a fresh plan check discards response and cannot answer the prior selected owner
+ok 31 - browser generation change during a fresh plan check discards response and cannot answer the prior selected owner
+  ---
+  duration_ms: 0.8819
+  type: 'test'
+  ...
+# Subtest: browser transient plan GET conflicts discard actions and retry only bounded read observation
+ok 32 - browser transient plan GET conflicts discard actions and retry only bounded read observation
+  ---
+  duration_ms: 0.7602
+  type: 'test'
+  ...
+# Subtest: owned observation rejects a same-session status for another root and selection resets cursor backlog
+ok 33 - owned observation rejects a same-session status for another root and selection resets cursor backlog
+  ---
+  duration_ms: 0.7775
+  type: 'test'
+  ...
+# Subtest: normal Agent shows native-owned investigations and drains terminal child history without a graph selection
+ok 34 - normal Agent shows native-owned investigations and drains terminal child history without a graph selection
+  ---
+  duration_ms: 1.4026
+  type: 'test'
+  ...
+# Subtest: profile conflicts refresh the displayed account and model without replaying the retained task
+ok 35 - profile conflicts refresh the displayed account and model without replaying the retained task
+  ---
+  duration_ms: 13.5762
+  type: 'test'
+  ...
+# Subtest: browser sends its known profile revision and retains the prompt when native admission rejects a stale view
+ok 36 - browser sends its known profile revision and retains the prompt when native admission rejects a stale view
+  ---
+  duration_ms: 10.2897
+  type: 'test'
+  ...
+# Subtest: browser Settings preserves the selected profile route through private discovery and footer enrollment
+ok 37 - browser Settings preserves the selected profile route through private discovery and footer enrollment
+  ---
+  duration_ms: 3.1932
+  type: 'test'
+  ...
+# Subtest: rename sends the displayed expected title only for the selected supported conversation and retains conflicts
+ok 38 - rename sends the displayed expected title only for the selected supported conversation and retains conflicts
+  ---
+  duration_ms: 1.3428
+  type: 'test'
+  ...
+# Subtest: Responses saved-key discovery and model selection preserve backend-reported wire
+ok 39 - Responses saved-key discovery and model selection preserve backend-reported wire
+  ---
+  duration_ms: 1.2214
+  type: 'test'
+  ...
+# Subtest: restoring the native view does not wait for provider catalogue discovery
+ok 40 - restoring the native view does not wait for provider catalogue discovery
+  ---
+  duration_ms: 11.3845
+  type: 'test'
+  ...
+# Subtest: view catches a completion between event and status reads and drains final events
+ok 41 - view catches a completion between event and status reads and drains final events
+  ---
+  duration_ms: 0.9743
+  type: 'test'
+  ...
+# Subtest: an obsolete view response cannot overwrite the next selection
+ok 42 - an obsolete view response cannot overwrite the next selection
+  ---
+  duration_ms: 0.6058
+  type: 'test'
+  ...
+# Subtest: provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state
+ok 43 - provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state
+  ---
+  duration_ms: 1.1049
+  type: 'test'
+  ...
+# Subtest: stale operation bytes cannot produce an approval request
+ok 44 - stale operation bytes cannot produce an approval request
+  ---
+  duration_ms: 0.6205
+  type: 'test'
+  ...
+# Subtest: browser patch comparison revalidates owned snapshots and never submits approval
+ok 45 - browser patch comparison revalidates owned snapshots and never submits approval
+  ---
+  duration_ms: 1.593
+  type: 'test'
+  ...
+# Subtest: browser cannot compare malformed patch absence and missing batch manifest
+ok 46 - browser cannot compare malformed patch absence and missing batch manifest
+  ---
+  duration_ms: 2.4659
+  type: 'test'
+  ...
+# Subtest: MCP login browser routes expose only exact observation, start and cancel methods
+ok 47 - MCP login browser routes expose only exact observation, start and cancel methods
+  ---
+  duration_ms: 61.8757
+  type: 'test'
+  ...
+# Subtest: session skill controls expose only exact GET and POST routes
+ok 48 - session skill controls expose only exact GET and POST routes
+  ---
+  duration_ms: 48.6583
+  type: 'test'
+  ...
+# Subtest: workspace skill catalogue is an exact read-only browser route
+ok 49 - workspace skill catalogue is an exact read-only browser route
+  ---
+  duration_ms: 0.4738
+  type: 'test'
+  ...
+# Subtest: context and graph-resume view allowlist restricts methods and exposes no checkpoint/state mutation route
+ok 50 - context and graph-resume view allowlist restricts methods and exposes no checkpoint/state mutation route
+  ---
+  duration_ms: 0.4517
+  type: 'test'
+  ...
+# Subtest: planning view allowlist exposes only scoped observation, human input and resume methods
+ok 51 - planning view allowlist exposes only scoped observation, human input and resume methods
+  ---
+  duration_ms: 0.4635
+  type: 'test'
+  ...
+# Subtest: view forwards only allowed planning requests at the configured native origin and keeps durable cookie authentication
+ok 52 - view forwards only allowed planning requests at the configured native origin and keeps durable cookie authentication
+  ---
+  duration_ms: 472.2373
+  type: 'test'
+  ...
+# Subtest: browser adapter forwards durable native view credentials across restart without retaining the master token
+ok 53 - browser adapter forwards durable native view credentials across restart without retaining the master token
+  ---
+  duration_ms: 435.8178
+  type: 'test'
+  ...
+# Subtest: event stream routes are read-only and exclude foreign path encodings
+ok 54 - event stream routes are read-only and exclude foreign path encodings
+  ---
+  duration_ms: 0.5735
+  type: 'test'
+  ...
+# Subtest: synthetic stream peer forwards bytes before completion and detaches without a cancel command
+ok 55 - synthetic stream peer forwards bytes before completion and detaches without a cancel command
+  ---
+  duration_ms: 63.3158
+  type: 'test'
+  ...
+1..55
+# tests 55
+# suites 0
+# pass 55
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4136.7004

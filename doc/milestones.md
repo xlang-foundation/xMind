@@ -1,5 +1,29 @@
 # Reviewable milestones
 
+The trusted OAuth candidate passed the complete **115/115** local native gate
+in **386.74 seconds**, plus **257 extension / 55 browser** checks, with **2459**
+unchanged mapped inputs. The new independent HTTPS authority contract passes;
+the actual native trusted-login fixture is compiled but deliberately not run
+on the development PC. This is not successful native OAuth acceptance.
+[Exact local evidence](evidence/native-oauth-trusted-local.json).
+
+Trusted HTTPS OAuth acceptance is prepared as a mandatory isolated Windows
+contract. The independent synthetic authority verifies S256, one-use codes,
+resource/client/redirect binding, callback faults and authenticated MCP replies.
+The compiled C++ fixture must acquire a grant through the actual native service,
+persist/reopen it through xlang3 SQLite and use it through the production MCP
+factory. The complete hosted inventory now requires **116** contracts. The
+desktop certificate helper and hosted-only CMake option both reject locally;
+the desktop's CurrentUser Root thumbprints remain unchanged. Successful hosted
+native login is still unverified. [Acceptance boundary](native-mcp-trusted-acceptance.md).
+
+The corrected `73ccf90` hosted view job passed all **257 extension / 55 browser**
+checks. Independently downloaded evidence verifies its artifact digest, all
+**45 tracked / 47 including vendor inputs**, unchanged inputs/assets and twelve
+regenerated assets against exact accepted source bytes. This is scoped client
+acceptance, with no native login or installed/rendered claim.
+[Hosted view evidence](evidence/native-views-hosted-73ccf90.json).
+
 Native MCP console controls pass the complete **114/114** local native gate in
 **388.18 seconds**, plus **257 extension / 55 browser** checks, with **2455**
 unchanged mapped inputs. The actual `xmind` console starts/observes/watches/cancels
@@ -18,7 +42,7 @@ The prior `f595205` hosted view job failed **before executing its Node suites**:
 the three added test files and updated test totals were missing from the CI
 inventory. The reviewed guard now requires all **45 tracked / 47 including vendor
 inputs** and **257 extension / 55 browser** tests, without removing/skipping any
-tests. Local full suites pass; corrected hosted acceptance is separate and pending.
+tests. Local full suites pass; the corrected hosted acceptance is recorded above.
 [Original job log and exact failure](evidence/native-mcp-login-view-ci-f595205.json).
 
 Native MCP login service and browser/VS Code Settings controls pass the complete

@@ -1,0 +1,43 @@
+{
+  "observedAt": "2026-10-10T06:23:47.976Z",
+  "sourceRevision": "73ccf9020f0b9fcb1579382ba9c70811e93ede01",
+  "runId": 38030012342,
+  "jobId": 114148779768,
+  "conclusion": "success",
+  "artifact": {
+    "id": 11661891808,
+    "digest": "sha256:118a5cad1d06b5bbbd9d5d27bc2b240bbfdc1bb3ea3fc71eb49a5a7e2b6b44e6",
+    "bytes": 115884
+  },
+  "scope": "Actual isolated hosted complete 257 extension / 55 browser synthetic adapter/controller suites; independently downloaded artifact digest, 45 exact-revision tracked source blobs plus two locked vendor files, unchanged source/assets and all twelve archive/regenerated assets verified. No native execution, live model requests, installed/rendered IDE or real OAuth login acceptance.",
+  "trackedFiles": 45,
+  "vendorFiles": 2,
+  "browserAssets": 12,
+  "extension": {
+    "exitCode": 0,
+    "tests": 257,
+    "passed": 257,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "browser": {
+    "exitCode": 0,
+    "tests": 55,
+    "passed": 55,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "rawHashes": {
+    "doc/evidence/native-views-hosted-73ccf90-gate.json": "dd129bc446923dc9a0459c1829e09cd712cbe77a64d87c25533aa1110fc97b06",
+    "doc/evidence/native-views-hosted-73ccf90-source-before.json": "612e9cdaf4a6d7bb8f6dfede035060a598bcc83df31875d4f9a3338de3e3291a",
+    "doc/evidence/native-views-hosted-73ccf90-source-after.json": "612e9cdaf4a6d7bb8f6dfede035060a598bcc83df31875d4f9a3338de3e3291a",
+    "doc/evidence/native-views-hosted-73ccf90-assets-before.json": "69a1f26b904756e7d0687b342b02d855c3e00cd1327c5eff38385563787e5072",
+    "doc/evidence/native-views-hosted-73ccf90-assets-after.json": "69a1f26b904756e7d0687b342b02d855c3e00cd1327c5eff38385563787e5072",
+    "doc/evidence/native-views-hosted-73ccf90-extension.log": "e5a60188784dd98553af297a9cd5d856e25170b832417a002013281050b18b05",
+    "doc/evidence/native-views-hosted-73ccf90-browser.log": "ee0a716efda090adfc42a2137d0533a74fa4e0834623e9171671f99563aed885",
+    "doc/evidence/native-views-hosted-73ccf90-artifact.json": "69783f538c5b4ed18dbb01c9e595aa9fc1b189003b48e60a89b9e962a3e10089",
+    "doc/evidence/native-views-hosted-73ccf90-job.log": "1d3dcdce1292925a6ac80e5c95c378af084925c77465a2d0de5f2674e3f55572"
+  }
+}

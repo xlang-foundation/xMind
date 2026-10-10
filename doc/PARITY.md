@@ -20,6 +20,26 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+The trusted OAuth candidate passes the complete **115/115** local native gate
+in **386.74 seconds**, plus **257 extension / 55 browser** checks, with **2459**
+unchanged inputs. The additional local test checks the independent synthetic
+HTTPS authority; native trusted login is compiled but not executed locally.
+[Exact local evidence](evidence/native-oauth-trusted-local.json).
+
+An actual-service trusted HTTPS OAuth fixture is compiled and prepared for the
+isolated Windows runner. Its independent authority checks native S256/code
+exchange and negative callbacks; the native fixture requires encrypted grant
+publication/reopen and actual MCP bearer use. The hosted exact inventory now
+requires **116** contracts. Local peer and execution-boundary checks do not
+establish successful native login; that hosted result remains unverified.
+[Acceptance boundary](native-mcp-trusted-acceptance.md).
+
+The corrected complete hosted view gate at `73ccf90` passed **257 extension /
+55 browser** checks. Downloaded artifact, exact source and regenerated asset
+hashes were independently verified; this does not establish native or current
+installed/rendered acceptance.
+[Hosted evidence](evidence/native-views-hosted-73ccf90.json).
+
 Native MCP console setup/status/watch/cancel commands now use the same backend
 service as graphical Settings and pass **114/114** local native checks in
 **388.18 seconds**, with **2455** unchanged inputs. The complete **257 extension /
@@ -28,7 +48,7 @@ grant metadata and untrusted TLS rejection; independent synthetic HTTP fixtures
 cover CLI ownership, CAS, detach and private-field/link rejection. Trusted HTTPS
 positive login, real browser launch, registration, refresh/revocation and current
 installed/rendered acceptance remain unfinished. The prior hosted view manifest
-failure is retained; its corrected full inventory awaits hosted acceptance.
+failure is retained; its corrected full inventory passed the hosted view gate above.
 [Console implementation](native-mcp-console.md),
 [exact local evidence](evidence/native-oauth-cli-local.json),
 [hosted failure](evidence/native-mcp-login-view-ci-f595205.json).
