@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+The first hosted native-view gate completed with **107/110 passed**. The two
+local profile/view contracts stopped during packaging because the pinned pure
+source checkout has `LICENSE`, while the fixtures requested `LICENSE.txt`.
+The handoff contract then invoked the removed editor upgrade API. The candidate
+fix uses the actual source license, removes that obsolete editor scenario while
+retaining native owner-handoff safety assertions, and invokes the browser test
+through `xmind.exe serve`. No migration flow is introduced. Syntax checks pass;
+the complete native rerun and installed acceptance remain pending.
+[Original hosted failure and scoped fixes](evidence/native-ci-current-format-candidate.json).
+
 First-sidebar reconnect fix: changing folders before the first view exists
 now preserves the pending open intent and reopens the latest workspace. The
 regression failed on the previous code and the complete **220 extension fixture

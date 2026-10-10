@@ -61,7 +61,7 @@ jobs:
           $env:XMIND_BROWSER_TEST_ASSETS='build/browser-assets'
           node --test views/browser/tests/*.cjs > build/ci-evidence/browser-controller.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node views/browser/tests/native-contract.mjs build/native/Release/xmind_server.exe ../xlang3/build/Release/modules ../stdlib-source/Lib build/browser-assets > build/ci-evidence/browser-native.log
+          node views/browser/tests/native-contract.mjs build/native/Release/xmind.exe ../xlang3/build/Release/modules ../stdlib-source/Lib build/browser-assets > build/ci-evidence/browser-native.log
           exit $LASTEXITCODE
       - name: Stage the contract-tested native runtime and pinned pure library source
         working-directory: xmind

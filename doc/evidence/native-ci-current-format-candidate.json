@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-unaccepted",
+  "sourceBase": "faab16fa899403bee06c5cbcdbb18891a857e5bc",
+  "failedRun": {
+    "id": 38005698078,
+    "job": 114073862283,
+    "sourceRevision": "48aa77277ed88ea2e682c35408215634ddcc2260",
+    "passed": 107,
+    "total": 110,
+    "rawLog": "doc/evidence/native-unified-hosted-48aa772-failed.log",
+    "rawLogSha256": "1509b5a3dfff81e9e764694e345346f259754a0eaa5305d9518154b6b0e398e0"
+  },
+  "diagnosis": [
+    {
+      "contracts": [
+        "native_local_profile_contract",
+        "native_local_view_contract"
+      ],
+      "error": "Packaging requested LICENSE.txt; pinned source checkout supplies LICENSE.",
+      "resolution": "Use the source LICENSE when present; support the development pure-source tree LICENSE.txt name. Packaging still verifies and includes the real license."
+    },
+    {
+      "contracts": [
+        "native_backend_handoff_contract"
+      ],
+      "error": "Obsolete actualThinUpgrade fixture invokes the removed JavaScript owner upgrade API, using a deliberately minimal runtime.",
+      "resolution": "Remove obsolete editor upgrade fixture. Preserve all actual native retirement, admission, process exit, auth/workspace/policy/manifest rejection, retained session/history/provider state and activation assertions."
+    }
+  ],
+  "otherFix": "Browser CI invokes the current xmind.exe serve mode rather than the removed xmind_server.exe target.",
+  "sourceHashes": {
+    ".github/workflows/native-windows.yml": "4c8629c14217bbe8ea68ad2112628d7266ef98d91b604ae54194ebadf5c70909",
+    "Native/tests/local_profile_contract.mjs": "d6b3781235c84b64c340650b46ac835864f1b04efdec139970a6591fd49ed560",
+    "Native/tests/local_view_contract.mjs": "89b2a127596c3e8efaad972a02ae0f0c79599b7fcec7cf5b1c617c4a9da46572",
+    "Native/tests/backend_handoff_contract.mjs": "ab61ad728d97356b87c44372503626d58c46d74c153f21efb9b34cf5e54cb32d",
+    "views/browser/tests/native-contract.mjs": "de2c0b8e65406e22462bec7f85bd171b01a052b2b043e97a5ab2e859b6281602"
+  },
+  "verification": {
+    "nodeSyntaxChecks": 4,
+    "nativeReexecuted": false,
+    "nativeAccepted": false,
+    "installedRuntimeChanged": false,
+    "providerRequests": 0
+  },
+  "limits": [
+    "Separate live xlang3 performance run prevents local native validation.",
+    "Complete native gate including local profile and local view remains mandatory.",
+    "No migration flow was added; current local-view integration retains its independent native contract."
+  ]
+}

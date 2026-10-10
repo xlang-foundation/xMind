@@ -50,3 +50,4 @@ doc/evidence/native-responses-reasoning-hosted-ci-job.log -text whitespace=-blan
 # Preserve emitted compiler/failed-assertion whitespace in the original evidence.
 doc/evidence/native-unified-view-candidate-build-first.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-unified-view-candidate-extension-failed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-unified-hosted-48aa772-failed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
