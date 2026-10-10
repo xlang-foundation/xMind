@@ -19,6 +19,13 @@ xMind has a local HTML view using the same sidebar renderer and native API clien
 
 Connect and Disconnect are accessible SVG icon buttons. The OSS page connects directly to the xMind runtime on the same computer; it has no server-token field. The local launcher enrolls the browser session with its private credential, while the durable session stays in an HttpOnly cookie. If the local runtime cannot enroll the page, the dialog explains how to reopen it from xMind or VS Code. It never asks for a server token. Cancel, close and Escape leave an established session intact; a failed reconnect does not clear the current conversation. Team and remote authentication belong to private Nexus.
 
+When the local view is launched with the trusted `.config/providers.yaml`, it
+imports that file into another selected or added workspace profile only when
+that profile has no saved provider profiles. Each profile stores its own
+encrypted xlang3-backed credentials; existing non-empty provider settings are
+preserved. Import performs no provider request, and key values never pass
+through the browser.
+
 The C++ server owns execution, tools, graphs, permissions, providers and history. SQLite I/O remains in embedded xlang3. The Node HTTP adapter serves validated view-asset snapshots and forwards a finite allowlist of API requests to a configured loopback native server. A page reload loads a complete new snapshot from its configured asset directory without restarting the adapter or losing its authenticated sessions. Boundary, route, size and CSP restrictions still apply; a rejected bundle does not revoke backend access. Closing the view does not cancel execution. This is a local HTTP transport. Team deployment, WebRTC and the standalone Electron IDE belong to private Nexus.
 
 The left workspace canvas browses the active native root and previews UTF-8 files through workspace-handle reads. Directory links and Git metadata are omitted; backend-private `.config` and `.agentflow` paths remain denied. The view is read-only: agent edits still appear as approval proposals, and full editor, multi-file diff and recovery workflows remain open coding-parity work.

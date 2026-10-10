@@ -19,6 +19,7 @@
 #include <memory>
 #include <mutex>
 #include <set>
+#include <stdexcept>
 #include <string>
 
 namespace {
@@ -153,6 +154,51 @@ int run_local_view(int argc, char **argv) {
             client.set_read_timeout(15, 0);
             client.set_write_timeout(5, 0);
             client.set_follow_location(false);
+        };
+        const auto import_shared_provider_config = [&](const std::shared_ptr<agentflow::LocalProfileConnection> &target) {
+            if (options.provider_config.empty())
+                return;
+            httplib::Client client("127.0.0.1", target->port);
+            configure(client);
+            const auto secret = target->auth.view();
+            std::string authorization = "Bearer " +
+                std::string(reinterpret_cast<const char *>(secret.data()), secret.size());
+            const httplib::Headers headers{{"Authorization", authorization}};
+            const auto current = client.Get("/v1/provider/profiles", headers);
+            if (!authorization.empty())
+                SecureZeroMemory(authorization.data(), authorization.size());
+            // Older retained runtimes do not implement provider-profile import.
+            // Let workspace selection proceed; the matching native package will
+            // apply this shared local configuration when that profile is opened.
+            if (!current || current->status == 404)
+                return;
+            require(current->status == 200, "Native provider settings are unavailable");
+            auto metadata = Json::parse(current->body);
+            require(metadata.is_object() && metadata.contains("revision") &&
+                        metadata["revision"].is_number_integer() && metadata["revision"] >= 0 &&
+                        metadata.contains("profiles") && metadata["profiles"].is_array(),
+                    "Native provider settings are invalid");
+            if (!metadata["profiles"].empty())
+                return;
+            const auto config_path = std::filesystem::absolute(options.provider_config).u8string();
+            const std::string config(reinterpret_cast<const char *>(config_path.data()), config_path.size());
+            const auto import = client.Post("/v1/provider/configuration/import", headers,
+                Json{{"path", config}, {"expected_revision", metadata["revision"]}}.dump(),
+                "application/json");
+            if (!import)
+                throw std::runtime_error("Native provider settings could not be applied");
+            if (import->status == 409) {
+                const auto refreshed = client.Get("/v1/provider/profiles", headers);
+                require(refreshed && refreshed->status == 200,
+                        "Native provider settings could not be refreshed");
+                const auto latest = Json::parse(refreshed->body);
+                require(latest.is_object() && latest.contains("profiles") && latest["profiles"].is_array(),
+                        "Native provider settings are invalid");
+                if (!latest["profiles"].empty())
+                    return;
+                throw std::runtime_error("Native provider settings changed during workspace connection");
+            }
+            require(import->status == 200, "Shared provider configuration was rejected");
         };
         const auto issue = [&] {
             httplib::Client client("127.0.0.1", connection->port);
@@ -352,6 +398,7 @@ int run_local_view(int argc, char **argv) {
                         selected.require_existing_profile = true;
                         target = std::make_shared<agentflow::LocalProfileConnection>(
                             agentflow::connect_local_profile(selected));
+                        import_shared_provider_config(target);
                     }
                     require(agentflow::WorkspaceTools(target->workspace).identity() == requested_id,
                             "Native profile resolved to a different workspace");
@@ -460,6 +507,7 @@ int run_local_view(int argc, char **argv) {
                     try {
                         target = std::make_shared<agentflow::LocalProfileConnection>(
                             agentflow::connect_local_profile(selected));
+                        import_shared_provider_config(target);
                     } catch (const std::invalid_argument &) {
                         response(output, 400,
                                  "Choose an existing accessible folder outside xMind's private profile storage");
