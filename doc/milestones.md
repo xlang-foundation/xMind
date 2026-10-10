@@ -1,5 +1,12 @@
 # Reviewable milestones
 
+The existing earlier browser checkpoint was inspected and its history refresh
+button exercised without submitting a model request. Saved transcript/usage
+and provider choices were visible, but refresh required connecting again.
+Cached display is not proof of a usable backend connection or acceptance of
+the current native adapter. No credential was entered or authentication bypassed.
+[Actual browser observation and original screenshot](evidence/browser-existing-refresh-observation.json).
+
 Protected profile creation now explicitly selects the current Windows user as
 owner, matching the existing verification rule even when a token's default
 owner is a group. The DACL and refusal of foreign-owned existing storage are

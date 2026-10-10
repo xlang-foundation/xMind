@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "observed-not-accepted",
+  "currentRepositoryHead": "645d76fd049d9372aba24444cfbf518a20d77435",
+  "url": "http://127.0.0.1:60405/ui/",
+  "scope": "Existing earlier browser checkpoint inspected through the actual browser; current native adapter was not installed or executed.",
+  "action": "Refresh history button, without sending a message or submitting a model request.",
+  "beforeRefresh": "Saved completed run and historical transcript/usage/provider choices were displayed.",
+  "afterRefresh": "Enter the native server access token to connect",
+  "observedSavedRun": "85d4468465c074a02657ff8c5b69f498",
+  "screenshot": {
+    "file": "doc/evidence/native-browser-preview-existing-refresh-auth-required.jpg",
+    "sha256": "ea0cb2e68aed81ec104b2307b6bdfb704bc5a0f531a2c501cec70253f111e2f4"
+  },
+  "verification": {
+    "actualBrowserRead": true,
+    "newModelRequestSubmitted": false,
+    "newNativeProcessStarted": false,
+    "currentNativeAdapterAccepted": false,
+    "installedVscodeAccepted": false,
+    "browserConsoleErrorEntries": 0
+  },
+  "limits": [
+    "Displayed saved/cached content is not proof of a usable backend connection.",
+    "The authentication-required state was observed; cookie expiry or another cause was not independently established.",
+    "No credential entered, access changed or authentication bypassed.",
+    "Current native UI readiness and full gate remain pending."
+  ]
+}
