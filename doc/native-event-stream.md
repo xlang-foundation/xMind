@@ -109,6 +109,15 @@ fixture around the actual shared subscription and production extension code;
 they do not prove native, rendered editor or live model execution.
 [VS Code candidate and original evidence](evidence/native-event-stream-vscode-adoption-candidate.json).
 
+The real native view contract now also prepares production-browser-controller
+acceptance around an actual human/tool graph: stream while paused, detach
+without cancellation, reattach, submit checkpoint-bound human input, observe
+incremental committed events and verify the real read result and terminal
+history without duplicate rendering. The transport is instrumented only to
+record its actual calls/events; no native replies are substituted. Syntax and
+whitespace checks pass. These new assertions have not executed and do not
+establish native streaming or rendered UI acceptance.
+
 Remaining acceptance includes the complete native gate, actual incremental
 delivery while a run continues, authorization revocation/expiry, saturated
 streams, disconnect/reconnect and backend restart without replay, actual shared

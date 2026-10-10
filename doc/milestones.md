@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+Actual native/browser-controller stream assertions are prepared in the native
+view contract: a real human/tool graph stays paused during observation, survives
+view disposal, replays after reattachment, accepts explicit checkpoint-bound
+input and completes its actual file read. Assertions require incremental
+committed frames, unique displayed sequences and exact persisted terminal
+history. Only syntax/whitespace checks have run; this acceptance remains pending.
+The separate local benchmark is still live, so no local native launch is claimed.
+
 VS Code subscription adoption candidate: the actual extension host now uses
 the same scoped committed-event subscription as the browser. Periodic run
 polling is removed. Event-triggered snapshots preserve history, approvals,
