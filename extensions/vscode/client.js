@@ -122,12 +122,16 @@ class BackendClient {
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
   run(session_id, prompt, model_id,binding) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}),...profileBindingFields(binding) }); }
   events(id, after) { return this.request(`/v1/runs/${encodeURIComponent(id)}/events?after=${after}`); }
+  async openEventStream(path,signal){
+    signal?.throwIfAborted();const token=validateToken(await this.#tokenProvider());signal?.throwIfAborted();
+    return this.fetch(this.baseUrl+path,{method:'GET',headers:{Authorization:`Bearer ${token}`,Accept:'text/event-stream'},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(35000)]):AbortSignal.timeout(35000),redirect:'error'});
+  }
   async eventStream(id,{after=0,scope='run',session_id,signal,onEvent,onObservation}={}) {
     executionIdentity(id);executionIdentity(session_id);planInteger(after);
     if(!['run','tree','graph'].includes(scope)||typeof onEvent!=='function'||onObservation!==undefined&&typeof onObservation!=='function')throw new Error('Invalid event stream observer');
-    signal?.throwIfAborted();const token=validateToken(await this.#tokenProvider());signal?.throwIfAborted();
+    signal?.throwIfAborted();
     const route=scope==='graph'?`/v1/graph-runs/${id}/events/stream`:`/v1/runs/${id}/${scope==='tree'?'tree-events':'events'}/stream`;
-    let response;try{response=await this.fetch(this.baseUrl+route+'?after='+after,{method:'GET',headers:{Authorization:`Bearer ${token}`,Accept:'text/event-stream'},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(35000)]):AbortSignal.timeout(35000),redirect:'error'});}catch(error){if(error?.name==='TypeError'||error?.name==='TimeoutError')error.eventTransportUnavailable=true;throw error;}
+    let response;try{response=await this.openEventStream(route+'?after='+after,signal);}catch(error){if(error?.name==='TypeError'||error?.name==='TimeoutError')error.eventTransportUnavailable=true;throw error;}
     if(!response.ok){const value=await response.json();const error=new Error(typeof value.detail==='string'?value.detail:'Native event observation unavailable');error.status=response.status;throw error;}
     const known=new Set([id]);
     return readCommittedEventStream(response,{root:id,session:session_id,scope,after,signal,onEvent,onObservation,authorizeEvent:async event=>{

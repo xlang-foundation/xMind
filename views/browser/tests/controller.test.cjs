@@ -1,7 +1,20 @@
-const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController}=require('../browser.js');
+const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController,BrowserSessionClient}=require('../browser.js');
 const {planFixture,inputMessage}=require('../../../extensions/vscode/tests/plan-fixture');
 // Synthetic domain replies around the actual browser controller and shared
 // subscription. These tests do not supply native/provider execution.
+test('browser session client shares the committed parser using cookies without bearer access',async()=>{
+ const run={id:'root',session_id:'session',state:'completed',parent_id:'',node_id:'',graph_root:false},event={seq:7,run_id:'root',kind:'model.text',data:{text:'Synthetic cookie stream 雪'}},frame=(type,value,id)=>`${id===undefined?'':'id: '+id+'\n'}event: ${type}\ndata: ${JSON.stringify(value)}\n\n`,requests=[],delivered=[];
+ const wire=frame('observation',{run,scope:'run',after:0})+frame('committed',event,7)+frame('end',{reason:'terminal',after:7});
+ const client=new BrowserSessionClient('http://127.0.0.1:60405',{fetchImpl:async(url,options)=>{requests.push({url,options});if(url.includes('/stream'))return new Response(wire,{headers:{'Content-Type':'text/event-stream'}});return {ok:true,json:async()=>({status:'ok'})};}});
+ await client.health();const result=await client.eventStream('root',{session_id:'session',onEvent:event=>delivered.push(event)});assert.deepEqual(delivered,[event]);assert.equal(result.cursor,7);assert.equal(result.reason,'terminal');assert.equal(requests[1].url,'http://127.0.0.1:60405/v1/runs/root/events/stream?after=0');
+ for(const request of requests){assert.equal(request.options.credentials,'same-origin');assert.equal(request.options.redirect,'error');assert.equal(request.options.headers.Authorization,undefined);}assert.equal(requests[1].options.headers.Accept,'text/event-stream');
+});
+
+test('browser cookie stream refuses invalid scope and pre-abort before fetch and reports expired access',async()=>{
+ const requests=[],client=new BrowserSessionClient('http://127.0.0.1:60405',{fetchImpl:async(url,options)=>{requests.push({url,options});return {ok:false,status:401,json:async()=>({detail:'Synthetic browser session expired'})};}}),aborted=new AbortController();aborted.abort();
+ await assert.rejects(client.eventStream('root',{session_id:'session',signal:aborted.signal,onEvent(){}}));await assert.rejects(client.eventStream('root',{session_id:'session',scope:'other',onEvent(){}}),/Invalid/);assert.equal(requests.length,0);await assert.rejects(client.eventStream('root',{session_id:'session',onEvent(){}}),error=>error.status===401&&/expired/.test(error.message));assert.equal(requests.length,1);assert.equal(requests[0].options.headers.Authorization,undefined);
+});
+
 test('browser uses committed feed callbacks and stays idle without periodic observation requests',async()=>{
  const posted=[],streams=[];let snapshots=0,run={id:'root',session_id:'session',state:'running',parent_id:'',node_id:'',graph_root:false};const client={baseUrl:'http://127.0.0.1:8765',status:async()=>{snapshots++;return run;},events:async()=>[],operations:async()=>[],history:async()=>[],runs:async()=>[run],eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))};
  const view=new BrowserController(client,m=>posted.push(m));view.session='session';view.runId='root';view.runs=[run];view.health={owned_child_observation:false};

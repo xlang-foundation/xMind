@@ -24,7 +24,7 @@ const {createRequire}=await import('node:module'),require=createRequire(import.m
 const {WorkspaceBackend}=require('../../extensions/vscode/workspace-backend.js');
 const {resolveNativeRuntime}=require('../../extensions/vscode/native-runtime.js');
 const {BackendClient,EventStreamSubscription}=require('../../extensions/vscode/client.js');
-const {BrowserController}=require('../../views/browser/browser.js');
+const {BrowserController,BrowserSessionClient}=require('../../views/browser/browser.js');
 const {createBrowserServer}=await import('../../views/browser/server.mjs');
 const secrets=new Map(),state=new Map(),settings={runtimeDirectory:runtime,stdlibSource:'',providerConfigPath:'',workspaceEdits:true};
 const context={extensionUri:{fsPath:path.join(base,'extension')},globalStorageUri:{fsPath:path.join(base,'view-hosts')},workspaceState:{get:k=>state.get(k),update:async(k,v)=>state.set(k,v)},secrets:{get:async k=>secrets.get(k),store:async(k,v)=>secrets.set(k,v),delete:async k=>secrets.delete(k)},globalState:{get:()=>{throw Error('Editor owner registry must not be read');},update:()=>{throw Error('Editor owner registry must not be written');}}};
@@ -67,8 +67,8 @@ try{
  // Instrumentation records transport calls; it does not supply domain replies.
  const streamSession=await native.createSession('Actual native browser subscription'),waitGraph=(await native.graphs()).graphs.find(value=>value.id==='profile.wait.read'),waiting=await native.graphRun(streamSession.id,waitGraph.id,waitGraph.revision,'Wait, then read the real file');
  await waitFor(async()=>{const value=await native.graph(waiting.id);return value.run.state==='paused'&&value;},'native human pause');
- const feeds=[],actualEvents=[],observedClient=Object.create(native);
- observedClient.eventStream=(id,options)=>{feeds.push({id,signal:options.signal});return native.eventStream(id,{...options,onEvent:async event=>{actualEvents.push(event);await options.onEvent(event);}});};
+ const feeds=[],actualEvents=[],browserClient=new BrowserSessionClient(browserOrigin,{fetchImpl:(url,options)=>fetch(url,{...options,headers:{...options.headers,Cookie:cookie,'Sec-Fetch-Site':'same-origin',Origin:browserOrigin}})}),observedClient=Object.create(browserClient);
+ observedClient.eventStream=(id,options)=>{feeds.push({id,signal:options.signal});return browserClient.eventStream(id,{...options,onEvent:async event=>{actualEvents.push(event);await options.onEvent(event);}});};
  const firstMessages=[],firstView=new BrowserController(observedClient,message=>firstMessages.push(message));
  try{await firstView.initialize({session:streamSession.id,run:waiting.id});const pausedEvents=await native.graphEvents(waiting.id,0);await waitFor(()=>firstView.subscription?.cursor===pausedEvents.at(-1).seq,'actual paused feed delivery');assert.equal(feeds.length,1);assert.equal((await native.graph(waiting.id)).run.state,'paused');firstView.dispose();assert.equal(feeds[0].signal.aborted,true);assert.equal((await native.graph(waiting.id)).run.state,'paused');assert.equal((await native.graphChildren(waiting.id)).length,0);}
  finally{firstView.dispose();}

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-native-and-installed-validation-pending",
+  "parentRevision": "ec9475104df0e2e53851c9db11b4664a2130528c",
+  "scope": "Browser cookie client and actual shared parser/subscription under complete synthetic Node suites; no native/provider or installed/rendered UI execution",
+  "sourceFiles": 2421,
+  "sourceUnchangedAcrossSuites": true,
+  "suites": {
+    "extension": {
+      "tests": 241,
+      "pass": 241,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "tests": 49,
+      "pass": 49,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  "browser": {
+    "observation": "HttpOnly session cookie transport for JSON and SSE; shared reader and scoped subscription",
+    "metadata": "Read-only snapshots on observation, committed event and terminal end; coalesced 100 ms event refresh",
+    "concurrency": "Cookie credentials and same-origin requests, no bearer token acquisition or export; expired session explicitly fails",
+    "retirement": "Conversation/generation change and disposal detach only observation and refuse delayed callbacks"
+  },
+  "pending": [
+    "Complete native gate and actual stream integration",
+    "Actual production cookie client/controller native acceptance prepared",
+    "Native disconnect/revocation/capacity/restart acceptance",
+    "Fresh installed/rendered coding acceptance"
+  ],
+  "providerRequests": 0,
+  "nativeExecuted": false,
+  "currentInstallationChanged": false,
+  "rawEvidence": {
+    "doc/evidence/native-unified-event-stream-browser-cookie-extension.log": "3d90420b22756e5d857d4a6e7c980cf8bd97f16db232c3e0470b0280d13eff20",
+    "doc/evidence/native-unified-event-stream-browser-cookie-browser.log": "01ca97fccd2ad160c8a4686d03ee257a2908468dc2b09e789114698ed0173232",
+    "doc/evidence/native-unified-event-stream-browser-cookie-source-before.json": "db3cfec6853115a69aa07d91343d5b23f9d4e44dbb94d2a12f8228e65132bd6e",
+    "doc/evidence/native-unified-event-stream-browser-cookie-source-after.json": "db3cfec6853115a69aa07d91343d5b23f9d4e44dbb94d2a12f8228e65132bd6e"
+  }
+}

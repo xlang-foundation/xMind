@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+Browser cookie-stream correction candidate: the page's session client previously
+overrode JSON requests only, so its inherited SSE method attempted bearer-token
+acquisition and failed. `BrowserSessionClient` now supplies same-origin cookie
+transport for both JSON and SSE while retaining the shared committed parser,
+ownership checks and subscription. Editor clients retain protected bearer
+transport. All **241 extension / 49 browser** synthetic checks pass with all
+2421 tracked inputs unchanged. New fixtures exercise the production cookie
+client and parser, UTF-8 delivery, no bearer acquisition/export, pre-abort,
+invalid scope and expired-session failure. The real native controller acceptance
+now uses that actual cookie client through the browser adapter; it remains
+unexecuted. [Candidate and original evidence](evidence/native-event-stream-browser-cookie-candidate.json).
+
 Actual native/browser-controller stream assertions are prepared in the native
 view contract: a real human/tool graph stays paused during observation, survives
 view disposal, replays after reattachment, accepts explicit checkpoint-bound

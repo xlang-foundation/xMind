@@ -10,6 +10,14 @@ const ContextViewController=typeof module!=='undefined'&&module.exports?require(
 const SkillViewController=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').SkillViewController:globalThis.XMindBackend.SkillViewController;
 const validateGraphContext=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').validateGraphContext:globalThis.XMindBackend.validateGraphContext;
 const EventStreamSubscription=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').EventStreamSubscription:globalThis.XMindBackend.EventStreamSubscription;
+const BackendClient=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').BackendClient:globalThis.XMindBackend.BackendClient;
+// Browser authentication stays in an HttpOnly cookie. Domain validation and
+// committed-event parsing remain shared with the native editor client.
+class BrowserSessionClient extends BackendClient {
+  constructor(origin,{fetchImpl=globalThis.fetch,requestSignal=()=>AbortSignal.timeout(15000)}={}){super(origin,()=>{throw new Error('Browser views use session authentication');},fetchImpl);this.requestSignal=requestSignal;}
+  async request(path,body){const response=await this.fetch(this.baseUrl+path,{method:body===undefined?'GET':'POST',headers:body===undefined?{}:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),credentials:'same-origin',redirect:'error',signal:this.requestSignal()});const data=await response.json();if(!response.ok){const error=new Error(typeof data.detail==='string'?data.detail:`Backend returned ${response.status}`);error.status=response.status;throw error;}return data;}
+  async openEventStream(path,signal){signal?.throwIfAborted();return this.fetch(this.baseUrl+path,{method:'GET',headers:{Accept:'text/event-stream'},credentials:'same-origin',redirect:'error',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(35000)]):AbortSignal.timeout(35000)});}
+}
 // Thin view controller. All execution, permissions and persistence stay native.
 class BrowserController {
   async readSkills(){
@@ -184,7 +192,7 @@ class BrowserController {
     }
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BrowserController};
+if(typeof module!=='undefined'&&module.exports)module.exports={BrowserController,BrowserSessionClient};
 else {
   let controller,connectionAttempt,connectionGeneration=0;const element=id=>document.getElementById(id),dialog=element('connection');
   const post=data=>window.dispatchEvent(new MessageEvent('message',{data,origin:location.origin,source:window}));
@@ -206,11 +214,7 @@ else {
     const headers={'Content-Type':'application/json'};if(entered!==undefined)headers.Authorization='Bearer '+XMindBackend.validateToken(entered);entered=undefined;
     const response=await fetch('/ui/session',{method:'POST',headers,body:'{}',credentials:'same-origin',redirect:'error',signal:signal()});delete headers.Authorization;if(!response.ok){if(response.status===401)throw new Error('Enter the native server access token to connect');const failure=await response.json().catch(()=>({}));throw new Error(failure.error_code==='invalid_view_session'?'The server and browser adapter access-session versions do not match. Update them together.':'Browser session connection failed');}if(generation!==connectionGeneration)return;
     // Reuse the domain route contract with the browser's actual session transport.
-    class SessionClient extends XMindBackend.BackendClient {
-      constructor(){super(location.origin,()=>{throw new Error('Browser views use session authentication');});}
-      async request(path,body){const response=await fetch(this.baseUrl+path,{method:body===undefined?'GET':'POST',headers:body===undefined?{}:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),credentials:'same-origin',redirect:'error',signal:signal()});const data=await response.json();if(!response.ok){const error=new Error(typeof data.detail==='string'?data.detail:`Backend returned ${response.status}`);error.status=response.status;throw error;}return data;}
-    }
-    const client=new SessionClient();await client.health();if(generation!==connectionGeneration)return;
+    const client=new BrowserSessionClient(location.origin,{requestSignal:signal});await client.health();if(generation!==connectionGeneration)return;
     let saved;try{saved=JSON.parse(sessionStorage.getItem('xmind.view.selection')||'null');}catch{}
     next=new BrowserController(client,data=>published?post(data):pending.push(data),{save:value=>sessionStorage.setItem('xmind.view.selection',JSON.stringify(value)),copy:text=>navigator.clipboard.writeText(text),link:url=>window.open(url,'_blank','noopener,noreferrer'),review:plan=>{element('browser-review').hidden=false;element('review-title').textContent='Proposed '+(plan.action||'file change')+': '+plan.path+(plan.destination_path?' → '+plan.destination_path:'');element('review-before-label').textContent=plan.before_exists===false?'Before · absent':'Before';element('review-after-label').textContent=plan.after_exists===false?'After · absent':'After';element('review-before').textContent=plan.before_content;element('review-after').textContent=plan.after_content;}});await next.initialize(saved);if(generation!==connectionGeneration){next.dispose();return;}initializing=false;controller?.dispose();controller=next;published=true;pending.forEach(post);dialog.close();element('connection-error').textContent='';element('disconnect-view').hidden=false;element('workspace-info').textContent='Connected to the native xMind runtime. The right sidebar shows durable conversations, runs, workflows and approval proposals. Closing this view leaves backend execution running.';
   }catch(error){next?.dispose();if(generation===connectionGeneration){element('connection-error').textContent=error.message;if(!dialog.open)dialog.showModal();}}finally{entered=undefined;if(connectionAttempt===attempt){connectionAttempt=undefined;dialog.querySelector('button[type="submit"]').disabled=false;}}}

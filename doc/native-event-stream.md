@@ -1,5 +1,17 @@
 # Committed native event feeds
 
+Browser transport correction: the original page session subclass overrode JSON
+requests but inherited bearer-authenticated streaming. It therefore could not
+open a production browser feed. The shared reader now obtains its response
+through a transport method; the production `BrowserSessionClient` overrides
+that method and JSON requests with same-origin HttpOnly cookie transport.
+Browser SSE never acquires or exports a backend bearer token. Native/editor
+clients retain their protected bearer transport and abort-before/after-secret
+checks. The actual native view contract uses this production browser client
+through the real browser adapter. Complete **241 extension / 49 browser**
+synthetic suites pass; actual native and rendered acceptance remain pending.
+[Correction scope and original evidence](evidence/native-event-stream-browser-cookie-candidate.json).
+
 Candidate transport implementation. **New native compilation/integration is
 pending.** The accepted `689404e` installation remains unchanged. The existing
 browser and VS Code adoption described below are tested candidates; actual
