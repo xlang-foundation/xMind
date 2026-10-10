@@ -1,0 +1,14 @@
+# Live provider and webpage acceptance — October 10, 2026
+
+This is evidence from the actual local xMind webpage at `http://127.0.0.1:60415/ui/`, connected through the local browser adapter to the managed native profile for `D:\CantorAI2026\xMind`. The active profile was launched with `.config/providers.yaml`. No API key values were read, copied, or entered during this test. The page was also inspected after a full refresh and in a second tab.
+
+| Provider | Catalogue and selected model | Actual inference result |
+| --- | --- | --- |
+| Claude Messages | Discovery returned 13 models. Selected `claude-haiku-4-5-20251001`. | **Passed.** Read-only prompt returned `OK`; run `17b1325565c463964b78a993ec731133` completed. UI showed input 6,089, output 4, first token 0.57 s, total 0.60 s. Refresh and a second tab’s history refresh restored the response, provider identity and metrics. |
+| Gemini GenerateContent | Discovery returned 11 models. Selected `models/gemini-2.5-flash`. | **Failed.** Run `432685a617b1b8111d524539eec5f348` failed with provider HTTP 404 before a response. The UI preserved the failure and admitted model identity. |
+| DeepSeek Chat Completions | Discovery returned `deepseek-flash` and `deepseek-v4-pro`. Selected `deepseek-flash`. | **Unresolved.** Run `a110fbe9d299ab5ec8ba73c1abdfb601` remained `running` with only `budget.model_call.started` in the event feed after more than two minutes. Stop returned “Run is no longer owned by this executor”; the saved run still appeared as running, and the conversation controls would not start a new conversation. No response was recorded. |
+| OpenAI Responses | Discovery returned 20 models, including `gpt-4.1-mini`, the `gpt-5.4`/`gpt-5.5`/`gpt-5.6-*` entries and `gpt-6-*` entries. Selected `gpt-4.1-mini`. | **Unresolved.** A fresh read-only connectivity prompt was admitted as run `ae9776792d7898830c6efdbcc39a495e`. The page displayed `Illegal invocation`; its event feed reached `budget.model_call.started` but recorded no model response or terminal event during observation. The run remained `running`, and Stop returned `Run is no longer owned by this executor`. |
+
+The webpage’s workspace selector listed xMind and TestProj. In one connected tab, switching xMind → TestProj → xMind succeeded and showed `Workspace changed · runs continue on their original backend`; the tab was returned to xMind. In another tab, the same TestProj switch displayed `Workspace switch failed · Illegal invocation`. The live result is therefore mixed, with an intermittent workspace-switch failure. During active-run refreshes and the OpenAI run, the page also displayed `Illegal invocation` transiently. A separate local-contract suite passes but does not override these live findings.
+
+This test used a pre-existing managed development package. It does not verify the pending native source changes in the current worktree. No synthetic provider peer was used for the results above.

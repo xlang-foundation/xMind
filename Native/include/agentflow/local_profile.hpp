@@ -9,6 +9,8 @@ struct LocalProfileOptions {
     std::string workspace, profile_root, provider_config, graphs_config;
     std::optional<bool> approved_edits;
     bool require_existing_profile = false;
+    bool upgrade_backend = false;
+    bool defer_busy_upgrade = false;
 };
 struct LocalProfileConnection {
     std::string workspace, directory;
@@ -27,7 +29,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
 // DPAPI profile record before allowing the managed-copy runtime fast path.
 void validate_local_profile_launch(const std::string &state_file,const std::string &workspace,
                                    const std::string &runtime,const std::string &manifest,
-                                   const std::string &auth_token);
+                                   const std::string &auth_token,const std::string &owner_receipt={});
 // Returns only validated profiles already present under the user-local profile
 // root. This never opens a client-supplied path or creates profile storage.
 std::vector<LocalWorkspaceProfile> list_local_workspace_profiles(const std::string &profile_root = {});

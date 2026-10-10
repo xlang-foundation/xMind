@@ -34,6 +34,7 @@ void help(){
         "  xmind schema-worker   (private bounded schema protocol)\n\n"
         "Without --port, the console discovers or starts its persistent local workspace profile.\n"
         "--config selects the one provider YAML; existing profiles retain their configuration.\n"
+        "--upgrade-backend safely replaces the managed profile runtime when the current owner supports it.\n"
         "Explicit --port attaches to an operator-selected backend using XMIND_AUTH_TOKEN.\n"
         "No key is accepted on the command line. Agent-worker execution remains pending.\n"
         "Closing the console leaves backend runs alive; /cancel explicitly cancels a run.\n";
@@ -63,6 +64,7 @@ int dispatch(int argc,char** argv){
     while(first<argc&&std::string_view(argv[first]).starts_with("--")){
         const std::string option=argv[first++];if(!seen.insert(option).second)throw std::invalid_argument("Duplicate console option");
         if(option=="--read-only"){options.approved_edits=false;continue;}
+        if(option=="--upgrade-backend"){options.upgrade_backend=true;continue;}
         if(option!="--port"&&option!="--workspace"&&option!="--profile-root"&&option!="--config"&&option!="--graphs-config")throw std::invalid_argument("Unknown console option");
         if(first==argc||!*argv[first])throw std::invalid_argument("Console option requires a value");const std::string value=argv[first++];
         if(option=="--port"){named_port=true;port=std::to_string(port_number(value));}
@@ -71,7 +73,7 @@ int dispatch(int argc,char** argv){
         else if(option=="--config")options.provider_config=value;
         else options.graphs_config=value;
     }
-    if(named_port&&(!options.profile_root.empty()||!options.provider_config.empty()||!options.graphs_config.empty()||options.approved_edits))throw std::invalid_argument("Local profile launch options cannot change an explicitly selected backend");
+    if(named_port&&(!options.profile_root.empty()||!options.provider_config.empty()||!options.graphs_config.empty()||options.approved_edits||options.upgrade_backend))throw std::invalid_argument("Local profile launch options cannot change an explicitly selected backend");
     std::function<agentflow::LocalProfileConnection()> profile;
 #if defined(_WIN32)
     if(!named_port)profile=[options]{return agentflow::connect_local_profile(options);};

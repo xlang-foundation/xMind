@@ -1,31 +1,61 @@
 # Managed native owner upgrades
 
+## Current native profile path (under verification)
+
+The xMind binary now accepts `--upgrade-backend` on a managed local-profile
+command. It stages the current verified runtime in the profile store while
+keeping the current runtime authoritative, binds the upgrade to the
+authenticated workspace and owner receipt, retires the existing owner, then
+starts and activates the replacement with the same encrypted
+profile record, SQLite database, owner token and listener port. Pending handoff
+state is kept in the protected profile record so reconnect can resume an
+interrupted retirement or activation. Provider and graph YAML are not replayed
+on replacement startup. The native browser/VS Code view adapter requests this
+upgrade automatically when its verified runtime differs from the saved
+profile; if active work or an in-flight admission prevents quiescence, it keeps
+serving through the current owner and retries on a later view launch. The
+console exposes the same operation through `--upgrade-backend`; an explicit
+busy upgrade fails without preventing ordinary reconnects or graph continuation.
+The VS Code extension then imports its configured provider YAML through the
+native provider-profile API after connection.
+
+Once an owner receipt is persisted, recovery is bound to the staged target
+generation. It validates and launches that private copy even if the app package
+has changed since staging; a later launch can upgrade again to the newer
+package. Until the owner receipt exists, ordinary profile commands continue to
+use the source runtime even when a busy upgrade intent is retained.
+
+`Native/tests/local_profile_contract.mjs` now constructs an older synthetic
+runtime generation, creates a real managed profile under it, and upgrades the
+profile while checking the port, session, graph result and history survive.
+The independent VS Code extension contract suite passes **263/263**, including
+provider YAML import and workspace readiness ([captured output](evidence/vscode-extension-contract-20261010.log)). JavaScript syntax and patch
+whitespace checks pass. The previous native source revision built in Release
+with the current xlang3 runtime in `build/native-milestone-clean`; the busy-
+upgrade recovery edits are not yet rebuilt. CTest is deferred by the build gate
+while a live xlang3 performance run is active. The updated profile-upgrade
+contract and installed `TestProj` continuity remain unverified. The installed
+profile has not been mutated; live acceptance must follow the native contract.
+
 ## Current installed-profile boundary
 
 On 2026-10-10, the live `TestProj` managed profile was observed at runtime
 `57da085`, process 34252, port 49164. Its authenticated provider catalogue
 returned revision 0 with no profiles. That runtime implements the native
-owner-retirement protocol, but not provider-YAML import. The current native
-view adapter has no upgrade command and `connect_local_profile` keeps the
-profile's recorded runtime generation, so selecting a newer extension bundle
-alone cannot update this profile.
+owner-retirement protocol, but not provider-YAML import. It will be eligible
+for the new automatic view launch upgrade after the native build and isolated
+contract pass. Until then, the installed profile remains unchanged.
 
 The current runtime imported all four provider identities from the shared YAML
 into a separate real xlang3 SQLite profile without making a provider or model
 request. See the
 [exact evidence](evidence/provider-import-live-local-20261010.json).
 
-The missing integration is a native-view-owned explicit upgrade that retains
-the same SQLite profile and owner token, obtains and consumes the exact native
-retirement receipt, starts the verified replacement on the same backend port,
-publishes its PID/runtime/authority back into encrypted `profile.state`, and
-activates before admitting new work. Because persisted browser-view
-credentials live in the same SQLite database and bind to the still-running
-view-host process, preserving that database and host identity also preserves
-those browser sessions. The upgrade must recover an interrupted handoff
-without replaying retirement or starting a competing owner. Current source does
-not yet implement this path; historical adapter checks below are not evidence
-of installed-profile upgrade acceptance.
+The new native path now implements profile state, database, owner token and
+port continuity. Its C++ contract and installed VS Code/browser-view continuity
+remain unverified. Because persisted browser-view credentials bind to the
+still-running view-host process, preserving the database alone does not prove
+those sessions survive a real runtime replacement.
 
 Historical checkpoint: the JavaScript owner registry and editor upgrade/cancel
 commands described below have been removed from the current source. Native

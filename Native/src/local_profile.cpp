@@ -24,6 +24,13 @@ namespace agentflow {
 namespace {
 using Json = nlohmann::json;
 namespace fs = std::filesystem;
+struct ProfileRequestError : std::runtime_error {
+    int status;
+    std::string body;
+    ProfileRequestError(int value, std::string response)
+        : std::runtime_error("Managed backend owner request was rejected: " + response),
+          status(value), body(std::move(response)) {}
+};
 void require(bool condition, const char *message = "Local profile validation failed; stored state was preserved") {
     if (!condition)
         throw std::runtime_error(message);
@@ -360,8 +367,28 @@ void shape(const Json &value, const Store &store, const WorkspaceTools &workspac
     require(value.value("phase", std::string{}) == "preparing" ||
             value.value("phase", std::string{}) == "starting" ||
             value.value("phase", std::string{}) == "ready");
+    if(value.contains("owner_receipt")){
+        const auto receipt=value.at("owner_receipt");
+        require(receipt.is_object()&&receipt.size()==3&&hex(receipt.value("generation",std::string{}),32)&&
+                hex(receipt.value("receipt_id",std::string{}),32)&&receipt.contains("revision")&&
+                receipt.at("revision").is_number_integer()&&receipt.at("revision").get<std::int64_t>()>0);
+        if(value.contains("replacement_port"))
+            require(value.at("replacement_port").is_number_integer()&&value.at("replacement_port").get<int>()>0&&
+                    value.at("replacement_port").get<int>()<=65535);
+    }
+    if(value.contains("upgrade_intent"))require(value.at("upgrade_intent").is_boolean()&&value.at("upgrade_intent").get<bool>());
+    if(value.contains("replacement_manifest"))require((value.contains("owner_receipt")||value.contains("upgrade_intent"))&&hex(value.at("replacement_manifest").get<std::string>(),64));
+    require(!value.contains("replacement_port")||value.contains("owner_receipt")||value.contains("upgrade_intent"));
     require(contains(store.directory, absolute(value.at("runtime").get<std::string>())),
             "Saved runtime escaped its private profile directory");
+    if(value.contains("replacement_runtime")){
+        require((value.contains("owner_receipt")||value.contains("upgrade_intent"))&&
+                    value.contains("replacement_manifest")&&
+                    contains(store.directory,absolute(value.at("replacement_runtime").get<std::string>()))&&
+                    (absolute(value.at("replacement_runtime").get<std::string>())!=absolute(value.at("runtime").get<std::string>())||
+                     (value.contains("owner_receipt")&&value.at("manifest")==value.at("replacement_manifest"))),
+                "Replacement runtime escaped its private profile directory");
+    }
     if (value.at("phase") != "preparing") {
         const auto birth = value.value("birth", std::string{});
         require(value.at("pid") > 0 && !birth.empty() && birth.size() <= 20 && birth.front() != '0' &&
@@ -478,16 +505,24 @@ Child launch(Store &store, Json &state) {
                                    L"--workspace",
                                    wide(state.at("workspace").get<std::string>()),
                                    L"--port",
-                                   L"0",
+                                   state.contains("replacement_port")?std::to_wstring(state.at("replacement_port").get<int>()):L"0",
                                    L"--runtime-manifest-sha256",
                                    wide(state.at("manifest").get<std::string>()),
                                    L"--profile-state",
                                    (store.directory / L"profile.state").native()};
+    if(state.contains("owner_receipt")){
+        const auto& receipt=state.at("owner_receipt");
+        args.push_back(L"--owner-receipt");
+        args.push_back(wide(receipt.at("generation").get<std::string>()+":"+
+            std::to_string(receipt.at("revision").get<std::int64_t>())+":"+
+            receipt.at("receipt_id").get<std::string>()));
+    }
     if (state.at("approved_edits").get<bool>()) {
         args.push_back(L"--workspace-edits");
         args.push_back(L"approved");
     }
     for (const auto *field : {"provider_config", "graphs_config"}) {
+        if(state.contains("owner_receipt"))break;
         const auto value = state.value(field, std::string{});
         if (!value.empty()) {
             args.push_back(std::string(field) == "provider_config" ? L"--provider-config"
@@ -576,6 +611,53 @@ bool authenticated(const Json &state) {
         return false;
     }
 }
+Json profile_request(int port,const std::string& token,const std::string& path,const Json* payload=nullptr){
+    httplib::Client client("127.0.0.1",port);client.set_connection_timeout(1,0);client.set_read_timeout(5,0);client.set_write_timeout(5,0);client.set_follow_location(false);
+    const httplib::Headers headers{{"Authorization","Bearer "+token}};
+    const auto response=payload?client.Post(path,headers,payload->dump(),"application/json"):client.Get(path,headers);
+    require(response!=nullptr,"Managed backend owner request failed");
+    require(response->body.size()<=128*1024,"Managed backend owner response exceeds limits");
+    if(response->status<200||response->status>=300)throw ProfileRequestError(response->status,response->body);
+    return parse(response->body);
+}
+std::pair<fs::path,std::string> stage_current_runtime(Store& store,const WorkspaceTools& workspace){
+    const auto source=absolute(loaded_root());const auto raw=file_bytes(source/L"native-runtime-manifest.json",4*1024*1024),digest=context_digest(raw);
+    VerifiedRuntimeGeneration source_generation(text(source),digest);source_generation.require_loaded_server_image();
+    const auto target=store.directory/(L"runtime-"+wide(random_id()));Store destination(target,true);const auto manifest=parse(raw);
+    std::map<fs::path,std::unique_ptr<Store>> prepared_directories;
+    for(const auto& [name,file_digest]:manifest.at("files").items()){
+        (void)file_digest;const auto relative=fs::u8path(name),parent=relative.parent_path();
+        if(!parent.empty()&&!prepared_directories.contains(parent))prepared_directories.emplace(parent,std::make_unique<Store>(destination.directory/parent,true));
+        require(CopyFileW(extended(source/relative).c_str(),extended(destination.directory/relative).c_str(),TRUE)!=0,"Cannot stage the verified replacement runtime");
+    }
+    auto output=destination.open(L"native-runtime-manifest.json",GENERIC_WRITE,CREATE_NEW);DWORD written=0;
+    require(WriteFile(output.value,raw.data(),static_cast<DWORD>(raw.size()),&written,nullptr)!=0&&written==raw.size()&&FlushFileBuffers(output.value)!=0,"Cannot publish the replacement runtime manifest");
+    output.value=INVALID_HANDLE_VALUE;
+    VerifiedRuntimeGeneration verified(VerifiedRuntimeGeneration::managed_profile_copy(text(destination.directory),digest,workspace.root_path()));verified.revalidate();
+    return {destination.directory,digest};
+}
+Json authority_body(const Json& workspace){
+    require(workspace.value("configured",false)&&workspace.contains("workspace_id")&&workspace.contains("authority_id"));
+    return {{"expected_workspace_id",workspace.at("workspace_id")},{"expected_workspace_authority_id",workspace.at("authority_id")}};
+}
+void retire_for_upgrade(Store& store,Json& state,const WorkspaceTools& workspace){
+    require(state.contains("owner_receipt")&&state.contains("replacement_port")&&state.contains("replacement_manifest")&&state.contains("replacement_runtime"),"Incomplete persisted backend handoff intent; profile was preserved");
+    const auto pid=state.at("pid").get<std::uint32_t>();const auto birth=state.value("birth",std::string{});
+    if(pid&&!observe_owner_exit(pid,birth,0).exited){
+        try{
+            Json ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
+            Json body=authority_body(ws);const auto& receipt=state.at("owner_receipt");
+            body["expected_generation"]=receipt.at("generation");body["expected_revision"]=receipt.at("revision");body["receipt_id"]=receipt.at("receipt_id");
+            body["target_runtime_root"]=state.at("replacement_runtime");body["target_manifest_sha256"]=state.at("replacement_manifest");body["approved_edits"]=state.at("approved_edits");
+            profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner/retire",&body);
+        }catch(...){/* retirement may commit before its response or listener remains available */}
+    }
+    const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(15);
+    while(pid&&!observe_owner_exit(pid,birth,0).exited&&std::chrono::steady_clock::now()<deadline)std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    require(!pid||observe_owner_exit(pid,birth,0).exited,"Backend retirement is unresolved; reconnect to this profile to resume the same handoff");
+    VerifiedRuntimeGeneration target(VerifiedRuntimeGeneration::managed_profile_copy(state.at("replacement_runtime").get<std::string>(),state.at("replacement_manifest").get<std::string>(),workspace.root_path()));target.revalidate();
+    state["runtime"]=state.at("replacement_runtime");state["manifest"]=state.at("replacement_manifest");state["pid"]=static_cast<std::uint32_t>(0);state["birth"]="";state["port"]=0;state["phase"]="preparing";store.write(state);
+}
 } // namespace
 std::vector<LocalWorkspaceProfile> list_local_workspace_profiles(const std::string &profile_root) {
     const auto configured = absolute(profile_root.empty() ? default_root() : profile_root);
@@ -649,6 +731,9 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
     if (fs::exists(store.directory / L"profile.state")) {
         state = store.state();
         shape(state, store, workspace);
+        std::string loaded_manifest;
+        if(options.upgrade_backend&&!state.contains("owner_receipt")&&!state.contains("upgrade_intent"))
+            loaded_manifest=context_digest(file_bytes(absolute(loaded_root())/L"native-runtime-manifest.json",4*1024*1024));
         for (const auto &[field, value] : std::array<std::pair<const char *, std::string>, 2>{
                  {{"provider_config", options.provider_config}, {"graphs_config", options.graphs_config}}})
             if (!value.empty())
@@ -657,6 +742,44 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         if (options.approved_edits)
             require(state.at("approved_edits") == *options.approved_edits,
                     "Profile edit policy changed; update the existing backend explicitly");
+        if(state.contains("owner_receipt")||(options.upgrade_backend&&(state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
+            bool deferred_busy_upgrade=false;
+            if(!state.contains("owner_receipt")){
+                if(!state.contains("upgrade_intent")){
+                    require(state.at("phase")=="ready"&&authenticated(state),"Only an authenticated ready owner can be upgraded");
+                    const auto current_owner=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner");
+                    require(current_owner.value("retirement_supported",false),"Current managed runtime does not support profile-preserving upgrade");
+                    auto [target,digest]=stage_current_runtime(store,workspace);
+                    state["replacement_runtime"]=text(target);state["replacement_manifest"]=digest;state["replacement_port"]=state.at("port");state["upgrade_intent"]=true;store.write(state);
+                }
+                const auto ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
+                const auto owner=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner");
+                require(owner.value("retirement_supported",false),"Current managed runtime does not support profile-preserving upgrade");
+                Json quiesced=owner;
+                if(!owner.value("quiesced",false)){
+                    Json request=authority_body(ws);request["expected_generation"]=owner.at("generation");request["expected_revision"]=owner.at("revision");
+                    try {
+                        quiesced=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner/quiesce",&request);
+                    } catch(const ProfileRequestError& error) {
+                        bool busy=false;
+                        if(error.status==409)try{const auto detail=parse(error.body).value("detail",std::string{});busy=detail=="Native admission is in flight"||detail=="Native execution must be healthy and idle before owner control";}catch(...){}
+                        if(options.defer_busy_upgrade&&busy)deferred_busy_upgrade=true;else throw;
+                    }
+                }
+                if(!deferred_busy_upgrade){
+                    require(quiesced.value("quiesced",false)&&quiesced.contains("receipt_id")&&quiesced.contains("revision"),"Backend did not issue a quiescence receipt");
+                    state["owner_receipt"]={{"generation",quiesced.at("generation")},{"revision",quiesced.at("revision")},{"receipt_id",quiesced.at("receipt_id")}};
+                    state.erase("upgrade_intent");store.write(state);
+                }
+            }
+            if(!deferred_busy_upgrade){
+                bool replacement_already_running=false;
+                if(state.contains("owner_receipt")&&state.at("phase")=="ready"&&state.at("pid").get<std::uint32_t>()){
+                    try{verify_process(state);replacement_already_running=true;}catch(...){}
+                }
+                if(!replacement_already_running)retire_for_upgrade(store,state,workspace);
+            }
+        }
     } else {
         for (const auto &item : fs::directory_iterator(store.directory))
             require(item.path().filename() == L"startup.lock",
@@ -686,46 +809,55 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         store.write(state);
     }
     if (state.at("phase") == "preparing") {
-        const auto source = absolute(loaded_root());
-        const auto raw = file_bytes(source / L"native-runtime-manifest.json", 4 * 1024 * 1024);
-        require(context_digest(raw) == state.at("manifest").get<std::string>(),
-                "Prepared profile belongs to a different accepted package; operator recovery is required");
-        if (!source_generation) {
-            source_generation = std::make_unique<VerifiedRuntimeGeneration>(
-                text(source), state.at("manifest").get<std::string>());
-            source_generation->require_loaded_server_image();
+        if(state.contains("owner_receipt")){
+            // A receipt binds recovery to the fully staged target generation.
+            // The app package may have changed since staging; finish this
+            // handoff from its verified private copy, then a later launch can
+            // upgrade again to the newer package.
+            runtime=std::make_unique<VerifiedRuntimeGeneration>(VerifiedRuntimeGeneration::managed_profile_copy(
+                state.at("runtime").get<std::string>(),state.at("manifest").get<std::string>(),workspace.root_path()));
+        } else {
+            const auto source = absolute(loaded_root());
+            const auto raw = file_bytes(source / L"native-runtime-manifest.json", 4 * 1024 * 1024);
+            require(context_digest(raw) == state.at("manifest").get<std::string>(),
+                    "Prepared profile belongs to a different accepted package; operator recovery is required");
+            if (!source_generation) {
+                source_generation = std::make_unique<VerifiedRuntimeGeneration>(
+                    text(source), state.at("manifest").get<std::string>());
+                source_generation->require_loaded_server_image();
+            }
+            const auto target = store.directory / (L"runtime-" + wide(random_id()));
+            Store destination(target, true);
+            state["runtime"] = text(destination.directory);
+            store.write(state);
+            const auto manifest = parse(raw);
+            // Prepare and pin each destination directory once. Repeating recursive
+            // directory creation for every library file makes a cold profile pay
+            // the same path traversal thousands of times. Store applies the private
+            // ACL and rejects aliases; its handles keep these paths pinned through
+            // copying and the complete destination generation verification below.
+            std::map<fs::path, std::unique_ptr<Store>> prepared_directories;
+            for (const auto &[name, digest] : manifest.at("files").items()) {
+                const auto path = fs::u8path(name);
+                const auto parent = path.parent_path();
+                if (!parent.empty() && !prepared_directories.contains(parent))
+                    prepared_directories.emplace(parent, std::make_unique<Store>(destination.directory / parent, true));
+                require(CopyFileW(extended(source / path).c_str(), extended(destination.directory / path).c_str(),
+                                  TRUE) != 0,
+                        "Cannot copy the verified profile runtime inventory");
+            }
+            auto output = destination.open(L"native-runtime-manifest.json", GENERIC_WRITE, CREATE_NEW);
+            DWORD written = 0;
+            require(WriteFile(output.value, raw.data(), static_cast<DWORD>(raw.size()), &written, nullptr) != 0 &&
+                        written == raw.size() && FlushFileBuffers(output.value) != 0,
+                    "Cannot publish the verified profile runtime manifest");
+            CloseHandle(output.value);
+            output.value = INVALID_HANDLE_VALUE;
+            runtime = std::make_unique<VerifiedRuntimeGeneration>(
+                VerifiedRuntimeGeneration::managed_profile_copy(text(destination.directory),
+                                                                state.at("manifest").get<std::string>(),
+                                                                workspace.root_path()));
         }
-        const auto target = store.directory / (L"runtime-" + wide(random_id()));
-        Store destination(target, true);
-        state["runtime"] = text(destination.directory);
-        store.write(state);
-        const auto manifest = parse(raw);
-        // Prepare and pin each destination directory once. Repeating recursive
-        // directory creation for every library file makes a cold profile pay
-        // the same path traversal thousands of times. Store applies the private
-        // ACL and rejects aliases; its handles keep these paths pinned through
-        // copying and the complete destination generation verification below.
-        std::map<fs::path, std::unique_ptr<Store>> prepared_directories;
-        for (const auto &[name, digest] : manifest.at("files").items()) {
-            const auto path = fs::u8path(name);
-            const auto parent = path.parent_path();
-            if (!parent.empty() && !prepared_directories.contains(parent))
-                prepared_directories.emplace(parent, std::make_unique<Store>(destination.directory / parent, true));
-            require(CopyFileW(extended(source / path).c_str(), extended(destination.directory / path).c_str(),
-                              TRUE) != 0,
-                    "Cannot copy the verified profile runtime inventory");
-        }
-        auto output = destination.open(L"native-runtime-manifest.json", GENERIC_WRITE, CREATE_NEW);
-        DWORD written = 0;
-        require(WriteFile(output.value, raw.data(), static_cast<DWORD>(raw.size()), &written, nullptr) != 0 &&
-                    written == raw.size() && FlushFileBuffers(output.value) != 0,
-                "Cannot publish the verified profile runtime manifest");
-        CloseHandle(output.value);
-        output.value = INVALID_HANDLE_VALUE;
-        runtime = std::make_unique<VerifiedRuntimeGeneration>(
-            VerifiedRuntimeGeneration::managed_profile_copy(text(destination.directory),
-                                                            state.at("manifest").get<std::string>(),
-                                                            workspace.root_path()));
     }
     if (!runtime)
         runtime = std::make_unique<VerifiedRuntimeGeneration>(VerifiedRuntimeGeneration::managed_profile_copy(
@@ -750,8 +882,20 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         if (state.at("phase") == "ready") {
             if (child && !child->detached)
                 child->release();
-            if (authenticated(state))
+            if (authenticated(state)){
+                if(state.contains("owner_receipt")){
+                    const auto ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
+                    auto owner=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner");
+                    if(owner.value("quiesced",false)){
+                        Json request=authority_body(ws);request["expected_generation"]=owner.at("generation");request["expected_revision"]=owner.at("revision");request["receipt_id"]=owner.at("receipt_id");
+                        profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner/activate",&request);
+                        owner=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner");
+                    }
+                    require(!owner.value("quiesced",true),"Replacement owner remains quiesced; reconnect to resume activation");
+                    state.erase("owner_receipt");state.erase("replacement_port");state.erase("replacement_manifest");state.erase("replacement_runtime");store.write(state);
+                }
                 break;
+            }
         }
         if (observe_owner_exit(state.at("pid").get<std::uint32_t>(), state.at("birth").get<std::string>(), 0)
                 .exited)
@@ -772,7 +916,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
 }
 void validate_local_profile_launch(const std::string &state_file,const std::string &workspace_root,
                                    const std::string &runtime_root,const std::string &manifest,
-                                   const std::string &auth_token) {
+                                   const std::string &auth_token,const std::string &owner_receipt) {
     const auto path=absolute(state_file);
     require(path.filename()==L"profile.state"&&hex(manifest,64)&&hex(auth_token,64));
     Store store(path.parent_path());
@@ -785,6 +929,17 @@ void validate_local_profile_launch(const std::string &state_file,const std::stri
                 state.at("runtime")==text(absolute(runtime_root))&&
                 state.at("manifest")==manifest&&state.at("auth")==auth_token,
             "Managed profile runtime does not match its protected startup record");
+    if(owner_receipt.empty())require(!state.contains("owner_receipt"),
+            "Managed profile replacement receipt was not supplied to the server");
+    else{
+        const auto first=owner_receipt.find(':'),last=owner_receipt.rfind(':');
+        require(first==32&&last>first&&last+33==owner_receipt.size()&&
+                state.contains("owner_receipt")&&
+                state.at("owner_receipt").at("generation")==owner_receipt.substr(0,first)&&
+                state.at("owner_receipt").at("revision")==std::stoll(owner_receipt.substr(first+1,last-first-1))&&
+                state.at("owner_receipt").at("receipt_id")==owner_receipt.substr(last+1),
+                "Managed profile replacement receipt differs from its protected startup record");
+    }
 }
 void publish_local_profile_ready(const std::string &state_file, int port, const std::string &token,
                                  const std::string &workspace_root, const std::string &workspace_id,

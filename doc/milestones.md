@@ -1,5 +1,32 @@
 # Reviewable milestones
 
+Managed profile runtime upgrade is now wired into the native profile launcher.
+The console supports `--upgrade-backend`; the native browser/VS Code adapter
+requests it automatically when its verified package differs from the saved
+runtime. The flow stages and verifies the replacement, uses the authenticated
+workspace authority and owner receipt to retire the old process, then starts
+the replacement on the same port and SQLite profile before activation. A new
+synthetic older-generation contract checks session/history/run continuity and
+port stability. A clean native Release build against the current xlang3 runtime
+passed before the active-work retry adjustment in
+`build/native-milestone-clean`; the current source needs a rebuild. CTest is
+deferred while the live xlang3 benchmark runs. The profile-upgrade native
+contract and installed continuity acceptance remain pending. Separate live
+provider and webpage checks on the older managed preview are recorded below;
+they do not verify these source changes. The independent VS Code extension contract suite passes
+**263/263**, including its provider YAML import and workspace readiness gates;
+see [captured output](evidence/vscode-extension-contract-20261010.log).
+
+Current desktop inspection confirms the live VS Code TestProj pane is still
+waiting for workspace connection and displays `Authentication required`. The
+separate browser tab on port 60405 still waits for a native-server token and
+its workspace catalogue returns HTTP 401. The profile-aware browser on port
+60415 did connect to the managed local profile without entering a server
+token; its live provider and webpage results are recorded below. Same-machine
+xMind view and VS Code launches enroll through their local owner and keep that
+credential inside the adapter. A token prompt belongs only to a separately
+attached remote server client.
+
 The shared provider YAML is now verified against the current native runtime
 and real embedded-xlang3 SQLite: a disposable profile imported Claude,
 DeepSeek, Gemini and OpenAI at registry revision 1, with no provider or model
@@ -11,6 +38,19 @@ client, and no replacement updates the encrypted local `profile.state` yet.
 Profile-preserving owner handoff from the current native view remains open;
 the precise live and isolated evidence is in
 [provider-import-live-local-20261010.json](evidence/provider-import-live-local-20261010.json).
+
+Live webpage provider checks used the actual local managed profile: Claude
+returned a real `OK` response with recorded usage and timings, Gemini model
+discovery succeeded but inference failed with HTTP 404, DeepSeek left an
+orphaned `running` record whose Stop action reported no executor owner, and
+OpenAI model discovery returned 20 models; a fresh OpenAI `gpt-4.1-mini` run was
+admitted but stayed `running` at `budget.model_call.started` with `Illegal
+invocation` displayed in the page, and Stop reported that the executor no longer
+owned it. Workspace switching was mixed: one connected
+tab successfully switched xMind → TestProj → xMind, while another failed with
+`Illegal invocation`. These results and run identities are recorded in
+[live provider acceptance](evidence/live-provider-browser-acceptance-20261010.md);
+the pending profile-upgrade source has not been built or installed in this older preview.
 
 Schema-v14 checkpoint `15c87c0` passes the complete local Release native gate:
 **118/118 contracts** in **366.56 seconds**. It updates disposable historical

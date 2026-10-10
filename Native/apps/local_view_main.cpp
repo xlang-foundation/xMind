@@ -113,6 +113,12 @@ int run_local_view(int argc, char **argv) {
             const auto path = std::filesystem::current_path().u8string();
             options.workspace.assign(reinterpret_cast<const char *>(path.data()), path.size());
         }
+        // Each editor/browser adapter has a verified package. Bring an older
+        // managed profile forward before exposing that package's API surface.
+        // If active native work prevents a safe handoff, keep using the healthy
+        // current owner and retry on a later view launch.
+        options.upgrade_backend = true;
+        options.defer_busy_upgrade = true;
         agentflow::validate_local_view_ready(ready, options.workspace);
         verify_client_image();
         auto connection = std::make_shared<agentflow::LocalProfileConnection>(

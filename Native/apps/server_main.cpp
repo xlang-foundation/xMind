@@ -104,14 +104,15 @@ int run_server(int argc,char** argv) {
         std::unique_ptr<agentflow::WorkspaceTools> startup_workspace;
         if(options.contains("--profile-state")&&!options.contains("--runtime-manifest-sha256"))throw std::invalid_argument("Managed profile state requires a qualified native package");
         if(options.contains("--owner-receipt")&&options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Native and legacy owner preconditions are distinct");
-        if(options.contains("--profile-state")&&(options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket")))throw std::invalid_argument("Managed profile startup cannot replace an existing owner");
+        if(options.contains("--profile-state")&&options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Managed profile startup cannot use a legacy operator ticket");
         if((options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket"))&&!options.contains("--runtime-manifest-sha256"))throw std::invalid_argument("Replacement requires a verified native package");
         if(options.contains("--runtime-manifest-sha256")){
             if(!options.contains("--workspace"))throw std::invalid_argument("Native owner controls require an execution workspace");
             startup_workspace=std::make_unique<agentflow::WorkspaceTools>(options.at("--workspace"));
             const auto runtime_root=loaded_runtime_root();
             if(options.contains("--profile-state")){
-                agentflow::validate_local_profile_launch(options.at("--profile-state"),startup_workspace->root_path(),runtime_root,options.at("--runtime-manifest-sha256"),auth);
+                const auto owner_receipt=options.find("--owner-receipt");
+                agentflow::validate_local_profile_launch(options.at("--profile-state"),startup_workspace->root_path(),runtime_root,options.at("--runtime-manifest-sha256"),auth,owner_receipt==options.end()?std::string{}:owner_receipt->second);
                 runtime_generation=std::make_unique<agentflow::VerifiedRuntimeGeneration>(agentflow::VerifiedRuntimeGeneration::managed_profile_copy(runtime_root,options.at("--runtime-manifest-sha256"),startup_workspace->root_path()));
                 runtime_generation->require_loaded_server_image();
             }else{
