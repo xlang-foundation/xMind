@@ -1,0 +1,48 @@
+{
+  "sourceRevision": "c386a37",
+  "result": "passed",
+  "scope": "Rendered standalone browser session restoration, responsive workspace registration, and workspace switching against the current native build",
+  "viewUrl": "http://127.0.0.1:60426/ui/",
+  "nativeOrigin": "http://127.0.0.1:52944",
+  "nativeExecutableSha256": "e40191fd818c8fc39386462bf7275d2b8e6d5855e329b810dafa05f20621f9de",
+  "viewportCssPixels": {
+    "width": 648,
+    "height": 553
+  },
+  "refreshSessionRestoration": {
+    "result": "passed",
+    "serverTokenReentered": false,
+    "workspaceRestored": "TestProj"
+  },
+  "compactWorkspaceControls": {
+    "addWorkspaceX": 455.59,
+    "addWorkspaceWidth": 100.41,
+    "connectX": 564,
+    "disconnectX": 604,
+    "overlap": false,
+    "clickTarget": "workspace-add-dialog",
+    "result": "passed"
+  },
+  "workspaceRegistration": {
+    "folder": "D:\\CantorAI2026\\xMind",
+    "result": "passed",
+    "selectedAfterAdd": true,
+    "serverRootDisplayed": true
+  },
+  "workspaceSwitching": {
+    "sequence": [
+      "TestProj",
+      "xMind",
+      "TestProj"
+    ],
+    "result": "passed",
+    "sessionListRefreshed": true,
+    "providerConfigurationRefreshed": true
+  },
+  "providerRequests": 0,
+  "workspaceFileChanges": 0,
+  "browserTestResults": {
+    "passed": 61,
+    "failed": 0
+  }
+}

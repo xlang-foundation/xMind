@@ -70,22 +70,28 @@ The runtime must be verified and contain the same `xmind.exe` as the current nat
 
 The native view's generated access token is stored under `%LOCALAPPDATA%\xMind\BrowserView`; enter it once in Connect. Provider API keys belong in Settings. After token validation, the adapter returns the durable native view credential as an HttpOnly, SameSite=Strict cookie. JavaScript does not retain either credential. Reload reconnects with that cookie, which lasts up to eight hours across browser close/reopen and same-origin adapter/backend restarts. Expiry, authority rotation or explicit Disconnect revokes access; Disconnect does not cancel native execution. Only selected session/run/model/workflow IDs are saved in sessionStorage; keys and conversation content are not stored there.
 
+The standalone page attempts cookie-session restoration when it loads. This
+uses the same-origin session endpoint without an Authorization header; the
+adapter authenticates the opaque HttpOnly cookie and never exposes the native
+server token to page JavaScript. A fresh browser without a cookie is prompted
+to connect as before.
+
 Live browser smoke verification used the actual native profile-aware host and rendered both `xMind` and `TestProj` in the selector. Switching to `TestProj` changed the selected backend and cleared its session list; switching back restored the xMind workspace. No model request or file effect was issued. The smoke test also caught and fixed same-origin GET handling: browsers omit `Origin` on same-origin catalogue reads, so the adapter allows that read while workspace-changing POST still requires the exact view origin. The in-app browser's fetch rejected one abort-signal wrapper; the view now retries only that specific pre-request compatibility error without the signal, while normal browsers retain cancellation and timeouts.
 
 On 2026-10-10, rendered webpage acceptance submitted the existing
-`D:\CantorAI2026\TestProj` folder through **Add workspace** on the native
-profile-aware view. The view registered and selected that profile, then
-successfully switched to the original xMind profile and back to TestProj. The
-visible server root followed each selection; TestProj showed its own empty
-session list and unconfigured provider state. No model request or workspace
-file change was issued. This confirms the browser needs its own **Add
-workspace** flow because it has no VS Code opened-folder context. The live
-profile-aware host executable hash was
-`fbcbf957195397da26cfe7143c976d727d2836337d67c67731429179c051c1dc`, different
-from the local build hash `e40191fd818c8fc39386462bf7275d2b8e6d5855e329b810dafa05f20621f9de`;
-therefore this is rendered acceptance of the running host, not a claim that a
-fresh install of the current build passed browser startup. See
-[live workspace acceptance metadata](evidence/browser-workspace-live-20261010.json).
+The first rendered acceptance used a profile-aware host whose binary differed
+from the current build; its exact scope remains in the
+[initial live evidence](evidence/browser-workspace-live-20261010.json). A later
+run used the current `xmind.exe` hash and the real standalone webpage at a
+648-pixel viewport. After a page refresh, its HttpOnly session restored without
+re-entering the server token. **Add workspace** opened the workspace dialog,
+registered `D:\CantorAI2026\xMind` alongside `TestProj`, and selected it. The
+selector then switched back to `TestProj`; the picker re-enabled and the page
+showed the TestProj native workspace. The Add and Connect controls remained
+separate at the narrow viewport. No provider request or workspace file change
+was issued. This proves the browser needs its own **Add workspace** flow
+because it has no VS Code opened-folder context. See the
+[current-build rendered acceptance](evidence/browser-workspace-live-current-build-20261010.json).
 
 Cookie authentication requires browser same-origin fetch metadata, while session enrollment and revocation also require the exact view Origin. Cross-origin requests remain rejected. Session identifiers are not accepted in URLs. There is a 32-session limit and bounded session-request bodies. This cookie is for the loopback HTTP development transport; remote access still requires a separately designed HTTPS/team authentication adapter.
 
