@@ -1,5 +1,27 @@
 # Current native validation
 
+## Rendered UI spot check — 2026-10-10
+
+The actual VS Code Extension Development Host rendered xMind in the right
+sidebar and reported `D:\CantorAI2026\TestProj` as its native backend root,
+matching the opened folder. Its provider selector was disabled and Settings
+showed an empty “Add profile” state, so this check did not complete a model run
+or file-write flow. The open browser tabs were tied to an older asset snapshot;
+they do not verify the current browser build or its Add workspace control. A
+fresh current-build browser and model-backed rendered acceptance are still
+required. This is a direct UI observation, separate from the native controller
+contracts below.
+
+At source `4701255`, the native local-view contract passed in 188.95 seconds,
+including actual browser-cookie workspace registration and production browser
+controller/SSE use against a compiled native owner. It also drove the production
+VS Code backend/controller through a native graph pause, resumed incremental
+events, read and approved file creation, and matched disk bytes to the effect
+receipt. The native results, restart/replay, feed limits and revocation are
+captured in [exact local evidence](evidence/native-local-view-browser-sse-local.json).
+Provider requests were zero; VS Code APIs were fixtures, and this does not claim
+rendered browser/IDE or installed-client acceptance.
+
 The shared patch-review client candidate passed **222 extension / 41 browser**
 contracts with all 44 input and 12 generated asset hashes unchanged. It renders
 all four per-file patch actions and uses revalidated read-only comparisons;

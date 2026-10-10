@@ -1,26 +1,55 @@
 # Committed native event feeds
 
-The production-host native acceptance also prepares an actual approved
-creation case. A registered human/tool graph proposes a Unicode file; the
-current sidebar opens the production read-only comparison, while the file
-must remain absent. Approval from the retired sidebar must leave the operation
-waiting and the file absent. Current-sidebar approval must create exactly one
-tool child, complete the graph and produce a persisted success receipt whose
-hash/size match independently read disk bytes. VS Code comparison display is
-an API fixture; its documents come from the actual native proposal. These
-assertions have only passed syntax/whitespace checks and remain unexecuted.
-They do not prove installed writing, live coding inference or full parity.
+## Current production browser-controller acceptance
 
-Production extension-host acceptance is now prepared inside the native view
-contract. It runs the actual `extension.js`, shared reader/subscription and
-`WorkspaceBackend` against the compiled native executable. Only the VS Code
-workspace/webview API is a fixture; backend replies are actual HTTP results.
-Assertions require a paused graph's committed replay, sidebar close/reopen
-without cancellation, rejection of input from the retired view, explicit
-checkpoint-bound input from the current view, one real file-read child and
-exact terminal persisted history. A periodic run timer is rejected by the
-fixture. Syntax/whitespace checks pass; these assertions have not executed.
-This will not establish installed/rendered IDE or live-provider acceptance.
+At xMind source `4701255b1489894c9b281cd74c4b551abe1ba38d`, the complete
+`native_local_view_contract` passed in 188.95 seconds against the compiled
+native executable and real loopback HTTP/browser adapter. The test ran the
+production `BrowserController`, `BrowserSessionClient`, event reader and
+`EventStreamSubscription`; it did not substitute native event replies. A real
+paused agent graph was resumed with human input, and newly committed events
+arrived incrementally before terminal history reconciliation. The test also
+restarted the browser adapter at its origin and resumed from the accepted
+cookie/cursor, detached and reattached without cancelling the graph, saturated
+the native stream lease while preserving command access, and killed the view
+owner to verify reauthentication without advancing or replaying the graph.
+The same native-view test now registers an actual existing workspace folder
+through the browser route and verifies profile selection and credential
+rotation.
+
+This is production browser-controller and native HTTP acceptance, not a
+rendered-browser screenshot or installed VS Code acceptance. It used no
+provider requests (`providerRequests: 0`), so it does not establish live model
+inference. In the same run, the production VS Code extension controller and
+`WorkspaceBackend` also drove a real native graph through pause, view retirement,
+human input, file read and approved Unicode file creation; the resulting disk
+bytes matched the native success receipt. VS Code workspace/webview APIs were
+fixtures, so this does not establish a rendered or installed IDE.
+[Original CTest output](evidence/native-local-view-browser-sse-local.log),
+[source and binary hashes](evidence/native-local-view-browser-sse-local.json).
+
+This passing result supersedes the earlier statements below that the prepared
+production browser-controller, incremental-event, capacity and revocation
+assertions had not executed. The broader installed/rendered and live-provider
+requirements remain open.
+
+The current gate also exercised a production-host approved creation case. A
+registered human/tool graph proposed a Unicode file; the retired controller's
+approval was rejected and the file remained absent. Approval through the
+current controller created exactly one tool child, completed the graph and
+returned a persisted success receipt whose hash/size matched independently
+read disk bytes. VS Code comparison display is an API fixture; its documents
+came from the actual native proposal. Installed writing, live coding inference
+and full parity remain separate requirements.
+
+Production extension-host acceptance ran in the same gate: actual `extension.js`,
+shared reader/subscription and `WorkspaceBackend` ran against the compiled native
+executable. Only VS Code workspace/webview APIs were fixtures; backend replies
+were actual HTTP results. It verified paused-graph replay, sidebar retirement
+and reopen without cancellation, rejection of input from the retired view,
+checkpoint-bound input through the current view, a real file-read child and
+exact terminal persisted history, with no periodic run timer. Installed/rendered
+IDE and live-provider acceptance remain separate.
 
 Clean frame-boundary EOF is now classified as transport unavailability after
 preserving the last consumer-accepted cursor. The standalone reader still
@@ -32,11 +61,10 @@ and subscription together to prove acknowledged replay and bounded exhaustion.
 Complete **243 extension / 50 browser** synthetic suites pass.
 [EOF recovery scope and original evidence](evidence/native-event-stream-eof-candidate.json).
 
-The prepared native browser acceptance now restarts the actual browser adapter
-at its existing origin while a native human/tool graph is paused. It requires
-a newly validated observation using the prior cookie and accepted cursor,
-unchanged selected root/session and no dependent read before human input.
-This gateway-restart assertion has not run. It does not establish backend
+The native browser acceptance restarted the actual browser adapter at its
+existing origin while a native human/tool graph was paused. The prior cookie
+and accepted cursor restored the same root/session, with no dependent read
+before human input. This verifies access-adapter restart, not backend-process
 restart or installed/rendered acceptance.
 
 Native transport source `7a148ff` passed the complete hosted **110-contract**
@@ -44,9 +72,10 @@ gate and package verification. Its executed native view assertions compare
 completed actual tool-graph graph/tree/run streams to persisted records,
 Last-Event-ID replay/cursor rejection and scoped browser-cookie forwarding.
 Downloaded artifacts independently verify the exact contract set and packaged
-bytes/sources. Later production reader/subscription/controller, active-feed and
-capacity/revocation assertions have not run natively. The installed `689404e`
-profile is preserved; actual installed/rendered streaming remains pending.
+bytes/sources. At source `4701255`, production reader/subscription/controller,
+active-feed, capacity and revocation paths subsequently passed local native
+acceptance. The installed `689404e` profile is preserved; actual
+installed/rendered streaming remains pending.
 [Accepted transport scope](evidence/native-event-stream-hosted-7a148ff-scope.json).
 
 Browser transport correction: the original page session subclass overrode JSON
@@ -56,9 +85,9 @@ through a transport method; the production `BrowserSessionClient` overrides
 that method and JSON requests with same-origin HttpOnly cookie transport.
 Browser SSE never acquires or exports a backend bearer token. Native/editor
 clients retain their protected bearer transport and abort-before/after-secret
-checks. The actual native view contract uses this production browser client
-through the real browser adapter. Complete **241 extension / 49 browser**
-synthetic suites pass; actual native and rendered acceptance remain pending.
+checks. The current native integration described above exercises this production
+browser client through the real browser adapter. Complete **241 extension / 49
+browser** synthetic suites pass; rendered-browser acceptance remains pending.
 [Correction scope and original evidence](evidence/native-event-stream-browser-cookie-candidate.json).
 
 The full webpage fixture now runs all emitted classic scripts together and
@@ -67,19 +96,20 @@ committed text/usage render in the live response; the terminal persisted history
 replaces it once. The idle page issues no periodic run requests and disconnect
 sends no cancellation or admission. Complete **241 extension / 50 browser**
 suites pass. Initial fixture assertions were corrected to inspect the live
-container and the native normalized usage fields. This remains JSDOM/synthetic
-transport evidence, not actual native or rendered-browser acceptance.
+container and the native normalized usage fields. These DOM metrics remain
+JSDOM/synthetic evidence; actual native event delivery is separately proven
+above, and rendered-browser acceptance remains open.
 [Full-page fixture scope and original logs](evidence/native-event-stream-browser-page-candidate.json).
 
 Transport compilation and scoped replay integration passed at `7a148ff`.
-**New controller and active-feed integration is pending.** The accepted
-`689404e` installation remains unchanged. The existing
-browser and VS Code adoption described below are tested candidates; actual
-native and installed/rendered acceptance remain.
+Production browser and VS Code controller/active-feed integration subsequently
+passed at `4701255`; the accepted `689404e` installation remains unchanged.
+Rendered/installed acceptance is still separate.
 
-The shared `BackendClient.eventStream` reader is now implemented and passes
-synthetic parser/ownership/abort contracts. Actual native-reader integration,
-reconnection management and controller adoption remain pending.
+The shared `BackendClient.eventStream` reader passes synthetic
+parser/ownership/abort contracts and the production native-reader integration
+recorded above. Its consumer-accepted cursor is the only resume point after
+disconnection.
 [Reader candidate and exact verification](evidence/native-event-stream-client-candidate.json).
 
 | Read-only endpoint | Persisted scope |
@@ -123,10 +153,10 @@ Both adapters bound total forwarded bytes; neither owns execution or SQLite.
 The complete local **224 extension / 43 browser** fixture suites pass with all
 2421 tracked native/tool/view inputs unchanged during the tests. A synthetic
 HTTP peer separately proves browser delivery before peer completion and detach
-without a cancel command. That is adapter evidence, not native streaming.
-The real native view contract now compares single/graph/tree replay with actual
-saved records, checks invalid cursors and exercises browser-cookie streaming.
-Those new assertions have not executed yet.
+without a cancel command. The real native view contract also compares
+single/graph/tree replay with actual saved records, rejects invalid cursors,
+and exercises browser-cookie streaming, production reader/subscription,
+incremental graph events and reconnect at source `4701255`.
 [Candidate and exact verification scope](evidence/native-event-stream-transport-candidate.json).
 
 The production reader uses authenticated read-only GET, fatal incremental UTF-8
@@ -138,8 +168,8 @@ cursor; they do not send commands or start a fallback connection. A native end
 frame must acknowledge that exact cursor. Connection/frame limits and transport
 timeouts bound parsing. The complete **232 extension / 43 browser** fixture
 suites pass with all 2421 tracked native/tool/view inputs unchanged. The real
-native view contract now also exercises this production reader and scoped
-resume, but those new assertions remain unexecuted.
+native view contract exercises this production reader and scoped resume at
+source `4701255`.
 
 `EventStreamSubscription` supplies the shared observation lifecycle. It pins the
 client/origin, root, conversation, scope and view generation; a matching watch
@@ -149,8 +179,8 @@ late events, outcomes and retry callbacks. Only marked fetch/body transport
 unavailability and HTTP 503 receive up to three bounded retries. Authentication,
 protocol and consumer failures stop explicitly; a consumer `TypeError` cannot
 be mistaken for a network failure. The complete **238 extension / 43 browser**
-fixture suites pass. Actual native subscription is prepared in the view
-contract but has not run; the controller candidates are described below.
+fixture suites pass. Actual native subscription and controller adoption passed
+in the current native view contract.
 [Subscription candidate and original evidence](evidence/native-event-stream-subscription-candidate.json).
 
 The browser now uses that actual shared subscription for run, graph and owned
@@ -163,8 +193,9 @@ deduplicate overlapping REST and SSE delivery. View retirement cancels queued
 refreshes and detaches observation only. Four additional controller fixtures
 cover idle request counts, stale callbacks, overlapping events and new graph
 children during a held snapshot. Complete **238 extension / 47 browser** suites
-pass with all 2421 tracked inputs unchanged. This is synthetic controller
-evidence, not actual native or installed/rendered streaming acceptance.
+pass with all 2421 tracked inputs unchanged. The native integration described
+above additionally verifies actual event delivery; these fixtures do not prove
+installed/rendered streaming acceptance.
 [Browser adoption scope and original evidence](evidence/native-event-stream-browser-adoption-candidate.json).
 
 The production VS Code host now uses the same subscription, pinned additionally
@@ -177,18 +208,17 @@ for metadata updates without displaying that other run's live events. Selection
 intent, workspace changes and disposal abort only observation and invalidate
 queued callbacks. Complete **241 extension / 47 browser** synthetic suites pass
 with unchanged tracked inputs. The new host checks use a labelled transport
-fixture around the actual shared subscription and production extension code;
-they do not prove native, rendered editor or live model execution.
+fixture around the actual shared subscription and production extension code.
+The native extension-host integration above verifies backend behavior;
+rendered editor and live model execution remain open.
 [VS Code candidate and original evidence](evidence/native-event-stream-vscode-adoption-candidate.json).
 
-The real native view contract now also prepares production-browser-controller
-acceptance around an actual human/tool graph: stream while paused, detach
-without cancellation, reattach, submit checkpoint-bound human input, observe
-incremental committed events and verify the real read result and terminal
-history without duplicate rendering. The transport is instrumented only to
-record its actual calls/events; no native replies are substituted. Syntax and
-whitespace checks pass. These new assertions have not executed and do not
-establish native streaming or rendered UI acceptance.
+The real native view contract exercises the production browser controller
+around an actual human/tool graph: stream while paused, detach without
+cancellation, reattach, submit checkpoint-bound human input, observe incremental
+committed events and verify the real read result and terminal history without
+duplicate delivery. Instrumentation records actual calls/events; no native
+replies are substituted. See the exact passing gate at the top of this file.
 
 Further prepared assertions open two actual paused feeds using scoped browser
 access directly against native: the third stream must receive HTTP 503 while
@@ -196,10 +226,8 @@ session commands remain available. Aborting one reader must leave the graph
 paused. Killing its actual view owner must end the other stream with
 `reauthenticate`, preserve the paused graph and leave its dependent read pending.
 Both observers have bounded transport timeouts and are aborted during cleanup.
-These capacity/revocation checks are also unexecuted.
+The capacity/revocation checks passed in the current native view contract.
 
-Remaining acceptance includes the complete native gate, actual incremental
-delivery while a run continues, authorization revocation/expiry, saturated
-streams, disconnect/reconnect and backend restart without replay, actual shared
-UI integration and fresh installed/rendered coding. Provider gateway streaming and
-A2A streaming remain separate contracts.
+Remaining acceptance is the full source-wide native gate, rendered/installed
+browser and VS Code validation, live-provider streaming and backend-process
+restart without replay. A2A streaming remains a separate protocol contract.

@@ -68,6 +68,14 @@ does not bypass admission, take ownership of SQLite or replace scheduling.
 Unrestricted script code is a trusted extension until stronger containment is
 implemented. Neither embedded execution nor shared-memory IPC is an OS sandbox.
 
+The current authoring foundation accepts bounded YAML graph catalogs, JSON
+graph catalogs, YAML or JSON global instruction records, and plain Markdown
+instruction files through offline native administration. These records are
+validated by the existing native graph plan and are persisted through embedded
+xlang3 SQLite. This does not yet provide YAML agent/tool declarations, a
+filesystem skill catalogue, `.py` tool registration, or the xlang3 programming
+API. See [authoring formats and current coverage](authoring.md).
+
 ## Planning, AgentFlow and scheduling
 
 Planning decides **what** steps are needed. AgentFlow enforces the execution
@@ -168,18 +176,20 @@ Its packaged bytes were independently checked. Fresh installed/rendered coding
 acceptance remains pending; earlier installed previews are separate checkpoints.
 [Exact gate and package scope](evidence/native-view-hosted-689404e-package.json).
 
-Pending delivery includes fresh installed-controller acceptance, HTTP
-SSE acceptance for the shared UI event feed (browser and VS Code subscription
-candidates pass synthetic checks; A2A streaming is separate),
-unified YAML/Markdown/Python authoring, reusable nested super-agents,
-shared scheduling/worker placement, xlang3 IPC, Local/Nexus connection integration
-and remaining provider/coding parity.
+The production browser and VS Code controllers now pass local native HTTP/SSE
+integration through real pause, incremental resume, reconnect, detach and an
+approved file effect; exact scope is recorded in
+[native event-feed evidence](native-event-stream.md). A fresh rendered
+installation and live-provider SSE remain separate acceptance. Pending delivery
+also includes complete agent/tool authoring and xlang3 Python registration,
+reusable nested super-agents, shared scheduling/worker placement, xlang3 IPC,
+Local/Nexus connection integration and remaining provider/coding parity.
 
-The [committed event transport](native-event-stream.md) passed the complete
-native gate at `7a148ff`, including actual completed tool-graph replay through
-native and scoped browser adapters. Later reader/subscription/controller
-integration and active-feed/capacity/revocation checks remain pending. This
-does not establish completion of the shared UI SSE requirement above.
+The [committed event transport](native-event-stream.md) passed its full native
+gate at `7a148ff`, then the production reader, browser subscription, active-feed
+replay/capacity/revocation and the native VS Code host adapter passed together
+in `native_local_view_contract` at `4701255`. Rendered/installed acceptance
+remains a distinct requirement.
 
 Required acceptance covers the actual consolidated server/console, existing
 native contracts, client adapters and a fresh installed profile, then stream

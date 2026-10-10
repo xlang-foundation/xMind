@@ -1,0 +1,19 @@
+Start testing: Oct 10 04:58 Pacific Daylight Time
+----------------------------------------------------------
+99/118 Testing: native_local_view_contract
+99/118 Test: native_local_view_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs" "D:/CantorAI2026/xMind/build/native/contract-bin/Debug/xmind.exe" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/xlang3_runtime.dll" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/native
+"native_local_view_contract" start time: Oct 10 04:58 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualProductionExtensionController":true,"actualNativeSidebarSubscription":true,"actualSidebarDetachReattach":true,"retiredSidebarCannotSubmitInput":true,"actualSidebarHumanToolCompletion":true,"installedIde":false,"renderedIde":false,"providerRequests":0,"actualSidebarProposalComparison":true,"retiredSidebarCannotApprove":true,"actualSidebarApprovedCreation":true,"actualCreationReceiptMatchesDisk":true,"actualNativeView":true,"unsafeRendezvousRejectedBeforeBackendStartup":true,"actualProductionEditorHostAdapter":true,"actualSharedConsoleBackend":true,"actualToolGraph":true,"browserCookieAccess":true,"actualBrowserControllerStreaming":true,"actualGatewayRestartScopedReplay":true,"actualPausedFeedDetachAndReattach":true,"actualHumanResumeIncrementalEvents":true,"actualStreamCapacityAndCommandFairness":true,"actualStreamReauthenticationAfterViewExit":true,"actualNativeBrowserWorkspaceRegistration":true,"backendTokenNeverExported":true,"ownerControlRejected":true,"duplicateGrantRejected":true,"processBoundViewRevokedAfterExit":true,"sameProfileAndHistoryAcrossHostReload":true,"renderedUi":false}
+<end of output>
+Test time = 188.95 sec
+----------------------------------------------------------
+Test Passed.
+"native_local_view_contract" end time: Oct 10 05:01 Pacific Daylight Time
+"native_local_view_contract" time elapsed: 00:03:08
+----------------------------------------------------------
+
+End testing: Oct 10 05:01 Pacific Daylight Time

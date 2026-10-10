@@ -1,0 +1,30 @@
+{
+  "source": "4701255b1489894c9b281cd74c4b551abe1ba38d",
+  "test": "native_local_view_contract",
+  "result": "passed",
+  "elapsed_seconds": 188.95,
+  "assertions": {
+    "actualBrowserControllerStreaming": true,
+    "actualGatewayRestartScopedReplay": true,
+    "actualPausedFeedDetachAndReattach": true,
+    "actualHumanResumeIncrementalEvents": true,
+    "actualStreamCapacityAndCommandFairness": true,
+    "actualStreamReauthenticationAfterViewExit": true,
+    "actualNativeBrowserWorkspaceRegistration": true,
+    "renderedUi": false,
+    "providerRequests": 0,
+    "installedIde": false
+  },
+  "log": {
+    "path": "doc/evidence/native-local-view-browser-sse-local.log",
+    "sha256": "c09e6aeadfa895d406c3eca5f2748d2a3098d9a84e2623a5c5c3d04f2d082db9"
+  },
+  "sha256": {
+    "Native/tests/local_view_contract.mjs": "6ea9e3870910da3096ded4249e6390c09e305b6a8012bda811c0b3e265353cd3",
+    "views/browser/browser.js": "452cd796ee69cfc326e14f669eeb1a9f0fcf82724987bf6404101c24a5b87a54",
+    "views/browser/server.mjs": "19ecf812a4fa8fcbf73f2746ffe316f1f830cd44158b0b12c27b755046732ccc",
+    "Native/apps/local_view_main.cpp": "7508e4326c2684d685218b74843cab6e4f430809e6f4b457e28a1c29d69ba88d",
+    "Native/src/local_profile.cpp": "39f08d71ae0403a9058e23c4901e39e10ee2f06629276a3e101d10adc3e1ed97",
+    "build/native/contract-bin/Debug/xmind.exe": "884643e7417434bea80455ce96e6668ea0989f07fae85339143339f382af94ac"
+  }
+}

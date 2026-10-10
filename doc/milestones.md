@@ -1,5 +1,24 @@
 # Reviewable milestones
 
+Native authoring now accepts bounded YAML graph catalogs plus JSON/YAML/Markdown
+agent-instruction supplements. The new YAML converter rejects duplicate keys,
+aliases, multiple documents and oversized values before existing native graph
+validation; accepted records persist through embedded xlang3 SQLite. Graph and
+instruction persistence tests passed in the complete **118/118 native CTest**
+run. This is the authoring foundation only: named agents/tools, skills, `.py`
+callables and the xlang3 programming API remain open. [Supported formats and
+limits](authoring.md).
+
+The current `native_local_view_contract` passed at source `4701255` in 188.95
+seconds. The actual native backend, browser adapter and production browser
+controller completed workspace registration, scoped incremental graph events,
+cookie/cursor reconnect, detach/reattach, stream-capacity and view-owner
+revocation checks. In the same run, production VS Code controller/backend code
+completed a native pause/input/read/approved-create path and matched the actual
+disk bytes to the native receipt. No provider calls were made. VS Code APIs are
+fixtures; a rendered browser/IDE and installed-client acceptance remain open.
+[CTest output and provenance](evidence/native-local-view-browser-sse-local.json).
+
 The local managed-profile startup repair now passes the native profile contract
 **1/1** in **76.79 seconds** and runtime-generation contract **1/1** in **6.07
 seconds**. The copier now closes its native manifest writer before the read-only
@@ -494,8 +513,10 @@ file digests, **16** committed host/view source mappings, generated browser HTML
 and vendor copies. The VSIX has **1897 entries**, five native files and 1830 pure
 source files. Original logs/manifests and the verifier's initial source-map error
 are recorded. No local native execution or current installation acceptance is
-claimed. Fresh installed/rendered coding, SSE, authoring, workers/IPC, profile
-binding and full parity remain required. No migration layer is implemented.
+claimed. Fresh installed/rendered coding, declarative/code authoring,
+workers/IPC, profile binding and full parity remain required. Native/browser-
+controller SSE acceptance now passes locally; installed/rendered acceptance
+remains open. No migration layer is implemented.
 [Passed gate, original evidence and independently verified package](evidence/native-view-hosted-689404e-package.json).
 
 That exact VSIX is now installed into a fresh isolated VS Code profile. All
@@ -646,8 +667,10 @@ including **1,869 pure-source files** and **23 license files**. Its actual packa
 approved effects, one denied effect, actual provider usage and exact multiline
 history across restart. No old profile or installation was touched.
 [Package and live evidence](evidence/native-unified-package-release.json).
-Fresh installed/rendered VS Code acceptance, UI SSE, authoring APIs and
-agent-worker integration remain pending. Native console bootstrap is accepted
+Fresh installed/rendered VS Code acceptance, declarative/code authoring APIs
+and agent-worker integration remain pending. Native/browser-controller SSE
+integration passes locally; rendered/installed UI acceptance remains open.
+Native console bootstrap is accepted
 in the later checkpoint above.
 
 The primary **`xmind.exe`** now executes the existing native backend, console,
@@ -676,8 +699,10 @@ transport prerequisite, not integrated agent-worker or performance acceptance.
 The installed client still uses its existing 0.1.4 runtime generation. The new
 package uses one `xmind.exe` and will be validated with a fresh local profile;
 legacy-profile migration is excluded by the product decision. Fresh installed
-acceptance and automatic console bootstrap remain pending, along with UI SSE,
-authoring APIs and agent workers.
+acceptance and automatic console bootstrap remain pending, along with
+declarative/code authoring APIs and agent workers. Native/browser-controller
+SSE integration now passes locally; rendered/installed UI acceptance remains
+open.
 
 The CLI multiline/composer source checkpoint passed the complete **103 native
 contracts in 215.71 seconds**, with 2,390 unchanged mapped inputs, plus **222

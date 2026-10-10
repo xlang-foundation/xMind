@@ -1,4 +1,5 @@
 #include "agentflow/graph.hpp"
+#include "agentflow/authoring_document.hpp"
 #include "agentflow/mcp_wire.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
@@ -7,7 +8,7 @@ namespace agentflow {
 namespace {
 using Json=nlohmann::json;constexpr std::int64_t maximum_revision=9007199254740991;
 bool identifier(const std::string& value){return !value.empty() && value.size()<=64 && value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")==std::string::npos;}
-Json parse(const std::string& source,bool stored){if(source.size()>(stored?1048576:262144))throw std::invalid_argument("Graph catalog exceeds limits");try{return Json::parse(mcp_compact_object(source));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid graph catalog JSON");}catch(const Json::exception&){throw std::invalid_argument("Invalid graph catalog JSON");}}
+Json parse(const std::string& source,bool stored){if(source.size()>(stored?1048576:262144))throw std::invalid_argument("Graph catalog exceeds limits");try{auto encoded=source;if(!stored){const auto first=source.find_first_not_of(" \t\r\n");if(first==std::string::npos)throw std::invalid_argument("Empty graph catalog");if(source[first]!='{'&&source[first]!='[')encoded=authoring_yaml_to_json(source);}return Json::parse(mcp_compact_object(encoded));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid graph catalog JSON or YAML");}catch(const Json::exception&){throw std::invalid_argument("Invalid graph catalog JSON or YAML");}}
 void fields(const Json& value,std::initializer_list<const char*> allowed){if(!value.is_object())throw std::invalid_argument("Graph catalog value must be an object");for(auto it=value.begin();it!=value.end();++it)if(std::none_of(allowed.begin(),allowed.end(),[&](const char* key){return it.key()==key;}))throw std::invalid_argument("Unknown or backend-owned graph catalog field");}
 std::string id(const Json& value){if(!value.contains("id") || !value["id"].is_string() || !identifier(value["id"].get<std::string>()))throw std::invalid_argument("Invalid graph catalog ID");return value["id"].get<std::string>();}
 std::int64_t revision(const Json& value,const char* key){if(!value.contains(key) || !value[key].is_number_integer() || value[key]<1 || value[key]>maximum_revision)throw std::invalid_argument("Invalid stored graph revision");return value[key].get<std::int64_t>();}

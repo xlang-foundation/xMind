@@ -1,4 +1,5 @@
 #include "agentflow/agent_instructions.hpp"
+#include "agentflow/authoring_document.hpp"
 #include "agentflow/mcp_wire.hpp"
 #include "nlohmann/json.hpp"
 namespace agentflow {
@@ -6,7 +7,18 @@ namespace {
 using Json=nlohmann::json;constexpr std::int64_t revision_limit=9007199254740991;
 Json parse(const std::string& source){
     if(source.size()>256*1024)throw std::invalid_argument("Instruction configuration exceeds limits");
-    try{return Json::parse(mcp_compact_object(source));}
+    const auto first=source.find_first_not_of(" \t\r\n");if(first==std::string::npos)return Json{{"instructions",source}};
+    try{
+        if(source[first]=='{'||source[first]=='[')return Json::parse(mcp_compact_object(source));
+        std::size_t position=first;std::string_view line;bool yaml=false;
+        while(position<source.size()){
+            const auto end=source.find_first_of("\r\n",position);line=std::string_view(source).substr(position,end==std::string::npos?source.size()-position:end-position);
+            const auto begin=line.find_first_not_of(" \t");if(begin!=std::string_view::npos&&!line.substr(begin).starts_with('#')){line.remove_prefix(begin);yaml=line.starts_with("instructions:")||line.starts_with("version:");break;}
+            if(end==std::string::npos)break;position=end+1;if(source[end]=='\r'&&position<source.size()&&source[position]=='\n')++position;
+        }
+        if(yaml)return Json::parse(authoring_yaml_to_json(source));
+        return Json{{"instructions",source}};
+    }
     catch(const McpProtocolError&){throw std::invalid_argument("Invalid instruction configuration JSON");}
     catch(const Json::exception&){throw std::invalid_argument("Invalid instruction configuration JSON");}
 }
