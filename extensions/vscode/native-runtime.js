@@ -10,6 +10,7 @@ const REQUIRED_NATIVE = Object.freeze([
   'xmind.exe', 'xlang3_runtime.dll', 'xlang3.exe',
   'modules/xlang_json.x3pkg.dll', 'modules/xlang_sqlite3.x3pkg.dll'
 ]);
+const RETIRED_NATIVE = new Set(['xmind_server.exe', 'xmind_cli.exe', 'xmind_admin.exe', 'xmind_schema_worker.exe']);
 const REQUIRED_STDLIB = Object.freeze(['os.py', 'json/__init__.py', 'encodings/__init__.py', 'importlib/__init__.py']);
 const FORBIDDEN_COMPONENTS = new Set(['.git', '.config', '.agentflow', '__pycache__', 'site-packages']);
 function check(value, message) { if (!value) throw new Error(message); }
@@ -48,6 +49,9 @@ function validateManifest(manifest) {
   const files = manifest.files, native = REQUIRED_NATIVE;
   check(files && typeof files === 'object' && !Array.isArray(files) && Object.keys(files).length >= native.length + REQUIRED_STDLIB.length &&
     Object.keys(files).length <= 20000, 'The native runtime file inventory is invalid.');
+  if (Object.keys(files).some(name => RETIRED_NATIVE.has(name))) {
+    throw new Error('This native runtime uses the retired multi-executable layout. Install the current unified xMind package; automatic migration is unsupported.');
+  }
   const names = new Set();
   for (const [name, digest] of Object.entries(files)) {
     check(relativeFile(name) && runtimeFileKind(name) && /^[a-f0-9]{64}$/.test(digest) && !names.has(name.toLowerCase()), 'The native runtime file inventory is invalid.');

@@ -46,7 +46,7 @@ test('unified package resolves fixed entry modes and retains the exact primary e
 
 test('one format rejects missing primary executables, legacy launchers and unsupported schemas',async t=>{
  const f=await fixture(t);
- for(const name of ['xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe'])assert.throws(()=>validateManifest({...f.manifest,files:{...f.manifest.files,[name]:'d'.repeat(64)}}),/inventory/);
+ for(const name of ['xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe'])assert.throws(()=>validateManifest({...f.manifest,files:{...f.manifest.files,[name]:'d'.repeat(64)}}),/retired multi-executable layout.*current unified xMind package.*migration is unsupported/);
  const missing=structuredClone(f.manifest);delete missing.files['xmind.exe'];assert.throws(()=>validateManifest(missing),/incomplete|inventory/);
  assert.throws(()=>validateManifest({...f.manifest,schemaVersion:2}),/incompatible/);
  assert.throws(()=>nativeProgramEntry({runtimeRoot:f.runtime},'worker'),/Unsupported/);

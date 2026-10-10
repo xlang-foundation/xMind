@@ -25,6 +25,12 @@ Provider credentials are imported by Native from one explicitly configured YAML
 path. The extension passes that path without reading the credentials. Native
 owners and their sessions survive view closure and folder switching.
 
+The current package accepts one `xmind.exe` entry point. Old isolated development
+copies from 0.1.0–0.1.4 still contain separate server/CLI executables and are
+rejected; there is no profile/package migration path. The verifier now identifies
+that retired layout and directs the user to install the current unified package.
+The current source runtime inventory verifies **1,896 files**.
+
 Validation on 2026-10-08:
 
 - Windows Release configure/build and all 88 registered native contracts
