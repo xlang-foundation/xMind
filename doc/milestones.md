@@ -18,6 +18,14 @@ current-browser evidence also verified CLI reattachment to an existing profile
 owner; same-session/event inspection across clients remains a separate gate.
 [Exact current rendered evidence](evidence/browser-workspace-live-ed5b84d.json).
 
+The installed VS Code `0.1.5` extension also opened the actual `TestProj`
+folder in a new VS Code window and launched its managed native view for that
+same root. Its ready record confirms reattachment to the existing TestProj
+profile owner; **263/263** extension tests pass. The native view process and
+workspace binding are verified, while rendered sidebar inspection remains
+unverified because this session exposes browser automation but not a native
+VS Code window. [Live workspace evidence](evidence/vscode-open-folder-live-20261010.json).
+
 At source `59f46791c02cb18cd4aa4c66b7d01b22f06cbcb0`, managed local-profile
 startup verifies the complete source runtime once, then authenticates protected
 profile state and uses the verified managed-copy path for server startup and

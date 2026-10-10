@@ -1,0 +1,34 @@
+{
+  "sourceRevision": "c52e0da",
+  "result": "passed",
+  "scope": "Installed VS Code xMind extension startup against the actual opened TestProj folder and its managed local profile",
+  "vscodeVersion": "1.141.0",
+  "extension": {
+    "identifier": "agentflow-local.agentflow",
+    "version": "0.1.5",
+    "installed": true,
+    "extensionHostRunning": true
+  },
+  "workbench": {
+    "newWindow": true,
+    "windowTitle": "Welcome - TestProj - Visual Studio Code",
+    "openedFolder": "D:\\CantorAI2026\\TestProj"
+  },
+  "nativeView": {
+    "launched": true,
+    "processId": 39436,
+    "readyRecord": true,
+    "workspaceConfigured": true,
+    "workspaceRoot": "D:\\CantorAI2026\\TestProj",
+    "backendOrigin": "http://127.0.0.1:49164",
+    "backendProcessId": 34252,
+    "reusedExistingProfileOwner": true
+  },
+  "extensionTests": {
+    "passed": 263,
+    "failed": 0,
+    "skipped": 0
+  },
+  "providerRequests": 0,
+  "visualWebviewInspection": "Not available in this session; the computer-use bridge exposes browser tabs but no native VS Code window surface."
+}
