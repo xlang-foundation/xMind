@@ -50,6 +50,32 @@ std::string mcp_oauth_pkce_challenge(std::span<const std::uint8_t> verifier);
 SecretBytes mcp_oauth_code_grant_form(const McpOAuthPublicClient& client,
     std::string_view resource,const SecretBytes& code,const SecretBytes& verifier);
 McpOAuthTokens mcp_oauth_token_response(SecretBytes json,const std::vector<std::string>& requested_scopes);
+SecretBytes mcp_oauth_refresh_grant_form(std::string_view client_id,std::string_view resource,
+    const SecretBytes& refresh_token,const std::vector<std::string>& scopes);
+McpOAuthTokens mcp_oauth_refresh_response(SecretBytes json,SecretBytes previous_refresh_token,
+    const std::vector<std::string>& previous_scopes);
+// Backend-only, single-caller exchange primitive. Every exchange invocation
+// retires this owner, including cancellation, timeout, HTTP/parse/TLS failure.
+// A durable coordinator must claim the grant revision BEFORE calling exchange,
+// then atomically publish the resulting complete grant/receipt. This class does
+// not provide persistence, automatic refresh, retry or tool-call replay rights.
+class McpOAuthRefreshAttempt {
+public:
+    McpOAuthRefreshAttempt(McpOAuthDiscovery discovery,std::string client_id,
+        std::string expected_token_endpoint,SecretBytes refresh_token,
+        std::vector<std::string> scopes,McpDeadline expires);
+    ~McpOAuthRefreshAttempt();
+    McpOAuthRefreshAttempt(const McpOAuthRefreshAttempt&)=delete;
+    McpOAuthRefreshAttempt& operator=(const McpOAuthRefreshAttempt&)=delete;
+    McpOAuthRefreshAttempt(McpOAuthRefreshAttempt&&) noexcept;
+    McpOAuthRefreshAttempt& operator=(McpOAuthRefreshAttempt&&) noexcept;
+    bool ready() const noexcept;
+    McpOAuthTokens exchange(McpDeadline deadline,std::stop_token cancel={});
+    void cancel() noexcept;
+private:
+    struct Impl;
+    std::unique_ptr<Impl> impl_;
+};
 // Native single-caller owner for a pre-registered public client. Backend code
 // owns this attempt, callback routing and returned credentials. This does not
 // provide a listener, persistence, registration, refresh or tool-call replay.

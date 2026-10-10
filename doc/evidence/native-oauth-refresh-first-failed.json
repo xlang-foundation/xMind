@@ -1,0 +1,28 @@
+{
+  "observedAt": "2026-10-10T07:10:23.385Z",
+  "sourceBaseRevision": "67082693786d0dc6181e1b717a260a02aa97bf20",
+  "qualification": "Candidate identified by frozen input hashes in preserved source-before.json, not the base revision alone.",
+  "nativeContracts": 116,
+  "passed": 115,
+  "failed": [
+    "native_local_profile_contract"
+  ],
+  "seconds": 376.95,
+  "reason": "First managed profile-info child reached its unchanged 60000ms fixture deadline; exit code null, with retained fixture. Native backend listening log exists. Root cause not established.",
+  "retainedFixture": "C:/Users/shaw9/AppData/Local/Temp/xmind-local-profile-dYMEzw",
+  "focusedPassed": 2,
+  "rawHashes": {
+    "doc/evidence/native-oauth-refresh-first-failed-focused-build.log": "a3eaedc08a466f8f782b96d58fed423c671b169fa29733a02c0b80485a98023b",
+    "doc/evidence/native-oauth-refresh-first-failed-focused-ctest.log": "91a45193f555f3f7d4fd6fac68b24c39c262525087088fbe56c33da239d1d8d5",
+    "doc/evidence/native-oauth-refresh-first-failed-focused-details.log": "d8785e48608fd4fc500aac2aafb40cd284d11ed7f5186d176cc79ad3bd7fd928",
+    "doc/evidence/native-oauth-refresh-first-failed-peer.log": "173935d06081b0bfa5c05964bb3d787e1878cb090d8d59711001beae115607db",
+    "doc/evidence/native-oauth-refresh-first-failed-full-build.log": "864ffaac778d763e66b3bb817427fb6d955d9dd6accabcda98dffe15a0de568b",
+    "doc/evidence/native-oauth-refresh-first-failed-full-ctest.log": "ef3575bae8124f67719bc22fb9809cf81ca6baa94821d3181f6289e2b0c9a60c",
+    "doc/evidence/native-oauth-refresh-first-failed-contracts.json": "447452260338eb67cb311273b3cca7e957adad42a731b449b738dcd5cf963826",
+    "doc/evidence/native-oauth-refresh-first-failed-source-before.json": "2742d6a4541f8eee7b3e7205686b5d821ea8e60441d93fdc95630e37bf3e1e6d",
+    "doc/evidence/native-oauth-refresh-first-failed-full-details.log": "70bde7df5fb1a2dc722ca14fe5a8ba17448bba4d32efe249137eb1ede2f9fc63"
+  },
+  "completeCurrentGatePassed": false,
+  "trustedNativeRefreshVerified": false,
+  "automaticRefreshImplemented": false
+}

@@ -12,7 +12,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer as createTcpServer} from 'node:net';
 export const access='synthetic-positive-access-not-live',refresh='synthetic positive refresh not live';
 export function createOAuthPeer(options,{registeredPort=43211}={}){
- const counts={probe:{},metadata:{},authorize:{},tokens:{},authenticated:{}};const codes=new Map();let origin,error;
+ const counts={probe:{},metadata:{},authorize:{},tokens:{},authenticated:{},refresh:{}};const codes=new Map();let origin,error;
  const kinds=new Set(['success','registered','denied','bad-state','bad-issuer','bad-code','cancelled','occupied']);
  const count=(group,kind)=>counts[group][kind]=(counts[group][kind]||0)+1;
  const peer=createServer(options,async(request,response)=>{
@@ -28,6 +28,17 @@ export function createOAuthPeer(options,{registeredPort=43211}={}){
     reply(200,{jsonrpc:'2.0',id:rpc.id,result:rpc.method==='server/discover'?{resultType:'complete',supportedVersions:['2026-07-28'],capabilities:{tools:{}}}:{resultType:'complete',tools:[]}});return;
    }
    assert.equal(request.headers.authorization,undefined,'Native owner/access/refresh credentials must not leak to discovery or token endpoints');
+   if(url.pathname.startsWith('/refresh/')){
+    const mode=url.pathname.slice(9);assert.ok(['rotate','retain','scope-expanded','bad-json','http-failure','lost-reply','redirect'].includes(mode));assert.equal(request.method,'POST');assert.equal(request.headers['content-type'],'application/x-www-form-urlencoded');
+    const params=new URLSearchParams(body),keys=[...params.keys()];assert.equal(new Set(keys).size,keys.length);assert.deepEqual(keys.sort(),['client_id','grant_type','refresh_token','resource','scope']);
+    assert.equal(params.get('client_id'),'synthetic-public-client');assert.equal(params.get('grant_type'),'refresh_token');assert.equal(params.get('refresh_token'),'synthetic refresh +&=');assert.equal(params.get('resource'),origin+'/mcp/success');assert.equal(params.get('scope'),'tools.read tools.list');count('refresh',mode);
+    if(mode==='http-failure'){reply(400,{error:'invalid_grant',error_description:'synthetic private refresh diagnostic'});return;}
+    if(mode==='lost-reply'){response.destroy();return;}
+    if(mode==='redirect'){response.writeHead(307,{Location:origin+'/refresh-forwarded'});response.end();return;}
+    if(mode==='bad-json'){response.writeHead(200,{'Content-Type':'application/json'});response.end('{"access_token":"synthetic-refreshed-access","access_token":"duplicate","token_type":"Bearer"}');return;}
+    reply(200,{access_token:'synthetic-refreshed-access',token_type:'Bearer',expires_in:600,scope:mode==='scope-expanded'?'tools.admin':'tools.read',...(mode==='rotate'?{refresh_token:'synthetic rotated refresh +&='}:{})});return;
+   }
+   if(url.pathname==='/refresh-forwarded'){count('refresh','forwarded');throw Error('Refresh credentials must not follow a redirect');}
    if(url.pathname.startsWith('/resource/')){
     const kind=url.pathname.slice(10);assert.ok(kinds.has(kind));assert.equal(request.method,'GET');count('metadata',kind);reply(200,{resource:origin+'/mcp/'+kind,authorization_servers:[origin+'/issuer'],scopes_supported:['tools.read'],bearer_methods_supported:['header']});return;
    }
@@ -58,7 +69,7 @@ export function trustedRequest(url,ca,{method='GET',body,headers={}}={}){
 }
 async function hosted(){
  if(process.platform!=='win32'||process.env.GITHUB_ACTIONS!=='true'||process.env.RUNNER_ENVIRONMENT!=='github-hosted'||process.env.RUNNER_OS!=='Windows'||!/^\d+$/.test(process.env.GITHUB_RUN_ID||''))throw Error('Trusted OAuth acceptance requires an isolated GitHub-hosted Windows runner. Never impersonate its environment locally.');
- const [executable,modules,stdlib,openssl,certificateHelper]=process.argv.slice(2),execute=promisify(execFile),tempRoot=await realpath(process.env.RUNNER_TEMP),directory=await mkdtemp(join(tempRoot,'xmind-oauth-trust-'));
+ const [executable,modules,stdlib,openssl,certificateHelper,refreshExecutable]=process.argv.slice(2),execute=promisify(execFile),tempRoot=await realpath(process.env.RUNNER_TEMP),directory=await mkdtemp(join(tempRoot,'xmind-oauth-trust-'));
  assert.equal(dirname(await realpath(directory)),tempRoot);let peer,child,exited,timer,installed=false,thumbprint,registeredReservation,occupiedReservation;
  const caFile=join(directory,'ca.cer'),provision=action=>execute('pwsh.exe',['-NoProfile','-NonInteractive','-File',certificateHelper,'-Action',action,'-CertificateFile',caFile,'-Thumbprint',thumbprint],{windowsHide:true,timeout:20000});
  try{
@@ -93,6 +104,9 @@ async function hosted(){
   peer.assertHealthy();assert.deepEqual(peer.counts.tokens,{success:1,registered:1,'bad-code':1});assert.deepEqual(peer.counts.probe,Object.fromEntries(['success','registered','denied','bad-state','bad-issuer','bad-code','cancelled','occupied'].map(kind=>[kind,1])));assert.equal(peer.counts.authorize.occupied,undefined);
   child.stdin.end('verify-success\n');const [code,signal]=await exited;assert.equal(signal,null);assert.equal(code,0,stderr);assert.match(stdout,/native-grant-verified/);assert.match(stdout,/native-grant-reopened/);peer.assertHealthy();assert.deepEqual(peer.counts.authenticated,{'server/discover':4,'tools/list':4});
   for(const filename of ['state.sqlite','state.sqlite-wal']){let bytes;try{bytes=await readFile(join(directory,filename));}catch(error){if(error.code==='ENOENT')continue;throw error;}assert.ok(!bytes.includes(Buffer.from(access)));assert.ok(!bytes.includes(Buffer.from(refresh)));}
+  for(const mode of ['rotate','retain','scope-expanded','bad-json','http-failure','lost-reply','redirect']){const result=await execute(refreshExecutable,[mode,origin],{windowsHide:true,timeout:10000});assert.match(result.stdout,new RegExp('passed '+mode));peer.assertHealthy();}
+  assert.deepEqual(peer.counts.refresh,Object.fromEntries(['rotate','retain','scope-expanded','bad-json','http-failure','lost-reply','redirect'].map(mode=>[mode,1])));
+  process.stdout.write('Separate actual native single-use refresh protocol passed trusted HTTPS rotation/retention, restricted scope, duplicate JSON, HTTP failure, lost reply and redirect rejection with exactly one request per owner and zero forwarded requests. Synthetic refresh inputs; no durable refresh publication, automatic refresh or client refresh support claimed.\n');
   process.stdout.write('Actual native OAuth service passed trusted HTTPS discovery, default and registered exact-path/port callbacks, occupied-port rejection without fallback, independent S256/code/resource/client binding, two positive code exchanges, encrypted complete grant publication/reopen, bearer MCP discovery before/after reopen, denial/state/issuer/code rejection and cancellation without extra token requests. Synthetic authority and tokens only; no real provider account or rendered/browser-launch acceptance.\n');
  }finally{
   clearTimeout(timer);if(child&&child.exitCode===null&&child.signalCode===null){child.kill();await exited;}if(peer)await peer.close();

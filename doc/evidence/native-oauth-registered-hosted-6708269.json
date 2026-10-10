@@ -1,0 +1,36 @@
+{
+  "observedAt": "2026-10-10T07:32:17.043Z",
+  "sourceRevision": "67082693786d0dc6181e1b717a260a02aa97bf20",
+  "runId": 38032273799,
+  "jobId": 114156272888,
+  "conclusion": "failure",
+  "runUrl": "https://github.com/xlang-foundation/xMind/actions/runs/38032273799",
+  "nativeRegisteredContracts": 116,
+  "nativePassed": 115,
+  "failed": [
+    "native_mcp_oauth_trusted_contract"
+  ],
+  "seconds": 407.85,
+  "archive": {
+    "id": 11662449280,
+    "digest": "sha256:185559f0e8d11c5ce5f42a4e263ac5f3b7e640d2a2e4e1510677bedfc21ca6db",
+    "size": 44007,
+    "verified": true
+  },
+  "cause": "Hosted certificate provisioning failed: Import-Certificate into CurrentUser/Root reported UI is not allowed in this operation.",
+  "nativeTrustedLoginExecuted": false,
+  "nativeTrustedLoginVerified": false,
+  "packagingExecuted": false,
+  "scope": "Complete exact native inventory and original failure outputs verified. Trusted native OAuth fixture stopped before native login when owned test-CA import failed; 115 other native contracts passed. No trusted-login or packaged product acceptance claimed.",
+  "sdkRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+  "rawHashes": {
+    "doc/evidence/native-oauth-registered-hosted-6708269-contracts.json": "7286f1792d00bccd33f883e5c76ceeed3418992432e6db8a8744a8530a781fbb",
+    "doc/evidence/native-oauth-registered-hosted-6708269-native-build.log": "a589d53e269ac25e15c9eb0a26d03d4b11a5084330abbb07dadcd75d1fdea19a",
+    "doc/evidence/native-oauth-registered-hosted-6708269-native-configure.log": "43393dc5764a3f5f4499623868b3fc9c1acd43e121f72d2c5747abd5630172c1",
+    "doc/evidence/native-oauth-registered-hosted-6708269-native-ctest.log": "1f0e1775fdf54122908cd5f581acc3ce9f2fbd3a3de51565a35ae34d99fccd4b",
+    "doc/evidence/native-oauth-registered-hosted-6708269-provenance.json": "3b0ef1c9c9718db71a3e23ad2a01106d0efccaaee5a576def3b1a4f35c2540de",
+    "doc/evidence/native-oauth-registered-hosted-6708269-full-details.log": "b0eeefa3e3f65020e69293589517e5b024aaca727db2d966175a539ee02ee8b8",
+    "doc/evidence/native-oauth-registered-hosted-6708269-job.log": "62dad8ecdaf1511569dd56053313731e0f0f61b5042b0dc8fcaf7092e569227a",
+    "doc/evidence/native-oauth-registered-hosted-6708269-artifacts.json": "ef041490fd4a91ed82244eaf68967ba1e819dbcab424fdfa656d85852583dc57"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "observedAt": "2026-10-10T07:23:04.507Z",
+  "sourceBaseRevision": "67082693786d0dc6181e1b717a260a02aa97bf20",
+  "qualification": "Original focused repeat failed. Diagnostic copies changed only their watchdog/measurement output; they are not acceptance. Measurements precede the uncompiled destination-directory optimization.",
+  "originalWatchdogMs": 60000,
+  "originalFocusedRepeatPassed": false,
+  "diagnosticWatchdogMs": 180000,
+  "diagnosticFirstColdStartMs": 57196,
+  "diagnosticCompleted": true,
+  "diagnosticIsOriginalGateAcceptance": false,
+  "originalTestSourceSha256": "d6b3781235c84b64c340650b46ac835864f1b04efdec139970a6591fd49ed560",
+  "diagnosticSourceSha256": "0fbe498ba24f235b3d4bc7f74e2f4a0130fdfd5976f2ef32f0f5c80bce03573c",
+  "rootCauseProven": false,
+  "optimizationVerified": false,
+  "rawHashes": {
+    "doc/evidence/native-oauth-refresh-profile-recheck-failed.log": "738d3d28edd677eafc7443408348454e2f05ade1ecc981c854d5b4df139d3429",
+    "doc/evidence/native-oauth-refresh-profile-recheck-failed-details.log": "b198124d32bdf09082c54c5ec99e286a35fc6620e47896c4ef454a344ff1973e",
+    "doc/evidence/native-oauth-refresh-profile-diagnostic.log": "e2ac64edea9afaf075b5cb93e36588c31d791f5a9276628d8a91e9b16ddbf4cb",
+    "doc/evidence/native-oauth-refresh-profile-diagnostic-timing.log": "6a2ec9d1cc44ec928cc13dbb84f3a6b29467f6244c9dcf1c68f964a74ca3a289"
+  }
+}

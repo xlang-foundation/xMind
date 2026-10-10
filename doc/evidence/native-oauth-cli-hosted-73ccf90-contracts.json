@@ -1,0 +1,3690 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test"
+    ],
+    "files" : 
+    [
+      "D:/a/xMind/xMind/xmind/Native/CMakeLists.txt"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 249,
+        "parent" : 0
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 257,
+        "parent" : 2
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 262,
+        "parent" : 4
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 267,
+        "parent" : 6
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 271,
+        "parent" : 8
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 279,
+        "parent" : 10
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 287,
+        "parent" : 12
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 295,
+        "parent" : 14
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 300,
+        "parent" : 16
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 305,
+        "parent" : 18
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 313,
+        "parent" : 20
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 318,
+        "parent" : 22
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 326,
+        "parent" : 24
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 332,
+        "parent" : 26
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 339,
+        "parent" : 28
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 347,
+        "parent" : 30
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 355,
+        "parent" : 32
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 359,
+        "parent" : 34
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 367,
+        "parent" : 36
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 376,
+        "parent" : 38
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 385,
+        "parent" : 40
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 397,
+        "parent" : 42
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 405,
+        "parent" : 44
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 417,
+        "parent" : 46
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 431,
+        "parent" : 48
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 438,
+        "parent" : 50
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 442,
+        "parent" : 52
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 445,
+        "parent" : 54
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 448,
+        "parent" : 56
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 451,
+        "parent" : 58
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 454,
+        "parent" : 60
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 457,
+        "parent" : 62
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 460,
+        "parent" : 64
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 466,
+        "parent" : 66
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 472,
+        "parent" : 68
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 483,
+        "parent" : 70
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 486,
+        "parent" : 72
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 498,
+        "parent" : 74
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 501,
+        "parent" : 76
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 507,
+        "parent" : 78
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 513,
+        "parent" : 80
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 522,
+        "parent" : 82
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 531,
+        "parent" : 84
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 539,
+        "parent" : 86
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 547,
+        "parent" : 88
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 551,
+        "parent" : 90
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 561,
+        "parent" : 92
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 567,
+        "parent" : 94
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 572,
+        "parent" : 96
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 578,
+        "parent" : 98
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 580,
+        "parent" : 100
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 587,
+        "parent" : 102
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 595,
+        "parent" : 104
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 600,
+        "parent" : 106
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 605,
+        "parent" : 108
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 613,
+        "parent" : 110
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 622,
+        "parent" : 112
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 633,
+        "parent" : 114
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 647,
+        "parent" : 116
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 661,
+        "parent" : 118
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 672,
+        "parent" : 120
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 682,
+        "parent" : 122
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 685,
+        "parent" : 124
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 693,
+        "parent" : 126
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 701,
+        "parent" : 128
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 709,
+        "parent" : 130
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 717,
+        "parent" : 132
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 728,
+        "parent" : 134
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 737,
+        "parent" : 136
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 745,
+        "parent" : 138
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 748,
+        "parent" : 140
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 751,
+        "parent" : 142
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 758,
+        "parent" : 144
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 767,
+        "parent" : 146
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 776,
+        "parent" : 148
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 785,
+        "parent" : 150
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 794,
+        "parent" : 152
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 801,
+        "parent" : 154
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 809,
+        "parent" : 156
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 815,
+        "parent" : 158
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 824,
+        "parent" : 160
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 833,
+        "parent" : 162
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 837,
+        "parent" : 164
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 841,
+        "parent" : 166
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 845,
+        "parent" : 168
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 854,
+        "parent" : 170
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 854,
+        "parent" : 172
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 860,
+        "parent" : 174
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 865,
+        "parent" : 176
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 868,
+        "parent" : 178
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 871,
+        "parent" : 180
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 874,
+        "parent" : 182
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 878,
+        "parent" : 184
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 882,
+        "parent" : 186
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 886,
+        "parent" : 188
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 900,
+        "parent" : 190
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 910,
+        "parent" : 192
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 919,
+        "parent" : 194
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 929,
+        "parent" : 196
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 937,
+        "parent" : 198
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 945,
+        "parent" : 200
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 955,
+        "parent" : 202
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 964,
+        "parent" : 204
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 973,
+        "parent" : 206
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 977,
+        "parent" : 208
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 984,
+        "parent" : 210
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 992,
+        "parent" : 212
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 995,
+        "parent" : 214
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1006,
+        "parent" : 216
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1014,
+        "parent" : 218
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1026,
+        "parent" : 220
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1036,
+        "parent" : 222
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1047,
+        "parent" : 224
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1054,
+        "parent" : 226
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "backtrace" : 1,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_json_schema_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_json_schema_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 3,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_wire_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_wire_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 5,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_model_stream_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "model_stream_protocol_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 7,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_model_request_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "model_request_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 9,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_context_selection_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_context_selection_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 11,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_request_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_request_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 13,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_stream_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_stream_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 15,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_history_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_history_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 17,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_anthropic_request_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_anthropic_request_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 19,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_anthropic_stream_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_anthropic_stream_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 21,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_anthropic_history_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_anthropic_history_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 23,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_responses_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_responses_protocol_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 25,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_dynamic_plan_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_dynamic_plan_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 27,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_agent_authority_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_authority_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 29,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_dynamic_plan_repository_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_dynamic_plan_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 31,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_context_repository_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_context_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 33,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/context_control_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_context_control_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_context_control_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 35,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/context_cli_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_context_cli_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 37,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/context_engine_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_context_engine_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_context_engine_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 150.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 39,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/context_graph_engine_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_context_graph_engine_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_context_graph_engine_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 150.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 41,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/provider_yaml_config_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_provider_yaml_config_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_yaml_config_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 43,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_planning_http_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_planning_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 45,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_native_child_executor_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_child_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 47,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/dynamic_plan_engine_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_dynamic_plan_engine_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_dynamic_plan_engine_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 49,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/dynamic_plan_mcp_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_dynamic_plan_mcp_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_dynamic_plan_mcp_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 51,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_secret_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_secret_protection_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 53,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/a2a_task_control_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_a2a_task_control_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 55,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/a2a_message_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_a2a_message_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 57,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/a2a_stream_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_a2a_stream_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 59,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/a2a_v1_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_a2a_v1_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 61,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/responses_agent_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_responses_agent_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 63,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/graph_service_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_service_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 65,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/provider_cli_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_cli_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 67,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/provider_setup_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_provider_setup_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_setup_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 69,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/graph_runner_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_graph_runner_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_runner_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 71,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/graph_mcp_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_graph_mcp_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_mcp_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 73,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/graph_mcp_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_mcp_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 75,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/delegation_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_native_delegation_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_delegation_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 77,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/delegation_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_delegation_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 79,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/graph_checkpoint_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_graph_checkpoint_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_checkpoint_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 81,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/graph_children_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_graph_children_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_children_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 83,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/graph_contract_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_graph_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 85,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/instruction_configuration_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_instruction_configuration_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_instruction_configuration_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 87,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_process_configuration_contract.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_schema_worker.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_process_configuration_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 89,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/process_executor_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_process_executor_contract.exe",
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/process_peer.mjs",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_process_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 91,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/agent_process_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_process_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 93,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/process_contract_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_process_contract.exe",
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/process_peer.mjs"
+      ],
+      "config" : "Release",
+      "name" : "native_process_adapter_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 40.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 95,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_configuration_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_configuration_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 97,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_oauth_credentials_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_oauth_credentials_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 99,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/mcp_oauth_service_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_oauth_service_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib",
+        "C:/Program Files/OpenSSL/bin/openssl.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_oauth_service_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 101,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/mcp_authorization_cli_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_authorization_cli_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 103,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_schema_worker_contract.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_schema_budget_fixture.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_schema_worker_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 105,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_stdio_contract.exe",
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/mcp_stdio_peer.mjs",
+        "D:/a/xMind/xMind/xmind/Native"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_stdio_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 107,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_handshake_contract.exe",
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/mcp_handshake_peer.mjs",
+        "D:/a/xMind/xMind/xmind/Native"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_handshake_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 109,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_client_contract.exe",
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/mcp_client_peer.mjs",
+        "D:/a/xMind/xMind/xmind/Native"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_client_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 111,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/sdk/http_effect_host.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_effect_contract.exe",
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/mcp_effect_peer.mjs",
+        "D:/a/xMind/xMind/xmind/Native",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_effect_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 113,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/agent_service_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_agent_service_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_service_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 115,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/agent_runner_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_agent_runner_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_runner_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 117,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/gemini_agent_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_agent_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_agent_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 119,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/anthropic_agent_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_anthropic_agent_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_anthropic_agent_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 121,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_file_patch_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_file_patch_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 20.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 123,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_skill_state_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_skill_state_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 125,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/skill_catalogue_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_skill_catalogue_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 127,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/create_executor_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_create_executor_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_create_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 129,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_edit_executor_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_edit_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 131,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_patch_file_executor_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_patch_file_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 133,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_patch_executor_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_patch_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 135,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_patch_tool_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_patch_tool_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 137,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/approved_edit_http_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_approved_edit_http_fixture.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_approved_edit_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 139,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/workspace_tools_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_workspace_tools_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_workspace_tools_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 141,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/repository_instructions_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_workspace_tools_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_repository_instructions_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 143,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/skill_context_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_skill_context_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_skill_context_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 145,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/chat_provider_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_chat_provider_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_chat_provider_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 147,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/gemini_provider_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_provider_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_provider_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 149,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/deepseek_provider_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_deepseek_provider_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_deepseek_provider_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 151,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/deepseek_profile_runtime_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_deepseek_profile_runtime_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_deepseek_profile_runtime_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 153,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/provider_model_policy_runtime_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_provider_model_policy_runtime_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_model_policy_runtime_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 155,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/anthropic_provider_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_anthropic_provider_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_anthropic_provider_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 157,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/mcp_oauth_callback_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_oauth_callback_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_oauth_callback_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 159,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/responses_context_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_responses_context_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_responses_context_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 161,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/http_stream_transport_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_http_stream_transport_contract.exe",
+        "C:/Program Files/OpenSSL/bin/openssl.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_http_stream_transport_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 163,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/agent_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 165,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/agent_edit_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_edit_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 167,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/agent_patch_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_patch_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 169,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/agent_mcp_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_mcp_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 171,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/agent_mcp_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib",
+        "modern"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_sdk_modern_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 173,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/agent_mcp_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_admin.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib",
+        "legacy"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_sdk_legacy_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 175,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/http_cli_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_server.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_http_cli_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 177,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/unified_program_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_unified_program_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 179,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/agent_patch_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib",
+        "unified"
+      ],
+      "config" : "Release",
+      "name" : "native_unified_patch_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 181,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/graph_service_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib",
+        "unified"
+      ],
+      "config" : "Release",
+      "name" : "native_unified_graph_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 183,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/agent_mcp_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib",
+        "",
+        "unified"
+      ],
+      "config" : "Release",
+      "name" : "native_unified_mcp_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 185,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/console_workspace_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_console_workspace_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 187,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/local_profile_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/xlang3_runtime.dll",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_local_profile_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 189,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/local_view_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/xlang3_runtime.dll",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_local_view_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 191,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_xlang_sqlite_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "embedded_xlang_sqlite_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 193,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_incoming_repository_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_incoming_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 195,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_task_list_repository_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_task_list_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 197,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_permission_waiter_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_permission_waiter_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 199,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_operation_repository_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_operation_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 201,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_repository_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "xlang_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 203,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_persistence_service_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "persistence_service_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 205,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_backend_owner_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_backend_owner_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 207,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_legacy_owner_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_legacy_owner_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 209,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_owner_process_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_owner_process_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 15.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 211,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/runtime_generation_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_runtime_generation_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/xlang3_runtime.dll"
+      ],
+      "config" : "Release",
+      "name" : "native_runtime_generation_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 213,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/backend_owner_http_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_backend_owner_http_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/xlang3_runtime.dll",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_backend_owner_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 215,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/backend_handoff_contract.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/xlang3_runtime.dll",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_backend_handoff_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 217,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_provider_profiles_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_profiles_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 219,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/provider_profile_runtime_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_provider_profile_runtime_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_profile_runtime_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 221,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/provider_profile_cli_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_provider_profile_cli_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib",
+        "D:/a/xMind/xMind/xmind/build/native/Release/xmind_cli.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_profile_cli_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 223,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/gemini_catalogue_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_catalogue_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_catalogue_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 225,
+      "command" : 
+      [
+        "C:/hostedtoolcache/windows/node/22.23.3/x64/node.exe",
+        "D:/a/xMind/xMind/xmind/Native/tests/gemini_profile_runtime_peer.mjs",
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_gemini_profile_runtime_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_profile_runtime_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 50.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 227,
+      "command" : 
+      [
+        "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_credential_repository_contract.exe",
+        "D:/a/xMind/xMind/xlang3/build/Release/modules",
+        "D:/a/xMind/xMind/stdlib-source/Lib"
+      ],
+      "config" : "Release",
+      "name" : "encrypted_credential_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/a/xMind/xMind/xmind/build/native"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}

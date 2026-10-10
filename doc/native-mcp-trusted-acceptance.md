@@ -1,5 +1,12 @@
 # Trusted HTTPS OAuth acceptance
 
+The first completed hosted gate at `6708269` passed **115 of 116** contracts in
+**407.85 seconds**. The trusted contract failed before native login because
+`Import-Certificate` into `CurrentUser\Root` reported that UI is not allowed.
+The downloaded archive digest, exact inventory and original logs are verified.
+This is a test provisioning failure, not successful trusted OAuth acceptance.
+[Original hosted failure](evidence/native-oauth-registered-hosted-6708269.json).
+
 Successful HTTPS login must be tested through the actual native service, not by
 injecting tokens or setting a connected state. The new hosted-only contract runs
 the compiled C++ service, its real callback receiver, code exchange, encrypted
@@ -50,6 +57,14 @@ runner and requires its exact additional contract in the complete inventory.
 The normal local gate includes the independent peer contract; the hosted gate
 includes both that contract and the actual native trusted-login contract.
 Their verification scopes must remain separate.
+
+The later [single-use refresh primitive](native-mcp-refresh.md) adds one local
+contract, bringing the complete local/hosted inventories to **116 / 117**.
+While the owned test root is installed, the existing hosted trusted contract
+also invokes the actual native refresh primitive for seven independently checked
+response/failure modes. These separate synthetic protocol checks prove no durable
+refresh publication, automatic renewal or client refresh workflow; hosted results
+for this strengthened source remain unverified.
 
 Local checks verify the independent peer over real Node HTTPS with an explicit
 CA and rejection under default untrusted TLS. At original source `6cde3ba`, the

@@ -1,0 +1,35 @@
+Start testing: Oct 09 23:59 Pacific Daylight Time
+----------------------------------------------------------
+52/116 Testing: native_mcp_oauth_trusted_peer_contract
+52/116 Test: native_mcp_oauth_trusted_peer_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_oauth_trusted_peer_contract.mjs" "C:/Program Files/Git/usr/bin/openssl.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_mcp_oauth_trusted_peer_contract" start time: Oct 09 23:59 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Independent synthetic OAuth/MCP peer passed real HTTPS with explicit CA verification, default untrusted-TLS rejection, metadata/challenge, authorization faults, independently checked S256 code exchange and authenticated MCP responses. No native login or Windows trust provisioning executed.
+<end of output>
+Test time =   0.43 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_trusted_peer_contract" end time: Oct 09 23:59 Pacific Daylight Time
+"native_mcp_oauth_trusted_peer_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+81/116 Testing: native_mcp_oauth_refresh_contract
+81/116 Test: native_mcp_oauth_refresh_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_oauth_refresh_peer_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_oauth_refresh_contract.exe" "C:/Program Files/Git/usr/bin/openssl.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_mcp_oauth_refresh_contract" start time: Oct 09 23:59 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Actual native refresh primitive passed independent form decoding, token rotation/retention and scope rejection, bound metadata, single-use cancellation/deadline and real untrusted HTTPS contact with zero HTTP dispatch. No trusted native refresh, durable grant publication, automatic refresh or UI acceptance.
+<end of output>
+Test time =   0.34 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_refresh_contract" end time: Oct 09 23:59 Pacific Daylight Time
+"native_mcp_oauth_refresh_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 09 23:59 Pacific Daylight Time

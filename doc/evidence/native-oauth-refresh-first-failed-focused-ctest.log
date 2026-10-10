@@ -1,0 +1,9 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 52: native_mcp_oauth_trusted_peer_contract
+1/2 Test #52: native_mcp_oauth_trusted_peer_contract ...   Passed    0.43 sec
+    Start 81: native_mcp_oauth_refresh_contract
+2/2 Test #81: native_mcp_oauth_refresh_contract ........   Passed    0.34 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.79 sec

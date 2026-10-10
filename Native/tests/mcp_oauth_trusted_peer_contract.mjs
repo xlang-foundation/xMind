@@ -29,5 +29,17 @@ try{
  }
  for(const kind of ['success','registered'])for(const method of ['server/discover','tools/list']){const result=await trustedRequest(origin+'/mcp/'+kind,ca,{method:'POST',headers:{Authorization:'Bearer '+access,'Content-Type':'application/json','mcp-method':method},body:JSON.stringify({jsonrpc:'2.0',id:'fixture-'+kind+'-'+method,method})});assert.equal(result.status,200);assert.equal(JSON.parse(result.body).result.resultType,'complete');}
  peer.assertHealthy();assert.deepEqual(peer.counts.tokens,{success:1,registered:1,'bad-code':1});assert.deepEqual(peer.counts.authenticated,{'server/discover':2,'tools/list':2});
+ const refreshModes=['rotate','retain','scope-expanded','bad-json','http-failure','lost-reply','redirect'];
+ const refreshBody=new URLSearchParams({client_id:'synthetic-public-client',grant_type:'refresh_token',refresh_token:'synthetic refresh +&=',resource:origin+'/mcp/success',scope:'tools.read tools.list'}).toString();
+ for(const mode of refreshModes){
+  const request=()=>trustedRequest(origin+'/refresh/'+mode,ca,{method:'POST',body:refreshBody,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+  if(mode==='lost-reply'){await assert.rejects(request());continue;}
+  const result=await request();assert.equal(result.status,mode==='http-failure'?400:mode==='redirect'?307:200);
+  if(mode==='redirect'){assert.equal(result.headers.location,origin+'/refresh-forwarded');continue;}
+  if(mode==='bad-json'){assert.equal((result.body.match(/"access_token"/g)||[]).length,2);continue;}
+  const value=JSON.parse(result.body);if(mode==='http-failure'){assert.equal(value.error,'invalid_grant');continue;}
+  assert.equal(value.access_token,'synthetic-refreshed-access');assert.equal(value.scope,mode==='scope-expanded'?'tools.admin':'tools.read');assert.equal(value.refresh_token,mode==='rotate'?'synthetic rotated refresh +&=':undefined);
+ }
+ peer.assertHealthy();assert.deepEqual(peer.counts.refresh,Object.fromEntries(refreshModes.map(mode=>[mode,1])));
  process.stdout.write('Independent synthetic OAuth/MCP peer passed real HTTPS with explicit CA verification, default untrusted-TLS rejection, metadata/challenge, authorization faults, independently checked S256 code exchange and authenticated MCP responses. No native login or Windows trust provisioning executed.\n');
 }finally{if(peer)await peer.close();await rm(directory,{recursive:true,force:true});}

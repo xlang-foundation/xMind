@@ -1,0 +1,19 @@
+Start testing: Oct 10 00:25 Pacific Daylight Time
+----------------------------------------------------------
+96/116 Testing: native_local_profile_contract
+96/116 Test: native_local_profile_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/local_profile_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/xlang3_runtime.dll" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_local_profile_contract" start time: Oct 10 00:25 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualManagedNativeStartup":true,"authenticatedNativeOwnerVerified":true,"concurrentReattachmentSameOwner":true,"encryptedRendezvous":true,"consoleDetachKeepsOwner":true,"changedPolicyAndDamagedRecordRefused":true,"actualToolGraph":true,"sameSqliteProfileAfterObservedExit":true,"historyExactAfterRestart":true,"privateStorageExclusion":true,"providerRequests":0,"releasePackage":false,"installedIde":false}
+<end of output>
+Test time =  75.40 sec
+----------------------------------------------------------
+Test Passed.
+"native_local_profile_contract" end time: Oct 10 00:26 Pacific Daylight Time
+"native_local_profile_contract" time elapsed: 00:01:15
+----------------------------------------------------------
+
+End testing: Oct 10 00:26 Pacific Daylight Time

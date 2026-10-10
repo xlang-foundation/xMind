@@ -82,6 +82,47 @@ SecretBytes mcp_oauth_code_grant_form(const McpOAuthPublicClient& client,std::st
     bounded(client.client_id,2048);https(client.issuer);redirect(client.redirect_uri);https(resource);if(code.view().empty())invalid();bounded(std::string_view(reinterpret_cast<const char*>(code.view().data()),code.view().size()),4096);(void)mcp_oauth_pkce_challenge(verifier.view());
     PrivateText form;form.value.reserve(65536);parameter(form.value,"grant_type",bytes("authorization_code"),65536);parameter(form.value,"client_id",bytes(client.client_id),65536);parameter(form.value,"redirect_uri",bytes(client.redirect_uri),65536);parameter(form.value,"resource",bytes(resource),65536);parameter(form.value,"code",code.view(),65536);parameter(form.value,"code_verifier",verifier.view(),65536);return SecretBytes(bytes(form.value));
 }
+SecretBytes mcp_oauth_refresh_grant_form(std::string_view client_id,std::string_view resource,const SecretBytes& refresh,const std::vector<std::string>& scopes){
+    bounded(client_id,2048);https(resource);scopes_valid(scopes);
+    if(refresh.view().empty()||refresh.view().size()>32768)invalid();for(auto c:refresh.view())if(c<0x20||c>0x7e)invalid();
+    PrivateText form;form.value.reserve(131072);parameter(form.value,"grant_type",bytes("refresh_token"),131072);parameter(form.value,"client_id",bytes(client_id),131072);parameter(form.value,"resource",bytes(resource),131072);parameter(form.value,"refresh_token",refresh.view(),131072);
+    if(!scopes.empty()){std::string requested;for(const auto& scope:scopes){if(!requested.empty())requested+=' ';requested+=scope;}parameter(form.value,"scope",bytes(requested),131072);}
+    return SecretBytes(bytes(form.value));
+}
+McpOAuthTokens mcp_oauth_refresh_response(SecretBytes source,SecretBytes previous,const std::vector<std::string>& scopes){
+    // Validate the prior opaque token even when the response rotates it.
+    if(previous.view().empty()||previous.view().size()>32768)invalid();for(auto c:previous.view())if(c<0x20||c>0x7e)invalid();
+    auto result=mcp_oauth_token_response(std::move(source),scopes);
+    // Empty previous scope metadata is not permission to accept new scopes.
+    for(const auto& scope:result.scopes)if(std::find(scopes.begin(),scopes.end(),scope)==scopes.end())invalid();
+    if(!result.refresh_token)result.refresh_token=std::move(previous);return result;
+}
+struct McpOAuthRefreshAttempt::Impl {
+    std::string endpoint,resource,client_id;SecretBytes refresh;std::vector<std::string> scopes;McpDeadline expires;bool retired=false;
+    Impl(std::string target,std::string audience,std::string client,SecretBytes token,std::vector<std::string> granted,McpDeadline limit):endpoint(std::move(target)),resource(std::move(audience)),client_id(std::move(client)),refresh(std::move(token)),scopes(std::move(granted)),expires(limit){}
+    void retire() noexcept {retired=true;refresh.clear();}
+};
+McpOAuthRefreshAttempt::McpOAuthRefreshAttempt(McpOAuthDiscovery discovery,std::string client,std::string expected,SecretBytes token,std::vector<std::string> scopes,McpDeadline expires){
+    const auto& metadata=discovery.authorization;https(metadata.issuer);https(metadata.token_endpoint);https(expected);
+    if(metadata.issuer.find('?')!=std::string::npos||metadata.token_endpoint!=expected||std::find(discovery.resource.authorization_servers.begin(),discovery.resource.authorization_servers.end(),metadata.issuer)==discovery.resource.authorization_servers.end()||std::find(metadata.token_auth_methods.begin(),metadata.token_auth_methods.end(),"none")==metadata.token_auth_methods.end())invalid();
+    (void)mcp_oauth_refresh_grant_form(client,discovery.resource.resource,token,scopes);
+    const auto now=std::chrono::steady_clock::now();if(expires<=now||expires>now+std::chrono::minutes(10))throw McpTransportTimeout("Invalid MCP OAuth refresh lifetime");
+    impl_=std::make_unique<Impl>(metadata.token_endpoint,discovery.resource.resource,std::move(client),std::move(token),std::move(scopes),expires);
+}
+McpOAuthRefreshAttempt::~McpOAuthRefreshAttempt()=default;
+McpOAuthRefreshAttempt::McpOAuthRefreshAttempt(McpOAuthRefreshAttempt&&) noexcept=default;
+McpOAuthRefreshAttempt& McpOAuthRefreshAttempt::operator=(McpOAuthRefreshAttempt&&) noexcept=default;
+bool McpOAuthRefreshAttempt::ready()const noexcept{if(!impl_||impl_->retired)return false;if(std::chrono::steady_clock::now()>=impl_->expires){impl_->retire();return false;}return true;}
+void McpOAuthRefreshAttempt::cancel()noexcept{if(impl_)impl_->retire();}
+McpOAuthTokens McpOAuthRefreshAttempt::exchange(McpDeadline deadline,std::stop_token cancel){
+    if(!impl_||impl_->retired)invalid();auto& owner=*impl_;owner.retired=true;
+    try{
+        if(cancel.stop_requested())throw McpTransportCancelled("MCP OAuth refresh cancelled");
+        const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(std::min(deadline,owner.expires)-std::chrono::steady_clock::now());if(remaining.count()<=0)throw McpTransportTimeout("MCP OAuth refresh deadline exceeded");
+        auto form=mcp_oauth_refresh_grant_form(owner.client_id,owner.resource,owner.refresh,owner.scopes);HttpStreamRequest request;request.url=owner.endpoint;request.deadline=remaining;request.idle_timeout=remaining;
+        auto response=post_form_json(request,form,1024*1024,cancel);auto result=mcp_oauth_refresh_response(std::move(response),std::move(owner.refresh),owner.scopes);owner.retire();return result;
+    }catch(const TransportCancelled&){owner.retire();throw McpTransportCancelled("MCP OAuth refresh cancelled");}catch(const TransportTimeout&){owner.retire();throw McpTransportTimeout("MCP OAuth refresh deadline exceeded");}catch(const ProviderHttpError& error){owner.retire();throw McpTransportError("MCP OAuth refresh endpoint returned HTTP "+std::to_string(error.status));}catch(const TransportError&){owner.retire();throw McpTransportError("Native MCP OAuth refresh transport failed");}catch(...){owner.retire();throw;}
+}
 struct McpOAuthAuthorizationAttempt::Impl {
     McpOAuthDiscovery discovery;McpOAuthPublicClient client;std::vector<std::string> scopes;McpDeadline expires;
     SecretBytes state,verifier;std::optional<SecretBytes> code;enum class Phase{callback,exchange,retired};Phase phase=Phase::callback;

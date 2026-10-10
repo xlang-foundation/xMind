@@ -214,12 +214,13 @@ class Store {
         auto part = directory.root_path();
         for (const auto &component : directory.relative_path()) {
             part /= component;
-            if (create && !fs::exists(part)) {
-                require(CreateDirectoryW(part.c_str(), &security.attributes) != 0 ||
+            const auto native_part = extended(part);
+            if (create && !fs::exists(fs::path(native_part))) {
+                require(CreateDirectoryW(native_part.c_str(), &security.attributes) != 0 ||
                             GetLastError() == ERROR_ALREADY_EXISTS,
                         "Cannot create protected local profile directory");
             }
-            Handle held(CreateFileW(part.c_str(), FILE_READ_ATTRIBUTES | READ_CONTROL,
+            Handle held(CreateFileW(native_part.c_str(), FILE_READ_ATTRIBUTES | READ_CONTROL,
                                     FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING,
                                     FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, nullptr));
             require(held.value != INVALID_HANDLE_VALUE);
@@ -642,9 +643,17 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         state["runtime"] = text(destination.directory);
         store.write(state);
         const auto manifest = parse(raw);
+        // Prepare and pin each destination directory once. Repeating recursive
+        // directory creation for every library file makes a cold profile pay
+        // the same path traversal thousands of times. Store applies the private
+        // ACL and rejects aliases; its handles keep these paths pinned through
+        // copying and the complete destination generation verification below.
+        std::map<fs::path, std::unique_ptr<Store>> prepared_directories;
         for (const auto &[name, digest] : manifest.at("files").items()) {
             const auto path = fs::u8path(name);
-            fs::create_directories(fs::path(extended(destination.directory / path.parent_path())));
+            const auto parent = path.parent_path();
+            if (!parent.empty() && !prepared_directories.contains(parent))
+                prepared_directories.emplace(parent, std::make_unique<Store>(destination.directory / parent, true));
             require(CopyFileW(extended(source / path).c_str(), extended(destination.directory / path).c_str(),
                               TRUE) != 0,
                     "Cannot copy the verified profile runtime inventory");

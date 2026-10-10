@@ -20,6 +20,42 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+The rebuilt single-use refresh/startup candidate passes the complete **116/116**
+local native gate in **382.06 seconds**, with all **2462** frozen inputs unchanged.
+The original managed-profile contract passes without changing its watchdog.
+Client inputs are unchanged from the prior complete **257 extension / 55 browser**
+result; those suites were not rerun. Durable/automatic refresh, trusted native
+login and current installed acceptance remain unfinished.
+[Exact local evidence](evidence/native-oauth-refresh-local.json).
+
+The registered-callback hosted gate at `6708269` passed **115 of 116** native
+contracts in **407.85 seconds**. Trusted OAuth stopped before native login when
+test-certificate import into `CurrentUser\Root` rejected noninteractive use.
+Downloaded artifact digest, exact inventory and original logs are verified.
+Trusted acceptance remains unproved; the test provisioning repair is pending.
+[Original hosted failure](evidence/native-oauth-registered-hosted-6708269.json).
+
+The single-use refresh exchange primitive compiles and passes two focused native
+contracts. Form encoding, rotation/retention, scope/metadata rejection, cancellation
+and deadline retirement are checked, with actual untrusted TLS contact and no
+HTTP dispatch. The first complete 116-contract local gate passed 115 and failed
+managed profile startup at its unchanged 60-second fixture deadline. The original
+output is preserved. The original focused repeat also failed. A longer-watchdog
+diagnostic completed with a 57,196 ms cold start; that modified diagnostic is not
+acceptance. Directory preparation now prepares and pins each destination once.
+Its rebuilt original focused contract passes in 75.40 seconds with the unchanged
+per-command watchdog; the following complete gate passes as recorded above. Hosted inventory now
+requires 117. This primitive does not implement durable or automatic refresh,
+running-owner coordination or client refresh controls.
+[Implementation boundary](native-mcp-refresh.md).
+[Original full-gate failure](evidence/native-oauth-refresh-first-failed.json).
+
+The preceding `73ccf90` console package passed **114 hosted native** contracts in
+**417.25 seconds**, **257 extension / 55 browser** checks and independent artifact,
+source/runtime/VSIX and twelve browser asset comparisons. It predates callback
+registration and refresh work and has no current installed/trusted-login claim.
+[Exact hosted evidence](evidence/native-oauth-cli-hosted-73ccf90.json).
+
 The registered-callback candidate adds native callback path/port configuration
 and exact exclusive binding, with purpose/agent authority changes on registration
 changes. The complete rebuilt **115/115** native gate passes in **388.83 seconds**,

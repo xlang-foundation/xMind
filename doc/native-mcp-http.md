@@ -1,5 +1,11 @@
 # Native MCP HTTP transport
 
+The newer [single-use refresh primitive](native-mcp-refresh.md) is separately
+scoped. It does not enable automatic refresh or replace the required durable
+grant-rotation and running-owner coordination work. The current complete rebuilt
+native gate for that candidate passes **116/116** in **382.06 seconds**, with
+**2462** unchanged inputs. [Exact evidence](evidence/native-oauth-refresh-local.json).
+
 The latest [native login service and Settings controls](native-mcp-login.md),
 including [console setup/status/watch/cancel](native-mcp-console.md), pass the
 complete **114/114** local native and **257 extension / 55 browser** gates.

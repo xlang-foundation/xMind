@@ -1,0 +1,32 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 96: native_local_profile_contract
+1/1 Test #96: native_local_profile_contract ....***Failed   63.99 sec
+{"retainedFixture":"C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-local-profile-NrMQa8"}
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+null !== 0
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/local_profile_contract.mjs:20:77
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: null,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =  64.00 sec
+
+The following tests FAILED:
+	 96 - native_local_profile_contract (Failed)
+Errors while running CTest

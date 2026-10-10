@@ -1,0 +1,380 @@
+MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+
+  Checking File Globs
+  absl_log_severity.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_log_severity.lib
+  absl_exponential_biased.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\profiling\Release\absl_exponential_biased.lib
+  absl_civil_time.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\time\Release\absl_civil_time.lib
+  agentflow_mcp_wire.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_wire.lib
+  absl_time_zone.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\time\Release\absl_time_zone.lib
+  absl_utf8_for_code_point.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_utf8_for_code_point.lib
+  absl_spinlock_wait.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_spinlock_wait.lib
+  absl_hardening.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_hardening.lib
+  absl_source_location.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\types\Release\absl_source_location.lib
+  agentflow_secrets.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_secrets.lib
+  absl_flags_commandlineflag_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag_internal.lib
+  absl_leak_check.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_leak_check.lib
+  absl_log_internal_nullguard.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_nullguard.lib
+  absl_strerror.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_strerror.lib
+  agentflow_file_patch.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_file_patch.lib
+  Scanning sources for module dependencies...
+  agentflow_process.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process.lib
+  yaml-cpp.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\yaml-cpp\Release\yaml-cpp.lib
+  agentflow_models.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_models.lib
+  agentflow_json_schema.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_json_schema.lib
+  agentflow_mcp_stdio.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_stdio.lib
+  agentflow_provider_transport.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_provider_transport.lib
+  xmind_schema_worker.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind_schema_worker.exe
+  agentflow_owner_process.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_owner_process.lib
+  agentflow_mcp_http.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_http.lib
+  absl_raw_logging_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_raw_logging_internal.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  anthropic_stream_contract.cpp
+  agentflow_chat_provider.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_chat_provider.lib
+  agentflow_core.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_core.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  anthropic_request_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  credential_repository_contract.cpp
+  agentflow_a2a.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_a2a.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_policy.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_policy.lib
+  context_selection_contract.cpp
+  agentflow_context_selection_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_context_selection_contract.exe
+  agentflow_anthropic_request_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_anthropic_request_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_credential_repository_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_credential_repository_contract.exe
+  context_repository_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  anthropic_history_contract.cpp
+  agentflow_graph.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_runtime_generation.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_runtime_generation.lib
+  backend_owner_contract.cpp
+  agentflow_anthropic_stream_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_anthropic_stream_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_schema_worker.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_schema_worker.lib
+  agentflow_backend_owner_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_backend_owner_contract.exe
+  agentflow_anthropic_history_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_anthropic_history_contract.exe
+  agentflow_mcp_configuration.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_configuration.lib
+  absl_cordz_functions.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_functions.lib
+  absl_throw_delegate.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_throw_delegate.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  absl_debugging_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_debugging_internal.lib
+  agentflow_view_sessions.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_view_sessions.lib
+  file_patch_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  gemini_history_contract.cpp
+  chat_provider_contract.cpp
+  agentflow_file_patch_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_file_patch_contract.exe
+  anthropic_provider_contract.cpp
+  agentflow_chat_provider_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_chat_provider_contract.exe
+  agentflow_context_repository_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_context_repository_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  dynamic_plan_repository_contract.cpp
+  dynamic_plan_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  gemini_request_contract.cpp
+  agentflow_anthropic_provider_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_anthropic_provider_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  gemini_provider_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  gemini_stream_contract.cpp
+  agentflow_gemini_request_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_gemini_request_contract.exe
+  agentflow_gemini_history_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_gemini_history_contract.exe
+  agentflow_gemini_provider_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_gemini_provider_contract.exe
+  agentflow_mcp_client_factory.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_client_factory.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_dynamic_plan_repository_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_dynamic_plan_repository_contract.exe
+  http_stream_transport_contract.cpp
+  absl_base.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_base.lib
+  agentflow_instruction_configuration.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_instruction_configuration.lib
+  agentflow_gemini_stream_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_gemini_stream_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  json_schema_contract.cpp
+  instruction_configuration_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  incoming_repository_contract.cpp
+  agentflow_json_schema_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_json_schema_contract.exe
+  agentflow_http_stream_transport_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_http_stream_transport_contract.exe
+  agentflow_mcp_oauth_service.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_oauth_service.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  legacy_owner_contract.cpp
+  agentflow_instruction_configuration_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_instruction_configuration_contract.exe
+  absl_base_cpu_detect.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_base_cpu_detect.lib
+  absl_tracing_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_tracing_internal.lib
+  agentflow_legacy_owner_process.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_legacy_owner_process.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  absl_log_internal_conditions.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_conditions.lib
+  absl_city.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\hash\Release\absl_city.lib
+  mcp_client_contract.cpp
+  agentflow_incoming_repository_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_incoming_repository_contract.exe
+  absl_strings_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_strings_internal.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  mcp_configuration_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  mcp_handshake_contract.cpp
+  agentflow_mcp_client_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_client_contract.exe
+  absl_malloc_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\base\Release\absl_malloc_internal.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  mcp_oauth_callback_contract.cpp
+  agentflow_legacy_owner_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_legacy_owner_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  graph_checkpoint_contract.cpp
+  absl_int128.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\numeric\Release\absl_int128.lib
+  mcp_oauth_credentials_contract.cpp
+  agentflow_mcp_handshake_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_handshake_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  absl_decode_rust_punycode.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_decode_rust_punycode.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  mcp_stdio_contract.cpp
+  agentflow_mcp_configuration_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_configuration_contract.exe
+  mcp_wire_contract.cpp
+  agentflow_mcp_oauth_callback_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_oauth_callback_contract.exe
+  graph_contract.cpp
+  agentflow_mcp_stdio_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_stdio_contract.exe
+  agentflow_mcp_wire_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_wire_contract.exe
+  agentflow_mcp_oauth_credentials_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_oauth_credentials_contract.exe
+  agentflow_dynamic_plan_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_dynamic_plan_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  model_stream_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  owner_process_contract.cpp
+  operation_repository_contract.cpp
+  absl_graphcycles_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\synchronization\Release\absl_graphcycles_internal.lib
+  agentflow_owner_process_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_owner_process_contract.exe
+  model_request_contract.cpp
+  agentflow_graph_checkpoint_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph_checkpoint_contract.exe
+  agentflow_operation_repository_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_operation_repository_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_model_stream_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_model_stream_contract.exe
+  persistence_service_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  absl_stacktrace.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_stacktrace.lib
+  absl_demangle_rust.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_rust.lib
+  process_contract.cpp
+  permission_waiter_contract.cpp
+  agentflow_graph_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  repository_contract.cpp
+  agentflow_persistence_service_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_persistence_service_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_model_request_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_model_request_contract.exe
+  schema_budget_fixture.cpp
+  responses_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  responses_context_contract.cpp
+  secret_protection_contract.cpp
+  agentflow_permission_waiter_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_permission_waiter_contract.exe
+  agentflow_process_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_contract.exe
+  agentflow_schema_budget_fixture.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_schema_budget_fixture.exe
+  agentflow_responses_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_responses_contract.exe
+  absl_strings.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_strings.lib
+  absl_crc_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\crc\Release\absl_crc_internal.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  task_list_repository_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  runtime_generation_contract.cpp
+  skill_state_contract.cpp
+  agentflow_responses_context_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_responses_context_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  xlang_sqlite_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_xlang_sqlite_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_xlang_sqlite_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  absl_demangle_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_internal.lib
+  persistence_demo.cpp
+  absl_log_internal_fnmatch.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_fnmatch.lib
+  absl_log_internal_proto.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_proto.lib
+  absl_log_internal_structured_proto.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_structured_proto.lib
+  absl_str_format_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_str_format_internal.lib
+  agentflow_secret_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_secret_contract.exe
+  agentflow_runtime_generation_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_runtime_generation_contract.exe
+  absl_hash.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\hash\Release\absl_hash.lib
+  schema_worker_contract.cpp
+  absl_flags_commandlineflag.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag.lib
+  agentflow_task_list_repository_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_task_list_repository_contract.exe
+  agentflow_repository_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_repository_contract.exe
+  absl_time.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\time\Release\absl_time.lib
+  xmind_persistence_demo.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind_persistence_demo.exe
+  absl_flags_marshalling.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_marshalling.lib
+  absl_crc32c.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\crc\Release\absl_crc32c.lib
+  absl_symbolize.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_symbolize.lib
+  absl_flags_private_handle_accessor.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_private_handle_accessor.lib
+  absl_kernel_timeout_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\synchronization\Release\absl_kernel_timeout_internal.lib
+  absl_log_entry.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_entry.lib
+  absl_log_internal_globals.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_globals.lib
+  absl_examine_stack.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\debugging\Release\absl_examine_stack.lib
+  absl_log_sink.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_sink.lib
+  absl_crc_cord_state.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\crc\Release\absl_crc_cord_state.lib
+  absl_log_internal_format.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_format.lib
+  absl_cord_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cord_internal.lib
+  absl_synchronization.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\synchronization\Release\absl_synchronization.lib
+  absl_flags_program_name.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_program_name.lib
+  absl_cordz_handle.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_handle.lib
+  absl_hashtablez_sampler.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\container\Release\absl_hashtablez_sampler.lib
+  absl_vlog_config_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_vlog_config_internal.lib
+  absl_flags_config.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_config.lib
+  absl_log_globals.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_globals.lib
+  absl_cordz_info.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_info.lib
+  absl_flags_internal.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_internal.lib
+  absl_log_internal_log_sink_set.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_log_sink_set.lib
+  absl_cord.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\strings\Release\absl_cord.lib
+  absl_raw_hash_set.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\container\Release\absl_raw_hash_set.lib
+  absl_log_internal_message.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_message.lib
+  absl_log_internal_check_op.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_check_op.lib
+  absl_flags_reflection.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\abseil-cpp\absl\flags\Release\absl_flags_reflection.lib
+  re2.vcxproj -> D:\a\xMind\xMind\xmind\build\native\third_party\re2\Release\re2.lib
+  agentflow_workspace.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_workspace.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_local_profile.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_local_profile.lib
+  agentflow_console_transport.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_console_transport.lib
+  skill_context_contract.cpp
+  agentflow_edits.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_edits.lib
+  agentflow_backend_owner_control.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_backend_owner_control.lib
+  workspace_tools_contract.cpp
+  agentflow_skill_state_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_skill_state_contract.exe
+  agentflow_process_effects.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_effects.lib
+  agentflow_mcp_effects.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_effects.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  cli_main.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_schema_worker_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_schema_worker_contract.exe
+  patch_executor_contract.cpp
+  patch_file_executor_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  patch_tool_contract.cpp
+  create_executor_contract.cpp
+  mcp_effect_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_skill_context_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_skill_context_contract.exe
+  edit_executor_contract.cpp
+  agentflow_workspace_tools_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_workspace_tools_contract.exe
+  agentflow_create_executor_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_create_executor_contract.exe
+  agentflow_patch_executor_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_patch_executor_contract.exe
+  agentflow_patch_file_executor_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_patch_file_executor_contract.exe
+  xmind_cli.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind_cli.exe
+  agentflow_edit_executor_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_edit_executor_contract.exe
+  agentflow_patch_tool_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_patch_tool_contract.exe
+  agentflow_agent.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_agent.lib
+  agentflow_process_configuration.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_configuration.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  dynamic_plan_mcp_contract.cpp
+  graph_children_contract.cpp
+  dynamic_plan_engine_contract.cpp
+  context_engine_contract.cpp
+  agent_service_contract.cpp
+  agentflow_graph_children_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph_children_contract.exe
+  agentflow_context_engine_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_context_engine_contract.exe
+  agentflow_dynamic_plan_engine_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_dynamic_plan_engine_contract.exe
+  gemini_agent_contract.cpp
+  deepseek_provider_contract.cpp
+  agentflow_dynamic_plan_mcp_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_dynamic_plan_mcp_contract.exe
+  agent_authority_contract.cpp
+  native_delegation_contract.cpp
+  agentflow_process_executor_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_executor_contract.exe
+  agentflow_agent_service_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_agent_service_contract.exe
+  native_child_executor_contract.cpp
+  agentflow_agent_authority_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_agent_authority_contract.exe
+  agentflow_gemini_agent_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_gemini_agent_contract.exe
+  agentflow_mcp_effect_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_effect_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  process_configuration_contract.cpp
+  agentflow_native_child_executor_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_native_child_executor_contract.exe
+  agentflow_graph_execution.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph_execution.lib
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  anthropic_agent_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agent_runner_contract.cpp
+  agentflow_process_configuration_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_process_configuration_contract.exe
+  agentflow_native_delegation_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_native_delegation_contract.exe
+  agentflow_agent_runner_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_agent_runner_contract.exe
+  agentflow_deepseek_provider_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_deepseek_provider_contract.exe
+  agentflow_anthropic_agent_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_anthropic_agent_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_http.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_http.lib
+  graph_mcp_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_runtime.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_runtime.lib
+  graph_runner_contract.cpp
+  admin_main.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  context_graph_engine_contract.cpp
+  mcp_oauth_service_contract.cpp
+  approved_edit_http_fixture.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  mcp_oauth_trusted_contract.cpp
+  xmind_admin.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind_admin.exe
+  agentflow_graph_runner_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph_runner_contract.exe
+  agentflow_approved_edit_http_fixture.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_approved_edit_http_fixture.exe
+  agentflow_mcp_oauth_service_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_oauth_service_contract.exe
+  agentflow_context_graph_engine_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_context_graph_engine_contract.exe
+  planning_http_contract.cpp
+  agentflow_graph_mcp_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_graph_mcp_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  context_control_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  agentflow_mcp_oauth_trusted_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_mcp_oauth_trusted_contract.exe
+  provider_profile_cli_contract.cpp
+  provider_model_policy_runtime_contract.cpp
+  backend_owner_http_contract.cpp
+  agentflow_provider_profile_cli_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_provider_profile_cli_contract.exe
+  gemini_profile_runtime_contract.cpp
+  agentflow_planning_http_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_planning_http_contract.exe
+  provider_profile_runtime_contract.cpp
+  deepseek_profile_runtime_contract.cpp
+  agentflow_context_control_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_context_control_contract.exe
+  agentflow_backend_owner_http_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_backend_owner_http_contract.exe
+  agentflow_provider_model_policy_runtime_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_provider_model_policy_runtime_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  server_main.cpp
+  provider_profiles_contract.cpp
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  provider_setup_contract.cpp
+  xmind.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind.exe
+  agentflow_gemini_profile_runtime_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_gemini_profile_runtime_contract.exe
+  agentflow_provider_profiles_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_provider_profiles_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
+  provider_yaml_config_contract.cpp
+  xmind_server.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\xmind_server.exe
+  agentflow_deepseek_profile_runtime_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_deepseek_profile_runtime_contract.exe
+  gemini_catalogue_contract.cpp
+  agentflow_provider_yaml_config_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_provider_yaml_config_contract.exe
+  agentflow_gemini_catalogue_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_gemini_catalogue_contract.exe
+  agentflow_provider_profile_runtime_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_provider_profile_runtime_contract.exe
+  agentflow_provider_setup_contract.vcxproj -> D:\a\xMind\xMind\xmind\build\native\Release\agentflow_provider_setup_contract.exe
+  Building Custom Rule D:/a/xMind/xMind/xmind/Native/CMakeLists.txt
