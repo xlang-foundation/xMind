@@ -12,6 +12,9 @@ The same pushed source passed hosted **224 extension / 41 browser** checks with
 all 44 source/vendor files and 12 generated assets unchanged. Downloaded asset
 bytes match the original gate digests. This does not prove native startup.
 [Original hosted gate and independent artifact checks](evidence/native-rendezvous-owner-hosted-views.json).
+The older queued `da4f6e1` build then repeated the same owner failure; it does
+not contain this host fix. The corrected `0b96974` native run has now started.
+[Original older failure and corrected run identity](evidence/native-rendezvous-owner-older-confirmation.json).
 
 The local native launcher now detects the actual Python benchmark parent as well
 as its workers, and rechecks before configure, compile and contracts. The previous

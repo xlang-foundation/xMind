@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "status": "older-source-failed",
+  "observedSource": "da4f6e129728df4b917df07eb0e33210a2062d5a",
+  "currentHead": "181b1c69b7b6f0dbec52a0f064b2bcc2350167ad",
+  "run": 38010848777,
+  "job": 114090957047,
+  "verification": {
+    "unifiedNativeBuildPassed": true,
+    "earlyNativeViewContractFailed": true,
+    "viewTestSeconds": 15.5,
+    "complete110GateExecuted": false,
+    "nativeAccepted": false
+  },
+  "observedError": "Local profile storage is not owned by this Windows user",
+  "rawLog": {
+    "file": "doc/evidence/native-unified-hosted-da4f6e1-failed.log",
+    "sha256": "057cb04cad0dac8f3d6b6b1c54bb4dea8503958fa99d358a577cf7a5ce8b9bc2"
+  },
+  "disposition": "This source predates the native-owned rendezvous fix 0b96974; it repeats the same diagnosed failure, so no further startup patch is justified by it.",
+  "correctedRun": {
+    "id": 38011500398,
+    "job": 114094981101,
+    "source": "0b96974122ef066d86d03c5d864f6d45b5acea47",
+    "state": "in_progress",
+    "startedAt": "2026-10-10T01:14:00Z"
+  },
+  "limits": [
+    "Actual corrected native startup, full native gate and installed UI acceptance remain pending.",
+    "The earlier run does not validate the new host directory allocation.",
+    "No local native build or model request occurred."
+  ]
+}

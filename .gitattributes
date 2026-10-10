@@ -54,3 +54,4 @@ doc/evidence/native-unified-view-candidate-extension-failed.log -text whitespace
 doc/evidence/native-unified-hosted-48aa772-failed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-unified-hosted-faab16f-failed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-unified-hosted-645d76f-failed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-unified-hosted-da4f6e1-failed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
