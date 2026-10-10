@@ -5,6 +5,7 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const crypto=require('node:crypto');
 const {spawn}=require('node:child_process');
+const {BackendClient}=require('./client');
 function canonicalPath(value){
   if(typeof value!=='string'||!value||value.length>32760||/[\x00-\x1f]/.test(value))throw new Error('Invalid local workspace path.');
   const ordinary=value.startsWith('\\\\?\\UNC\\')?'\\\\'+value.slice(8):value.startsWith('\\\\?\\')?value.slice(4):value;
@@ -26,6 +27,20 @@ function workspaceMetadata(value){
 function machineSetting(vscode,name){
   const inspected=vscode.workspace.getConfiguration('agentflow').inspect?.(name);
   return inspected?.globalValue??inspected?.defaultValue;
+}
+async function providerConfigurationPath(context,vscode,io,setting){
+  if(setting)return setting;
+  // Development installs have a fixed source layout. Never search an opened
+  // workspace for provider credentials.
+  if(vscode.ExtensionMode?.Development===undefined||context.extensionMode!==vscode.ExtensionMode.Development)return undefined;
+  const extensionRoot=context.extensionUri?.fsPath;
+  if(typeof extensionRoot!=='string'||!path.isAbsolute(extensionRoot))return undefined;
+  const candidate=path.resolve(extensionRoot,'..','..','.config','providers.yaml');
+  try{
+    const info=await io.lstat(candidate);
+    if(!info.isFile()||info.isSymbolicLink()||canonicalPath(await io.realpath(candidate))!==canonicalPath(candidate))throw new Error('Development provider configuration is aliased or not a regular file.');
+    return candidate;
+  }catch(error){if(error.code==='ENOENT')return undefined;throw error;}
 }
 
 class WorkspaceBackend {
@@ -82,14 +97,14 @@ class WorkspaceBackend {
     const canonical=canonicalPath(await this.deps.fs.realpath(selection.folder.uri.fsPath));
     const roots=await Promise.all(selection.roots.map(async root=>canonicalPath(await this.deps.fs.realpath(root.fsPath))));
     const scope=crypto.createHash('sha256').update(keyPath(canonical)).digest('hex');
-    const config={runtimeDirectory:machineSetting(this.vscode,'runtimeDirectory'),stdlibSource:machineSetting(this.vscode,'stdlibSource'),providerConfigPath:machineSetting(this.vscode,'providerConfigPath')};
+    const config={runtimeDirectory:machineSetting(this.vscode,'runtimeDirectory'),stdlibSource:machineSetting(this.vscode,'stdlibSource'),providerConfigPath:await providerConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'providerConfigPath'))};
     const runtime=await this.resolveRuntime(this.context,{platform:this.deps.platform,arch:this.deps.arch,remoteName:this.vscode.env?.remoteName??null},config);
     if(runtime.qualified!==true)throw new Error('Managed profiles require bundled verified pure-library sources. Clear stdlibSource or use an external development server.');
     if(!current())throw new Error('Workspace changed while preparing its backend.');
     const retained=this.adapters.get(scope);
     if(retained){
       if(roots.some(root=>contained(root,retained.privateDirectory)||contained(retained.privateDirectory,root)||contained(root,retained.profileDirectory)||contained(retained.profileDirectory,root)))throw new Error('Private native storage overlaps the opened folder set. Existing storage was preserved.');
-      try{await this.observe(retained);if(!current())throw new Error('Workspace changed while reconnecting.');this.active={...retained,epoch,signature:selection.signature,roots:selection.roots};return this.active;}
+      try{await this.observe(retained);await this.importProviders(retained.origin,await this.context.secrets.get(`xmind.auth:${retained.origin}`),runtime.providerConfig);if(!current())throw new Error('Workspace changed while reconnecting.');this.active={...retained,epoch,signature:selection.signature,roots:selection.roots};return this.active;}
       catch(error){if(!current())throw error;this.closeAdapter(retained);this.adapters.delete(scope);}
     }
     let privateRoot=canonicalPath(runtime.privateStateRoot);
@@ -129,7 +144,6 @@ class WorkspaceBackend {
     }
     if(roots.some(root=>contained(root,profileRoot)||contained(profileRoot,root)))throw new Error('Local profile storage overlaps an opened workspace.');
     const args=['view','--workspace',canonical,'--profile-root',profileRoot,'--ready-file',ready];
-    if(runtime.providerConfig)args.push('--config',runtime.providerConfig);
     if(machineSetting(this.vscode,'workspaceEdits')===false)args.push('--read-only');
     if(!current())throw new Error('Workspace changed before starting its native view.');
     const env={...this.deps.env,XMIND_VIEW_TOKEN:token};for(const key of Object.keys(env))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY'||key==='XMIND_AUTH_TOKEN')delete env[key];
@@ -154,6 +168,7 @@ class WorkspaceBackend {
       owner={origin:metadata.origin,canonical,scope,metadata:actual,child,pid:child.pid,backendPid:metadata.backend_process_id,privateDirectory:directory,profileDirectory};
       await this.context.secrets.store('xmind.auth:'+owner.origin,token);
       await this.observe(owner);
+      await this.importProviders(owner.origin,token,runtime.providerConfig);
       if(!current())throw new Error('Workspace changed while authenticating its native view.');
       this.adapters.set(scope,owner);this.active={...owner,epoch,signature:selection.signature,roots:selection.roots};return this.active;
     }catch(error){if(owner)this.closeAdapter(owner);else if(child.exitCode==null)child.kill();throw error;}
@@ -162,6 +177,13 @@ class WorkspaceBackend {
   async readWorkspace(origin,token){
     const response=await this.deps.fetch(origin+'/v1/workspace',{headers:{Authorization:'Bearer '+token},redirect:'error',signal:AbortSignal.timeout(2000)});
     if(!response.ok)throw new Error('Cannot verify the local native workspace.');return workspaceMetadata(await response.json());
+  }
+  async importProviders(origin,token,providerConfig){
+    this.providerImportPending=false;
+    if(!providerConfig)return;
+    const client=new BackendClient(origin,()=>token,this.deps.fetch);
+    try{const current=await client.providerProfiles();await client.importProviderConfiguration(providerConfig,current.revision);}
+    catch(error){if(error.status===409){this.providerImportPending=true;return;}throw error;}
   }
   async attach(origin,token){
     const epoch=this.epoch,selection=await this.selectedFolder(false);
@@ -193,7 +215,7 @@ class WorkspaceBackend {
     const active=this.active;
     if(!active)return {origin:null,configured:false,root:null,workspace_id:null,authority_id:null};
     const ticket={owner:active.scope,epoch:this.epoch,origin:active.origin,signature:active.signature};
-    this.assert(ticket);const actual=await this.observe(active);this.assert(ticket);return {origin:active.origin,...actual};
+    this.assert(ticket);const actual=await this.observe(active);this.assert(ticket);return {origin:active.origin,...actual,provider_import_pending:this.providerImportPending===true};
   }
 }
-module.exports={WorkspaceBackend,workspaceMetadata,canonicalPath,machineSetting};
+module.exports={WorkspaceBackend,workspaceMetadata,canonicalPath,machineSetting,providerConfigurationPath};

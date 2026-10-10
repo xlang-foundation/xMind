@@ -8,6 +8,10 @@ workspaceSkillRouteTest('workspace skill catalogue is an exact read-only browser
  for(const route of ['/v1/workspace','/v1/workspace/skills']){workspaceSkillRouteAssert.equal(allowedApiRoute(route,'GET'),true);for(const method of ['POST','PUT','DELETE'])workspaceSkillRouteAssert.equal(allowedApiRoute(route,method),false);}
  for(const route of ['/v1/workspace/skills/load','/v1/workspace/skills/../credentials','/v1/workspace/skills/'])workspaceSkillRouteAssert.equal(allowedApiRoute(route,'GET'),false);
 });
+workspaceSkillRouteTest('browser view cannot invoke the native provider YAML file reader',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs');
+ for(const method of ['GET','POST','PUT','PATCH','DELETE','HEAD'])workspaceSkillRouteAssert.equal(allowedApiRoute('/v1/provider/configuration/import',method),false);
+});
 // Explicit synthetic native peer/assets: only thin view routing and durable
 // access forwarding are tested. No native SQLite, model or agent execution.
 const test=require('node:test'),assert=require('node:assert/strict');

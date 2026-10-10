@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/model_provider.hpp"
+#include <filesystem>
 namespace agentflow {
 struct ProviderProfileMetadata {
     std::string id,route_id,provider,model;
@@ -27,5 +28,7 @@ public:
     virtual ProviderProfileRuntimeMetadata save_profile(std::string id,std::string route,std::string model,
         SecretBytes key,std::int64_t expected_revision,bool activate=false)=0;
     virtual ProviderProfileRuntimeMetadata select_profile(std::string id,std::int64_t expected_revision)=0;
+    virtual ProviderProfileRuntimeMetadata import_yaml_configuration(const std::filesystem::path& absolute_path,
+        std::int64_t expected_revision)=0;
 };
 }

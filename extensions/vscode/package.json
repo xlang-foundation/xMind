@@ -95,7 +95,7 @@
           "type": "string",
           "default": "",
           "scope": "machine",
-          "description": "Absolute path to the single provider YAML configuration imported by Native. The extension never reads its contents or loads a project-local configuration automatically."
+          "description": "Optional absolute path overriding the provider YAML file. Development installs automatically use the repository .config/providers.yaml when present; opened workspace folders are never searched."
         },
         "agentflow.workspaceEdits": {
           "type": "boolean",

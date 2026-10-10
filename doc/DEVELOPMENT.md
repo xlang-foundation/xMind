@@ -79,10 +79,13 @@ on TestProj after the 88-contract native gate; its normal persistent window
 retains VS Code's folder-trust requirement. Node adapter tests alone do not
 establish that acceptance. See [opened-folder evidence](vscode-opened-workspace.md).
 
-Configure `agentflow.runtimeDirectory`, optional `agentflow.stdlibSource` and
-the one `agentflow.providerConfigPath` in machine/global User settings. Native
-alone imports provider YAML; the extension neither reads keys nor auto-loads
-selected-project configuration. An explicit external connection uses
+Configure `agentflow.runtimeDirectory`, optional `agentflow.stdlibSource` and,
+for an installed extension, optional `agentflow.providerConfigPath` in
+machine/global User settings. In an Extension Development Host, xMind imports
+the repository's `.config/providers.yaml` automatically when that regular file
+exists. The extension passes only the absolute path to the authenticated native
+owner; Native parses the YAML and encrypts keys in SQLite. The extension never
+reads key values or searches the opened project for provider configuration. An explicit external connection uses
 `agentflow.backendMode=external` and `agentflow.backendUrl`, with its token in
 SecretStorage. A wrong root or unavailable workspace identity blocks submission.
 `Tools/start-ui.ps1` and its external-origin bootstrap retain their separate

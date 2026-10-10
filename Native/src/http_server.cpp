@@ -572,6 +572,13 @@ struct HttpServer::Impl {
                 if(!request.params.empty())throw std::invalid_argument("Provider profile metadata does not accept query parameters");
                 reply(response,metadata(profile_setup->configuration()));
             }));
+            server.Post("/v1/provider/configuration/import",guarded([profile_setup,metadata,revision](const Request& request,Response& response){
+                if(!request.params.empty()||request.body.size()>65536)throw std::invalid_argument("Provider configuration import request exceeds limits");
+                const auto value=body(request,{"path","expected_revision"});
+                const auto path=string_field(value,"path",32768);
+                if(path.empty())throw std::invalid_argument("Provider configuration path is unavailable");
+                reply(response,metadata(profile_setup->import_yaml_configuration(std::filesystem::u8path(path),revision(value))));
+            }));
             server.Post("/v1/provider/profiles",guarded([profile_setup,metadata,revision](const Request& request,Response& response){
                 if(!request.params.empty()||request.body.size()>65536)throw std::invalid_argument("Provider profile setup request exceeds limits");
                 const auto value=body(request,{"id","route_id","model","api_key","expected_revision","activate"});

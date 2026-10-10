@@ -53,7 +53,7 @@ paths are read from machine/global settings, never selected-project settings.
 | `agentflow.backendMode` | `managed` by default; `external` explicitly attaches to an existing loopback backend. |
 | `agentflow.runtimeDirectory` | Optional absolute directory containing a verified `native-runtime-manifest.json`; otherwise use the extension's bundled runtime. |
 | `agentflow.stdlibSource` | Optional trusted pure standard-library source directory for development; otherwise use bundled source. |
-| `agentflow.providerConfigPath` | The **one** explicit absolute provider YAML path imported by Native. The extension does not read its contents or search opened projects for configuration. |
+| `agentflow.providerConfigPath` | Optional absolute provider YAML path imported by Native. Development Host automatically uses this repository's `.config/providers.yaml`; the extension passes only its path and never searches the opened project. |
 | `agentflow.workspaceEdits` | Default `true` for newly started managed backends: file creation/edit proposals require native approval before writing. Explicit `false` starts a read-only owner. Existing profiles retain their native startup policy; changed explicit launch options are rejected. |
 | `agentflow.backendUrl` | External mode's explicitly configured loopback origin. |
 

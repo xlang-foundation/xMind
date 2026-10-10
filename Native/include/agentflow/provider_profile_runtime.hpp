@@ -46,7 +46,7 @@ public:
     // absent models preserve existing choices and new key-only profiles remain
     // unconfigured until model discovery/selection through the normal API.
     ProviderProfileRuntimeMetadata import_yaml_configuration(const std::filesystem::path& absolute_path,
-        std::int64_t expected_revision);
+        std::int64_t expected_revision) override;
     Run submit(std::string id,std::string session,std::string prompt) override;
     Run submit_model(std::string id,std::string session,std::string prompt,std::string model) override;
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;

@@ -88,6 +88,10 @@ class BackendClient {
   graphChildHistory(root,child) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/children/${encodeURIComponent(child)}/history`); }
   graphInput(root,node,input_json,expected_checkpoint_revision) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision}); }
   providerConfiguration() { return this.request('/v1/provider/configuration'); }
+  async importProviderConfiguration(path,expected_revision) {
+    if(typeof path!=='string'||!path||path.length>32768||/[\x00-\x1f]/.test(path)||!(/^[A-Za-z]:[\\/]/.test(path)||/^\\\\[^\\/]+[\\/][^\\/]+/.test(path)))throw new Error('Provider configuration must be an absolute local path');
+    planInteger(expected_revision);return validateProviderProfiles(await this.request('/v1/provider/configuration/import',{path,expected_revision}),true);
+  }
   async mcpAuthorizationServers() { return validateMcpAuthorizationServers(await this.request('/v1/mcp/authorization/servers')); }
   async startMcpAuthorization(server_id,expected_config_revision,expected_credential_revision,request_id) {
     mcpServerIdentity(server_id);planInteger(expected_config_revision,1);planInteger(expected_credential_revision);executionIdentity(request_id);
