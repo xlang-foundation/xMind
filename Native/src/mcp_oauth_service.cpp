@@ -1,5 +1,6 @@
 #include "agentflow/mcp_oauth_service.hpp"
 #include "agentflow/mcp_oauth_credentials.hpp"
+#include "agentflow/mcp_oauth_renewal.hpp"
 #include "agentflow/mcp_oauth_callback.hpp"
 #include "agentflow/mcp_http_client.hpp"
 #include "agentflow/mcp_wire.hpp"
@@ -15,6 +16,10 @@ namespace {
 std::int64_t wall(){return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();}
 bool terminal(const std::string& state){return state=="connected"||state=="failed"||state=="denied"||state=="cancelled"||state=="expired";}
 void identity(const std::string& value){if(value.empty()||value.size()>128||value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::invalid_argument("Invalid MCP authorization request identity");}
+McpOAuthAttemptStatus renewal_status(const McpOAuthRefreshRecord& r){
+    const auto state=r.state=="committed"?"connected":r.state=="cancelled"?"cancelled":r.state=="uncertain"?"failed":r.state=="dispatched"?"exchanging":"discovering";
+    return {r.binding.request_id,r.binding.server_id,state,"",r.state=="cancelled"?"cancelled":r.state=="uncertain"?"refresh_uncertain":"",r.binding.configuration_revision,r.published_revision?r.published_revision:r.binding.credential_revision,r.created_unix_ms+300000,false};
+}
 }
 struct McpOAuthService::Impl {
     struct Entry {
@@ -24,6 +29,8 @@ struct McpOAuthService::Impl {
         McpOAuthAttemptStatus value;
         std::stop_source cancellation;
         std::jthread worker;
+        bool renewal=false;
+        std::optional<McpOAuthStoredRefresh> refresh;
     };
     PersistenceService& store;
     std::vector<McpServerSetting> settings;
@@ -44,6 +51,10 @@ struct McpOAuthService::Impl {
         catch(const PersistenceClosed&){throw;}
         catch(...){value.state="unavailable";}
         return value;
+    }
+    McpOAuthAttemptStatus observe_entry(const std::shared_ptr<Entry>& entry){
+        if(!entry->renewal||terminal(entry->value.state))return entry->value;
+        auto value=renewal_status(store.mcp_oauth_refresh(entry->value.id).get());value.cancellation_requested=entry->value.cancellation_requested;return value;
     }
     void phase(const std::shared_ptr<Entry>& entry,std::string state,std::string url={}){
         std::lock_guard lock(mutex);
@@ -89,6 +100,12 @@ struct McpOAuthService::Impl {
         catch(const McpProtocolError&){finish(entry,"failed","protocol_rejected");}
         catch(...){finish(entry,stop.stop_requested()?"cancelled":"failed",stop.stop_requested()?"cancelled":"authorization_failed");}
     }
+    void run_renewal(const std::shared_ptr<Entry>& entry){
+        try{
+            const auto result=renew_mcp_oauth_grant(store,entry->config,std::move(*entry->refresh),entry->deadline,entry->cancellation.get_token());
+            std::lock_guard lock(mutex);const auto requested=entry->value.cancellation_requested;entry->value=renewal_status(result);entry->value.cancellation_requested=requested;entry->refresh.reset();
+        }catch(...){entry->refresh.reset();finish(entry,"failed","refresh_recovery_required");}
+    }
 };
 McpOAuthService::McpOAuthService(PersistenceService& store,std::vector<McpServerSetting> settings):impl_(std::make_unique<Impl>(store,std::move(settings))){}
 McpOAuthService::~McpOAuthService(){stop();}
@@ -97,9 +114,10 @@ McpOAuthAttemptStatus McpOAuthService::start(std::string server_id,std::int64_t 
     identity(id);if(revision<1||credential_revision<0||credential_revision>9007199254740991LL)throw std::invalid_argument("Invalid MCP authorization revision");
     auto& owner=*impl_;std::lock_guard lock(owner.mutex);if(owner.stopping)throw PersistenceClosed("MCP authorization service is stopping");
     if(const auto found=owner.entries.find(id);found!=owner.entries.end()){
-        if(found->second->config.id!=server_id||found->second->config.revision!=revision||found->second->expected_credential_revision!=credential_revision)throw Conflict("MCP authorization request identity changed");return found->second->value;
+        if(found->second->renewal||found->second->config.id!=server_id||found->second->config.revision!=revision||found->second->expected_credential_revision!=credential_revision)throw Conflict("MCP authorization request identity changed");return found->second->value;
     }
     if(owner.retired.contains(id))throw Conflict("MCP authorization request identity was retired");
+    try{(void)owner.store.mcp_oauth_refresh(id).get();throw Conflict("MCP request identity belongs to durable renewal");}catch(const NotFound&){}
     const auto config=std::find_if(owner.settings.begin(),owner.settings.end(),[&](const auto& item){return item.id==server_id;});if(config==owner.settings.end())throw NotFound("MCP server not found");
     if(!config->enabled||!config->oauth||config->revision!=revision)throw Conflict("MCP authorization configuration is unavailable or changed");
     const auto observed=owner.observe(*config);if(observed.state=="unavailable"||observed.credential_revision!=credential_revision)throw Conflict("MCP authorization credential changed or is unavailable");
@@ -112,7 +130,26 @@ McpOAuthAttemptStatus McpOAuthService::start(std::string server_id,std::int64_t 
     try{entry->worker=std::jthread([&owner,entry]{owner.run(entry);});}catch(...){owner.entries.erase(id);throw;}
     return entry->value;
 }
-McpOAuthAttemptStatus McpOAuthService::status(const std::string& id){identity(id);std::lock_guard lock(impl_->mutex);const auto found=impl_->entries.find(id);if(found==impl_->entries.end())throw NotFound("MCP authorization attempt not found");return found->second->value;}
-McpOAuthAttemptStatus McpOAuthService::cancel(const std::string& id){identity(id);std::lock_guard lock(impl_->mutex);const auto found=impl_->entries.find(id);if(found==impl_->entries.end())throw NotFound("MCP authorization attempt not found");auto& entry=*found->second;if(!terminal(entry.value.state)){entry.value.cancellation_requested=true;entry.cancellation.request_stop();}return entry.value;}
+McpOAuthAttemptStatus McpOAuthService::renew(std::string server_id,std::int64_t revision,std::int64_t credential_revision,std::string id){
+    identity(id);if(revision<1||credential_revision<1||credential_revision>9007199254740991LL)throw std::invalid_argument("Invalid MCP renewal revision");
+    auto& owner=*impl_;std::lock_guard lock(owner.mutex);if(owner.stopping)throw PersistenceClosed("MCP authorization service is stopping");
+    if(const auto found=owner.entries.find(id);found!=owner.entries.end()){
+        if(!found->second->renewal||found->second->config.id!=server_id||found->second->config.revision!=revision||found->second->expected_credential_revision!=credential_revision)throw Conflict("MCP renewal request identity changed");return owner.observe_entry(found->second);
+    }
+    try{const auto receipt=owner.store.mcp_oauth_refresh(id).get();if(receipt.binding.server_id!=server_id||receipt.binding.configuration_revision!=revision||receipt.binding.credential_revision!=credential_revision)throw Conflict("MCP renewal request identity changed");return renewal_status(receipt);}catch(const NotFound&){}
+    if(owner.retired.contains(id))throw Conflict("MCP request identity was retired");
+    const auto config=std::find_if(owner.settings.begin(),owner.settings.end(),[&](const auto& value){return value.id==server_id;});if(config==owner.settings.end())throw NotFound("MCP server not found");if(!config->enabled||!config->oauth||config->revision!=revision)throw Conflict("MCP renewal configuration changed");
+    std::size_t active=0;for(const auto& [key,value]:owner.entries){(void)key;if(!terminal(value->value.state)){++active;if(value->config.id==server_id)throw Conflict("MCP authorization is already pending");}}if(active>=4)throw PersistenceBusy("MCP authorization capacity is full");
+    if(owner.entries.size()>=64){const auto old=std::find_if(owner.entries.begin(),owner.entries.end(),[](const auto& value){return terminal(value.second->value.state);});if(old==owner.entries.end()||owner.retired.size()>=4096)throw PersistenceBusy("MCP authorization history capacity is full");if(old->second->worker.joinable())old->second->worker.join();owner.retired.insert(old->first);owner.entries.erase(old);}
+    auto entry=std::make_shared<Impl::Entry>();entry->config=*config;entry->expected_credential_revision=credential_revision;entry->renewal=true;entry->deadline=std::chrono::steady_clock::now()+std::chrono::minutes(5);
+    entry->refresh=McpOAuthCredentialStore(owner.store).prepare_refresh(*config,id,credential_revision);
+    if(!entry->refresh->grant)return renewal_status(entry->refresh->record);
+    entry->value=renewal_status(entry->refresh->record);
+    try{owner.entries.emplace(id,entry);entry->worker=std::jthread([&owner,entry]{owner.run_renewal(entry);});}
+    catch(...){owner.entries.erase(id);try{McpOAuthCredentialStore(owner.store).abandon_refresh(entry->refresh->record);}catch(...){}throw;}
+    return entry->value;
+}
+McpOAuthAttemptStatus McpOAuthService::status(const std::string& id){identity(id);std::lock_guard lock(impl_->mutex);const auto found=impl_->entries.find(id);if(found==impl_->entries.end())return renewal_status(impl_->store.mcp_oauth_refresh(id).get());return impl_->observe_entry(found->second);}
+McpOAuthAttemptStatus McpOAuthService::cancel(const std::string& id){identity(id);std::lock_guard lock(impl_->mutex);const auto found=impl_->entries.find(id);if(found==impl_->entries.end())return renewal_status(impl_->store.mcp_oauth_refresh(id).get());auto& entry=*found->second;if(!terminal(entry.value.state)){entry.value.cancellation_requested=true;entry.cancellation.request_stop();}return impl_->observe_entry(found->second);}
 void McpOAuthService::stop(){auto& owner=*impl_;std::lock_guard stopping(owner.stop_mutex);std::vector<std::shared_ptr<Impl::Entry>> entries;{std::lock_guard lock(owner.mutex);owner.stopping=true;for(const auto& [id,entry]:owner.entries){(void)id;entry->cancellation.request_stop();entries.push_back(entry);}}for(const auto& entry:entries)if(entry->worker.joinable())entry->worker.join();}
 }

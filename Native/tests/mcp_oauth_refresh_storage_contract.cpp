@@ -1,6 +1,8 @@
 #include "agentflow/mcp_oauth_credentials.hpp"
 #include "agentflow/mcp_wire.hpp"
 #include "agentflow/xlang_sqlite.hpp"
+#include "agentflow/graph.hpp"
+#include "agentflow/context_selection.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <filesystem>
@@ -29,16 +31,46 @@ int main(int argc,char** argv){if(argc!=3)return 2;try{
     {
         PersistenceService store(database,imports);configs=McpConfigurationStore(store).apply(Json{{"servers",definitions}}.dump());McpOAuthCredentialStore grants(store);for(const auto& c:configs)grants.save(c,c.id=="cancel"?"HTTPS://issuer.example.test/token":endpoint,tokens(),now(),0);
         XlangSqlite inspect(database,imports);const auto& config=configs.at(0);
+        store.create_session("admission","Synthetic idle admission").get();
+        store.create_run("pre-active","admission").get();
+        rejects<Conflict>([&]{grants.prepare_refresh(config,"active-denied",1);});
+        rejects<NotFound>([&]{store.mcp_oauth_refresh("active-denied").get();});
+        store.transition("pre-active",RunState::queued,RunState::cancelled).get();
+        const std::string prompt=R"({"content":"Synthetic inbound objective"})",identity=R"({"role":"user","parts":[{"kind":"text","text":"Synthetic inbound objective"}]})";
+        store.start_incoming_message("prior-inbound","admission","prior-message",prompt,identity).get();store.transition("prior-inbound",RunState::queued,RunState::cancelled).get();
+        for(int n=0;n<3;++n){store.append_message("admission","user",Json{{"content","Synthetic older objective "+std::to_string(n)}}.dump()).get();store.append_message("admission","assistant",R"({"content":"Synthetic older answer"})").get();}
         rejects<Conflict>([&]{grants.prepare_refresh(config,"stale",2);});
         rejects<std::invalid_argument>([&]{store.put_information(category,"forged","{}").get();});
         rejects<std::invalid_argument>([&]{store.compare_information(category,"forged","{}",{}).get();});
         auto first=grants.prepare_refresh(config,"commit-first",1);require(bool(first.grant)&&first.record.state=="prepared"&&same(first.grant->tokens.access_token,"synthetic-old-access"));
+        const auto history_size=store.history("admission").get().size();
+        const auto admission_fence=[&]{
+            rejects<Conflict>([&]{store.create_run("denied-root","admission").get();});
+            rejects<Conflict>([&]{store.start_prompt_run("denied-prompt","admission",prompt).get();});
+            rejects<Conflict>([&]{store.start_incoming_message("denied-inbound","","denied-message",prompt,identity).get();});
+            rejects<NotFound>([&]{store.session("ctx_denied-inbound").get();});
+            const GraphPlan plan(R"({"nodes":[{"id":"leaf","type":"agent","prompt":"Synthetic graph"}]})");
+            rejects<Conflict>([&]{store.start_graph_run("denied-graph","admission","synthetic-graph",1,plan,prompt).get();});
+            require(store.start_incoming_message("ignored-retry","admission","prior-message",prompt,identity).get().id=="prior-inbound");
+            require(store.history("admission").get().size()==history_size&&store.runs("admission").get().size()==2);
+        };admission_fence();
+        const ContextBinding binding{R"({"model_id":"synthetic-model","wire":"responses"})",std::string(64,'a')};
+        const ContextScope scope{ContextScopeKind::session,"admission"};const auto snapshot=store.context_snapshot(scope,binding).get();
+        store.request_context_compaction({"pending-context","local-owner",scope,binding,snapshot.head.revision}).get();
+        rejects<Conflict>([&]{store.claim_idle_context_owner({"denied-idle","pending-context",scope,binding,snapshot.head.revision}).get();});
+        ContextCompactionSpec maintenance;maintenance.id="denied-compaction";maintenance.maintenance_attempt_id="denied-maintenance";maintenance.snapshot=snapshot;const auto selected=select_context(snapshot,maintenance.policy);require(bool(selected));maintenance.selection=*selected;maintenance.input_json=R"({"model":"synthetic-model","input":[]})";maintenance.input_binding=context_digest(maintenance.input_json);maintenance.admission=IdleContextAdmission{"denied-idle"};maintenance.manual_request_id="pending-context";
+        rejects<Conflict>([&]{store.begin_context_compaction(maintenance).get();});
+        ContextMeasureRequestSpec measure;measure.id="denied-count";measure.owner_id="denied-idle";measure.payload_binding=context_digest("synthetic inference");measure.model_id="synthetic-model";measure.scope=scope;measure.binding=binding;measure.head_revision=snapshot.head.revision;measure.source_watermark=snapshot.source_watermark;measure.serialized_bytes=64;measure.input_json=maintenance.input_json;measure.count_request_binding=context_digest(measure.input_json);
+        rejects<Conflict>([&]{store.begin_context_measure(measure).get();});
+        require(inspect.execute("SELECT id FROM context_idle_owners").rows.empty()&&inspect.execute("SELECT id FROM context_compactions").rows.empty()&&inspect.execute("SELECT id FROM context_measures").rows.empty());
+        require(store.context_manual_request("pending-context",binding).get().state=="pending");store.retire_context_request("pending-context",binding,ContextFailureCode::cancelled).get();
         auto duplicate=grants.prepare_refresh(config,"commit-first",1);require(!duplicate.grant&&duplicate.record.state=="prepared");
         rejects<Conflict>([&]{grants.prepare_refresh(config,"different-request",1);});
         rejects<Conflict>([&]{grants.save(config,endpoint,tokens(),now(),1);});rejects<Conflict>([&]{grants.remove(config,1);});
         const auto owner=store.backend_owner().get();rejects<Conflict>([&]{store.quiesce_backend({owner.generation,owner.revision}).get();});
         auto wrong=first.record;wrong.generation="different-owner";rejects<Conflict>([&]{grants.dispatch_refresh(wrong);});
         auto dispatched=grants.dispatch_refresh(first.record);require(dispatched.state=="dispatched"&&dispatched.dispatched_unix_ms>0);rejects<Conflict>([&]{grants.dispatch_refresh(first.record);});
+        admission_fence();
         rejects<Conflict>([&]{store.put_credential(config.oauth->scope,config.oauth->id,mcp_credential_purpose(config,"OAUTH"),"Cannot bypass owner",secret("synthetic replacement"),1).get();});
         const auto old_ciphertext=std::get<SqlBytes>(inspect.execute("SELECT ciphertext FROM credentials WHERE id='commit-grant'").rows.at(0).at(0));const auto before=store.information(category,"commit-first").get();
         inspect.execute("CREATE TRIGGER reject_refresh_receipt BEFORE UPDATE ON information WHEN OLD.category='native-mcp-oauth-refresh' AND OLD.id='commit-first' BEGIN SELECT RAISE(ABORT,'synthetic receipt storage fault'); END");

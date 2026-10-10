@@ -373,7 +373,7 @@ struct HttpServer::Impl {
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
             const bool stream=std::regex_match(request.path,stream_route);
             static const std::regex mcp_auth_read(R"(^/v1/mcp/authorization/(servers|attempts/[A-Za-z0-9_-]+)$)");
-            static const std::regex mcp_auth_write(R"(^/v1/mcp/authorization/attempts(/[A-Za-z0-9_-]+/cancel)?$)");
+            static const std::regex mcp_auth_write(R"(^/v1/mcp/authorization/(attempts(/[A-Za-z0-9_-]+/cancel)?|renewals)$)");
             const bool mcp_authorized=(request.method=="GET"&&std::regex_match(request.path,mcp_auth_read))||(request.method=="POST"&&std::regex_match(request.path,mcp_auth_write));
             if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && (mcp_authorized||(stream&&request.method=="GET")||(!stream&&std::regex_match(request.path,view_route) && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
@@ -670,6 +670,12 @@ struct HttpServer::Impl {
                 const auto input=body(request,{"server_id","expected_config_revision","expected_credential_revision","request_id"});
                 if(!input.contains("expected_credential_revision")||!input.at("expected_credential_revision").is_number_integer()||input.at("expected_credential_revision")<0||input.at("expected_credential_revision")>9007199254740991LL)throw std::invalid_argument("Invalid MCP credential revision");
                 reply(response,encode_authorization(mcp_oauth->start(string_field(input,"server_id",64),graph_revision(input,"expected_config_revision"),input.at("expected_credential_revision").get<std::int64_t>(),identifier(string_field(input,"request_id",128)))),202);
+            }));
+            server.Post("/v1/mcp/authorization/renewals",guarded([this,encode_authorization](const Request& request,Response& response){
+                if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("MCP renewal does not accept query parameters");
+                const auto input=body(request,{"server_id","expected_config_revision","expected_credential_revision","request_id"});
+                if(!input.contains("expected_credential_revision")||!input.at("expected_credential_revision").is_number_integer()||input.at("expected_credential_revision")<1||input.at("expected_credential_revision")>9007199254740991LL)throw std::invalid_argument("Invalid MCP renewal credential revision");
+                reply(response,encode_authorization(mcp_oauth->renew(string_field(input,"server_id",64),graph_revision(input,"expected_config_revision"),input.at("expected_credential_revision").get<std::int64_t>(),identifier(string_field(input,"request_id",128)))),202);
             }));
             server.Get(R"(/v1/mcp/authorization/attempts/([A-Za-z0-9_-]+))",guarded([this,encode_authorization](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("MCP authorization status does not accept query parameters");reply(response,encode_authorization(mcp_oauth->status(identifier(request.matches[1]))));}));
             server.Post(R"(/v1/mcp/authorization/attempts/([A-Za-z0-9_-]+)/cancel)",guarded([this,encode_authorization](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("MCP authorization cancellation does not accept query parameters");body(request,{});reply(response,encode_authorization(mcp_oauth->cancel(identifier(request.matches[1]))),202);}));

@@ -24,6 +24,8 @@ public:
     virtual std::vector<McpOAuthServerStatus> servers()=0;
     virtual McpOAuthAttemptStatus start(std::string server_id,std::int64_t config_revision,
         std::int64_t credential_revision,std::string request_id)=0;
+    virtual McpOAuthAttemptStatus renew(std::string server_id,std::int64_t config_revision,
+        std::int64_t credential_revision,std::string request_id)=0;
     virtual McpOAuthAttemptStatus status(const std::string& id)=0;
     virtual McpOAuthAttemptStatus cancel(const std::string& id)=0;
 };

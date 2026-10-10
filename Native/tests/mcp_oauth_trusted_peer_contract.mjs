@@ -8,6 +8,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {createOAuthPeer,trustedRequest,access} from './mcp_oauth_trusted_peer.mjs';
+import {renewalModes} from './mcp_oauth_renewal_peer.mjs';
 const [openssl]=process.argv.slice(2),execute=promisify(execFile),directory=await mkdtemp(join(tmpdir(),'xmind-oauth-peer-'));let peer;
 try{
  await execute(openssl,['req','-x509','-newkey','rsa:2048','-nodes','-keyout',join(directory,'key.pem'),'-out',join(directory,'cert.pem'),'-days','1','-subj','/CN=localhost','-addext','subjectAltName=IP:127.0.0.1'],{windowsHide:true});
@@ -41,5 +42,14 @@ try{
   assert.equal(value.access_token,'synthetic-refreshed-access');assert.equal(value.scope,mode==='scope-expanded'?'tools.admin':'tools.read');assert.equal(value.refresh_token,mode==='rotate'?'synthetic rotated refresh +&=':undefined);
  }
  peer.assertHealthy();assert.deepEqual(peer.counts.refresh,Object.fromEntries(refreshModes.map(mode=>[mode,1])));
+ for(const mode of renewalModes.filter(value=>value!=='cancel')){
+  const resource=await trustedRequest(origin+'/renew-resource/'+mode,ca);assert.equal(JSON.parse(resource.body).resource,origin+'/renew-mcp/'+mode);
+  const issuer=await trustedRequest(origin+'/.well-known/oauth-authorization-server/renew-issuer/'+mode,ca);assert.equal(JSON.parse(issuer.body).token_endpoint,origin+'/renew-token/'+mode);
+  const body=new URLSearchParams({client_id:'synthetic-public-client',grant_type:'refresh_token',refresh_token:'synthetic refresh +&=',resource:origin+'/renew-mcp/'+mode,scope:'tools.read tools.list'}).toString();
+  const request=()=>trustedRequest(origin+'/renew-token/'+mode,ca,{method:'POST',body,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+  if(mode==='lost-reply'){await assert.rejects(request());continue;}const reply=await request();assert.equal(reply.status,mode==='http-failure'?400:mode==='redirect'?307:200);
+  if(['rotate','retain','publish-fault'].includes(mode))assert.equal(JSON.parse(reply.body).access_token,'synthetic-renewed-access');
+ }
+ peer.assertHealthy();assert.deepEqual(peer.counts.renewal,Object.fromEntries(renewalModes.filter(value=>value!=='cancel').map(mode=>[mode,1])));
  process.stdout.write('Independent synthetic OAuth/MCP peer passed real HTTPS with explicit CA verification, default untrusted-TLS rejection, metadata/challenge, authorization faults, independently checked S256 code exchange and authenticated MCP responses. No native login or Windows trust provisioning executed.\n');
 }finally{if(peer)await peer.close();await rm(directory,{recursive:true,force:true});}

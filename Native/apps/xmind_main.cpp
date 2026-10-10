@@ -24,6 +24,7 @@ void help(){
         "  xmind [local profile options] workspaces\n"
         "  xmind [connection options] mcp-auth\n"
         "  xmind [connection options] mcp-login SERVER\n"
+        "  xmind [connection options] mcp-refresh SERVER\n"
         "  xmind [connection options] mcp-login-status REQUEST_ID\n"
         "  xmind [connection options] mcp-login-open REQUEST_ID\n"
         "  xmind [connection options] mcp-login-cancel REQUEST_ID\n"

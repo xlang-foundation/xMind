@@ -82,7 +82,7 @@ nlohmann::json mcp_attempt(const nlohmann::json& value,const nlohmann::json& bin
     if(state=="connected")mcp_integer(value["credential_revision"],1);
     for(const auto* field:{"id","server_id","config_revision"})if(binding.contains(field)&&binding[field]!=value[field])throw std::runtime_error("MCP sign-in ownership changed");
     if(binding.contains("credential_revision")&&(state=="connected"?value["credential_revision"]<=binding["credential_revision"]:value["credential_revision"]!=binding["credential_revision"]))throw std::runtime_error("MCP sign-in credential revision changed");
-    const std::map<std::string,std::set<std::string>> reasons={{"failed",{"backend_quiesced","configuration_or_credential_changed","protocol_rejected","authorization_failed"}},{"denied",{"authorization_failed","access_denied","interaction_required","login_required","consent_required","temporarily_unavailable","server_error","invalid_request","unauthorized_client","unsupported_response_type","invalid_scope"}},{"cancelled",{"cancelled"}},{"expired",{"deadline_exceeded"}}};const auto reason=reasons.find(state);if(reason==reasons.end()){if(!value["reason"].is_null())throw std::runtime_error("Invalid MCP sign-in reason");}else if(!value["reason"].is_string()||!reason->second.contains(value["reason"].get<std::string>()))throw std::runtime_error("Invalid MCP sign-in reason");
+    const std::map<std::string,std::set<std::string>> reasons={{"failed",{"backend_quiesced","configuration_or_credential_changed","protocol_rejected","authorization_failed","refresh_uncertain","refresh_recovery_required"}},{"denied",{"authorization_failed","access_denied","interaction_required","login_required","consent_required","temporarily_unavailable","server_error","invalid_request","unauthorized_client","unsupported_response_type","invalid_scope"}},{"cancelled",{"cancelled"}},{"expired",{"deadline_exceeded"}}};const auto reason=reasons.find(state);if(reason==reasons.end()){if(!value["reason"].is_null())throw std::runtime_error("Invalid MCP sign-in reason");}else if(!value["reason"].is_string()||!reason->second.contains(value["reason"].get<std::string>()))throw std::runtime_error("Invalid MCP sign-in reason");
     if(state=="awaiting_callback"){if(!value["authorization_url"].is_string())throw std::runtime_error("Invalid MCP sign-in URL");mcp_https_link(value["authorization_url"].get<std::string>());}else if(!value["authorization_url"].is_null())throw std::runtime_error("Unexpected MCP sign-in URL");return value;
 }
 nlohmann::json mcp_request(agentflow::ConsoleTransport& client,const httplib::Headers& headers,const std::string& path,const nlohmann::json* body=nullptr){
@@ -100,10 +100,11 @@ std::string mcp_request_id(){
 nlohmann::json mcp_command(agentflow::ConsoleTransport& client,const httplib::Headers& headers,const std::string& command,const std::string& identity){
     const std::string root="/v1/mcp/authorization";
     if(command=="mcp-auth")return mcp_servers(mcp_request(client,headers,root+"/servers"));
-    if(command=="mcp-login"){
-        mcp_identity(identity,true);const auto catalogue=mcp_servers(mcp_request(client,headers,root+"/servers"));const auto& servers=catalogue["servers"];const auto found=std::find_if(servers.begin(),servers.end(),[&](const auto& server){return server["id"]==identity;});if(found==servers.end()||!(*found)["enabled"].get<bool>()||!(*found)["configured"].get<bool>()||(*found)["state"]!="needs_login")throw std::runtime_error("Select a configured MCP server requiring sign-in; inspect mcp-auth.");
+    if(command=="mcp-login"||command=="mcp-refresh"){
+        const bool renewal=command=="mcp-refresh";
+        mcp_identity(identity,true);const auto catalogue=mcp_servers(mcp_request(client,headers,root+"/servers"));const auto& servers=catalogue["servers"];const auto found=std::find_if(servers.begin(),servers.end(),[&](const auto& server){return server["id"]==identity;});if(found==servers.end()||!(*found)["enabled"].get<bool>()||!(*found)["configured"].get<bool>()||(renewal?((*found)["credential_revision"].get<std::int64_t>()<1||((*found)["state"]!="needs_login"&&(*found)["state"]!="authorized")):(*found)["state"]!="needs_login"))throw std::runtime_error(renewal?"Select a configured MCP server with an existing grant; inspect mcp-auth.":"Select a configured MCP server requiring sign-in; inspect mcp-auth.");
         const auto id=mcp_request_id();const nlohmann::json binding={{"id",id},{"server_id",identity},{"config_revision",(*found)["config_revision"]},{"credential_revision",(*found)["credential_revision"]}},body={{"request_id",id},{"server_id",identity},{"expected_config_revision",binding["config_revision"]},{"expected_credential_revision",binding["credential_revision"]}};
-        std::cerr<<"MCP login request "<<id<<" for "<<identity<<". If the reply is lost, use mcp-login-status "<<id<<"; do not restart automatically.\n"<<std::flush;if(!std::cerr)throw std::runtime_error("Cannot publish MCP sign-in observation identity; no login sent");return mcp_attempt(mcp_request(client,headers,root+"/attempts",&body),binding);
+        std::cerr<<"MCP "<<(renewal?"renewal":"login")<<" request "<<id<<" for "<<identity<<". If the reply is lost, use mcp-login-status "<<id<<"; do not restart automatically.\n"<<std::flush;if(!std::cerr)throw std::runtime_error("Cannot publish MCP observation identity; no request sent");return mcp_attempt(mcp_request(client,headers,root+(renewal?"/renewals":"/attempts"),&body),binding);
     }
     mcp_identity(identity);auto value=mcp_attempt(mcp_request(client,headers,root+"/attempts/"+identity),{{"id",identity}});
     if(command=="mcp-login-cancel"&&!mcp_terminal(value["state"].get<std::string>())){const nlohmann::json body=nlohmann::json::object(),binding={{"id",identity},{"server_id",value["server_id"]},{"config_revision",value["config_revision"]},{"credential_revision",value["credential_revision"]}};value=mcp_attempt(mcp_request(client,headers,root+"/attempts/"+identity+"/cancel",&body),binding);}
@@ -396,7 +397,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
         if(prompt=="/exit")return exit_status();
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
-            std::cerr<<"MCP sign-in: /mcp lists configured OAuth status; /mcp-login SERVER starts using current native revisions. /mcp-status REQUEST, /mcp-open REQUEST, /mcp-cancel REQUEST and /mcp-watch REQUEST inspect, open, cancel or observe that backend-owned attempt. Closing chat only detaches.\n";
+            std::cerr<<"MCP sign-in: /mcp lists configured OAuth status; /mcp-login SERVER signs in and /mcp-refresh SERVER renews an existing grant using current native revisions. /mcp-status REQUEST, /mcp-open REQUEST, /mcp-cancel REQUEST and /mcp-watch REQUEST inspect, open, cancel or observe that backend-owned attempt. Closing chat only detaches.\n";
             std::cerr<<"/compose [GRAPH_ID] collects a multiline request until /send; /discard cancels it. Use //send or //discard for those literal lines. Other slash lines remain request text. Unfinished EOF and blocks over 1 MiB are discarded without submission.\n";
             std::cerr<<"Context controls: context SESSION [MODEL], compact-context SESSION HEAD_REV REQUEST_ID [MODEL], context-request SESSION REQUEST_ID [MODEL]. Resume a ready closed graph with resume-graph ROOT CHECKPOINT_REV.\n";
             std::cerr<<"/runs lists recorded root runs in the selected conversation; use /watch or /graph-watch to attach one.\n";
@@ -411,12 +412,13 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
                 const auto split=prompt.find(' ');const auto verb=prompt.substr(0,split),identity=split==std::string::npos?std::string{}:prompt.substr(split+1);std::string command;
                 if(verb=="/mcp"&&identity.empty())command="mcp-auth";
                 else if(verb=="/mcp-login")command="mcp-login";
+                else if(verb=="/mcp-refresh")command="mcp-refresh";
                 else if(verb=="/mcp-status")command="mcp-login-status";
                 else if(verb=="/mcp-open")command="mcp-login-open";
                 else if(verb=="/mcp-cancel")command="mcp-login-cancel";
                 else if(verb=="/mcp-watch")command="mcp-login-watch";
-                else throw std::invalid_argument("Use /mcp, /mcp-login SERVER, /mcp-status REQUEST, /mcp-open REQUEST, /mcp-cancel REQUEST or /mcp-watch REQUEST.");
-                if(command!="mcp-auth")mcp_identity(identity,command=="mcp-login");
+                else throw std::invalid_argument("Use /mcp, /mcp-login SERVER, /mcp-refresh SERVER, /mcp-status REQUEST, /mcp-open REQUEST, /mcp-cancel REQUEST or /mcp-watch REQUEST.");
+                if(command!="mcp-auth")mcp_identity(identity,command=="mcp-login"||command=="mcp-refresh");
                 if(command=="mcp-login-watch")mcp_result=mcp_watch(client,headers,identity);
                 else {const auto value=mcp_command(client,headers,command,identity);std::cout<<Json{{"type",command=="mcp-auth"?"mcp_authorization_servers":"mcp_authorization_attempt"},{"result",value}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("MCP observation output unavailable; backend sign-in continues");mcp_result=0;}
             }catch(const std::exception& error){std::cerr<<error.what()<<'\n';mcp_result=1;}continue;
@@ -724,7 +726,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         }
         else if(command=="mcp-servers" && argc==3) path="/v1/mcp/servers";
         else if(command=="mcp-auth"&&argc==3)mcp_operation=true;
-        else if((command=="mcp-login"||command=="mcp-login-status"||command=="mcp-login-cancel"||command=="mcp-login-open"||command=="mcp-login-watch")&&argc==4){mcp_operation=true;mcp_id=mcp_identity(argv[3],command=="mcp-login");}
+        else if((command=="mcp-login"||command=="mcp-refresh"||command=="mcp-login-status"||command=="mcp-login-cancel"||command=="mcp-login-open"||command=="mcp-login-watch")&&argc==4){mcp_operation=true;mcp_id=mcp_identity(argv[3],command=="mcp-login"||command=="mcp-refresh");}
         else if(command=="process-profiles" && argc==3) path="/v1/process/profiles";
         else if(command=="instructions" && argc==3) path="/v1/agent/instructions";
         else if(command=="delegation"&&argc==3)path="/v1/agent/delegation";

@@ -1,5 +1,11 @@
 # Trusted HTTPS OAuth acceptance
 
+The subsequent [manual renewal coordinator](native-mcp-renewal.md) adds an
+actual-service integrated trusted fixture to the mandatory hosted contract.
+Rotation/retention, protocol failure, lost replies, cancellation and publication
+rollback must be verified against its exact new source. The earlier results
+below prove separate login/exchange/storage boundaries, not this integration.
+
 The repaired `0eee494` hosted gate passes all **117 native** contracts in
 **344.09 seconds**, plus **257 extension / 55 browser** checks and packaging.
 Independent downloads verify both archive digests, exact contract inventory,

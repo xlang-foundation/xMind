@@ -5,6 +5,11 @@ const {BackendClient,validateMcpAuthorizationServers,validateMcpAuthorizationAtt
 const token='synthetic-mcp-authorization-owner'.padEnd(64,'x');
 const server=()=>({id:'tools.peer',config_revision:3,credential_revision:0,enabled:true,configured:true,state:'needs_login',expires_unix_ms:null});
 const attempt=()=>({id:'login-1',server_id:'tools.peer',state:'discovering',config_revision:3,credential_revision:0,authorization_url:null,expires_unix_ms:9999999999999,reason:null,cancellation_requested:false});
+test('MCP renewal uses exact existing-grant revision and rejects absent grants before dispatch',async()=>{
+ const calls=[],client=new BackendClient('http://127.0.0.1:8765',()=>token,async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>({...attempt(),credential_revision:7,state:'failed',reason:'refresh_uncertain'})};});
+ await assert.rejects(client.renewMcpAuthorization('tools.peer',3,0,'login-1'));assert.equal(calls.length,0);
+ const result=await client.renewMcpAuthorization('tools.peer',3,7,'login-1');assert.equal(result.reason,'refresh_uncertain');assert.equal(calls[0].url,client.baseUrl+'/v1/mcp/authorization/renewals');assert.deepEqual(JSON.parse(calls[0].options.body),{server_id:'tools.peer',expected_config_revision:3,expected_credential_revision:7,request_id:'login-1'});
+});
 test('MCP setup client sends exact authenticated commands and binds observations to the request owner',async()=>{
   const seen=[],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{seen.push({url,options});return {ok:true,json:async()=>url.endsWith('/servers')?{servers:[server()]}:attempt()};});
   await client.mcpAuthorizationServers();await client.startMcpAuthorization('tools.peer',3,0,'login-1');await client.mcpAuthorization('login-1',{server_id:'tools.peer',config_revision:3,credential_revision:0});await client.cancelMcpAuthorization('login-1',{server_id:'tools.peer',config_revision:3,credential_revision:0});

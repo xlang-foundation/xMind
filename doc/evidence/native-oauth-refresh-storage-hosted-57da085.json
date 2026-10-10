@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "57da08510354220327a06b40717fd247ca5f5ab8",
+  "run": 38037137332,
+  "job": 114169818641,
+  "scope": "Exact isolated hosted 118-native, 257-extension and 55-browser gates and packaging. Actual xlang3 SQLite durable refresh ownership/publication/restart contracts passed, plus trusted synthetic native OAuth login/callback/grant reopen and seven separate single-use refresh protocol modes. Owned machine-root cleanup, artifact digests, complete runtime/source-bundle/VSIX bytes and independently accepted browser assets verified. Source 57da085 precedes the new renewal coordinator and client controls; no integrated network renewal, automatic expiry renewal, real-account or installed/rendered acceptance.",
+  "nativeContracts": 118,
+  "extensionContracts": 257,
+  "browserContracts": 55,
+  "sourceBundleFiles": 29,
+  "runtimeFiles": 1860,
+  "pureSourceFiles": 1830,
+  "vsixEntries": 1897,
+  "binaries": [
+    "modules/xlang_json.x3pkg.dll",
+    "modules/xlang_sqlite3.x3pkg.dll",
+    "xlang3.exe",
+    "xlang3_runtime.dll",
+    "xmind.exe"
+  ],
+  "textNewlineComparisons": [
+    {
+      "file": "extensions/vscode/package.json",
+      "packagedSha256": "7b6626730c006dae09f4e26a534054fd799e1427398351b3dee65b5c716a4906",
+      "gitBlobSha256": "f917d36fd9e98114a2f3c4f381b39b1e3cc09f9af5687b87482874d8e2a93497",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/extension.js",
+      "packagedSha256": "38fa748be5fc93e8a5fb2c7b36842b569eec9ddbfeca7532a9e1c34d5c2082ef",
+      "gitBlobSha256": "11c90ca7562b659838a15f8f2a4c26e1f7a497c4e7a184a03267645af5815197",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/client.js",
+      "packagedSha256": "ad41ffaf1c9ed57d6dc525f18a58d35321d0f93e43dd785de2ec12aa3513e965",
+      "gitBlobSha256": "f3aa80b9279ab804fa50bd4242aa0bf45956b4e0ba0c7b43a2ca5dbcc0ce1065",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/workspace-backend.js",
+      "packagedSha256": "cb3dcc32ee6d680e5e1c4638d2af886d6c77c4e672e92e04bf3fc051fb915d5b",
+      "gitBlobSha256": "19f2cb67498348a4088d9d1eec51b960d49a32d6b33e04923fd463910f3fdeaf",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/native-runtime.js",
+      "packagedSha256": "e53335c510e8ed457c2c44f15c1a1ef9c3f2e702170417cd4e241a9824f90cdb",
+      "gitBlobSha256": "4b10a833cedc93fc4364a80ddd08d20a4e8ead7134ecc0f052c2b1c4bc635b58",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/browser-view.js",
+      "packagedSha256": "ac025e3e2fb0f12cbd2de3915de8b8c1951d38f4892d8cc9bd2b92b65701cee1",
+      "gitBlobSha256": "f5e47b3b60530b4ed1b98ff3254eb0debbb49c5fde860912abd09d4a1d05a1ea",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.js",
+      "packagedSha256": "597a3be45ba50d8773bb30f012a6e56748fe153f45a724a1809105249a32af82",
+      "gitBlobSha256": "f636d5bf1f360993d86936abdaa33c7cf7fe421697c7c2a737e4d4917178c8ee",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.css",
+      "packagedSha256": "1137983a1b7a28e2dd09492261cd83460819736d5a67d608cd7791942fb096a5",
+      "gitBlobSha256": "109e8347e0a426c2de8da930339f367a08e2d1d490c225505c637ac0054f5016",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/patch-review.js",
+      "packagedSha256": "4e5fd0d6e61f3846c72cc420c0268314e1979cc49983bb0754e0a124ef68397e",
+      "gitBlobSha256": "8f748febcfa7517088490799361c7105ffdb5f136fb08fc58544a29981fff681",
+      "exactBytes": false
+    },
+    {
+      "file": "views/browser/server.mjs",
+      "packagedSha256": "26e6018ba7476c3e92c731dc556c0da3e936470488611d941b73876cf1039fcf",
+      "gitBlobSha256": "20e5dc32700ed67212c0fb6380ced6ba4e4a3d67acf096459b5d055d9bb6c3b0",
+      "exactBytes": false
+    },
+    {
+      "file": "views/browser/browser.js",
+      "packagedSha256": "ab3f18383e401ce5ba3854f5be4c18a70ae456568021a1495695a91509182c22",
+      "gitBlobSha256": "8a746046d33b72ff8dbd81282e93fcce4edd7f8a9a0523c09d3116d1c1485752",
+      "exactBytes": false
+    },
+    {
+      "file": "views/browser/browser.css",
+      "packagedSha256": "90f4ef9e268d9a128e4c4398c8e944426330070ab6b435189ee989b69ea381fd",
+      "gitBlobSha256": "8cae13ebf6ff2700bbcbe1a7150315603fc5865ff8bdbe3c9e30c2cb3ca901dc",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.js",
+      "packagedSha256": "597a3be45ba50d8773bb30f012a6e56748fe153f45a724a1809105249a32af82",
+      "gitBlobSha256": "f636d5bf1f360993d86936abdaa33c7cf7fe421697c7c2a737e4d4917178c8ee",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.css",
+      "packagedSha256": "1137983a1b7a28e2dd09492261cd83460819736d5a67d608cd7791942fb096a5",
+      "gitBlobSha256": "109e8347e0a426c2de8da930339f367a08e2d1d490c225505c637ac0054f5016",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/client.js",
+      "packagedSha256": "ad41ffaf1c9ed57d6dc525f18a58d35321d0f93e43dd785de2ec12aa3513e965",
+      "gitBlobSha256": "f3aa80b9279ab804fa50bd4242aa0bf45956b4e0ba0c7b43a2ca5dbcc0ce1065",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/patch-review.js",
+      "packagedSha256": "4e5fd0d6e61f3846c72cc420c0268314e1979cc49983bb0754e0a124ef68397e",
+      "gitBlobSha256": "8f748febcfa7517088490799361c7105ffdb5f136fb08fc58544a29981fff681",
+      "exactBytes": false
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11663479556,
+      "sha256": "b74e9537b6603f8e570917b790ac9ad6c9bbf532b238440ff9bcd40a0d3e16c6"
+    },
+    {
+      "id": 11664169530,
+      "sha256": "56b2275754f68e159ac8de0077931ed3ab7c5182a899c6f6212d7b17ef696320"
+    }
+  ],
+  "vsixSha256": "77d174ab748c230e1879ae15aeabec99072283a324c8e882d2a83a48df5af9bf",
+  "sourceManifestSha256": "05e94a3caeea79bc356798504c0d89cd90bc83169356c58e9b8cf29660b26611",
+  "runtimeManifestSha256": "164ea18f3c16c574bbab9f5391c426d922b8936bee8d2236648f723fa7bcfea5",
+  "evidenceHashes": {
+    "native-gate.json": "828c91c8e8af2017f9f602afc1e245fd146a1f666f47febc34c342ef887c2cc1",
+    "contracts.json": "33e5467d1fcdd5f84d6336aba1d4d48029f63d7261cbb5e5c1f43dbe21cbac21",
+    "native-ctest.log": "c3fc258c3c46d904b49a48aaa70bbbec6bd819ce15b438dc3d820c6916e0bd81",
+    "native-view-early-ctest.log": "e6cb3b23a8bc1ade77b4e808909ba7fd06f3283727e4ce35a9c3a303a328f2a6",
+    "provenance.json": "ca8ffcd45d3cf0753c6cb86f97a65ccea9763c6a70e0fd2ff985583298c7dbc1",
+    "accepted-source-manifest.json": "05e94a3caeea79bc356798504c0d89cd90bc83169356c58e9b8cf29660b26611",
+    "runtime-staging.json": "95bc8b4258209171d4b4e35b03c7d3c2c40ee82e89e0f854408298bc1d58f3ff",
+    "browser-controller.log": "107035191674daf2dc009f42fe6b907896288d71ab51c641427396b0ab6177f7",
+    "browser-native.log": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693",
+    "browser-package-verification.log": "0156111ab9409f090c7f2314c622d66878215dc84f776dc2b547198865cd7ca2"
+  },
+  "installed": false,
+  "localNativeExecuted": false,
+  "liveModelRequests": 0,
+  "nativeSeconds": 360.18,
+  "observedAt": "2026-10-10T08:39:09.978Z",
+  "artifactDigestsVerified": true,
+  "exactSourceContractInventoryVerified": true,
+  "clientTapVerified": true,
+  "independentlyAcceptedViewAssetsCompared": 12,
+  "requiredPackageAssets": 20,
+  "trustedOAuthAcceptance": true,
+  "trustedRefreshPrimitiveAcceptance": true,
+  "durableRefreshStorageAcceptance": true,
+  "durableRefreshAcceptance": false,
+  "automaticRefreshAcceptance": false,
+  "nativeFullDetailsSha256": "6032ce2d9347f4a290e2e9f8b2d447fa1d8bae2507a547e9779f35bbe7b49a4f",
+  "rawHashes": {
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-native-gate.json": "828c91c8e8af2017f9f602afc1e245fd146a1f666f47febc34c342ef887c2cc1",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-contracts.json": "33e5467d1fcdd5f84d6336aba1d4d48029f63d7261cbb5e5c1f43dbe21cbac21",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-native-ctest.log": "c3fc258c3c46d904b49a48aaa70bbbec6bd819ce15b438dc3d820c6916e0bd81",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-native-view-early-ctest.log": "e6cb3b23a8bc1ade77b4e808909ba7fd06f3283727e4ce35a9c3a303a328f2a6",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-provenance.json": "ca8ffcd45d3cf0753c6cb86f97a65ccea9763c6a70e0fd2ff985583298c7dbc1",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-accepted-source-manifest.json": "05e94a3caeea79bc356798504c0d89cd90bc83169356c58e9b8cf29660b26611",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-runtime-staging.json": "95bc8b4258209171d4b4e35b03c7d3c2c40ee82e89e0f854408298bc1d58f3ff",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-browser-controller.log": "107035191674daf2dc009f42fe6b907896288d71ab51c641427396b0ab6177f7",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-browser-native.log": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-browser-package-verification.log": "0156111ab9409f090c7f2314c622d66878215dc84f776dc2b547198865cd7ca2",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-job.log": "83ac45f146d267f2895f4a5caba5c248e391354742844beec1b96ce6aed5c67e",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-artifacts.json": "72755efd447551ba0334b74cad7e1d462239f4d1310d19ac5dccf4f33ee2972a",
+    "doc/evidence/native-oauth-refresh-storage-hosted-57da085-full-details.log": "6032ce2d9347f4a290e2e9f8b2d447fa1d8bae2507a547e9779f35bbe7b49a4f"
+  },
+  "conclusion": "success"
+}

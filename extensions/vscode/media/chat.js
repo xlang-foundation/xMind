@@ -470,8 +470,8 @@ function renderMcpSettings(message){
     const row=node('div',undefined,'mcp-server'),heading=node('div',undefined,'mcp-heading');heading.append(node('strong',server.id));row.append(heading);
     row.append(node('p',(labels[attempt?.state||server.state]||'Unavailable')+(attempt?.reason?' · '+attempt.reason.replaceAll('_',' '):''),'hint'));
     const actions=node('div',undefined,'mcp-actions'),button=(label,type)=>{const control=node('button',label);control.type='button';control.disabled=!!message.busy;control.onclick=()=>api.postMessage({type,server:server.id});actions.append(control);return control;};
-    if(pending){if(attempt.state==='awaiting_callback'&&!attempt.cancellation_requested)button('Open sign-in page','mcp-open');const cancel=button(attempt.cancellation_requested?'Cancelling…':'Cancel sign-in','mcp-cancel');cancel.disabled=!!message.busy||attempt.cancellation_requested;}
-    else if(server.enabled&&server.configured&&server.state==='needs_login'&&attempt?.state!=='connected')button('Sign in','mcp-start');
+    if(pending){if(attempt.state==='awaiting_callback'&&!attempt.cancellation_requested)button('Open sign-in page','mcp-open');const cancel=button(attempt.cancellation_requested?'Cancelling…':'Cancel request','mcp-cancel');cancel.disabled=!!message.busy||attempt.cancellation_requested;}
+    else if(server.enabled&&server.configured){if(server.state==='needs_login'&&attempt?.state!=='connected')button('Sign in','mcp-start');if(server.credential_revision>0&&['authorized','needs_login'].includes(server.state))button('Renew grant','mcp-renew');}
     row.append(actions);list.append(row);
   }
 }

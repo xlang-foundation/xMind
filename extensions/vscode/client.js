@@ -93,6 +93,10 @@ class BackendClient {
     mcpServerIdentity(server_id);planInteger(expected_config_revision,1);planInteger(expected_credential_revision);executionIdentity(request_id);
     return validateMcpAuthorizationAttempt(await this.request('/v1/mcp/authorization/attempts',{server_id,expected_config_revision,expected_credential_revision,request_id}),{id:request_id,server_id,config_revision:expected_config_revision,credential_revision:expected_credential_revision});
   }
+  async renewMcpAuthorization(server_id,expected_config_revision,expected_credential_revision,request_id) {
+    mcpServerIdentity(server_id);planInteger(expected_config_revision,1);planInteger(expected_credential_revision,1);executionIdentity(request_id);
+    return validateMcpAuthorizationAttempt(await this.request('/v1/mcp/authorization/renewals',{server_id,expected_config_revision,expected_credential_revision,request_id}),{id:request_id,server_id,config_revision:expected_config_revision,credential_revision:expected_credential_revision});
+  }
   async mcpAuthorization(id,binding) {
     executionIdentity(id);return validateMcpAuthorizationAttempt(await this.request(`/v1/mcp/authorization/attempts/${id}`),{...binding,id});
   }
@@ -465,13 +469,13 @@ class McpAuthorizationController {
     }catch(error){if(!this.active(epoch))return;if(error.status===404){this.available=false;this.servers=[];this.error='MCP login setup is unavailable on this backend.';}else this.error=error.message;this.present();}
     finally{this.loading=false;if(this.active(epoch)){this.present();this.arm();}}
   }
-  async start(serverId){
+  async start(serverId,renewal=false){
     mcpServerIdentity(serverId);if(!this.active()||this.busy)return;if(this.loading)throw new Error('MCP settings are refreshing. Try again.');const server=this.servers.find(item=>item.id===serverId);
-    if(!server||!server.enabled||!server.configured||server.state!=='needs_login'||this.pending(this.attempts.get(serverId)?.value)&&this.attempts.has(serverId))throw new Error('Refresh MCP settings and select a server requiring login.');
+    if(!server||!server.enabled||!server.configured||(renewal?server.credential_revision<1||!['authorized','needs_login'].includes(server.state):server.state!=='needs_login')||this.pending(this.attempts.get(serverId)?.value)&&this.attempts.has(serverId))throw new Error(renewal?'Refresh MCP settings and select a server with an existing grant.':'Refresh MCP settings and select a server requiring login.');
     const epoch=this.epoch,binding={id:this.requestId(),server_id:server.id,config_revision:server.config_revision,credential_revision:server.credential_revision};executionIdentity(binding.id);this.busy=true;this.error='';this.attempts.set(serverId,{binding});this.present();
     try{
       await this.persist();if(!this.active(epoch))return;
-      const value=await this.client.startMcpAuthorization(serverId,binding.config_revision,binding.credential_revision,binding.id);if(!this.active(epoch))return;this.attempts.get(serverId).value=value;
+      const value=await (renewal?this.client.renewMcpAuthorization(serverId,binding.config_revision,binding.credential_revision,binding.id):this.client.startMcpAuthorization(serverId,binding.config_revision,binding.credential_revision,binding.id));if(!this.active(epoch))return;this.attempts.get(serverId).value=value;
     }catch(error){if(this.active(epoch)){this.error=error.message;if([400,401,403,404,409,429,503].includes(error.status))this.attempts.delete(serverId);}}
     finally{if(this.active(epoch)){this.busy=false;await this.persist();this.present();this.arm();}}
   }
@@ -500,7 +504,7 @@ function validateMcpAuthorizationAttempt(value,binding={}){
   if(!['discovering','awaiting_callback','exchanging','connected','failed','denied','cancelled','expired'].includes(value.state)||typeof value.cancellation_requested!=='boolean')throw new Error('Invalid MCP authorization attempt');
   for(const field of ['id','server_id','config_revision'])if(binding[field]!==undefined&&value[field]!==binding[field])throw new Error('MCP authorization ownership changed');
   if(binding.credential_revision!==undefined&&(value.state==='connected'?value.credential_revision<=binding.credential_revision:value.credential_revision!==binding.credential_revision))throw new Error('MCP authorization credential revision changed');
-  const reasons={failed:['backend_quiesced','configuration_or_credential_changed','protocol_rejected','authorization_failed'],denied:['authorization_failed','access_denied','interaction_required','login_required','consent_required','temporarily_unavailable','server_error','invalid_request','unauthorized_client','unsupported_response_type','invalid_scope'],cancelled:['cancelled'],expired:['deadline_exceeded']};
+  const reasons={failed:['backend_quiesced','configuration_or_credential_changed','protocol_rejected','authorization_failed','refresh_uncertain','refresh_recovery_required'],denied:['authorization_failed','access_denied','interaction_required','login_required','consent_required','temporarily_unavailable','server_error','invalid_request','unauthorized_client','unsupported_response_type','invalid_scope'],cancelled:['cancelled'],expired:['deadline_exceeded']};
   if(reasons[value.state]? !reasons[value.state].includes(value.reason):value.reason!==null)throw new Error('Invalid MCP authorization reason');
   if(value.state==='awaiting_callback'){
     if(typeof value.authorization_url!=='string'||value.authorization_url.length>16384||/[\u0000-\u0020\u007f]/.test(value.authorization_url))throw new Error('Invalid MCP authorization URL');

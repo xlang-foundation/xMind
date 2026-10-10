@@ -431,8 +431,8 @@ async function activate(context) {
           await readSkills();
         } else if(message.type==='mcp-refresh'){
           await readMcp();
-        } else if(['mcp-start','mcp-cancel','mcp-open'].includes(message.type)){
-          try{if(!mcpRestored)await readMcp();if(message.type==='mcp-start')await mcpController.start(message.server);else if(message.type==='mcp-cancel')await mcpController.cancel(message.server);else await mcpController.open(message.server,url=>vscode.env.openExternal(vscode.Uri.parse(url)));}
+        } else if(['mcp-start','mcp-renew','mcp-cancel','mcp-open'].includes(message.type)){
+          try{if(!mcpRestored)await readMcp();if(message.type==='mcp-start')await mcpController.start(message.server);else if(message.type==='mcp-renew')await mcpController.start(message.server,true);else if(message.type==='mcp-cancel')await mcpController.cancel(message.server);else await mcpController.open(message.server,url=>vscode.env.openExternal(vscode.Uri.parse(url)));}
           catch(error){post({type:'mcp-error',text:error.message});}
         } else if(message.type==='skills-refresh'){
           if(!sessionId){const session=await client.createSession('Workspace skills');if(panel!==view)return;await selectSession(session.id);await refresh();}else await readSkills();

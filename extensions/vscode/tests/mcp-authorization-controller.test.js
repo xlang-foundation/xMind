@@ -11,6 +11,12 @@ function fixture(reply){
   const controller=new McpAuthorizationController(client,message=>messages.push(message),{save:entries=>saved.push(structuredClone(entries)),requestId:()=>binding.id,schedule:fn=>{scheduled.add(fn);return fn;},unschedule:fn=>scheduled.delete(fn)});
   return {controller,calls,messages,saved,scheduled};
 }
+test('MCP renewal persists its old-grant identity before POST and restores a lost reply with GET only',async()=>{
+ const renewalBinding={...binding,credential_revision:7},configured={...server,state:'authorized',credential_revision:7};let posted=false;
+ const f=fixture(({path,method})=>{if(path.endsWith('/servers'))return {servers:[configured]};if(method==='POST'){assert.equal(path,'/v1/mcp/authorization/renewals');assert.deepEqual(f.saved.at(-1),[renewalBinding]);posted=true;throw new Error('Synthetic lost renewal acknowledgement');}assert.ok(posted);return attempt({credential_revision:8,state:'connected'});});
+ await f.controller.read();await f.controller.start(server.id,true);assert.equal(f.calls.filter(call=>call.method==='POST').length,1);assert.deepEqual(f.saved.at(-1),[renewalBinding]);f.controller.dispose();
+ const restored=fixture(({path})=>path.endsWith('/servers')?{servers:[{...configured,credential_revision:8}]}:attempt({credential_revision:8,state:'connected'}));await restored.controller.read([renewalBinding]);assert.ok(restored.calls.every(call=>call.method==='GET'));assert.deepEqual(restored.saved.at(-1),[]);assert.equal(restored.messages.at(-1).attempts[0].state,'connected');restored.controller.dispose();
+});
 test('MCP view restores only observation identity; reload never starts or replays login',async()=>{
   const f=fixture(({path})=>path.endsWith('/servers')?{servers:[server]}:attempt({state:'awaiting_callback',authorization_url:'https://issuer.example.test/authorize?state=synthetic'}));
   await f.controller.read([binding]);assert.deepEqual(f.calls.map(c=>c.method),['GET','GET']);assert.equal(f.scheduled.size,1);assert.deepEqual(f.saved.at(-1),[binding]);assert.ok(!JSON.stringify(f.saved).includes('authorization_url'));

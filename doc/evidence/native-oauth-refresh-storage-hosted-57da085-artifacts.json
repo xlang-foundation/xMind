@@ -1,0 +1,45 @@
+{
+  "total_count": 2,
+  "artifacts": [
+    {
+      "id": 11664169530,
+      "node_id": "MDg6QXJ0aWZhY3QxMTY2NDE2OTUzMA==",
+      "name": "native-windows-runtime-57da08510354220327a06b40717fd247ca5f5ab8",
+      "size_in_bytes": 9900619,
+      "url": "https://api.github.com/repos/xlang-foundation/xMind/actions/artifacts/11664169530",
+      "archive_download_url": "https://api.github.com/repos/xlang-foundation/xMind/actions/artifacts/11664169530/zip",
+      "expired": false,
+      "digest": "sha256:56b2275754f68e159ac8de0077931ed3ab7c5182a899c6f6212d7b17ef696320",
+      "created_at": "2026-10-10T08:37:17Z",
+      "updated_at": "2026-10-10T08:37:17Z",
+      "expires_at": "2026-10-24T08:37:15Z",
+      "workflow_run": {
+        "id": 38037137332,
+        "repository_id": 847870727,
+        "head_repository_id": 847870727,
+        "head_branch": "checkpoint/native-persistence-m1",
+        "head_sha": "57da08510354220327a06b40717fd247ca5f5ab8"
+      }
+    },
+    {
+      "id": 11663479556,
+      "node_id": "MDg6QXJ0aWZhY3QxMTY2MzQ3OTU1Ng==",
+      "name": "native-windows-evidence-57da08510354220327a06b40717fd247ca5f5ab8",
+      "size_in_bytes": 17870014,
+      "url": "https://api.github.com/repos/xlang-foundation/xMind/actions/artifacts/11663479556",
+      "archive_download_url": "https://api.github.com/repos/xlang-foundation/xMind/actions/artifacts/11663479556/zip",
+      "expired": false,
+      "digest": "sha256:b74e9537b6603f8e570917b790ac9ad6c9bbf532b238440ff9bcd40a0d3e16c6",
+      "created_at": "2026-10-10T08:37:15Z",
+      "updated_at": "2026-10-10T08:37:15Z",
+      "expires_at": "2026-10-24T08:37:13Z",
+      "workflow_run": {
+        "id": 38037137332,
+        "repository_id": 847870727,
+        "head_repository_id": 847870727,
+        "head_branch": "checkpoint/native-persistence-m1",
+        "head_sha": "57da08510354220327a06b40717fd247ca5f5ab8"
+      }
+    }
+  ]
+}

@@ -10,15 +10,36 @@ import {mkdtemp,readFile,writeFile,rm,realpath} from 'node:fs/promises';
 import {join,resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createServer as createTcpServer} from 'node:net';
+import {runRenewalAcceptance,renewalModes} from './mcp_oauth_renewal_peer.mjs';
 export const access='synthetic-positive-access-not-live',refresh='synthetic positive refresh not live';
 export function createOAuthPeer(options,{registeredPort=43211}={}){
- const counts={probe:{},metadata:{},authorize:{},tokens:{},authenticated:{},refresh:{}};const codes=new Map();let origin,error;
+ const counts={probe:{},metadata:{},authorize:{},tokens:{},authenticated:{},refresh:{},renewal:{}};const codes=new Map();let origin,error;
  const kinds=new Set(['success','registered','denied','bad-state','bad-issuer','bad-code','cancelled','occupied']);
  const count=(group,kind)=>counts[group][kind]=(counts[group][kind]||0)+1;
  const peer=createServer(options,async(request,response)=>{
   try{
    const url=new URL(request.url,origin),reply=(status,value,headers={})=>{response.writeHead(status,{'Content-Type':'application/json',...headers});response.end(JSON.stringify(value));};
    assert.equal(request.headers.cookie,undefined);let body='';for await(const bytes of request){body+=bytes;if(body.length>65536)throw Error('Synthetic request bound exceeded');}
+   if(url.pathname.startsWith('/renew-mcp/')){
+    const mode=url.pathname.slice(11);assert.ok(renewalModes.includes(mode));assert.equal(request.method,'POST');assert.equal(request.headers.authorization,undefined,'Renewal discovery must be anonymous');assert.equal(JSON.parse(body).method,'server/discover');
+    reply(401,{error:'synthetic_authorization_required'},{'WWW-Authenticate':`Bearer resource_metadata="${origin}/renew-resource/${mode}", scope="tools.read"`});return;
+   }
+   if(url.pathname.startsWith('/renew-resource/')){
+    const mode=url.pathname.slice(16);assert.ok(renewalModes.includes(mode));assert.equal(request.method,'GET');assert.equal(request.headers.authorization,undefined);reply(200,{resource:origin+'/renew-mcp/'+mode,authorization_servers:[origin+'/renew-issuer/'+mode],scopes_supported:['tools.read','tools.list'],bearer_methods_supported:['header']});return;
+   }
+   if(url.pathname.startsWith('/.well-known/oauth-authorization-server/renew-issuer/')){
+    const mode=url.pathname.split('/').at(-1);assert.ok(renewalModes.includes(mode));assert.equal(request.method,'GET');assert.equal(request.headers.authorization,undefined);reply(200,{issuer:origin+'/renew-issuer/'+mode,authorization_endpoint:origin+'/authorize',token_endpoint:origin+'/renew-token/'+mode,response_types_supported:['code'],grant_types_supported:['authorization_code','refresh_token'],code_challenge_methods_supported:['S256'],token_endpoint_auth_methods_supported:['none'],scopes_supported:['tools.read','tools.list']});return;
+   }
+   if(url.pathname.startsWith('/renew-token/')){
+    const mode=url.pathname.slice(13);assert.ok(renewalModes.includes(mode));assert.equal(request.method,'POST');assert.equal(request.headers.authorization,undefined);assert.equal(request.headers['content-type'],'application/x-www-form-urlencoded');
+    const params=new URLSearchParams(body),keys=[...params.keys()];assert.equal(new Set(keys).size,keys.length);assert.deepEqual(keys.sort(),['client_id','grant_type','refresh_token','resource','scope']);assert.equal(params.get('client_id'),'synthetic-public-client');assert.equal(params.get('grant_type'),'refresh_token');assert.equal(params.get('refresh_token'),'synthetic refresh +&=');assert.equal(params.get('resource'),origin+'/renew-mcp/'+mode);assert.equal(params.get('scope'),'tools.read tools.list');count('renewal',mode);
+    if(mode==='cancel'){request.on('close',()=>{});return;}
+    if(mode==='http-failure'){reply(400,{error:'invalid_grant',error_description:'synthetic private renewal diagnostic'});return;}
+    if(mode==='lost-reply'){response.destroy();return;}
+    if(mode==='redirect'){response.writeHead(307,{Location:origin+'/refresh-forwarded'});response.end();return;}
+    if(mode==='bad-json'){response.writeHead(200,{'Content-Type':'application/json'});response.end('{"access_token":"synthetic-renewed-access","access_token":"duplicate","token_type":"Bearer"}');return;}
+    reply(200,{access_token:'synthetic-renewed-access',token_type:'Bearer',expires_in:600,scope:mode==='scope-expanded'?'tools.admin':'tools.read',...(mode==='rotate'?{refresh_token:'synthetic rotated refresh +&='}:{})});return;
+   }
    if(url.pathname.startsWith('/mcp/')){
     const kind=url.pathname.slice(5);assert.ok(kinds.has(kind));assert.equal(request.method,'POST');
     const rpc=JSON.parse(body);assert.equal(rpc.jsonrpc,'2.0');
@@ -69,7 +90,7 @@ export function trustedRequest(url,ca,{method='GET',body,headers={}}={}){
 }
 async function hosted(){
  if(process.platform!=='win32'||process.env.GITHUB_ACTIONS!=='true'||process.env.RUNNER_ENVIRONMENT!=='github-hosted'||process.env.RUNNER_OS!=='Windows'||!/^\d+$/.test(process.env.GITHUB_RUN_ID||''))throw Error('Trusted OAuth acceptance requires an isolated GitHub-hosted Windows runner. Never impersonate its environment locally.');
- const [executable,modules,stdlib,openssl,certificateHelper,refreshExecutable]=process.argv.slice(2),execute=promisify(execFile),tempRoot=await realpath(process.env.RUNNER_TEMP),directory=await mkdtemp(join(tempRoot,'xmind-oauth-trust-'));
+ const [executable,modules,stdlib,openssl,certificateHelper,refreshExecutable,renewalExecutable]=process.argv.slice(2),execute=promisify(execFile),tempRoot=await realpath(process.env.RUNNER_TEMP),directory=await mkdtemp(join(tempRoot,'xmind-oauth-trust-'));
  assert.equal(dirname(await realpath(directory)),tempRoot);let peer,child,exited,timer,installed=false,thumbprint,registeredReservation,occupiedReservation;
  const caFile=join(directory,'ca.cer'),provision=action=>execute('pwsh.exe',['-NoProfile','-NonInteractive','-File',certificateHelper,'-Action',action,'-CertificateFile',caFile,'-Thumbprint',thumbprint],{windowsHide:true,timeout:20000});
  try{
@@ -106,6 +127,8 @@ async function hosted(){
   for(const filename of ['state.sqlite','state.sqlite-wal']){let bytes;try{bytes=await readFile(join(directory,filename));}catch(error){if(error.code==='ENOENT')continue;throw error;}assert.ok(!bytes.includes(Buffer.from(access)));assert.ok(!bytes.includes(Buffer.from(refresh)));}
   for(const mode of ['rotate','retain','scope-expanded','bad-json','http-failure','lost-reply','redirect']){const result=await execute(refreshExecutable,[mode,origin],{windowsHide:true,timeout:10000});assert.match(result.stdout,new RegExp('passed '+mode));peer.assertHealthy();}
   assert.deepEqual(peer.counts.refresh,Object.fromEntries(['rotate','retain','scope-expanded','bad-json','http-failure','lost-reply','redirect'].map(mode=>[mode,1])));
+  await runRenewalAcceptance(renewalExecutable,modules,stdlib,origin,{peer});
+  assert.deepEqual(peer.counts.renewal,Object.fromEntries(renewalModes.map(mode=>[mode,1])));assert.equal(peer.counts.refresh.forwarded,undefined);
   process.stdout.write('Separate actual native single-use refresh protocol passed trusted HTTPS rotation/retention, restricted scope, duplicate JSON, HTTP failure, lost reply and redirect rejection with exactly one request per owner and zero forwarded requests. Synthetic refresh inputs; no durable refresh publication, automatic refresh or client refresh support claimed.\n');
   process.stdout.write('Actual native OAuth service passed trusted HTTPS discovery, default and registered exact-path/port callbacks, occupied-port rejection without fallback, independent S256/code/resource/client binding, two positive code exchanges, encrypted complete grant publication/reopen, bearer MCP discovery before/after reopen, denial/state/issuer/code rejection and cancellation without extra token requests. Synthetic authority and tokens only; no real provider account or rendered/browser-launch acceptance.\n');
  }finally{

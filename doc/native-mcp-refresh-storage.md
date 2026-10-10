@@ -1,6 +1,6 @@
 # Durable native MCP refresh storage
 
-The current candidate adds typed C++ repository operations for refresh claims,
+The storage checkpoint at `57da085` adds typed C++ repository operations for refresh claims,
 dispatch and atomic complete-grant publication through embedded-xlang3 SQLite.
 The complete rebuilt **117/117** local native gate passes in **389.30 seconds**,
 with all **2464** frozen inputs unchanged and three focused contracts passing.
@@ -8,6 +8,11 @@ It is not automatic refresh or a working network coordinator. Client source is
 unchanged from the earlier complete **257 extension / 55 browser** acceptance;
 those suites were not rerun for this candidate.
 [Exact local evidence](evidence/native-oauth-refresh-storage-local.json).
+
+The subsequent [native manual renewal coordinator](native-mcp-renewal.md)
+integrates these operations with network discovery/exchange, authenticated
+commands and console/view controls. Its acceptance is recorded separately;
+the storage checkpoint alone does not prove that integration.
 
 ## Ownership and receipts
 

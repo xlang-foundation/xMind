@@ -8,6 +8,7 @@ function apiPath(path){return /^\/v1\/(?:health|workspace(?:\/skills)?|workspace
 export function allowedApiRoute(path,method){
  if(/^\/v1\/mcp\/authorization\/(?:servers|attempts\/[A-Za-z0-9_-]{1,128})$/.test(path))return method==='GET';
  if(/^\/v1\/mcp\/authorization\/attempts(?:\/[A-Za-z0-9_-]{1,128}\/cancel)?$/.test(path))return method==='POST';
+ if(path==='/v1/mcp/authorization/renewals')return method==='POST';
  if(/^\/v1\/(?:runs\/[A-Za-z0-9_-]+\/(?:events|tree-events)|graph-runs\/[A-Za-z0-9_-]+\/events)\/stream$/.test(path))return method==='GET';
  if(!apiPath(path)||!['GET','POST'].includes(method))return false;
  if(path==='/v1/workspaces')return method==='GET';

@@ -12,6 +12,8 @@ public:
     std::vector<McpOAuthServerStatus> servers() override;
     McpOAuthAttemptStatus start(std::string server_id,std::int64_t config_revision,
         std::int64_t credential_revision,std::string request_id) override;
+    McpOAuthAttemptStatus renew(std::string server_id,std::int64_t config_revision,
+        std::int64_t credential_revision,std::string request_id) override;
     McpOAuthAttemptStatus status(const std::string& id) override;
     McpOAuthAttemptStatus cancel(const std::string& id) override;
     void stop();

@@ -1,5 +1,24 @@
 # Reviewable milestones
 
+The local managed-profile startup repair now passes the native profile contract
+**1/1** in **76.79 seconds** and runtime-generation contract **1/1** in **6.07
+seconds**. The copier now closes its native manifest writer before the read-only
+inventory verifier reopens that file; transient Windows sharing violations get
+a bounded retry. A live CLI `profile-info` also reattached to the same backend
+PID and `D:\CantorAI2026\TestProj` workspace as the VS Code launch (`started`
+false). This is local source/profile evidence, not a rebuilt release package or
+full rendered VS Code acceptance.
+
+The storage source `57da085` passes the complete hosted **118 native** gate in
+**360.18 seconds**, **257 extension / 55 browser** checks and packaging. Independent
+downloads verify exact inventory, both archive digests, all runtime/source-bundle
+bytes, sixteen packaged-source comparisons and twelve accepted browser assets.
+Actual durable xlang3 SQLite storage, trusted synthetic login/refresh primitives
+and owned machine-root cleanup are verified. The subsequent manual renewal
+coordinator and client controls require separate acceptance; this older source
+does not establish their integrated exchange.
+[Exact hosted storage evidence](evidence/native-oauth-refresh-storage-hosted-57da085.json).
+
 The repaired `0eee494` hosted source passes all **117 native** contracts in
 **344.09 seconds**, **257 extension / 55 browser** checks and packaging. Original
 output confirms actual trusted native OAuth login/registered callbacks, encrypted

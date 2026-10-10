@@ -8,9 +8,10 @@ and downloaded artifact/package bytes are independently verified. This is synthe
 protocol acceptance, not durable or automatic renewal.
 [Exact hosted evidence](evidence/native-oauth-refresh-hosted-0eee494.json).
 
-The native library now contains a single-caller `McpOAuthRefreshAttempt` and
-private form/response helpers. This is an exchange primitive; automatic refresh
-and CLI/view refresh controls are not implemented. A newer
+The native library contains a single-caller `McpOAuthRefreshAttempt` and
+private form/response helpers. The subsequent [manual renewal coordinator](native-mcp-renewal.md)
+uses these through the backend with console and Settings controls. Automatic
+expiry renewal remains unfinished. The preceding
 [durable storage candidate](native-mcp-refresh-storage.md) passes the complete
 **117/117** local gate in **389.30 seconds**, with **2464** unchanged inputs.
 The production MCP factory still rejects a known expired grant; the storage

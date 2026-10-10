@@ -20,6 +20,20 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+The storage source `57da085` has passed all **118 hosted native** contracts in
+**360.18 seconds**, **257 extension / 55 browser** checks and packaging. The
+downloaded exact inventory, artifact digests, runtime/VSIX bytes, trusted synthetic
+OAuth output, durable xlang3 SQLite storage and owned certificate cleanup verify
+independently. This source precedes the new manual renewal coordinator and client
+controls; it does not prove their integrated trusted exchange.
+[Exact hosted storage evidence](evidence/native-oauth-refresh-storage-hosted-57da085.json).
+
+The subsequent [manual renewal integration](native-mcp-renewal.md) connects the
+native service, authenticated HTTP commands, unified console and Settings
+controls. Its complete candidate gate is recorded separately below when verified.
+Automatic expiry renewal, mid-run coordination and explicit uncertain grant
+recovery remain required.
+
 The repaired `0eee494` source passes all **117 hosted native** contracts in
 **344.09 seconds**, **257 extension / 55 browser** checks and packaging. Downloaded
 evidence confirms actual trusted native login/registered callbacks, encrypted
@@ -584,7 +598,7 @@ removed Python prototype's status table; it is not a completion score.
 | Instructions and agent presets | Native repository guidance discovery, source binding, durable approval checks and explicit workspace.inspect revision1 leaf policy | Full instruction scoping/configuration and broader reproducible presets |
 | Skills and commands | Native workspace discovery/loading, catalogue inspection, model activation, user attachments/removal and persisted selections have scoped native and actual OpenAI/other-provider acceptance; see [skills](native-skills.md) | Full command/skill lifecycle, source management, URL/embedded sources, broader scoping and current installed/rendered acceptance |
 | Plugins | Native ownership is specified | Lifecycle, hooks, isolation and compatibility acceptance |
-| MCP | Configured native stdio/HTTP tools, schema worker, approvals and modern/legacy official SDK peers have scoped contracts. Native OAuth service, callbacks, encrypted grants and console/view controls exist; registered callback settings are under verification | Successful hosted trusted OAuth acceptance, real authority login, registration/CIMD/DCR, refresh/revocation and running-owner coordination, resources/prompts/subscriptions, broader SDK features and full live coding interoperability |
+| MCP | Configured native stdio/HTTP tools, schema worker, approvals and modern/legacy official SDK peers have scoped contracts. Hosted trusted synthetic login/callbacks and durable encrypted grants are verified. Manual renewal service and console/Settings controls have separate acceptance in [renewal](native-mcp-renewal.md) | Integrated trusted renewal for the new source, real authority login, registration/CIMD/DCR, automatic renewal/revocation and running-owner coordination, uncertain grant recovery, resources/prompts/subscriptions, broader SDK features and full live coding interoperability |
 | Permissions and policies | Backend-owned durable grant/deny/cancel and effect ownership have actual file/process/peer fixtures | Complete policy rules, recovery and consistent enforcement across exposed tools/protocols |
 | Context compaction | Native Responses checkpoints/counting, session/mid-run and manual/automatic paths, private provider state and actual budgets passed their scoped complete gate, including the later serializer repair; [design and evidence](native-context-compaction-design.md) | Complete non-Responses provider strategies and live coding/installed thin-client acceptance using the current package format; local contracts do not establish full compaction completion |
 | Snapshots and recovery | Durable uncertainty inspection and non-replay safeguards cover selected effects | General reviewable snapshots, restoration and attributed reconciliation |
