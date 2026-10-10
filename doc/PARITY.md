@@ -22,8 +22,9 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 Native MCP HTTP remains unfinished. The production approval registry now has
 a shared native client interface implemented by stdio; its new compilation and
-effect-contract acceptance are pending. This is a required transport boundary,
-not HTTP/OAuth parity. [Scope and pinned protocol](native-mcp-http.md).
+effect-contract acceptance are pending. The linked HTTP metadata component
+and native fixtures are also unexecuted. Neither establishes HTTP/OAuth parity.
+[Scope and pinned protocols](native-mcp-http.md).
 
 Native file discovery and literal content search now interpret hierarchical
 workspace-local Git/search ignore metadata, ordered negation and scoped overrides.

@@ -15,18 +15,32 @@ The existing actual MCP effect contract now passes its real stdio peer through
 that interface. Compile-time assertions require an abstract base, a shared
 deadline type, noncopyable stdio ownership and no public tool dispatch on either
 type. Whitespace/source checks pass; native compilation and execution of these
-changes are pending. The accepted native `7a148ff` package predates this change.
+changes are pending. The accepted native `977e945` package predates this change.
 
 ## Protocol and ownership
 
-The HTTP implementation targets the pinned
-[MCP 2025-11-25 Streamable HTTP specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports).
-Required behavior includes POSTing individual JSON-RPC messages with both JSON
-and SSE in Accept, accepting JSON or SSE request responses, empty 202 notification
-acknowledgements, negotiated protocol headers and assigned session headers.
-SSE reconnect uses GET and its own Last-Event-ID; it must not replay another
-stream's messages. Optional session DELETE must also handle 405. Session loss
-requires reinitialization, which cannot justify resending an uncertain tool call.
+The native wire codec already pins modern `2026-07-28`, with explicit older
+negotiation. HTTP must implement those distinct protocol eras too; this is
+peer interoperability, not product-format migration. The
+[modern HTTP specification](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http)
+uses request metadata/mirrored headers, POST JSON or request-scoped SSE, and
+POST notification subscriptions. It has no session IDs, standalone GET or
+Last-Event-ID resumption. Closing a response stream cancels its MCP request.
+The [older HTTP specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)
+uses initialize/session headers, GET streams, optional DELETE and resumable
+SSE. Those mechanisms cannot be silently mixed into a modern request.
+
+`mcp_http_metadata.cpp` now projects standard headers from actual native request
+bytes and validates tool parameter header declarations. Values preserve exact
+property paths, Unicode/control/whitespace encoding, boolean spelling and safe
+integer precision without a floating-point round trip. Null/absent values omit
+headers. Invalid declarations throw before projection; the future HTTP client
+must catch declaration rejection per tool and omit that tool from discovery.
+Existing stdio discovery remains unchanged. Byte/header-count limits are xMind
+implementation limits. This component is linked into the actual MCP wire target
+and has additions to its existing native contract, but has not been compiled
+or executed yet. Network dispatch, discovery filtering and HTTP ownership are
+still unfinished.
 
 The following are xMind implementation decisions, not claims of delivered
 protocol support:
@@ -39,14 +53,16 @@ protocol support:
 - TLS uses OS verification. Redirects cannot forward credentials to another
   destination. Parsing, response sizes, session IDs and deadlines are bounded.
 - Transport loss records uncertain effects when dispatch may have occurred.
-  Reconnect may resume observation; it cannot repeat a journalled tool POST.
+  Older resumable observation cannot repeat a journalled tool POST. Modern
+  stream closure cannot be treated as automatic resumable observation. UI
+  disconnection detaches the viewer; it must not close runtime-owned MCP work.
 - The factory selects and connects the actual transport before registry
   discovery. Factory/configuration, HTTP binding and response-header access
   still need implementation; existing provider helpers alone are insufficient.
 
 ## Authorization
 
-The pinned [MCP authorization specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization)
+The [modern MCP authorization specification](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization)
 requires resource and authorization-server discovery, PKCE capability checks
 and resource parameters in authorization/token requests. HTTP session identity
 does not substitute for authorization.
@@ -66,8 +82,9 @@ all unfinished.
 - Test actual native HTTP with independent official SDK peers: initialize,
   JSON/SSE response variants, notifications, tool discovery, schema validation,
   explicit approvals and independently observed peer effects/receipts.
-- Verify protocol/session headers, concurrent-stream isolation, resumable GET,
-  cancellation/deadlines, session expiry and DELETE behavior.
+- Verify modern metadata/header agreement, safe parameter projection and
+  per-tool rejection, concurrent request isolation and cancellation/deadlines.
+  Verify older session headers, resumable GET, expiry and DELETE separately.
 - Lose a reply around a peer effect; require recorded uncertainty and no
   duplicate tool dispatch after reconnect or backend restart.
 - Exercise TLS/authentication, OAuth discovery/PKCE/issuer/resource binding,

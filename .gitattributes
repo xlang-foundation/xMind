@@ -62,3 +62,5 @@ doc/evidence/native-unified-hosted-689404e-contracts.json -text whitespace=-blan
 doc/evidence/native-unified-event-stream-*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 doc/evidence/native-unified-hosted-7a148ff-passed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-unified-hosted-7a148ff-contracts.json -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-unified-hosted-977e945-passed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-unified-hosted-977e945-contracts.json -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

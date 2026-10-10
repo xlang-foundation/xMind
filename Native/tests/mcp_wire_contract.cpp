@@ -2,6 +2,7 @@
 // No MCP subprocess, provider, remote tool effect or full interoperability claim.
 #include "agentflow/mcp_wire.hpp"
 #include "agentflow/mcp_requests.hpp"
+#include "agentflow/mcp_http_metadata.hpp"
 #include "nlohmann/json.hpp"
 #include <iostream>
 #include <vector>
@@ -115,6 +116,30 @@ int main() {
         for(int i=0;i<300;++i) {const auto item=tracker.prepare("tools/list","{}",McpWireEra::legacy);tracker.cancel(item.request.id);}
         rejected([&]{tracker.receive(response(cancelled.request.id));});
         require(tracker.pending()==1,"Retirement history is bounded without evicting active requests");
-        std::cout<<"Native MCP wire codec passed bounded fragmented JSON-RPC fixtures; no subprocess, remote tool or complete MCP support claimed\n";return 0;
+        const auto http=mcp_http_request_headers(mcp_request("http","tools/call",R"({"name":"雪","arguments":{}})",McpWireEra::modern),McpWireEra::modern);
+        require(http.size()==3 && http[0].value=="2026-07-28" && http[1].value=="tools/call" && http[2].value=="=?base64?6Zuq?=","HTTP headers must derive from actual modern request bytes and encode Unicode names");
+        const auto oldHttp=mcp_http_request_headers(mcp_request("http","tools/list","{}",McpWireEra::legacy),McpWireEra::legacy);
+        require(oldHttp.size()==1 && oldHttp[0].value=="2025-11-25","Older HTTP requests cannot invent modern mirror metadata");
+        rejected([&]{mcp_http_request_headers(mcp_request("http","tools/list","{}",McpWireEra::legacy),McpWireEra::modern);});
+        rejected([&]{mcp_http_request_headers(mcp_request("http","tools/call","{}",McpWireEra::modern),McpWireEra::modern);});
+        rejected([&]{mcp_http_request_headers(mcp_request("http","bad\r\nInjected","{}",McpWireEra::modern),McpWireEra::modern);});
+        McpHttpToolHeaders projection(R"({"type":"object","properties":{"n":{"type":"integer","x-mcp-header":"Count"},"context":{"type":"object","properties":{"region":{"type":"string","x-mcp-header":"Region"}}},"flag":{"type":"boolean","x-mcp-header":"Enabled"}}})");
+        const auto projected=projection.project(R"({"n":9007199254740991,"context":{"region":"line1\nline2"},"flag":false})");
+        require(projected.size()==3 && projected[0].name=="Mcp-Param-Region" && projected[0].value=="=?base64?bGluZTEKbGluZTI=?=" && projected[1].value=="false" && projected[2].value=="9007199254740991","Nested paths, control encoding, false and maximum exact integer must survive HTTP projection");
+        require(projection.project(R"({"context":null,"n":null})").empty(),"Absent/null mirrored values must omit headers");
+        require(projection.project(R"({"n":-9007199254740991})")[0].value=="-9007199254740991","Minimum safe integer must remain exact");
+        require(projection.project(R"({"n":420e-1})")[0].value=="42","Exact exponent integer must use decimal header spelling");
+        require(projection.project(R"({"n":42.000})")[0].value=="42","Exact decimal integer must use decimal header spelling");
+        require(projection.project(R"({"n":-0.000})")[0].value=="0","Negative zero must have canonical integer spelling");
+        for(const auto& raw:{R"({"n":9007199254740992})",R"({"n":-9007199254740992})",R"({"n":1.00000000000000000001})",R"({"n":1e-20})",R"({"n":"42"})",R"({"flag":0})",R"({"context":[]})"})rejected([&]{projection.project(raw);});
+        McpHttpToolHeaders literal(R"({"properties":{"text":{"type":"string","x-mcp-header":"Text"}}})");
+        require(literal.project(R"({"text":"=?base64?literal?="})")[0].value=="=?base64?PT9iYXNlNjQ/bGl0ZXJhbD89?=","Sentinel-looking literals must be encoded to avoid ambiguity");
+        require(literal.project(R"({"text":" padded "})")[0].value=="=?base64?IHBhZGRlZCA=?=","Padded strings must preserve whitespace through Base64");
+        require(literal.project(R"({"text":"a\tb"})")[0].value=="a\tb","Interior horizontal tabs are valid HTTP field values");
+        require(literal.project(R"({"text":""})")[0].value.empty(),"Present empty strings must emit empty headers");
+        for(const auto& schema:{R"({"properties":{"x":{"type":"number","x-mcp-header":"X"}}})",R"({"properties":{"x":{"type":"string","x-mcp-header":""}}})",R"({"properties":{"x":{"type":"string","x-mcp-header":"Bad\r\nName"}}})",R"({"properties":{"x":{"type":"string","x-mcp-header":"X"},"y":{"type":"string","x-mcp-header":"x"}}})",R"({"items":{"properties":{"x":{"type":"string","x-mcp-header":"X"}}}})",R"({"allOf":[{"properties":{"x":{"type":"string","x-mcp-header":"X"}}}]})",R"({"type":"string","x-mcp-header":"Root"})",R"({"$defs":{"hidden":{"properties":{"x":{"type":"string","x-mcp-header":"X"}}}}})"})rejected([&]{McpHttpToolHeaders invalidHeaders(schema);});
+        rejected([&]{literal.project(Json{{"text",std::string(16385,'x')}}.dump());});
+        rejected([&]{literal.project(R"({"text":"x","text":"y"})");});
+        std::cout<<"Native MCP wire codec and HTTP metadata projection passed bounded fixtures; no subprocess, HTTP network binding, remote tool or complete MCP support claimed\n";return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }

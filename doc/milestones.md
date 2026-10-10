@@ -1,5 +1,27 @@
 # Reviewable milestones
 
+Native browser streaming accepted at `977e945`: the full hosted **110 native
+contracts** passed in **356.85 seconds**, with **241 extension / 49 browser**
+fixtures and actual browser/native integration. The production cookie client,
+shared reader/subscription and native gateway now have actual paused
+detach/reattach, checkpoint-bound human input, committed incremental events,
+two-stream capacity/command fairness and process-exit revocation acceptance.
+Independent verification checked the downloaded bundle/runtime/VSIX hashes,
+all 16 host/view source mappings and generated browser assets. Later clean EOF,
+gateway restart, actual extension controller and approved creation assertions
+remain pending, as do fresh installed/rendered coding and live inference.
+[Scope](evidence/native-event-stream-hosted-977e945-scope.json),
+[package verification](evidence/native-event-stream-hosted-977e945-package.json).
+
+Native MCP HTTP metadata candidate: the actual wire library now validates and
+projects modern request headers and declared parameter headers, including
+exact safe integers, nested paths, Unicode/control encoding, absent/null values
+and case-insensitive name uniqueness. Its existing native contract has bounded
+fixtures; compilation/execution is pending. HTTP networking, discovery filtering,
+OAuth and effect acceptance remain unfinished. The design now distinguishes
+modern request-scoped HTTP from older session/resumption semantics.
+[Implementation and remaining acceptance](native-mcp-http.md).
+
 Native MCP transport interface candidate: production `McpToolRegistry` now
 accepts a transport-neutral `McpToolClient`, implemented by the existing stdio
 binding. Dispatch stays private to the same durable approval/effect registry.
