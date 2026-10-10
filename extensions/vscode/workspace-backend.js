@@ -109,10 +109,28 @@ class WorkspaceBackend {
     try{await this.deps.fs.lstat(directory);throw new Error('View rendezvous already exists; its data was preserved.');}catch(error){if(error.code!=='ENOENT')throw error;}
     const ready=path.win32.join(directory,'ready.json'),token=this.deps.random();
     if(!/^[a-f0-9]{64}$/.test(token))throw new Error('Invalid local view authentication.');
-    const args=['view','--workspace',canonical,'--ready-file',ready];
+    // Keep SQLite and native package DLL paths under a short canonical
+    // per-user path. Windows package caches can expand AppData paths past the
+    // native runtime's legacy DLL-loading limit.
+    let profileRoot;
+    if(this.deps.profileRoot)profileRoot=canonicalPath(this.deps.profileRoot);
+    else{
+      const userProfile=this.deps.env.USERPROFILE;
+      if(!userProfile)throw new Error('Local xMind profile storage requires the Windows user profile directory.');
+      const userRoot=canonicalPath(await this.deps.fs.realpath(userProfile));
+      let profileParent=path.win32.join(userRoot,'.xMind');
+      await this.deps.fs.mkdir(profileParent,{recursive:true});
+      profileParent=canonicalPath(await this.deps.fs.realpath(profileParent));
+      profileRoot=path.win32.join(profileParent,'p');
+      if(profileRoot.length>84){
+        profileRoot=path.win32.join(userRoot,'p');
+      }
+      if(profileRoot.length>84)throw new Error('The local Windows profile location is too long for native runtime preparation.');
+    }
+    if(roots.some(root=>contained(root,profileRoot)||contained(profileRoot,root)))throw new Error('Local profile storage overlaps an opened workspace.');
+    const args=['view','--workspace',canonical,'--profile-root',profileRoot,'--ready-file',ready];
     if(runtime.providerConfig)args.push('--config',runtime.providerConfig);
     if(machineSetting(this.vscode,'workspaceEdits')===false)args.push('--read-only');
-    if(this.deps.profileRoot)args.push('--profile-root',canonicalPath(this.deps.profileRoot));
     if(!current())throw new Error('Workspace changed before starting its native view.');
     const env={...this.deps.env,XMIND_VIEW_TOKEN:token};for(const key of Object.keys(env))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY'||key==='XMIND_AUTH_TOKEN')delete env[key];
     const child=this.deps.spawn(runtime.nativeProgram,args,{cwd:canonical,env,windowsHide:true,stdio:'ignore'});

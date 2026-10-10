@@ -24,8 +24,7 @@ namespace agentflow {
 namespace {
 using Json = nlohmann::json;
 namespace fs = std::filesystem;
-void require(bool condition,
-             const char *message = "Local profile validation failed; stored state was preserved") {
+void require(bool condition, const char *message = "Local profile validation failed; stored state was preserved") {
     if (!condition)
         throw std::runtime_error(message);
 }
@@ -243,10 +242,10 @@ class Store {
                std::to_string(info.nFileIndexHigh) + ":" + std::to_string(info.nFileIndexLow);
     }
     Handle open(const wchar_t *name, DWORD access, DWORD creation, DWORD share = 0) {
-        Handle file(CreateFileW((directory / name).c_str(), access | READ_CONTROL, share,
+        Handle file(CreateFileW(extended(directory / name).c_str(), access | READ_CONTROL, share,
                                 &security.attributes, creation,
                                 FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OPEN_REPARSE_POINT, nullptr));
-        require(file.value != INVALID_HANDLE_VALUE);
+        require(file.value != INVALID_HANDLE_VALUE, "Cannot create protected local profile file");
         BY_HANDLE_FILE_INFORMATION info{};
         require(GetFileInformationByHandle(file.value, &info) != 0 &&
                 !(info.dwFileAttributes & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT)) &&
@@ -292,14 +291,14 @@ class Store {
             auto old = open(L"profile.state", FILE_READ_ATTRIBUTES, OPEN_EXISTING,
                             FILE_SHARE_READ | FILE_SHARE_DELETE);
         }
-        require(MoveFileExW((directory / name).c_str(), (directory / L"profile.state").c_str(),
+        require(MoveFileExW(extended(directory / name).c_str(), extended(directory / L"profile.state").c_str(),
                             MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0,
                 "Cannot publish local profile record; stored database was preserved");
     }
     Handle lock() {
         const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(35);
         for (;;) {
-            Handle value(CreateFileW((directory / L"startup.lock").c_str(),
+            Handle value(CreateFileW(extended(directory / L"startup.lock").c_str(),
                                      GENERIC_READ | GENERIC_WRITE | READ_CONTROL, 0, &security.attributes,
                                      OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OPEN_REPARSE_POINT,
                                      nullptr));
@@ -658,9 +657,13 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                               TRUE) != 0,
                     "Cannot copy the verified profile runtime inventory");
         }
-        std::ofstream output(destination.directory / L"native-runtime-manifest.json", std::ios::binary);
-        output.write(raw.data(), static_cast<std::streamsize>(raw.size()));
-        output.close();
+        auto output = destination.open(L"native-runtime-manifest.json", GENERIC_WRITE, CREATE_NEW);
+        DWORD written = 0;
+        require(WriteFile(output.value, raw.data(), static_cast<DWORD>(raw.size()), &written, nullptr) != 0 &&
+                    written == raw.size() && FlushFileBuffers(output.value) != 0,
+                "Cannot publish the verified profile runtime manifest");
+        CloseHandle(output.value);
+        output.value = INVALID_HANDLE_VALUE;
         runtime = std::make_unique<VerifiedRuntimeGeneration>(
             text(destination.directory), state.at("manifest").get<std::string>(), workspace.root_path());
         runtime->revalidate();

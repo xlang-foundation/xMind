@@ -10,12 +10,14 @@
 #include <map>
 #include <mutex>
 #include <set>
+#include <chrono>
+#include <thread>
 #include <vector>
 
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
-[[noreturn]] void denied(){throw RuntimeGenerationDenied("Native runtime generation verification failed");}
+[[noreturn]] void denied(const char* detail=nullptr){throw RuntimeGenerationDenied(detail?std::string("Native runtime generation verification failed: ")+detail:"Native runtime generation verification failed");}
 void require(bool value){if(!value)denied();}
 bool hex(const std::string& value,std::size_t count){return value.size()==count&&value.find_first_not_of("0123456789abcdef")==std::string::npos;}
 std::wstring wide(const std::string& value){require(!value.empty()&&value.size()<=32768&&std::none_of(value.begin(),value.end(),[](unsigned char c){return c<32;}));const int size=MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0);require(size>0);std::wstring result(size,L'\0');require(MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),result.data(),size)==size);return result;}
@@ -25,7 +27,31 @@ bool same(const std::wstring& a,const std::wstring& b){return a.size()==b.size()
 std::wstring final_name(HANDLE handle){const auto size=GetFinalPathNameByHandleW(handle,nullptr,0,FILE_NAME_NORMALIZED|VOLUME_NAME_DOS);require(size>0&&size<32768);std::wstring result(size,L'\0');const auto used=GetFinalPathNameByHandleW(handle,result.data(),size,FILE_NAME_NORMALIZED|VOLUME_NAME_DOS);require(used>0&&used<size);result.resize(used);require(result.starts_with(L"\\\\?\\")&&!result.starts_with(L"\\\\?\\UNC\\"));return result;}
 struct Handle {
     HANDLE value=INVALID_HANDLE_VALUE;BY_HANDLE_FILE_INFORMATION info{};std::wstring path;bool directory=false;
-    Handle(const std::wstring& name,bool dir,bool mutable_ancestor=false):directory(dir){value=CreateFileW(name.c_str(),mutable_ancestor?FILE_READ_ATTRIBUTES:GENERIC_READ,mutable_ancestor?FILE_SHARE_READ|FILE_SHARE_WRITE:FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_OPEN_REPARSE_POINT|(dir?FILE_FLAG_BACKUP_SEMANTICS:FILE_FLAG_SEQUENTIAL_SCAN),nullptr);if(value==INVALID_HANDLE_VALUE)denied();try{require(GetFileInformationByHandle(value,&info)!=0);require(!(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)&&((info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)!=0)==dir&&(dir||info.nNumberOfLinks==1));path=final_name(value);require(same(path,name));}catch(...){CloseHandle(value);value=INVALID_HANDLE_VALUE;throw;}}
+    Handle(const std::wstring& name,bool dir,bool mutable_ancestor=false):directory(dir){
+        for(unsigned attempt=0;;++attempt){
+            value=CreateFileW(name.c_str(),mutable_ancestor?FILE_READ_ATTRIBUTES:GENERIC_READ,
+                mutable_ancestor?FILE_SHARE_READ|FILE_SHARE_WRITE:FILE_SHARE_READ,nullptr,OPEN_EXISTING,
+                FILE_FLAG_OPEN_REPARSE_POINT|(dir?FILE_FLAG_BACKUP_SEMANTICS:FILE_FLAG_SEQUENTIAL_SCAN),nullptr);
+            if(value!=INVALID_HANDLE_VALUE)break;
+            const auto error=GetLastError();
+            if(error!=ERROR_SHARING_VIOLATION||attempt>=20){
+                if(error==ERROR_SHARING_VIOLATION){
+                    const auto slash=name.find_last_of(L"\\/");
+                    const auto leaf=utf8(name.substr(slash==std::wstring::npos?0:slash+1));
+                    throw RuntimeGenerationDenied("Native runtime generation verification failed: runtime entry remained locked (Win32 32): "+leaf);
+                }
+                denied(dir?"runtime inventory directory could not be opened":"runtime inventory file could not be opened");
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(25));
+        }
+        try{
+            require(GetFileInformationByHandle(value,&info)!=0);
+            require(!(info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)&&
+                ((info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)!=0)==dir&&(dir||info.nNumberOfLinks==1));
+            path=final_name(value);
+            require(same(path,name));
+        }catch(...){CloseHandle(value);value=INVALID_HANDLE_VALUE;throw;}
+    }
     ~Handle(){if(value!=INVALID_HANDLE_VALUE)CloseHandle(value);}
     Handle(Handle&& other)noexcept:value(other.value),info(other.info),path(std::move(other.path)),directory(other.directory){other.value=INVALID_HANDLE_VALUE;}
     Handle& operator=(Handle&&)=delete;Handle(const Handle&)=delete;
@@ -60,11 +86,11 @@ struct VerifiedRuntimeGeneration::Impl {
     void revalidate()const{std::lock_guard lock(verification);for(const auto& handle:ancestors)handle.stable(false);root.stable();for(const auto& handle:directories)handle.stable();for(const auto& handle:files)handle.stable();require(inventory(root.path)==expected);require(files.at(positions.at("native-runtime-manifest.json")).bytes(4*1024*1024)==manifest);}
     void current()const{revalidate();std::wstring image(32768,L'\0');const auto size=GetModuleFileNameW(nullptr,image.data(),static_cast<DWORD>(image.size()));require(size>0&&size<image.size());image.resize(size);Handle actual(absolute(utf8(image)),false);const auto& server=files.at(positions.at("xmind.exe"));require(actual.identity()==server.identity()&&same(actual.path,server.path)&&context_digest(actual.bytes(128*1024*1024))==binding.server_sha256);}
 };
-VerifiedRuntimeGeneration::VerifiedRuntimeGeneration(const std::string& root,const std::string& digest,const std::string& excluded){try{impl_=std::make_unique<Impl>(root,digest,excluded);}catch(...){denied();}}
+VerifiedRuntimeGeneration::VerifiedRuntimeGeneration(const std::string& root,const std::string& digest,const std::string& excluded){try{impl_=std::make_unique<Impl>(root,digest,excluded);}catch(const RuntimeGenerationDenied&){throw;}catch(...){denied();}}
 VerifiedRuntimeGeneration::~VerifiedRuntimeGeneration()=default;
 VerifiedRuntimeGeneration::VerifiedRuntimeGeneration(VerifiedRuntimeGeneration&&) noexcept=default;
 VerifiedRuntimeGeneration& VerifiedRuntimeGeneration::operator=(VerifiedRuntimeGeneration&&) noexcept=default;
 const RuntimeGenerationBinding& VerifiedRuntimeGeneration::binding()const{if(!impl_)denied();return impl_->binding;}
-void VerifiedRuntimeGeneration::revalidate()const{try{if(!impl_)denied();impl_->revalidate();}catch(...){denied();}}
-void VerifiedRuntimeGeneration::require_current_server()const{try{if(!impl_)denied();impl_->current();}catch(...){denied();}}
+void VerifiedRuntimeGeneration::revalidate()const{try{if(!impl_)denied();impl_->revalidate();}catch(const RuntimeGenerationDenied&){throw;}catch(...){denied();}}
+void VerifiedRuntimeGeneration::require_current_server()const{try{if(!impl_)denied();impl_->current();}catch(const RuntimeGenerationDenied&){throw;}catch(...){denied();}}
 }
