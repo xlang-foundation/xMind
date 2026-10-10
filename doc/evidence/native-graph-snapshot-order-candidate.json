@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "parentRevision": "b599ef63a9664cc2fa4f3f4544e8afcf593f0277",
+  "status": "candidate-native-revalidation-pending",
+  "scope": "Production browser graph snapshot read ordering and complete synthetic Node suites; original native view failure retained",
+  "failedHostedSource": "e6032d9ef434816dcd149894dd5216c643011568",
+  "failedHostedRun": 38019192226,
+  "failedHostedJob": 114117115960,
+  "failedStage": "Early native local view contract; full native gate not reached",
+  "failure": "Unowned graph event during actual paused graph resume",
+  "correction": "Read committed events before fresh graph/child ownership in initial and terminal snapshots; preserve rejection of unowned events",
+  "oldSourceReproducedInitialAndTerminalFailures": true,
+  "suites": {
+    "extension": {
+      "tests": 243,
+      "pass": 243,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  "trackedInputs": 2436,
+  "generatedAssets": 12,
+  "inputsAndAssetsUnchanged": true,
+  "nativeExecutedLocally": false,
+  "providerRequests": 0,
+  "installedUi": false,
+  "nativeCorrectionVerified": false,
+  "rawHashes": {
+    "doc/evidence/native-unified-graph-snapshot-extension.log": "d03ccf9ab0d07a32bb9bb8974628797d2daa63ff985e49c1811ea58a702e790a",
+    "doc/evidence/native-unified-graph-snapshot-browser.log": "f3aa8f7f6f9ea415b8a5fbb5538c5b1da0d537910a5ceda2644f021681a684e3",
+    "doc/evidence/native-unified-graph-snapshot-old-source-regression.log": "fa135ea372c5cfd638fbef10addebdc59d11ae4d17ec3da1f22efecfc4553a7a",
+    "doc/evidence/native-unified-graph-snapshot-source-before.json": "5ecf7aed33fd80769ebebc4abb56a0685e4bb16156fad2e3baad9ac8e1354d16",
+    "doc/evidence/native-unified-graph-snapshot-source-after.json": "5ecf7aed33fd80769ebebc4abb56a0685e4bb16156fad2e3baad9ac8e1354d16",
+    "doc/evidence/native-unified-hosted-e6032d9-native-view-early-ctest.log": "f8eb2d931f97ee2dedf38d24051daad3e7b4d72cd440531b2588a18fbd05ada8",
+    "doc/evidence/native-unified-hosted-e6032d9-provenance.json": "107a17eb8e6e25adde28229de9067575517068afdb1b35da8598a616e93043db",
+    "doc/evidence/native-unified-hosted-e6032d9-failed.log": "bb3cf9ccca159ca70280bba345d6d6777a1480be81b4a28a8538ac547eefc62c"
+  }
+}

@@ -1,5 +1,18 @@
 # Reviewable milestones
 
+Native early view acceptance failed at `e6032d9`: its actual browser resume
+reported `Unowned graph event`, so the full native gate was not reached. Original
+hosted failure/provenance/job output is retained. The browser snapshot fetched
+children before events; a newly committed child could be missing from that older
+owner list. Source now reads events before fresh root/child metadata, and refreshes
+terminal ownership/operations before displaying final events. Ownership rejection
+remains intact. New deterministic initial/terminal fixtures reproduce both errors
+against the original source and pass the correction; an unowned event still fails.
+Full **243 extension / 53 browser** synthetic suites pass with all **2436** tracked
+inputs and 12 generated assets unchanged. Actual native correction acceptance,
+current MCP compilation and installed/rendered coding remain pending.
+[Failure and candidate evidence](evidence/native-graph-snapshot-order-candidate.json).
+
 Native MCP HTTP configuration/factory candidate: production agent execution,
 idle context preparation, graph tools and admin discovery now select a shared
 native owner from immutable stdio/HTTP settings. HTTP endpoint and encrypted

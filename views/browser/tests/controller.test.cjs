@@ -45,6 +45,16 @@ test('browser resolves new graph child ownership after an older snapshot finishe
  }finally{release();view.dispose();}
 });
 
+for(const phase of ['initial','terminal'])test('browser graph '+phase+' snapshot reads committed events before child ownership',async()=>{
+ const root={id:'root',session_id:'session',state:'running',parent_id:'',node_id:'',graph_root:true},child={id:'child',session_id:'session',state:'completed',parent_id:'root',node_id:'tool',graph_root:false},event={seq:3,run_id:'child',kind:'run.completed',data:{}},posted=[],reads=[];let born=false,eventReads=0,statusReads=0;
+ const client={status:async()=>{statusReads++;return phase==='terminal'&&statusReads>1?{...root,state:'completed'}:root;},graphEvents:async()=>{reads.push('events');eventReads++;if(phase==='initial'||eventReads===2){born=true;return [event];}return [];},graph:async()=>{reads.push('root');return {run:born&&phase==='terminal'?{...root,state:'completed'}:root,spec:{nodes:[{id:'tool',type:'tool'}]}};},graphChildren:async()=>{reads.push('children');return born?[child]:[];},operations:async()=>[],history:async()=>[],runs:async()=>[root]};
+ const view=new BrowserController(client,m=>posted.push(m));view.session='session';view.runId='root';view.runs=[root];
+ try{await view.poll();assert.ok(reads.indexOf('events')<reads.indexOf('children'));assert.equal(view.children.get('child').node_id,'tool');assert.deepEqual(posted.filter(m=>m.type==='graph-event').map(m=>[m.event.seq,m.node_id]),[[3,'tool']]);assert.equal(view.cursor,3);assert.ok(!posted.some(m=>m.type==='error'));if(phase==='terminal')assert.equal(posted.findLast(m=>m.type==='status').text,'completed');}finally{view.dispose();}
+});
+test('browser graph snapshot still rejects an event without owned child metadata',async()=>{
+ const root={id:'root',session_id:'session',state:'running',parent_id:'',node_id:'',graph_root:true},posted=[],client={status:async()=>root,graphEvents:async()=>[{seq:3,run_id:'foreign',kind:'run.completed',data:{}}],graph:async()=>({run:root,spec:{nodes:[]}}),graphChildren:async()=>[],operations:async()=>[]};
+ const view=new BrowserController(client,m=>posted.push(m));view.session='session';view.runId='root';view.runs=[root];try{await view.poll();assert.equal(view.cursor,0);assert.ok(posted.some(m=>m.type==='error'&&m.text==='Unowned graph event'));assert.ok(!posted.some(m=>m.type==='graph-event'));}finally{view.dispose();}
+});
 test('browser forwards actual native file-proposal policy and clears unsupported legacy metadata without writes',async()=>{
  const posted=[];let health={agent_execution:false,file_edit_proposals:false};const client={health:async()=>health,graphs:async()=>({graphs:[]})},view=new BrowserController(client,m=>posted.push(m));try{await view.refreshCapabilities();assert.equal(posted.findLast(m=>m.type==='capabilities').fileEditProposals,false);health={agent_execution:false,file_edit_proposals:true};await view.refreshCapabilities();assert.equal(posted.findLast(m=>m.type==='capabilities').fileEditProposals,true);health={agent_execution:false};await view.refreshCapabilities();assert.equal(posted.findLast(m=>m.type==='capabilities').fileEditProposals,undefined);assert.ok(!posted.some(m=>m.type==='user'||m.type==='operations'));}finally{view.dispose();}
 });
