@@ -218,11 +218,31 @@ int run_local_view(int argc, char **argv) {
                     headers.emplace("X-XMind-View-Origin", origin);
                 } else {
                     headers.emplace("Authorization", supplied);
-                    headers.emplace("X-XMind-View-Origin",
-                                    request.get_header_value("X-XMind-View-Origin"));
+                        headers.emplace("X-XMind-View-Origin",
+                                        request.get_header_value("X-XMind-View-Origin"));
+                }
+                const bool streaming=request.method=="GET"&&(request.path.ends_with("/events/stream")||request.path.ends_with("/tree-events/stream"));
+                if(streaming&&request.has_header("Last-Event-ID")){
+                    require(request.get_header_value_count("Last-Event-ID")==1,"Duplicate stream cursor");
+                    headers.emplace("Last-Event-ID",request.get_header_value("Last-Event-ID"));
                 }
                 httplib::Client client("127.0.0.1", connection.port);
                 configure(client);
+                if(streaming){
+                    auto stream=std::make_shared<httplib::ClientImpl::StreamHandle>(client.open_stream("GET",request.target,{},headers));
+                    if(!stream->is_valid()){response(output,503,"Native event observation unavailable");return;}
+                    if(stream->response->status!=200){response(output,stream->response->status,"Native event observation rejected");return;}
+                    require(stream->response->get_header_value("Content-Type")=="text/event-stream","Invalid native event response");
+                    output.set_header("X-Accel-Buffering","no");
+                    output.set_chunked_content_provider("text/event-stream",[stream,total=std::size_t{0}](std::size_t,httplib::DataSink& sink)mutable{
+                        if(!sink.is_writable())return false;
+                        char bytes[16384];const auto count=stream->read(bytes,sizeof(bytes));
+                        if(count<0||stream->has_read_error())return false;
+                        if(count==0){sink.done();return true;}
+                        total+=static_cast<std::size_t>(count);if(total>64*1024*1024)return false;
+                        return sink.write(bytes,static_cast<std::size_t>(count));
+                    });return;
+                }
                 const auto result = request.method == "GET"
                                         ? client.Get(request.target, headers)
                                         : client.Post(request.target, headers, body,

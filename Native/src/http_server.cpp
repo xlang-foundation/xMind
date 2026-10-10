@@ -288,6 +288,58 @@ struct HttpServer::Impl {
 #endif
         handler(request,response);
     });}
+    void event_stream(const Request& request,Response& response,bool graph,bool tree){
+        for(const auto& [name,value]:request.params)if(name!="after")throw std::invalid_argument("Unknown event stream query");
+        auto after=cursor(request);
+        if(request.get_header_value_count("Last-Event-ID")>1)throw std::invalid_argument("Duplicate stream cursor");
+        if(request.has_header("Last-Event-ID")){
+            const auto value=request.get_header_value("Last-Event-ID");std::int64_t resumed=0;
+            const auto parsed=std::from_chars(value.data(),value.data()+value.size(),resumed);
+            if(value.empty()||parsed.ec!=std::errc{}||parsed.ptr!=value.data()+value.size()||resumed<0)throw std::invalid_argument("Invalid stream cursor");
+            if(request.has_param("after")&&after!=resumed)throw std::invalid_argument("Conflicting stream cursors");
+            after=resumed;
+        }
+        if(after>9007199254740991LL)throw std::invalid_argument("Stream cursor exceeds public integer limits");
+        const auto id=identifier(request.matches[1]);const auto initial=persistence.run(id).get();
+        if(graph){if(!initial.graph_root)throw std::invalid_argument("Expected a graph root");persistence.graph_run(id).get();}
+        if((graph||tree)&&!initial.parent_id.empty())throw std::invalid_argument("Tree observation requires a root run");
+        if(after){const auto boundary=(graph||tree)?persistence.tree_events(id,after-1,1).get():persistence.event_batch(id,after-1,1).get();if(boundary.empty()||boundary.front().sequence!=after)throw std::invalid_argument("Cursor does not belong to this event stream");}
+        auto lease=std::make_shared<StreamLease>(active_streams);
+        if(stopping||!lease->acquire()){reply(response,{{"detail","Event stream capacity is busy; reconnect later"}},503);return;}
+        const auto supplied=request.get_header_value("Authorization"),view_origin=request.get_header_value("X-XMind-View-Origin");
+        const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(25);
+        response.set_header("Cache-Control","no-store");response.set_header("X-Content-Type-Options","nosniff");response.set_header("X-Accel-Buffering","no");
+        response.set_chunked_content_provider("text/event-stream",[this,id,graph,tree,after,lease,supplied,view_origin,deadline,first=true,written=std::size_t{0}](std::size_t,httplib::DataSink& sink)mutable{
+            const auto finish=[&](const char* reason){const auto frame="event: end\ndata: "+Json{{"reason",reason},{"after",after}}.dump()+"\n\n";if(!sink.write(frame.data(),frame.size()))return false;sink.done();return true;};
+            const auto heartbeat=std::chrono::steady_clock::now()+std::chrono::seconds(1);
+            while(!stopping&&sink.is_writable()){
+                try{
+#if defined(_WIN32)
+                    if(supplied.starts_with("View ")&&!view_sessions->accepts(std::string_view(supplied).substr(5),view_origin))return finish("reauthenticate");
+#endif
+                    // Read state before the batch: terminal state and final events
+                    // are committed together. Drain that batch before ending.
+                    const auto run=persistence.run(id).get();
+                    if(first){const auto frame="event: observation\ndata: "+Json{{"run",encode(run)},{"after",after},{"scope",graph?"graph":tree?"tree":"run"}}.dump()+"\n\n";if(!sink.write(frame.data(),frame.size()))return false;first=false;}
+                    const auto events=(graph||tree)?persistence.tree_events(id,after,16).get():persistence.event_batch(id,after,16).get();
+                    for(const auto& event:events){
+                        if(event.sequence<=after||event.sequence>9007199254740991LL)throw std::runtime_error("Invalid persisted event cursor");
+                        const auto frame="id: "+std::to_string(event.sequence)+"\nevent: committed\ndata: "+encode(event).dump()+"\n\n";
+                        if(frame.size()>16*1024*1024)throw std::runtime_error("Persisted event exceeds stream limit");
+                        if(written+frame.size()>32*1024*1024)return finish("reconnect");
+                        if(!sink.write(frame.data(),frame.size()))return false;
+                        written+=frame.size();after=event.sequence;
+                    }
+                    if(events.size()<16&&(run.state==RunState::completed||run.state==RunState::failed||run.state==RunState::cancelled))return finish("terminal");
+                    if(std::chrono::steady_clock::now()>=deadline)return finish("reconnect");
+                    if(!events.empty())return true;
+                }catch(...){return finish("interrupted");}
+                if(std::chrono::steady_clock::now()>=heartbeat){const std::string frame=": keepalive\n\n";return sink.write(frame.data(),frame.size());}
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            return false;
+        });
+    }
     Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner):persistence(store),executor(execution),owner_control(owner),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
         validate_local_auth_token(token);
 #if defined(_WIN32)
@@ -316,7 +368,9 @@ struct HttpServer::Impl {
             static const std::regex view_route(R"(^/v1/(health|workspace(/skills)?|models|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/skills|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
-            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && std::regex_match(request.path,view_route) && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))){
+            static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
+            const bool stream=std::regex_match(request.path,stream_route);
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((stream&&request.method=="GET")||(!stream&&std::regex_match(request.path,view_route) && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
                 catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
@@ -692,6 +746,9 @@ struct HttpServer::Impl {
             reply(response,result);
         }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/events)",guarded([this](const Request& request,Response& response) {reply(response,encode_all(persistence.events(identifier(request.matches[1]),cursor(request)).get()));}));
+        server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/events/stream)",guarded([this](const Request& request,Response& response){event_stream(request,response,false,false);}));
+        server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/tree-events/stream)",guarded([this](const Request& request,Response& response){event_stream(request,response,false,true);}));
+        server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+)/events/stream)",guarded([this](const Request& request,Response& response){event_stream(request,response,true,true);}));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/children)",guarded([this](const Request& request,Response& response){
             if(!request.params.empty())throw std::invalid_argument("Owned children do not accept query parameters");
             reply(response,encode_all(persistence.owned_children(identifier(request.matches[1])).get()));

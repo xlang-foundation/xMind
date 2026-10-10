@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-native-validation-pending",
+  "acceptedInstalledSource": "689404eeeae8c0b83a7859b7efba584100a46edb",
+  "scope": "Complete local Node view suites and source inspection; new C++ stream code is not yet compiled/executed",
+  "sourceFiles": 2421,
+  "sourceUnchangedAcrossSuites": true,
+  "suites": {
+    "extension": {
+      "tests": 224,
+      "passed": 224,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "sha256": "f2296b38c298572ab2a3da3022802c6a531e5782e272f9d0eba6ca8b94e26a4b"
+    },
+    "browser": {
+      "tests": 43,
+      "passed": 43,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "sha256": "8a4a8d10a3859e3e5fa4920311d6d81df549dc848443099022c5adc656bb01f6"
+    }
+  },
+  "endpoints": [
+    "GET /v1/runs/{id}/events/stream",
+    "GET /v1/runs/{id}/tree-events/stream",
+    "GET /v1/graph-runs/{id}/events/stream"
+  ],
+  "behavior": [
+    "Committed event IDs and scoped replay cursor validation",
+    "Backend read-only batches and terminal drain; disconnect does not dispatch cancellation",
+    "Two shared stream leases preserve control worker capacity",
+    "25-second connection lifetime and bounded frame/connection bytes",
+    "Native view forwards incremental bytes with the pinned HTTP streaming API",
+    "Browser forwards incremental bytes and cursor headers under existing cookie/origin/auth rules"
+  ],
+  "verifiedAdapterFixture": [
+    "Read-only route allowlist",
+    "Frame delivered before the synthetic peer finishes",
+    "Detach closes the peer connection without sending a cancel command"
+  ],
+  "pendingNativeChecks": [
+    "Actual graph/run/tree replay equality through the production native view",
+    "Last-Event-ID replay, invalid/unknown/future/conflicting cursor rejection",
+    "Browser cookie stream preserves native history and graph receipts"
+  ],
+  "remaining": [
+    "New native build and complete 110-contract gate",
+    "Shared client SSE parser/reconnect and browser/VS Code controller adoption; current UI still polls",
+    "Live disconnect, authorization expiry/revocation, stream-capacity, failure/restart and installed/rendered stream acceptance"
+  ],
+  "providerRequests": 0,
+  "nativeExecuted": false,
+  "currentInstallationChanged": false,
+  "rawEvidence": {
+    "doc/evidence/native-unified-event-stream-extension.log": "f2296b38c298572ab2a3da3022802c6a531e5782e272f9d0eba6ca8b94e26a4b",
+    "doc/evidence/native-unified-event-stream-browser.log": "8a4a8d10a3859e3e5fa4920311d6d81df549dc848443099022c5adc656bb01f6",
+    "doc/evidence/native-unified-event-stream-source-before.json": "3bec79874320d507c4742a81557160f9ebd3518de512383c0501f76d106bdd61",
+    "doc/evidence/native-unified-event-stream-source-after.json": "3bec79874320d507c4742a81557160f9ebd3518de512383c0501f76d106bdd61"
+  }
+}

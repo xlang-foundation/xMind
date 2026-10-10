@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+Committed-event transport candidate: native run/graph/owned-tree SSE endpoints,
+scoped cursor replay, bounded connection/stream leases and incremental native
+view/browser forwarding are implemented. The complete local **224 extension /
+43 browser** fixture suites pass with all 2421 tracked native/tool/view inputs
+unchanged. The browser fixture observes a frame before the peer finishes and
+detaches without sending cancellation. New real native replay/cookie assertions
+are prepared but unexecuted. Current UI controllers still poll; native acceptance,
+shared client/controller adoption and installed/rendered streaming remain pending.
+The accepted `689404e` installation is preserved.
+[Protocol, implementation and remaining acceptance](native-event-stream.md).
+
 Hosted source `689404e` passed **all 110 native contracts** in **275.04 seconds**,
 then **224 extension / 41 browser** checks, actual browser/native integration,
 runtime staging and VSIX verification. The real production editor host connected

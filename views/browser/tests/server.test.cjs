@@ -50,3 +50,19 @@ test('browser adapter forwards durable native view credentials across restart wi
     assert.ok(observed.every(item=>!item.input.includes(master)),'Master token cannot enter session JSON');
   }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
 });
+test('event stream routes are read-only and exclude foreign path encodings',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs');
+ for(const route of ['/v1/runs/root/events/stream','/v1/runs/root/tree-events/stream','/v1/graph-runs/root/events/stream'])for(const method of ['GET','POST','HEAD','PUT','DELETE'])assert.equal(allowedApiRoute(route,method),method==='GET');
+ for(const route of ['/v1/runs/root/events/stream/extra','/v1/graph-runs/root/tree-events/stream','/v1/runs/a%2Fb/events/stream'])assert.equal(allowedApiRoute(route,'GET'),false);
+});
+test('synthetic stream peer forwards bytes before completion and detaches without a cancel command',async()=>{
+ const {createBrowserServer}=await import('../server.mjs'),assetRoot=resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets'),observed=[];
+ const token='synthetic-event-stream-token-'.padEnd(64,'x'),frame='id: 8\nevent: committed\ndata: {"seq":8,"run_id":"root","kind":"fixture","data":{"text":"雪"}}\n\n';let upstream,view,detached=false;
+ const peer=createServer(async(request,response)=>{observed.push({path:request.url,authorization:request.headers.authorization,cursor:request.headers['last-event-id']});if(request.url!=='/v1/runs/root/events/stream?after=7'){response.writeHead(404,{'Content-Type':'application/json'});response.end('{}');return;}assert.equal(request.headers.authorization,'Bearer '+token);assert.equal(request.headers['last-event-id'],'7');upstream=response;response.on('close',()=>detached=true);response.writeHead(200,{'Content-Type':'text/event-stream'});response.write(frame);});
+ try{
+  await new Promise(yes=>peer.listen(0,'127.0.0.1',yes));view=await createBrowserServer({backend:'http://127.0.0.1:'+peer.address().port,assetRoot});const origin=await view.listen(),abort=new AbortController();
+  const response=await fetch(origin+'/v1/runs/root/events/stream?after=7',{headers:{Authorization:'Bearer '+token,'Last-Event-ID':'7'},signal:AbortSignal.any([abort.signal,AbortSignal.timeout(5000)])});assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),'text/event-stream');
+  const reader=response.body.getReader(),decoder=new TextDecoder();let bytes='';while(!bytes.includes('\n\n')){const result=await reader.read();assert.equal(result.done,false);bytes+=decoder.decode(result.value,{stream:true});}assert.equal(bytes,frame);assert.equal(upstream.writableEnded,false,'The browser must receive the frame while the native peer remains open');abort.abort();
+  const until=Date.now()+2000;while(!detached&&Date.now()<until)await new Promise(yes=>setTimeout(yes,10));assert.equal(detached,true);assert.deepEqual(observed.map(value=>value.path),['/v1/runs/root/events/stream?after=7']);
+ }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(yes=>peer.close(yes));}
+});

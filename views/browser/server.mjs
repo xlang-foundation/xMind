@@ -6,6 +6,7 @@ const csp="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 
 function origin(input){const url=new URL(input);if(url.protocol!=='http:'||!['127.0.0.1','localhost'].includes(url.hostname)||url.username||url.password||url.pathname!=='/'||url.search||url.hash)throw new Error('Use a loopback native backend origin');url.hostname='127.0.0.1';return url.origin;}
 function apiPath(path){return /^\/v1\/(?:health|workspace(?:\/skills)?|models|graphs|agent\/(?:delegation|planning)|provider\/(?:configuration|models|profiles(?:\/(?:select|models))?)|sessions(?:\/[A-Za-z0-9_-]+\/(?:history|runs|title|skills|context(?:\/(?:compact|requests\/[A-Za-z0-9_-]+))?))?|runs(?:\/[A-Za-z0-9_-]+(?:\/(?:events|tree-events|children(?:\/[A-Za-z0-9_-]+\/history)?|cancel|operations|plan(?:\/(?:human\/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(?:\/[A-Za-z0-9_-]+(?:\/(?:children(?:\/[A-Za-z0-9_-]+\/history)?|events|human\/[A-Za-z0-9_.-]+|resume))?)?|operations\/[A-Za-z0-9_-]+(?:\/(?:inspection|decision))?)$/.test(path);}
 export function allowedApiRoute(path,method){
+ if(/^\/v1\/(?:runs\/[A-Za-z0-9_-]+\/(?:events|tree-events)|graph-runs\/[A-Za-z0-9_-]+\/events)\/stream$/.test(path))return method==='GET';
  if(!apiPath(path)||!['GET','POST'].includes(method))return false;
  if(/^\/v1\/workspace(?:\/skills)?$/.test(path))return method==='GET';
  if(/^\/v1\/sessions\/[A-Za-z0-9_-]+\/context(?:\/requests\/[A-Za-z0-9_-]+)?$/.test(path))return method==='GET';
@@ -65,11 +66,17 @@ export async function createBrowserServer({backend,assetRoot}){
    const controller=new AbortController();response.on('close',()=>{if(!response.writableEnded)controller.abort();});
    // Only the configured native origin receives the supplied access credential. Browser
    // origin enforcement belongs here; native Host/auth guards remain active.
-   const upstream=await fetch(destination+url.pathname+url.search,{method:request.method,headers:{...access,...(request.method==='POST'?{'Content-Type':'application/json'}:{})},body:request.method==='POST'?Buffer.concat(chunks):undefined,redirect:'error',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(15000)])});
+   const streaming=/^\/v1\/(?:runs\/[A-Za-z0-9_-]+\/(?:events|tree-events)|graph-runs\/[A-Za-z0-9_-]+\/events)\/stream$/.test(url.pathname);
+   const upstream=await fetch(destination+url.pathname+url.search,{method:request.method,headers:{...access,...(request.method==='POST'?{'Content-Type':'application/json'}:{}),...(streaming&&request.headers['last-event-id']?{'Last-Event-ID':request.headers['last-event-id']}:{})},body:request.method==='POST'?Buffer.concat(chunks):undefined,redirect:'error',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(streaming?30000:15000)])});
+   if(streaming&&upstream.status===200){
+    if(upstream.headers.get('content-type')!=='text/event-stream'){controller.abort();reply(502,{detail:'Invalid native event response'});return;}
+    response.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Accel-Buffering':'no'});response.flushHeaders();
+    let total=0;for await(const chunk of upstream.body){total+=chunk.length;if(total>64*1024*1024)throw new Error('Event stream exceeds limits');if(!response.write(chunk))await new Promise((yes,no)=>{const cleanup=()=>{response.off('drain',drain);response.off('close',closed);},drain=()=>{cleanup();yes();},closed=()=>{cleanup();no(new Error('View detached'));};response.once('drain',drain);response.once('close',closed);});}response.end();return;
+   }
    if(!(upstream.headers.get('content-type')||'').startsWith('application/json')){reply(502,{detail:'Native backend returned an invalid response'});return;}
    let length=0;const output=[];for await(const chunk of upstream.body){length+=chunk.length;if(length>16*1024*1024){controller.abort();reply(502,{detail:'Native response exceeds view limits'});return;}output.push(chunk);}
    response.writeHead(upstream.status,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});response.end(Buffer.concat(output));
-  }catch{if(!response.destroyed)reply(502,{detail:'Native backend is unavailable or the request was interrupted'});}
+  }catch{if(!response.destroyed){if(response.headersSent)response.destroy();else reply(502,{detail:'Native backend is unavailable or the request was interrupted'});}}
  });server.requestTimeout=20000;server.headersTimeout=10000;server.keepAliveTimeout=1000;
  return {server,listen:async(port=0)=>{await new Promise((yes,no)=>{server.once('error',no);server.listen(port,'127.0.0.1',yes);});viewOrigin='http://127.0.0.1:'+server.address().port;cookieName='xmind_view_'+server.address().port;return viewOrigin;},close:async()=>{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}};
 }
