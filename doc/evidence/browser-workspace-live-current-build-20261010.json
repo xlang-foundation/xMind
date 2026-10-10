@@ -39,6 +39,13 @@
     "sessionListRefreshed": true,
     "providerConfigurationRefreshed": true
   },
+  "nativeCliReattachment": {
+    "command": "xmind --workspace D:\\CantorAI2026\\TestProj --profile-root <isolated acceptance profile> profile-info",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "processId": 29520,
+    "started": false,
+    "result": "passed; CLI reattached to the existing native TestProj profile owner"
+  },
   "providerRequests": 0,
   "workspaceFileChanges": 0,
   "browserTestResults": {

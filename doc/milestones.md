@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+The exact current Windows native build now passes rendered standalone-webpage
+workspace acceptance at source `c386a37`: the browser restored its HttpOnly
+session after refresh, the 648-pixel responsive header kept Add workspace away
+from Connect, the real Add dialog registered the xMind repository in an
+isolated acceptance profile, and the selector switched back to `TestProj`.
+The current native CLI then listed both profiles and reattached to the existing
+TestProj owner (`started: false`). This verifies shared workspace ownership;
+same-session/event inspection across clients remains a separate gate. No model
+request or workspace-file change occurred. The updated browser suite passes
+**61/61**. [Exact rendered evidence](evidence/browser-workspace-live-current-build-20261010.json).
+
 At source `59f46791c02cb18cd4aa4c66b7d01b22f06cbcb0`, managed local-profile
 startup verifies the complete source runtime once, then authenticates protected
 profile state and uses the verified managed-copy path for server startup and
