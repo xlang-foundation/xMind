@@ -1,0 +1,29 @@
+{
+  "sourceRevision": "cc39c841d2be48ea44060cd6c0133bb508d27951",
+  "result": "passed",
+  "scope": "Rendered browser workspace registration and profile switching on an already-running native profile-aware xMind view",
+  "viewUrl": "http://127.0.0.1:60422/ui/",
+  "nativeOrigin": "http://127.0.0.1:63547",
+  "liveHostExecutableSha256": "fbcbf957195397da26cfe7143c976d727d2836337d67c67731429179c051c1dc",
+  "currentBuildExecutableSha256": "e40191fd818c8fc39386462bf7275d2b8e6d5855e329b810dafa05f20621f9de",
+  "workspaceRegistration": {
+    "folder": "D:\\CantorAI2026\\TestProj",
+    "result": "passed",
+    "selectedAfterAdd": true,
+    "serverRootDisplayed": true
+  },
+  "workspaceSwitching": {
+    "sequence": [
+      "xMind",
+      "TestProj",
+      "xMind",
+      "TestProj"
+    ],
+    "result": "passed",
+    "sessionListRefreshed": true,
+    "providerConfigurationRefreshed": true
+  },
+  "providerRequests": 0,
+  "workspaceFileChanges": 0,
+  "qualification": "The live profile-aware host binary differs from the current local native build. A separate fresh launch of the current build did not reach readiness; native local-view and browser contract evidence remains separate."
+}

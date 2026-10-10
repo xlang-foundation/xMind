@@ -72,6 +72,21 @@ The native view's generated access token is stored under `%LOCALAPPDATA%\xMind\B
 
 Live browser smoke verification used the actual native profile-aware host and rendered both `xMind` and `TestProj` in the selector. Switching to `TestProj` changed the selected backend and cleared its session list; switching back restored the xMind workspace. No model request or file effect was issued. The smoke test also caught and fixed same-origin GET handling: browsers omit `Origin` on same-origin catalogue reads, so the adapter allows that read while workspace-changing POST still requires the exact view origin. The in-app browser's fetch rejected one abort-signal wrapper; the view now retries only that specific pre-request compatibility error without the signal, while normal browsers retain cancellation and timeouts.
 
+On 2026-10-10, rendered webpage acceptance submitted the existing
+`D:\CantorAI2026\TestProj` folder through **Add workspace** on the native
+profile-aware view. The view registered and selected that profile, then
+successfully switched to the original xMind profile and back to TestProj. The
+visible server root followed each selection; TestProj showed its own empty
+session list and unconfigured provider state. No model request or workspace
+file change was issued. This confirms the browser needs its own **Add
+workspace** flow because it has no VS Code opened-folder context. The live
+profile-aware host executable hash was
+`fbcbf957195397da26cfe7143c976d727d2836337d67c67731429179c051c1dc`, different
+from the local build hash `e40191fd818c8fc39386462bf7275d2b8e6d5855e329b810dafa05f20621f9de`;
+therefore this is rendered acceptance of the running host, not a claim that a
+fresh install of the current build passed browser startup. See
+[live workspace acceptance metadata](evidence/browser-workspace-live-20261010.json).
+
 Cookie authentication requires browser same-origin fetch metadata, while session enrollment and revocation also require the exact view Origin. Cross-origin requests remain rejected. Session identifiers are not accepted in URLs. There is a 32-session limit and bounded session-request bodies. This cookie is for the loopback HTTP development transport; remote access still requires a separately designed HTTPS/team authentication adapter.
 
 Settings supports provider enrollment and model discovery through the native API. A separate development profile initially starts without a provider key; the existing VS Code preview's saved key is not copied. The user has now configured this webpage profile and completed a live OpenAI Chat Completions response. Its actual rendered and native-persisted usage was observed: 3,679 input, 789 output and 4,468 total tokens, model `chat-latest`, first token 1,425 ms and elapsed 7,200 ms. [Metadata-only evidence](evidence/browser-live-response-metadata.json) excludes conversation content and credentials. This proves one live response and its usage rendering, not full coding/provider parity.
