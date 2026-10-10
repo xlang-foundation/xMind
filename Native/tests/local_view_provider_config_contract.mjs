@@ -16,7 +16,9 @@ const base=await fs.mkdtemp(path.join(parent,'xmind-local-view-provider-'));
 const initial=path.join(base,'initial workspace'),existing=path.join(base,'existing workspace');
 const added=path.join(base,'added workspace'),profiles=path.join(base,'profiles');
 const bundle=path.join(base,'bundle'),runtime=path.join(base,'runtime'),assets=path.join(base,'assets');
-const yaml=path.join(base,'providers.yaml'),ready=path.join(base,'ready.json');
+const yaml=path.join(base,'providers.yaml');
+const readyRoot=path.join(parent,'xmind-local-view-provider-ready-'+randomBytes(8).toString('hex'));
+const ready=path.join(readyRoot,'ready.json');
 const pids=new Set();let browser,viewProcess,viewError='',passed=false;
 const env={...process.env};
 for(const key of Object.keys(env))if(key==='XMIND_AUTH_TOKEN'||key==='XMIND_API_KEY'||key.startsWith('XMIND_UI_'))delete env[key];
@@ -41,7 +43,7 @@ try{
   const bytes=await fs.readFile(source);await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),bytes);files[name]=createHash('sha256').update(bytes).digest('hex');
  }
  const notice=Buffer.from('Synthetic local provider configuration contract package.');await fs.mkdir(path.join(bundle,'licenses'));await fs.writeFile(path.join(bundle,'licenses/NOTICE.txt'),notice);
- const {createHash}=await import('node:crypto');files['licenses/NOTICE.txt']=createHash('sha256').update(notice).digest('hex');
+ files['licenses/NOTICE.txt']=createHash('sha256').update(notice).digest('hex');
  const source=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),files}));
  const sourceFile=path.join(base,'source-manifest.json');await fs.writeFile(sourceFile,source);
  await stageNativeRuntime({explicitStage:true,bundle,bundleManifest:sourceFile,bundleManifestSha256:createHash('sha256').update(source).digest('hex'),stdlibSource:stdlib,stdlibLicense:await fs.access(path.join(path.dirname(stdlib),'LICENSE')).then(()=>path.join(path.dirname(stdlib),'LICENSE'),()=>path.join(path.dirname(stdlib),'LICENSE.txt')),out:runtime});
@@ -69,5 +71,6 @@ try{
  if(viewProcess?.pid)try{await stop(viewProcess.pid);}catch{}
  for(const pid of [...pids])try{await stop(pid);}catch(error){console.error('Owned profile cleanup: '+error.message);passed=false;}
  assert.equal(path.dirname(await fs.realpath(base)),parent);assert.ok(path.basename(base).startsWith('xmind-local-view-provider-'));
- if(passed)await fs.rm(base,{recursive:true,force:true});else console.error(JSON.stringify({retainedFixture:base,viewError}));
+ if(passed){await fs.rm(base,{recursive:true,force:true});await fs.rm(readyRoot,{recursive:true,force:true});}
+ else console.error(JSON.stringify({retainedFixture:base,retainedReadyRoot:readyRoot,viewError}));
 }
