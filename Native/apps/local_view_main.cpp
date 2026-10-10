@@ -7,20 +7,24 @@
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
+#include <shobjidl.h>
 
 #include <algorithm>
 #include <chrono>
 #include <atomic>
 #include <cstdlib>
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <thread>
 
 namespace {
 using Json = nlohmann::json;
@@ -53,6 +57,52 @@ std::int64_t now() {
 void response(httplib::Response &output, int status, const char *detail) {
     output.status = status;
     output.set_content(Json{{"detail", detail}}.dump(), "application/json");
+}
+std::optional<std::string> choose_workspace_folder() {
+    std::optional<std::string> selected;
+    std::exception_ptr failure;
+    std::thread picker([&] {
+        const auto initialized = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+        if (FAILED(initialized)) {
+            failure = std::make_exception_ptr(std::runtime_error("Cannot initialize the native folder picker"));
+            return;
+        }
+        IFileOpenDialog *dialog = nullptr;
+        try {
+            auto status = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER,
+                                           IID_PPV_ARGS(&dialog));
+            if (FAILED(status)) throw std::runtime_error("Cannot create the native folder picker");
+            DWORD options = 0;
+            status = dialog->GetOptions(&options);
+            if (SUCCEEDED(status)) status = dialog->SetOptions(options | FOS_PICKFOLDERS | FOS_FORCEFILESYSTEM | FOS_PATHMUSTEXIST);
+            if (SUCCEEDED(status)) status = dialog->SetTitle(L"Choose an xMind workspace folder");
+            if (FAILED(status)) throw std::runtime_error("Cannot configure the native folder picker");
+            status = dialog->Show(nullptr);
+            if (status == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
+                selected.reset();
+            } else if (FAILED(status)) {
+                throw std::runtime_error("The native folder picker failed");
+            } else {
+                IShellItem *item = nullptr;
+                status = dialog->GetResult(&item);
+                if (FAILED(status)) throw std::runtime_error("The native folder picker returned no folder");
+                PWSTR path = nullptr;
+                status = item->GetDisplayName(SIGDN_FILESYSPATH, &path);
+                item->Release();
+                if (FAILED(status) || !path) throw std::runtime_error("The selected workspace path is unavailable");
+                const auto free_path = std::unique_ptr<wchar_t, decltype(&CoTaskMemFree)>(path, CoTaskMemFree);
+                const auto encoded = std::filesystem::path(path).u8string();
+                selected = std::string(reinterpret_cast<const char *>(encoded.data()), encoded.size());
+            }
+        } catch (...) {
+            failure = std::current_exception();
+        }
+        if (dialog) dialog->Release();
+        CoUninitialize();
+    });
+    picker.join();
+    if (failure) std::rethrow_exception(failure);
+    return selected;
 }
 void verify_client_image() {
     std::wstring image(32768, L'\0');
@@ -342,6 +392,39 @@ int run_local_view(int argc, char **argv) {
                     output.set_content(Json{{"can_add", true},
                                             {"selected_workspace_id", workspace_id},
                                             {"workspaces", std::move(entries)}}.dump(),
+                                       "application/json");
+                    return;
+                }
+                if (request.path == "/v1/workspaces/pick" && request.method == "POST") {
+                    if (host || request.target != request.path ||
+                        request.get_header_value_count("X-XMind-View-Origin") != 1 ||
+                        request.get_header_value("Content-Type") != "application/json" ||
+                        request.body.size() > 16) {
+                        response(output, 400, "Invalid workspace picker request");
+                        return;
+                    }
+                    const auto [current_id, current] = browser_workspace(supplied, browser_origin);
+                    if (!validate_browser_session(supplied, current, browser_origin)) {
+                        response(output, 401, "Browser view session expired or was revoked");
+                        return;
+                    }
+                    try {
+                        const auto request_body = Json::parse(body);
+                        require(request_body.is_object() && request_body.empty(), "Workspace picker accepts an empty object");
+                    } catch (const std::exception &) {
+                        response(output, 400, "Workspace picker accepts an empty object");
+                        return;
+                    }
+                    const auto chosen = choose_workspace_folder();
+                    std::lock_guard switch_lock(browser_switch_mutex);
+                    const auto [latest_id, latest] = browser_workspace(supplied, browser_origin);
+                    if (latest_id != current_id || !validate_browser_session(supplied, latest, browser_origin)) {
+                        response(output, 409, "Browser workspace changed while the folder picker was open");
+                        return;
+                    }
+                    output.status = 200;
+                    output.set_content(Json{{"cancelled", !chosen.has_value()},
+                                            {"root", chosen ? Json(*chosen) : Json(nullptr)}}.dump(),
                                        "application/json");
                     return;
                 }

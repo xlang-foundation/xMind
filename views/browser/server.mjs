@@ -57,13 +57,13 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
     }
     const current=sessionFor(request);if(!current){reply(401,{connected:false});return;}const restored=await nativeSession('/current',viewHeaders(current));reply(restored.status===200?200:restored.status===401?401:502,{connected:restored.status===200});return;
    }
-   if(url.pathname==='/ui/workspaces'||url.pathname==='/ui/workspaces/select'||url.pathname==='/ui/workspaces/add'){
-    const selecting=url.pathname.endsWith('/select'),adding=url.pathname.endsWith('/add'),mutating=selecting||adding;
+   if(url.pathname==='/ui/workspaces'||url.pathname==='/ui/workspaces/select'||url.pathname==='/ui/workspaces/add'||url.pathname==='/ui/workspaces/pick'){
+    const selecting=url.pathname.endsWith('/select'),adding=url.pathname.endsWith('/add'),picking=url.pathname.endsWith('/pick'),mutating=selecting||adding||picking;
     const originMatches=request.headers.origin===viewOrigin,originAbsent=request.headers.origin===undefined;
     if(url.search||(mutating?!originMatches:!originAbsent&&!originMatches)||request.method!==(mutating?'POST':'GET')||(mutating&&request.headers['content-type']!=='application/json')){reply(403,{detail:'Same-origin workspace access required'});return;}
     const credential=sessionFor(request);if(!credential){reply(401,{detail:'Connect to a native xMind Server first'});return;}
-    let body={};if(mutating){let raw='';for await(const chunk of request){raw+=chunk.toString('utf8');if(Buffer.byteLength(raw)>4096){reply(413,{detail:'Workspace request exceeds limits'});return;}}try{body=JSON.parse(raw);}catch{reply(400,{detail:'Invalid workspace request'});return;}const valid=selecting?body&&!Array.isArray(body)&&Object.keys(body).length===1&&typeof body.workspace_id==='string'&&/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(body.workspace_id):body&&!Array.isArray(body)&&Object.keys(body).length===1&&typeof body.root==='string'&&body.root.length>0&&body.root.length<=32760;if(!valid){reply(400,{detail:selecting?'Select a workspace from the native catalogue':'Enter one absolute workspace folder path'});return;}}
-    const nativePath='/v1/workspaces'+(selecting?'/select':adding?'/add':''),selected=await nativeJson(nativePath,mutating?'POST': 'GET',viewHeaders(credential),mutating?body:undefined,mutating?60000:15000);
+    let body={};if(mutating){let raw='';for await(const chunk of request){raw+=chunk.toString('utf8');if(Buffer.byteLength(raw)>4096){reply(413,{detail:'Workspace request exceeds limits'});return;}}try{body=JSON.parse(raw);}catch{reply(400,{detail:'Invalid workspace request'});return;}const valid=selecting?body&&!Array.isArray(body)&&Object.keys(body).length===1&&typeof body.workspace_id==='string'&&/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(body.workspace_id):picking?body&&!Array.isArray(body)&&Object.keys(body).length===0:body&&!Array.isArray(body)&&Object.keys(body).length===1&&typeof body.root==='string'&&body.root.length>0&&body.root.length<=32760;if(!valid){reply(400,{detail:selecting?'Select a workspace from the native catalogue':picking?'The local folder picker requires an empty request':'Enter one absolute workspace folder path'});return;}}
+    const nativePath='/v1/workspaces'+(selecting?'/select':adding?'/add':picking?'/pick':''),selected=await nativeJson(nativePath,mutating?'POST': 'GET',viewHeaders(credential),mutating?body:undefined,mutating?120000:15000);
     if(!mutating&&(selected.status===401||selected.status===404)){
      // A VS Code-attached xmind serve owns exactly its opened folder and has no
      // profile catalogue. Read that authenticated workspace as a one-item,
@@ -79,6 +79,7 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
     }
     if(selected.status!==200){reply(selected.status,selected.data);return;}
     if(!mutating){reply(200,selected.data);return;}
+    if(picking){const data=selected.data;if(!data||typeof data.cancelled!=='boolean'||data.cancelled&&data.root!==null||!data.cancelled&&(typeof data.root!=='string'||!data.root||data.root.length>32760||/[\u0000-\u001f]/.test(data.root))){reply(502,{detail:'The native host returned an invalid folder selection.'});return;}reply(200,data);return;}
     const {credential:replacement,expires_unix_ms:expires,max_age_seconds:maxAge,workspace}=selected.data;
     if(!/^[0-9a-f]{64}\.[0-9a-f]{64}$/.test(replacement)||!Number.isSafeInteger(expires)||expires<1||!Number.isSafeInteger(maxAge)||maxAge<1||maxAge>28800||!workspace||workspace.configured!==true||typeof workspace.root!=='string'||!workspace.root||typeof workspace.workspace_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(workspace.workspace_id)||typeof workspace.authority_id!=='string'||!/^[a-f0-9]{32}$/.test(workspace.authority_id)){reply(502,{error_code:'invalid_workspace_session',detail:'The native host returned an invalid workspace session.'});return;}
     response.setHeader('Set-Cookie',`${cookieName}=${replacement}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}`);reply(200,{connected:true,workspace});return;

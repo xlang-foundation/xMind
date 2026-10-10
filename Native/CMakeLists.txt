@@ -232,7 +232,7 @@ target_include_directories(xmind PRIVATE include third_party/cpp-httplib third_p
 target_link_libraries(xmind PRIVATE agentflow_secrets agentflow_console_transport agentflow_http agentflow_instruction_configuration agentflow_json_schema agentflow_mcp_wire Threads::Threads)
 if(WIN32)
   target_sources(xmind PRIVATE apps/admin_main.cpp apps/local_view_main.cpp)
-  target_link_libraries(xmind PRIVATE agentflow_local_profile agentflow_runtime agentflow_process_configuration agentflow_mcp_configuration agentflow_mcp_client_factory agentflow_mcp_effects agentflow_graph agentflow_owner_process agentflow_backend_owner_control agentflow_legacy_owner_process bcrypt ws2_32 crypt32 shell32)
+  target_link_libraries(xmind PRIVATE agentflow_local_profile agentflow_runtime agentflow_process_configuration agentflow_mcp_configuration agentflow_mcp_client_factory agentflow_mcp_effects agentflow_graph agentflow_owner_process agentflow_backend_owner_control agentflow_legacy_owner_process bcrypt ws2_32 crypt32 shell32 ole32)
   target_link_libraries(xmind_server PRIVATE agentflow_local_profile)
   add_custom_command(TARGET xmind POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
     "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:xmind>")
