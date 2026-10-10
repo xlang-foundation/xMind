@@ -1,5 +1,14 @@
 # Reviewable milestones
 
+Production sidebar approved-creation acceptance prepared: a second actual
+native graph requires human input, then a `create_file` proposal. The host
+fixture runs the production comparison path and requires absence before
+approval, rejection of a retired sidebar's decision, current-sidebar approval,
+exact Unicode disk bytes and persisted receipt hash/size, one child and terminal
+history. Syntax/whitespace checks pass; actual native execution is pending.
+Model requests remain excluded from this acceptance; installed/rendered coding
+and live inference are separate requirements. [Scope](native-event-stream.md).
+
 Actual production VS Code controller acceptance prepared: the native view
 contract now imports a host fixture that executes production `extension.js`,
 `WorkspaceBackend`, client and subscription against the real compiled backend.

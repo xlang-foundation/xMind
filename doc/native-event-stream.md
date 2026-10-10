@@ -1,5 +1,16 @@
 # Committed native event feeds
 
+The production-host native acceptance also prepares an actual approved
+creation case. A registered human/tool graph proposes a Unicode file; the
+current sidebar opens the production read-only comparison, while the file
+must remain absent. Approval from the retired sidebar must leave the operation
+waiting and the file absent. Current-sidebar approval must create exactly one
+tool child, complete the graph and produce a persisted success receipt whose
+hash/size match independently read disk bytes. VS Code comparison display is
+an API fixture; its documents come from the actual native proposal. These
+assertions have only passed syntax/whitespace checks and remain unexecuted.
+They do not prove installed writing, live coding inference or full parity.
+
 Production extension-host acceptance is now prepared inside the native view
 contract. It runs the actual `extension.js`, shared reader/subscription and
 `WorkspaceBackend` against the compiled native executable. Only the VS Code
