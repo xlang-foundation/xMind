@@ -7,7 +7,13 @@ The earlier `51724ab` backend-only restart contract is retained as
 [historical evidence](evidence/browser-native-restart-contract.log); that older
 adapter still used an in-memory login map. Current live two-child browser
 acceptance has its own [source and scope](native-responses-reasoning.md).
-The current combined browser and VS Code contract suite passes **326/326** ([captured output](evidence/browser-web-contract-20261010.log)). Live local auto-connection was also verified against the running native backend and in the rendered browser view.
+The combined browser and VS Code contract suite passed **326/326** in its
+[captured run](evidence/browser-web-contract-20261010.log). The latest isolated
+source-integrity workflow passed **264 VS Code and 63 browser contracts**;
+all 49 source/vendor files and 12 generated browser assets remained unchanged.
+See the exact [run and artifact evidence](evidence/view-contracts-c7fbc194.json).
+Live local auto-connection was also verified against the running native backend
+and in the rendered browser view.
 
 xMind has a local HTML view using the same sidebar renderer and native API client as the VS Code extension. The desktop layout places the agent sidebar on the right, Settings at its top, and the discovered-model selector beside the composer at the bottom. Drag the divider to resize it; arrow keys, Shift+arrows, Home and End also resize a focused divider. Its width is remembered as a non-secret appearance preference in localStorage. Narrow windows use the available width.
 

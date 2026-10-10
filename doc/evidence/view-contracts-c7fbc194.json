@@ -1,0 +1,39 @@
+{
+  "workflow": "Browser and VS Code contracts",
+  "runId": "38087983894",
+  "runUrl": "https://github.com/xlang-foundation/xMind/actions/runs/38087983894",
+  "sourceRevision": "c7fbc194109a16a756014ff0f558a5eeb0bcefb2",
+  "conclusion": "success",
+  "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+  "artifact": {
+    "id": "11681954643",
+    "name": "view-contracts-evidence-c7fbc194109a16a756014ff0f558a5eeb0bcefb2",
+    "bytes": 120877,
+    "sha256": "68ab2b9a3769273ef9c1b7e40a0ac88e141663a843968120eb2e3d958d858a7b",
+    "digestVerified": true
+  },
+  "sourceInventory": {
+    "trackedFiles": 47,
+    "vendorFiles": 2,
+    "totalFiles": 49,
+    "browserAssets": 12,
+    "sourceAndAssetBytesUnchanged": true
+  },
+  "extension": {
+    "tests": 264,
+    "passed": 264,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "browser": {
+    "tests": 63,
+    "passed": 63,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "providerRequests": 0,
+  "nativeExecuted": false,
+  "cpythonExecuted": false
+}

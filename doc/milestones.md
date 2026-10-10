@@ -13,9 +13,10 @@ passed before the active-work retry adjustment in
 deferred while the live xlang3 benchmark runs. The profile-upgrade native
 contract and installed continuity acceptance remain pending. Separate live
 provider and webpage checks on the older managed preview are recorded below;
-they do not verify these source changes. The independent VS Code extension contract suite passes
-**263/263**, including its provider YAML import and workspace readiness gates;
-see [captured output](evidence/vscode-extension-contract-20261010.log).
+they do not verify these source changes. The isolated view workflow passed
+**264 VS Code and 63 browser contracts**, with all tracked sources, vendored
+files and browser assets unchanged. See the exact
+[run and artifact evidence](evidence/view-contracts-c7fbc194.json).
 
 Current desktop inspection confirms the live VS Code TestProj pane is still
 waiting for workspace connection and displays `Authentication required`. The
