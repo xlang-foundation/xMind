@@ -7,10 +7,21 @@ not access the database or run a separate agent.
 
 The [product design](runtime-product-design.md) consolidates these roles into
 `xmind serve` and `xmind [--port PORT] [COMMAND ...]`. The native `xmind` target
-now shares the existing server/console/admin/schema handlers. Existing installed
-packages still use older launchers. The new package uses a fresh profile with
-one `xmind.exe` and requires no migration. Automatic console discovery/start and worker execution remain pending;
-the current console needs an existing authenticated backend.
+shares the server/console/admin/schema handlers. On Windows, running the console
+without `--port` discovers the managed profile for the selected workspace or
+starts its backend with the same `xmind.exe`; browser and VS Code attach to that
+profile. The default workspace is the current directory, overridable with
+`--workspace`. Explicit `--port` remains an operator-selected external backend.
+Managed profile startup on other hosts and first-use acceptance from the
+current installed package remain unverified; agent-worker execution is pending.
+No legacy profile migration is required.
+
+The current native Release build passed all **118 local CTest contracts**. The
+actual `native_local_profile_contract` and `native_local_view_contract` exercise
+the unified binary, managed workspace startup, xlang3-backed SQLite, console
+reattachment, and the production host/browser adapters. They make no installed
+or rendered VS Code claim and issue no provider request. The exact hosted native
+gate for the newer MCP renewal source is still pending separately.
 
 ## Selected workspace connection
 
@@ -29,9 +40,8 @@ the console does not silently adopt the replacement backend. Agent and graph
 requests also carry the pinned workspace and authority for atomic backend
 admission. Client exit still leaves backend execution alive.
 
-This connection check is a prerequisite for managed profile discovery and
-startup. It does not implement automatic bootstrap. Explicit `--port` commands
-without `--workspace` retain the operator-selected backend behavior.
+Managed profile discovery/startup is verified on Windows. Explicit `--port`
+commands without `--workspace` retain the operator-selected backend behavior.
 
 ## Multiline requests
 
