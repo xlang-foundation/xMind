@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+Native MCP HTTP POST candidate: the native async WinHTTP layer now sends
+request/schema-derived headers and exposes bounded response metadata/bytes
+for JSON/SSE and authentication challenges, with a conservative send boundary.
+Existing provider behavior retains its selected-header/media rules. Real-socket
+synthetic peer assertions are added to the existing transport contract for raw
+arguments, both media, status/session/auth metadata, acknowledgement shape,
+exact dispatch counts, cancellation, deadlines and certificate rejection.
+Node syntax/whitespace checks pass; native compilation/execution is pending.
+Connected MCP ownership, decoding, configuration/factory and OAuth remain
+unfinished. [Scope](native-mcp-http.md).
+
 Native browser streaming accepted at `977e945`: the full hosted **110 native
 contracts** passed in **356.85 seconds**, with **241 extension / 49 browser**
 fixtures and actual browser/native integration. The production cookie client,

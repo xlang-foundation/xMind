@@ -10,12 +10,41 @@ import {join} from 'node:path';
 const execute=promisify(execFile);
 const [executable,openssl]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-transport-'));
-let redirected=0,requests=0,plain,tls;const credentialRequests=new Map(),jsonPostRequests=new Map();
+let redirected=0,requests=0,plain,tls;const credentialRequests=new Map(),jsonPostRequests=new Map(),mcpRequests=new Map();
 const jsonPostBody=String.raw`{"input":"native 🌍","decimal":1.00000000000000000001,"pa\u0074h":"raw"}`;
 const jsonPostReply='{"input_tokens":19,"opaque":"synthetic 🌍"}';
 const wire='data: '+JSON.stringify({choices:[{index:0,delta:{content:'transport fixture'},finish_reason:'stop'}]})+'\n\ndata: [DONE]\n\n';
 function handler(request,response) {
   requests++;
+  if(request.url.startsWith('/mcp/')){
+    mcpRequests.set(request.url,(mcpRequests.get(request.url)??0)+1);
+    assert.equal(request.method,'POST');assert.equal(request.headers.accept,'application/json, text/event-stream');assert.equal(request.headers['content-type'],'application/json');
+    assert.equal(request.headers.authorization,'Bearer transport-test-token-not-a-real-key');assert.equal(request.headers['x-extra'],undefined);assert.equal(request.headers['anthropic-version'],undefined);
+    const chunks=[];request.on('data',bytes=>chunks.push(bytes));request.on('end',()=>{
+      const raw=Buffer.concat(chunks).toString('utf8'),body=JSON.parse(raw),legacy=request.url==='/mcp/legacy',notice=request.url==='/mcp/notification'||request.url==='/mcp/bad-ack';
+      assert.equal(body.jsonrpc,'2.0');assert.equal(request.headers['mcp-protocol-version'],legacy?'2025-11-25':'2026-07-28');
+      assert.equal(request.headers['mcp-session-id'],legacy?'fixture-session':undefined);
+      if(legacy){assert.equal(body.method,'tools/list');assert.equal(request.headers['mcp-method'],undefined);assert.equal(request.headers['mcp-name'],undefined);}
+      else {
+        assert.equal(body.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');assert.equal(request.headers['mcp-method'],body.method);
+        if(notice){assert.equal(body.id,undefined);assert.equal(body.method,'notifications/progress');assert.equal(request.headers['mcp-name'],undefined);}
+        else {
+          assert.equal(body.method,'tools/call');assert.equal(body.params.name,'雪');assert.equal(request.headers['mcp-name'],'=?base64?6Zuq?=');
+          assert.equal(request.headers['mcp-param-count'],'9007199254740991');assert.equal(request.headers['mcp-param-region'],'=?base64?bGluZTEKbGluZTI=?=');
+          assert.ok(raw.includes('"precise":1.00000000000000000001'),'MCP POST must not round-trip raw argument decimals through floating point');
+        }
+      }
+      if(notice){response.writeHead(202);response.end(request.url==='/mcp/bad-ack'?'invalid body':'');return;}
+      if(request.url==='/mcp/redirect'){response.writeHead(302,{Location:`http://127.0.0.1:${plain.address().port}/redirect-target`});response.end();return;}
+      if(request.url==='/mcp/auth'){response.writeHead(401,{'WWW-Authenticate':'Bearer resource_metadata="http://127.0.0.1/resource"'});response.end();return;}
+      if(request.url==='/mcp/error'){response.writeHead(400,{'Content-Type':'application/json'});response.end('{"jsonrpc":"2.0","id":"http-fixture","error":{"code":-32020,"message":"fixture mismatch"}}');return;}
+      if(request.url==='/mcp/delay')return;
+      const reply='{"jsonrpc":"2.0","id":"http-fixture","result":{"resultType":"complete","content":[{"type":"text","text":"actual 雪 bytes"}]}}';
+      const sse=request.url==='/mcp/sse';response.writeHead(200,{'Content-Type':request.url==='/mcp/wrong-media'?'text/plain':sse?'text/event-stream; charset=utf-8':'application/json; charset=utf-8',...(legacy?{'Mcp-Session-Id':'fixture-next-session'}:{})});
+      const bytes=Buffer.from(sse?'event: message\ndata: '+reply+'\n\n':reply),split=bytes.indexOf(Buffer.from('雪'))+1;
+      response.write(bytes.subarray(0,split));setTimeout(()=>response.end(bytes.subarray(split)),10);
+    });return;
+  }
   if(request.url.startsWith('/post-json/')){
     jsonPostRequests.set(request.url,(jsonPostRequests.get(request.url)??0)+1);
     assert.equal(request.method,'POST');assert.equal(request.headers.accept,'application/json');assert.equal(request.headers['content-type'],'application/json');assert.equal(request.headers['x-extra'],undefined);
@@ -81,6 +110,7 @@ try {
   await Promise.all([new Promise(resolve=>plain.listen(0,'127.0.0.1',resolve)),new Promise(resolve=>tls.listen(0,'127.0.0.1',resolve))]);
   const result=await execute(executable,[`http://127.0.0.1:${plain.address().port}`,`https://127.0.0.1:${tls.address().port}`],{timeout:20000,windowsHide:true});
   assert.equal(redirected,0,'Credentials must not be forwarded by a followed redirect');
+  assert.deepEqual(Object.fromEntries(mcpRequests),{'/mcp/json':1,'/mcp/sse':1,'/mcp/error':1,'/mcp/auth':1,'/mcp/legacy':1,'/mcp/notification':1,'/mcp/bad-ack':1,'/mcp/redirect':1,'/mcp/wrong-media':1,'/mcp/delay':2,'/mcp/after-failure':1},'Native MCP POST requests must reach sockets exactly once; invalid metadata/pre-cancel/TLS must not reach a peer');
   assert.deepEqual(Object.fromEntries(credentialRequests),{'/auth/api-key':1,'/json-auth/api-key':1,'/auth/api-key/redirect':1,'/auth/google-key':1,'/json-auth/google-key':1,'/auth/google-key/redirect':1},'Only selected-header requests reach the wire; missing/injected credentials are rejected before sending');
   assert.deepEqual(Object.fromEntries(jsonPostRequests),{'/post-json/bearer':1,'/post-json/api-key':1,'/post-json/google-key':1,'/post-json/claude-protocol':1,'/post-json/boundary':2,'/post-json/large':1,'/post-json/oversized':1,'/post-json/wrong-media':1,'/post-json/redirect':1,'/post-json/diagnostic':1,'/post-json/delay':2,'/post-json/stall':1,'/post-json/after-failure':1},'Exact native JSON POST requests reach the wire once; invalid requests, TLS failure and pre-cancellation never dispatch');
   assert.ok(requests>=9,'Protocol cases must reach real native sockets');

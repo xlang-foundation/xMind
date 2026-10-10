@@ -1,4 +1,5 @@
 #include "agentflow/http_stream_transport.hpp"
+#include "agentflow/mcp_http_transport.hpp"
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
@@ -83,11 +84,25 @@ std::wstring wide(const std::string& text) {
     return result;
 }
 std::wstring lower(std::wstring value) {for(auto& c:value) c=static_cast<wchar_t>(std::towlower(c));return value;}
-enum class TransferKind {event_post,json_get,json_post};
+enum class TransferKind {event_post,json_get,json_post,mcp_post};
+std::optional<std::string> response_field(HINTERNET request,const wchar_t* name) {
+    std::array<wchar_t,8192> buffer{};DWORD size=static_cast<DWORD>(sizeof(buffer));
+    if(!WinHttpQueryHeaders(request,WINHTTP_QUERY_CUSTOM,name,buffer.data(),&size,WINHTTP_NO_HEADER_INDEX)) {
+        if(GetLastError()==ERROR_WINHTTP_HEADER_NOT_FOUND)return std::nullopt;
+        throw TransportError("Missing or oversized MCP HTTP response metadata");
+    }
+    std::string result;for(const auto c:std::wstring_view(buffer.data())) {
+        if(c!=L'\t' && (c<32 || c>126))throw TransportError("Invalid MCP HTTP response metadata");
+        result.push_back(static_cast<char>(c));
+    }
+    return result;
+}
 }
 static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     const std::function<void(std::string_view)>& consume,std::stop_token cancel,
-    TransferKind kind,std::size_t response_limit) {
+    TransferKind kind,std::size_t response_limit,const McpHttpPost* mcp=nullptr,
+    const std::function<void(const McpHttpResponseHead&)>& on_head={},
+    const std::function<void()>& on_sending={}) {
     if(!consume || input.url.empty() || input.url.size()>8192 || input.body.size()>8*1024*1024 ||
         input.deadline.count()<=0 || input.deadline.count()>600000 || input.idle_timeout.count()<=0 || input.idle_timeout.count()>600000)
         throw std::invalid_argument("Invalid provider transport configuration");
@@ -122,8 +137,27 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     WipedHeaders headers;
     const auto json=kind!=TransferKind::event_post;
     headers.value=kind==TransferKind::json_get?L"":L"Content-Type: application/json\r\n";
-    headers.value+=json?L"Accept: application/json\r\n":L"Accept: text/event-stream\r\n";
+    headers.value+=mcp?L"Accept: application/json, text/event-stream\r\n":json?L"Accept: application/json\r\n":L"Accept: text/event-stream\r\n";
     if(input.protocol==ProviderHttpProtocol::anthropic)headers.value+=L"anthropic-version: 2023-06-01\r\n";
+    if(mcp) {
+        auto projected=mcp_http_request_headers(input.body,mcp->era,mcp->legacy_protocol);
+        if(mcp->input_schema) {
+            const auto body=nlohmann::json::parse(mcp_compact_object(input.body));
+            if(body["method"]!="tools/call")throw McpProtocolError("MCP header schema requires a tool call");
+            const auto params=mcp_object_member(input.body,"params");
+            if(!params)throw McpProtocolError("MCP tool call has no parameters");
+            const auto arguments=mcp_object_member(*params,"arguments").value_or("{}");
+            const auto values=McpHttpToolHeaders(*mcp->input_schema).project(arguments);
+            projected.insert(projected.end(),values.begin(),values.end());
+        }
+        for(const auto& header:projected)headers.value+=wide(header.name)+L": "+wide(header.value)+L"\r\n";
+        if(mcp->legacy_session) {
+            if(mcp->era!=McpWireEra::legacy || mcp->legacy_session->empty() || mcp->legacy_session->size()>4096)throw McpProtocolError("Invalid MCP HTTP session binding");
+            for(unsigned char c:*mcp->legacy_session)if(c<33 || c>126)throw McpProtocolError("Invalid MCP HTTP session binding");
+            headers.value+=L"Mcp-Session-Id: "+wide(*mcp->legacy_session)+L"\r\n";
+        }
+        if(headers.value.size()>64*1024)throw McpProtocolError("MCP HTTP headers exceed native limits");
+    }
     if(bearer) {
         const auto bytes=bearer->view();
         if(bytes.empty() || bytes.size()>32768) throw std::invalid_argument("Invalid provider credential");
@@ -137,6 +171,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         }
         headers.value+=L"\r\n";
     }
+    if(mcp && headers.value.size()>64*1024)throw McpProtocolError("MCP HTTP headers exceed native limits");
     std::array<char,8192> buffer{};State state;
     Handle raw(WinHttpOpenRequest(connection.value,kind==TransferKind::json_get?L"GET":L"POST",path.c_str(),nullptr,WINHTTP_NO_REFERER,WINHTTP_DEFAULT_ACCEPT_TYPES,secure?WINHTTP_FLAG_SECURE:0));
     DWORD policy=WINHTTP_OPTION_REDIRECT_POLICY_NEVER;checked(WinHttpSetOption(raw.value,WINHTTP_OPTION_REDIRECT_POLICY,&policy,sizeof(policy)));
@@ -148,13 +183,18 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         throw TransportError("Cannot register native HTTP callback");
     RequestHandle request{raw.release(),state};
     state.prepare();
+    if(mcp) {
+        if(cancel.stop_requested())throw TransportCancelled("MCP request cancelled before sending");
+        if(Clock::now()>=deadline)throw TransportTimeout("MCP request deadline exceeded before sending");
+        on_sending();
+    }
     checked(WinHttpSendRequest(request.value,headers.value.c_str(),static_cast<DWORD>(headers.value.size()),
         input.body.empty()?WINHTTP_NO_REQUEST_DATA:const_cast<char*>(input.body.data()),static_cast<DWORD>(input.body.size()),static_cast<DWORD>(input.body.size()),context));
     state.wait(WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE,deadline,cancel);
     state.prepare();checked(WinHttpReceiveResponse(request.value,nullptr));state.wait(WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE,deadline,cancel);
     DWORD status=0,size=sizeof(status);
     checked(WinHttpQueryHeaders(request.value,WINHTTP_QUERY_STATUS_CODE|WINHTTP_QUERY_FLAG_NUMBER,WINHTTP_HEADER_NAME_BY_INDEX,&status,&size,WINHTTP_NO_HEADER_INDEX));
-    if(status<200 || status>=300) {
+    if(!mcp && (status<200 || status>=300)) {
         ProviderHttpError failure(static_cast<int>(status));
         // Error bodies can contain credentials or user content. Retain only
         // exact, known protocol identifiers; never retain messages or raw JSON.
@@ -200,16 +240,25 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         throw failure;
     }
     std::array<wchar_t,256> content{};size=static_cast<DWORD>(content.size()*sizeof(wchar_t));
-    if(!WinHttpQueryHeaders(request.value,WINHTTP_QUERY_CONTENT_TYPE,WINHTTP_HEADER_NAME_BY_INDEX,content.data(),&size,WINHTTP_NO_HEADER_INDEX)) throw TransportError("Missing or oversized provider content type");
+    if(!WinHttpQueryHeaders(request.value,WINHTTP_QUERY_CONTENT_TYPE,WINHTTP_HEADER_NAME_BY_INDEX,content.data(),&size,WINHTTP_NO_HEADER_INDEX)) {
+        if(!mcp || GetLastError()!=ERROR_WINHTTP_HEADER_NOT_FOUND)throw TransportError("Missing or oversized HTTP content type");
+    }
     auto media=lower(std::wstring(content.data()));media=media.substr(0,media.find(L';'));
     while(!media.empty() && (media.back()==L' ' || media.back()==L'\t')) media.pop_back();
-    if(media!=(json?L"application/json":L"text/event-stream")) throw TransportError("Unexpected provider response content type");
+    if(mcp) {
+        McpHttpResponseHead head;head.status=static_cast<int>(status);
+        for(auto c:media){if(c<32 || c>126)throw TransportError("Invalid MCP response content type");head.media_type+=static_cast<char>(c);}
+        head.legacy_session=response_field(request.value,L"Mcp-Session-Id");head.authenticate=response_field(request.value,L"WWW-Authenticate");
+        on_head(head);
+        if(status==200 && media!=L"application/json" && media!=L"text/event-stream")throw TransportError("Unexpected MCP response content type");
+    } else if(media!=(json?L"application/json":L"text/event-stream")) throw TransportError("Unexpected provider response content type");
     const std::size_t limit=response_limit;
     std::size_t received=0;
     for(;;) {
         if(cancel.stop_requested()) throw TransportCancelled("Provider request cancelled");
         state.prepare();checked(WinHttpQueryDataAvailable(request.value,nullptr));
         const auto available=state.wait(WINHTTP_CALLBACK_STATUS_DATA_AVAILABLE,deadline,cancel);if(!available) break;
+        if(mcp && status==202)throw TransportError("MCP notification acknowledgement must have an empty body");
         state.prepare();checked(WinHttpReadData(request.value,buffer.data(),static_cast<DWORD>(std::min<std::size_t>(available,buffer.size())),nullptr));
         const auto read=state.wait(WINHTTP_CALLBACK_STATUS_READ_COMPLETE,deadline,cancel);if(!read) break;
         if(read>buffer.size() || read>limit-received) throw TransportError("Provider response exceeds configured limit");
@@ -233,5 +282,13 @@ std::string post_json(const HttpStreamRequest& input,const SecretBytes* bearer,
     std::string result;
     transfer(input,bearer,[&](std::string_view chunk){result.append(chunk);},cancel,TransferKind::json_post,max_response_bytes);
     return result;
+}
+void post_mcp_http(const McpHttpPost& input,const SecretBytes* bearer,
+    const std::function<void(const McpHttpResponseHead&)>& on_head,
+    const std::function<void(std::string_view)>& consume,
+    const std::function<void()>& on_sending,std::stop_token cancel) {
+    if(input.body.empty() || !on_head || !on_sending)throw std::invalid_argument("MCP HTTP requires body and ownership callbacks");
+    const HttpStreamRequest request{input.url,input.body,input.deadline,input.idle_timeout};
+    transfer(request,bearer,consume,cancel,TransferKind::mcp_post,8*1024*1024,&input,on_head,on_sending);
 }
 }

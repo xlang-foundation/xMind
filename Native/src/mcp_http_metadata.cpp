@@ -74,6 +74,7 @@ std::string integer(std::string_view raw) {
 }
 }
 std::vector<McpHttpHeader> mcp_http_request_headers(std::string_view request,McpWireEra era,std::string_view legacy_protocol) {
+    if(era!=McpWireEra::modern && era!=McpWireEra::legacy)invalid();
     const auto value=object(request);
     if(!value.contains("jsonrpc") || value["jsonrpc"]!="2.0" || !value.contains("method") || value.contains("result") || value.contains("error"))invalid();
     const auto method=string(value["method"]);if(method.empty() || method.size()>256)invalid();

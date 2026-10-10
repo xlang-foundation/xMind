@@ -119,6 +119,7 @@ int main() {
         const auto http=mcp_http_request_headers(mcp_request("http","tools/call",R"({"name":"雪","arguments":{}})",McpWireEra::modern),McpWireEra::modern);
         require(http.size()==3 && http[0].value=="2026-07-28" && http[1].value=="tools/call" && http[2].value=="=?base64?6Zuq?=","HTTP headers must derive from actual modern request bytes and encode Unicode names");
         const auto oldHttp=mcp_http_request_headers(mcp_request("http","tools/list","{}",McpWireEra::legacy),McpWireEra::legacy);
+        rejected([&]{mcp_http_request_headers(mcp_request("http","tools/list","{}",McpWireEra::legacy),static_cast<McpWireEra>(999));});
         require(oldHttp.size()==1 && oldHttp[0].value=="2025-11-25","Older HTTP requests cannot invent modern mirror metadata");
         rejected([&]{mcp_http_request_headers(mcp_request("http","tools/list","{}",McpWireEra::legacy),McpWireEra::modern);});
         rejected([&]{mcp_http_request_headers(mcp_request("http","tools/call","{}",McpWireEra::modern),McpWireEra::modern);});

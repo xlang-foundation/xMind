@@ -1,7 +1,9 @@
 #include "agentflow/http_stream_transport.hpp"
 #include "agentflow/model_stream.hpp"
+#include "agentflow/mcp_http_transport.hpp"
 #include <iostream>
 #include <thread>
+#include <utility>
 
 using namespace agentflow;
 using namespace std::chrono_literals;
@@ -146,6 +148,36 @@ int main(int argc,char** argv) {
         }
         // Fresh request after cancellation/exception checks cleanup and isolation.
         {ChatCompletionStream decoder([](const ModelEvent&){});post_event_stream(request("/ok"),&secret,[&](std::string_view bytes){decoder.feed(bytes);});require(decoder.finish().finish_reason=="stop","Transport must remain usable");}
-        std::cout<<"Native transport contracts passed against synthetic protocol peer; no live model was called\n";return 0;
+        const auto mcpBody=mcp_request("http-fixture","tools/call",R"({"name":"雪","arguments":{"n":9007199254740991,"region":"line1\nline2","precise":1.00000000000000000001}})",McpWireEra::modern);
+        const auto mcpSchema=R"({"properties":{"n":{"type":"integer","x-mcp-header":"Count"},"region":{"type":"string","x-mcp-header":"Region"}}})";
+        auto mcpInput=[&](const std::string& path){McpHttpPost input;input.url=base+"/mcp/"+path;input.body=mcpBody;input.input_schema=mcpSchema;input.deadline=10s;input.idle_timeout=5s;return input;};
+        const std::string mcpReply=R"({"jsonrpc":"2.0","id":"http-fixture","result":{"resultType":"complete","content":[{"type":"text","text":"actual 雪 bytes"}]}})";
+        auto exchange=[&](const McpHttpPost& input,std::stop_token cancel=std::stop_token{}) {
+            McpHttpResponseHead head;std::string body;int sent=0,heads=0;
+            post_mcp_http(input,&secret,[&](const auto& h){require(sent==1 && heads++==0,"MCP headers must follow one conservative send boundary");head=h;},[&](std::string_view bytes){require(heads==1,"MCP bytes must follow response metadata");body+=bytes;},[&]{++sent;},cancel);
+            require(sent==1 && heads==1,"MCP POST must not retry or omit response metadata");return std::pair{head,body};
+        };
+        {const auto [head,body]=exchange(mcpInput("json"));require(head.status==200 && head.media_type=="application/json" && body==mcpReply,"Native MCP JSON response must preserve exact UTF-8 bytes");}
+        {const auto [head,body]=exchange(mcpInput("sse"));require(head.status==200 && head.media_type=="text/event-stream" && body=="event: message\ndata: "+mcpReply+"\n\n","Native MCP transport must accept actual request-scoped SSE bytes");}
+        {const auto [head,body]=exchange(mcpInput("error"));require(head.status==400 && body==R"({"jsonrpc":"2.0","id":"http-fixture","error":{"code":-32020,"message":"fixture mismatch"}})","MCP JSON-RPC HTTP errors must remain attributable, not provider errors");}
+        {const auto [head,body]=exchange(mcpInput("auth"));require(head.status==401 && head.authenticate=="Bearer resource_metadata=\"http://127.0.0.1/resource\"" && body.empty(),"MCP authorization challenge must remain backend-private protocol metadata");}
+        {auto input=mcpInput("legacy");input.era=McpWireEra::legacy;input.body=mcp_request("http-fixture","tools/list","{}",McpWireEra::legacy);input.input_schema.reset();input.legacy_session="fixture-session";
+         const auto [head,body]=exchange(input);require(head.status==200 && head.legacy_session=="fixture-next-session" && body==mcpReply,"Older session request/response metadata must survive native transport");}
+        auto notice=mcpInput("notification");notice.body="{\"jsonrpc\":\"2.0\",\"method\":\"notifications/progress\",\"params\":"+*mcp_object_member(mcp_request("notice","notifications/progress","{}",McpWireEra::modern),"params")+"}";notice.input_schema.reset();
+        {const auto [head,body]=exchange(notice);require(head.status==202 && body.empty(),"Empty notification acknowledgement must succeed without Content-Type");}
+        notice.url=base+"/mcp/bad-ack";rejects<TransportError>([&]{exchange(notice);});
+        {const auto [head,body]=exchange(mcpInput("redirect"));require(head.status==302 && body.empty(),"MCP redirect must surface its status without forwarding credentials");}
+        rejects<TransportError>([&]{exchange(mcpInput("wrong-media"));});
+        {auto input=mcpInput("delay");std::stop_source cancellation;std::jthread canceller([&]{std::this_thread::sleep_for(150ms);cancellation.request_stop();});rejects<TransportCancelled>([&]{exchange(input,cancellation.get_token());});}
+        {auto input=mcpInput("delay");input.deadline=200ms;rejects<TransportTimeout>([&]{exchange(input);});}
+        {auto input=mcpInput("invalid");int sent=0;auto call=[&](std::stop_token cancel={}){post_mcp_http(input,&secret,[](const auto&){},[](std::string_view){},[&]{++sent;},cancel);};
+         std::stop_source cancellation;cancellation.request_stop();rejects<TransportCancelled>([&]{call(cancellation.get_token());});
+         input.legacy_session="injected\r\nX-Extra: invalid";rejects<McpProtocolError>([&]{call();});input.legacy_session.reset();
+         input.input_schema=R"({"properties":{"n":{"type":"integer","x-mcp-header":"Bad\r\nName"}}})";rejects<McpProtocolError>([&]{call();});input.input_schema=mcpSchema;
+         input.url="http://example.invalid/mcp";rejects<std::invalid_argument>([&]{call();});
+         require(sent==0,"Invalid metadata, pre-cancellation and remote plaintext must stop before the send boundary");
+         input.url=tls+"/mcp/json";rejects<TransportError>([&]{call();});require(sent<=1,"Invalid configuration must not dispatch; untrusted TLS may cross the conservative send boundary");}
+        {const auto [head,body]=exchange(mcpInput("after-failure"));require(head.status==200 && body==mcpReply,"Fresh native MCP POST must survive prior cancellation and TLS failures");}
+        std::cout<<"Native provider and MCP POST byte transport contracts passed against synthetic peers; no MCP approval/client integration, OAuth or live model was verified\n";return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }

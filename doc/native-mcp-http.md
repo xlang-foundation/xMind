@@ -42,6 +42,23 @@ and has additions to its existing native contract, but has not been compiled
 or executed yet. Network dispatch, discovery filtering and HTTP ownership are
 still unfinished.
 
+The native Windows POST candidate now reuses the existing async WinHTTP
+transport's certificate, redirect, credential-wiping and deadline machinery.
+It adds a typed MCP boundary: actual request/schema-derived headers, explicit
+older session input, JSON/SSE response selection, response status/session/auth
+challenge metadata, empty 202 acknowledgement enforcement and a conservative
+possibly-sent callback immediately before the send API. Error responses remain
+backend-private protocol input. No retry, redirect forwarding or approval
+authority is added. Its existing real-socket transport contract now requires
+exact request counts, UTF-8/raw-decimal preservation, both response media,
+older session metadata, 400 RPC errors, 401 challenges, empty/invalid 202,
+cancellation, deadlines, invalid metadata and certificate rejection. The peer
+is synthetic and does not establish official MCP SDK interoperability. Only
+Node syntax and whitespace/source checks have run; native execution is pending.
+This is POST byte transport, not a connected `McpToolClient`: JSON/SSE message
+decoding, negotiation, discovery filtering, registry dispatch integration,
+configuration/factory and OAuth remain unfinished.
+
 The following are xMind implementation decisions, not claims of delivered
 protocol support:
 
