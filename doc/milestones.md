@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+Clean frame-boundary EOF recovery candidate: the shared committed reader still
+rejects a missing native end acknowledgement, but now marks a clean connection
+EOF as transport unavailability. The subscription retries at the last accepted
+cursor with its existing three-attempt bound; it sends only stream GETs.
+Incomplete/malformed frames, identity/authentication and consumer failures stop
+explicitly. Complete **243 extension / 50 browser** synthetic suites pass with
+all 2421 tracked inputs unchanged. The real native view contract now also
+prepares a browser-adapter restart at the same origin/cookie, requiring a fresh
+validated observation at the preserved cursor while the actual graph stays
+paused. That new native assertion is unexecuted.
+[Candidate and original evidence](evidence/native-event-stream-eof-candidate.json).
+
 Native SSE transport accepted at `7a148ff`: the isolated hosted build passed
 all **110 native contracts** in **371.87 seconds**, then **224 extension /
 43 browser** fixtures, actual browser/native integration and package checks.

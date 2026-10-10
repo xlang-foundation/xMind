@@ -251,7 +251,7 @@ async function readCommittedEventStream(response,{root,session,scope,after,signa
   try{
     while(true){
       signal?.throwIfAborted();let chunk;try{chunk=await reader.read();}catch(error){if(error?.name==='TypeError'||error?.name==='TimeoutError')error.eventTransportUnavailable=true;throw error;}signal?.throwIfAborted();
-      if(chunk.done){pending+=decoder.decode();throw new Error('Native event stream ended without a complete end frame');}
+      if(chunk.done){pending+=decoder.decode();const error=new Error('Native event stream ended without a complete end frame');if(!pending.trim())error.eventTransportUnavailable=true;throw error;}
       if(!ArrayBuffer.isView(chunk.value))throw new Error('Invalid event stream bytes');total+=chunk.value.byteLength;if(total>64*1024*1024)throw new Error('Event stream exceeds its connection limit');
       pending+=decoder.decode(chunk.value,{stream:true});pending=pending.replace(/\r\n/g,'\n');
       let end;while((end=pending.indexOf('\n\n'))!==-1){if(end>16*1024*1024+1024)throw new Error('Event stream frame exceeds its limit');const value=await frame(pending.slice(0,end));pending=pending.slice(end+2);if(value)return value;}

@@ -1,5 +1,22 @@
 # Committed native event feeds
 
+Clean frame-boundary EOF is now classified as transport unavailability after
+preserving the last consumer-accepted cursor. The standalone reader still
+rejects the absent native acknowledgement; the shared subscription can retry
+only its read-only GET at that cursor, at most three times. Incomplete frames,
+malformed JSON/UTF-8, ownership/authentication and consumer rejection do not
+receive this classification. Two additional fixtures use the production reader
+and subscription together to prove acknowledged replay and bounded exhaustion.
+Complete **243 extension / 50 browser** synthetic suites pass.
+[EOF recovery scope and original evidence](evidence/native-event-stream-eof-candidate.json).
+
+The prepared native browser acceptance now restarts the actual browser adapter
+at its existing origin while a native human/tool graph is paused. It requires
+a newly validated observation using the prior cookie and accepted cursor,
+unchanged selected root/session and no dependent read before human input.
+This gateway-restart assertion has not run. It does not establish backend
+restart or installed/rendered acceptance.
+
 Native transport source `7a148ff` passed the complete hosted **110-contract**
 gate and package verification. Its executed native view assertions compare
 completed actual tool-graph graph/tree/run streams to persisted records,

@@ -90,7 +90,22 @@ test('stream detach preserves delivered cursor and a rejected callback never ack
 });
 test('EOF, malformed JSON and unsupported frames retain the last accepted cursor',async()=>{
  const initial=streamFrame('observation',{run:streamRoot(),scope:'run',after:0}),committed=streamFrame('committed',streamEvent(1),1);
- for(const tail of ['', 'event: committed\ndata: {\n\n','event: unknown\ndata: {}\n\n','event: end\nevent: end\ndata: {}\n\n']){const events=[],client=new BackendClient('http://localhost:8765',()=>token,async()=>streamResponse(initial+committed+tail));await assert.rejects(client.eventStream('root',{session_id:'session',onEvent:e=>events.push(e)}),error=>error.eventCursor===1);assert.equal(events.length,1);}
+ for(const tail of ['', 'event: committed\ndata: {\n\n','event: unknown\ndata: {}\n\n','event: end\nevent: end\ndata: {}\n\n','event: committed\ndata: {']){const events=[],client=new BackendClient('http://localhost:8765',()=>token,async()=>streamResponse(initial+committed+tail));await assert.rejects(client.eventStream('root',{session_id:'session',onEvent:e=>events.push(e)}),error=>error.eventCursor===1&&(tail===''?error.eventTransportUnavailable===true:!error.eventTransportUnavailable));assert.equal(events.length,1);}
+});
+
+test('actual reader and subscription reconnect clean EOF at the accepted cursor without replaying commands or events',async()=>{
+ const {EventStreamSubscription}=require('../client'),requests=[],events=[],errors=[],tasks=[],ended=[];
+ const client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{requests.push({url,options});const after=Number(new URL(url).searchParams.get('after'));return streamResponse(requests.length===1?streamFrame('observation',{run:streamRoot({state:'running'}),scope:'run',after})+streamFrame('committed',streamEvent(7),7):streamWire([streamEvent(8)],{after}));});
+ const subscription=new EventStreamSubscription({current:()=>true,onEvent:event=>events.push(event),onEnd:value=>ended.push(value),onError:error=>errors.push(error),schedule:(callback,delay)=>{tasks.push({callback,delay});return callback;},unschedule:()=>{}});
+ try{subscription.watch({client,root:'root',session:'session',scope:'run',generation:1,after:0});await subscriptionTick();assert.equal(subscription.cursor,7);assert.equal(tasks.length,1);assert.equal(tasks[0].delay,500);tasks.shift().callback();await subscriptionTick();assert.deepEqual(requests.map(value=>new URL(value.url).searchParams.get('after')),['0','7']);assert.deepEqual(events.map(event=>event.seq),[7,8]);assert.equal(ended[0].cursor,8);assert.equal(errors.length,0);assert.equal(tasks.length,0);assert.ok(requests.every(value=>value.options.method==='GET'&&new URL(value.url).pathname==='/v1/runs/root/events/stream'));
+ }finally{subscription.dispose();}
+});
+
+test('clean EOF retry stops after its bounded attempts while preserving the acknowledged cursor',async()=>{
+ const {EventStreamSubscription}=require('../client'),requests=[],tasks=[],errors=[];const client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{requests.push({url,options});return streamResponse(streamFrame('observation',{run:streamRoot({state:'paused'}),scope:'run',after:7}));});
+ const subscription=new EventStreamSubscription({current:()=>true,onEvent:()=>{throw Error('No new event permitted');},onError:error=>errors.push(error),schedule:(callback,delay)=>{tasks.push({callback,delay});return callback;},unschedule:()=>{}});
+ try{subscription.watch({client,root:'root',session:'session',scope:'run',generation:1,after:7});await subscriptionTick();const delays=[];while(tasks.length){const task=tasks.shift();delays.push(task.delay);task.callback();await subscriptionTick();}assert.deepEqual(delays,[500,1000,2000]);assert.equal(requests.length,4);assert.equal(errors.length,1);assert.equal(errors[0].eventCursor,7);assert.equal(subscription.cursor,7);assert.equal(subscription.finished,true);assert.ok(requests.every(value=>value.options.method==='GET'&&value.url.endsWith('/events/stream?after=7')));
+ }finally{subscription.dispose();}
 });
 test('resume uses the accepted scoped cursor and HTTP rejection does not trigger a fallback or command',async()=>{
  const sent=[],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{sent.push({url,options});return streamResponse(streamWire([streamEvent(8)],{scope:'tree',after:7,reason:'reconnect'}));});const result=await client.eventStream('root',{session_id:'session',scope:'tree',after:7,onEvent(){}});assert.equal(result.reason,'reconnect');assert.equal(result.cursor,8);assert.equal(sent[0].url,'http://127.0.0.1:8765/v1/runs/root/tree-events/stream?after=7');

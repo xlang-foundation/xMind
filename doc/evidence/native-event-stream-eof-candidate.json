@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-native-and-installed-validation-pending",
+  "parentRevision": "3bac8456dba130b416ea1c4a49514aa19882a041",
+  "scope": "Clean EOF reconnect through production reader/subscription and complete synthetic Node suites under complete synthetic Node suites; no native/provider or installed/rendered UI execution",
+  "sourceFiles": 2421,
+  "sourceUnchangedAcrossSuites": true,
+  "suites": {
+    "extension": {
+      "tests": 243,
+      "pass": 243,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "tests": 50,
+      "pass": 50,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  "browser": {
+    "observation": "HttpOnly session cookie transport for JSON and SSE; shared reader and scoped subscription",
+    "metadata": "Read-only snapshots on observation, committed event and terminal end; coalesced 100 ms event refresh",
+    "concurrency": "Clean frame-boundary EOF resumes only read-only stream GET at accepted cursor; incomplete/malformed frames stop and reconnect attempts are bounded",
+    "retirement": "Conversation/generation change and disposal detach only observation and refuse delayed callbacks"
+  },
+  "pending": [
+    "Complete native gate and actual stream integration",
+    "Actual gateway restart and acknowledged-cursor replay added to native view contract but unexecuted",
+    "Native disconnect/revocation/capacity/restart acceptance",
+    "Fresh installed/rendered coding acceptance"
+  ],
+  "providerRequests": 0,
+  "nativeExecuted": false,
+  "currentInstallationChanged": false,
+  "rawEvidence": {
+    "doc/evidence/native-unified-event-stream-eof-extension.log": "a7826fc3dc7a1a78d03a076ed78d7e650fb56e23d80a37916867c048661ef4f0",
+    "doc/evidence/native-unified-event-stream-eof-browser.log": "41698ea86d7be34f1bceda016881cce9181145ddc8c55c5655402b2a66214264",
+    "doc/evidence/native-unified-event-stream-eof-source-before.json": "b3c065f82538df78af6b664e5b8bf890646a2ddfd5fe96c55c524621ca530494",
+    "doc/evidence/native-unified-event-stream-eof-source-after.json": "b3c065f82538df78af6b664e5b8bf890646a2ddfd5fe96c55c524621ca530494"
+  }
+}
