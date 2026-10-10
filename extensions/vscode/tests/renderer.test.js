@@ -19,6 +19,22 @@ function renderer(){
   for(const file of ['patch-review.js','node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+test('MCP Settings renders native outcomes and sends only server-bound sign-in intent',()=>{
+ const r=renderer(),doc=r.dom.window.document;try{
+  doc.getElementById('settings').click();assert.equal(r.posted.at(-1).type,'mcp-refresh');assert.ok(doc.querySelector('#provider-settings #mcp-settings'));assert.equal(doc.querySelector('footer #mcp-settings'),null);
+  const server={id:'tools.peer',enabled:true,configured:true,state:'needs_login'},attempt={server_id:server.id,state:'awaiting_callback',cancellation_requested:false};
+  r.send({type:'mcp-authorization',available:true,servers:[server],attempts:[],busy:false,error:''});doc.querySelector('#mcp-servers button').click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'mcp-start',server:server.id});
+  r.send({type:'mcp-authorization',available:true,servers:[server],attempts:[attempt],busy:false,error:''});const buttons=[...doc.querySelectorAll('#mcp-servers button')];assert.deepEqual(buttons.map(b=>b.textContent),['Open sign-in page','Cancel sign-in']);buttons[0].click();assert.equal(r.posted.at(-1).type,'mcp-open');buttons[1].click();assert.equal(r.posted.at(-1).type,'mcp-cancel');
+  r.send({type:'mcp-authorization',available:true,servers:[server],attempts:[{...attempt,state:'failed',reason:'authorization_failed'}],busy:false,error:''});assert.match(doc.getElementById('mcp-servers').textContent,/Sign-in failed/);assert.equal(doc.querySelector('#mcp-servers button').textContent,'Sign in');
+  const before=r.posted.filter(m=>m.type==='mcp-cancel').length;doc.getElementById('settings-close').click();assert.equal(r.posted.filter(m=>m.type==='mcp-cancel').length,before,'Closing settings never cancels backend login');
+ }finally{r.dom.window.close();}
+});
+test('MCP Settings escapes peer labels and never shows a working connector for an unavailable backend',()=>{
+ const r=renderer(),doc=r.dom.window.document;try{
+  r.send({type:'mcp-authorization',available:true,servers:[{id:'<img src=x onerror=unsafe>',enabled:false,configured:false,state:'disabled'}],attempts:[],busy:false,error:''});assert.equal(doc.querySelector('#mcp-servers img'),null);assert.equal(doc.querySelector('#mcp-servers button'),null);
+  r.send({type:'mcp-authorization',available:false,servers:[],attempts:[],busy:false,error:'MCP login setup is unavailable on this backend.'});assert.match(doc.getElementById('mcp-status').textContent,/unavailable/);assert.equal(doc.querySelector('#mcp-servers button'),null);
+ }finally{r.dom.window.close();}
+});
 test('footer file-change mode follows native capability and never promises writes for unknown legacy policy',()=>{
  const r=renderer(),doc=r.dom.window.document;try{const mode=doc.getElementById('file-mode');assert.ok(mode.closest('footer'));assert.equal(mode.hidden,true);r.send({type:'capabilities',execution:true,fileEditProposals:false,models:[]});assert.equal(mode.hidden,false);assert.match(mode.textContent,/Read only: file changes disabled/);r.send({type:'capabilities',execution:true,fileEditProposals:true,models:[]});assert.match(mode.textContent,/File changes require approval/);r.send({type:'capabilities',execution:true,fileEditProposals:'<img onerror=unsafe>',models:[]});assert.equal(mode.hidden,true);assert.equal(mode.textContent,'');assert.equal(mode.querySelector('img'),null);r.send({type:'capabilities',execution:true,fileEditProposals:false,models:[]});r.send({type:'workspace-clear'});assert.equal(mode.hidden,true);assert.equal(mode.textContent,'');assert.deepEqual(JSON.parse(JSON.stringify(r.posted)),[{type:'ready'}]);}finally{r.dom.window.close();}
 });

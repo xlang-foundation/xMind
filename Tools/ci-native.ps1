@@ -62,6 +62,7 @@ $ciExpected=@('model_stream_protocol_contract','model_request_contract','native_
 $ciExpected+='native_mcp_wire_contract'
 $ciExpected+='native_mcp_oauth_callback_contract'
 $ciExpected+='native_mcp_oauth_credentials_contract'
+$ciExpected+='native_mcp_oauth_service_contract'
 $ciExpected+='native_file_patch_contract'
 $ciExpected+='native_patch_file_executor_contract'
 $ciExpected+='native_patch_executor_contract'

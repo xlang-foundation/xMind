@@ -11,6 +11,7 @@ const SkillViewController=typeof module!=='undefined'&&module.exports?require('.
 const validateGraphContext=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').validateGraphContext:globalThis.XMindBackend.validateGraphContext;
 const EventStreamSubscription=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').EventStreamSubscription:globalThis.XMindBackend.EventStreamSubscription;
 const BackendClient=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').BackendClient:globalThis.XMindBackend.BackendClient;
+const McpAuthorizationController=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').McpAuthorizationController:globalThis.XMindBackend.McpAuthorizationController;
 // Browser authentication stays in an HttpOnly cookie. Domain validation and
 // committed-event parsing remain shared with the native editor client.
 class BrowserSessionClient extends BackendClient {
@@ -28,7 +29,7 @@ class BrowserController {
   }
   constructor(client,post,{save=()=>{},review=()=>{},copy=()=>{},link=()=>{},subscriptionFactory=options=>new EventStreamSubscription(options)}={}){this.client=client;this.post=post;this.save=save;this.review=review;this.copy=copy;this.link=link;this.subscriptionFactory=subscriptionFactory;this.generation=0;this.cursor=0;this.runs=[];this.graphs=[];this.children=new Map();this.operations=new Map();this.models={models:[]};this.queue=Promise.resolve();}
   stop(){clearTimeout(this.snapshotTimer);this.snapshotTimer=undefined;this.subscription?.stop();this.contextController?.invalidate();this.skillController?.invalidate();this.pendingTreeEvents=false;const hadPlan=!!this.planObservation||this.pendingPlanObservation;this.pendingPlanObservation=false;this.planReadConflicts=0;this.planObservation=undefined;if(hadPlan)this.post({type:'plan-clear'});this.generation++;this.profileController?.invalidate();}
-  dispose(){this.disposed=true;this.profileController?.dispose();this.stop();this.contextController?.dispose();clearTimeout(this.keyTimer);this.selection=undefined;}
+  dispose(){this.disposed=true;this.mcpController?.dispose();this.profileController?.dispose();this.stop();this.contextController?.dispose();clearTimeout(this.keyTimer);this.selection=undefined;}
   async readContext(){
     if(this.disposed)return;
     if(this.health?.context_controls!==true){if(this.contextController?.record)this.contextController.invalidate();return;}
@@ -39,10 +40,15 @@ class BrowserController {
   }
   current(version){return !this.disposed&&version===this.generation;}
   busy(){return this.runs.some(run=>['queued','running','paused'].includes(run.state));}
-  remember(){this.save({session:this.session,run:this.runId,model:this.model,graph:this.graphId});}
+  remember(){this.save({session:this.session,run:this.runId,model:this.model,graph:this.graphId,...(this.mcpBindings!==undefined?{mcp:this.mcpBindings}:{})});}
+  async readMcp(){
+    if(this.disposed)return;
+    if(!this.mcpController){this.mcpController=new McpAuthorizationController(this.client,this.post,{current:()=>!this.disposed,save:bindings=>{this.mcpBindings=bindings;this.remember();}});return this.mcpController.read(this.mcpBindings||[]);}
+    return this.mcpController.read();
+  }
   present(){this.post({type:'runs',runs:this.runs,selected:this.runId,busy:this.busy()});}
   async refreshCapabilities(){const version=this.generation,health=await this.client.health();if(Object.hasOwn(health,'agent_planning'))await this.client.planning();let catalogue={models:[]};if(health.agent_execution)catalogue=await this.client.models();let graphs={graphs:[]};try{graphs=await this.client.graphs();}catch(error){if(error.status!==404)throw error;}if(!this.current(version))return;if(!Array.isArray(catalogue.models)||!Array.isArray(graphs.graphs)||graphs.graphs.some(g=>typeof g.id!=='string'||!Number.isSafeInteger(g.revision)||g.revision<1||typeof g.executable!=='boolean'))throw new Error('Invalid backend capabilities');this.health=health;this.models=catalogue;this.model=catalogue.models.some(m=>m.id===this.model)?this.model:catalogue.default_model;this.graphs=graphs.graphs;if(!this.graphs.some(g=>g.id===this.graphId&&g.executable))this.graphId=undefined;this.post({type:'capabilities',execution:health.agent_execution,fileEditProposals:health.file_edit_proposals,renameSessions:health.session_rename===true,models:catalogue.models,model:this.model});this.post({type:'graphs',graphs:this.graphs,selected:this.graphId});if(this.profileController){await this.profileController.refresh();if(this.current(version))this.profileController.models(this.model);}}
-  async initialize(saved){this.model=saved?.model;this.graphId=saved?.graph;await this.refreshCapabilities();if(this.disposed)return;const version=this.generation,sessions=await this.client.sessions();if(!this.current(version))return;if(saved?.session&&sessions.some(s=>s.id===saved.session))await this.select(saved.session,saved.run);else if(sessions.length)await this.select(sessions.at(-1).id);if(this.disposed)return;this.post({type:'sessions',sessions,selected:this.session});if(!this.session)this.post({type:'status',text:this.health.agent_execution?'Ready':'Backend connected · open Settings to configure a model'});await this.readSkills();this.discover().catch(()=>{}); }
+  async initialize(saved){this.model=saved?.model;this.graphId=saved?.graph;this.mcpBindings=saved?.mcp;await this.refreshCapabilities();if(this.disposed)return;const version=this.generation,sessions=await this.client.sessions();if(!this.current(version))return;if(saved?.session&&sessions.some(s=>s.id===saved.session))await this.select(saved.session,saved.run);else if(sessions.length)await this.select(sessions.at(-1).id);if(this.disposed)return;this.post({type:'sessions',sessions,selected:this.session});if(!this.session)this.post({type:'status',text:this.health.agent_execution?'Ready':'Backend connected · open Settings to configure a model'});await this.readSkills();this.discover().catch(()=>{}); }
   async select(id,preferred){this.stop();const version=this.generation;this.session=id;this.runId=undefined;this.children.clear();this.graph=undefined;this.operations.clear();this.post({type:'graph-clear'});this.post({type:'operations',operations:[]});this.post({type:'reset-run'});const history=await this.client.history(id),runs=await this.client.runs(id);if(!this.current(version))return;
     const previousProfile=this.profileController?.state;await this.profileController?.refresh();if(!this.current(version))return;
     if(previousProfile&&(previousProfile.revision!==this.profileController.state?.revision||previousProfile.active!==this.profileController.state?.active))await this.refreshCapabilities();
@@ -159,6 +165,11 @@ class BrowserController {
     }
   }
   async command(message){if(this.disposed||!message||typeof message.type!=='string')return;const version=this.generation;
+    if(message.type==='mcp-refresh')return this.readMcp();
+    if(['mcp-start','mcp-cancel','mcp-open'].includes(message.type)){
+      try{if(!this.mcpController)await this.readMcp();if(message.type==='mcp-start')await this.mcpController.start(message.server);else if(message.type==='mcp-cancel')await this.mcpController.cancel(message.server);else this.mcpController.open(message.server,this.link);}
+      catch(error){if(!this.disposed)this.post({type:'mcp-error',text:error.message});}return;
+    }
     if(message.type==='ready')return;
     if(message.type==='skills-refresh'){if(!this.session){const session=await this.client.createSession('Workspace skills');if(this.current(version))await this.select(session.id);}await this.readSkills();return;}
     if(message.type==='skills-change'){try{if(this.health?.skill_controls!==true||this.busy()||!this.skillController)throw new Error('Wait for the selected conversation to become idle.');await this.skillController.change(message);}catch(error){if(this.current(version))this.post({type:'skills-error',text:error.message});}return;}

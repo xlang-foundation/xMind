@@ -1,0 +1,1552 @@
+TAP version 13
+# Subtest: browser view reuses the selected backend without exposing credentials in navigation
+ok 1 - browser view reuses the selected backend without exposing credentials in navigation
+  ---
+  duration_ms: 1.6326
+  type: 'test'
+  ...
+# Subtest: changing servers retires only the old view and disposal prevents reopening
+ok 2 - changing servers retires only the old view and disposal prevents reopening
+  ---
+  duration_ms: 0.6085
+  type: 'test'
+  ...
+# Subtest: invalid origins and tokens do not create access views or copy credentials
+ok 3 - invalid origins and tokens do not create access views or copy credentials
+  ---
+  duration_ms: 1.0015
+  type: 'test'
+  ...
+# Subtest: context routes preserve actual supplied metrics, model/query and idempotent request/profile preconditions
+ok 4 - context routes preserve actual supplied metrics, model/query and idempotent request/profile preconditions
+  ---
+  duration_ms: 2.4879
+  type: 'test'
+  ...
+# Subtest: public context metadata rejects foreign identities and private/provider-window fields
+ok 5 - public context metadata rejects foreign identities and private/provider-window fields
+  ---
+  duration_ms: 0.896
+  type: 'test'
+  ...
+# Subtest: shared context controller rechecks the displayed head and makes one genuine mutation with fresh profile binding
+ok 6 - shared context controller rechecks the displayed head and makes one genuine mutation with fresh profile binding
+  ---
+  duration_ms: 1.198
+  type: 'test'
+  ...
+# Subtest: stale head, disabled capability, outstanding actual request and detached generation never mutate context
+ok 7 - stale head, disabled capability, outstanding actual request and detached generation never mutate context
+  ---
+  duration_ms: 0.7597
+  type: 'test'
+  ...
+# Subtest: context observation conflict clears actions and mutation failure never retries automatically
+ok 8 - context observation conflict clears actions and mutation failure never retries automatically
+  ---
+  duration_ms: 0.6836
+  type: 'test'
+  ...
+# Subtest: older overlapping same-generation context success/error cannot replace or clear a newer observation
+ok 9 - older overlapping same-generation context success/error cannot replace or clear a newer observation
+  ---
+  duration_ms: 0.5176
+  type: 'test'
+  ...
+# Subtest: terminal tracked request cannot hide a different actual newly admitted manual request
+ok 10 - terminal tracked request cannot hide a different actual newly admitted manual request
+  ---
+  duration_ms: 0.8408
+  type: 'test'
+  ...
+# Subtest: MCP setup client sends exact authenticated commands and binds observations to the request owner
+ok 11 - MCP setup client sends exact authenticated commands and binds observations to the request owner
+  ---
+  duration_ms: 2.2979
+  type: 'test'
+  ...
+# Subtest: MCP invalid destinations, identities and revisions never dispatch
+ok 12 - MCP invalid destinations, identities and revisions never dispatch
+  ---
+  duration_ms: 1.0772
+  type: 'test'
+  ...
+# Subtest: MCP public metadata rejects private fields, duplicate servers and unsupported states
+ok 13 - MCP public metadata rejects private fields, duplicate servers and unsupported states
+  ---
+  duration_ms: 0.3725
+  type: 'test'
+  ...
+# Subtest: MCP authorization links are HTTPS and confined to the actual callback-wait phase
+ok 14 - MCP authorization links are HTTPS and confined to the actual callback-wait phase
+  ---
+  duration_ms: 0.4316
+  type: 'test'
+  ...
+# Subtest: MCP responses cannot switch server, attempt or configuration, or invent a successful credential revision
+ok 15 - MCP responses cannot switch server, attempt or configuration, or invent a successful credential revision
+  ---
+  duration_ms: 0.4979
+  type: 'test'
+  ...
+# Subtest: planning capabilities are truthful and do not invent presets or limits
+ok 16 - planning capabilities are truthful and do not invent presets or limits
+  ---
+  duration_ms: 1.511
+  type: 'test'
+  ...
+# Subtest: client preserves the displayed head and exact raw input at its authenticated loopback origin
+ok 17 - client preserves the displayed head and exact raw input at its authenticated loopback origin
+  ---
+  duration_ms: 3.8366
+  type: 'test'
+  ...
+# Subtest: invalid input identities, types and preconditions never reach the backend
+ok 18 - invalid input identities, types and preconditions never reach the backend
+  ---
+  duration_ms: 0.9904
+  type: 'test'
+  ...
+# Subtest: human input validates decoded duplicate keys, Unicode and nested JSON without reserializing
+ok 19 - human input validates decoded duplicate keys, Unicode and nested JSON without reserializing
+  ---
+  duration_ms: 0.438
+  type: 'test'
+  ...
+# Subtest: strict public planning DTOs reject foreign ownership, stale claims and private projection fields
+ok 20 - strict public planning DTOs reject foreign ownership, stale claims and private projection fields
+  ---
+  duration_ms: 2.8299
+  type: 'test'
+  ...
+# Subtest: provider call correlation retains the exact native 256-byte dotted/colon identity domain
+ok 21 - provider call correlation retains the exact native 256-byte dotted/colon identity domain
+  ---
+  duration_ms: 0.4192
+  type: 'test'
+  ...
+# Subtest: coding children are observed through actual dynamic ownership without a read-only label
+ok 22 - coding children are observed through actual dynamic ownership without a read-only label
+  ---
+  duration_ms: 1.2986
+  type: 'test'
+  ...
+# Subtest: session skill client posts only exact revision, ids and workspace authority
+ok 23 - session skill client posts only exact revision, ids and workspace authority
+  ---
+  duration_ms: 2.5613
+  type: 'test'
+  ...
+# Subtest: skill controller publishes acknowledged manual attachment and removal without model prompts
+ok 24 - skill controller publishes acknowledged manual attachment and removal without model prompts
+  ---
+  duration_ms: 0.6894
+  type: 'test'
+  ...
+# Subtest: skill reads discard responses from a previous conversation generation
+ok 25 - skill reads discard responses from a previous conversation generation
+  ---
+  duration_ms: 0.2485
+  type: 'test'
+  ...
+# Subtest: skill acknowledgements cannot publish into a newly selected conversation
+ok 26 - skill acknowledgements cannot publish into a newly selected conversation
+  ---
+  duration_ms: 0.3016
+  type: 'test'
+  ...
+# Subtest: malformed catalogue metadata cannot enter a skill chooser, while source conflicts allow only clearing
+ok 27 - malformed catalogue metadata cannot enter a skill chooser, while source conflicts allow only clearing
+  ---
+  duration_ms: 0.6648
+  type: 'test'
+  ...
+# Subtest: provider enrollment accepts only matching approved OpenAI wire and endpoint pairs
+ok 28 - provider enrollment accepts only matching approved OpenAI wire and endpoint pairs
+  ---
+  duration_ms: 0.2934
+  type: 'test'
+  ...
+# Subtest: subscription rotates using its delivered cursor without duplicating a matching watch
+ok 29 - subscription rotates using its delivered cursor without duplicating a matching watch
+  ---
+  duration_ms: 11.1668
+  type: 'test'
+  ...
+# Subtest: subscription replacement aborts stale observation and cannot deliver its event or terminal outcome
+ok 30 - subscription replacement aborts stale observation and cannot deliver its event or terminal outcome
+  ---
+  duration_ms: 1.5448
+  type: 'test'
+  ...
+# Subtest: subscription retirement, origin change and disposal prevent delayed retries
+ok 31 - subscription retirement, origin change and disposal prevent delayed retries
+  ---
+  duration_ms: 1.7929
+  type: 'test'
+  ...
+# Subtest: subscription bounds busy retries and never retries authentication or malformed acknowledgements
+ok 32 - subscription bounds busy retries and never retries authentication or malformed acknowledgements
+  ---
+  duration_ms: 2.5662
+  type: 'test'
+  ...
+# Subtest: a consumer TypeError stops the subscription without acknowledging or retrying its event
+ok 33 - a consumer TypeError stops the subscription without acknowledging or retrying its event
+  ---
+  duration_ms: 1.0419
+  type: 'test'
+  ...
+# Subtest: subscription refuses invalid bindings before opening or scheduling a connection
+ok 34 - subscription refuses invalid bindings before opening or scheduling a connection
+  ---
+  duration_ms: 0.4892
+  type: 'test'
+  ...
+# Subtest: committed stream reader handles split UTF-8 and CRLF using one authenticated read-only request
+ok 35 - committed stream reader handles split UTF-8 and CRLF using one authenticated read-only request
+  ---
+  duration_ms: 18.4948
+  type: 'test'
+  ...
+# Subtest: graph stream validates owned child conversation before delivering its event
+ok 36 - graph stream validates owned child conversation before delivering its event
+  ---
+  duration_ms: 7.3954
+  type: 'test'
+  ...
+# Subtest: stream rejects changed root/session/scope and events without an initial observation
+ok 37 - stream rejects changed root/session/scope and events without an initial observation
+  ---
+  duration_ms: 3.1769
+  type: 'test'
+  ...
+# Subtest: stream cursor advances only after delivery and rejects duplicate IDs and conflicting end cursors
+ok 38 - stream cursor advances only after delivery and rejects duplicate IDs and conflicting end cursors
+  ---
+  duration_ms: 1.9515
+  type: 'test'
+  ...
+# Subtest: stream validates admission values and an abort during token lookup cannot send a request
+ok 39 - stream validates admission values and an abort during token lookup cannot send a request
+  ---
+  duration_ms: 0.6211
+  type: 'test'
+  ...
+# Subtest: stream detach preserves delivered cursor and a rejected callback never acknowledges its event
+ok 40 - stream detach preserves delivered cursor and a rejected callback never acknowledges its event
+  ---
+  duration_ms: 1.6341
+  type: 'test'
+  ...
+# Subtest: EOF, malformed JSON and unsupported frames retain the last accepted cursor
+ok 41 - EOF, malformed JSON and unsupported frames retain the last accepted cursor
+  ---
+  duration_ms: 2.251
+  type: 'test'
+  ...
+# Subtest: actual reader and subscription reconnect clean EOF at the accepted cursor without replaying commands or events
+ok 42 - actual reader and subscription reconnect clean EOF at the accepted cursor without replaying commands or events
+  ---
+  duration_ms: 3.8984
+  type: 'test'
+  ...
+# Subtest: clean EOF retry stops after its bounded attempts while preserving the acknowledged cursor
+ok 43 - clean EOF retry stops after its bounded attempts while preserving the acknowledged cursor
+  ---
+  duration_ms: 1.644
+  type: 'test'
+  ...
+# Subtest: resume uses the accepted scoped cursor and HTTP rejection does not trigger a fallback or command
+ok 44 - resume uses the accepted scoped cursor and HTTP rejection does not trigger a fallback or command
+  ---
+  duration_ms: 0.7605
+  type: 'test'
+  ...
+# Subtest: workspace skill inspection uses the native read-only catalogue without inventing activation
+ok 45 - workspace skill inspection uses the native read-only catalogue without inventing activation
+  ---
+  duration_ms: 0.1732
+  type: 'test'
+  ...
+# Subtest: owned-child client keeps parent scope and validates the committed tree cursor
+ok 46 - owned-child client keeps parent scope and validates the committed tree cursor
+  ---
+  duration_ms: 0.3708
+  type: 'test'
+  ...
+# Subtest: owned observation covers concurrent admission and paged events without inventing aggregate usage
+ok 47 - owned observation covers concurrent admission and paged events without inventing aggregate usage
+  ---
+  duration_ms: 2.2604
+  type: 'test'
+  ...
+# Subtest: owned observation rejects foreign children and events before requesting private child history
+ok 48 - owned observation rejects foreign children and events before requesting private child history
+  ---
+  duration_ms: 0.272
+  type: 'test'
+  ...
+# Subtest: agent and graph requests preserve the observed profile binding without silently acquiring a newer revision
+ok 49 - agent and graph requests preserve the observed profile binding without silently acquiring a newer revision
+  ---
+  duration_ms: 0.4672
+  type: 'test'
+  ...
+# Subtest: client accepts only an advertised GenerateContent route and carries its native wire through profile admission
+ok 50 - client accepts only an advertised GenerateContent route and carries its native wire through profile admission
+  ---
+  duration_ms: 0.8851
+  type: 'test'
+  ...
+# Subtest: native provider profile client preserves route, key omission, activation and revision at its authenticated origin
+ok 51 - native provider profile client preserves route, key omission, activation and revision at its authenticated origin
+  ---
+  duration_ms: 0.5434
+  type: 'test'
+  ...
+# Subtest: advertised Gemini Settings discovery keeps full model resources and publishes a profile only after footer selection
+ok 52 - advertised Gemini Settings discovery keeps full model resources and publishes a profile only after footer selection
+  ---
+  duration_ms: 2.3149
+  type: 'test'
+  ...
+# Subtest: Gemini Settings cannot discover through absent, disabled or foreign advertised routes
+ok 53 - Gemini Settings cannot discover through absent, disabled or foreign advertised routes
+  ---
+  duration_ms: 0.5197
+  type: 'test'
+  ...
+# Subtest: profile metadata rejects secret references, duplicate identities and inconsistent backend route families
+ok 54 - profile metadata rejects secret references, duplicate identities and inconsistent backend route families
+  ---
+  duration_ms: 0.5054
+  type: 'test'
+  ...
+# Subtest: invalid profile mutations never leave the client and discovery rejects key reflection
+ok 55 - invalid profile mutations never leave the client and discovery rejects key reflection
+  ---
+  duration_ms: 0.2026
+  type: 'test'
+  ...
+# Subtest: graph access adapter preserves backend identity, revision and raw human JSON
+ok 56 - graph access adapter preserves backend identity, revision and raw human JSON
+  ---
+  duration_ms: 0.21
+  type: 'test'
+  ...
+# Subtest: session discovery, URL encoding, error handling and origin boundaries
+ok 57 - session discovery, URL encoding, error handling and origin boundaries
+  ---
+  duration_ms: 38.5811
+  type: 'test'
+  ...
+# Subtest: origin-scoped authentication and native request bodies
+ok 58 - origin-scoped authentication and native request bodies
+  ---
+  duration_ms: 0.4305
+  type: 'test'
+  ...
+# Subtest: selection creates an exact relative data draft without claiming a filesystem snapshot
+ok 59 - selection creates an exact relative data draft without claiming a filesystem snapshot
+  ---
+  duration_ms: 1.7331
+  type: 'test'
+  ...
+# Subtest: unsaved Unicode buffer text is preserved and labelled without a save action
+ok 60 - unsaved Unicode buffer text is preserved and labelled without a save action
+  ---
+  duration_ms: 0.6129
+  type: 'test'
+  ...
+# Subtest: virtual, empty, private and linked selections are rejected before buffer reads
+ok 61 - virtual, empty, private and linked selections are rejected before buffer reads
+  ---
+  duration_ms: 1.8075
+  type: 'test'
+  ...
+# Subtest: sibling roots, aliases and case-sensitive canonical siblings cannot supply context
+ok 62 - sibling roots, aliases and case-sensitive canonical siblings cannot supply context
+  ---
+  duration_ms: 1.1341
+  type: 'test'
+  ...
+# Subtest: editor version and selection changes during filesystem observation are rejected
+ok 63 - editor version and selection changes during filesystem observation are rejected
+  ---
+  duration_ms: 1.2443
+  type: 'test'
+  ...
+# Subtest: oversized and malformed selected text is rejected without silent truncation
+ok 64 - oversized and malformed selected text is rejected without silent truncation
+  ---
+  duration_ms: 1.3852
+  type: 'test'
+  ...
+# Subtest: a retargeted editor path is rejected after reading the original buffer
+ok 65 - a retargeted editor path is rejected after reading the original buffer
+  ---
+  duration_ms: 0.4732
+  type: 'test'
+  ...
+# Subtest: unconfigured, replaced workspace and stale adapter observations yield no context
+ok 66 - unconfigured, replaced workspace and stale adapter observations yield no context
+  ---
+  duration_ms: 0.5759
+  type: 'test'
+  ...
+# Subtest: sidebar MCP login is bound to its backend and closing the sidebar detaches without cancelling
+ok 67 - sidebar MCP login is bound to its backend and closing the sidebar detaches without cancelling
+  ---
+  duration_ms: 21.6843
+  type: 'test'
+  ...
+# Subtest: sidebar renders committed subscription events and refreshes metadata without a periodic timer
+ok 68 - sidebar renders committed subscription events and refreshes metadata without a periodic timer
+  ---
+  duration_ms: 43.5476
+  type: 'test'
+  ...
+# Subtest: sidebar terminal snapshot retains queued completion frames until native stream acknowledgement
+ok 69 - sidebar terminal snapshot retains queued completion frames until native stream acknowledgement
+  ---
+  duration_ms: 5.4523
+  type: 'test'
+  ...
+# Subtest: sidebar selection retires its feed, delayed events and queued metadata refresh
+ok 70 - sidebar selection retires its feed, delayed events and queued metadata refresh
+  ---
+  duration_ms: 3.0892
+  type: 'test'
+  ...
+# Subtest: sidebar graph stream refreshes child transcript after direct committed delivery
+ok 71 - sidebar graph stream refreshes child transcript after direct committed delivery
+  ---
+  duration_ms: 4.182
+  type: 'test'
+  ...
+# Subtest: selection command appends a backend-bound sidebar draft without a question popup or inference
+ok 72 - selection command appends a backend-bound sidebar draft without a question popup or inference
+  ---
+  duration_ms: 2.981
+  type: 'test'
+  ...
+# Subtest: selection rejected by its source adapter adds no draft and submits no model request
+ok 73 - selection rejected by its source adapter adds no draft and submits no model request
+  ---
+  duration_ms: 1.8695
+  type: 'test'
+  ...
+# Subtest: sidebar focus can clear the active editor without discarding the captured document
+ok 74 - sidebar focus can clear the active editor without discarding the captured document
+  ---
+  duration_ms: 2.9272
+  type: 'test'
+  ...
+# Subtest: a workspace change while selection capture is pending discards its context
+ok 75 - a workspace change while selection capture is pending discards its context
+  ---
+  duration_ms: 2.2677
+  type: 'test'
+  ...
+# Subtest: context queued before sidebar readiness is discarded on workspace reconnection
+ok 76 - context queued before sidebar readiness is discarded on workspace reconnection
+  ---
+  duration_ms: 2.3462
+  type: 'test'
+  ...
+# Subtest: sidebar reports actual native file-proposal policy and clears it when switching to a legacy backend
+ok 77 - sidebar reports actual native file-proposal policy and clears it when switching to a legacy backend
+  ---
+  duration_ms: 4.8362
+  type: 'test'
+  ...
+# Subtest: pending backend changes are disclosed without replacing the saved conversation or replaying its run
+ok 78 - pending backend changes are disclosed without replacing the saved conversation or replaying its run
+  ---
+  duration_ms: 2.027
+  type: 'test'
+  ...
+# Subtest: VS Code conversation selection recovers discovery when native provider publication outlives its retired acknowledgement
+ok 79 - VS Code conversation selection recovers discovery when native provider publication outlives its retired acknowledgement
+  ---
+  duration_ms: 4.139
+  type: 'test'
+  ...
+# Subtest: VS Code recovery discards a late catalogue after another conversation intent and reads the current profile without writes
+ok 80 - VS Code recovery discards a late catalogue after another conversation intent and reads the current profile without writes
+  ---
+  duration_ms: 3.628
+  type: 'test'
+  ...
+# Subtest: VS Code retains saved-profile discovery after Settings close and conversation selection, and rejects another-view stale catalogue
+ok 81 - VS Code retains saved-profile discovery after Settings close and conversation selection, and rejects another-view stale catalogue
+  ---
+  duration_ms: 3.0927
+  type: 'test'
+  ...
+# Subtest: opened folder changes rebind the existing sidebar to its own backend and clear the old draft/observations without cancelling execution
+ok 82 - opened folder changes rebind the existing sidebar to its own backend and clear the old draft/observations without cancelling execution
+  ---
+  duration_ms: 2.1606
+  type: 'test'
+  ...
+# Subtest: an accepted old-folder run survives a delayed reply without becoming the new folder observation
+ok 83 - an accepted old-folder run survives a delayed reply without becoming the new folder observation
+  ---
+  duration_ms: 2.3228
+  type: 'test'
+  ...
+# Subtest: VS Code footer provider command selects a saved key-only profile via native CAS, then discovers without a key and waits for explicit model choice
+ok 84 - VS Code footer provider command selects a saved key-only profile via native CAS, then discovers without a key and waits for explicit model choice
+  ---
+  duration_ms: 2.5213
+  type: 'test'
+  ...
+# Subtest: VS Code context control uses actual observed head and keeps the request acknowledgement separate from completed execution
+ok 85 - VS Code context control uses actual observed head and keeps the request acknowledgement separate from completed execution
+  ---
+  duration_ms: 3.2216
+  type: 'test'
+  ...
+# Subtest: VS Code graph Resume is bound to selected root and freshly observed checkpoint/eligibility
+ok 86 - VS Code graph Resume is bound to selected root and freshly observed checkpoint/eligibility
+  ---
+  duration_ms: 4.1097
+  type: 'test'
+  ...
+# Subtest: VS Code Agent observes scoped leaf histories and tree events without inventing a graph or resubmitting work
+ok 87 - VS Code Agent observes scoped leaf histories and tree events without inventing a graph or resubmitting work
+  ---
+  duration_ms: 2.696
+  type: 'test'
+  ...
+# Subtest: native admission profile conflict updates the sidebar account/model without task replay
+ok 88 - native admission profile conflict updates the sidebar account/model without task replay
+  ---
+  duration_ms: 2.1348
+  type: 'test'
+  ...
+# Subtest: native terminal state refreshes transcript and stops polling with durable operation inspection
+ok 89 - native terminal state refreshes transcript and stops polling with durable operation inspection
+  ---
+  duration_ms: 1.8622
+  type: 'test'
+  ...
+# Subtest: saved Responses enrollment restores discovery and reports the native wire
+ok 90 - saved Responses enrollment restores discovery and reports the native wire
+  ---
+  duration_ms: 1.9559
+  type: 'test'
+  ...
+# Subtest: extension answers only a displayed and freshly owned question with exact raw input/CAS, without changing approval authority
+ok 91 - extension answers only a displayed and freshly owned question with exact raw input/CAS, without changing approval authority
+  ---
+  duration_ms: 5.96
+  type: 'test'
+  ...
+# Subtest: extension rejects forged question fields, duplicate input keys and stale fresh-head observations before POST
+ok 92 - extension rejects forged question fields, duplicate input keys and stale fresh-head observations before POST
+  ---
+  duration_ms: 3.5772
+  type: 'test'
+  ...
+# Subtest: extension final-human-only ready paused owner exposes authenticated explicit resume with the observed preconditions
+ok 93 - extension final-human-only ready paused owner exposes authenticated explicit resume with the observed preconditions
+  ---
+  duration_ms: 4.9113
+  type: 'test'
+  ...
+# Subtest: extension close during fresh plan revalidation cannot post an answer or publish its obsolete observation
+ok 94 - extension close during fresh plan revalidation cannot post an answer or publish its obsolete observation
+  ---
+  duration_ms: 2.5158
+  type: 'test'
+  ...
+# Subtest: extension plan-read conflict clears the old action projection and never retries its input mutation
+ok 95 - extension plan-read conflict clears the old action projection and never retries its input mutation
+  ---
+  duration_ms: 2.3407
+  type: 'test'
+  ...
+# Subtest: settings key fetches a sidebar list; only a separate model selection saves encrypted backend settings
+ok 96 - settings key fetches a sidebar list; only a separate model selection saves encrypted backend settings
+  ---
+  duration_ms: 2.1788
+  type: 'test'
+  ...
+# Subtest: sidebar selection rejects an ID outside the actual discovery response
+ok 97 - sidebar selection rejects an ID outside the actual discovery response
+  ---
+  duration_ms: 1.9296
+  type: 'test'
+  ...
+# Subtest: sidebar rename binds selected session and original title, refreshes metadata and reports conflicts without inference
+ok 98 - sidebar rename binds selected session and original title, refreshes metadata and reports conflicts without inference
+  ---
+  duration_ms: 4.1116
+  type: 'test'
+  ...
+# Subtest: invalid keys and unsupported provider destinations never transmit credentials
+ok 99 - invalid keys and unsupported provider destinations never transmit credentials
+  ---
+  duration_ms: 3.9956
+  type: 'test'
+  ...
+# Subtest: discovery errors and malformed or empty catalogs never save provider settings
+ok 100 - discovery errors and malformed or empty catalogs never save provider settings
+  ---
+  duration_ms: 4.329
+  type: 'test'
+  ...
+# Subtest: closing during discovery prevents publishing a list or saving a credential
+ok 101 - closing during discovery prevents publishing a list or saving a credential
+  ---
+  duration_ms: 1.6058
+  type: 'test'
+  ...
+# Subtest: saved key populates the sidebar automatically and changes models without a key popup
+ok 102 - saved key populates the sidebar automatically and changes models without a key popup
+  ---
+  duration_ms: 1.652
+  type: 'test'
+  ...
+# Subtest: rejected saved key shows settings guidance and replacement uses the same sidebar selection
+ok 103 - rejected saved key shows settings guidance and replacement uses the same sidebar selection
+  ---
+  duration_ms: 2.1072
+  type: 'test'
+  ...
+# Subtest: graph observation keeps child transcript and usage out of the root stream
+ok 104 - graph observation keeps child transcript and usage out of the root stream
+  ---
+  duration_ms: 2.9329
+  type: 'test'
+  ...
+# Subtest: human input binds observed root, waiting node and exact checkpoint; raw JSON reaches the backend
+ok 105 - human input binds observed root, waiting node and exact checkpoint; raw JSON reaches the backend
+  ---
+  duration_ms: 2.262
+  type: 'test'
+  ...
+# Subtest: selection intent invalidates queued human input before another conversation is displayed
+ok 106 - selection intent invalidates queued human input before another conversation is displayed
+  ---
+  duration_ms: 2.142
+  type: 'test'
+  ...
+# Subtest: graph child approval retains exact current operation review and uses the shared decision endpoint
+ok 107 - graph child approval retains exact current operation review and uses the shared decision endpoint
+  ---
+  duration_ms: 2.6369
+  type: 'test'
+  ...
+# Subtest: graph catalog allows model-free tool graphs and rejects arbitrary view plans or graph IDs
+ok 108 - graph catalog allows model-free tool graphs and rejects arbitrary view plans or graph IDs
+  ---
+  duration_ms: 1.7702
+  type: 'test'
+  ...
+# Subtest: workflow choice persists for the same backend and restores only an advertised executable graph
+ok 109 - workflow choice persists for the same backend and restores only an advertised executable graph
+  ---
+  duration_ms: 1.7319
+  type: 'test'
+  ...
+# Subtest: older run inspection remains accessible and selected run persists across view reopening
+ok 110 - older run inspection remains accessible and selected run persists across view reopening
+  ---
+  duration_ms: 4.171
+  type: 'test'
+  ...
+# Subtest: run selection rejects IDs outside the selected conversation before fetching their details
+ok 111 - run selection rejects IDs outside the selected conversation before fetching their details
+  ---
+  duration_ms: 1.6048
+  type: 'test'
+  ...
+# Subtest: older terminal run keeps observing an active conversation and rejects another submission
+ok 112 - older terminal run keeps observing an active conversation and rejects another submission
+  ---
+  duration_ms: 2.301
+  type: 'test'
+  ...
+# Subtest: uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+ok 113 - uncertain edit inspection uses the host-only read endpoint without deciding or accepting webview paths
+  ---
+  duration_ms: 1.8538
+  type: 'test'
+  ...
+# Subtest: inspection rejects a different backend operation and discards observations after selection changes
+ok 114 - inspection rejects a different backend operation and discards observations after selection changes
+  ---
+  duration_ms: 3.1375
+  type: 'test'
+  ...
+# Subtest: only a reviewed pending operation can be decided and payload stays backend-owned
+ok 115 - only a reviewed pending operation can be decided and payload stays backend-owned
+  ---
+  duration_ms: 1.9763
+  type: 'test'
+  ...
+# Subtest: closing the view during proposal revalidation cannot send an approval
+ok 116 - closing the view during proposal revalidation cannot send an approval
+  ---
+  duration_ms: 1.8766
+  type: 'test'
+  ...
+# Subtest: changed proposal bytes invalidate the displayed review
+ok 117 - changed proposal bytes invalidate the displayed review
+  ---
+  duration_ms: 4.47
+  type: 'test'
+  ...
+# Subtest: session selection intent invalidates an in-flight approval before queued selection runs
+ok 118 - session selection intent invalidates an in-flight approval before queued selection runs
+  ---
+  duration_ms: 1.9867
+  type: 'test'
+  ...
+# Subtest: closing a panel during history loading cannot start a detached poller
+ok 119 - closing a panel during history loading cannot start a detached poller
+  ---
+  duration_ms: 1.729
+  type: 'test'
+  ...
+# Subtest: older native servers without a catalogue keep default execution without invented model IDs
+ok 120 - older native servers without a catalogue keep default execution without invented model IDs
+  ---
+  duration_ms: 1.9155
+  type: 'test'
+  ...
+# Subtest: edit comparison opens exact revalidated backend snapshots without granting or writing
+ok 121 - edit comparison opens exact revalidated backend snapshots without granting or writing
+  ---
+  duration_ms: 2.4296
+  type: 'test'
+  ...
+# Subtest: creation comparison opens absent-to-proposed snapshots without creating a file or granting
+ok 122 - creation comparison opens absent-to-proposed snapshots without creating a file or granting
+  ---
+  duration_ms: 2.138
+  type: 'test'
+  ...
+# Subtest: refresh reloads backend execution capabilities and history without submitting a run
+ok 123 - refresh reloads backend execution capabilities and history without submitting a run
+  ---
+  duration_ms: 2.3276
+  type: 'test'
+  ...
+# Subtest: selected configured model survives view reopening and retired models fall back on refresh
+ok 124 - selected configured model survives view reopening and retired models fall back on refresh
+  ---
+  duration_ms: 5.0546
+  type: 'test'
+  ...
+# Subtest: normal development bootstrap completes activation before resolving the sidebar and clears private environment
+ok 125 - normal development bootstrap completes activation before resolving the sidebar and clears private environment
+  ---
+  duration_ms: 2.129
+  type: 'test'
+  ...
+# Subtest: all patch action comparisons use revalidated read-only backend snapshots and never grant
+ok 126 - all patch action comparisons use revalidated read-only backend snapshots and never grant
+  ---
+  duration_ms: 6.1985
+  type: 'test'
+  ...
+# Subtest: a forged Allow message cannot approve malformed backend patch snapshots
+ok 127 - a forged Allow message cannot approve malformed backend patch snapshots
+  ---
+  duration_ms: 2.0863
+  type: 'test'
+  ...
+# Subtest: managed model choice survives an adapter-port change using native workspace/profile scope
+ok 128 - managed model choice survives an adapter-port change using native workspace/profile scope
+  ---
+  duration_ms: 1.825
+  type: 'test'
+  ...
+# Subtest: a different native profile cannot restore a foreign saved model even at the same adapter URL
+ok 129 - a different native profile cannot restore a foreign saved model even at the same adapter URL
+  ---
+  duration_ms: 1.5977
+  type: 'test'
+  ...
+# Subtest: folder switching before the first sidebar exists reopens the latest workspace after stale startup
+ok 130 - folder switching before the first sidebar exists reopens the latest workspace after stale startup
+  ---
+  duration_ms: 2.0105
+  type: 'test'
+  ...
+# Subtest: MCP view restores only observation identity; reload never starts or replays login
+ok 131 - MCP view restores only observation identity; reload never starts or replays login
+  ---
+  duration_ms: 2.5963
+  type: 'test'
+  ...
+# Subtest: MCP view persists identity before admission and observes lost replies without retrying POST
+ok 132 - MCP view persists identity before admission and observes lost replies without retrying POST
+  ---
+  duration_ms: 1.4089
+  type: 'test'
+  ...
+# Subtest: MCP completion and cancellation follow backend outcomes; terminal grants are not cancelled by a view
+ok 133 - MCP completion and cancellation follow backend outcomes; terminal grants are not cancelled by a view
+  ---
+  duration_ms: 0.826
+  type: 'test'
+  ...
+# Subtest: MCP observation is retired on disposal and cannot open stale or terminal links
+ok 134 - MCP observation is retired on disposal and cannot open stale or terminal links
+  ---
+  duration_ms: 3.9097
+  type: 'test'
+  ...
+# Subtest: MCP missing attempts after backend restart are discarded without re-admission
+ok 135 - MCP missing attempts after backend restart are discarded without re-admission
+  ---
+  duration_ms: 0.5972
+  type: 'test'
+  ...
+# Subtest: staging preserves accepted native bytes and pure source while excluding interpreters and bytecode
+ok 136 - staging preserves accepted native bytes and pure source while excluding interpreters and bytecode
+  ---
+  duration_ms: 134.8225
+  type: 'test'
+  ...
+# Subtest: unified staging binds one product executable and rejects legacy launcher injection
+ok 137 - unified staging binds one product executable and rejects legacy launcher injection
+  ---
+  duration_ms: 89.1675
+  type: 'test'
+  ...
+# Subtest: unbound or changed native source manifests never publish output
+ok 138 - unbound or changed native source manifests never publish output
+  ---
+  duration_ms: 16.6303
+  type: 'test'
+  ...
+# Subtest: source inventory cannot include a Python executable or missing native file
+ok 139 - source inventory cannot include a Python executable or missing native file
+  ---
+  duration_ms: 14.5089
+  type: 'test'
+  ...
+# Subtest: missing pure source, license output collision and reused output fail before publication
+ok 140 - missing pure source, license output collision and reused output fail before publication
+  ---
+  duration_ms: 31.1774
+  type: 'test'
+  ...
+# Subtest: outputs cannot be nested in source trees and private paths cannot be license inputs
+ok 141 - outputs cannot be nested in source trees and private paths cannot be license inputs
+  ---
+  duration_ms: 26.0278
+  type: 'test'
+  ...
+# Subtest: symbolic source aliases cannot enter a native runtime package
+ok 142 - symbolic source aliases cannot enter a native runtime package
+  ---
+  duration_ms: 14.805
+  type: 'test'
+  ...
+# Subtest: packaged native discovery binds every listed byte and returns paths without launching
+ok 143 - packaged native discovery binds every listed byte and returns paths without launching
+  ---
+  duration_ms: 51.0704
+  type: 'test'
+  ...
+# Subtest: unified package resolves fixed entry modes and retains the exact primary executable
+ok 144 - unified package resolves fixed entry modes and retains the exact primary executable
+  ---
+  duration_ms: 132.1752
+  type: 'test'
+  ...
+# Subtest: one format rejects missing primary executables, legacy launchers and unsupported schemas
+ok 145 - one format rejects missing primary executables, legacy launchers and unsupported schemas
+  ---
+  duration_ms: 14.0046
+  type: 'test'
+  ...
+# Subtest: retained generation uses verified private inventory and reuses exact bytes without overwriting
+ok 146 - retained generation uses verified private inventory and reuses exact bytes without overwriting
+  ---
+  duration_ms: 103.4193
+  type: 'test'
+  ...
+# Subtest: managed generation refuses unqualified pure-source override without creating runtime storage
+ok 147 - managed generation refuses unqualified pure-source override without creating runtime storage
+  ---
+  duration_ms: 25.7194
+  type: 'test'
+  ...
+# Subtest: explicit machine runtime and pure source paths do not search the repository or configuration
+ok 148 - explicit machine runtime and pure source paths do not search the repository or configuration
+  ---
+  duration_ms: 27.7232
+  type: 'test'
+  ...
+# Subtest: unsupported host or remote execution is rejected before filesystem access
+ok 149 - unsupported host or remote execution is rejected before filesystem access
+  ---
+  duration_ms: 0.3908
+  type: 'test'
+  ...
+# Subtest: binary tampering and missing pure-source inventory are rejected
+ok 150 - binary tampering and missing pure-source inventory are rejected
+  ---
+  duration_ms: 14.292
+  type: 'test'
+  ...
+# Subtest: manifest forbids unknown executables, native Python extensions, traversal and private paths
+ok 151 - manifest forbids unknown executables, native Python extensions, traversal and private paths
+  ---
+  duration_ms: 12.0816
+  type: 'test'
+  ...
+# Subtest: unexpected files are rejected even when every expected hash is unchanged
+ok 152 - unexpected files are rejected even when every expected hash is unchanged
+  ---
+  duration_ms: 14.8138
+  type: 'test'
+  ...
+# Subtest: relative, controlled or malformed configuration paths are rejected without reading keys
+ok 153 - relative, controlled or malformed configuration paths are rejected without reading keys
+  ---
+  duration_ms: 46.7359
+  type: 'test'
+  ...
+# Subtest: new workspace with imported keys asks for a saved provider without discovery, activation or another key
+ok 154 - new workspace with imported keys asks for a saved provider without discovery, activation or another key
+  ---
+  duration_ms: 1.8996
+  type: 'test'
+  ...
+# Subtest: saved-provider guidance cannot publish after its workspace attachment is retired
+ok 155 - saved-provider guidance cannot publish after its workspace attachment is retired
+  ---
+  duration_ms: 0.2788
+  type: 'test'
+  ...
+# Subtest: saved key-only provider selection is a native CAS followed by discovery, with model enrollment only on explicit selection
+ok 156 - saved key-only provider selection is a native CAS followed by discovery, with model enrollment only on explicit selection
+  ---
+  duration_ms: 1.0256
+  type: 'test'
+  ...
+# Subtest: conflicting provider selection reads fresh metadata once without replaying the native selection
+ok 157 - conflicting provider selection reads fresh metadata once without replaying the native selection
+  ---
+  duration_ms: 0.5126
+  type: 'test'
+  ...
+# Subtest: saved-credential discovery survives close and conversation discard, with exact native CAS and no retained key
+ok 158 - saved-credential discovery survives close and conversation discard, with exact native CAS and no retained key
+  ---
+  duration_ms: 0.7533
+  type: 'test'
+  ...
+# Subtest: external profile, registry, route or backend identity changes retire saved catalogue without a model write
+ok 159 - external profile, registry, route or backend identity changes retire saved catalogue without a model write
+  ---
+  duration_ms: 0.8065
+  type: 'test'
+  ...
+# Subtest: unsaved keys never enter retained catalogue and discard or expiry removes their selection authority
+ok 160 - unsaved keys never enter retained catalogue and discard or expiry removes their selection authority
+  ---
+  duration_ms: 2.4324
+  type: 'test'
+  ...
+# Subtest: older metadata reads cannot erase the newer saved-profile observation or republish its catalogue
+ok 161 - older metadata reads cannot erase the newer saved-profile observation or republish its catalogue
+  ---
+  duration_ms: 0.2337
+  type: 'test'
+  ...
+# Subtest: admission reconciliation refreshes changed metadata and discards pending keys without replay
+ok 162 - admission reconciliation refreshes changed metadata and discards pending keys without replay
+  ---
+  duration_ms: 0.5108
+  type: 'test'
+  ...
+# Subtest: retired admission reconciliation cannot publish a late metadata response
+ok 163 - retired admission reconciliation cannot publish a late metadata response
+  ---
+  duration_ms: 0.374
+  type: 'test'
+  ...
+# Subtest: admission uses the profile snapshot already shown in this view and does not refresh past an external change
+ok 164 - admission uses the profile snapshot already shown in this view and does not refresh past an external change
+  ---
+  duration_ms: 0.2153
+  type: 'test'
+  ...
+# Subtest: profile setup discovers privately, rejects forged models and enrolls only on footer selection
+ok 165 - profile setup discovers privately, rejects forged models and enrolls only on footer selection
+  ---
+  duration_ms: 0.4806
+  type: 'test'
+  ...
+# Subtest: saved-key discovery stays on its owned route while native save can rebind within the family
+ok 166 - saved-key discovery stays on its owned route while native save can rebind within the family
+  ---
+  duration_ms: 0.2795
+  type: 'test'
+  ...
+# Subtest: disposing or changing backend cannot publish late discovery or send a pending key in enrollment
+ok 167 - disposing or changing backend cannot publish late discovery or send a pending key in enrollment
+  ---
+  duration_ms: 9.2156
+  type: 'test'
+  ...
+# Subtest: MCP Settings renders native outcomes and sends only server-bound sign-in intent
+ok 168 - MCP Settings renders native outcomes and sends only server-bound sign-in intent
+  ---
+  duration_ms: 116.6992
+  type: 'test'
+  ...
+# Subtest: MCP Settings escapes peer labels and never shows a working connector for an unavailable backend
+ok 169 - MCP Settings escapes peer labels and never shows a working connector for an unavailable backend
+  ---
+  duration_ms: 24.5613
+  type: 'test'
+  ...
+# Subtest: footer file-change mode follows native capability and never promises writes for unknown legacy policy
+ok 170 - footer file-change mode follows native capability and never promises writes for unknown legacy policy
+  ---
+  duration_ms: 23.6541
+  type: 'test'
+  ...
+# Subtest: skill chooser stays in the sidebar footer, retains focus, and sends revision-bound attachment intent
+ok 171 - skill chooser stays in the sidebar footer, retains focus, and sends revision-bound attachment intent
+  ---
+  duration_ms: 15.5616
+  type: 'test'
+  ...
+# Subtest: effective backend root uses plain text and folder switch clears the old draft
+ok 172 - effective backend root uses plain text and folder switch clears the old draft
+  ---
+  duration_ms: 16.0981
+  type: 'test'
+  ...
+# Subtest: footer saved-provider chooser uses public profiles, preserves actual selection until acknowledgement and never opens key settings
+ok 173 - footer saved-provider chooser uses public profiles, preserves actual selection until acknowledgement and never opens key settings
+  ---
+  duration_ms: 19.8648
+  type: 'test'
+  ...
+# Subtest: DeepSeek Settings enrollment uses the footer model chooser and saved response metrics
+ok 174 - DeepSeek Settings enrollment uses the footer model chooser and saved response metrics
+  ---
+  duration_ms: 40.7175
+  type: 'test'
+  ...
+# Subtest: context control stays beside the bottom composer, shows actual counters and submits only the displayed session/model/head
+ok 175 - context control stays beside the bottom composer, shows actual counters and submits only the displayed session/model/head
+  ---
+  duration_ms: 17.8658
+  type: 'test'
+  ...
+# Subtest: graph resume is exposed only from backend eligibility and removed selection cannot act on the old closed owner
+ok 176 - graph resume is exposed only from backend eligibility and removed selection cannot act on the old closed owner
+  ---
+  duration_ms: 17.5287
+  type: 'test'
+  ...
+# Subtest: Agent plan renders actual dependencies/correlations/held response metrics safely inside the existing sidebar
+ok 177 - Agent plan renders actual dependencies/correlations/held response metrics safely inside the existing sidebar
+  ---
+  duration_ms: 28.5733
+  type: 'test'
+  ...
+# Subtest: human answer keeps raw numeric lexemes and draft across observations, binds current identities/CAS and rejects detached form sends
+ok 178 - human answer keeps raw numeric lexemes and draft across observations, binds current identities/CAS and rejects detached form sends
+  ---
+  duration_ms: 20.3912
+  type: 'test'
+  ...
+# Subtest: dynamic human questions use written answers by default and safely encode actual characters without granting operation approval
+ok 179 - dynamic human questions use written answers by default and safely encode actual characters without granting operation approval
+  ---
+  duration_ms: 17.0122
+  type: 'test'
+  ...
+# Subtest: human-only completed frontier exposes explicit resume only for an enabled ready paused owner and preserves unanswered controls separately
+ok 180 - human-only completed frontier exposes explicit resume only for an enabled ready paused owner and preserves unanswered controls separately
+  ---
+  duration_ms: 21.0884
+  type: 'test'
+  ...
+# Subtest: Agent investigations retain independent metrics and terminal replay does not synthesize a graph or another answer
+ok 181 - Agent investigations retain independent metrics and terminal replay does not synthesize a graph or another answer
+  ---
+  duration_ms: 15.5369
+  type: 'test'
+  ...
+# Subtest: run inspector uses selected historical provider context independently of the current model
+ok 182 - run inspector uses selected historical provider context independently of the current model
+  ---
+  duration_ms: 15.5417
+  type: 'test'
+  ...
+# Subtest: run inspector suppresses malformed or secret-bearing provider metadata
+ok 183 - run inspector suppresses malformed or secret-bearing provider metadata
+  ---
+  duration_ms: 14.6186
+  type: 'test'
+  ...
+# Subtest: profile Settings offers saved and new providers and keeps discovered models in the footer
+ok 184 - profile Settings offers saved and new providers and keeps discovered models in the footer
+  ---
+  duration_ms: 14.9276
+  type: 'test'
+  ...
+# Subtest: closing Settings keeps the saved discovered footer list and sends no model or profile mutation
+ok 185 - closing Settings keeps the saved discovered footer list and sends no model or profile mutation
+  ---
+  duration_ms: 14.4647
+  type: 'test'
+  ...
+# Subtest: GenerateContent labels depend on advertised routes and keep model choice in the footer
+ok 186 - GenerateContent labels depend on advertised routes and keep model choice in the footer
+  ---
+  duration_ms: 14.043
+  type: 'test'
+  ...
+# Subtest: advertised Gemini Settings clears the draft key and uses the footer for full discovered model resources
+ok 187 - advertised Gemini Settings clears the draft key and uses the footer for full discovered model resources
+  ---
+  duration_ms: 19.3927
+  type: 'test'
+  ...
+# Subtest: recorded GenerateContent response and run context retain their native identity and supplied metrics
+ok 188 - recorded GenerateContent response and run context retain their native identity and supplied metrics
+  ---
+  duration_ms: 18.7579
+  type: 'test'
+  ...
+# Subtest: conversation rename keeps expected title and draft through conflicts, and cancels when selection changes
+ok 189 - conversation rename keeps expected title and draft through conflicts, and cancels when selection changes
+  ---
+  duration_ms: 18.026
+  type: 'test'
+  ...
+# Subtest: footer displays only a recognized backend-reported provider wire
+ok 190 - footer displays only a recognized backend-reported provider wire
+  ---
+  duration_ms: 16.951
+  type: 'test'
+  ...
+# Subtest: model protocol failure shows only recognized diagnostics and preserves conversation context
+ok 191 - model protocol failure shows only recognized diagnostics and preserves conversation context
+  ---
+  duration_ms: 13.3713
+  type: 'test'
+  ...
+# Subtest: provider failures remain visible through transcript refresh without invented replies or metrics
+ok 192 - provider failures remain visible through transcript refresh without invented replies or metrics
+  ---
+  duration_ms: 13.4711
+  type: 'test'
+  ...
+# Subtest: incompatible provider history and unavailable saved context explain recovery without fabricating a reply
+ok 193 - incompatible provider history and unavailable saved context explain recovery without fabricating a reply
+  ---
+  duration_ms: 15.117
+  type: 'test'
+  ...
+# Subtest: unknown failure reasons remain safe and DOM callback exceptions invalidate the fixture
+ok 194 - unknown failure reasons remain safe and DOM callback exceptions invalidate the fixture
+  ---
+  duration_ms: 22.27
+  type: 'test'
+  ...
+# Subtest: recorded provider identifiers render without raw error messages or unknown fields
+ok 195 - recorded provider identifiers render without raw error messages or unknown fields
+  ---
+  duration_ms: 14.1787
+  type: 'test'
+  ...
+# Subtest: durable command output renders independent channels without executing markup or controls
+ok 196 - durable command output renders independent channels without executing markup or controls
+  ---
+  duration_ms: 11.5667
+  type: 'test'
+  ...
+# Subtest: output replay preserves fragmented Unicode and ignores only exact duplicate bytes
+ok 197 - output replay preserves fragmented Unicode and ignores only exact duplicate bytes
+  ---
+  duration_ms: 13.71
+  type: 'test'
+  ...
+# Subtest: gaps, malformed bytes and capture overflow never invent output
+ok 198 - gaps, malformed bytes and capture overflow never invent output
+  ---
+  duration_ms: 77.8976
+  type: 'test'
+  ...
+# Subtest: recorded output survives transcript refresh and clears on run or conversation change
+ok 199 - recorded output survives transcript refresh and clears on run or conversation change
+  ---
+  duration_ms: 23.3782
+  type: 'test'
+  ...
+# Subtest: the sidebar bounds command stream cards and leaves excess output in recorded activity
+ok 200 - the sidebar bounds command stream cards and leaves excess output in recorded activity
+  ---
+  duration_ms: 23.9084
+  type: 'test'
+  ...
+# Subtest: command approval reviews literal arguments before sending only a decision ID
+ok 201 - command approval reviews literal arguments before sending only a decision ID
+  ---
+  duration_ms: 12.062
+  type: 'test'
+  ...
+# Subtest: approval displays bound guidance hashes and rejects malformed source metadata
+ok 202 - approval displays bound guidance hashes and rejects malformed source metadata
+  ---
+  duration_ms: 18.7459
+  type: 'test'
+  ...
+# Subtest: file, command and MCP approvals render active skill bindings and fail closed for malformed snapshots
+ok 203 - file, command and MCP approvals render active skill bindings and fail closed for malformed snapshots
+  ---
+  duration_ms: 38.1788
+  type: 'test'
+  ...
+# Subtest: approval polling preserves inspected nodes, focus and pending decisions while changed bindings replace the card
+ok 204 - approval polling preserves inspected nodes, focus and pending decisions while changed bindings replace the card
+  ---
+  duration_ms: 28.3102
+  type: 'test'
+  ...
+# Subtest: malformed or expired command proposals cannot be allowed
+ok 205 - malformed or expired command proposals cannot be allowed
+  ---
+  duration_ms: 14.5994
+  type: 'test'
+  ...
+# Subtest: command results preserve separate escaped output, hex bytes and actual exit metrics
+ok 206 - command results preserve separate escaped output, hex bytes and actual exit metrics
+  ---
+  duration_ms: 15.6834
+  type: 'test'
+  ...
+# Subtest: uncertain commands remain blocked and malformed outcomes retain raw evidence
+ok 207 - uncertain commands remain blocked and malformed outcomes retain raw evidence
+  ---
+  duration_ms: 12.2533
+  type: 'test'
+  ...
+# Subtest: command output metrics require exact encoded retained bytes and safe drained counts
+ok 208 - command output metrics require exact encoded retained bytes and safe drained counts
+  ---
+  duration_ms: 16.5821
+  type: 'test'
+  ...
+# Subtest: pending approval remains reachable without streamed activity moving review or granting permission
+ok 209 - pending approval remains reachable without streamed activity moving review or granting permission
+  ---
+  duration_ms: 13.768
+  type: 'test'
+  ...
+# Subtest: approval notice follows current unexpired backend proposals and retires on run or workspace changes
+ok 210 - approval notice follows current unexpired backend proposals and retires on run or workspace changes
+  ---
+  duration_ms: 16.947
+  type: 'test'
+  ...
+# Subtest: new-file review distinguishes absence, previews exact content and never retries uncertainty
+ok 211 - new-file review distinguishes absence, previews exact content and never retries uncertainty
+  ---
+  duration_ms: 12.0548
+  type: 'test'
+  ...
+# Subtest: external MCP approval names the server and tool and uncertainty never offers replay
+ok 212 - external MCP approval names the server and tool and uncertainty never offers replay
+  ---
+  duration_ms: 11.6596
+  type: 'test'
+  ...
+# Subtest: run detail selector preserves conversation history and blocks submission while another run is active
+ok 213 - run detail selector preserves conversation history and blocks submission while another run is active
+  ---
+  duration_ms: 16.8719
+  type: 'test'
+  ...
+# Subtest: uncertain edit inspection renders escaped observations and never offers an effect approval
+ok 214 - uncertain edit inspection renders escaped observations and never offers an effect approval
+  ---
+  duration_ms: 13.0119
+  type: 'test'
+  ...
+# Subtest: durable response profile badges use recorded identities and reject malformed metadata
+ok 215 - durable response profile badges use recorded identities and reject malformed metadata
+  ---
+  duration_ms: 18.5781
+  type: 'test'
+  ...
+# Subtest: history renders Markdown/code, copies plain code and shows exact provider usage
+ok 216 - history renders Markdown/code, copies plain code and shows exact provider usage
+  ---
+  duration_ms: 16.1139
+  type: 'test'
+  ...
+# Subtest: unknown historical usage stays unavailable and malicious Markdown is sanitized
+ok 217 - unknown historical usage stays unavailable and malicious Markdown is sanitized
+  ---
+  duration_ms: 17.4983
+  type: 'test'
+  ...
+# Subtest: editor context appends to an existing question as plain draft text without submitting
+ok 218 - editor context appends to an existing question as plain draft text without submitting
+  ---
+  duration_ms: 12.328
+  type: 'test'
+  ...
+# Subtest: foreign workspace, cleared root, invalid and oversized editor context cannot replace the draft
+ok 219 - foreign workspace, cleared root, invalid and oversized editor context cannot replace the draft
+  ---
+  duration_ms: 10.1754
+  type: 'test'
+  ...
+# Subtest: file creation approval discloses parent directory effects as escaped paths
+ok 220 - file creation approval discloses parent directory effects as escaped paths
+  ---
+  duration_ms: 13.8122
+  type: 'test'
+  ...
+# Subtest: provider failure codes render actionable messages and exact failed-response usage
+ok 221 - provider failure codes render actionable messages and exact failed-response usage
+  ---
+  duration_ms: 15.8908
+  type: 'test'
+  ...
+# Subtest: live token badges use model usage events and reset when the persisted transcript arrives
+ok 222 - live token badges use model usage events and reset when the persisted transcript arrives
+  ---
+  duration_ms: 17.5304
+  type: 'test'
+  ...
+# Subtest: tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
+ok 223 - tool-turn checkpoint starts a new live response and history refresh preserves its received prefix
+  ---
+  duration_ms: 14.3446
+  type: 'test'
+  ...
+# Subtest: bottom model selector exposes only backend-advertised IDs and sends the selected ID
+ok 224 - bottom model selector exposes only backend-advertised IDs and sends the selected ID
+  ---
+  duration_ms: 10.8679
+  type: 'test'
+  ...
+# Subtest: provider cache/reasoning counts and backend first-token time render without derived estimates
+ok 225 - provider cache/reasoning counts and backend first-token time render without derived estimates
+  ---
+  duration_ms: 15.0199
+  type: 'test'
+  ...
+# Subtest: Claude usage events and persisted metadata keep uncached input, cache writes and reads distinct
+ok 226 - Claude usage events and persisted metadata keep uncached input, cache writes and reads distinct
+  ---
+  duration_ms: 13.0868
+  type: 'test'
+  ...
+# Subtest: zero Claude counters remain visible while absent input and output stay unavailable
+ok 227 - zero Claude counters remain visible while absent input and output stay unavailable
+  ---
+  duration_ms: 16.1579
+  type: 'test'
+  ...
+# Subtest: cache-write badges require supplied safe nonnegative integer counts
+ok 228 - cache-write badges require supplied safe nonnegative integer counts
+  ---
+  duration_ms: 26.3889
+  type: 'test'
+  ...
+# Subtest: common provider metrics keep their original label unless native usage marks uncached input
+ok 229 - common provider metrics keep their original label unless native usage marks uncached input
+  ---
+  duration_ms: 16.2302
+  type: 'test'
+  ...
+# Subtest: pending file comparison sends only an operation ID and remains separate from approval
+ok 230 - pending file comparison sends only an operation ID and remains separate from approval
+  ---
+  duration_ms: 11.7287
+  type: 'test'
+  ...
+# Subtest: top-right settings dialog clears key input and leaves model selection in the footer
+ok 231 - top-right settings dialog clears key input and leaves model selection in the footer
+  ---
+  duration_ms: 16.5465
+  type: 'test'
+  ...
+# Subtest: graph human form preserves a draft across checkpoints and sends raw input with the displayed revision
+ok 232 - graph human form preserves a draft across checkpoints and sends raw input with the displayed revision
+  ---
+  duration_ms: 16.0079
+  type: 'test'
+  ...
+# Subtest: graph child responses retain actual supplied per-response metrics independently of the root transcript
+ok 233 - graph child responses retain actual supplied per-response metrics independently of the root transcript
+  ---
+  duration_ms: 16.8902
+  type: 'test'
+  ...
+# Subtest: footer workflow chooser enables a real advertised tool graph on a model-free backend
+ok 234 - footer workflow chooser enables a real advertised tool graph on a model-free backend
+  ---
+  duration_ms: 10.7165
+  type: 'test'
+  ...
+# Subtest: graph join summary keeps full observed outputs expandable without fabricated aggregate metrics
+ok 235 - graph join summary keeps full observed outputs expandable without fabricated aggregate metrics
+  ---
+  duration_ms: 9.8927
+  type: 'test'
+  ...
+# Subtest: patch review shows actual action, absent snapshots, move destination and non-atomic batch before any decision
+ok 236 - patch review shows actual action, absent snapshots, move destination and non-atomic batch before any decision
+  ---
+  duration_ms: 16.6947
+  type: 'test'
+  ...
+# Subtest: malformed patch identity, missing batch manifest, absence, hashes and destinations disable Allow and comparison but preserve Deny
+ok 237 - malformed patch identity, missing batch manifest, absence, hashes and destinations disable Allow and comparison but preserve Deny
+  ---
+  duration_ms: 13.8338
+  type: 'test'
+  ...
+# Subtest: patch move review discloses both guidance scopes and rejects unbound scope metadata
+ok 238 - patch move review discloses both guidance scopes and rejects unbound scope metadata
+  ---
+  duration_ms: 14.6552
+  type: 'test'
+  ...
+# Subtest: host launches only native view without a backend token, database path or pipes
+ok 239 - host launches only native view without a backend token, database path or pipes
+  ---
+  duration_ms: 4.5541
+  type: 'test'
+  ...
+# Subtest: reload replaces only the view; profile and native backend identity remain stable
+ok 240 - reload replaces only the view; profile and native backend identity remain stable
+  ---
+  duration_ms: 2.4409
+  type: 'test'
+  ...
+# Subtest: read-only, trust, remote and pure-source boundaries apply before launch
+ok 241 - read-only, trust, remote and pure-source boundaries apply before launch
+  ---
+  duration_ms: 1.8758
+  type: 'test'
+  ...
+# Subtest: multi-root explicitly uses the opened root and host cwd
+ok 242 - multi-root explicitly uses the opened root and host cwd
+  ---
+  duration_ms: 0.8329
+  type: 'test'
+  ...
+# Subtest: private rendezvous fallback and aliases cannot expose storage to workspace tools
+ok 243 - private rendezvous fallback and aliases cannot expose storage to workspace tools
+  ---
+  duration_ms: 0.7549
+  type: 'test'
+  ...
+# Subtest: wrong roots, process metadata and profile overlap fail and close only the view
+ok 244 - wrong roots, process metadata and profile overlap fail and close only the view
+  ---
+  duration_ms: 1.2367
+  type: 'test'
+  ...
+# Subtest: expanded folder set cannot expose a retained profile or rendezvous
+ok 245 - expanded folder set cannot expose a retained profile or rendezvous
+  ---
+  duration_ms: 1.2505
+  type: 'test'
+  ...
+# Subtest: workspace mutation during readiness closes the adapter without claiming backend termination
+ok 246 - workspace mutation during readiness closes the adapter without claiming backend termination
+  ---
+  duration_ms: 0.3432
+  type: 'test'
+  ...
+# Subtest: admission carries verified workspace authority and rejects late selection mutation
+ok 247 - admission carries verified workspace authority and rejects late selection mutation
+  ---
+  duration_ms: 1.1751
+  type: 'test'
+  ...
+# Subtest: authority drift rejects admission before a replacement run can be created
+ok 248 - authority drift rejects admission before a replacement run can be created
+  ---
+  duration_ms: 0.6203
+  type: 'test'
+  ...
+# Subtest: readiness timeout does not retry spawning or create a JavaScript database
+ok 249 - readiness timeout does not retry spawning or create a JavaScript database
+  ---
+  duration_ms: 12.7566
+  type: 'test'
+  ...
+# Subtest: external attachment still verifies the actual opened workspace
+ok 250 - external attachment still verifies the actual opened workspace
+  ---
+  duration_ms: 0.3721
+  type: 'test'
+  ...
+# Subtest: private native startup errors are accepted only for the spawned adapter PID
+ok 251 - private native startup errors are accepted only for the spawned adapter PID
+  ---
+  duration_ms: 1.3388
+  type: 'test'
+  ...
+# Subtest: a folder switch during preparation connects the latest folder after stale startup cleanup
+ok 252 - a folder switch during preparation connects the latest folder after stale startup cleanup
+  ---
+  duration_ms: 1.0024
+  type: 'test'
+  ...
+# Subtest: trust revocation during preparation prevents native startup without cancelling existing work
+ok 253 - trust revocation during preparation prevents native startup without cancelling existing work
+  ---
+  duration_ms: 0.2541
+  type: 'test'
+  ...
+# Subtest: attachment refuses trust or remote-host changes during workspace verification
+ok 254 - attachment refuses trust or remote-host changes during workspace verification
+  ---
+  duration_ms: 0.2876
+  type: 'test'
+  ...
+# Subtest: native creates the rendezvous directory ownership; the host only chooses a fresh name
+ok 255 - native creates the rendezvous directory ownership; the host only chooses a fresh name
+  ---
+  duration_ms: 0.4085
+  type: 'test'
+  ...
+# Subtest: a chosen rendezvous collision is preserved and cannot start a native adapter
+ok 256 - a chosen rendezvous collision is preserved and cannot start a native adapter
+  ---
+  duration_ms: 0.37
+  type: 'test'
+  ...
+# Subtest: a published rendezvous directory alias is refused before authentication
+ok 257 - a published rendezvous directory alias is refused before authentication
+  ---
+  duration_ms: 0.4074
+  type: 'test'
+  ...
+1..257
+# tests 257
+# suites 0
+# pass 257
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2196.6946

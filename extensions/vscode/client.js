@@ -88,6 +88,17 @@ class BackendClient {
   graphChildHistory(root,child) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/children/${encodeURIComponent(child)}/history`); }
   graphInput(root,node,input_json,expected_checkpoint_revision) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision}); }
   providerConfiguration() { return this.request('/v1/provider/configuration'); }
+  async mcpAuthorizationServers() { return validateMcpAuthorizationServers(await this.request('/v1/mcp/authorization/servers')); }
+  async startMcpAuthorization(server_id,expected_config_revision,expected_credential_revision,request_id) {
+    mcpServerIdentity(server_id);planInteger(expected_config_revision,1);planInteger(expected_credential_revision);executionIdentity(request_id);
+    return validateMcpAuthorizationAttempt(await this.request('/v1/mcp/authorization/attempts',{server_id,expected_config_revision,expected_credential_revision,request_id}),{id:request_id,server_id,config_revision:expected_config_revision,credential_revision:expected_credential_revision});
+  }
+  async mcpAuthorization(id,binding) {
+    executionIdentity(id);return validateMcpAuthorizationAttempt(await this.request(`/v1/mcp/authorization/attempts/${id}`),{...binding,id});
+  }
+  async cancelMcpAuthorization(id,binding) {
+    executionIdentity(id);return validateMcpAuthorizationAttempt(await this.request(`/v1/mcp/authorization/attempts/${id}/cancel`,{}),{...binding,id});
+  }
   discoverProviderModels(api_key,expected_revision) { return this.request('/v1/provider/models',{api_key,expected_revision}); }
   configureProvider(model,api_key,expected_revision) { return this.request('/v1/provider/configuration',{model,api_key,expected_revision}); }
   async providerProfiles() { return validateProviderProfiles(await this.request('/v1/provider/profiles'),true); }
@@ -429,7 +440,74 @@ function validatePlanObservation(value,root){
   if(calls.size!==value.revisions.length||revision!==plan.revision)throw new Error('Planning revision ledger changed');return value;
 }
 
+class McpAuthorizationController {
+  constructor(client,post,{current=()=>true,save=()=>{},requestId=()=>globalThis.crypto.randomUUID(),schedule=(fn)=>setTimeout(fn,1000),unschedule=clearTimeout}={}){
+    this.client=client;this.post=post;this.current=current;this.save=save;this.requestId=requestId;this.schedule=schedule;this.unschedule=unschedule;this.attempts=new Map();this.servers=[];this.epoch=0;this.available=false;this.busy=false;this.error='';
+  }
+  active(epoch=this.epoch){return !this.disposed&&epoch===this.epoch&&this.current();}
+  pending(value){return !value||['discovering','awaiting_callback','exchanging'].includes(value.state);}
+  present(){if(this.active())this.post({type:'mcp-authorization',available:this.available,servers:this.servers,attempts:[...this.attempts.values()].filter(entry=>entry.value).map(entry=>entry.value),busy:this.busy||!!this.loading,error:this.error});}
+  persist(){return this.save([...this.attempts.values()].filter(entry=>this.pending(entry.value)).map(entry=>({...entry.binding})));}
+  arm(){this.unschedule(this.timer);this.timer=undefined;if(this.active()&&this.available&&[...this.attempts.values()].some(entry=>this.pending(entry.value)))this.timer=this.schedule(()=>{this.timer=undefined;this.read().catch(()=>{});});}
+  dispose(){this.disposed=true;this.epoch++;this.unschedule(this.timer);this.timer=undefined;this.attempts.clear();}
+  async read(saved){
+    const epoch=this.epoch;if(!this.active(epoch)||this.loading)return;if(this.busy){this.arm();return;}this.loading=true;
+    try{
+      const result=await this.client.mcpAuthorizationServers();if(!this.active(epoch))return;this.servers=result.servers;this.available=true;this.error='';
+      if(saved!==undefined){if(!Array.isArray(saved)||saved.length>16)throw new Error('Invalid saved MCP login observation');for(const binding of saved){mcpFields(binding,['id','server_id','config_revision','credential_revision']);executionIdentity(binding.id);mcpServerIdentity(binding.server_id);planInteger(binding.config_revision,1);planInteger(binding.credential_revision);if(this.attempts.has(binding.server_id))throw new Error('Duplicate saved MCP login observation');if(this.servers.some(server=>server.id===binding.server_id&&server.config_revision===binding.config_revision))this.attempts.set(binding.server_id,{binding:{...binding}});}}
+      for(const [serverId,entry] of [...this.attempts]){
+        if(!this.servers.some(server=>server.id===serverId&&server.config_revision===entry.binding.config_revision)){this.attempts.delete(serverId);continue;}
+        if(!this.pending(entry.value))continue;
+        try{const value=await this.client.mcpAuthorization(entry.binding.id,entry.binding);if(!this.active(epoch))return;entry.value=value;}
+        catch(error){if(!this.active(epoch))return;if(error.status===404){this.attempts.delete(serverId);this.error='The backend no longer has this login attempt. Start a new login if needed.';}else throw error;}
+      }
+      await this.persist();if(this.active(epoch))this.present();
+    }catch(error){if(!this.active(epoch))return;if(error.status===404){this.available=false;this.servers=[];this.error='MCP login setup is unavailable on this backend.';}else this.error=error.message;this.present();}
+    finally{this.loading=false;if(this.active(epoch)){this.present();this.arm();}}
+  }
+  async start(serverId){
+    mcpServerIdentity(serverId);if(!this.active()||this.busy)return;if(this.loading)throw new Error('MCP settings are refreshing. Try again.');const server=this.servers.find(item=>item.id===serverId);
+    if(!server||!server.enabled||!server.configured||server.state!=='needs_login'||this.pending(this.attempts.get(serverId)?.value)&&this.attempts.has(serverId))throw new Error('Refresh MCP settings and select a server requiring login.');
+    const epoch=this.epoch,binding={id:this.requestId(),server_id:server.id,config_revision:server.config_revision,credential_revision:server.credential_revision};executionIdentity(binding.id);this.busy=true;this.error='';this.attempts.set(serverId,{binding});this.present();
+    try{
+      await this.persist();if(!this.active(epoch))return;
+      const value=await this.client.startMcpAuthorization(serverId,binding.config_revision,binding.credential_revision,binding.id);if(!this.active(epoch))return;this.attempts.get(serverId).value=value;
+    }catch(error){if(this.active(epoch)){this.error=error.message;if([400,401,403,404,409,429,503].includes(error.status))this.attempts.delete(serverId);}}
+    finally{if(this.active(epoch)){this.busy=false;await this.persist();this.present();this.arm();}}
+  }
+  async cancel(serverId){
+    mcpServerIdentity(serverId);const entry=this.attempts.get(serverId);if(!this.active()||this.busy||!entry||!this.pending(entry.value))return;if(this.loading)throw new Error('MCP settings are refreshing. Try again.');
+    const epoch=this.epoch;this.busy=true;this.error='';this.present();
+    try{const value=await this.client.cancelMcpAuthorization(entry.binding.id,entry.binding);if(this.active(epoch))entry.value=value;}
+    catch(error){if(this.active(epoch))this.error=error.message;}
+    finally{if(this.active(epoch)){this.busy=false;await this.persist();this.present();this.arm();}}
+  }
+  open(serverId,link){mcpServerIdentity(serverId);const value=this.attempts.get(serverId)?.value;if(!this.active()||!value||value.state!=='awaiting_callback'||value.cancellation_requested||Date.now()>=value.expires_unix_ms)throw new Error('Wait for the current MCP authorization link.');validateMcpAuthorizationAttempt(value);return link(value.authorization_url);}
+}
 function exactFields(value,fields){if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field)))throw new Error('Invalid provider profile metadata');}
+function mcpFields(value,fields){if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field)))throw new Error('Invalid MCP authorization metadata');}
+function mcpServerIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(value))throw new Error('Invalid MCP server identity');return value;}
+function validateMcpAuthorizationServers(value){
+  mcpFields(value,['servers']);if(!Array.isArray(value.servers)||value.servers.length>16)throw new Error('Invalid MCP authorization servers');
+  const ids=new Set();for(const server of value.servers){
+    mcpFields(server,['id','config_revision','credential_revision','enabled','configured','state','expires_unix_ms']);mcpServerIdentity(server.id);planInteger(server.config_revision,1);planInteger(server.credential_revision);
+    if(ids.has(server.id)||typeof server.enabled!=='boolean'||typeof server.configured!=='boolean'||!['not_configured','disabled','authorized','needs_login','unavailable'].includes(server.state))throw new Error('Invalid MCP authorization server');
+    if(server.expires_unix_ms!==null)planInteger(server.expires_unix_ms,1);ids.add(server.id);
+  }return value;
+}
+function validateMcpAuthorizationAttempt(value,binding={}){
+  mcpFields(value,['id','server_id','state','config_revision','credential_revision','authorization_url','expires_unix_ms','reason','cancellation_requested']);executionIdentity(value.id);mcpServerIdentity(value.server_id);planInteger(value.config_revision,1);planInteger(value.credential_revision);planInteger(value.expires_unix_ms,1);
+  if(!['discovering','awaiting_callback','exchanging','connected','failed','denied','cancelled','expired'].includes(value.state)||typeof value.cancellation_requested!=='boolean')throw new Error('Invalid MCP authorization attempt');
+  for(const field of ['id','server_id','config_revision'])if(binding[field]!==undefined&&value[field]!==binding[field])throw new Error('MCP authorization ownership changed');
+  if(binding.credential_revision!==undefined&&(value.state==='connected'?value.credential_revision<=binding.credential_revision:value.credential_revision!==binding.credential_revision))throw new Error('MCP authorization credential revision changed');
+  const reasons={failed:['backend_quiesced','configuration_or_credential_changed','protocol_rejected','authorization_failed'],denied:['authorization_failed','access_denied','interaction_required','login_required','consent_required','temporarily_unavailable','server_error','invalid_request','unauthorized_client','unsupported_response_type','invalid_scope'],cancelled:['cancelled'],expired:['deadline_exceeded']};
+  if(reasons[value.state]? !reasons[value.state].includes(value.reason):value.reason!==null)throw new Error('Invalid MCP authorization reason');
+  if(value.state==='awaiting_callback'){
+    if(typeof value.authorization_url!=='string'||value.authorization_url.length>16384||/[\u0000-\u0020\u007f]/.test(value.authorization_url))throw new Error('Invalid MCP authorization URL');
+    const url=new URL(value.authorization_url);if(url.protocol!=='https:'||url.username||url.password||url.hash)throw new Error('Invalid MCP authorization URL');
+  }else if(value.authorization_url!==null)throw new Error('Unexpected MCP authorization URL');
+  return value;
+}
 function profileIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.:/-]{1,256}$/.test(value)||value.startsWith('sk-'))throw new Error('Invalid provider profile identity');return value;}
 function profileRevision(value){if(!Number.isSafeInteger(value)||value<0)throw new Error('Invalid provider profile revision');}
 function profileKey(value){if(value!==undefined&&(typeof value!=='string'||!/^[\x21-\x7e]{1,32768}$/.test(value)))throw new Error('Enter a provider API key without spaces');}
@@ -551,5 +629,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue};
-else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
+else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};

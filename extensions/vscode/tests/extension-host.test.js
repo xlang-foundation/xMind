@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,EventStreamSubscription } = require('../client');
+const { BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,EventStreamSubscription,McpAuthorizationController } = require('../client');
 const {planFixture,inputMessage}=require('./plan-fixture');
 
 function harness(options={}) {
@@ -22,6 +22,7 @@ function harness(options={}) {
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
+    if(target.pathname.startsWith('/v1/mcp/authorization/'))return options.mcp?{ok:true,json:async()=>options.mcp(target.pathname,requestOptions)}:{ok:false,status:404,json:async()=>({detail:'Synthetic backend has no MCP login API'})};
     let data;
     if(target.pathname.endsWith('/context/compact')){const body=JSON.parse(requestOptions.body);contextRequests.push(body);options.contextRecord={...options.contextRecord,head_revision:options.contextRecord.head_revision+1};data={id:body.id,state:'pending'};}
     else if(target.pathname.includes('/context/requests/'))data={id:target.pathname.split('/').at(-1),state:'completed'};
@@ -128,7 +129,7 @@ function harness(options={}) {
     assert(ticket){if(!this.active||ticket.epoch!==this.epoch||ticket.origin!==this.active.origin)throw new Error('Workspace changed');}
   }
   let intervalID=0;
-  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,EventStreamSubscription}:name==='./webview'?require('../webview'):require(name),
+  const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,EventStreamSubscription,McpAuthorizationController}:name==='./webview'?require('../webview'):require(name),
     setTimeout:(callback,delay)=>{bootstrapTasks.push(callback);scheduledTasks.push({callback,delay});return scheduledTasks.length;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
@@ -142,6 +143,12 @@ function harness(options={}) {
     pauseHistory(promise) {pendingHistory=promise;}};
 }
 
+test('sidebar MCP login is bound to its backend and closing the sidebar detaches without cancelling',async()=>{
+ const server={id:'tools.peer',config_revision:1,credential_revision:0,enabled:true,configured:true,state:'needs_login',expires_unix_ms:null};let value;const admissions=[];
+ const h=harness({mcp:(path,options)=>{if(path.endsWith('/servers'))return {servers:[server]};if(path==='/v1/mcp/authorization/attempts'){const request=JSON.parse(options.body);admissions.push(request);value={id:request.request_id,server_id:request.server_id,config_revision:1,credential_revision:0,state:'discovering',authorization_url:null,expires_unix_ms:9999999999999,reason:null,cancellation_requested:false};}return value;}});await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{view.receive({type:'mcp-refresh'});await until(()=>view.posted.findLast(m=>m.type==='mcp-authorization')?.busy===false);view.receive({type:'mcp-start',server:server.id});await until(()=>view.posted.findLast(m=>m.type==='mcp-authorization')?.attempts.length===1);assert.equal(admissions.length,1);assert.equal(admissions[0].expected_config_revision,1);assert.equal(admissions[0].expected_credential_revision,0);assert.deepEqual(Object.keys(admissions[0]).sort(),['expected_config_revision','expected_credential_revision','request_id','server_id']);const saved=h.state.get('xmind.mcp.login');assert.equal(saved.url,'http://127.0.0.1:8765');assert.equal(saved.attempts[0].id,admissions[0].request_id);assert.ok(!JSON.stringify(saved).includes('authorization_url'));}
+ finally{view.close();}assert.ok(!h.requests.some(path=>path.endsWith('/cancel')));
+});
 test('sidebar renders committed subscription events and refreshes metadata without a periodic timer',async()=>{
  const h=harness({running:true});await h.commands.get('agentflow.open')();const view=h.views[0];
  try{view.receive({type:'ready'});await until(()=>h.streams.length===1&&view.posted.some(m=>m.type==='operations'));const feed=h.streams[0];assert.equal(feed.id,'finished');assert.equal(feed.options.scope,'run');assert.equal(h.intervals.size,0);

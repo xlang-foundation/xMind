@@ -1,5 +1,21 @@
 # Reviewable milestones
 
+Native MCP login service and browser/VS Code Settings controls pass the complete
+**113/113** local native gate in **378.02 seconds**, plus **257 extension / 55
+browser** checks, with **2454** unchanged mapped inputs. The actual C++ async
+service uses embedded-xlang3 encrypted grants and authenticated HTTP/View routes.
+An independent self-signed HTTPS peer requires real TLS contact and zero HTTP
+requests, native failed login without credential publication, duplicate request
+identity/CAS rejection and retained terminal cancellation. The actual browser
+adapter/shared client/controller also executes setup commands against that native
+service. Synthetic DOM and VS Code API fixtures verify Settings controls,
+ownership, HTTPS links, saved observation, lost-reply non-replay and view detach.
+The first TLS-observation and VM import fixture failures are retained. Trusted
+HTTPS positive OAuth login, registration selection, refresh/revocation, running
+owner coordination, CLI login and current packaged/installed/rendered acceptance
+remain unfinished. [Exact evidence](evidence/native-oauth-service-local.json),
+[service and client boundary](native-mcp-login.md).
+
 Native OAuth grant persistence/factory integration passes the complete
 **112/112** local gate in **384.25 seconds**, with **2446** unchanged mapped inputs.
 Actual xlang3 SQLite fixtures verify complete encrypted grants, a single-query

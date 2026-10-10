@@ -459,7 +459,22 @@ function profileRoutes(){
 byId('provider-profile').onchange=()=>{byId('provider-key').value='';byId('settings-status').textContent='';profileRoutes();api.postMessage({type:'discardProviderKey'});};
 byId('provider-name').onchange=()=>{byId('provider-key').value='';api.postMessage({type:'discardProviderKey'});};
 byId('profile-use').onclick=()=>{byId('provider-key').value='';api.postMessage({type:'select-provider',id:byId('provider-profile').value});};
-byId('settings').onclick=()=>{byId('provider-key').value='';settings.showModal();byId('provider-key').focus();};
+byId('settings').onclick=()=>{byId('provider-key').value='';settings.showModal();byId('provider-key').focus();api.postMessage({type:'mcp-refresh'});};
+byId('mcp-refresh').onclick=()=>api.postMessage({type:'mcp-refresh'});
+function renderMcpSettings(message){
+  const list=byId('mcp-servers');list.replaceChildren();byId('mcp-refresh').disabled=!!message.busy;
+  byId('mcp-status').textContent=message.error||(!message.available?'MCP sign-in is unavailable on this backend.':message.servers.length?'':'No MCP servers configured.');
+  const labels={not_configured:'OAuth not configured',disabled:'Disabled',authorized:'Signed in',needs_login:'Sign-in required',unavailable:'Credentials unavailable',discovering:'Discovering authorization server…',awaiting_callback:'Waiting for sign-in',exchanging:'Completing sign-in…',connected:'Signed in',failed:'Sign-in failed',denied:'Sign-in denied',cancelled:'Sign-in cancelled',expired:'Sign-in expired'};
+  for(const server of message.servers||[]){
+    const attempt=(message.attempts||[]).find(value=>value.server_id===server.id),pending=attempt&&['discovering','awaiting_callback','exchanging'].includes(attempt.state);
+    const row=node('div',undefined,'mcp-server'),heading=node('div',undefined,'mcp-heading');heading.append(node('strong',server.id));row.append(heading);
+    row.append(node('p',(labels[attempt?.state||server.state]||'Unavailable')+(attempt?.reason?' · '+attempt.reason.replaceAll('_',' '):''),'hint'));
+    const actions=node('div',undefined,'mcp-actions'),button=(label,type)=>{const control=node('button',label);control.type='button';control.disabled=!!message.busy;control.onclick=()=>api.postMessage({type,server:server.id});actions.append(control);return control;};
+    if(pending){if(attempt.state==='awaiting_callback'&&!attempt.cancellation_requested)button('Open sign-in page','mcp-open');const cancel=button(attempt.cancellation_requested?'Cancelling…':'Cancel sign-in','mcp-cancel');cancel.disabled=!!message.busy||attempt.cancellation_requested;}
+    else if(server.enabled&&server.configured&&server.state==='needs_login'&&attempt?.state!=='connected')button('Sign in','mcp-start');
+    row.append(actions);list.append(row);
+  }
+}
 byId('settings-close').onclick=()=>{api.postMessage({type:'discardProviderKey'});settings.close();};
 settings.addEventListener('cancel',()=>api.postMessage({type:'discardProviderKey'}));
 settings.addEventListener('close',()=>{byId('provider-key').value='';byId('settings').focus();});
@@ -501,6 +516,8 @@ window.addEventListener('message',event=>{
   else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);profiles.value=m.active;profileRoutes();}
   else if(m.type==='provider-wire'){const label=byId('provider-mode');label.textContent=m.wire==='gemini-generate-content'?'Gemini GenerateContent':m.wire==='anthropic-messages'?'Claude Messages':providerWireLabel(m.wire)||'';label.hidden=!label.textContent;}
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
+  else if(m.type==='mcp-authorization'){renderMcpSettings(m);}
+  else if(m.type==='mcp-error'){byId('mcp-status').textContent=m.text;}
   else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;refreshRename();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
   else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();byId('events').textContent='';}
   else if(m.type==='draft'){byId('prompt').value=m.text;resizePrompt();}

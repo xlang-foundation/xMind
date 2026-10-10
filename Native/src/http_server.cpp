@@ -9,6 +9,7 @@
 #include "agentflow/dynamic_plan.hpp"
 #include "agentflow/a2a_task_control.hpp"
 #include "agentflow/backend_owner_control.hpp"
+#include "agentflow/mcp_oauth_setup.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
@@ -259,6 +260,7 @@ struct HttpServer::Impl {
     PersistenceService& persistence;
     RunExecutor* executor;
     BackendOwnerControl* owner_control;
+    McpOAuthSetup* mcp_oauth;
     EditRecoveryReader* recovery;
     std::vector<McpServerMetadata> mcp_servers;
     std::vector<ProcessProfileMetadata> process_profiles;
@@ -340,7 +342,7 @@ struct HttpServer::Impl {
             return false;
         });
     }
-    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner):persistence(store),executor(execution),owner_control(owner),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
+    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth):persistence(store),executor(execution),owner_control(owner),mcp_oauth(oauth),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
         validate_local_auth_token(token);
 #if defined(_WIN32)
         if(owner_control&&!owner_control->covers(store,execution,graphs))throw std::invalid_argument("Native owner controller does not cover this transport");
@@ -370,7 +372,10 @@ struct HttpServer::Impl {
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
             const bool stream=std::regex_match(request.path,stream_route);
-            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((stream&&request.method=="GET")||(!stream&&std::regex_match(request.path,view_route) && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
+            static const std::regex mcp_auth_read(R"(^/v1/mcp/authorization/(servers|attempts/[A-Za-z0-9_-]+)$)");
+            static const std::regex mcp_auth_write(R"(^/v1/mcp/authorization/attempts(/[A-Za-z0-9_-]+/cancel)?$)");
+            const bool mcp_authorized=(request.method=="GET"&&std::regex_match(request.path,mcp_auth_read))||(request.method=="POST"&&std::regex_match(request.path,mcp_auth_write));
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && (mcp_authorized||(stream&&request.method=="GET")||(!stream&&std::regex_match(request.path,view_route) && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
                 catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
@@ -654,6 +659,21 @@ struct HttpServer::Impl {
             Json configured=Json::array();for(const auto& item:mcp_servers)configured.push_back({{"id",item.id},{"revision",item.revision},{"enabled",item.enabled},{"transport",item.transport}});
             reply(response,{{"servers",configured},{"runtime_state","per_run"}});
         }));
+        if(mcp_oauth){
+            const auto encode_authorization=[](const McpOAuthAttemptStatus& value){return Json{{"id",value.id},{"server_id",value.server_id},{"state",value.state},{"config_revision",value.config_revision},{"credential_revision",value.credential_revision},{"authorization_url",value.authorization_url.empty()?Json(nullptr):Json(value.authorization_url)},{"expires_unix_ms",value.expires_unix_ms},{"reason",value.reason.empty()?Json(nullptr):Json(value.reason)},{"cancellation_requested",value.cancellation_requested}};};
+            server.Get("/v1/mcp/authorization/servers",guarded([this](const Request& request,Response& response){
+                if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("MCP authorization status does not accept query parameters");
+                Json values=Json::array();for(const auto& value:mcp_oauth->servers())values.push_back({{"id",value.id},{"config_revision",value.config_revision},{"credential_revision",value.credential_revision},{"enabled",value.enabled},{"configured",value.configured},{"state",value.state},{"expires_unix_ms",value.expires_unix_ms?Json(*value.expires_unix_ms):Json(nullptr)}});reply(response,{{"servers",values}});
+            }));
+            server.Post("/v1/mcp/authorization/attempts",guarded([this,encode_authorization](const Request& request,Response& response){
+                if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("MCP authorization does not accept query parameters");
+                const auto input=body(request,{"server_id","expected_config_revision","expected_credential_revision","request_id"});
+                if(!input.contains("expected_credential_revision")||!input.at("expected_credential_revision").is_number_integer()||input.at("expected_credential_revision")<0||input.at("expected_credential_revision")>9007199254740991LL)throw std::invalid_argument("Invalid MCP credential revision");
+                reply(response,encode_authorization(mcp_oauth->start(string_field(input,"server_id",64),graph_revision(input,"expected_config_revision"),input.at("expected_credential_revision").get<std::int64_t>(),identifier(string_field(input,"request_id",128)))),202);
+            }));
+            server.Get(R"(/v1/mcp/authorization/attempts/([A-Za-z0-9_-]+))",guarded([this,encode_authorization](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("MCP authorization status does not accept query parameters");reply(response,encode_authorization(mcp_oauth->status(identifier(request.matches[1]))));}));
+            server.Post(R"(/v1/mcp/authorization/attempts/([A-Za-z0-9_-]+)/cancel)",guarded([this,encode_authorization](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("MCP authorization cancellation does not accept query parameters");body(request,{});reply(response,encode_authorization(mcp_oauth->cancel(identifier(request.matches[1]))),202);}));
+        }
         server.Get("/v1/sessions",guarded([this](const Request&,Response& response) {reply(response,encode_all(persistence.sessions().get()));}));
         server.Get("/v1/process/profiles",guarded([this](const Request& request,Response& response) {
             if(!request.params.empty())throw std::invalid_argument("Process metadata does not accept query parameters");
@@ -815,7 +835,7 @@ struct HttpServer::Impl {
         }
     }
 };
-HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs,profile_setup,owner)) {}
+HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs,profile_setup,owner,oauth)) {}
 HttpServer::~HttpServer(){stop();}
 int HttpServer::bind(int port) {
     if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");

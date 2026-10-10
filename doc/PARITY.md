@@ -20,6 +20,17 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+Authenticated MCP setup routes, the asynchronous C++ login owner and browser/VS
+Code Settings controls pass **113/113** local native, **257 extension / 55 browser**
+checks with **2454** unchanged inputs. Actual native service/SQLite and browser
+adapter/controller acceptance covers TLS-negative login, status, request identity,
+CAS, cancellation and no untrusted-server HTTP dispatch. Client/DOM/host fixtures
+verify public metadata ownership, HTTPS links and reload/detach without replay.
+This does not prove trusted HTTPS positive OAuth login, registration selection,
+refresh/revocation, CLI login, complete connector configuration or current
+installed/rendered acceptance. [Implementation boundary](native-mcp-login.md),
+[exact evidence](evidence/native-oauth-service-local.json).
+
 OAuth grant persistence/factory integration passes **112/112** local native
 contracts in **384.25 seconds**, with **2446** unchanged inputs. Actual xlang3
 SQLite verifies encrypted complete grants, atomic snapshots/rotation/rollback,

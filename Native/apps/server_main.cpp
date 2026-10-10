@@ -25,6 +25,7 @@
 #include "agentflow/backend_owner_control.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/local_profile.hpp"
+#include "agentflow/mcp_oauth_service.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <bcrypt.h>
@@ -236,6 +237,7 @@ int run_server(int argc,char** argv) {
 #if defined(_WIN32)
         std::unique_ptr<agentflow::BackendOwnerControl> owner_control;
         if(runtime_generation){runtime_generation->require_current_server();const auto actual=executor->execution_workspace();if(actual.root!=startup_workspace->root_path()||actual.workspace_id!=startup_workspace->identity())throw std::runtime_error("Qualified execution workspace changed during startup");owner_control=std::make_unique<agentflow::BackendOwnerControl>(persistence,*executor,*runtime_generation,graph_execution,auth);}
+        auto mcp_oauth=std::make_unique<agentflow::McpOAuthService>(persistence,mcp_settings);
 #endif
         agentflow::HttpServer server(persistence,auth,executor.get()
 #if defined(_WIN32)
@@ -245,7 +247,7 @@ int run_server(int argc,char** argv) {
 #endif
             ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()},provider_setup,graph_execution,provider_profiles
 #if defined(_WIN32)
-            ,owner_control.get()
+            ,owner_control.get(),mcp_oauth.get()
 #endif
         );const auto bound=server.bind(port);
 #if defined(_WIN32)

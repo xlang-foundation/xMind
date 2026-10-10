@@ -40,3 +40,4 @@ input{font:inherit;color:var(--vscode-input-foreground);background:var(--vscode-
 .approval-notice[hidden]{display:none}
 .approval-notice button{flex:none}
 #events{max-height:240px;overflow:auto}
+#mcp-settings{margin-top:20px;padding-top:12px;border-top:1px solid var(--vscode-panel-border)}.mcp-heading,.mcp-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}.mcp-heading h3{margin:0;font-size:14px}.mcp-server{padding:10px 0;border-bottom:1px solid var(--vscode-panel-border);overflow-wrap:anywhere}.mcp-actions{justify-content:flex-start}#mcp-status{font-size:12px;overflow-wrap:anywhere}

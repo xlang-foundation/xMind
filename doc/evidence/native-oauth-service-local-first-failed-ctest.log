@@ -1,0 +1,31 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 50: native_mcp_oauth_service_contract
+1/1 Test #50: native_mcp_oauth_service_contract ...***Failed    0.51 sec
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(tlsRejections>=1)
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/mcp_oauth_service_peer.mjs:49:142
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.53 sec
+
+The following tests FAILED:
+	 50 - native_mcp_oauth_service_contract (Failed)
+Errors while running CTest

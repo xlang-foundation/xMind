@@ -87,3 +87,6 @@ doc/evidence/native-oauth-grants-* -text
 doc/evidence/native-oauth-grants-*.log whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-oauth-grants-*contracts.json whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-oauth-authorization-hosted-dd08604-* -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-oauth-service-* -text
+doc/evidence/native-oauth-service-*.log whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-oauth-service-*contracts.json whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

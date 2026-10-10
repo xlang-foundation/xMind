@@ -1,7 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
-const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,EventStreamSubscription } = require('./client');
+const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,EventStreamSubscription,McpAuthorizationController } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const {patchReview}=require('./patch-review');
@@ -46,6 +46,7 @@ async function activate(context) {
   let selectedModel;
   let providerSelection;
   let profileController;
+  let mcpController;
   let graphCatalogue=[],selectedGraph,graphSnapshot;
   let graphChildren=new Map(),childHistory=new Map();
   let ownedObservation=false;
@@ -380,7 +381,7 @@ async function activate(context) {
     }else connection=await workspaceBackend.connect();
     const origin=connection.origin,connectionEpoch=workspaceBackend.epoch;
     const connectionCurrent=()=>workspaceBackend.epoch===connectionEpoch&&workspaceBackend.active?.origin===origin;
-    contextController?.dispose();contextController=undefined;profileController?.dispose();client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
+    mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
     client.bindWorkspace(workspaceBackend);
     const profileTarget=client;profileController=new ProviderProfileController(client,post,()=>!!panel&&client===profileTarget&&configuredOrigin()===profileTarget.baseUrl);
     const initial=await capabilities();if(!connectionCurrent())throw new Error('Workspace changed while opening the sidebar.');health=initial.health;modelCatalogue=initial.catalogue;
@@ -399,8 +400,11 @@ async function activate(context) {
       marked:asset('node_modules','marked','lib','marked.umd.js'),purify:asset('node_modules','dompurify','dist','purify.min.js'),patchReview:asset('patch-review.js')
     });
     const view = panel,workspaceEpoch=workspaceBackend.epoch;
+    const mcpClient=client,mcpScope={...connectionState()};let mcpRestored=false;
+    mcpController=new McpAuthorizationController(mcpClient,post,{current:()=>panel===view&&client===mcpClient&&workspaceBackend.epoch===workspaceEpoch&&configuredOrigin()===mcpClient.baseUrl,requestId:()=>crypto.randomUUID(),save:attempts=>context.workspaceState.update('xmind.mcp.login',{...mcpScope,attempts})});
+    const readMcp=()=>{if(mcpRestored)return mcpController.read();mcpRestored=true;const saved=context.workspaceState.get('xmind.mcp.login');return mcpController.read(savedConnection(saved)?saved.attempts:[]);};
     disposeSubscription?.dispose();receiveSubscription?.dispose();
-    disposeSubscription=panel.onDidDispose(() => { if (panel === view) { contextReadyView=undefined;pendingEditorContexts=[];profileController?.dispose();stop(); reviewed.clear(); providerSelection=undefined; panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
+    disposeSubscription=panel.onDidDispose(() => { if (panel === view) { contextReadyView=undefined;pendingEditorContexts=[];mcpController?.dispose();profileController?.dispose();stop(); reviewed.clear(); providerSelection=undefined; panel = undefined; sidebarView = undefined; } }, null, context.subscriptions);
     receiveSubscription=panel.webview.onDidReceiveMessage(message => {
       if(panel!==view||workspaceBackend.epoch!==workspaceEpoch)return;
       if(panel===view&&['model','select-provider'].includes(message?.type))contextController?.invalidate();
@@ -425,6 +429,11 @@ async function activate(context) {
           // Fetch with the saved backend key; settings handles a rejected key.
           try{await configureModel();}catch{}
           await readSkills();
+        } else if(message.type==='mcp-refresh'){
+          await readMcp();
+        } else if(['mcp-start','mcp-cancel','mcp-open'].includes(message.type)){
+          try{if(!mcpRestored)await readMcp();if(message.type==='mcp-start')await mcpController.start(message.server);else if(message.type==='mcp-cancel')await mcpController.cancel(message.server);else await mcpController.open(message.server,url=>vscode.env.openExternal(vscode.Uri.parse(url)));}
+          catch(error){post({type:'mcp-error',text:error.message});}
         } else if(message.type==='skills-refresh'){
           if(!sessionId){const session=await client.createSession('Workspace skills');if(panel!==view)return;await selectSession(session.id);await refresh();}else await readSkills();
         } else if(message.type==='skills-change'){
@@ -627,7 +636,7 @@ async function activate(context) {
   }));
   function disconnectWorkspace(){
     contextReadyView=undefined;pendingEditorContexts=[];
-    workspaceBackend.invalidate();stop();contextController?.dispose();contextController=undefined;profileController?.dispose();profileController=undefined;
+    workspaceBackend.invalidate();stop();mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();profileController=undefined;
     providerSelection=undefined;reviewed.clear();clearGraph();sessionId=undefined;runId=undefined;sessionRuns=[];client=undefined;
     modelCatalogue={models:[],default_model:''};selectedModel=undefined;graphCatalogue=[];selectedGraph=undefined;
     receiveSubscription?.dispose();receiveSubscription=undefined;disposeSubscription?.dispose();disposeSubscription=undefined;
@@ -665,7 +674,7 @@ async function activate(context) {
       else{if(pendingEditorContexts.length>=8)throw new Error('The sidebar is still opening. Wait before adding more selections.');pendingEditorContexts.push({view,client:target,generation:epoch,epoch:workspaceBackend.epoch,message});}
     } catch (error) { vscode.window.showErrorMessage(error.message); }
   }));
-  context.subscriptions.push({ dispose:()=>{stop();workspaceBackend.dispose();receiveSubscription?.dispose();disposeSubscription?.dispose();} });
+  context.subscriptions.push({ dispose:()=>{mcpController?.dispose();stop();workspaceBackend.dispose();receiveSubscription?.dispose();disposeSubscription?.dispose();} });
   if(previewReady) {
     // View resolution waits for extension activation. Opening synchronously
     // inside activation would wait on itself in a normal development host.
