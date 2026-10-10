@@ -176,64 +176,74 @@ int run_local_view(int argc, char **argv) {
                                      request.get_header_value_count("X-XMind-View-Origin") == 1;
                 if (!host && !browser) {
                     response(output, 401, "View authentication required");
-                } else
-                    try {
-                        httplib::Headers headers;
-                        std::string body = request.body;
-                        if (host && request.path == "/v1/view-sessions" && request.method == "POST") {
-                            // A trusted host may open the existing browser adapter.
-                            std::set<std::string> keys;
-                            const auto input =
-                                Json::parse(body, [&](int depth, Json::parse_event_t event, Json &value) {
-                                    require(depth <= 2, "Invalid browser session request");
-                                    if (event == Json::parse_event_t::key)
-                                        require(keys.insert(value.get<std::string>()).second,
-                                                "Duplicate browser session field");
-                                    return true;
-                                });
-                            require(input.is_object() && input.size() == 1 && input.contains("origin") &&
-                                        input.at("origin").is_string(),
-                                    "Browser session requires only its origin");
-                            auto lease = input;
-                            lease["process_id"] = GetCurrentProcessId();
-                            lease["process_birth"] =
-                                agentflow::inspect_owner_process_birth(GetCurrentProcessId());
-                            body = lease.dump();
-                            headers.emplace("Authorization", "Bearer " + master);
-                        } else if (host) {
-                            std::lock_guard lock(credential_mutex);
-                            if (expires - now() < 60000)
-                                issue();
-                            headers.emplace("Authorization", "View " + credential);
-                            headers.emplace("X-XMind-View-Origin", origin);
-                        } else {
-                            headers.emplace("Authorization", supplied);
-                            headers.emplace("X-XMind-View-Origin",
-                                            request.get_header_value("X-XMind-View-Origin"));
-                        }
-                        httplib::Client client("127.0.0.1", connection.port);
-                        configure(client);
-                        const auto result = request.method == "GET"
-                                                ? client.Get(request.target, headers)
-                                                : client.Post(request.target, headers, body,
-                                                              request.get_header_value("Content-Type"));
-                        if (!result)
-                            response(output, 503,
-                                     "Native backend observation unavailable; reconnect this profile");
-                        else {
-                            output.status = result->status;
-                            output.set_content(result->body, result->get_header_value("Content-Type"));
-                        }
-                    } catch (const std::invalid_argument &) {
-                        response(output, 400, "Invalid view request");
-                    } catch (const Json::exception &) {
-                        response(output, 400, "Invalid view request");
-                    } catch (...) {
-                        response(output, 503, "Native view observation unavailable");
-                    }
+                } else {
+                    // Admission runs before cpp-httplib reads the request body.
+                    // Only the regular route handler may forward that body.
+                    return httplib::Server::HandlerResponse::Unhandled;
+                }
             }
             return httplib::Server::HandlerResponse::Handled;
         });
+        const auto forward = [&](const httplib::Request &request, httplib::Response &output) {
+            const auto supplied = request.get_header_value("Authorization");
+            const bool host = equal(supplied, authorization);
+            try {
+                httplib::Headers headers;
+                std::string body = request.body;
+                if (host && request.path == "/v1/view-sessions" && request.method == "POST") {
+                    // A trusted host may open the existing browser adapter.
+                    std::set<std::string> keys;
+                    const auto input =
+                        Json::parse(body, [&](int depth, Json::parse_event_t event, Json &value) {
+                            require(depth <= 2, "Invalid browser session request");
+                            if (event == Json::parse_event_t::key)
+                                require(keys.insert(value.get<std::string>()).second,
+                                        "Duplicate browser session field");
+                            return true;
+                        });
+                    require(input.is_object() && input.size() == 1 && input.contains("origin") &&
+                                input.at("origin").is_string(),
+                            "Browser session requires only its origin");
+                    auto lease = input;
+                    lease["process_id"] = GetCurrentProcessId();
+                    lease["process_birth"] =
+                        agentflow::inspect_owner_process_birth(GetCurrentProcessId());
+                    body = lease.dump();
+                    headers.emplace("Authorization", "Bearer " + master);
+                } else if (host) {
+                    std::lock_guard lock(credential_mutex);
+                    if (expires - now() < 60000)
+                        issue();
+                    headers.emplace("Authorization", "View " + credential);
+                    headers.emplace("X-XMind-View-Origin", origin);
+                } else {
+                    headers.emplace("Authorization", supplied);
+                    headers.emplace("X-XMind-View-Origin",
+                                    request.get_header_value("X-XMind-View-Origin"));
+                }
+                httplib::Client client("127.0.0.1", connection.port);
+                configure(client);
+                const auto result = request.method == "GET"
+                                        ? client.Get(request.target, headers)
+                                        : client.Post(request.target, headers, body,
+                                                      request.get_header_value("Content-Type"));
+                if (!result)
+                    response(output, 503,
+                             "Native backend observation unavailable; reconnect this profile");
+                else {
+                    output.status = result->status;
+                    output.set_content(result->body, result->get_header_value("Content-Type"));
+                }
+            } catch (const std::invalid_argument &) {
+                response(output, 400, "Invalid view request");
+            } catch (const Json::exception &) {
+                response(output, 400, "Invalid view request");
+            } catch (...) {
+                response(output, 503, "Native view observation unavailable");
+            }
+        };
+        server.Get(R"(/v1/.*)", forward);
+        server.Post(R"(/v1/.*)", forward);
         httplib::Client metadata_client("127.0.0.1", connection.port);
         configure(metadata_client);
         const auto metadata =

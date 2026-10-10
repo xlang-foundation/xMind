@@ -23,8 +23,15 @@ and the published directory is requalified before authentication is stored.
 On the hosted Windows runner, the default owner differs from the user: the prior
 host-created leaf caused native's strict owner check to fail. Those checks remain
 unchanged. The corrected host passes **224 extension / 41 browser fixtures**;
-its real native rerun remains pending.
+its real native rerun reached view readiness and failed on the first session
+write. The adapter forwarded POST requests in cpp-httplib's pre-routing handler,
+before the library had read their bodies. Forwarding now uses regular GET/POST
+handlers; the pre-routing hook admits or rejects access before body reading.
+The native contract additionally checks exact Unicode titles, chunked UTF-8
+writes, malformed JSON and the adapter's payload limit. This correction still
+requires a real native rerun and the complete gate.
 [Observed failure, original provenance and candidate scope](evidence/native-rendezvous-owner-candidate.json).
+[Actual write failure and forwarding correction](evidence/native-view-body-forwarding-candidate.json).
 
 The VS Code host selects the actual trusted opened folder, verifies the package,
 launches `xmind view` and authenticates its returned workspace. Native owns backend

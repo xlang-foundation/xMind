@@ -1,0 +1,25 @@
+Test project D:/a/xMind/xMind/xmind/build/native
+    Start 91: native_local_view_contract
+1/1 Test #91: native_local_view_contract .......***Failed   19.14 sec
+{"retainedFixture":"C:\\Users\\runneradmin\\AppData\\Local\\Temp\\xmind-local-view-l4tVQ2"}
+D:\a\xMind\xMind\xmind\extensions\vscode\client.js:49
+    if (!response.ok) { const error=new Error(typeof data.detail === 'string' ? data.detail : `Backend returned ${response.status}`);error.status=response.status;throw error; }
+                                    ^
+
+Error: Invalid JSON request
+    at BackendClient.request (D:\a\xMind\xMind\xmind\extensions\vscode\client.js:49:37)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///D:/a/xMind/xMind/xmind/Native/tests/local_view_contract.mjs:38:57 {
+  status: 400
+}
+
+Node.js v22.23.3
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =  19.21 sec
+
+The following tests FAILED:
+	 91 - native_local_view_contract (Failed)
+Errors while running CTest

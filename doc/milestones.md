@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+Hosted source `0b96974` compiled and reached native view readiness, then failed
+the first actual session write with HTTP 400 `Invalid JSON request`. The owner
+fix therefore passed that startup boundary, but the native contract did not pass.
+Source inspection found that forwarding ran before cpp-httplib read POST bodies.
+The candidate now keeps access checks in pre-routing and forwards from regular
+GET/POST handlers. Exact Unicode/chunked writes and malformed/oversized rejection
+are added to the real native contract. Syntax/whitespace checks pass; native
+rerun, the full 110-contract gate and fresh installed UI acceptance remain pending.
+No migration layer or local native execution was added.
+[Original native failure and candidate scope](evidence/native-view-body-forwarding-candidate.json).
+
 The corrected hosted build reached real view startup and failed its strict owner
 check. Original runner provenance confirms that the default owner differs from
 the current user. The host now chooses an unused name and leaves leaf creation

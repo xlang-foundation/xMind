@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-native-rerun-required",
+  "observedSource": "0b96974122ef066d86d03c5d864f6d45b5acea47",
+  "run": 38011500398,
+  "job": 114094981101,
+  "artifact": 11655057347,
+  "completedAt": "2026-10-10T01:33:47Z",
+  "verification": {
+    "unifiedNativeBuildPassed": true,
+    "productionHostConnectedToNativeView": true,
+    "protectedRendezvousStartupBoundaryPassed": true,
+    "firstActualSessionWriteFailed": true,
+    "viewTestSeconds": 19.14,
+    "complete110GateExecuted": false,
+    "nativeAccepted": false,
+    "installedAdapterChanged": false
+  },
+  "observedError": "HTTP 400 Invalid JSON request at local_view_contract.mjs:38:57",
+  "cause": {
+    "scope": "inspection of pinned cpp-httplib and product source",
+    "library": "Native/third_party/cpp-httplib/httplib.h",
+    "librarySha256": "ac84b5a041be99a5e7616b05c907681b75c157314a22d7681f71e73a6c2554d1",
+    "sequence": "Server::routing invokes pre_routing_handler before dispatch_request reads the body; the adapter forwarded from that pre-routing hook."
+  },
+  "candidate": {
+    "behavior": "Reject invalid host/origin/method/auth before reading; admit valid requests to regular GET/POST handlers, which forward the body after library parsing.",
+    "nativeViewSha256": "5f2ebec5889a942049a524fb10ed5af697f9a51ba69bad7220bf167e7c37a2f2",
+    "contractSha256": "1cc0ffd3f33b3119b835e2b00563212332cd878ae33b2488297706625f6c6bda",
+    "realContractChecks": [
+      "exact Unicode and quoted session title shared with console",
+      "chunked UTF-8 session write with exact persisted title",
+      "malformed JSON rejected without a new session",
+      "request over 1 MiB rejected without a new session",
+      "existing native tool graph, browser session, scope/owner denial and view-exit revocation checks retained"
+    ],
+    "localChecks": [
+      "node --check Native/tests/local_view_contract.mjs",
+      "git diff --check"
+    ],
+    "migrationLayer": false
+  },
+  "rawEvidence": [
+    {
+      "file": "doc/evidence/native-unified-hosted-0b96974-failed.log",
+      "sha256": "924a4b23e647e2c5d98cf9c82a058f91934b41dc1c62e1121540702d2561e9fe"
+    },
+    {
+      "file": "doc/evidence/native-unified-hosted-0b96974-provenance.json",
+      "sha256": "26325e8a4c1b46bf3bf2e971ada4e8b12ce4d643e00108a94d3885789794060a"
+    },
+    {
+      "file": "doc/evidence/native-unified-hosted-0b96974-view-failed.log",
+      "sha256": "e64771803eb6f1d7aa37a2d524ee078ce89aaf4fb9ad6b7b861a8cc9ff0fb8dd"
+    }
+  ],
+  "limits": [
+    "No corrected native contract run or full native gate pass is claimed.",
+    "The independent benchmark parent PID 8220 remains live; no local native build or runtime test was executed.",
+    "No provider/model request, current installed editor acceptance or fresh rendered UI acceptance is claimed."
+  ]
+}
