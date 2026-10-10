@@ -20,6 +20,25 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+The repaired `0eee494` source passes all **117 hosted native** contracts in
+**344.09 seconds**, **257 extension / 55 browser** checks and packaging. Downloaded
+evidence confirms actual trusted native login/registered callbacks, encrypted
+grant reopen, seven separate native refresh protocol modes and owned machine-root
+cleanup. Digests, exact inventory and package bytes are verified. Synthetic
+authority/tokens do not establish real-account, automatic/durable renewal or
+installed/rendered acceptance; this source precedes the newer storage candidate.
+[Exact hosted evidence](evidence/native-oauth-refresh-hosted-0eee494.json).
+
+The newer durable refresh storage candidate passes the complete rebuilt **117/117**
+local native gate in **389.30 seconds**, with all **2464** inputs unchanged and
+three focused contracts passing. Actual xlang3 SQLite verifies exclusive claims,
+credential/quiescence fences, atomic ciphertext/receipt rollback/publication and
+generation restart retirement. Client source is unchanged; those suites were not
+rerun. Current hosted **118-contract** acceptance, network coordination, automatic
+renewal and client recovery remain unfinished. Both original failures are retained.
+[Exact local evidence](evidence/native-oauth-refresh-storage-local.json).
+[Storage ownership and remaining integration](native-mcp-refresh-storage.md).
+
 The native checkpoint `6afaaf7` passes the complete **116/116**
 local native gate in **382.06 seconds**, with all **2462** frozen inputs unchanged.
 The original managed-profile contract passes without changing its watchdog.

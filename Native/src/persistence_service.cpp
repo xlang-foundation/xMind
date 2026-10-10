@@ -301,4 +301,9 @@ std::future<void> PersistenceService::delete_credential(std::string scope,std::s
 std::future<ResolvedCredential> PersistenceService::resolve_credential_snapshot(std::string scope,std::string id,std::string purpose) {
     return impl_->observe([scope=std::move(scope),id=std::move(id),purpose=std::move(purpose)](Repository& repository){return repository.resolve_credential_snapshot(scope,id,purpose);});
 }
+std::future<McpOAuthRefreshClaim> PersistenceService::claim_mcp_oauth_refresh(McpOAuthRefreshSpec spec){return impl_->submit([spec=std::move(spec)](Repository& r){return r.claim_mcp_oauth_refresh(spec);});}
+std::future<McpOAuthRefreshRecord> PersistenceService::mcp_oauth_refresh(std::string id){return impl_->observe([id=std::move(id)](Repository& r){return r.mcp_oauth_refresh(id);});}
+std::future<McpOAuthRefreshRecord> PersistenceService::dispatch_mcp_oauth_refresh(std::string id,std::string generation){return impl_->submit([id=std::move(id),generation=std::move(generation)](Repository& r){return r.dispatch_mcp_oauth_refresh(id,generation);});}
+std::future<McpOAuthRefreshRecord> PersistenceService::abandon_mcp_oauth_refresh(std::string id,std::string generation){return impl_->submit([id=std::move(id),generation=std::move(generation)](Repository& r){return r.abandon_mcp_oauth_refresh(id,generation);});}
+std::future<McpOAuthRefreshRecord> PersistenceService::publish_mcp_oauth_refresh(std::string id,std::string generation,SecretBytes grant){return impl_->submit([id=std::move(id),generation=std::move(generation),grant=std::move(grant)](Repository& r){return r.publish_mcp_oauth_refresh(id,generation,grant);});}
 }

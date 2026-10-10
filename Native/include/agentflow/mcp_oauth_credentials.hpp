@@ -10,6 +10,7 @@ struct McpOAuthGrant {
     McpOAuthTokens tokens;
     bool usable_at(std::int64_t now_unix_ms) const noexcept;
 };
+struct McpOAuthStoredRefresh {McpOAuthRefreshRecord record;std::optional<McpOAuthGrant> grant;};
 // Native connector-owned encrypted grant storage. One ciphertext/revision holds
 // both tokens, scopes, receipt time and token endpoint. SQLite I/O stays on the
 // embedded-xlang3 persistence thread. No grant is a tool approval or retry right.
@@ -20,6 +21,10 @@ public:
         McpOAuthTokens tokens,std::int64_t acquired_unix_ms,std::int64_t expected_revision);
     McpOAuthGrant load(const McpServerSetting& setting);
     void remove(const McpServerSetting& setting,std::int64_t expected_revision);
+    McpOAuthStoredRefresh prepare_refresh(const McpServerSetting&,std::string request_id,std::int64_t expected_revision);
+    McpOAuthRefreshRecord dispatch_refresh(const McpOAuthRefreshRecord&);
+    McpOAuthRefreshRecord abandon_refresh(const McpOAuthRefreshRecord&);
+    McpOAuthRefreshRecord publish_refresh(const McpServerSetting&,const McpOAuthRefreshRecord&,McpOAuthTokens,std::int64_t acquired_unix_ms);
 private:
     PersistenceService& store_;
 };

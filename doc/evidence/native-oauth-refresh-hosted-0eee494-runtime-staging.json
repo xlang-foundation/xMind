@@ -1,0 +1,17 @@
+{
+  "sourceRevision": "0eee4944d1c99d5cc93f48492485e6c8960cab92",
+  "sdkRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+  "stdlibRevision": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+  "contracts": 117,
+  "sourceFiles": 29,
+  "sourceManifestSha256": "527478e7192e5b4e507ecc5b33eccb2b2e02693a1d122eb5cd800e966954c3ee",
+  "output": "D:\\a\\xMind\\xMind\\xmind\\extensions\\vscode\\native-runtime",
+  "manifestSha256": "c4e34017e069cdf37ec2bb452b764691e5bc3524199c22b73571360680c1d9b4",
+  "nativeFiles": 5,
+  "pureSourceFiles": 1830,
+  "files": 1860,
+  "nativeExecuted": false,
+  "configAccessed": false,
+  "installed": false,
+  "scope": "File staging from the complete successful native gate; VSIX verification follows separately"
+}

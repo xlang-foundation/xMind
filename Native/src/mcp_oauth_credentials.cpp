@@ -35,19 +35,42 @@ struct Reader {
     std::span<const std::uint8_t> field(std::size_t limit){const auto size=number(4);if(size>limit)invalid();return take(static_cast<std::size_t>(size));}
     std::string text(std::size_t limit){const auto input=field(limit);return {reinterpret_cast<const char*>(input.data()),input.size()};}
 };
+SecretBytes encode_grant(const std::string& target,const McpOAuthTokens& tokens,std::int64_t acquired){
+    endpoint(target);token(tokens.access_token.view());if(tokens.refresh_token)token(tokens.refresh_token->view(),true);scopes(tokens.scopes);(void)expiry(acquired,tokens.expires_in);
+    Writer out;out.append(bytes(magic));out.number(static_cast<std::uint64_t>(acquired),8);out.number(tokens.expires_in.value_or(0),4);out.field(bytes(target));out.number(tokens.scopes.size(),4);for(const auto& scope:tokens.scopes)out.field(bytes(scope));out.field(tokens.access_token.view());out.field(tokens.refresh_token?tokens.refresh_token->view():std::span<const std::uint8_t>{});return SecretBytes(out.value);
+}
+McpOAuthGrant decode_grant(ResolvedCredential resolved){
+    Reader input{resolved.secret.view()};if(input.source.size()>bound||!std::ranges::equal(input.take(magic.size()),bytes(magic)))invalid();const auto timestamp=input.number(8);if(!timestamp||timestamp>static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()))invalid();const auto acquired=static_cast<std::int64_t>(timestamp);const auto seconds=static_cast<std::uint32_t>(input.number(4));std::optional<std::uint32_t> duration;if(seconds)duration=seconds;
+    auto target=input.text(8192);endpoint(target);const auto count=input.number(4);if(count>64)invalid();std::vector<std::string> granted;for(std::uint64_t n=0;n<count;++n)granted.push_back(input.text(8192));scopes(granted);
+    const auto access=input.field(32768);token(access);McpOAuthTokens tokens{SecretBytes(access),{},duration,std::move(granted)};const auto refresh=input.field(32768);if(!refresh.empty()){token(refresh,true);tokens.refresh_token=SecretBytes(refresh);}if(input.cursor!=input.source.size())invalid();
+    return {resolved.metadata.revision,acquired,expiry(acquired,duration),std::move(target),std::move(tokens)};
+}
+McpOAuthRefreshSpec refresh_binding(const McpServerSetting& config,const std::string& id,std::int64_t revision,const std::string& target){return {id,config.id,config.oauth->scope,config.oauth->id,mcp_credential_purpose(config,"OAUTH"),mcp_server_setting_json(config),target,config.revision,revision};}
 }
 bool McpOAuthGrant::usable_at(std::int64_t now) const noexcept {return now>=acquired_unix_ms&&(!expires_unix_ms||now<*expires_unix_ms);}
 CredentialMetadata McpOAuthCredentialStore::save(const McpServerSetting& config,std::string token_endpoint,McpOAuthTokens tokens,std::int64_t acquired,std::int64_t expected_revision){
-    setting(config);endpoint(token_endpoint);token(tokens.access_token.view());if(tokens.refresh_token)token(tokens.refresh_token->view(),true);scopes(tokens.scopes);(void)expiry(acquired,tokens.expires_in);
-    Writer out;out.append(bytes(magic));out.number(static_cast<std::uint64_t>(acquired),8);out.number(tokens.expires_in.value_or(0),4);out.field(bytes(token_endpoint));out.number(tokens.scopes.size(),4);for(const auto& scope:tokens.scopes)out.field(bytes(scope));out.field(tokens.access_token.view());out.field(tokens.refresh_token?tokens.refresh_token->view():std::span<const std::uint8_t>{});
-    return store_.put_credential(config.oauth->scope,config.oauth->id,mcp_credential_purpose(config,"OAUTH"),"MCP OAuth authorization",SecretBytes(out.value),expected_revision).get();
+    setting(config);auto encoded=encode_grant(token_endpoint,tokens,acquired);
+    return store_.put_credential(config.oauth->scope,config.oauth->id,mcp_credential_purpose(config,"OAUTH"),"MCP OAuth authorization",std::move(encoded),expected_revision).get();
 }
 McpOAuthGrant McpOAuthCredentialStore::load(const McpServerSetting& config){
-    setting(config);auto resolved=store_.resolve_credential_snapshot(config.oauth->scope,config.oauth->id,mcp_credential_purpose(config,"OAUTH")).get();
-    Reader input{resolved.secret.view()};if(input.source.size()>bound||!std::ranges::equal(input.take(magic.size()),bytes(magic)))invalid();const auto timestamp=input.number(8);if(!timestamp||timestamp>static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()))invalid();const auto acquired=static_cast<std::int64_t>(timestamp);const auto seconds=static_cast<std::uint32_t>(input.number(4));std::optional<std::uint32_t> duration;if(seconds)duration=seconds;
-    auto token_endpoint=input.text(8192);endpoint(token_endpoint);const auto count=input.number(4);if(count>64)invalid();std::vector<std::string> granted;for(std::uint64_t n=0;n<count;++n)granted.push_back(input.text(8192));scopes(granted);
-    const auto access=input.field(32768);token(access);McpOAuthTokens tokens{SecretBytes(access),{},duration,std::move(granted)};const auto refresh=input.field(32768);if(!refresh.empty()){token(refresh,true);tokens.refresh_token=SecretBytes(refresh);}if(input.cursor!=input.source.size())invalid();
-    return {resolved.metadata.revision,acquired,expiry(acquired,duration),std::move(token_endpoint),std::move(tokens)};
+    setting(config);return decode_grant(store_.resolve_credential_snapshot(config.oauth->scope,config.oauth->id,mcp_credential_purpose(config,"OAUTH")).get());
 }
 void McpOAuthCredentialStore::remove(const McpServerSetting& config,std::int64_t revision){setting(config);auto snapshot=store_.resolve_credential_snapshot(config.oauth->scope,config.oauth->id,mcp_credential_purpose(config,"OAUTH")).get();if(snapshot.metadata.revision!=revision)throw Conflict("MCP OAuth grant revision changed");store_.delete_credential(config.oauth->scope,config.oauth->id,revision).get();}
+McpOAuthStoredRefresh McpOAuthCredentialStore::prepare_refresh(const McpServerSetting& config,std::string id,std::int64_t revision){
+    setting(config);std::optional<McpOAuthRefreshSpec> binding;
+    try{const auto previous=store_.mcp_oauth_refresh(id).get();binding=refresh_binding(config,id,revision,previous.binding.token_endpoint);}
+    catch(const NotFound&){auto current=load(config);if(current.revision!=revision)throw Conflict("MCP refresh credential revision changed");if(!current.tokens.refresh_token)invalid();binding=refresh_binding(config,id,revision,current.token_endpoint);}
+    auto claim=store_.claim_mcp_oauth_refresh(std::move(*binding)).get();if(!claim.grant)return {std::move(claim.record),{}};
+    try{auto grant=decode_grant(std::move(*claim.grant));if(!grant.tokens.refresh_token||grant.token_endpoint!=claim.record.binding.token_endpoint)invalid();return {std::move(claim.record),std::move(grant)};}
+    catch(...){try{store_.abandon_mcp_oauth_refresh(claim.record.binding.request_id,claim.record.generation).get();}catch(...){}throw;}
+}
+McpOAuthRefreshRecord McpOAuthCredentialStore::dispatch_refresh(const McpOAuthRefreshRecord& r){return store_.dispatch_mcp_oauth_refresh(r.binding.request_id,r.generation).get();}
+McpOAuthRefreshRecord McpOAuthCredentialStore::abandon_refresh(const McpOAuthRefreshRecord& r){return store_.abandon_mcp_oauth_refresh(r.binding.request_id,r.generation).get();}
+McpOAuthRefreshRecord McpOAuthCredentialStore::publish_refresh(const McpServerSetting& config,const McpOAuthRefreshRecord& r,McpOAuthTokens tokens,std::int64_t acquired){
+    setting(config);if(refresh_binding(config,r.binding.request_id,r.binding.credential_revision,r.binding.token_endpoint)!=r.binding)throw Conflict("MCP refresh publication binding differs");
+    auto previous=load(config);if(previous.revision!=r.binding.credential_revision||previous.token_endpoint!=r.binding.token_endpoint)throw Conflict("MCP refresh stored grant changed");
+    for(const auto& scope:tokens.scopes)if(std::find(previous.tokens.scopes.begin(),previous.tokens.scopes.end(),scope)==previous.tokens.scopes.end())invalid();
+    if(!tokens.refresh_token)tokens.refresh_token=std::move(previous.tokens.refresh_token);if(!tokens.refresh_token)invalid();auto encoded=encode_grant(r.binding.token_endpoint,tokens,acquired);
+    return store_.publish_mcp_oauth_refresh(r.binding.request_id,r.generation,std::move(encoded)).get();
+}
 }

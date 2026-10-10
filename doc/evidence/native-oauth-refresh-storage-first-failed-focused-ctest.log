@@ -1,0 +1,18 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 48: native_mcp_configuration_contract
+1/3 Test #48: native_mcp_configuration_contract ...........   Passed    0.30 sec
+    Start 49: native_mcp_oauth_credentials_contract
+2/3 Test #49: native_mcp_oauth_credentials_contract .......   Passed    0.28 sec
+    Start 50: native_mcp_oauth_refresh_storage_contract
+3/3 Test #50: native_mcp_oauth_refresh_storage_contract ...***Failed    0.18 sec
+Retained synthetic refresh fixture: C:\Users\shaw9\AppData\Local\Temp\xmind-durable-refresh-488143570
+Invalid MCP refresh binding
+
+
+67% tests passed, 1 tests failed out of 3
+
+Total Test time (real) =   0.77 sec
+
+The following tests FAILED:
+	 50 - native_mcp_oauth_refresh_storage_contract (Failed)
+Errors while running CTest

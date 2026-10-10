@@ -1,0 +1,21 @@
+{
+  "observedAt": "2026-10-10T07:53:44.270Z",
+  "sourceBaseRevision": "0eee4944d1c99d5cc93f48492485e6c8960cab92",
+  "qualification": "Uncommitted candidate identified by preserved source hashes.",
+  "focusedContracts": 3,
+  "passed": 2,
+  "failed": [
+    "native_mcp_oauth_refresh_storage_contract"
+  ],
+  "seconds": 0.77,
+  "reason": "Invalid MCP refresh binding: validator used a hard-coded credential-purpose prefix length of 14, but mcp-http-oauth: has length 15.",
+  "retainedSyntheticFixture": "C:/Users/shaw9/AppData/Local/Temp/xmind-durable-refresh-488143570",
+  "completeCurrentGatePassed": false,
+  "rawHashes": {
+    "doc/evidence/native-oauth-refresh-storage-first-failed-configure.log": "2d103e2194669fab487ca994f2128497ef76fe264f8f52536ea0d00ef62da872",
+    "doc/evidence/native-oauth-refresh-storage-first-failed-focused-build.log": "228d1dc547acf2a94308ed4e0d076cc595bef4ba09704e5a23b85bcd7d910326",
+    "doc/evidence/native-oauth-refresh-storage-first-failed-focused-ctest.log": "2ee042e5a29e26f03096266ef78649621ab967fb1b08a1f3252f81fbe98f483d",
+    "doc/evidence/native-oauth-refresh-storage-first-failed-focused-details.log": "ab447802c4936cff0a3a6599c51595fcea29ecb1e1ee69e05c67304e5865e7c4",
+    "doc/evidence/native-oauth-refresh-storage-first-failed-source.json": "829c31b28f7fb4acc84d277fefbaba47e915f3d474cc7fd35da1660b601f875d"
+  }
+}

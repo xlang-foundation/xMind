@@ -33,4 +33,5 @@ private:
 // configuration identity and environment name; a command change needs a key
 // provisioned for the new purpose. This is never supplied by a view/model.
 std::string mcp_credential_purpose(const McpServerSetting& setting,const std::string& name);
+std::string mcp_server_setting_json(const McpServerSetting& setting);
 }

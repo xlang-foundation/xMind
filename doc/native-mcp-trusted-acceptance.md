@@ -1,5 +1,16 @@
 # Trusted HTTPS OAuth acceptance
 
+The repaired `0eee494` hosted gate passes all **117 native** contracts in
+**344.09 seconds**, plus **257 extension / 55 browser** checks and packaging.
+Independent downloads verify both archive digests, exact contract inventory,
+runtime/VSIX bytes and actual trusted fixture output. The native service performs
+two successful default/registered logins, encrypted grant reopen and authenticated
+MCP discovery; separate native refresh protocol cases pass seven modes with one
+request each and no forwarding. Owned machine-root cleanup is confirmed. Authority
+and tokens are synthetic; automatic/durable renewal and installed/rendered product
+acceptance remain unfinished. This result precedes the newer storage candidate.
+[Exact hosted acceptance](evidence/native-oauth-refresh-hosted-0eee494.json).
+
 The first completed hosted gate at `6708269` passed **115 of 116** contracts in
 **407.85 seconds**. The trusted contract failed before native login because
 `Import-Certificate` into `CurrentUser\Root` reported that UI is not allowed.
@@ -73,8 +84,9 @@ contract, bringing the complete local/hosted inventories to **116 / 117**.
 While the owned test root is installed, the existing hosted trusted contract
 also invokes the actual native refresh primitive for seven independently checked
 response/failure modes. These separate synthetic protocol checks prove no durable
-refresh publication, automatic renewal or client refresh workflow; hosted results
-for this strengthened source remain unverified.
+refresh publication, automatic renewal or client refresh workflow. Hosted results
+for `0eee494` pass as recorded above. The newer storage candidate adds another
+contract, requiring **117 local / 118 hosted** for its own complete acceptance.
 
 Local checks verify the independent peer over real Node HTTPS with an explicit
 CA and rejection under default untrusted TLS. At original source `6cde3ba`, the
@@ -91,7 +103,7 @@ registered-callback source separately passes **115/115** local native checks in
 Its eight-case hosted trusted-login fixture compiles but is not executed locally.
 [Current registered-callback evidence](evidence/native-oauth-registered-local.json).
 
-Remaining delivery includes that hosted acceptance, real MCP authority login,
+Remaining delivery includes hosted acceptance of the newer storage candidate, real MCP authority login,
 client-registration selection/CIMD/DCR, refresh/revocation, running-owner
 coordination, complete graphical connector configuration and fresh installed
 UI acceptance. [Native service](native-mcp-login.md) and

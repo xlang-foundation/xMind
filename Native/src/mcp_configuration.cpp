@@ -118,6 +118,7 @@ std::vector<McpServerSetting> McpConfigurationStore::apply(const std::string& so
     const auto encoded=Json{{"version",1},{"servers",saved},{"retired_ids",retired}}.dump();if(encoded.size()>256*1024)throw Conflict("Stored MCP configuration exceeds limits");
     store_.put_information("native-mcp","servers",encoded).get();return values;
 }
+std::string mcp_server_setting_json(const McpServerSetting& value){const auto encoded=encode(value);(void)setting(encoded,true);return encoded.dump();}
 std::string mcp_credential_purpose(const McpServerSetting& setting,const std::string& name) {
     std::string source;
     if(setting.transport=="http") {

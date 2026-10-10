@@ -188,6 +188,45 @@ std::string credential_context(const std::string& scope,const std::string& id,
     }
     return context+":"+std::to_string(revision);
 }
+constexpr std::string_view refresh_category="native-mcp-oauth-refresh";
+void changed_one(const SqlResult&);
+void refresh_spec(const McpOAuthRefreshSpec& s){
+    constexpr std::string_view purpose_prefix="mcp-http-oauth:";
+    auto scheme=s.token_endpoint.substr(0,8);for(auto& c:scheme)if(c>='A'&&c<='Z')c=static_cast<char>(c-'A'+'a');
+    bounded_identity(s.request_id);bounded_identity(s.server_id);
+    identifier(s.credential_id);if(s.scope!="server"||s.credential_id.size()>256||s.configuration_revision<1||s.credential_revision<1||s.credential_revision==std::numeric_limits<std::int64_t>::max()||!s.purpose.starts_with(purpose_prefix)||s.purpose.size()!=purpose_prefix.size()+64||s.purpose.substr(purpose_prefix.size()).find_first_not_of("0123456789abcdef")!=std::string::npos||s.token_endpoint.size()>8192||scheme!="https://"||s.token_endpoint.find_first_of("\r\n\0",0,3)!=std::string::npos)throw std::invalid_argument("Invalid MCP refresh binding");
+    const auto j=Json::parse(object_json(s.server_json,65536));
+    if(j.dump()!=s.server_json||j.at("id")!=s.server_id||j.at("revision")!=s.configuration_revision||j.at("transport")!="http"||j.at("enabled")!=true||!j.contains("oauth")||j.at("oauth").at("scope")!=s.scope||j.at("oauth").at("id")!=s.credential_id)throw std::invalid_argument("MCP refresh configuration binding differs");
+}
+Json refresh_binding_json(const McpOAuthRefreshSpec& s){return {{"request",s.request_id},{"server",s.server_id},{"scope",s.scope},{"credential",s.credential_id},{"purpose",s.purpose},{"configuration",Json::parse(s.server_json)},{"configuration_revision",s.configuration_revision},{"credential_revision",s.credential_revision},{"token_endpoint",s.token_endpoint}};}
+Json refresh_json(const McpOAuthRefreshRecord& r){return {{"schema",1},{"binding",refresh_binding_json(r.binding)},{"generation",r.generation},{"state",r.state},{"created_ms",r.created_unix_ms},{"dispatched_ms",r.dispatched_unix_ms},{"settled_ms",r.settled_unix_ms},{"published_revision",r.published_revision}};}
+McpOAuthRefreshRecord refresh_decode(const std::string& raw){
+    try{
+        const auto j=Json::parse(object_json(raw,98304));const auto& b=j.at("binding");McpOAuthRefreshRecord r;
+        for(const auto* name:{"schema","created_ms","dispatched_ms","settled_ms","published_revision"})if(!j.at(name).is_number_integer())throw DatabaseError("Invalid saved MCP refresh integer");
+        for(const auto* name:{"configuration_revision","credential_revision"})if(!b.at(name).is_number_integer())throw DatabaseError("Invalid saved MCP refresh revision");
+        r.binding={b.at("request"),b.at("server"),b.at("scope"),b.at("credential"),b.at("purpose"),b.at("configuration").dump(),b.at("token_endpoint"),b.at("configuration_revision"),b.at("credential_revision")};
+        r.generation=j.at("generation");r.state=j.at("state");r.created_unix_ms=j.at("created_ms");r.dispatched_unix_ms=j.at("dispatched_ms");r.settled_unix_ms=j.at("settled_ms");r.published_revision=j.at("published_revision");refresh_spec(r.binding);bounded_identity(r.generation);
+        if(j.at("schema")!=1||refresh_json(r)!=j||r.created_unix_ms<=0||r.dispatched_unix_ms<0||r.settled_unix_ms<0||r.published_revision<0)throw DatabaseError("Invalid saved MCP refresh receipt");
+        const bool prepared=r.state=="prepared",dispatched=r.state=="dispatched",cancelled=r.state=="cancelled",uncertain=r.state=="uncertain",committed=r.state=="committed";
+        if(!(prepared||dispatched||cancelled||uncertain||committed)||(prepared&&(r.dispatched_unix_ms||r.settled_unix_ms))||(dispatched&&(!r.dispatched_unix_ms||r.settled_unix_ms))||(cancelled&&(r.dispatched_unix_ms||!r.settled_unix_ms))||((uncertain||committed)&&(!r.dispatched_unix_ms||!r.settled_unix_ms))||(committed?r.published_revision!=r.binding.credential_revision+1:r.published_revision!=0))throw DatabaseError("Invalid saved MCP refresh phase");return r;
+    }catch(const DatabaseError&){throw;}catch(...){throw DatabaseError("Invalid saved MCP refresh receipt");}
+}
+McpOAuthRefreshRecord refresh_read(XlangSqlite& db,const std::string& id){
+    bounded_identity(id);const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(refresh_category),id}).rows;if(rows.empty())throw NotFound("MCP refresh request not found");auto r=refresh_decode(text(rows.at(0).at(0)));if(r.binding.request_id!=id)throw DatabaseError("Saved MCP refresh identity differs");return r;
+}
+std::vector<McpOAuthRefreshRecord> refresh_records(XlangSqlite& db){
+    const auto rows=db.execute("SELECT id,payload FROM information WHERE category=? ORDER BY id LIMIT 4097",{std::string(refresh_category)}).rows;if(rows.size()>4096)throw DatabaseError("MCP refresh receipt capacity exceeded");std::vector<McpOAuthRefreshRecord> records;
+    for(const auto& row:rows){auto r=refresh_decode(text(row.at(1)));if(r.binding.request_id!=text(row.at(0)))throw DatabaseError("Saved MCP refresh identity differs");records.push_back(std::move(r));}return records;
+}
+bool refresh_blocks(const McpOAuthRefreshRecord& r){return r.state=="prepared"||r.state=="dispatched"||r.state=="uncertain";}
+void refresh_fence(XlangSqlite& db,const std::string& scope,const std::string& id){for(const auto& r:refresh_records(db))if(r.binding.scope==scope&&r.binding.credential_id==id&&refresh_blocks(r))throw Conflict("MCP credential revision has a durable refresh owner");}
+void refresh_configuration(XlangSqlite& db,const McpOAuthRefreshSpec& s){
+    const auto rows=db.execute("SELECT payload FROM information WHERE category='native-mcp' AND id='servers'").rows;if(rows.empty())throw Conflict("MCP refresh configuration is absent");const auto j=Json::parse(object_json(text(rows.at(0).at(0)),262144));
+    std::size_t matches=0;for(const auto& server:j.at("servers"))if(server.at("id")==s.server_id){++matches;if(server.dump()!=s.server_json)throw Conflict("MCP refresh configuration changed");}if(matches!=1)throw Conflict("MCP refresh configuration is absent or ambiguous");
+}
+void refresh_update(XlangSqlite& db,const McpOAuthRefreshRecord& before,const McpOAuthRefreshRecord& after){changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=? AND payload=?",{refresh_json(after).dump(),std::string(refresh_category),before.binding.request_id,refresh_json(before).dump()}));}
+void refresh_recover(XlangSqlite& db,const std::string& generation){for(const auto& r:refresh_records(db))if(r.generation!=generation&&(r.state=="prepared"||r.state=="dispatched")){auto next=r;next.state=r.state=="prepared"?"cancelled":"uncertain";next.settled_unix_ms=now_ms();refresh_update(db,r,next);}}
 std::string state_name(RunState state) {
     switch(state) {
     case RunState::queued: return "queued"; case RunState::running: return "running";
@@ -1786,6 +1825,7 @@ BackendOwnerState decode_owner(const std::string& raw){
 std::optional<std::string> owner_record(XlangSqlite& db){const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id='owner'",{std::string(backend_owner_category)}).rows;return rows.empty()?std::optional<std::string>{}:text(rows[0][0]);}
 void write_owner(XlangSqlite& db,const BackendOwnerState& s,const std::optional<std::string>& previous){const auto raw=owner_json(s).dump();const auto written=previous?db.execute("UPDATE information SET payload=? WHERE category=? AND id='owner' AND payload=?",{raw,std::string(backend_owner_category),*previous}):db.execute("INSERT INTO information(category,id,payload) VALUES(?,'owner',?) ON CONFLICT(category,id) DO NOTHING",{std::string(backend_owner_category),raw});if(written.affected_rows!=1)throw Conflict("Native owner changed before publication");}
 void require_database_idle(XlangSqlite& db){
+    for(const auto& r:refresh_records(db))if(r.state=="prepared"||r.state=="dispatched")throw Conflict("Native MCP refresh ownership is still active");
     // All predicates are native literals. Include unfinished effect and context
     // ownership even if a corrupt/failed root claims to be terminal.
     for(const auto* sql:{
@@ -1818,12 +1858,12 @@ BackendOwnerState stage_backend_owner(XlangSqlite& db,const BackendLease& lease,
     else if(bootstrap)throw Conflict("Replacement source owner is absent");
     BackendOwnerState current{generation,revision,false,{}};
     if(bootstrap){current.quiesced=true;current.receipt_id=bootstrap->receipt.receipt_id;current.replacement_target=bootstrap->target;current.replacement_prepared=true;current.replacement_source=bootstrap->receipt;current.database_path=lease.canonical_database_path();}
-    write_owner(db,current,previous);return current;
+    write_owner(db,current,previous);refresh_recover(db,generation);return current;
 }
 BackendOwnerState stage_legacy_owner(XlangSqlite& db,const BackendLease& lease,const std::string& generation,const LegacyOwnerBootstrap& legacy){
     owner_identity(generation);require_legacy_owner_bootstrap(db,lease,legacy);const auto previous=owner_record(db);std::int64_t revision=1;
     if(previous){const auto prior=decode_owner(*previous);if(prior.quiesced&&prior.legacy_ticket_id!=legacy.ticket_id)throw Conflict("Legacy operator ticket does not own the prepared generation");if(prior.generation==generation)throw Conflict("Legacy replacement must bind a fresh generation");revision=prior.revision+1;owner_revision(revision);}
-    BackendOwnerState current{generation,revision,true,generation};current.replacement_target=legacy.target;current.replacement_prepared=true;current.database_path=lease.canonical_database_path();current.legacy_ticket_id=legacy.ticket_id;write_owner(db,current,previous);return current;
+    BackendOwnerState current{generation,revision,true,generation};current.replacement_target=legacy.target;current.replacement_prepared=true;current.database_path=lease.canonical_database_path();current.legacy_ticket_id=legacy.ticket_id;write_owner(db,current,previous);refresh_recover(db,generation);return current;
 }
 }
 std::string encode_backend_owner_target(const BackendOwnerTarget& target){return target_json(target).dump();}
@@ -1855,7 +1895,7 @@ BackendOwnerState Repository::activate_backend_replacement(const BackendLease& l
 }
 void Repository::put_information(const std::string& category,const std::string& id,const std::string& json) {
     identifier(category); identifier(id);
-    if(category==backend_owner_category||category==legacy_owner_category)throw std::invalid_argument("Use typed native owner control");
+    if(category==backend_owner_category||category==legacy_owner_category||category==refresh_category)throw std::invalid_argument("Use typed native owner control");
     if(category=="secrets" || category=="credentials") throw std::invalid_argument("Use the encrypted credential repository");
     Transaction transaction(impl_->database);
     changed_one(impl_->database.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO UPDATE SET payload=excluded.payload",{category,id,json}));
@@ -1863,7 +1903,7 @@ void Repository::put_information(const std::string& category,const std::string& 
 }
 void Repository::compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected) {
     identifier(category);identifier(id);
-    if(category==legacy_owner_category)throw std::invalid_argument("Use typed native owner control");
+    if(category==legacy_owner_category||category==refresh_category)throw std::invalid_argument("Use typed native owner control");
     if(category==backend_owner_category)throw std::invalid_argument("Use typed native owner control");
     if(category=="secrets"||category=="credentials")throw std::invalid_argument("Use the encrypted credential repository");
     Transaction transaction(impl_->database);
@@ -1885,7 +1925,7 @@ CredentialMetadata Repository::put_credential(const std::string& scope,const std
     const auto context=credential_context(scope,id,purpose,revision);
     if(label.size()>4096 || label.find('\0')!=std::string::npos) throw std::invalid_argument("Invalid credential label");
     const auto protected_value=protect_secret(secret,context);
-    auto& db=impl_->database; Transaction transaction(db);
+    auto& db=impl_->database; Transaction transaction(db);refresh_fence(db,scope,id);
     const auto existing=db.execute("SELECT revision FROM credentials WHERE scope=? AND id=?",{scope,id});
     if(expected_revision==0) {
         if(!existing.rows.empty()) throw Conflict("Credential already exists");
@@ -1922,13 +1962,43 @@ ResolvedCredential Repository::resolve_credential_snapshot(const std::string& sc
 void Repository::delete_credential(const std::string& scope,const std::string& id,std::int64_t expected_revision) {
     identifier(scope);identifier(id);
     if(expected_revision<=0) throw std::invalid_argument("Invalid credential revision");
-    auto& db=impl_->database;Transaction transaction(db);
+    auto& db=impl_->database;Transaction transaction(db);refresh_fence(db,scope,id);
     const auto rows=db.execute("SELECT revision FROM credentials WHERE scope=? AND id=?",{scope,id}).rows;
     if(rows.empty()) throw NotFound("Credential not found");
     if(integer(rows[0][0])!=expected_revision) throw Conflict("Credential revision changed");
     changed_one(db.execute("INSERT INTO retired_credentials(scope,id) VALUES(?,?)",{scope,id}));
     changed_one(db.execute("DELETE FROM credentials WHERE scope=? AND id=? AND revision=?",{scope,id,expected_revision}));
     transaction.commit();
+}
+McpOAuthRefreshClaim Repository::claim_mcp_oauth_refresh(const McpOAuthRefreshSpec& spec){
+    refresh_spec(spec);auto& db=impl_->database;Transaction tx(db);const auto owner=backend_owner();if(owner.quiesced)throw BackendQuiesced("Native backend is quiesced");
+    const auto existing=db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(refresh_category),spec.request_id}).rows;
+    if(!existing.empty()){auto record=refresh_read(db,spec.request_id);if(record.binding!=spec)throw Conflict("MCP refresh request identity changed");tx.commit();return {std::move(record),{}};}
+    const auto records=refresh_records(db);if(records.size()>=4096)throw Conflict("MCP refresh receipt capacity exceeded");refresh_fence(db,spec.scope,spec.credential_id);refresh_configuration(db,spec);
+    auto grant=resolve_credential_snapshot(spec.scope,spec.credential_id,spec.purpose);if(grant.metadata.revision!=spec.credential_revision)throw Conflict("MCP refresh credential revision changed");
+    McpOAuthRefreshRecord record{spec,owner.generation,"prepared",now_ms()};
+    changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?)",{std::string(refresh_category),spec.request_id,refresh_json(record).dump()}));tx.commit();return {std::move(record),std::move(grant)};
+}
+McpOAuthRefreshRecord Repository::mcp_oauth_refresh(const std::string& id){return refresh_read(impl_->database,id);}
+McpOAuthRefreshRecord Repository::dispatch_mcp_oauth_refresh(const std::string& id,const std::string& generation){
+    auto& db=impl_->database;Transaction tx(db);const auto before=refresh_read(db,id);const auto owner=backend_owner();
+    if(owner.quiesced)throw BackendQuiesced("Native backend is quiesced");if(owner.generation!=generation||before.generation!=generation||before.state!="prepared")throw Conflict("MCP refresh dispatch owner changed");refresh_configuration(db,before.binding);
+    auto grant=resolve_credential_snapshot(before.binding.scope,before.binding.credential_id,before.binding.purpose);if(grant.metadata.revision!=before.binding.credential_revision)throw Conflict("MCP refresh credential revision changed");
+    auto after=before;after.state="dispatched";after.dispatched_unix_ms=now_ms();refresh_update(db,before,after);tx.commit();return after;
+}
+McpOAuthRefreshRecord Repository::abandon_mcp_oauth_refresh(const std::string& id,const std::string& generation){
+    auto& db=impl_->database;Transaction tx(db);const auto before=refresh_read(db,id);const auto owner=backend_owner();
+    if(owner.quiesced)throw BackendQuiesced("Native backend is quiesced");if(owner.generation!=generation||before.generation!=generation||(before.state!="prepared"&&before.state!="dispatched"))throw Conflict("MCP refresh retirement owner changed");
+    auto after=before;after.state=before.state=="prepared"?"cancelled":"uncertain";after.settled_unix_ms=now_ms();refresh_update(db,before,after);tx.commit();return after;
+}
+McpOAuthRefreshRecord Repository::publish_mcp_oauth_refresh(const std::string& id,const std::string& generation,const SecretBytes& complete_grant){
+    if(complete_grant.view().empty()||complete_grant.view().size()>128*1024)throw std::invalid_argument("Invalid complete MCP refresh grant");
+    auto& db=impl_->database;Transaction tx(db);const auto before=refresh_read(db,id);const auto owner=backend_owner();
+    if(owner.quiesced)throw BackendQuiesced("Native backend is quiesced");if(owner.generation!=generation||before.generation!=generation||before.state!="dispatched")throw Conflict("MCP refresh publication owner changed");refresh_configuration(db,before.binding);
+    const auto& binding=before.binding;const auto snapshot=resolve_credential_snapshot(binding.scope,binding.credential_id,binding.purpose);if(snapshot.metadata.revision!=binding.credential_revision)throw Conflict("MCP refresh credential revision changed");
+    const auto revision=binding.credential_revision+1;const auto encrypted=protect_secret(complete_grant,credential_context(binding.scope,binding.credential_id,binding.purpose,revision));
+    changed_one(db.execute("UPDATE credentials SET revision=?,protection=?,ciphertext=? WHERE scope=? AND id=? AND purpose=? AND revision=?",{revision,encrypted.protection,encrypted.ciphertext,binding.scope,binding.credential_id,binding.purpose,binding.credential_revision}));
+    auto after=before;after.state="committed";after.published_revision=revision;after.settled_unix_ms=now_ms();refresh_update(db,before,after);tx.commit();return after;
 }
 Operation Repository::request_operation(const std::string& id,const OperationSpec& input,std::int64_t expiry) {
     identifier(id);identifier(input.run_id);identifier(input.workspace);identifier(input.tool);

@@ -1,0 +1,21 @@
+{
+  "observedAt": "2026-10-10T07:54:52.024Z",
+  "sourceBaseRevision": "0eee4944d1c99d5cc93f48492485e6c8960cab92",
+  "qualification": "Uncommitted candidate identified by preserved source hashes.",
+  "focusedContracts": 3,
+  "passed": 2,
+  "failed": [
+    "native_mcp_oauth_refresh_storage_contract"
+  ],
+  "seconds": 0.72,
+  "reason": "Fixture used whitespace in access-token strings; complete-grant encoding correctly rejected them before reaching the injected receipt-write fault.",
+  "retainedSyntheticFixture": "C:/Users/shaw9/AppData/Local/Temp/xmind-durable-refresh-4074307218",
+  "completeCurrentGatePassed": false,
+  "rawHashes": {
+    "doc/evidence/native-oauth-refresh-storage-second-failed-configure.log": "2d103e2194669fab487ca994f2128497ef76fe264f8f52536ea0d00ef62da872",
+    "doc/evidence/native-oauth-refresh-storage-second-failed-focused-build.log": "b98dc652700c26e1666ff2219338692e18a227fc94c490c66af74b8ee394c95d",
+    "doc/evidence/native-oauth-refresh-storage-second-failed-focused-ctest.log": "3ecdeb77bb6eee005a29f380eeca175788686d6185abf501c3c23aefb37b822b",
+    "doc/evidence/native-oauth-refresh-storage-second-failed-focused-details.log": "49a46747e0a078fc33401f14250bc850e95682c91934f8efbc60a513180dcc80",
+    "doc/evidence/native-oauth-refresh-storage-second-failed-source.json": "d371235889b9a5a8c5e08b0459b27ab9a1efd510381d24fc2639256b9d354569"
+  }
+}

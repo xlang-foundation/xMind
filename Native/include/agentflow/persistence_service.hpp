@@ -156,6 +156,11 @@ public:
     std::future<SecretBytes> resolve_credential(std::string scope,std::string id,std::string purpose);
     std::future<ResolvedCredential> resolve_credential_snapshot(std::string scope,std::string id,std::string purpose);
     std::future<void> delete_credential(std::string scope,std::string id,std::int64_t expected_revision);
+    std::future<McpOAuthRefreshClaim> claim_mcp_oauth_refresh(McpOAuthRefreshSpec);
+    std::future<McpOAuthRefreshRecord> mcp_oauth_refresh(std::string request_id);
+    std::future<McpOAuthRefreshRecord> dispatch_mcp_oauth_refresh(std::string request_id,std::string generation);
+    std::future<McpOAuthRefreshRecord> abandon_mcp_oauth_refresh(std::string request_id,std::string generation);
+    std::future<McpOAuthRefreshRecord> publish_mcp_oauth_refresh(std::string request_id,std::string generation,SecretBytes complete_grant);
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;

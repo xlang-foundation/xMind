@@ -8,6 +8,7 @@
 #include "agentflow/graph_context_records.hpp"
 #include "agentflow/skill_records.hpp"
 #include "agentflow/backend_owner.hpp"
+#include "agentflow/mcp_oauth_refresh_records.hpp"
 #include <memory>
 #include <vector>
 #include <optional>
@@ -23,6 +24,7 @@ struct CredentialMetadata {
     std::int64_t revision;
 };
 struct ResolvedCredential {CredentialMetadata metadata;SecretBytes secret;};
+struct McpOAuthRefreshClaim {McpOAuthRefreshRecord record;std::optional<ResolvedCredential> grant;};
 // Target repository: C++ contracts, all database operations through xlang3.
 // Construct/use/destroy on the persistence thread. No direct SQLite linkage.
 class Repository {
@@ -177,6 +179,13 @@ public:
     ResolvedCredential resolve_credential_snapshot(const std::string& scope,const std::string& id,
         const std::string& purpose);
     void delete_credential(const std::string& scope,const std::string& id,std::int64_t expected_revision);
+    // Typed connector ownership. Only a new claim returns the private snapshot;
+    // duplicate requests observe their receipt and never receive a retry right.
+    McpOAuthRefreshClaim claim_mcp_oauth_refresh(const McpOAuthRefreshSpec&);
+    McpOAuthRefreshRecord mcp_oauth_refresh(const std::string& request_id);
+    McpOAuthRefreshRecord dispatch_mcp_oauth_refresh(const std::string& request_id,const std::string& generation);
+    McpOAuthRefreshRecord abandon_mcp_oauth_refresh(const std::string& request_id,const std::string& generation);
+    McpOAuthRefreshRecord publish_mcp_oauth_refresh(const std::string& request_id,const std::string& generation,const SecretBytes& complete_grant);
     std::size_t recover_interrupted(const BackendLease& owner);
 private:
     struct Impl;

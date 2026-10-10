@@ -1,9 +1,20 @@
 # Native MCP OAuth refresh
 
+The `0eee494` hosted source passes **117 native / 257 extension / 55 browser**
+contracts and packaging. Its actual native exchange primitive exercises seven
+trusted HTTPS refresh modes with one request per owner and no forwarding, separate
+from the actual native login/grant reopen tests. Owned isolated machine-root cleanup
+and downloaded artifact/package bytes are independently verified. This is synthetic
+protocol acceptance, not durable or automatic renewal.
+[Exact hosted evidence](evidence/native-oauth-refresh-hosted-0eee494.json).
+
 The native library now contains a single-caller `McpOAuthRefreshAttempt` and
-private form/response helpers. This is an exchange primitive; automatic refresh,
-durable refresh ownership/publication and CLI/view refresh controls are not
-implemented. The production MCP factory still rejects a known expired grant.
+private form/response helpers. This is an exchange primitive; automatic refresh
+and CLI/view refresh controls are not implemented. A newer
+[durable storage candidate](native-mcp-refresh-storage.md) passes the complete
+**117/117** local gate in **389.30 seconds**, with **2464** unchanged inputs.
+The production MCP factory still rejects a known expired grant; the storage
+operations are not yet wired to a network renewal coordinator.
 Adding a request encoder does not make expired production connections work.
 
 ## Implemented exchange behavior
@@ -66,12 +77,14 @@ allows the actual native primitive to exercise rotation, retention, scope
 expansion, duplicate JSON, HTTP failure, lost reply and redirect rejection. It
 requires exactly one request per owner and zero forwarded requests. These are
 synthetic protocol inputs, separate from the actual login service/grant tests.
-Hosted native refresh remains unverified; even a pass will not prove durable
-refresh publication, automatic renewal, real authority or installed acceptance.
+The hosted native exchange primitive passes at `0eee494`, as recorded above.
+That result does not prove durable refresh publication, automatic renewal, real
+authority or installed acceptance.
 The local complete gate identifies native checkpoint `6afaaf7`. A subsequent
 test-only provisioning repair changes the hosted certificate store and cleanup
 assertions; it does not change compiled native product code. Its successful
-hosted execution is still required.
+hosted execution is verified at `0eee494`. The newer storage candidate passes its
+own complete local gate and still requires its **118-contract** hosted acceptance.
 
 ## Required production integration
 

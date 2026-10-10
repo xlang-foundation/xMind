@@ -1,0 +1,52 @@
+Start testing: Oct 10 00:53 Pacific Daylight Time
+----------------------------------------------------------
+48/117 Testing: native_mcp_configuration_contract
+48/117 Test: native_mcp_configuration_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_configuration_contract.exe" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_mcp_configuration_contract" start time: Oct 10 00:53 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native stdio/HTTP configuration passed embedded-xlang3 persistence, backend revisions, encrypted endpoint/command purpose binding, invalid mixed/plaintext/URL/scope rejection, exact replacement preservation, reopen and retired identities. No peer/model/UI activation claimed
+<end of output>
+Test time =   0.30 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_configuration_contract" end time: Oct 10 00:53 Pacific Daylight Time
+"native_mcp_configuration_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+49/117 Testing: native_mcp_oauth_credentials_contract
+49/117 Test: native_mcp_oauth_credentials_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_oauth_credentials_contract.exe" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_mcp_oauth_credentials_contract" start time: Oct 10 00:53 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native OAuth grant storage passed actual xlang3 SQLite encryption/reopen, atomic snapshot/rotation/rollback, resource/issuer/client/server binding, expiry/clock-rollback and factory pre-connect rejection, malformed/ciphertext relocation rejection and retired identity checks. Synthetic tokens; no trusted HTTPS login, refresh/revocation request or UI setup verified
+<end of output>
+Test time =   0.28 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_credentials_contract" end time: Oct 10 00:53 Pacific Daylight Time
+"native_mcp_oauth_credentials_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+50/117 Testing: native_mcp_oauth_refresh_storage_contract
+50/117 Test: native_mcp_oauth_refresh_storage_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_oauth_refresh_storage_contract.exe" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_mcp_oauth_refresh_storage_contract" start time: Oct 10 00:53 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Retained synthetic refresh fixture: C:\Users\shaw9\AppData\Local\Temp\xmind-durable-refresh-488143570
+Invalid MCP refresh binding
+<end of output>
+Test time =   0.18 sec
+----------------------------------------------------------
+Test Failed.
+"native_mcp_oauth_refresh_storage_contract" end time: Oct 10 00:53 Pacific Daylight Time
+"native_mcp_oauth_refresh_storage_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 10 00:53 Pacific Daylight Time
