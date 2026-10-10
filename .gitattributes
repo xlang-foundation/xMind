@@ -2,7 +2,7 @@
 # Preserve raw checkpoint evidence and its recorded SHA-256 across Git clones.
 doc/evidence/native-compose-*.log -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 doc/evidence/native-unified-*.log -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-doc/evidence/native-unified-hosted-*.json -text
+doc/evidence/native-unified-hosted-*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 doc/evidence/xlang3-ipc-foundation-*.log -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 doc/evidence/native-private-state-* -text
 doc/evidence/native-private-state-*.log whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
