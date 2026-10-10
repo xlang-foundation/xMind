@@ -366,6 +366,9 @@ Run ProviderProfileRuntime::submit_graph_workspace(std::string id,std::string se
     return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));
 }
 std::vector<std::string> ProviderProfileRuntime::models()const{std::lock_guard lock(impl_->mutex);return impl_->service->models();}
+std::vector<AgentDefinitionMetadata> ProviderProfileRuntime::agent_definitions()const{std::lock_guard lock(impl_->mutex);return impl_->service->agent_definitions();}
+SessionAgentState ProviderProfileRuntime::session_agent(const std::string& session)const{std::lock_guard lock(impl_->mutex);return impl_->service->session_agent(session);}
+SessionAgentState ProviderProfileRuntime::select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t revision){std::lock_guard lock(impl_->mutex);return impl_->service->select_session_agent(session,std::move(selected),revision);}
 void ProviderProfileRuntime::cancel(const std::string& id){std::lock_guard lock(impl_->mutex);impl_->service->cancel(id);}
 bool ProviderProfileRuntime::healthy()const{std::lock_guard lock(impl_->mutex);return impl_->service->healthy();}
 bool ProviderProfileRuntime::idle()const{std::lock_guard lock(impl_->mutex);return impl_->service->idle();}

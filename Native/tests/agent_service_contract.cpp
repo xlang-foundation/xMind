@@ -1,4 +1,5 @@
 #include "agentflow/agent_service.hpp"
+#include "agentflow/agent_definitions.hpp"
 #include <iostream>
 #include <thread>
 
@@ -30,6 +31,8 @@ int main(int argc,char** argv) {
     if(argc!=5) return 2;
     try {
         PersistenceService store(argv[1],{argv[2],argv[3]});
+        AgentDefinitionStore definitions(store);const auto imported=definitions.apply("agents:\n  - id: service.profile\n    model_id: synthetic-service-protocol\n    instructions: Preserve the exact marker service-profile-instructions in your reasoning.\n");
+        require(imported.entries.size()==1&&imported.entries[0].revision==1,"Named agent catalogue must import into native persistence");
         AgentSettings settings;settings.provider.endpoint=argv[4];settings.provider.model="synthetic-service-protocol";
         for(const auto* id:{"a","b","queued","rejected"}) store.create_session(id,id).get();
         AgentService service(store,settings,2,1);
@@ -50,11 +53,13 @@ int main(int argc,char** argv) {
             AgentService repeated(store,settings,1,1);
             for(int cycle=0;cycle<4;++cycle) {
                 const auto id="notifier_"+std::to_string(cycle);store.create_session(id,id).get();
+                if(cycle==0){const auto catalogue=repeated.agent_definitions();require(catalogue.size()==1&&catalogue[0].id=="service.profile","Agent service must expose safe catalogue metadata");const auto selected=repeated.select_session_agent(id,catalogue[0],0);require(selected.selected&&selected.selected->id=="service.profile"&&selected.revision==1&&selected.editable,"Conversation must pin the selected named agent revision");}
                 // Exercise ordinary submissions while the independent expiry
                 // loop has crossed a tick. Actual model.text and cancellation,
                 // rather than elapsed time alone, establish dispatch/retirement.
                 std::this_thread::sleep_for(120ms);
                 repeated.submit(id,id,"hold-stream");streaming(store,id);
+                if(cycle==0){const auto selected=store.session_agent(id).get();require(selected.selected&&selected.selected->instructions.find("service-profile-instructions")!=std::string::npos,"Selected agent instructions must survive admission and be persisted as the session snapshot");}
                 require(store.run(id).get().state==RunState::running,"Repeated notifier wake must start its actual provider stream");
                 repeated.cancel(id);cancelled(store,id);
                 const auto rows=store.run_history(id).get();

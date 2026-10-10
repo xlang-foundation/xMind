@@ -2,6 +2,7 @@
 #include "agentflow/records.hpp"
 #include "agentflow/context_control.hpp"
 #include "agentflow/skill_records.hpp"
+#include "agentflow/agent_definition_records.hpp"
 #include <utility>
 #include <optional>
 #include <vector>
@@ -33,6 +34,10 @@ public:
     virtual bool supports_file_edit_proposals()const{return false;}
     virtual bool supports_skill_catalogue()const{return false;}
     virtual bool supports_session_skills()const{return false;}
+    virtual bool supports_agent_selection()const{return false;}
+    virtual std::vector<AgentDefinitionMetadata> agent_definitions()const{throw RunUnavailable("Named agent definitions are unavailable");}
+    virtual SessionAgentState session_agent(const std::string&)const{throw RunUnavailable("Conversation agent selection is unavailable");}
+    virtual SessionAgentState select_session_agent(const std::string&,std::optional<AgentDefinitionMetadata>,std::int64_t){throw RunUnavailable("Conversation agent selection is unavailable");}
     virtual WorkspaceSkillCatalogue workspace_skills()const{throw RunUnavailable("Workspace skill inspection is unavailable");}
     virtual WorkspaceSessionSkills session_skills(const std::string&)const{throw RunUnavailable("Session skill controls are unavailable");}
     virtual WorkspaceSessionSkills replace_session_skills(const std::string&,std::vector<std::string>,std::int64_t,WorkspaceAdmission){throw RunUnavailable("Session skill controls are unavailable");}

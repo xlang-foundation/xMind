@@ -1,4 +1,5 @@
 #include "agentflow/agent_service.hpp"
+#include "agentflow/agent_definitions.hpp"
 #include "agentflow/delegation_executor.hpp"
 #include "agentflow/dynamic_plan_executor.hpp"
 #include "agentflow/http_stream_transport.hpp"
@@ -49,7 +50,7 @@ ContextFailureCode context_failure(const std::exception_ptr& failure){
 }
 struct AgentService::Impl {
     enum class Phase {queued,working,waiting,faulted};
-    struct Job {std::string id,model;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;};
+    struct Job {std::string id,model,agent_instructions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;};
     struct ContextJob {std::string request_id,session,model,owner_id;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
     struct Prepared {};
     PersistenceService& persistence;
@@ -101,6 +102,7 @@ struct AgentService::Impl {
             auto job=std::make_shared<Job>();job->id=run.id;job->phase=Phase::waiting;
             try{job->model=runner.admitted_dynamic_model(run.id);runner.validate_dynamic_owner(run.id,job->model);}
             catch(const DynamicPlanUnavailable&){}
+            const auto selected=store.session_agent(run.session_id).get();if(selected.selected)job->agent_instructions=selected.selected->instructions;
             active.emplace(run.id,job);
             // Even an already-answered clean pause waits for an authenticated
             // duplicate answer or explicit resume; startup never replays it.
@@ -182,7 +184,7 @@ struct AgentService::Impl {
             }
             if(children&&!children->healthy())fail();
             try{
-                const auto observed=runner.execute(job->id,job->stop.get_token(),job->model);std::unique_lock lock(mutex);
+                const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions);std::unique_lock lock(mutex);
                 if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);continue;}
                 if(observed.state!=RunState::paused)throw DatabaseError("Agent worker returned without actual retirement or a human pause");
                 // Re-read under the input owner lock: a final answer may have
@@ -349,6 +351,19 @@ AgentService::AgentService(PersistenceService& store,AgentSettings settings,std:
 AgentService::~AgentService()=default;
 Run AgentService::submit(std::string id,std::string session,std::string prompt){return submit_model(std::move(id),std::move(session),std::move(prompt),{});}
 std::vector<std::string> AgentService::models()const{return impl_->runner.models();}
+std::vector<AgentDefinitionMetadata> AgentService::agent_definitions()const{
+    std::lock_guard lock(impl_->mutex);impl_->require_available();std::vector<AgentDefinitionMetadata> result;
+    for(const auto& item:AgentDefinitionStore(impl_->persistence).load().entries)result.push_back({item.id,item.revision,item.model_id});return result;
+}
+SessionAgentState AgentService::session_agent(const std::string& session)const{
+    std::lock_guard lock(impl_->mutex);impl_->require_available();return impl_->persistence.session_agent(session).get();
+}
+SessionAgentState AgentService::select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t expected){
+    std::lock_guard lock(impl_->mutex);impl_->require_available();std::optional<AgentDefinition> pinned;
+    if(selected){if(selected->id.empty()||selected->revision<1)throw std::invalid_argument("Invalid named agent selection");const auto catalog=AgentDefinitionStore(impl_->persistence).load();const auto found=std::find_if(catalog.entries.begin(),catalog.entries.end(),[&](const auto& item){return item.id==selected->id;});
+        if(found==catalog.entries.end()||found->revision!=selected->revision||found->model_id!=selected->model_id)throw Conflict("Named agent definition changed; refresh before selecting it");pinned=*found;}
+    return impl_->persistence.replace_session_agent(session,std::move(pinned),expected).get();
+}
 bool AgentService::supports_delegation()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&impl_->delegation&&impl_->children->healthy();}
 bool AgentService::supports_dynamic_planning()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&impl_->planning_enabled&&impl_->children->healthy();}
 bool AgentService::supports_context()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&impl_->runner.supports_context();}
@@ -389,11 +404,14 @@ ContextManualStatus AgentService::request_context(const std::string& session,con
     const auto result=ContextManualStatus{admitted.id,admitted.state};lock.unlock();impl_->context_changed.notify_one();return result;
 }
 Run AgentService::submit_model(std::string id,std::string session,std::string prompt,std::string model){
-    if(!model.empty()){const auto configured=models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
-    auto job=std::make_shared<Impl::Job>();job->id=id;job->model=std::move(model);
-    std::unique_lock lock(impl_->mutex);impl_->require_admission();if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
+    auto job=std::make_shared<Impl::Job>();job->id=id;
+    std::unique_lock lock(impl_->mutex);impl_->require_admission();
+    const auto selected=impl_->persistence.session_agent(session).get();std::optional<AgentDefinition> profile=selected.selected;
+    if(profile){job->agent_instructions=profile->instructions;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
+    if(!model.empty()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
+    job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}
-    Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model);}
+    Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,profile);}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
 }

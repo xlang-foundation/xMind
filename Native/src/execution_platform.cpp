@@ -48,6 +48,9 @@ Run ExecutionPlatform::submit_graph_workspace(std::string id,std::string session
     return submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));
 }
 std::vector<std::string> ExecutionPlatform::models() const{return agents_?agents_->models():std::vector<std::string>{};}
+std::vector<AgentDefinitionMetadata> ExecutionPlatform::agent_definitions()const{if(!agents_)throw RunUnavailable("Named agent definitions require a configured provider");return agents_->agent_definitions();}
+SessionAgentState ExecutionPlatform::session_agent(const std::string& session)const{if(!agents_)throw RunUnavailable("Named agent selection requires a configured provider");return agents_->session_agent(session);}
+SessionAgentState ExecutionPlatform::select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t revision){if(!agents_)throw RunUnavailable("Named agent selection requires a configured provider");return agents_->select_session_agent(session,std::move(selected),revision);}
 bool ExecutionPlatform::supports_delegation()const{return agents_&&healthy()&&agents_->supports_delegation();}
 bool ExecutionPlatform::supports_dynamic_planning()const{return agents_&&healthy()&&agents_->supports_dynamic_planning();}
 bool ExecutionPlatform::supports_context()const{return agents_&&healthy()&&agents_->supports_context();}

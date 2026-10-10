@@ -503,7 +503,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>13)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>14)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -532,7 +532,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>13) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>14) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -748,6 +748,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         if(integer(db.execute("PRAGMA defer_foreign_keys").rows.at(0).at(0))!=0||integer(db.execute("PRAGMA foreign_keys").rows.at(0).at(0))!=1)throw DatabaseError("Context migration foreign key enforcement differs");
     }
     if(version<13)db.execute("PRAGMA user_version=13");
+    if(version<14){db.execute("CREATE TABLE session_agents(session_id TEXT PRIMARY KEY NOT NULL REFERENCES sessions(id),selection_json TEXT NOT NULL CHECK(length(CAST(selection_json AS BLOB))<=65536 AND json_valid(selection_json) AND json_type(selection_json)='object'),revision INTEGER NOT NULL CHECK(revision>0))");db.execute("PRAGMA user_version=14");}
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
     if(bootstrap)stage_backend_owner(db,*startup_lease,startup_generation,bootstrap);
@@ -1667,6 +1668,39 @@ SessionSkillState Repository::replace_session_skills(const std::string& id,const
     if(expected==0)db.execute("INSERT INTO session_skills VALUES(?,?,?,1)",{id,selections.workspace_id,source});
     else changed_one(db.execute("UPDATE session_skills SET selections_json=?,revision=revision+1 WHERE session_id=? AND workspace_id=? AND revision=?",{source,id,selections.workspace_id,expected}));
     auto result=session_skills(id,selections.workspace_id);tx.commit();return result;
+}
+SessionAgentState Repository::session_agent(const std::string& id){
+    session(id);SessionAgentState result;auto& db=impl_->database;
+    const auto rows=db.execute("SELECT selection_json,revision FROM session_agents WHERE session_id=?",{id}).rows;
+    if(!rows.empty()){
+        const auto encoded=text(rows[0][0]);result.revision=integer(rows[0][1]);
+        if(result.revision<1||result.revision>9007199254740991LL)throw DatabaseError("Invalid session agent revision");
+        try{
+            const auto value=Json::parse(object_json(encoded,65536));
+            if(value.size()!=2||!value.contains("version")||!value["version"].is_number_integer()||value["version"]!=1||!value.contains("agent"))throw DatabaseError("Invalid saved session agent selection");
+            if(!value["agent"].is_null()){
+                const auto& saved=value["agent"];
+                if(!saved.is_object()||saved.size()!=4||!saved.contains("id")||!saved["id"].is_string()||!saved.contains("revision")||!saved["revision"].is_number_integer()||!saved.contains("model_id")||!saved["model_id"].is_string()||!saved.contains("instructions")||!saved["instructions"].is_string())throw DatabaseError("Invalid saved session agent definition");
+                AgentDefinition agent{saved["id"].get<std::string>(),saved["revision"].get<std::int64_t>(),saved["model_id"].get<std::string>(),saved["instructions"].get<std::string>()};
+                if(agent.id.empty()||agent.id.size()>64||agent.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||agent.revision<1||agent.revision>9007199254740991LL||agent.model_id.size()>256||agent.model_id.find('\0')!=std::string::npos||agent.instructions.empty()||agent.instructions.size()>32768||agent.instructions.find('\0')!=std::string::npos)throw DatabaseError("Invalid saved session agent definition values");
+                result.selected=std::move(agent);
+            }
+        }catch(const DatabaseError&){throw;}catch(...){throw DatabaseError("Invalid saved session agent selection");}
+    }
+    result.editable=db.execute("SELECT id FROM runs WHERE session_id=? AND parent_run_id IS NULL AND state IN ('queued','running','paused') UNION ALL SELECT id FROM context_idle_owners WHERE session_id=? AND state='active' LIMIT 1",{id,id}).rows.empty();
+    return result;
+}
+SessionAgentState Repository::replace_session_agent(const std::string& id,std::optional<AgentDefinition> selected,std::int64_t expected){
+    if(expected<0||expected>=9007199254740991LL)throw std::invalid_argument("Invalid session agent revision");
+    if(selected){const auto& agent=*selected;if(agent.id.empty()||agent.id.size()>64||agent.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||agent.revision<1||agent.revision>9007199254740991LL||agent.model_id.size()>256||agent.model_id.find('\0')!=std::string::npos||agent.instructions.empty()||agent.instructions.size()>32768||agent.instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid selected agent definition");}
+    auto& db=impl_->database;Transaction tx(db);const auto previous=session_agent(id);
+    if(!previous.editable)throw Conflict("Conversation agent cannot change while execution or context maintenance owns the session");
+    if(previous.revision!=expected)throw Conflict("Conversation agent changed; refresh before editing");
+    Json snapshot=nullptr;if(selected)snapshot={{"id",selected->id},{"revision",selected->revision},{"model_id",selected->model_id},{"instructions",selected->instructions}};
+    const auto source=Json{{"version",1},{"agent",std::move(snapshot)}}.dump();
+    if(expected==0)db.execute("INSERT INTO session_agents VALUES(?,?,1)",{id,source});
+    else changed_one(db.execute("UPDATE session_agents SET selection_json=?,revision=revision+1 WHERE session_id=? AND revision=?",{source,id,expected}));
+    auto result=session_agent(id);tx.commit();return result;
 }
 SkillSelections Repository::initialize_run_skills(const std::string& id,const std::string& workspace){
     SkillSelections initial{workspace,{}};validate_skill_selections(initial);auto& db=impl_->database;Transaction tx(db);const auto current=run(id);

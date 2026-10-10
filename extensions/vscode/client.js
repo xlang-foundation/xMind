@@ -135,6 +135,15 @@ class BackendClient {
     if(!observed.editable)throw new Error('Wait for this conversation to become idle before changing skills.');
     return validateSessionSkills(await this.request(`/v1/sessions/${encodeURIComponent(id)}/skills`,{ids,expected_revision:observed.revision,expected_workspace_id:observed.workspace_id,expected_workspace_authority_id:observed.authority_id}),id);
   }
+  async agentDefinitions() { return validateAgentCatalogue(await this.request('/v1/agents')); }
+  async sessionAgent(id,catalogue) { executionIdentity(id);return validateSessionAgent(await this.request(`/v1/sessions/${encodeURIComponent(id)}/agent`),id,catalogue); }
+  async replaceSessionAgent(id,definition,observed,catalogue) {
+    executionIdentity(id);if(!observed?.editable||!Number.isSafeInteger(observed.revision)||observed.revision<0)throw new Error('Wait for this conversation to become idle before changing its agent.');
+    const selected=definition===undefined?undefined:catalogue?.agents?.find(item=>item.id===definition.id&&item.revision===definition.revision);
+    if(definition!==undefined&&!selected)throw new Error('Choose an agent from the current backend catalogue.');
+    const result=await this.request(`/v1/sessions/${encodeURIComponent(id)}/agent`,{agent_id:selected?.id??null,agent_revision:selected?.revision??0,expected_revision:observed.revision});
+    return validateSessionAgent(result,id,catalogue);
+  }
   createSession(title) { return this.request('/v1/sessions', { title }); }
   renameSession(id,title,expectedTitle) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/title`,{title,expected_title:expectedTitle}); }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }
@@ -216,6 +225,37 @@ function validateSessionSkills(value,session){
 function validateSkillCatalogue(value){
   if(!value||typeof value.workspace_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(value.workspace_id)||typeof value.authority_id!=='string'||!/^[a-f0-9]{32}$/.test(value.authority_id)||!Array.isArray(value.skills)||value.skills.length>64||new Set(value.skills.map(s=>s?.id)).size!==value.skills.length)throw new Error('Invalid backend skill catalogue.');
   for(const skill of value.skills){skillIds([skill?.id]);if(typeof skill.name!=='string'||new TextEncoder().encode(skill.name).length>1024||typeof skill.path!=='string'||!skill.path.startsWith('.agents/skills/')||typeof skill.model_invocable!=='boolean'||Object.keys(skill).some(key=>!['id','name','path','model_invocable','description','autoinvoke'].includes(key))||Object.hasOwn(skill,'description')&&typeof skill.description!=='string'||Object.hasOwn(skill,'autoinvoke')&&typeof skill.autoinvoke!=='boolean')throw new Error('Invalid backend skill catalogue entry.');}return value;
+}
+function agentIdentity(id){if(typeof id!=='string'||!id||id.length>64||!/^[A-Za-z0-9_.-]+$/.test(id))throw new Error('Invalid named agent identity.');return id;}
+function validateAgentCatalogue(value){
+  if(!value||typeof value!=='object'||Object.keys(value).length!==1||!Array.isArray(value.agents)||value.agents.length>64)throw new Error('Invalid backend agent catalogue.');
+  const ids=new Set();for(const agent of value.agents){if(!agent||typeof agent!=='object'||Object.keys(agent).length!==3)throw new Error('Invalid backend agent metadata.');agentIdentity(agent.id);if(ids.has(agent.id)||!Number.isSafeInteger(agent.revision)||agent.revision<1||typeof agent.model_id!=='string'||agent.model_id.length>256||agent.model_id.startsWith('sk-'))throw new Error('Invalid or duplicate backend agent metadata.');ids.add(agent.id);}
+  return value;
+}
+function validateSessionAgent(value,session,catalogue){
+  if(!value||typeof value!=='object'||Object.keys(value).length!==4||value.session_id!==session||!Number.isSafeInteger(value.revision)||value.revision<0||typeof value.editable!=='boolean'||!(value.selected===null||value.selected&&typeof value.selected==='object'&&Object.keys(value.selected).length===3))throw new Error('Invalid backend conversation agent state.');
+  if(value.selected){const selected=value.selected;agentIdentity(selected.id);if(!Number.isSafeInteger(selected.revision)||selected.revision<1||typeof selected.model_id!=='string'||selected.model_id.length>256||selected.model_id.startsWith('sk-'))throw new Error('Invalid selected backend agent metadata.');if(catalogue&&!catalogue.agents.some(item=>item.id===selected.id&&item.revision===selected.revision&&item.model_id===selected.model_id))throw new Error('Selected agent differs from its backend catalogue.');}
+  return value;
+}
+class AgentSelectionController {
+  constructor(client,post,scope){this.client=client;this.post=post;this.scope=scope;this.serial=0;}
+  invalidate(){this.serial++;this.record=undefined;this.post({type:'agent-selection-clear'});}
+  current(scope,serial){const now=this.scope();return serial===this.serial&&now.enabled&&now.session===scope.session&&now.generation===scope.generation;}
+  async read(){
+    const scope=this.scope(),serial=++this.serial;if(!scope.enabled||!scope.session){this.record=undefined;this.post({type:'agent-selection-clear'});return;}
+    this.record=undefined;const catalogue=validateAgentCatalogue(await this.client.agentDefinitions());if(!this.current(scope,serial))return;
+    const selection=validateSessionAgent(await this.client.sessionAgent(scope.session),scope.session);
+    if(!this.current(scope,serial))return;
+    if(selection.selected&&!catalogue.agents.some(item=>item.id===selection.selected.id&&item.revision===selection.selected.revision&&item.model_id===selection.selected.model_id))throw new Error('The selected agent revision is no longer in the current catalogue; clear or replace it.');
+    this.record={scope,catalogue,selection};this.post({type:'agent-selection',catalogue,selection});return this.record;
+  }
+  async change(message){
+    const observed=this.record,scope=this.scope();if(!observed||!scope.enabled||!observed.selection.editable||scope.session!==observed.scope.session||scope.generation!==observed.scope.generation||message.session!==scope.session||message.revision!==observed.selection.revision)throw new Error('Refresh this idle conversation before changing its agent.');
+    const definition=message.agent_id===null?undefined:observed.catalogue.agents.find(item=>item.id===message.agent_id);if(message.agent_id!==null&&!definition)throw new Error('Choose an agent from the current catalogue.');
+    const serial=++this.serial,selection=await this.client.replaceSessionAgent(scope.session,definition,observed.selection,observed.catalogue);if(!this.current(scope,serial))return;
+    if(selection.revision!==observed.selection.revision+1||selection.selected?.id!==definition?.id||selection.selected?.revision!==definition?.revision)throw new Error('Backend agent acknowledgement changed the requested selection.');
+    this.record={scope,catalogue:observed.catalogue,selection};this.post({type:'agent-selection',catalogue:observed.catalogue,selection});return this.record;
+  }
 }
 class SkillViewController {
   constructor(client,post,scope){this.client=client;this.post=post;this.scope=scope;this.serial=0;}
@@ -637,5 +677,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
-else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
+else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};

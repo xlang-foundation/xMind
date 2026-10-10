@@ -94,6 +94,7 @@ test('browser adapts a VS Code-attached single-workspace server without inventin
 test('event stream routes are read-only and exclude foreign path encodings',async()=>{
  const {allowedApiRoute}=await import('../server.mjs');
  assert.equal(allowedApiRoute('/v1/workspaces/select','POST'),false,'Profile switch credentials are handled only by the HttpOnly UI adapter');assert.equal(allowedApiRoute('/v1/workspaces/add','POST'),false,'Workspace registration credentials are handled only by the HttpOnly UI adapter');
+ assert.equal(allowedApiRoute('/v1/agents','GET'),true);assert.equal(allowedApiRoute('/v1/agents','POST'),false,'Named agent definitions are a read-only browser catalogue');assert.equal(allowedApiRoute('/v1/sessions/session_1/agent','GET'),true);assert.equal(allowedApiRoute('/v1/sessions/session_1/agent','POST'),true);assert.equal(allowedApiRoute('/v1/sessions/session_1/agent?x=y','POST'),false);
  for(const route of ['/v1/runs/root/events/stream','/v1/runs/root/tree-events/stream','/v1/graph-runs/root/events/stream'])for(const method of ['GET','POST','HEAD','PUT','DELETE'])assert.equal(allowedApiRoute(route,method),method==='GET');
  for(const route of ['/v1/runs/root/events/stream/extra','/v1/graph-runs/root/tree-events/stream','/v1/runs/a%2Fb/events/stream'])assert.equal(allowedApiRoute(route,'GET'),false);
 });

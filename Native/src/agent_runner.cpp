@@ -221,9 +221,10 @@ void AgentRunner::validate_dynamic_owner(const std::string& root_id,const std::s
     }}catch(const ProcessBeforeDispatchError&){throw DynamicPlanUnavailable("Admitted dynamic process binding is unavailable");}
       catch(const std::filesystem::filesystem_error&){throw DynamicPlanUnavailable("Admitted dynamic process binding is unavailable");}
 }
-Run AgentRunner::start(std::string id,std::string session_id,std::string prompt,const std::string& model_id) {
+Run AgentRunner::start(std::string id,std::string session_id,std::string prompt,const std::string& model_id,const std::optional<AgentDefinition>& selected_agent) {
     if(prompt.empty() || prompt.size()>1024*1024) throw std::invalid_argument("Prompt must contain 1-1048576 UTF-8 bytes");
     auto input=Json{{"content",std::move(prompt)}};const auto context=provider_context_json(settings_,model_id);if(!context.empty())input["provider_context"]=Json::parse(context);
+    if(selected_agent){const auto& agent=*selected_agent;if(agent.id.empty()||agent.id.size()>64||agent.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||agent.revision<1||agent.revision>9007199254740991LL||agent.instructions.empty()||agent.instructions.size()>32768||agent.instructions.find('\0')!=std::string::npos||agent.model_id.size()>256||agent.model_id.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid selected agent snapshot");input["agent_profile"]={{"id",agent.id},{"revision",agent.revision},{"model_id",agent.model_id}};}
     return persistence_.start_prompt_run(std::move(id),std::move(session_id),input.dump(),execution_budget(model_id),execution_capabilities(model_id)).get();
 }
 ContextBinding AgentRunner::context_binding(const std::string& model_id)const{
@@ -412,7 +413,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         request.max_output_tokens=settings_.max_output_tokens;
         auto agent_instructions=settings_.instructions;
         if(!graph_instructions.empty()){
-            agent_instructions.append("\n\nGraph agent instructions (trusted catalog):\n");
+            agent_instructions.append("\n\nSelected agent instructions (trusted backend snapshot):\n");
             agent_instructions+=graph_instructions;
         }
         auto instructions=agent_instructions;std::unique_ptr<RepositoryInstructionContext> repository_context;

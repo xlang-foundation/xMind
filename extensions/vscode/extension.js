@@ -1,7 +1,7 @@
 'use strict';
 const vscode = require('vscode');
 const crypto = require('node:crypto');
-const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,EventStreamSubscription,McpAuthorizationController } = require('./client');
+const { BackendClient, backendOrigin, validateToken, providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,SkillViewController,AgentSelectionController,EventStreamSubscription,McpAuthorizationController } = require('./client');
 const { html } = require('./webview');
 const { editReview } = require('./edit-review');
 const {patchReview}=require('./patch-review');
@@ -53,6 +53,7 @@ async function activate(context) {
   let planningObservation=false,planSnapshot,pendingPlanRead=false,planReadConflicts=0;
   let contextObservation=false,contextController;
   let skillController;
+  let agentController;
   const stateKey = 'agentflow.session';
   const modelStateKey = 'xmind.model';
   const runStateKey = 'xmind.observedRun';
@@ -67,7 +68,13 @@ async function activate(context) {
     if(!skillController||skillController.client!==target)skillController=new SkillViewController(target,post,()=>({session:sessionId,generation,enabled:!!panel&&client===target&&health?.skill_controls===true}));
     try{await skillController.read();}catch(error){if(client===target&&version===generation)post({type:'skills-error',text:error.message});}
   }
-  const stop = () => { clearTimeout(snapshotTimer);snapshotTimer=undefined;eventSubscription?.stop();generation++;contextController?.invalidate();skillController?.invalidate();profileController?.invalidate(); };
+  async function readAgentSelection(){
+    if(!panel||!client)return;const target=client,version=generation;
+    if(health?.agent_selection!==true){if(agentController)agentController.invalidate();return;}
+    if(!agentController||agentController.client!==target)agentController=new AgentSelectionController(target,post,()=>({session:sessionId,generation,enabled:!!panel&&client===target&&health?.agent_selection===true}));
+    try{await agentController.read();}catch(error){if(client===target&&version===generation)post({type:'agent-selection-error',text:error.message});}
+  }
+  const stop = () => { clearTimeout(snapshotTimer);snapshotTimer=undefined;eventSubscription?.stop();generation++;contextController?.invalidate();skillController?.invalidate();agentController?.invalidate();profileController?.invalidate(); };
   const streamCurrent=pin=>!!panel&&panel===pin.view&&generation===pin.generation&&client===pin.client&&sessionId===pin.session&&configuredOrigin()===pin.origin;
   function watch(){
     const pin=eventSubscription?.pin,selected=sessionRuns.find(value=>value.id===runId);
@@ -283,7 +290,7 @@ async function activate(context) {
       watch();
       await poll();
     } else {presentRuns();post({ type: 'status', text: 'Ready' });}
-    await readSkills();
+    await readSkills();await readAgentSelection();
   }
 
   async function selectRun(id) {
@@ -422,13 +429,14 @@ async function activate(context) {
           post({type:'workspace',root:connection.metadata.root,roots:connection.roots,managed:!previewOrigin&&machineSetting(vscode,'backendMode')!=='external',backendChangePending:connection.backendChangePending===true});
           contextReadyView=view;const pending=pendingEditorContexts;pendingEditorContexts=[];
           for(const item of pending)if(item.view===view&&item.client===client&&item.generation===generation&&item.epoch===workspaceBackend.epoch)post(item.message);
-          post({ type: 'capabilities', execution: health.agent_execution, renameSessions:health.session_rename===true, model:selectedModel, models:modelCatalogue.models });
+          post({ type: 'capabilities', execution: health.agent_execution, renameSessions:health.session_rename===true,agentSelection:health.agent_selection===true, model:selectedModel, models:modelCatalogue.models });
           await refresh();
           if (sessionId) await selectSession(sessionId);
           await refreshGraphs();
           // Fetch with the saved backend key; settings handles a rejected key.
           try{await configureModel();}catch{}
           await readSkills();
+          await readAgentSelection();
         } else if(message.type==='mcp-refresh'){
           await readMcp();
         } else if(['mcp-start','mcp-renew','mcp-cancel','mcp-open'].includes(message.type)){
@@ -438,6 +446,8 @@ async function activate(context) {
           if(!sessionId){const session=await client.createSession('Workspace skills');if(panel!==view)return;await selectSession(session.id);await refresh();}else await readSkills();
         } else if(message.type==='skills-change'){
           try{if(health?.skill_controls!==true||busySession()||!skillController)throw new Error('Wait for the selected conversation to become idle.');await skillController.change(message);}catch(error){post({type:'skills-error',text:error.message});}
+        } else if(message.type==='agent-select'){
+          try{if(health?.agent_selection!==true||busySession()||!agentController)throw new Error('Wait for this conversation to become idle before changing its agent.');await agentController.change(message);}catch(error){post({type:'agent-selection-error',text:error.message});}
         } else if (message.type === 'saveProviderKey') {
           let key=message.key;delete message.key;
           try{await configureModel(key===''?undefined:key,message.profile,message.route);}finally{key=undefined;}

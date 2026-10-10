@@ -14,6 +14,10 @@ public:
     Run submit_model(std::string id,std::string session_id,std::string prompt,std::string model_id) override;
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
     std::vector<std::string> models() const override;
+    bool supports_agent_selection()const override{return true;}
+    std::vector<AgentDefinitionMetadata> agent_definitions()const override;
+    SessionAgentState session_agent(const std::string& session)const override;
+    SessionAgentState select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t expected_revision)override;
     bool supports_delegation() const override;
     bool supports_dynamic_planning() const override;
     bool supports_context() const override;

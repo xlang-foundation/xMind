@@ -21,6 +21,11 @@ const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undef
 let skillSnapshot,skillPending=false;
 const skillRows=new Map();
 function skillControls(){const disabled=skillPending||sessionBusy||activeRun||!skillSnapshot?.selection?.editable;for(const row of skillRows.values())row.button.disabled=disabled;byId('skills-clear').disabled=disabled;}
+let agentSnapshot,agentPending=false;
+function agentControls(){const select=byId('agent');select.disabled=agentPending||sessionBusy||activeRun||!agentSnapshot?.selection?.editable;}
+function clearAgentSelection(){agentSnapshot=undefined;agentPending=false;byId('agent-picker').hidden=true;byId('agent-status').textContent='';byId('agent').replaceChildren();}
+function renderAgentSelection(value){agentSnapshot=value;agentPending=false;const select=byId('agent'),catalogue=value.catalogue.agents,selected=value.selection.selected;select.replaceChildren();const fallback=node('option','Agent (default)');fallback.value='';select.append(fallback);for(const item of catalogue){const option=node('option',item.id+(item.model_id?' · '+item.model_id:''));option.value=item.id;option.title=item.id+(item.model_id?' · '+item.model_id:'');select.append(option);}select.value=selected?.id||'';byId('agent-picker').hidden=false;byId('agent-status').textContent=selected?'Conversation agent · '+selected.id:'Default agent';agentControls();}
+byId('agent').onchange=()=>{const state=agentSnapshot?.selection;if(!state?.editable||sessionBusy||activeRun||agentPending)return;agentPending=true;agentControls();api.postMessage({type:'agent-select',session:state.session_id,revision:state.revision,agent_id:byId('agent').value||null});};
 function clearSkills(){skillSnapshot=undefined;skillPending=false;skillRows.clear();byId('skill-list').replaceChildren();byId('skills-view').hidden=true;}
 function renderSkills(message){
   skillSnapshot=message;skillPending=false;byId('skills-view').hidden=false;const selected=message.selection?.ids||[];
@@ -485,12 +490,15 @@ window.addEventListener('message',event=>{
   const m=event.data;if(!m||typeof m.type!=='string')return;
   const scroll=byId('scroll'),follow=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<80;
   if(m.type==='workspace'){const root=byId('workspace-root');if(root&&typeof m.root==='string'&&m.root.length<=32760&&Array.isArray(m.roots)){currentWorkspaceRoot=m.root;root.textContent='Backend root: '+m.root+(m.roots.length>1?' · active root from '+m.roots.length+' workspace folders':'')+(m.backendChangePending===true?' · Backend changes pending; using saved backend':'');root.hidden=false;}}
-  else if(m.type==='workspace-clear'){currentWorkspaceRoot=undefined;operations([]);const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}const mode=byId('file-mode');if(mode){mode.textContent='';mode.hidden=true;}byId('prompt').value='';resizePrompt();}
+  else if(m.type==='workspace-clear'){currentWorkspaceRoot=undefined;clearAgentSelection();operations([]);const root=byId('workspace-root');if(root){root.textContent='';root.hidden=true;}const mode=byId('file-mode');if(mode){mode.textContent='';mode.hidden=true;}byId('prompt').value='';resizePrompt();}
   else if(m.type==='graphs'){const select=byId('workflow');select.replaceChildren();const single=node('option','Agent (default)');single.value='';select.append(single);for(const graph of m.graphs){const option=node('option',graph.id+' · '+graph.node_count+' nodes'+(graph.executable?'':' · unavailable'));option.value=graph.id;option.disabled=!graph.executable;option.dataset.executable=graph.executable?'true':'';option.selected=graph.id===m.selected;select.append(option);}if(!m.selected)select.value='';workflowExecutable=!!m.graphs.find(g=>g.id===m.selected&&g.executable);byId('workflow-picker').hidden=!m.graphs.length;byId('send').disabled=!canExecute()||activeRun||sessionBusy;}
   else if(m.type==='graph-clear')clearGraph();
   else if(m.type==='skills')renderSkills(m);
   else if(m.type==='skills-clear')clearSkills();
   else if(m.type==='skills-error')skillError(m.text);
+  else if(m.type==='agent-selection')renderAgentSelection(m);
+  else if(m.type==='agent-selection-clear')clearAgentSelection();
+  else if(m.type==='agent-selection-error'){agentPending=false;agentControls();byId('agent-status').textContent=m.text;}
   else if(m.type==='context-clear')clearContext();
   else if(m.type==='context')contextView(m.record);
   else if(m.type==='plan-clear')clearPlan();
@@ -503,7 +511,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.title);option.value=session.id;option.dataset.sessionId=session.id;option.selected=session.id===m.selected;byId('sessions').append(option);}refreshRename();}
   else if(m.type==='rename-result'){if(renameSnapshot?.id===m.id){byId('rename-save').disabled=false;byId('rename-status').textContent=m.text||'';if(m.success)renameDialog.close();}}
   else if(m.type==='runs'){
-    sessionBusy=m.busy;skillControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
+    sessionBusy=m.busy;skillControls();agentControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
     for(const run of m.runs){const option=node('option',run.state+' · '+run.id);option.value=run.id;option.selected=run.id===m.selected;byId('runs').append(option);}
     renderRunContext(m.runs.find(run=>run.id===m.selected));
     if(displayedPlan&&displayedPlan.run.id!==m.selected)clearPlan();planControls();if(displayedGraph&&displayedGraph.run.id!==m.selected)clearGraph();
@@ -518,7 +526,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
   else if(m.type==='mcp-authorization'){renderMcpSettings(m);}
   else if(m.type==='mcp-error'){byId('mcp-status').textContent=m.text;}
-  else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;refreshRename();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
+  else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;refreshRename();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
   else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();byId('events').textContent='';}
   else if(m.type==='draft'){byId('prompt').value=m.text;resizePrompt();}
   else if(m.type==='append-context'){
@@ -541,7 +549,7 @@ window.addEventListener('message',event=>{
       section.append(detail);
     }
   }
-  else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);skillControls();byId('send').disabled=!canExecute()||activeRun||sessionBusy;byId('cancel').hidden=!activeRun;}
+  else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);skillControls();agentControls();byId('send').disabled=!canExecute()||activeRun||sessionBusy;byId('cancel').hidden=!activeRun;}
   else if(m.type==='error'){for(const row of graphRows.values())if(row.button)row.button.disabled=false;for(const row of planRows.values())row.submitting=false;const graphResume=byId('graph-resume');if(graphResume)graphResume.disabled=displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true;const resume=byId('plan-resume');if(resume)delete resume.dataset.submitting;planControls();if(displayedContext)contextView(displayedContext);byId('status').textContent=m.text;if(settings.open){byId('settings-status').textContent=m.text;byId('settings-save').disabled=false;}}
   // Keep review position stable while backend-owned effects await a decision.
   // The notice navigates to the proposal; it never sends an approval itself.

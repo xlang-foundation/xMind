@@ -7,6 +7,7 @@
 #include "agentflow/context_records.hpp"
 #include "agentflow/graph_context_records.hpp"
 #include "agentflow/skill_records.hpp"
+#include "agentflow/agent_definition_records.hpp"
 #include "agentflow/backend_owner.hpp"
 #include "agentflow/mcp_oauth_refresh_records.hpp"
 #include <memory>
@@ -140,6 +141,8 @@ public:
     SkillSelections run_skills(const std::string& run_id);
     SessionSkillState session_skills(const std::string& session_id,const std::string& workspace_id);
     SessionSkillState replace_session_skills(const std::string& session_id,const SkillSelections& selections,std::int64_t expected_revision);
+    SessionAgentState session_agent(const std::string& session_id);
+    SessionAgentState replace_session_agent(const std::string& session_id,std::optional<AgentDefinition> selected,std::int64_t expected_revision);
     void record_tool_turn(const std::string& run_id,const std::string& assistant_json,const std::vector<std::string>& tool_json,const std::optional<SkillSelections>& skills={});
     Run complete_run(const std::string& run_id,const std::string& assistant_json);
     Run run(const std::string& id);

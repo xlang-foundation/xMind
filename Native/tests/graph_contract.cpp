@@ -61,6 +61,9 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         const std::string definitions="agents:\n  - id: reviewer\n    model_id: review-model-v1\n    instructions: |\n      Review only the assigned branch.\n";
         const auto first=agents.apply(definitions);
         require(first.revision==1&&first.entries.size()==1&&first.entries[0].revision==1,"YAML agent import must assign native catalog/profile revisions");
+        store.create_session("named-session","Native selected agent snapshot").get();
+        const auto selection=store.replace_session_agent("named-session",first.entries[0],0).get();
+        require(selection.revision==1&&selection.selected&&selection.selected->id=="reviewer"&&selection.selected->revision==1&&selection.editable,"Session agent selection must pin the chosen native profile revision");
         const std::string named_graph="graphs:\n  - id: named_review\n    spec:\n      nodes:\n        - id: inspect\n          type: agent\n          agent_id: reviewer\n          prompt: Review this branch\n";
         GraphCatalogStore graphs(store);const auto captured=graphs.apply(named_graph);const auto& node=captured.entries[0].plan.nodes()[0];
         require(node.agent_id=="reviewer"&&node.agent_revision==1&&node.model_id=="review-model-v1"&&node.instructions=="Review only the assigned branch.\n","Graph admission must resolve and pin named profile behavior into the immutable executable node");
@@ -75,8 +78,15 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         require(revised.entries[0].revision==2&&revised.entries[0].plan.nodes()[0].agent_revision==2&&revised.entries[0].plan.nodes()[0].model_id=="review-model-v2","Updating a named agent must create a new immutable graph revision");
         require(Json::parse(pinned).at("nodes")[0].at("agent_revision")==1&&Json::parse(pinned).at("nodes")[0].at("model_id")=="review-model-v1","Previously admitted graph plans must retain their original named behavior snapshot");
         require(agents.apply("agents:\n  - id: reviewer\n    model_id: review-model-v2\n    instructions: |\n      Review only the assigned branch and cite the source.\n").revision==2,"Equivalent named agent imports must preserve revisions");
+        const auto pinned_selection=store.session_agent("named-session").get();require(pinned_selection.selected&&pinned_selection.selected->revision==1&&pinned_selection.selected->model_id=="review-model-v1","Session selection must retain its original prompt/model snapshot after catalog replacement");
+        rejects<Conflict>([&]{store.replace_session_agent("named-session",std::nullopt,0).get();});
+        store.start_prompt_run("named-session-run","named-session",R"({"content":"Synthetic active owner"})").get();
+        require(!store.session_agent("named-session").get().editable,"Active root run must lock session agent selection");
+        rejects<Conflict>([&]{store.replace_session_agent("named-session",std::nullopt,1).get();});
+        store.transition("named-session-run",RunState::queued,RunState::cancelled,R"({"reason":"test retirement"})").get();
+        const auto cleared=store.replace_session_agent("named-session",std::nullopt,1).get();require(cleared.revision==2&&!cleared.selected&&cleared.editable,"Clearing a selection must retain one revision and become editable after run retirement");
         store.close();
     }
-    {PersistenceService store((std::filesystem::u8path(argv[1])/"named-agents.sqlite").string(),imports);const auto reopened=AgentDefinitionStore(store).load();const auto graph=GraphCatalogStore(store).load();require(reopened.entries[0].revision==2&&graph.entries[0].plan.nodes()[0].agent_revision==2,"Named agent and graph snapshots must reopen through actual xlang3/SQLite storage");store.close();}
+    {PersistenceService store((std::filesystem::u8path(argv[1])/"named-agents.sqlite").string(),imports);const auto reopened=AgentDefinitionStore(store).load();const auto graph=GraphCatalogStore(store).load();const auto selection=store.session_agent("named-session").get();require(reopened.entries[0].revision==2&&graph.entries[0].plan.nodes()[0].agent_revision==2&&selection.revision==2&&!selection.selected,"Named agent, graph snapshots and session selection must reopen through actual xlang3/SQLite storage");store.close();}
     std::cout<<"Native graph contracts passed planning, joins, conditions, references, human checkpoint restore, uncertain non-replay, bounded YAML catalog import and actual xlang3/SQLite configuration revisions/fault/reopen. Coordinator outputs are synthetic; no agent/tool graph execution claimed.\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 const {BackendClient}=createRequire(import.meta.url)('../../extensions/vscode/client.js');
-import {spawn,execFile} from 'node:child_process';
+import {spawn,spawnSync,execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {createServer} from 'node:http';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
@@ -11,7 +11,7 @@ import {tmpdir} from 'node:os';
 import {join,resolve,dirname,basename} from 'node:path';
 import {randomBytes} from 'node:crypto';
 const execute=promisify(execFile);
-const [serverExe,cliExe,modules,stdlib,programMode]=process.argv.slice(2);
+const [serverExe,cliExe,modules,stdlib,adminExe,programMode]=process.argv.slice(2);
 const unified=programMode==='unified';
 assert.ok(programMode===undefined||unified,'Unknown native program mode');
 const root=await mkdtemp(join(tmpdir(),'xmind-graph-service-')),workspace=join(root,'work'),database=join(root,'state.sqlite');
@@ -68,6 +68,8 @@ async function session(id){assert.equal((await request('/v1/sessions',{id,title:
 async function submit(id,session,graph='wait.read'){return request('/v1/graph-runs',{id,session_id:session,graph_id:graph,graph_revision:1,prompt:'Actual graph service fixture task'});}
 try {
  await mkdir(workspace);await writeFile(join(workspace,'left.txt'),'Actual left bytes\n');await writeFile(join(workspace,'right.txt'),'Actual right bytes\n');await writeFile(join(root,'graphs.json'),JSON.stringify(definitions));
+ const agentCatalogFile=join(root,'agents.yaml');await writeFile(agentCatalogFile,'agents:\n  - id: service.review\n    model_id: fixture-model\n    instructions: Keep the native session selection fixture isolated.\n');
+ const importedAgents=spawnSync(adminExe,['admin','--db',database,'--modules',modules,'--stdlib',stdlib,'import-agents',agentCatalogFile],{env,encoding:'utf8',windowsHide:true,timeout:10000});assert.ifError(importedAgents.error);assert.equal(importedAgents.status,0,importedAgents.stderr);assert.deepEqual(JSON.parse(importedAgents.stdout),{catalog_revision:1,agents:[{id:'service.review',revision:1,model_id:'fixture-model'}],execution_available:false});
  await new Promise(resolve=>model.listen(0,'127.0.0.1',resolve));await start();
  assert.equal((await request('/v1/graphs',undefined,{Authorization:''})).status,401);
  const catalogue=await cli('graphs');assert.equal(catalogue.graphs.length,4);assert.equal(catalogue.graphs.find(graph=>graph.id==='model.flow').executable,false);assert.equal(catalogue.graphs.find(graph=>graph.id==='plain.read').executable,true);
@@ -124,7 +126,17 @@ try {
  await assert.rejects(readFile(join(workspace,'approved.txt')),error=>error.code==='ENOENT');const consoleEffect=await interactiveGraph(effect.id,'approve');assert.equal(consoleEffect.records.find(record=>record.type==='operation_review').operation.id,operation.id);await state(effect.id,'completed');assert.equal(await readFile(join(workspace,'approved.txt'),'utf8'),'Actual reviewed graph bytes\n');
  // A configured graph agent uses actual native provider sockets and retains
  // child usage separately; only this protocol peer's reply/counts are synthetic.
- await stop();await start(true);await session('model');const agent=await cli('graph-run','model','model.flow','1','Observe an actual dependency');await state(agent.id,'completed');if(modelFailure)throw modelFailure;assert.equal(modelRequests,1);const branches=await cli('graph-children',agent.id);assert.equal(branches.length,2);assert.ok((await cli('graph-events',agent.id)).some(event=>event.kind==='model.usage'));const modelHistory=await cli('history','model');assert.ok(!('usage' in modelHistory[1].data));
+ await stop();await start(true);
+ const agentViewClient=new BackendClient(`http://127.0.0.1:${port}`,()=>token),agentSession=await agentViewClient.createSession('Named agent HTTP selection'),agentCatalogue=await agentViewClient.agentDefinitions();assert.deepEqual(agentCatalogue,{agents:[{id:'service.review',revision:1,model_id:'fixture-model'}]});
+ let agentSelection=await agentViewClient.sessionAgent(agentSession.id,agentCatalogue);assert.equal(agentSelection.revision,0);assert.equal(agentSelection.editable,true);assert.equal(agentSelection.selected,null);
+ agentSelection=await agentViewClient.replaceSessionAgent(agentSession.id,agentCatalogue.agents[0],agentSelection,agentCatalogue);assert.equal(agentSelection.revision,1);assert.equal(agentSelection.selected.id,'service.review');
+ await assert.rejects(agentViewClient.replaceSessionAgent(agentSession.id,undefined,{...agentSelection,revision:0},agentCatalogue),error=>error.status===409);
+ agentSelection=await agentViewClient.replaceSessionAgent(agentSession.id,undefined,agentSelection,agentCatalogue);assert.equal(agentSelection.revision,2);assert.equal(agentSelection.selected,null);
+ assert.deepEqual(await cli('agents'),agentCatalogue,'The local console client must read the same native agent catalogue');
+ let cliSelection=await cli('session-agent',agentSession.id);assert.equal(cliSelection.revision,2);assert.equal(cliSelection.selected,null);
+ cliSelection=await cli('set-agent',agentSession.id,'service.review','2','1');assert.equal(cliSelection.revision,3);assert.equal(cliSelection.selected.id,'service.review');
+ cliSelection=await cli('set-agent',agentSession.id,'default','3','0');assert.equal(cliSelection.revision,4);assert.equal(cliSelection.selected,null);
+ await session('model');const agent=await cli('graph-run','model','model.flow','1','Observe an actual dependency');await state(agent.id,'completed');if(modelFailure)throw modelFailure;assert.equal(modelRequests,1);const branches=await cli('graph-children',agent.id);assert.equal(branches.length,2);assert.ok((await cli('graph-events',agent.id)).some(event=>event.kind==='model.usage'));const modelHistory=await cli('history','model');assert.ok(!('usage' in modelHistory[1].data));
  const agentHistory=await cli('graph-child-history',agent.id,branches.find(child=>child.node_id==='agent').id);assert.equal(agentHistory.at(-1).data.usage.prompt_tokens,12);assert.equal(agentHistory.at(-1).data.usage.completion_tokens,5);assert.equal(agentHistory.at(-1).data.content,'Synthetic provider reply after actual dependency execution');
  console.log('Native graph service HTTP/CLI passed actual catalog admission, actor/stale rejection, paused capacity/provider ownership, restart, human resume, real dependency reads, repeated scheduling, root cancellation, separately approved creation, graph-watch child ownership/cursor reconnect/terminal drain/disconnect without cancellation, and configured agent transport with synthetic provider data.');
 } finally {for(const observer of observers)await stopObserver(observer);await stop();model.closeAllConnections();await new Promise(resolve=>model.close(resolve));assert.equal(dirname(resolve(root)),resolve(tmpdir()));assert.ok(basename(root).startsWith('xmind-graph-service-'));await rm(root,{recursive:true,force:true});}

@@ -73,6 +73,11 @@ Json session_skill_metadata(const std::string& session,const WorkspaceSessionSki
     return {{"session_id",session},{"workspace_id",value.workspace.workspace_id},{"authority_id",value.workspace.authority_id},
         {"revision",value.state.revision},{"ids",value.state.selections.ids},{"manual_ids",value.state.selections.manual_ids},{"editable",value.state.editable}};
 }
+Json agent_metadata(const AgentDefinitionMetadata& value){return {{"id",value.id},{"revision",value.revision},{"model_id",value.model_id}};}
+Json session_agent_metadata(const std::string& session,const SessionAgentState& value){
+    const auto selected=value.selected?agent_metadata({value.selected->id,value.selected->revision,value.selected->model_id}):Json(nullptr);
+    return {{"session_id",session},{"revision",value.revision},{"editable",value.editable},{"selected",selected}};
+}
 std::optional<ProviderProfileAdmission> profile_admission(const Json& value){
     const bool named=value.contains("provider_profile_id"),versioned=value.contains("expected_provider_revision");
     if(named!=versioned)throw std::invalid_argument("Provider profile and revision must be supplied together");
@@ -367,7 +372,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/skills)?|models|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/skills)?|models|agents|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/skills|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -498,7 +503,30 @@ struct HttpServer::Impl {
         }));
         server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{ "skill_controls",executor&&executor->supports_session_skills()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
+            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
+        }));
+        server.Get("/v1/agents",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Agent catalogue does not accept query parameters");
+            if(!executor||!executor->supports_agent_selection())throw RunUnavailable("Named agent selection is unavailable");
+            Json entries=Json::array();for(const auto& item:executor->agent_definitions())entries.push_back(agent_metadata(item));reply(response,{{"agents",std::move(entries)}});
+        }));
+        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/agent)",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session agent selection does not accept query parameters");
+            if(!executor||!executor->supports_agent_selection())throw RunUnavailable("Conversation agent selection is unavailable");
+            const auto session=request.matches[1].str();reply(response,session_agent_metadata(session,executor->session_agent(session)));
+        }));
+        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/agent)",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>8192)throw std::invalid_argument("Invalid session agent request target or size");
+            if(!executor||!executor->supports_agent_selection())throw RunUnavailable("Conversation agent selection is unavailable");
+            const auto value=body(request,{"agent_id","agent_revision","expected_revision"});
+            if(value.size()!=3||!value.contains("agent_id")||!value.contains("agent_revision")||!value.at("agent_revision").is_number_integer()||value.at("agent_revision")<0||value.at("agent_revision")>9007199254740991LL||!value.contains("expected_revision")||!value.at("expected_revision").is_number_integer()||value.at("expected_revision")<0||value.at("expected_revision")>=9007199254740991LL)throw std::invalid_argument("Agent selection requires an ID, definition revision and expected session revision");
+            std::optional<AgentDefinitionMetadata> selected;
+            if(!value.at("agent_id").is_null()){
+                if(!value.at("agent_id").is_string()||value.at("agent_revision").get<std::int64_t>()<1)throw std::invalid_argument("Invalid named agent selection");
+                const auto id=string_field(value,"agent_id",64);const auto revision=value.at("agent_revision").get<std::int64_t>();const auto catalogue=executor->agent_definitions();const auto found=std::find_if(catalogue.begin(),catalogue.end(),[&](const auto& item){return item.id==id;});
+                if(found==catalogue.end()||found->revision!=revision)throw Conflict("Named agent definition changed; refresh before selecting it");selected=*found;
+            } else if(value.at("agent_revision").get<std::int64_t>()!=0)throw std::invalid_argument("Clearing agent selection requires definition revision zero");
+            const auto session=request.matches[1].str();reply(response,session_agent_metadata(session,executor->select_session_agent(session,std::move(selected),value.at("expected_revision").get<std::int64_t>())));
         }));
         server.Get("/v1/workspace",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Workspace metadata does not accept query parameters");
