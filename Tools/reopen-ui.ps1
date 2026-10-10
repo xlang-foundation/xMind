@@ -6,7 +6,7 @@ $sidebarMetadata=Get-Content -LiteralPath (Join-Path $sidebarRuntime 'active.jso
 $env:XMIND_UI_BACKEND_ORIGIN=$sidebarMetadata.origin
 $env:XMIND_UI_READY_FILE=Join-Path $sidebarRuntime ('sidebar-opened-'+[Guid]::NewGuid().ToString('N')+'.json')
 try {
-    $sidebarArguments=@('--new-window','--disable-workspace-trust','--skip-welcome','--remote-debugging-port=57217',('--user-data-dir="'+(Join-Path $sidebarRuntime 'profile')+'"'),('--extensions-dir="'+(Join-Path $sidebarRuntime 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $sidebarRoot 'extensions\vscode')+'"'),('"'+$sidebarRoot+'"'))
+    $sidebarArguments=@('--new-window','--skip-welcome','--remote-debugging-port=57217',('--user-data-dir="'+(Join-Path $sidebarRuntime 'profile')+'"'),('--extensions-dir="'+(Join-Path $sidebarRuntime 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $sidebarRoot 'extensions\vscode')+'"'),('"'+$sidebarRoot+'"'))
     $sidebarProcess=Start-Process -FilePath $sidebarCode -ArgumentList $sidebarArguments -WorkingDirectory $sidebarRoot -WindowStyle Normal -PassThru
     $sidebarMetadata.host_launcher_pid=$sidebarProcess.Id;$sidebarMetadata.ready_file=$env:XMIND_UI_READY_FILE
     [System.IO.File]::WriteAllText((Join-Path $sidebarRuntime 'active.json'),($sidebarMetadata|ConvertTo-Json))
