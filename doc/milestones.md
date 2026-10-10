@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+Hosted source `faab16f` compiled and finished its full native test run with
+**107/110 passed** in 310.95 seconds. The same license-staging and removed editor
+upgrade-API failures blocked it; the actual local-view regression did not run.
+Those causes were already corrected in `9f73bdc`. The corrected `645d76f` run
+has started, with the real view test scheduled before unrelated test compilation.
+Native readiness and the complete gate remain unaccepted.
+[Original older result and exact current-run identity](evidence/native-view-preflight-hosted-failed.json).
+
 The existing earlier browser checkpoint was inspected and its history refresh
 button exercised without submitting a model request. Saved transcript/usage
 and provider choices were visible, but refresh required connecting again.

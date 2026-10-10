@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "status": "native-unaccepted",
+  "observedSourceRevision": "faab16fa899403bee06c5cbcdbb18891a857e5bc",
+  "currentRepositoryHead": "ef0ea358ff145bf9a4fadb01ba554d87668ceb17",
+  "run": 38007741636,
+  "job": 114081255562,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/38007741636",
+  "rawLog": {
+    "file": "doc/evidence/native-unified-hosted-faab16f-failed.log",
+    "sha256": "ee219e8e15b82b6f61551870fe6ea411cd7774adade563660f9034fdcbf6bc2e"
+  },
+  "verification": {
+    "nativeBuildPassed": true,
+    "registeredTests": 110,
+    "passed": 107,
+    "failed": 3,
+    "ctestSeconds": 310.95,
+    "completeNativeGatePassed": false
+  },
+  "failures": [
+    {
+      "name": "native_local_profile_contract",
+      "reason": "Stage requested missing stdlib-source/LICENSE.txt; pinned source uses LICENSE."
+    },
+    {
+      "name": "native_local_view_contract",
+      "reason": "Same staging failure occurred before the native ready-path or view startup regression executed."
+    },
+    {
+      "name": "native_backend_handoff_contract",
+      "reason": "Obsolete actualThinUpgrade fixture invoked the removed editor upgrade path."
+    }
+  ],
+  "disposition": "These are the same causes as run 38005698078, already corrected in 9f73bdc. No additional speculative startup fix is justified by this result.",
+  "currentRun": {
+    "id": 38009467577,
+    "job": 114088353256,
+    "sourceRevision": "645d76fd049d9372aba24444cfbf518a20d77435",
+    "observedState": "in_progress",
+    "startedAt": "2026-10-10T00:43:19Z"
+  },
+  "limits": [
+    "faab16f native source compiled, but its actual local profile/view tests failed during staging; native readiness remains unverified.",
+    "The later explicit-owner change and revised CI sequencing are not accepted by this older run.",
+    "Corrected source full native gate, installed sidebar and real provider integration remain pending."
+  ]
+}
