@@ -10,7 +10,7 @@ import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
 import {createBrowserServer} from '../../views/browser/server.mjs';
 const require=createRequire(import.meta.url),{BrowserController,BrowserSessionClient}=require('../../views/browser/browser.js');
-const [executable,modules,stdlib,openssl]=process.argv.slice(2),execute=promisify(execFile);
+const [executable,modules,stdlib,openssl,cli]=process.argv.slice(2),execute=promisify(execFile);
 const directory=await mkdtemp(join(tmpdir(),'xmind-oauth-service-'));let tls,child,browserView,browserController,httpRequests=0,tlsObservations=0;
 try{
   await execute(openssl,['req','-x509','-newkey','rsa:2048','-nodes','-keyout',join(directory,'key.pem'),'-out',join(directory,'cert.pem'),'-days','1','-subj','/CN=localhost','-addext','subjectAltName=IP:127.0.0.1'],{windowsHide:true});
@@ -69,9 +69,20 @@ try{
     const browserDeadline=Date.now()+5000;do{await browserController.command({type:'mcp-refresh'});if(observations.at(-1).attempts[0]?.state==='failed')break;assert.ok(Date.now()<browserDeadline);await new Promise(resolve=>setTimeout(resolve,10));}while(true);
     assert.equal(observations.at(-1).attempts[0].reason,'authorization_failed');assert.deepEqual(saved.at(-1).mcp,[]);const browserBefore=browserRequests.length;browserController.dispose();assert.equal(browserRequests.length,browserBefore,'View disposal must not dispatch cancellation');
     await browserView.close();browserView=undefined;
+    // The same product binary's native console observes/adopts the real service,
+    // not a separate execution engine. Synthetic untrusted TLS still prevents
+    // any real OAuth grant or sign-in-page launch in this acceptance.
+    const consoleEnvironment={...process.env,XMIND_AUTH_TOKEN:'synthetic-oauth-service-owner-token'};
+    const consoleCommand=async(args,failed=false)=>{let result;try{result=await execute(cli,['--port',String(port),...args],{env:consoleEnvironment,windowsHide:true,timeout:10000});result.code=0;}catch(error){result=error;}assert.equal(result.code,failed?1:0,result.stderr);return result;};
+    const consoleServers=JSON.parse((await consoleCommand(['mcp-auth'])).stdout);assert.equal(consoleServers.servers.find(server=>server.id==='authorized-peer').state,'authorized');
+    const consoleStarted=await consoleCommand(['mcp-login','oauth.peer']),consoleAttempt=JSON.parse(consoleStarted.stdout);assert.equal(consoleAttempt.server_id,'oauth.peer');assert.match(consoleStarted.stderr,new RegExp(consoleAttempt.id));
+    const consoleWatch=await consoleCommand(['mcp-login-watch',consoleAttempt.id],true);assert.equal(JSON.parse(consoleWatch.stdout.trim().split(/\r?\n/).at(-1)).state,'failed');
+    const consoleStatus=JSON.parse((await consoleCommand(['mcp-login-status',consoleAttempt.id])).stdout);assert.equal(consoleStatus.reason,'authorization_failed');
+    const consoleCancelled=JSON.parse((await consoleCommand(['mcp-login-cancel',consoleAttempt.id])).stdout);assert.equal(consoleCancelled.state,'failed');
+    await consoleCommand(['mcp-login','authorized-peer'],true);await consoleCommand(['mcp-login-open',consoleAttempt.id],true);
     const tlsDeadline=Date.now()+1000;while(!tlsObservations&&Date.now()<tlsDeadline)await new Promise(resolve=>setTimeout(resolve,10));
     assert.equal(httpRequests,0,'OS TLS rejection must prevent all requests, credentials and token exchange at the untrusted server');assert.ok(tlsObservations>=1,'The production service must reach the actual TLS peer');
     child.stdin.end('service-fixture-done\n');const [code,signal]=await exited;assert.equal(signal,null);assert.equal(code,0,stderr);assert.match(stdout,/Native OAuth service fixture finished/);
-    process.stdout.write('Production native OAuth service passed actual asynchronous TLS-negative failure, request identity/CAS/terminal cancellation, existing encrypted grant status, native HTTP and origin-bound View authentication, actual browser adapter/shared client/controller setup, forbidden destinations/query/duplicate fields and zero untrusted-server HTTP dispatch. No trusted HTTPS login, positive token exchange or installed/rendered UI acceptance verified.\n');
+    process.stdout.write('Production native OAuth service passed actual asynchronous TLS-negative failure, request identity/CAS/terminal cancellation, existing encrypted grant status, native HTTP and origin-bound View authentication, actual browser adapter/shared client/controller setup and unified native console setup/watch/status/cancel, forbidden destinations/query/duplicate fields and zero untrusted-server HTTP dispatch. No trusted HTTPS login, positive token exchange, browser launch or installed/rendered UI acceptance verified.\n');
   }finally{clearTimeout(timer);if(child.exitCode===null&&child.signalCode===null){child.kill();await exited;}}
 }finally{browserController?.dispose();if(browserView)await browserView.close();if(tls){tls.closeAllConnections();await new Promise(resolve=>tls.close(resolve));}await rm(directory,{recursive:true,force:true});}

@@ -1,5 +1,12 @@
 # Native MCP login service and client controls
 
+The shared native service now also has [native console commands](native-mcp-console.md).
+The complete **114/114** local native and **257 extension / 55 browser** gates pass;
+actual console-to-service acceptance covers metadata, admission, observation and
+terminal cancellation with an untrusted TLS peer. Trusted HTTPS positive login
+and actual browser launch remain unverified.
+[Exact current checkpoint](evidence/native-oauth-cli-local.json).
+
 The C++ backend owns asynchronous OAuth discovery, callback receipt, code
 exchange and encrypted grant publication. Browser and VS Code Settings expose
 sign-in controls for backend-configured OAuth MCP servers. A view sends server
@@ -67,7 +74,7 @@ The current flow uses a backend-configured, pre-registered **public** client ID
 whose registration must allow the native loopback redirect/ephemeral port.
 Registration selection, fixed redirect configuration, CIMD/DCR, positive trusted
 HTTPS login, automatic refresh, revocation, coordination of running MCP owners,
-CLI login commands and full graphical connector configuration remain unfinished.
+full graphical connector configuration remain unfinished.
 Fresh packaged/installed/rendered current UI acceptance is also required.
 
 The complete checkpoint gate and its original failures are recorded in

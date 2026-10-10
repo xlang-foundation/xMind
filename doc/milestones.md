@@ -1,5 +1,26 @@
 # Reviewable milestones
 
+Native MCP console controls pass the complete **114/114** local native gate in
+**388.18 seconds**, plus **257 extension / 55 browser** checks, with **2455**
+unchanged mapped inputs. The actual `xmind` console starts/observes/watches/cancels
+the production C++ service with embedded-xlang3 encrypted grant metadata and an
+independent untrusted TLS peer. Synthetic HTTP fixtures verify automatic native
+revision selection, generated/published request identity, exact CAS admission,
+terminal observation without cancellation dispatch, interactive detach, owned
+NDJSON observation, strict metadata/HTTPS link validation and non-reflecting
+errors. The original first compilation failure is retained. Trusted HTTPS
+positive OAuth login, actual browser launch, registration, refresh/revocation,
+running-owner coordination and installed/rendered acceptance remain unfinished.
+[Exact evidence](evidence/native-oauth-cli-local.json),
+[console contract](native-mcp-console.md).
+
+The prior `f595205` hosted view job failed **before executing its Node suites**:
+the three added test files and updated test totals were missing from the CI
+inventory. The reviewed guard now requires all **45 tracked / 47 including vendor
+inputs** and **257 extension / 55 browser** tests, without removing/skipping any
+tests. Local full suites pass; corrected hosted acceptance is separate and pending.
+[Original job log and exact failure](evidence/native-mcp-login-view-ci-f595205.json).
+
 Native MCP login service and browser/VS Code Settings controls pass the complete
 **113/113** local native gate in **378.02 seconds**, plus **257 extension / 55
 browser** checks, with **2454** unchanged mapped inputs. The actual C++ async

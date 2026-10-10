@@ -15,8 +15,14 @@
 #include <vector>
 #include <algorithm>
 #include <string_view>
+#include <array>
+#include <random>
+#include <map>
 #if defined(_WIN32)
 #include <windows.h>
+#include <bcrypt.h>
+#include <shellapi.h>
+#include "agentflow/mcp_http_transport.hpp"
 #endif
 
 namespace {
@@ -46,6 +52,75 @@ std::int64_t provider_revision(const std::string& source){
     const auto value=event_cursor(source);if(value>9007199254740991)throw std::invalid_argument("Invalid provider revision");return value;
 }
 std::int64_t plan_revision(const std::string& source){const auto value=provider_revision(source);if(value<1)throw std::invalid_argument("Plan revision and state sequence must be positive");return value;}
+std::string mcp_identity(const std::string& value,bool server=false){
+    const std::string_view allowed=server?"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-":"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-";
+    if(value.empty()||value.size()>(server?64:128)||value.find_first_not_of(allowed)!=std::string::npos)throw std::invalid_argument("Invalid MCP sign-in identity");return value;
+}
+void mcp_fields(const nlohmann::json& value,std::initializer_list<const char*> fields){if(!value.is_object()||value.size()!=fields.size())throw std::runtime_error("Invalid MCP sign-in metadata");for(const auto* field:fields)if(!value.contains(field))throw std::runtime_error("Invalid MCP sign-in metadata");}
+std::int64_t mcp_integer(const nlohmann::json& value,std::int64_t minimum=0){if(!value.is_number_integer()||value<minimum||value>9007199254740991LL)throw std::runtime_error("Invalid MCP sign-in revision or expiry");return value.get<std::int64_t>();}
+nlohmann::json mcp_parse(const std::string& source){
+    if(source.empty()||source.size()>65536)throw std::runtime_error("Invalid MCP sign-in metadata");
+    try{std::vector<std::set<std::string>> keys;return nlohmann::json::parse(source,[&](int depth,nlohmann::json::parse_event_t event,nlohmann::json& parsed){if(depth>6)throw std::runtime_error("Invalid metadata depth");if(event==nlohmann::json::parse_event_t::object_start)keys.emplace_back();else if(event==nlohmann::json::parse_event_t::object_end)keys.pop_back();else if(event==nlohmann::json::parse_event_t::key&&!keys.back().insert(parsed.get<std::string>()).second)throw std::runtime_error("Duplicate metadata field");return true;});}catch(...){throw std::runtime_error("Invalid MCP sign-in metadata");}
+}
+void mcp_https_link(const std::string& value){
+    auto scheme=value.substr(0,8);for(auto& c:scheme)if(c>='A'&&c<='Z')c=static_cast<char>(c-'A'+'a');
+    if(scheme!="https://"||value.size()>16384)throw std::runtime_error("Invalid MCP sign-in URL");for(unsigned char c:value)if(c<=32||c==127||c=='#'||c=='\\')throw std::runtime_error("Invalid MCP sign-in URL");
+#if defined(_WIN32)
+    try{agentflow::validate_mcp_http_endpoint(value.substr(0,value.find('?')));}catch(...){throw std::runtime_error("Invalid MCP sign-in URL");}
+#else
+    const auto end=value.find_first_of("/?",8);const auto authority=value.substr(8,end==std::string::npos?end:end-8);if(authority.empty()||authority.find('@')!=std::string::npos)throw std::runtime_error("Invalid MCP sign-in URL");
+#endif
+}
+bool mcp_terminal(const std::string& state){return state=="connected"||state=="failed"||state=="denied"||state=="cancelled"||state=="expired";}
+nlohmann::json mcp_servers(const nlohmann::json& value){
+    mcp_fields(value,{"servers"});if(!value["servers"].is_array()||value["servers"].size()>16)throw std::runtime_error("Invalid MCP server catalogue");std::set<std::string> ids;
+    for(const auto& server:value["servers"]){mcp_fields(server,{"id","config_revision","credential_revision","enabled","configured","state","expires_unix_ms"});if(!server["id"].is_string()||!server["state"].is_string()||!server["enabled"].is_boolean()||!server["configured"].is_boolean())throw std::runtime_error("Invalid MCP server catalogue");const auto id=mcp_identity(server["id"].get<std::string>(),true);if(!ids.insert(id).second)throw std::runtime_error("Duplicate MCP server identity");mcp_integer(server["config_revision"],1);mcp_integer(server["credential_revision"]);if(!server["expires_unix_ms"].is_null())mcp_integer(server["expires_unix_ms"],1);const auto state=server["state"].get<std::string>();if(state!="not_configured"&&state!="disabled"&&state!="authorized"&&state!="needs_login"&&state!="unavailable")throw std::runtime_error("Invalid MCP server state");}return value;
+}
+nlohmann::json mcp_attempt(const nlohmann::json& value,const nlohmann::json& binding=nlohmann::json::object()){
+    mcp_fields(value,{"id","server_id","state","config_revision","credential_revision","authorization_url","expires_unix_ms","reason","cancellation_requested"});for(const auto* field:{"id","server_id","state"})if(!value[field].is_string())throw std::runtime_error("Invalid MCP sign-in attempt");mcp_identity(value["id"].get<std::string>());mcp_identity(value["server_id"].get<std::string>(),true);mcp_integer(value["config_revision"],1);mcp_integer(value["credential_revision"]);mcp_integer(value["expires_unix_ms"],1);if(!value["cancellation_requested"].is_boolean())throw std::runtime_error("Invalid MCP sign-in attempt");
+    const auto state=value["state"].get<std::string>();if(!mcp_terminal(state)&&state!="discovering"&&state!="awaiting_callback"&&state!="exchanging")throw std::runtime_error("Invalid MCP sign-in state");
+    if(state=="connected")mcp_integer(value["credential_revision"],1);
+    for(const auto* field:{"id","server_id","config_revision"})if(binding.contains(field)&&binding[field]!=value[field])throw std::runtime_error("MCP sign-in ownership changed");
+    if(binding.contains("credential_revision")&&(state=="connected"?value["credential_revision"]<=binding["credential_revision"]:value["credential_revision"]!=binding["credential_revision"]))throw std::runtime_error("MCP sign-in credential revision changed");
+    const std::map<std::string,std::set<std::string>> reasons={{"failed",{"backend_quiesced","configuration_or_credential_changed","protocol_rejected","authorization_failed"}},{"denied",{"authorization_failed","access_denied","interaction_required","login_required","consent_required","temporarily_unavailable","server_error","invalid_request","unauthorized_client","unsupported_response_type","invalid_scope"}},{"cancelled",{"cancelled"}},{"expired",{"deadline_exceeded"}}};const auto reason=reasons.find(state);if(reason==reasons.end()){if(!value["reason"].is_null())throw std::runtime_error("Invalid MCP sign-in reason");}else if(!value["reason"].is_string()||!reason->second.contains(value["reason"].get<std::string>()))throw std::runtime_error("Invalid MCP sign-in reason");
+    if(state=="awaiting_callback"){if(!value["authorization_url"].is_string())throw std::runtime_error("Invalid MCP sign-in URL");mcp_https_link(value["authorization_url"].get<std::string>());}else if(!value["authorization_url"].is_null())throw std::runtime_error("Unexpected MCP sign-in URL");return value;
+}
+nlohmann::json mcp_request(agentflow::ConsoleTransport& client,const httplib::Headers& headers,const std::string& path,const nlohmann::json* body=nullptr){
+    auto response=body?client.Post(path,headers,body->dump(),"application/json"):client.Get(path,headers);if(!response)throw std::runtime_error("MCP sign-in reply unavailable. Inspect the recorded request ID; no automatic retry.");if(response->status!=(body?202:200))throw std::runtime_error("Backend rejected MCP sign-in request (HTTP "+std::to_string(response->status)+"). No automatic retry.");return mcp_parse(response->body);
+}
+std::string mcp_request_id(){
+    std::array<unsigned char,32> bytes{};
+#if defined(_WIN32)
+    if(BCryptGenRandom(nullptr,bytes.data(),static_cast<ULONG>(bytes.size()),BCRYPT_USE_SYSTEM_PREFERRED_RNG)<0)throw std::runtime_error("Cannot generate MCP sign-in request identity");
+#else
+    std::random_device random;for(auto& byte:bytes)byte=static_cast<unsigned char>(random());
+#endif
+    constexpr char hex[]="0123456789abcdef";std::string value;for(auto byte:bytes){value+=hex[byte>>4];value+=hex[byte&15];}return value;
+}
+nlohmann::json mcp_command(agentflow::ConsoleTransport& client,const httplib::Headers& headers,const std::string& command,const std::string& identity){
+    const std::string root="/v1/mcp/authorization";
+    if(command=="mcp-auth")return mcp_servers(mcp_request(client,headers,root+"/servers"));
+    if(command=="mcp-login"){
+        mcp_identity(identity,true);const auto catalogue=mcp_servers(mcp_request(client,headers,root+"/servers"));const auto& servers=catalogue["servers"];const auto found=std::find_if(servers.begin(),servers.end(),[&](const auto& server){return server["id"]==identity;});if(found==servers.end()||!(*found)["enabled"].get<bool>()||!(*found)["configured"].get<bool>()||(*found)["state"]!="needs_login")throw std::runtime_error("Select a configured MCP server requiring sign-in; inspect mcp-auth.");
+        const auto id=mcp_request_id();const nlohmann::json binding={{"id",id},{"server_id",identity},{"config_revision",(*found)["config_revision"]},{"credential_revision",(*found)["credential_revision"]}},body={{"request_id",id},{"server_id",identity},{"expected_config_revision",binding["config_revision"]},{"expected_credential_revision",binding["credential_revision"]}};
+        std::cerr<<"MCP login request "<<id<<" for "<<identity<<". If the reply is lost, use mcp-login-status "<<id<<"; do not restart automatically.\n"<<std::flush;if(!std::cerr)throw std::runtime_error("Cannot publish MCP sign-in observation identity; no login sent");return mcp_attempt(mcp_request(client,headers,root+"/attempts",&body),binding);
+    }
+    mcp_identity(identity);auto value=mcp_attempt(mcp_request(client,headers,root+"/attempts/"+identity),{{"id",identity}});
+    if(command=="mcp-login-cancel"&&!mcp_terminal(value["state"].get<std::string>())){const nlohmann::json body=nlohmann::json::object(),binding={{"id",identity},{"server_id",value["server_id"]},{"config_revision",value["config_revision"]},{"credential_revision",value["credential_revision"]}};value=mcp_attempt(mcp_request(client,headers,root+"/attempts/"+identity+"/cancel",&body),binding);}
+    if(command=="mcp-login-open"){
+        const auto now=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();if(value["state"]!="awaiting_callback"||value["cancellation_requested"].get<bool>()||mcp_integer(value["expires_unix_ms"],1)<=now)throw std::runtime_error("No current MCP sign-in page; inspect mcp-login-status.");
+#if defined(_WIN32)
+        const auto url=value["authorization_url"].get<std::string>();const auto length=MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,url.data(),static_cast<int>(url.size()),nullptr,0);if(length<1)throw std::runtime_error("Invalid MCP sign-in URL");std::wstring wide(length,L'\0');if(MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,url.data(),static_cast<int>(url.size()),wide.data(),length)!=length)throw std::runtime_error("Invalid MCP sign-in URL");if(reinterpret_cast<INT_PTR>(ShellExecuteW(nullptr,L"open",wide.c_str(),nullptr,nullptr,SW_SHOWNORMAL))<=32)throw std::runtime_error("Cannot open the MCP sign-in page; use the validated HTTPS URL from status.");
+#else
+        throw std::runtime_error("Opening a sign-in page is unavailable on this platform; use its validated HTTPS URL.");
+#endif
+    }
+    return value;
+}
+int mcp_watch(agentflow::ConsoleTransport& client,const httplib::Headers& headers,const std::string& id){
+    mcp_identity(id);nlohmann::json binding=nlohmann::json::object();std::string previous;const auto deadline=std::chrono::steady_clock::now()+std::chrono::minutes(6);
+    do{const auto value=mcp_attempt(mcp_request(client,headers,"/v1/mcp/authorization/attempts/"+id),binding.empty()?nlohmann::json{{"id",id}}:binding);const auto state=value["state"].get<std::string>(),encoded=value.dump();if(encoded!=previous){std::cout<<encoded<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("MCP observation output unavailable; backend sign-in continues");previous=encoded;}if(mcp_terminal(state))return state=="connected"?0:1;if(binding.empty())binding={{"id",id},{"server_id",value["server_id"]},{"config_revision",value["config_revision"]},{"credential_revision",value["credential_revision"]}};std::this_thread::sleep_for(std::chrono::milliseconds(500));}while(std::chrono::steady_clock::now()<deadline);throw std::runtime_error("MCP observation detached at its deadline; backend sign-in was not cancelled");
+}
 void skill_ids(const nlohmann::json& value){
     if(!value.is_array()||value.size()>8)throw std::invalid_argument("Select at most eight skills");std::set<std::string> unique;
     for(const auto& item:value){if(!item.is_string())throw std::invalid_argument("Skill ids must be strings");const auto& id=item.get_ref<const std::string&>();if(id.empty()||id.size()>256||id=="."||id==".."||id.find_first_of("/\\:")!=std::string::npos||id.find('\0')!=std::string::npos||!unique.insert(id).second)throw std::invalid_argument("Invalid or duplicate skill id");}
@@ -314,13 +389,14 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
                  <<Json{{"type","history"},{"session_id",session},{"history",history}}.dump()<<'\n'<<std::flush;
         if(!std::cout)throw std::runtime_error("Chat history output is unavailable");
     }
-    int last_result=0,profile_result=0,skill_result=0;std::string prompt;
-    const auto exit_status=[&]{return last_result!=0?last_result:profile_result!=0?profile_result:skill_result;};
+    int last_result=0,profile_result=0,skill_result=0,mcp_result=0;std::string prompt;
+    const auto exit_status=[&]{return last_result!=0?last_result:profile_result!=0?profile_result:skill_result!=0?skill_result:mcp_result;};
     while(std::cerr<<"xMind > "<<std::flush,std::getline(std::cin,prompt)) {
         if(!prompt.empty() && prompt.back()=='\r')prompt.pop_back();
         if(prompt=="/exit")return exit_status();
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
+            std::cerr<<"MCP sign-in: /mcp lists configured OAuth status; /mcp-login SERVER starts using current native revisions. /mcp-status REQUEST, /mcp-open REQUEST, /mcp-cancel REQUEST and /mcp-watch REQUEST inspect, open, cancel or observe that backend-owned attempt. Closing chat only detaches.\n";
             std::cerr<<"/compose [GRAPH_ID] collects a multiline request until /send; /discard cancels it. Use //send or //discard for those literal lines. Other slash lines remain request text. Unfinished EOF and blocks over 1 MiB are discarded without submission.\n";
             std::cerr<<"Context controls: context SESSION [MODEL], compact-context SESSION HEAD_REV REQUEST_ID [MODEL], context-request SESSION REQUEST_ID [MODEL]. Resume a ready closed graph with resume-graph ROOT CHECKPOINT_REV.\n";
             std::cerr<<"/runs lists recorded root runs in the selected conversation; use /watch or /graph-watch to attach one.\n";
@@ -329,6 +405,21 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
             std::cerr<<"/profiles lists saved provider metadata without changing this chat's admission binding; /profile ID REVISION explicitly selects a shared profile and clears this chat's model override.\n";
             std::cerr<<"/skills lists current workspace guide metadata without activating a guide.\n/session-skills inspects current attachments; /attach-skill ID and /remove-skill ID change exact catalogue ids (spaces are part of the id); /clear-skills clears the observed selection. Native revisions prevent stale writes.\n/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+        }
+        if(prompt=="/mcp"||prompt.starts_with("/mcp ")||prompt.starts_with("/mcp-")){
+            try{
+                const auto split=prompt.find(' ');const auto verb=prompt.substr(0,split),identity=split==std::string::npos?std::string{}:prompt.substr(split+1);std::string command;
+                if(verb=="/mcp"&&identity.empty())command="mcp-auth";
+                else if(verb=="/mcp-login")command="mcp-login";
+                else if(verb=="/mcp-status")command="mcp-login-status";
+                else if(verb=="/mcp-open")command="mcp-login-open";
+                else if(verb=="/mcp-cancel")command="mcp-login-cancel";
+                else if(verb=="/mcp-watch")command="mcp-login-watch";
+                else throw std::invalid_argument("Use /mcp, /mcp-login SERVER, /mcp-status REQUEST, /mcp-open REQUEST, /mcp-cancel REQUEST or /mcp-watch REQUEST.");
+                if(command!="mcp-auth")mcp_identity(identity,command=="mcp-login");
+                if(command=="mcp-login-watch")mcp_result=mcp_watch(client,headers,identity);
+                else {const auto value=mcp_command(client,headers,command,identity);std::cout<<Json{{"type",command=="mcp-auth"?"mcp_authorization_servers":"mcp_authorization_attempt"},{"result",value}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("MCP observation output unavailable; backend sign-in continues");mcp_result=0;}
+            }catch(const std::exception& error){std::cerr<<error.what()<<'\n';mcp_result=1;}continue;
         }
         if(prompt.starts_with("/watch ")||prompt.starts_with("/graph-watch ")){
             const bool graphAttachment=prompt.starts_with("/graph-watch ");const auto id=prompt.substr(graphAttachment?13:7);
@@ -573,7 +664,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
             for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
             return value;
         };
-        using Json=nlohmann::json;std::string path,chat_model;Json body;bool post=false,watch=false,graph_watch=false,chat=false,saved_provider_key=false,profile_operation=false;std::int64_t watch_cursor=0;
+        using Json=nlohmann::json;std::string path,chat_model,mcp_id;Json body;bool post=false,watch=false,graph_watch=false,chat=false,saved_provider_key=false,profile_operation=false,mcp_operation=false;std::int64_t watch_cursor=0;
         if(command=="health" && argc==3) path="/v1/health";
         else if(command=="chat" && argc>=3 && argc<=5){chat=true;if(argc>=4)path=id(argv[3]);if(argc==5)chat_model=argv[4];}
         else if(command=="sessions" && argc==3) path="/v1/sessions";
@@ -632,6 +723,8 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
             path="/v1/provider/configuration";body=provider_key_fields(argv[4],argv[5]);body["model"]=argv[3];post=true;
         }
         else if(command=="mcp-servers" && argc==3) path="/v1/mcp/servers";
+        else if(command=="mcp-auth"&&argc==3)mcp_operation=true;
+        else if((command=="mcp-login"||command=="mcp-login-status"||command=="mcp-login-cancel"||command=="mcp-login-open"||command=="mcp-login-watch")&&argc==4){mcp_operation=true;mcp_id=mcp_identity(argv[3],command=="mcp-login");}
         else if(command=="process-profiles" && argc==3) path="/v1/process/profiles";
         else if(command=="instructions" && argc==3) path="/v1/agent/instructions";
         else if(command=="delegation"&&argc==3)path="/v1/agent/delegation";
@@ -685,6 +778,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         client.set_connection_timeout(5,0);client.set_read_timeout(15,0);client.set_write_timeout(5,0);client.set_follow_location(false);
         const httplib::Headers headers{{"Authorization",std::string("Bearer ")+auth}};
         if(chat)return chat_session(client,headers,path,chat_model);
+        if(mcp_operation){if(command=="mcp-login-watch")return mcp_watch(client,headers,mcp_id);std::cout<<mcp_command(client,headers,command,mcp_id).dump(2)<<'\n';if(!std::cout)throw std::runtime_error("MCP observation output unavailable; backend sign-in continues");return 0;}
         if(saved_provider_key){
             const auto current=client.Get("/v1/health",headers);if(!current||current->status!=200)throw std::runtime_error("Cannot inspect backend provider capabilities");
             const auto capability=Json::parse(current->body);

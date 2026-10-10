@@ -20,6 +20,19 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+Native MCP console setup/status/watch/cancel commands now use the same backend
+service as graphical Settings and pass **114/114** local native checks in
+**388.18 seconds**, with **2455** unchanged inputs. The complete **257 extension /
+55 browser** suites also pass. Actual native-service integration covers encrypted
+grant metadata and untrusted TLS rejection; independent synthetic HTTP fixtures
+cover CLI ownership, CAS, detach and private-field/link rejection. Trusted HTTPS
+positive login, real browser launch, registration, refresh/revocation and current
+installed/rendered acceptance remain unfinished. The prior hosted view manifest
+failure is retained; its corrected full inventory awaits hosted acceptance.
+[Console implementation](native-mcp-console.md),
+[exact local evidence](evidence/native-oauth-cli-local.json),
+[hosted failure](evidence/native-mcp-login-view-ci-f595205.json).
+
 Authenticated MCP setup routes, the asynchronous C++ login owner and browser/VS
 Code Settings controls pass **113/113** local native, **257 extension / 55 browser**
 checks with **2454** unchanged inputs. Actual native service/SQLite and browser

@@ -1,11 +1,12 @@
 # Native MCP HTTP transport
 
-The latest [native login service and Settings controls](native-mcp-login.md) pass
-the complete **113/113** local native and **257 extension / 55 browser** gates.
+The latest [native login service and Settings controls](native-mcp-login.md),
+including [console setup/status/watch/cancel](native-mcp-console.md), pass the
+complete **114/114** local native and **257 extension / 55 browser** gates.
 Real native HTTP/View and browser adapter/controller checks cover TLS-negative
 login and grant/status boundaries; trusted HTTPS positive login, registration,
 refresh/revocation and installed/rendered current acceptance remain unfinished.
-[Exact checkpoint evidence](evidence/native-oauth-service-local.json).
+[Exact checkpoint evidence](evidence/native-oauth-cli-local.json).
 
 The configured native HTTP tool component has passed actual approved JSON/SSE
 effects, denial, lost-reply uncertainty and SQLite restart against an official

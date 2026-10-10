@@ -1,0 +1,13 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 50: native_mcp_oauth_service_contract
+1/4 Test #50: native_mcp_oauth_service_contract .......   Passed    1.43 sec
+    Start 51: native_mcp_authorization_cli_contract
+2/4 Test #51: native_mcp_authorization_cli_contract ...   Passed    1.43 sec
+    Start 88: native_http_cli_contract
+3/4 Test #88: native_http_cli_contract ................   Passed    2.65 sec
+    Start 89: native_unified_program_contract
+4/4 Test #89: native_unified_program_contract .........   Passed    1.27 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =   6.79 sec
