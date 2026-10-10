@@ -101,9 +101,10 @@ and a fresh workspace read. Installed patch review for this 0.1.4 package remain
 a separate acceptance step. [Patch implementation and scope](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/native-file-patch.md),
 [runtime handoff](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/native-runtime-handoff.md).
 
-**Open Browser View (Copy Connection Token)** opens the selected backend's
-browser access adapter and copies its connection token for Connect. Closing
-that access view does not stop Native execution. [Browser details](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/browser-view.md).
+**Open Browser View** opens a local browser adapter connected to the selected
+workspace. The extension enrolls the page's browser session privately; no server
+token needs to be copied into the page. Closing that access view does not stop
+native execution. [Browser details](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/browser-view.md).
 
 Client tests use labelled synthetic host, process, HTTP and DOM fixtures. Live
 and installed results are reported separately and do not establish complete

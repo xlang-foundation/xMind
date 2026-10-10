@@ -641,7 +641,7 @@ async function activate(context) {
       if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before connecting a browser view.');
       await open();const origin=configuredOrigin();if(!workspaceBackend.active)throw new Error('Connect the opened workspace before opening its browser.');
       let token=await context.secrets.get(secretKey(origin));
-      try{const target=new BackendClient(origin,()=>token);await target.health();if(origin!==configuredOrigin())throw new Error('Backend changed while opening the browser. Try again.');await browserViews.open(origin,token);vscode.window.showInformationMessage('xMind Browser uses this server’s models and history. Paste the copied server token into Connect once.');}finally{token=undefined;}
+      try{const target=new BackendClient(origin,()=>token);await target.health();if(origin!==configuredOrigin())throw new Error('Backend changed while opening the browser. Try again.');await browserViews.open(origin,token);vscode.window.showInformationMessage('xMind Browser is connected to this workspace and uses its models and history.');}finally{token=undefined;}
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
   function disconnectWorkspace(){

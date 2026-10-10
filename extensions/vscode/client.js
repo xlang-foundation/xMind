@@ -320,7 +320,7 @@ async function readCommittedEventStream(response,{root,session,scope,after,signa
   finally{signal?.removeEventListener('abort',detach);try{await reader.cancel();}catch{}reader.releaseLock();}
 }
 class EventStreamSubscription {
-  constructor({current,onEvent,onObservation,onEnd,onError,schedule=setTimeout,unschedule=clearTimeout}){
+  constructor({current,onEvent,onObservation,onEnd,onError,schedule=(callback,delay)=>globalThis.setTimeout(callback,delay),unschedule=timer=>globalThis.clearTimeout(timer)}){
     if(typeof current!=='function'||typeof onEvent!=='function')throw new Error('Invalid event subscription callbacks');
     this.current=current;this.onEvent=onEvent;this.onObservation=onObservation;this.onEnd=onEnd;this.onError=onError;this.schedule=schedule;this.unschedule=unschedule;this.epoch=0;this.disposed=false;
   }

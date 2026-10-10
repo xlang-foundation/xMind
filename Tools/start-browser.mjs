@@ -24,7 +24,7 @@ const port=Number(options.get('--port')||60405);
 if(!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid browser view port');
 await mkdir(state,{recursive:true});
 
-let backend=viewOrigin,nativePid,tokenFile;
+let backend=viewOrigin,nativePid,tokenFile,localAccessToken;
 if(!backend){
   const runtime=resolve(options.get('--runtime')||join(root,'extensions','vscode','native-runtime'));
   const verified=await verifyNativeRuntime(runtime);
@@ -44,6 +44,7 @@ if(!backend){
   const token=randomBytes(32).toString('hex');
   tokenFile=join(state,'auth.token');
   await writeFile(tokenFile,token,{flag:'w',mode:0o600});
+  localAccessToken=token;
   const runtimeRoot=verified.runtimeRoot;
   const args=['view','--workspace',workspace,'--profile-root',profileRoot,'--ready-file',readyFile];
   let providerConfig=options.get('--provider-config');
@@ -78,10 +79,27 @@ if(!backend){
   }
   if(metadata.process_id!==nativePid||typeof metadata.origin!=='string'||!/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}$/.test(metadata.origin)||metadata.workspace?.configured!==true||typeof metadata.workspace.root!=='string'||metadata.workspace.root.toLowerCase()!==workspace.toLowerCase())throw new Error('Native view metadata does not match the selected workspace.');
   backend=metadata.origin;
+}else{
+  // Reuse only a credential belonging to this user's active xMind browser
+  // launch and only when its recorded native origin matches the attachment.
+  // The value remains in this process; it is never sent to browser JavaScript.
+  try{
+    const activeFile=join(state,'active.json'),activeInfo=await lstat(activeFile);
+    if(activeInfo.isFile()&&!activeInfo.isSymbolicLink()&&activeInfo.size<=16384){
+      const active=JSON.parse(await readFile(activeFile,'utf8'));
+      if(active.backend===backend){
+        const candidate=join(state,'auth.token'),tokenInfo=await lstat(candidate);
+        if(tokenInfo.isFile()&&!tokenInfo.isSymbolicLink()&&tokenInfo.nlink===1&&tokenInfo.size===64){
+          const token=(await readFile(candidate,'utf8')).trim();
+          if(/^[0-9a-f]{64}$/.test(token)){tokenFile=candidate;localAccessToken=token;}
+        }
+      }
+    }
+  }catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;}
 }
 
-const view=await createBrowserServer({backend,assetRoot:assets});
+const view=await createBrowserServer({backend,assetRoot:assets,localAccessToken});
 const url=await view.listen(port)+'/ui/';
 await writeFile(join(state,'active.json'),JSON.stringify({url,backend,nativePid,viewPid:process.pid,assets,credentialFile:tokenFile},null,2),{mode:0o600});
 console.log('xMind Browser ready at '+url);
-console.log(tokenFile?'Native profile-aware view '+backend+' · its local browser access token is stored in the private launch-state directory.':'Attached to the existing native view '+backend+'.');
+console.log(tokenFile?'Native profile-aware browser connected to '+backend+'.':'Attached to the existing native view '+backend+'.');

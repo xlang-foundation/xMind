@@ -50,6 +50,16 @@ test('browser adapter forwards durable native view credentials across restart wi
     assert.ok(observed.every(item=>!item.input.includes(master)),'Master token cannot enter session JSON');
   }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
 });
+test('profile-aware local browser session connects without asking the page for its server token',async()=>{
+ const {createBrowserServer}=await import('../server.mjs'),assetRoot=resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets');
+ const master='e'.repeat(64),credential='c'.repeat(64)+'.'+'d'.repeat(64),observed=[];let view;
+ const peer=createServer(async(request,response)=>{for await(const _ of request){}observed.push({path:request.url,authorization:request.headers.authorization});const reply=(status,value)=>{response.writeHead(status,{'Content-Type':'application/json'});response.end(JSON.stringify(value));};if(request.url==='/v1/view-sessions'&&request.headers.authorization==='Bearer '+master){reply(200,{credential,expires_unix_ms:Date.now()+28800000,max_age_seconds:28800});return;}if(request.url==='/v1/health'&&request.headers.authorization==='View '+credential){reply(200,{status:'ok'});return;}reply(401,{});});
+ try{
+  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));view=await createBrowserServer({backend:'http://127.0.0.1:'+peer.address().port,assetRoot,localAccessToken:master});const origin=await view.listen(),headers={Origin:origin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'};
+  const pageRequest=await fetch(origin+'/ui/session',{method:'POST',headers,body:'{}'});assert.equal(pageRequest.status,200);assert.deepEqual(await pageRequest.json(),{connected:true});assert.equal(pageRequest.headers.get('set-cookie').includes(master),false);assert.equal(observed[0].path,'/v1/view-sessions');assert.equal(observed[0].authorization,'Bearer '+master);
+  const cookie=pageRequest.headers.get('set-cookie').split(';')[0],health=await fetch(origin+'/v1/health',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}});assert.equal(health.status,200);assert.equal(observed[1].authorization,'View '+credential);
+ }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
+});
 test('workspace catalogue and switch stay native and rotate the HttpOnly profile credential',async()=>{
  const {createBrowserServer}=await import('../server.mjs'),assetRoot=resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets');
  const master='workspace-switch-master-token'.padEnd(64,'x'),first='1'.repeat(64)+'.'+'2'.repeat(64),second='3'.repeat(64)+'.'+'4'.repeat(64),third='5'.repeat(64)+'.'+'6'.repeat(64),idA='windows-local-file-v1:alpha',idB='windows-local-file-v1:beta',idC='windows-local-file-v1:gamma';let active=first,selected=idA,view;

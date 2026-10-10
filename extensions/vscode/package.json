@@ -59,7 +59,7 @@
       },
       {
         "command": "agentflow.openBrowser",
-        "title": "xMind: Open Browser View (Copy Connection Token)"
+        "title": "xMind: Open Browser View"
       },
       {
         "command": "agentflow.selectWorkspaceRoot",

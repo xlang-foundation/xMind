@@ -21,8 +21,9 @@ export function allowedApiRoute(path,method){
  if(/^\/v1\/agent\/(?:delegation|planning)$/.test(path)||/^\/v1\/runs\/[A-Za-z0-9_-]+\/(?:tree-events|children(?:\/[A-Za-z0-9_-]+\/history)?|plan)$/.test(path))return method==='GET';
  return true;
 }
-export async function createBrowserServer({backend,assetRoot}){
+export async function createBrowserServer({backend,assetRoot,localAccessToken}){
  const destination=origin(backend),directory=await realpath(resolve(assetRoot));
+ if(localAccessToken!==undefined&&!/^[\x21-\x7e]{32,256}$/.test(localAccessToken))throw new Error('Invalid local browser access credential');
  async function readAssets(){const snapshot=new Map();let total=0;for(const [route,[name,mime]] of Object.entries(assets)){const file=await realpath(join(directory,name));if(file!==join(directory,name))throw new Error('Browser assets must remain in the configured directory');const bytes=await readFile(file);total+=bytes.length;if(bytes.length>2*1024*1024||total>8*1024*1024)throw new Error('Browser assets exceed limits');snapshot.set(route,{bytes,mime});}return snapshot;}
  let files=await readAssets();
  let viewOrigin,cookieName;
@@ -40,7 +41,7 @@ export async function createBrowserServer({backend,assetRoot}){
     if(url.search||request.headers.origin!==viewOrigin||request.method!=='POST'||request.headers['content-type']!=='application/json'){reply(403,{detail:'Same-origin session access required'});return;}
     let size=0;for await(const chunk of request){size+=chunk.length;if(size>4096){reply(413,{detail:'Session request exceeds limits'});return;}}
     if(url.pathname.endsWith('/disconnect')){const current=sessionFor(request);response.setHeader('Set-Cookie',`${cookieName}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0`);if(current){const revoked=await nativeSession('/revoke',viewHeaders(current));if(revoked.status!==200&&revoked.status!==401){reply(502,{detail:'View session revocation could not be confirmed'});return;}}reply(200,{connected:false});return;}
-    const authorization=request.headers.authorization;
+    const authorization=request.headers.authorization||(localAccessToken&&!sessionFor(request)?'Bearer '+localAccessToken:undefined);
     if(authorization){
      if(!/^Bearer [\x21-\x7e]{32,256}$/.test(authorization)){reply(401,{detail:'Invalid server access token'});return;}
      const issued=await nativeSession('',{Authorization:authorization},{origin:viewOrigin});
