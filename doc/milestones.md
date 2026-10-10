@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+The shared provider YAML is now verified against the current native runtime
+and real embedded-xlang3 SQLite: a disposable profile imported Claude,
+DeepSeek, Gemini and OpenAI at registry revision 1, with no provider or model
+network requests. The existing VS Code `TestProj` profile remains on runtime
+`57da085`; its live catalogue is empty. That owner supports authenticated
+quiesce/retire/activate, but its runtime has no YAML-import endpoint. The
+current native view adapter removed the earlier JavaScript owner-upgrade
+client, and no replacement updates the encrypted local `profile.state` yet.
+Profile-preserving owner handoff from the current native view remains open;
+the precise live and isolated evidence is in
+[provider-import-live-local-20261010.json](evidence/provider-import-live-local-20261010.json).
+
 Schema-v14 checkpoint `15c87c0` passes the complete local Release native gate:
 **118/118 contracts** in **366.56 seconds**. It updates disposable historical
 database fixtures to remove only empty agent selections, refreshes current-schema

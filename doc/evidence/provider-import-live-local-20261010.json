@@ -1,0 +1,35 @@
+{
+  "scope": "Local Windows x64 runtime and provider-profile acceptance only",
+  "test": {
+    "runtime_revision": "63ab4c7e6ba96ed77e7ef1729acf8de56b6d960b",
+    "workspace": "isolated temporary folder",
+    "storage": "real managed xMind profile and embedded xlang3 SQLite",
+    "command": "xmind --workspace <temporary-folder> --profile-root <local-profile-root> --config <shared-provider-yaml> provider-profiles",
+    "result": {
+      "revision": 1,
+      "profile_ids": ["claude", "deepseek", "gemini", "openai"]
+    },
+    "provider_configuration_contents_disclosed": false,
+    "provider_api_requests": 0,
+    "model_requests": 0,
+    "temporary_profile_cleanup": "blocked by command policy; retained in local profile storage"
+  },
+  "existing_testproj": {
+    "runtime_revision": "57da08510354220327a06b40717fd247ca5f5ab8",
+    "process_id": 34252,
+    "port": 49164,
+    "started_by_inspection": false,
+    "provider_catalogue_revision": 0,
+    "provider_profile_ids": []
+  },
+  "source_routes": {
+    "legacy_testproj_owner": [
+      "/v1/backend/owner",
+      "/v1/backend/owner/quiesce",
+      "/v1/backend/owner/retire",
+      "/v1/backend/owner/activate"
+    ],
+    "legacy_provider_import": false
+  },
+  "repository_head": "682f52d"
+}

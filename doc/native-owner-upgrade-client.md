@@ -1,5 +1,32 @@
 # Managed native owner upgrades
 
+## Current installed-profile boundary
+
+On 2026-10-10, the live `TestProj` managed profile was observed at runtime
+`57da085`, process 34252, port 49164. Its authenticated provider catalogue
+returned revision 0 with no profiles. That runtime implements the native
+owner-retirement protocol, but not provider-YAML import. The current native
+view adapter has no upgrade command and `connect_local_profile` keeps the
+profile's recorded runtime generation, so selecting a newer extension bundle
+alone cannot update this profile.
+
+The current runtime imported all four provider identities from the shared YAML
+into a separate real xlang3 SQLite profile without making a provider or model
+request. See the
+[exact evidence](evidence/provider-import-live-local-20261010.json).
+
+The missing integration is a native-view-owned explicit upgrade that retains
+the same SQLite profile and owner token, obtains and consumes the exact native
+retirement receipt, starts the verified replacement on the same backend port,
+publishes its PID/runtime/authority back into encrypted `profile.state`, and
+activates before admitting new work. Because persisted browser-view
+credentials live in the same SQLite database and bind to the still-running
+view-host process, preserving that database and host identity also preserves
+those browser sessions. The upgrade must recover an interrupted handoff
+without replaying retirement or starting a competing owner. Current source does
+not yet implement this path; historical adapter checks below are not evidence
+of installed-profile upgrade acceptance.
+
 Historical checkpoint: the JavaScript owner registry and editor upgrade/cancel
 commands described below have been removed from the current source. Native
 owner-control contracts remain available to operators; this document is not a
