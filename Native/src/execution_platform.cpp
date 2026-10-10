@@ -1,5 +1,6 @@
 #include "agentflow/execution_platform.hpp"
 #include "agentflow/skill_context.hpp"
+#include "agentflow/agent_definitions.hpp"
 #include <algorithm>
 #include <random>
 #include <sstream>
@@ -48,9 +49,15 @@ Run ExecutionPlatform::submit_graph_workspace(std::string id,std::string session
     return submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));
 }
 std::vector<std::string> ExecutionPlatform::models() const{return agents_?agents_->models():std::vector<std::string>{};}
-std::vector<AgentDefinitionMetadata> ExecutionPlatform::agent_definitions()const{if(!agents_)throw RunUnavailable("Named agent definitions require a configured provider");return agents_->agent_definitions();}
-SessionAgentState ExecutionPlatform::session_agent(const std::string& session)const{if(!agents_)throw RunUnavailable("Named agent selection requires a configured provider");return agents_->session_agent(session);}
-SessionAgentState ExecutionPlatform::select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t revision){if(!agents_)throw RunUnavailable("Named agent selection requires a configured provider");return agents_->select_session_agent(session,std::move(selected),revision);}
+std::vector<AgentDefinitionMetadata> ExecutionPlatform::agent_definitions()const{
+    std::vector<AgentDefinitionMetadata> result;for(const auto& item:AgentDefinitionStore(store_).load().entries)result.push_back({item.id,item.revision,item.model_id});return result;
+}
+SessionAgentState ExecutionPlatform::session_agent(const std::string& session)const{return store_.session_agent(session).get();}
+SessionAgentState ExecutionPlatform::select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t revision){
+    std::optional<AgentDefinition> pinned;if(selected){if(selected->id.empty()||selected->revision<1)throw std::invalid_argument("Invalid named agent selection");const auto catalog=AgentDefinitionStore(store_).load();const auto found=std::find_if(catalog.entries.begin(),catalog.entries.end(),[&](const auto& item){return item.id==selected->id;});
+        if(found==catalog.entries.end()||found->revision!=selected->revision||found->model_id!=selected->model_id)throw Conflict("Named agent definition changed; refresh before selecting it");pinned=*found;}
+    return store_.replace_session_agent(session,std::move(pinned),revision).get();
+}
 bool ExecutionPlatform::supports_delegation()const{return agents_&&healthy()&&agents_->supports_delegation();}
 bool ExecutionPlatform::supports_dynamic_planning()const{return agents_&&healthy()&&agents_->supports_dynamic_planning();}
 bool ExecutionPlatform::supports_context()const{return agents_&&healthy()&&agents_->supports_context();}

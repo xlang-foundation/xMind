@@ -16,7 +16,7 @@ public:
     ExecutionWorkspaceMetadata execution_workspace()const override;
     bool supports_skill_catalogue()const override;
     bool supports_session_skills()const override{return supports_skill_catalogue();}
-    bool supports_agent_selection()const override{return static_cast<bool>(agents_);}
+    bool supports_agent_selection()const override{return true;}
     std::vector<AgentDefinitionMetadata> agent_definitions()const override;
     SessionAgentState session_agent(const std::string& session)const override;
     SessionAgentState select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t expected_revision)override;
