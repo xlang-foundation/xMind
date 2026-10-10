@@ -14,7 +14,7 @@ struct GraphNodeDefinition {
     std::vector<std::string> dependencies;
     // MCP specs require an arguments_json string so catalogue/checkpoint JSON
     // round trips retain literal number tokens and escaped property spellings.
-    std::string prompt,model_id,tool,arguments_json;
+    std::string prompt,model_id,instructions,tool,arguments_json;
     std::string condition_json;
     std::optional<GraphMcpBinding> mcp;
 };

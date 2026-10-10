@@ -291,7 +291,9 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     check();ContextManager manager(persistence_,provider,*settings_.context,message);
     return manager.compact_idle(current.spec.scope,binding,current.spec.id,trusted,credential?&*credential:nullptr,token,deadline);
 }
-Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id,std::shared_ptr<RootExecutionBudget> budget) {
+Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id,
+    std::shared_ptr<RootExecutionBudget> budget,const std::string& graph_instructions) {
+    if(graph_instructions.size()>32768 || graph_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Graph agent instructions exceed limits");
     const auto admitted=persistence_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
     bool leaf=false,dynamic_child=false,graph_agent=false;std::optional<DynamicPlanCapabilities> child_caps;std::optional<DynamicPresetCapability> child_preset;
     if(!admitted.parent_id.empty()){
@@ -408,7 +410,12 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         });
         ModelRequest request;request.include_usage=settings_.provider.stream_usage==Capability::supported;
         request.max_output_tokens=settings_.max_output_tokens;
-        auto instructions=settings_.instructions;std::unique_ptr<RepositoryInstructionContext> repository_context;
+        auto agent_instructions=settings_.instructions;
+        if(!graph_instructions.empty()){
+            agent_instructions.append("\n\nGraph agent instructions (trusted catalog):\n");
+            agent_instructions+=graph_instructions;
+        }
+        auto instructions=agent_instructions;std::unique_ptr<RepositoryInstructionContext> repository_context;
         if(workspace_){
             const auto sources=workspace_->repository_instructions(".",token);auto metadata=Json::array();
             for(const auto& source:sources){
@@ -497,7 +504,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!leaf&&budget&&delegation_&&!delegation_->healthy())throw DelegationOutcomeUnrecorded("Native delegation owner is faulted");
             if(dynamic_root){if(!planning_->healthy())throw DynamicOutcomeUnrecorded("Native planning owner is faulted");validate_dynamic_owner(id,provider.model);}
             if(repository_context){
-                auto current=settings_.instructions+repository_context->prepare(token);
+                auto current=agent_instructions+repository_context->prepare(token);
                 if(!settings_.instruction_policy.instructions.empty()){current.append(instruction_prefix);current+=settings_.instruction_policy.instructions;}
                 if(current.size()>65536)throw ToolFileError("Combined agent instructions exceed limits");
                 request.messages.front().content=std::move(current);
@@ -627,7 +634,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     if(call.name=="apply_patch"&&settings_.approved_edits&&repository_context){prepared_patch=PatchTool(persistence_,*workspace_,*repository_context).prepare(call.arguments_json,token);guidance_ready=prepared_patch.has_value()&&guidance_ready;}
                     if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}}}};}
                     else if(call.name=="list_skills"&&repository_context){try{if(mcp_compact_object(call.arguments_json)!="{}")throw std::invalid_argument("Skill listing takes no arguments");}catch(const McpProtocolError&){throw std::invalid_argument("Invalid skill listing arguments");}output=Json::parse(repository_context->skills().catalogue_json(token));}
-                    else if(call.name=="load_skill"&&repository_context){const auto base_bytes=settings_.instructions.size()+(settings_.instruction_policy.instructions.empty()?0:instruction_prefix.size()+settings_.instruction_policy.instructions.size());output=Json::parse(repository_context->activate_skill(call.arguments_json,base_bytes,token));}
+                    else if(call.name=="load_skill"&&repository_context){const auto base_bytes=agent_instructions.size()+(settings_.instruction_policy.instructions.empty()?0:instruction_prefix.size()+settings_.instruction_policy.instructions.size());output=Json::parse(repository_context->activate_skill(call.arguments_json,base_bytes,token));}
                     else if(call.name=="edit_file" && settings_.approved_edits) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(EditExecutor(persistence_,*workspace_).invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance)));

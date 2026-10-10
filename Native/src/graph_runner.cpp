@@ -301,7 +301,7 @@ Run GraphRunner::execute(const std::string& id,std::stop_token external,bool pre
             // Allocate tracking before launching: once a worker exists, no
             // allocation failure may relabel its effects as "not dispatched".
             flights.push_back({child_id,{},slot});
-            try{const auto selected=prepared.definition.model_id.empty()?model:prepared.definition.model_id;flights.back().result=std::async(std::launch::async,[this,child_id,prepared=std::move(prepared),selected,deadline,budget,token=stop.get_token()]() mutable {return prepared.definition.kind==GraphNodeKind::agent?agents_->execute(child_id,token,selected,budget):tool(child_id,std::move(prepared),token,deadline,static_cast<bool>(budget));});}
+            try{const auto selected=prepared.definition.model_id.empty()?model:prepared.definition.model_id;flights.back().result=std::async(std::launch::async,[this,child_id,prepared=std::move(prepared),selected,deadline,budget,token=stop.get_token()]() mutable {return prepared.definition.kind==GraphNodeKind::agent?agents_->execute(child_id,token,selected,budget,prepared.definition.instructions):tool(child_id,std::move(prepared),token,deadline,static_cast<bool>(budget));});}
             catch(...){if(slot)budget->release_leaf();flights.pop_back();store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"graph_worker_launch_failed"})").get();store_.settle_graph_child(child_id).get();stop.request_stop();}continue;
         }
         if(flights.empty() && decisions.waiting_human.empty())throw DatabaseError("Graph has no runnable or waiting work");

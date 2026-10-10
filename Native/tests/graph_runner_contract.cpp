@@ -16,8 +16,8 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
  PersistenceService store(database,imports);AgentSettings settings;settings.provider.model="fixture-model";settings.provider.endpoint=argv[4];settings.provider.tools=Capability::supported;settings.workspace=argv[1];settings.run_timeout=std::chrono::seconds(15);GraphRunner runner(store,settings,2);
  const GraphPlan plan(R"({"nodes":[
   {"id":"read","type":"tool","tool":"read_file","arguments":{"path":"left.txt"}},
-  {"id":"left","type":"agent","prompt":"parallel-left","depends_on":["read"]},
-  {"id":"right","type":"agent","prompt":"parallel-right","depends_on":["read"]},
+  {"id":"left","type":"agent","prompt":"parallel-left","instructions":"Work as the left-side reviewer. Report only findings from your assigned branch.","depends_on":["read"]},
+  {"id":"right","type":"agent","prompt":"parallel-right","instructions":"Work as the right-side reviewer. Report only findings from your assigned branch.","depends_on":["read"]},
   {"id":"review","type":"human","prompt":"Choose the next file","depends_on":["left","right"]},
   {"id":"chosen","type":"tool","tool":"read_file","depends_on":["review"],"arguments":{"path":{"$ref":{"node":"review","path":["path"]}}}},
   {"id":"excluded","type":"tool","tool":"read_file","depends_on":["review"],"when":{"node":"review","path":["path"],"equals":"never.txt"},"arguments":{"path":"never.txt"}}

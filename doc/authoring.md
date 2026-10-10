@@ -18,14 +18,20 @@ graphs:
         - id: inspect
           type: agent
           prompt: Inspect the selected change and report findings.
+          instructions: |
+            Act as a security reviewer. Cite only evidence from your assigned branch.
 ```
 
 The native `GraphPlan` validator remains authoritative for node types,
-dependencies, schemas and permissions. A catalog can hold at most 16 graphs;
-IDs are stable and retired IDs cannot be reused. Import output reports catalog
-and graph revisions plus node counts. `execution_available: false` means the
-admin command only registered definitions; it did not start a run. Running a
-saved catalog through a reusable public graph API is still in progress.
+dependencies, schemas and permissions. Agent nodes may include their own
+bounded `instructions` and `model_id`; the backend applies those instructions
+to that node's LLM loop while retaining the server's registered tools,
+permissions, repository instructions and global policy. A catalog can hold at
+most 16 graphs; IDs are stable and retired IDs cannot be reused. Import output
+reports catalog and graph revisions plus node counts. `execution_available:
+false` in the offline admin import result means import did not start a run. A
+running server separately advertises live executability in `/v1/graphs` and
+accepts registered graph runs through its shared execution service.
 
 ## Agent instructions
 
@@ -56,9 +62,11 @@ supported. JSON input remains accepted.
 
 ## Still required for the agreed product
 
-The current slice does not yet define named YAML agents, tool bindings, skill
-catalogs, arbitrary xlang3 `.py` callables, or the in-process programming API.
-Those authoring styles must eventually produce the same validated native
-definitions, tool registry and permission receipts; parser acceptance alone
-does not establish runtime behavior. See the [runtime architecture](runtime-product-design.md)
-for the complete target and remaining integration work.
+The current slice supports per-node agent instructions inside YAML graph
+definitions, but does not yet define reusable named YAML agents, per-agent tool
+bindings, filesystem skill catalogs, arbitrary xlang3 `.py` callables, or the
+in-process programming API. Those authoring styles must eventually produce the
+same validated native definitions, tool registry and permission receipts;
+parser acceptance alone does not establish runtime behavior. See the
+[runtime architecture](runtime-product-design.md) for the complete target and
+remaining integration work.

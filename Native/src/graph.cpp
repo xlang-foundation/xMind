@@ -100,7 +100,7 @@ GraphPlan::GraphPlan(const std::string& source){
     for(const auto& value:spec["nodes"]){
         const auto kind=text(value,"type",16);GraphNodeDefinition node;node.id=text(value,"id",64);
         if(!identifier(node.id) || !ids.emplace(node.id,nodes_.size()).second)throw std::invalid_argument("Invalid or duplicate graph node ID");
-        if(kind=="agent"){node.kind=GraphNodeKind::agent;fields(value,{"id","type","depends_on","prompt","model_id","when"});node.prompt=text(value,"prompt",32768);if(value.contains("model_id"))node.model_id=text(value,"model_id",256);}
+        if(kind=="agent"){node.kind=GraphNodeKind::agent;fields(value,{"id","type","depends_on","prompt","model_id","instructions","when"});node.prompt=text(value,"prompt",32768);if(value.contains("model_id"))node.model_id=text(value,"model_id",256);if(value.contains("instructions"))node.instructions=text(value,"instructions",32768);}
         else if(kind=="tool"){
             node.kind=GraphNodeKind::tool;node.tool=text(value,"tool",128);
             if(mcp_alias(node.tool)){
