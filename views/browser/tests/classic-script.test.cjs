@@ -118,7 +118,7 @@ test('production classic scripts share a realm without collisions and restore ow
       }
     }
     for(let attempts=0;attempts<100&&!document.getElementById('workspace-info').textContent.startsWith('Connected');++attempts)await new Promise(resolve=>setImmediate(resolve));
-    assert.match(document.getElementById('workspace-info').textContent,/Connected to the native xMind runtime/);assert.match(document.getElementById('workspace-info').textContent,/D:\\Projects\\Example/);
+    assert.match(document.getElementById('workspace-info').textContent,/Connected to xMind on this computer/);assert.match(document.getElementById('workspace-info').textContent,/Workspace: D:\\Projects\\Example/);
     assert.equal(document.getElementById('connection').open,false);
     assert.equal(document.getElementById('sessions').value,parent.session_id);
     assert.equal(document.querySelector('footer #model').value,'fixture-model');
