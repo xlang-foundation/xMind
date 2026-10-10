@@ -1,0 +1,9 @@
+MSBuild version 18.9.1+a81b43525 for .NET Framework
+
+  Checking File Globs
+  agentflow_mcp_wire.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_mcp_wire.lib
+  agentflow_secrets.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_secrets.lib
+  agentflow_provider_transport.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_provider_transport.lib
+  agentflow_mcp_http.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_mcp_http.lib
+  mcp_oauth_callback_contract.cpp
+  agentflow_mcp_oauth_callback_contract.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_mcp_oauth_callback_contract.exe

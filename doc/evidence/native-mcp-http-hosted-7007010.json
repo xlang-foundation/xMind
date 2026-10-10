@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "70070107444a17e3012e0c897a4ae6baa0d934d6",
+  "run": 38023402355,
+  "job": 114129041691,
+  "scope": "Independent downloaded gate, bundle and VSIX byte/source verification; no local native execution or installed/rendered UI acceptance",
+  "nativeContracts": 110,
+  "extensionContracts": 244,
+  "browserContracts": 54,
+  "sourceBundleFiles": 29,
+  "runtimeFiles": 1860,
+  "pureSourceFiles": 1830,
+  "vsixEntries": 1897,
+  "binaries": [
+    "modules/xlang_json.x3pkg.dll",
+    "modules/xlang_sqlite3.x3pkg.dll",
+    "xlang3.exe",
+    "xlang3_runtime.dll",
+    "xmind.exe"
+  ],
+  "textNewlineComparisons": [
+    {
+      "file": "extensions/vscode/package.json",
+      "packagedSha256": "7b6626730c006dae09f4e26a534054fd799e1427398351b3dee65b5c716a4906",
+      "gitBlobSha256": "f917d36fd9e98114a2f3c4f381b39b1e3cc09f9af5687b87482874d8e2a93497",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/extension.js",
+      "packagedSha256": "3ea5fbc3ea197dba136e58af5e49b7a29e058950274b94d55842f54e256fddd3",
+      "gitBlobSha256": "09e4eea41957dd717571a16d19f0502f8658f23ed533c0c5f1fb617ac7e80a43",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/client.js",
+      "packagedSha256": "2740a8abb301fb760e450f4a0c06f83b9b33901c33d879df4bf96914def551d0",
+      "gitBlobSha256": "ec495493af4ac29011fa1b68cc944e567f5d647cce3e6244c67c50b6faff4ee4",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/workspace-backend.js",
+      "packagedSha256": "cb3dcc32ee6d680e5e1c4638d2af886d6c77c4e672e92e04bf3fc051fb915d5b",
+      "gitBlobSha256": "19f2cb67498348a4088d9d1eec51b960d49a32d6b33e04923fd463910f3fdeaf",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/native-runtime.js",
+      "packagedSha256": "e53335c510e8ed457c2c44f15c1a1ef9c3f2e702170417cd4e241a9824f90cdb",
+      "gitBlobSha256": "4b10a833cedc93fc4364a80ddd08d20a4e8ead7134ecc0f052c2b1c4bc635b58",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/browser-view.js",
+      "packagedSha256": "ac025e3e2fb0f12cbd2de3915de8b8c1951d38f4892d8cc9bd2b92b65701cee1",
+      "gitBlobSha256": "f5e47b3b60530b4ed1b98ff3254eb0debbb49c5fde860912abd09d4a1d05a1ea",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.js",
+      "packagedSha256": "3b4ed94cfd4aa2c25eca1a34710c1d48a4c56356071b1b4fcf85ce876e42778c",
+      "gitBlobSha256": "8305db924538888e9e390f244ed968e21ac122816f3609f95aca018b97ec11a7",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.css",
+      "packagedSha256": "4bc89edf03e09585ec0fda84ac0cf51bd1808b080d3445c856cc1c37856c4201",
+      "gitBlobSha256": "bee0171c6440a16314b179cdfe2062a69f6eb447779cc11d7f0d59a92b20966d",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/patch-review.js",
+      "packagedSha256": "4e5fd0d6e61f3846c72cc420c0268314e1979cc49983bb0754e0a124ef68397e",
+      "gitBlobSha256": "8f748febcfa7517088490799361c7105ffdb5f136fb08fc58544a29981fff681",
+      "exactBytes": false
+    },
+    {
+      "file": "views/browser/server.mjs",
+      "packagedSha256": "3fc1619ae354c5d9c0bd9c06c5d2889a624b72bae80e6a8dcf44075550a34cb7",
+      "gitBlobSha256": "e7e8b0dc31096aafc956e1a047559a3413554156fb07c666cbf02f2c7740ba70",
+      "exactBytes": false
+    },
+    {
+      "file": "views/browser/browser.js",
+      "packagedSha256": "fe11eede48fb9252faa9be50485c34ce71c5bf4a1ab4f9177b8e98a6ea8edeba",
+      "gitBlobSha256": "ea785431328c34c128e2558bbda8d304781fcf3da3fcea3d36efd006f7616d78",
+      "exactBytes": false
+    },
+    {
+      "file": "views/browser/browser.css",
+      "packagedSha256": "90f4ef9e268d9a128e4c4398c8e944426330070ab6b435189ee989b69ea381fd",
+      "gitBlobSha256": "8cae13ebf6ff2700bbcbe1a7150315603fc5865ff8bdbe3c9e30c2cb3ca901dc",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.js",
+      "packagedSha256": "3b4ed94cfd4aa2c25eca1a34710c1d48a4c56356071b1b4fcf85ce876e42778c",
+      "gitBlobSha256": "8305db924538888e9e390f244ed968e21ac122816f3609f95aca018b97ec11a7",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/media/chat.css",
+      "packagedSha256": "4bc89edf03e09585ec0fda84ac0cf51bd1808b080d3445c856cc1c37856c4201",
+      "gitBlobSha256": "bee0171c6440a16314b179cdfe2062a69f6eb447779cc11d7f0d59a92b20966d",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/client.js",
+      "packagedSha256": "2740a8abb301fb760e450f4a0c06f83b9b33901c33d879df4bf96914def551d0",
+      "gitBlobSha256": "ec495493af4ac29011fa1b68cc944e567f5d647cce3e6244c67c50b6faff4ee4",
+      "exactBytes": false
+    },
+    {
+      "file": "extensions/vscode/patch-review.js",
+      "packagedSha256": "4e5fd0d6e61f3846c72cc420c0268314e1979cc49983bb0754e0a124ef68397e",
+      "gitBlobSha256": "8f748febcfa7517088490799361c7105ffdb5f136fb08fc58544a29981fff681",
+      "exactBytes": false
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11659993986,
+      "sha256": "53101ead44a0690fc9f4872c34a09e8b07c9309e79e9a4728669f8a0b717aff8"
+    },
+    {
+      "id": 11659993993,
+      "sha256": "9cf9a06edb7156c152b22cd23c284065a7cdc24bfcd8ddac5c4cdf90a237ce97"
+    }
+  ],
+  "vsixSha256": "a9eeeb6cbbc0dc94842fa71b2b3823b0ca5c8e0e57b92894277ad4fffaa49ead",
+  "sourceManifestSha256": "b1c667c904e7af80bf93cff5e335585b10da1908e433abfdf7307a642b116fa9",
+  "runtimeManifestSha256": "f358428b34846fb2c45e019a6069fc0477d98df72c362ff520930bba68310d87",
+  "evidenceHashes": {
+    "native-gate.json": "9e08b3367b3e81d13bd26d1fe1c4e80a43d9be4aa4c982f0fff351b8ed35f987",
+    "contracts.json": "9aa347dbdd0c5eddcdeeab18d1fde0cbbbb1861bdf8d2d7d1a4ccb368b5e3d93",
+    "native-ctest.log": "417db22e9cca4effafb8a47d623a9ed27be5daadd4317c43eea4331802b85570",
+    "native-view-early-ctest.log": "cdb9cbc51d7dac87471ae68e2a46b8f5b054a67cbf68f897c9ccde2da6385549",
+    "provenance.json": "98c6078e856a710afaeb446328dd1d70eac356665d6dcaec47ae22df2fbf303f",
+    "accepted-source-manifest.json": "b1c667c904e7af80bf93cff5e335585b10da1908e433abfdf7307a642b116fa9",
+    "runtime-staging.json": "ae91cebc0d0fa066844417fa71eecd6d458dc44bd67f0df6b2113e0783a0c529",
+    "browser-controller.log": "75c5a3e6f938cc119af4c03f4dc9002f5296e562abff70a546f6c94ef263f42d",
+    "browser-native.log": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693",
+    "browser-package-verification.log": "0156111ab9409f090c7f2314c622d66878215dc84f776dc2b547198865cd7ca2"
+  },
+  "installed": false,
+  "localNativeExecuted": false,
+  "liveModelRequests": 0,
+  "nativeSeconds": 447.12,
+  "observedAt": "2026-10-10T04:55:32.808Z",
+  "rawHashes": {
+    "doc/evidence/native-mcp-http-hosted-7007010-native-gate.json": "9e08b3367b3e81d13bd26d1fe1c4e80a43d9be4aa4c982f0fff351b8ed35f987",
+    "doc/evidence/native-mcp-http-hosted-7007010-contracts.json": "9aa347dbdd0c5eddcdeeab18d1fde0cbbbb1861bdf8d2d7d1a4ccb368b5e3d93",
+    "doc/evidence/native-mcp-http-hosted-7007010-native-ctest.log": "417db22e9cca4effafb8a47d623a9ed27be5daadd4317c43eea4331802b85570",
+    "doc/evidence/native-mcp-http-hosted-7007010-native-view-early-ctest.log": "cdb9cbc51d7dac87471ae68e2a46b8f5b054a67cbf68f897c9ccde2da6385549",
+    "doc/evidence/native-mcp-http-hosted-7007010-provenance.json": "98c6078e856a710afaeb446328dd1d70eac356665d6dcaec47ae22df2fbf303f",
+    "doc/evidence/native-mcp-http-hosted-7007010-accepted-source-manifest.json": "b1c667c904e7af80bf93cff5e335585b10da1908e433abfdf7307a642b116fa9",
+    "doc/evidence/native-mcp-http-hosted-7007010-runtime-staging.json": "ae91cebc0d0fa066844417fa71eecd6d458dc44bd67f0df6b2113e0783a0c529",
+    "doc/evidence/native-mcp-http-hosted-7007010-browser-controller.log": "75c5a3e6f938cc119af4c03f4dc9002f5296e562abff70a546f6c94ef263f42d",
+    "doc/evidence/native-mcp-http-hosted-7007010-browser-native.log": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693",
+    "doc/evidence/native-mcp-http-hosted-7007010-browser-package-verification.log": "0156111ab9409f090c7f2314c622d66878215dc84f776dc2b547198865cd7ca2",
+    "doc/evidence/native-mcp-http-hosted-7007010-job.log": "66104b48ac015c164e7d49e358356b3615c6473a614a38b5ba88507cff26b64a"
+  },
+  "extensionGateQualification": "Original downloaded job output verifies the full 244-extension suite; the original browser-controller log verifies the full 54-browser suite. Zero failures/cancellations/skips.",
+  "workflow": "https://github.com/xlang-foundation/xMind/actions/runs/38023402355",
+  "notCurrentAuthorizationCandidate": true,
+  "notCurrentCallbackCandidate": true
+}

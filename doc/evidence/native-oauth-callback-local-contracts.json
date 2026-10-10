@@ -1,0 +1,3593 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test"
+    ],
+    "files" : 
+    [
+      "D:/CantorAI2026/xMind/Native/CMakeLists.txt"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 245,
+        "parent" : 0
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 253,
+        "parent" : 2
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 258,
+        "parent" : 4
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 263,
+        "parent" : 6
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 267,
+        "parent" : 8
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 275,
+        "parent" : 10
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 283,
+        "parent" : 12
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 291,
+        "parent" : 14
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 296,
+        "parent" : 16
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 301,
+        "parent" : 18
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 309,
+        "parent" : 20
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 314,
+        "parent" : 22
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 322,
+        "parent" : 24
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 328,
+        "parent" : 26
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 335,
+        "parent" : 28
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 343,
+        "parent" : 30
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 351,
+        "parent" : 32
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 355,
+        "parent" : 34
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 363,
+        "parent" : 36
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 372,
+        "parent" : 38
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 381,
+        "parent" : 40
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 393,
+        "parent" : 42
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 401,
+        "parent" : 44
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 413,
+        "parent" : 46
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 427,
+        "parent" : 48
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 434,
+        "parent" : 50
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 438,
+        "parent" : 52
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 441,
+        "parent" : 54
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 444,
+        "parent" : 56
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 447,
+        "parent" : 58
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 450,
+        "parent" : 60
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 453,
+        "parent" : 62
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 456,
+        "parent" : 64
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 462,
+        "parent" : 66
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 468,
+        "parent" : 68
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 479,
+        "parent" : 70
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 482,
+        "parent" : 72
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 494,
+        "parent" : 74
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 497,
+        "parent" : 76
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 503,
+        "parent" : 78
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 509,
+        "parent" : 80
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 518,
+        "parent" : 82
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 527,
+        "parent" : 84
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 535,
+        "parent" : 86
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 543,
+        "parent" : 88
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 547,
+        "parent" : 90
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 557,
+        "parent" : 92
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 563,
+        "parent" : 94
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 570,
+        "parent" : 96
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 578,
+        "parent" : 98
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 583,
+        "parent" : 100
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 588,
+        "parent" : 102
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 596,
+        "parent" : 104
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 605,
+        "parent" : 106
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 616,
+        "parent" : 108
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 630,
+        "parent" : 110
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 644,
+        "parent" : 112
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 655,
+        "parent" : 114
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 665,
+        "parent" : 116
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 668,
+        "parent" : 118
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 676,
+        "parent" : 120
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 684,
+        "parent" : 122
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 692,
+        "parent" : 124
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 700,
+        "parent" : 126
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 711,
+        "parent" : 128
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 720,
+        "parent" : 130
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 728,
+        "parent" : 132
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 731,
+        "parent" : 134
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 734,
+        "parent" : 136
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 741,
+        "parent" : 138
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 750,
+        "parent" : 140
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 759,
+        "parent" : 142
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 768,
+        "parent" : 144
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 777,
+        "parent" : 146
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 784,
+        "parent" : 148
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 792,
+        "parent" : 150
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 798,
+        "parent" : 152
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 807,
+        "parent" : 154
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 816,
+        "parent" : 156
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 820,
+        "parent" : 158
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 824,
+        "parent" : 160
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 828,
+        "parent" : 162
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 837,
+        "parent" : 164
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 837,
+        "parent" : 166
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 843,
+        "parent" : 168
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 848,
+        "parent" : 170
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 851,
+        "parent" : 172
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 854,
+        "parent" : 174
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 857,
+        "parent" : 176
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 861,
+        "parent" : 178
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 865,
+        "parent" : 180
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 869,
+        "parent" : 182
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 883,
+        "parent" : 184
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 893,
+        "parent" : 186
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 902,
+        "parent" : 188
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 912,
+        "parent" : 190
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 920,
+        "parent" : 192
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 928,
+        "parent" : 194
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 938,
+        "parent" : 196
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 947,
+        "parent" : 198
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 956,
+        "parent" : 200
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 960,
+        "parent" : 202
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 967,
+        "parent" : 204
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 975,
+        "parent" : 206
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 978,
+        "parent" : 208
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 989,
+        "parent" : 210
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 997,
+        "parent" : 212
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1009,
+        "parent" : 214
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1019,
+        "parent" : 216
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1030,
+        "parent" : 218
+      },
+      {
+        "file" : 0
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 1037,
+        "parent" : 220
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "backtrace" : 1,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_json_schema_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_json_schema_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 3,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_wire_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_wire_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 5,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_model_stream_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "model_stream_protocol_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 7,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_model_request_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "model_request_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 9,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_context_selection_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_context_selection_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 11,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_gemini_request_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_request_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 13,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_gemini_stream_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_stream_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 15,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_gemini_history_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_history_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 17,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_anthropic_request_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_anthropic_request_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 19,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_anthropic_stream_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_anthropic_stream_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 21,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_anthropic_history_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_anthropic_history_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 23,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_responses_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_responses_protocol_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 25,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_dynamic_plan_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_dynamic_plan_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 27,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_authority_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_authority_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 29,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_dynamic_plan_repository_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_dynamic_plan_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 31,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_context_repository_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_context_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 33,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/context_control_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_context_control_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_context_control_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 35,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/context_cli_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_context_cli_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 37,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/context_engine_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_context_engine_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_context_engine_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 150.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 39,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/context_graph_engine_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_context_graph_engine_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_context_graph_engine_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 150.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 41,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/provider_yaml_config_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_provider_yaml_config_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_yaml_config_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 43,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_planning_http_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_planning_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 45,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_native_child_executor_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_child_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 47,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/dynamic_plan_engine_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_dynamic_plan_engine_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_dynamic_plan_engine_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 49,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/dynamic_plan_mcp_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_dynamic_plan_mcp_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_dynamic_plan_mcp_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 51,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_secret_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_secret_protection_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 53,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/a2a_task_control_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_a2a_task_control_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 55,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/a2a_message_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_a2a_message_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 57,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/a2a_stream_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_a2a_stream_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 59,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/a2a_v1_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_a2a_v1_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 61,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_responses_agent_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 63,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/graph_service_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_service_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 65,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/provider_cli_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_cli_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 67,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/provider_setup_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_provider_setup_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_setup_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 69,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/graph_runner_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_graph_runner_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_runner_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 71,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/graph_mcp_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_graph_mcp_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_mcp_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 73,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/graph_mcp_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_admin.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_mcp_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 75,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/delegation_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_native_delegation_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_delegation_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 77,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/delegation_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_delegation_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 79,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/graph_checkpoint_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_graph_checkpoint_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_checkpoint_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 81,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/graph_children_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_graph_children_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_children_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 83,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/graph_contract_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_graph_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_admin.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_graph_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 85,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/instruction_configuration_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_instruction_configuration_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_instruction_configuration_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 87,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_process_configuration_contract.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_schema_worker.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_process_configuration_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 89,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/process_executor_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_process_executor_contract.exe",
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/process_peer.mjs",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_process_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 91,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_process_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_admin.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_process_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 93,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/process_contract_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_process_contract.exe",
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/process_peer.mjs"
+      ],
+      "config" : "Release",
+      "name" : "native_process_adapter_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 40.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 95,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_configuration_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_configuration_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 97,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_schema_worker_contract.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_schema_budget_fixture.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_schema_worker_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 99,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_stdio_contract.exe",
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/mcp_stdio_peer.mjs",
+        "D:/CantorAI2026/xMind/Native"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_stdio_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 101,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_handshake_contract.exe",
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/mcp_handshake_peer.mjs",
+        "D:/CantorAI2026/xMind/Native"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_handshake_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 103,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_client_contract.exe",
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/mcp_client_peer.mjs",
+        "D:/CantorAI2026/xMind/Native"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_client_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 105,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/sdk/http_effect_host.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_effect_contract.exe",
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/mcp_effect_peer.mjs",
+        "D:/CantorAI2026/xMind/Native",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_effect_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 107,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_service_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_service_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_service_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 109,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_runner_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_runner_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_runner_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 111,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/gemini_agent_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_gemini_agent_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_agent_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 113,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/anthropic_agent_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_anthropic_agent_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_anthropic_agent_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 115,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_file_patch_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_file_patch_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 20.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 117,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_skill_state_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_skill_state_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 119,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/skill_catalogue_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_skill_catalogue_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 121,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/create_executor_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_create_executor_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_create_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 123,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_edit_executor_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_edit_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 125,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_patch_file_executor_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_patch_file_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 127,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_patch_executor_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_patch_executor_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 129,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_patch_tool_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_patch_tool_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 131,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/approved_edit_http_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_approved_edit_http_fixture.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_approved_edit_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 133,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/workspace_tools_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_workspace_tools_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_workspace_tools_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 135,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/repository_instructions_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_workspace_tools_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_repository_instructions_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 137,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/skill_context_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_skill_context_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_skill_context_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 139,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/chat_provider_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_chat_provider_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_chat_provider_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 141,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/gemini_provider_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_gemini_provider_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_provider_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 143,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/deepseek_provider_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_deepseek_provider_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_deepseek_provider_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 145,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/deepseek_profile_runtime_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_deepseek_profile_runtime_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_deepseek_profile_runtime_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 147,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/provider_model_policy_runtime_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_provider_model_policy_runtime_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_model_policy_runtime_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 149,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/anthropic_provider_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_anthropic_provider_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_anthropic_provider_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 151,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/mcp_oauth_callback_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_oauth_callback_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_oauth_callback_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 153,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/responses_context_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_responses_context_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_responses_context_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 155,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/http_stream_transport_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_http_stream_transport_contract.exe",
+        "C:/Program Files/Git/usr/bin/openssl.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_http_stream_transport_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 157,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 159,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_edit_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_edit_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 161,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_patch_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_patch_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 163,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_mcp_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_admin.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_agent_mcp_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 165,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_mcp_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_admin.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib",
+        "modern"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_sdk_modern_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 167,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_mcp_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_admin.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib",
+        "legacy"
+      ],
+      "config" : "Release",
+      "name" : "native_mcp_sdk_legacy_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 169,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/http_cli_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_http_cli_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 171,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/unified_program_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_unified_program_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 173,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_patch_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib",
+        "unified"
+      ],
+      "config" : "Release",
+      "name" : "native_unified_patch_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 175,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/graph_service_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib",
+        "unified"
+      ],
+      "config" : "Release",
+      "name" : "native_unified_graph_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 177,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/agent_mcp_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib",
+        "",
+        "unified"
+      ],
+      "config" : "Release",
+      "name" : "native_unified_mcp_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 179,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/console_workspace_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_console_workspace_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 181,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/local_profile_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/xlang3_runtime.dll",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_local_profile_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 183,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/xlang3_runtime.dll",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_local_view_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 120.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 185,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_xlang_sqlite_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "embedded_xlang_sqlite_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 187,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_incoming_repository_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_incoming_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 189,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_task_list_repository_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_task_list_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 191,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_permission_waiter_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_permission_waiter_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 30.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 193,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_operation_repository_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_operation_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 195,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_repository_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "xlang_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 197,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_persistence_service_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "persistence_service_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 199,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_backend_owner_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_backend_owner_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 201,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_legacy_owner_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_legacy_owner_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 203,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_owner_process_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_owner_process_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 15.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 205,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/runtime_generation_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_runtime_generation_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/xlang3_runtime.dll"
+      ],
+      "config" : "Release",
+      "name" : "native_runtime_generation_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 207,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/backend_owner_http_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_backend_owner_http_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/xlang3_runtime.dll",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_backend_owner_http_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 209,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/backend_handoff_contract.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/xlang3_runtime.dll",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_backend_handoff_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 90.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 211,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_provider_profiles_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_profiles_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 213,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/provider_profile_runtime_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_provider_profile_runtime_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_profile_runtime_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 215,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/provider_profile_cli_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_provider_profile_cli_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_provider_profile_cli_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 217,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/gemini_catalogue_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_gemini_catalogue_contract.exe"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_catalogue_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 45.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 219,
+      "command" : 
+      [
+        "C:/Program Files/nodejs/node.exe",
+        "D:/CantorAI2026/xMind/Native/tests/gemini_profile_runtime_peer.mjs",
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_gemini_profile_runtime_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "native_gemini_profile_runtime_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 50.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    },
+    {
+      "backtrace" : 221,
+      "command" : 
+      [
+        "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_credential_repository_contract.exe",
+        "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules",
+        "C:/Python/Python314/Lib"
+      ],
+      "config" : "Release",
+      "name" : "encrypted_credential_repository_contract",
+      "properties" : 
+      [
+        {
+          "name" : "TIMEOUT",
+          "value" : 60.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "D:/CantorAI2026/xMind/build/skill-state-native"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}

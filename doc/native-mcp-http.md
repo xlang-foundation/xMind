@@ -204,7 +204,53 @@ This owner supports pre-registered public clients with token authentication
 are rejected by the current component. Hosted packaging and installed/rendered
 acceptance of this source remain separate requirements.
 
+## Native loopback callback component
+
+`McpOAuthLoopbackCallback` binds exclusively to IPv4 `127.0.0.1` before the
+backend creates its authorization attempt. It supports an ephemeral port or an
+explicit registered port and exposes its exact redirect URI. The caller must
+register/use that URI with the selected authorization server. The receiver is
+single-use and validates the attempt's exact redirect before listening. Its
+deadline is bounded by the authorization owner's expiry.
+
+The GET callback passes the original query bytes to the native state/issuer/code
+owner. Wrong Host, Origin/Authorization headers, other paths/methods and oversized
+targets cannot admit a code. Duplicate state, missing required issuer, malformed
+target and denial retire the exchange as specified by the owner. Fixed callback
+pages contain no reflected query fields, outbound links or scripts, and use
+no-store/no-referrer/CSP headers. HTTP parsing has private temporary copies;
+this is not a promise to erase every library or OS buffer. The receiver performs
+neither token exchange nor tool dispatch. This remains a native library component;
+the authenticated product setup routes and view controls do not yet call it.
+
+The full native build and **111/111** local contracts pass in **378.16 seconds**,
+with **2443** unchanged mapped inputs and the pinned bridge-disabled xlang3 SDK.
+The first callback-only build failed because the protocol-error declaration
+include was missing; the original failure is retained. That include was repaired
+before the full build/gate. The original fixture checked socket closure after
+process exit. A test-only follow-up then strengthened both fixture files: all
+**12** callback cases now check closure while the native process and receiver
+remain alive awaiting an independent peer acknowledgement. The rebuilt callback
+contract passes in **0.99 seconds**. All production inputs and recorded production
+binaries remain unchanged; the complete 111-test gate was not repeated after
+that two-file fixture change. The exact scopes/hashes/raw outputs are retained in
+[callback evidence](evidence/native-oauth-callback-local.json).
+
+Trusted HTTPS discovery/login/token exchange, encrypted grant persistence,
+registration selection, refresh/revocation and client login controls remain
+required. Current callback paths use bounded literal ASCII letters/digits,
+slashes, underscores and hyphens. IPv6, HTTPS and non-query response-mode
+callback receivers are separate work.
+
 ## Acceptance still required
+
+The configured HTTP/terminal-feed package at `7007010` has separately passed the
+complete hosted **110/110** gate in **447.12 seconds**, **244/54** client suites
+and downloaded bundle/VSIX hash verification. It predates the newer OAuth
+authorization owner and callback listener. Its **1860** runtime files and **29**
+source-bundle files match recorded manifests; packaged view sources match the
+commit. This is no installed/rendered acceptance of the current implementation.
+[Original hosted evidence](evidence/native-mcp-http-hosted-7007010.json).
 
 - Verify hosted packaging, installed public agent/graph HTTP-MCP workflows and
   rendered approval UI against the current source.

@@ -1,0 +1,31 @@
+Start testing: Oct 09 21:59 Pacific Daylight Time
+----------------------------------------------------------
+76/111 Testing: native_mcp_oauth_callback_contract
+76/111 Test: native_mcp_oauth_callback_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/mcp_oauth_callback_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_oauth_callback_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_mcp_oauth_callback_contract" start time: Oct 09 21:59 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Actual native loopback callback passed valid; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed bad; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed duplicate; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed missing-issuer; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed encoded-target; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed denial; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed cancel; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed pre-cancel; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed timeout; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed owner-expiry; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed binding; exclusive binding and socket retirement checked while the native process stayed alive.
+Actual native loopback callback passed deadline; exclusive binding and socket retirement checked while the native process stayed alive.
+Synthetic browser redirects exercised the production native listener/authorization owner. No trusted HTTPS login, token exchange, persistence or product UI integration verified.
+<end of output>
+Test time =   0.97 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_callback_contract" end time: Oct 09 21:59 Pacific Daylight Time
+"native_mcp_oauth_callback_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 09 21:59 Pacific Daylight Time

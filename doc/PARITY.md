@@ -20,6 +20,21 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+The native loopback callback library component passes the **111/111** local
+gate in **378.16 seconds**. A subsequent test-only callback rebuild passes all
+**12** real-socket cases in **0.99 seconds**, including port closure while the
+native process/receiver remain alive. Production inputs/binaries did not change;
+the complete gate was not repeated for the two strengthened fixtures. This is
+no authenticated setup API, encrypted OAuth grant persistence, trusted HTTPS
+login or client login flow. [Exact evidence](evidence/native-oauth-callback-local.json).
+
+The configured HTTP/terminal-feed source `7007010` passed the complete hosted
+**110 native / 244 extension / 54 browser** gates and packaging. Downloaded
+artifacts are independently verified by raw hashes, exact test inventory and
+bundle/VSIX bytes. This package predates the newer OAuth authorization owner and
+callback listener and has no current installed/rendered acceptance.
+[Hosted verification](evidence/native-mcp-http-hosted-7007010.json).
+
 New native OAuth authorization components pass **110/110** local contracts in
 **376.23 seconds**, with **2439** unchanged mapped inputs. Independent socket
 checks validate the production code-grant form and RFC PKCE; native fixtures

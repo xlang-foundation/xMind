@@ -1,5 +1,28 @@
 # Reviewable milestones
 
+The native loopback callback receiver passes real-socket synthetic browser
+redirects through the production authorization owner. The complete **111/111**
+local gate passes in **378.16 seconds**, with **2443** unchanged mapped inputs.
+A later two-file test-only strengthening and rebuilt callback contract passes
+**12** cases in **0.99 seconds**, now checking port closure while the native
+process/receiver remain alive. Production inputs/binaries remain unchanged;
+the complete gate was not repeated after that fixture change. Exclusive Windows
+binding, exact redirect/raw target/state/issuer admission, fixed non-reflecting
+responses, denial, cancellation and deadline/owner expiry are verified within
+that scope. Authenticated setup routes, encrypted OAuth grant persistence,
+registration selection, trusted HTTPS login and client controls remain
+unfinished. The first missing-include build failure is retained.
+[Exact callback evidence](evidence/native-oauth-callback-local.json).
+
+The configured native MCP HTTP and terminal-feed source `7007010` passed its
+complete hosted **110-contract** native gate in **447.12 seconds**, plus **244
+extension / 54 browser** contracts and packaging. Independent downloaded bundle
+and VSIX verification checks all **1860** runtime files, the **29** source-bundle
+files, exact contract names/gate hashes and packaged view bytes against that
+commit. Original output and hash provenance are retained. This package predates
+the newer authorization owner and callback listener and is not installed in the
+running previews. [Hosted package evidence](evidence/native-mcp-http-hosted-7007010.json).
+
 Native OAuth authorization components pass the complete **110/110** local gate
 in **376.23 seconds**, with **2439** unchanged mapped inputs and the pinned native
 xlang3 runtime, without executing CPython. The production private form encoder

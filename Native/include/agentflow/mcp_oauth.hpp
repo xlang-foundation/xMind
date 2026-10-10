@@ -63,6 +63,8 @@ public:
     McpOAuthAuthorizationAttempt(McpOAuthAuthorizationAttempt&&) noexcept;
     McpOAuthAuthorizationAttempt& operator=(McpOAuthAuthorizationAttempt&&) noexcept;
     std::string authorization_url() const;
+    std::string redirect_uri() const;
+    McpDeadline expires_at() const;
     void accept_callback(std::string_view redirect_uri,std::string_view raw_query);
     bool ready() const noexcept;
     McpOAuthTokens exchange(McpDeadline deadline,std::stop_token cancel={});

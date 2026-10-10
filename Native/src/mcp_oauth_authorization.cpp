@@ -98,6 +98,8 @@ McpOAuthAuthorizationAttempt::McpOAuthAuthorizationAttempt(McpOAuthDiscovery dis
 McpOAuthAuthorizationAttempt::~McpOAuthAuthorizationAttempt()=default;
 McpOAuthAuthorizationAttempt::McpOAuthAuthorizationAttempt(McpOAuthAuthorizationAttempt&&) noexcept=default;
 McpOAuthAuthorizationAttempt& McpOAuthAuthorizationAttempt::operator=(McpOAuthAuthorizationAttempt&&) noexcept=default;
+std::string McpOAuthAuthorizationAttempt::redirect_uri() const {if(!impl_)invalid();return impl_->client.redirect_uri;}
+McpDeadline McpOAuthAuthorizationAttempt::expires_at() const {if(!impl_)invalid();return impl_->expires;}
 std::string McpOAuthAuthorizationAttempt::authorization_url() const {
     if(!impl_||impl_->phase!=Impl::Phase::callback)invalid();if(std::chrono::steady_clock::now()>=impl_->expires){impl_->retire();throw McpTransportTimeout("MCP OAuth authorization expired");}const auto& owner=*impl_;std::string result=owner.discovery.authorization.authorization_endpoint;result.reserve(32768);if(result.find('?')==std::string::npos)result+='?';
     parameter(result,"response_type",bytes("code"),32768);parameter(result,"client_id",bytes(owner.client.client_id),32768);parameter(result,"redirect_uri",bytes(owner.client.redirect_uri),32768);parameter(result,"resource",bytes(owner.discovery.resource.resource),32768);parameter(result,"state",owner.state.view(),32768);parameter(result,"code_challenge",bytes(mcp_oauth_pkce_challenge(owner.verifier.view())),32768);parameter(result,"code_challenge_method",bytes("S256"),32768);
