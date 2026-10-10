@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+Protected profile creation now explicitly selects the current Windows user as
+owner, matching the existing verification rule even when a token's default
+owner is a group. The DACL and refusal of foreign-owned existing storage are
+unchanged. Windows descriptor parsing confirms the supplied owner and unchanged
+access entries; native compilation and execution remain pending. This is not
+established as the earlier view-readiness failure's cause.
+[Candidate source and scoped descriptor probe](evidence/native-profile-explicit-owner-candidate.json).
+
 External attachment now rechecks workspace trust and host location after native
 workspace verification, before accepting the connection. The regression failed
 on the previous code; all **221 extension fixture checks** pass after the fix.

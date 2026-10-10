@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-unaccepted",
+  "sourceBase": "38eed0a5b53c6ab311e1626c6bb5bce4053612de",
+  "sourceFile": "Native/src/local_profile.cpp",
+  "sourceSha256": "a030fa4df36275eaf79201356bfcec28d6c4f971ca041bd05abb07c7c20ccf07",
+  "change": "The security descriptor used to create protected profile directories/files now supplies O:<current TokenUser SID> while retaining the existing protected DACL. Existing owner verification and refusal remain unchanged.",
+  "reason": "Windows object creation uses the token default owner when none is specified. The existing verifier requires the current TokenUser owner. These may differ.",
+  "references": [
+    "https://learn.microsoft.com/en-us/windows/win32/secauthz/owner-of-a-new-object",
+    "https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format"
+  ],
+  "verification": {
+    "descriptorProbe": {
+      "OriginalOwnerMissing": true,
+      "ExplicitOwnerMatchesCurrentUser": true,
+      "AccessControlUnchanged": true,
+      "NativeExecuted": false,
+      "NativeCompiled": false
+    },
+    "scope": "Windows built-in RawSecurityDescriptor parsing only. Current development token default owner equals user; a differing-owner runtime scenario was not executed.",
+    "nativeCompiled": false,
+    "nativeContractExecuted": false,
+    "nativeAccepted": false,
+    "providerRequests": 0,
+    "installedRuntimeChanged": false
+  },
+  "requiredAcceptance": [
+    "Complete native contract gate including actual protected local profile creation, restart and view integration.",
+    "No relaxation of existing-directory/file owner, DACL, alias or link checks."
+  ],
+  "limits": [
+    "Not established as the existing native-view readiness failure cause.",
+    "Separate live xlang3 performance run still prevents local native phases.",
+    "Native-hosted candidate requires complete rerun."
+  ]
+}

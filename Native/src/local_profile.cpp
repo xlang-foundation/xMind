@@ -126,7 +126,10 @@ struct Security {
         require(GetTokenInformation(token.value, TokenUser, user.data(), size, &size) != 0);
         LPWSTR sid = nullptr;
         require(ConvertSidToStringSidW(reinterpret_cast<TOKEN_USER *>(user.data())->User.Sid, &sid) != 0);
-        const auto sddl = L"D:P(A;;FA;;;SY)(A;;FA;;;" + std::wstring(sid) + L")";
+        // Creation must satisfy verify() even when the token's default owner
+        // is a group. Do not relax existing-file ownership checks or repair
+        // somebody else's storage in place.
+        const auto sddl = L"O:" + std::wstring(sid) + L"D:P(A;;FA;;;SY)(A;;FA;;;" + std::wstring(sid) + L")";
         LocalFree(sid);
         require(ConvertStringSecurityDescriptorToSecurityDescriptorW(sddl.c_str(), SDDL_REVISION_1,
                                                                      &descriptor, nullptr) != 0);
