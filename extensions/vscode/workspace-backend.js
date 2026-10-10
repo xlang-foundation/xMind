@@ -144,7 +144,7 @@ class WorkspaceBackend {
     const canonical=canonicalPath(await this.deps.fs.realpath(selection.folder.uri.fsPath));
     const actual=await this.readWorkspace(origin,token);
     if(!actual.configured||keyPath(actual.root)!==keyPath(canonical))throw new Error('The attached backend workspace differs from the opened folder.');
-    if(epoch!==this.epoch||selection.signature!==this.signature()||this.disposed)throw new Error('Workspace changed while attaching.');
+    if(epoch!==this.epoch||selection.signature!==this.signature()||this.disposed||!this.vscode.workspace.isTrusted||this.vscode.env?.remoteName)throw new Error('Workspace changed while attaching.');
     const scope=crypto.createHash('sha256').update(keyPath(canonical)).digest('hex');
     this.active={origin,canonical,scope,metadata:actual,epoch,signature:selection.signature,roots:selection.roots};return this.active;
   }

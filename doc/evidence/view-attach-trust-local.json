@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "sourceBase": "9f73bdc83a06c44c36dc3730fe944016ed94e9e3",
+  "change": "Recheck workspace trust and local host after asynchronous external-backend workspace verification, before recording the active connection.",
+  "regression": "Trust revocation or switching to a remote extension host during verification must reject attachment; no active connection or native startup.",
+  "sourceHashes": {
+    "extensions/vscode/workspace-backend.js": "8cd3833c828d681054c4896db057e86cc4c1d7558dfc47adbc08606381bb3731",
+    "extensions/vscode/tests/workspace-backend.test.js": "0c40258cc5e79f983fef6dce7afb0d1a483c198b2e5875d9bf2de5434efe69b3",
+    "Tools/ci-views.mjs": "ab473b4e5e47555870778cd31b8e3e7c3d7b9ad4ccfa06feaf2cdcf475529f09"
+  },
+  "logs": {
+    "beforeFix": {
+      "file": "doc/evidence/native-unified-attach-trust-before-fix.log",
+      "sha256": "0ad308cd4cc1689d4722c64afc10c1ad2512528a708b655921d8f19d22d9ead8"
+    },
+    "completeRerun": {
+      "file": "doc/evidence/native-unified-attach-trust-extension-complete.log",
+      "sha256": "93e597cb4b71792c790a2b93d3d1400982964ea7e457a45542f932b6156cd2b5"
+    }
+  },
+  "verification": {
+    "beforeFix": "15 passed, 1 failed: Missing expected rejection.",
+    "completeExtensionSuite": {
+      "tests": 221,
+      "passed": 221,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "nativeExecuted": false,
+    "providerRequests": 0,
+    "installedIde": false,
+    "renderedSidebar": false
+  },
+  "scope": "Synthetic VS Code API and backend metadata fixture; no native backend or installed editor acceptance claimed."
+}

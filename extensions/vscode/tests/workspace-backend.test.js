@@ -83,3 +83,12 @@ test('trust revocation during preparation prevents native startup without cancel
  const h=harness();let release,entered;const arrived=new Promise(resolve=>entered=resolve),paused=new Promise(resolve=>release=resolve);
  h.manager.resolveRuntime=async()=>{entered();await paused;return h.runtime;};const opening=h.manager.connect(),refusal=assert.rejects(opening,/changed/);await arrived;h.vscode.workspace.isTrusted=false;release();await refusal;assert.equal(h.launches.length,0);assert.equal(h.secrets.size,0);
 });
+
+// External attachment is also an asynchronous native workspace observation.
+test('attachment refuses trust or remote-host changes during workspace verification',async()=>{
+ for(const change of [h=>{h.vscode.workspace.isTrusted=false;},h=>{h.vscode.env.remoteName='ssh-remote';}]){
+  const h=harness();h.manager.deps.fetch=async()=>{change(h);return {ok:true,json:async()=>({configured:true,root:'D:\\Projects\\Example',workspace_id:'windows-local-file-v1:1:fixture',authority_id:'b'.repeat(32)})};};
+  await assert.rejects(h.manager.attach('http://127.0.0.1:19100','c'.repeat(64)),/Workspace changed while attaching/);
+  assert.equal(h.manager.active,undefined);assert.equal(h.launches.length,0);
+ }
+});

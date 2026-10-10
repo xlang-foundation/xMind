@@ -1,5 +1,11 @@
 # Reviewable milestones
 
+External attachment now rechecks workspace trust and host location after native
+workspace verification, before accepting the connection. The regression failed
+on the previous code; all **221 extension fixture checks** pass after the fix.
+[Failure and complete rerun](evidence/view-attach-trust-local.json).
+This does not establish native or installed-editor acceptance.
+
 The first hosted native-view gate completed with **107/110 passed**. The two
 local profile/view contracts stopped during packaging because the pinned pure
 source checkout has `LICENSE`, while the fixtures requested `LICENSE.txt`.

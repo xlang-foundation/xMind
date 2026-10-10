@@ -1,0 +1,117 @@
+TAP version 13
+# Subtest: host launches only native view without a backend token, database path or pipes
+ok 1 - host launches only native view without a backend token, database path or pipes
+  ---
+  duration_ms: 3.8864
+  type: 'test'
+  ...
+# Subtest: reload replaces only the view; profile and native backend identity remain stable
+ok 2 - reload replaces only the view; profile and native backend identity remain stable
+  ---
+  duration_ms: 2.0087
+  type: 'test'
+  ...
+# Subtest: read-only, trust, remote and pure-source boundaries apply before launch
+ok 3 - read-only, trust, remote and pure-source boundaries apply before launch
+  ---
+  duration_ms: 1.3274
+  type: 'test'
+  ...
+# Subtest: multi-root explicitly uses the opened root and host cwd
+ok 4 - multi-root explicitly uses the opened root and host cwd
+  ---
+  duration_ms: 0.5782
+  type: 'test'
+  ...
+# Subtest: private rendezvous fallback and aliases cannot expose storage to workspace tools
+ok 5 - private rendezvous fallback and aliases cannot expose storage to workspace tools
+  ---
+  duration_ms: 0.6129
+  type: 'test'
+  ...
+# Subtest: wrong roots, process metadata and profile overlap fail and close only the view
+ok 6 - wrong roots, process metadata and profile overlap fail and close only the view
+  ---
+  duration_ms: 1.6965
+  type: 'test'
+  ...
+# Subtest: expanded folder set cannot expose a retained profile or rendezvous
+ok 7 - expanded folder set cannot expose a retained profile or rendezvous
+  ---
+  duration_ms: 0.6577
+  type: 'test'
+  ...
+# Subtest: workspace mutation during readiness closes the adapter without claiming backend termination
+ok 8 - workspace mutation during readiness closes the adapter without claiming backend termination
+  ---
+  duration_ms: 0.3
+  type: 'test'
+  ...
+# Subtest: admission carries verified workspace authority and rejects late selection mutation
+ok 9 - admission carries verified workspace authority and rejects late selection mutation
+  ---
+  duration_ms: 1.1782
+  type: 'test'
+  ...
+# Subtest: authority drift rejects admission before a replacement run can be created
+ok 10 - authority drift rejects admission before a replacement run can be created
+  ---
+  duration_ms: 0.5917
+  type: 'test'
+  ...
+# Subtest: readiness timeout does not retry spawning or create a JavaScript database
+ok 11 - readiness timeout does not retry spawning or create a JavaScript database
+  ---
+  duration_ms: 11.5292
+  type: 'test'
+  ...
+# Subtest: external attachment still verifies the actual opened workspace
+ok 12 - external attachment still verifies the actual opened workspace
+  ---
+  duration_ms: 0.3936
+  type: 'test'
+  ...
+# Subtest: private native startup errors are accepted only for the spawned adapter PID
+ok 13 - private native startup errors are accepted only for the spawned adapter PID
+  ---
+  duration_ms: 0.7797
+  type: 'test'
+  ...
+# Subtest: a folder switch during preparation connects the latest folder after stale startup cleanup
+ok 14 - a folder switch during preparation connects the latest folder after stale startup cleanup
+  ---
+  duration_ms: 0.4216
+  type: 'test'
+  ...
+# Subtest: trust revocation during preparation prevents native startup without cancelling existing work
+ok 15 - trust revocation during preparation prevents native startup without cancelling existing work
+  ---
+  duration_ms: 0.6181
+  type: 'test'
+  ...
+# Subtest: attachment refuses trust or remote-host changes during workspace verification
+not ok 16 - attachment refuses trust or remote-host changes during workspace verification
+  ---
+  duration_ms: 0.6128
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\extensions\\vscode\\tests\\workspace-backend.test.js:88:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (D:\CantorAI2026\xMind\extensions\vscode\tests\workspace-backend.test.js:91:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 15
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 98.0925

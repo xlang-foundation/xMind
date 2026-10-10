@@ -51,7 +51,13 @@ verification handles removes duplicate full-inventory hashing while preserving
 source/destination checks. The second probe completed backend startup but failed
 before view readiness. Its native error still needs to be observed. Private
 startup-error reporting and stderr observation are prepared for the next probe.
-The latest C++ source, including that reporting, has not been rebuilt yet.
+Hosted source `48aa772` compiled, but its local profile/view tests stopped during
+package staging because they requested `LICENSE.txt` instead of the pinned
+source checkout's `LICENSE`. The full gate passed 107/110: the third failure
+invoked the removed editor upgrade API. These failures and the candidate fixes
+are recorded in [hosted evidence](evidence/native-ci-current-format-candidate.json).
+The readiness failure still has no accepted native rerun; later rendezvous
+preflight changes also require the complete gate.
 
 A separate live xlang3 97-case performance run caused subsequent native phases
 to be deferred. The complete **110-contract native gate has not passed** for
