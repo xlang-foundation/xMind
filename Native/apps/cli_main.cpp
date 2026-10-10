@@ -744,6 +744,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         }
         else if(command=="models" && argc==3) path="/v1/models";
         else if(command=="agents"&&argc==3)path="/v1/agents";
+        else if(command=="agent-definition"&&argc==4){const std::string value=argv[3];if(value.empty()||value.size()>64||value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos)throw std::invalid_argument("Invalid named agent identity");path="/v1/agents/"+value;}
         else if(command=="session-agent"&&argc==4)path="/v1/sessions/"+id(argv[3])+"/agent";
         else if(command=="set-agent"&&argc==7){const auto session=id(argv[3]);const auto expected=provider_revision(argv[5]),definition_revision=provider_revision(argv[6]);Json agent_id=nullptr;if(std::string(argv[4])!="default"){const std::string value=argv[4];if(value.empty()||value.size()>64||value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||definition_revision<1)throw std::invalid_argument("Invalid named agent identity or revision");agent_id=value;}else if(definition_revision!=0)throw std::invalid_argument("Default agent selection requires definition revision zero");path="/v1/sessions/"+session+"/agent";body={{"agent_id",std::move(agent_id)},{"agent_revision",definition_revision},{"expected_revision",expected}};post=true;}
         else if(command=="skills" && argc==3) path="/v1/workspace/skills";

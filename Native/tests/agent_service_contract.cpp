@@ -53,7 +53,7 @@ int main(int argc,char** argv) {
             AgentService repeated(store,settings,1,1);
             for(int cycle=0;cycle<4;++cycle) {
                 const auto id="notifier_"+std::to_string(cycle);store.create_session(id,id).get();
-                if(cycle==0){const auto catalogue=repeated.agent_definitions();require(catalogue.size()==1&&catalogue[0].id=="service.profile","Agent service must expose safe catalogue metadata");const auto selected=repeated.select_session_agent(id,catalogue[0],0);require(selected.selected&&selected.selected->id=="service.profile"&&selected.revision==1&&selected.editable,"Conversation must pin the selected named agent revision");}
+                if(cycle==0){const auto catalogue=repeated.agent_definitions();require(catalogue.size()==1&&catalogue[0].id=="service.profile","Agent service must expose safe catalogue metadata");const auto detail=repeated.agent_definition("service.profile");require(detail.instructions.find("service-profile-instructions")!=std::string::npos&&detail.model_id=="synthetic-service-protocol","Agent service must return the persisted named definition");rejects<NotFound>([&]{repeated.agent_definition("missing-agent");});const auto selected=repeated.select_session_agent(id,catalogue[0],0);require(selected.selected&&selected.selected->id=="service.profile"&&selected.revision==1&&selected.editable,"Conversation must pin the selected named agent revision");}
                 // Exercise ordinary submissions while the independent expiry
                 // loop has crossed a tick. Actual model.text and cancellation,
                 // rather than elapsed time alone, establish dispatch/retirement.

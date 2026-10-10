@@ -18,8 +18,8 @@ Baseline: `anomalyco/opencode` tag `v2.0.16`, commit
 [documentation](https://opencode.ai/v2/docs). Documentation can differ from this
 release; inspect the pinned source before finalizing each acceptance criterion.
 
-The current OpenAPI audit contains **136 operations**: **23** have a mapped C++
-source candidate, **113** remain unmapped, and **zero** are verified parity.
+The current OpenAPI audit contains **136 operations**: **25** have a mapped C++
+source candidate, **111** remain unmapped, and **zero** are verified parity.
 The audit embeds all **245** pinned schema components and resolves all **855**
 JSON references, including the operation request and response definitions. Its
 generation is deterministic and refreshes native source hashes. A mapping or

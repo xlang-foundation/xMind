@@ -517,6 +517,12 @@ struct HttpServer::Impl {
             if(!executor||!executor->supports_agent_selection())throw RunUnavailable("Named agent selection is unavailable");
             Json entries=Json::array();for(const auto& item:executor->agent_definitions())entries.push_back(agent_metadata(item));reply(response,{{"agents",std::move(entries)}});
         }));
+        server.Get(R"(/v1/agents/([A-Za-z0-9_.-]{1,64}))",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Agent definition does not accept query parameters");
+            if(!executor||!executor->supports_agent_selection())throw RunUnavailable("Named agent definitions are unavailable");
+            const auto definition=executor->agent_definition(request.matches[1].str());
+            reply(response,{{"agent",{{"id",definition.id},{"revision",definition.revision},{"model_id",definition.model_id.empty()?Json(nullptr):Json(definition.model_id)},{"instructions",definition.instructions}}}});
+        }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/agent)",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session agent selection does not accept query parameters");
             if(!executor||!executor->supports_agent_selection())throw RunUnavailable("Conversation agent selection is unavailable");

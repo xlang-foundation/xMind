@@ -16,6 +16,7 @@ public:
     std::vector<std::string> models() const override;
     bool supports_agent_selection()const override{return true;}
     std::vector<AgentDefinitionMetadata> agent_definitions()const override;
+    AgentDefinition agent_definition(const std::string& id)const override;
     SessionAgentState session_agent(const std::string& session)const override;
     SessionAgentState select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t expected_revision)override;
     bool supports_delegation() const override;

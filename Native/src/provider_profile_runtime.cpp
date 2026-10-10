@@ -376,6 +376,7 @@ Run ProviderProfileRuntime::submit_graph_workspace(std::string id,std::string se
 }
 std::vector<std::string> ProviderProfileRuntime::models()const{std::lock_guard lock(impl_->mutex);return impl_->service->models();}
 std::vector<AgentDefinitionMetadata> ProviderProfileRuntime::agent_definitions()const{std::lock_guard lock(impl_->mutex);return impl_->service->agent_definitions();}
+AgentDefinition ProviderProfileRuntime::agent_definition(const std::string& id)const{std::lock_guard lock(impl_->mutex);return impl_->service->agent_definition(id);}
 SessionAgentState ProviderProfileRuntime::session_agent(const std::string& session)const{std::lock_guard lock(impl_->mutex);return impl_->service->session_agent(session);}
 SessionAgentState ProviderProfileRuntime::select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t revision){std::lock_guard lock(impl_->mutex);return impl_->service->select_session_agent(session,std::move(selected),revision);}
 void ProviderProfileRuntime::cancel(const std::string& id){std::lock_guard lock(impl_->mutex);impl_->service->cancel(id);}

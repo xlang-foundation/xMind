@@ -4,7 +4,7 @@ import {pathToFileURL} from 'node:url';
 const assets={'/ui/patch-review.js':['patch-review.js','text/javascript; charset=utf-8'],'/ui/':['index.html','text/html; charset=utf-8'],'/ui/browser.js':['browser.js','text/javascript; charset=utf-8'],'/ui/browser.css':['browser.css','text/css; charset=utf-8'],'/ui/chat.js':['chat.js','text/javascript; charset=utf-8'],'/ui/chat.css':['chat.css','text/css; charset=utf-8'],'/ui/client.js':['client.js','text/javascript; charset=utf-8'],'/ui/marked.js':['marked.js','text/javascript; charset=utf-8'],'/ui/purify.js':['purify.js','text/javascript; charset=utf-8']};
 const csp="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'";
 function origin(input){const url=new URL(input);if(url.protocol!=='http:'||!['127.0.0.1','localhost'].includes(url.hostname)||url.username||url.password||url.pathname!=='/'||url.search||url.hash)throw new Error('Use a loopback native backend origin');url.hostname='127.0.0.1';return url.origin;}
-function apiPath(path){return /^\/v1\/(?:health|workspace(?:\/(?:skills|files|file))?|workspaces|models|agents|graphs|agent\/(?:delegation|planning)|provider\/(?:configuration|models|profiles(?:\/(?:select|models))?)|sessions(?:\/[A-Za-z0-9_-]+\/(?:history|runs|title|skills|agent|context(?:\/(?:compact|requests\/[A-Za-z0-9_-]+))?))?|runs(?:\/[A-Za-z0-9_-]+(?:\/(?:events|tree-events|children(?:\/[A-Za-z0-9_-]+\/history)?|cancel|operations|plan(?:\/(?:human\/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(?:\/[A-Za-z0-9_-]+(?:\/(?:children(?:\/[A-Za-z0-9_-]+\/history)?|events|human\/[A-Za-z0-9_.-]+|resume))?)?|operations\/[A-Za-z0-9_-]+(?:\/(?:inspection|decision))?)$/.test(path);}
+function apiPath(path){return /^\/v1\/(?:health|workspace(?:\/(?:skills|files|file))?|workspaces|models|agents(?:\/[A-Za-z0-9_.-]{1,64})?|graphs|agent\/(?:delegation|planning)|provider\/(?:configuration|models|profiles(?:\/(?:select|models))?)|sessions(?:\/[A-Za-z0-9_-]+\/(?:history|runs|title|skills|agent|context(?:\/(?:compact|requests\/[A-Za-z0-9_-]+))?))?|runs(?:\/[A-Za-z0-9_-]+(?:\/(?:events|tree-events|children(?:\/[A-Za-z0-9_-]+\/history)?|cancel|operations|plan(?:\/(?:human\/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(?:\/[A-Za-z0-9_-]+(?:\/(?:children(?:\/[A-Za-z0-9_-]+\/history)?|events|human\/[A-Za-z0-9_.-]+|resume))?)?|operations\/[A-Za-z0-9_-]+(?:\/(?:inspection|decision))?)$/.test(path);}
 export function allowedApiRoute(path,method){
  if(/^\/v1\/mcp\/authorization\/(?:servers|attempts\/[A-Za-z0-9_-]{1,128})$/.test(path))return method==='GET';
  if(/^\/v1\/mcp\/authorization\/attempts(?:\/[A-Za-z0-9_-]{1,128}\/cancel)?$/.test(path))return method==='POST';
@@ -13,6 +13,7 @@ export function allowedApiRoute(path,method){
  if(!apiPath(path)||!['GET','POST'].includes(method))return false;
  if(path==='/v1/workspaces')return method==='GET';
  if(path==='/v1/agents')return method==='GET';
+ if(/^\/v1\/agents\/[A-Za-z0-9_.-]{1,64}$/.test(path))return method==='GET';
  if(path==='/v1/workspace/files'||path==='/v1/workspace/file')return method==='GET';
  if(/^\/v1\/sessions\/[A-Za-z0-9_-]+\/agent$/.test(path))return method==='GET'||method==='POST';
  if(/^\/v1\/workspace(?:\/skills)?$/.test(path))return method==='GET';

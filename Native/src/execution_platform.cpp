@@ -62,6 +62,10 @@ std::vector<std::string> ExecutionPlatform::models() const{return agents_?agents
 std::vector<AgentDefinitionMetadata> ExecutionPlatform::agent_definitions()const{
     std::vector<AgentDefinitionMetadata> result;for(const auto& item:AgentDefinitionStore(store_).load().entries)result.push_back({item.id,item.revision,item.model_id});return result;
 }
+AgentDefinition ExecutionPlatform::agent_definition(const std::string& id)const{
+    const auto catalog=AgentDefinitionStore(store_).load();const auto found=std::find_if(catalog.entries.begin(),catalog.entries.end(),[&](const auto& item){return item.id==id;});
+    if(found==catalog.entries.end())throw NotFound("Named agent definition not found");return *found;
+}
 SessionAgentState ExecutionPlatform::session_agent(const std::string& session)const{return store_.session_agent(session).get();}
 SessionAgentState ExecutionPlatform::select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t revision){
     std::optional<AgentDefinition> pinned;if(selected){if(selected->id.empty()||selected->revision<1)throw std::invalid_argument("Invalid named agent selection");const auto catalog=AgentDefinitionStore(store_).load();const auto found=std::find_if(catalog.entries.begin(),catalog.entries.end(),[&](const auto& item){return item.id==selected->id;});

@@ -40,6 +40,7 @@ public:
     virtual bool supports_session_skills()const{return false;}
     virtual bool supports_agent_selection()const{return false;}
     virtual std::vector<AgentDefinitionMetadata> agent_definitions()const{throw RunUnavailable("Named agent definitions are unavailable");}
+    virtual AgentDefinition agent_definition(const std::string&)const{throw RunUnavailable("Named agent definitions are unavailable");}
     virtual SessionAgentState session_agent(const std::string&)const{throw RunUnavailable("Conversation agent selection is unavailable");}
     virtual SessionAgentState select_session_agent(const std::string&,std::optional<AgentDefinitionMetadata>,std::int64_t){throw RunUnavailable("Conversation agent selection is unavailable");}
     virtual WorkspaceSkillCatalogue workspace_skills()const{throw RunUnavailable("Workspace skill inspection is unavailable");}

@@ -872,7 +872,7 @@ if(BUILD_TESTING)
   if(AGENTFLOW_NODE_EXECUTABLE)
     if(WIN32)
       add_test(NAME native_agent_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_http_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_http_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>" "$<TARGET_FILE:xmind_admin>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
       set_tests_properties(native_agent_http_contract PROPERTIES TIMEOUT 90)
       add_test(NAME native_agent_edit_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"

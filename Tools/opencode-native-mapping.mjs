@@ -2,6 +2,8 @@
 const http = 'Native/src/http_server.cpp';
 const workspace = 'Native/src/workspace_tools.cpp';
 export const nativePartial = {
+  'agent.list': [http, 'GET /v1/agents', 'executor->agent_definitions', 'Only persisted ID/revision/model metadata is returned; OpenCode mode, permission, description, hidden/default and source metadata remain incomplete.'],
+  'agent.get': [http, 'GET /v1/agents/{id}', 'executor->agent_definition', 'Persisted model and instructions are readable; OpenCode mode, permission, description, hidden/default and source metadata remain incomplete.'],
   'session.list': [http, 'GET /v1/sessions', '"/v1/sessions"', 'Location/project scoping, filters and pagination remain to be compared.'],
   'session.create': [http, 'POST /v1/sessions', 'persistence.create_session', 'The upstream session fields, agent/environment configuration and full creation lifecycle remain incomplete.'],
   'session.update': [http, 'POST /v1/sessions/{id}/title', 'persistence.rename_session', 'Only optimistic title updates exist; other upstream session metadata changes remain incomplete.'],

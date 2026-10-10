@@ -355,6 +355,11 @@ std::vector<AgentDefinitionMetadata> AgentService::agent_definitions()const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();std::vector<AgentDefinitionMetadata> result;
     for(const auto& item:AgentDefinitionStore(impl_->persistence).load().entries)result.push_back({item.id,item.revision,item.model_id});return result;
 }
+AgentDefinition AgentService::agent_definition(const std::string& id)const{
+    std::lock_guard lock(impl_->mutex);impl_->require_available();const auto catalog=AgentDefinitionStore(impl_->persistence).load();
+    const auto found=std::find_if(catalog.entries.begin(),catalog.entries.end(),[&](const auto& item){return item.id==id;});
+    if(found==catalog.entries.end())throw NotFound("Named agent definition not found");return *found;
+}
 SessionAgentState AgentService::session_agent(const std::string& session)const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();return impl_->persistence.session_agent(session).get();
 }
