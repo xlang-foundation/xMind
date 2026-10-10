@@ -55,4 +55,16 @@ export const nativePartial = {
     scope: 'Native Chat Completions and Responses request/stream boundaries, encrypted backend enrollment and selected live Responses checks exist. Local65 and exact ac69 hosted65 add real CLI profile controls, OpenAI catalogue discovery/encrypted enrollment and shared identity guards using synthetic provider sockets. Exact c4ec09fc hosted69 reran these native contracts, frontend98/17, native/browser integration and18-asset VSIX verification. Its separately installed actual browser/native pair completed one live gpt-5.6-sol Responses Agent request selecting a real README read, persisted two supplied usage/timing records, retained history/selection after immediate refresh and passed read-only installed CLI inspection. The original browser cookie required reconnect and its cause is unresolved. Evidence applies only to its exact revisions, configured model and recorded scenarios, not all pinned model entries.',
     gaps: 'The 209 pinned OpenAI entries are not all tested or implemented. Non-chat modes, multimodal input/output, embeddings, batch, full reasoning/model capability controls and per-model acceptance remain incomplete. Other providers and OpenAI-compatible deployments require their own authentication, endpoint, wire and behavior validation.',
   },
+  xai: {
+    sources: [
+      ['Native/apps/server_main.cpp', 'add("xai.responses"'],
+      ['Native/src/provider_model_policy.cpp', 'ProviderModelPolicy documented_xai_model_policy'],
+      ['Native/src/responses_request.cpp', 'serialize_responses_request'],
+      ['Native/src/responses_stream.cpp', 'ResponsesStream::feed'],
+      ['Native/src/provider_profile_runtime.cpp', 'model_capabilities'],
+    ],
+    evidenceFiles: ['doc/evidence/native-xai-responses-local.json'],
+    scope: 'Native xAI Responses profile discovery and a full AgentRunner tool loop passed against an independent synthetic xAI-compatible catalogue/SSE peer. The C++ runtime, selected Grok profile, actual workspace read, encrypted credential handling and xlang3 SQLite persistence/reopen are real. Only grok-4.7 is admitted for tool execution by the reviewed model policy. No xAI key or live provider request was used.',
+    gaps: 'The 58 pinned xAI entries are not individually accepted. Live account catalogue/inference, model-specific tool/reasoning/streaming behavior, non-chat and media modes, xAI error/timeout/cancellation behavior and complete provider-group parity remain unverified.',
+  },
 };

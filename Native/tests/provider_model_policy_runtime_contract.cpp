@@ -27,6 +27,10 @@ std::vector<ProviderProfileExecutionPolicy> policies(const std::string& origin){
         ProviderProfileExecutionPolicy policy{route,config,ProviderCataloguePolicy{origin+"/models",ProviderCatalogueFormat::openai}};
         policy.model_capabilities=documented_openai_model_policy(wire);result.push_back(std::move(policy));
     }
+    ProviderProfileRoute xai{"xai.responses","xai",origin+"/xai/responses","fixture","fixture:xai",ProviderWire::responses};
+    ChatProviderConfig xai_config;xai_config.endpoint=xai.endpoint;xai_config.wire=xai.wire;xai_config.deadline=5s;xai_config.idle_timeout=3s;
+    ProviderProfileExecutionPolicy xai_policy{xai,xai_config,ProviderCataloguePolicy{origin+"/xai/models",ProviderCatalogueFormat::openai}};
+    xai_policy.model_capabilities=documented_xai_model_policy();result.push_back(std::move(xai_policy));
     return result;
 }
 void unchanged(PersistenceService& store,ProviderProfileRuntime& runtime,std::int64_t revision,const std::string& registry,std::size_t credentials){
@@ -48,7 +52,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         PersistenceService store(database,imports);ProviderProfileRuntime runtime(store,base,allowed,1,8);Access access(store,runtime);
         httplib::Client client("127.0.0.1",access.port);client.set_read_timeout(5);
         const httplib::Headers auth{{"Authorization","Bearer "+owner}};
-        auto post=[&](const std::string& path,const Json& body,int status){const auto r=client.Post(path,auth,body.dump(),"application/json");require(r&&r->status==status,"Unexpected native model policy HTTP status");return Json::parse(r->body);};
+        auto post=[&](const std::string& path,const Json& body,int status){const auto r=client.Post(path,auth,body.dump(),"application/json");if(!r||r->status!=status)throw std::runtime_error("Unexpected native model policy HTTP status for "+path+": expected "+std::to_string(status)+", got "+(r?std::to_string(r->status):"no response"));return Json::parse(r->body);};
         const Json draft={{"id","openai"},{"route_id","openai.chat"},{"api_key",fixture_key},{"expected_revision",0}};
         const auto noauth=client.Post("/v1/provider/profiles/models",draft.dump(),"application/json");require(noauth&&noauth->status==401,"Catalogue requires actual native owner authentication");
         const auto chat=post("/v1/provider/profiles/models",draft,200);
@@ -56,6 +60,9 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         auto response_draft=draft;response_draft["id"]="responses";response_draft["route_id"]="openai.responses";
         const auto responses=post("/v1/provider/profiles/models",response_draft,200);
         require(responses==Json{{"models",Json::array({{{"id","gpt-4.1"}},{{"id","gpt-6-astra"}},{{"id","gpt-6-sol"}},{{"id","gpt-6.1-sol"}}})}},"Responses catalogue must retain all documented current tools without granting future identities");
+        const Json xai_draft={{"id","xai"},{"route_id","xai.responses"},{"api_key",fixture_key},{"expected_revision",0}};
+        const auto xai_models=post("/v1/provider/profiles/models",xai_draft,200);
+        require(xai_models==Json{{"models",Json::array({{{"id","grok-4.7"}}})}},"xAI discovery must expose only the exact natively declared tool-capable Grok frontier model");
         require(runtime.configuration().revision==0&&store.credentials("fixture").get().empty(),"Discovery must not publish credentials or configuration");
         {std::ofstream out(config);out<<"version: 1\nprofiles:\n  openai:\n    route: openai.chat\n    api_key: "<<fixture_key<<"\n";}
         require(runtime.import_yaml_configuration(config,0).revision==1&&!runtime.available(),"Key-only YAML profile must remain unconfigured");
@@ -81,6 +88,12 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         require(store.operations("read-run").get().empty(),"Read-only tool execution cannot dispatch effects");
         for(;;){try{runtime.save_profile("responses","openai.responses","gpt-6.1-sol",key(fixture_key),2,false);break;}catch(const Conflict&){require(std::chrono::steady_clock::now()<until,"Native worker did not retire");std::this_thread::sleep_for(5ms);}}
         require(runtime.configuration().revision==3&&runtime.configuration().active=="openai","Responses enrollment must preserve the selected Chat owner");
+        require(runtime.save_profile("xai","xai.responses","grok-4.7",key(fixture_key),3,true).revision==4&&runtime.configuration().active=="xai","Reviewed xAI frontier model must activate on native Responses for execution");
+        store.create_session("xai-read","Synthetic native xAI model policy read").get();
+        post("/v1/runs",{{"id","xai-read-run"},{"session_id","xai-read"},{"prompt","Read marker.txt using Grok through the native Responses route."},{"provider_profile_id","xai"},{"expected_provider_revision",4}},202);
+        const auto xai_until=std::chrono::steady_clock::now()+8s;
+        for(;;){const auto run=store.run("xai-read-run").get();if(run.state==RunState::completed)break;require(run.state==RunState::queued||run.state==RunState::running,"Native xAI model policy read failed");require(std::chrono::steady_clock::now()<xai_until,"Native xAI model policy read timed out");std::this_thread::sleep_for(5ms);}
+        const auto xai_history=store.history("xai-read").get();require(xai_history.size()==4&&xai_history[2].role=="tool"&&Json::parse(xai_history.back().json).at("content")=="Synthetic xAI native model policy read completed.","Actual native Responses tool loop must execute and retain the owned xAI profile read");require(xai_history[2].json.find("model-policy-file-marker")!=std::string::npos&&store.operations("xai-read-run").get().empty(),"Grok tool call must use the actual workspace file without inventing effects");
         registry=store.information("native-provider-profiles","registry").get();
         auto malformed=Json::parse(registry);for(auto& p:malformed["profiles"])if(p["id"]=="responses")p["model"]="gpt-image-1";
         store.put_information("native-provider-profiles","registry",malformed.dump()).get();
@@ -90,9 +103,10 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         rejects<DatabaseError>([&]{ProviderProfileRuntime invalid(store,base,allowed,1,8);});
         require(store.information("native-provider-profiles","registry").get()==original&&store.credentials("fixture").get().size()==count,"Invalid stored inactive model must fail closed without changing keys or registry");
         store.put_information("native-provider-profiles","registry",registry).get();
-        ProviderProfileRuntime reopened(store,base,allowed,1,8);require(reopened.available()&&reopened.configuration().revision==3,"Valid stored profiles must reopen without publication");
+        ProviderProfileRuntime reopened(store,base,allowed,1,8);require(reopened.available()&&reopened.configuration().revision==4,"Valid stored profiles must reopen without publication");
         const auto current=store.history("read").get();require(current.size()==history.size(),"Restart changed conversation size");for(std::size_t i=0;i<history.size();++i)require(current[i].json==history[i].json,"Restart changed original native tool/model history");
-        require(reopened.discover_models("responses","openai.responses",key(""),3)==std::vector<std::string>{"gpt-4.1","gpt-6-astra","gpt-6-sol","gpt-6.1-sol"},"Reopened saved-key Responses discovery must retain exact route capabilities");
+        require(reopened.discover_models("responses","openai.responses",key(""),4)==std::vector<std::string>{"gpt-4.1","gpt-6-astra","gpt-6-sol","gpt-6.1-sol"},"Reopened saved-key Responses discovery must retain exact route capabilities");
+        require(reopened.discover_models("xai","xai.responses",key(""),4)==std::vector<std::string>{"grok-4.7"},"Reopened saved-key xAI discovery must retain the native Grok model policy");
     }
     {
         PersistenceService store((root/"plain.sqlite").string(),imports);ProviderProfileRuntime plain(store,AgentSettings{},allowed,1,8);

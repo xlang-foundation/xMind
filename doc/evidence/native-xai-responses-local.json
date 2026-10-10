@@ -1,0 +1,39 @@
+{
+  "baseRevision": "7c9fb0c",
+  "sourceState": "Local working-tree xAI route candidate; exact modified source hashes and compiled native binaries recorded below.",
+  "nativePassed": 118,
+  "nativeFailed": 0,
+  "nativeSkipped": 0,
+  "nativeSeconds": 363.88,
+  "sourceSha256": {
+    "Native/apps/server_main.cpp": "a59f501f043c2b7886cfa28b04cbac88f65e01344c7bcb5a9009fbaea6a6d189",
+    "Native/include/agentflow/provider_model_policy.hpp": "176583cbfdaa39fcae1f0ee2cb5a53dfbdaec584e83837d062cff8be8ccc3080",
+    "Native/src/provider_model_policy.cpp": "f130c58dad12081721b7fffc90a5dd2a540883897f885c6bbcc7e52aa8d124b1",
+    "Native/tests/provider_model_policy_runtime_contract.cpp": "ba9f2096ad9d2c7638a7e679c7f9b385053e4dd53f662a8e0ddce3fe5184aefa",
+    "Native/tests/provider_model_policy_runtime_peer.mjs": "9003da49571d7ce4cf1991be32fd6459856cdc2bb472ddae3fe49d1bf13bb025",
+    "Native/tests/provider_cli_contract.mjs": "502a84f5829c3787dcfdd1397d7fd66fc968ee5b2f4b981e31b1cc7964d95854",
+    "Native/src/provider_profile_runtime.cpp": "ff6bb41fb01bee610f1c6d05f94b8894e8d846d602511c7b834a2c70873bf213",
+    "Native/src/responses_request.cpp": "c8cee193c5177353ddb941eb17d4a546a4cbe2cf67716fd78aa1ca76153e60b8",
+    "Native/src/responses_stream.cpp": "96978ec3eae24b8055b0fa980316e402ac0900fbb8ace2c2777e27d072b47389"
+  },
+  "compiledBinarySha256": {
+    "xmind_server.exe": "1e01962cbdb5f7a52689d7a4f7f6e4cb3f5349cc337c85b84af380c5242ac011",
+    "agentflow_provider_model_policy_runtime_contract.exe": "f2a5788c01c8d4e88aea5fa16e950a5d0f6b902978a8d971bf53cc43efe9d2ca"
+  },
+  "logSha256": {
+    "native-xai-responses-local-ctest.log": "a06e455d600f5ba39d85ae808e299a80068bcc29e91e8614fd8bbcac35524e4c",
+    "native-xai-responses-full-ctest.log": "664f645c6aeedc56242c8dd09c0032cd200819bd2ae476cd84a5627be0a48e3b"
+  },
+  "testCommands": [
+    "ctest --test-dir build/native -C Release --output-on-failure -R ^native_provider_model_policy_runtime_contract$",
+    "ctest --test-dir build/native -C Release --output-on-failure"
+  ],
+  "verifiedNewCases": [
+    "Production xAI Responses route and exact grok-4.7 tool-capability policy",
+    "Synthetic xAI-compatible catalogue admits only the reviewed grok-4.7 model",
+    "Native AgentRunner streams a Grok function call, reads the actual workspace marker file and resumes to a final answer",
+    "Encrypted provider credential, run history and profile configuration persist through xlang3 SQLite close/reopen",
+    "Socket oracle verifies request order, bearer-key boundary, stream settings and no retry or fabricated provider call"
+  ],
+  "scope": "Complete local native CTest suite passed: 118/118, 0 failed, 0 skipped. It includes the focused xAI contract: synthetic xAI-compatible catalogue and Responses SSE, actual native AgentRunner/tool loop/workspace read, encrypted credential handling and xlang3 SQLite persistence/reopen. No xAI account, key or live inference was used. No full LiteLLM provider/model parity, VS Code acceptance or separate browser UI acceptance is claimed."
+}

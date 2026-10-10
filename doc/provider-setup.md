@@ -7,6 +7,14 @@ tools for GPT-6 Sol/Luna require explicit `none` reasoning. Saved keys continue
 to belong to their existing route. Discovery does not rotate credentials or
 activate a model. [Policy, declarations and validation](native-model-eligibility.md).
 
+The native route registry also includes `xai.responses` for the xAI Responses
+API. Its documented tool-capable model allowlist currently admits `grok-4.7`;
+other catalogue entries remain unavailable for tool runs until their model
+capabilities are reviewed. The native xAI contract passed against a synthetic
+Responses peer, including model discovery, a streamed `read_file` call, actual
+workspace access and xlang3 SQLite reopen. No xAI account, API key or live
+inference was used, and the 58 pinned xAI entries are not individually accepted.
+
 ## Local YAML configuration and native profile integration
 
 The new source accepts a trusted local `--provider-config FILE` using native

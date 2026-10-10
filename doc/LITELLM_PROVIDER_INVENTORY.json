@@ -20,8 +20,8 @@
     "fireworks-ai-up-to-4b"
   ],
   "nativeCoverage": {
-    "partialProviderGroups": 3,
-    "unmappedProviderGroups": 133,
+    "partialProviderGroups": 4,
+    "unmappedProviderGroups": 132,
     "verifiedProviderParity": 0,
     "caveat": "Source anchors and selected recorded live checks are partial evidence. No complete provider-group or model-entry parity is verified."
   },
@@ -138,27 +138,27 @@
           {
             "path": "Native/src/anthropic_request.cpp",
             "anchor": "serialize_anthropic_request",
-            "sha256": "57652eecd8c36a0f129b412c38539907e2e756a02169f1b0588be869cf764067"
+            "sha256": "d2351a9921cdb09b18e7f49144504a5c8eb5af1d3ee9209cad97f8b1edf40353"
           },
           {
             "path": "Native/src/anthropic_stream.cpp",
             "anchor": "AnthropicStream::feed",
-            "sha256": "97477c08ca39b5cfce406bf66578b66db9d17dd67c7a668dc32c7c78ab58c283"
+            "sha256": "4a3e7eba8dcd57bf6243a2e17f28fa1cb6baaed13ad9e4f7f5f2d40cc9ecf828"
           },
           {
             "path": "Native/src/anthropic_history.cpp",
             "anchor": "anthropic_history_content",
-            "sha256": "3957ffb24f1249c97a6225e05fa707974d4bf6b9b67ef21b2ff2f14d250f9501"
+            "sha256": "f72ef4e625fa3c4b466d529ab7ed95cdf13a9014acffeb8ff5ad62cce44e25c9"
           },
           {
             "path": "Native/src/chat_provider.cpp",
             "anchor": "ProviderWire::anthropic_messages",
-            "sha256": "339a45a94dae4bc084e54c4e699ac99ab7fd959d0068f8eebcef20229a467cc7"
+            "sha256": "28c4dc3991ec1afc4f2e90328d1c95442f71f187f1fe9e394dd0b3960b53242b"
           },
           {
             "path": "Native/src/agent_runner.cpp",
             "anchor": "AgentRunner::execute",
-            "sha256": "7dcbe7bd664712178d4246713b52bcfc08867688fa701dcfb460f1c3645f90c9"
+            "sha256": "e90be8ed78f9cae5040be48a3c9416893d11a0dcef3d5435acacd15f7f6f6766"
           }
         ],
         "artifacts": [
@@ -947,12 +947,12 @@
           {
             "path": "Native/src/gemini_history.cpp",
             "anchor": "gemini_model_request",
-            "sha256": "abf5eaa961c24b87cc371b141b8e59707ebec41e996e17127ed1a6d211f4e66a"
+            "sha256": "8c3ade72eec983a3e917928e350e8cfd0237047733e42aeba4958b84f4f8820a"
           },
           {
             "path": "Native/src/agent_runner.cpp",
             "anchor": "AgentRunner::execute",
-            "sha256": "7dcbe7bd664712178d4246713b52bcfc08867688fa701dcfb460f1c3645f90c9"
+            "sha256": "e90be8ed78f9cae5040be48a3c9416893d11a0dcef3d5435acacd15f7f6f6766"
           },
           {
             "path": "Native/src/provider_catalogue.cpp",
@@ -962,7 +962,7 @@
           {
             "path": "Native/src/provider_profile_runtime.cpp",
             "anchor": "validate_execution",
-            "sha256": "da546961f15f1ded6167c20a965767d9242e2ed2b26f8b1f71023bcf6d0698c1"
+            "sha256": "3fbd97e7cbf8a177ecb5b8e76d6e450fc3091dd5d20b85d81fbbc6206bde0897"
           }
         ],
         "artifacts": [
@@ -1536,27 +1536,27 @@
           {
             "path": "Native/src/model_request.cpp",
             "anchor": "serialize_chat_request",
-            "sha256": "03c0578fe4048984b9434b11f36c36911b92f2cc53164d9cf43c3a8a038e8725"
+            "sha256": "cf31c8e668534b0cf5f49872021b8116d42cbc64b78b65b431183e90e5d7125d"
           },
           {
             "path": "Native/src/responses_request.cpp",
             "anchor": "serialize_responses_request",
-            "sha256": "5c54f93515b97de98b6481638d39aa0ae16c68acf5fa4191043851b82c3c72a9"
+            "sha256": "c8cee193c5177353ddb941eb17d4a546a4cbe2cf67716fd78aa1ca76153e60b8"
           },
           {
             "path": "Native/src/responses_stream.cpp",
             "anchor": "ResponsesStream::feed",
-            "sha256": "e676ff93421b7e8becf9495ac9d5cf651b04a0d297fd0bc0f3c3eb159977b27a"
+            "sha256": "96978ec3eae24b8055b0fa980316e402ac0900fbb8ace2c2777e27d072b47389"
           },
           {
             "path": "Native/src/chat_provider.cpp",
             "anchor": "complete_model",
-            "sha256": "339a45a94dae4bc084e54c4e699ac99ab7fd959d0068f8eebcef20229a467cc7"
+            "sha256": "28c4dc3991ec1afc4f2e90328d1c95442f71f187f1fe9e394dd0b3960b53242b"
           },
           {
             "path": "Native/src/provider_setup.cpp",
             "anchor": "ProviderRuntime::configuration",
-            "sha256": "7c783a59233aea1bb893d1347ba94f9cc765a8684b5a74ab91904d77f4edd50c"
+            "sha256": "6fa1d2d0b50725deaf15d05dcce73490797c7955328f36a41873a74c619cc9ae"
           }
         ],
         "artifacts": [
@@ -2542,7 +2542,44 @@
       },
       "agentflowStatus": "unverified",
       "acceptance": "Validate native C++ provider authentication, model identifiers, streaming, cancellation, usage, errors and each requested model capability. xlang3 remains the embedded script/database runtime.",
-      "nativeStatus": "unmapped"
+      "nativeStatus": "partial",
+      "nativeEvidence": {
+        "sources": [
+          {
+            "path": "Native/apps/server_main.cpp",
+            "anchor": "add(\"xai.responses\"",
+            "sha256": "a59f501f043c2b7886cfa28b04cbac88f65e01344c7bcb5a9009fbaea6a6d189"
+          },
+          {
+            "path": "Native/src/provider_model_policy.cpp",
+            "anchor": "ProviderModelPolicy documented_xai_model_policy",
+            "sha256": "f130c58dad12081721b7fffc90a5dd2a540883897f885c6bbcc7e52aa8d124b1"
+          },
+          {
+            "path": "Native/src/responses_request.cpp",
+            "anchor": "serialize_responses_request",
+            "sha256": "c8cee193c5177353ddb941eb17d4a546a4cbe2cf67716fd78aa1ca76153e60b8"
+          },
+          {
+            "path": "Native/src/responses_stream.cpp",
+            "anchor": "ResponsesStream::feed",
+            "sha256": "96978ec3eae24b8055b0fa980316e402ac0900fbb8ace2c2777e27d072b47389"
+          },
+          {
+            "path": "Native/src/provider_profile_runtime.cpp",
+            "anchor": "model_capabilities",
+            "sha256": "3fbd97e7cbf8a177ecb5b8e76d6e450fc3091dd5d20b85d81fbbc6206bde0897"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "doc/evidence/native-xai-responses-local.json",
+            "sha256": "94f95a10f5407a137f85812a12b57fe1c7e0da7b99ef4a7db28f4a7ba3c0cffe"
+          }
+        ],
+        "scope": "Native xAI Responses profile discovery and a full AgentRunner tool loop passed against an independent synthetic xAI-compatible catalogue/SSE peer. The C++ runtime, selected Grok profile, actual workspace read, encrypted credential handling and xlang3 SQLite persistence/reopen are real. Only grok-4.7 is admitted for tool execution by the reviewed model policy. No xAI key or live provider request was used.",
+        "gaps": "The 58 pinned xAI entries are not individually accepted. Live account catalogue/inference, model-specific tool/reasoning/streaming behavior, non-chat and media modes, xAI error/timeout/cancellation behavior and complete provider-group parity remain unverified."
+      }
     },
     {
       "provider": "xiaomi_mimo",

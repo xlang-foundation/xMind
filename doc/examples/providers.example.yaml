@@ -16,3 +16,6 @@ profiles:
   deepseek:
     route: deepseek.chat
     api_key: ""
+  xai:
+    route: xai.responses
+    api_key: ""

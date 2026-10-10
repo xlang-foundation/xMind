@@ -51,6 +51,20 @@ ProviderModelPolicy documented_openai_model_policy(ProviderWire wire){
     }
     return result;
 }
+ProviderModelPolicy documented_xai_model_policy(){
+    // xAI's Grok 4.7 documentation (consulted 2026-10-10) identifies Responses
+    // as its primary API and documents custom function calling, streaming and
+    // configurable reasoning. Catalogue entries alone cannot confer tools.
+    // https://docs.x.ai/developers/grok-4-7
+    // https://docs.x.ai/developers/tools/function-calling
+    // https://docs.x.ai/developers/model-capabilities/text/streaming
+    ProviderModelPolicy result;result.wire=ProviderWire::responses;
+    NativeModelCapabilities grok;
+    grok.tools=Capability::supported;grok.stream_usage=Capability::supported;grok.output_limit=Capability::supported;
+    grok.reasoning_efforts={ReasoningEffort::low,ReasoningEffort::medium,ReasoningEffort::high,ReasoningEffort::xhigh};
+    result.models.emplace("grok-4.7",std::move(grok));
+    return result;
+}
 void validate_provider_model_policy(const ProviderModelPolicy& policy){
     if(policy.wire!=ProviderWire::chat_completions&&policy.wire!=ProviderWire::responses&&policy.wire!=ProviderWire::anthropic_messages&&policy.wire!=ProviderWire::gemini_generate_content)
         throw std::invalid_argument("Invalid native model policy wire");
