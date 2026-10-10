@@ -1,16 +1,36 @@
 # Current native validation
 
-## Rendered UI spot check — 2026-10-10
+## Rendered webpage and VS Code workspace — 2026-10-10
 
-The actual VS Code Extension Development Host rendered xMind in the right
-sidebar and reported `D:\CantorAI2026\TestProj` as its native backend root,
-matching the opened folder. Its provider selector was disabled and Settings
-showed an empty “Add profile” state, so this check did not complete a model run
-or file-write flow. The open browser tabs were tied to an older asset snapshot;
-they do not verify the current browser build or its Add workspace control. A
-fresh current-build browser and model-backed rendered acceptance are still
-required. This is a direct UI observation, separate from the native controller
-contracts below.
+The current VS Code Extension Development Host rendered xMind in its right
+sidebar and reported the selected opened folder as its native backend root. A
+fresh current-source webpage was launched from **xMind: Open Browser View**,
+connected to that same temporary preview backend, and displayed the identical
+folder beside its workspace selector. Refresh restored the authenticated
+connection and retained the correct root. This live path exposed the mismatch
+between the browser's multi-profile catalogue and VS Code's single-folder
+`serve` backend; the access adapter now presents the authenticated `/v1/workspace`
+as a fixed one-item catalogue in that mode. The page disables Add workspace and
+explains that profile-aware local `xmind view` is needed to add or switch
+profiles. The browser DOM and adapter test exercises both modes.
+
+Browser tests passed **60/60** after the adapter fallback, then the focused
+workspace/adapter suite passed **13/13** after the rendered hint change. The
+current assets were rebuilt and the live page was refreshed to show that hint.
+The native executable was then rebuilt from current source and staged in a
+verified development runtime. Against a fresh, isolated profile root, its full
+local view advertised `can_add: true`; the live same-origin browser adapter
+registered `D:\CantorAI2026\TestProj`, selected it, retained both profiles, and
+rotated the HttpOnly session cookie. In the rendered standalone page, **Add
+workspace** opened the folder-path dialog, registered and selected `TestProj`,
+and remained selected after refresh. Switching back to `xMind` changed the
+displayed server workspace accordingly. The VS Code-attached page remains
+fixed to its opened folder. Browser webpage/adapter contracts pass **16/16**.
+This check made no model request or workspace-file effect. Model-backed
+rendered answer/file approval and installed-client acceptance remain separate
+work. Evidence and scope are in [browser-view.md](browser-view.md).
+The tested launcher and adapter change are commits `36d995a` and `661351e` on
+`checkpoint/native-persistence-m1`.
 
 At source `4701255`, the native local-view contract passed in 188.95 seconds,
 including actual browser-cookie workspace registration and production browser
