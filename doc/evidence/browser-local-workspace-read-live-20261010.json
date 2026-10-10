@@ -1,0 +1,20 @@
+{
+  "kind": "manual-rendered-browser-observation",
+  "observed_at_utc": "2026-10-10T22:23:59Z",
+  "source_revision": "e55110e4af235139576f80b50bf34ff31e46302e",
+  "browser": "Microsoft Edge",
+  "view_origin": "http://127.0.0.1:60431",
+  "native_origin": "http://127.0.0.1:63547",
+  "native_runtime": ".agentflow/dev-browser-runtime-current/xmind.exe",
+  "native_runtime_sha256": "fbcbf957195397da26cfe7143c976d727d2836337d67c67731429179c051c1dc",
+  "observed": {
+    "connected_without_token_prompt": true,
+    "selected_workspace": "D:\\CantorAI2026\\xMind",
+    "workspace_picker_visible": true,
+    "add_workspace_visible": true,
+    "workspace_file_tree_visible": true,
+    "workspace_file_tree_result": "This xMind runtime needs an update to browse workspace files."
+  },
+  "scope": "The page rendered and auto-connected; the native workspace file-list request was rejected by the currently running packaged runtime. No file preview or write was verified.",
+  "source_acceptance": "Native/tests/agent_http_contract.mjs now verifies browser view-session access to workspace listing and preview. Its hosted native execution is pending."
+}

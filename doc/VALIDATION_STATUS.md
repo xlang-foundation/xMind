@@ -10,6 +10,22 @@ provenance](evidence/native-schema14-local-20261010.json). Webpage and extension
 sources did not change; the already documented rendered webpage and VS Code
 workspace evidence records their latest live check.
 
+## Local workspace file browsing — 2026-10-10
+
+The current Edge page at `60431` auto-connected without a token prompt and
+showed the local `xMind` workspace selector and **Add workspace** control. Its
+file tree reported that the connected packaged native runtime needs an update;
+the actual workspace listing was not returned. The running binary was
+`.agentflow/dev-browser-runtime-current/xmind.exe`
+(`fbcbf957195397da26cfe7143c976d727d2836337d67c67731429179c051c1dc`). Exact
+manual observation: [workspace-read browser evidence](evidence/browser-local-workspace-read-live-20261010.json).
+
+The browser now explains this runtime mismatch instead of displaying the raw
+401. `Native/tests/agent_http_contract.mjs` also checks that a real native view
+session can list workspace files and preview UTF-8 content. That C++/xlang3
+contract and a current packaged runtime are pending the hosted gate; the live
+observation does not establish workspace browsing success.
+
 ## Rendered webpage and VS Code workspace — 2026-10-10
 
 The current VS Code Extension Development Host rendered xMind in its right
