@@ -23,6 +23,13 @@ reattachment, and the production host/browser adapters. They make no installed
 or rendered VS Code claim and issue no provider request. The exact hosted native
 gate for the newer MCP renewal source is still pending separately.
 
+`agents` lists persisted named-agent IDs, revisions and optional model IDs.
+`agent-definition ID` retrieves one persisted definition, including its
+instructions, through the authenticated native API. Definition IDs may contain
+letters, numbers, `_`, `-` and `.`. This inspection is read-only and does not
+start a run. The current implementation is only a partial OpenCode mapping;
+mode, permission, description, visibility and source metadata remain absent.
+
 ## Selected workspace connection
 
 Use an explicit workspace when attaching the console to a local backend:
