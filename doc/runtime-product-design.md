@@ -162,7 +162,13 @@ earlier accepted runtime and managed launcher. Its rendered/sidebar acceptance
 and adoption of the native profile controller remain pending. Preserve existing
 installations; no legacy-format or existing-profile migration is required.
 
-Pending delivery includes native-controller adoption by client adapters, HTTP
+The native-controller editor adapter and browser enrollment now passed real
+native integration and the full hosted 110-contract gate at `689404e`.
+Its packaged bytes were independently checked. Fresh installed/rendered coding
+acceptance remains pending; earlier installed previews are separate checkpoints.
+[Exact gate and package scope](evidence/native-view-hosted-689404e-package.json).
+
+Pending delivery includes fresh installed-controller acceptance, HTTP
 SSE for the shared UI event feed (currently 500 ms polling; A2A streaming is
 separate), unified YAML/Markdown/Python authoring, reusable nested super-agents,
 shared scheduling/worker placement, xlang3 IPC, Local/Nexus connection integration

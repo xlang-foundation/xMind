@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "689404eeeae8c0b83a7859b7efba584100a46edb",
+  "scope": "Fresh isolated VS Code installation and complete installed file comparison; no native runtime launch or rendered UI acceptance",
+  "profileRoot": "D:\\CantorAI2026\\xMind\\.agentflow\\ui-host\\native-view-689404e",
+  "extensionRoot": "D:\\CantorAI2026\\xMind\\.agentflow\\ui-host\\native-view-689404e\\extensions\\agentflow-local.agentflow-0.1.5",
+  "vsixSha256": "8ec24e038e806edd7b3e0be2a00721d8cb5c59eadf55b917beb29267d2e4b671",
+  "installedFilesCompared": 1895,
+  "runtimeFiles": 1860,
+  "runtimeManifestSha256": "d684a526a398a3d8a880e21d6ad898e564ccc825d11eba4d5085129f222c5877",
+  "packageMetadataPolicy": "VS Code-added __metadata excluded from package.json structural comparison; every other installed package byte must match the verified VSIX",
+  "nativeExecuted": false,
+  "renderedUi": false,
+  "providerRequests": 0,
+  "existingInstallationsChanged": false
+}

@@ -1,5 +1,32 @@
 # Reviewable milestones
 
+Hosted source `689404e` passed **all 110 native contracts** in **275.04 seconds**,
+then **224 extension / 41 browser** checks, actual browser/native integration,
+runtime staging and VSIX verification. The real production editor host connected
+through the native view, wrote sessions, ran a native tool graph, shared console
+history, enrolled browser access and verified process-exit revocation and same
+profile/history after host reload. This is actual native integration with a
+fixture VS Code API, not installed/rendered editor acceptance or live inference.
+
+Independent downloaded-artifact verification checked the exact registered and
+passed contract sets and original gate hashes, all **29 bundle / 1860 runtime**
+file digests, **16** committed host/view source mappings, generated browser HTML
+and vendor copies. The VSIX has **1897 entries**, five native files and 1830 pure
+source files. Original logs/manifests and the verifier's initial source-map error
+are recorded. No local native execution or current installation acceptance is
+claimed. Fresh installed/rendered coding, SSE, authoring, workers/IPC, profile
+binding and full parity remain required. No migration layer is implemented.
+[Passed gate, original evidence and independently verified package](evidence/native-view-hosted-689404e-package.json).
+
+That exact VSIX is now installed into a fresh isolated VS Code profile. All
+**1895 installed extension files** were compared with the verified archive;
+only VS Code's added package `__metadata` is excluded from structural manifest
+comparison. Every native runtime byte matches. Existing installations were
+preserved. This is installation/file evidence only: no local native runtime was
+launched while the separate benchmark parent remains live. Rendered interaction
+and actual coding acceptance in this profile are still pending.
+[Fresh installation and complete file comparison](evidence/native-view-hosted-689404e-fresh-install.json).
+
 Hosted source `0b96974` compiled and reached native view readiness, then failed
 the first actual session write with HTTP 400 `Invalid JSON request`. The owner
 fix therefore passed that startup boundary, but the native contract did not pass.

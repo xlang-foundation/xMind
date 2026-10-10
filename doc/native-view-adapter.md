@@ -1,7 +1,14 @@
 # Native editor and browser access adapter
 
-Candidate implementation; **native integration acceptance is pending**. Do not
-package or advertise this candidate as a working editor connection yet.
+Source `689404e` passed real native integration and the full **110-contract**
+hosted gate, followed by **224 extension / 41 browser** checks and packaging.
+The production editor adapter was exercised with a fixture VS Code API;
+**fresh installed/rendered editor acceptance remains pending**.
+[Original gate and independent package verification](evidence/native-view-hosted-689404e-package.json).
+The exact VSIX is installed into a fresh isolated profile and all 1895 installed
+extension files match the archive, apart from installer-added manifest metadata.
+It has not been launched for local native or rendered acceptance yet.
+[File-level installation evidence](evidence/native-view-hosted-689404e-fresh-install.json).
 
 `xmind view --workspace DIR --ready-file FILE` connects through the native local
 profile controller and binds a separate loopback HTTP access endpoint. The
@@ -28,8 +35,8 @@ write. The adapter forwarded POST requests in cpp-httplib's pre-routing handler,
 before the library had read their bodies. Forwarding now uses regular GET/POST
 handlers; the pre-routing hook admits or rejects access before body reading.
 The native contract additionally checks exact Unicode titles, chunked UTF-8
-writes, malformed JSON and the adapter's payload limit. This correction still
-requires a real native rerun and the complete gate.
+writes, malformed JSON and the adapter's payload limit. The corrected source
+passed both the early real view test and that test within the complete gate.
 [Observed failure, original provenance and candidate scope](evidence/native-rendezvous-owner-candidate.json).
 [Actual write failure and forwarding correction](evidence/native-view-body-forwarding-candidate.json).
 
