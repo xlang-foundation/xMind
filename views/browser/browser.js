@@ -244,6 +244,7 @@ else {
   function showWorkspaceCatalogue(value){while(picker.firstChild)picker.removeChild(picker.firstChild);for(const item of value.workspaces){const option=document.createElement('option');option.value=item.workspace_id;option.textContent=item.name+' · '+item.root;picker.appendChild(option);}selectedWorkspaceId=value.selected_workspace_id;picker.value=selectedWorkspaceId;picker.disabled=value.workspaces.length<2;addWorkspace.disabled=value.can_add!==true;addWorkspace.title=addWorkspace.disabled?'Connect to the profile-aware local xMind view to add or switch workspaces.':'';workspaceControl.hidden=false;}
   let filePreviewGeneration=0;
   function canvasNote(target,message){const note=document.createElement('li');note.className='tree-note';note.textContent=message;target.appendChild(note);}
+  function workspaceBrowseFailure(error){if(error?.status===401||error?.status===404)return 'This xMind runtime needs an update to browse workspace files.';return error?.message||'Workspace files could not be loaded.';}
   async function loadWorkspaceDirectory(client,workspaceId,generation,path,target){
     target.replaceChildren();target.setAttribute('aria-busy','true');
     try{
@@ -255,7 +256,7 @@ else {
         else{button.disabled=true;button.title='Links are not opened by the workspace viewer.';}
       }
       if(value.truncated)canvasNote(target,'Directory listing is truncated at the native result limit.');if(value.entries.length===0)canvasNote(target,'This folder is empty.');
-    }catch(error){if(generation===connectionGeneration){target.replaceChildren();canvasNote(target,error.message||'Workspace files could not be loaded.');}}
+    }catch(error){if(generation===connectionGeneration){target.replaceChildren();canvasNote(target,workspaceBrowseFailure(error));}}
     finally{target.removeAttribute('aria-busy');}
   }
   async function showWorkspaceFile(client,workspaceId,generation,path,button){

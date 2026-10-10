@@ -99,6 +99,7 @@ test('production classic scripts share a realm without collisions and restore ow
     const url=new URL(input,window.location.origin);assert.equal(url.origin,window.location.origin,'Fixture rejects any provider/native network destination');
     const route=url.pathname+url.search;requests.push({route,method:options.method||'GET',credentials:options.credentials,headers:options.headers});
     if(url.pathname.endsWith('/tree-events')){assert.equal(url.searchParams.get('after'),'0');return {ok:true,status:200,json:async()=>[]};}
+    if(route==='/v1/workspace/files?path=.')return {ok:false,status:401,json:async()=>({detail:'Authentication required'})};
     if(route==='/v1/provider/profiles')return {ok:false,status:404,json:async()=>({detail:'Synthetic older profile metadata unavailable'})};
     assert.ok(Object.hasOwn(routes,route),'Unexpected classic-script fixture route: '+route);
     return {ok:true,status:200,json:async()=>structuredClone(routes[route])};
@@ -119,6 +120,7 @@ test('production classic scripts share a realm without collisions and restore ow
     }
     for(let attempts=0;attempts<100&&!document.getElementById('workspace-info').textContent.startsWith('Connected');++attempts)await new Promise(resolve=>setImmediate(resolve));
     assert.match(document.getElementById('workspace-info').textContent,/Connected to xMind on this computer/);assert.match(document.getElementById('workspace-info').textContent,/Workspace: D:\\Projects\\Example/);
+    for(let attempts=0;attempts<100&&!document.getElementById('workspace-files').textContent.includes('needs an update');++attempts)await new Promise(resolve=>setImmediate(resolve));assert.match(document.getElementById('workspace-files').textContent,/This xMind runtime needs an update to browse workspace files/);
     assert.equal(document.getElementById('connection').open,false);
     assert.equal(document.getElementById('sessions').value,parent.session_id);
     assert.equal(document.querySelector('footer #model').value,'fixture-model');
