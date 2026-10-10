@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-unaccepted",
+  "sourceBase": "b9b07167a7c6dde90cb8cd5bda6a2d4cad86dac8",
+  "change": "Use detected available CPU count capped at four for isolated SDK/native compilation. Record CPU count, chosen parallelism and default-owner/user match without exposing SIDs or credentials.",
+  "sourceFile": "Tools/ci-native.ps1",
+  "sourceSha256": "a58132894b10bcb7ea0aab68eaa0964625c0b61272ddd007b14c0b27e9303ba3",
+  "reference": "https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
+  "verification": {
+    "powershellSyntaxPassed": true,
+    "complete110ContractRegistrationExecutionAndReceiptBlockUnchanged": true,
+    "gateBlockSha256": "0a0ef2a34bdb397bfa36893dbdf892ce4f573da9d0845feb10f4929ae7a5f492",
+    "nativeCompiled": false,
+    "nativeExecuted": false,
+    "performanceImprovementMeasured": false,
+    "providerRequests": 0
+  },
+  "limits": [
+    "Only isolated GitHub runner compilation changes; development benchmark guard remains.",
+    "No test filtering, cached test result or partial acceptance introduced.",
+    "Native UI readiness, complete native acceptance and installed rendering remain pending."
+  ]
+}

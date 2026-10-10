@@ -26,11 +26,15 @@ $ciCmake=Join-Path $ciVisualStudio.installationPath 'Common7/IDE/CommonExtension
 if(-not(Test-Path -LiteralPath $ciCmake)){$ciCmake=(Get-Command cmake -ErrorAction Stop).Source}
 $ciCtest=Join-Path (Split-Path $ciCmake -Parent) 'ctest.exe'
 if(-not(Test-Path -LiteralPath $ciCtest)){throw 'Matching CTest executable is missing.'}
-$ciProvenance=@{xmind=(& git -C $ciRoot rev-parse HEAD).Trim();xlang3=$ciRevision;stdlib_source=$ciStdlibRevision;sqlite_prerequisite='Included in pinned xlang3 source; no overlay applied';runtime='Native xlang3; no CPython execution or bridge';toolchain=$ciGenerator;toolchain_version=$ciVisualStudio.installationVersion}
+$ciProcessors=[Environment]::ProcessorCount
+$ciParallelism=[Math]::Max(1,[Math]::Min(4,$ciProcessors))
+$ciIdentity=[System.Security.Principal.WindowsIdentity]::GetCurrent()
+try {$ciDefaultOwnerMatchesUser=($ciIdentity.Owner.Value -eq $ciIdentity.User.Value)} finally {$ciIdentity.Dispose()}
+$ciProvenance=@{xmind=(& git -C $ciRoot rev-parse HEAD).Trim();xlang3=$ciRevision;stdlib_source=$ciStdlibRevision;sqlite_prerequisite='Included in pinned xlang3 source; no overlay applied';runtime='Native xlang3; no CPython execution or bridge';toolchain=$ciGenerator;toolchain_version=$ciVisualStudio.installationVersion;processors=$ciProcessors;build_parallelism=$ciParallelism;windows_default_owner_matches_user=$ciDefaultOwnerMatchesUser}
 $ciProvenance|ConvertTo-Json|Set-Content (Join-Path $ciEvidence 'provenance.json')
 $ciRuntimeBuild=Join-Path $ciRuntime 'build'
 Invoke-CiCommand 'runtime-configure' $ciCmake @('-S',$ciRuntime,'-B',$ciRuntimeBuild,'-G',$ciGenerator,'-A','x64','-DXLANG3_BUILD_CPYTHON_BRIDGE=OFF','-DXLANG3_PYTHON314_EXECUTABLE:FILEPATH=OFF')
-Invoke-CiCommand 'runtime-build' $ciCmake @('--build',$ciRuntimeBuild,'--config','Release','--target','xlang3','xlang_json_native_package','xlang_sqlite3_native_package','--parallel','2')
+Invoke-CiCommand 'runtime-build' $ciCmake @('--build',$ciRuntimeBuild,'--config','Release','--target','xlang3','xlang_json_native_package','xlang_sqlite3_native_package','--parallel',$ciParallelism.ToString())
 $ciRelease=Join-Path $ciRuntimeBuild 'Release'
 $ciNative=Join-Path $ciRoot 'build/native'
 $ciNode=(Get-Command node -ErrorAction Stop).Source
@@ -47,8 +51,8 @@ Invoke-CiCommand 'native-configure' $ciCmake @('-S',(Join-Path $ciRoot 'Native')
 # Build the actual process contract and its production dependencies first. This
 # catches new executor/test compile errors before unrelated schema/agent targets;
 # the full build and exact complete contract gate below remain unconditional.
-Invoke-CiCommand 'native-process-contract-build' $ciCmake @('--build',$ciNative,'--config','Release','--target','agentflow_process_executor_contract','--parallel','2')
-Invoke-CiCommand 'native-build' $ciCmake @('--build',$ciNative,'--config','Release','--parallel','2')
+Invoke-CiCommand 'native-process-contract-build' $ciCmake @('--build',$ciNative,'--config','Release','--target','agentflow_process_executor_contract','--parallel',$ciParallelism.ToString())
+Invoke-CiCommand 'native-build' $ciCmake @('--build',$ciNative,'--config','Release','--parallel',$ciParallelism.ToString())
 $ciTests=& $ciCtest --test-dir $ciNative -C Release --show-only=json-v1
 if($LASTEXITCODE -ne 0){throw 'Could not inspect the configured native contracts.'}
 $ciTests|Set-Content (Join-Path $ciEvidence 'contracts.json')
