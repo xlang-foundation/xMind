@@ -184,7 +184,7 @@ void migration_contract(const std::string& database,const std::vector<std::strin
     {
         PersistenceService store(database,imports);const auto h=store.history("legacy_session").get();require(h.size()==saved.size()&&h[0].json==saved[0].json&&h[1].json==saved[1].json&&store.information("fixture","preserved").get()==R"({"keep":true})","Actual v10-to-v11 migration preserves full saved history/config");
         const auto b=store.root_budget("legacy_root").get();require(b.spec.policy_id=="native.delegation"&&b.model_calls_reserved==1&&b.parent_model_calls_reserved==1&&b.planned_children_reserved==0&&!store.dynamic_plan_for_root("legacy_root").get(),"Legacy budget must retain actual counters without fictional dynamic backfill");rejects<NotFound>([&]{store.dynamic_capabilities("legacy_root").get();},"Legacy root cannot gain invented planning authority");
-        {XlangSqlite sql(database,imports);require(std::get<std::int64_t>(sql.execute("PRAGMA user_version").rows.at(0).at(0))==13,"Successful exact old migration must reach schema13");}store.close();
+        {XlangSqlite sql(database,imports);require(std::get<std::int64_t>(sql.execute("PRAGMA user_version").rows.at(0).at(0))==14,"Successful exact old migration must reach the current schema");}store.close();
     }
 }
 DelegationBatchSpec legacy_spec(PersistenceService& store,const std::string& root,const std::string& batch,const std::vector<std::string>& children){

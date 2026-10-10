@@ -3,15 +3,16 @@
 #include <stdexcept>
 #include <utility>
 
-// Only initial EMPTY skill selections can be removed from these disposable
-// legacy fixtures. Activated or later-revised guidance must never be discarded.
+// Only initial EMPTY skill and agent selections can be removed from these
+// disposable legacy fixtures. Activated or later-revised guidance must never
+// be discarded.
 inline void remove_skill_schema_fixture(agentflow::XlangSqlite& database){
     const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
     const auto version=scalar("PRAGMA user_version");if(version==12)return;
-    if(version!=13||scalar("SELECT count(*) FROM session_skills")!=0||scalar("SELECT count(*) FROM run_skills WHERE json_array_length(selections_json,'$.ids')!=0 OR revision!=1")!=0)throw std::runtime_error("Legacy fixture cannot discard actual skill selection authority");
+    if((version!=13&&version!=14)||scalar("SELECT count(*) FROM session_skills")!=0||scalar("SELECT count(*) FROM run_skills WHERE json_array_length(selections_json,'$.ids')!=0 OR revision!=1")!=0||(version==14&&scalar("SELECT count(*) FROM session_agents")!=0))throw std::runtime_error("Legacy fixture cannot discard actual skill or agent selection authority");
     database.execute("SAVEPOINT reconstruct_legacy_skills");try{
         for(const auto* trigger:{"run_skill_identity","run_skill_insert_owner","run_skill_update_owner"})database.execute(std::string("DROP TRIGGER ")+trigger);
-        database.execute("DROP TABLE run_skills");database.execute("DROP TABLE session_skills");database.execute("PRAGMA user_version=12");database.execute("RELEASE reconstruct_legacy_skills");
+        database.execute("DROP TABLE run_skills");database.execute("DROP TABLE session_skills");if(version==14)database.execute("DROP TABLE session_agents");database.execute("PRAGMA user_version=12");database.execute("RELEASE reconstruct_legacy_skills");
     }catch(...){database.execute("ROLLBACK TO reconstruct_legacy_skills");database.execute("RELEASE reconstruct_legacy_skills");throw;}
 }
 // Reverse only schema12 additions in disposable legacy-migration fixtures.
