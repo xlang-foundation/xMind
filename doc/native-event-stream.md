@@ -12,6 +12,16 @@ through the real browser adapter. Complete **241 extension / 49 browser**
 synthetic suites pass; actual native and rendered acceptance remain pending.
 [Correction scope and original evidence](evidence/native-event-stream-browser-cookie-candidate.json).
 
+The full webpage fixture now runs all emitted classic scripts together and
+streams through the actual cookie client, bridge and renderer. Synthetic
+committed text/usage render in the live response; the terminal persisted history
+replaces it once. The idle page issues no periodic run requests and disconnect
+sends no cancellation or admission. Complete **241 extension / 50 browser**
+suites pass. Initial fixture assertions were corrected to inspect the live
+container and the native normalized usage fields. This remains JSDOM/synthetic
+transport evidence, not actual native or rendered-browser acceptance.
+[Full-page fixture scope and original logs](evidence/native-event-stream-browser-page-candidate.json).
+
 Candidate transport implementation. **New native compilation/integration is
 pending.** The accepted `689404e` installation remains unchanged. The existing
 browser and VS Code adoption described below are tested candidates; actual

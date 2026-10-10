@@ -29,7 +29,7 @@ const [extension,browser]=await Promise.all([
 const after=await freeze();await writeFile(join(out,'source-after.json'),JSON.stringify(after,null,2)+'\n');
 const assetsAfter=await assets();await writeFile(join(out,'assets-after.json'),JSON.stringify(assetsAfter,null,2)+'\n');
 const unchanged=JSON.stringify(before)===JSON.stringify(after)&&JSON.stringify(assetsBefore)===JSON.stringify(assetsAfter);
-const passed=unchanged&&extension.exitCode===0&&browser.exitCode===0&&extension.tests===241&&extension.passed===241&&browser.tests===49&&browser.passed===49&&[extension,browser].every(r=>r.failed===0&&r.skipped===0&&r.cancelled===0);
+const passed=unchanged&&extension.exitCode===0&&browser.exitCode===0&&extension.tests===241&&extension.passed===241&&browser.tests===50&&browser.passed===50&&[extension,browser].every(r=>r.failed===0&&r.skipped===0&&r.cancelled===0);
 const report={sourceRevision:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),scope:'Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance',sourceFiles:files.length,trackedSourceFiles:tracked.length,vendorFiles:2,browserAssets:assetNames.length,sourceAndAssetBytesUnchanged:unchanged,extension,browser,providerRequests:0,nativeExecuted:false,cpythonExecuted:false,passed};
 await writeFile(join(out,'gate.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 if(!passed)process.exitCode=1;

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-native-and-installed-validation-pending",
+  "parentRevision": "977e945374d3bef82b6fabd4a6299a0208961987",
+  "scope": "Complete webpage classic scripts, cookie bridge and shared reader in JSDOM under complete synthetic Node suites; no native/provider or installed/rendered UI execution",
+  "sourceFiles": 2421,
+  "sourceUnchangedAcrossSuites": true,
+  "suites": {
+    "extension": {
+      "tests": 241,
+      "pass": 241,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "tests": 50,
+      "pass": 50,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  "browser": {
+    "observation": "HttpOnly session cookie transport for JSON and SSE; shared reader and scoped subscription",
+    "metadata": "Read-only snapshots on observation, committed event and terminal end; coalesced 100 ms event refresh",
+    "concurrency": "Full emitted script order renders streamed text and normalized fixture usage, remains idle without polling, replaces live response with persisted transcript once and detaches without cancellation",
+    "retirement": "Conversation/generation change and disposal detach only observation and refuse delayed callbacks"
+  },
+  "pending": [
+    "Complete native gate and actual stream integration",
+    "Actual native cookie/controller integration prepared",
+    "Native disconnect/revocation/capacity/restart acceptance",
+    "Fresh installed/rendered coding acceptance"
+  ],
+  "providerRequests": 0,
+  "nativeExecuted": false,
+  "currentInstallationChanged": false,
+  "rawEvidence": {
+    "doc/evidence/native-unified-event-stream-browser-page-extension.log": "3cc5746fd647db519dfb075729a0a31806c71a7e204abea80b19ddfc4fbed71a",
+    "doc/evidence/native-unified-event-stream-browser-page-browser.log": "9d6a7b9cf7eb28de1cbf45fb1ebda30bb56a1c5bb8ec815fccf02aaf6a8c14d4",
+    "doc/evidence/native-unified-event-stream-browser-page-source-before.json": "4f34f11c8ee1c46e96421780ed8c04af332114d2b94d0520ac92c5cc0bab197b",
+    "doc/evidence/native-unified-event-stream-browser-page-source-after.json": "4f34f11c8ee1c46e96421780ed8c04af332114d2b94d0520ac92c5cc0bab197b"
+  }
+}

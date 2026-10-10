@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+Full webpage streaming fixture: the complete emitted classic-script order,
+cookie connection bridge, actual shared reader/subscription and renderer now
+run together in JSDOM. Synthetic committed frames render live text and exact
+normalized usage, remain idle without periodic run polling, replace live output
+with one persisted terminal response and detach without sending cancellation
+or admission. Complete **241 extension / 50 browser** synthetic suites pass
+with all 2421 tracked inputs unchanged. This is DOM fixture evidence, not a
+native backend or installed/rendered browser acceptance claim.
+[Scope and original evidence](evidence/native-event-stream-browser-page-candidate.json).
+
 Browser cookie-stream correction candidate: the page's session client previously
 overrode JSON requests only, so its inherited SSE method attempted bearer-token
 acquisition and failed. `BrowserSessionClient` now supplies same-origin cookie
