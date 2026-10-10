@@ -1,0 +1,44 @@
+{
+  "sourceRevision": "ed5b84dd3590545d71cf4b82e0eddaf0ae08b572",
+  "result": "passed",
+  "scope": "Rendered current-build standalone webpage connection, workspace registration, switching, and refresh restoration against an isolated native local profile",
+  "viewUrl": "http://127.0.0.1:56095/ui/",
+  "nativeOrigin": "http://127.0.0.1:56092",
+  "nativeExecutableSha256": "0DBBEA452F0D998D2884E73AE6999C4D69A1F8A6F4C25825A9C6996873C49F72",
+  "runtimeManifestSha256": "af74dd62e788204b228fd85ef1903a014362c0b8d1a65d9cad51efcf77f7ec08",
+  "viewportCssPixels": {
+    "width": 648,
+    "height": 553
+  },
+  "testWorkspaceRoots": [
+    "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-live-web-PmSOWC\\workspace-one",
+    "C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-live-web-PmSOWC\\workspace-two"
+  ],
+  "refreshSessionRestoration": {
+    "result": "passed",
+    "serverTokenReentered": false,
+    "workspaceRestored": "workspace-one"
+  },
+  "workspaceRegistration": {
+    "folder": "workspace-two",
+    "result": "passed",
+    "selectedAfterAdd": true
+  },
+  "workspaceSwitching": {
+    "sequence": [
+      "workspace-one",
+      "workspace-two",
+      "workspace-one"
+    ],
+    "result": "passed",
+    "historyRefreshed": true
+  },
+  "providerRequests": 0,
+  "workspaceFileChanges": 0,
+  "browserTestResults": {
+    "passed": 61,
+    "failed": 0
+  },
+  "syntheticLocalAuthentication": true,
+  "releasePackage": false
+}
