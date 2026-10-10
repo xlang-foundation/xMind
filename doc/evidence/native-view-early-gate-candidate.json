@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-unaccepted",
+  "sourceBase": "3b0aa741e7b49150e898318faaebd8fa26e08dbb",
+  "change": "Build unified xmind and actual process contract before unrelated test executables, then run the existing real local-view contract early to expose native startup failures sooner.",
+  "sourceFile": "Tools/ci-native.ps1",
+  "sourceSha256": "0c49efa58627b169ab8440cae6a223b4409d2a16fffe7ec5814daf8b537dacef",
+  "verification": {
+    "powershellSyntaxPassed": true,
+    "complete110ContractRegistrationExecutionAndReceiptBlockUnchanged": true,
+    "fullGateBlockSha256": "0a0ef2a34bdb397bfa36893dbdf892ce4f573da9d0845feb10f4929ae7a5f492",
+    "nativeBuildExecuted": false,
+    "nativeContractExecuted": false,
+    "nativeAccepted": false,
+    "performanceImprovementMeasured": false
+  },
+  "scope": "The early local-view contract uses actual xmind/xlang3/SQLite, production editor host and browser cookie access; package provenance and VS Code APIs are fixtures, with no live model or installed/rendered IDE acceptance.",
+  "limits": [
+    "Focused success cannot publish the native gate or package acceptance; full build and all 110 contracts remain mandatory.",
+    "Active remote run was not cancelled or restarted; new source triggers a queued validation run.",
+    "Separate development-machine benchmark guard remains."
+  ]
+}

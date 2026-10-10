@@ -48,10 +48,12 @@ Invoke-CiCommand 'native-sdk-peer-install' $ciNpm @('ci','--prefix',(Join-Path $
 Invoke-CiCommand 'native-view-host-install' $ciNpm @('ci','--prefix',(Join-Path $ciRoot 'extensions/vscode'),'--ignore-scripts','--no-audit','--no-fund')
 $ciOpenSsl=(Get-Command openssl -ErrorAction Stop).Source
 Invoke-CiCommand 'native-configure' $ciCmake @('-S',(Join-Path $ciRoot 'Native'),'-B',$ciNative,'-G',$ciGenerator,'-A','x64',('-DAGENTFLOW_XLANG3_SOURCE='+$ciRuntime),('-DAGENTFLOW_XLANG3_RUNTIME_DIR='+$ciRelease),('-DAGENTFLOW_PYTHON_LIB_SOURCE='+$ciStdlib),('-DAGENTFLOW_NODE_EXECUTABLE='+$ciNode),('-DAGENTFLOW_OPENSSL_EXECUTABLE='+$ciOpenSsl))
-# Build the actual process contract and its production dependencies first. This
-# catches new executor/test compile errors before unrelated schema/agent targets;
-# the full build and exact complete contract gate below remain unconditional.
-Invoke-CiCommand 'native-process-contract-build' $ciCmake @('--build',$ciNative,'--config','Release','--target','agentflow_process_executor_contract','--parallel',$ciParallelism.ToString())
+# Build the actual process contract and unified product before unrelated test
+# executables, then exercise native profile/view startup and the real thin host.
+# A focused success is diagnostic only: the full build and exact complete
+# contract gate below are still required before packaging or acceptance.
+Invoke-CiCommand 'native-process-contract-build' $ciCmake @('--build',$ciNative,'--config','Release','--target','agentflow_process_executor_contract','xmind','--parallel',$ciParallelism.ToString())
+Invoke-CiCommand 'native-view-early-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error','-R','^native_local_view_contract$')
 Invoke-CiCommand 'native-build' $ciCmake @('--build',$ciNative,'--config','Release','--parallel',$ciParallelism.ToString())
 $ciTests=& $ciCtest --test-dir $ciNative -C Release --show-only=json-v1
 if($LASTEXITCODE -ne 0){throw 'Could not inspect the configured native contracts.'}
