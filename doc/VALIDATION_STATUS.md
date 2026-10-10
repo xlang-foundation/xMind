@@ -35,6 +35,12 @@ folder registration flow. Port `60405` still serves an obsolete token-entry
 page. The profile-aware page and current-runtime workspace read remain the
 required live acceptance.
 
+Commit `31987db` makes the fixed-workspace limitation visible in the left
+workspace pane. Its isolated hosted workflow passes **264 VS Code and 65
+browser contracts**; source, vendor and generated-asset integrity checks pass.
+This does not establish native execution or rendered local-profile acceptance.
+[Hosted run](https://github.com/xlang-foundation/xMind/actions/runs/38092318086).
+
 ## Rendered webpage and VS Code workspace — 2026-10-10
 
 The current VS Code Extension Development Host rendered xMind in its right
