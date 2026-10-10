@@ -1,5 +1,14 @@
 # Reviewable milestones
 
+The corrected hosted build reached real view startup and failed its strict owner
+check. Original runner provenance confirms that the default owner differs from
+the current user. The host now chooses an unused name and leaves leaf creation
+to native's explicit-user protected storage. All **224 extension / 41 browser**
+fixture checks pass, including collision and alias refusal; the real native test
+now checks that the host leaves the leaf absent before launch. Native rerun,
+the full 110-contract gate and installed acceptance remain pending.
+[Original failure, before-fix regression and candidate evidence](evidence/native-rendezvous-owner-candidate.json).
+
 The local native launcher now detects the actual Python benchmark parent as well
 as its workers, and rechecks before configure, compile and contracts. The previous
 guard missed live parent PID 8220; a real launch after the fix exited with deferral

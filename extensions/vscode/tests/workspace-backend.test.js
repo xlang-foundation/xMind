@@ -14,7 +14,7 @@ function harness(options={}){
  const context={workspaceState:{get:key=>state.get(key),update:async(key,value)=>state.set(key,value)},secrets:{get:async key=>secrets.get(key),store:async(key,value)=>secrets.set(key,value),delete:async key=>secrets.delete(key)},globalState:{get:()=>{throw Error('No editor owner registry');},update:()=>{throw Error('No editor owner registry');}}};
  let time=0,sequence=0;
  const runtime={nativeProgram:'C:\\Runtime\\xmind.exe',qualified:true,providerConfig:settings.providerConfigPath,privateStateRoot:options.storage||'C:\\Private'};
- const deps={platform:'win32',arch:'x64',env:{PATH:'fixture-path',LOCALAPPDATA:'C:\\Local',XMIND_AUTH_TOKEN:'stale-master',XMIND_API_KEY:'stale-provider',XMIND_UI_BOOTSTRAP_TOKEN:'stale-preview'},random:()=> 'c'.repeat(64),now:()=>time,sleep:async ms=>{time+=ms;},fs:{realpath:async value=>options.alias?.(value)||value,mkdir:async value=>directories.push(value),mkdtemp:async prefix=>prefix+(++sequence),lstat:async file=>{if(!files.has(file)){const e=Error('pending');e.code='ENOENT';throw e;}return {isFile:()=>true,isSymbolicLink:()=>false,nlink:1,size:1000};},readFile:async file=>JSON.stringify(files.get(file))},spawn:(program,args,config)=>{
+ const deps={platform:'win32',arch:'x64',env:{PATH:'fixture-path',LOCALAPPDATA:'C:\\Local',XMIND_AUTH_TOKEN:'stale-master',XMIND_API_KEY:'stale-provider',XMIND_UI_BOOTSTRAP_TOKEN:'stale-preview'},random:()=> 'c'.repeat(64),directoryNonce:()=> (++sequence).toString(16).padStart(32,'0'),now:()=>time,sleep:async ms=>{time+=ms;},fs:{realpath:async value=>options.alias?.(value)||value,mkdir:async value=>directories.push(value),mkdtemp:async prefix=>prefix+(++sequence),lstat:async file=>{if(!files.has(file)){const e=Error('pending');e.code='ENOENT';throw e;}return {isFile:()=>true,isSymbolicLink:()=>false,nlink:1,size:1000};},readFile:async file=>JSON.stringify(files.get(file))},spawn:(program,args,config)=>{
   const child=new EventEmitter();child.pid=2000+sequence;child.exitCode=null;child.kills=0;child.unref=()=>{};child.kill=()=>{child.kills++;child.exitCode=1;child.emit('exit',1);};
   const root=args[args.indexOf('--workspace')+1],ready=args[args.indexOf('--ready-file')+1];
   const info={origin:'http://127.0.0.1:'+(19000+sequence),process_id:child.pid,process_birth:'12345678',backend_process_id:3000,profile_directory:'C:\\Local\\xMind\\LocalProfiles\\'+root.replaceAll(/[\\:]/g,'_'),workspace:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+root.replaceAll(/[^a-zA-Z0-9]/g,'_'),authority_id:'b'.repeat(32)}};
@@ -65,7 +65,7 @@ test('private native startup errors are accepted only for the spawned adapter PI
  for(const foreign of [false,true]){
   const h=harness(),spawn=h.manager.deps.spawn;let pid;
   h.manager.deps.spawn=(...args)=>{const child=spawn(...args);pid=child.pid;queueMicrotask(()=>{child.exitCode=2;child.emit('exit',2);});return child;};
-  h.deps.fs.lstat=async file=>{if(file.endsWith('ready.json')){const e=Error('no ready record');e.code='ENOENT';throw e;}return {isFile:()=>true,isSymbolicLink:()=>false,nlink:1,size:500};};
+  h.deps.fs.lstat=async file=>{if(!file.endsWith('error.json')){const e=Error('no ready record');e.code='ENOENT';throw e;}return {isFile:()=>true,isSymbolicLink:()=>false,nlink:1,size:500};};
   h.deps.fs.readFile=async()=>JSON.stringify({error_code:'native_view_startup_failed',process_id:foreign?pid+1:pid,detail:'Native view access could not be issued'});
   await assert.rejects(h.manager.connect(),foreign?/did not become ready/:/could not be issued/);assert.equal(h.launches.length,1);assert.equal(h.secrets.size,0);
  }
@@ -91,4 +91,19 @@ test('attachment refuses trust or remote-host changes during workspace verificat
   await assert.rejects(h.manager.attach('http://127.0.0.1:19100','c'.repeat(64)),/Workspace changed while attaching/);
   assert.equal(h.manager.active,undefined);assert.equal(h.launches.length,0);
  }
+});
+
+test('native creates the rendezvous directory ownership; the host only chooses a fresh name',async()=>{
+ const h=harness();h.deps.fs.mkdtemp=async()=>{throw Error('Editor must not create native rendezvous ownership');};
+ const owner=await h.manager.connect();assert.equal(h.launches.length,1);
+ assert.deepEqual(h.directories,['C:\\Private']);assert.ok(owner.privateDirectory.startsWith('C:\\Private\\native-view-'));
+});
+
+test('a chosen rendezvous collision is preserved and cannot start a native adapter',async()=>{
+ const h=harness();h.manager.deps.fs.lstat=async()=>({isDirectory:()=>true});
+ await assert.rejects(h.manager.connect(),/already exists/);assert.equal(h.launches.length,0);assert.equal(h.secrets.size,0);
+});
+test('a published rendezvous directory alias is refused before authentication',async()=>{
+ const h=harness({alias:value=>/\\native-view-[a-f0-9]{32}$/.test(value)?'C:\\Different':value});
+ await assert.rejects(h.manager.connect(),/different directory/);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,1);assert.equal(h.secrets.size,0);
 });

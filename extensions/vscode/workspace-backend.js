@@ -31,7 +31,7 @@ function machineSetting(vscode,name){
 class WorkspaceBackend {
   constructor(vscode,context,resolveRuntime,dependencies={}){
     this.vscode=vscode;this.context=context;this.resolveRuntime=resolveRuntime;
-    this.deps={fs,spawn,fetch:(...args)=>fetch(...args),random:()=>crypto.randomBytes(32).toString('hex'),sleep:ms=>new Promise(resolve=>setTimeout(resolve,ms)),now:()=>Date.now(),platform:process.platform,arch:process.arch,env:process.env,...dependencies};
+    this.deps={fs,spawn,fetch:(...args)=>fetch(...args),random:()=>crypto.randomBytes(32).toString('hex'),directoryNonce:()=>crypto.randomBytes(16).toString('hex'),sleep:ms=>new Promise(resolve=>setTimeout(resolve,ms)),now:()=>Date.now(),platform:process.platform,arch:process.arch,env:process.env,...dependencies};
     this.epoch=0;this.adapters=new Map();this.active=undefined;this.disposed=false;this.connecting=undefined;
   }
   signature(){return JSON.stringify((this.vscode.workspace.workspaceFolders||[]).map(folder=>folder.uri.toString()));}
@@ -100,8 +100,13 @@ class WorkspaceBackend {
     if(roots.some(root=>contained(root,privateRoot)||contained(privateRoot,root)))throw new Error('Private view storage overlaps the opened folder set.');
     await this.deps.fs.mkdir(privateRoot,{recursive:true});privateRoot=canonicalPath(await this.deps.fs.realpath(privateRoot));
     if(roots.some(root=>contained(root,privateRoot)||contained(privateRoot,root)))throw new Error('Private view storage resolves inside a workspace.');
-    const directory=canonicalPath(await this.deps.fs.mkdtemp(path.win32.join(privateRoot,'native-view-')));
+    // Native creates the leaf with its explicit user owner and protected DACL.
+    // Node's default owner can be a group on an elevated Windows host.
+    const nonce=this.deps.directoryNonce();
+    if(typeof nonce!=='string'||!/^[a-f0-9]{32}$/.test(nonce))throw new Error('Invalid private view directory nonce.');
+    const directory=canonicalPath(path.win32.join(privateRoot,'native-view-'+nonce));
     if(!contained(privateRoot,directory)||roots.some(root=>contained(root,directory)||contained(directory,root)))throw new Error('View rendezvous escaped private storage.');
+    try{await this.deps.fs.lstat(directory);throw new Error('View rendezvous already exists; its data was preserved.');}catch(error){if(error.code!=='ENOENT')throw error;}
     const ready=path.win32.join(directory,'ready.json'),token=this.deps.random();
     if(!/^[a-f0-9]{64}$/.test(token))throw new Error('Invalid local view authentication.');
     const args=['view','--workspace',canonical,'--ready-file',ready];
@@ -124,6 +129,7 @@ class WorkspaceBackend {
         try{const errorFile=path.win32.join(directory,'error.json'),info=await this.deps.fs.lstat(errorFile);if(info.isFile()&&!info.isSymbolicLink()&&info.nlink===1&&info.size<=4096){const error=JSON.parse(await this.deps.fs.readFile(errorFile,'utf8'));if(error.process_id===child.pid&&error.error_code==='native_view_startup_failed'&&typeof error.detail==='string'&&error.detail.length>0&&error.detail.length<=1024)detail=error.detail;}}catch{}
         throw new Error(detail);
       }
+      if(keyPath(canonicalPath(await this.deps.fs.realpath(directory)))!==keyPath(directory))throw new Error('View rendezvous resolves to a different directory.');
       if(metadata.process_id!==child.pid||typeof metadata.process_birth!=='string'||!/^[1-9][0-9]{0,19}$/.test(metadata.process_birth)||!Number.isSafeInteger(metadata.backend_process_id)||metadata.backend_process_id<1||!/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}$/.test(metadata.origin))throw new Error('Native view process metadata differs.');
       const actual=workspaceMetadata(metadata.workspace),profileDirectory=canonicalPath(metadata.profile_directory);
       if(!actual.configured||keyPath(actual.root)!==keyPath(canonical)||roots.some(root=>contained(root,profileDirectory)||contained(profileDirectory,root)))throw new Error('Native workspace or private profile differs from the opened folder set.');

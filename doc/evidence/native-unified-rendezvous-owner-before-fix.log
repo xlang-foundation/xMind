@@ -1,0 +1,122 @@
+TAP version 13
+# Subtest: host launches only native view without a backend token, database path or pipes
+ok 1 - host launches only native view without a backend token, database path or pipes
+  ---
+  duration_ms: 4.1327
+  type: 'test'
+  ...
+# Subtest: reload replaces only the view; profile and native backend identity remain stable
+ok 2 - reload replaces only the view; profile and native backend identity remain stable
+  ---
+  duration_ms: 2.0777
+  type: 'test'
+  ...
+# Subtest: read-only, trust, remote and pure-source boundaries apply before launch
+ok 3 - read-only, trust, remote and pure-source boundaries apply before launch
+  ---
+  duration_ms: 1.3323
+  type: 'test'
+  ...
+# Subtest: multi-root explicitly uses the opened root and host cwd
+ok 4 - multi-root explicitly uses the opened root and host cwd
+  ---
+  duration_ms: 0.6014
+  type: 'test'
+  ...
+# Subtest: private rendezvous fallback and aliases cannot expose storage to workspace tools
+ok 5 - private rendezvous fallback and aliases cannot expose storage to workspace tools
+  ---
+  duration_ms: 0.5993
+  type: 'test'
+  ...
+# Subtest: wrong roots, process metadata and profile overlap fail and close only the view
+ok 6 - wrong roots, process metadata and profile overlap fail and close only the view
+  ---
+  duration_ms: 1.4415
+  type: 'test'
+  ...
+# Subtest: expanded folder set cannot expose a retained profile or rendezvous
+ok 7 - expanded folder set cannot expose a retained profile or rendezvous
+  ---
+  duration_ms: 0.5945
+  type: 'test'
+  ...
+# Subtest: workspace mutation during readiness closes the adapter without claiming backend termination
+ok 8 - workspace mutation during readiness closes the adapter without claiming backend termination
+  ---
+  duration_ms: 0.2831
+  type: 'test'
+  ...
+# Subtest: admission carries verified workspace authority and rejects late selection mutation
+ok 9 - admission carries verified workspace authority and rejects late selection mutation
+  ---
+  duration_ms: 1.0524
+  type: 'test'
+  ...
+# Subtest: authority drift rejects admission before a replacement run can be created
+ok 10 - authority drift rejects admission before a replacement run can be created
+  ---
+  duration_ms: 0.5377
+  type: 'test'
+  ...
+# Subtest: readiness timeout does not retry spawning or create a JavaScript database
+ok 11 - readiness timeout does not retry spawning or create a JavaScript database
+  ---
+  duration_ms: 11.1894
+  type: 'test'
+  ...
+# Subtest: external attachment still verifies the actual opened workspace
+ok 12 - external attachment still verifies the actual opened workspace
+  ---
+  duration_ms: 0.5014
+  type: 'test'
+  ...
+# Subtest: private native startup errors are accepted only for the spawned adapter PID
+ok 13 - private native startup errors are accepted only for the spawned adapter PID
+  ---
+  duration_ms: 0.7514
+  type: 'test'
+  ...
+# Subtest: a folder switch during preparation connects the latest folder after stale startup cleanup
+ok 14 - a folder switch during preparation connects the latest folder after stale startup cleanup
+  ---
+  duration_ms: 0.3483
+  type: 'test'
+  ...
+# Subtest: trust revocation during preparation prevents native startup without cancelling existing work
+ok 15 - trust revocation during preparation prevents native startup without cancelling existing work
+  ---
+  duration_ms: 0.3221
+  type: 'test'
+  ...
+# Subtest: attachment refuses trust or remote-host changes during workspace verification
+ok 16 - attachment refuses trust or remote-host changes during workspace verification
+  ---
+  duration_ms: 0.3502
+  type: 'test'
+  ...
+# Subtest: native creates the rendezvous directory ownership; the host only chooses a fresh name
+not ok 17 - native creates the rendezvous directory ownership; the host only chooses a fresh name
+  ---
+  duration_ms: 0.2303
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\extensions\\vscode\\tests\\workspace-backend.test.js:96:1'
+  failureType: 'testCodeFailure'
+  error: 'Editor must not create native rendezvous ownership'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    h.deps.fs.mkdtemp (D:\CantorAI2026\xMind\extensions\vscode\tests\workspace-backend.test.js:97:54)
+    WorkspaceBackend.open (D:\CantorAI2026\xMind\extensions\vscode\workspace-backend.js:103:54)
+    async TestContext.<anonymous> (D:\CantorAI2026\xMind\extensions\vscode\tests\workspace-backend.test.js:98:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 16
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 96.0145

@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-native-unaccepted",
+  "sourceBase": "da4f6e129728df4b917df07eb0e33210a2062d5a",
+  "hostedFailure": {
+    "run": 38009467577,
+    "job": 114088353256,
+    "source": "645d76fd049d9372aba24444cfbf518a20d77435",
+    "artifact": 11652944799,
+    "nativeBuildPassed": true,
+    "earlyViewContractFailed": true,
+    "viewTestSeconds": 17.13,
+    "nativeMessage": "Local profile storage is not owned by this Windows user",
+    "provenance": {
+      "file": "doc/evidence/native-unified-hosted-645d76f-provenance.json",
+      "sha256": "e6e178217440b4c1f218703471e31e9dc5e79872440dcb6e11aaee98aa854bc3"
+    },
+    "defaultOwnerMatchesUser": false
+  },
+  "diagnosis": "The real console profile started, then the editor-created rendezvous leaf had the token default group owner. Native refused that leaf under its unchanged current-user ownership rule.",
+  "change": "Host chooses a cryptographically random unused private leaf; native preflight creates it using explicit TokenUser owner/protected DACL. Existing paths are refused; published directory aliases are refused before storing authentication.",
+  "sourceHashes": {
+    "extensions/vscode/workspace-backend.js": "19f2cb67498348a4088d9d1eec51b960d49a32d6b33e04923fd463910f3fdeaf",
+    "extensions/vscode/tests/workspace-backend.test.js": "bdef0efcc1703d3ab5866da9fded324ab6de93c35acf436bf3aacaf5fa7c2a94",
+    "Native/tests/local_view_contract.mjs": "7602008a3130f1fa54d7a242d0ff90f14a26fb614d252d6fb01971971b8ff82d",
+    "Tools/ci-views.mjs": "4b7491b378ca8e8f965cd2d62da9c32ecdba04d2656c3929d2f20c0089a8c207"
+  },
+  "logs": {
+    "hostedFailure": {
+      "file": "doc/evidence/native-unified-hosted-645d76f-failed.log",
+      "sha256": "3ee1f6dac43d70b6ae98598c4627d0da6d1d36055b4c5498f5bd59cb2278cdc2"
+    },
+    "beforeFix": {
+      "file": "doc/evidence/native-unified-rendezvous-owner-before-fix.log",
+      "sha256": "d88e4b6b9399968d824997bfa6065a1c68fc4b51ed456143d132fd720f638f6a"
+    },
+    "extensionComplete": {
+      "file": "doc/evidence/native-unified-rendezvous-owner-extension-complete.log",
+      "sha256": "aef44b92f0720e978fedfda1314a74feab4e332a3b37dc99a860a1a8b809057b"
+    },
+    "browserComplete": {
+      "file": "doc/evidence/native-unified-rendezvous-owner-browser-complete.log",
+      "sha256": "200c0b4526c78eaa6ac3d54fe755b9d04e529fadbdcc58ffbf187e321706a1af"
+    }
+  },
+  "verification": {
+    "beforeFixOwnerFixtureFailed": true,
+    "extensionSuite": {
+      "tests": 224,
+      "passed": 224,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browserSuite": {
+      "tests": 41,
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "nativeTestSyntaxPassed": true,
+    "nativeCreationRegressionPrepared": true,
+    "newNativeContractExecuted": false,
+    "completeNativeGatePassed": false,
+    "providerRequests": 0,
+    "installed": false,
+    "renderedCurrentNativeAdapter": false
+  },
+  "limits": [
+    "Fixtures prove host/controller boundaries only.",
+    "Real native view and complete 110-contract gate remain mandatory.",
+    "The separate benchmark is still active; no local native build/test was run.",
+    "Existing installation and provider keys unchanged."
+  ]
+}

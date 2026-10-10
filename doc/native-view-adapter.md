@@ -16,6 +16,16 @@ the adapter PID. Neither file contains backend or provider credentials. The
 product host uses no stdin/stdout pipe protocol. A test driver can capture stderr
 to observe a native failure; that is diagnostic output, not a product transport.
 
+The host chooses a fresh unused leaf under its qualified private root. Native
+creates that leaf with an explicit current-user owner and protected DACL; the
+host does not create it with Node's default ownership. Existing names are refused,
+and the published directory is requalified before authentication is stored.
+On the hosted Windows runner, the default owner differs from the user: the prior
+host-created leaf caused native's strict owner check to fail. Those checks remain
+unchanged. The corrected host passes **224 extension / 41 browser fixtures**;
+its real native rerun remains pending.
+[Observed failure, original provenance and candidate scope](evidence/native-rendezvous-owner-candidate.json).
+
 The VS Code host selects the actual trusted opened folder, verifies the package,
 launches `xmind view` and authenticates its returned workspace. Native owns backend
 startup, storage, process ownership and recovery. The editor no longer allocates
