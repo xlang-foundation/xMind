@@ -1,11 +1,13 @@
 #include "agentflow/mcp_client.hpp"
 #include "agentflow/mcp_http_client.hpp"
+#include "agentflow/mcp_client_factory.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/json_schema.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "nlohmann/json.hpp"
 #include <filesystem>
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -129,14 +131,18 @@ int main(int argc,char** argv){
             }
             start(store,"blocked-run");Task blocked(store,argv,uncertain_root,"blocked-run","blocked-operation","normal");proposed(store,"blocked-operation");store.decide_operation("blocked-operation",OperationDecision::allow,"fixture-controller").get();rejects<WorkspaceEffectUncertain>([&]{blocked.result.get();});require(contents(uncertain_root/"effect.txt")=="actual native MCP effect\n","Workspace quarantine must block another actual MCP dispatch");store.transition("blocked-run",RunState::running,RunState::failed).get();
             const auto other_workspace=root("other-workspace");start(store,"blocked-other");Task other(store,argv,other_workspace,"blocked-other","blocked-other","normal",R"({"body":"must not run","decimal":1.00000000000000000001})",uncertain_root);proposed(store,"blocked-other");store.decide_operation("blocked-other",OperationDecision::allow,"fixture-controller").get();rejects<WorkspaceEffectUncertain>([&]{other.result.get();});require(contents(uncertain_root/"effect.txt")=="actual native MCP effect\n" && contents(other_workspace/"effect.txt").empty(),"Stable server quarantine must block actual dispatch from another workspace");store.transition("blocked-other",RunState::running,RunState::failed).get();
+            Json http_servers=Json::array();
+            for(const std::string mode:{"normal-json","normal-sse","deny","disconnect"})http_servers.push_back({{"id","official-http-"+mode},{"transport","http"},{"endpoint",std::string(argv[6])+"/"+mode},{"credential",{{"scope","server"},{"id","http-key-"+mode}}}});
+            const auto http_settings=McpConfigurationStore(store).apply(Json{{"servers",http_servers}}.dump());
+            for(const auto& server:http_settings){const std::string credential="synthetic-mcp-http-fixture";store.put_credential("server",server.bearer->id,mcp_credential_purpose(server,"BEARER"),"labeled HTTP fixture key",SecretBytes({reinterpret_cast<const std::uint8_t*>(credential.data()),credential.size()}),0).get();}
             for(const std::string mode:{"normal-json","normal-sse","deny","disconnect"}) {
                 const auto id="http-"+mode;const auto workspace=root(id);start(store,id);
                 const auto remote=std::filesystem::path(argv[7])/mode/"effect.txt";
+                const auto server=*std::find_if(http_settings.begin(),http_settings.end(),[&](const auto& setting){return setting.id=="official-http-"+mode;});
                 auto invoke=[&]() {
-                    return std::async(std::launch::async,[&,workspace,id,mode]{
-                        const std::string credential="synthetic-mcp-http-fixture";SecretBytes secret({reinterpret_cast<const std::uint8_t*>(credential.data()),credential.size()});
-                        McpHttpClient client(std::string(argv[6])+"/"+mode,std::optional<SecretBytes>(std::move(secret)));client.connect(std::chrono::steady_clock::now()+5s);
-                        WorkspaceTools tools(workspace.string());McpToolRegistry registry(client,store,tools,"official-http-"+mode,1,std::chrono::steady_clock::now()+5s);
+                    return std::async(std::launch::async,[&,workspace,id,server]{
+                        auto client=connect_mcp_client(server,store,std::chrono::steady_clock::now()+5s);
+                        WorkspaceTools tools(workspace.string());McpToolRegistry registry(*client,store,tools,server.id,server.revision,std::chrono::steady_clock::now()+5s);
                         const auto definitions=registry.definitions();require(definitions.size()==1 && definitions[0].input_schema_json.find("x-mcp-header")!=std::string::npos,"Actual HTTP SDK schema/header declarations must reach the native registry");
                         return registry.invoke(id,id,definitions[0].name,R"({"body":"actual native HTTP MCP effect 雪\n","decimal":1.00000000000000000001})",expiry(),std::chrono::steady_clock::now()+5s);
                     });

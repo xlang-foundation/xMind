@@ -9,6 +9,7 @@
 #include <string_view>
 
 namespace agentflow {
+void validate_mcp_http_endpoint(std::string_view endpoint);
 struct McpHttpPost {
     std::string url,body;
     McpWireEra era=McpWireEra::modern;

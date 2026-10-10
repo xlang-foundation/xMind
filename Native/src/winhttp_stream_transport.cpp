@@ -85,6 +85,20 @@ std::wstring wide(const std::string& text) {
 }
 std::wstring lower(std::wstring value) {for(auto& c:value) c=static_cast<wchar_t>(std::towlower(c));return value;}
 enum class TransferKind {event_post,json_get,json_post,mcp_post};
+struct Endpoint {std::wstring host,path;INTERNET_PORT port;bool secure;};
+Endpoint endpoint(const std::string& input) {
+    if(input.empty() || input.size()>8192)throw std::invalid_argument("Invalid endpoint URL");
+    for(unsigned char c:input)if(c<=32 || c==127 || c=='#')throw std::invalid_argument("Invalid endpoint URL");
+    const auto url=wide(input);URL_COMPONENTS parts{};parts.dwStructSize=sizeof(parts);
+    parts.dwSchemeLength=parts.dwHostNameLength=parts.dwUrlPathLength=parts.dwExtraInfoLength=parts.dwUserNameLength=parts.dwPasswordLength=static_cast<DWORD>(-1);
+    if(!WinHttpCrackUrl(url.c_str(),static_cast<DWORD>(url.size()),0,&parts))throw std::invalid_argument("Invalid endpoint URL");
+    if(parts.dwUserNameLength || parts.dwPasswordLength || input.find('@')!=std::string::npos)throw std::invalid_argument("Endpoint cannot contain credentials");
+    Endpoint result;result.host.assign(parts.lpszHostName,parts.dwHostNameLength);result.port=parts.nPort;result.secure=parts.nScheme==INTERNET_SCHEME_HTTPS;
+    const auto normalized=lower(result.host);
+    if(result.host.empty() || (!result.secure && (parts.nScheme!=INTERNET_SCHEME_HTTP || (normalized!=L"localhost" && normalized!=L"127.0.0.1" && normalized!=L"::1"))))throw std::invalid_argument("Remote endpoints require HTTPS");
+    result.path.assign(parts.lpszUrlPath,parts.dwUrlPathLength);if(result.path.empty())result.path=L"/";
+    if(parts.dwExtraInfoLength)result.path.append(parts.lpszExtraInfo,parts.dwExtraInfoLength);return result;
+}
 std::optional<std::string> response_field(HINTERNET request,const wchar_t* name) {
     std::array<wchar_t,8192> buffer{};DWORD size=static_cast<DWORD>(sizeof(buffer));
     if(!WinHttpQueryHeaders(request,WINHTTP_QUERY_CUSTOM,name,buffer.data(),&size,WINHTTP_NO_HEADER_INDEX)) {
@@ -116,24 +130,12 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     if(!bearer&&input.credential_header!=CredentialHeader::bearer)throw std::invalid_argument("Provider API-key header requires a credential");
     if(input.protocol!=ProviderHttpProtocol::generic&&input.protocol!=ProviderHttpProtocol::anthropic)
         throw std::invalid_argument("Unsupported provider HTTP protocol");
-    for(unsigned char c:input.url) if(c<=32 || c==127 || c=='#') throw std::invalid_argument("Invalid endpoint URL");
     if(cancel.stop_requested()) throw TransportCancelled("Provider request cancelled");
     const auto deadline=Clock::now()+input.deadline;
-    const auto url=wide(input.url);
-    URL_COMPONENTS parts{};parts.dwStructSize=sizeof(parts);
-    parts.dwSchemeLength=parts.dwHostNameLength=parts.dwUrlPathLength=parts.dwExtraInfoLength=parts.dwUserNameLength=parts.dwPasswordLength=static_cast<DWORD>(-1);
-    if(!WinHttpCrackUrl(url.c_str(),static_cast<DWORD>(url.size()),0,&parts)) throw std::invalid_argument("Invalid endpoint URL");
-    if(parts.dwUserNameLength || parts.dwPasswordLength || input.url.find('@')!=std::string::npos) throw std::invalid_argument("Endpoint cannot contain credentials");
-    const std::wstring host(parts.lpszHostName,parts.dwHostNameLength);
-    const auto secure=parts.nScheme==INTERNET_SCHEME_HTTPS;
-    const auto normalized=lower(host);
-    if(!secure && (parts.nScheme!=INTERNET_SCHEME_HTTP || (normalized!=L"localhost" && normalized!=L"127.0.0.1" && normalized!=L"::1")))
-        throw std::invalid_argument("Remote provider endpoints require HTTPS");
-    std::wstring path(parts.lpszUrlPath,parts.dwUrlPathLength);if(path.empty()) path=L"/";
-    if(parts.dwExtraInfoLength) path.append(parts.lpszExtraInfo,parts.dwExtraInfoLength);
+    const auto parsed=endpoint(input.url);
     Handle session(WinHttpOpen(L"xMind/0.1",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,WINHTTP_FLAG_ASYNC));
     checked(WinHttpSetTimeouts(session.value,10000,10000,10000,static_cast<int>(input.idle_timeout.count())));
-    Handle connection(WinHttpConnect(session.value,host.c_str(),parts.nPort,0));
+    Handle connection(WinHttpConnect(session.value,parsed.host.c_str(),parsed.port,0));
     WipedHeaders headers;
     const auto json=kind!=TransferKind::event_post;
     headers.value=kind==TransferKind::json_get?L"":L"Content-Type: application/json\r\n";
@@ -173,7 +175,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     }
     if(mcp && headers.value.size()>64*1024)throw McpProtocolError("MCP HTTP headers exceed native limits");
     std::array<char,8192> buffer{};State state;
-    Handle raw(WinHttpOpenRequest(connection.value,kind==TransferKind::json_get?L"GET":L"POST",path.c_str(),nullptr,WINHTTP_NO_REFERER,WINHTTP_DEFAULT_ACCEPT_TYPES,secure?WINHTTP_FLAG_SECURE:0));
+    Handle raw(WinHttpOpenRequest(connection.value,kind==TransferKind::json_get?L"GET":L"POST",parsed.path.c_str(),nullptr,WINHTTP_NO_REFERER,WINHTTP_DEFAULT_ACCEPT_TYPES,parsed.secure?WINHTTP_FLAG_SECURE:0));
     DWORD policy=WINHTTP_OPTION_REDIRECT_POLICY_NEVER;checked(WinHttpSetOption(raw.value,WINHTTP_OPTION_REDIRECT_POLICY,&policy,sizeof(policy)));
     // Never ask the OS to send ambient user credentials to a model endpoint.
     DWORD logon=WINHTTP_AUTOLOGON_SECURITY_LEVEL_HIGH;checked(WinHttpSetOption(raw.value,WINHTTP_OPTION_AUTOLOGON_POLICY,&logon,sizeof(logon)));
@@ -283,6 +285,7 @@ std::string post_json(const HttpStreamRequest& input,const SecretBytes* bearer,
     transfer(input,bearer,[&](std::string_view chunk){result.append(chunk);},cancel,TransferKind::json_post,max_response_bytes);
     return result;
 }
+void validate_mcp_http_endpoint(std::string_view value) {(void)endpoint(std::string(value));}
 void post_mcp_http(const McpHttpPost& input,const SecretBytes* bearer,
     const std::function<void(const McpHttpResponseHead&)>& on_head,
     const std::function<void(std::string_view)>& consume,

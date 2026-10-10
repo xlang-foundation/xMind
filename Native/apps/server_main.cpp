@@ -151,7 +151,7 @@ int run_server(int argc,char** argv) {
             std::string source;char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Process configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted process configuration file");process_profiles=process_configurations.apply(source);
         }else process_profiles=process_configurations.load();
         for(const auto& item:process_profiles)process_metadata.push_back({item.id,item.revision,item.max_timeout.count()});
-        for(const auto& item:mcp_settings)mcp_metadata.push_back({item.id,item.revision,item.enabled});
+        for(const auto& item:mcp_settings)mcp_metadata.push_back({item.id,item.revision,item.enabled,item.transport});
         std::unique_ptr<agentflow::WorkspaceTools> recovery_workspace;
         std::unique_ptr<agentflow::EditExecutor> recovery;
 #endif

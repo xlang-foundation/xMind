@@ -651,7 +651,7 @@ struct HttpServer::Impl {
         }));
         server.Get("/v1/mcp/servers",guarded([this](const Request& request,Response& response) {
             if(!request.params.empty())throw std::invalid_argument("MCP metadata does not accept query parameters");
-            Json configured=Json::array();for(const auto& item:mcp_servers)configured.push_back({{"id",item.id},{"revision",item.revision},{"enabled",item.enabled},{"transport","stdio"}});
+            Json configured=Json::array();for(const auto& item:mcp_servers)configured.push_back({{"id",item.id},{"revision",item.revision},{"enabled",item.enabled},{"transport",item.transport}});
             reply(response,{{"servers",configured},{"runtime_state","per_run"}});
         }));
         server.Get("/v1/sessions",guarded([this](const Request&,Response& response) {reply(response,encode_all(persistence.sessions().get()));}));

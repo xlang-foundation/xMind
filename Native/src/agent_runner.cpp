@@ -1,4 +1,4 @@
-#include "agentflow/mcp_client.hpp"
+#include "agentflow/mcp_client_factory.hpp"
 #include "agentflow/agent_runner.hpp"
 #include "nlohmann/json.hpp"
 #include "agentflow/edit_executor.hpp"
@@ -270,15 +270,11 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     if(workspace_){trusted.tools=workspace_->definitions();for(auto& definition:SkillContext::definitions())trusted.tools.push_back(std::move(definition));}
     if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());trusted.tools.push_back(PatchTool::definition());}
     if(process_)trusted.tools.push_back(process_->definition());
-    struct McpRuntime {std::unique_ptr<McpStdioClient> client;std::unique_ptr<McpToolRegistry> registry;};
+    struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<McpToolRegistry> registry;};
     std::vector<McpRuntime> peers;std::set<std::string> aliases;for(const auto& definition:trusted.tools)aliases.insert(definition.name);
     for(const auto& server:settings_.mcp_servers){
         if(!server.enabled)continue;check();
-        McpStdioConfiguration configuration{server.executable,server.working_directory,server.arguments,{}};
-        struct ClearEnvironment {McpStdioConfiguration& value;~ClearEnvironment(){for(auto& entry:value.environment)if(!entry.second.empty())SecureZeroMemory(entry.second.data(),entry.second.size());}} clear{configuration};
-        for(const auto& reference:server.credentials){check();auto secret=persistence_.resolve_credential(reference.scope,reference.id,mcp_credential_purpose(server,reference.name)).get();
-            const auto bytes=secret.view();configuration.environment.emplace_back(reference.name,std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size()));}
-        check();McpRuntime runtime;runtime.client=std::make_unique<McpStdioClient>(configuration);runtime.client->connect(deadline,token);
+        check();McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,deadline,token);
         runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,deadline,token);
         for(const auto& definition:runtime.registry->definitions()){
             if(trusted.tools.size()>=64||!aliases.insert(definition.name).second)throw ModelRequestCapacityExceeded("Idle model tool catalogue exceeds limits or has an alias collision");
@@ -438,7 +434,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(PatchTool::definition());
         if(process_)request.tools.push_back(process_->definition());
-        struct McpRuntime {std::unique_ptr<McpStdioClient> client;std::unique_ptr<McpToolRegistry> registry;};
+        struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<McpToolRegistry> registry;};
         std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;Json mcp_bindings=Json::array();
         const auto native_tools=request.tools;
         auto close_mcp=[&]{mcp_tools.clear();mcp_runtimes.clear();mcp_bindings=Json::array();};
@@ -447,11 +443,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         for(const auto& server:settings_.mcp_servers) {
             if(!server.enabled)continue;cancelled(token);
             persistence_.append_event(id,"mcp.connecting",Json{{"server_id",server.id},{"config_revision",server.revision}}.dump()).get();
-            McpStdioConfiguration configuration{server.executable,server.working_directory,server.arguments,{}};
-            struct ClearEnvironment {McpStdioConfiguration& config;~ClearEnvironment(){for(auto& entry:config.environment)if(!entry.second.empty())SecureZeroMemory(entry.second.data(),entry.second.size());}} clear{configuration};
-            for(const auto& reference:server.credentials){auto secret=persistence_.resolve_credential(reference.scope,reference.id,mcp_credential_purpose(server,reference.name)).get();const auto bytes=secret.view();configuration.environment.emplace_back(reference.name,std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size()));}
             cancelled(token);if(std::chrono::steady_clock::now()>=run_deadline)throw RootBudgetDeadlineExceeded("Root execution deadline elapsed before MCP launch");
-            McpRuntime runtime;runtime.client=std::make_unique<McpStdioClient>(configuration);runtime.client->connect(run_deadline,token);
+            McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,run_deadline,token);
             persistence_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",runtime.client->server().protocol_version}}.dump()).get();
             runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,run_deadline,token);
             const auto definitions=runtime.registry->definitions();

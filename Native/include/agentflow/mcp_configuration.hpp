@@ -1,14 +1,18 @@
 #pragma once
 #include "agentflow/persistence_service.hpp"
+#include <optional>
 
 namespace agentflow {
 struct McpEnvironmentCredential {std::string name,scope,id;};
+struct McpBearerCredential {std::string scope,id;};
 struct McpServerSetting {
     std::string id,executable,working_directory;
     std::int64_t revision=0;
     bool enabled=true;
     std::vector<std::string> arguments;
     std::vector<McpEnvironmentCredential> credentials;
+    std::string transport="stdio",endpoint;
+    std::optional<McpBearerCredential> bearer;
 };
 // Startup/admin-owned configuration. Apply before creating runtime workers;
 // immutable settings snapshots are used for the lifetime of that service.

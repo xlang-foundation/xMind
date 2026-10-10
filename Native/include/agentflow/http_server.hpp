@@ -9,7 +9,7 @@ class ProviderSetup;
 class ProviderProfileSetup;
 class GraphExecution;
 class BackendOwnerControl;
-struct McpServerMetadata {std::string id;std::int64_t revision;bool enabled;};
+struct McpServerMetadata {std::string id;std::int64_t revision;bool enabled;std::string transport="stdio";};
 struct ProcessProfileMetadata {std::string id;std::int64_t revision,max_timeout_ms;};
 struct AgentInstructionMetadata {std::int64_t revision=0;std::size_t byte_count=0;};
 void validate_local_auth_token(std::string_view token);

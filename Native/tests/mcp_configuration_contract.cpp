@@ -1,4 +1,5 @@
 #include "agentflow/mcp_configuration.hpp"
+#include "agentflow/mcp_client_factory.hpp"
 #include "nlohmann/json.hpp"
 #include <filesystem>
 #include <iostream>
@@ -49,6 +50,24 @@ int main(int argc,char** argv){
             require(reopened.resolve_credential("server","fixture-key",bound_purpose).get().view().size()>0,"Encrypted referenced credential must survive independently of public metadata");
             configurations.apply(R"({"servers":[]})");rejects<Conflict>([&]{configurations.apply(desired());});require(configurations.load().empty(),"Removed identities must stay retired");reopened.close();
         }
-        std::cout<<"Native MCP configuration passed embedded-xlang3 persistence, backend revisions, encrypted purpose-bound credential references, invalid/duplicate/plain-env/scope rejection, exact replacement preservation, reopen and retired identities. No peer/model/UI activation claimed\n";return 0;
+        {
+            const auto http_database=(root.path/"http-state.sqlite").string();Json server{{"id","http-fixture"},{"transport","http"},{"endpoint","https://fixture.example.test/mcp"},{"credential",{{"scope","server"},{"id","http-fixture-key"}}}};
+            const auto desired=[&]{return Json{{"servers",Json::array({server})}}.dump();};std::string purpose;
+            {
+                PersistenceService store(http_database,imports);McpConfigurationStore configurations(store);const auto first=configurations.apply(desired());require(first[0].transport=="http" && first[0].revision==1 && first[0].executable.empty() && first[0].credentials.empty() && first[0].bearer->id=="http-fixture-key","HTTP configuration must keep endpoint/key references separate from process configuration");
+                purpose=mcp_credential_purpose(first[0],"BEARER");const std::string secret="labeled-private-http-key";store.put_credential("server","http-fixture-key",purpose,"labeled HTTP key",SecretBytes({reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size()}),0).get();
+                const auto unchanged=store.information("native-mcp","servers").get();require(unchanged.find(secret)==std::string::npos,"HTTP metadata must never retain plaintext credentials");
+                for(const auto& endpoint:{"http://remote.example.test/mcp","https://user:password@fixture.example.test/mcp","https://fixture.example.test/mcp#fragment","https://fixture.example.test/mcp\r\nInjected"}){auto invalid=server;invalid["endpoint"]=endpoint;rejects<std::invalid_argument>([&]{configurations.apply(Json{{"servers",Json::array({invalid})}}.dump());});}
+                for(const auto* key:{"executable","arguments","headers","credentials"}){auto invalid=server;invalid[key]="forbidden";rejects<std::invalid_argument>([&]{configurations.apply(Json{{"servers",Json::array({invalid})}}.dump());});}
+                auto invalid=server;invalid["credential"]["value"]=secret;rejects<std::invalid_argument>([&]{configurations.apply(Json{{"servers",Json::array({invalid})}}.dump());});invalid=server;invalid["credential"]["scope"]="team";rejects<std::invalid_argument>([&]{configurations.apply(Json{{"servers",Json::array({invalid})}}.dump());});
+                require(store.information("native-mcp","servers").get()==unchanged,"Rejected HTTP replacements must preserve exact persisted metadata");
+                server["enabled"]=false;const auto disabled=configurations.apply(desired());require(disabled[0].revision==2 && mcp_credential_purpose(disabled[0],"BEARER")==purpose,"Enablement changes must preserve endpoint credential purpose");
+                rejects<std::invalid_argument>([&]{connect_mcp_client(disabled[0],store,std::chrono::steady_clock::now()+std::chrono::seconds(5));});
+                std::stop_source cancellation;cancellation.request_stop();rejects<McpTransportCancelled>([&]{connect_mcp_client(first[0],store,std::chrono::steady_clock::now()+std::chrono::seconds(5),cancellation.get_token());});rejects<McpTransportTimeout>([&]{connect_mcp_client(first[0],store,std::chrono::steady_clock::now());});
+                server["endpoint"]="https://other.example.test/mcp";const auto changed=configurations.apply(desired());require(changed[0].revision==3 && mcp_credential_purpose(changed[0],"BEARER")!=purpose,"HTTP endpoint changes must rotate config and require newly bound keys");rejects<Conflict>([&]{store.resolve_credential("server","http-fixture-key",mcp_credential_purpose(changed[0],"BEARER")).get();});store.close();
+            }
+            PersistenceService reopened(http_database,imports);McpConfigurationStore configurations(reopened);const auto values=configurations.load();require(values.size()==1 && values[0].transport=="http" && values[0].revision==3 && values[0].endpoint=="https://other.example.test/mcp","HTTP metadata/revisions must survive SQLite reopen");require(!reopened.resolve_credential("server","http-fixture-key",purpose).get().view().empty(),"Original encrypted key must survive without accepting a changed endpoint purpose");configurations.apply(R"({"servers":[]})");rejects<Conflict>([&]{configurations.apply(desired());});reopened.close();
+        }
+        std::cout<<"Native stdio/HTTP configuration passed embedded-xlang3 persistence, backend revisions, encrypted endpoint/command purpose binding, invalid mixed/plaintext/URL/scope rejection, exact replacement preservation, reopen and retired identities. No peer/model/UI activation claimed\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }

@@ -30,7 +30,7 @@ struct McpHttpClient::Impl {
     struct Tool {std::string schema,binding;};
     std::map<std::string,Tool> tools;
     Impl(std::string url,std::optional<SecretBytes> secret):endpoint(std::move(url)),bearer(std::move(secret)),handshake(requests) {
-        if(endpoint.empty() || endpoint.size()>8192)throw std::invalid_argument("Invalid MCP HTTP endpoint");
+        validate_mcp_http_endpoint(endpoint);
     }
     void retire() noexcept {
         live=false;closed=true;tools.clear();legacy_session.reset();bearer.reset();

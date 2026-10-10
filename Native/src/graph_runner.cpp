@@ -1,4 +1,4 @@
-#include "agentflow/mcp_client.hpp"
+#include "agentflow/mcp_client_factory.hpp"
 #include "agentflow/graph_runner.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/edit_executor.hpp"
@@ -139,19 +139,12 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
             const auto available=[&]{if(cancel.stop_requested())throw McpTransportCancelled("Graph MCP execution cancelled before launch");if(std::chrono::steady_clock::now()>=deadline)throw McpTransportTimeout("Graph MCP execution deadline elapsed");};
             available();
             store_.append_event(id,"mcp.connecting",Json{{"server_id",server.id},{"config_revision",server.revision},{"source","graph"}}.dump()).get();
-            McpStdioConfiguration configuration{server.executable,server.working_directory,server.arguments,{}};
-            struct ClearEnvironment {McpStdioConfiguration& config;~ClearEnvironment(){for(auto& entry:config.environment)if(!entry.second.empty())SecureZeroMemory(entry.second.data(),entry.second.size());}} clear{configuration};
-            for(const auto& reference:server.credentials){
-                available();
-                try{auto secret=store_.resolve_credential(reference.scope,reference.id,mcp_credential_purpose(server,reference.name)).get();const auto bytes=secret.view();configuration.environment.emplace_back(reference.name,std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size()));}
-                catch(const NotFound&){throw McpCredentialUnavailable("Graph MCP credential is unavailable");}
-                catch(const Conflict&){throw McpCredentialUnavailable("Graph MCP credential binding is unavailable");}
-            }
-            // The constructor launches the native process. Cancellation and
-            // the root segment deadline are checked before acquiring it.
-            available();McpStdioClient client(configuration);client.connect(deadline,cancel);
-            store_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",client.server().protocol_version},{"source","graph"}}.dump()).get();
-            McpToolRegistry registry(client,store_,*workspace_,server.id,server.revision,deadline,cancel);
+            available();std::unique_ptr<McpToolClient> client;
+            try{client=connect_mcp_client(server,store_,deadline,cancel);}
+            catch(const NotFound&){throw McpCredentialUnavailable("Graph MCP credential is unavailable");}
+            catch(const Conflict&){throw McpCredentialUnavailable("Graph MCP credential binding is unavailable");}
+            store_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",client->server().protocol_version},{"source","graph"}}.dump()).get();
+            McpToolRegistry registry(*client,store_,*workspace_,server.id,server.revision,deadline,cancel);
             const auto definitions=registry.definitions();
             store_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()},{"source","graph"}}.dump()).get();
             if(std::none_of(definitions.begin(),definitions.end(),[&](const auto& definition){return definition.name==name;}))return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_mcp_alias_unavailable"})").get();

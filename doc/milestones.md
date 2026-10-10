@@ -1,5 +1,20 @@
 # Reviewable milestones
 
+Native MCP HTTP configuration/factory candidate: production agent execution,
+idle context preparation, graph tools and admin discovery now select a shared
+native owner from immutable stdio/HTTP settings. HTTP endpoint and encrypted
+server bearer references bind credential purpose; native authority includes
+transport, endpoint, reference and actual credential revision. Public server
+metadata reports the transport without destinations/keys. Admin provisioning
+uses the registered `BEARER` target and retains catalogue-reflection checks.
+The official HTTP SDK effect assertion now goes through persisted configuration,
+encrypted credential resolution and this production factory. Existing native
+configuration/authority contracts add URL/mixed-field/plaintext/scope rejection,
+endpoint-change binding, pre-connect cancellation/deadline and SQLite reopen.
+Whitespace/source and Node fixture syntax checks pass; native acceptance remains
+pending. OAuth, broader HTTP lifecycle and graphical setup remain unfinished.
+[Current implementation boundary](native-mcp-http.md).
+
 Native MCP HTTP owner candidate: `McpHttpClient` now implements the same private
 dispatch interface as stdio, using incremental JSON/SSE decoding and shared tool
 description/result validation. Negotiation, per-tool header filtering, immutable

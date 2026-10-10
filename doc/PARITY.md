@@ -24,8 +24,10 @@ Native MCP HTTP remains unfinished. The production approval registry now has
 a shared native client interface implemented by stdio; its new compilation and
 effect-contract acceptance are pending. The native HTTP owner, incremental
 decoder, metadata projection, shared result validation and official HTTP SDK
-effect assertions are also unexecuted. Product configuration remains stdio-only;
-OAuth and broader HTTP lifecycle remain unfinished.
+effect assertions are also unexecuted. Native configuration/factory now route
+agents, graph tools and admin discovery through stdio or HTTP, with protected
+endpoint-bound bearer references. That source and expanded persistence/authority
+assertions await acceptance; OAuth and broader HTTP lifecycle remain unfinished.
 [Scope and pinned protocols](native-mcp-http.md).
 
 Native file discovery and literal content search now interpret hierarchical

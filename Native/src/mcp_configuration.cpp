@@ -1,5 +1,6 @@
 #include "agentflow/mcp_configuration.hpp"
 #include "agentflow/mcp_wire.hpp"
+#include "agentflow/mcp_http_transport.hpp"
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
@@ -33,12 +34,24 @@ std::string environment_name(std::string value) {
     if(value=="SYSTEMROOT" || value=="TEMP" || value=="TMP")throw std::invalid_argument("System environment cannot be a credential target");return value;
 }
 McpServerSetting setting(const Json& value,bool stored) {
-    fields(value,{"id","revision","transport","enabled","executable","working_directory","arguments","credentials"});
+    const auto transport=text(value,"transport",16);
+    if(transport=="stdio")fields(value,{"id","revision","transport","enabled","executable","working_directory","arguments","credentials"});
+    else if(transport=="http")fields(value,{"id","revision","transport","enabled","endpoint","credential"});
+    else throw std::invalid_argument("MCP transport is not implemented");
     if(!stored && value.contains("revision"))throw std::invalid_argument("MCP revisions are owned by the backend");
     McpServerSetting result;result.id=text(value,"id",64);identity(result.id);
-    if(text(value,"transport",16)!="stdio")throw std::invalid_argument("MCP transport is not implemented");
-    result.executable=text(value,"executable",32768);result.working_directory=text(value,"working_directory",32768);
-    if(!std::filesystem::u8path(result.executable).is_absolute() || !std::filesystem::u8path(result.working_directory).is_absolute())throw std::invalid_argument("MCP executable and directory must be absolute backend paths");
+    result.transport=transport;
+    if(transport=="stdio") {
+        result.executable=text(value,"executable",32768);result.working_directory=text(value,"working_directory",32768);
+        if(!std::filesystem::u8path(result.executable).is_absolute() || !std::filesystem::u8path(result.working_directory).is_absolute())throw std::invalid_argument("MCP executable and directory must be absolute backend paths");
+    } else {
+        result.endpoint=text(value,"endpoint",8192);validate_mcp_http_endpoint(result.endpoint);
+        if(value.contains("credential")){
+            fields(value["credential"],{"scope","id"});const auto scope=text(value["credential"],"scope",128);
+            if(scope!="server")throw std::invalid_argument("MCP credential scope requires implemented server authorization");
+            result.bearer=McpBearerCredential{scope,text(value["credential"],"id",256)};
+        }
+    }
     if(value.contains("enabled")){if(!value["enabled"].is_boolean())throw std::invalid_argument("Invalid MCP enabled flag");result.enabled=value["enabled"].get<bool>();}
     if(stored){if(!value.contains("revision") || !value["revision"].is_number_integer() || value["revision"]<1 || value["revision"]>std::numeric_limits<std::int64_t>::max())throw std::invalid_argument("Invalid stored MCP revision");result.revision=value["revision"].get<std::int64_t>();}
     if(value.contains("arguments")){
@@ -53,7 +66,11 @@ McpServerSetting setting(const Json& value,bool stored) {
 }
 Json encode(const McpServerSetting& value,bool stored=true) {
     Json credentials=Json::array();for(const auto& reference:value.credentials)credentials.push_back({{"name",reference.name},{"scope",reference.scope},{"id",reference.id}});
-    Json result{{"id",value.id},{"transport","stdio"},{"enabled",value.enabled},{"executable",value.executable},{"working_directory",value.working_directory},{"arguments",value.arguments},{"credentials",credentials}};
+    Json result{{"id",value.id},{"transport",value.transport},{"enabled",value.enabled}};
+    if(value.transport=="http"){
+        result["endpoint"]=value.endpoint;
+        if(value.bearer)result["credential"]={{"scope",value.bearer->scope},{"id",value.bearer->id}};
+    }else {result["executable"]=value.executable;result["working_directory"]=value.working_directory;result["arguments"]=value.arguments;result["credentials"]=std::move(credentials);}
     if(stored)result["revision"]=value.revision;return result;
 }
 Json parse(const std::string& source) {
@@ -84,9 +101,14 @@ std::vector<McpServerSetting> McpConfigurationStore::apply(const std::string& so
     store_.put_information("native-mcp","servers",encoded).get();return values;
 }
 std::string mcp_credential_purpose(const McpServerSetting& setting,const std::string& name) {
-    const auto source=Json{{"id",setting.id},{"executable",setting.executable},{"directory",setting.working_directory},{"arguments",setting.arguments},{"environment",environment_name(name)}}.dump();
+    std::string source;
+    if(setting.transport=="http") {
+        if(name!="BEARER")throw std::invalid_argument("HTTP MCP credential target must be BEARER");validate_mcp_http_endpoint(setting.endpoint);
+        source=Json{{"id",setting.id},{"transport","http"},{"endpoint",setting.endpoint},{"header","Authorization: Bearer"}}.dump();
+    }else if(setting.transport=="stdio")source=Json{{"id",setting.id},{"executable",setting.executable},{"directory",setting.working_directory},{"arguments",setting.arguments},{"environment",environment_name(name)}}.dump();
+    else throw std::invalid_argument("Unsupported MCP credential transport");
     BCRYPT_ALG_HANDLE algorithm=nullptr;std::array<UCHAR,32> bytes{};if(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)<0)throw std::runtime_error("Cannot bind MCP credential purpose");
     const auto status=BCryptHash(algorithm,nullptr,0,reinterpret_cast<PUCHAR>(const_cast<char*>(source.data())),static_cast<ULONG>(source.size()),bytes.data(),static_cast<ULONG>(bytes.size()));BCryptCloseAlgorithmProvider(algorithm,0);if(status<0)throw std::runtime_error("Cannot bind MCP credential purpose");
-    std::ostringstream value;value<<"mcp-environment:"<<std::hex<<std::setfill('0');for(const auto byte:bytes)value<<std::setw(2)<<static_cast<unsigned>(byte);return value.str();
+    std::ostringstream value;value<<(setting.transport=="http"?"mcp-http-bearer:":"mcp-environment:")<<std::hex<<std::setfill('0');for(const auto byte:bytes)value<<std::setw(2)<<static_cast<unsigned>(byte);return value.str();
 }
 }

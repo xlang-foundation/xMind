@@ -32,6 +32,16 @@ std::string identity(const AgentSettings& value,const std::vector<AgentAuthority
 }
 int main(){try{
     const auto base=settings();const auto metadata=versions(base);const auto bound=identity(base,metadata);
+    {
+        auto http=base;auto& peer=http.mcp_servers.front();peer.executable.clear();peer.working_directory.clear();peer.arguments.clear();peer.credentials.clear();peer.transport="http";peer.endpoint="https://fixture.example.test/mcp";peer.bearer=McpBearerCredential{"server","http-fixture"};
+        const auto versions=[&](const AgentSettings& value){return std::vector<AgentAuthorityCredentialVersion>{{value.credential->scope,value.credential->id,value.credential->purpose,3},{"server",value.mcp_servers.front().bearer->id,mcp_credential_purpose(value.mcp_servers.front(),"BEARER"),7}};};
+        const auto selected=identity(http,versions(http));require(selected!=bound,"HTTP transport and credential reference must change private authority");
+        auto changed=http;changed.mcp_servers.front().endpoint="https://other.example.test/mcp";require(identity(changed,versions(changed))!=selected,"HTTP destination must bind authority and credential purpose");
+        changed=http;changed.mcp_servers.front().bearer->id="other-key";require(identity(changed,versions(changed))!=selected,"HTTP credential account reference must bind authority");
+        auto rotated=versions(http);rotated.back().revision++;require(identity(http,rotated)!=selected,"HTTP credential rotation must change authority");
+        changed=http;changed.mcp_servers.front().arguments.push_back("ambiguous-process");rejected([&]{identity(changed,versions(changed));});
+        changed=http;changed.mcp_servers.front().endpoint="http://remote.example.test/mcp";rejected([&]{identity(changed,versions(changed));});
+    }
     require(bound.size()==64&&bound.find_first_not_of("0123456789abcdef")==std::string::npos,"Invalid private authority digest");
     require(agent_authority_identity(base,"","synthetic-workspace-object",metadata)==bound,"Default model admission changed authority");
     auto alternative=base;alternative.selectable_models.push_back("synthetic-alternate");

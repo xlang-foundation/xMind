@@ -1,7 +1,9 @@
 # Native MCP HTTP transport
 
-HTTP and OAuth are unfinished. The current product accepts native stdio MCP
-configuration only. Do not advertise the new interface as a working HTTP client.
+HTTP acceptance and OAuth are unfinished. Native source now accepts stdio/HTTP
+configuration and selects the corresponding owner, but the latest accepted
+package predates this implementation. Do not advertise unexecuted source as a
+verified working HTTP integration.
 
 The implementation now separates `McpToolClient` from `McpStdioClient`.
 The existing production `McpToolRegistry` receives the transport-neutral owner;
@@ -63,7 +65,18 @@ tool bindings, filters invalid header declarations and projects actual calls
 before the send boundary. Changed cached bindings retire the owner. Interrupted
 calls preserve observed response bytes and possibly-sent attribution; neither
 stream IDs nor retry fields trigger request replay. All source is unverified
-natively. Product configuration/factory wiring remains stdio-only.
+natively. The native configuration/factory now select both bindings in agent
+execution, idle context preparation, direct graph tools and admin discovery.
+HTTP uses a backend-owned endpoint and optional encrypted server-scope bearer
+reference. Its credential purpose binds exact endpoint, configuration identity
+and authorization target. Endpoint changes require newly bound credentials.
+Native authority binds transport/destination/reference/credential revision.
+Ambiguous process/HTTP fields, arbitrary headers, plaintext values, unsupported
+scopes, remote plaintext URLs, embedded credentials, fragments and controls are
+rejected. Admin catalogue reflection checks retain private wiping credential
+copies; clients/models receive no token. Existing revision/retirement and SQLite
+ownership rules apply. Configuration, authority and actual HTTP effect assertions
+now require these paths; they remain unexecuted natively.
 
 The existing native effect contract now adds a pinned official SDK HTTP host
 (`@modelcontextprotocol/server` 2.3.1 / Zod 4.2.0). It requires actual remote
@@ -76,7 +89,7 @@ probe have run. The probe checks fixture schema annotations and SDK JSON/SSE
 shape; it does not execute C++, sockets, approvals or persistence.
 
 OAuth, empty/non-JSON older discovery fallback, older server-request replies,
-resumable GET/DELETE, notification subscription ownership and product connection
+resumable GET/DELETE, notification subscription ownership and graphical connection
 controls remain unfinished. The current owner explicitly fails unsupported
 responses rather than admitting tool effects through another transport.
 
@@ -94,11 +107,28 @@ protocol support:
   Older resumable observation cannot repeat a journalled tool POST. Modern
   stream closure cannot be treated as automatic resumable observation. UI
   disconnection detaches the viewer; it must not close runtime-owned MCP work.
-- The factory must select and connect the actual transport before registry
-  discovery. Product factory/configuration integration still needs implementation;
-  the new access owner and transport do not make HTTP selectable in the product.
+- The factory selects and connects the actual transport before registry
+  discovery. Current source routes through it; hosted compilation and actual
+  execution must establish acceptance before the HTTP configuration is verified.
 
-## Authorization
+## Native configuration candidate
+
+Trusted startup/offline-admin input can describe an HTTP server as:
+
+```json
+{"servers":[{"id":"remote-tools","transport":"http","endpoint":"https://mcp.example.test/mcp","credential":{"scope":"server","id":"remote-tools-key"}}]}
+```
+
+This is a documentation placeholder, not a tested service. Omit `credential`
+only for an explicitly configured unauthenticated endpoint. The existing
+`import-mcp` and `put-mcp-credential` admin commands use this registered
+reference; the HTTP credential target is `BEARER`. Secret input remains a private
+environment source, encrypted by the native backend and stored through xlang3
+SQLite. It is never a JSON value, request argument, public event or command-line
+secret. Import/provision while the backend is stopped; its runtime configuration
+snapshot is immutable. No live profile or user configuration was changed here.
+
+## OAuth authorization
 
 The [modern MCP authorization specification](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization)
 requires resource and authorization-server discovery, PKCE capability checks

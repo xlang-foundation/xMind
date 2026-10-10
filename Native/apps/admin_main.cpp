@@ -1,4 +1,4 @@
-#include "agentflow/mcp_client.hpp"
+#include "agentflow/mcp_client_factory.hpp"
 #include "agentflow/mcp_configuration.hpp"
 #include "agentflow/process_configuration.hpp"
 #include "agentflow/agent_instructions.hpp"
@@ -119,30 +119,30 @@ int run_admin(int argc,char** argv){
             try {
                 agentflow::WorkspaceTools workspace(argv[command+2]);
                 const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(30);
-                agentflow::McpStdioConfiguration config{server->executable,server->working_directory,server->arguments,{}};
-                struct ClearEnvironment {agentflow::McpStdioConfiguration& config;~ClearEnvironment(){for(auto& entry:config.environment)if(!entry.second.empty())SecureZeroMemory(entry.second.data(),entry.second.size());}} clear{config};
-                for(const auto& reference:server->credentials){
-                    auto secret=store.resolve_credential(reference.scope,reference.id,agentflow::mcp_credential_purpose(*server,reference.name)).get();
-                    const auto bytes=secret.view();config.environment.emplace_back(reference.name,std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size()));
-                }
-                if(std::chrono::steady_clock::now()>=deadline)throw std::runtime_error("MCP discovery deadline exceeded");
-                agentflow::McpStdioClient client(config);client.connect(deadline);
-                agentflow::McpToolRegistry registry(client,store,workspace,server->id,server->revision,deadline);
+                std::vector<agentflow::SecretBytes> private_credentials;
+                auto client=agentflow::connect_mcp_client(*server,store,deadline,{},&private_credentials);
+                agentflow::McpToolRegistry registry(*client,store,workspace,server->id,server->revision,deadline);
                 auto tools=Json::array();for(const auto& tool:registry.definitions()){
                     // Peer descriptions/schemas remain untrusted public
                     // metadata. Never print an injected credential reflected
                     // in a string, object key or JSON-escaped peer name.
                     const auto description=Json(tool.description),schema=Json::parse(tool.input_schema_json);
-                    for(const auto& entry:config.environment)if(reflected(description,entry.second) || reflected(schema,entry.second) || reflected(Json(tool.input_schema_json),entry.second))throw std::runtime_error("MCP public catalogue reflected a private credential");
+                    for(const auto& credential:private_credentials){
+                        const auto bytes=credential.view();
+                        struct WipedText {std::string value;~WipedText(){if(!value.empty())SecureZeroMemory(value.data(),value.size());}} secret{std::string(reinterpret_cast<const char*>(bytes.data()),bytes.size())};
+                        if(reflected(description,secret.value) || reflected(schema,secret.value) || reflected(Json(tool.input_schema_json),secret.value))throw std::runtime_error("MCP public catalogue reflected a private credential");
+                    }
                     tools.push_back({{"alias",tool.name},{"description",tool.description},{"input_schema_json",tool.input_schema_json}});
                 }
-                std::cout<<Json{{"server_id",server->id},{"config_revision",server->revision},{"protocol_version",client.server().protocol_version},{"tools",std::move(tools)},{"tool_dispatch_performed",false}}.dump()<<'\n';
+                std::cout<<Json{{"server_id",server->id},{"config_revision",server->revision},{"protocol_version",client->server().protocol_version},{"tools",std::move(tools)},{"tool_dispatch_performed",false}}.dump()<<'\n';
             }catch(...){throw std::runtime_error("MCP tool discovery did not complete");}
         }else if(action=="put-mcp-credential" && command+4==argc){
             const std::string id=argv[command+1],name=argv[command+2],source=argv[command+3];
             const auto settings=configurations.load();const agentflow::McpServerSetting* server=nullptr;for(const auto& value:settings)if(value.id==id)server=&value;
             if(!server)throw std::invalid_argument("MCP server is not registered");const agentflow::McpEnvironmentCredential* reference=nullptr;for(const auto& value:server->credentials)if(value.name==name)reference=&value;
-            if(!reference)throw std::invalid_argument("MCP credential environment is not registered; use its normalized uppercase name");
+            agentflow::McpEnvironmentCredential http_reference;
+            if(server->transport=="http" && server->bearer && name=="BEARER"){http_reference={name,server->bearer->scope,server->bearer->id};reference=&http_reference;}
+            if(!reference)throw std::invalid_argument("MCP credential target is not registered; use BEARER for HTTP or the normalized environment name for stdio");
             const auto* input=std::getenv(source.c_str());if(!input || !*input)throw std::invalid_argument("Private secret source environment is empty");
             const auto count=std::char_traits<char>::length(input);if(count>32768)throw std::invalid_argument("MCP credential exceeds environment limits");
             agentflow::SecretBytes secret({reinterpret_cast<const std::uint8_t*>(input),count});
