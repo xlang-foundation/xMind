@@ -1,5 +1,15 @@
 # Current native validation
 
+## Schema-v14 checkpoint — 2026-10-10
+
+Commit `15c87c0` passes all **118/118** native Release CTest contracts in
+**366.56 seconds** after correcting legacy test fixtures and schema-version
+assertions for persistent named-agent selection. The current-schema legacy owner
+handoff contract also passes without dropping saved data. [Exact local log and
+provenance](evidence/native-schema14-local-20261010.json). Webpage and extension
+sources did not change; the already documented rendered webpage and VS Code
+workspace evidence records their latest live check.
+
 ## Rendered webpage and VS Code workspace — 2026-10-10
 
 The current VS Code Extension Development Host rendered xMind in its right

@@ -1,0 +1,15 @@
+{
+  "observedAt": "2026-10-10T18:18:00Z",
+  "sourceRevision": "15c87c071d26be220d0abce81486db91baab4e6",
+  "test": "complete native CTest Release suite",
+  "command": "ctest --test-dir build/native -C Release --output-on-failure",
+  "result": "passed",
+  "contractsPassed": 118,
+  "contractsFailed": 0,
+  "seconds": 366.56,
+  "scope": "Schema-v14 native backend validation, including current agent selection persistence, actual legacy-schema fixture reconstruction, provider profiles, graph/delegation, MCP/A2A, coding operations, managed local profile and local browser/VS Code view controllers. Browser and extension source suites were not rerun in this checkpoint.",
+  "log": {
+    "path": "doc/evidence/native-schema14-local-20261010-ctest.log",
+    "sha256": "9559dd7bbe10e5e28a5525524384b87136fbdfa225382b92a8c7f89707a5da73"
+  }
+}

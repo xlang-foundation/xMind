@@ -1,5 +1,14 @@
 # Reviewable milestones
 
+Schema-v14 checkpoint `15c87c0` passes the complete local Release native gate:
+**118/118 contracts** in **366.56 seconds**. It updates disposable historical
+database fixtures to remove only empty agent selections, refreshes current-schema
+assertions and lets the legacy owner handoff safely snapshot current schema-v14
+repositories. The [complete CTest log and provenance](evidence/native-schema14-local-20261010.json)
+are recorded. Client sources did not change; the existing rendered webpage
+workspace acceptance remains **61/61**. OpenCode parity gaps and live model-backed
+coding acceptance remain open.
+
 The exact current Windows native build now passes rendered standalone-webpage
 workspace acceptance at source `c386a37`: the browser restored its HttpOnly
 session after refresh, the 648-pixel responsive header kept Add workspace away
