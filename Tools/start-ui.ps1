@@ -26,6 +26,11 @@ foreach($uiArgument in @($CodeExecutable,$RuntimeDirectory,$BundleDirectory,$Std
     if($uiArgument -and $uiArgument.IndexOfAny([char[]]@([char]0,[char]10,[char]13,[char]34)) -ge 0){throw 'Preview arguments cannot contain quotes or control characters.'}
 }
 $uiProject=Split-Path $PSScriptRoot -Parent
+$uiOpenWorkspace=$uiProject
+if($Workspace){
+    $uiOpenWorkspace=[System.IO.Path]::GetFullPath($Workspace)
+    if(-not (Test-Path -LiteralPath $uiOpenWorkspace -PathType Container)){throw 'The selected UI workspace must be an existing folder.'}
+}
 $uiState=Join-Path (Join-Path $uiProject '.agentflow') $PreviewName
 New-Item -ItemType Directory -Force -Path $uiState | Out-Null
 if(-not $CodeExecutable) {$CodeExecutable=Join-Path $uiProject '.agentflow/ui-host/vscode/Code.exe'}
@@ -124,7 +129,7 @@ try {
     $env:XMIND_UI_READY_FILE=$uiReady
     # User explicitly requested a visible UI. This is an isolated development
     # host for this known repository, with its own settings/extensions directory.
-    $uiCodeArgs=@('--new-window','--disable-workspace-trust','--skip-welcome',('--remote-debugging-port='+$DebugPort),'--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiProject+'"'))
+    $uiCodeArgs=@('--new-window','--disable-workspace-trust','--skip-welcome',('--remote-debugging-port='+$DebugPort),'--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiOpenWorkspace+'"'))
     $uiHost=Start-Process -FilePath $CodeExecutable -ArgumentList $uiCodeArgs -WorkingDirectory $uiProject -WindowStyle Normal -PassThru
     $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=[bool]$uiHealth.agent_execution;server_executable=$uiServer;source_server_executable=$uiSourceServer;server_sha256=(Get-FileHash -LiteralPath $uiServer -Algorithm SHA256).Hash;modules=$uiModules;source_revision=$uiBuildProvenance.xmind;preview_name=$PreviewName;debug_port=$DebugPort;graphs_config=$GraphsConfig} | ConvertTo-Json
     [System.IO.File]::WriteAllText((Join-Path $uiState 'active.json'),$uiMetadata)

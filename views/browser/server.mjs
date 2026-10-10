@@ -59,6 +59,19 @@ export async function createBrowserServer({backend,assetRoot}){
     const credential=sessionFor(request);if(!credential){reply(401,{detail:'Connect to a native xMind Server first'});return;}
     let body={};if(mutating){let raw='';for await(const chunk of request){raw+=chunk.toString('utf8');if(Buffer.byteLength(raw)>4096){reply(413,{detail:'Workspace request exceeds limits'});return;}}try{body=JSON.parse(raw);}catch{reply(400,{detail:'Invalid workspace request'});return;}const valid=selecting?body&&!Array.isArray(body)&&Object.keys(body).length===1&&typeof body.workspace_id==='string'&&/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(body.workspace_id):body&&!Array.isArray(body)&&Object.keys(body).length===1&&typeof body.root==='string'&&body.root.length>0&&body.root.length<=32760;if(!valid){reply(400,{detail:selecting?'Select a workspace from the native catalogue':'Enter one absolute workspace folder path'});return;}}
     const nativePath='/v1/workspaces'+(selecting?'/select':adding?'/add':''),selected=await nativeJson(nativePath,mutating?'POST': 'GET',viewHeaders(credential),mutating?body:undefined,mutating?60000:15000);
+    if(!mutating&&(selected.status===401||selected.status===404)){
+     // A VS Code-attached xmind serve owns exactly its opened folder and has no
+     // profile catalogue. Read that authenticated workspace as a one-item,
+     // non-addable catalogue; xmind view continues to supply the full local
+     // profile catalogue and registration endpoint.
+     const current=await nativeJson('/v1/workspace','GET',viewHeaders(credential));
+     const workspace=current.data;
+     if(current.status===200&&workspace?.configured===true&&typeof workspace.root==='string'&&workspace.root&&typeof workspace.workspace_id==='string'&&/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(workspace.workspace_id)){
+      const name=workspace.root.replace(/[\\/]+$/,'').split(/[\\/]/).at(-1)||workspace.root;
+      reply(200,{can_add:false,selected_workspace_id:workspace.workspace_id,workspaces:[{workspace_id:workspace.workspace_id,name,root:workspace.root}]});return;
+     }
+     reply(current.status,current.data);return;
+    }
     if(selected.status!==200){reply(selected.status,selected.data);return;}
     if(!mutating){reply(200,selected.data);return;}
     const {credential:replacement,expires_unix_ms:expires,max_age_seconds:maxAge,workspace}=selected.data;

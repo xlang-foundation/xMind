@@ -18,11 +18,14 @@ The C++ server owns execution, tools, graphs, permissions, providers and history
 
 The browser shows its active server workspace, offers a selector for other
 local profiles and provides **Add workspace** for an existing folder. Unlike VS
-Code, a browser tab has no opened-folder context. The selector is populated
-from the native protected profile catalogue and displays the workspace name
-and root. The native catalogue advertises whether the running server supports
-registration; the button remains disabled until a server with this capability
-is attached.
+Code, a browser tab has no opened-folder context. On the profile-aware `xmind
+view` host, the selector is populated from the native protected profile
+catalogue and displays the workspace name and root; **Add workspace** is
+enabled when that host supports registration. When VS Code opens the browser
+for its single-folder `serve` backend, the adapter reads the authenticated
+workspace and exposes it as a fixed one-item selector. That keeps the opened
+folder attached to the browser without pretending that this backend can add or
+switch local profiles.
 
 Workspace selection must be owned by the native host. The browser sends an
 opaque workspace selection for switching and a user-entered folder path for

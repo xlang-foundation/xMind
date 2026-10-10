@@ -76,6 +76,21 @@ test('workspace catalogue and switch stay native and rotate the HttpOnly profile
   assert.equal((await fetch(viewOrigin+'/ui/workspaces/add',{method:'POST',headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json'},body:JSON.stringify({root:'D:\\Projects\\Gamma'})})).status,403,'Workspace registration requires the exact same-origin request header');
  }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
 });
+test('browser adapts a VS Code-attached single-workspace server without inventing workspace registration',async()=>{
+ const {createBrowserServer}=await import('../server.mjs'),assetRoot=resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets');
+ const master='single-workspace-master-token'.padEnd(64,'x'),credential='a'.repeat(64)+'.'+'b'.repeat(64),id='windows-local-file-v1:attached',root='D:\\Projects\\Attached',observed=[];let view;
+ const peer=createServer(async(request,response)=>{observed.push(request.url);for await(const _ of request){}const reply=(status,data)=>{response.writeHead(status,{'Content-Type':'application/json'});response.end(JSON.stringify(data));};
+  if(request.url==='/v1/view-sessions'&&request.method==='POST'){assert.equal(request.headers.authorization,'Bearer '+master);reply(200,{credential,expires_unix_ms:Date.now()+28800000,max_age_seconds:28800});return;}
+  if(request.headers.authorization!=='View '+credential){reply(401,{});return;}
+  if(request.url==='/v1/workspaces'){reply(401,{detail:'Workspace catalogue is unavailable on this server'});return;}
+  if(request.url==='/v1/workspace'){reply(200,{configured:true,root,workspace_id:id,authority_id:'c'.repeat(32)});return;}
+  reply(404,{});
+ });
+ try{await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));view=await createBrowserServer({backend:'http://127.0.0.1:'+peer.address().port,assetRoot});const origin=await view.listen(),base={Origin:origin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'};
+  const login=await fetch(origin+'/ui/session',{method:'POST',headers:{...base,Authorization:'Bearer '+master},body:'{}'});assert.equal(login.status,200);const cookie=login.headers.get('set-cookie').split(';')[0];
+  const response=await fetch(origin+'/ui/workspaces',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}});assert.equal(response.status,200);assert.deepEqual(await response.json(),{can_add:false,selected_workspace_id:id,workspaces:[{workspace_id:id,name:'Attached',root}]});assert.deepEqual(observed.slice(-2),['/v1/workspaces','/v1/workspace']);
+ }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
+});
 test('event stream routes are read-only and exclude foreign path encodings',async()=>{
  const {allowedApiRoute}=await import('../server.mjs');
  assert.equal(allowedApiRoute('/v1/workspaces/select','POST'),false,'Profile switch credentials are handled only by the HttpOnly UI adapter');assert.equal(allowedApiRoute('/v1/workspaces/add','POST'),false,'Workspace registration credentials are handled only by the HttpOnly UI adapter');
