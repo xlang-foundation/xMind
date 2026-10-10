@@ -1,4 +1,5 @@
 #include "agentflow/process_configuration.hpp"
+#include "agentflow/authoring_document.hpp"
 #include "agentflow/mcp_wire.hpp"
 #include "nlohmann/json.hpp"
 #include <filesystem>
@@ -16,7 +17,17 @@ std::string text(const Json& value,const char* key,std::size_t limit) {
     if(result.empty() || result.size()>limit || result.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid process configuration text");return result;
 }
 void id(const std::string& value){if(value.empty() || value.size()>64 || value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos)throw std::invalid_argument("Invalid process profile identity");}
-Json parse(const std::string& source){if(source.size()>256*1024)throw std::invalid_argument("Process configuration exceeds limits");try{return Json::parse(mcp_compact_object(source));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid process configuration JSON");}}
+Json parse(const std::string& source){
+    if(source.size()>256*1024)throw std::invalid_argument("Process configuration exceeds limits");
+    const auto first=source.find_first_not_of(" \t\r\n");
+    if(first==std::string::npos)throw std::invalid_argument("Empty process configuration");
+    if(source[first]=='{' || source[first]=='['){
+        try{return Json::parse(mcp_compact_object(source));}
+        catch(const McpProtocolError&){throw std::invalid_argument("Invalid process configuration JSON");}
+    }
+    try{return Json::parse(authoring_yaml_to_json(source));}
+    catch(const std::invalid_argument&){throw std::invalid_argument("Invalid process configuration JSON or YAML");}
+}
 ProcessProfile profile(const Json& value,bool stored) {
     fields(value,{"id","executable","prefix_arguments","max_timeout_ms","revision","executable_id"});
     if(!stored && (value.contains("revision") || value.contains("executable_id")))throw std::invalid_argument("Process revision/executable binding are backend-owned");

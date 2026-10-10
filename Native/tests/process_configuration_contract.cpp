@@ -19,14 +19,16 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
     Directory folder;const auto executable=folder.path/"actual-native-copy.exe",workspace=folder.path/"workspace";std::filesystem::copy_file(std::filesystem::u8path(argv[1]),executable);std::filesystem::create_directory(workspace);
     const auto database=(folder.path/"state.sqlite").string();const std::vector<std::string> imports{argv[2],argv[3]};
     Json p{{"id","fixture"},{"executable",executable.string()},{"prefix_arguments",Json::array({"literal fixture argument"})},{"max_timeout_ms",120000}};
-    const auto desired=[&]{return Json{{"profiles",Json::array({p})}}.dump();};std::string binding;
+    const auto desired=[&]{return Json{{"profiles",Json::array({p})}}.dump();};
+    const auto yaml=[&]{return std::string("profiles:\n  - id: fixture\n    executable: ")+Json(executable.string()).dump()+"\n    prefix_arguments:\n      - literal fixture argument\n    max_timeout_ms: 120000\n";};std::string binding;
     {
         PersistenceService store(database,imports);ProcessConfigurationStore configurations(store);require(configurations.load().empty(),"Absent registry must not invent executable profiles");
-        const auto first=configurations.apply(desired());require(first.size()==1,"Import must create exactly one profile");binding=first[0].executable_id;require(first[0].revision==1 && binding==ForegroundProcess::executable_identity(executable.string()),"Import must bind an actual native file and assign revision");
-        require(configurations.apply(desired())[0].revision==1,"Identical metadata/bytes must preserve revision");const auto before=store.information("native-process","profiles").get();
+        const auto first=configurations.apply(yaml());require(first.size()==1,"YAML import must create exactly one profile");binding=first[0].executable_id;require(first[0].revision==1 && binding==ForegroundProcess::executable_identity(executable.string()),"Import must bind an actual native file and assign revision");
+        require(configurations.apply(desired())[0].revision==1,"JSON and YAML imports of identical metadata/bytes must preserve revision");const auto before=store.information("native-process","profiles").get();
         for(const auto* field:{"revision","executable_id","environment","credentials"}){auto invalid=p;invalid[field]="untrusted fixture value";rejects<std::invalid_argument>([&]{configurations.apply(Json{{"profiles",Json::array({invalid})}}.dump());});}
         auto relative=p;relative["executable"]="relative.exe";rejects<std::invalid_argument>([&]{configurations.apply(Json{{"profiles",Json::array({relative})}}.dump());});
         rejects<std::invalid_argument>([&]{configurations.apply(Json{{"profiles",Json::array({p,p})}}.dump());});rejects<std::invalid_argument>([&]{configurations.apply(R"({"profiles":[],"profiles":[]})");});
+        rejects<std::invalid_argument>([&]{configurations.apply("profiles:\n  - id: duplicate\n    id: second\n");});
         require(store.information("native-process","profiles").get()==before,"Every rejected replacement must preserve exact committed configuration");
         p["max_timeout_ms"]=10000;const auto changed=configurations.apply(desired());require(changed[0].revision==2 && changed[0].executable_id==binding,"Policy change rotates revision without inventing binary change");
         {std::ofstream mutation(executable,std::ios::binary|std::ios::app);mutation<<"actual fixture byte change";require(bool(mutation),"Actual executable fixture mutation required");}

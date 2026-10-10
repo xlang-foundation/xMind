@@ -96,27 +96,28 @@ All **39 extension contracts passed locally** with labelled isolated renderer/ho
 
 ## Trusted profile registry and executable binding
 
-`ProcessConfigurationStore` stores versioned metadata in the existing information repository through embedded xlang3. A bounded trusted JSON file supplies `id`, absolute local-drive `executable`, `prefix_arguments` and `max_timeout_ms`. The backend assigns revisions and executable bindings; desired files cannot supply those fields, environment values, credentials or unknown fields. Identical configuration/bytes preserve revision; policy or executable changes rotate it. Removed IDs remain permanently retired. Import is startup/offline administration under the existing database owner lease; there is no live public mutation API.
+`ProcessConfigurationStore` stores versioned metadata in the existing information repository through embedded xlang3. A bounded trusted JSON or YAML file supplies `id`, absolute local-drive `executable`, `prefix_arguments` and `max_timeout_ms`. The backend assigns revisions and executable bindings; desired files cannot supply those fields, environment values, credentials or unknown fields. Identical configuration/bytes preserve revision; policy or executable changes rotate it. Removed IDs remain permanently retired. Import is startup/offline administration under the existing database owner lease; there is no live public mutation API.
 
 The binding combines the actual Windows file identity and SHA-256 of the retained executable, with a 256 MiB executable limit. Native [CNG hashing](https://learn.microsoft.com/en-us/windows/win32/api/bcrypt/nf-bcrypt-bcryptcreatehash) uses owned algorithm/hash handles. The launched file and every executable-parent directory are retained with write/delete sharing denied. A changed file identity or bytes reject dispatch before user code runs. The profile snapshot and proposal both retain this binding; startup of an execution service with an obsolete profile snapshot requires explicit administrator reimport. Model-free inspection can still read saved registry/history. This does not authenticate dependent DLLs, scripts or arbitrary remote effects, and is not an OS sandbox.
 
 Prepared usage after a passing build, for a trusted local xlang3 profile:
 
-```json
-{
-  "profiles": [{
-    "id": "xlang3",
-    "executable": "D:/CantorAI2026/xlang3/build/Release/xlang3.exe",
-    "prefix_arguments": [],
-    "max_timeout_ms": 120000
-  }]
-}
+```yaml
+profiles:
+  - id: xlang3
+    executable: D:/CantorAI2026/xlang3/build/Release/xlang3.exe
+    prefix_arguments: []
+    max_timeout_ms: 120000
 ```
 
-Stop the backend before importing into its database:
+The trusted profile import accepts either JSON or the same bounded YAML subset
+used by native AgentFlow authoring. Both formats share duplicate-field,
+executable-binding, timeout and retirement checks; changing only the file format
+does not revise an identical profile. Stop the backend before importing into
+its database:
 
 ```powershell
-.\build\native\Release\xmind_admin.exe --db STATE.sqlite --modules MODULES --stdlib LIB_SOURCE import-processes profiles.json
+.\build\native\Release\xmind_admin.exe --db STATE.sqlite --modules MODULES --stdlib LIB_SOURCE import-processes profiles.yaml
 ```
 
 The server loads saved profiles or imports a trusted file at startup with `--process-config FILE` (`Tools/agentflow.ps1 -ProcessConfig FILE`). Actual execution also requires a configured model with supported tools and a verified `--workspace`. The authenticated `GET /v1/process/profiles` and CLI `process-profiles` expose only IDs, revisions and timeout budgets with `runtime_state:per_operation`; they do not invent active processes or expose commands/bindings. These flags are source-prepared and are absent from the older tested preview bundle until a new passing artifact is installed.
