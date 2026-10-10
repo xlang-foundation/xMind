@@ -1,5 +1,29 @@
 # Current native validation
 
+## Browser recheck — 2026-10-10
+
+The open `60415` page connects to the same-machine xMind backend without a
+token prompt. Its selector shows the local xMind and TestProj workspaces plus a
+provider-test workspace; its right sidebar restores conversation history, run
+metrics and saved Claude, Gemini, DeepSeek and OpenAI profiles/models. This
+adapter is attached to the fixed-workspace `xmind serve` backend, so **Add
+workspace** is disabled with an explanatory hint. Workspace file browsing still
+reports that this connected native runtime needs an update.
+
+The profile-aware page at `60422` has **Add workspace** enabled and selects
+TestProj, but this launched profile has no provider profiles and its current
+native runtime also reports that workspace file browsing needs an update. The
+new shared-provider import contract is part of hosted run
+[38093398490](https://github.com/xlang-foundation/xMind/actions/runs/38093398490),
+which is still building the pinned xlang3 runtime and native contract set. The
+earlier failure on run `38091048320` was the managed-profile contract hitting a
+transient Windows lock on `native-runtime-manifest.json`; it predates commit
+`c5f8fab`, which added bounded retry, so the newer run is the acceptance gate
+for that repair. The standalone webpage contracts pass **65/65**, including
+tokenless local Connect and workspace-mode behavior. Chrome/Edge were not
+available through the current browser-control session; the live observations
+above came from the open Codex browser tabs.
+
 ## Schema-v14 checkpoint — 2026-10-10
 
 Commit `15c87c0` passes all **118/118** native Release CTest contracts in
