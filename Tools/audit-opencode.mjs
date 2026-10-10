@@ -14,6 +14,23 @@ if (revision !== expected) throw new Error('Reference revision differs from pinn
 // Read the committed object so a dirty reference checkout cannot alter the pin.
 const schemaBytes = execFileSync('git', ['-C', reference, 'show', expected + ':packages/protocol/openapi.json'], { maxBuffer: 16 * 1024 * 1024 });
 const schema = JSON.parse(schemaBytes.toString('utf8'));
+let schemaReferenceCount = 0;
+function resolveJsonPointer(document, reference) {
+  if (!reference.startsWith('#/')) throw new Error(`Pinned schema contains a non-local reference: ${reference}`);
+  const value = reference.slice(2).split('/').map(token => token.replaceAll('~1', '/').replaceAll('~0', '~'))
+    .reduce((current, token) => current && Object.hasOwn(current, token) ? current[token] : undefined, document);
+  if (value === undefined) throw new Error(`Pinned schema reference does not resolve: ${reference}`);
+  return value;
+}
+function verifySchemaReferences(value) {
+  if (!value || typeof value !== 'object') return;
+  if (typeof value.$ref === 'string') {
+    resolveJsonPointer(schema, value.$ref);
+    schemaReferenceCount++;
+  }
+  for (const child of Object.values(value)) verifySchemaReferences(child);
+}
+verifySchemaReferences(schema);
 const operations = [];
 for (const [path, methods] of Object.entries(schema.paths)) {
   for (const [method, operation] of Object.entries(methods)) {
@@ -49,7 +66,8 @@ const inventory = { source: 'https://github.com/anomalyco/opencode/tree/v2.0.16'
   statusScope: 'Historical Python prototype mappings were removed with that implementation. nativeStatus and nativeEvidence describe reviewed C++ source candidates. Unmapped is not proof of absence; no operation is verified parity.',
   nativeSourceHashFormat: 'SHA-256 of UTF-8 source text with CRLF normalized to LF; source candidates may include uncommitted changes at audit time.',
   schema: 'packages/protocol/openapi.json', schemaSha256: createHash('sha256').update(schemaBytes).digest('hex'),
-  schemaReferences: 'Resolve $ref values against the pinned source schema. This inventory does not dereference them or cover every non-API behavior.',
+  schemaReferenceCount, pinnedComponents: schema.components,
+  schemaReferences: 'Operation request/response JSON Pointers are retained and resolve against the embedded pinnedComponents definitions. Non-API behavior is outside this OpenAPI inventory.',
   operationCount: operations.length, operations };
 const target = resolve(root, 'doc/OPENCODE_API_INVENTORY.json');
 writeFileSync(target, JSON.stringify(inventory, null, 2) + '\n');

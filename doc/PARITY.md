@@ -18,6 +18,16 @@ Baseline: `anomalyco/opencode` tag `v2.0.16`, commit
 [documentation](https://opencode.ai/v2/docs). Documentation can differ from this
 release; inspect the pinned source before finalizing each acceptance criterion.
 
+The current OpenAPI audit contains **136 operations**: **23** have a mapped C++
+source candidate, **113** remain unmapped, and **zero** are verified parity.
+The audit embeds all **245** pinned schema components and resolves all **855**
+JSON references, including the operation request and response definitions. Its
+generation is deterministic and refreshes native source hashes. A mapping or
+passing component contract alone does not prove end-to-end feature equivalence.
+Refresh with `node Tools/audit-opencode.mjs`; the generated
+[inventory](OPENCODE_API_INVENTORY.json) records the exact request, response,
+schema and operation-specific acceptance criteria.
+
 ## Current native verification scope
 
 The storage source `57da085` has passed all **118 hosted native** contracts in
