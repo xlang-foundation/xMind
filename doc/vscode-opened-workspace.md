@@ -31,6 +31,14 @@ rejected; there is no profile/package migration path. The verifier now identifie
 that retired layout and directs the user to install the current unified package.
 The current source runtime inventory verifies **1,896 files**.
 
+The rebuilt **0.1.5 VSIX** was verified and installed in both an isolated test
+profile and the regular VS Code profile (VS Code **1.141.0**). With the package
+installed, `TestProj`'s native owner was reused by the CLI (`started: false`) for
+the exact same opened folder; no provider or model request occurred. This confirms
+package inventory, managed backend availability and CLI reattachment, but no
+screenshot-based composition or model-backed file change is claimed.
+[Package and live profile evidence](evidence/vscode-packaged-profile-live-20261010.json).
+
 Validation on 2026-10-08:
 
 - Windows Release configure/build and all 88 registered native contracts

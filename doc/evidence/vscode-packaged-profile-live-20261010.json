@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-10",
+  "sourceRevision": "f317b74",
+  "extension": {
+    "identifier": "agentflow-local.agentflow",
+    "version": "0.1.5",
+    "vsCodeVersion": "1.141.0",
+    "installedIntoRegularProfile": true,
+    "installedIntoIsolatedVerificationProfile": true,
+    "vsixSha256": "6E5609A0495F2B793FBA693B8CC7F540ACC3FD934CFC201E67936F261C4E5BA9",
+    "archiveEntries": 1933
+  },
+  "nativeRuntime": {
+    "manifestSha256": "96d8bef42869d624c384cdcaec18024c0c62f5ae7198e266856a7b04118f40c5",
+    "fileCount": 1896,
+    "unifiedExecutable": "xmind.exe",
+    "retiredExecutableEntries": 0,
+    "sourceVerifier": "passed"
+  },
+  "workspace": "D:\\CantorAI2026\\TestProj",
+  "managedBackend": {
+    "workspaceArgument": "D:\\CantorAI2026\\TestProj",
+    "runtimeManifestSha256": "96d8bef42869d624c384cdcaec18024c0c62f5ae7198e266856a7b04118f40c5",
+    "fileChangesEnabledWithApproval": true,
+    "providerModelConfigured": false,
+    "providerRequests": 0
+  },
+  "cliReattachment": {
+    "sameWorkspace": true,
+    "started": false,
+    "sameNativeOwnerPid": 34252
+  },
+  "trustBypass": false,
+  "tests": {
+    "vscodeExtension": "262 passed, 0 failed",
+    "sourceRuntimeInventory": "1,896 files verified"
+  },
+  "limits": [
+    "The Windows Computer Use bridge returned a stale VS Code window-handle error, so screenshot-based visual composition was not verified.",
+    "No model-backed edit or file effect was tested in this acceptance."
+  ]
+}
