@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+Native MCP HTTP owner candidate: `McpHttpClient` now implements the same private
+dispatch interface as stdio, using incremental JSON/SSE decoding and shared tool
+description/result validation. Negotiation, per-tool header filtering, immutable
+catalogue checks, exact request correlation and interruption attribution are in
+native source. The existing effect contract is expanded with a pinned official
+HTTP SDK peer: real JSON/SSE disk effects after approval, denial with zero calls,
+duplicate rejection, one lost-reply effect and actual SQLite restart checks.
+The peer independently checks bytes/counts. Node syntax/whitespace and a separate
+SDK-only schema/response-shape probe pass; C++ compilation and execution remain
+pending. Product configuration/factory, OAuth and broader HTTP lifecycle remain
+unfinished. [Exact scope](native-mcp-http.md).
+
 Native MCP HTTP POST candidate: the native async WinHTTP layer now sends
 request/schema-derived headers and exposes bounded response metadata/bytes
 for JSON/SSE and authentication challenges, with a conservative send boundary.

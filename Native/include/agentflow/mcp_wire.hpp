@@ -20,6 +20,10 @@ struct McpWireMessage {
 struct McpClientIdentity {
     std::string name="xMind",version="0.1.0",capabilities_json="{}";
 };
+// Decode one complete JSON-RPC object, including pretty-printed HTTP JSON.
+// Same envelope/duplicate/UTF-8/size rules as the stdio line codec; raw bytes
+// and argument/result number tokens remain unchanged.
+McpWireMessage mcp_decode_message(std::string_view bytes);
 // Transport-neutral newline framing only. One owner thread. The client layer
 // owns request correlation, era negotiation, permissions and process lifetime.
 class McpLineStream {

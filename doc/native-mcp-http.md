@@ -55,9 +55,30 @@ older session metadata, 400 RPC errors, 401 challenges, empty/invalid 202,
 cancellation, deadlines, invalid metadata and certificate rejection. The peer
 is synthetic and does not establish official MCP SDK interoperability. Only
 Node syntax and whitespace/source checks have run; native execution is pending.
-This is POST byte transport, not a connected `McpToolClient`: JSON/SSE message
-decoding, negotiation, discovery filtering, registry dispatch integration,
-configuration/factory and OAuth remain unfinished.
+The source now also has `McpHttpClient`, implementing `McpToolClient` with the
+same private dispatch boundary as stdio. Its incremental JSON/SSE decoder uses
+the strict existing JSON-RPC envelope codec and retains literal result tokens.
+It negotiates modern discovery and structured older fallback, caches immutable
+tool bindings, filters invalid header declarations and projects actual calls
+before the send boundary. Changed cached bindings retire the owner. Interrupted
+calls preserve observed response bytes and possibly-sent attribution; neither
+stream IDs nor retry fields trigger request replay. All source is unverified
+natively. Product configuration/factory wiring remains stdio-only.
+
+The existing native effect contract now adds a pinned official SDK HTTP host
+(`@modelcontextprotocol/server` 2.3.1 / Zod 4.2.0). It requires actual remote
+JSON/SSE writes after durable native approval, denial without dispatch, duplicate
+operation rejection, lost-reply uncertainty and xlang3 SQLite restart records.
+The host independently compares peer disk bytes and dispatch counts. Existing
+stdio effects remain in the same contract; the exact contract count is unchanged.
+Only Node syntax, source/whitespace inspection and a separate SDK-only handler
+probe have run. The probe checks fixture schema annotations and SDK JSON/SSE
+shape; it does not execute C++, sockets, approvals or persistence.
+
+OAuth, empty/non-JSON older discovery fallback, older server-request replies,
+resumable GET/DELETE, notification subscription ownership and product connection
+controls remain unfinished. The current owner explicitly fails unsupported
+responses rather than admitting tool effects through another transport.
 
 The following are xMind implementation decisions, not claims of delivered
 protocol support:
@@ -73,9 +94,9 @@ protocol support:
   Older resumable observation cannot repeat a journalled tool POST. Modern
   stream closure cannot be treated as automatic resumable observation. UI
   disconnection detaches the viewer; it must not close runtime-owned MCP work.
-- The factory selects and connects the actual transport before registry
-  discovery. Factory/configuration, HTTP binding and response-header access
-  still need implementation; existing provider helpers alone are insufficient.
+- The factory must select and connect the actual transport before registry
+  discovery. Product factory/configuration integration still needs implementation;
+  the new access owner and transport do not make HTTP selectable in the product.
 
 ## Authorization
 

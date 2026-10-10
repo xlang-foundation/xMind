@@ -3,6 +3,7 @@
 #include "agentflow/mcp_wire.hpp"
 #include "agentflow/mcp_requests.hpp"
 #include "agentflow/mcp_http_metadata.hpp"
+#include "agentflow/mcp_http_stream.hpp"
 #include "nlohmann/json.hpp"
 #include <iostream>
 #include <vector>
@@ -141,6 +142,22 @@ int main() {
         for(const auto& schema:{R"({"properties":{"x":{"type":"number","x-mcp-header":"X"}}})",R"({"properties":{"x":{"type":"string","x-mcp-header":""}}})",R"({"properties":{"x":{"type":"string","x-mcp-header":"Bad\r\nName"}}})",R"({"properties":{"x":{"type":"string","x-mcp-header":"X"},"y":{"type":"string","x-mcp-header":"x"}}})",R"({"items":{"properties":{"x":{"type":"string","x-mcp-header":"X"}}}})",R"({"allOf":[{"properties":{"x":{"type":"string","x-mcp-header":"X"}}}]})",R"({"type":"string","x-mcp-header":"Root"})",R"({"$defs":{"hidden":{"properties":{"x":{"type":"string","x-mcp-header":"X"}}}}})"})rejected([&]{McpHttpToolHeaders invalidHeaders(schema);});
         rejected([&]{literal.project(Json{{"text",std::string(16385,'x')}}.dump());});
         rejected([&]{literal.project(R"({"text":"x","text":"y"})");});
-        std::cout<<"Native MCP wire codec and HTTP metadata projection passed bounded fixtures; no subprocess, HTTP network binding, remote tool or complete MCP support claimed\n";return 0;
+        const std::string pretty="{\n  \"jsonrpc\":\"2.0\",\n  \"id\":\"http\",\n  \"result\":{\"decimal\":1.00000000000000000001,\"text\":\"雪\"}\n}";
+        std::vector<McpWireMessage> decodedHttp;
+        McpHttpMessageStream httpJson("application/json",[&](const auto& message){decodedHttp.push_back(message);});
+        for(char byte:pretty)httpJson.feed(std::string_view(&byte,1));require(decodedHttp.empty(),"HTTP JSON must wait for complete bounded body");httpJson.finish();
+        require(decodedHttp.size()==1 && decodedHttp[0].raw_json==pretty && decodedHttp[0].payload_json.find("1.00000000000000000001")!=std::string::npos,"Pretty HTTP JSON must preserve exact raw result tokens");rejected([&]{httpJson.feed("{}");});
+        const auto single=Json::parse(pretty).dump();const std::string sse="\xef\xbb\xbf: heartbeat 雪\r\n\r\nevent: message\r\nid: opaque-observation\r\nretry: 0\r\ndata: "+single+"\r\n\r\n";
+        McpHttpMessageStream httpSse("text/event-stream",[&](const auto& message){decodedHttp.push_back(message);});for(char byte:sse)httpSse.feed(std::string_view(&byte,1));httpSse.finish();
+        require(decodedHttp.size()==2 && decodedHttp.back().id_json=="\"http\"","Fragmented BOM/Unicode/CRLF SSE must decode one message without reconnect authority");
+        McpHttpMessageStream multi("text/event-stream",[&](const auto& message){decodedHttp.push_back(message);});multi.feed("data: {\"jsonrpc\":\"2.0\",\rdata: \"id\":\"multi\",\"result\":{}}\r\r");multi.finish();require(decodedHttp.back().id_json=="\"multi\"","SSE multiline data and lone CR delimiters must decode actual JSON");
+        for(const auto& malformed:{std::string("data: {}\n\n"),std::string("event: endpoint\ndata: ")+single+"\n\n",std::string(": invalid ")+char(0xff)+"\n\n"}) {
+            McpHttpMessageStream input("text/event-stream",[](const auto&){});rejected([&]{input.feed(malformed);input.finish();});rejected([&]{input.feed("");});
+        }
+        {McpHttpMessageStream input("text/event-stream",[](const auto&){});input.feed("data: "+single+"\n");rejected([&]{input.finish();});}
+        {McpHttpMessageStream input("application/json",[](const auto&){});input.feed(pretty+pretty);rejected([&]{input.finish();});}
+        {McpHttpMessageStream input("application/json",[](const auto&){});rejected([&]{input.feed(std::string(1024*1024+1,'x'));});}
+        {McpHttpMessageStream input("text/event-stream",[](const auto&){throw std::logic_error("HTTP fixture consumer stopped");});bool stopped=false;try{input.feed("data: "+single+"\n\n");}catch(const std::logic_error&){stopped=true;}require(stopped,"HTTP message consumer failure must propagate");rejected([&]{input.feed("");});}
+        std::cout<<"Native MCP wire codec, HTTP metadata and incremental JSON/SSE decoding passed bounded fixtures; no subprocess, network, remote tool or complete MCP support claimed\n";return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }

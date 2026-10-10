@@ -1,4 +1,5 @@
 #include "agentflow/mcp_client.hpp"
+#include "agentflow/mcp_http_client.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/json_schema.hpp"
 #include "agentflow/xlang_sqlite.hpp"
@@ -18,6 +19,7 @@ static_assert(std::is_base_of_v<McpToolClient,McpStdioClient>);
 static_assert(std::is_same_v<McpToolClient::Deadline,McpStdioClient::Deadline>);
 static_assert(!PublicMcpDispatch<McpToolClient> && !PublicMcpDispatch<McpStdioClient>);
 static_assert(!std::is_copy_constructible_v<McpStdioClient>);
+static_assert(std::is_base_of_v<McpToolClient,McpHttpClient> && !PublicMcpDispatch<McpHttpClient> && !std::is_copy_constructible_v<McpHttpClient>);
 namespace {
 using Json=nlohmann::json;
 void require(bool value,const char* reason){if(!value)throw std::runtime_error(reason);}
@@ -75,7 +77,7 @@ struct Task {
 };
 }
 int main(int argc,char** argv){
-    if(argc!=6)return 2;
+    if(argc!=8)return 2;
     try {
         Directory directory;const auto database=(directory.path/"state.sqlite").string();const std::vector<std::string> imports{argv[4],argv[5]};
         auto root=[&](const std::string& id){const auto value=directory.path/id;require(std::filesystem::create_directory(value),"Isolated workspace must be newly created");std::ofstream(value/"effect.txt",std::ios::binary);return value;};
@@ -127,15 +129,35 @@ int main(int argc,char** argv){
             }
             start(store,"blocked-run");Task blocked(store,argv,uncertain_root,"blocked-run","blocked-operation","normal");proposed(store,"blocked-operation");store.decide_operation("blocked-operation",OperationDecision::allow,"fixture-controller").get();rejects<WorkspaceEffectUncertain>([&]{blocked.result.get();});require(contents(uncertain_root/"effect.txt")=="actual native MCP effect\n","Workspace quarantine must block another actual MCP dispatch");store.transition("blocked-run",RunState::running,RunState::failed).get();
             const auto other_workspace=root("other-workspace");start(store,"blocked-other");Task other(store,argv,other_workspace,"blocked-other","blocked-other","normal",R"({"body":"must not run","decimal":1.00000000000000000001})",uncertain_root);proposed(store,"blocked-other");store.decide_operation("blocked-other",OperationDecision::allow,"fixture-controller").get();rejects<WorkspaceEffectUncertain>([&]{other.result.get();});require(contents(uncertain_root/"effect.txt")=="actual native MCP effect\n" && contents(other_workspace/"effect.txt").empty(),"Stable server quarantine must block actual dispatch from another workspace");store.transition("blocked-other",RunState::running,RunState::failed).get();
+            for(const std::string mode:{"normal-json","normal-sse","deny","disconnect"}) {
+                const auto id="http-"+mode;const auto workspace=root(id);start(store,id);
+                const auto remote=std::filesystem::path(argv[7])/mode/"effect.txt";
+                auto invoke=[&]() {
+                    return std::async(std::launch::async,[&,workspace,id,mode]{
+                        const std::string credential="synthetic-mcp-http-fixture";SecretBytes secret({reinterpret_cast<const std::uint8_t*>(credential.data()),credential.size()});
+                        McpHttpClient client(std::string(argv[6])+"/"+mode,std::optional<SecretBytes>(std::move(secret)));client.connect(std::chrono::steady_clock::now()+5s);
+                        WorkspaceTools tools(workspace.string());McpToolRegistry registry(client,store,tools,"official-http-"+mode,1,std::chrono::steady_clock::now()+5s);
+                        const auto definitions=registry.definitions();require(definitions.size()==1 && definitions[0].input_schema_json.find("x-mcp-header")!=std::string::npos,"Actual HTTP SDK schema/header declarations must reach the native registry");
+                        return registry.invoke(id,id,definitions[0].name,R"({"body":"actual native HTTP MCP effect 雪\n","decimal":1.00000000000000000001})",expiry(),std::chrono::steady_clock::now()+5s);
+                    });
+                };
+                auto result=invoke();const auto proposal=proposed(store,id);require(proposal.state==OperationState::awaiting_approval && contents(remote).empty(),"HTTP read-only hints cannot bypass durable approval or execute early");
+                store.decide_operation(id,mode=="deny"?OperationDecision::deny:OperationDecision::allow,"fixture-controller").get();
+                if(mode=="deny"){rejects<PermissionDenied>([&]{result.get();});require(contents(remote).empty(),"Denied HTTP tool must have no peer effect");}
+                else if(mode=="disconnect"){rejects<McpEffectUncertain>([&]{result.get();});require(store.operation(id).get().state==OperationState::uncertain && contents(remote)=="actual native HTTP MCP effect 雪\n","Lost HTTP reply must record one real uncertain effect");}
+                else {const auto output=Json::parse(result.get());require(output["acknowledged_by_peer"]==true && contents(remote)=="actual native HTTP MCP effect 雪\n" && store.operation(id).get().state==OperationState::succeeded,"Approved HTTP JSON/SSE effect must have actual disk bytes and durable acknowledgement");auto duplicate=invoke();rejects<Conflict>([&]{duplicate.get();});require(contents(remote)=="actual native HTTP MCP effect 雪\n","Duplicate approved HTTP operation must not dispatch again");}
+                store.transition(id,RunState::running,mode=="normal-json" || mode=="normal-sse"?RunState::completed:RunState::failed).get();
+            }
             fault_root=root("journal-fault");start(store,"journal-fault");
             {XlangSqlite inject(database,imports);inject.execute("CREATE TRIGGER reject_mcp_success BEFORE UPDATE OF state ON operations WHEN NEW.id='journal-fault' AND NEW.state='succeeded' BEGIN SELECT RAISE(ABORT,'fixture MCP outcome storage fault'); END");}
             Task fault(store,argv,fault_root,"journal-fault","journal-fault","normal");proposed(store,"journal-fault");store.decide_operation("journal-fault",OperationDecision::allow,"fixture-controller").get();rejects<McpOutcomeUnrecorded>([&]{fault.result.get();});require(contents(fault_root/"effect.txt")=="actual native MCP effect\n" && store.operation("journal-fault").get().state==OperationState::executing,"Outcome storage failure must preserve the real claimed effect for restart recovery");store.close();
         }
         {
             PersistenceService reopened(database,imports);require(reopened.operation("normal").get().state==OperationState::succeeded && reopened.operation("disconnect").get().state==OperationState::uncertain,"Acknowledged/uncertain peer outcomes must survive backend reopen");
+            require(reopened.operation("http-normal-json").get().state==OperationState::succeeded && reopened.operation("http-normal-sse").get().state==OperationState::succeeded && reopened.operation("http-disconnect").get().state==OperationState::uncertain,"Actual HTTP SDK acknowledgements and lost-reply uncertainty must survive xlang3 SQLite restart");
             require(reopened.operation("journal-fault").get().state==OperationState::uncertain && reopened.run("journal-fault").get().state==RunState::failed,"Unrecorded claimed effect must be quarantined on restart");
             require(contents(fault_root/"effect.txt")=="actual native MCP effect\n","Restart must never replay a claimed external effect");reopened.close();
         }
-        std::cout<<"Native approval-backed MCP registry passed actual subprocess file effects and embedded-xlang3 journal: exact approvals, untrusted hints, aliases/schema binding, denial/cancellation, duplicate rejection, malformed catalogs/arguments, post-effect lost/error replies, quarantine and journal-fault restart. No live model/UI/SDK interoperability or independent peer-result verification claimed\n";return 0;
+        std::cout<<"Native approval-backed MCP registry passed actual subprocess and modern HTTP SDK file effects with embedded-xlang3 journal: approval, denial, duplicate rejection, JSON/SSE acknowledgement, lost replies and restart uncertainty. HTTP host separately verifies peer disk bytes. No live model or rendered UI acceptance claimed\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }

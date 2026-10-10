@@ -88,6 +88,7 @@ std::string frame(const Json& value) {
     } catch(const Json::exception&) {throw McpProtocolError("Invalid outgoing MCP UTF-8");}
 }
 }
+McpWireMessage mcp_decode_message(std::string_view bytes) {return decode(std::string(bytes));}
 struct McpLineStream::Impl {
     Sink sink;
     std::string pending;
