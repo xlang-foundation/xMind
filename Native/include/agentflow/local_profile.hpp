@@ -22,6 +22,7 @@ void publish_local_profile_ready(const std::string &state_file, int port, const 
                                  const std::string &workspace, const std::string &workspace_id,
                                  const std::string &authority);
 // Publish only public adapter metadata outside the selected workspace.
+void validate_local_view_ready(const std::string &file, const std::string &workspace);
 void publish_local_view_ready(const std::string &file, const std::string &metadata,
                               const std::string &workspace);
 } // namespace agentflow

@@ -105,6 +105,11 @@ int run_local_view(int argc, char **argv) {
         const std::string authorization = "Bearer " + access;
         SecureZeroMemory(access.data(), access.size());
         SetEnvironmentVariableW(L"XMIND_VIEW_TOKEN", nullptr);
+        if (options.workspace.empty()) {
+            const auto path = std::filesystem::current_path().u8string();
+            options.workspace.assign(reinterpret_cast<const char *>(path.data()), path.size());
+        }
+        agentflow::validate_local_view_ready(ready, options.workspace);
         verify_client_image();
         auto connection = agentflow::connect_local_profile(options);
         httplib::Server server;

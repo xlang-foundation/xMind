@@ -1,0 +1,24 @@
+{
+  "observedAt": "2026-10-10T00:08:12.328Z",
+  "sourceBaseRevision": "69a26f38958dac5600524d9399c7e92481289277",
+  "qualification": "Uncompiled native preflight candidate, not native acceptance evidence.",
+  "sourceHashes": {
+    "Native/apps/local_view_main.cpp": "fd8dfc9a7aa87860177610dd0d728894817d7c89cd513b727bb46560ba375c9f",
+    "Native/include/agentflow/local_profile.hpp": "ea27ca6d3cc3172ca7509195551ff7f692a486115c056388b3c58178dce32f0d",
+    "Native/src/local_profile.cpp": "5399ecfe26f2795b9bc6475c55df45f448dd3fa23ab56e51350e1110577d5950",
+    "Native/tests/local_view_contract.mjs": "d82456995783989e632d6d84cc12661055cbd10809885eeac4a53d5bbf058993"
+  },
+  "change": "Validate private rendezvous path, workspace exclusion, directory ownership and existing-file refusal before package qualification/backend discovery or configuration import.",
+  "preparedRegression": "Run the real native view with its ready path inside the workspace and assert refusal before profile storage or a ready file is created.",
+  "verification": {
+    "nodeSyntaxCheckPassed": true,
+    "nativeCompiled": false,
+    "nativeContractExecuted": false,
+    "nativeAccepted": false
+  },
+  "limits": [
+    "The separate live xlang3 performance run still prevents local native phases.",
+    "The original native-view readiness failure remains unresolved; run 38005698078 is still live.",
+    "Installed runtime unchanged."
+  ]
+}

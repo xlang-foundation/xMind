@@ -716,14 +716,20 @@ void publish_local_profile_ready(const std::string &state_file, int port, const 
     state["phase"] = "ready";
     store.write(state);
 }
-void publish_local_view_ready(const std::string &file, const std::string &metadata,
-                              const std::string &workspace_root) {
+void validate_local_view_ready(const std::string &file, const std::string &workspace_root) {
     const auto target = absolute(file);
     WorkspaceTools workspace(workspace_root);
     require(!contains(absolute(workspace.root_path()), target.parent_path()) &&
                 !contains(target.parent_path(), absolute(workspace.root_path())),
             "View rendezvous overlaps the selected workspace");
     Store store(target.parent_path(), true);
+    require(!fs::exists(target), "View rendezvous already exists; its data was preserved");
+}
+void publish_local_view_ready(const std::string &file, const std::string &metadata,
+                              const std::string &workspace_root) {
+    validate_local_view_ready(file, workspace_root);
+    const auto target = absolute(file);
+    Store store(target.parent_path());
     const auto value = parse(metadata);
     require(value.is_object() && !value.contains("auth") && !value.contains("token") &&
             metadata.size() <= 16384);

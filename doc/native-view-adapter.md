@@ -63,3 +63,12 @@ failure, pass the real console/editor-host/browser-cookie integration test and
 the complete native suite with frozen source, then build a new verified VSIX and
 validate its right sidebar in the actual IDE. The existing installed 0.1.5
 package is unchanged and still contains its earlier accepted runtime/launcher.
+
+## Pending preflight change
+
+The latest source validates the private ready-file location before backend
+discovery/start and provider configuration import. Existing rendezvous files
+are refused without overwriting their contents. A native contract is prepared
+to reject a ready file inside the workspace before creating profile storage.
+This change is **uncompiled and unaccepted** while native validation is deferred.
+[Source-bound candidate record](evidence/native-view-preflight-candidate.json).
