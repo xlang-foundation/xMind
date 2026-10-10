@@ -118,6 +118,14 @@ record its actual calls/events; no native replies are substituted. Syntax and
 whitespace checks pass. These new assertions have not executed and do not
 establish native streaming or rendered UI acceptance.
 
+Further prepared assertions open two actual paused feeds using scoped browser
+access directly against native: the third stream must receive HTTP 503 while
+session commands remain available. Aborting one reader must leave the graph
+paused. Killing its actual view owner must end the other stream with
+`reauthenticate`, preserve the paused graph and leave its dependent read pending.
+Both observers have bounded transport timeouts and are aborted during cleanup.
+These capacity/revocation checks are also unexecuted.
+
 Remaining acceptance includes the complete native gate, actual incremental
 delivery while a run continues, authorization revocation/expiry, saturated
 streams, disconnect/reconnect and backend restart without replay, actual shared

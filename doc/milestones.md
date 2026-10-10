@@ -7,6 +7,9 @@ input and completes its actual file read. Assertions require incremental
 committed frames, unique displayed sequences and exact persisted terminal
 history. Only syntax/whitespace checks have run; this acceptance remains pending.
 The separate local benchmark is still live, so no local native launch is claimed.
+The same contract now prepares actual two-stream capacity/command-fairness,
+reader detach and view-process-exit reauthentication checks while a real graph
+remains paused. Those additional checks are also unexecuted.
 
 VS Code subscription adoption candidate: the actual extension host now uses
 the same scoped committed-event subscription as the browser. Periodic run
