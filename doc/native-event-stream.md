@@ -2,8 +2,8 @@
 
 Candidate transport implementation. **New native compilation/integration is
 pending.** The accepted `689404e` installation remains unchanged. The existing
-browser and VS Code controllers still use polling; actual reader integration,
-reconnection and controller adoption are the next integration steps.
+VS Code controller still uses polling. The browser adoption described below is
+a tested candidate; actual native and installed/rendered acceptance remain.
 
 The shared `BackendClient.eventStream` reader is now implemented and passes
 synthetic parser/ownership/abort contracts. Actual native-reader integration,
@@ -78,8 +78,22 @@ unavailability and HTTP 503 receive up to three bounded retries. Authentication,
 protocol and consumer failures stop explicitly; a consumer `TypeError` cannot
 be mistaken for a network failure. The complete **238 extension / 43 browser**
 fixture suites pass. Actual native subscription is prepared in the view
-contract but has not run; UI controller adoption is still pending.
+contract but has not run; VS Code controller adoption is still pending.
 [Subscription candidate and original evidence](evidence/native-event-stream-subscription-candidate.json).
+
+The browser now uses that actual shared subscription for run, graph and owned
+tree scopes. A committed callback updates the selected live view, while
+observation/event/end callbacks request read-only metadata snapshots. Event
+refreshes coalesce in a single 100 ms timeout; there is no periodic HTTP timer.
+Snapshot requests serialize, so a newly observed child waits for an older
+snapshot and then resolves its current owner before publication. Cursor checks
+deduplicate overlapping REST and SSE delivery. View retirement cancels queued
+refreshes and detaches observation only. Four additional controller fixtures
+cover idle request counts, stale callbacks, overlapping events and new graph
+children during a held snapshot. Complete **238 extension / 47 browser** suites
+pass with all 2421 tracked inputs unchanged. This is synthetic controller
+evidence, not actual native or installed/rendered streaming acceptance.
+[Browser adoption scope and original evidence](evidence/native-event-stream-browser-adoption-candidate.json).
 
 Remaining acceptance includes the complete native gate, actual incremental
 delivery while a run continues, authorization revocation/expiry, saturated

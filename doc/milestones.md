@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+Browser subscription adoption candidate: the browser controller now observes
+the shared committed-event feed, with no periodic HTTP timer. Read-only
+run/graph/approval/plan/history snapshots refresh on observation, committed
+events and terminal end; event-triggered refreshes coalesce for 100 ms. Serialized
+snapshots discover new child ownership after an older snapshot, and overlapping
+REST/SSE records render once. Selection changes and disposal retire observation
+without cancelling execution. All **238 extension / 47 browser** synthetic
+checks pass with all 2421 tracked inputs unchanged. Actual native streaming,
+VS Code adoption and fresh installed/rendered acceptance remain pending.
+[Candidate and original evidence](evidence/native-event-stream-browser-adoption-candidate.json).
+
 Shared subscription lifecycle candidate: connection rotation resumes the
 delivered cursor, and root/conversation/origin/generation changes abort only the
 old observation and refuse its delayed events/outcomes/retries. Busy/transport

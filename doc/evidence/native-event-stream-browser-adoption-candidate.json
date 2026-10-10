@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-native-and-installed-validation-pending",
+  "parentRevision": "0fcee6031ccb65f84bcd55ecbf87d145ee6d2b0d",
+  "scope": "Browser controller and actual shared subscription under complete synthetic Node suites; no native/provider or installed/rendered UI execution",
+  "sourceFiles": 2421,
+  "sourceUnchangedAcrossSuites": true,
+  "suites": {
+    "extension": {
+      "tests": 238,
+      "pass": 238,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "tests": 47,
+      "pass": 47,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    }
+  },
+  "browser": {
+    "observation": "Shared scoped SSE subscription; no periodic HTTP timer",
+    "metadata": "Read-only snapshots on observation, committed event and terminal end; coalesced 100 ms event refresh",
+    "concurrency": "Snapshot serialization discovers child ownership after a prior snapshot; overlapping REST/SSE events render once",
+    "retirement": "Conversation/generation change and disposal detach only observation and refuse delayed callbacks"
+  },
+  "pending": [
+    "Complete native gate and actual stream integration",
+    "VS Code controller adoption",
+    "Native disconnect/revocation/capacity/restart acceptance",
+    "Fresh installed/rendered coding acceptance"
+  ],
+  "providerRequests": 0,
+  "nativeExecuted": false,
+  "currentInstallationChanged": false,
+  "rawEvidence": {
+    "doc/evidence/native-unified-event-stream-browser-adoption-extension.log": "1a32fb2e3d60088c613fe63a1065b3cafe319b12958379cc1b63811dc1361c97",
+    "doc/evidence/native-unified-event-stream-browser-adoption-browser.log": "c883d5be4916cadcfd0127473c66b518409574cdb6bc9783278c7c81545ca1f3",
+    "doc/evidence/native-unified-event-stream-browser-adoption-source-before.json": "f0d3bbc3b0d3d0c299a7c2251b784799f358db10099606243188dda8798068bd",
+    "doc/evidence/native-unified-event-stream-browser-adoption-source-after.json": "f0d3bbc3b0d3d0c299a7c2251b784799f358db10099606243188dda8798068bd"
+  }
+}

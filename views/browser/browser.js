@@ -9,6 +9,7 @@ const validatePlanInputText=typeof module!=='undefined'&&module.exports?require(
 const ContextViewController=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').ContextViewController:globalThis.XMindBackend.ContextViewController;
 const SkillViewController=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').SkillViewController:globalThis.XMindBackend.SkillViewController;
 const validateGraphContext=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').validateGraphContext:globalThis.XMindBackend.validateGraphContext;
+const EventStreamSubscription=typeof module!=='undefined'&&module.exports?require('../../extensions/vscode/client').EventStreamSubscription:globalThis.XMindBackend.EventStreamSubscription;
 // Thin view controller. All execution, permissions and persistence stay native.
 class BrowserController {
   async readSkills(){
@@ -17,8 +18,8 @@ class BrowserController {
     this.skillController??=new SkillViewController(this.client,m=>{if(!this.disposed)this.post(m);},()=>({session:this.session,generation:this.generation,enabled:!this.disposed&&this.health?.skill_controls===true}));
     try{await this.skillController.read();}catch(error){if(this.current(version))this.post({type:'skills-error',text:error.message});}
   }
-  constructor(client,post,{save=()=>{},review=()=>{},copy=()=>{},link=()=>{}}={}){this.client=client;this.post=post;this.save=save;this.review=review;this.copy=copy;this.link=link;this.generation=0;this.cursor=0;this.runs=[];this.graphs=[];this.children=new Map();this.operations=new Map();this.models={models:[]};this.queue=Promise.resolve();}
-  stop(){clearInterval(this.timer);this.timer=undefined;this.contextController?.invalidate();this.skillController?.invalidate();this.pendingTreeEvents=false;const hadPlan=!!this.planObservation||this.pendingPlanObservation;this.pendingPlanObservation=false;this.planReadConflicts=0;this.planObservation=undefined;if(hadPlan)this.post({type:'plan-clear'});this.generation++;this.profileController?.invalidate();}
+  constructor(client,post,{save=()=>{},review=()=>{},copy=()=>{},link=()=>{},subscriptionFactory=options=>new EventStreamSubscription(options)}={}){this.client=client;this.post=post;this.save=save;this.review=review;this.copy=copy;this.link=link;this.subscriptionFactory=subscriptionFactory;this.generation=0;this.cursor=0;this.runs=[];this.graphs=[];this.children=new Map();this.operations=new Map();this.models={models:[]};this.queue=Promise.resolve();}
+  stop(){clearTimeout(this.snapshotTimer);this.snapshotTimer=undefined;this.subscription?.stop();this.contextController?.invalidate();this.skillController?.invalidate();this.pendingTreeEvents=false;const hadPlan=!!this.planObservation||this.pendingPlanObservation;this.pendingPlanObservation=false;this.planReadConflicts=0;this.planObservation=undefined;if(hadPlan)this.post({type:'plan-clear'});this.generation++;this.profileController?.invalidate();}
   dispose(){this.disposed=true;this.profileController?.dispose();this.stop();this.contextController?.dispose();clearTimeout(this.keyTimer);this.selection=undefined;}
   async readContext(){
     if(this.disposed)return;
@@ -45,28 +46,49 @@ class BrowserController {
     // carry an unsaved key across the conversation change.
     if(this.current(version)&&previousProfile&&!retainedCatalogue&&this.profileController?.state?.active){try{await this.discover();}catch{}}
     if(!this.current(version))return;if(this.runId){await this.poll();this.watch();}else this.post({type:'status',text:'Ready'});await this.readSkills();}
-  watch(){clearInterval(this.timer);if(this.busy()||this.pendingTreeEvents||this.pendingPlanObservation)this.timer=setInterval(()=>this.poll(),500);}
+  watch(){
+    const run=this.runs.find(value=>value.id===this.runId&&['queued','running','paused'].includes(value.state))||this.runs.find(value=>['queued','running','paused'].includes(value.state))||((this.pendingTreeEvents||this.pendingPlanObservation)&&this.runs.find(value=>value.id===this.runId));
+    if(!run||!this.session||this.disposed){this.subscription?.stop();return;}
+    this.subscription??=this.subscriptionFactory({current:pin=>this.current(pin.generation)&&this.client===pin.client&&this.session===pin.session,onObservation:async(value,pin)=>{if(this.current(pin.generation))await this.poll();},onEvent:async(event,pin)=>{
+      if(!this.current(pin.generation))return;
+      if(pin.root===this.runId&&event.seq>this.cursor){
+        if(event.run_id!==this.runId&&!this.children.has(event.run_id))await this.poll();
+        if(!this.current(pin.generation))return;
+        if(event.seq>this.cursor){const child=this.children.get(event.run_id);if(event.run_id!==this.runId&&!child)throw new Error('Refresh the owned child before displaying its event');this.post({type:event.run_id===this.runId?'event':pin.scope==='graph'?'graph-event':'owned-event',event,node_id:child?.node_id,child_id:event.run_id});this.cursor=event.seq;}
+      }
+      this.scheduleSnapshot(pin);
+    },onEnd:async(result,pin)=>{if(!this.current(pin.generation))return;await this.poll();if(this.current(pin.generation))this.watch();},onError:(error,pin)=>{if(this.current(pin.generation))this.post({type:'error',text:error.message});}});
+    this.subscription.watch({client:this.client,root:run.id,session:this.session,scope:run.graph_root?'graph':this.health?.owned_child_observation===true?'tree':'run',generation:this.generation,after:run.id===this.runId?this.cursor:0});
+  }
+  scheduleSnapshot(pin){if(this.snapshotTimer||!this.current(pin.generation))return;this.snapshotTimer=setTimeout(()=>{this.snapshotTimer=undefined;if(this.current(pin.generation))this.poll().then(()=>{if(this.current(pin.generation))this.watch();});},100);}
   async refreshSessions(){const version=this.generation,sessions=await this.client.sessions();if(this.current(version))this.post({type:'sessions',sessions,selected:this.session});}
-  async poll(){if(this.polling||!this.runId)return;this.polling=true;const version=this.generation,id=this.runId;try{
+  async poll(){
+    const version=this.generation;
+    while(this.snapshotPromise){await this.snapshotPromise;if(!this.current(version))return;}
+    if(!this.runId||!this.current(version))return;
+    const pending=this.pollSnapshot();this.snapshotPromise=pending;
+    try{await pending;}finally{if(this.snapshotPromise===pending)this.snapshotPromise=undefined;}
+  }
+  async pollSnapshot(){const version=this.generation,id=this.runId;try{
     const run=await this.client.status(id);if(!this.current(version))return;
     if(!run.graph_root&&this.health?.owned_child_observation===true){await this.pollOwned(run,version);return;}
     if(run.graph_root){const root=await this.client.graph(id),children=await this.client.graphChildren(id),events=await this.client.graphEvents(id,this.cursor);if(!this.current(version))return;if(root.run.id!==id||root.run.session_id!==this.session||children.some(child=>child.parent_id!==id||child.session_id!==this.session))throw new Error('Graph observation changed');this.children=new Map(children.map(child=>[child.id,child]));this.graph=root;const histories={},operations=[];
       for(const child of children){if(root.spec.nodes.find(node=>node.id===child.node_id)?.type==='agent')histories[child.id]=await this.client.graphChildHistory(id,child.id);operations.push(...await this.client.operations(child.id));if(!this.current(version))return;}
-      this.post({type:'graph',record:root,children,histories});for(const event of events){if(event.run_id!==id&&!this.children.has(event.run_id))throw new Error('Unowned graph event');this.post({type:event.run_id===id?'event':'graph-event',event,node_id:this.children.get(event.run_id)?.node_id});this.cursor=event.seq;}this.operations=new Map(operations.map(item=>[item.id,item]));this.post({type:'operations',operations:operations.map(item=>({...item,node_id:this.children.get(item.run_id)?.node_id}))});
-    }else{const events=await this.client.events(id,this.cursor),operations=await this.client.operations(id);if(!this.current(version))return;for(const event of events){if(event.run_id!==id)throw new Error('Unowned run event');this.post({type:'event',event});this.cursor=event.seq;}this.operations=new Map(operations.map(item=>[item.id,item]));this.post({type:'operations',operations});}
+      this.post({type:'graph',record:root,children,histories});for(const event of events){if(event.seq<=this.cursor)continue;if(event.run_id!==id&&!this.children.has(event.run_id))throw new Error('Unowned graph event');this.post({type:event.run_id===id?'event':'graph-event',event,node_id:this.children.get(event.run_id)?.node_id});this.cursor=event.seq;}this.operations=new Map(operations.map(item=>[item.id,item]));this.post({type:'operations',operations:operations.map(item=>({...item,node_id:this.children.get(item.run_id)?.node_id}))});
+    }else{const events=await this.client.events(id,this.cursor),operations=await this.client.operations(id);if(!this.current(version))return;for(const event of events){if(event.seq<=this.cursor)continue;if(event.run_id!==id)throw new Error('Unowned run event');this.post({type:'event',event});this.cursor=event.seq;}this.operations=new Map(operations.map(item=>[item.id,item]));this.post({type:'operations',operations});}
     const latest=await this.client.status(id);if(!this.current(version))return;
     if(['completed','failed','cancelled'].includes(latest.state)){
-      const final=run.graph_root?await this.client.graphEvents(id,this.cursor):await this.client.events(id,this.cursor);if(!this.current(version))return;for(const event of final){if(event.run_id!==id&&!this.children.has(event.run_id))throw new Error('Unowned final event');this.post({type:event.run_id===id?'event':'graph-event',event,node_id:this.children.get(event.run_id)?.node_id});this.cursor=event.seq;}
+      const final=run.graph_root?await this.client.graphEvents(id,this.cursor):await this.client.events(id,this.cursor);if(!this.current(version))return;for(const event of final){if(event.seq<=this.cursor)continue;if(event.run_id!==id&&!this.children.has(event.run_id))throw new Error('Unowned final event');this.post({type:event.run_id===id?'event':'graph-event',event,node_id:this.children.get(event.run_id)?.node_id});this.cursor=event.seq;}
       if(run.graph_root){const root=await this.client.graph(id),children=await this.client.graphChildren(id),histories={};for(const child of children)if(root.spec.nodes.find(node=>node.id===child.node_id)?.type==='agent')histories[child.id]=await this.client.graphChildHistory(id,child.id);if(!this.current(version))return;this.graph=root;this.post({type:'graph',record:root,children,histories});}
     }
-    const history=await this.client.history(this.session),runs=await this.client.runs(this.session);if(!this.current(version))return;this.runs=runs;this.present();this.post({type:'transcript',history,preserveLive:['queued','running','paused'].includes(latest.state)});this.post({type:'status',text:latest.state});if(!this.busy())clearInterval(this.timer);
-  }catch(error){if(error.status===409&&this.current(version)){this.graph=undefined;this.post({type:'graph-clear'});}if(this.current(version))this.post({type:'error',text:error.message});}finally{this.polling=false;if(!this.busy())await this.readSkills();await this.readContext().catch(error=>{if(this.current(version))this.post({type:'error',text:error.message});});}}
+    const history=await this.client.history(this.session),runs=await this.client.runs(this.session);if(!this.current(version))return;this.runs=runs;this.present();this.post({type:'transcript',history,preserveLive:['queued','running','paused'].includes(latest.state)});this.post({type:'status',text:latest.state});
+  }catch(error){if(error.status===409&&this.current(version)){this.graph=undefined;this.post({type:'graph-clear'});}if(this.current(version))this.post({type:'error',text:error.message});}finally{if(this.current(version)){if(!this.busy())await this.readSkills();await this.readContext().catch(error=>{if(this.current(version))this.post({type:'error',text:error.message});});}}}
   async pollOwned(run,version){
     const id=this.runId,validRoot=value=>{if(value.id!==id||value.session_id!==this.session||value.parent_id||value.graph_root)throw new Error('Owned run observation identity changed');};validRoot(run);
     const publish=snapshot=>{
       this.children=new Map(snapshot.children.map(child=>[child.run.id,child.run]));this.operations=new Map(snapshot.operations.map(operation=>[operation.id,operation]));
       this.post({type:'owned-children',parent:run,children:snapshot.children,histories:snapshot.histories});
-      for(const event of snapshot.events){this.post({type:event.run_id===id?'event':'owned-event',event,child_id:event.run_id});this.cursor=event.seq;}
+      for(const event of snapshot.events){if(event.seq<=this.cursor)continue;this.post({type:event.run_id===id?'event':'owned-event',event,child_id:event.run_id});this.cursor=event.seq;}
       this.post({type:'operations',operations:snapshot.operations.map(operation=>({...operation,node_id:this.children.get(operation.run_id)?.node_id}))});
     };
     let snapshot=await observeOwnedRun(this.client,run,this.session,this.cursor);if(!this.current(version))return;publish(snapshot);
@@ -76,7 +98,7 @@ class BrowserController {
     await this.readPlan(id,version);if(!this.current(version))return;
     const history=await this.client.history(this.session),runs=await this.client.runs(this.session);if(!this.current(version))return;
     this.runs=runs;this.pendingTreeEvents=!snapshot.caughtUp;this.present();this.post({type:'transcript',history,preserveLive:['queued','running','paused'].includes(run.state)});this.post({type:'status',text:run.state});
-    if(!this.busy()&&!this.pendingTreeEvents&&!this.pendingPlanObservation)clearInterval(this.timer);else if(!this.timer)this.watch();
+    this.watch();
   }
   async readPlan(root,version){
     if(!Object.hasOwn(this.health||{},'agent_planning'))return;

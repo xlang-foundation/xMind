@@ -169,8 +169,9 @@ acceptance remains pending; earlier installed previews are separate checkpoints.
 [Exact gate and package scope](evidence/native-view-hosted-689404e-package.json).
 
 Pending delivery includes fresh installed-controller acceptance, HTTP
-SSE for the shared UI event feed (currently 500 ms polling; A2A streaming is
-separate), unified YAML/Markdown/Python authoring, reusable nested super-agents,
+SSE acceptance and VS Code adoption for the shared UI event feed (the browser
+subscription candidate passes synthetic checks; A2A streaming is separate),
+unified YAML/Markdown/Python authoring, reusable nested super-agents,
 shared scheduling/worker placement, xlang3 IPC, Local/Nexus connection integration
 and remaining provider/coding parity.
 

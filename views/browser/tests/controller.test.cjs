@@ -1,5 +1,37 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController}=require('../browser.js');
 const {planFixture,inputMessage}=require('../../../extensions/vscode/tests/plan-fixture');
+// Synthetic domain replies around the actual browser controller and shared
+// subscription. These tests do not supply native/provider execution.
+test('browser uses committed feed callbacks and stays idle without periodic observation requests',async()=>{
+ const posted=[],streams=[];let snapshots=0,run={id:'root',session_id:'session',state:'running',parent_id:'',node_id:'',graph_root:false};const client={baseUrl:'http://127.0.0.1:8765',status:async()=>{snapshots++;return run;},events:async()=>[],operations:async()=>[],history:async()=>[],runs:async()=>[run],eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))};
+ const view=new BrowserController(client,m=>posted.push(m));view.session='session';view.runId='root';view.runs=[run];view.health={owned_child_observation:false};
+ try{view.watch();await new Promise(resolve=>setImmediate(resolve));assert.equal(streams.length,1);assert.equal(streams[0].id,'root');assert.equal(streams[0].options.scope,'run');await streams[0].options.onObservation({run,scope:'run',after:0});
+  const event={seq:1,run_id:'root',kind:'model.text',data:{text:'Synthetic streamed browser chunk'}};await streams[0].options.onEvent(event);assert.equal(posted.filter(m=>m.type==='event'&&m.event.seq===1).length,1);assert.equal(view.cursor,1);
+  await new Promise(resolve=>setTimeout(resolve,150));const settled=snapshots;await new Promise(resolve=>setTimeout(resolve,550));assert.equal(snapshots,settled,'Idle observation must not issue a 500 ms HTTP poll');assert.equal(streams.length,1);
+  run={...run,state:'completed'};streams[0].resolve({reason:'terminal',cursor:1});await new Promise(resolve=>setTimeout(resolve,20));assert.equal(posted.findLast(m=>m.type==='status').text,'completed');assert.equal(view.subscription.pin,undefined);assert.equal(view.timer,undefined);
+ }finally{view.dispose();}
+});
+test('browser selection retirement aborts the feed and rejects late events from that conversation',async()=>{
+ const posted=[],streams=[],client={baseUrl:'http://127.0.0.1:8765',eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))},view=new BrowserController(client,m=>posted.push(m));view.session='session';view.runId='root';view.runs=[{id:'root',state:'running'}];view.health={};
+ try{view.watch();await new Promise(resolve=>setImmediate(resolve));view.stop();view.session='next-session';view.runId='next-root';view.runs=[{id:'next-root',state:'running'}];view.watch();await new Promise(resolve=>setImmediate(resolve));assert.equal(streams.length,2);assert.equal(streams[0].options.signal.aborted,true);const count=posted.length;await assert.rejects(streams[0].options.onEvent({seq:1,run_id:'root',kind:'model.text',data:{text:'Retired fixture'}}),/retired/);streams[0].resolve({reason:'terminal',cursor:0});await new Promise(resolve=>setImmediate(resolve));assert.equal(posted.length,count);assert.equal(view.cursor,0);
+ }finally{view.dispose();}
+});
+test('browser event arriving during a snapshot does not render that committed record twice',async()=>{
+ const posted=[],streams=[],event={seq:1,run_id:'root',kind:'model.text',data:{text:'Synthetic concurrent fixture'}},run={id:'root',session_id:'session',state:'running',parent_id:'',node_id:'',graph_root:false};let release;const held=new Promise(resolve=>release=resolve);let queried=false;const client={baseUrl:'http://127.0.0.1:8765',status:async()=>run,events:async()=>{queried=true;return held;},operations:async()=>[],history:async()=>[],runs:async()=>[run],eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))};const view=new BrowserController(client,m=>posted.push(m));view.session='session';view.runId='root';view.runs=[run];view.health={};
+ try{view.watch();await new Promise(resolve=>setImmediate(resolve));const snapshot=view.poll();for(let i=0;i<20&&!queried;i++)await new Promise(resolve=>setImmediate(resolve));assert.equal(queried,true);await streams[0].options.onEvent(event);release([event]);await snapshot;assert.equal(posted.filter(m=>m.type==='event'&&m.event.seq===1).length,1);assert.equal(view.cursor,1);
+ }finally{release([event]);view.dispose();}
+});
+test('browser resolves new graph child ownership after an older snapshot finishes',async()=>{
+ const run={id:'root',session_id:'session',state:'running',parent_id:'',node_id:'',graph_root:true},child={id:'child',session_id:'session',state:'running',parent_id:'root',node_id:'agent',graph_root:false},record={run,spec:{nodes:[{id:'agent',type:'agent'}]}},posted=[],streams=[];
+ let release,reads=0,blocked=false;const held=new Promise(resolve=>release=resolve);
+ const client={baseUrl:'http://127.0.0.1:8765',status:async()=>run,graph:async()=>record,graphChildren:async()=>++reads===1?[]:[child],graphEvents:async()=>[],graphChildHistory:async()=>[],operations:async()=>[],history:async()=>{if(reads===1){blocked=true;await held;}return [];},runs:async()=>[run],eventStream:(id,options)=>new Promise(resolve=>streams.push({id,options,resolve}))};
+ const view=new BrowserController(client,m=>posted.push(m));view.session='session';view.runId='root';view.runs=[run];view.health={};
+ try{view.watch();await new Promise(resolve=>setImmediate(resolve));const snapshot=view.poll();for(let n=0;n<20&&!blocked;n++)await new Promise(resolve=>setImmediate(resolve));assert.equal(blocked,true);
+  const event={seq:2,run_id:'child',kind:'model.text',data:{text:'Synthetic new child'}};const delivery=streams[0].options.onEvent(event);await new Promise(resolve=>setImmediate(resolve));assert.equal(posted.filter(m=>m.type==='graph-event').length,0);release();await Promise.all([snapshot,delivery]);
+  assert.equal(reads,2);assert.equal(view.children.get('child').parent_id,'root');assert.deepEqual(posted.filter(m=>m.type==='graph-event').map(m=>[m.event.seq,m.node_id]),[[2,'agent']]);assert.equal(view.subscription.cursor,2);assert.ok(!posted.some(m=>m.type==='error'));
+ }finally{release();view.dispose();}
+});
+
 test('browser forwards actual native file-proposal policy and clears unsupported legacy metadata without writes',async()=>{
  const posted=[];let health={agent_execution:false,file_edit_proposals:false};const client={health:async()=>health,graphs:async()=>({graphs:[]})},view=new BrowserController(client,m=>posted.push(m));try{await view.refreshCapabilities();assert.equal(posted.findLast(m=>m.type==='capabilities').fileEditProposals,false);health={agent_execution:false,file_edit_proposals:true};await view.refreshCapabilities();assert.equal(posted.findLast(m=>m.type==='capabilities').fileEditProposals,true);health={agent_execution:false};await view.refreshCapabilities();assert.equal(posted.findLast(m=>m.type==='capabilities').fileEditProposals,undefined);assert.ok(!posted.some(m=>m.type==='user'||m.type==='operations'));}finally{view.dispose();}
 });
