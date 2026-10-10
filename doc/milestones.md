@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+At source `59f46791c02cb18cd4aa4c66b7d01b22f06cbcb0`, managed local-profile
+startup verifies the complete source runtime once, then authenticates protected
+profile state and uses the verified managed-copy path for server startup and
+workspace reattachment. This removes redundant full-package scans while keeping
+complete explicit revalidation available; a changed managed runtime is rejected
+by the verifier contract. The rebuilt Windows binary passed the local-profile,
+runtime-generation and native/browser workspace contracts. The standalone
+webpage suite passed **60/60**. The currently open webpage still uses an older
+backend and keeps Add workspace disabled; fresh rendered acceptance against the
+rebuilt backend remains open. [Exact scope](evidence/native-profile-workspace-59f4679.json).
+
 Native authoring now accepts bounded YAML graph catalogs plus JSON/YAML/Markdown
 agent-instruction supplements. The new YAML converter rejects duplicate keys,
 aliases, multiple documents and oversized values before existing native graph

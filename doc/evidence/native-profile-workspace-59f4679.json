@@ -1,0 +1,68 @@
+{
+  "sourceRevision": "59f46791c02cb18cd4aa4c66b7d01b22f06cbcb0",
+  "branch": "checkpoint/native-persistence-m1",
+  "result": "passed",
+  "build": {
+    "command": "cmake --build build/skill-state-native --config Release --target xmind -- /m:2",
+    "result": "passed"
+  },
+  "contracts": [
+    {
+      "name": "native_local_view_contract",
+      "result": "passed",
+      "elapsed_seconds": 161.17,
+      "scope": [
+        "actual native backend and browser adapter",
+        "native profile catalogue and workspace registration",
+        "workspace selection and browser credential rotation",
+        "persistent SQLite profile and production browser controller",
+        "native streaming, pause, resume and owner-revocation paths"
+      ],
+      "provider_requests": 0,
+      "rendered_ui": false,
+      "installed_ide": false
+    },
+    {
+      "name": "native_local_profile_contract",
+      "result": "passed",
+      "elapsed_seconds": 103.78,
+      "scope": [
+        "cold local profile creation",
+        "DPAPI-protected launch record and actual owned server startup",
+        "concurrent reattachment",
+        "SQLite-backed graph execution and history",
+        "backend restart and saved history continuity"
+      ],
+      "provider_requests": 0
+    },
+    {
+      "name": "native_runtime_generation_contract",
+      "result": "passed",
+      "elapsed_seconds": 5.92,
+      "scope": [
+        "complete source package verification",
+        "loaded executable identity",
+        "managed-copy fast startup validation",
+        "full explicit managed-copy revalidation rejects tampering"
+      ]
+    },
+    {
+      "name": "node --test views/browser/tests/*.test.cjs",
+      "result": "passed",
+      "tests": 60,
+      "passed": 60,
+      "failed": 0,
+      "elapsed_ms": 1842.65
+    }
+  ],
+  "live_browser_observation": {
+    "url": "http://127.0.0.1:60415/ui/",
+    "workspace_selector_visible": true,
+    "visible_workspaces": [
+      "xMind · D:\\CantorAI2026\\xMind",
+      "TestProj · D:\\CantorAI2026\\TestProj"
+    ],
+    "add_workspace_enabled": false,
+    "qualification": "This already-open tab remains attached to an older backend that does not advertise profile registration. The passing native/browser contract exercised registration and selection against the rebuilt backend; this checkpoint does not claim a fresh rendered-page run against it."
+  }
+}

@@ -4,8 +4,8 @@ xMind is being built as a general-purpose single-agent and graph platform with a
 
 OpenCode 2 is the coding feature reference; LiteLLM is the provider coverage reference. Their implementations are not the engine. See the [architecture](doc/architecture.md), [SVG](doc/architecture.svg), [pinned parity baseline](doc/PARITY.md) and [provider requirements](doc/MODEL_SUPPORT.md).
 
-The latest local checkpoint passed all **98 native, 215 extension and 39 browser
-contracts**. Native discovery and literal content search now share hierarchical
+The latest live coding-acceptance checkpoint passed **98 native, 215 extension
+and 39 browser contracts**. Native discovery and literal content search now share hierarchical
 local ignore rules. Real OpenAI filtered search and an xlang3/SQLite history
 restart passed. Native `glob_files` supports recursive discovery for agents,
 read-only children and graph tools; `read_file` supports bounded line pages
