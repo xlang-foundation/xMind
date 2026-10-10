@@ -127,7 +127,7 @@ class BackendClient {
     if(!['run','tree','graph'].includes(scope)||typeof onEvent!=='function'||onObservation!==undefined&&typeof onObservation!=='function')throw new Error('Invalid event stream observer');
     signal?.throwIfAborted();const token=validateToken(await this.#tokenProvider());signal?.throwIfAborted();
     const route=scope==='graph'?`/v1/graph-runs/${id}/events/stream`:`/v1/runs/${id}/${scope==='tree'?'tree-events':'events'}/stream`;
-    const response=await this.fetch(this.baseUrl+route+'?after='+after,{method:'GET',headers:{Authorization:`Bearer ${token}`,Accept:'text/event-stream'},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(35000)]):AbortSignal.timeout(35000),redirect:'error'});
+    let response;try{response=await this.fetch(this.baseUrl+route+'?after='+after,{method:'GET',headers:{Authorization:`Bearer ${token}`,Accept:'text/event-stream'},signal:signal?AbortSignal.any([signal,AbortSignal.timeout(35000)]):AbortSignal.timeout(35000),redirect:'error'});}catch(error){if(error?.name==='TypeError'||error?.name==='TimeoutError')error.eventTransportUnavailable=true;throw error;}
     if(!response.ok){const value=await response.json();const error=new Error(typeof value.detail==='string'?value.detail:'Native event observation unavailable');error.status=response.status;throw error;}
     const known=new Set([id]);
     return readCommittedEventStream(response,{root:id,session:session_id,scope,after,signal,onEvent,onObservation,authorizeEvent:async event=>{
@@ -246,7 +246,7 @@ async function readCommittedEventStream(response,{root,session,scope,after,signa
   };
   try{
     while(true){
-      signal?.throwIfAborted();const chunk=await reader.read();signal?.throwIfAborted();
+      signal?.throwIfAborted();let chunk;try{chunk=await reader.read();}catch(error){if(error?.name==='TypeError'||error?.name==='TimeoutError')error.eventTransportUnavailable=true;throw error;}signal?.throwIfAborted();
       if(chunk.done){pending+=decoder.decode();throw new Error('Native event stream ended without a complete end frame');}
       if(!ArrayBuffer.isView(chunk.value))throw new Error('Invalid event stream bytes');total+=chunk.value.byteLength;if(total>64*1024*1024)throw new Error('Event stream exceeds its connection limit');
       pending+=decoder.decode(chunk.value,{stream:true});pending=pending.replace(/\r\n/g,'\n');
@@ -255,6 +255,46 @@ async function readCommittedEventStream(response,{root,session,scope,after,signa
     }
   }catch(error){if(error&&typeof error==='object')error.eventCursor=cursor;throw error;}
   finally{signal?.removeEventListener('abort',detach);try{await reader.cancel();}catch{}reader.releaseLock();}
+}
+class EventStreamSubscription {
+  constructor({current,onEvent,onObservation,onEnd,onError,schedule=setTimeout,unschedule=clearTimeout}){
+    if(typeof current!=='function'||typeof onEvent!=='function')throw new Error('Invalid event subscription callbacks');
+    this.current=current;this.onEvent=onEvent;this.onObservation=onObservation;this.onEnd=onEnd;this.onError=onError;this.schedule=schedule;this.unschedule=unschedule;this.epoch=0;this.disposed=false;
+  }
+  matches(pin){return this.pin&&this.pin.client===pin.client&&this.pin.origin===pin.client.baseUrl&&this.pin.root===pin.root&&this.pin.session===pin.session&&this.pin.scope===pin.scope&&this.pin.generation===pin.generation;}
+  valid(pin,epoch){return !this.disposed&&this.pin===pin&&this.epoch===epoch&&pin.client.baseUrl===pin.origin&&this.current(pin);}
+  watch(value){
+    if(this.disposed)return;executionIdentity(value.root);executionIdentity(value.session);planInteger(value.after??0);
+    if(!value.client||typeof value.client.eventStream!=='function'||!['run','tree','graph'].includes(value.scope)||!Number.isSafeInteger(value.generation)||value.generation<0)throw new Error('Invalid event subscription binding');
+    if(this.matches(value))return;
+    this.stop();const pin=Object.freeze({...value,origin:backendOrigin(value.client.baseUrl),after:value.after??0});if(!this.current(pin))return;
+    this.pin=pin;this.cursor=pin.after;this.failedAttempts=0;this.finished=false;this.connect(pin,this.epoch);
+  }
+  stop(){this.epoch++;this.unschedule(this.timer);this.timer=undefined;this.abort?.abort();this.abort=undefined;this.pin=undefined;}
+  dispose(){this.stop();this.disposed=true;}
+  async connect(pin,epoch){
+    if(!this.valid(pin,epoch)||this.finished)return;const abort=new AbortController();this.abort=abort;
+    try{
+      const consume=async(callback,...values)=>{try{return await callback?.(...values);}catch(error){const rejected=new Error('Event observer rejected delivery',{cause:error});rejected.eventConsumerFailure=true;throw rejected;}};
+      const result=await pin.client.eventStream(pin.root,{scope:pin.scope,session_id:pin.session,after:this.cursor,signal:abort.signal,onObservation:async value=>{if(!this.valid(pin,epoch))throw new Error('Event subscription retired');await consume(this.onObservation,value,pin);if(!this.valid(pin,epoch))throw new Error('Event subscription retired');},onEvent:async event=>{if(!this.valid(pin,epoch))throw new Error('Event subscription retired');await consume(this.onEvent,event,pin);if(!this.valid(pin,epoch))throw new Error('Event subscription retired');this.cursor=event.seq;this.failedAttempts=0;}});
+      if(!this.valid(pin,epoch))return;
+      if(!result||result.cursor!==this.cursor)throw new Error('Event subscription acknowledgement changed');
+      if(result.reason==='terminal'){this.finished=true;await this.onEnd?.(result,pin);return;}
+      if(result.reason==='reauthenticate'){this.finished=true;const error=new Error('Reconnect this profile to continue event observation');error.status=401;this.notifyError(error,pin);return;}
+      if(result.reason!=='reconnect'){this.finished=true;this.notifyError(new Error('Native event observation was interrupted; reconnect this profile'),pin);return;}
+      this.retry(pin,epoch,0);
+    }catch(error){
+      if(!this.valid(pin,epoch)||abort.signal.aborted)return;
+      // Retry only bounded transport unavailability. Protocol/identity and
+      // consumer failures stop explicitly; a cursor cannot be silently skipped.
+      if(!this.finished&&!error.eventConsumerFailure&&(error.status===503||error.eventTransportUnavailable===true)){
+        this.failedAttempts++;if(this.failedAttempts<=3){this.retry(pin,epoch,Math.min(4000,500*2**(this.failedAttempts-1)));return;}
+      }
+      this.finished=true;this.notifyError(error,pin);
+    }finally{if(this.abort===abort)this.abort=undefined;}
+  }
+  retry(pin,epoch,delay){if(!this.valid(pin,epoch))return;this.timer=this.schedule(()=>{this.timer=undefined;if(this.valid(pin,epoch))this.connect(pin,epoch);},delay);}
+  notifyError(error,pin){try{Promise.resolve(this.onError?.(error,pin)).catch(()=>{});}catch{} }
 }
 function executionIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(value))throw new Error('Invalid execution identity');return value;}
 function providerCallIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.:-]{1,256}$/.test(value))throw new Error('Invalid provider call identity');return value;}
@@ -507,5 +547,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue};
-else globalThis.XMindBackend={BackendClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue};
+else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue};

@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+Shared subscription lifecycle candidate: connection rotation resumes the
+delivered cursor, and root/conversation/origin/generation changes abort only the
+old observation and refuse its delayed events/outcomes/retries. Busy/transport
+retries are bounded; authentication, protocol and consumer failures stop
+explicitly. All **238 extension / 43 browser** fixture checks pass with all
+2421 tracked inputs unchanged. The real native contract now includes production
+subscription replay, but it has not executed. Both UI controllers still poll;
+adoption and installed/native acceptance remain pending. The accepted installation
+is unchanged. [Candidate and exact verification scope](evidence/native-event-stream-subscription-candidate.json).
+
 Shared event reader candidate: `BackendClient.eventStream` validates root,
 conversation, scope, committed IDs and owned-child metadata, decodes split UTF-8
 and CRLF, preserves consumer-acknowledged cursors and detaches on abort/protocol

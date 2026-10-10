@@ -69,6 +69,18 @@ suites pass with all 2421 tracked native/tool/view inputs unchanged. The real
 native view contract now also exercises this production reader and scoped
 resume, but those new assertions remain unexecuted.
 
+`EventStreamSubscription` supplies the shared observation lifecycle. It pins the
+client/origin, root, conversation, scope and view generation; a matching watch
+does not reopen the feed. A normal native connection rotation resumes its own
+delivered cursor. Replacement/disposal aborts the old observation and rejects
+late events, outcomes and retry callbacks. Only marked fetch/body transport
+unavailability and HTTP 503 receive up to three bounded retries. Authentication,
+protocol and consumer failures stop explicitly; a consumer `TypeError` cannot
+be mistaken for a network failure. The complete **238 extension / 43 browser**
+fixture suites pass. Actual native subscription is prepared in the view
+contract but has not run; UI controller adoption is still pending.
+[Subscription candidate and original evidence](evidence/native-event-stream-subscription-candidate.json).
+
 Remaining acceptance includes the complete native gate, actual incremental
 delivery while a run continues, authorization revocation/expiry, saturated
 streams, disconnect/reconnect and backend restart without replay, shared UI

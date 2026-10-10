@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-native-validation-pending",
+  "acceptedInstalledSource": "689404eeeae8c0b83a7859b7efba584100a46edb",
+  "readerCandidateSource": "991bd76115ad99d3a85ade96dfddcce1e0c32a82",
+  "scope": "Shared subscription lifecycle under complete synthetic Node suites; no native stream or installed/rendered UI execution",
+  "sourceFiles": 2421,
+  "sourceUnchangedAcrossSuites": true,
+  "suites": {
+    "extension": {
+      "tests": 238,
+      "passed": 238,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "sha256": "42d2d0bea98f891190951cad5936a234a2b6ff667b45dea9f7e3656053919e71"
+    },
+    "browser": {
+      "tests": 43,
+      "passed": 43,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "sha256": "2bebc6e391ad2ac853161ee0e9b3fccb746a867ddb3b575fd682f7ed95c8e1ab"
+    }
+  },
+  "subscription": {
+    "component": "EventStreamSubscription",
+    "binding": [
+      "client instance",
+      "canonical origin",
+      "root",
+      "conversation",
+      "scope",
+      "view generation"
+    ],
+    "cursor": "Acknowledged only after the selected consumer accepts a committed event",
+    "rotation": "Native reconnect end opens the same scoped feed at the delivered cursor",
+    "retirement": "Abort and clear only observation; reject delayed old-epoch events/outcomes/retries",
+    "failurePolicy": "At most three retries for marked fetch/body transport unavailability or HTTP 503; authentication, protocol and consumer rejection stop explicitly",
+    "consumerTypeError": "Tagged as delivery failure; cannot trigger a transport retry"
+  },
+  "tests": [
+    "Matching watch is idempotent and connection rotation resumes acknowledged cursor",
+    "Replacement aborts stale feed and rejects its event/terminal outcome",
+    "Retirement, origin changes and disposal suppress delayed retry",
+    "Busy retry bound and auth/interrupted/malformed acknowledgements stop",
+    "Consumer TypeError does not acknowledge or retry",
+    "Invalid binding cannot open or schedule a feed"
+  ],
+  "pending": [
+    "Production subscription on the actual graph feed added to the native view contract",
+    "New complete native gate and package",
+    "Browser/VS Code controllers still poll; subscription adoption remains",
+    "Actual native incremental/disconnect/revocation/capacity/restart and installed/rendered acceptance"
+  ],
+  "providerRequests": 0,
+  "nativeExecuted": false,
+  "currentInstallationChanged": false,
+  "rawEvidence": {
+    "doc/evidence/native-unified-event-stream-subscription-extension.log": "42d2d0bea98f891190951cad5936a234a2b6ff667b45dea9f7e3656053919e71",
+    "doc/evidence/native-unified-event-stream-subscription-browser.log": "2bebc6e391ad2ac853161ee0e9b3fccb746a867ddb3b575fd682f7ed95c8e1ab",
+    "doc/evidence/native-unified-event-stream-subscription-source-before.json": "c3fb360197f91f7c65e757bfb279dabbf1dce2d582636ada30a677ead135be07",
+    "doc/evidence/native-unified-event-stream-subscription-source-after.json": "c3fb360197f91f7c65e757bfb279dabbf1dce2d582636ada30a677ead135be07"
+  }
+}
