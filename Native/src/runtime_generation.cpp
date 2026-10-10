@@ -28,13 +28,14 @@ std::wstring final_name(HANDLE handle){const auto size=GetFinalPathNameByHandleW
 struct Handle {
     HANDLE value=INVALID_HANDLE_VALUE;BY_HANDLE_FILE_INFORMATION info{};std::wstring path;bool directory=false;
     Handle(const std::wstring& name,bool dir,bool mutable_ancestor=false):directory(dir){
-        for(unsigned attempt=0;;++attempt){
+        const auto sharing_deadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);
+        for(;;){
             value=CreateFileW(name.c_str(),mutable_ancestor?FILE_READ_ATTRIBUTES:GENERIC_READ,
                 mutable_ancestor?FILE_SHARE_READ|FILE_SHARE_WRITE:FILE_SHARE_READ,nullptr,OPEN_EXISTING,
                 FILE_FLAG_OPEN_REPARSE_POINT|(dir?FILE_FLAG_BACKUP_SEMANTICS:FILE_FLAG_SEQUENTIAL_SCAN),nullptr);
             if(value!=INVALID_HANDLE_VALUE)break;
             const auto error=GetLastError();
-            if(error!=ERROR_SHARING_VIOLATION||attempt>=20){
+            if(error!=ERROR_SHARING_VIOLATION||std::chrono::steady_clock::now()>=sharing_deadline){
                 if(error==ERROR_SHARING_VIOLATION){
                     const auto slash=name.find_last_of(L"\\/");
                     const auto leaf=utf8(name.substr(slash==std::wstring::npos?0:slash+1));
@@ -42,7 +43,7 @@ struct Handle {
                 }
                 denied(dir?"runtime inventory directory could not be opened":"runtime inventory file could not be opened");
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(25));
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
         try{
             require(GetFileInformationByHandle(value,&info)!=0);
