@@ -32,9 +32,10 @@ std::set<Reference> references(const AgentSettings& settings){
             text(server.endpoint,8192);validate_mcp_http_endpoint(server.endpoint);
             if(server.revision<1 || !server.executable.empty() || !server.working_directory.empty() || !server.arguments.empty() || !server.credentials.empty())throw std::invalid_argument("Invalid HTTP agent authority configuration");
             if(server.bearer){text(server.bearer->scope,128);text(server.bearer->id,256);if(server.bearer->scope!="server")throw std::invalid_argument("HTTP MCP credential scope is unavailable");if(server.enabled)result.emplace(server.bearer->scope,server.bearer->id,mcp_credential_purpose(server,"BEARER"));}
+            if(server.oauth){if(server.bearer)throw std::invalid_argument("HTTP MCP requires one credential method");text(server.oauth->scope,128);text(server.oauth->id,256);const auto purpose=mcp_credential_purpose(server,"OAUTH");if(server.enabled)result.emplace(server.oauth->scope,server.oauth->id,purpose);}
             continue;
         }
-        if(server.transport!="stdio" || !server.endpoint.empty() || server.bearer)throw std::invalid_argument("Invalid MCP agent authority transport");
+        if(server.transport!="stdio" || !server.endpoint.empty() || server.bearer || server.oauth)throw std::invalid_argument("Invalid MCP agent authority transport");
         text(server.executable,32768);text(server.working_directory,32768);
         if(server.arguments.size()>64||server.credentials.size()>32||server.revision<1)
             throw std::invalid_argument("Agent authority MCP configuration exceeds limits");
@@ -192,6 +193,7 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
         if(server.transport=="http") {
             entry["endpoint"]=server.endpoint;
             entry["bearer_reference"]=server.bearer?Json{{"scope",server.bearer->scope},{"id",server.bearer->id}}:Json(nullptr);
+            if(server.oauth)entry["oauth_reference"]={{"scope",server.oauth->scope},{"id",server.oauth->id},{"issuer",server.oauth->issuer},{"client_id",server.oauth->client_id}};
         }else {entry["executable"]=server.executable;entry["working_directory"]=server.working_directory;entry["arguments"]=server.arguments;entry["credential_references"]=std::move(references);}
         encoded["mcp_servers"].push_back(std::move(entry));
     }

@@ -298,4 +298,7 @@ std::future<SecretBytes> PersistenceService::resolve_credential(std::string scop
 std::future<void> PersistenceService::delete_credential(std::string scope,std::string id,std::int64_t revision) {
     return impl_->submit([scope=std::move(scope),id=std::move(id),revision](Repository& repository){repository.delete_credential(scope,id,revision);});
 }
+std::future<ResolvedCredential> PersistenceService::resolve_credential_snapshot(std::string scope,std::string id,std::string purpose) {
+    return impl_->observe([scope=std::move(scope),id=std::move(id),purpose=std::move(purpose)](Repository& repository){return repository.resolve_credential_snapshot(scope,id,purpose);});
+}
 }

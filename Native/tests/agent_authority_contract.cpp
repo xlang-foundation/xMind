@@ -43,6 +43,15 @@ int main(){try{
         changed=http;changed.mcp_servers.front().endpoint="http://remote.example.test/mcp";rejected([&]{identity(changed,versions(changed));});
     }
     require(bound.size()==64&&bound.find_first_not_of("0123456789abcdef")==std::string::npos,"Invalid private authority digest");
+    {
+        auto oauth=base;auto& peer=oauth.mcp_servers.front();peer.executable.clear();peer.working_directory.clear();peer.arguments.clear();peer.credentials.clear();peer.transport="http";peer.endpoint="https://resource.example.test/mcp";peer.oauth=McpOAuthCredential{"server","oauth-account-grant","https://issuer.example.test/tenant","synthetic-public-client"};
+        const auto versions=[&](const AgentSettings& value){return std::vector<AgentAuthorityCredentialVersion>{{value.credential->scope,value.credential->id,value.credential->purpose,3},{"server",value.mcp_servers.front().oauth->id,mcp_credential_purpose(value.mcp_servers.front(),"OAUTH"),7}};};
+        const auto selected=identity(oauth,versions(oauth));auto rotated=versions(oauth);rotated.back().revision++;require(identity(oauth,rotated)!=selected,"OAuth grant rotation must change admitted authority");
+        auto changed=oauth;changed.mcp_servers.front().oauth->client_id+="-other";require(identity(changed,versions(changed))!=selected,"OAuth public client must bind credential purpose and authority");
+        changed=oauth;changed.mcp_servers.front().oauth->issuer+="/other";require(identity(changed,versions(changed))!=selected,"OAuth selected issuer must bind authority");
+        changed=oauth;changed.mcp_servers.front().oauth->id+="-other";require(identity(changed,versions(changed))!=selected,"OAuth account credential reference must bind authority");
+        changed=oauth;changed.mcp_servers.front().bearer=McpBearerCredential{"server","ambiguous"};rejected([&]{identity(changed,versions(changed));});
+    }
     require(agent_authority_identity(base,"","synthetic-workspace-object",metadata)==bound,"Default model admission changed authority");
     auto alternative=base;alternative.selectable_models.push_back("synthetic-alternate");
     require(agent_authority_identity(alternative,"synthetic-alternate","synthetic-workspace-object",metadata)!=identity(alternative,metadata),"Selected alternate model was not bound");

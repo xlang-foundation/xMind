@@ -1908,13 +1908,16 @@ std::vector<CredentialMetadata> Repository::credentials(const std::string& scope
     return result;
 }
 SecretBytes Repository::resolve_credential(const std::string& scope,const std::string& id,const std::string& purpose) {
+    return std::move(resolve_credential_snapshot(scope,id,purpose).secret);
+}
+ResolvedCredential Repository::resolve_credential_snapshot(const std::string& scope,const std::string& id,const std::string& purpose) {
     // Purpose is supplied by the calling connector, not accepted from public views.
     credential_context(scope,id,purpose,1);
-    const auto rows=impl_->database.execute("SELECT purpose,revision,protection,ciphertext FROM credentials WHERE scope=? AND id=?",{scope,id}).rows;
+    const auto rows=impl_->database.execute("SELECT purpose,revision,protection,ciphertext,label FROM credentials WHERE scope=? AND id=?",{scope,id}).rows;
     if(rows.empty()) throw NotFound("Credential not found");
     const auto& row=rows[0];
     if(text(row[0])!=purpose) throw Conflict("Credential purpose differs");
-    return reveal_secret({text(row[2]),std::get<SqlBytes>(row[3])},credential_context(scope,id,purpose,integer(row[1])));
+    return {{scope,id,purpose,text(row[4]),integer(row[1])},reveal_secret({text(row[2]),std::get<SqlBytes>(row[3])},credential_context(scope,id,purpose,integer(row[1])))};
 }
 void Repository::delete_credential(const std::string& scope,const std::string& id,std::int64_t expected_revision) {
     identifier(scope);identifier(id);

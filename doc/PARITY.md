@@ -20,6 +20,22 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+OAuth grant persistence/factory integration passes **112/112** local native
+contracts in **384.25 seconds**, with **2446** unchanged inputs. Actual xlang3
+SQLite verifies encrypted complete grants, atomic snapshots/rotation/rollback,
+reopen and purpose/context binding. Native authority includes grant revisions;
+an independent socket peer verifies retirement before any request after known
+expiry. This is no authenticated setup API, trusted HTTPS login, automatic
+refresh/revocation or current installed/view acceptance. The earlier client
+suites apply to unchanged client source and were not rerun here.
+[Exact component evidence](evidence/native-oauth-grants-local.json).
+
+Authorization-owner source `dd08604` has separately passed **110 hosted native**
+contracts in **332.01 seconds**, **244 extension / 54 browser** suites and
+downloaded bundle/VSIX verification. It predates callback/grant-storage work.
+No trusted HTTPS login or current installed/rendered acceptance follows from
+this package. [Exact hosted evidence](evidence/native-oauth-authorization-hosted-dd08604.json).
+
 The native loopback callback library component passes the **111/111** local
 gate in **378.16 seconds**. A subsequent test-only callback rebuild passes all
 **12** real-socket cases in **0.99 seconds**, including port closure while the

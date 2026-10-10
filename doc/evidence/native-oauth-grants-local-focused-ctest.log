@@ -1,0 +1,11 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 14: native_agent_authority_contract
+1/3 Test #14: native_agent_authority_contract .........   Passed    0.21 sec
+    Start 49: native_mcp_oauth_credentials_contract
+2/3 Test #49: native_mcp_oauth_credentials_contract ...   Passed    0.23 sec
+    Start 79: native_http_stream_transport_contract
+3/3 Test #79: native_http_stream_transport_contract ...   Passed   11.80 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =  12.26 sec

@@ -242,6 +242,54 @@ required. Current callback paths use bounded literal ASCII letters/digits,
 slashes, underscores and hyphens. IPv6, HTTPS and non-query response-mode
 callback receivers are separate work.
 
+## Encrypted OAuth grant component
+
+HTTP MCP configuration now accepts one `oauth` reference containing `scope`,
+`id`, `issuer` and `client_id`, as an alternative to the static `credential`
+reference. The implemented scope is `server`. Resource and issuer must use HTTPS;
+the selected issuer has no query. Unknown fields and mixed authentication
+methods are rejected. Public configuration contains no access/refresh tokens.
+
+`McpOAuthCredentialStore` stores access and optional refresh tokens, granted
+scopes, receipt timestamp, optional expiry and the validated HTTPS token endpoint
+in one bounded encrypted record. Native purpose binding includes exact server,
+resource, issuer and public client identities; DPAPI context additionally binds
+the credential scope/ID and record revision. Binary private encoding avoids
+converting tokens into public JSON. Owned encoding/token buffers are wiped on
+release; this is not an all-allocator/OS-copy erasure guarantee.
+
+The repository now resolves metadata and protected bytes from one SQLite SELECT
+through xlang3, yielding one exact credential revision with the plaintext.
+Refresh tokens retain valid opaque spaces/punctuation from the
+[OAuth refresh-token syntax](https://www.rfc-editor.org/rfc/rfc6749.html#appendix-A.17).
+They are never resource-server header values. Compare-and-swap replacement
+atomically rotates the complete grant. Removal
+permanently retires that credential identity; new authorization requires a new
+reference. Credential administration is available for disabled connectors,
+while the factory still refuses to connect them. Local removal is not an OAuth
+revocation request and does not yet coordinate already-running owners.
+
+The actual MCP factory resolves the encrypted grant, rejects missing/expired
+grants or a clock rollback and passes only the access token to the HTTP owner.
+Both tokens feed private catalogue-reflection checks. The owner checks known
+expiry before each request, including discovery and later tool requests. Missing
+expiry is retained as unknown rather than inventing a lifetime. Private agent
+authority binds OAuth references and the actual credential revision, so rotation
+changes the admission digest. Automatic refresh/retry is not implemented.
+
+Focused native grant storage, authority and real-socket validity contracts pass
+**3/3** in **12.26 seconds**. The socket peer requires exactly one successful
+discovery and zero later requests after expiry. The first focused build had a
+test-fixture lambda syntax error; its original output is retained. The final
+complete native build/gate, including missing-grant, refresh-token spaces and
+disabled-cleanup assertions, passes **112/112** in **384.25 seconds**, with
+**2446** unchanged mapped inputs and the pinned bridge-disabled xlang3 SDK.
+Raw build/test output, exact test inventory, source and binary hashes are in
+[grant evidence](evidence/native-oauth-grants-local.json). Client source stayed
+unchanged; the prior 244/54 synthetic view suites were not rerun for this
+native checkpoint. There is no trusted HTTPS OAuth login, authenticated product setup
+flow, refresh/rotation/revocation request or view login acceptance yet.
+
 ## Acceptance still required
 
 The configured HTTP/terminal-feed package at `7007010` has separately passed the

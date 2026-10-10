@@ -83,3 +83,7 @@ doc/evidence/native-oauth-callback-* -text
 doc/evidence/native-oauth-callback-*.log whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-oauth-callback-*contracts.json whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-mcp-http-hosted-7007010-* -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-oauth-grants-* -text
+doc/evidence/native-oauth-grants-*.log whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-oauth-grants-*contracts.json whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-oauth-authorization-hosted-dd08604-* -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

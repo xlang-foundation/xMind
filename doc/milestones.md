@@ -1,5 +1,30 @@
 # Reviewable milestones
 
+Native OAuth grant persistence/factory integration passes the complete
+**112/112** local gate in **384.25 seconds**, with **2446** unchanged mapped inputs.
+Actual xlang3 SQLite fixtures verify complete encrypted grants, a single-query
+credential/metadata snapshot, atomic rotation/rollback/reopen, exact
+resource/issuer/client/server binding, ciphertext relocation and malformed
+record rejection, retired IDs and disabled-connector administration. The native
+factory rejects missing/expired grants. An independent socket peer verifies one
+valid discovery and zero later requests after expiry; the owner retires instead
+of reconnecting/replaying. Authority digests change with OAuth credential
+references/revisions. Refresh-token spaces survive native parsing and encrypted
+storage. The first fixture-syntax build failure is retained; a final full build
+includes all late source edits. Prior client source is unchanged and its 244/54
+suites were not rerun here. Authenticated setup routes, trusted HTTPS login,
+refresh/revocation, coordination of running owners and client login controls
+remain unfinished. [Exact grant evidence](evidence/native-oauth-grants-local.json).
+
+The native authorization-owner source `dd08604` passed the complete hosted
+**110 native** gate in **332.01 seconds**, plus **244 extension / 54 browser**
+contracts and packaging. Independent downloaded archive/VSIX verification checks
+the **1860** runtime files, **29** source-bundle files, exact contract names and
+packaged view sources. Original raw outputs and hashes are retained. This package
+predates the newer callback receiver and encrypted OAuth grant integration and
+has no installed/rendered current acceptance.
+[Hosted authorization package](evidence/native-oauth-authorization-hosted-dd08604.json).
+
 The native loopback callback receiver passes real-socket synthetic browser
 redirects through the production authorization owner. The complete **111/111**
 local gate passes in **378.16 seconds**, with **2443** unchanged mapped inputs.

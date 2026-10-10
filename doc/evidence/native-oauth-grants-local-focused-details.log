@@ -1,0 +1,51 @@
+Start testing: Oct 09 22:08 Pacific Daylight Time
+----------------------------------------------------------
+14/112 Testing: native_agent_authority_contract
+14/112 Test: native_agent_authority_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_authority_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_authority_contract" start time: Oct 09 22:08 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native private agent authority bindings passed (synthetic settings and credential metadata; no key resolution, peer or provider execution).
+<end of output>
+Test time =   0.21 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_authority_contract" end time: Oct 09 22:08 Pacific Daylight Time
+"native_agent_authority_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+49/112 Testing: native_mcp_oauth_credentials_contract
+49/112 Test: native_mcp_oauth_credentials_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_mcp_oauth_credentials_contract.exe" "D:/CantorAI2026/.worktrees/xlang3-xmind-import-utf8/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_mcp_oauth_credentials_contract" start time: Oct 09 22:08 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native OAuth grant storage passed actual xlang3 SQLite encryption/reopen, atomic snapshot/rotation/rollback, resource/issuer/client/server binding, expiry/clock-rollback and factory pre-connect rejection, malformed/ciphertext relocation rejection and retired identity checks. Synthetic tokens; no trusted HTTPS login, refresh/revocation request or UI setup verified
+<end of output>
+Test time =   0.23 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_credentials_contract" end time: Oct 09 22:08 Pacific Daylight Time
+"native_mcp_oauth_credentials_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+79/112 Testing: native_http_stream_transport_contract
+79/112 Test: native_http_stream_transport_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/http_stream_transport_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_http_stream_transport_contract.exe" "C:/Program Files/Git/usr/bin/openssl.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_http_stream_transport_contract" start time: Oct 09 22:08 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native provider/MCP POST byte transport and OAuth metadata fixtures passed; native PKCE, private form/token bytes, callback binding/expiry/replay and TLS/cancel/deadline components checked. No trusted HTTPS OAuth login/token exchange, encrypted OAuth persistence, live model or complete MCP support verified
+<end of output>
+Test time =  11.80 sec
+----------------------------------------------------------
+Test Passed.
+"native_http_stream_transport_contract" end time: Oct 09 22:08 Pacific Daylight Time
+"native_http_stream_transport_contract" time elapsed: 00:00:11
+----------------------------------------------------------
+
+End testing: Oct 09 22:08 Pacific Daylight Time

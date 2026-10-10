@@ -36,7 +36,7 @@ std::string environment_name(std::string value) {
 McpServerSetting setting(const Json& value,bool stored) {
     const auto transport=text(value,"transport",16);
     if(transport=="stdio")fields(value,{"id","revision","transport","enabled","executable","working_directory","arguments","credentials"});
-    else if(transport=="http")fields(value,{"id","revision","transport","enabled","endpoint","credential"});
+    else if(transport=="http")fields(value,{"id","revision","transport","enabled","endpoint","credential","oauth"});
     else throw std::invalid_argument("MCP transport is not implemented");
     if(!stored && value.contains("revision"))throw std::invalid_argument("MCP revisions are owned by the backend");
     McpServerSetting result;result.id=text(value,"id",64);identity(result.id);
@@ -50,6 +50,12 @@ McpServerSetting setting(const Json& value,bool stored) {
             fields(value["credential"],{"scope","id"});const auto scope=text(value["credential"],"scope",128);
             if(scope!="server")throw std::invalid_argument("MCP credential scope requires implemented server authorization");
             result.bearer=McpBearerCredential{scope,text(value["credential"],"id",256)};
+        }
+        if(value.contains("oauth")){
+            if(result.bearer)throw std::invalid_argument("MCP HTTP requires one credential method");
+            const auto& oauth=value["oauth"];fields(oauth,{"scope","id","issuer","client_id"});
+            result.oauth=McpOAuthCredential{text(oauth,"scope",128),text(oauth,"id",256),text(oauth,"issuer",8192),text(oauth,"client_id",2048)};
+            (void)mcp_credential_purpose(result,"OAUTH");
         }
     }
     if(value.contains("enabled")){if(!value["enabled"].is_boolean())throw std::invalid_argument("Invalid MCP enabled flag");result.enabled=value["enabled"].get<bool>();}
@@ -70,6 +76,7 @@ Json encode(const McpServerSetting& value,bool stored=true) {
     if(value.transport=="http"){
         result["endpoint"]=value.endpoint;
         if(value.bearer)result["credential"]={{"scope",value.bearer->scope},{"id",value.bearer->id}};
+        if(value.oauth)result["oauth"]={{"scope",value.oauth->scope},{"id",value.oauth->id},{"issuer",value.oauth->issuer},{"client_id",value.oauth->client_id}};
     }else {result["executable"]=value.executable;result["working_directory"]=value.working_directory;result["arguments"]=value.arguments;result["credentials"]=std::move(credentials);}
     if(stored)result["revision"]=value.revision;return result;
 }
@@ -103,12 +110,21 @@ std::vector<McpServerSetting> McpConfigurationStore::apply(const std::string& so
 std::string mcp_credential_purpose(const McpServerSetting& setting,const std::string& name) {
     std::string source;
     if(setting.transport=="http") {
-        if(name!="BEARER")throw std::invalid_argument("HTTP MCP credential target must be BEARER");validate_mcp_http_endpoint(setting.endpoint);
-        source=Json{{"id",setting.id},{"transport","http"},{"endpoint",setting.endpoint},{"header","Authorization: Bearer"}}.dump();
+        validate_mcp_http_endpoint(setting.endpoint);
+        if(name=="OAUTH"){
+            if(!setting.oauth||setting.bearer||setting.oauth->scope!="server"||setting.oauth->id.empty()||setting.oauth->id.size()>256||setting.oauth->issuer.empty()||setting.oauth->issuer.size()>8192||setting.oauth->client_id.empty()||setting.oauth->client_id.size()>2048)throw std::invalid_argument("Invalid MCP OAuth credential binding");
+            validate_mcp_http_endpoint(setting.oauth->issuer);
+            const auto secure=[](std::string url){for(auto& c:url)if(c>='A'&&c<='Z')c=static_cast<char>(c-'A'+'a');return url.starts_with("https://");};
+            if(!secure(setting.endpoint)||!secure(setting.oauth->issuer)||setting.oauth->issuer.find('?')!=std::string::npos)throw std::invalid_argument("MCP OAuth requires HTTPS resource and issuer");
+            for(unsigned char c:setting.oauth->client_id)if(c<0x20||c==0x7f)throw std::invalid_argument("Invalid MCP OAuth client identity");
+            identity(setting.id);
+            source=Json{{"id",setting.id},{"transport","http"},{"resource",setting.endpoint},{"issuer",setting.oauth->issuer},{"client_id",setting.oauth->client_id}}.dump();
+        }else if(name=="BEARER"&&!setting.oauth)source=Json{{"id",setting.id},{"transport","http"},{"endpoint",setting.endpoint},{"header","Authorization: Bearer"}}.dump();
+        else throw std::invalid_argument("Invalid HTTP MCP credential target");
     }else if(setting.transport=="stdio")source=Json{{"id",setting.id},{"executable",setting.executable},{"directory",setting.working_directory},{"arguments",setting.arguments},{"environment",environment_name(name)}}.dump();
     else throw std::invalid_argument("Unsupported MCP credential transport");
     BCRYPT_ALG_HANDLE algorithm=nullptr;std::array<UCHAR,32> bytes{};if(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)<0)throw std::runtime_error("Cannot bind MCP credential purpose");
     const auto status=BCryptHash(algorithm,nullptr,0,reinterpret_cast<PUCHAR>(const_cast<char*>(source.data())),static_cast<ULONG>(source.size()),bytes.data(),static_cast<ULONG>(bytes.size()));BCryptCloseAlgorithmProvider(algorithm,0);if(status<0)throw std::runtime_error("Cannot bind MCP credential purpose");
-    std::ostringstream value;value<<(setting.transport=="http"?"mcp-http-bearer:":"mcp-environment:")<<std::hex<<std::setfill('0');for(const auto byte:bytes)value<<std::setw(2)<<static_cast<unsigned>(byte);return value.str();
+    std::ostringstream value;value<<(setting.transport=="http"?(name=="OAUTH"?"mcp-http-oauth:":"mcp-http-bearer:"):"mcp-environment:")<<std::hex<<std::setfill('0');for(const auto byte:bytes)value<<std::setw(2)<<static_cast<unsigned>(byte);return value.str();
 }
 }

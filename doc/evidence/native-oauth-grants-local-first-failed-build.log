@@ -1,0 +1,42 @@
+CMake is re-running because D:/CantorAI2026/xMind/build/skill-state-native/CMakeFiles/generate.stamp is out-of-date.
+  the file 'D:/CantorAI2026/xMind/Native/CMakeLists.txt'
+  is newer than 'D:/CantorAI2026/xMind/build/skill-state-native/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.
+-- Configuring done (0.6s)
+-- Generating done (2.0s)
+-- Build files have been written to: D:/CantorAI2026/xMind/build/skill-state-native
+MSBuild version 18.9.1+a81b43525 for .NET Framework
+
+  Checking File Globs
+  agentflow_mcp_wire.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_mcp_wire.lib
+  agentflow_models.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_models.lib
+  agentflow_secrets.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_secrets.lib
+  graph.cpp
+  persistence_service.cpp
+  repository.cpp
+D:\CantorAI2026\xMind\Native\src\repository.cpp(2041,176): warning C4457: declaration of 'owner' hides function parameter [D:\CantorAI2026\xMind\build\skill-state-native\agentflow_core.vcxproj]
+      D:\CantorAI2026\xMind\Native\src\repository.cpp(2028,65):
+      see declaration of 'owner'
+  
+  Generating Code...
+  agentflow_core.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_core.lib
+  agentflow_provider_transport.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_provider_transport.lib
+  mcp_configuration.cpp
+  agentflow_mcp_configuration.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_mcp_configuration.lib
+  agentflow_mcp_http.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_mcp_http.lib
+  agentflow_mcp_stdio.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_mcp_stdio.lib
+  mcp_client_factory.cpp
+  mcp_oauth_credentials.cpp
+  Generating Code...
+  agentflow_mcp_client_factory.vcxproj -> D:\CantorAI2026\xMind\build\skill-state-native\Release\agentflow_mcp_client_factory.lib
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  mcp_oauth_credentials_contract.cpp
+D:\CantorAI2026\xMind\Native\tests\mcp_oauth_credentials_contract.cpp(33,124): error C7746: 'desired': cannot appear in its own initializer [D:\CantorAI2026\xMind\build\skill-state-native\agentflow_mcp_oauth_credentials_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\mcp_oauth_credentials_contract.cpp(33,124): error C3536: 'desired': cannot be used before it is initialized [D:\CantorAI2026\xMind\build\skill-state-native\agentflow_mcp_oauth_credentials_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\mcp_oauth_credentials_contract.cpp(33,124): error C2326: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>> main::<lambda_1>::operator ()(void) const': function cannot access 'desired' [D:\CantorAI2026\xMind\build\skill-state-native\agentflow_mcp_oauth_credentials_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\mcp_oauth_credentials_contract.cpp(66,393): error C3487: 'int': all return expressions must deduce to the same type: previously it was 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' [D:\CantorAI2026\xMind\build\skill-state-native\agentflow_mcp_oauth_credentials_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\mcp_oauth_credentials_contract.cpp(67,2): error C2143: syntax error: missing ';' before 'catch' [D:\CantorAI2026\xMind\build\skill-state-native\agentflow_mcp_oauth_credentials_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\mcp_oauth_credentials_contract.cpp(67,2): error C2318: no try block associated with this catch handler [D:\CantorAI2026\xMind\build\skill-state-native\agentflow_mcp_oauth_credentials_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\mcp_oauth_credentials_contract.cpp(26,52): error C2317: 'try' block starting on line '26' has no catch handlers [D:\CantorAI2026\xMind\build\skill-state-native\agentflow_mcp_oauth_credentials_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\mcp_oauth_credentials_contract.cpp(26,31): error C1075: '{': no matching token found [D:\CantorAI2026\xMind\build\skill-state-native\agentflow_mcp_oauth_credentials_contract.vcxproj]

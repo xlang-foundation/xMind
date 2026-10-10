@@ -218,6 +218,15 @@ int main(int argc,char** argv) {
         {auto form=privateBytes(formText);std::stop_source stop;std::jthread canceller([&]{std::this_thread::sleep_for(150ms);stop.request_stop();});rejects<TransportCancelled>([&]{post_form_json(formRequest("delay"),form,4096,stop.get_token());});}
         {auto form=privateBytes(formText);auto input=formRequest("delay");input.deadline=200ms;rejects<TransportTimeout>([&]{post_form_json(input,form,4096);});}
         {auto form=privateBytes(formText);auto input=formRequest("invalid");std::stop_source stop;stop.request_stop();rejects<TransportCancelled>([&]{post_form_json(input,form,4096,stop.get_token());});input.body="unowned body";rejects<std::invalid_argument>([&]{post_form_json(input,form,4096);});input.body.clear();input.credential_header=CredentialHeader::x_api_key;rejects<std::invalid_argument>([&]{post_form_json(input,form,4096);});input.credential_header=CredentialHeader::bearer;input.url="http://remote.example.test/token";rejects<std::invalid_argument>([&]{post_form_json(input,form,4096);});}
+        {
+            const auto now=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            for(const auto validity:{McpBearerValidity{now-2000,now-1000},McpBearerValidity{now+1000,now+2000}}){McpHttpClient owner(base+"/oauth-validity",privateBytes(synthetic),validity);rejects<McpOAuthAuthorizationRequired>([&]{owner.connect(std::chrono::steady_clock::now()+5s);});require(!owner.ready(),"Expired/clock-rollback owner must retire before any real socket request");}
+            rejects<std::invalid_argument>([&]{McpHttpClient owner(base+"/oauth-validity",{},McpBearerValidity{now,now+1000});});
+            McpHttpClient owner(base+"/oauth-validity",privateBytes(synthetic),McpBearerValidity{now-10,now+2000});owner.connect(std::chrono::steady_clock::now()+5s);require(owner.ready(),"Actual discovery must complete with a currently valid bearer");
+            std::this_thread::sleep_until(std::chrono::system_clock::time_point(std::chrono::milliseconds(now+2050)));
+            rejects<McpOAuthAuthorizationRequired>([&]{owner.list_tools({},std::chrono::steady_clock::now()+5s);});require(!owner.ready(),"Expiry after discovery must retire the owner before sending tools/list");
+            rejects<McpProtocolError>([&]{owner.connect(std::chrono::steady_clock::now()+5s);});
+        }
         const std::string verifier="dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
         require(mcp_oauth_pkce_challenge(privateBytes(verifier).view())=="E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM","Native BCrypt SHA-256/base64url must match RFC 7636 Appendix B");
         const McpOAuthDiscovery oauth{resource,metadata};const McpOAuthPublicClient publicClient{metadata.issuer,"fixture public client 雪","http://127.0.0.1:54321/oauth/callback"};

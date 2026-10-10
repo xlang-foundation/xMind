@@ -3,12 +3,13 @@
 #include "agentflow/secret_protection.hpp"
 #include <memory>
 namespace agentflow {
+struct McpBearerValidity {std::int64_t acquired_unix_ms;std::optional<std::int64_t> expires_unix_ms;};
 // Native HTTP access owner. Trusted endpoint/credential only; one calling
 // thread. Tool dispatch remains private to the durable approval registry.
 // An interrupted owner is retired, never reconnected or used to replay effects.
 class McpHttpClient final : public McpToolClient {
 public:
-    explicit McpHttpClient(std::string endpoint,std::optional<SecretBytes> bearer={});
+    explicit McpHttpClient(std::string endpoint,std::optional<SecretBytes> bearer={},std::optional<McpBearerValidity> validity={});
     ~McpHttpClient() override;
     McpHttpClient(const McpHttpClient&)=delete;
     McpHttpClient& operator=(const McpHttpClient&)=delete;

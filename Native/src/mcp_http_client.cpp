@@ -23,6 +23,7 @@ std::string binding(const McpToolDescription& tool) {
 struct McpHttpClient::Impl {
     std::string endpoint,legacy_protocol="2025-11-25";
     std::optional<SecretBytes> bearer;
+    std::optional<McpBearerValidity> validity;
     std::optional<std::string> legacy_session;
     McpRequestTracker requests;
     McpHandshake handshake;
@@ -30,8 +31,9 @@ struct McpHttpClient::Impl {
     std::size_t rejected=0;
     struct Tool {std::string schema,binding;};
     std::map<std::string,Tool> tools;
-    Impl(std::string url,std::optional<SecretBytes> secret):endpoint(std::move(url)),bearer(std::move(secret)),handshake(requests) {
+    Impl(std::string url,std::optional<SecretBytes> secret,std::optional<McpBearerValidity> lifetime):endpoint(std::move(url)),bearer(std::move(secret)),validity(lifetime),handshake(requests) {
         validate_mcp_http_endpoint(endpoint);
+        if(validity&&(!bearer||validity->acquired_unix_ms<=0||(validity->expires_unix_ms&&*validity->expires_unix_ms<=validity->acquired_unix_ms)))throw std::invalid_argument("Invalid native MCP bearer lifetime");
     }
     void retire() noexcept {
         live=false;closed=true;tools.clear();legacy_session.reset();bearer.reset();
@@ -40,6 +42,7 @@ struct McpHttpClient::Impl {
     std::optional<McpCorrelatedReply> exchange(const std::string& frame,McpWireEra era,
         const std::string& expected,Deadline deadline,std::stop_token cancel,bool& attempted,
         const std::optional<std::string>& schema={},bool initializing=false,std::string* observed_response=nullptr) {
+        if(validity){const auto now=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();if(now<validity->acquired_unix_ms||(validity->expires_unix_ms&&now>=*validity->expires_unix_ms))throw McpOAuthAuthorizationRequired({});}
         const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now());
         if(remaining.count()<=0)throw McpTransportTimeout("MCP HTTP request deadline exceeded");
         McpHttpPost input;input.url=endpoint;input.body=frame;input.era=era;input.legacy_protocol=legacy_protocol;
@@ -76,7 +79,7 @@ struct McpHttpClient::Impl {
         catch(const TransportError&){throw McpTransportError("Native MCP HTTP transport failed");}
     }
 };
-McpHttpClient::McpHttpClient(std::string endpoint,std::optional<SecretBytes> bearer):impl_(std::make_unique<Impl>(std::move(endpoint),std::move(bearer))) {}
+McpHttpClient::McpHttpClient(std::string endpoint,std::optional<SecretBytes> bearer,std::optional<McpBearerValidity> validity):impl_(std::make_unique<Impl>(std::move(endpoint),std::move(bearer),validity)) {}
 McpHttpClient::~McpHttpClient(){shutdown();}
 void McpHttpClient::connect(Deadline deadline,std::stop_token cancel) {
     auto& state=*impl_;if(state.started || state.closed)throw McpProtocolError("MCP HTTP owner cannot reconnect or replay negotiation");state.started=true;

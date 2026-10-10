@@ -1,6 +1,7 @@
 #include "agentflow/mcp_client_factory.hpp"
 #include "agentflow/mcp_client.hpp"
 #include "agentflow/mcp_http_client.hpp"
+#include "agentflow/mcp_oauth_credentials.hpp"
 #define NOMINMAX
 #include <windows.h>
 namespace agentflow {
@@ -13,11 +14,21 @@ std::unique_ptr<McpToolClient> connect_mcp_client(const McpServerSetting& settin
     if(setting.transport=="http") {
         if(!setting.executable.empty() || !setting.working_directory.empty() || !setting.arguments.empty() || !setting.credentials.empty())throw std::invalid_argument("HTTP MCP cannot carry process configuration");
         if(setting.bearer && setting.bearer->scope!="server")throw std::invalid_argument("HTTP MCP credential scope is unavailable");
+        if(setting.bearer&&setting.oauth)throw std::invalid_argument("HTTP MCP requires one credential method");
         std::optional<SecretBytes> credential;
+        std::optional<McpBearerValidity> validity;
         if(setting.bearer){check();credential=store.resolve_credential(setting.bearer->scope,setting.bearer->id,mcp_credential_purpose(setting,"BEARER")).get();capture(*credential);}
-        check();auto client=std::make_unique<McpHttpClient>(setting.endpoint,std::move(credential));client->connect(deadline,cancel);return client;
+        if(setting.oauth){
+            check();auto grant=[&]{try{return McpOAuthCredentialStore(store).load(setting);}catch(const NotFound&){throw McpOAuthAuthorizationRequired({});}}();
+            const auto now=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            if(!grant.usable_at(now))throw McpOAuthAuthorizationRequired({});
+            capture(grant.tokens.access_token);if(grant.tokens.refresh_token)capture(*grant.tokens.refresh_token);
+            credential=std::move(grant.tokens.access_token);
+            validity=McpBearerValidity{grant.acquired_unix_ms,grant.expires_unix_ms};
+        }
+        check();auto client=std::make_unique<McpHttpClient>(setting.endpoint,std::move(credential),validity);client->connect(deadline,cancel);return client;
     }
-    if(setting.transport!="stdio" || !setting.endpoint.empty() || setting.bearer)throw std::invalid_argument("Invalid native MCP transport configuration");
+    if(setting.transport!="stdio" || !setting.endpoint.empty() || setting.bearer || setting.oauth)throw std::invalid_argument("Invalid native MCP transport configuration");
     McpStdioConfiguration configuration{setting.executable,setting.working_directory,setting.arguments,{}};
     struct ClearEnvironment {McpStdioConfiguration& config;~ClearEnvironment(){for(auto& entry:config.environment)if(!entry.second.empty())SecureZeroMemory(entry.second.data(),entry.second.size());}} clear{configuration};
     configuration.environment.reserve(setting.credentials.size());

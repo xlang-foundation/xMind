@@ -22,6 +22,7 @@ struct CredentialMetadata {
     std::string scope,id,purpose,label;
     std::int64_t revision;
 };
+struct ResolvedCredential {CredentialMetadata metadata;SecretBytes secret;};
 // Target repository: C++ contracts, all database operations through xlang3.
 // Construct/use/destroy on the persistence thread. No direct SQLite linkage.
 class Repository {
@@ -172,6 +173,8 @@ public:
         std::int64_t expected_revision);
     std::vector<CredentialMetadata> credentials(const std::string& scope);
     SecretBytes resolve_credential(const std::string& scope,const std::string& id,
+        const std::string& purpose);
+    ResolvedCredential resolve_credential_snapshot(const std::string& scope,const std::string& id,
         const std::string& purpose);
     void delete_credential(const std::string& scope,const std::string& id,std::int64_t expected_revision);
     std::size_t recover_interrupted(const BackendLease& owner);

@@ -154,6 +154,7 @@ public:
         std::string purpose,std::string label,SecretBytes secret,std::int64_t expected_revision);
     std::future<std::vector<CredentialMetadata>> credentials(std::string scope);
     std::future<SecretBytes> resolve_credential(std::string scope,std::string id,std::string purpose);
+    std::future<ResolvedCredential> resolve_credential_snapshot(std::string scope,std::string id,std::string purpose);
     std::future<void> delete_credential(std::string scope,std::string id,std::int64_t expected_revision);
 private:
     struct Impl;
