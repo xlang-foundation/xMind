@@ -248,5 +248,7 @@ else {
   }catch(error){controller?.dispose();controller=undefined;clearWorkspaceUi();if(generation===connectionGeneration){element('connection-error').textContent=error.message;if(!dialog.open)dialog.showModal();}}finally{entered=undefined;if(connectionAttempt===attempt){connectionAttempt=undefined;dialog.querySelector('button[type="submit"]').disabled=false;}}}
   element('connection-form').onsubmit=event=>{event.preventDefault();if(connectionAttempt)return;const entered=element('server-token').value;element('server-token').value='';connect(entered);};
   window.addEventListener('pagehide',()=>{abortConnection();controller?.dispose();});
+  // Restore the bounded HttpOnly browser session after reload without retaining the server master token.
+  connect();
 }
 })();
