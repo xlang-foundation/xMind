@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+Native OAuth authorization components pass the complete **110/110** local gate
+in **376.23 seconds**, with **2439** unchanged mapped inputs and the pinned native
+xlang3 runtime, without executing CPython. The production private form encoder
+is checked by an independent socket peer for exact resource/client/redirect/code
+fields and RFC PKCE. Native fixtures cover random authorization requests,
+callback state/issuer/redirect/expiry/replay, allowlisted denial, private token
+parsing, cancellation and untrusted HTTPS rejection. Trusted HTTPS login,
+callback listener/routes, registration selection, encrypted OAuth persistence,
+refresh/revocation and browser/VS Code login remain unfinished. The earlier
+244/54 client results apply to unchanged client source; those suites were not
+rerun for this native-only checkpoint. Hosted and installed acceptance remain
+separate. [Exact local component evidence](evidence/native-oauth-authorization-local.json),
+[implementation boundary](native-mcp-http.md).
+
 Native MCP HTTP/OAuth and terminal-feed checkpoint passed the complete local
 **110-contract** gate in **371.74 seconds**, with **2438** unchanged mapped inputs,
 the pinned native xlang3 runtime and no CPython interpreter/bridge. The complete

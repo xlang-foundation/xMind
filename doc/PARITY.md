@@ -20,6 +20,14 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+New native OAuth authorization components pass **110/110** local contracts in
+**376.23 seconds**, with **2439** unchanged mapped inputs. Independent socket
+checks validate the production code-grant form and RFC PKCE; native fixtures
+validate callback binding/expiry/replay/denial, private token parsing and TLS
+rejection. This does not deliver trusted HTTPS login, callback listener/routes,
+registration selection, encrypted OAuth persistence, refresh/revocation or view
+login controls. [Component evidence](evidence/native-oauth-authorization-local.json).
+
 Native MCP HTTP remains partial. The native owner, decoder, metadata projection,
 shared result validation and configured factory have compiled. The actual
 official HTTP SDK effect contract passes approved JSON/SSE writes, denial,

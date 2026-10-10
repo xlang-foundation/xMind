@@ -75,3 +75,7 @@ doc/evidence/native-mcp-oauth-*.log whitespace=-blank-at-eol,-blank-at-eof,-spac
 doc/evidence/native-mcp-oauth-local*contracts.json -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-unified-hosted-298da66-failed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/native-unified-hosted-ad5a363-failed.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+# Preserve original native authorization component logs and CTest JSON bytes.
+doc/evidence/native-oauth-authorization-* -text
+doc/evidence/native-oauth-authorization-*.log whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/native-oauth-authorization-*contracts.json whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

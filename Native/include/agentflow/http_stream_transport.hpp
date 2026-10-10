@@ -39,4 +39,9 @@ std::string get_json(const HttpStreamRequest& request,const SecretBytes* bearer,
 // This transport preserves response bytes; it does not interpret opaque state.
 std::string post_json(const HttpStreamRequest& request,const SecretBytes* bearer,
     std::size_t max_response_bytes,std::stop_token cancel={});
+// Native form POST with no provider credentials or caller-selected headers.
+// Body and returned JSON bytes stay in wiping buffers; request.body must be empty.
+// OAuth callers additionally require HTTPS and validate issuer/resource binding.
+SecretBytes post_form_json(const HttpStreamRequest& request,const SecretBytes& form,
+    std::size_t max_response_bytes,std::stop_token cancel={});
 }

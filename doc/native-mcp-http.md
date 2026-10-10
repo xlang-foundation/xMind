@@ -163,6 +163,47 @@ certificate. No positive HTTPS discovery against a trusted authorization server,
 registration, callback/state/PKCE exchange, token storage/refresh/revocation or
 user-facing login flow has been verified. Those remain required.
 
+## Native authorization-owner component
+
+The native library now has a single-caller `McpOAuthAuthorizationAttempt` for a
+pre-registered public client whose selected issuer advertises `none` token
+authentication, authorization-code support and `S256`. Windows cryptographic RNG
+creates independent state/verifier values; BCrypt SHA-256 and unpadded base64url
+create PKCE challenges. Public authorization URLs include the registered client,
+redirect, resource and selected scopes, with no code verifier. Challenged scopes
+are not restricted to the resource's advertised list.
+
+Callbacks bind the exact redirect, state and decoded issuer before accepting an
+authorization code or error. Duplicate fields, malformed encoding, expiry,
+mismatched issuer, missing required issuer and replay retire the attempt. A validated
+denial exposes an exact allowlisted reason, never descriptions or error URIs.
+The owner consumes its authority before token POST; cancellation, failures and
+repeated exchange cannot automatically replay the grant.
+
+The production code-grant encoder returns a private wiping form containing the
+resource, client, redirect, authorization code and verifier. Native form POST
+uses no provider credentials or caller-selected headers, bounded wiping response
+storage and OS TLS/redirect/cancellation policy. OAuth error bodies are not
+provider diagnostics. Private token parsing checks token type, token bounds,
+integer expiry and returned scopes. Application code owns input copies; owned
+buffer cleanup is not a claim that every allocator or OS transport copy is erased.
+
+The complete native build and **110/110** local gate pass in **376.23 seconds**,
+with **2439** unchanged mapped inputs, the pinned xlang3 runtime and its CPython
+bridge disabled. Independent socket assertions require exact production grant
+fields and an independently computed RFC PKCE challenge. Raw build/test output,
+contract inventory, source hashes and actual binary hashes are retained in
+[authorization component evidence](evidence/native-oauth-authorization-local.json).
+Fixtures exercise component semantics and loopback byte transport;
+native authorization exchange itself still requires HTTPS and rejects the
+untrusted fixture certificate. No trusted HTTPS user login, callback listener,
+encrypted authorization/token persistence, registration selection, refresh,
+revocation or browser/VS Code login controls are delivered by this component.
+This owner supports pre-registered public clients with token authentication
+`none`. Redirect query strings and authorization attempts longer than ten minutes
+are rejected by the current component. Hosted packaging and installed/rendered
+acceptance of this source remain separate requirements.
+
 ## Acceptance still required
 
 - Verify hosted packaging, installed public agent/graph HTTP-MCP workflows and

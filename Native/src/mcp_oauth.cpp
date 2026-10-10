@@ -110,7 +110,8 @@ McpOAuthServerMetadata mcp_oauth_server_metadata(std::string_view source,std::st
     result.token_endpoint=text(value,"token_endpoint");(void)uri(result.token_endpoint);
     if(value.contains("registration_endpoint")){result.registration_endpoint=text(value,"registration_endpoint");(void)uri(*result.registration_endpoint);}
     const auto pkce=list(value,"code_challenge_methods_supported",16,true);if(std::find(pkce.begin(),pkce.end(),"S256")==pkce.end())invalid();
-    const auto response_types=list(value,"response_types_supported",16,true);if(std::find(response_types.begin(),response_types.end(),"code")==response_types.end())invalid();
+    result.pkce_s256=true;
+    const auto response_types=list(value,"response_types_supported",16,true);if(std::find(response_types.begin(),response_types.end(),"code")==response_types.end())invalid();result.authorization_code=true;
     if(value.contains("grant_types_supported")){const auto grants=list(value,"grant_types_supported",16);if(std::find(grants.begin(),grants.end(),"authorization_code")==grants.end())invalid();}
     result.token_auth_methods=value.contains("token_endpoint_auth_methods_supported")?list(value,"token_endpoint_auth_methods_supported",16):std::vector<std::string>{"client_secret_basic"};
     result.scopes=list(value,"scopes_supported",64,false,true);result.response_issuer_required=flag(value,"authorization_response_iss_parameter_supported");result.client_id_metadata_supported=flag(value,"client_id_metadata_document_supported");return result;

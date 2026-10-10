@@ -10,6 +10,7 @@
 #include <cwctype>
 #include <initializer_list>
 #include <mutex>
+#include <vector>
 
 namespace agentflow {
 namespace {
@@ -84,7 +85,7 @@ std::wstring wide(const std::string& text) {
     return result;
 }
 std::wstring lower(std::wstring value) {for(auto& c:value) c=static_cast<wchar_t>(std::towlower(c));return value;}
-enum class TransferKind {event_post,json_get,json_post,mcp_post};
+enum class TransferKind {event_post,json_get,json_post,mcp_post,form_post};
 struct Endpoint {std::wstring host,path;INTERNET_PORT port;bool secure;};
 Endpoint endpoint(const std::string& input) {
     if(input.empty() || input.size()>8192)throw std::invalid_argument("Invalid endpoint URL");
@@ -121,10 +122,14 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     const std::function<void(std::string_view)>& consume,std::stop_token cancel,
     TransferKind kind,std::size_t response_limit,const McpHttpPost* mcp=nullptr,
     const std::function<void(const McpHttpResponseHead&)>& on_head={},
-    const std::function<void()>& on_sending={}) {
+    const std::function<void()>& on_sending={},const SecretBytes* form=nullptr) {
     if(!consume || input.url.empty() || input.url.size()>8192 || input.body.size()>8*1024*1024 ||
         input.deadline.count()<=0 || input.deadline.count()>600000 || input.idle_timeout.count()<=0 || input.idle_timeout.count()>600000)
         throw std::invalid_argument("Invalid provider transport configuration");
+    const auto formMode=kind==TransferKind::form_post;
+    if(formMode && (!form || form->view().empty() || form->view().size()>65536 || !input.body.empty() || bearer || mcp || input.credential_header!=CredentialHeader::bearer || input.protocol!=ProviderHttpProtocol::generic))throw std::invalid_argument("Invalid native form transport configuration");
+    if(!formMode && form)throw std::invalid_argument("Unexpected native form body");
+    const auto body=formMode?std::string_view(reinterpret_cast<const char*>(form->view().data()),form->view().size()):std::string_view(input.body);
     std::wstring_view credentialPrefix;
     switch(input.credential_header){
         case CredentialHeader::bearer:credentialPrefix=L"Authorization: Bearer ";break;
@@ -143,7 +148,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     Handle connection(WinHttpConnect(session.value,parsed.host.c_str(),parsed.port,0));
     WipedHeaders headers;
     const auto json=kind!=TransferKind::event_post;
-    headers.value=kind==TransferKind::json_get?L"":L"Content-Type: application/json\r\n";
+    headers.value=kind==TransferKind::json_get?L"":formMode?L"Content-Type: application/x-www-form-urlencoded\r\n":L"Content-Type: application/json\r\n";
     headers.value+=mcp?L"Accept: application/json, text/event-stream\r\n":json?L"Accept: application/json\r\n":L"Accept: text/event-stream\r\n";
     if(input.protocol==ProviderHttpProtocol::anthropic)headers.value+=L"anthropic-version: 2023-06-01\r\n";
     if(mcp) {
@@ -179,7 +184,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         headers.value+=L"\r\n";
     }
     if(mcp && headers.value.size()>64*1024)throw McpProtocolError("MCP HTTP headers exceed native limits");
-    std::array<char,8192> buffer{};State state;
+    std::array<char,8192> buffer{};struct WipeBuffer {std::array<char,8192>& bytes;~WipeBuffer(){SecureZeroMemory(bytes.data(),bytes.size());}} wipeBuffer{buffer};State state;
     Handle raw(WinHttpOpenRequest(connection.value,kind==TransferKind::json_get?L"GET":L"POST",parsed.path.c_str(),nullptr,WINHTTP_NO_REFERER,WINHTTP_DEFAULT_ACCEPT_TYPES,parsed.secure?WINHTTP_FLAG_SECURE:0));
     DWORD policy=WINHTTP_OPTION_REDIRECT_POLICY_NEVER;checked(WinHttpSetOption(raw.value,WINHTTP_OPTION_REDIRECT_POLICY,&policy,sizeof(policy)));
     // Never ask the OS to send ambient user credentials to a model endpoint.
@@ -196,13 +201,16 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         on_sending();
     }
     checked(WinHttpSendRequest(request.value,headers.value.c_str(),static_cast<DWORD>(headers.value.size()),
-        input.body.empty()?WINHTTP_NO_REQUEST_DATA:const_cast<char*>(input.body.data()),static_cast<DWORD>(input.body.size()),static_cast<DWORD>(input.body.size()),context));
+        body.empty()?WINHTTP_NO_REQUEST_DATA:const_cast<char*>(body.data()),static_cast<DWORD>(body.size()),static_cast<DWORD>(body.size()),context));
     state.wait(WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE,deadline,cancel);
     state.prepare();checked(WinHttpReceiveResponse(request.value,nullptr));state.wait(WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE,deadline,cancel);
     DWORD status=0,size=sizeof(status);
     checked(WinHttpQueryHeaders(request.value,WINHTTP_QUERY_STATUS_CODE|WINHTTP_QUERY_FLAG_NUMBER,WINHTTP_HEADER_NAME_BY_INDEX,&status,&size,WINHTTP_NO_HEADER_INDEX));
     if(!mcp && (status<200 || status>=300)) {
         ProviderHttpError failure(static_cast<int>(status));
+        // OAuth errors may echo authorization codes/verifiers. Do not parse or
+        // retain their bodies as provider diagnostics.
+        if(formMode)throw failure;
         // Error bodies can contain credentials or user content. Retain only
         // exact, known protocol identifiers; never retain messages or raw JSON.
         if(status>=400) try {
@@ -289,6 +297,16 @@ std::string post_json(const HttpStreamRequest& input,const SecretBytes* bearer,
     std::string result;
     transfer(input,bearer,[&](std::string_view chunk){result.append(chunk);},cancel,TransferKind::json_post,max_response_bytes);
     return result;
+}
+SecretBytes post_form_json(const HttpStreamRequest& input,const SecretBytes& form,
+    std::size_t max_response_bytes,std::stop_token cancel) {
+    if(!max_response_bytes || max_response_bytes>1024*1024)throw std::invalid_argument("Invalid native form response limit");
+    struct Response {std::vector<std::uint8_t> bytes;~Response(){if(!bytes.empty())SecureZeroMemory(bytes.data(),bytes.size());}} result;
+    // No growth after secret bytes arrive: abandoned allocations cannot retain
+    // earlier token-response fragments owned by this accumulator.
+    result.bytes.reserve(max_response_bytes);
+    transfer(input,nullptr,[&](std::string_view chunk){result.bytes.insert(result.bytes.end(),chunk.begin(),chunk.end());},cancel,TransferKind::form_post,max_response_bytes,nullptr,{},{},&form);
+    return SecretBytes(result.bytes);
 }
 void validate_mcp_http_endpoint(std::string_view value) {(void)endpoint(std::string(value));}
 void post_mcp_http(const McpHttpPost& input,const SecretBytes* bearer,

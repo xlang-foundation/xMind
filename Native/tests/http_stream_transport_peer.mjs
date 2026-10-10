@@ -7,15 +7,32 @@ import {promisify} from 'node:util';
 import {mkdtemp,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {createHash} from 'node:crypto';
 const execute=promisify(execFile);
 const [executable,openssl]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-transport-'));
-let redirected=0,requests=0,plain,tls;const credentialRequests=new Map(),jsonPostRequests=new Map(),mcpRequests=new Map();
+let redirected=0,requests=0,plain,tls;const credentialRequests=new Map(),jsonPostRequests=new Map(),mcpRequests=new Map(),formRequests=new Map();
 const jsonPostBody=String.raw`{"input":"native 🌍","decimal":1.00000000000000000001,"pa\u0074h":"raw"}`;
 const jsonPostReply='{"input_tokens":19,"opaque":"synthetic 🌍"}';
 const wire='data: '+JSON.stringify({choices:[{index:0,delta:{content:'transport fixture'},finish_reason:'stop'}]})+'\n\ndata: [DONE]\n\n';
 function handler(request,response) {
   requests++;
+  if(request.url.startsWith('/form/')){
+    formRequests.set(request.url,(formRequests.get(request.url)??0)+1);assert.equal(request.method,'POST');assert.equal(request.headers['content-type'],'application/x-www-form-urlencoded');assert.equal(request.headers.accept,'application/json');
+    for(const name of ['authorization','x-api-key','x-goog-api-key','anthropic-version','mcp-protocol-version'])assert.equal(request.headers[name],undefined);
+    const chunks=[];request.on('data',bytes=>chunks.push(bytes));request.on('end',()=>{
+      const raw=Buffer.concat(chunks).toString('utf8');
+      if(request.url==='/form/grant'){
+        const fields=new URLSearchParams(raw);assert.equal([...fields].length,6);
+        assert.equal(fields.get('grant_type'),'authorization_code');assert.equal(fields.get('client_id'),'fixture public client 雪');assert.equal(fields.get('redirect_uri'),'http://127.0.0.1:54321/oauth/callback');assert.equal(fields.get('resource'),'https://resource.example.test/mcp');assert.equal(fields.get('code'),'synthetic+code&=');
+        assert.equal(createHash('sha256').update(fields.get('code_verifier')).digest('base64url'),'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM');
+      }else assert.equal(raw,'grant_type=authorization_code&code=synthetic%2Bcode%26%3D&resource=https%3A%2F%2Fresource.example.test%2Fmcp');
+      if(request.url==='/form/delay')return;
+      if(request.url==='/form/redirect'){response.writeHead(302,{Location:`http://127.0.0.1:${plain.address().port}/redirect-target`});response.end();return;}
+      if(request.url==='/form/error'){response.writeHead(400,{'Content-Type':'application/json'});response.end('{"error":"invalid_grant","error_description":"private synthetic code echo"}');return;}
+      response.writeHead(200,{'Content-Type':request.url==='/form/wrong-media'?'text/plain':'application/json'});response.end(request.url==='/form/oversized'?'x'.repeat(5000):'{"access_token":"synthetic-access-not-a-real-token","refresh_token":"synthetic-refresh-not-a-real-token","token_type":"Bearer","expires_in":3600,"scope":"files:read"}');
+    });return;
+  }
   if(request.url==='/oauth-auth'){
     mcpRequests.set(request.url,(mcpRequests.get(request.url)??0)+1);
     assert.equal(request.method,'POST');assert.equal(request.headers.authorization,'Bearer transport-test-token-not-a-real-key');
@@ -120,6 +137,7 @@ try {
   assert.deepEqual(Object.fromEntries(mcpRequests),{'/mcp/json':1,'/mcp/sse':1,'/mcp/error':1,'/mcp/auth':1,'/mcp/legacy':1,'/mcp/notification':1,'/mcp/bad-ack':1,'/mcp/redirect':1,'/mcp/wrong-media':1,'/mcp/delay':2,'/mcp/after-failure':1,'/oauth-auth':1},'Native MCP POST requests must reach sockets exactly once; invalid metadata/pre-cancel/TLS and retired OAuth owners must not reach a peer');
   assert.deepEqual(Object.fromEntries(credentialRequests),{'/auth/api-key':1,'/json-auth/api-key':1,'/auth/api-key/redirect':1,'/auth/google-key':1,'/json-auth/google-key':1,'/auth/google-key/redirect':1},'Only selected-header requests reach the wire; missing/injected credentials are rejected before sending');
   assert.deepEqual(Object.fromEntries(jsonPostRequests),{'/post-json/bearer':1,'/post-json/api-key':1,'/post-json/google-key':1,'/post-json/claude-protocol':1,'/post-json/boundary':2,'/post-json/large':1,'/post-json/oversized':1,'/post-json/wrong-media':1,'/post-json/redirect':1,'/post-json/diagnostic':1,'/post-json/delay':2,'/post-json/stall':1,'/post-json/after-failure':1},'Exact native JSON POST requests reach the wire once; invalid requests, TLS failure and pre-cancellation never dispatch');
+  assert.deepEqual(Object.fromEntries(formRequests),{'/form/token':1,'/form/error':1,'/form/redirect':1,'/form/wrong-media':1,'/form/oversized':1,'/form/delay':2,'/form/grant':1},'Private native form POST must have exact bytes, no ambient credentials/retries, bounded bodies and zero invalid/pre-cancel/TLS dispatch');
   assert.ok(requests>=9,'Protocol cases must reach real native sockets');
   process.stdout.write(result.stdout);
 } finally {
