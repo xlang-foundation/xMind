@@ -67,6 +67,21 @@ the backend before the graph can run. Agent IDs remain retired after removal.
 A named definition does not add tools or permissions: the same server-
 registered tools, workspace access and approval policy still apply.
 
+## Single-agent conversation selection
+
+The xMind backend exposes the current agent catalogue at `GET /v1/agents` and
+persists a revisioned selection per conversation at
+`/v1/sessions/{id}/agent`. Selection snapshots contain public IDs, definition
+revisions and model metadata; instructions stay in the backend and are pinned
+into the run at admission. A conversation must be idle to change selection,
+and clients send the observed session revision to prevent stale writes.
+
+The VS Code sidebar and browser share the native-backed selector. In the
+interactive console, `/agents` lists the catalogue, `/agent` shows the current
+conversation selection, `/agent ID` selects a definition, and `/agent default`
+clears it. Selecting an agent in an empty console starts a durable conversation
+before applying the selection. These controls do not grant tools or permissions.
+
 ## Agent instructions
 
 `xmind admin ... import-instructions FILE` accepts a plain Markdown document,
@@ -96,10 +111,12 @@ supported. JSON input remains accepted.
 
 ## Still required for the agreed product
 
-The current slice supports reusable named YAML agents in graph nodes and
-per-node inline instructions. Single-agent session selection of a named
-definition, per-agent tool bindings, filesystem skill catalogs, arbitrary
-xlang3 `.py` callables, and the in-process programming API remain incomplete.
+The current slice supports reusable named YAML agents in graph nodes, per-node
+inline instructions and revisioned single-agent conversation selection.
+Per-agent tool bindings, arbitrary xlang3 `.py` callables and the in-process
+programming API remain incomplete. Workspace Markdown skill discovery and
+selection are implemented, while the full command/skill lifecycle still has
+documented gaps.
 Those authoring styles must eventually produce the same validated native
 definitions, tool registry and permission receipts; parser acceptance alone
 does not establish runtime behavior. See the

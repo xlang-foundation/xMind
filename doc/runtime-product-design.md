@@ -74,9 +74,10 @@ instruction records, and plain Markdown instruction files through offline
 native administration. Named definitions currently bind prompt guidance and
 an optional model to graph nodes; import pins each resolved definition into the
 immutable graph revision. These records are persisted through embedded xlang3
-SQLite. This does not yet provide single-agent session selection, per-agent
-tool bindings, a filesystem skill catalogue, `.py` tool registration, or the
-xlang3 programming API. See [authoring formats and current coverage](authoring.md).
+SQLite. Revisioned single-agent session selection and workspace Markdown skill
+catalogues are implemented in the shared backend and thin clients. Per-agent
+tool bindings, `.py` tool registration and the xlang3 programming API remain
+incomplete. See [authoring formats and current coverage](authoring.md).
 
 ## Planning, AgentFlow and scheduling
 

@@ -139,6 +139,19 @@ void skill_acknowledgement(const nlohmann::json& value,const std::string& sessio
     skill_snapshot(value,session);if(value["workspace_id"]!=request["expected_workspace_id"]||value["authority_id"]!=request["expected_workspace_authority_id"]||value["revision"].get<std::int64_t>()!=request["expected_revision"].get<std::int64_t>()+1||value["ids"].size()!=request["ids"].size()||value["manual_ids"].size()!=request["ids"].size())throw std::runtime_error("Skill acknowledgement changed binding or selection");
     for(const auto& id:request["ids"])if(std::find(value["ids"].begin(),value["ids"].end(),id)==value["ids"].end()||std::find(value["manual_ids"].begin(),value["manual_ids"].end(),id)==value["manual_ids"].end())throw std::runtime_error("Skill acknowledgement changed explicit attachment");
 }
+void agent_catalogue(const nlohmann::json& value){
+    if(!value.is_object()||value.size()!=1||!value.contains("agents")||!value["agents"].is_array()||value["agents"].size()>64)throw std::runtime_error("Invalid native agent catalogue");
+    std::set<std::string> ids;for(const auto& item:value["agents"]){
+        if(!item.is_object()||item.size()!=3||!item.contains("id")||!item["id"].is_string()||!item.contains("revision")||!item["revision"].is_number_integer()||!item.contains("model_id")||!item["model_id"].is_string())throw std::runtime_error("Invalid native agent metadata");
+        const auto id=item["id"].get<std::string>(),model=item["model_id"].get<std::string>();if(id.empty()||id.size()>64||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||!ids.insert(id).second||item["revision"]<1||item["revision"]>9007199254740991LL||model.size()>256||model.starts_with("sk-")||model.find('\0')!=std::string::npos)throw std::runtime_error("Invalid native agent metadata");
+    }
+}
+void session_agent_snapshot(const nlohmann::json& value,const std::string& session){
+    if(!value.is_object()||value.size()!=4||!value.contains("session_id")||value["session_id"]!=session||!value.contains("revision")||!value["revision"].is_number_integer()||value["revision"]<0||value["revision"]>9007199254740991LL||!value.contains("editable")||!value["editable"].is_boolean()||!value.contains("selected"))throw std::runtime_error("Invalid conversation agent selection");
+    if(value["selected"].is_null())return;const auto& selected=value["selected"];
+    if(!selected.is_object()||selected.size()!=3||!selected.contains("id")||!selected["id"].is_string()||!selected.contains("revision")||!selected["revision"].is_number_integer()||!selected.contains("model_id")||!selected["model_id"].is_string())throw std::runtime_error("Invalid selected agent metadata");
+    const auto id=selected["id"].get<std::string>(),model=selected["model_id"].get<std::string>();if(id.empty()||id.size()>64||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||selected["revision"]<1||selected["revision"]>9007199254740991LL||model.size()>256||model.starts_with("sk-")||model.find('\0')!=std::string::npos)throw std::runtime_error("Invalid selected agent metadata");
+}
 nlohmann::json read_skill_snapshot(const std::string& filename){
     std::ifstream file(std::filesystem::u8path(filename),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read session skill snapshot file");std::string source;char byte;while(file.get(byte)){if(source.size()>=8192)throw std::invalid_argument("Session skill snapshot exceeds 8 KiB");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read session skill snapshot file");
     try{
@@ -372,6 +385,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
     };
     nlohmann::json observed_skills;
     const auto health=request("/v1/health");if(!health.is_object() || !health.contains("agent_execution") || !health["agent_execution"].is_boolean())throw std::runtime_error("Invalid backend chat capabilities");
+    const bool agent_selection=health.value("agent_selection",false);
     const bool profile_admission=health.value("provider_profile_admission",false)||health.value("graph_provider_profile_admission",false);
     auto provider_binding=profile_admission?provider_admission_binding(request("/v1/provider/profiles")):Json::object();
     if(!model.empty()){
@@ -390,8 +404,8 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
                  <<Json{{"type","history"},{"session_id",session},{"history",history}}.dump()<<'\n'<<std::flush;
         if(!std::cout)throw std::runtime_error("Chat history output is unavailable");
     }
-    int last_result=0,profile_result=0,skill_result=0,mcp_result=0;std::string prompt;
-    const auto exit_status=[&]{return last_result!=0?last_result:profile_result!=0?profile_result:skill_result!=0?skill_result:mcp_result;};
+    int last_result=0,profile_result=0,skill_result=0,agent_result=0,mcp_result=0;std::string prompt;
+    const auto exit_status=[&]{return last_result!=0?last_result:profile_result!=0?profile_result:skill_result!=0?skill_result:agent_result!=0?agent_result:mcp_result;};
     while(std::cerr<<"xMind > "<<std::flush,std::getline(std::cin,prompt)) {
         if(!prompt.empty() && prompt.back()=='\r')prompt.pop_back();
         if(prompt=="/exit")return exit_status();
@@ -405,7 +419,43 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
             std::cerr<<"/profiles lists saved provider metadata without changing this chat's admission binding; /profile ID REVISION explicitly selects a shared profile and clears this chat's model override.\n";
+            std::cerr<<"/agents lists named agent definitions; /agent shows this conversation's selection; /agent ID selects one and /agent default clears it. Selection is revision-checked and locked while a run is active.\n";
             std::cerr<<"/skills lists current workspace guide metadata without activating a guide.\n/session-skills inspects current attachments; /attach-skill ID and /remove-skill ID change exact catalogue ids (spaces are part of the id); /clear-skills clears the observed selection. Native revisions prevent stale writes.\n/models lists backend-enabled models; /model ID selects one for subsequent turns; /model resets to the server default.\n/provider-models discovers account models through the backend's saved key.\n/sessions lists saved conversations; /session ID resumes one; /new starts an empty conversation on your next request.\n/title NAME renames the selected conversation; /history displays its saved messages; /exit leaves. Prefix a literal slash request with another slash.\n";continue;
+        }
+        if(prompt=="/agents"||prompt=="/agent"||prompt.starts_with("/agent ")){
+            if(!agent_selection){agent_result=1;std::cerr<<"This backend does not support named agent selection. Update the native backend.\n";continue;}
+            try{
+                const auto catalogue=request("/v1/agents");agent_catalogue(catalogue);
+                if(prompt=="/agents"){
+                    std::cout<<Json{{"type","agents"},{"catalogue",catalogue}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Agent catalogue output unavailable");agent_result=0;continue;
+                }
+                if(prompt=="/agent"&&session.empty()){agent_result=1;std::cerr<<"No conversation is selected. Use /sessions and /session ID, or /agent ID to start an agent conversation.\n";continue;}
+                const auto selected_id=prompt=="/agent"?std::string{}:prompt.substr(7);Json agent_id=nullptr,expected_agent=nullptr;std::int64_t definition_revision=0;
+                if(prompt!="/agent"&&selected_id.empty())throw std::invalid_argument("Empty named agent identity");
+                if(selected_id!="default"){
+                    if(!selected_id.empty()){
+                        if(selected_id.size()>64||selected_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos)throw std::invalid_argument("Invalid named agent identity");
+                        const auto found=std::find_if(catalogue["agents"].begin(),catalogue["agents"].end(),[&](const Json& value){return value["id"]==selected_id;});if(found==catalogue["agents"].end()){agent_result=1;std::cerr<<"Agent was not found. Use /agents to see current IDs.\n";continue;}expected_agent=*found;agent_id=selected_id;definition_revision=expected_agent["revision"].get<std::int64_t>();
+                    }
+                }
+                if(session.empty()){
+                    if(agent_id.is_null()){agent_result=1;std::cerr<<"No conversation is selected to clear. Use /agent ID to start an agent conversation.\n";continue;}
+                    const Json creation={{"title","New conversation"}};const auto created=request("/v1/sessions",&creation);if(!created.is_object()||!created.contains("id")||!created["id"].is_string())throw std::runtime_error("Invalid new conversation response");session=created["id"].get<std::string>();if(session.empty()||session.size()>128||session.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid new conversation identity");
+                    std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",Json::array()}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("New agent conversation output unavailable");
+                }
+                const auto path="/v1/sessions/"+session+"/agent";auto observed=request(path);session_agent_snapshot(observed,session);
+                if(prompt=="/agent"){
+                    std::cout<<Json{{"type","agent_selection"},{"catalogue",catalogue},{"selection",observed}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Agent selection output unavailable");agent_result=0;continue;
+                }
+                if(!observed["editable"].get<bool>()){agent_result=1;std::cerr<<"This conversation's agent is locked while a run is active. Wait for it to finish, then use /agent again.\n";continue;}
+                const Json body={{"agent_id",agent_id},{"agent_revision",definition_revision},{"expected_revision",observed["revision"]}};const auto response=client.Post(path,headers,body.dump(),"application/json");if(!response)throw std::runtime_error("Cannot reach xMind Server during agent selection");
+                if(response->status==400||response->status==403||response->status==409){agent_result=1;std::cerr<<"Agent selection rejected (HTTP "<<response->status<<"). Use /agent to refresh before retrying; no write was replayed.\n";continue;}
+                if(response->status!=200)throw std::runtime_error("Server rejected agent selection");const auto acknowledged=Json::parse(response->body);session_agent_snapshot(acknowledged,session);
+                const bool selection_matches=agent_id.is_null()?acknowledged["selected"].is_null():acknowledged["selected"].is_object()&&acknowledged["selected"]["id"]==agent_id&&acknowledged["selected"]["revision"]==definition_revision&&acknowledged["selected"]["model_id"]==expected_agent["model_id"];
+                if(!acknowledged["editable"].get<bool>()||acknowledged["revision"]!=observed["revision"].get<std::int64_t>()+1||!selection_matches)throw std::runtime_error("Backend agent acknowledgement changed selection or revision");
+                std::cout<<Json{{"type","agent_selection"},{"catalogue",catalogue},{"selection",acknowledged}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Agent selection output unavailable");agent_result=0;
+            }catch(const std::invalid_argument&){agent_result=1;std::cerr<<"Use /agents, /agent or /agent ID|default.\n";}catch(const std::exception& error){agent_result=1;std::cerr<<error.what()<<'\n';}
+            continue;
         }
         if(prompt=="/mcp"||prompt.starts_with("/mcp ")||prompt.starts_with("/mcp-")){
             try{
