@@ -33,6 +33,40 @@ false` in the offline admin import result means import did not start a run. A
 running server separately advertises live executability in `/v1/graphs` and
 accepts registered graph runs through its shared execution service.
 
+Graph nodes can instead reference a reusable named definition with `agent_id`:
+
+```yaml
+graphs:
+  - id: review
+    spec:
+      nodes:
+        - id: inspect
+          type: agent
+          agent_id: security_reviewer
+          prompt: Inspect the selected change and report findings.
+```
+
+Import the definitions before importing graphs that reference them:
+
+```yaml
+agents:
+  - id: security_reviewer
+    model_id: claude-sonnet
+    instructions: |
+      Review for security issues. Cite only evidence from your assigned branch.
+```
+
+`xmind admin ... import-agents FILE` stores at most 64 definitions through
+xlang3-backed SQLite. A definition supplies bounded instructions and an
+optional model ID. Graph import resolves the ID and copies its revision,
+instructions and optional model into the immutable graph plan. Updating an
+agent and reimporting a graph creates a new graph revision; existing runs keep
+their captured plan. A graph node using `agent_id` cannot override the
+definition's model or instructions. A configured model ID must be enabled by
+the backend before the graph can run. Agent IDs remain retired after removal.
+A named definition does not add tools or permissions: the same server-
+registered tools, workspace access and approval policy still apply.
+
 ## Agent instructions
 
 `xmind admin ... import-instructions FILE` accepts a plain Markdown document,
@@ -62,11 +96,12 @@ supported. JSON input remains accepted.
 
 ## Still required for the agreed product
 
-The current slice supports per-node agent instructions inside YAML graph
-definitions, but does not yet define reusable named YAML agents, per-agent tool
-bindings, filesystem skill catalogs, arbitrary xlang3 `.py` callables, or the
-in-process programming API. Those authoring styles must eventually produce the
-same validated native definitions, tool registry and permission receipts;
-parser acceptance alone does not establish runtime behavior. See the
+The current slice supports reusable named YAML agents in graph nodes and
+per-node inline instructions. Single-agent session selection of a named
+definition, per-agent tool bindings, filesystem skill catalogs, arbitrary
+xlang3 `.py` callables, and the in-process programming API remain incomplete.
+Those authoring styles must eventually produce the same validated native
+definitions, tool registry and permission receipts; parser acceptance alone
+does not establish runtime behavior. See the
 [runtime architecture](runtime-product-design.md) for the complete target and
 remaining integration work.

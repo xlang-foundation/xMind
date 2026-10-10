@@ -1,6 +1,7 @@
 // Native domain and real embedded-xlang3 storage contract. Completion/input
 // values below are labeled fixtures, not model/tool execution evidence.
 #include "agentflow/graph.hpp"
+#include "agentflow/agent_definitions.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "nlohmann/json.hpp"
 #include <filesystem>
@@ -54,5 +55,28 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         store.put_information("native-graphs","catalog",R"({"version":2,"revision":3,"graphs":[],"retired_ids":[]})").get();const auto corrupt=store.information("native-graphs","catalog").get();rejects<std::invalid_argument>([&]{catalog.apply(R"({"graphs":[]})");});require(store.information("native-graphs","catalog").get()==corrupt,"Corrupt graph configuration must not be overwritten");store.close();}
     const std::string yaml="graphs:\n  - id: yaml_workflow\n    spec:\n      nodes:\n        - id: inspect\n          type: agent\n          prompt: Read the selected project files\n";
     {PersistenceService store((std::filesystem::u8path(argv[1])/"graph-yaml.sqlite").string(),imports);GraphCatalogStore catalog(store);const auto imported=catalog.apply(yaml);require(imported.revision==1&&imported.entries.size()==1&&imported.entries[0].id=="yaml_workflow"&&imported.entries[0].plan.nodes().size()==1,"Native graph catalog must accept bounded YAML definitions");require(catalog.apply(yaml).revision==1,"Equivalent YAML must preserve immutable definition revisions");const auto saved=store.information("native-graphs","catalog").get();for(const auto malformed:{"graphs:\n  - id: duplicate\n    id: shadow\n    spec: {}\n","graphs: &items []\n","graphs: *items\n"}){rejects<std::invalid_argument>([&]{catalog.apply(malformed);});require(store.information("native-graphs","catalog").get()==saved,"Rejected duplicate-key or alias YAML must preserve the saved definition");}store.close();}
+    {
+        PersistenceService store((std::filesystem::u8path(argv[1])/"named-agents.sqlite").string(),imports);
+        AgentDefinitionStore agents(store);
+        const std::string definitions="agents:\n  - id: reviewer\n    model_id: review-model-v1\n    instructions: |\n      Review only the assigned branch.\n";
+        const auto first=agents.apply(definitions);
+        require(first.revision==1&&first.entries.size()==1&&first.entries[0].revision==1,"YAML agent import must assign native catalog/profile revisions");
+        const std::string named_graph="graphs:\n  - id: named_review\n    spec:\n      nodes:\n        - id: inspect\n          type: agent\n          agent_id: reviewer\n          prompt: Review this branch\n";
+        GraphCatalogStore graphs(store);const auto captured=graphs.apply(named_graph);const auto& node=captured.entries[0].plan.nodes()[0];
+        require(node.agent_id=="reviewer"&&node.agent_revision==1&&node.model_id=="review-model-v1"&&node.instructions=="Review only the assigned branch.\n","Graph admission must resolve and pin named profile behavior into the immutable executable node");
+        const auto pinned=captured.entries[0].plan.json();const auto saved_graph=store.information("native-graphs","catalog").get();
+        rejects<std::invalid_argument>([&]{graphs.apply("graphs:\n  - id: unknown_agent\n    spec:\n      nodes:\n        - id: inspect\n          type: agent\n          agent_id: missing\n          prompt: Must reject\n");});
+        rejects<std::invalid_argument>([&]{graphs.apply("graphs:\n  - id: spoofed_revision\n    spec:\n      nodes:\n        - id: inspect\n          type: agent\n          agent_id: reviewer\n          agent_revision: 900\n          prompt: Must reject\n");});
+        rejects<std::invalid_argument>([&]{graphs.apply("graphs:\n  - id: spoofed_instructions\n    spec:\n      nodes:\n        - id: inspect\n          type: agent\n          agent_id: reviewer\n          instructions: Caller supplied behavior\n          prompt: Must reject\n");});
+        require(store.information("native-graphs","catalog").get()==saved_graph,"Unknown and caller-supplied profile revisions must not mutate graph state");
+        const auto changed=agents.apply("agents:\n  - id: reviewer\n    model_id: review-model-v2\n    instructions: |\n      Review only the assigned branch and cite the source.\n");
+        require(changed.entries[0].revision==2,"Changed named behavior must advance its own revision");
+        const auto revised=graphs.apply(named_graph);
+        require(revised.entries[0].revision==2&&revised.entries[0].plan.nodes()[0].agent_revision==2&&revised.entries[0].plan.nodes()[0].model_id=="review-model-v2","Updating a named agent must create a new immutable graph revision");
+        require(Json::parse(pinned).at("nodes")[0].at("agent_revision")==1&&Json::parse(pinned).at("nodes")[0].at("model_id")=="review-model-v1","Previously admitted graph plans must retain their original named behavior snapshot");
+        require(agents.apply("agents:\n  - id: reviewer\n    model_id: review-model-v2\n    instructions: |\n      Review only the assigned branch and cite the source.\n").revision==2,"Equivalent named agent imports must preserve revisions");
+        store.close();
+    }
+    {PersistenceService store((std::filesystem::u8path(argv[1])/"named-agents.sqlite").string(),imports);const auto reopened=AgentDefinitionStore(store).load();const auto graph=GraphCatalogStore(store).load();require(reopened.entries[0].revision==2&&graph.entries[0].plan.nodes()[0].agent_revision==2,"Named agent and graph snapshots must reopen through actual xlang3/SQLite storage");store.close();}
     std::cout<<"Native graph contracts passed planning, joins, conditions, references, human checkpoint restore, uncertain non-replay, bounded YAML catalog import and actual xlang3/SQLite configuration revisions/fault/reopen. Coordinator outputs are synthetic; no agent/tool graph execution claimed.\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

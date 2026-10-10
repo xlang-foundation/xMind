@@ -1,4 +1,5 @@
 #include "agentflow/graph.hpp"
+#include "agentflow/agent_definitions.hpp"
 #include "agentflow/authoring_document.hpp"
 #include "agentflow/mcp_wire.hpp"
 #include "nlohmann/json.hpp"
@@ -21,11 +22,30 @@ GraphCatalog decode(const Json& value,bool stored){
     if(stored){if(!value.contains("retired_ids") || !value["retired_ids"].is_array() || value["retired_ids"].size()>4096)throw std::invalid_argument("Invalid retired graph identities");for(const auto& retired:value["retired_ids"]){if(!retired.is_string())throw std::invalid_argument("Invalid retired graph identity");auto key=retired.get<std::string>();if(!identifier(key) || !ids.insert(key).second)throw std::invalid_argument("Duplicate or active retired graph identity");result.retired_ids.push_back(std::move(key));}}
     return result;
 }
+Json resolve_agent_definitions(Json value,const AgentDefinitionCatalog& definitions){
+    if(!value.is_object()||!value.contains("graphs")||!value["graphs"].is_array())return value;
+    for(auto& entry:value["graphs"]){
+        if(!entry.is_object()||!entry.contains("spec")||!entry["spec"].is_object()||!entry["spec"].contains("nodes")||!entry["spec"]["nodes"].is_array())continue;
+        for(auto& node:entry["spec"]["nodes"]){
+            if(!node.is_object()||!node.contains("agent_id"))continue;
+            if(!node["agent_id"].is_string()||node.contains("agent_revision")||node.contains("instructions")||node.contains("model_id"))
+                throw std::invalid_argument("Named graph agents cannot override or supply backend-pinned definition fields");
+            const auto id=node["agent_id"].get<std::string>();
+            const auto found=std::find_if(definitions.entries.begin(),definitions.entries.end(),[&](const auto& item){return item.id==id;});
+            if(found==definitions.entries.end())throw std::invalid_argument("Graph references an unknown named agent definition");
+            node["agent_revision"]=found->revision;
+            node["instructions"]=found->instructions;
+            if(!found->model_id.empty())node["model_id"]=found->model_id;
+        }
+    }
+    return value;
+}
 std::string encode(const GraphCatalog& catalog){auto entries=Json::array();for(const auto& graph:catalog.entries)entries.push_back({{"id",graph.id},{"revision",graph.revision},{"spec",Json::parse(graph.plan.json())}});return Json{{"version",1},{"revision",catalog.revision},{"graphs",std::move(entries)},{"retired_ids",catalog.retired_ids}}.dump();}
 }
 GraphCatalog GraphCatalogStore::load(){std::string source;try{source=store_.information("native-graphs","catalog").get();}catch(const NotFound&){return {};};return decode(parse(source,true),true);}
 GraphCatalog GraphCatalogStore::apply(const std::string& source){
-    auto desired=decode(parse(source,false),false);const auto previous=load();desired.retired_ids=previous.retired_ids;bool changed=previous.revision==0 || desired.entries.size()!=previous.entries.size();
+    const auto definitions=AgentDefinitionStore(store_).load();
+    auto desired=decode(resolve_agent_definitions(parse(source,false),definitions),false);const auto previous=load();desired.retired_ids=previous.retired_ids;bool changed=previous.revision==0 || desired.entries.size()!=previous.entries.size();
     for(std::size_t i=0;i<desired.entries.size();++i){auto& entry=desired.entries[i];if(std::find(previous.retired_ids.begin(),previous.retired_ids.end(),entry.id)!=previous.retired_ids.end())throw std::invalid_argument("Retired graph identities cannot be reused");const auto found=std::find_if(previous.entries.begin(),previous.entries.end(),[&](const auto& old){return old.id==entry.id;});
         if(found==previous.entries.end()){entry.revision=1;changed=true;}
         else if(found->plan.json()==entry.plan.json()){entry.revision=found->revision;}

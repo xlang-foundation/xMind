@@ -68,13 +68,15 @@ does not bypass admission, take ownership of SQLite or replace scheduling.
 Unrestricted script code is a trusted extension until stronger containment is
 implemented. Neither embedded execution nor shared-memory IPC is an OS sandbox.
 
-The current authoring foundation accepts bounded YAML graph catalogs, JSON
-graph catalogs, YAML or JSON global instruction records, and plain Markdown
-instruction files through offline native administration. These records are
-validated by the existing native graph plan and are persisted through embedded
-xlang3 SQLite. This does not yet provide YAML agent/tool declarations, a
-filesystem skill catalogue, `.py` tool registration, or the xlang3 programming
-API. See [authoring formats and current coverage](authoring.md).
+The current authoring foundation accepts bounded YAML/JSON graph catalogs,
+reusable bounded YAML/JSON named agent catalogs, YAML or JSON global
+instruction records, and plain Markdown instruction files through offline
+native administration. Named definitions currently bind prompt guidance and
+an optional model to graph nodes; import pins each resolved definition into the
+immutable graph revision. These records are persisted through embedded xlang3
+SQLite. This does not yet provide single-agent session selection, per-agent
+tool bindings, a filesystem skill catalogue, `.py` tool registration, or the
+xlang3 programming API. See [authoring formats and current coverage](authoring.md).
 
 ## Planning, AgentFlow and scheduling
 

@@ -2,6 +2,7 @@
 #include "agentflow/mcp_configuration.hpp"
 #include "agentflow/process_configuration.hpp"
 #include "agentflow/agent_instructions.hpp"
+#include "agentflow/agent_definitions.hpp"
 #include "agentflow/graph.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/owner_process.hpp"
@@ -92,10 +93,15 @@ int run_admin(int argc,char** argv){
             const agentflow::LegacyOwnerBootstrap boot{identity.str(),qualified};database.begin();try{const auto snapshot=agentflow::snapshot_legacy_database(database);agentflow::publish_legacy_owner_ticket(database,lease,boot,{pid,argv[command+5],argv[command+6]},snapshot);database.commit();}catch(...){database.rollback();throw;}
             std::cout<<nlohmann::json{{"legacy_ticket_id",boot.ticket_id},{"admission_closed",true},{"quiescence_receipt",false},{"schema_migrated",false}}.dump()<<'\n';return 0;
         }
-        if(command>=argc)throw std::invalid_argument("Commands: import-graphs FILE; import-instructions FILE; import-processes FILE; import-mcp FILE; discover-mcp SERVER_ID WORKSPACE; put-mcp-credential SERVER_ID ENV_NAME SECRET_SOURCE_ENV. Run while the backend is stopped.");
+        if(command>=argc)throw std::invalid_argument("Commands: import-agents FILE; import-graphs FILE; import-instructions FILE; import-processes FILE; import-mcp FILE; discover-mcp SERVER_ID WORKSPACE; put-mcp-credential SERVER_ID ENV_NAME SECRET_SOURCE_ENV. Run while the backend is stopped.");
         agentflow::PersistenceService store(options.at("--db"),{options.at("--modules"),options.at("--stdlib")});agentflow::McpConfigurationStore configurations(store);
         using Json=nlohmann::json;const std::string action=argv[command];
-        if(action=="import-graphs" && command+2==argc){
+        if(action=="import-agents" && command+2==argc){
+            std::ifstream file(std::filesystem::u8path(argv[command+1]),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted agent definition catalog");std::string source;char byte;
+            while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Agent definition catalog exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted agent definition catalog");
+            const auto catalog=agentflow::AgentDefinitionStore(store).apply(source);auto agents=Json::array();for(const auto& agent:catalog.entries)agents.push_back({{"id",agent.id},{"revision",agent.revision},{"model_id",agent.model_id.empty()?Json(nullptr):Json(agent.model_id)}});
+            std::cout<<Json{{"catalog_revision",catalog.revision},{"agents",std::move(agents)},{"execution_available",false}}.dump()<<'\n';
+        }else if(action=="import-graphs" && command+2==argc){
             std::ifstream file(std::filesystem::u8path(argv[command+1]),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted graph catalog");std::string source;char byte;
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Graph catalog exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted graph catalog");
             const auto catalog=agentflow::GraphCatalogStore(store).apply(source);auto graphs=Json::array();for(const auto& graph:catalog.entries)graphs.push_back({{"id",graph.id},{"revision",graph.revision},{"node_count",graph.plan.nodes().size()}});

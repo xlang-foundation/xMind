@@ -1,5 +1,6 @@
 #include "agentflow/graph_runner.hpp"
 #include "agentflow/graph_service.hpp"
+#include "agentflow/agent_definitions.hpp"
 #include "nlohmann/json.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/edit_executor.hpp"
@@ -13,16 +14,22 @@ struct Task{std::stop_source stop;std::future<Run> result;Task(GraphRunner& runn
 Operation approval(PersistenceService& store,const std::string& root){const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);while(std::chrono::steady_clock::now()<deadline){for(const auto& child:store.children(root).get())for(const auto& op:store.operations(child.id).get())if(op.state==OperationState::awaiting_approval)return op;std::this_thread::sleep_for(std::chrono::milliseconds(5));}throw std::runtime_error("Graph approval did not arrive");}
 int main(int argc,char** argv){if(argc!=5)return 2;try{
  const auto database=(std::filesystem::u8path(argv[1])/"runner.sqlite").string();const std::vector<std::string> imports{argv[2],argv[3]};
- PersistenceService store(database,imports);AgentSettings settings;settings.provider.model="fixture-model";settings.provider.endpoint=argv[4];settings.provider.tools=Capability::supported;settings.workspace=argv[1];settings.run_timeout=std::chrono::seconds(15);GraphRunner runner(store,settings,2);
- const GraphPlan plan(R"({"nodes":[
+ PersistenceService store(database,imports);AgentSettings settings;settings.provider.model="fixture-model";settings.provider.endpoint=argv[4];settings.provider.tools=Capability::supported;settings.workspace=argv[1];settings.run_timeout=std::chrono::seconds(15);
+ AgentDefinitionStore(store).apply(R"({"agents":[
+  {"id":"review_left","model_id":"fixture-model","instructions":"Work as the left-side reviewer. Report only findings from your assigned branch."},
+  {"id":"review_right","model_id":"fixture-model","instructions":"Work as the right-side reviewer. Report only findings from your assigned branch."}
+ ]})");
+ const Json spec=Json::parse(R"({"nodes":[
   {"id":"read","type":"tool","tool":"read_file","arguments":{"path":"left.txt"}},
-  {"id":"left","type":"agent","prompt":"parallel-left","instructions":"Work as the left-side reviewer. Report only findings from your assigned branch.","depends_on":["read"]},
-  {"id":"right","type":"agent","prompt":"parallel-right","instructions":"Work as the right-side reviewer. Report only findings from your assigned branch.","depends_on":["read"]},
+  {"id":"left","type":"agent","agent_id":"review_left","prompt":"parallel-left","depends_on":["read"]},
+  {"id":"right","type":"agent","agent_id":"review_right","prompt":"parallel-right","depends_on":["read"]},
   {"id":"review","type":"human","prompt":"Choose the next file","depends_on":["left","right"]},
   {"id":"chosen","type":"tool","tool":"read_file","depends_on":["review"],"arguments":{"path":{"$ref":{"node":"review","path":["path"]}}}},
   {"id":"excluded","type":"tool","tool":"read_file","depends_on":["review"],"when":{"node":"review","path":["path"],"equals":"never.txt"},"arguments":{"path":"never.txt"}}
  ]})");
- runner.validate(plan);store.create_session("main","Real graph execution with synthetic inference").get();store.start_graph_run("root","main","fixture",1,plan,R"({"content":"root actual graph task","model_id":"fixture-model"})").get();
+ const auto registered=GraphCatalogStore(store).apply(Json{{"graphs",Json::array({{{"id","fixture"},{"spec",spec}}})}}.dump());
+ const GraphPlan plan=registered.entries.at(0).plan;GraphRunner runner(store,settings,2);
+ runner.validate(plan);require(plan.nodes()[1].agent_revision==1&&plan.nodes()[1].model_id=="fixture-model","Graph runner input must contain native-resolved named-agent snapshots");store.create_session("main","Real graph execution with synthetic inference").get();store.start_graph_run("root","main","fixture",registered.entries.at(0).revision,plan,R"({"content":"root actual graph task","model_id":"fixture-model"})").get();
  require(runner.execute("root").state==RunState::paused,"Human step must pause after observed agent joins");auto root=store.graph_run("root").get();require(!root.input_json.empty(),"Immutable graph input must be retained");auto checkpoint=Json::parse(root.checkpoint_json);require(checkpoint["nodes"][0]["output"]["content"]=="Actual left file\n","Direct graph tool must use actual workspace content");require(store.children("root").get().size()==3,"Human node must not masquerade as executable child");
  store.input_graph_human("root","review",R"({"path":"right.txt"})","local-owner",root.checkpoint_revision).get();require(runner.execute("root").state==RunState::completed,"Resumed graph must run the typed-reference tool and finish");root=store.graph_run("root").get();checkpoint=Json::parse(root.checkpoint_json);require(checkpoint["nodes"][4]["output"]["content"]=="Actual right file\n" && checkpoint["nodes"][5]["state"]=="skipped","Actual human data must resolve tool argument and condition");require(store.children("root").get().size()==4,"Skipped tool must never be admitted");const auto history=store.history("main").get();require(history.size()==2 && Json::parse(history.back().json)["source"]=="graph_join","Root history must retain its own observed join only");require(!Json::parse(history.back().json).contains("usage"),"Graph must not fabricate aggregate token metrics");
  const GraphPlan discovery(R"({"nodes":[{"id":"find","type":"tool","tool":"glob_files","arguments":{"pattern":"{left,right}.txt"}}]})");
