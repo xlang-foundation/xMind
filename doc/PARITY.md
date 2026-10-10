@@ -20,6 +20,11 @@ release; inspect the pinned source before finalizing each acceptance criterion.
 
 ## Current native verification scope
 
+Native MCP HTTP remains unfinished. The production approval registry now has
+a shared native client interface implemented by stdio; its new compilation and
+effect-contract acceptance are pending. This is a required transport boundary,
+not HTTP/OAuth parity. [Scope and pinned protocol](native-mcp-http.md).
+
 Native file discovery and literal content search now interpret hierarchical
 workspace-local Git/search ignore metadata, ordered negation and scoped overrides.
 Positive glob behavior matches the inspected adapter's file-whitelist/directory

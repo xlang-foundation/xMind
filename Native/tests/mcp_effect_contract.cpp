@@ -1,3 +1,4 @@
+#include "agentflow/mcp_client.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/json_schema.hpp"
 #include "agentflow/xlang_sqlite.hpp"
@@ -8,8 +9,15 @@
 #include <iostream>
 #include <random>
 #include <thread>
+#include <type_traits>
 using namespace agentflow;
 using namespace std::chrono_literals;
+template<class Client>concept PublicMcpDispatch=requires(Client& peer){peer.call_tool("tool","{}",McpDeadline{},std::stop_token{});};
+static_assert(std::is_abstract_v<McpToolClient>);
+static_assert(std::is_base_of_v<McpToolClient,McpStdioClient>);
+static_assert(std::is_same_v<McpToolClient::Deadline,McpStdioClient::Deadline>);
+static_assert(!PublicMcpDispatch<McpToolClient> && !PublicMcpDispatch<McpStdioClient>);
+static_assert(!std::is_copy_constructible_v<McpStdioClient>);
 namespace {
 using Json=nlohmann::json;
 void require(bool value,const char* reason){if(!value)throw std::runtime_error(reason);}
@@ -38,7 +46,8 @@ struct Task {
             try {
                 client.connect(std::chrono::steady_clock::now()+5s,cancel.get_token());
                 phase="catalogue";
-                McpToolRegistry registry(client,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token());
+                McpToolClient& owned_peer=client;
+                McpToolRegistry registry(owned_peer,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token());
                 const auto definitions=registry.definitions();require(definitions.size()==1 && definitions[0].name.starts_with("mcp_") && definitions[0].name.size()==52,"Native registry must derive a bounded alias from trusted identity and exact snapshot");
                 require(definitions[0].description.find("Peer tool name (untrusted metadata): \"fixture.write\"")!=std::string::npos,"Model catalogue must expose the original peer tool identity as quoted untrusted metadata");
                 const auto snapshot=registry.approval_bindings_json();const auto metadata=Json::parse(snapshot);

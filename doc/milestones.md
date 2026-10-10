@@ -1,5 +1,14 @@
 # Reviewable milestones
 
+Native MCP transport interface candidate: production `McpToolRegistry` now
+accepts a transport-neutral `McpToolClient`, implemented by the existing stdio
+binding. Dispatch stays private to the same durable approval/effect registry.
+Common failures preserve possibly-sent/request/response attribution. The actual
+MCP effect contract is updated to use the abstract interface and require private
+dispatch/shared deadline/noncopyable ownership at compile time. Whitespace/source
+checks pass; native compile/execution is pending. HTTP/OAuth remain unavailable.
+[Pinned protocol, implementation boundary and remaining acceptance](native-mcp-http.md).
+
 Production sidebar approved-creation acceptance prepared: a second actual
 native graph requires human input, then a `create_file` proposal. The host
 fixture runs the production comparison path and requires absence before

@@ -1,3 +1,4 @@
+#include "agentflow/mcp_client.hpp"
 #include "agentflow/graph_runner.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/edit_executor.hpp"

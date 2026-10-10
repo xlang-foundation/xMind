@@ -1,3 +1,4 @@
+#include "agentflow/mcp_client.hpp"
 #include "agentflow/graph_service.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/xlang_sqlite.hpp"

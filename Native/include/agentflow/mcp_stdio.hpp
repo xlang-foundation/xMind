@@ -1,4 +1,5 @@
 #pragma once
+#include "agentflow/mcp_transport.hpp"
 #include <chrono>
 #include <cstdint>
 #include <memory>
@@ -11,9 +12,6 @@
 #include <vector>
 
 namespace agentflow {
-struct McpTransportError : std::runtime_error {using std::runtime_error::runtime_error;};
-struct McpTransportTimeout : McpTransportError {using McpTransportError::McpTransportError;};
-struct McpTransportCancelled : McpTransportError {using McpTransportError::McpTransportError;};
 struct McpStdioConfiguration {
     std::string executable,working_directory;
     std::vector<std::string> arguments;

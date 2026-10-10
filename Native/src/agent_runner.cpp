@@ -1,3 +1,4 @@
+#include "agentflow/mcp_client.hpp"
 #include "agentflow/agent_runner.hpp"
 #include "nlohmann/json.hpp"
 #include "agentflow/edit_executor.hpp"

@@ -1,3 +1,4 @@
+#include "agentflow/mcp_client.hpp"
 #include "agentflow/mcp_configuration.hpp"
 #include "agentflow/process_configuration.hpp"
 #include "agentflow/agent_instructions.hpp"

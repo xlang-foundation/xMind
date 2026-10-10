@@ -25,10 +25,10 @@ struct McpToolRegistry::Impl {
         McpToolDescription description;
         std::string alias,fingerprint;
     };
-    McpStdioClient& client;PersistenceService& store;WorkspaceTools& workspace;
+    McpToolClient& client;PersistenceService& store;WorkspaceTools& workspace;
     std::string config_id,protocol_version;std::int64_t revision;
     std::map<std::string,Entry> entries;
-    Impl(McpStdioClient& peer,PersistenceService& persistence,WorkspaceTools& root,std::string id,std::int64_t version):client(peer),store(persistence),workspace(root),config_id(std::move(id)),revision(version) {}
+    Impl(McpToolClient& peer,PersistenceService& persistence,WorkspaceTools& root,std::string id,std::int64_t version):client(peer),store(persistence),workspace(root),config_id(std::move(id)),revision(version) {}
     Json approval_binding(const Entry& entry) const {
         return {{"server_config_id",config_id},{"config_revision",revision},
             {"peer_tool",entry.description.name},{"alias",entry.alias},{"catalogue_fingerprint",entry.fingerprint},
@@ -37,8 +37,8 @@ struct McpToolRegistry::Impl {
             {"annotations_json",entry.description.annotations_json}};
     }
 };
-McpToolRegistry::McpToolRegistry(McpStdioClient& client,PersistenceService& store,WorkspaceTools& workspace,
-    std::string id,std::int64_t revision,McpStdioClient::Deadline deadline,std::stop_token cancel):impl_(std::make_unique<Impl>(client,store,workspace,std::move(id),revision)) {
+McpToolRegistry::McpToolRegistry(McpToolClient& client,PersistenceService& store,WorkspaceTools& workspace,
+    std::string id,std::int64_t revision,McpToolClient::Deadline deadline,std::stop_token cancel):impl_(std::make_unique<Impl>(client,store,workspace,std::move(id),revision)) {
     auto& state=*impl_;
     if(state.config_id.empty() || state.config_id.size()>128 || state.config_id.find('\0')!=std::string::npos || revision<=0)throw std::invalid_argument("Invalid trusted MCP configuration identity");
     if(!client.ready())throw McpProtocolError("MCP discovery requires a ready owned client");
@@ -74,7 +74,7 @@ std::string McpToolRegistry::approval_bindings_json() const {
     return bindings.dump();
 }
 std::string McpToolRegistry::invoke(const std::string& id,const std::string& run,const std::string& alias,const std::string& arguments,
-    std::int64_t expiry,McpStdioClient::Deadline deadline,std::stop_token cancel,InstructionPrecondition guidance) {
+    std::int64_t expiry,McpToolClient::Deadline deadline,std::stop_token cancel,InstructionPrecondition guidance) {
     auto& state=*impl_;const auto found=state.entries.find(alias);
     if(found==state.entries.end())throw std::invalid_argument("Tool is not registered on this backend");
     const auto& entry=found->second;SchemaWorker().evaluate(entry.description.input_schema_json,arguments,deadline,cancel);

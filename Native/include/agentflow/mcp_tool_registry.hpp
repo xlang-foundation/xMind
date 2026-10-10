@@ -1,5 +1,5 @@
 #pragma once
-#include "agentflow/mcp_client.hpp"
+#include "agentflow/mcp_tool_client.hpp"
 #include "agentflow/permission_waiter.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/instruction_precondition.hpp"
@@ -16,8 +16,8 @@ struct McpEffectNotDispatched : std::runtime_error {using std::runtime_error::ru
 // commands, raw peer names, approval actors, claims or operation outcomes.
 class McpToolRegistry {
 public:
-    McpToolRegistry(McpStdioClient& client,PersistenceService& store,WorkspaceTools& workspace,
-        std::string config_id,std::int64_t config_revision,McpStdioClient::Deadline deadline,
+    McpToolRegistry(McpToolClient& client,PersistenceService& store,WorkspaceTools& workspace,
+        std::string config_id,std::int64_t config_revision,McpToolClient::Deadline deadline,
         std::stop_token cancel={});
     ~McpToolRegistry();
     McpToolRegistry(const McpToolRegistry&)=delete;
@@ -29,7 +29,7 @@ public:
     std::string approval_bindings_json() const;
     std::string invoke(const std::string& operation_id,const std::string& run_id,
         const std::string& alias,const std::string& arguments,std::int64_t approval_expiry,
-        McpStdioClient::Deadline deadline,std::stop_token cancel={},InstructionPrecondition guidance={});
+        McpToolClient::Deadline deadline,std::stop_token cancel={},InstructionPrecondition guidance={});
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
