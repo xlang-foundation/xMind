@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-10",
+  "sourceRevision": "f317b74",
+  "nativeRuntime": {
+    "nativeRevision": "57da08510354220327a06b40717fd247ca5f5ab8",
+    "xlang3Revision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+    "manifestSha256": "96d8bef42869d624c384cdcaec18024c0c62f5ae7198e266856a7b04118f40c5",
+    "xmindExeSha256": "00e32342e08a5755aa826612ea935e61138829302ecc0fe23b7345595cf3bcc1"
+  },
+  "backend": {
+    "mode": "native C++ xMind Server",
+    "database": "disposable SQLite under ignored .agentflow test state",
+    "databaseIo": "embedded xlang3 SQLite",
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "providerConfig": ".config/providers.yaml",
+    "profileRevision": 1,
+    "activeProfile": ""
+  },
+  "discoveries": [
+    { "profile": "claude", "route": "anthropic.messages", "status": "passed", "modelCount": 13 },
+    { "profile": "gemini", "route": "gemini.generate-content", "status": "passed", "modelCount": 11 },
+    { "profile": "deepseek", "route": "deepseek.chat", "status": "passed", "modelCount": 2 },
+    { "profile": "openai", "route": "openai.responses", "status": "passed", "modelCount": 20 }
+  ],
+  "providerGenerationRequests": 0,
+  "apiKeysPrintedOrRecorded": false,
+  "scopeLimit": "Confirms current native profile import and live catalogue discovery only. It does not prove inference, tool calling, every model's capability, or rendered VS Code model selection."
+}

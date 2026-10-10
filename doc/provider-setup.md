@@ -7,7 +7,7 @@ tools for GPT-6 Sol/Luna require explicit `none` reasoning. Saved keys continue
 to belong to their existing route. Discovery does not rotate credentials or
 activate a model. [Policy, declarations and validation](native-model-eligibility.md).
 
-## Local YAML configuration: native integration in progress
+## Local YAML configuration and native profile integration
 
 The new source accepts a trusted local `--provider-config FILE` using native
 yaml-cpp 0.9.0, pinned to upstream commit
@@ -40,8 +40,10 @@ two source-checked server launches and durable cookie/history recovery without
 replay. The actual VSIX package passed **18 required asset checks**; all 12
 view files matched the tested bytes and all 30 payloads were hashed.
 [Integration and packaging evidence](evidence/native-provider-footer-integration-provenance.json)
-retains the initial guard-host failure separately. Installation and native
-live-provider acceptance remain pending.
+retains the initial guard-host failure separately. The current 0.1.5 package is
+installed in the regular VS Code profile. Its exact native runtime passed real
+catalogue discovery for all four configured provider profiles below; inference
+and rendered model-selection acceptance remain separate.
 
 Copy [the empty example](examples/providers.example.yaml) to
 `D:\CantorAI2026\xMind\.config\providers.yaml` and enter keys locally. The
@@ -131,6 +133,17 @@ AgentRunner, tools, streaming continuation or installed clients. They establish
 credential and generation access only. Credentials and private diagnostics
 remain outside Git. A live xlang3 benchmark deferred the original native
 diagnostic; the direct HTTPS checks did not start or modify that runtime.
+
+## Current native profile-discovery acceptance — 2026-10-10
+
+The packaged native C++ runtime imported `.config/providers.yaml` into a
+disposable xlang3/SQLite backend, then the authenticated `/v1/provider/profiles`
+and `/v1/provider/profiles/models` API discovered each saved profile's models
+through its registered route. Claude returned **13**, Gemini **11**, DeepSeek
+**2**, and OpenAI Responses **20** models. No key was printed or returned and no
+generation request was made. This validates current native catalogue discovery;
+live inference, tool calling and rendered VS Code model selection remain separate
+checks. [Exact executable, routes and counts](evidence/live-native-provider-discovery-20261010.json).
 
 ## Current installed preview issue
 
