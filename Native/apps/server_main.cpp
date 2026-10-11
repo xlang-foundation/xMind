@@ -150,13 +150,23 @@ int run_server(int argc,char** argv) {
         }
         const auto bind_workspace_membership=[&](agentflow::AgentSettings& settings){
             if(!settings.workspace||!workspace_registry)return;
-            const auto workspace_id=agentflow::WorkspaceTools(*settings.workspace).identity();
+            const agentflow::WorkspaceTools primary(*settings.workspace);
+            const auto workspace_id=primary.identity();const auto primary_root=primary.root_path();
             const auto registry=workspace_registry;
-            settings.workspace_membership_snapshot=[registry,workspace_id]{
-                const auto group=registry->get(workspace_id);agentflow::WorkspaceMembershipSnapshot snapshot;
-                snapshot.workspace_id=group.workspace_id;snapshot.revision=group.revision;snapshot.folders.reserve(group.folders.size());
-                for(const auto& folder:group.folders)snapshot.folders.push_back({folder.folder_id,folder.root});
-                return snapshot;
+            settings.workspace_membership_snapshot=[registry,workspace_id,primary_root]{
+                try {
+                    const auto group=registry->get(workspace_id);agentflow::WorkspaceMembershipSnapshot snapshot;
+                    snapshot.workspace_id=group.workspace_id;snapshot.revision=group.revision;snapshot.folders.reserve(group.folders.size());
+                    for(const auto& folder:group.folders)snapshot.folders.push_back({folder.folder_id,folder.root});
+                    return snapshot;
+                } catch(const std::out_of_range&) {
+                    // Existing local profiles may predate explicit workspace
+                    // registration. Preserve their primary-folder capability;
+                    // registration can later expand this to multiple roots.
+                    const agentflow::WorkspaceTools verified(primary_root);
+                    if(verified.identity()!=workspace_id||verified.root_path()!=primary_root)throw;
+                    return agentflow::WorkspaceMembershipSnapshot{workspace_id,1,{{workspace_id,primary_root}}};
+                }
             };
         };
         std::vector<agentflow::XlangPythonToolRegistration> xlang_python_tools;
