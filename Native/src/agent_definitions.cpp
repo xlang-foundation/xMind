@@ -70,15 +70,25 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
 
     std::set<std::string> ids;
     for (const auto& record : value.at("agents")) {
-        if (stored) fields(record, {"id", "revision", "model_id", "instructions"});
-        else fields(record, {"id", "model_id", "instructions"});
+        if (stored) fields(record, {"id", "revision", "model_id", "instructions", "tools"});
+        else fields(record, {"id", "model_id", "instructions", "tools"});
         const auto key = text(record, "id", 64);
         if (!identifier(key) || !ids.insert(key).second) throw std::invalid_argument("Invalid or duplicate agent definition ID");
         const auto model = record.contains("model_id") ? text(record, "model_id", 256, true) : std::string{};
         const auto guidance = text(record, "instructions", 32768);
         const auto rev = stored ? revision(record, "revision") : 0;
         if (rev > result.revision) throw std::invalid_argument("Agent definition revision exceeds catalog revision");
-        result.entries.push_back({key, rev, model, guidance});
+        std::optional<std::vector<std::string>> tools;
+        if (record.contains("tools")) {
+            if (!record.at("tools").is_array()) throw std::invalid_argument("Agent tool bindings must be an array");
+            tools.emplace();
+            for (const auto& item : record.at("tools")) {
+                if (!item.is_string()) throw std::invalid_argument("Agent tool bindings must contain names");
+                tools->push_back(item.get<std::string>());
+            }
+            validate_agent_tool_allowlist(tools);
+        }
+        result.entries.push_back({key, rev, model, guidance, std::move(tools)});
     }
 
     if (stored) {
@@ -96,8 +106,11 @@ AgentDefinitionCatalog decode(const Json& value, bool stored) {
 
 std::string encode(const AgentDefinitionCatalog& catalog) {
     auto entries = Json::array();
-    for (const auto& agent : catalog.entries)
-        entries.push_back({{"id", agent.id}, {"revision", agent.revision}, {"model_id", agent.model_id}, {"instructions", agent.instructions}});
+    for (const auto& agent : catalog.entries) {
+        Json entry{{"id", agent.id}, {"revision", agent.revision}, {"model_id", agent.model_id}, {"instructions", agent.instructions}};
+        if (agent.tools) entry["tools"] = *agent.tools;
+        entries.push_back(std::move(entry));
+    }
     return Json{{"version", 1}, {"revision", catalog.revision}, {"agents", std::move(entries)}, {"retired_ids", catalog.retired_ids}}.dump();
 }
 }
@@ -120,7 +133,7 @@ AgentDefinitionCatalog AgentDefinitionStore::apply(const std::string& source) {
             throw std::invalid_argument("Retired agent definition IDs cannot be reused");
         const auto found = std::find_if(previous.entries.begin(), previous.entries.end(), [&](const auto& old) { return old.id == entry.id; });
         if (found == previous.entries.end()) { entry.revision = 1; changed = true; }
-        else if (found->model_id == entry.model_id && found->instructions == entry.instructions) entry.revision = found->revision;
+        else if (found->model_id == entry.model_id && found->instructions == entry.instructions && found->tools == entry.tools) entry.revision = found->revision;
         else {
             if (found->revision == maximum_revision) throw std::overflow_error("Agent definition revision exhausted");
             entry.revision = found->revision + 1;

@@ -230,7 +230,7 @@ void AgentRunner::validate_dynamic_owner(const std::string& root_id,const std::s
 Run AgentRunner::start(std::string id,std::string session_id,std::string prompt,const std::string& model_id,const std::optional<AgentDefinition>& selected_agent) {
     if(prompt.empty() || prompt.size()>1024*1024) throw std::invalid_argument("Prompt must contain 1-1048576 UTF-8 bytes");
     auto input=Json{{"content",std::move(prompt)}};const auto context=provider_context_json(settings_,model_id);if(!context.empty())input["provider_context"]=Json::parse(context);
-    if(selected_agent){const auto& agent=*selected_agent;if(agent.id.empty()||agent.id.size()>64||agent.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||agent.revision<1||agent.revision>9007199254740991LL||agent.instructions.empty()||agent.instructions.size()>32768||agent.instructions.find('\0')!=std::string::npos||agent.model_id.size()>256||agent.model_id.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid selected agent snapshot");input["agent_profile"]={{"id",agent.id},{"revision",agent.revision},{"model_id",agent.model_id}};}
+    if(selected_agent){const auto& agent=*selected_agent;if(agent.id.empty()||agent.id.size()>64||agent.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||agent.revision<1||agent.revision>9007199254740991LL||agent.instructions.empty()||agent.instructions.size()>32768||agent.instructions.find('\0')!=std::string::npos||agent.model_id.size()>256||agent.model_id.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid selected agent snapshot");validate_agent_tool_allowlist(agent.tools);input["agent_profile"]={{"id",agent.id},{"revision",agent.revision},{"model_id",agent.model_id}};if(agent.tools)input["agent_profile"]["tools"]=*agent.tools;}
     return persistence_.start_prompt_run(std::move(id),std::move(session_id),input.dump(),execution_budget(model_id),execution_capabilities(model_id)).get();
 }
 ContextBinding AgentRunner::context_binding(const std::string& model_id)const{
@@ -299,8 +299,11 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     return manager.compact_idle(current.spec.scope,binding,current.spec.id,trusted,credential?&*credential:nullptr,token,deadline);
 }
 Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::string& model_id,
-    std::shared_ptr<RootExecutionBudget> budget,const std::string& graph_instructions) {
+    std::shared_ptr<RootExecutionBudget> budget,const std::string& graph_instructions,
+    std::optional<std::vector<std::string>> tool_allowlist) {
     if(graph_instructions.size()>32768 || graph_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Graph agent instructions exceed limits");
+    auto effective_tool_allowlist=tool_allowlist?std::move(tool_allowlist):settings_.tool_allowlist;
+    validate_agent_tool_allowlist(effective_tool_allowlist);
     const auto admitted=persistence_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
     bool leaf=false,dynamic_child=false,graph_agent=false;std::optional<DynamicPlanCapabilities> child_caps;std::optional<DynamicPresetCapability> child_preset;
     if(!admitted.parent_id.empty()){
@@ -489,7 +492,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 validate_dynamic_owner(id,provider.model);
                 auto presets=root_caps->presets;
                 for(auto& preset:presets){
-                    if(!preset.readonly){preset.tools.clear();for(const auto& definition:request.tools)preset.tools.push_back(definition.name);}
+                    if(!preset.readonly){preset.tools.clear();for(const auto& definition:request.tools)if(!effective_tool_allowlist||std::find(effective_tool_allowlist->begin(),effective_tool_allowlist->end(),definition.name)!=effective_tool_allowlist->end())preset.tools.push_back(definition.name);}
                     std::sort(preset.tools.begin(),preset.tools.end());
                     const auto child=dynamic_child_settings(settings_,preset,provider.model);
                     preset.backend_identity=agent_authority_identity(child,provider.model,root_caps->workspace_identity,agent_authority_credentials(persistence_,child));
@@ -501,7 +504,13 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(budget&&!leaf&&delegation_&&settings_.delegation){if(request.tools.size()>=64)throw std::invalid_argument("Model tool catalogue exceeds limits");request.tools.push_back(DelegationExecutor::definition());}
         if(dynamic_root){for(auto& definition:dynamic_plan_tool_definitions(*root_caps)){if(request.tools.size()>=64)throw std::invalid_argument("Model tool catalogue exceeds limits");request.tools.push_back(std::move(definition));}}
         };
-        auto refresh_tools=[&]{discover_mcp();discover_a2a();seal_catalogue();offer_orchestration();};
+        auto apply_tool_allowlist=[&](bool require_all){
+            if(!effective_tool_allowlist)return;
+            std::set<std::string> allowed(effective_tool_allowlist->begin(),effective_tool_allowlist->end());
+            if(require_all)for(const auto& name:allowed)if(std::none_of(request.tools.begin(),request.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Agent binds an unavailable tool: "+name);
+            request.tools.erase(std::remove_if(request.tools.begin(),request.tools.end(),[&](const auto& tool){return !allowed.contains(tool.name);}),request.tools.end());
+        };
+        auto refresh_tools=[&]{discover_mcp();discover_a2a();apply_tool_allowlist(false);seal_catalogue();offer_orchestration();apply_tool_allowlist(true);};
         refresh_tools();
         std::string planning_continuation;
         auto commit_plan_result=[&](const DynamicExecutionResult& actual){
@@ -668,7 +677,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(process_->invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance)));
                     } else if(call.name=="delegate_tasks"&&budget&&!leaf&&delegation_&&settings_.delegation){
-                        auto frozen=settings_;frozen.provider=provider;
+                        auto frozen=settings_;frozen.provider=provider;frozen.tool_allowlist=effective_tool_allowlist;
                         output=Json::parse(delegation_->invoke(id,call,reply.dump(),frozen,budget,token));
                     } else if(const auto registered=mcp_tools.find(call.name);registered!=mcp_tools.end()) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();

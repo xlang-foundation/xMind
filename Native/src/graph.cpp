@@ -101,9 +101,14 @@ GraphPlan::GraphPlan(const std::string& source){
         const auto kind=text(value,"type",16);GraphNodeDefinition node;node.id=text(value,"id",64);
         if(!identifier(node.id) || !ids.emplace(node.id,nodes_.size()).second)throw std::invalid_argument("Invalid or duplicate graph node ID");
         if(kind=="agent"){
-            node.kind=GraphNodeKind::agent;fields(value,{"id","type","depends_on","prompt","model_id","instructions","agent_id","agent_revision","when"});node.prompt=text(value,"prompt",32768);
+            node.kind=GraphNodeKind::agent;fields(value,{"id","type","depends_on","prompt","model_id","instructions","agent_id","agent_revision","tools","when"});node.prompt=text(value,"prompt",32768);
             if(value.contains("model_id"))node.model_id=text(value,"model_id",256);
             if(value.contains("instructions"))node.instructions=text(value,"instructions",32768);
+            if(value.contains("tools")){
+                if(!value["tools"].is_array())throw std::invalid_argument("Graph agent tool bindings must be an array");
+                node.tools.emplace();for(const auto& item:value["tools"]){if(!item.is_string())throw std::invalid_argument("Graph agent tool bindings must contain names");node.tools->push_back(item.get<std::string>());}
+                validate_agent_tool_allowlist(node.tools);
+            }
             if(value.contains("agent_id")){
                 node.agent_id=text(value,"agent_id",64);
                 if(!identifier(node.agent_id)||!value.contains("agent_revision")||!value["agent_revision"].is_number_integer()||value["agent_revision"]<1||value["agent_revision"]>9007199254740991LL||node.instructions.empty())

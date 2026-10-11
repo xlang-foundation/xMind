@@ -28,7 +28,7 @@ Json resolve_agent_definitions(Json value,const AgentDefinitionCatalog& definiti
         if(!entry.is_object()||!entry.contains("spec")||!entry["spec"].is_object()||!entry["spec"].contains("nodes")||!entry["spec"]["nodes"].is_array())continue;
         for(auto& node:entry["spec"]["nodes"]){
             if(!node.is_object()||!node.contains("agent_id"))continue;
-            if(!node["agent_id"].is_string()||node.contains("agent_revision")||node.contains("instructions")||node.contains("model_id"))
+            if(!node["agent_id"].is_string()||node.contains("agent_revision")||node.contains("instructions")||node.contains("model_id")||node.contains("tools"))
                 throw std::invalid_argument("Named graph agents cannot override or supply backend-pinned definition fields");
             const auto id=node["agent_id"].get<std::string>();
             const auto found=std::find_if(definitions.entries.begin(),definitions.entries.end(),[&](const auto& item){return item.id==id;});
@@ -36,6 +36,7 @@ Json resolve_agent_definitions(Json value,const AgentDefinitionCatalog& definiti
             node["agent_revision"]=found->revision;
             node["instructions"]=found->instructions;
             if(!found->model_id.empty())node["model_id"]=found->model_id;
+            if(found->tools)node["tools"]=*found->tools;
         }
     }
     return value;

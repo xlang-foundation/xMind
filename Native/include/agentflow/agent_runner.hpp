@@ -43,6 +43,8 @@ struct AgentSettings {
     // must explicitly clear it rather than acquiring another root allowance.
     std::optional<DynamicPlanningPolicy> planning;
     std::optional<ContextRuntimePolicy> context;
+    // Used for trusted delegated leaves and explicit named-agent bindings.
+    std::optional<std::vector<std::string>> tool_allowlist;
 };
 std::string provider_context_json(const AgentSettings& settings,const std::string& model_id={});
 // Shared native single-agent/model-tool loop, callable by backend workers and
@@ -56,7 +58,8 @@ public:
     Run start(std::string id,std::string session_id,std::string prompt,const std::string& model_id={},
         const std::optional<AgentDefinition>& selected_agent={});
     Run execute(const std::string& run_id,std::stop_token cancel={},const std::string& model_id={},
-        std::shared_ptr<RootExecutionBudget> budget={},const std::string& graph_instructions={});
+        std::shared_ptr<RootExecutionBudget> budget={},const std::string& graph_instructions={},
+        std::optional<std::vector<std::string>> tool_allowlist={});
     std::optional<RootBudgetSpec> execution_budget(const std::string& model_id={}) const;
     std::optional<DynamicPlanCapabilities> execution_capabilities(const std::string& model_id={}) const;
     // Metadata-only controller preflight; neither method launches MCP or models.

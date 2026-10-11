@@ -1680,8 +1680,9 @@ SessionAgentState Repository::session_agent(const std::string& id){
             if(value.size()!=2||!value.contains("version")||!value["version"].is_number_integer()||value["version"]!=1||!value.contains("agent"))throw DatabaseError("Invalid saved session agent selection");
             if(!value["agent"].is_null()){
                 const auto& saved=value["agent"];
-                if(!saved.is_object()||saved.size()!=4||!saved.contains("id")||!saved["id"].is_string()||!saved.contains("revision")||!saved["revision"].is_number_integer()||!saved.contains("model_id")||!saved["model_id"].is_string()||!saved.contains("instructions")||!saved["instructions"].is_string())throw DatabaseError("Invalid saved session agent definition");
+                if(!saved.is_object()||(saved.size()!=4&&saved.size()!=5)||!saved.contains("id")||!saved["id"].is_string()||!saved.contains("revision")||!saved["revision"].is_number_integer()||!saved.contains("model_id")||!saved["model_id"].is_string()||!saved.contains("instructions")||!saved["instructions"].is_string()||(saved.size()==5&&!saved.contains("tools")))throw DatabaseError("Invalid saved session agent definition");
                 AgentDefinition agent{saved["id"].get<std::string>(),saved["revision"].get<std::int64_t>(),saved["model_id"].get<std::string>(),saved["instructions"].get<std::string>()};
+                if(saved.contains("tools")){if(!saved["tools"].is_array())throw DatabaseError("Invalid saved session agent tool bindings");agent.tools.emplace();for(const auto& item:saved["tools"]){if(!item.is_string())throw DatabaseError("Invalid saved session agent tool binding");agent.tools->push_back(item.get<std::string>());}validate_agent_tool_allowlist(agent.tools);}
                 if(agent.id.empty()||agent.id.size()>64||agent.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||agent.revision<1||agent.revision>9007199254740991LL||agent.model_id.size()>256||agent.model_id.find('\0')!=std::string::npos||agent.instructions.empty()||agent.instructions.size()>32768||agent.instructions.find('\0')!=std::string::npos)throw DatabaseError("Invalid saved session agent definition values");
                 result.selected=std::move(agent);
             }
@@ -1692,11 +1693,11 @@ SessionAgentState Repository::session_agent(const std::string& id){
 }
 SessionAgentState Repository::replace_session_agent(const std::string& id,std::optional<AgentDefinition> selected,std::int64_t expected){
     if(expected<0||expected>=9007199254740991LL)throw std::invalid_argument("Invalid session agent revision");
-    if(selected){const auto& agent=*selected;if(agent.id.empty()||agent.id.size()>64||agent.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||agent.revision<1||agent.revision>9007199254740991LL||agent.model_id.size()>256||agent.model_id.find('\0')!=std::string::npos||agent.instructions.empty()||agent.instructions.size()>32768||agent.instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid selected agent definition");}
+    if(selected){const auto& agent=*selected;validate_agent_tool_allowlist(agent.tools);if(agent.id.empty()||agent.id.size()>64||agent.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||agent.revision<1||agent.revision>9007199254740991LL||agent.model_id.size()>256||agent.model_id.find('\0')!=std::string::npos||agent.instructions.empty()||agent.instructions.size()>32768||agent.instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid selected agent definition");}
     auto& db=impl_->database;Transaction tx(db);const auto previous=session_agent(id);
     if(!previous.editable)throw Conflict("Conversation agent cannot change while execution or context maintenance owns the session");
     if(previous.revision!=expected)throw Conflict("Conversation agent changed; refresh before editing");
-    Json snapshot=nullptr;if(selected)snapshot={{"id",selected->id},{"revision",selected->revision},{"model_id",selected->model_id},{"instructions",selected->instructions}};
+    Json snapshot=nullptr;if(selected){snapshot={{"id",selected->id},{"revision",selected->revision},{"model_id",selected->model_id},{"instructions",selected->instructions}};if(selected->tools)snapshot["tools"]=*selected->tools;}
     const auto source=Json{{"version",1},{"agent",std::move(snapshot)}}.dump();
     if(expected==0)db.execute("INSERT INTO session_agents VALUES(?,?,1)",{id,source});
     else changed_one(db.execute("UPDATE session_agents SET selection_json=?,revision=revision+1 WHERE session_id=? AND revision=?",{source,id,expected}));

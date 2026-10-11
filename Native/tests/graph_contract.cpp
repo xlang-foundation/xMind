@@ -21,7 +21,7 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         {{"id","after-rejected"},{"type","agent"},{"prompt","Synthetic skip descendant"},{"depends_on",{"rejected"}}}
     })}};
     const GraphPlan plan(spec.dump());require(plan.nodes().size()==6 && plan.order().size()==6,"Native plan must include all nodes");
-    for(const auto source:{R"({"nodes":[]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","depends_on":["missing"]}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","depends_on":["b"]},{"id":"b","type":"agent","prompt":"x","depends_on":["a"]}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","permissions":"allow"}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","prompt":"spoof"}]})",R"({"nodes":[{"id":"a","type":"tool","tool":"read_file","arguments":{"path":{"$ref":{"node":"undeclared"}}}}]})"})rejects<std::invalid_argument>([&]{GraphPlan invalid(source);});
+    for(const auto source:{R"({"nodes":[]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","depends_on":["missing"]}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","depends_on":["b"]},{"id":"b","type":"agent","prompt":"x","depends_on":["a"]}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","permissions":"allow"}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","prompt":"spoof"}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","tools":["read_file","read_file"]}]})",R"({"nodes":[{"id":"a","type":"agent","prompt":"x","tools":["../read_file"]}]})",R"({"nodes":[{"id":"a","type":"tool","tool":"read_file","arguments":{"path":{"$ref":{"node":"undeclared"}}}}]})"})rejects<std::invalid_argument>([&]{GraphPlan invalid(source);});
     const std::string alias="mcp_"+std::string(48,'a');
     const std::string raw_arguments=R"({ "dec\u0069mal":1.00000000000000000001,"large":18446744073709551616,"path":{"$ref":{"node":"input","path":["path"]}},"safe":[{"$ref":{"node":"input","path":["safe"]}}] })";
     const Json mcp_spec={{"nodes",Json::array({{{"id","input"},{"type","human"},{"prompt","Synthetic typed dependency"}},{{"id","remote"},{"type","tool"},{"tool",alias},{"arguments_json",raw_arguments},{"mcp",{{"server_id","fixture-peer"},{"config_revision",7}}},{"depends_on",{"input"}}}})}};
@@ -58,27 +58,31 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
     {
         PersistenceService store((std::filesystem::u8path(argv[1])/"named-agents.sqlite").string(),imports);
         AgentDefinitionStore agents(store);
-        const std::string definitions="agents:\n  - id: reviewer\n    model_id: review-model-v1\n    instructions: |\n      Review only the assigned branch.\n";
+        const std::string definitions="agents:\n  - id: reviewer\n    model_id: review-model-v1\n    instructions: |\n      Review only the assigned branch.\n    tools:\n      - read_file\n      - search_files\n";
         const auto first=agents.apply(definitions);
-        require(first.revision==1&&first.entries.size()==1&&first.entries[0].revision==1,"YAML agent import must assign native catalog/profile revisions");
+        require(first.revision==1&&first.entries.size()==1&&first.entries[0].revision==1&&first.entries[0].tools&&*first.entries[0].tools==std::vector<std::string>{"read_file","search_files"},"YAML agent import must assign native catalog/profile revisions and preserve its tool allowlist");
+        const auto saved_agents=store.information("native-agents","catalog").get();
+        for(const auto invalid:{"agents:\n  - id: reviewer\n    instructions: Invalid duplicate bindings\n    tools:\n      - read_file\n      - read_file\n","agents:\n  - id: reviewer\n    instructions: Invalid path-like binding\n    tools:\n      - ../read_file\n"}){rejects<std::invalid_argument>([&]{agents.apply(invalid);});require(store.information("native-agents","catalog").get()==saved_agents,"Rejected tool allowlists must preserve the saved native agent definition");}
         store.create_session("named-session","Native selected agent snapshot").get();
         const auto selection=store.replace_session_agent("named-session",first.entries[0],0).get();
         require(selection.revision==1&&selection.selected&&selection.selected->id=="reviewer"&&selection.selected->revision==1&&selection.editable,"Session agent selection must pin the chosen native profile revision");
         const std::string named_graph="graphs:\n  - id: named_review\n    spec:\n      nodes:\n        - id: inspect\n          type: agent\n          agent_id: reviewer\n          prompt: Review this branch\n";
         GraphCatalogStore graphs(store);const auto captured=graphs.apply(named_graph);const auto& node=captured.entries[0].plan.nodes()[0];
-        require(node.agent_id=="reviewer"&&node.agent_revision==1&&node.model_id=="review-model-v1"&&node.instructions=="Review only the assigned branch.\n","Graph admission must resolve and pin named profile behavior into the immutable executable node");
+        require(node.agent_id=="reviewer"&&node.agent_revision==1&&node.model_id=="review-model-v1"&&node.instructions=="Review only the assigned branch.\n"&&node.tools&&*node.tools==std::vector<std::string>{"read_file","search_files"},"Graph admission must resolve and pin named profile behavior and tools into the immutable executable node");
         const auto pinned=captured.entries[0].plan.json();const auto saved_graph=store.information("native-graphs","catalog").get();
         rejects<std::invalid_argument>([&]{graphs.apply("graphs:\n  - id: unknown_agent\n    spec:\n      nodes:\n        - id: inspect\n          type: agent\n          agent_id: missing\n          prompt: Must reject\n");});
         rejects<std::invalid_argument>([&]{graphs.apply("graphs:\n  - id: spoofed_revision\n    spec:\n      nodes:\n        - id: inspect\n          type: agent\n          agent_id: reviewer\n          agent_revision: 900\n          prompt: Must reject\n");});
         rejects<std::invalid_argument>([&]{graphs.apply("graphs:\n  - id: spoofed_instructions\n    spec:\n      nodes:\n        - id: inspect\n          type: agent\n          agent_id: reviewer\n          instructions: Caller supplied behavior\n          prompt: Must reject\n");});
+        rejects<std::invalid_argument>([&]{graphs.apply("graphs:\n  - id: spoofed_tools\n    spec:\n      nodes:\n        - id: inspect\n          type: agent\n          agent_id: reviewer\n          tools: [create_file]\n          prompt: Must reject\n");});
         require(store.information("native-graphs","catalog").get()==saved_graph,"Unknown and caller-supplied profile revisions must not mutate graph state");
-        const auto changed=agents.apply("agents:\n  - id: reviewer\n    model_id: review-model-v2\n    instructions: |\n      Review only the assigned branch and cite the source.\n");
-        require(changed.entries[0].revision==2,"Changed named behavior must advance its own revision");
+        const auto changed=agents.apply("agents:\n  - id: reviewer\n    model_id: review-model-v2\n    instructions: |\n      Review only the assigned branch and cite the source.\n    tools:\n      - read_file\n");
+        require(changed.entries[0].revision==2&&changed.entries[0].tools&&*changed.entries[0].tools==std::vector<std::string>{"read_file"},"Changing named behavior or its tool allowlist must advance its own revision");
         const auto revised=graphs.apply(named_graph);
         require(revised.entries[0].revision==2&&revised.entries[0].plan.nodes()[0].agent_revision==2&&revised.entries[0].plan.nodes()[0].model_id=="review-model-v2","Updating a named agent must create a new immutable graph revision");
         require(Json::parse(pinned).at("nodes")[0].at("agent_revision")==1&&Json::parse(pinned).at("nodes")[0].at("model_id")=="review-model-v1","Previously admitted graph plans must retain their original named behavior snapshot");
-        require(agents.apply("agents:\n  - id: reviewer\n    model_id: review-model-v2\n    instructions: |\n      Review only the assigned branch and cite the source.\n").revision==2,"Equivalent named agent imports must preserve revisions");
-        const auto pinned_selection=store.session_agent("named-session").get();require(pinned_selection.selected&&pinned_selection.selected->revision==1&&pinned_selection.selected->model_id=="review-model-v1","Session selection must retain its original prompt/model snapshot after catalog replacement");
+        const auto revised_definitions="agents:\n  - id: reviewer\n    model_id: review-model-v2\n    instructions: |\n      Review only the assigned branch and cite the source.\n    tools:\n      - read_file\n";
+        require(agents.apply(revised_definitions).revision==2,"Equivalent named agent imports must preserve revisions");
+        const auto pinned_selection=store.session_agent("named-session").get();require(pinned_selection.selected&&pinned_selection.selected->revision==1&&pinned_selection.selected->model_id=="review-model-v1"&&pinned_selection.selected->tools&&*pinned_selection.selected->tools==std::vector<std::string>{"read_file","search_files"},"Session selection must retain its original prompt/model/tool snapshot after catalog replacement");
         rejects<Conflict>([&]{store.replace_session_agent("named-session",std::nullopt,0).get();});
         store.start_prompt_run("named-session-run","named-session",R"({"content":"Synthetic active owner"})").get();
         require(!store.session_agent("named-session").get().editable,"Active root run must lock session agent selection");

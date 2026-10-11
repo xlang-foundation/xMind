@@ -536,7 +536,7 @@ struct HttpServer::Impl {
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Agent definition does not accept query parameters");
             if(!executor||!executor->supports_agent_selection())throw RunUnavailable("Named agent definitions are unavailable");
             const auto definition=executor->agent_definition(request.matches[1].str());
-            reply(response,{{"agent",{{"id",definition.id},{"revision",definition.revision},{"model_id",definition.model_id.empty()?Json(nullptr):Json(definition.model_id)},{"instructions",definition.instructions}}}});
+            reply(response,{{"agent",{{"id",definition.id},{"revision",definition.revision},{"model_id",definition.model_id.empty()?Json(nullptr):Json(definition.model_id)},{"instructions",definition.instructions},{"tools",definition.tools?Json(*definition.tools):Json(nullptr)}}}});
         }));
 #if defined(_WIN32)
         const auto encode_remote_agent=[](const A2aRemoteAgentDescriptor& agent){return Json{{"id",agent.id},{"revision",agent.revision},{"card_url",agent.card_url},{"enabled",agent.enabled},{"has_bearer",agent.has_bearer}};};

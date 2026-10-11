@@ -99,7 +99,7 @@ int run_admin(int argc,char** argv){
         if(action=="import-agents" && command+2==argc){
             std::ifstream file(std::filesystem::u8path(argv[command+1]),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted agent definition catalog");std::string source;char byte;
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Agent definition catalog exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted agent definition catalog");
-            const auto catalog=agentflow::AgentDefinitionStore(store).apply(source);auto agents=Json::array();for(const auto& agent:catalog.entries)agents.push_back({{"id",agent.id},{"revision",agent.revision},{"model_id",agent.model_id.empty()?Json(nullptr):Json(agent.model_id)}});
+            const auto catalog=agentflow::AgentDefinitionStore(store).apply(source);auto agents=Json::array();for(const auto& agent:catalog.entries)agents.push_back({{"id",agent.id},{"revision",agent.revision},{"model_id",agent.model_id.empty()?Json(nullptr):Json(agent.model_id)},{"tools",agent.tools?Json(*agent.tools):Json(nullptr)}});
             std::cout<<Json{{"catalog_revision",catalog.revision},{"agents",std::move(agents)},{"execution_available",false}}.dump()<<'\n';
         }else if(action=="import-graphs" && command+2==argc){
             std::ifstream file(std::filesystem::u8path(argv[command+1]),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted graph catalog");std::string source;char byte;

@@ -50,7 +50,7 @@ ContextFailureCode context_failure(const std::exception_ptr& failure){
 }
 struct AgentService::Impl {
     enum class Phase {queued,working,waiting,faulted};
-    struct Job {std::string id,model,agent_instructions;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;};
+    struct Job {std::string id,model,agent_instructions;std::optional<std::vector<std::string>> agent_tools;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;};
     struct ContextJob {std::string request_id,session,model,owner_id;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
     struct Prepared {};
     PersistenceService& persistence;
@@ -102,7 +102,7 @@ struct AgentService::Impl {
             auto job=std::make_shared<Job>();job->id=run.id;job->phase=Phase::waiting;
             try{job->model=runner.admitted_dynamic_model(run.id);runner.validate_dynamic_owner(run.id,job->model);}
             catch(const DynamicPlanUnavailable&){}
-            const auto selected=store.session_agent(run.session_id).get();if(selected.selected)job->agent_instructions=selected.selected->instructions;
+            const auto selected=store.session_agent(run.session_id).get();if(selected.selected){job->agent_instructions=selected.selected->instructions;job->agent_tools=selected.selected->tools;}
             active.emplace(run.id,job);
             // Even an already-answered clean pause waits for an authenticated
             // duplicate answer or explicit resume; startup never replays it.
@@ -184,7 +184,7 @@ struct AgentService::Impl {
             }
             if(children&&!children->healthy())fail();
             try{
-                const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions);std::unique_lock lock(mutex);
+                const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools);std::unique_lock lock(mutex);
                 if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);continue;}
                 if(observed.state!=RunState::paused)throw DatabaseError("Agent worker returned without actual retirement or a human pause");
                 // Re-read under the input owner lock: a final answer may have
@@ -412,7 +412,7 @@ Run AgentService::submit_model(std::string id,std::string session,std::string pr
     auto job=std::make_shared<Impl::Job>();job->id=id;
     std::unique_lock lock(impl_->mutex);impl_->require_admission();
     const auto selected=impl_->persistence.session_agent(session).get();std::optional<AgentDefinition> profile=selected.selected;
-    if(profile){job->agent_instructions=profile->instructions;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
+    if(profile){job->agent_instructions=profile->instructions;job->agent_tools=profile->tools;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
     if(!model.empty()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
     job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->pending.push_back(job);}catch(...){impl_->active.erase(id);throw;}

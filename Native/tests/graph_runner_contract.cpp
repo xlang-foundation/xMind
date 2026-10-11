@@ -16,8 +16,8 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
  const auto database=(std::filesystem::u8path(argv[1])/"runner.sqlite").string();const std::vector<std::string> imports{argv[2],argv[3]};
  PersistenceService store(database,imports);AgentSettings settings;settings.provider.model="fixture-model";settings.provider.endpoint=argv[4];settings.provider.tools=Capability::supported;settings.workspace=argv[1];settings.run_timeout=std::chrono::seconds(15);
  AgentDefinitionStore(store).apply(R"({"agents":[
-  {"id":"review_left","model_id":"fixture-model","instructions":"Work as the left-side reviewer. Report only findings from your assigned branch."},
-  {"id":"review_right","model_id":"fixture-model","instructions":"Work as the right-side reviewer. Report only findings from your assigned branch."}
+  {"id":"review_left","model_id":"fixture-model","instructions":"Work as the left-side reviewer. Report only findings from your assigned branch.","tools":["read_file"]},
+  {"id":"review_right","model_id":"fixture-model","instructions":"Work as the right-side reviewer. Report only findings from your assigned branch.","tools":["search_files"]}
  ]})");
  const Json spec=Json::parse(R"({"nodes":[
   {"id":"read","type":"tool","tool":"read_file","arguments":{"path":"left.txt"}},

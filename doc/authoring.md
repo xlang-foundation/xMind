@@ -18,15 +18,20 @@ graphs:
         - id: inspect
           type: agent
           prompt: Inspect the selected change and report findings.
+          tools:
+            - read_file
+            - search_files
           instructions: |
             Act as a security reviewer. Cite only evidence from your assigned branch.
 ```
 
 The native `GraphPlan` validator remains authoritative for node types,
-dependencies, schemas and permissions. Agent nodes may include their own
-bounded `instructions` and `model_id`; the backend applies those instructions
-to that node's LLM loop while retaining the server's registered tools,
-permissions, repository instructions and global policy. A catalog can hold at
+dependencies, schemas and permissions. Agent nodes may include bounded
+`instructions`, `model_id`, and an optional `tools` list. A tool list narrows
+the server-authorized catalogue for that node; it cannot add tools, bypass
+approval, or expand workspace permissions. Omitting `tools` keeps the normal
+backend policy, while an empty list offers no tools. Bindings are checked
+against the current native/MCP/A2A catalogue before inference. A catalog can hold at
 most 16 graphs; IDs are stable and retired IDs cannot be reused. Import output
 reports catalog and graph revisions plus node counts. `execution_available:
 false` in the offline admin import result means import did not start a run. A
@@ -52,20 +57,25 @@ Import the definitions before importing graphs that reference them:
 agents:
   - id: security_reviewer
     model_id: claude-sonnet
+    tools:
+      - read_file
+      - search_files
     instructions: |
       Review for security issues. Cite only evidence from your assigned branch.
 ```
 
 `xmind admin ... import-agents FILE` stores at most 64 definitions through
-xlang3-backed SQLite. A definition supplies bounded instructions and an
-optional model ID. Graph import resolves the ID and copies its revision,
-instructions and optional model into the immutable graph plan. Updating an
+xlang3-backed SQLite. A definition supplies bounded instructions, an optional
+model ID, and an optional tool allowlist. Graph import resolves the ID and
+copies its revision, instructions, model, and tool binding into the immutable
+graph plan. Updating an
 agent and reimporting a graph creates a new graph revision; existing runs keep
 their captured plan. A graph node using `agent_id` cannot override the
 definition's model or instructions. A configured model ID must be enabled by
 the backend before the graph can run. Agent IDs remain retired after removal.
-A named definition does not add tools or permissions: the same server-
-registered tools, workspace access and approval policy still apply.
+A named definition does not grant tools or permissions: its optional allowlist
+can only narrow the server-registered tools, workspace access and approval
+policy.
 
 ## Single-agent conversation selection
 
@@ -80,7 +90,9 @@ The VS Code sidebar and browser share the native-backed selector. In the
 interactive console, `/agents` lists the catalogue, `/agent` shows the current
 conversation selection, `/agent ID` selects a definition, and `/agent default`
 clears it. Selecting an agent in an empty console starts a durable conversation
-before applying the selection. These controls do not grant tools or permissions.
+before applying the selection. The selected allowlist is snapshotted with the
+conversation and enforced by the native model/tool loop; it grants no tools or
+permissions.
 
 ## Agent instructions
 
@@ -112,9 +124,9 @@ supported. JSON input remains accepted.
 ## Still required for the agreed product
 
 The current slice supports reusable named YAML agents in graph nodes, per-node
-inline instructions and revisioned single-agent conversation selection.
-Per-agent tool bindings, arbitrary xlang3 `.py` callables and the in-process
-programming API remain incomplete. Workspace Markdown skill discovery and
+inline instructions, per-agent native tool allowlists, and revisioned
+single-agent conversation selection. Arbitrary xlang3 `.py` callables and the
+in-process programming API remain incomplete. Workspace Markdown skill discovery and
 selection are implemented, while the full command/skill lifecycle still has
 documented gaps.
 Those authoring styles must eventually produce the same validated native
