@@ -41,8 +41,8 @@ inference, streaming, or installed VS Code result; see the
 The rendered browser was then opened as a fresh same-machine view, connected to
 the local process without a server-token or provider-key prompt, and used its
 saved OpenAI profile for a completed `gpt-5.6-sol` request. The response and
-provider-reported usage/backend timings appeared in the sidebar. The old
-unlinked `60415` browser tab is excluded from this acceptance. Exact evidence
+provider-reported usage/backend timings appeared in the sidebar in both the
+in-app browser and external Microsoft Edge. The old unlinked `60415` browser tab is excluded from this acceptance. Exact evidence
 and limits: [saved-profile UI run](evidence/browser-live-saved-profile-ui-20261010.json).
 
 The current OpenAPI audit contains **136 operations**: **25** have a mapped C++

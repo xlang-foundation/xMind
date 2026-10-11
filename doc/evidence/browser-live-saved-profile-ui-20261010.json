@@ -1,8 +1,7 @@
 {
-  "scope": "Rendered same-machine browser acceptance for saved provider profiles and one live OpenAI response",
+  "scope": "Rendered same-machine browser acceptance for saved provider profiles and live OpenAI responses in the in-app browser and Microsoft Edge",
   "observed_local_date": "2026-10-10",
   "runtime_source_revision": "65f20505321e67dffcb495ff38e735781a9fdc8e",
-  "evidence_documentation_commit": "c3d8c95",
   "runtime_executable": ".agentflow/local-dev-runtime-65f2050/xmind.exe",
   "runtime_executable_sha256": "c4adf884da6f959429f79b01be40d754badca5ca485dd9e68ed4b207174acdad",
   "xlang3_runtime_sha256": "4c0959726dfdaf8c12321188da524808e516cf224bab5ae590b3bd05a4349c07",
@@ -19,6 +18,7 @@
     "openai": 20
   },
   "live_run": {
+    "browser_surface": "Codex in-app browser",
     "run_id": "b57114bfb5b23214e137d6f9d2047a6d",
     "state": "completed",
     "provider": "OpenAI · Responses",
@@ -38,9 +38,31 @@
       "source": "backend-measured"
     }
   },
+  "external_edge_run": {
+    "browser_surface": "Microsoft Edge",
+    "run_id": "2886cbe41cfc0b16d0bedb74f3822dbe",
+    "state": "completed",
+    "provider": "OpenAI · Responses",
+    "provider_profile_revision": 3,
+    "model": "gpt-5.6-sol",
+    "reply": "UI_OK_EDGE",
+    "tokens": {
+      "input": 3816,
+      "output": 7,
+      "total": 3823,
+      "cached": 3802,
+      "reasoning": 0,
+      "source": "provider-reported"
+    },
+    "timings_seconds": {
+      "first_token": 0.80,
+      "elapsed": 0.98,
+      "source": "backend-measured"
+    }
+  },
   "negative_observation": "The older open tab at 127.0.0.1:60415 reported that local xMind access was unavailable. It was not the connected view used for this acceptance.",
   "limits": [
     "Local development runtime only; this is not hosted-release or installed-IDE acceptance.",
-    "The live response verifies one text-only OpenAI request and model/token/timing rendering, not streaming, tools, edits or complete provider compatibility."
+    "The live responses verify text-only OpenAI requests and model/token/timing rendering, not streaming, tools, edits or complete provider compatibility."
   ]
 }
