@@ -84,6 +84,14 @@ node Tools/start-browser.mjs --runtime D:\path\to\verified\native-runtime --port
 
 The runtime must be verified and contain the same `xmind.exe` as the current native build; the launcher rejects stale packages. It starts `xmind view` with the shared local profile root and a protected native ready file, then attaches the HTML adapter to that profile-aware host. Do not point `--backend` at generic `xmind serve` when workspace selection is expected. To attach the adapter to a view host already running, pass that host's loopback origin with `--backend`.
 
+For local language-server support, put trusted profiles in
+`.config/language-servers.yaml`. The profile-aware browser launcher passes that
+file to the native view automatically; use `--language-server-config FILE` to
+select a different trusted file. `Tools/start-ui.ps1` accepts the same switch
+and otherwise uses the repository-local file when present. Both launch paths
+keep the executable and its arguments in owner configuration, never in page or
+model input.
+
 The profile-aware local launcher keeps its generated access credential in the private launch-state directory and enrolls the page server-side. The VS Code launcher passes its already authenticated local credential directly to the loopback adapter in memory. The page never receives the server credential in JavaScript, a URL, clipboard or browser storage, and users do not enter one. The adapter returns the durable native view credential as an HttpOnly, SameSite=Strict cookie. Reload reconnects with that cookie, which lasts up to eight hours across browser close/reopen and same-origin adapter/backend restarts. Expiry, authority rotation or explicit Disconnect revokes access; Disconnect does not cancel native execution. Only selected session/run/model/workflow IDs are saved in sessionStorage; keys and conversation content are not stored there.
 
 The standalone page attempts cookie-session restoration when it loads. This

@@ -16,6 +16,8 @@
       "persistent native stdio client",
       "AgentRunner language-server tool remains read-only",
       "authenticated HTTP formatting with workspace authority",
+      "provider-profile runtime exposes configured language servers before model selection",
+      "provider-profile runtime forwards formatting to its shared native execution platform",
       "document symbols",
       "definition",
       "references",
@@ -25,8 +27,8 @@
     ]
   },
   "vscode_tests": {
-    "command": "node --test extensions/vscode/tests/language-server-editor.test.js extensions/vscode/tests/client.test.js",
-    "passed": 45,
+    "command": "node --test extensions/vscode/tests/*.test.js",
+    "passed": 293,
     "failed": 0,
     "result": "passed",
     "verified": [
@@ -35,9 +37,24 @@
       "overlapping formatting edits are rejected"
     ]
   },
+  "browser_tests": {
+    "command": "node --test views/browser/tests/*.test.cjs",
+    "passed": 85,
+    "failed": 0,
+    "result": "passed"
+  },
+  "rendered_vscode_development_host": {
+    "result": "passed",
+    "workspace": "D:/CantorAI2026/LspFormatFixture",
+    "language_server": "installed rust-analyzer",
+    "action": "VS Code Format Document",
+    "observed": "The unsaved one-line Rust buffer became multiline rustfmt output; saving wrote the formatted bytes, and rustfmt --check passed.",
+    "provider_inference": 0,
+    "workspace_scope": "Disposable fixture outside the xMind repository and private runtime directories."
+  },
   "limitations": [
-    "Installed IDE rendered formatting acceptance was not performed.",
     "Formatter discovery and configuration UX remain open.",
-    "No project repair loop was evaluated."
+    "The installed packaged extension was not tested; the rendered VS Code host ran the current extension from source.",
+    "No model-driven project repair loop was evaluated."
   ]
 }

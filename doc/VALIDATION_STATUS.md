@@ -1,5 +1,45 @@
 # Current native validation
 
+## Native editor formatting checkpoint — 2026-10-11
+
+The VS Code extension now registers a document-formatting provider for each
+configured language-server profile. Formatting sends the current unsaved
+editor buffer, workspace authority and VS Code indentation settings through the
+native authenticated HTTP bridge. The native client checks that the configured
+server advertises formatting support; results are validated for document
+bounds and overlapping edits before VS Code applies them. The model-visible
+AgentRunner language-server tool remains read-only.
+
+The Release `agentflow_language_server_contract` target builds, and its direct
+run against the installed Rust Analyzer passes real stdio initialization,
+formatting, semantic navigation, diagnostics, AgentRunner read-only checks,
+authenticated formatting over native HTTP and xlang3 SQLite initialization.
+The focused VS Code/client test command passes **45/45**. The native contract
+alone did not verify rendered IDE behavior; the Development Host result below
+subsequently proves formatting and save for the configured Rust profile.
+Packaged IDE acceptance, automatic formatter discovery/configuration and a
+full edit/build/diagnose loop remain unverified.
+Exact scope is recorded in
+[formatting evidence](evidence/native-language-server-formatting-local-20261011.json).
+Checkpoint `4209649` is pushed to `checkpoint/native-persistence-m1`.
+
+The packaged extension, formatter discovery and model-driven repair loop remain
+distinct from this source-host check; do not infer their acceptance from the
+real native Rust Analyzer contract.
+
+After the native contract exposed an empty language-server catalogue in the
+provider-profile runtime, that runtime now forwards profile metadata and user
+queries to its shared `ExecutionPlatform`. A rebuilt native backend and
+rendered VS Code Extension Development Host then formatted and saved
+`D:\CantorAI2026\LspFormatFixture\main.rs` using the configured Rust Analyzer;
+`rustfmt --check` passed on the saved file. The opened workspace was a disposable
+fixture, provider inference was zero, and the extension suite passed **293/293**
+and browser suite **85/85**. This demonstrates the in-editor formatting path
+from trusted YAML profile through native authority-bound HTTP into the editor;
+the packaged extension and a full model-driven edit/build/diagnose repair loop
+remain unverified. Updated scope is in
+[formatting evidence](evidence/native-language-server-formatting-local-20261011.json).
+
 ## VS Code language-server navigation checkpoint — 2026-10-11
 
 Configured language servers now back VS Code Go to Definition, Find References

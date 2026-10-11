@@ -41,8 +41,9 @@ The extension passes the path to xMind without reading the configuration.
 
 The real Rust Analyzer contract verifies persistent workspace initialization,
 repeated document symbols, clean pull diagnostics, user-triggered document
-formatting, and profile import/revision behavior against SQLite. The VS Code
-extension publishes those diagnostics and registers definition, references,
+formatting through both the standalone and provider-profile runtime, and profile
+import/revision behavior against SQLite. The VS Code extension publishes those
+diagnostics and registers definition, references,
 hover and document-formatting providers for configured
 languages. Provider requests use the unsaved editor buffer and workspace
 authority; returned locations outside the opened folder are dropped. Automated
@@ -53,8 +54,10 @@ HTTP and the authorized browser-view path also return its definition locations.
 The client retries a bounded number of standard `ContentModified` responses
 while project analysis changes. Formatting uses VS Code's current unsaved
 buffer and indentation options, checks returned edits against the document,
-and applies them through the editor formatter API. AgentRunner's model-visible
-language-server tool stays read-only. Installed-IDE rendered acceptance,
-formatter discovery/configuration and a complete edit/build/diagnose repair
-loop remain open; see [validation status](VALIDATION_STATUS.md) and
+and applies them through the editor formatter API. A rendered VS Code Extension
+Development Host formatted and saved a Rust fixture through the configured
+provider-profile backend; the saved source also passed `rustfmt --check`.
+AgentRunner's model-visible language-server tool stays read-only. Packaged
+extension acceptance, formatter discovery/configuration and a complete
+edit/build/diagnose repair loop remain open; see [validation status](VALIDATION_STATUS.md) and
 [the 2026-10-11 formatting contract](evidence/native-language-server-formatting-local-20261011.json).

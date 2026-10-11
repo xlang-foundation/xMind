@@ -352,6 +352,12 @@ WorkspaceFile ProviderProfileRuntime::browse_workspace_file(const std::string& p
     std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Workspace file preview requires an opened root");
     const auto workspace=impl_->workspace_metadata();auto file=impl_->workspace_binding->browse_file(path);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},impl_->workspace_metadata());return file;
 }
+std::vector<LanguageServerMetadata> ProviderProfileRuntime::language_server_profiles()const{std::lock_guard lock(impl_->mutex);return impl_->service->language_server_profiles();}
+std::string ProviderProfileRuntime::language_server_query(const LanguageServerRequest& request){
+    std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Language-server queries require an opened workspace");
+    const auto workspace=impl_->workspace_metadata();auto result=impl_->service->language_server_query(request);
+    validate_workspace_admission({workspace.workspace_id,workspace.authority_id},impl_->workspace_metadata());return result;
+}
 bool ProviderProfileRuntime::supports_skill_catalogue()const{std::lock_guard lock(impl_->mutex);return static_cast<bool>(impl_->workspace_binding);}
 WorkspaceSkillCatalogue ProviderProfileRuntime::workspace_skills()const{
     std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Workspace skill inspection requires an opened root");

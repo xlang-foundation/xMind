@@ -1,5 +1,5 @@
 param(
-    [string]$CodeExecutable,[string]$RuntimeDirectory,[string]$BundleDirectory,
+    [string]$CodeExecutable,[string]$RuntimeDirectory,[string]$BundleDirectory,[string]$ServerExecutable,
     [string]$StdlibSource='C:\Python\Python314\Lib',
     [string]$Model,[string]$ModelEndpoint,[string]$SelectableModels,
     [ValidateSet('chat-completions','responses')][string]$ModelWire='chat-completions',
@@ -11,7 +11,8 @@ param(
     [ValidatePattern('^[A-Za-z0-9_-]{1,64}$')][string]$PreviewName='ui-host',
     [ValidateRange(1024,65535)][int]$DebugPort=57217,
     [string]$GraphsConfig,
-    [string]$ProviderConfig
+    [string]$ProviderConfig,
+    [string]$LanguageServerConfig
 )
 $ErrorActionPreference='Stop'
 if([bool]$Model -ne [bool]$ModelEndpoint){throw 'Provide both -Model and -ModelEndpoint.'}
@@ -22,7 +23,7 @@ if($ApprovedEdits -and -not $Workspace){throw 'Approved file edits require a wor
 if($Workspace -and $ModelTools -ne 'supported'){throw 'Workspace execution requires -ModelTools supported.'}
 if($ProviderKeyEnvironment -notmatch '^[A-Za-z_][A-Za-z0-9_]*$'){throw 'Invalid provider key environment name.'}
 if($ProviderKeyEnvironment -eq 'XMIND_AUTH_TOKEN' -or $ProviderKeyEnvironment -like 'XMIND_UI_*'){throw 'Select a provider credential variable, not a preview authentication variable.'}
-foreach($uiArgument in @($CodeExecutable,$RuntimeDirectory,$BundleDirectory,$StdlibSource,$Model,$ModelEndpoint,$SelectableModels,$CredentialId,$Workspace,$GraphsConfig,$ProviderConfig)){
+foreach($uiArgument in @($CodeExecutable,$RuntimeDirectory,$BundleDirectory,$ServerExecutable,$StdlibSource,$Model,$ModelEndpoint,$SelectableModels,$CredentialId,$Workspace,$GraphsConfig,$ProviderConfig,$LanguageServerConfig)){
     if($uiArgument -and $uiArgument.IndexOfAny([char[]]@([char]0,[char]10,[char]13,[char]34)) -ge 0){throw 'Preview arguments cannot contain quotes or control characters.'}
 }
 $uiProject=Split-Path $PSScriptRoot -Parent
@@ -40,7 +41,7 @@ if(Test-Path -LiteralPath (Join-Path $uiState 'active.json')){
 }
 if(Get-NetTCPConnection -State Listen -LocalPort $DebugPort -ErrorAction SilentlyContinue){throw 'The selected development-host debug port is already in use.'}
 if(-not (Test-Path -LiteralPath $CodeExecutable)) {throw 'Select an installed VS Code executable or unpack the official portable ZIP under .agentflow/ui-host/vscode.'}
-$uiServer=Join-Path $uiProject 'build\native\Release\xmind.exe'
+$uiServer=if($ServerExecutable){[System.IO.Path]::GetFullPath($ServerExecutable)}else{Join-Path $uiProject 'build\native\Release\xmind.exe'}
 $uiBuildProvenance=$null
 if($BundleDirectory){
     if($RuntimeDirectory){throw 'Select a complete native bundle or a runtime directory, not both.'}
@@ -90,6 +91,11 @@ try {
         if(Test-Path -LiteralPath $uiProviderTemplate -PathType Leaf){$ProviderConfig=$uiProviderTemplate}
     }
     if($ProviderConfig){$uiArgs+=@('--provider-config',('"'+[System.IO.Path]::GetFullPath($ProviderConfig)+'"'))}
+    if(-not $LanguageServerConfig){
+        $uiLanguageServerTemplate=Join-Path $uiProject '.config/language-servers.yaml'
+        if(Test-Path -LiteralPath $uiLanguageServerTemplate -PathType Leaf){$LanguageServerConfig=$uiLanguageServerTemplate}
+    }
+    if($LanguageServerConfig){$uiArgs+=@('--language-server-config',('"'+[System.IO.Path]::GetFullPath($LanguageServerConfig)+'"'))}
     if($Workspace){$uiArgs+=@('--workspace',('"'+[System.IO.Path]::GetFullPath($Workspace)+'"'))}
     if($ApprovedEdits){$uiArgs+=@('--workspace-edits','approved')}
     if($GraphsConfig){$uiArgs+=@('--graphs-config',('"'+[System.IO.Path]::GetFullPath($GraphsConfig)+'"'))}
@@ -131,7 +137,7 @@ try {
     # host for this known repository, with its own settings/extensions directory.
     $uiCodeArgs=@('--new-window','--skip-welcome',('--remote-debugging-port='+$DebugPort),'--user-data-dir',('"'+(Join-Path $uiState 'profile')+'"'),'--extensions-dir',('"'+(Join-Path $uiState 'extensions')+'"'),('--extensionDevelopmentPath="'+(Join-Path $uiProject 'extensions\vscode')+'"'),('"'+$uiOpenWorkspace+'"'))
     $uiHost=Start-Process -FilePath $CodeExecutable -ArgumentList $uiCodeArgs -WorkingDirectory $uiProject -WindowStyle Normal -PassThru
-    $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=[bool]$uiHealth.agent_execution;server_executable=$uiServer;source_server_executable=$uiSourceServer;server_sha256=(Get-FileHash -LiteralPath $uiServer -Algorithm SHA256).Hash;modules=$uiModules;source_revision=$uiBuildProvenance.xmind;preview_name=$PreviewName;debug_port=$DebugPort;graphs_config=$GraphsConfig} | ConvertTo-Json
+    $uiMetadata=@{origin=$uiOrigin;backend_pid=$uiProcess.Id;host_launcher_pid=$uiHost.Id;ready_file=$uiReady;agent_execution=$uiHealth.agent_execution;model_configured=[bool]$uiHealth.agent_execution;server_executable=$uiServer;source_server_executable=$uiSourceServer;server_sha256=(Get-FileHash -LiteralPath $uiServer -Algorithm SHA256).Hash;modules=$uiModules;source_revision=$uiBuildProvenance.xmind;preview_name=$PreviewName;debug_port=$DebugPort;graphs_config=$GraphsConfig;language_server_config=$LanguageServerConfig} | ConvertTo-Json
     [System.IO.File]::WriteAllText((Join-Path $uiState 'active.json'),$uiMetadata)
     $uiMetadata
 } catch {

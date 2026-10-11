@@ -11,10 +11,10 @@ import {verifyNativeRuntime} from '../extensions/vscode/native-runtime.js';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const options=new Map();
 for(let i=2;i<process.argv.length;i+=2){
-  if(!['--backend','--state','--assets','--runtime','--built-server','--workspace','--profile-root','--ready-root','--port','--provider-config'].includes(process.argv[i])||!process.argv[i+1]||options.has(process.argv[i]))throw new Error('Invalid browser launcher arguments');
+  if(!['--backend','--state','--assets','--runtime','--built-server','--workspace','--profile-root','--ready-root','--port','--provider-config','--language-server-config'].includes(process.argv[i])||!process.argv[i+1]||options.has(process.argv[i]))throw new Error('Invalid browser launcher arguments');
   options.set(process.argv[i],process.argv[i+1]);
 }
-if(options.has('--backend')&&['--runtime','--built-server','--workspace','--profile-root','--ready-root','--provider-config'].some(name=>options.has(name)))throw new Error('--backend cannot be combined with native profile launch options');
+if(options.has('--backend')&&['--runtime','--built-server','--workspace','--profile-root','--ready-root','--provider-config','--language-server-config'].some(name=>options.has(name)))throw new Error('--backend cannot be combined with native profile launch options');
 const env=process.env;
 const localAppData=env.LOCALAPPDATA||join(env.USERPROFILE||root,'AppData','Local');
 const state=resolve(options.get('--state')||join(localAppData,'xMind','BrowserView'));
@@ -37,7 +37,7 @@ async function activeCredential(){
   }catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;}
 }
 
-let backend=viewOrigin,nativePid,tokenFile,localAccessToken;
+let backend=viewOrigin,nativePid,tokenFile,localAccessToken,languageServerConfig;
 if(!backend){
   const runtime=resolve(options.get('--runtime')||join(root,'extensions','vscode','native-runtime'));
   const verified=await verifyNativeRuntime(runtime);
@@ -63,6 +63,9 @@ if(!backend){
   let providerConfig=options.get('--provider-config');
   if(!providerConfig){const candidate=join(root,'.config','providers.yaml');try{if((await stat(candidate)).isFile())providerConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
   if(providerConfig)args.push('--config',resolve(providerConfig));
+  languageServerConfig=options.get('--language-server-config');
+  if(!languageServerConfig){const candidate=join(root,'.config','language-servers.yaml');try{if((await stat(candidate)).isFile())languageServerConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
+  if(languageServerConfig){languageServerConfig=resolve(languageServerConfig);args.push('--language-server-config',languageServerConfig);}
   const childEnv={...env,XMIND_VIEW_TOKEN:token};
   for(const key of Object.keys(childEnv))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY'||key==='XMIND_AUTH_TOKEN')delete childEnv[key];
   const child=spawn(join(runtimeRoot,'xmind.exe'),args,{cwd:workspace,env:childEnv,windowsHide:true,detached:true,stdio:['ignore','ignore','pipe']});
@@ -102,6 +105,6 @@ if(!backend){
 
 const view=await createBrowserServer({backend,assetRoot:assets,localAccessToken});
 const url=await view.listen(port)+'/ui/';
-await writeFile(join(state,'active.json'),JSON.stringify({url,backend,nativePid,viewPid:process.pid,assets,credentialFile:tokenFile},null,2),{mode:0o600});
+await writeFile(join(state,'active.json'),JSON.stringify({url,backend,nativePid,viewPid:process.pid,assets,credentialFile:tokenFile,languageServerConfig},null,2),{mode:0o600});
 console.log('xMind Browser ready at '+url);
 console.log(tokenFile?'Native profile-aware browser connected to '+backend+'.':'Attached to the existing native view '+backend+'.');

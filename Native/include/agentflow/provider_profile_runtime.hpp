@@ -55,6 +55,8 @@ public:
     bool supports_workspace_browsing()const override;
     WorkspaceListing browse_workspace_files(const std::string& path)const override;
     WorkspaceFile browse_workspace_file(const std::string& path)const override;
+    std::vector<LanguageServerMetadata> language_server_profiles()const override;
+    std::string language_server_query(const LanguageServerRequest& request)override;
     bool supports_skill_catalogue()const override;
     bool supports_session_skills()const override{return supports_skill_catalogue();}
     bool supports_agent_selection()const override{return true;}

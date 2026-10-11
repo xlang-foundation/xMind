@@ -1,5 +1,6 @@
 #include "agentflow/language_server_tools.hpp"
 #include "agentflow/execution_platform.hpp"
+#include "agentflow/provider_profile_runtime.hpp"
 #include "agentflow/http_server.hpp"
 #include "httplib.h"
 #include <cstdlib>
@@ -62,6 +63,23 @@ void http_contract(const std::string& executable,const std::string& workspace_pa
     auto stale=input;stale["expected_workspace_authority_id"]=std::string(32,'0');const auto rejected=client.Post("/v1/language-server/query",headers,stale.dump(),"application/json");require(rejected&&rejected->status==409,"Stale workspace authority must be rejected before language-server dispatch");
     httplib::Client anonymous_client("127.0.0.1",port);const auto anonymous=anonymous_client.Post("/v1/language-server/query",input.dump(),"application/json");require(anonymous&&anonymous->status==401,"Editor LSP query must retain native backend authentication");
 }
+void provider_profile_contract(const std::string& executable,const std::string& workspace_path,const std::string& path,const std::string& modules,const std::string& pure_python){
+    TempDirectory temp;PersistenceService persistence(utf8(temp.path/"profile-lsp.sqlite"),{modules,pure_python});
+    AgentSettings settings;settings.workspace=workspace_path;settings.language_servers.push_back(rust_profile(executable));
+    ProviderProfileRoute route{"openai.chat","openai","https://api.openai.com/v1/chat/completions","server","provider:setup:openai",ProviderWire::chat_completions};
+    ChatProviderConfig provider;provider.endpoint=route.endpoint;provider.wire=route.wire;
+    ProviderProfileExecutionPolicy policy{route,provider};ProviderProfileRuntime runtime(persistence,std::move(settings),{policy},1,8);
+    const auto profiles=runtime.language_server_profiles();require(profiles.size()==1&&profiles.front().id=="rust-analyzer"&&profiles.front().extensions==std::vector<std::string>{".rs"},"Provider-profile runtime must expose sanitized trusted language-server metadata even before model selection");
+    LanguageServerRequest formatting;formatting.path=path;formatting.method="formatting";formatting.document_text="pub fn profile_runtime_format( )->i32{let value=2;value}\n";formatting.formatting_options=LanguageServerRequest::FormattingOptions{4,true,true,false,true};
+    const auto direct=Json::parse(runtime.language_server_query(formatting));require(direct["result"].is_array()&&!direct["result"].empty(),"Provider-profile runtime must forward user-triggered formatting through its native execution platform");
+    const std::string token="provider-profile-language-server-contract-token-32-bytes";HttpServer server(persistence,token,&runtime);const auto port=server.bind(0);require(port>0,"Provider-profile language-server HTTP API failed to bind");Serving serving(server);
+    httplib::Client client("127.0.0.1",port);client.set_connection_timeout(2,0);client.set_read_timeout(100,0);client.set_follow_location(false);const httplib::Headers headers{{"Authorization","Bearer "+token}};
+    httplib::Result workspace;for(int i=0;i<50;++i){workspace=client.Get("/v1/workspace",headers);if(workspace)break;std::this_thread::sleep_for(std::chrono::milliseconds(20));}
+    require(workspace&&workspace->status==200,"Provider-profile runtime must publish its opened workspace");const auto metadata=Json::parse(workspace->body);
+    const auto catalogue=client.Get("/v1/language-servers",headers);require(catalogue&&catalogue->status==200&&Json::parse(catalogue->body)["profiles"].size()==1,"Provider-profile HTTP client must discover configured languages without provider-key metadata");
+    Json input={{"path",path},{"method","formatting"},{"document_text",formatting.document_text},{"formatting_options",{{"tab_size",4},{"insert_spaces",true},{"trim_trailing_whitespace",true},{"insert_final_newline",false},{"trim_final_newlines",true}}},{"expected_workspace_id",metadata["workspace_id"]},{"expected_workspace_authority_id",metadata["authority_id"]}};
+    const auto formatted=client.Post("/v1/language-server/query",headers,input.dump(),"application/json");require(formatted&&formatted->status==200&&Json::parse(formatted->body)["result"].is_array()&&!Json::parse(formatted->body)["result"].empty(),"Authenticated provider-profile HTTP must return actual Rust Analyzer formatting edits");
+}
 }
 int main(int argc,char** argv){
     if(argc!=6)return 2;
@@ -97,7 +115,7 @@ int main(int argc,char** argv){
         const auto diagnostics=request("diagnostics");
         require(diagnostics["result"].is_object()&&diagnostics["result"]["items"].is_array()&&diagnostics["result"]["items"].empty(),"Real rust-analyzer must report the valid fixture without diagnostics");
         const auto editor=registry.query(LanguageServerRequest{path,"documentSymbol",0,0});require(Json::parse(editor)["result"]==symbols["result"],"Editor and AgentRunner queries must share the same trusted server-selection behavior");
-        http_contract(argv[1],argv[2],path,argv[4],argv[5]);
-        std::cout<<"Actual rust-analyzer verified persistent native stdio, AgentRunner read-only tool queries, user-triggered formatting over authenticated workspace-authority-bound HTTP, symbols, definition, references, hover and clean diagnostics. xlang3 SQLite initialized the real backend; no model or synthetic LSP peer used\n";return 0;
+        http_contract(argv[1],argv[2],path,argv[4],argv[5]);provider_profile_contract(argv[1],argv[2],path,argv[4],argv[5]);
+        std::cout<<"Actual rust-analyzer verified persistent native stdio, AgentRunner read-only tool queries, direct and authenticated provider-profile formatting, symbols, definition, references, hover and clean diagnostics. xlang3 SQLite initialized the real backends; no model or synthetic LSP peer used\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }
