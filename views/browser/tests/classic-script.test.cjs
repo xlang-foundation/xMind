@@ -17,6 +17,7 @@ const sources={
 
 test('full webpage script order streams through the cookie bridge, renders real fixture metrics and detaches without commands',async()=>{
  const dom=new JSDOM(browserHtml(),{url:'http://127.0.0.1:8765/ui/',runScripts:'outside-only'}),window=dom.window,document=window.document,requests=[];
+ assert.match(document.querySelector('.local-node').textContent,/Local node · This computer/);assert.equal(document.querySelector('#workspace-picker').getAttribute('aria-label'),'Workspace folder');assert.equal(document.querySelector('.file-tree-heading').textContent,'Project files');assert.equal(document.getElementById('add-workspace').textContent,'Add folder');assert.doesNotMatch(document.body.textContent,/Server access token/);
  assert.ok(document.getElementById('workspace-picker'));assert.ok(document.getElementById('add-workspace'));assert.equal(document.getElementById('workspace-add-dialog').open,false);
  const run={id:'root',session_id:'session',parent_id:'',node_id:'',graph_root:false,state:'running'};let body,streamSignal,history=[];
  const frame=(type,data,id)=>`${id===undefined?'':'id: '+id+'\n'}event: ${type}\ndata: ${JSON.stringify(data)}\n\n`,send=(type,data,id)=>body.enqueue(new TextEncoder().encode(frame(type,data,id)));
