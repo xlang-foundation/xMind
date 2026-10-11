@@ -48,6 +48,17 @@ std::vector<WorkspaceVcsFileStatus> ExecutionPlatform::vcs_status()const{
     throw RunUnavailable("Version control status is unavailable on this platform");
 #endif
 }
+WorkspaceVcsInfo ExecutionPlatform::vcs_info()const{
+#if defined(_WIN32)
+    if(!workspace_binding_)throw RunUnavailable("Version control metadata requires an opened workspace");
+    const auto workspace=execution_workspace();
+    try{const auto value=workspace_vcs_info(*workspace_binding_);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
+        return {value.current_branch,value.default_branch,value.local_branches,value.repository};}
+    catch(const VcsStatusFailure&){throw;}
+#else
+    throw RunUnavailable("Version control metadata is unavailable on this platform");
+#endif
+}
 WorkspaceListing ExecutionPlatform::browse_workspace_files(const std::string& path)const{
     if(!workspace_binding_)throw RunUnavailable("Workspace browsing requires an opened root");
     const auto workspace=execution_workspace();auto listing=workspace_binding_->browse_files(path);

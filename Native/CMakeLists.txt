@@ -955,6 +955,9 @@ if(BUILD_TESTING)
     add_test(NAME native_cli_vcs_status_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_vcs_status_contract.mjs" "$<TARGET_FILE:xmind_cli>")
     set_tests_properties(native_cli_vcs_status_contract PROPERTIES TIMEOUT 20)
+    add_test(NAME native_cli_vcs_metadata_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_vcs_metadata_contract.mjs" "$<TARGET_FILE:xmind_cli>")
+    set_tests_properties(native_cli_vcs_metadata_contract PROPERTIES TIMEOUT 20)
     if(WIN32)
       add_test(NAME native_unified_program_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/unified_program_contract.mjs" "$<TARGET_FILE:xmind>"

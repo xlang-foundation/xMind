@@ -30,6 +30,8 @@ void help(){
         "  xmind [connection options] mcp-login-cancel REQUEST_ID\n"
         "  xmind [connection options] mcp-login-watch REQUEST_ID\n"
         "  xmind [connection options] git-status\n"
+        "  xmind [connection options] git-info\n"
+        "  xmind [connection options] git-branches\n"
         "  xmind view --ready-file FILE [local profile options]\n"
         "  xmind admin [native administration arguments]\n"
         "  xmind schema-worker   (private bounded schema protocol)\n\n"

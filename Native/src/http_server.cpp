@@ -401,7 +401,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|agents|graphs|vcs/init|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|agents|graphs|vcs/(init|status|info|branches)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -604,6 +604,18 @@ struct HttpServer::Impl {
             if(!executor)throw RunUnavailable("Version control status requires an opened workspace");
             std::lock_guard lock(vcs_initialization_mutex);auto values=Json::array();for(const auto& item:executor->vcs_status())values.push_back({{"file",item.file},{"additions",item.additions},{"deletions",item.deletions},{"status",item.status}});
             reply(response,values);
+        }));
+        server.Get("/v1/vcs/info",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("VCS metadata uses the opened workspace and accepts no query parameters");
+            if(!executor)throw RunUnavailable("Version control metadata requires an opened workspace");
+            std::lock_guard lock(vcs_initialization_mutex);const auto value=executor->vcs_info();
+            Json branch=Json::object();if(!value.current_branch.empty())branch["current"]=value.current_branch;if(!value.default_branch.empty())branch["default"]=value.default_branch;
+            Json metadata={{"branch",std::move(branch)}};if(value.repository)metadata["provider"]="git";reply(response,metadata);
+        }));
+        server.Get("/v1/vcs/branches",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("VCS branches use the opened workspace and accept no query parameters");
+            if(!executor)throw RunUnavailable("Version control branches require an opened workspace");
+            std::lock_guard lock(vcs_initialization_mutex);reply(response,executor->vcs_info().local_branches);
         }));
         server.Get("/v1/workspace/files",guarded([this](const Request& request,Response& response){
             const auto path=workspace_browse_path(request);if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Workspace browsing requires an opened root");

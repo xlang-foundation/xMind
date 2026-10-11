@@ -57,9 +57,9 @@ provider-reported usage/backend timings appeared in the sidebar in both the
 in-app browser and external Microsoft Edge. The old unlinked `60415` browser tab is excluded from this acceptance. Exact evidence
 and limits: [saved-profile UI run](evidence/browser-live-saved-profile-ui-20261010.json).
 
-The current OpenAPI audit contains **141 operations**: **27** have a mapped C++
-source candidate, **114** remain unmapped, and **zero** are verified parity.
-Native Git initialization and workspace status add two source candidates; they
+The current OpenAPI audit contains **141 operations**: **29** have a mapped C++
+source candidate, **112** remain unmapped, and **zero** are verified parity.
+Native Git initialization, status and branch metadata/listing add four source candidates; they
 do not establish full VCS or operation-level parity.
 Compared with v2.0.16, v2.0.26 adds five operations: credential creation/listing,
 server connect/pair, and VCS initialization. These operation IDs are unchanged
@@ -105,6 +105,16 @@ status evidence](evidence/cli-git-status-local-20261011.json), [native status
 evidence](evidence/native-vcs-status-local-20261011.json) and [VS Code status
 evidence](evidence/vscode-git-status-command-local-20261011.json).
 
+The following checkpoint adds `GET /v1/vcs/info` and `/v1/vcs/branches`, with
+`xmind git-info` and `xmind git-branches`. Current/default branch metadata and
+local refs are read from the same opened workspace through bounded native Git
+commands. The native HTTP contract covers unborn and committed local branches;
+CLI contracts check authenticated routing and reject malformed replies. The
+webpage Git panel renders branch metadata and distinguishes a clean repository
+from a workspace without Git; its full browser suite passed 82 tests. Remote
+branch search, review base selection, diffs, rename/binary details and full
+OpenCode VCS parity remain open. See the [native branch evidence](evidence/native-vcs-branches-local-20261011.json).
+
 ## OpenCode V2 functional baseline
 
 The source/API pin is v2.0.26. The following broader behavior baseline is drawn
@@ -126,8 +136,8 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | Models and providers | Provider authentication, broad provider/model catalogue, per-session model selection, variants and provider/model request settings | Encrypted multi-provider profiles, native discovery and several native wire protocols exist. Broad provider/model capability acceptance, variants, general settings precedence and complete live-client tests remain incomplete. |
 | MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP MCP and scoped OAuth work exist; OAuth renewal/interoperability, resources/prompts/subscriptions, plugin lifecycle and complete command parity remain incomplete. |
 | Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Backend-owned approvals and effect receipts are implemented for scoped operations. General policy rules, durable change snapshots/reversal and full export/sharing contracts remain incomplete. |
-| Version control | Initialize Git and inspect working-tree changes for coding/review flows | Native Git init and status endpoints operate on the opened workspace and have actual xMind HTTP coverage; the browser exposes both actions | Branch info/list, review base and diffs, end-to-end CLI/VS Code flows, rename/binary cases, other providers and full VCS parity |
-| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 27 have reviewed native source candidates, 114 are unmapped, and none has verified operation-level parity. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
+| Version control | Initialize Git, inspect status/branches and compare working-tree or branch diffs for coding/review flows | Native Git init/status/info/local branch list operate on the opened workspace; actual backend HTTP and CLI metadata contracts pass, and the browser adapter exposes read-only endpoints. Review base/diffs, CLI live-package acceptance, VS Code branch command, rename/binary cases, other providers and full VCS parity remain open. |
+| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 29 have reviewed native source candidates, 112 are unmapped, and none has verified operation-level parity. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
 
 This is a feature-level checklist, not an assertion that the cited docs are a
 complete specification of every v2.0.26 implementation detail. For API work,

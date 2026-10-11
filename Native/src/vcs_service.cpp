@@ -130,6 +130,42 @@ std::vector<VcsFileStatus> workspace_vcs_status_impl(WorkspaceTools& workspace){
     std::sort(result.begin(),result.end(),[](const auto& left,const auto& right){return left.file<right.file;});
     return result;
 }
+bool has_git_marker(WorkspaceTools& workspace){
+    const auto listing=workspace.list_files(".");
+    if(listing.truncated)throw VcsStatusFailure(503,"Cannot verify the repository marker in a truncated workspace root");
+    const auto marker=std::find_if(listing.entries.begin(),listing.entries.end(),[](const WorkspaceEntry& entry){auto name=entry.name;std::transform(name.begin(),name.end(),name.begin(),[](unsigned char c){return c>='A'&&c<='Z'?static_cast<char>(c-'A'+'a'):c;});return name==".git";});
+    if(marker==listing.entries.end())return false;
+    if(marker->kind!="directory"&&marker->kind!="file")throw VcsStatusFailure(409,"Git metadata must be a regular file or directory");
+    return true;
+}
+std::optional<std::string> symbolic_ref(const std::string& executable,WorkspaceTools& workspace,const std::string& name){
+    const auto result=run_git(executable,workspace,{"symbolic-ref","--quiet","--short",name},8192);
+    if(result.termination!=ProcessTermination::exited||result.truncated)throw VcsStatusFailure(503,"Git could not inspect branch metadata");
+    if(result.exit_code==1)return {};
+    if(result.exit_code!=0)throw VcsStatusFailure(503,"Git could not inspect branch metadata");
+    auto value=result.stdout_bytes;while(!value.empty()&&(value.back()=='\r'||value.back()=='\n'))value.pop_back();
+    if(value.empty()||value.size()>1024||value.find_first_of("\r\n")!=std::string::npos||value.find('\0')!=std::string::npos)throw VcsStatusFailure(503,"Git returned invalid branch metadata");
+    return value;
+}
+VcsInfo workspace_vcs_info_impl(WorkspaceTools& workspace){
+    VcsInfo info;if(!has_git_marker(workspace))return info;info.repository=true;
+    const auto executable=utf8(git_executable());
+    const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(30);
+    const auto head=run_git_until(executable,workspace,{"symbolic-ref","--quiet","--short","HEAD"},deadline,8192);
+    if(head.termination!=ProcessTermination::exited||head.truncated)throw VcsStatusFailure(503,"Git could not inspect the current branch");
+    if(head.exit_code==0){auto value=head.stdout_bytes;while(!value.empty()&&(value.back()=='\r'||value.back()=='\n'))value.pop_back();if(value.empty()||value.size()>1024||value.find_first_of("\r\n")!=std::string::npos||value.find('\0')!=std::string::npos)throw VcsStatusFailure(503,"Git returned an invalid current branch");info.current_branch=std::move(value);}
+    else if(head.exit_code!=1)throw VcsStatusFailure(503,"Git could not inspect the current branch");
+    if(const auto remote=symbolic_ref(executable,workspace,"refs/remotes/origin/HEAD")){const auto slash=remote->find('/');if(slash!=std::string::npos&&slash+1<remote->size())info.default_branch=remote->substr(slash+1);}
+    const auto branches=run_git_until(executable,workspace,{"for-each-ref","--format=%(refname:short)","refs/heads"},deadline,256*1024);
+    if(branches.termination!=ProcessTermination::exited||branches.exit_code!=0||branches.truncated)throw VcsStatusFailure(503,"Git could not list local branches");
+    std::size_t start=0;while(start<branches.stdout_bytes.size()){
+        const auto end=branches.stdout_bytes.find('\n',start);const auto stop=end==std::string::npos?branches.stdout_bytes.size():end;
+        auto name=std::string_view(branches.stdout_bytes).substr(start,stop-start);if(!name.empty()&&name.back()=='\r')name.remove_suffix(1);
+        if(name.empty()||name.size()>1024||info.local_branches.size()>=4096||name.find('\0')!=std::string_view::npos)throw VcsStatusFailure(503,"Git returned an invalid local branch list");
+        info.local_branches.emplace_back(name);start=end==std::string::npos?branches.stdout_bytes.size():end+1;
+    }
+    return info;
+}
 void ensure_no_vcs(const WorkspaceListing& entries){
     if(entries.truncated)throw VcsInitializationFailure(503,"Cannot verify repository state in a truncated workspace root");
     const auto found=std::find_if(entries.entries.begin(),entries.entries.end(),[](const WorkspaceEntry& entry){
@@ -142,6 +178,7 @@ void ensure_no_vcs(const WorkspaceListing& entries){
 }
 
 std::vector<VcsFileStatus> workspace_vcs_status(WorkspaceTools& workspace){return workspace_vcs_status_impl(workspace);}
+VcsInfo workspace_vcs_info(WorkspaceTools& workspace){return workspace_vcs_info_impl(workspace);}
 
 void initialize_workspace_vcs(WorkspaceTools& workspace,std::string_view provider){
     if(provider.empty()||provider.size()>64)throw VcsInitializationFailure(400,"Invalid version control provider");

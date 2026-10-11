@@ -5,21 +5,22 @@
   "agentflow_route": "GET /v1/vcs/status",
   "implementation": {
     "runtime": "Native C++ Git status through ExecutionPlatform and the opened WorkspaceTools root",
-    "git_process": "Fixed Git executable and argument vectors; bounded foreground process; Git pager, optional locks, system config, fsmonitor, external diff and textconv disabled",
+    "git_process": "Fixed native Git arguments; bounded process/output; pager, optional locks, system config, fsmonitor, external diff and textconv disabled",
     "authority": "Authenticated workspace owner or same-machine browser view; no caller-selected root or path; serialized with repository initialization",
-    "response": "Array of changed workspace-relative file paths, added/deleted line counts and added/deleted/modified status"
+    "response": "Changed workspace-relative paths with added/deleted line counts and added/deleted/modified status"
   },
   "validation": {
-    "native_build": "CMake Release targets xmind and agentflow_backend_owner_http_contract passed",
-    "native_contract": "native_backend_owner_http_contract passed through the actual xMind executable and xlang3 SQLite backend",
-    "native_contract_scope": "Opened temporary workspace; real Git initialization; empty clean status; untracked text file with a space in its name and exact two-line count; committed file changed from two lines to two lines with one replacement; exact one-add/one-delete count; bearer rejection; path query rejection; same-machine View authorization.",
-    "browser_contract": "node --test views/browser/tests/*.test.cjs passed 80 tests, including GET-only allowlisting, HttpOnly credential forwarding, browser rendering and line-count aggregation.",
-    "browser_live_rendered": false,
-    "inventory_audit": "141 pinned operations; 27 native source candidates; 114 unmapped; 0 verified operation-level parity."
+    "native_build": "Visual Studio CMake Release targets xmind, xmind_cli and agentflow_backend_owner_http_contract passed",
+    "native_contract": "native_backend_owner_http_contract passed through actual xMind and xlang3 SQLite",
+    "native_contract_scope": "Real temporary workspace and Git repository; clean status; untracked spaced filename and line counts; committed modification with exact add/delete counts; bearer rejection; caller-path query rejection; same-machine View authorization. The same contract now checks current/default branch metadata and local refs.",
+    "cli_status_contract": "native_cli_vcs_status_contract passed authenticated endpoint routing and strict response validation.",
+    "vscode_status": "xMind: Show Git Status exists and its extension-host contract passed in the prior checkpoint; rendered IDE acceptance remains unverified.",
+    "browser_contract": "node --test views/browser/tests/*.test.cjs passed 82 tests, including branch-aware Git status rendering and GET-only VCS routes.",
+    "inventory_audit": "141 pinned operations; 29 native source candidates; 112 unmapped; 0 verified operation-level parity."
   },
   "remaining": [
-    "CLI and VS Code status controls are not yet implemented.",
-    "Branch info/list, review base, diffs, rename and binary cases, other VCS providers, non-Windows execution and installed-package UI acceptance remain incomplete.",
-    "This scoped execution contract does not establish full OpenCode vcs.status operation parity."
+    "Review-base selection and working/branch/committed diffs remain incomplete.",
+    "Rename and binary diff behavior, non-Windows execution, and full OpenCode vcs.status parity remain incomplete.",
+    "CLI live-profile and rendered IDE acceptance remain unverified."
   ]
 }

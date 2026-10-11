@@ -17,11 +17,12 @@ current installed package remain unverified; agent-worker execution is pending.
 No legacy profile migration is required.
 
 The preceding full native Release gate passed **118 local CTest contracts**.
-This Git-status checkpoint rebuilt the unified binary and CLI, then passed
-`native_http_cli_contract`, `native_cli_vcs_status_contract` and
-`native_backend_owner_http_contract`. The latter exercises actual Git status
-through the opened workspace and xlang3-backed SQLite. This focused run did not
-rerun all native CTest contracts or establish a rendered IDE check.
+The VCS checkpoint adds workspace-scoped Git metadata and local branch listing
+alongside status. Backend-owner HTTP coverage exercises a real temporary Git
+repository, the local-view adapter, and xlang3-backed SQLite. CLI metadata and
+status contracts validate authenticated endpoint selection and reject malformed
+responses. This focused run does not establish complete OpenCode VCS parity or
+a rendered IDE check.
 
 `agents` lists persisted named-agent IDs, revisions and optional model IDs.
 `agent-definition ID` retrieves one persisted definition, including its
@@ -59,6 +60,10 @@ the browser, and VS Code use the same workspace authority. Branch listings,
 review-base comparison, full diffs and rename/binary parity are not implemented
 yet. See [CLI Git status evidence](evidence/cli-git-status-local-20261011.json)
 and the [native Git status contract](evidence/native-vcs-status-local-20261011.json).
+
+`xmind git-info` returns the Git provider and current/default branch metadata;
+`xmind git-branches` lists local branches. Both use the opened workspace and
+the same native backend. They do not accept a caller-supplied repository path.
 
 ## Multiline requests
 

@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-11",
+  "operation_ids": ["vcs.get", "vcs.branch.list"],
+  "pinned_upstream": "OpenCode v2.0.26",
+  "agentflow_routes": ["GET /v1/vcs/info", "GET /v1/vcs/branches"],
+  "implementation": {
+    "runtime": "Native C++ Git metadata through ExecutionPlatform and the opened WorkspaceTools root",
+    "commands": ["symbolic-ref --quiet --short HEAD", "symbolic-ref --quiet --short refs/remotes/origin/HEAD", "for-each-ref --format=%(refname:short) refs/heads"],
+    "limits": "Fixed Git argument vectors, existing bounded child-process runtime, 4,096 branch limit, 1,024-byte branch-name limit",
+    "authority": "Authenticated workspace owner or same-machine browser view; no caller-selected repository path; metadata serialized with Git initialization"
+  },
+  "validation": {
+    "native_build": "Visual Studio CMake Release build of xmind, xmind_cli, and agentflow_backend_owner_http_contract passed",
+    "native_http_contract": "native_backend_owner_http_contract passed against the actual native server and xlang3-backed SQLite",
+    "native_http_scope": "Created a real temporary Git repository through xMind; checked unborn current branch and empty local-branch list; committed a fixture; verified current branch matched the sole local ref; verified query rejection and same-machine view authorization.",
+    "cli_contract": "native_cli_vcs_metadata_contract passed authenticated endpoint selection, payload validation, and rejection of malformed metadata/branch names.",
+    "browser_contract": "node --test views/browser/tests/*.test.cjs passed 82 tests, including rendering current/default branch metadata, distinguishing clean from uninitialized Git, read-only route allowlisting, and status-only fallback for older backends.",
+    "inventory_audit": "141 pinned operations; 29 native source candidates; 112 unmapped; 0 verified operation-level parity."
+  },
+  "remaining": [
+    "OpenCode branch-list search/limit options and remote branches are not implemented.",
+    "Review-base selection and working/branch/committed diff contracts remain incomplete.",
+    "VS Code does not yet expose a dedicated branch-list command; branch change/checkout is not implemented.",
+    "This scoped execution contract does not establish complete vcs.get or vcs.branch.list operation parity."
+  ]
+}

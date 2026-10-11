@@ -741,7 +741,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
             for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
             return value;
         };
-        using Json=nlohmann::json;std::string path,chat_model,mcp_id;Json body;bool post=false,watch=false,graph_watch=false,chat=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false,vcs_status=false;std::int64_t watch_cursor=0;
+        using Json=nlohmann::json;std::string path,chat_model,mcp_id;Json body;bool post=false,watch=false,graph_watch=false,chat=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false,vcs_status=false,vcs_info=false,vcs_branches=false;std::int64_t watch_cursor=0;
         if(command=="health" && argc==3) path="/v1/health";
         else if(command=="chat" && argc>=3 && argc<=5){chat=true;if(argc>=4)path=id(argv[3]);if(argc==5)chat_model=argv[4];}
         else if(command=="sessions" && argc==3) path="/v1/sessions";
@@ -757,6 +757,8 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         else if(command=="runs" && argc==4) path="/v1/sessions/"+id(argv[3])+"/runs";
         else if(command=="status" && argc==4) path="/v1/runs/"+id(argv[3]);
         else if(command=="git-status"&&argc==3){path="/v1/vcs/status";vcs_status=true;}
+        else if(command=="git-info"&&argc==3){path="/v1/vcs/info";vcs_info=true;}
+        else if(command=="git-branches"&&argc==3){path="/v1/vcs/branches";vcs_branches=true;}
         else if(command=="operations" && argc==4) path="/v1/runs/"+id(argv[3])+"/operations";
         else if(command=="children"&&argc==4)path="/v1/runs/"+id(argv[3])+"/children";
         else if(command=="child-history"&&argc==5)path="/v1/runs/"+id(argv[3])+"/children/"+id(argv[4])+"/history";
@@ -905,6 +907,16 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
                 const auto count=[](const Json& value){return value.is_number_unsigned()&&value.get<std::uint64_t>()<=9007199254740991ULL;};
                 if(!item.is_object()||item.size()!=4||!item.contains("file")||!item["file"].is_string()||item["file"].get_ref<const std::string&>().empty()||item["file"].get_ref<const std::string&>().size()>32768||item["file"].get_ref<const std::string&>().find('\0')!=std::string::npos||!item.contains("additions")||!count(item["additions"])||!item.contains("deletions")||!count(item["deletions"])||!item.contains("status")||!item["status"].is_string()||(item["status"]!="added"&&item["status"]!="deleted"&&item["status"]!="modified"))throw std::runtime_error("Invalid native Git status entry");
             }
+        }
+        if(vcs_info){
+            const auto valid_branch=[](const Json& value){return value.is_string()&&!value.get_ref<const std::string&>().empty()&&value.get_ref<const std::string&>().size()<=1024&&value.get_ref<const std::string&>().find_first_of("\r\n") == std::string::npos&&value.get_ref<const std::string&>().find('\0')==std::string::npos;};
+            const auto valid_branch_object=[&](const Json& value){if(!value.is_object()||value.size()>2)return false;for(auto item=value.begin();item!=value.end();++item)if((item.key()!="current"&&item.key()!="default")||!valid_branch(item.value()))return false;return true;};
+            const bool valid_provider=!result.is_object()||!result.contains("provider")||(result["provider"].is_string()&&result["provider"]=="git");
+            if(!result.is_object()||result.size()<(result.contains("provider")?2U:1U)||result.size()>2||!valid_provider||!result.contains("branch")||!valid_branch_object(result["branch"]))throw std::runtime_error("Invalid native Git metadata response");
+        }
+        if(vcs_branches){
+            if(!result.is_array()||result.size()>4096)throw std::runtime_error("Invalid native Git branch response");
+            for(const auto& branch:result)if(!branch.is_string()||branch.get_ref<const std::string&>().empty()||branch.get_ref<const std::string&>().size()>1024||branch.get_ref<const std::string&>().find_first_of("\r\n")!=std::string::npos||branch.get_ref<const std::string&>().find('\0')!=std::string::npos)throw std::runtime_error("Invalid native Git branch entry");
         }
         if(command=="session-skills")skill_snapshot(result,id(argv[3]));
         if(command=="set-skills")skill_acknowledgement(result,id(argv[3]),body);
