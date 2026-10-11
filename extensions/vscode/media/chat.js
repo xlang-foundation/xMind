@@ -26,7 +26,8 @@ function appendRunActivity(event){
   if(event?.kind==='a2a.task_event'&&event.data&&typeof event.data==='object'){
     const record=event.data.data,response=record?.event;
     if(record&&typeof record==='object'&&response&&typeof response==='object'){
-      const state=response.status?.state||response.task?.status?.state,task=response.id||response.taskId||response.task?.id;
+      const update=response.task||response.statusUpdate||response.status_update||response.artifactUpdate||response.artifact_update||response.message||response;
+      const state=update.status?.state||update.task?.status?.state,task=update.id||update.taskId||update.task?.id;
       summary='A2A task update'+(typeof record.agent_id==='string'?' · '+record.agent_id:'')+(typeof state==='string'?' · '+state:'')+(typeof task==='string'?' · '+task:'')+(Number.isSafeInteger(record.event_sequence)?' · event '+record.event_sequence:'')+'\n';
     }
   }

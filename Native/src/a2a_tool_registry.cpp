@@ -107,9 +107,10 @@ std::string A2aAgentToolRegistry::invoke(const std::string& id,const std::string
         if(entry.peer.streaming){
             entry.client->stream_message(request,remaining,[&](const std::string& event_json){
                 Json event;try{event=Json::parse(event_json);}catch(...){throw A2aOutcomeUnrecorded("A2A stream event could not be decoded");}
-                if(event.contains("id")&&event["id"].is_string())streamed_task_id=event["id"].get<std::string>();
-                if(event.contains("taskId")&&event["taskId"].is_string())streamed_task_id=event["taskId"].get<std::string>();
-                if(event.contains("contextId")&&event["contextId"].is_string())streamed_context_id=event["contextId"].get<std::string>();
+                const Json* value=&event;for(const auto* field:{"task","statusUpdate","status_update","artifactUpdate","artifact_update","message"})if(event.contains(field)&&event[field].is_object()){value=&event[field];break;}
+                if(value->contains("id")&&(*value)["id"].is_string())streamed_task_id=(*value)["id"].get<std::string>();
+                if(value->contains("taskId")&&(*value)["taskId"].is_string())streamed_task_id=(*value)["taskId"].get<std::string>();
+                if(value->contains("contextId")&&(*value)["contextId"].is_string())streamed_context_id=(*value)["contextId"].get<std::string>();
                 response=event_json;
                 if(on_task_event)on_task_event(Json{{"operation_id",id},{"agent_id",entry.registration.id},
                     {"event_sequence",++event_sequence},{"event",std::move(event)}}.dump());

@@ -98,11 +98,15 @@ without streaming. The AgentRunner persists each remote result as an
 `a2a.task_event` while the call is active, so the existing event stream,
 reconnect and run-history paths can observe it; the operation still records the
 final acknowledged task and follows the same no-retry uncertain-outcome rule.
-The registry contract checks delivery and durable event counts. The shared
-browser/VS Code activity panel labels each event with peer, task state, task ID
-and event sequence, then retains the full JSON payload for inspection. The
-independent official SDK peer stream contract and rendered live-stream browser
-and installed VS Code acceptance are still required.
+The registry contract checks two delivered events using the A2A 1.0
+`StreamResponse` wrappers (`task` and `statusUpdate`) and durable event counts.
+The pinned official JavaScript SDK peer now advertises and serves streaming;
+its own self-check exercises `sendMessageStream`, and the native CTest contract
+consumes that peer's wrapped events. The native executable contract is awaiting
+the hosted Windows gate. The shared browser/VS Code activity panel labels each
+event with peer, task state, task ID and event sequence, then retains the full
+JSON payload for inspection. Rendered live-stream browser and installed VS Code
+acceptance are still required.
 
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),

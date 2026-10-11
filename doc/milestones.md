@@ -18,12 +18,16 @@ The outbound A2A client provides capability-gated SSE `SendStreamingMessage`
 and `SubscribeToTask` methods for protocol 1.0 and 0.3. AgentRunner now routes
 advertised streaming sends through that client and persists each returned task
 event in the run journal; non-streaming peers retain blocking `SendMessage`.
-The registry contract covers two live events and durable event counts. The
-shared activity panel now labels A2A events with peer, status, task ID and
-sequence. Inbound resubscription/recovery integration, the official SDK
-streaming peer contract, and native compilation remain open; hosted Windows
-validation is required. VS Code's renderer contract passes **73/73**, the full
-extension suite **268/268**, and the browser suite **71/71**.
+The registry contract covers two live events in the A2A 1.0 `StreamResponse`
+wrappers (`task` and `statusUpdate`) and durable event counts. The pinned
+official JavaScript SDK peer advertises and serves streaming; its own
+`sendMessageStream` self-check passes, and the native CTest contract now
+consumes its wrapped events. The native executable contract is awaiting the
+hosted Windows gate. The shared activity panel labels A2A events with peer,
+status, task ID and sequence. Inbound resubscription/recovery, rendered live
+browser streaming and installed VS Code acceptance remain open. VS Code's
+renderer contract passes **73/73**, the full extension suite **268/268**, and
+the browser suite **72/72**.
 
 Managed profile runtime upgrade is now wired into the native profile launcher.
 The console supports `--upgrade-backend`; the native browser/VS Code adapter

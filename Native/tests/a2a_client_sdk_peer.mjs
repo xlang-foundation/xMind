@@ -22,7 +22,7 @@ application.use((request,response,next)=>{
 const card={
   name:'Pinned official A2A SDK peer',description:'Independent SDK contract peer for xMind native outbound A2A',version:'1.3.0',
   supportedInterfaces:[],provider:undefined,
-  capabilities:{streaming:false,pushNotifications:false,stateTransitionHistory:true},
+  capabilities:{streaming:true,pushNotifications:false,stateTransitionHistory:true},
   securitySchemes:{xmindPeer:{httpAuthSecurityScheme:{scheme:'Bearer',bearerFormat:'opaque'}}},
   securityRequirements:[{schemes:{xmindPeer:{list:[]}}}],defaultInputModes:['text/plain'],defaultOutputModes:['text/plain'],skills:[],signatures:[]
 };
@@ -50,8 +50,8 @@ try{
     const peer=await new ClientFactory({cardResolver:new DefaultAgentCardResolver({fetchImpl:authenticatedFetch}),transports:[new JsonRpcTransportFactory({fetchImpl:authenticatedFetch})]}).createFromUrl(`http://127.0.0.1:${appServer.address().port}`);
     process.stdout.write('SDK peer self-check: discovered\n');
     const result=await deadline('SendMessage',peer.sendMessage({message:{messageId:'sdk-self-check',role:Role.ROLE_USER,parts:[{content:{$case:'text',value:'test the pinned peer'}}]}}));
-    assert.ok(result.id);const fetched=await deadline('GetTask',peer.getTask({id:result.id}));assert.equal(fetched.id,result.id);const cancelled=await deadline('CancelTask',peer.cancelTask({id:result.id}));assert.equal(cancelled.id,result.id);
-    process.stdout.write('Pinned SDK peer self-check passed card discovery and authenticated SendMessage/GetTask/CancelTask.\n');
+    assert.ok(result.id);const fetched=await deadline('GetTask',peer.getTask({id:result.id}));assert.equal(fetched.id,result.id);const streamed=[];for await(const event of peer.sendMessageStream({message:{messageId:'sdk-self-check-stream',role:Role.ROLE_USER,parts:[{content:{$case:'text',value:'test the pinned stream peer'}}]}}))streamed.push(event);assert.ok(streamed.length>=2&&streamed.some(event=>event.payload?.$case==='task')&&streamed.some(event=>event.payload?.$case==='statusUpdate'));const cancelled=await deadline('CancelTask',peer.cancelTask({id:result.id}));assert.equal(cancelled.id,result.id);
+    process.stdout.write('Pinned SDK peer self-check passed card discovery, authenticated SendMessage/GetTask/SendStreamingMessage/CancelTask.\n');
   }else{
     const child=spawn(executable,[url,token],{stdio:['ignore','pipe','pipe'],windowsHide:true});let stdout='',stderr='';
     child.stdout.setEncoding('utf8').on('data',chunk=>stdout+=chunk);child.stderr.setEncoding('utf8').on('data',chunk=>stderr+=chunk);
@@ -61,7 +61,7 @@ try{
       child.once('exit',(code,signal)=>{clearTimeout(timer);resolve({code,signal});});
     });
     assert.equal(result.code,0,`Native SDK-peer client failed (${result.signal||result.code}): ${stderr}`);
-    assert.match(stdout,/independent official A2A SDK 1\.3\.0 AgentCard discovery, SendMessage, GetTask and CancelTask/);
+    assert.match(stdout,/independent official A2A SDK 1\.3\.0 AgentCard discovery, SendMessage, GetTask, wrapped SendStreamingMessage task\/status events and CancelTask/);
     process.stdout.write(stdout);
   }
 }finally{

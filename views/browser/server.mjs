@@ -59,7 +59,11 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
      const previous=sessionFor(request);if(previous){const revoked=await nativeSession('/revoke',viewHeaders(previous));if(revoked.status!==200&&revoked.status!==401)throw new Error('Previous view revocation failed');}
      response.setHeader('Set-Cookie',`${cookieName}=${credential}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}`);reply(200,{connected:true});return;
     }
-    const current=sessionFor(request);if(!current){reply(401,{connected:false});return;}const restored=await nativeSession('/current',viewHeaders(current));reply(restored.status===200?200:restored.status===401?401:502,{connected:restored.status===200});return;
+    const current=sessionFor(request);if(!current){reply(401,{connected:false});return;}const restored=await nativeSession('/current',viewHeaders(current));if(restored.status===200){reply(200,{connected:true});return;}if(restored.status!==401||!localAccessToken){reply(restored.status===401?401:502,{connected:false});return;}
+    // A native restart can invalidate an old browser cookie while this local
+    // adapter still owns the launch credential. Recover silently so a page
+    // refresh never asks the user to copy a server token.
+    const issued=await nativeSession('',{Authorization:'Bearer '+localAccessToken},{origin:viewOrigin});if(issued.status!==200){reply(issued.status===401?401:issued.status===409?429:502,{detail:issued.status===409?'Too many active browser sessions':'Local xMind could not restore this browser view'});return;}const {credential,expires_unix_ms:expires,max_age_seconds:maxAge}=issued.data;if(!/^[0-9a-f]{64}\.[0-9a-f]{64}$/.test(credential)||!Number.isSafeInteger(expires)||expires<1||!Number.isSafeInteger(maxAge)||maxAge<1||maxAge>28800){reply(502,{error_code:'invalid_view_session',detail:'The server returned an invalid access session. Update the server and browser adapter together.'});return;}response.setHeader('Set-Cookie',`${cookieName}=${credential}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}`);reply(200,{connected:true});return;
    }
    if(url.pathname==='/ui/workspaces'||url.pathname==='/ui/workspaces/select'||url.pathname==='/ui/workspaces/add'||url.pathname==='/ui/workspaces/pick'){
     const selecting=url.pathname.endsWith('/select'),adding=url.pathname.endsWith('/add'),picking=url.pathname.endsWith('/pick'),mutating=selecting||adding||picking;
