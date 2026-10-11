@@ -20,8 +20,12 @@ JSON-RPC send/get/cancel operations for A2A 1.0 and the legacy 0.3 method names,
 and downgrades only on an explicit version-not-supported response that
 advertises 0.3 support. It honors a directly configured card path, checks
 response correlation, bounds and redacts peer errors, and currently accepts
-only interfaces on the configured card origin. A local loopback peer contract
-is being added; this does not establish independent SDK acceptance.
+only interfaces on the configured card origin. Its local loopback peer contract
+is included in the native CTest suite. A second CTest contract launches the
+pinned official JavaScript SDK 1.3.0 as an authenticated peer and exercises
+native card discovery, send, get and cancel. The peer harness has passed its
+standalone SDK self-check; the native executable's independent interop result
+is pending the hosted Windows native gate.
 The client is not yet registered in the runtime, persistence, AgentRunner,
 graph, CLI, browser or VS Code, and it does not yet support streaming or
 durable recovery after uncertain remote dispatch.
