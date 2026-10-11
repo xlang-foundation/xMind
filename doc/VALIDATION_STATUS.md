@@ -14,6 +14,15 @@ contract-tested, but actual installed-IDE definition/reference/hover results
 and formatter behavior remain unverified. See [language-server scope](native-language-server.md)
 and the [parity baseline](PARITY.md).
 
+An additional real Rust Analyzer semantic probe on the call-site fixture did
+not establish definition, references or hover: those queries returned `null`,
+and Rust Analyzer reported that Cargo metadata could not launch `cargo`
+(`Not enough quota is available to process this command`, Windows error 1816)
+inside the native language-server process. Raising the test child-process
+budget did not clear the failure on this host; the native limit was restored.
+Syntax-based symbols and diagnostics still pass. Treat semantic navigation as
+unverified pending a rerun on a host where Rust Analyzer can launch Cargo.
+
 The graph service and unified graph HTTP/CLI tests pass **2/2** after aligning
 their expected imported-agent metadata with the nullable `tools` field. The
 xlang3 repository contract passes **1/1** with the pinned compatibility
