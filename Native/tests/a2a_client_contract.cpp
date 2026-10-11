@@ -18,8 +18,8 @@ using Json=nlohmann::json;
 void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
 }
 int main(){
-    httplib::Server peer;std::atomic<bool> accept_remote=false,legacy_only=false,bad_request=false,legacy_unavailable=false,json_rpc_media_valid=true;std::atomic<int> discovery_count=0;int port=0;
-    std::vector<std::pair<std::string,std::string>> calls;std::mutex calls_mutex;
+    httplib::Server peer;std::atomic<bool> accept_remote=false,legacy_only=false,bad_request=false,legacy_unavailable=false,unsupported_auth=false,json_rpc_media_valid=true;std::atomic<int> discovery_count=0;int port=0;
+    std::vector<std::pair<std::string,std::string>> calls;std::vector<std::string> authorizations;std::mutex calls_mutex;
     auto serve_card=[&](const httplib::Request& request,httplib::Response& response){
         ++discovery_count;
         if(request.get_header_value("A2A-Version")=="1.0"&&legacy_only.load()){
@@ -30,6 +30,7 @@ int main(){
         if(request.get_header_value("A2A-Version")=="1.0"){
             response.set_header("A2A-Version","1.0");
             const auto endpoint="http://127.0.0.1:"+std::to_string(port)+"/a2a";
+            if(unsupported_auth.load()){response.set_content(Json{{"name","Peer"},{"description","Loopback test peer"},{"version","0.1"},{"supportedInterfaces",Json::array({{{"url",endpoint},{"protocolBinding","JSONRPC"},{"protocolVersion","1.0"}}})},{"securitySchemes",{{"api_key",{{"apiKeySecurityScheme",{{"location","header"},{"name","X-Peer-Key"}}}}}}},{"securityRequirements",Json::array({{{"schemes",{{"api_key",{{"list",Json::array()}}}}}}})},{"skills",Json::array()}}.dump(),"application/json");return;}
             if(accept_remote.load())response.set_content(Json{{"name","Peer"},{"description","Loopback test peer"},{"version","0.1"},{"supportedInterfaces",Json::array({{{"url",endpoint},{"protocolBinding","JSONRPC"},{"protocolVersion","1.0"}}})},{"skills",Json::array()}}.dump(),"application/json");
             else response.set_content(Json{{"name","Peer"},{"description","Loopback test peer"},{"version","0.1"},{"supportedInterfaces",Json::array({{{"url","https://other.invalid/a2a"},{"protocolBinding","JSONRPC"},{"protocolVersion","1.0"}}})},{"skills",Json::array()}}.dump(),"application/json");
             return;
@@ -40,7 +41,7 @@ int main(){
     peer.Post("/a2a",[&](const httplib::Request& request,httplib::Response& response){
         if(request.get_header_value("Content-Type")!="application/json")json_rpc_media_valid=false;
         const auto version=request.get_header_value("A2A-Version");Json body=Json::parse(request.body);
-        {std::lock_guard lock(calls_mutex);calls.emplace_back(version,body.at("method").get<std::string>());}
+        {std::lock_guard lock(calls_mutex);calls.emplace_back(version,body.at("method").get<std::string>());authorizations.push_back(request.get_header_value("Authorization"));}
         response.set_header("A2A-Version",version);const auto method=body.at("method").get<std::string>();const bool modern=version=="1.0";Json result;
         if(method==(modern?"SendMessage":"message/send"))result=modern?Json{{"task",{{"id","remote-task"},{"status",{{"state","TASK_STATE_SUBMITTED"}}}}}}:Json{{"kind","task"},{"id","remote-task"},{"status",{{"state","submitted"}}}};
         else if(method==(modern?"GetTask":"tasks/get"))result=modern?Json{{"id","remote-task"},{"status",{{"state","TASK_STATE_WORKING"}}}}:Json{{"kind","task"},{"id","remote-task"},{"status",{{"state","working"}}}};
@@ -58,11 +59,14 @@ int main(){
         const auto cancelled=Json::parse(client.cancel_task(R"({"id":"remote-task"})",2s));require(cancelled.at("status").at("state")=="TASK_STATE_CANCELED","CancelTask response was not returned");
         bool safe_error=false;try{(void)client.get_task(R"({"id":"missing"})",2s);}catch(const agentflow::A2aRemoteError& error){safe_error=error.code==-32601&&std::string(error.what()).find("private")==std::string::npos;}require(safe_error,"Remote JSON-RPC errors must retain the code and redact peer prose");
         {std::lock_guard lock(calls_mutex);require(calls.size()==4,"Unexpected outbound call count");for(const auto& call:calls)require(call.first=="1.0","A2A version header was not pinned on every native request");require(calls[0].second=="SendMessage"&&calls[1].second=="GetTask"&&calls[2].second=="CancelTask","Version-1 methods were not selected");}
+        {std::lock_guard lock(calls_mutex);calls.clear();authorizations.clear();}
+        const std::string unadvertised="fixture bearer for a public peer";agentflow::A2aJsonRpcClient public_peer(card,agentflow::SecretBytes({reinterpret_cast<const std::uint8_t*>(unadvertised.data()),unadvertised.size()}));public_peer.discover(2s);(void)public_peer.get_task(R"({"id":"remote-task"})",2s);{std::lock_guard lock(calls_mutex);require(calls.size()==1&&authorizations.size()==1&&authorizations.front().empty(),"A configured credential must not be sent when the AgentCard does not advertise bearer authentication");calls.clear();authorizations.clear();}
+        unsupported_auth=true;agentflow::A2aJsonRpcClient unsupported_auth_peer(card);bool auth_refused=false;try{(void)unsupported_auth_peer.discover(2s);}catch(const agentflow::TransportError&){auth_refused=true;}unsupported_auth=false;require(auth_refused&&!unsupported_auth_peer.ready(),"Unsupported AgentCard security requirements must be rejected before task dispatch");
         {std::lock_guard lock(calls_mutex);calls.clear();}legacy_only=true;bad_request=true;const auto before_bad_request=discovery_count.load();agentflow::A2aJsonRpcClient refused(card);bool no_downgrade=false;try{(void)refused.discover(2s);}catch(const agentflow::ProviderHttpError& error){no_downgrade=error.status==400&&!error.a2a_version_not_supported;}require(no_downgrade&&discovery_count.load()==before_bad_request+1,"A generic problem response must not trigger an A2A protocol downgrade");bad_request=false;legacy_unavailable=true;const auto before_unsupported=discovery_count.load();agentflow::A2aJsonRpcClient unsupported(card);bool no_legacy=false;try{(void)unsupported.discover(2s);}catch(const agentflow::ProviderHttpError& error){no_legacy=error.status==400&&error.a2a_version_not_supported&&!error.a2a_supports_legacy_03;}require(no_legacy&&discovery_count.load()==before_unsupported+1,"A version error without legacy support must not trigger downgrade");legacy_unavailable=false;agentflow::A2aJsonRpcClient legacy(card);const auto old=legacy.discover(2s);require(old.protocol_version=="0.3"&&old.endpoint=="http://127.0.0.1:"+std::to_string(port)+"/a2a","Legacy AgentCard fallback was not negotiated");
         const auto old_sent=Json::parse(legacy.send_message(R"({"message":{"messageId":"stable-legacy","role":"user","parts":[{"kind":"text","text":"hello"}]}})",2s));require(old_sent.at("kind")=="task","Legacy send result was not returned");
         (void)legacy.get_task(R"({"id":"remote-task"})",2s);(void)legacy.cancel_task(R"({"id":"remote-task"})",2s);
         {std::lock_guard lock(calls_mutex);require(calls.size()==3,"Unexpected legacy outbound call count");require(calls[0]==std::pair<std::string,std::string>{"0.3","message/send"}&&calls[1]==std::pair<std::string,std::string>{"0.3","tasks/get"}&&calls[2]==std::pair<std::string,std::string>{"0.3","tasks/cancel"},"Legacy A2A wire was not selected");}
-        require(discovery_count.load()==7,"Unexpected card discovery count");require(json_rpc_media_valid.load(),"A2A JSON-RPC requests must use the pinned binding's JSON content type");
+        require(discovery_count.load()==9,"Unexpected card discovery count");require(json_rpc_media_valid.load(),"A2A JSON-RPC requests must use the pinned binding's JSON content type");
     }catch(...){peer.stop();owner.join();throw;}
     peer.stop();owner.join();
     std::cout<<"Native A2A client passed origin-bound AgentCard discovery, version negotiation, v1 JSON-RPC send/get/cancel, response correlation and remote-error redaction. Integration, durable dispatch recovery, streaming, input-required and non-loopback TLS peer acceptance remain open.\n";

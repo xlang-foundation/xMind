@@ -40,11 +40,42 @@ std::string bounded_string(const Json& object,const char* key,std::size_t limit,
     if(!object[key].is_string())throw std::invalid_argument("AgentCard metadata has an invalid type");auto value=object[key].get<std::string>();
     if(value.size()>limit||value.find('\0')!=std::string::npos||(required&&value.empty()))throw std::invalid_argument("AgentCard metadata exceeds its limits");return value;
 }
+bool bearer_required(const Json& card,bool legacy){
+    const char* requirements_key=legacy?"security":"securityRequirements";
+    if(!card.contains(requirements_key))return false;
+    const auto& requirements=card[requirements_key];if(!requirements.is_array())throw std::invalid_argument("Invalid AgentCard security requirements");
+    if(requirements.empty())return false;
+    const auto& schemes=card.value("securitySchemes",Json::object());if(!schemes.is_object())throw std::invalid_argument("Invalid AgentCard security schemes");
+    bool no_auth_alternative=false,bearer_alternative=false;
+    for(const auto& requirement:requirements){
+        const Json* selected=&requirement;
+        if(!legacy){if(!requirement.is_object()||!requirement.contains("schemes")||!requirement["schemes"].is_object())throw std::invalid_argument("Invalid AgentCard security requirement");selected=&requirement["schemes"];}
+        else if(!requirement.is_object())throw std::invalid_argument("Invalid legacy AgentCard security requirement");
+        if(selected->empty()){no_auth_alternative=true;continue;}
+        bool supported=true;
+        for(auto item=selected->begin();item!=selected->end();++item){
+            if(legacy){if(!item.value().is_array()||!std::all_of(item.value().begin(),item.value().end(),[](const auto& scope){return scope.is_string();}))throw std::invalid_argument("Invalid legacy AgentCard security scope");}
+            else {const auto& scopes=item.value();if(!scopes.is_object()||!scopes.contains("list")||!scopes["list"].is_array()||!std::all_of(scopes["list"].begin(),scopes["list"].end(),[](const auto& scope){return scope.is_string();}))throw std::invalid_argument("Invalid AgentCard security scope");}
+            if(!schemes.contains(item.key())){supported=false;continue;}
+            const auto& scheme=schemes[item.key()];bool bearer=false;
+            if(legacy){bearer=scheme.is_object()&&scheme.value("type",std::string{})=="http"&&scheme.value("scheme",std::string{})=="bearer";}
+            else if(scheme.is_object()&&scheme.contains("httpAuthSecurityScheme")&&scheme["httpAuthSecurityScheme"].is_object()){
+                const auto& http=scheme["httpAuthSecurityScheme"];if(http.contains("scheme")&&http["scheme"].is_string()){auto value=http["scheme"].get<std::string>();std::transform(value.begin(),value.end(),value.begin(),[](unsigned char c){return static_cast<char>(std::tolower(c));});bearer=value=="bearer";}
+            }
+            if(!bearer)supported=false;
+        }
+        if(supported)bearer_alternative=true;
+    }
+    if(no_auth_alternative)return false;
+    if(bearer_alternative)return true;
+    throw std::invalid_argument("AgentCard requires an unsupported authentication scheme");
+}
 }
 struct A2aJsonRpcClient::Impl {
     std::string card_url;
     std::optional<SecretBytes> bearer;
     std::optional<A2aRemoteAgentInfo> selected;
+    bool send_bearer=false;
     std::uint64_t sequence=0;
     mutable std::mutex mutex;
     Impl(std::string url,std::optional<SecretBytes> credential):card_url(std::move(url)),bearer(std::move(credential)){(void)origin(card_url);}
@@ -61,7 +92,7 @@ struct A2aJsonRpcClient::Impl {
         else throw std::logic_error("Unsupported native A2A operation");
         const auto id="xmind-"+std::to_string(++sequence)+"-"+random_id();Json body={{"jsonrpc","2.0"},{"id",id},{"method",method},{"params",std::move(parsed)}};
         auto transport=request(selected->endpoint,timeout,selected->protocol_version=="1.0"?"1.0":"0.3");transport.body=body.dump();
-        const auto bytes=post_json(transport,bearer?&*bearer:nullptr,1024*1024,cancel);Json response;
+        const auto bytes=post_json(transport,send_bearer&&bearer?&*bearer:nullptr,1024*1024,cancel);Json response;
         try{response=Json::parse(bytes);}catch(const Json::exception&){throw TransportError("A2A peer returned invalid JSON-RPC data");}
         if(!response.is_object()||response.value("jsonrpc",std::string{})!="2.0"||!response.contains("id")||response["id"]!=id||response.contains("result")==response.contains("error"))throw TransportError("A2A peer returned a mismatched JSON-RPC response");
         if(response.contains("error")){const auto& error=response["error"];if(!error.is_object()||!error.contains("code")||!error["code"].is_number_integer())throw TransportError("A2A peer returned an invalid JSON-RPC error");int code=0;try{if(error["code"].is_number_unsigned()){const auto value=error["code"].get<std::uint64_t>();if(value>static_cast<std::uint64_t>(INT_MAX))throw TransportError("A2A peer returned an invalid JSON-RPC error");code=static_cast<int>(value);}else{const auto value=error["code"].get<std::int64_t>();if(value<INT_MIN||value>INT_MAX)throw TransportError("A2A peer returned an invalid JSON-RPC error");code=static_cast<int>(value);}}catch(const TransportError&){throw;}catch(const std::exception&){throw TransportError("A2A peer returned an invalid JSON-RPC error");}throw A2aRemoteError(code);}
@@ -71,7 +102,7 @@ struct A2aJsonRpcClient::Impl {
 A2aJsonRpcClient::A2aJsonRpcClient(std::string card_url,std::optional<SecretBytes> bearer):impl_(std::make_unique<Impl>(std::move(card_url),std::move(bearer))){}
 A2aJsonRpcClient::~A2aJsonRpcClient()=default;
 A2aRemoteAgentInfo A2aJsonRpcClient::discover(std::chrono::milliseconds timeout,std::stop_token cancel){
-    auto& state=*impl_;std::lock_guard lock(state.mutex);state.selected.reset();
+    auto& state=*impl_;std::lock_guard lock(state.mutex);state.selected.reset();state.send_bearer=false;
     const auto root=origin(state.card_url).value;std::string bytes;bool requested_v1=true;
     auto modern=state.request(card_path(state.card_url),timeout,"1.0");
     try{bytes=get_json(modern,state.bearer?&*state.bearer:nullptr,cancel);}
@@ -79,6 +110,8 @@ A2aRemoteAgentInfo A2aJsonRpcClient::discover(std::chrono::milliseconds timeout,
     Json card;try{card=Json::parse(bytes);}catch(const Json::exception&){throw TransportError("A2A peer returned an invalid AgentCard");}
     if(!card.is_object())throw TransportError("A2A peer returned an invalid AgentCard");A2aRemoteAgentInfo info;
     try{
+        state.send_bearer=bearer_required(card,!requested_v1);
+        if(state.send_bearer&&!state.bearer)throw TransportError("A2A peer requires bearer credentials");
         info.name=bounded_string(card,"name",256,true);info.description=bounded_string(card,"description",8192,true);info.agent_version=bounded_string(card,"version",128,true);
         if(card.contains("skills")){if(!card["skills"].is_array()||card["skills"].size()>256)throw std::invalid_argument("Invalid AgentCard skills");info.skills_json=card["skills"].dump();}else info.skills_json="[]";
         if(card.contains("supportedInterfaces")){

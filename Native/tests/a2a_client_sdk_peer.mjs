@@ -24,7 +24,7 @@ const card={
   supportedInterfaces:[],provider:undefined,
   capabilities:{streaming:false,pushNotifications:false,stateTransitionHistory:true},
   securitySchemes:{xmindPeer:{httpAuthSecurityScheme:{scheme:'Bearer',bearerFormat:'opaque'}}},
-  securityRequirements:[{schemes:{xmindPeer:{}}}],defaultInputModes:['text/plain'],defaultOutputModes:['text/plain'],skills:[],signatures:[]
+  securityRequirements:[{schemes:{xmindPeer:{list:[]}}}],defaultInputModes:['text/plain'],defaultOutputModes:['text/plain'],skills:[],signatures:[]
 };
 const taskContexts=new Map();
 const executor={

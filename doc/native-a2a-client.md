@@ -26,6 +26,11 @@ pinned official JavaScript SDK 1.3.0 as an authenticated peer and exercises
 native card discovery, send, get and cancel. The peer harness has passed its
 standalone SDK self-check; the native executable's independent interop result
 is pending the hosted Windows native gate.
+The native client now reads v1 and legacy card security requirements, accepts
+only no-auth alternatives or HTTP Bearer, refuses unsupported requirements,
+and withholds a configured bearer from subsequent calls when the card does not
+advertise bearer authentication. Focused loopback assertions cover refusal and
+credential withholding; hosted native compilation and CTest remain pending.
 The client is not yet registered in the runtime, persistence, AgentRunner,
 graph, CLI, browser or VS Code, and it does not yet support streaming or
 durable recovery after uncertain remote dispatch.
