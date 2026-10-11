@@ -1,5 +1,18 @@
 # Current native validation
 
+## Shared-client saved-provider status — 2026-10-11
+
+VSIX `0.1.9` is installed as `agentflow-local.agentflow@0.1.9`. Settings now
+states explicitly that a selected saved provider key is available to the local
+backend and will be reused; the replacement field stays blank. The actual
+browser Settings panel displayed this text for DeepSeek. No provider request
+was made to verify the indicator. The packaged native-runtime verifier passed
+with 1,899 files; VS Code tests pass **298/298** and browser tests **85/85**.
+VS Code installation is verified, while activation/rendering in an existing
+editor window remains unverified. This change does not validate the broader
+provider matrix, native process coding, or full OpenCode parity. See [sanitized
+browser evidence](evidence/provider-key-status-live-browser-20261011.json).
+
 ## Managed trusted process-profile configuration — 2026-10-11
 
 Commit `b0dd491` wires `.config/processes.yaml` into the managed browser and

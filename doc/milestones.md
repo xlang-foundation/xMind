@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+## Saved provider keys are clearly identified in client Settings — 2026-10-11
+
+The shared browser and VS Code renderer now says when the selected profile has
+a saved key available on the local xMind backend, and that users do not need to
+enter it again. The password field remains empty; the key itself and its
+reference are never sent to the renderer. The actual browser Settings panel
+showed the indicator for the active DeepSeek profile. Package `0.1.9` was
+verified and installed. VS Code tests pass **298/298** and browser tests
+**85/85**. A new rendered VS Code sidebar has not been verified, and native
+inference or full parity is unchanged. [Evidence](evidence/provider-key-status-live-browser-20261011.json).
+
 ## Explicit trusted runtime refresh in VS Code — 2026-10-11
 
 VS Code now registers **xMind: Apply Trusted Runtime Configuration**. After

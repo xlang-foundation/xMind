@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-11",
+  "scope": "Rendered local browser Settings status and shared-client package installation",
+  "browser_origin": "http://127.0.0.1:60415/ui/",
+  "selected_profile": "deepseek",
+  "selected_model": "deepseek-flash",
+  "saved_key_status_rendered": true,
+  "status_text": "Saved provider key is configured on this xMind backend and will be used automatically. You do not need to enter it here.",
+  "replacement_key_input_empty": true,
+  "provider_request_for_status_check": false,
+  "provider_secret_or_reference_sent_to_renderer": false,
+  "vscode_extension_version_installed": "0.1.9",
+  "vscode_sidebar_rendered_after_install": false,
+  "vscode_contracts": "298/298",
+  "browser_contracts": "85/85",
+  "native_runtime_file_count": 1899,
+  "native_runtime_manifest_sha256": "175bcdb47b9179ab8cb7dbbbdfd32d901fe624994135c82525c7f8556b3ce0ea",
+  "source_commit": "c5df313",
+  "operation_level_opencode_parity_claimed": false
+}

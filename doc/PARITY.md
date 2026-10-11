@@ -75,6 +75,21 @@ verified parity. Earlier full native, browser and VS Code gates remain scoped
 to their cited revisions; they do not establish full parity or current
 installed acceptance.
 
+## Current shared-client package and saved-key status (2026-10-11)
+
+VS Code package `0.1.9` adds an explicit Settings indicator when a saved
+provider profile is selected: its encrypted key is configured on the local
+xMind backend and will be reused without entering it again. The indicator is
+derived from saved-profile selection; no credential or credential reference is
+sent to the renderer. The actual local browser page showed this status for its
+active DeepSeek profile, while its API-key input remained empty. The browser
+suite passes **85/85** and the VS Code suite **298/298**. VSIX packaging verified
+the 1,899-file native runtime, and the installed extension list reports
+`agentflow-local.agentflow@0.1.9`. The shared renderer is updated in both
+clients, but a newly rendered VS Code sidebar has not been observed yet. This
+UX checkpoint does not change native inference behavior or the **zero**
+operation-level parity count. [Sanitized browser evidence](evidence/provider-key-status-live-browser-20261011.json).
+
 ## MCP resources and prompts (2026-10-11)
 
 The native MCP registry now discovers resources and prompts alongside tools for
