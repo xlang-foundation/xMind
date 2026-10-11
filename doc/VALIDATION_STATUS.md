@@ -14,6 +14,28 @@ All 134 tests have passed across the full run and targeted reruns; the full
 134-test suite has not yet been repeated after those final fixes. This is local
 Release validation, not installed IDE or packaged release acceptance.
 
+## Live saved-key native CLI process run — 2026-10-11
+
+The current `build/native/contract-bin/Release` server and CLI completed one
+actual DeepSeek `deepseek-flash` agent turn. A disposable backend imported the
+saved provider keys, discovered models through the backend using the saved
+DeepSeek key, and selected `deepseek-flash`; the key never entered the CLI
+request or output. The model proposed a single PowerShell `Write-Output`
+command. The CLI review was checked against the exact executable, fixed
+arguments and workspace before approval. Native execution returned exit code
+zero and the expected stdout marker, then persisted a succeeded process
+operation, completed run, conversation history and actual token/timing metrics.
+The isolated database and workspace were not added to the repository. This
+proves one live saved-key provider and foreground process path through the
+native CLI, not browser/VS Code process acceptance, shell discovery, or broad
+coding parity. [Sanitized evidence](evidence/native-live-cli-process-acceptance-20261011.json).
+
+The saved YAML profiles are intentionally key-only when their `model` field is
+blank. In that state the backend can enumerate profiles and use their saved
+keys for model discovery, but it cannot execute an agent until a model is
+selected. The provider/model picker must perform that selection; requesting the
+secret in the browser would violate the credential boundary.
+
 ## Shared-client saved-provider status — 2026-10-11
 
 VSIX `0.1.9` is installed as `agentflow-local.agentflow@0.1.9`. Settings now

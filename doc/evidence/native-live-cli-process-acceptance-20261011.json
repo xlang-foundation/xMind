@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-11",
+  "scope": "Actual Windows Release xmind_server and xmind_cli with the saved DeepSeek credential; temporary SQLite database, workspace, and trusted process profile. No provider key is included.",
+  "provider": {
+    "profile_id": "deepseek",
+    "route_id": "deepseek.chat",
+    "model": "deepseek-flash",
+    "saved_key_discovery": true
+  },
+  "run": {
+    "run_id": "6b73cc1ec3626f136a860ed366992cad",
+    "session_id": "0b0f5ce2f5471ec22c15fe2f436b5820",
+    "state": "completed"
+  },
+  "operation": {
+    "id": "352dc801be4b04859da997030ec0b5f2",
+    "tool": "run_process",
+    "state": "succeeded",
+    "decision_actor": "local-owner",
+    "profile_id": "powershell",
+    "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "arguments": [
+      "-NoLogo",
+      "-NoProfile",
+      "-NonInteractive",
+      "-Command",
+      "Write-Output 'XMIND_PROCESS_ACCEPTANCE'"
+    ],
+    "workdir": ".",
+    "approved_before_dispatch": true,
+    "exit_code": 0,
+    "termination": "exited",
+    "stdout": "XMIND_PROCESS_ACCEPTANCE"
+  },
+  "provider_usage": [
+    {
+      "model": "deepseek-flash",
+      "input_tokens": 3620,
+      "output_tokens": 128,
+      "total_tokens": 3748,
+      "cached_input_tokens": 256,
+      "reasoning_tokens": 42,
+      "first_token_ms": 617,
+      "elapsed_ms": 1173
+    },
+    {
+      "model": "deepseek-flash",
+      "input_tokens": 3953,
+      "output_tokens": 152,
+      "total_tokens": 4105,
+      "cached_input_tokens": 3712,
+      "reasoning_tokens": 64,
+      "first_token_ms": 809,
+      "elapsed_ms": 1716
+    }
+  ],
+  "limits": [
+    "One safe foreground process command only; no shell discovery or OpenCode process parity claim.",
+    "This is native CLI acceptance, not rendered browser or VS Code process acceptance.",
+    "No process profile was added to the repository configuration."
+  ],
+  "build": {
+    "xmind_source_revision": "dab8669609e1c2fd43faef666d2a1256cd51b09a",
+    "xmind_server_sha256": "DFADDE74C9F563A01DDFCC953230D952EC7EBB9CBA8DA6C6230F3E64A18C7283",
+    "xmind_cli_sha256": "5B69C48463D082506038A9057925DD0F1D559DEC2FBAAE8BB9A6A360E76067ED",
+    "xlang3_source_revision": "8151a334",
+    "xlang3_source_worktree_dirty": true,
+    "xlang3_runtime_dll_sha256": "586831FC46FA109368274D9C8A32D7DA24679DA6F986D9672AD74DA4FEF07546",
+    "xlang3_sqlite_module_sha256": "FCB0E481352672EB72D86A96E2EF5D9B58939A35AD03A4AC3E32BFE7DC733B8C"
+  }
+}

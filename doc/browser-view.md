@@ -26,6 +26,12 @@ encrypted xlang3-backed credentials; existing non-empty provider settings are
 preserved. Import performs no provider request, and key values never pass
 through the browser.
 
+A profile with a blank `model` is key-only: the backend can discover models
+with its encrypted saved key, but a model must be selected before the agent
+can run. The sidebar receives the public profile/model list and uses the
+selected profile on subsequent requests; it never needs or receives the raw
+provider key.
+
 The C++ server owns execution, tools, graphs, permissions, providers and history. SQLite I/O remains in embedded xlang3. The Node HTTP adapter serves validated view-asset snapshots and forwards a finite allowlist of API requests to a configured loopback native server. A page reload loads a complete new snapshot from its configured asset directory without restarting the adapter or losing its authenticated sessions. Boundary, route, size and CSP restrictions still apply; a rejected bundle does not revoke backend access. Closing the view does not cancel execution. This is a local HTTP transport. Team deployment, WebRTC and the standalone Electron IDE belong to private Nexus.
 
 The left side is the workspace canvas: its folder selector switches a local profile, and **Add folder** opens the native folder picker and registers a persistent profile on the same xMind node. Runs start in that selected workspace and execute in the xMind backend process. The file list and preview are read-only native workspace-handle reads; directory links and Git metadata are omitted, and backend-private `.config` and `.agentflow` paths remain denied. Git status plus working-tree, branch and committed diffs use native Git data scoped to that selected workspace; patch text is displayed as text in the workspace review area. The right sidebar holds conversation history, the active chat, run activity and approvals; provider and discovered-model selection stay below the composer. Agent edits still appear as approval proposals, and full editor, multi-file diff and recovery workflows remain open coding-parity work.

@@ -1,5 +1,20 @@
 # Reviewable milestones
 
+## Saved-key native CLI process run — 2026-10-11
+
+The current Release `xmind_server` and `xmind_cli` ran a real DeepSeek
+`deepseek-flash` turn using the encrypted key imported from `.config/providers.yaml`.
+The isolated profile began key-only; the backend discovered models through the
+saved key and activated the selected model before CLI admission. The agent
+proposed one PowerShell command, the CLI displayed the pending operation, and
+approval was granted only after checking the recorded executable, fixed
+arguments and workspace. The process printed the expected marker, the backend
+persisted its successful result, the run completed, and provider usage metrics
+were retained in conversation history. No process profile was added to the
+repository configuration. This verifies the live native CLI process path for
+one provider and one harmless command; rendered browser/VS Code process
+acceptance and broader shell parity remain open. [Sanitized evidence](evidence/native-live-cli-process-acceptance-20261011.json).
+
 ## Live browser coding write uses saved provider and approval — 2026-10-11
 
 The connected xMind browser completed a real DeepSeek coding run that requested

@@ -22,6 +22,14 @@ and timeout through view authentication; executable paths and bindings are
 not returned. The full CTest gate and rendered VS Code sidebar process run
 remain unverified at this checkpoint.
 
+The current Release native server and CLI later completed one actual saved-key
+DeepSeek `deepseek-flash` turn with a temporary trusted PowerShell profile. The
+key-only YAML profile discovered models through the backend; the CLI inspected
+and approved the exact harmless process proposal, and the server persisted its
+actual output and provider metrics. See [sanitized live CLI evidence](evidence/native-live-cli-process-acceptance-20261011.json).
+This does not close rendered browser/VS Code process acceptance or shell
+discovery and command-semantics parity.
+
 The current working-tree background-process checkpoint passes four focused
 native contracts: `native_process_executor_contract`,
 `native_agent_process_http_contract`, `native_agent_runner_contract`, and
