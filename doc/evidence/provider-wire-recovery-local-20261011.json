@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-11",
+  "source": "local browser provider check and shared renderer regression contract",
+  "saved_profiles_visible": [
+    "claude",
+    "gemini",
+    "deepseek",
+    "openai"
+  ],
+  "observed_existing_conversation_wire": "gemini-generate-content",
+  "selected_profile_wire": "chat-completions",
+  "incompatible_history_behavior": "run failed before provider transport; original conversation history remained available",
+  "fresh_conversation_provider_check": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "response": "OK",
+    "provider_reported_input_tokens": 5405,
+    "provider_reported_output_tokens": 2,
+    "status": "completed"
+  },
+  "renderer_change": "Browser and VS Code now explain that incompatible provider history stopped the request before provider contact, the saved key was not the cause, and starting a new conversation preserves the original history.",
+  "browser_reload": {
+    "pending_status": "Restoring saved provider settings from the local xMind backend…",
+    "restored_automatically": true,
+    "providers_after_reconnect": [
+      "claude",
+      "gemini",
+      "deepseek",
+      "openai"
+    ],
+    "manual_key_entry_required": false
+  },
+  "verification": {
+    "renderer_tests": "75 passed",
+    "browser_classic_script_tests": "4 passed",
+    "browser_full_suite": "85 passed",
+    "live_page": true,
+    "plaintext_provider_key_exposed": false
+  },
+  "scope_limits": [
+    "One live DeepSeek browser request was made; this does not establish cross-wire history conversion.",
+    "No plaintext provider keys or user conversation contents are recorded here."
+  ]
+}

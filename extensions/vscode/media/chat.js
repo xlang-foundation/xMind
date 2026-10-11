@@ -182,7 +182,7 @@ function runFailure(data){
   card.append(node('p',data?.reason==='provider_http_error'&&Number.isInteger(status)&&status>=100&&status<=599
     ?'The model provider returned HTTP '+status+'. This run stopped before completing its response.'
     :data?.reason==='incompatible_provider_history'
-    ?'This conversation contains provider history that the selected model’s wire cannot use. Start a new conversation or select a model using the previous wire. The recorded history is preserved.'
+    ?'xMind stopped this request before contacting the provider: this conversation contains provider-specific history that the selected model cannot use. The saved provider key was not the cause. Start a new conversation to use this model, or switch back to the model used for this history. The recorded history is preserved.'
     :data?.reason==='context_binding_changed'
     ?'This conversation’s saved model context belongs to a different backend or provider configuration. Start a new conversation with the current configuration. The recorded history is preserved.'
     :data?.reason==='context_unavailable'

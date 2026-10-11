@@ -268,7 +268,7 @@ test('incompatible provider history and unavailable saved context explain recove
   const r=renderer(),doc=r.dom.window.document;
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'incompatible_provider_history',message:'private-fixture-history'}}});
   r.send({type:'transcript',history:[]});
-  const card=doc.getElementById('run-failure');assert.equal(card.hidden,false);assert.match(card.textContent,/Start a new conversation/);assert.match(card.textContent,/recorded history is preserved/);
+  const card=doc.getElementById('run-failure');assert.equal(card.hidden,false);assert.match(card.textContent,/before contacting the provider/);assert.match(card.textContent,/saved provider key was not the cause/);assert.match(card.textContent,/Start a new conversation/);assert.match(card.textContent,/recorded history is preserved/);
   assert.ok(!card.textContent.includes('private-fixture-history'));assert.equal(card.querySelector('.metrics'),null);assert.equal(doc.querySelector('#history .assistant'),null);
   for(const reason of ['context_unavailable','context_binding_changed']){
     r.send({type:'event',event:{kind:'run.failed',data:{reason,message:'private-fixture-history'}}});r.send({type:'transcript',history:[]});

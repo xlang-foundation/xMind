@@ -15,6 +15,18 @@ const sources={
   '/ui/chat.js':'extensions/vscode/media/chat.js'
 };
 
+test('browser reload shows saved-settings restoration instead of a false unconfigured state while local reconnect is pending',async()=>{
+ const dom=new JSDOM(browserHtml(),{url:'http://127.0.0.1:8765/ui/',runScripts:'outside-only'}),window=dom.window,document=window.document;let finishSession;
+ window.AbortController=AbortController;window.AbortSignal=AbortSignal;window.TextDecoder=TextDecoder;window.TextEncoder=TextEncoder;
+ for(const dialog of document.querySelectorAll('dialog')){dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;dialog.dispatchEvent(new window.Event('close'));};}
+ window.fetch=async input=>{const url=new URL(input,window.location.origin);if(url.pathname==='/ui/session')return await new Promise(resolve=>{finishSession=resolve;});throw Error('Unexpected route during held reconnect: '+url.pathname);};
+ async function until(predicate){for(let n=0;n<200&&!predicate();n++)await new Promise(resolve=>setImmediate(resolve));assert.ok(predicate(),'Browser reconnect reached the expected state');}
+ try{for(const script of document.querySelectorAll('script')){const route=script.getAttribute('src');new vm.Script(fs.readFileSync(path.join(root,sources[route]),'utf8'),{filename:route}).runInContext(dom.getInternalVMContext());}
+  await until(()=>typeof finishSession==='function');assert.equal(document.getElementById('status').textContent,'Restoring saved provider settings from the local xMind backend…');assert.doesNotMatch(document.getElementById('status').textContent,/configure a model|add a provider/i);assert.equal(document.getElementById('send').disabled,true);
+  finishSession({ok:false,status:401,json:async()=>({})});await until(()=>document.getElementById('connection').open);assert.match(document.getElementById('connection-error').textContent,/did not accept this page/);
+ }finally{window.dispatchEvent(new window.Event('pagehide'));window.close();}
+});
+
 test('full webpage script order streams through the cookie bridge, renders real fixture metrics and detaches without commands',async()=>{
  const dom=new JSDOM(browserHtml(),{url:'http://127.0.0.1:8765/ui/',runScripts:'outside-only'}),window=dom.window,document=window.document,requests=[];
  assert.match(document.querySelector('.local-node').textContent,/Local node · This computer/);assert.equal(document.querySelector('#workspace-picker').getAttribute('aria-label'),'Workspace folder');assert.equal(document.querySelector('.file-tree-heading').textContent,'Project files');assert.equal(document.getElementById('add-workspace').textContent,'Add folder');assert.doesNotMatch(document.body.textContent,/Server access token/);
