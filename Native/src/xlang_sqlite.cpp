@@ -1,12 +1,39 @@
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/records.hpp"
 #include "xlang3/xlang3.h"
+#include <algorithm>
 #include <cstring>
+#include <filesystem>
 #include <limits>
 #include <thread>
 #include <type_traits>
 
 namespace agentflow {
+namespace {
+std::string sqlite_database_path(const std::string& input){
+#if defined(_WIN32)
+    if(input==":memory:")return input;
+    auto path=std::filesystem::u8path(input);auto native=path.native();
+    if(!path.is_absolute()||native.size()<252||native.starts_with(L"\\\\?\\")||native.starts_with(L"\\\\.\\"))return input;
+    std::replace(native.begin(),native.end(),L'/',L'\\');
+    const bool drive=native.size()>=3&&((native[0]>=L'A'&&native[0]<=L'Z')||(native[0]>=L'a'&&native[0]<=L'z'))&&native[1]==L':'&&native[2]==L'\\';
+    const bool unc=native.starts_with(L"\\\\");if(!drive&&!unc)return input;
+    for(std::size_t offset=drive?3:2;offset<native.size();){
+        const auto end=native.find(L'\\',offset);const auto part=native.substr(offset,end==std::wstring::npos?native.size()-offset:end-offset);
+        if(part.empty()||part==L"."||part==L".."||part.back()==L'.'||part.back()==L' '||part.find_first_of(L"<>:\"|?*")!=std::wstring::npos)return input;
+        auto stem=part.substr(0,part.find(L'.'));for(auto& character:stem)if(character>=L'a'&&character<=L'z')character-=L'a'-L'A';
+        if(stem==L"CON"||stem==L"PRN"||stem==L"AUX"||stem==L"NUL"||stem==L"CONIN$"||stem==L"CONOUT$"||
+           (stem.size()==4&&(stem.starts_with(L"COM")||stem.starts_with(L"LPT"))&&
+            ((stem[3]>=L'1'&&stem[3]<=L'9')||stem[3]==0x00b9||stem[3]==0x00b2||stem[3]==0x00b3)))return input;
+        if(end==std::wstring::npos)break;offset=end+1;
+    }
+    const auto extended=drive?std::filesystem::path(L"\\\\?\\"+native):std::filesystem::path(L"\\\\?\\UNC\\"+native.substr(2));
+    const auto encoded=extended.u8string();return {reinterpret_cast<const char*>(encoded.data()),encoded.size()};
+#else
+    return input;
+#endif
+}
+}
 struct XlangSqlite::Impl {
     // Runtime must outlive its connection and every temporary package value.
     X::Runtime runtime;
@@ -74,7 +101,7 @@ XlangSqlite::XlangSqlite(const std::string& database,const std::vector<std::stri
     // The SDK exports its native connection API as _sqlite3. Importing the
     // pure sqlite3 facade must not depend on a host-installed standard library.
     X::Module sqlite(impl_->runtime,"_sqlite3");
-    std::vector<X::Value> args{X::Value(impl_->runtime,database)};
+    std::vector<X::Value> args{X::Value(impl_->runtime,sqlite_database_path(database))};
     const std::vector<std::pair<std::string,X::Value>> options{{"isolation_level",X::Value(nullptr)}};
     if(!sqlite["connect"].Call(args,options,impl_->connection)) throw DatabaseError(impl_->runtime.LastError());
     execute("PRAGMA foreign_keys=ON");
