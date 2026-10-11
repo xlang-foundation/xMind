@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-11",
+  "scope": "Actual native local-view integration contract using an isolated Windows profile store and embedded xlang3 SQLite.",
+  "build": "build/goal-current, Release, configured with D:/CantorAI2026/xlang3/build/Release",
+  "related_contracts": {
+    "native_provider_yaml_config_contract": "passed",
+    "native_local_view_contract": "passed in 72.03 seconds",
+    "native_local_view_provider_config_contract": "passed in 70.33 seconds",
+    "native_provider_profile_runtime_contract": "passed"
+  },
+  "scenario": [
+    "An existing workspace profile started with an OpenAI provider from the shared YAML file.",
+    "The YAML file then gained a Claude profile while the native backend remained running.",
+    "The local browser view attached that existing workspace and exposed both profile IDs.",
+    "A new workspace attached afterward also received both profiles."
+  ],
+  "assertions": {
+    "existing_profile_updated_from_yaml": true,
+    "new_workspace_imported_yaml": true,
+    "provider_keys_returned_to_browser": false,
+    "provider_requests_performed": 0
+  },
+  "limitations": [
+    "A browser view already open when the YAML is edited does not watch the file; reopen the xMind view to reapply it.",
+    "No live provider inference or installed webpage acceptance was performed."
+  ]
+}

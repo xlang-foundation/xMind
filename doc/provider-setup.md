@@ -57,9 +57,14 @@ Copy [the empty example](examples/providers.example.yaml) to
 `D:\CantorAI2026\xMind\.config\providers.yaml` and enter keys locally. The
 development launchers pass that existing file to a newly launched configurable
 backend, or accept an explicit provider configuration path. Reusing an existing
-running backend does not hot-load the file. The file is ignored by Git and is
-never a client DTO or model input. The native backend encrypts imported keys
-into its SQLite credential store through embedded xlang3.
+backend from an explicit `--port` connection does not hot-load the file. The
+profile-aware local browser view applies the configured file when it attaches
+each workspace profile, including profiles that already have saved providers;
+new entries and key rotations are merged into the native encrypted registry.
+Changes made while that browser view is already open take effect after reopening
+the xMind view. The file is ignored by Git and is never a client DTO or model
+input. The native backend encrypts imported keys into its SQLite credential
+store through embedded xlang3.
 
 `profiles` maps profile IDs to a backend-registered `route`, optional `api_key`
 and optional `model`. An omitted model preserves an existing choice. A new

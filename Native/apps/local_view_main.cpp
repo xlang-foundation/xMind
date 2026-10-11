@@ -209,6 +209,9 @@ int run_local_view(int argc, char **argv) {
             client.set_write_timeout(5, 0);
             client.set_follow_location(false);
         };
+        // Reapply the trusted local YAML whenever this view attaches a workspace
+        // profile. The native registry merges supplied entries, so profiles
+        // already present do not prevent newly added or rotated keys from loading.
         const auto import_shared_provider_config = [&](const std::shared_ptr<agentflow::LocalProfileConnection> &target) {
             if (options.provider_config.empty())
                 return;
@@ -232,11 +235,9 @@ int run_local_view(int argc, char **argv) {
                         metadata["revision"].is_number_integer() && metadata["revision"] >= 0 &&
                         metadata.contains("profiles") && metadata["profiles"].is_array(),
                     "Native provider settings are invalid");
-            if (!metadata["profiles"].empty())
-                return;
             const auto config_path = std::filesystem::absolute(options.provider_config).u8string();
             const std::string config(reinterpret_cast<const char *>(config_path.data()), config_path.size());
-            const auto import = client.Post("/v1/provider/configuration/import", headers,
+            auto import = client.Post("/v1/provider/configuration/import", headers,
                 Json{{"path", config}, {"expected_revision", metadata["revision"]}}.dump(),
                 "application/json");
             if (!import)
@@ -248,9 +249,16 @@ int run_local_view(int argc, char **argv) {
                 const auto latest = Json::parse(refreshed->body);
                 require(latest.is_object() && latest.contains("profiles") && latest["profiles"].is_array(),
                         "Native provider settings are invalid");
-                if (!latest["profiles"].empty())
-                    return;
-                throw std::runtime_error("Native provider settings changed during workspace connection");
+                require(latest.contains("revision") && latest["revision"].is_number_integer() &&
+                            latest["revision"] >= 0,
+                        "Native provider settings are invalid");
+                import = client.Post("/v1/provider/configuration/import", headers,
+                    Json{{"path", config}, {"expected_revision", latest["revision"]}}.dump(),
+                    "application/json");
+                if (!import)
+                    throw std::runtime_error("Native provider settings could not be applied");
+                if (import->status == 409)
+                    throw std::runtime_error("Native provider settings changed during workspace connection");
             }
             require(import->status == 200, "Shared provider configuration was rejected");
         };
