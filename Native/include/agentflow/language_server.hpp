@@ -1,0 +1,35 @@
+#pragma once
+#include "agentflow/mcp_stdio.hpp"
+#include "agentflow/workspace_tools.hpp"
+#include <string>
+#include <memory>
+#include <vector>
+
+namespace agentflow {
+struct LanguageServerProfile {
+    std::string id,executable,executable_id,language_id;
+    std::vector<std::string> extensions,arguments;
+    std::vector<std::pair<std::string,std::string>> environment;
+    std::chrono::milliseconds request_timeout{30000};
+};
+struct LanguageServerRequest {
+    std::string path,method;
+    std::size_t line=0,character=0;
+};
+// A bounded, one-request native LSP client. The server executable, arguments,
+// environment and file-extension binding come only from trusted backend
+// configuration. The model supplies a workspace-relative document and method.
+class LanguageServerClient {
+public:
+    LanguageServerClient(WorkspaceTools& workspace,LanguageServerProfile profile);
+    ~LanguageServerClient();
+    LanguageServerClient(const LanguageServerClient&)=delete;
+    LanguageServerClient& operator=(const LanguageServerClient&)=delete;
+    std::string request(const LanguageServerRequest& request,std::stop_token cancel={}) const;
+private:
+    struct Impl;
+    WorkspaceTools& workspace_;
+    LanguageServerProfile profile_;
+    std::unique_ptr<Impl> impl_;
+};
+}

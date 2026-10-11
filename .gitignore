@@ -4,6 +4,7 @@ __pycache__/
 .agentflow/
 .config/
 build/
+Native/tests/fixtures/lsp-rust/target/
 .xlang3/
 node_modules/
 *.vsix

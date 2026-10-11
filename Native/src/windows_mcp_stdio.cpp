@@ -177,7 +177,9 @@ McpStdioProcess::McpStdioProcess(const McpStdioConfiguration& configuration):imp
 McpStdioProcess::~McpStdioProcess()=default;
 void McpStdioProcess::write(std::string_view frame,Deadline deadline,std::stop_token token) {
     auto& state=*impl_;if(state.closed || state.stopping.load())throw McpTransportError("MCP process transport is closed or faulted");
-    if(frame.empty() || frame.size()>1024*1024+1 || frame.find('\n')!=frame.size()-1)throw std::invalid_argument("MCP write requires one bounded newline frame");
+    // The pipe is a protocol-neutral byte transport. MCP callers still supply
+    // newline-delimited frames; language-server clients use Content-Length.
+    if(frame.empty() || frame.size()>1024*1024+8192)throw std::invalid_argument("Stdio write exceeds the bounded frame limit");
     if(token.stop_requested())throw McpTransportCancelled("MCP write cancelled before dispatch");
     if(!remaining(deadline))throw McpTransportTimeout("MCP write deadline expired before dispatch");
     PendingIo io(state.input.get());DWORD written=0;
