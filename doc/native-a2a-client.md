@@ -55,10 +55,18 @@ the remote effect. The extended native contract covers approved dispatch,
 denial without dispatch, exact message identity, returned task IDs and
 post-dispatch failure quarantine; hosted Windows build/execution is pending.
 
-Task inspection/recovery by saved task ID, streamed observation/resumption,
-input-required follow-up, cancellation, artifacts and full CLI/VS Code
-cross-client task inspection remain open. These are required before claiming
-full outbound A2A parity.
+An owner-authenticated `POST /v1/operations/{id}/a2a/inspect` now refreshes a
+known task using only the peer ID, registration revision, card URL, interface,
+and task ID sealed into its succeeded operation. It refuses uncertain sends,
+registration/interface changes, and missing task IDs, and persists the peer's
+latest returned task snapshot in xlang3 SQLite. The local browser allowlist
+forwards this route using the HttpOnly view session. The native contract checks
+owner authentication, same-origin view access, exact saved task ID, durable
+inspection, and that uncertain dispatches do not issue a second remote effect.
+This is explicit polling; streamed observation/resumption, input-required
+follow-up, cancellation, artifacts, CLI/VS Code controls, and a rendered UI for
+task inspection remain open. These are required before claiming full outbound
+A2A parity.
 
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),
