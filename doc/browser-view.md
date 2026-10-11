@@ -34,10 +34,10 @@ provider key.
 
 The C++ server owns execution, tools, graphs, permissions, providers and history. SQLite I/O remains in embedded xlang3. The Node HTTP adapter serves validated view-asset snapshots and forwards a finite allowlist of API requests to a configured loopback native server. A page reload loads a complete new snapshot from its configured asset directory without restarting the adapter or losing its authenticated sessions. Boundary, route, size and CSP restrictions still apply; a rejected bundle does not revoke backend access. Closing the view does not cancel execution. This is a local HTTP transport. Team deployment, WebRTC and the standalone Electron IDE belong to private Nexus.
 
-Today, the left side is the workspace canvas: its folder selector switches a
-single-folder local profile, and **Add folder** registers the chosen existing
-folder as another profile on the same xMind node. Runs start in that selected
-profile and execute in the xMind backend process. The file list and preview are
+Today, the left side is the workspace canvas: its workspace selector switches
+between single-folder local profiles, and **New workspace** registers a chosen
+existing folder as another profile on the same xMind node. Runs start in that
+selected profile and execute in the xMind backend process. The file list and preview are
 read-only native workspace-handle reads; directory links and Git metadata are
 omitted, and backend-private `.config` and `.agentflow` paths remain denied.
 Git status plus working-tree, branch and committed diffs use native Git data
@@ -81,10 +81,13 @@ as multi-folder support.
 ### Current single-folder implementation
 
 The browser shows its active local profile, offers a selector for other local
-profiles and provides **Add workspace** for an existing folder. Unlike VS Code,
+profiles and provides **New workspace** for an existing folder. The selected
+folder becomes that workspace's primary folder; the current runtime still binds
+one folder per profile, so attaching another folder to the same workspace is
+not implemented yet. Unlike VS Code,
 a browser tab has no opened-folder context. On the profile-aware `xmind view`
 host, the selector is populated from the native protected profile
-catalogue and displays the workspace name and root; **Add workspace** is
+catalogue and displays the workspace name and root; **New workspace** is
 enabled when that host supports registration. When VS Code opens the browser
 for its single-folder `serve` backend, the adapter reads the authenticated
 workspace and exposes it as a fixed one-item selector. That keeps the opened
@@ -103,7 +106,7 @@ server access to the browser user's local files. For a Nexus connection, choices
 must come from server-authorized workspaces, not the client machine. `xmind
 workspaces` and the local view API enumerate valid profiles under the protected
 profile root. The native host validates each DPAPI record, workspace identity
-and storage boundary; missing or damaged profiles are omitted. **Add workspace**
+and storage boundary; missing or damaged profiles are omitted. **New workspace**
 accepts one absolute local or UNC folder path over the same-origin browser
 session. The native host opens and canonicalizes the existing directory,
 rejects inaccessible roots and overlap with private profile storage, creates or
