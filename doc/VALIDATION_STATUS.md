@@ -1,5 +1,17 @@
 # Current native validation
 
+## Full current local gate — 2026-10-10
+
+The current Release `ALL_BUILD` passes the complete native suite **122/122**
+in **547.58 seconds**, including all previously failing managed-profile/view,
+xlang3 repository and owner-handoff contracts. The source also passes **272/272
+VS Code extension** and **75/75 browser** tests, followed by actual native/browser
+integration for a paused/resumed file-read graph, cookie/history retention over
+view/backend restart and no replay. Exact runtime/source hashes and raw logs are
+in [gate evidence](evidence/native-122-and-views-local-20261010.json). This is
+local validation only; installed VS Code rendering and live coding in the editor
+remain unverified.
+
 ## Rebuilt local browser provider acceptance — 2026-10-10
 
 The rebuilt local development runtime at source `65f20505321e67dffcb495ff38e735781a9fdc8e`

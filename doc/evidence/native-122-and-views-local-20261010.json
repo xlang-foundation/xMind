@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-10 America/Los_Angeles",
+  "scope": "Full local Windows Release native suite, VS Code extension suite, browser suite, and actual native/browser integration",
+  "xmindSourceRevision": "10d2a9ac745fada0679bb9b0d011f2f581b4ecab",
+  "xlang3SourceRevision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+  "artifacts": {
+    "nativeExecutableSha256": "c4adf884da6f959429f79b01be40d754badca5ca485dd9e68ed4b207174acdad",
+    "xlang3RuntimeSha256": "4c0959726dfdaf8c12321188da524808e516cf224bab5ae590b3bd05a4349c07"
+  },
+  "build": {
+    "configuration": "Release",
+    "target": "ALL_BUILD",
+    "result": "passed",
+    "toolchain": "Visual Studio MSBuild 18.9.1"
+  },
+  "nativeCTest": {
+    "registered": 122,
+    "passed": 122,
+    "failed": 0,
+    "skipped": 0,
+    "durationSeconds": 547.58,
+    "rawLog": "native-122-local-ctest-20261010.log",
+    "rawLogSha256": "87edee9a6eaa5e3ffa4b93f75e58958d4032ca0a27dd918b2c18cefce4f41225"
+  },
+  "clientSuites": {
+    "vscodeExtension": {
+      "command": "npm test",
+      "passed": 272,
+      "failed": 0,
+      "skipped": 0,
+      "durationMilliseconds": 2466,
+      "rawLog": "vscode-272-local-20261010.log",
+      "rawLogSha256": "0a0c13eeb342b35135d4dc54598ee5a185aab1e54ffa83619dc92b023ef13c40"
+    },
+    "browser": {
+      "command": "node --test views/browser/tests/*.test.cjs",
+      "passed": 75,
+      "failed": 0,
+      "skipped": 0,
+      "durationMilliseconds": 15117,
+      "rawLog": "browser-75-local-20261010.log",
+      "rawLogSha256": "56ba4a40994268794bdf1f8809bcfdaa804c5ba220420bcb53e220f615ca7477"
+    },
+    "nativeBrowserIntegration": {
+      "result": "passed",
+      "testSource": "../../views/browser/tests/native-contract.mjs",
+      "testSourceSha256": "0643eae256fc7f29b7f9da0d51635d00665381cc74a606307f9da2ade1b44c46",
+      "rawLog": "browser-native-integration-local-20261010.log",
+      "rawLogSha256": "ffa8a56eeb33ceb7dc064c220c2fff5c93805595cb78a3f52cb677f765a71f56",
+      "coverage": [
+        "native graph admission, human pause/input, actual workspace read and durable resume",
+        "browser adapter restart, HttpOnly cookie retention, native backend restart and no run replay",
+        "same-process browser launcher forwarding of native history and model metadata without copying credentials"
+      ]
+    }
+  },
+  "standardLibrarySource": "C:/Python/Python314/Lib (source files only; no CPython executable, runtime, or native extension)",
+  "limitations": "All three suites are local. They do not represent a hosted release gate, and they do not prove a current installed VS Code window's rendered interaction or live model-backed coding in the editor."
+}

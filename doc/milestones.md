@@ -1,5 +1,21 @@
 # Reviewable milestones
 
+## Full local native and client gate restored (2026-10-10)
+
+The Release `ALL_BUILD` and complete native CTest gate passed **122/122** in
+**547.58 seconds** on source `10d2a9a`. This includes current passing reruns for
+the managed-profile and local-view Unicode-path startup, xlang3 repository
+open, and backend handoff tests that were listed as failures in the earlier
+`60e454c` checkpoint. The matching source passes **272/272 VS Code extension**
+tests and **75/75 browser** tests. A fresh native/browser integration run also
+passed real graph pause/input/resume and workspace read, browser/session and
+backend restart, saved-history retention, and no execution replay. Only the
+disposable backend was restarted; no model or provider was simulated in that
+integration. Raw CTest, client logs, artifact hashes and exact limits are in
+[local gate evidence](evidence/native-122-and-views-local-20261010.json).
+These local gates do not establish hosted release packaging or current
+rendered/installed VS Code interaction; full OpenCode parity remains open.
+
 ## Saved provider keys on the rebuilt local browser (2026-10-10)
 
 Using the rebuilt native runtime and the repository's single
@@ -57,7 +73,9 @@ workspace path in the current Windows locale, `xlang_repository_contract`
 reports that it cannot open its database, and the owner-handoff fixture reports
 `No module named '_sqlite3'`. The latter two require xlang3/runtime diagnosis;
 they are not counted as passing. Provider replies in these contracts are
-synthetic; this checkpoint does not claim full A2A or OpenCode parity.
+synthetic; this historical `60e454c` checkpoint does not claim full A2A or
+OpenCode parity. Its four listed native failures were subsequently rerun and all
+passed at the later **122/122** checkpoint above.
 
 ## Same-machine browser reconnects to the active xMind process (2026-10-11)
 
