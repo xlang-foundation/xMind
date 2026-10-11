@@ -42,6 +42,55 @@ background jobs, full-output artifacts, interruption-safe recovery, and full
 OpenCode command parity remain open. The existing PTY test uses synthetic
 shell I/O and does not run a command in the user's workspace.
 
+## Background command parity contract
+
+The pinned OpenCode V2 shell contract allows a command to run in the
+background, returns control immediately, reports completion to the owning
+session, and retains complete output in managed storage. See the official
+[V2 tool contract](https://opencode.ai/v2/docs/tools/), checked 2026-10-11.
+The current xMind `run_process` remains synchronous, keeps at most 64 KiB of
+output in the event journal, and has no durable job record or full-output
+artifact. A PTY session is a separate interactive-terminal feature and does not
+close this gap.
+
+The native implementation must preserve these lifecycle guarantees:
+
+* A background request proposes the same backend-owned executable, exact
+  argument vector, profile revision, workspace directory, resource lock and
+  bounded lifetime as a foreground request. The controller approves that
+  exact payload before dispatch; background mode cannot weaken or bypass the
+  existing approval.
+* The start response identifies one durable job and returns while the process
+  remains active. The owning agent can inspect or wait for that job without
+  blocking unrelated read-only work. Completion and output remain visible to
+  the browser and VS Code even when the model response has not arrived or a
+  client has disconnected.
+* Output is streamed into bounded, cursor-readable journal events and a
+  separately retrievable full-output artifact. Model-facing summaries stay
+  bounded and identify truncation; they do not embed an unbounded build log in
+  conversation history. Storage failure after dispatch retires the process
+  tree and preserves an uncertain operation rather than fabricating success.
+* The process resource remains claimed until exit is observed and its result is
+  durably committed. Workspace/profile conflicts therefore remain quarantined
+  while the job runs. An explicit cancellation retires the owned tree and
+  records the observed lifecycle; it never claims rollback of child effects.
+* On native restart, an unobserved in-flight process is marked uncertain and
+  never replayed. The backend must not report it as successful or silently
+  create a replacement job. Completed output and exit evidence remain
+  inspectable after restart.
+* Graph tool nodes retain their synchronous contract unless the graph itself
+  models a persisted wait/join dependency. A graph cannot complete successfully
+  merely because it launched an unobserved background effect.
+
+The current per-run event API rejects output appends after a run becomes
+terminal, and operation-resource ownership is released only when the operation
+finishes. Those native invariants are why the job lifecycle, output artifact,
+wait/join behavior and recovery record must be implemented together rather
+than by detaching the existing foreground call in a worker thread. No
+background-command acceptance is claimed until the complete native, CLI,
+browser and VS Code flow exercises actual child processes and a real backend
+restart.
+
 The `37e153b` hosted gate built and passed 51 native contracts but its approved
 process-executor fixture exceeded the unchanged 45-second outer timeout.
 [Exact gate provenance](evidence/native-cli-recovery-corrected-gate-failure-provenance.json)

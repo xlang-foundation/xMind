@@ -268,13 +268,26 @@ loops remain open. See
 
 The source/API pin is v2.0.26. The following broader behavior baseline is drawn
 from the official [V2 CLI](https://opencode.ai/v2/docs/cli/),
+[intro and client modes](https://opencode.ai/v2/docs/),
+[configuration](https://opencode.ai/v2/docs/config/),
 [agents](https://opencode.ai/v2/docs/agents/),
 [models](https://opencode.ai/v2/docs/models/),
+[providers](https://opencode.ai/v2/docs/providers/),
 [tools](https://opencode.ai/v2/docs/tools/),
+[commands](https://opencode.ai/v2/docs/commands/),
+[skills](https://opencode.ai/v2/docs/skills/),
 [MCP](https://opencode.ai/v2/docs/mcp-servers/),
 [permissions](https://opencode.ai/v2/docs/permissions/) and
+[snapshots](https://opencode.ai/v2/docs/snapshots/),
+[attachments](https://opencode.ai/v2/docs/attachments/),
+[plugins](https://opencode.ai/v2/docs/plugins/),
+[references](https://opencode.ai/v2/docs/references/) and
 [sharing](https://opencode.ai/v2/docs/sharing/) documentation, checked on
-2026-10-10. The local coverage column describes the OSS target and current
+2026-10-11. The V2 shell contract specifically defines background execution,
+session completion notification and managed full-output retention; those are
+separate acceptance items from xMind's existing foreground process and PTY
+contracts. See [the native process implementation contract](native-process-tools.md#background-command-parity-contract).
+The local coverage column describes the OSS target and current
 evidence; it does not count Nexus-only or unverified behavior as parity.
 
 | Area | OpenCode V2 behavior to match | xMind OSS evidence and remaining gap |
