@@ -50,6 +50,10 @@
         "title": "xMind: Open Workspace"
       },
       {
+        "command": "agentflow.openTerminal",
+        "title": "xMind: Open Workspace Terminal"
+      },
+      {
         "command": "agentflow.selection",
         "title": "xMind: Ask About Selection"
       },

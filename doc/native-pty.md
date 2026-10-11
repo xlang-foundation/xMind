@@ -22,9 +22,11 @@ Authenticated local clients use these HTTP operations:
 The console client exposes the same lifecycle as `terminals SESSION`,
 `terminal-create SESSION [TITLE]`, `terminal-output ID [AFTER]`,
 `terminal-input ID UTF8`, `terminal-resize ID ROWS COLUMNS` and
-`terminal-close ID`. These commands allow scripts and console users to manage
-the same backend-owned terminal; a full-screen interactive attach UI is still
-outstanding.
+`terminal-close ID`. VS Code opens the backend-owned shell in its native
+terminal panel through a pseudoterminal bridge. The bridge pins one workspace,
+conversation and server generation, then relays terminal bytes without
+interpreting or estimating output. Full-screen interactive attach remains
+outstanding in the console client.
 
 The in-memory output ring retains at most 1 MiB per terminal. Each response
 returns the next sequence, whether older bytes were truncated, and actual
@@ -33,9 +35,10 @@ The server caps the number of live/retained terminals globally and per
 conversation. Terminal buffers are process-local and do not survive backend
 restart; the SQLite conversation remains intact.
 
-The current contract launches the real system command shell in an isolated
+The native contract launches the real system command shell in an isolated
 fixture workspace, waits for its initial prompt, sends a synthetic echo command,
 checks exact output replay, resizes the pseudoconsole, observes shell exit and
 closes the session. The HTTP integration contract runs the same lifecycle
-through the actual native server. Neither contract runs a command in the user's
-workspace. CLI and VS Code terminal interfaces are still outstanding.
+through the actual native server. VS Code bridge tests cover UTF-8 chunk
+boundaries, input and resize routing, and workspace revocation. Neither native
+contract runs a command in the user's workspace.

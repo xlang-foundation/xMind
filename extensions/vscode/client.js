@@ -154,6 +154,36 @@ class BackendClient {
     return validateSessionAgent(result,id,catalogue);
   }
   createSession(title) { return this.request('/v1/sessions', { title }); }
+  async terminals(session) {
+    executionIdentity(session);
+    const value=await this.request(`/v1/sessions/${encodeURIComponent(session)}/terminals`);
+    exactFields(value,['terminals']);
+    if(!Array.isArray(value.terminals)||value.terminals.length>256)throw new Error('Invalid terminal catalogue');
+    for(const terminal of value.terminals)validateTerminalMetadata(terminal,session);
+    return value.terminals;
+  }
+  async createTerminal(session,title,rows,columns) {
+    executionIdentity(session);terminalDimensions(rows,columns);
+    if(typeof title!=='string'||!title.trim()||title.length>128||/[\x00-\x1f\x7f]/.test(title))throw new Error('Invalid terminal title');
+    return validateTerminalMetadata(await this.request(`/v1/sessions/${encodeURIComponent(session)}/terminals`,{title,rows,columns}),session);
+  }
+  async terminal(id) { terminalIdentity(id);return validateTerminalMetadata(await this.request(`/v1/terminals/${id}`)); }
+  async terminalOutput(id,after) {
+    terminalIdentity(id);planInteger(after);
+    return validateTerminalOutput(await this.request(`/v1/terminals/${id}/output?after=${after}`));
+  }
+  async terminalInput(id,data) {
+    terminalIdentity(id);
+    if(typeof data!=='string'||!data||data.length>65536||data.includes('\0'))throw new Error('Invalid terminal input');
+    const value=await this.request(`/v1/terminals/${id}/input`,{data});exactFields(value,['written']);if(value.written!==true)throw new Error('Terminal input was not accepted');
+  }
+  async resizeTerminal(id,rows,columns) {
+    terminalIdentity(id);terminalDimensions(rows,columns);
+    return validateTerminalMetadata(await this.request(`/v1/terminals/${id}/resize`,{rows,columns}));
+  }
+  async closeTerminal(id) {
+    terminalIdentity(id);const value=await this.request(`/v1/terminals/${id}/close`,{});exactFields(value,['closed']);if(value.closed!==true)throw new Error('Terminal did not close');
+  }
   renameSession(id,title,expectedTitle) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/title`,{title,expected_title:expectedTitle}); }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
@@ -197,6 +227,26 @@ class BackendClient {
     if (decision !== 'allow' && decision !== 'deny') throw new Error('Decision must be allow or deny.');
     return this.request(`/v1/operations/${encodeURIComponent(id)}/decision`, { decision });
   }
+}
+
+function terminalIdentity(value){if(typeof value!=='string'||!/^[a-f0-9]{32}$/.test(value))throw new Error('Invalid terminal identity');}
+function terminalDimensions(rows,columns){if(!Number.isSafeInteger(rows)||rows<5||rows>300||!Number.isSafeInteger(columns)||columns<20||columns>500)throw new Error('Invalid terminal dimensions');}
+function validateTerminalMetadata(value,session){
+  exactFields(value,['id','session_id','title','rows','columns','running','exit_code','output_sequence']);
+  terminalIdentity(value.id);
+  if(session!==undefined&&value.session_id!==session||typeof value.session_id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(value.session_id)||
+    typeof value.title!=='string'||!value.title||value.title.length>128||/[\x00-\x1f\x7f]/.test(value.title)||
+    !Number.isSafeInteger(value.rows)||value.rows<5||value.rows>300||!Number.isSafeInteger(value.columns)||value.columns<20||value.columns>500||
+    typeof value.running!=='boolean'||value.running&&value.exit_code!==null||!value.running&&(!Number.isSafeInteger(value.exit_code)||value.exit_code< -2147483648||value.exit_code>2147483647)||
+    !Number.isSafeInteger(value.output_sequence)||value.output_sequence<0)throw new Error('Invalid terminal metadata');
+  return value;
+}
+function validateTerminalOutput(value){
+  exactFields(value,['encoding','data','next_sequence','truncated','running','exit_code']);
+  if(value.encoding!=='hex'||typeof value.data!=='string'||value.data.length>131072||value.data.length%2||!/^(?:[a-f0-9]{2})*$/.test(value.data)||
+    !Number.isSafeInteger(value.next_sequence)||value.next_sequence<0||typeof value.truncated!=='boolean'||typeof value.running!=='boolean'||
+    value.running&&value.exit_code!==null||!value.running&&(!Number.isSafeInteger(value.exit_code)||value.exit_code< -2147483648||value.exit_code>2147483647))throw new Error('Invalid terminal output');
+  return value;
 }
 
 function validateWorkspace(value){

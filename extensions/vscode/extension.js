@@ -9,6 +9,7 @@ const { browserViewLauncher } = require('./browser-view');
 const { WorkspaceBackend,machineSetting } = require('./workspace-backend');
 const { resolveNativeRuntime } = require('./native-runtime');
 const { captureEditorSelection } = require('./editor-selection');
+const { XMindPseudoterminal } = require('./terminal');
 
 async function activate(context) {
   const browserViews=browserViewLauncher(vscode,context);
@@ -27,6 +28,7 @@ async function activate(context) {
   const showEditReview=editReview(vscode,context);
   let panel;
   let sidebarView;
+  const terminalBridges=new Set();
   let resolveSidebar;
   let client;
   let health;
@@ -437,6 +439,8 @@ async function activate(context) {
           try{await configureModel();}catch{}
           await readSkills();
           await readAgentSelection();
+        } else if(message.type==='open-terminal'){
+          try{await openTerminalView();}catch(error){post({type:'status',text:error.message});vscode.window.showErrorMessage(error.message);}
         } else if(message.type==='mcp-refresh'){
           await readMcp();
         } else if(['mcp-start','mcp-renew','mcp-cancel','mcp-open'].includes(message.type)){
@@ -667,8 +671,34 @@ async function activate(context) {
     return opening;
   }
 
+  async function openTerminalView(){
+    if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before opening a coding terminal.');
+    await open();
+    const target=client,view=panel,workspaceEpoch=workspaceBackend.epoch;
+    if(!target||!view)throw new Error('Wait for xMind to load this workspace before opening a terminal.');
+    if(!sessionId){
+      const created=await target.createSession('Workspace terminal');
+      if(client!==target||panel!==view||workspaceBackend.epoch!==workspaceEpoch)throw new Error('Workspace changed while opening a terminal.');
+      await refresh();await selectSession(created.id);
+    }
+    const selectedSession=sessionId,origin=target.baseUrl;
+    const bridge=new XMindPseudoterminal(vscode,target,selectedSession,{
+      title:'xMind · '+(workspaceBackend.active?.metadata?.root?.split(/[\\/]/).filter(Boolean).pop()||'Workspace'),
+      current:()=>client===target&&panel===view&&workspaceBackend.epoch===workspaceEpoch&&workspaceBackend.active?.origin===origin,
+      onDispose:value=>terminalBridges.delete(value)
+    });
+    terminalBridges.add(bridge);
+    try{
+      const terminal=vscode.window.createTerminal({name:'xMind Terminal',pty:bridge});
+      terminal.show();
+    }catch(error){bridge.dispose();throw error;}
+  }
+
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.open', async () => {
     try { await open(); } catch (error) { vscode.window.showErrorMessage(error.message); }
+  }));
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.openTerminal',async()=>{
+    try{await openTerminalView();}catch(error){vscode.window.showErrorMessage(error.message);}
   }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.configureToken', async initialToken => {
     try { await configureToken(initialToken); } catch (error) { vscode.window.showErrorMessage(error.message); }
@@ -682,6 +712,7 @@ async function activate(context) {
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
   function disconnectWorkspace(){
+    for(const terminal of [...terminalBridges])terminal.dispose();terminalBridges.clear();
     contextReadyView=undefined;pendingEditorContexts=[];
     workspaceBackend.invalidate();stop();mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();profileController=undefined;
     providerSelection=undefined;reviewed.clear();clearGraph();sessionId=undefined;runId=undefined;sessionRuns=[];client=undefined;

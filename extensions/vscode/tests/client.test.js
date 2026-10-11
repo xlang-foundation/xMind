@@ -7,6 +7,23 @@ const {SkillViewController,validateSessionSkills}=require('../client');
 const skillWorkspace='windows-local-file-v1:synthetic-test-workspace',skillAuthority='a'.repeat(32);
 const skillState=(ids=[],revision=0,editable=true)=>({session_id:'session',workspace_id:skillWorkspace,authority_id:skillAuthority,revision,ids,manual_ids:ids,editable});
 const skillCatalogue={workspace_id:skillWorkspace,authority_id:skillAuthority,skills:[{id:'manual',name:'User guide',path:'.agents/skills/manual.md',model_invocable:false}]};
+test('terminal client authenticates each session-bound lifecycle request and validates byte cursors',async()=>{
+ const id='e'.repeat(32),requests=[],metadata={id,session_id:'session-one',title:'Terminal',rows:24,columns:80,running:true,exit_code:null,output_sequence:7};
+ const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{
+  requests.push({url,options});const route=new URL(url).pathname;
+  const value=route.endsWith('/terminals')&&options.method==='GET'?{terminals:[metadata]}:route.endsWith('/terminals')?metadata:route.endsWith('/output')?{encoding:'hex',data:'f09f',next_sequence:9,truncated:false,running:true,exit_code:null}:route.endsWith('/input')?{written:true}:route.endsWith('/resize')?{...metadata,rows:30,columns:100}:route.endsWith('/close')?{closed:true}:metadata;
+  return{ok:true,json:async()=>value};
+ });
+ assert.deepEqual(await client.terminals('session-one'),[metadata]);
+ await client.createTerminal('session-one','Terminal',24,80);const output=await client.terminalOutput(id,7);assert.equal(output.next_sequence,9);
+ await client.terminalInput(id,'echo hi\r');await client.resizeTerminal(id,30,100);await client.closeTerminal(id);
+ assert.deepEqual(requests.map(value=>new URL(value.url).pathname),[
+  '/v1/sessions/session-one/terminals','/v1/sessions/session-one/terminals',`/v1/terminals/${id}/output`,`/v1/terminals/${id}/input`,`/v1/terminals/${id}/resize`,`/v1/terminals/${id}/close`
+ ]);
+ assert.ok(requests.every(value=>value.options.headers.Authorization==='Bearer synthetic-client-token-32-bytes-long'));
+ assert.equal(requests[2].url.endsWith('?after=7'),true);assert.deepEqual(JSON.parse(requests[4].options.body),{rows:30,columns:100});
+ await assert.rejects(client.terminalOutput(id,-1),/invalid/i);await assert.rejects(client.terminalInput(id,'\0'),/invalid/i);assert.equal(requests.length,6);
+});
 test('session skill client posts only exact revision, ids and workspace authority',async()=>{
  const requests=[],client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>skillState(['manual'],1)};});
  const result=await client.replaceSessionSkills('session',['manual'],skillState());assert.equal(result.revision,1);assert.deepEqual(JSON.parse(requests[0].options.body),{ids:['manual'],expected_revision:0,expected_workspace_id:skillWorkspace,expected_workspace_authority_id:skillAuthority});assert.equal(requests[0].options.method,'POST');assert.equal(requests[0].url,'http://127.0.0.1:8765/v1/sessions/session/skills');
