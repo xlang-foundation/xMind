@@ -254,6 +254,7 @@ template<class Handler> auto guard_errors(Handler handler) {
         catch(const RunUnavailable&) {reply(response,{{"detail","Agent executor is unavailable"}},503);}
 #if defined(_WIN32)
         catch(const VcsInitializationFailure& error) {reply(response,{{"detail",error.what()}},error.http_status());}
+        catch(const VcsStatusFailure& error) {reply(response,{{"detail",error.what()}},error.http_status());}
 #endif
 #if defined(_WIN32)
         catch(const A2aRemoteError& error) {reply(response,{{"detail","Remote A2A task request failed"},{"a2a_error_code",error.code}},502);}
@@ -408,7 +409,7 @@ struct HttpServer::Impl {
             static const std::regex mcp_auth_read(R"(^/v1/mcp/authorization/(servers|attempts/[A-Za-z0-9_-]+)$)");
             static const std::regex mcp_auth_write(R"(^/v1/mcp/authorization/(attempts(/[A-Za-z0-9_-]+/cancel)?|renewals)$)");
             const bool mcp_authorized=(request.method=="GET"&&std::regex_match(request.path,mcp_auth_read))||(request.method=="POST"&&std::regex_match(request.path,mcp_auth_write));
-            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && (mcp_authorized||(stream&&request.method=="GET")||(!stream&&std::regex_match(request.path,view_route) && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && (mcp_authorized||(stream&&request.method=="GET")||(!stream&&(std::regex_match(request.path,view_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
                 catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
@@ -597,6 +598,12 @@ struct HttpServer::Impl {
             const auto provider=value.contains("provider")?string_field(value,"provider",64):std::string("git");
             if(!executor)throw RunUnavailable("Version control initialization requires an opened workspace");
             std::lock_guard lock(vcs_initialization_mutex);executor->initialize_vcs(provider);response.status=204;response.set_header("Cache-Control","no-store");
+        }));
+        server.Get("/v1/vcs/status",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("VCS status uses the opened workspace and accepts no query parameters");
+            if(!executor)throw RunUnavailable("Version control status requires an opened workspace");
+            std::lock_guard lock(vcs_initialization_mutex);auto values=Json::array();for(const auto& item:executor->vcs_status())values.push_back({{"file",item.file},{"additions",item.additions},{"deletions",item.deletions},{"status",item.status}});
+            reply(response,values);
         }));
         server.Get("/v1/workspace/files",guarded([this](const Request& request,Response& response){
             const auto path=workspace_browse_path(request);if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Workspace browsing requires an opened root");

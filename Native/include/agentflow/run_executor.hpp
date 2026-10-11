@@ -4,6 +4,7 @@
 #include "agentflow/skill_records.hpp"
 #include "agentflow/agent_definition_records.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include <cstdint>
 #include <utility>
 #include <optional>
 #include <string_view>
@@ -17,6 +18,7 @@ struct ProviderProfileAdmission {std::string id;std::int64_t revision=0;};
 // digest used by planning/context and contains no settings or credential data.
 struct ExecutionWorkspaceMetadata {bool configured=false;std::string root,workspace_id,authority_id;};
 struct WorkspaceSkillCatalogue {ExecutionWorkspaceMetadata workspace;std::string catalogue_json;};
+struct WorkspaceVcsFileStatus {std::string file;std::uint64_t additions=0,deletions=0;std::string status;};
 struct WorkspaceAdmission {std::string workspace_id,authority_id;};
 struct WorkspaceSessionSkills {ExecutionWorkspaceMetadata workspace;SessionSkillState state;};
 inline void validate_workspace_admission(const WorkspaceAdmission& expected,const ExecutionWorkspaceMetadata& actual){
@@ -34,6 +36,7 @@ public:
     virtual std::vector<std::string> models() const {return {};}
     virtual ExecutionWorkspaceMetadata execution_workspace()const{return {};}
     virtual void initialize_vcs(std::string_view){throw RunUnavailable("Workspace version control initialization is unavailable");}
+    virtual std::vector<WorkspaceVcsFileStatus> vcs_status()const{throw RunUnavailable("Workspace version control status is unavailable");}
     virtual bool supports_workspace_browsing()const{return false;}
     virtual WorkspaceListing browse_workspace_files(const std::string&)const{throw RunUnavailable("Workspace browsing is unavailable");}
     virtual WorkspaceFile browse_workspace_file(const std::string&)const{throw RunUnavailable("Workspace file preview is unavailable");}

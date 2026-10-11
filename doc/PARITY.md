@@ -57,10 +57,10 @@ provider-reported usage/backend timings appeared in the sidebar in both the
 in-app browser and external Microsoft Edge. The old unlinked `60415` browser tab is excluded from this acceptance. Exact evidence
 and limits: [saved-profile UI run](evidence/browser-live-saved-profile-ui-20261010.json).
 
-The current OpenAPI audit contains **141 operations**: **26** have a mapped C++
-source candidate, **115** remain unmapped, and **zero** are verified parity.
-Native Git initialization adds one reviewed source candidate; it does not
-establish full VCS or operation-level parity.
+The current OpenAPI audit contains **141 operations**: **27** have a mapped C++
+source candidate, **114** remain unmapped, and **zero** are verified parity.
+Native Git initialization and workspace status add two source candidates; they
+do not establish full VCS or operation-level parity.
 Compared with v2.0.16, v2.0.26 adds five operations: credential creation/listing,
 server connect/pair, and VCS initialization. These operation IDs are unchanged
 from v2.0.24 through v2.0.26. The audit embeds all **256** pinned
@@ -79,9 +79,23 @@ binary contract verified the created `.git` marker and Git's reported root,
 authorization, duplicate initialization and unsupported providers. The browser
 workspace header and VS Code command palette now expose the operation, bound to
 the connected workspace and guarded by confirmation. Browser and VS Code
-contracts cover success, cancellation and existing-repository errors. Git
-status, branches, diffs and other VCS providers remain unimplemented. See
+contracts cover success, cancellation and existing-repository errors. Branches,
+diffs and other VCS providers remain unimplemented. See
 [local VCS evidence](evidence/native-vcs-init-local-20261010.json).
+
+### Native Git status checkpoint (2026-10-11)
+
+`GET /v1/vcs/status` reports Git changes and per-file added/deleted line counts
+from the opened workspace. It runs fixed native Git arguments with bounded
+output/lifetime and rejects caller-selected paths. The actual xMind binary and
+xlang3/SQLite HTTP contract verified a clean repository, an untracked file with
+a space in its path and exact two-line counts, then a committed file changed
+with one addition and one deletion; bearer and local-view authorization and
+query rejection were also checked. The browser workspace includes a Git status
+control, with adapter and rendering coverage in the 80-test browser suite; a
+fresh rendered-browser check has not yet been done. CLI and VS Code status
+controls, branches, review base, diffs, rename/binary behavior and broader VCS
+equivalence remain incomplete. See [local status evidence](evidence/native-vcs-status-local-20261011.json).
 
 ## OpenCode V2 functional baseline
 
@@ -104,7 +118,8 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | Models and providers | Provider authentication, broad provider/model catalogue, per-session model selection, variants and provider/model request settings | Encrypted multi-provider profiles, native discovery and several native wire protocols exist. Broad provider/model capability acceptance, variants, general settings precedence and complete live-client tests remain incomplete. |
 | MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP MCP and scoped OAuth work exist; OAuth renewal/interoperability, resources/prompts/subscriptions, plugin lifecycle and complete command parity remain incomplete. |
 | Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Backend-owned approvals and effect receipts are implemented for scoped operations. General policy rules, durable change snapshots/reversal and full export/sharing contracts remain incomplete. |
-| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 26 have reviewed native source candidates, 115 are unmapped, and none has verified operation-level parity. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
+| Version control | Initialize Git and inspect working-tree changes for coding/review flows | Native Git init and status endpoints operate on the opened workspace and have actual xMind HTTP coverage; the browser exposes both actions | Branch info/list, review base and diffs, end-to-end CLI/VS Code flows, rename/binary cases, other providers and full VCS parity |
+| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 27 have reviewed native source candidates, 114 are unmapped, and none has verified operation-level parity. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
 
 This is a feature-level checklist, not an assertion that the cited docs are a
 complete specification of every v2.0.26 implementation detail. For API work,
@@ -705,7 +720,7 @@ removed Python prototype's status table; it is not a completion score.
 | Search and network configuration | Native HTTP/TLS and workspace search components exist | Configured network/search behavior across coding workflows |
 | Session sharing | Local backend sessions are shared across authorized views | Explicit export/sharing behavior and access-controlled output; team sharing belongs to Nexus |
 | CLI/TUI | The unified `xmind` console supports authenticated conversation/run/approval/inspection flows, provider catalogue/setup/selection, MCP sign-in/status/watch/cancel, revision-bound admission and signed native history. Windows managed profile discovery/start and shared CLI/view backend ownership pass actual local native contracts | Complete interactive coding/terminal UX, managed profile bootstrap on non-Windows hosts, current installed-package first-use and live provider acceptance |
-| Browser and VS Code | The browser now exposes a native-root file tree and bounded read-only UTF-8 preview; its right-sidebar client displays native history, models, approvals and actual metrics within recorded scopes | Editable workspace canvas, complete populated coding, multi-file diff/recovery/context and current installed editor acceptance |
+| Browser and VS Code | The browser exposes a native-root file tree, bounded UTF-8 preview, workspace-bound Git initialization/status and its right-sidebar history, models, approvals and actual metrics within recorded scopes | Editable workspace canvas, VS Code Git status surface, complete populated coding, multi-file diff/recovery/context and current installed editor acceptance |
 | A2A and agent graphs | Native shared-executor task controls and durable graphs have scoped contracts; hosted69 direct MCP effects, hosted71 read-only delegation, hosted77 bounded planning/revision and local78 coding-child MCP effects are distinct results. The installed ace/schema-v10 preview completed a real OpenAI two-child read/join; its repaired browser view was rendered | Installed VS Code delegation and live/rendered/installed planning acceptance, recursive/deterministic dynamic nodes, outbound remote delegation and remaining protocol interoperability |
 | Local/Nexus profiles | Shared protocol and ownership boundaries are specified | Profile isolation, authenticated enrollment and reconnect/lease/recovery acceptance; Nexus implements private coordination |
 

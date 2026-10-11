@@ -1,8 +1,10 @@
 #include "agentflow/vcs_service.hpp"
 #include "agentflow/process.hpp"
 #include <algorithm>
+#include <chrono>
 #include <filesystem>
 #include <optional>
+#include <unordered_map>
 #include <vector>
 #define NOMINMAX
 #include <windows.h>
@@ -52,6 +54,82 @@ std::vector<std::pair<std::string,std::string>> git_environment(){
     if(const auto profile=environment_value(L"USERPROFILE"))result.emplace_back("HOME",utf8(*profile));
     return result;
 }
+ProcessResult run_git(const std::string& executable,WorkspaceTools& workspace,std::vector<std::string> arguments,
+    std::size_t output_limit=1024*1024,std::chrono::milliseconds timeout=std::chrono::seconds(10)){
+    ProcessConfiguration launch;launch.executable=executable;launch.working_directory=workspace.root_path();
+    launch.working_directory_id=workspace.directory_identity(".");launch.workspace_root=launch.working_directory;
+    launch.workspace_root_id=workspace.identity();launch.arguments={"--no-optional-locks","-c","core.autocrlf=false","-c","core.fsmonitor=false","-c","core.quotepath=false","-c","diff.external=","--no-pager"};
+    launch.arguments.insert(launch.arguments.end(),std::make_move_iterator(arguments.begin()),std::make_move_iterator(arguments.end()));
+    launch.environment=git_environment();launch.environment.emplace_back("GIT_OPTIONAL_LOCKS","0");launch.environment.emplace_back("GIT_TERMINAL_PROMPT","0");launch.environment.emplace_back("GIT_CONFIG_NOSYSTEM","1");launch.timeout=timeout;launch.output_limit=output_limit;
+    try{return ForegroundProcess::run(launch);}
+    catch(const ProcessBeforeDispatchError&){throw VcsStatusFailure(503,"Git status could not be started safely");}
+    catch(const ProcessEffectUncertain&){throw VcsStatusFailure(503,"Git status was interrupted; refresh repository state before retrying");}
+}
+ProcessResult run_git_until(const std::string& executable,WorkspaceTools& workspace,std::vector<std::string> arguments,
+    std::chrono::steady_clock::time_point deadline,std::size_t output_limit=1024*1024){
+    const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now());
+    if(remaining<=std::chrono::milliseconds::zero())throw VcsStatusFailure(503,"Git status exceeded its 30-second operation limit");
+    return run_git(executable,workspace,std::move(arguments),output_limit,std::min(remaining,std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds(10))));
+}
+std::pair<std::uint64_t,std::uint64_t> parse_numstat(std::string_view output){
+    const auto first=output.find('\t'),second=first==std::string_view::npos?first:output.find('\t',first+1);
+    if(first==std::string_view::npos||second==std::string_view::npos)throw VcsStatusFailure(503,"Git returned an invalid file statistic");
+    const auto count=[](std::string_view value){
+        if(value=="-")return std::uint64_t{0};if(value.empty())throw VcsStatusFailure(503,"Git returned an invalid line count");
+        std::uint64_t result=0;for(const char digit:value){if(digit<'0'||digit>'9'||result>(UINT64_MAX-static_cast<unsigned>(digit-'0'))/10)throw VcsStatusFailure(503,"Git returned an invalid line count");result=result*10+static_cast<unsigned>(digit-'0');}return result;
+    };
+    return {count(output.substr(0,first)),count(output.substr(first+1,second-first-1))};
+}
+std::unordered_map<std::string,std::pair<std::uint64_t,std::uint64_t>> tracked_stats(const std::string& executable,WorkspaceTools& workspace,
+    std::chrono::steady_clock::time_point deadline){
+    const auto head=run_git_until(executable,workspace,{"rev-parse","--verify","--quiet","HEAD"},deadline,8192);
+    if(head.termination!=ProcessTermination::exited||head.truncated)throw VcsStatusFailure(503,"Git could not inspect repository history");
+    if(head.exit_code==1)return {};
+    if(head.exit_code!=0)throw VcsStatusFailure(503,"Git could not inspect repository history");
+    const auto result=run_git_until(executable,workspace,{"diff","--numstat","--no-renames","--no-ext-diff","--no-textconv","-z","HEAD","--","."},deadline);
+    if(result.termination!=ProcessTermination::exited||result.exit_code!=0||result.truncated)throw VcsStatusFailure(503,"Git could not compute workspace change statistics");
+    std::unordered_map<std::string,std::pair<std::uint64_t,std::uint64_t>> stats;std::size_t start=0;
+    while(start<result.stdout_bytes.size()){
+        const auto end=result.stdout_bytes.find('\0',start);if(end==std::string::npos)throw VcsStatusFailure(503,"Git returned incomplete workspace statistics");
+        const auto record=std::string_view(result.stdout_bytes).substr(start,end-start);const auto first=record.find('\t'),second=first==std::string_view::npos?first:record.find('\t',first+1);
+        if(first==std::string_view::npos||second==std::string_view::npos||second+1>=record.size())throw VcsStatusFailure(503,"Git returned invalid workspace statistics");
+        const auto [additions,deletions]=parse_numstat(record);const std::string file(record.substr(second+1));
+        if(file.size()>32768||stats.size()>=4096)throw VcsStatusFailure(503,"Workspace changes exceed the status limit");stats.emplace(file,std::pair{additions,deletions});start=end+1;
+    }
+    return stats;
+}
+std::string change_kind(std::string_view code){
+    if(code=="??")return "added";if(code.find('U')!=std::string_view::npos)return "modified";
+    const bool added=code.find('A')!=std::string_view::npos,deleted=code.find('D')!=std::string_view::npos;
+    if(added&&!deleted)return "added";if(deleted&&!added)return "deleted";return "modified";
+}
+std::vector<VcsFileStatus> workspace_vcs_status_impl(WorkspaceTools& workspace){
+    const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(30);
+    const auto listing=workspace.list_files(".");
+    if(listing.truncated)throw VcsStatusFailure(503,"Cannot verify the repository marker in a truncated workspace root");
+    const auto marker=std::find_if(listing.entries.begin(),listing.entries.end(),[](const WorkspaceEntry& entry){auto name=entry.name;std::transform(name.begin(),name.end(),name.begin(),[](unsigned char c){return c>='A'&&c<='Z'?static_cast<char>(c-'A'+'a'):static_cast<char>(c);});return name==".git";});
+    if(marker==listing.entries.end())return {};
+    if(marker->kind!="directory"&&marker->kind!="file")throw VcsStatusFailure(409,"Git metadata must be a regular file or directory");
+    const auto executable=utf8(git_executable());
+    const auto status=run_git_until(executable,workspace,{"status","--porcelain=v1","--untracked-files=all","--no-renames","-z","--","."},deadline);
+    if(status.termination!=ProcessTermination::exited||status.exit_code!=0||status.truncated)throw VcsStatusFailure(503,"Git could not read workspace status completely");
+    const auto stats=tracked_stats(executable,workspace,deadline);std::vector<VcsFileStatus> result;std::size_t start=0;
+    while(start<status.stdout_bytes.size()){
+        const auto end=status.stdout_bytes.find('\0',start);if(end==std::string::npos)throw VcsStatusFailure(503,"Git returned incomplete workspace status");
+        const auto record=std::string_view(status.stdout_bytes).substr(start,end-start);if(record.size()<4||record[2]!=' ')throw VcsStatusFailure(503,"Git returned invalid workspace status");
+        std::string file(record.substr(3));if(file.empty()||file.size()>32768||result.size()>=4096)throw VcsStatusFailure(503,"Workspace changes exceed the status limit");
+        const auto kind=change_kind(record.substr(0,2));auto found=stats.find(file);std::pair<std::uint64_t,std::uint64_t> counts{};
+        if(found!=stats.end())counts=found->second;
+        else if(kind=="added"){
+            const auto untracked=run_git_until(executable,workspace,{"diff","--no-index","--numstat","--no-renames","--no-ext-diff","--no-textconv","--","NUL",file},deadline,8192);
+            if(untracked.termination!=ProcessTermination::exited||untracked.truncated||untracked.exit_code>1)throw VcsStatusFailure(503,"Git could not count a new workspace file");
+            if(untracked.exit_code==1){const auto first=untracked.stdout_bytes.find('\t'),second=first==std::string::npos?first:untracked.stdout_bytes.find('\t',first+1);if(first!=std::string::npos&&second!=std::string::npos)counts=parse_numstat(untracked.stdout_bytes);}
+        }
+        result.push_back({std::move(file),counts.first,counts.second,kind});start=end+1;
+    }
+    std::sort(result.begin(),result.end(),[](const auto& left,const auto& right){return left.file<right.file;});
+    return result;
+}
 void ensure_no_vcs(const WorkspaceListing& entries){
     if(entries.truncated)throw VcsInitializationFailure(503,"Cannot verify repository state in a truncated workspace root");
     const auto found=std::find_if(entries.entries.begin(),entries.entries.end(),[](const WorkspaceEntry& entry){
@@ -62,6 +140,8 @@ void ensure_no_vcs(const WorkspaceListing& entries){
     if(found!=entries.entries.end())throw VcsInitializationFailure(409,"Project already has version control");
 }
 }
+
+std::vector<VcsFileStatus> workspace_vcs_status(WorkspaceTools& workspace){return workspace_vcs_status_impl(workspace);}
 
 void initialize_workspace_vcs(WorkspaceTools& workspace,std::string_view provider){
     if(provider.empty()||provider.size()>64)throw VcsInitializationFailure(400,"Invalid version control provider");

@@ -37,6 +37,17 @@ void ExecutionPlatform::initialize_vcs(std::string_view provider){
     (void)provider;throw RunUnavailable("Version control initialization is unavailable on this platform");
 #endif
 }
+std::vector<WorkspaceVcsFileStatus> ExecutionPlatform::vcs_status()const{
+#if defined(_WIN32)
+    if(!workspace_binding_)throw RunUnavailable("Version control status requires an opened workspace");
+    const auto workspace=execution_workspace();
+    try{const auto values=workspace_vcs_status(*workspace_binding_);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
+        std::vector<WorkspaceVcsFileStatus> result;result.reserve(values.size());for(const auto& value:values)result.push_back({value.file,value.additions,value.deletions,value.status});return result;}
+    catch(const VcsStatusFailure&){throw;}
+#else
+    throw RunUnavailable("Version control status is unavailable on this platform");
+#endif
+}
 WorkspaceListing ExecutionPlatform::browse_workspace_files(const std::string& path)const{
     if(!workspace_binding_)throw RunUnavailable("Workspace browsing requires an opened root");
     const auto workspace=execution_workspace();auto listing=workspace_binding_->browse_files(path);

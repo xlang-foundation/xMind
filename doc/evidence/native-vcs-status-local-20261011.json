@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-11",
+  "operation_id": "vcs.status",
+  "pinned_upstream": "OpenCode v2.0.26",
+  "agentflow_route": "GET /v1/vcs/status",
+  "implementation": {
+    "runtime": "Native C++ Git status through ExecutionPlatform and the opened WorkspaceTools root",
+    "git_process": "Fixed Git executable and argument vectors; bounded foreground process; Git pager, optional locks, system config, fsmonitor, external diff and textconv disabled",
+    "authority": "Authenticated workspace owner or same-machine browser view; no caller-selected root or path; serialized with repository initialization",
+    "response": "Array of changed workspace-relative file paths, added/deleted line counts and added/deleted/modified status"
+  },
+  "validation": {
+    "native_build": "CMake Release targets xmind and agentflow_backend_owner_http_contract passed",
+    "native_contract": "native_backend_owner_http_contract passed through the actual xMind executable and xlang3 SQLite backend",
+    "native_contract_scope": "Opened temporary workspace; real Git initialization; empty clean status; untracked text file with a space in its name and exact two-line count; committed file changed from two lines to two lines with one replacement; exact one-add/one-delete count; bearer rejection; path query rejection; same-machine View authorization.",
+    "browser_contract": "node --test views/browser/tests/*.test.cjs passed 80 tests, including GET-only allowlisting, HttpOnly credential forwarding, browser rendering and line-count aggregation.",
+    "browser_live_rendered": false,
+    "inventory_audit": "141 pinned operations; 27 native source candidates; 114 unmapped; 0 verified operation-level parity."
+  },
+  "remaining": [
+    "CLI and VS Code status controls are not yet implemented.",
+    "Branch info/list, review base, diffs, rename and binary cases, other VCS providers, non-Windows execution and installed-package UI acceptance remain incomplete.",
+    "This scoped execution contract does not establish full OpenCode vcs.status operation parity."
+  ]
+}
