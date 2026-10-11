@@ -137,7 +137,7 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
     if(versions.size()!=expected.size())throw std::invalid_argument("Incomplete agent credential metadata binding");
     Json encoded={{"schema",1},{"workspace_identity",workspace},{"workspace",settings.workspace?Json(*settings.workspace):Json(nullptr)},
         {"instructions",settings.instructions},{"instruction_policy",{{"revision",settings.instruction_policy.revision},{"instructions",settings.instruction_policy.instructions}}},
-        {"approved_edits",settings.approved_edits},{"max_turns",settings.max_turns},
+        {"approved_edits",settings.approved_edits},{"a2a_enabled",settings.a2a_enabled},{"max_turns",settings.max_turns},
         {"run_timeout_ms",settings.run_timeout.count()},{"selectable_models",settings.selectable_models},
         {"provider",{{"endpoint",settings.provider.endpoint},{"wire",wire(settings.provider.wire)},{"model",model},
             {"tools",capability(settings.provider.tools)},{"stream_usage",capability(settings.provider.stream_usage)},

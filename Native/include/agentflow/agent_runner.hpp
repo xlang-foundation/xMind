@@ -12,6 +12,7 @@
 namespace agentflow {
 class DelegationExecutor;
 class DynamicPlanExecutor;
+class A2aRemoteAgentRegistry;
 class RootExecutionBudget;
 struct CredentialReference {std::string scope,id,purpose;};
 // Public, immutable profile identity; never contains credentials or destinations.
@@ -32,6 +33,7 @@ struct AgentSettings {
     std::optional<std::int64_t> max_output_tokens;
     std::chrono::milliseconds run_timeout{600000};
     std::vector<McpServerSetting> mcp_servers;
+    bool a2a_enabled=true;
     std::vector<ProcessProfile> process_profiles;
     AgentInstructionPolicy instruction_policy;
     std::optional<ProviderExecutionIdentity> provider_identity;
@@ -73,5 +75,6 @@ private:
     std::unique_ptr<ProcessExecutor> process_;
     std::shared_ptr<DelegationExecutor> delegation_;
     std::shared_ptr<DynamicPlanExecutor> planning_;
+    std::unique_ptr<A2aRemoteAgentRegistry> a2a_registry_;
 };
 }

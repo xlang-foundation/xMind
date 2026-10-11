@@ -3,6 +3,8 @@
 #include "nlohmann/json.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
+#include "agentflow/a2a_tool_registry.hpp"
+#include "agentflow/a2a_agent_registry.hpp"
 #include "agentflow/create_executor.hpp"
 #include "agentflow/patch_tool.hpp"
 #include "agentflow/schema_worker.hpp"
@@ -82,12 +84,12 @@ std::string execution_identity(const AgentSettings& settings,const std::string& 
     return identity.dump();
 }
 std::string tool_catalogue(const std::vector<ModelToolDefinition>& definitions,const Json& actual_bindings){
-    if(!actual_bindings.is_array())throw DynamicPlanUnavailable("Actual MCP approval bindings are not a native array");
+    if(!actual_bindings.is_array())throw DynamicPlanUnavailable("Actual external-agent approval bindings are not a native array");
     std::map<std::string,Json> bindings;
     for(const auto& binding:actual_bindings){
         if(!binding.is_object()||!binding.contains("alias")||!binding["alias"].is_string()||
             !bindings.emplace(binding["alias"].get<std::string>(),binding).second)
-            throw DynamicPlanUnavailable("Actual MCP approval bindings contain an invalid or duplicate alias");
+            throw DynamicPlanUnavailable("Actual external-agent approval bindings contain an invalid or duplicate alias");
     }
     auto sorted=definitions;std::sort(sorted.begin(),sorted.end(),[](const auto& a,const auto& b){return a.name<b.name;});
     Json result={{"tools",Json::array()}};std::string previous;std::size_t matched_bindings=0;
@@ -98,11 +100,13 @@ std::string tool_catalogue(const std::vector<ModelToolDefinition>& definitions,c
         Json captured={{"name",definition.name},{"description",definition.description},{"input_schema_json",definition.input_schema_json}};
         const auto binding=bindings.find(definition.name);
         if(binding!=bindings.end()){
-            if(!definition.name.starts_with("mcp_")||!binding->second.contains("input_schema_json")||
-                binding->second["input_schema_json"]!=definition.input_schema_json)
-                throw DynamicPlanUnavailable("Actual MCP approval binding differs from its native tool schema");
-            captured["mcp_binding"]=binding->second;++matched_bindings;
-        }else if(definition.name.starts_with("mcp_"))throw DynamicPlanUnavailable("Actual MCP alias has no native approval binding");
+            if(!binding->second.contains("input_schema_json")||binding->second["input_schema_json"]!=definition.input_schema_json)
+                throw DynamicPlanUnavailable("Actual external-agent approval binding differs from its native tool schema");
+            if(definition.name.starts_with("mcp_"))captured["mcp_binding"]=binding->second;
+            else if(definition.name.starts_with("a2a_delegate_")&&binding->second.value("kind",std::string{})=="a2a_remote_agent")captured["a2a_binding"]=binding->second;
+            else throw DynamicPlanUnavailable("External-agent binding has an unexpected tool namespace");
+            ++matched_bindings;
+        }else if(definition.name.starts_with("mcp_")||definition.name.starts_with("a2a_delegate_"))throw DynamicPlanUnavailable("External-agent tool has no native approval binding");
         result["tools"].push_back(std::move(captured));
     }
     if(matched_bindings!=bindings.size())throw DynamicPlanUnavailable("Actual MCP approval binding has no discovered native tool");
@@ -117,7 +121,7 @@ void verify_child_catalogue(const std::vector<ModelToolDefinition>& actual,const
 }
 }
 AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,std::shared_ptr<DelegationExecutor> delegation,
-    std::shared_ptr<DynamicPlanExecutor> planning):persistence_(persistence),settings_(std::move(settings)),delegation_(std::move(delegation)),planning_(std::move(planning)) {
+    std::shared_ptr<DynamicPlanExecutor> planning):persistence_(persistence),settings_(std::move(settings)),delegation_(std::move(delegation)),planning_(std::move(planning)),a2a_registry_(std::make_unique<A2aRemoteAgentRegistry>(persistence)) {
     if(settings_.instruction_policy.instructions.size()>32768 || settings_.instruction_policy.instructions.find('\0')!=std::string::npos || settings_.instruction_policy.revision<0 || settings_.instruction_policy.revision>9007199254740991 || (!settings_.instruction_policy.instructions.empty() && settings_.instruction_policy.revision==0))throw std::invalid_argument("Invalid backend instruction policy");
     if(!settings_.instruction_policy.instructions.empty() && settings_.instructions.size()+settings_.instruction_policy.instructions.size()+instruction_prefix.size()>65536)throw std::invalid_argument("Combined agent instructions exceed limits");
     if(settings_.provider.model.empty() || settings_.provider.endpoint.empty() || settings_.max_turns==0 || settings_.max_turns>128 || settings_.instructions.size()>65536 || settings_.run_timeout.count()<=0 || settings_.run_timeout.count()>3600000)
@@ -183,7 +187,9 @@ std::optional<DynamicPlanCapabilities> AgentRunner::execution_capabilities(const
     for(const auto& definition:workspace_->definitions())inspect.tools.push_back(definition.name);
     for(const auto& definition:SkillContext::definitions())inspect.tools.push_back(definition.name);
     caps.presets.push_back(inspect);
-    if(settings_.approved_edits||process_||std::any_of(settings_.mcp_servers.begin(),settings_.mcp_servers.end(),[](const auto& server){return server.enabled;})){
+    const auto a2a_catalog=a2a_registry_->list();
+    const auto a2a_available=settings_.a2a_enabled&&std::any_of(a2a_catalog.entries.begin(),a2a_catalog.entries.end(),[](const auto& agent){return agent.enabled;});
+    if(settings_.approved_edits||process_||a2a_available||std::any_of(settings_.mcp_servers.begin(),settings_.mcp_servers.end(),[](const auto& server){return server.enabled;})){
         auto coding=inspect;coding.id="workspace.coding";coding.readonly=false;
         if(settings_.approved_edits){coding.tools.push_back("edit_file");coding.tools.push_back("create_file");coding.tools.push_back("apply_patch");}
         if(process_)coding.tools.push_back("run_process");caps.presets.push_back(std::move(coding));
@@ -303,7 +309,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         leaf=admission.kind==ChildAdmissionKind::delegated_leaf||dynamic_child;
         if(admission.kind!=ChildAdmissionKind::graph_agent&&!leaf)throw std::invalid_argument("Only admitted agent children can invoke the model engine");
         if(leaf&&(!budget||budget->root_id()!=admission.root_run_id||settings_.planning||settings_.delegation||!settings_.selectable_models.empty()))throw std::invalid_argument("Agent child requires its exact bounded root owner");
-        if(!dynamic_child&&leaf&&(admission.preset_id!="workspace.inspect"||admission.preset_revision!=1||settings_.approved_edits||!settings_.process_profiles.empty()||!settings_.mcp_servers.empty()||settings_.max_turns>4))throw std::invalid_argument("Delegated leaf requires its exact bounded read-only owner");
+        if(!dynamic_child&&leaf&&(admission.preset_id!="workspace.inspect"||admission.preset_revision!=1||settings_.approved_edits||!settings_.process_profiles.empty()||!settings_.mcp_servers.empty()||settings_.a2a_enabled||settings_.max_turns>4))throw std::invalid_argument("Delegated leaf requires its exact bounded read-only owner");
         if(dynamic_child){
             const auto plan=persistence_.dynamic_plan(admission.plan_id).get();
             const auto node=std::find_if(plan.nodes.begin(),plan.nodes.end(),[&](const auto& value){return value.child_run_id==id;});
@@ -443,9 +449,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(settings_.approved_edits) request.tools.push_back(PatchTool::definition());
         if(process_)request.tools.push_back(process_->definition());
         struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<McpToolRegistry> registry;};
-        std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;Json mcp_bindings=Json::array();
+        std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;Json approval_bindings=Json::array();
+        std::unique_ptr<A2aAgentToolRegistry> a2a_tools;
         const auto native_tools=request.tools;
-        auto close_mcp=[&]{mcp_tools.clear();mcp_runtimes.clear();mcp_bindings=Json::array();};
+        auto close_mcp=[&]{mcp_tools.clear();mcp_runtimes.clear();approval_bindings=Json::array();};
         auto discover_mcp=[&]{
         close_mcp();request.tools=native_tools;
         for(const auto& server:settings_.mcp_servers) {
@@ -459,13 +466,25 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             for(const auto& definition:definitions){if(request.tools.size()>=64 || !mcp_tools.emplace(definition.name,runtime.registry.get()).second)throw std::invalid_argument("Model tool catalogue exceeds limits or has an alias collision");request.tools.push_back(definition);}
             const auto bindings=Json::parse(runtime.registry->approval_bindings_json());
             if(!bindings.is_array())throw DynamicPlanUnavailable("Native MCP registry returned invalid approval bindings");
-            for(const auto& binding:bindings)mcp_bindings.push_back(binding);
+            for(const auto& binding:bindings)approval_bindings.push_back(binding);
             persistence_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()}}.dump()).get();
             mcp_runtimes.push_back(std::move(runtime));
         }
         };
+        auto discover_a2a=[&]{
+            if(!settings_.a2a_enabled||!workspace_)return;
+            const auto remaining=std::chrono::ceil<std::chrono::milliseconds>(run_deadline-std::chrono::steady_clock::now());
+            if(remaining.count()<=0)throw RootBudgetDeadlineExceeded("Root execution deadline elapsed before A2A discovery");
+            if(!a2a_tools)a2a_tools=std::make_unique<A2aAgentToolRegistry>(*a2a_registry_,persistence_,*workspace_,std::min(remaining,std::chrono::milliseconds(5000)),token);
+            for(const auto& agent:a2a_tools->unavailable_agent_ids())persistence_.append_event(id,"a2a.discovery_failed",Json{{"agent_id",agent},{"reason","peer_unavailable_or_invalid"}}.dump()).get();
+            const auto definitions=a2a_tools->definitions();
+            for(const auto& definition:definitions){if(request.tools.size()>=64||std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& existing){return existing.name==definition.name;}))throw std::invalid_argument("Model tool catalogue exceeds limits or has an alias collision");request.tools.push_back(definition);}
+            const auto bindings=Json::parse(a2a_tools->approval_bindings_json());if(!bindings.is_array())throw DynamicPlanUnavailable("Native A2A registry returned invalid approval bindings");
+            for(const auto& binding:bindings)approval_bindings.push_back(binding);
+            if(!definitions.empty())persistence_.append_event(id,"a2a.discovered",Json{{"peer_count",definitions.size()}}.dump()).get();
+        };
         auto seal_catalogue=[&]{
-            if(dynamic_child)verify_child_catalogue(request.tools,mcp_bindings,*child_caps,*child_preset);
+            if(dynamic_child)verify_child_catalogue(request.tools,approval_bindings,*child_caps,*child_preset);
             if(dynamic_root){
                 validate_dynamic_owner(id,provider.model);
                 auto presets=root_caps->presets;
@@ -475,14 +494,14 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     const auto child=dynamic_child_settings(settings_,preset,provider.model);
                     preset.backend_identity=agent_authority_identity(child,provider.model,root_caps->workspace_identity,agent_authority_credentials(persistence_,child));
                 }
-                root_caps=persistence_.finalize_dynamic_capabilities(id,root_caps->backend_identity,tool_catalogue(request.tools,mcp_bindings),std::move(presets)).get();
+                root_caps=persistence_.finalize_dynamic_capabilities(id,root_caps->backend_identity,tool_catalogue(request.tools,approval_bindings),std::move(presets)).get();
             }
         };
         auto offer_orchestration=[&]{
         if(budget&&!leaf&&delegation_&&settings_.delegation){if(request.tools.size()>=64)throw std::invalid_argument("Model tool catalogue exceeds limits");request.tools.push_back(DelegationExecutor::definition());}
         if(dynamic_root){for(auto& definition:dynamic_plan_tool_definitions(*root_caps)){if(request.tools.size()>=64)throw std::invalid_argument("Model tool catalogue exceeds limits");request.tools.push_back(std::move(definition));}}
         };
-        auto refresh_tools=[&]{discover_mcp();seal_catalogue();offer_orchestration();};
+        auto refresh_tools=[&]{discover_mcp();discover_a2a();seal_catalogue();offer_orchestration();};
         refresh_tools();
         std::string planning_continuation;
         auto commit_plan_result=[&](const DynamicExecutionResult& actual){
@@ -654,6 +673,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     } else if(const auto registered=mcp_tools.find(call.name);registered!=mcp_tools.end()) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance)));
+                    } else if(a2a_tools&&call.name.starts_with("a2a_delegate_")) {
+                        const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
+                        output=Json::parse(a2a_tools->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance)));
                     } else output=Json::parse(workspace_->invoke(call.name,call.arguments_json,token));
                     success=guidance_ready&&(call.name!="apply_patch"||output.value("state",std::string{})=="succeeded");
                 }
@@ -663,6 +685,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const PermissionDenied&) {output={{"error",{{"code","permission_denied"},{"message","Controller denied this operation; the requested effect was not dispatched"}}}};}
                 catch(const PermissionExpired&) {output={{"error",{{"code","permission_expired"},{"message","Approval expired; the requested effect was not dispatched"}}}};}
                 catch(const McpEffectNotDispatched&) {output={{"error",{{"code","mcp_not_dispatched"},{"message","MCP request was not dispatched"}}}};}
+                catch(const A2aEffectNotDispatched&) {output={{"error",{{"code","a2a_not_dispatched"},{"message","Remote A2A request was not dispatched"}}}};}
                 catch(const ProcessBeforeDispatchError&) {output={{"error",{{"code","process_not_dispatched"},{"message","Process did not execute; launch preconditions were unavailable or changed"}}}};}
                 catch(const ToolGuidanceChanged&) {output={{"error",{{"code","repository_instructions_required"},{"message","Approved proposal was retired without dispatch because repository guidance changed. Updated guidance will be supplied before a new call and new approval."}}}};}
                 catch(const ToolContentConflict&) {output={{"error",{{"code","content_conflict"},{"message","File contents, identity, replacement count or target absence no longer match the operation"}}}};}
@@ -701,9 +724,11 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
       catch(const ToolMutationUncertain&) {return terminate(RunState::failed,{{"reason","file_effect_uncertain"}});}
       catch(const EditOutcomeUnrecorded&) {throw;} // Leave claim for recovery; AgentService degrades admission.
       catch(const McpOutcomeUnrecorded&) {throw;}
+      catch(const A2aOutcomeUnrecorded&) {throw;}
       catch(const ProcessOutcomeUnrecorded&) {throw;}
       catch(const ProcessEffectUncertain&) {return terminate(RunState::failed,{{"reason","process_effect_uncertain"}});}
       catch(const McpEffectUncertain&) {return terminate(RunState::failed,{{"reason","mcp_effect_uncertain"}});}
+      catch(const A2aEffectUncertain&) {return terminate(RunState::failed,{{"reason","a2a_effect_uncertain"}});}
       catch(const SchemaEvaluationCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
       catch(const SchemaEvaluationFailure&) {return terminate(RunState::failed,{{"reason","mcp_schema_evaluation_unavailable"}});}
       catch(const McpTransportCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}

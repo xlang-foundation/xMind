@@ -83,7 +83,7 @@ struct A2aJsonRpcClient::Impl {
         if(timeout.count()<=0||timeout.count()>600000)throw std::invalid_argument("A2A request timeout is out of range");
         HttpStreamRequest value;value.url=std::move(url);value.deadline=timeout;value.idle_timeout=timeout;value.protocol=ProviderHttpProtocol::a2a_jsonrpc;value.a2a_version=std::move(version);value.observe_response=[expected=value.a2a_version](int status,const std::string& media,const std::string& received){if(status!=200||media!="application/json")throw TransportError("A2A JSON-RPC peer returned an invalid HTTP response");if(!received.empty()&&!expected.empty()&&received!=expected)throw TransportError("A2A peer response version does not match the request");};return value;
     }
-    std::string call(std::string method,std::string_view params,std::chrono::milliseconds timeout,std::stop_token cancel){
+    std::string call(std::string method,std::string_view params,std::chrono::milliseconds timeout,std::stop_token cancel,std::function<void()> on_sending={}){
         std::lock_guard lock(mutex);if(!selected)throw std::logic_error("A2A client must discover its peer before use");
         if(params.empty()||params.size()>256*1024)throw std::invalid_argument("A2A request parameters exceed limits");Json parsed=Json::parse(params);if(!parsed.is_object())throw std::invalid_argument("A2A request parameters must be an object");
         if(method=="send")method=selected->protocol_version=="1.0"?"SendMessage":"message/send";
@@ -91,7 +91,7 @@ struct A2aJsonRpcClient::Impl {
         else if(method=="cancel")method=selected->protocol_version=="1.0"?"CancelTask":"tasks/cancel";
         else throw std::logic_error("Unsupported native A2A operation");
         const auto id="xmind-"+std::to_string(++sequence)+"-"+random_id();Json body={{"jsonrpc","2.0"},{"id",id},{"method",method},{"params",std::move(parsed)}};
-        auto transport=request(selected->endpoint,timeout,selected->protocol_version=="1.0"?"1.0":"0.3");transport.body=body.dump();
+        auto transport=request(selected->endpoint,timeout,selected->protocol_version=="1.0"?"1.0":"0.3");transport.body=body.dump();transport.on_sending=std::move(on_sending);
         const auto bytes=post_json(transport,send_bearer&&bearer?&*bearer:nullptr,1024*1024,cancel);Json response;
         try{response=Json::parse(bytes);}catch(const Json::exception&){throw TransportError("A2A peer returned invalid JSON-RPC data");}
         if(!response.is_object()||response.value("jsonrpc",std::string{})!="2.0"||!response.contains("id")||response["id"]!=id||response.contains("result")==response.contains("error"))throw TransportError("A2A peer returned a mismatched JSON-RPC response");
@@ -130,7 +130,7 @@ A2aRemoteAgentInfo A2aJsonRpcClient::discover(std::chrono::milliseconds timeout,
     }catch(const TransportError&){throw;}catch(const std::exception&){throw TransportError("A2A peer returned an invalid or unsupported AgentCard");}
     state.selected=info;state.sequence=0;return info;
 }
-std::string A2aJsonRpcClient::send_message(std::string_view params,std::chrono::milliseconds timeout,std::stop_token cancel){return impl_->call("send",params,timeout,cancel);}
+std::string A2aJsonRpcClient::send_message(std::string_view params,std::chrono::milliseconds timeout,std::stop_token cancel,std::function<void()> on_sending){return impl_->call("send",params,timeout,cancel,std::move(on_sending));}
 std::string A2aJsonRpcClient::get_task(std::string_view params,std::chrono::milliseconds timeout,std::stop_token cancel){return impl_->call("get",params,timeout,cancel);}
 std::string A2aJsonRpcClient::cancel_task(std::string_view params,std::chrono::milliseconds timeout,std::stop_token cancel){return impl_->call("cancel",params,timeout,cancel);}
 bool A2aJsonRpcClient::ready()const{std::lock_guard lock(impl_->mutex);return impl_->selected.has_value();}

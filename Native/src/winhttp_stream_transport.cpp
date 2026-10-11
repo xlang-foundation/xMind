@@ -207,6 +207,11 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         if(Clock::now()>=deadline)throw TransportTimeout("MCP request deadline exceeded before sending");
         on_sending();
     }
+    if(input.on_sending) {
+        if(cancel.stop_requested())throw TransportCancelled("HTTP request cancelled before sending");
+        if(Clock::now()>=deadline)throw TransportTimeout("HTTP request deadline exceeded before sending");
+        input.on_sending();
+    }
     checked(WinHttpSendRequest(request.value,headers.value.c_str(),static_cast<DWORD>(headers.value.size()),
         body.empty()?WINHTTP_NO_REQUEST_DATA:const_cast<char*>(body.data()),static_cast<DWORD>(body.size()),static_cast<DWORD>(body.size()),context));
     state.wait(WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE,deadline,cancel);

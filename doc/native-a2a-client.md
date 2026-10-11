@@ -6,8 +6,9 @@ xMind currently exposes an authenticated local A2A server for JSON-RPC A2A
 1.0 and the declared 0.3 compatibility wire. The official JavaScript SDK
 1.3.0 has exercised that server, including durable tasks, retries, history,
 streaming, listing and cancellation. The native `delegate_tasks` tool creates
-bounded local read-only agents. xMind does not yet connect to a separately
-configured remote A2A agent, and local delegation is not outbound A2A support.
+bounded local read-only agents. AgentRunner now discovers enabled,
+owner-registered peers and exposes them to ordinary agent and graph nodes as
+typed outbound A2A tools. Read-only child agents do not inherit remote access.
 
 Interop baseline: official A2A protocol tag `v1.0.1`
 (`3303592588e388e62e0f69f701af531d2f4e3991`), with legacy wire coverage from
@@ -42,12 +43,22 @@ adapter allowlists these routes for the same-origin local view; it forwards
 the view-session credential internally and never asks the user for a server
 token. Native and adapter contracts cover owner authentication, revision
 conflicts, no-secret responses, route boundaries, rotation, clearing, retired
-IDs and restart behavior. The registry is not yet connected to AgentRunner,
-graphs or VS Code. The native CLI now exposes `a2a-agents`, `a2a-register`,
+IDs and restart behavior. The native CLI exposes `a2a-agents`, `a2a-register`,
 `a2a-enable` and `a2a-remove`; registration reads an optional bearer from a
 named environment variable and redacts it from output. Its Windows HTTP
-contract is pending. Outbound AgentRunner/graph dispatch, streaming and durable
-recovery after uncertain remote dispatch remain open.
+contract is pending. AgentRunner uses a per-run discovery snapshot, an
+operation-bound message ID, controller approval of the exact prompt and peer
+revision, and a final registration check before dispatch. It records returned
+task/context IDs. A failure after the send boundary or an unusable acknowledged
+reply becomes a durable uncertain operation, and the run stops without retrying
+the remote effect. The extended native contract covers approved dispatch,
+denial without dispatch, exact message identity, returned task IDs and
+post-dispatch failure quarantine; hosted Windows build/execution is pending.
+
+Task inspection/recovery by saved task ID, streamed observation/resumption,
+input-required follow-up, cancellation, artifacts and full CLI/VS Code
+cross-client task inspection remain open. These are required before claiming
+full outbound A2A parity.
 
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),

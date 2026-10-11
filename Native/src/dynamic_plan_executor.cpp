@@ -58,7 +58,7 @@ std::size_t live_count(const std::vector<ActiveBatch>& active){std::size_t resul
 AgentSettings dynamic_child_settings(const AgentSettings& parent,const DynamicPresetCapability& policy,const std::string& model){
     if(policy.revision!=1||(policy.id!="workspace.inspect"&&policy.id!="workspace.coding")||policy.readonly!=(policy.id=="workspace.inspect")||policy.turn_limit<1||policy.turn_limit>(policy.readonly?4:16)||model.empty())throw DynamicPlanUnavailable("Unsupported native dynamic child preset");
     auto child=parent;child.provider.model=model;child.selectable_models.clear();child.delegation.reset();child.planning.reset();child.max_turns=static_cast<std::size_t>(policy.turn_limit);
-    if(policy.readonly){child.approved_edits=false;child.process_profiles.clear();child.mcp_servers.clear();}
+    if(policy.readonly){child.approved_edits=false;child.process_profiles.clear();child.mcp_servers.clear();child.a2a_enabled=false;}
     // workspace.coding deliberately inherits every enabled parent's registered
     // edit/create/process/MCP boundary. Their existing approval and fresh native
     // binding checks remain the only effect authority.

@@ -29,6 +29,10 @@ struct HttpStreamRequest {
     ProviderHttpProtocol protocol=ProviderHttpProtocol::generic;
     std::string a2a_version;
     std::function<void(int,const std::string&,const std::string&)> observe_response;
+    // Runs immediately before the native transport begins a request body send.
+    // Effect callers use this boundary to distinguish a known pre-dispatch
+    // stop from a possibly delivered remote request.
+    std::function<void()> on_sending;
 };
 // Platform transport, outside the core. HTTPS uses OS certificate verification;
 // unencrypted HTTP is accepted only for explicitly configured loopback endpoints.

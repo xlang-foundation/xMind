@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/http_stream_transport.hpp"
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -25,7 +26,7 @@ public:
     A2aJsonRpcClient(const A2aJsonRpcClient&)=delete;
     A2aJsonRpcClient& operator=(const A2aJsonRpcClient&)=delete;
     A2aRemoteAgentInfo discover(std::chrono::milliseconds timeout,std::stop_token cancel={});
-    std::string send_message(std::string_view params_json,std::chrono::milliseconds timeout,std::stop_token cancel={});
+    std::string send_message(std::string_view params_json,std::chrono::milliseconds timeout,std::stop_token cancel={},std::function<void()> on_sending={});
     std::string get_task(std::string_view params_json,std::chrono::milliseconds timeout,std::stop_token cancel={});
     std::string cancel_task(std::string_view params_json,std::chrono::milliseconds timeout,std::stop_token cancel={});
     bool ready()const;

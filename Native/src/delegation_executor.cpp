@@ -68,7 +68,7 @@ std::string DelegationExecutor::invoke(const std::string& parent,const ModelTool
     bool replay=false;for(const auto& previous:impl_->store.delegation_batches(parent).get())if(previous.provider_tool_call_id==call.id){replay=true;break;}
     std::vector<NativeChildWork> work;work.reserve(spec.tasks.size());
     if(!replay)for(const auto& task:spec.tasks){
-        auto leaf=frozen;leaf.approved_edits=false;leaf.process_profiles.clear();leaf.mcp_servers.clear();leaf.delegation.reset();leaf.planning.reset();leaf.selectable_models.clear();leaf.max_turns=policy.max_leaf_turns;
+        auto leaf=frozen;leaf.approved_edits=false;leaf.process_profiles.clear();leaf.mcp_servers.clear();leaf.a2a_enabled=false;leaf.delegation.reset();leaf.planning.reset();leaf.selectable_models.clear();leaf.max_turns=policy.max_leaf_turns;
         const auto child=task.child_run_id;
         work.push_back({budget,[this,child,leaf=std::move(leaf),budget](std::stop_token stop)mutable{
             if(stop.stop_requested())return impl_->store.transition(child,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_delegated_leaf"})").get();
