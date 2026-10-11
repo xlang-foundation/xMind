@@ -2,7 +2,7 @@
   "scope": "Rendered same-machine browser acceptance for saved provider profiles and one live OpenAI response",
   "observed_local_date": "2026-10-10",
   "runtime_source_revision": "65f20505321e67dffcb495ff38e735781a9fdc8e",
-  "evidence_documentation_commit": "43f11cad090a6c258165b7f8e98bec1468e7e061",
+  "evidence_documentation_commit": "c3d8c95",
   "runtime_executable": ".agentflow/local-dev-runtime-65f2050/xmind.exe",
   "runtime_executable_sha256": "c4adf884da6f959429f79b01be40d754badca5ca485dd9e68ed4b207174acdad",
   "xlang3_runtime_sha256": "4c0959726dfdaf8c12321188da524808e516cf224bab5ae590b3bd05a4349c07",
