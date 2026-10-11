@@ -9452,7 +9452,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/agent_runner.cpp",
-        "sourceSha256": "5e2b35c04e827a020382a7c26d91bd82aa14b4c841bb1cdde6dcd269df387870",
+        "sourceSha256": "57949d9cdbbc07d898070db860a2823a6ece825bd3111b0870831d988e382cf0",
         "surface": "Reviewed native edit_file/create_file tools",
         "sourceAnchor": "CreateExecutor",
         "gap": "Approved exact edits and creation exist; general upstream filesystem write API and its full semantics remain incomplete.",

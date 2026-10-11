@@ -20,6 +20,29 @@ checked out locally. [Pinned source](https://github.com/anomalyco/opencode/tree/
 track the current V2 surface and can move independently of the source tag;
 source-defined API contracts take precedence for this inventory.
 
+## Current workspace/browser checkpoint (`4831636`, 2026-10-11)
+
+The browser exposes separate **New workspace** and **Add folder** operations.
+Creation starts from one selected folder as the primary folder; later additions
+stay in the same workspace and keep its active session. The native launcher now
+builds its ignored browser assets from the checked-out source at startup, so a
+stale generated asset directory cannot hide or revert those controls. Existing
+managed single-folder profiles that have not yet been registered retain a
+verified primary-folder membership snapshot; once registered, runs capture the
+persisted membership revision.
+
+The full Release CTest gate passed **133/133 in 590.37 seconds**, including
+local-profile restart, actual local-view graph admission, and workspace
+registry contracts. The combined browser and VS Code suites passed **391/391**;
+the startup contract additionally launched the adapter with an empty asset
+directory and verified the served page contains both current workspace
+actions. The source-generated OpenCode inventory was refreshed against the
+pinned `v2.0.26` schema: **141 operations, 31 native source candidates, 110
+unmapped, and zero verified operation-level parity**. These checks do not
+establish full coding workflows, installed-editor acceptance, worker/IPC
+placement, or OpenCode parity. See the [multi-folder workspace contract](native-multi-folder-workspaces.md)
+and [worker/IPC acceptance gap](native-ipc-worker-design.md).
+
 ## Latest native coding/runtime checkpoint (2026-10-11, VS Code package `0.1.8`)
 
 Named YAML agent definitions and graph agent nodes carry optional tool

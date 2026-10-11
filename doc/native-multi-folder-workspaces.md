@@ -26,6 +26,9 @@ folder as its own tree and reads previews through a native route that resolves
 the selected workspace's folder ID, re-opens the directory and verifies its
 native identity on every request.
 See the [current browser behavior and gap](browser-view.md#multi-folder-workspace-target).
+The browser launcher rebuilds the generated asset snapshot from the current
+source at startup, keeping the rendered workspace actions aligned with the
+checked-out client code.
 
 ## User workflow
 
