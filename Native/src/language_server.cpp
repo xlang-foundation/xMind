@@ -122,7 +122,7 @@ std::string LanguageServerClient::request(const LanguageServerRequest& call,std:
     static const std::vector<std::string> methods{"hover","definition","references","documentSymbol","diagnostics"};
     if(call.method.empty()||std::find(methods.begin(),methods.end(),call.method)==methods.end())throw std::invalid_argument("Unsupported language-server method");
     const auto extension=lower(std::filesystem::u8path(call.path).extension().string());if(std::none_of(profile_.extensions.begin(),profile_.extensions.end(),[&](const auto& value){return lower(value)==extension;}))throw ToolAccessDenied("No configured language server owns this file type");
-    const auto file=workspace_.read_file(call.path,cancel);if(file.content.size()>1024*1024)throw ToolFileError("Language-server document exceeds limits");
+    auto file=workspace_.read_file(call.path,cancel);if(call.document_text)file.content=*call.document_text;if(file.content.size()>1024*1024)throw ToolFileError("Language-server document exceeds limits");
     std::lock_guard lock(impl_->mutex);const auto deadline=Clock::now()+profile_.request_timeout;
     const auto root=std::filesystem::u8path(workspace_.root_path());const auto uri=file_uri(root/std::filesystem::u8path(call.path));
     try{impl_->start(deadline,cancel);impl_->open(uri,profile_.language_id,call.path,file.content,deadline,cancel);}

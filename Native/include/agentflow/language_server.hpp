@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace agentflow {
@@ -18,6 +19,7 @@ struct LanguageServerProfile {
 struct LanguageServerRequest {
     std::string path,method;
     std::size_t line=0,character=0;
+    std::optional<std::string> document_text;
 };
 // A bounded, one-request native LSP client. The server executable, arguments,
 // environment and file-extension binding come only from trusted backend

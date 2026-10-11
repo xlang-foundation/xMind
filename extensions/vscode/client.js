@@ -51,6 +51,24 @@ class BackendClient {
   }
   health() { return this.request('/v1/health'); }
   async workspace() { return validateWorkspace(await this.request('/v1/workspace')); }
+  async languageServerProfiles() {
+    const value=await this.request('/v1/language-servers');exactFields(value,['profiles']);
+    if(!Array.isArray(value.profiles)||value.profiles.length>16)throw new Error('Invalid native language-server catalogue.');
+    const ids=new Set();for(const profile of value.profiles){exactFields(profile,['id','language_id','revision','extensions']);if(typeof profile.id!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(profile.id)||ids.has(profile.id)||typeof profile.language_id!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(profile.language_id)||!Number.isSafeInteger(profile.revision)||profile.revision<1||!Array.isArray(profile.extensions)||!profile.extensions.length||profile.extensions.length>32||profile.extensions.some(extension=>typeof extension!=='string'||!/^\.[A-Za-z0-9_-]{1,15}$/.test(extension)))throw new Error('Invalid native language-server profile.');ids.add(profile.id);}
+    return value.profiles;
+  }
+  async languageServerQuery(query,binding) {
+    if(!query||typeof query!=='object'||Array.isArray(query)||!binding||typeof binding!=='object')throw new Error('Invalid language-server query.');
+    const path=query.path,method=query.method,line=query.line??0,character=query.character??0,documentText=query.documentText;
+    if(typeof path!=='string'||!path||path.length>4096||/[\x00-\x1f]/.test(path)||/^(?:[\\/]|[A-Za-z]:)/.test(path)||path.split(/[\\/]/).some(segment=>segment==='..')||!['hover','definition','references','documentSymbol','diagnostics'].includes(method)||!Number.isSafeInteger(line)||line<0||line>1000000||!Number.isSafeInteger(character)||character<0||character>1000000||
+       (documentText!==undefined&&(typeof documentText!=='string'||Buffer.byteLength(documentText,'utf8')>900*1024))||typeof binding.expected_workspace_id!=='string'||!binding.expected_workspace_id||binding.expected_workspace_id.length>256||typeof binding.expected_workspace_authority_id!=='string'||!/^[a-f0-9]{32}$/.test(binding.expected_workspace_authority_id))throw new Error('Invalid language-server query.');
+    const body={path,method,line,character,...(documentText===undefined?{}:{document_text:documentText}),expected_workspace_id:binding.expected_workspace_id,expected_workspace_authority_id:binding.expected_workspace_authority_id};
+    if(Buffer.byteLength(JSON.stringify(body),'utf8')>1024*1024)throw new Error('Editor document exceeds the language-server request limit.');
+    const value=await this.request('/v1/language-server/query',body,130000);
+    exactFields(value,['server_id','language_id','path','method','result','diagnostics']);
+    if(typeof value.server_id!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(value.server_id)||typeof value.language_id!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(value.language_id)||value.path!==path||value.method!==method||!Array.isArray(value.diagnostics)||value.diagnostics.length>10000)throw new Error('Invalid native language-server response.');
+    return value;
+  }
   initializeGitRepository() { return this.request('/v1/vcs/init',{}); }
   async vcsStatus() { return validateVcsStatus(await this.request('/v1/vcs/status')); }
   async vcsBase() { return validateVcsBase(await this.request('/v1/vcs/base')); }

@@ -139,9 +139,10 @@ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,
     }
     if(!settings_.language_servers.empty()){
         if(!workspace_)throw std::invalid_argument("Language servers require a verified workspace");
-        language_servers_=std::make_unique<LanguageServerToolRegistry>(*workspace_,settings_.language_servers);
+        language_servers_=settings_.language_server_registry;
+        if(!language_servers_)language_servers_=std::make_shared<LanguageServerToolRegistry>(*workspace_,settings_.language_servers);
         settings_.language_servers=language_servers_->profiles();
-    }
+    }else if(settings_.language_server_registry)throw std::invalid_argument("Language-server runtime was supplied without registered profiles");
     if(settings_.mcp_servers.size()>16)throw std::invalid_argument("MCP server count exceeds limits");
     std::set<std::string> mcp_ids;
     for(const auto& server:settings_.mcp_servers){if(server.id.empty() || server.revision<=0 || !mcp_ids.insert(server.id).second)throw std::invalid_argument("Invalid registered MCP configuration");if(server.enabled && !workspace_)throw std::invalid_argument("MCP execution requires a verified workspace and model tool capability");}

@@ -1,11 +1,15 @@
 #include "agentflow/language_server_tools.hpp"
 #include "agentflow/mcp_wire.hpp"
 #include "nlohmann/json.hpp"
+#include <algorithm>
+#include <cctype>
+#include <filesystem>
 #include <set>
 
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
+std::string lower(std::string value){for(auto& c:value)c=static_cast<char>(std::tolower(static_cast<unsigned char>(c)));return value;}
 std::size_t position(const Json& value,const char* key){
     if(!value.contains(key))return 0;const auto& item=value[key];
     if(!item.is_number_integer()||(!item.is_number_unsigned()&&item.get<std::int64_t>()<0)||item.get<std::uint64_t>()>1000000)throw std::invalid_argument("Language-server cursor position exceeds limits");
@@ -41,5 +45,11 @@ std::string LanguageServerToolRegistry::invoke(const std::string& source,std::st
     const auto id=args["server_id"].get<std::string>();const auto found=clients_.find(id);if(found==clients_.end())throw ToolAccessDenied("Language-server profile is not registered");
     LanguageServerRequest request;request.path=args["path"].get<std::string>();request.method=args["method"].get<std::string>();request.line=position(args,"line");request.character=position(args,"character");
     return found->second->request(request,cancel);
+}
+std::string LanguageServerToolRegistry::query(const LanguageServerRequest& request,std::stop_token cancel){
+    const auto extension=lower(std::filesystem::u8path(request.path).extension().string());const LanguageServerProfile* selected=nullptr;
+    for(const auto& profile:profiles_)if(std::any_of(profile.extensions.begin(),profile.extensions.end(),[&](const auto& value){return lower(value)==extension;})){if(selected)throw ToolAccessDenied("More than one configured language server owns this file type");selected=&profile;}
+    if(!selected)throw ToolAccessDenied("No configured language server owns this file type");
+    return clients_.at(selected->id)->request(request,cancel);
 }
 }

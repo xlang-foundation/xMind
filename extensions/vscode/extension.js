@@ -10,10 +10,12 @@ const { WorkspaceBackend,machineSetting } = require('./workspace-backend');
 const { resolveNativeRuntime } = require('./native-runtime');
 const { captureEditorSelection } = require('./editor-selection');
 const { XMindPseudoterminal } = require('./terminal');
+const { LanguageServerEditor } = require('./language-server-editor');
 
 async function activate(context) {
   const browserViews=browserViewLauncher(vscode,context);
   const workspaceBackend=new WorkspaceBackend(vscode,context,resolveNativeRuntime);
+  const languageServerEditor=new LanguageServerEditor(vscode,workspaceBackend);
   // Interactive preview uses a normal development host. VS Code test hosts
   // deliberately use in-memory storage and cannot verify reconnect persistence.
   let previewReady,previewOrigin;
@@ -392,6 +394,8 @@ async function activate(context) {
     const connectionCurrent=()=>workspaceBackend.epoch===connectionEpoch&&workspaceBackend.active?.origin===origin;
     mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));
     client.bindWorkspace(workspaceBackend);
+    await languageServerEditor.connect(client);
+    if(!connectionCurrent())throw new Error('Workspace changed while connecting language servers.');
     const profileTarget=client;profileController=new ProviderProfileController(client,post,()=>!!panel&&client===profileTarget&&configuredOrigin()===profileTarget.baseUrl);
     const initial=await capabilities();if(!connectionCurrent())throw new Error('Workspace changed while opening the sidebar.');health=initial.health;modelCatalogue=initial.catalogue;
     const savedModel=context.workspaceState.get(modelStateKey);
@@ -713,6 +717,7 @@ async function activate(context) {
   }));
   function disconnectWorkspace(){
     for(const terminal of [...terminalBridges])terminal.dispose();terminalBridges.clear();
+    languageServerEditor.disconnect();
     contextReadyView=undefined;pendingEditorContexts=[];
     workspaceBackend.invalidate();stop();mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();profileController=undefined;
     providerSelection=undefined;reviewed.clear();clearGraph();sessionId=undefined;runId=undefined;sessionRuns=[];client=undefined;
@@ -808,7 +813,7 @@ async function activate(context) {
       else{if(pendingEditorContexts.length>=8)throw new Error('The sidebar is still opening. Wait before adding more selections.');pendingEditorContexts.push({view,client:target,generation:epoch,epoch:workspaceBackend.epoch,message});}
     } catch (error) { vscode.window.showErrorMessage(error.message); }
   }));
-  context.subscriptions.push({ dispose:()=>{mcpController?.dispose();stop();workspaceBackend.dispose();receiveSubscription?.dispose();disposeSubscription?.dispose();} });
+  context.subscriptions.push({ dispose:()=>{mcpController?.dispose();languageServerEditor.dispose();stop();workspaceBackend.dispose();receiveSubscription?.dispose();disposeSubscription?.dispose();} });
   if(previewReady) {
     // View resolution waits for extension activation. Opening synchronously
     // inside activation would wait on itself in a normal development host.

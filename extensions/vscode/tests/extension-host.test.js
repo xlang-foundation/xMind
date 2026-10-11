@@ -12,7 +12,7 @@ const {planFixture,inputMessage}=require('./plan-fixture');
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
   const commands=new Map(),secrets=new Map(),requests=[],views=[],intervals=new Map(),streams=[],scheduledTasks=[],vcsInitializations=[],information=[],openedDocuments=[],shownDocuments=[];
-  const state=new Map(),errors=[],comparisons=[],bootstrapTasks=[],ready=[],warnings=[];let documentProvider;
+  const state=new Map(),errors=[],comparisons=[],bootstrapTasks=[],ready=[],warnings=[],languageServerEditorCalls=[];let documentProvider;
   let pendingHistory;
   let pendingOperation;
   let operations=options.operations||[];
@@ -135,14 +135,20 @@ function harness(options={}) {
     async prepare(){if(!this.active)throw new Error('Workspace disconnected');return {origin:this.active.origin,epoch:this.epoch,fields:{expected_workspace_id:this.active.metadata.workspace_id,expected_workspace_authority_id:this.active.metadata.authority_id}};}
     assert(ticket){if(!this.active||ticket.epoch!==this.epoch||ticket.origin!==this.active.origin)throw new Error('Workspace changed');}
   }
+  class TestLanguageServerEditor{
+    constructor(vscode,workspaceBackend){this.vscode=vscode;this.workspaceBackend=workspaceBackend;}
+    async connect(client){languageServerEditorCalls.push({type:'connect',client});}
+    disconnect(){languageServerEditorCalls.push({type:'disconnect'});}
+    dispose(){languageServerEditorCalls.push({type:'dispose'});}
+  }
   let intervalID=0;
   const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,EventStreamSubscription,McpAuthorizationController}:name==='./webview'?require('../webview'):require(name),
     setTimeout:(callback,delay)=>{bootstrapTasks.push(callback);scheduledTasks.push({callback,delay});return scheduledTasks.length;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
-  const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
+  const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     backendOwners,changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},

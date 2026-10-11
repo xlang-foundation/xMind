@@ -15,6 +15,7 @@ public:
     LanguageServerToolRegistry& operator=(const LanguageServerToolRegistry&)=delete;
     std::vector<ModelToolDefinition> definitions() const;
     std::string invoke(const std::string& arguments_json,std::stop_token cancel={});
+    std::string query(const LanguageServerRequest& request,std::stop_token cancel={});
     const std::vector<LanguageServerProfile>& profiles() const noexcept{return profiles_;}
 private:
     WorkspaceTools& workspace_;

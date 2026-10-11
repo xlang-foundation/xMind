@@ -30,6 +30,8 @@ public:
     SessionAgentState session_agent(const std::string& session)const override;
     SessionAgentState select_session_agent(const std::string& session,std::optional<AgentDefinitionMetadata> selected,std::int64_t expected_revision)override;
     WorkspaceSkillCatalogue workspace_skills()const override;
+    std::vector<LanguageServerMetadata> language_server_profiles()const override;
+    std::string language_server_query(const LanguageServerRequest& request)override;
     WorkspaceSessionSkills session_skills(const std::string& session)const override;
     WorkspaceSessionSkills replace_session_skills(const std::string& session,std::vector<std::string> ids,std::int64_t revision,WorkspaceAdmission expected)override;
     Run submit_workspace(std::string id,std::string session,std::string prompt,std::string model,
@@ -64,6 +66,7 @@ private:
     bool file_edit_proposals_=false;
     std::unique_ptr<WorkspaceTools> workspace_binding_;
     std::string workspace_authority_;
+    std::shared_ptr<LanguageServerToolRegistry> language_servers_;
     std::unique_ptr<AgentService> agents_;
     std::unique_ptr<GraphService> graphs_;
 };

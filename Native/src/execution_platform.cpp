@@ -12,6 +12,10 @@ namespace agentflow {
 namespace {std::string workspace_nonce(){std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)value<<std::setw(8)<<random();return value.str();}}
 ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings settings,std::size_t workers,std::size_t capacity):store_(store) {
     if(settings.workspace){workspace_binding_=std::make_unique<WorkspaceTools>(*settings.workspace);settings.workspace=workspace_binding_->root_path();workspace_authority_=workspace_nonce();}
+    if(workspace_binding_&&!settings.language_servers.empty()){
+        language_servers_=std::make_shared<LanguageServerToolRegistry>(*workspace_binding_,settings.language_servers);
+        settings.language_server_registry=language_servers_;
+    }
     file_edit_proposals_=workspace_binding_&&settings.approved_edits;
     if(!settings.provider.model.empty())agents_=std::make_unique<AgentService>(store,settings,workers,capacity);
     graphs_=std::make_unique<GraphService>(store,std::move(settings),std::min<std::size_t>(workers,8),capacity);
@@ -97,6 +101,14 @@ WorkspaceSkillCatalogue ExecutionPlatform::workspace_skills()const{
     const auto workspace=execution_workspace();const auto catalogue=SkillContext(*workspace_binding_).catalogue_json();
     validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
     return {workspace,catalogue};
+}
+std::vector<LanguageServerMetadata> ExecutionPlatform::language_server_profiles()const{
+    std::vector<LanguageServerMetadata> result;if(!language_servers_)return result;result.reserve(language_servers_->profiles().size());
+    for(const auto& profile:language_servers_->profiles())result.push_back({profile.id,profile.language_id,profile.revision,profile.extensions});return result;
+}
+std::string ExecutionPlatform::language_server_query(const LanguageServerRequest& request){
+    if(!workspace_binding_||!language_servers_)throw RunUnavailable("Language-server queries require an opened workspace and trusted server profile");
+    return language_servers_->query(request);
 }
 WorkspaceSessionSkills ExecutionPlatform::session_skills(const std::string& session)const{
     if(!workspace_binding_)throw RunUnavailable("Session skills require an opened root");const auto workspace=execution_workspace();

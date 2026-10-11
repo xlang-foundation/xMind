@@ -404,7 +404,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|language-servers|language-server/query|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -642,12 +642,28 @@ struct HttpServer::Impl {
             const auto workspace=executor->execution_workspace();const auto file=executor->browse_workspace_file(path);
             reply(response,{{"path",file.path},{"workspace_id",workspace.workspace_id},{"content",file.content}});
         }));
+        server.Post("/v1/language-server/query",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>1024*1024)throw std::invalid_argument("Invalid language-server query target or size");
+            if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Language-server queries require an opened workspace");
+            const auto value=body(request,{"path","method","line","character","document_text","expected_workspace_id","expected_workspace_authority_id"});
+            const auto binding=workspace_admission(value);if(!binding||!value.contains("path")||!value.contains("method")||value.size()<4||value.size()>7)throw std::invalid_argument("Language-server queries require a path, method and workspace authority");
+            const auto coordinate=[&](const char* field){if(!value.contains(field))return std::size_t{0};const auto& item=value[field];if(!item.is_number_integer()||item<0||item>1000000)throw std::invalid_argument("Language-server cursor position exceeds limits");return static_cast<std::size_t>(item.get<std::uint64_t>());};
+            const auto actual=executor->execution_workspace();validate_workspace_admission(*binding,actual);
+            LanguageServerRequest query;query.path=string_field(value,"path",4096);query.method=string_field(value,"method",32);query.line=coordinate("line");query.character=coordinate("character");
+            if(value.contains("document_text")){if(!value["document_text"].is_string()||value["document_text"].get_ref<const std::string&>().size()>900*1024)throw std::invalid_argument("Editor document exceeds language-server limits");query.document_text=value["document_text"].get<std::string>();}
+            const auto result=executor->language_server_query(query);validate_workspace_admission(*binding,executor->execution_workspace());reply(response,Json::parse(result));
+        }));
         server.Get("/v1/workspace/skills",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Skill catalogue does not accept query parameters");
             if(!executor||!executor->supports_skill_catalogue())throw RunUnavailable("Workspace skill inspection is unavailable");
             const auto actual=executor->workspace_skills();auto catalogue=Json::parse(actual.catalogue_json);
             catalogue["workspace_id"]=actual.workspace.workspace_id;catalogue["authority_id"]=actual.workspace.authority_id;
             reply(response,catalogue);
+        }));
+        server.Get("/v1/language-servers",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Language-server metadata does not accept query parameters");
+            Json profiles=Json::array();if(executor)for(const auto& profile:executor->language_server_profiles())profiles.push_back({{"id",profile.id},{"language_id",profile.language_id},{"revision",profile.revision},{"extensions",profile.extensions}});
+            reply(response,{{"profiles",std::move(profiles)}});
         }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/skills)",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session skills do not accept query parameters");

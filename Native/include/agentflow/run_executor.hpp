@@ -4,6 +4,7 @@
 #include "agentflow/skill_records.hpp"
 #include "agentflow/agent_definition_records.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include "agentflow/language_server.hpp"
 #include <cstdint>
 #include <utility>
 #include <optional>
@@ -18,6 +19,7 @@ struct ProviderProfileAdmission {std::string id;std::int64_t revision=0;};
 // digest used by planning/context and contains no settings or credential data.
 struct ExecutionWorkspaceMetadata {bool configured=false;std::string root,workspace_id,authority_id;};
 struct WorkspaceSkillCatalogue {ExecutionWorkspaceMetadata workspace;std::string catalogue_json;};
+struct LanguageServerMetadata {std::string id,language_id;std::int64_t revision=0;std::vector<std::string> extensions;};
 struct WorkspaceVcsFileStatus {std::string file;std::uint64_t additions=0,deletions=0;std::string status;};
 struct WorkspaceVcsFileDiff {std::string file,patch,status;std::uint64_t additions=0,deletions=0;};
 struct WorkspaceVcsReviewBase {std::string name,ref,source;};
@@ -55,6 +57,8 @@ public:
     virtual SessionAgentState session_agent(const std::string&)const{throw RunUnavailable("Conversation agent selection is unavailable");}
     virtual SessionAgentState select_session_agent(const std::string&,std::optional<AgentDefinitionMetadata>,std::int64_t){throw RunUnavailable("Conversation agent selection is unavailable");}
     virtual WorkspaceSkillCatalogue workspace_skills()const{throw RunUnavailable("Workspace skill inspection is unavailable");}
+    virtual std::vector<LanguageServerMetadata> language_server_profiles()const{return {};}
+    virtual std::string language_server_query(const LanguageServerRequest&){throw RunUnavailable("Language-server queries are unavailable");}
     virtual WorkspaceSessionSkills session_skills(const std::string&)const{throw RunUnavailable("Session skill controls are unavailable");}
     virtual WorkspaceSessionSkills replace_session_skills(const std::string&,std::vector<std::string>,std::int64_t,WorkspaceAdmission){throw RunUnavailable("Session skill controls are unavailable");}
     virtual Run submit_workspace(std::string,std::string,std::string,std::string,WorkspaceAdmission,
