@@ -1,5 +1,6 @@
 #include "agentflow/console_transport.hpp"
 #include "agentflow/program_entries.hpp"
+#include "agentflow/terminal_key_input.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <charconv>
@@ -745,42 +746,87 @@ void terminal_exact_fields(const nlohmann::json& value,std::initializer_list<con
 }
 class TerminalConsoleMode {
 public:
-    TerminalConsoleMode(){
+    explicit TerminalConsoleMode(bool force_console=false){
 #if defined(_WIN32)
         input_=GetStdHandle(STD_INPUT_HANDLE);output_=GetStdHandle(STD_OUTPUT_HANDLE);
-        if(input_!=INVALID_HANDLE_VALUE&&GetConsoleMode(input_,&input_mode_))console_=true;
+        bool standard_input_console=input_!=INVALID_HANDLE_VALUE&&GetConsoleMode(input_,&input_mode_);
+        if(force_console&&!standard_input_console){
+            const auto console_input=CreateFileW(L"CONIN$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,0,nullptr);
+            if(console_input!=INVALID_HANDLE_VALUE&&GetConsoleMode(console_input,&input_mode_)){input_=console_input;owns_input_=true;standard_input_console=true;}
+            else if(console_input!=INVALID_HANDLE_VALUE)CloseHandle(console_input);
+        }
+        if(force_console&&!standard_input_console)throw std::runtime_error("No interactive Windows console is available");
+        if(output_==INVALID_HANDLE_VALUE||!GetConsoleMode(output_,&output_mode_)){
+            const auto console_output=CreateFileW(L"CONOUT$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,0,nullptr);
+            if(console_output!=INVALID_HANDLE_VALUE){output_=console_output;owns_output_=true;}
+        }
+        if(standard_input_console){
+            console_=true;has_input_mode_=true;
+            const DWORD mode=(input_mode_&~(ENABLE_PROCESSED_INPUT|ENABLE_LINE_INPUT|ENABLE_ECHO_INPUT))|ENABLE_WINDOW_INPUT|ENABLE_EXTENDED_FLAGS;
+            SetConsoleMode(input_,mode);
+        }else{
+            resize_input_=CreateFileW(L"CONIN$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,0,nullptr);
+            if(resize_input_!=INVALID_HANDLE_VALUE&&GetConsoleMode(resize_input_,&resize_input_mode_)){
+                has_resize_input_mode_=true;const DWORD mode=resize_input_mode_|ENABLE_WINDOW_INPUT|ENABLE_EXTENDED_FLAGS;
+                SetConsoleMode(resize_input_,mode);
+            }else if(resize_input_!=INVALID_HANDLE_VALUE){CloseHandle(resize_input_);resize_input_=INVALID_HANDLE_VALUE;}
+        }
         if(output_!=INVALID_HANDLE_VALUE&&GetConsoleMode(output_,&output_mode_)){
             has_output_mode_=true;SetConsoleMode(output_,output_mode_|ENABLE_VIRTUAL_TERMINAL_PROCESSING);
         }
         input_cp_=GetConsoleCP();output_cp_=GetConsoleOutputCP();SetConsoleCP(CP_UTF8);SetConsoleOutputCP(CP_UTF8);
 #endif
+#if !defined(_WIN32)
+        if(force_console)throw std::runtime_error("The --console option is supported only on Windows");
+#endif
     }
     ~TerminalConsoleMode(){
 #if defined(_WIN32)
+        if(has_input_mode_)SetConsoleMode(input_,input_mode_);
         if(has_output_mode_)SetConsoleMode(output_,output_mode_);
+        if(has_resize_input_mode_)SetConsoleMode(resize_input_,resize_input_mode_);
         if(input_cp_)SetConsoleCP(input_cp_);if(output_cp_)SetConsoleOutputCP(output_cp_);
+        if(owns_input_)CloseHandle(input_);if(owns_output_)CloseHandle(output_);if(resize_input_!=INVALID_HANDLE_VALUE)CloseHandle(resize_input_);
 #endif
     }
 #if defined(_WIN32)
     bool console()const{return console_;}
     HANDLE input()const{return input_;}
-    void echo(const wchar_t* text,DWORD length)const{DWORD written=0;if(output_!=INVALID_HANDLE_VALUE)WriteConsoleW(output_,text,length,&written,nullptr);}
+    HANDLE resize_input()const{return resize_input_;}
+    std::pair<unsigned short,unsigned short> dimensions()const{
+        CONSOLE_SCREEN_BUFFER_INFO info{};
+        if(output_==INVALID_HANDLE_VALUE||!GetConsoleScreenBufferInfo(output_,&info))return {24,80};
+        const auto rows=static_cast<unsigned short>(std::max<SHORT>(1,info.srWindow.Bottom-info.srWindow.Top+1));
+        const auto columns=static_cast<unsigned short>(std::max<SHORT>(1,info.srWindow.Right-info.srWindow.Left+1));
+        return agentflow::terminal_console_dimensions(rows,columns);
+    }
 #endif
 private:
 #if defined(_WIN32)
-    HANDLE input_{INVALID_HANDLE_VALUE},output_{INVALID_HANDLE_VALUE};DWORD input_mode_{},output_mode_{};UINT input_cp_{},output_cp_{};bool console_{},has_output_mode_{};
+    HANDLE input_{INVALID_HANDLE_VALUE},output_{INVALID_HANDLE_VALUE},resize_input_{INVALID_HANDLE_VALUE};DWORD input_mode_{},output_mode_{},resize_input_mode_{};UINT input_cp_{},output_cp_{};bool console_{},has_input_mode_{},has_output_mode_{},owns_input_{},owns_output_{},has_resize_input_mode_{};
 #endif
 };
 
-int terminal_attach(agentflow::ConsoleTransport& client,int port,const std::string& workspace,const httplib::Headers& headers,const std::string& session,const std::string& title){
+int terminal_attach(agentflow::ConsoleTransport& client,int port,const std::string& workspace,const httplib::Headers& headers,const std::string& session,const std::string& title,bool force_console){
     using Json=nlohmann::json;
-    const auto created=client.Post("/v1/sessions/"+session+"/terminals",headers,Json{{"title",title},{"rows",24},{"columns",80}}.dump(),"application/json");
+    TerminalConsoleMode console(force_console);
+    unsigned short initial_rows=24,initial_columns=80;
+#if defined(_WIN32)
+    if(console.console()){const auto size=console.dimensions();initial_rows=size.first;initial_columns=size.second;}
+#endif
+    const auto created=client.Post("/v1/sessions/"+session+"/terminals",headers,Json{{"title",title},{"rows",initial_rows},{"columns",initial_columns}}.dump(),"application/json");
     if(!created||created->status!=201)throw std::runtime_error("Cannot create the workspace terminal");
     const auto metadata=Json::parse(created->body);terminal_exact_fields(metadata,{"id","session_id","title","rows","columns","running","exit_code","output_sequence"});
-    if(!metadata["id"].is_string()||metadata["id"].get_ref<const std::string&>().size()!=32||metadata["id"].get_ref<const std::string&>().find_first_not_of("0123456789abcdef")!=std::string::npos||metadata["session_id"]!=session||metadata["title"]!=title||metadata["rows"]!=24||metadata["columns"]!=80||metadata["running"]!=true||!metadata["exit_code"].is_null())throw std::runtime_error("Invalid created workspace terminal");
+    if(!metadata["id"].is_string()||metadata["id"].get_ref<const std::string&>().size()!=32||metadata["id"].get_ref<const std::string&>().find_first_not_of("0123456789abcdef")!=std::string::npos||metadata["session_id"]!=session||metadata["title"]!=title||metadata["rows"]!=initial_rows||metadata["columns"]!=initial_columns||metadata["running"]!=true||!metadata["exit_code"].is_null())throw std::runtime_error("Invalid created workspace terminal");
     const auto initial_sequence=terminal_sequence(metadata["output_sequence"]);(void)initial_sequence;
     const auto terminal=metadata["id"].get<std::string>();std::atomic_bool finished=false,stop=false;std::exception_ptr observation_error;std::string observation_message;
-    TerminalConsoleMode console;
+#if defined(_WIN32)
+    const auto send_input=[&](const std::wstring& wide){if(wide.empty())return;const auto data=utf8_argument(wide);const auto response=client.Post("/v1/terminals/"+terminal+"/input",headers,Json{{"data",data}}.dump(),"application/json");if(!response||response->status!=200)throw std::runtime_error("Terminal input was not accepted");};
+    const auto resize_terminal=[&]{
+        const auto size=console.dimensions();const auto response=client.Post("/v1/terminals/"+terminal+"/resize",headers,Json{{"rows",size.first},{"columns",size.second}}.dump(),"application/json");
+        if(!response||response->status!=200)throw std::runtime_error("Terminal resize was not accepted");
+    };
+#endif
     std::thread output([&]{
         try{
             agentflow::ConsoleTransport observer(port,workspace);observer.set_connection_timeout(2,0);observer.set_read_timeout(5,0);observer.set_write_timeout(2,0);observer.set_follow_location(false);
@@ -801,23 +847,40 @@ int terminal_attach(agentflow::ConsoleTransport& client,int port,const std::stri
             }
         }catch(...){observation_error=std::current_exception();try{std::rethrow_exception(observation_error);}catch(const std::exception& error){observation_message=error.what();}catch(...){observation_message="Unknown terminal observation failure";}finished.store(true,std::memory_order_release);}
     });
+#if defined(_WIN32)
+    std::atomic_bool stop_resize=false;std::exception_ptr resize_error;
+    std::thread resize_events;
+    if(!console.console()&&console.resize_input()!=INVALID_HANDLE_VALUE){
+        resize_events=std::thread([&]{try{INPUT_RECORD event{};DWORD count=0;while(!stop_resize.load(std::memory_order_acquire)){
+            if(WaitForSingleObject(console.resize_input(),100)!=WAIT_OBJECT_0)continue;
+            if(!ReadConsoleInputW(console.resize_input(),&event,1,&count)||count!=1)throw std::runtime_error("Terminal resize observation is unavailable");
+            if(event.EventType==WINDOW_BUFFER_SIZE_EVENT)resize_terminal();
+        }}catch(...){resize_error=std::current_exception();}});
+    }
+#endif
     std::cerr<<"Connected to the workspace shell. Enter commands; `exit` closes it.\n"<<std::flush;
     bool requested_exit=false;
     try{
 #if defined(_WIN32)
         if(console.console()){
-            std::wstring line;INPUT_RECORD record{};DWORD read=0;
+            INPUT_RECORD record{};DWORD read=0;wchar_t pending_high_surrogate{};
             while(!finished.load(std::memory_order_acquire)){
                 if(WaitForSingleObject(console.input(),100)!=WAIT_OBJECT_0)continue;
-                if(!ReadConsoleInputW(console.input(),&record,1,&read)||read!=1||record.EventType!=KEY_EVENT||!record.Event.KeyEvent.bKeyDown)continue;
-                const auto& key=record.Event.KeyEvent;const bool control=(key.dwControlKeyState&(LEFT_CTRL_PRESSED|RIGHT_CTRL_PRESSED))!=0;
-                if(control&&key.wVirtualKeyCode=='C'){
-                    const std::string interrupt(1,'\x03');const auto response=client.Post("/v1/terminals/"+terminal+"/input",headers,Json{{"data",interrupt}}.dump(),"application/json");if(!response||response->status!=200)throw std::runtime_error("Terminal interrupt was not accepted");continue;
-                }
-                if(key.wVirtualKeyCode==VK_RETURN){const auto text=utf8_argument(line);const std::string data=text+"\r\n";const auto response=client.Post("/v1/terminals/"+terminal+"/input",headers,Json{{"data",data}}.dump(),"application/json");if(!response||response->status!=200)throw std::runtime_error("Terminal input was not accepted");console.echo(L"\r\n",2);line.clear();continue;}
-                if(key.wVirtualKeyCode==VK_BACK){if(!line.empty()){line.pop_back();if(!line.empty()&&line.back()>=0xd800&&line.back()<=0xdbff)line.pop_back();console.echo(L"\b \b",3);}continue;}
-                if(control||key.uChar.UnicodeChar<0x20||line.size()>=32768)continue;
-                line.push_back(key.uChar.UnicodeChar);console.echo(&key.uChar.UnicodeChar,1);
+                if(!ReadConsoleInputW(console.input(),&record,1,&read)||read!=1)throw std::runtime_error("Terminal console input is unavailable");
+                if(record.EventType==WINDOW_BUFFER_SIZE_EVENT){resize_terminal();continue;}
+                if(record.EventType!=KEY_EVENT||!record.Event.KeyEvent.bKeyDown)continue;
+                const auto& key=record.Event.KeyEvent;const auto modifiers=key.dwControlKeyState;
+                const auto character=key.uChar.UnicodeChar;
+                std::wstring characters;
+                if(character>=0xd800&&character<=0xdbff){pending_high_surrogate=character;continue;}
+                if(character>=0xdc00&&character<=0xdfff){if(!pending_high_surrogate)continue;characters.push_back(pending_high_surrogate);characters.push_back(character);pending_high_surrogate=0;}
+                else{pending_high_surrogate=0;if(character)characters.push_back(character);}
+                const auto value=agentflow::terminal_key_input(key.wVirtualKeyCode,characters,
+                    (modifiers&(LEFT_CTRL_PRESSED|RIGHT_CTRL_PRESSED))!=0,
+                    (modifiers&(SHIFT_PRESSED))!=0,
+                    (modifiers&(LEFT_ALT_PRESSED|RIGHT_ALT_PRESSED))!=0);
+                const auto repeats=std::min<DWORD>(key.wRepeatCount,128);
+                for(DWORD repeat=0;repeat<repeats;++repeat)send_input(value);
             }
         }else
 #endif
@@ -828,10 +891,21 @@ int terminal_attach(agentflow::ConsoleTransport& client,int port,const std::stri
                 const std::string data=line+"\r\n";const auto response=client.Post("/v1/terminals/"+terminal+"/input",headers,Json{{"data",data}}.dump(),"application/json");if(!response||response->status!=200)throw std::runtime_error("Terminal input was not accepted");if(line=="exit"||line=="exit /b"){requested_exit=true;break;}
             }
         }
-    }catch(...){stop.store(true,std::memory_order_release);if(output.joinable())output.join();client.Post("/v1/terminals/"+terminal+"/close",headers,"{}","application/json");throw;}
+    }catch(...){stop.store(true,std::memory_order_release);
+#if defined(_WIN32)
+        stop_resize.store(true,std::memory_order_release);if(resize_events.joinable())resize_events.join();
+#endif
+        if(output.joinable())output.join();client.Post("/v1/terminals/"+terminal+"/close",headers,"{}","application/json");throw;}
     if(requested_exit){const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(3);while(!finished.load(std::memory_order_acquire)&&std::chrono::steady_clock::now()<deadline)std::this_thread::sleep_for(std::chrono::milliseconds(25));}
-    stop.store(true,std::memory_order_release);if(output.joinable())output.join();
+    stop.store(true,std::memory_order_release);
+#if defined(_WIN32)
+    stop_resize.store(true,std::memory_order_release);if(resize_events.joinable())resize_events.join();
+#endif
+    if(output.joinable())output.join();
     const auto closed=client.Post("/v1/terminals/"+terminal+"/close",headers,"{}","application/json");if(!closed||closed->status!=200)throw std::runtime_error("Could not retire the workspace terminal");
+#if defined(_WIN32)
+    if(resize_error)try{std::rethrow_exception(resize_error);}catch(const std::exception& error){throw std::runtime_error(error.what());}
+#endif
     if(observation_error)throw std::runtime_error(observation_message);
     return 0;
 }
@@ -839,7 +913,7 @@ int terminal_attach(agentflow::ConsoleTransport& client,int port,const std::stri
 
 int cli_main(int argc,char** argv,const std::string& workspace,const std::function<agentflow::LocalProfileConnection()>& profile) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, terminals SESSION, terminal-create SESSION [TITLE], terminal-attach SESSION [TITLE], terminal-output ID [AFTER], terminal-input ID UTF8, terminal-resize ID ROWS COLUMNS, terminal-close ID, runs, run, cancel, status, git-status, events, watch, models, agents, session-agent SESSION, set-agent SESSION AGENT_ID|default EXPECTED_REVISION AGENT_REVISION, skills, session-skills, set-skills SESSION SNAPSHOT_JSON_FILE [ID...], provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, inspect-plan ROOT, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, a2a-agents, a2a-register ID CARD_URL true|false EXPECTED_REVISION [BEARER_ENV], a2a-enable ID true|false EXPECTED_REVISION, a2a-remove ID EXPECTED_REVISION, a2a-inspect OPERATION_ID, a2a-cancel OPERATION_ID, a2a-follow-up OPERATION_ID SEQUENCE MESSAGE, process-profiles, operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, terminals SESSION, terminal-create SESSION [TITLE], terminal-attach SESSION [TITLE] [--console], terminal-output ID [AFTER], terminal-input ID UTF8, terminal-resize ID ROWS COLUMNS, terminal-close ID, runs, run, cancel, status, git-status, events, watch, models, agents, session-agent SESSION, set-agent SESSION AGENT_ID|default EXPECTED_REVISION AGENT_REVISION, skills, session-skills, set-skills SESSION SNAPSHOT_JSON_FILE [ID...], provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, a2a-agents, a2a-register ID CARD_URL true|false EXPECTED_REVISION [BEARER_ENV], a2a-enable ID true|false EXPECTED_REVISION, a2a-remove ID EXPECTED_REVISION, a2a-inspect OPERATION_ID, a2a-cancel OPERATION_ID, a2a-follow-up OPERATION_ID SEQUENCE MESSAGE, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -850,7 +924,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         };
         auto terminal_id=[](const std::string& value){if(value.size()!=32||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid terminal ID");return value;};
         auto terminal_dimension=[](const std::string& value){const auto parsed=event_cursor(value);if(parsed<1||parsed>500)throw std::invalid_argument("Terminal dimension is outside its supported range");return parsed;};
-        using Json=nlohmann::json;std::string path,chat_model,mcp_id,terminal_session,terminal_title="xMind CLI";Json body;bool post=false,watch=false,graph_watch=false,chat=false,terminal_attach_command=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false,vcs_status=false,vcs_info=false,vcs_branches=false,vcs_base=false,vcs_diff=false;std::int64_t watch_cursor=0;
+        using Json=nlohmann::json;std::string path,chat_model,mcp_id,terminal_session,terminal_title="xMind CLI";Json body;bool post=false,watch=false,graph_watch=false,chat=false,terminal_attach_command=false,terminal_force_console=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false,vcs_status=false,vcs_info=false,vcs_branches=false,vcs_base=false,vcs_diff=false;std::int64_t watch_cursor=0;
         if(command=="health" && argc==3) path="/v1/health";
         else if(command=="chat" && argc>=3 && argc<=5){chat=true;if(argc>=4)path=id(argv[3]);if(argc==5)chat_model=argv[4];}
         else if(command=="sessions" && argc==3) path="/v1/sessions";
@@ -858,7 +932,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         else if(command=="rename-session" && argc==6) {path="/v1/sessions/"+id(argv[3])+"/title";body={{"title",argv[4]},{"expected_title",argv[5]}};post=true;}
         else if(command=="history" && argc==4) path="/v1/sessions/"+id(argv[3])+"/history";
         else if(command=="terminals"&&argc==4)path="/v1/sessions/"+id(argv[3])+"/terminals";
-        else if(command=="terminal-attach"&&(argc==4||argc==5)){terminal_attach_command=true;terminal_session=id(argv[3]);if(argc==5){terminal_title=argv[4];if(terminal_title.empty()||terminal_title.size()>128||terminal_title.find_first_of("\r\n\0")!=std::string::npos)throw std::invalid_argument("Invalid terminal title");}}
+        else if(command=="terminal-attach"&&argc>=4&&argc<=6){terminal_attach_command=true;terminal_session=id(argv[3]);bool have_title=false;for(int index=4;index<argc;++index){if(std::string_view(argv[index])=="--console"){if(terminal_force_console)throw std::invalid_argument("Duplicate terminal console option");terminal_force_console=true;}else if(!have_title){terminal_title=argv[index];have_title=true;}else throw std::invalid_argument("Unexpected terminal attachment option");}if(terminal_title.empty()||terminal_title.size()>128||terminal_title.find_first_of("\r\n\0")!=std::string::npos)throw std::invalid_argument("Invalid terminal title");}
         else if(command=="terminal-create"&&(argc==4||argc==5)){path="/v1/sessions/"+id(argv[3])+"/terminals";if(argc==5)body={{"title",argv[4]}};else body=Json::object();post=true;}
         else if(command=="terminal-output"&&(argc==4||argc==5)){path="/v1/terminals/"+terminal_id(argv[3])+"/output?after="+std::to_string(event_cursor(argc==5?argv[4]:"0"));}
         else if(command=="terminal-input"&&argc==5){const std::string data=argv[4];if(data.empty()||data.size()>64*1024||data.find('\0')!=std::string::npos)throw std::invalid_argument("Terminal input is empty or exceeds limits");path="/v1/terminals/"+terminal_id(argv[3])+"/input";body={{"data",data}};post=true;}
@@ -986,7 +1060,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         agentflow::ConsoleTransport client(port,selected);
         client.set_connection_timeout(5,0);client.set_read_timeout(15,0);client.set_write_timeout(5,0);client.set_follow_location(false);
         const httplib::Headers headers{{"Authorization",std::string("Bearer ")+auth}};
-        if(terminal_attach_command)return terminal_attach(client,port,selected,headers,terminal_session,terminal_title);
+        if(terminal_attach_command)return terminal_attach(client,port,selected,headers,terminal_session,terminal_title,terminal_force_console);
         if(chat)return chat_session(client,headers,path,chat_model);
         if(mcp_operation){if(command=="mcp-login-watch")return mcp_watch(client,headers,mcp_id);std::cout<<mcp_command(client,headers,command,mcp_id).dump(2)<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("MCP observation output unavailable; backend sign-in continues");return 0;}
         if(a2a_operation){std::cout<<a2a_command(client,headers,command,argc,argv).dump(2)<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("A2A registry output unavailable");return 0;}

@@ -22,13 +22,16 @@ Authenticated local clients use these HTTP operations:
 The console client exposes the same lifecycle as `terminals SESSION`,
 `terminal-create SESSION [TITLE]`, `terminal-output ID [AFTER]`,
 `terminal-input ID UTF8`, `terminal-resize ID ROWS COLUMNS` and
-`terminal-close ID`. `terminal-attach SESSION [TITLE]` opens a line-oriented
-interactive shell, relays backend output, and sends completed input lines to
-the terminal. VS Code opens the same backend-owned shell in its native terminal
+`terminal-close ID`. `terminal-attach SESSION [TITLE] [--console]` opens a
+native console shell, relays backend output, forwards key presses immediately,
+and follows console window resizes. `--console` explicitly opens the attached
+Windows console when a launcher redirected standard input; ordinary pipe input
+stays line-based for scripted use. The VT mapping covers printable Unicode,
+control keys, arrows, navigation and function keys. VS Code opens the same backend-owned shell in its native terminal
 panel through a pseudoterminal bridge. The bridge pins one workspace,
 conversation and server generation, then relays terminal bytes without
-interpreting or estimating output. Keystroke-level full-screen terminal
-application support remains outstanding in the console client.
+interpreting or estimating output. Full-screen application behavior still
+requires acceptance in a real console and editor terminal.
 
 The in-memory output ring retains at most 1 MiB per terminal. Each response
 returns the next sequence, whether older bytes were truncated, and actual
@@ -37,8 +40,12 @@ The server caps the number of live/retained terminals globally and per
 conversation. Terminal buffers are process-local and do not survive backend
 restart; the SQLite conversation remains intact.
 
-The native contract launches the real system command shell in an isolated
-fixture workspace, waits for its initial prompt, sends a synthetic echo command,
+The key-mapping contract checks VT sequences, Unicode/control input, navigation,
+function keys and backend dimension bounds. The actual-server contract also
+launches the unified CLI inside a nested Windows ConPTY, types through
+`CONIN$`, resizes the console and checks the shell-reported dimensions and
+command output. The native contract launches the real system command shell in
+an isolated fixture workspace, waits for its initial prompt, sends a synthetic echo command,
 checks exact output replay, resizes the pseudoconsole, observes shell exit and
 closes the session. The HTTP integration contract runs the same lifecycle
 through the actual native server. It also attaches the CLI to a real fixture

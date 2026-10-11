@@ -206,14 +206,17 @@ controls and full TUI/OpenCode CLI parity remain required.
 
 ## Workspace shell attachment
 
-`terminal-attach SESSION [TITLE]` creates a native terminal pinned to the
+`terminal-attach SESSION [TITLE] [--console]` creates a native terminal pinned to the
 selected server workspace and the chosen persisted conversation. The CLI
-streams exact PTY bytes while accepting completed command lines; `exit` closes
-the shell. When attached to a real Windows console, VT output is enabled and
-the original console settings are restored on return. Pipe-based invocation
-uses UTF-8 lines so the same command can be exercised by the native server
-contract. Full-screen applications, per-key editing and mouse/alternate-screen
-parity remain open.
+streams exact PTY bytes and forwards console key events as VT input, including
+Unicode, control keys, navigation and function-key sequences. Console resize
+events resize the backend pseudoterminal, and original console input/output
+settings are restored on return. Pipe-based invocation uses UTF-8 lines for the
+native server contract. A nested Windows ConPTY integration contract exercises
+console keystrokes and live resize. Full-screen application behavior and mouse
+input remain unverified; concurrent chat controls, rich diffs and complete
+OpenCode TUI parity also remain open. Use `--console` when a launcher
+redirects standard input while the process still has an attached Windows console.
 
 The actual-server process contract starts the shell in an isolated fixture,
 sends `echo XMIND_CLI_TERMINAL_ATTACH_OK` and `exit`, checks relayed output and
