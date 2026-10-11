@@ -1,6 +1,9 @@
 #include "agentflow/execution_platform.hpp"
 #include "agentflow/skill_context.hpp"
 #include "agentflow/agent_definitions.hpp"
+#if defined(_WIN32)
+#include "agentflow/vcs_service.hpp"
+#endif
 #include <algorithm>
 #include <random>
 #include <sstream>
@@ -23,6 +26,16 @@ Run ExecutionPlatform::submit_model(std::string id,std::string session,std::stri
 Run ExecutionPlatform::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){if(const auto replay=store_.incoming_message(message,context,identity,content).get())return *replay;if(!agents_||!healthy())throw RunUnavailable("Incoming agent execution is unavailable");return agents_->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
 ExecutionWorkspaceMetadata ExecutionPlatform::execution_workspace()const{
     if(!workspace_binding_)return {};return {true,workspace_binding_->root_path(),workspace_binding_->identity(),workspace_authority_};
+}
+void ExecutionPlatform::initialize_vcs(std::string_view provider){
+#if defined(_WIN32)
+    if(!workspace_binding_)throw RunUnavailable("Version control initialization requires an opened workspace");
+    const auto workspace=execution_workspace();
+    try{initialize_workspace_vcs(*workspace_binding_,provider);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());}
+    catch(const VcsInitializationFailure&){throw;}
+#else
+    (void)provider;throw RunUnavailable("Version control initialization is unavailable on this platform");
+#endif
 }
 WorkspaceListing ExecutionPlatform::browse_workspace_files(const std::string& path)const{
     if(!workspace_binding_)throw RunUnavailable("Workspace browsing requires an opened root");

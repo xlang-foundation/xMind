@@ -6,6 +6,7 @@
 #include "agentflow/workspace_tools.hpp"
 #include <utility>
 #include <optional>
+#include <string_view>
 #include <vector>
 
 namespace agentflow {
@@ -32,6 +33,7 @@ public:
     virtual Run submit(std::string id,std::string session_id,std::string prompt)=0;
     virtual std::vector<std::string> models() const {return {};}
     virtual ExecutionWorkspaceMetadata execution_workspace()const{return {};}
+    virtual void initialize_vcs(std::string_view){throw RunUnavailable("Workspace version control initialization is unavailable");}
     virtual bool supports_workspace_browsing()const{return false;}
     virtual WorkspaceListing browse_workspace_files(const std::string&)const{throw RunUnavailable("Workspace browsing is unavailable");}
     virtual WorkspaceFile browse_workspace_file(const std::string&)const{throw RunUnavailable("Workspace file preview is unavailable");}

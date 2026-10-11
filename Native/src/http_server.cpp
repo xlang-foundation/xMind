@@ -27,10 +27,12 @@
 #include <chrono>
 #include <regex>
 #include <optional>
+#include <mutex>
 #include <span>
 #include <string_view>
 #if defined(_WIN32)
 #include "agentflow/view_sessions.hpp"
+#include "agentflow/vcs_service.hpp"
 #endif
 
 namespace agentflow {
@@ -251,6 +253,9 @@ template<class Handler> auto guard_errors(Handler handler) {
         catch(const RunBusy&) {reply(response,{{"detail","Agent queue is full"}},503);}
         catch(const RunUnavailable&) {reply(response,{{"detail","Agent executor is unavailable"}},503);}
 #if defined(_WIN32)
+        catch(const VcsInitializationFailure& error) {reply(response,{{"detail",error.what()}},error.http_status());}
+#endif
+#if defined(_WIN32)
         catch(const A2aRemoteError& error) {reply(response,{{"detail","Remote A2A task request failed"},{"a2a_error_code",error.code}},502);}
 #endif
         catch(const ProviderHttpError& error) {
@@ -290,6 +295,7 @@ struct HttpServer::Impl {
     AgentInstructionMetadata instructions;
     std::string authorization;
     std::atomic<bool> stopping=false;
+    std::mutex vcs_initialization_mutex;
     std::atomic<std::size_t> active_streams=0;
     struct StreamLease {
         std::atomic<std::size_t>& active;bool acquired=false;
@@ -394,7 +400,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|models|agents|graphs|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|agents|graphs|vcs/init|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -584,6 +590,13 @@ struct HttpServer::Impl {
             const auto actual=executor?executor->execution_workspace():ExecutionWorkspaceMetadata{};
             reply(response,{{"configured",actual.configured},{"root",actual.configured?Json(actual.root):Json(nullptr)},
                 {"workspace_id",actual.configured?Json(actual.workspace_id):Json(nullptr)},{"authority_id",actual.configured?Json(actual.authority_id):Json(nullptr)}});
+        }));
+        server.Post("/v1/vcs/init",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>8192)throw std::invalid_argument("Invalid VCS initialization request");
+            const auto value=request.body.empty()?Json::object():body(request,{"provider"});
+            const auto provider=value.contains("provider")?string_field(value,"provider",64):std::string("git");
+            if(!executor)throw RunUnavailable("Version control initialization requires an opened workspace");
+            std::lock_guard lock(vcs_initialization_mutex);executor->initialize_vcs(provider);response.status=204;response.set_header("Cache-Control","no-store");
         }));
         server.Get("/v1/workspace/files",guarded([this](const Request& request,Response& response){
             const auto path=workspace_browse_path(request);if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Workspace browsing requires an opened root");

@@ -14,6 +14,7 @@ public:
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
     std::vector<std::string> models() const override;
     ExecutionWorkspaceMetadata execution_workspace()const override;
+    void initialize_vcs(std::string_view provider)override;
     bool supports_workspace_browsing()const override{return static_cast<bool>(workspace_binding_);}
     WorkspaceListing browse_workspace_files(const std::string& path)const override;
     WorkspaceFile browse_workspace_file(const std::string& path)const override;

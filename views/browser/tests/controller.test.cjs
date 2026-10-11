@@ -9,6 +9,7 @@ test('browser session client shares the committed parser using cookies without b
  await client.health();const result=await client.eventStream('root',{session_id:'session',onEvent:event=>delivered.push(event)});assert.deepEqual(delivered,[event]);assert.equal(result.cursor,7);assert.equal(result.reason,'terminal');assert.equal(requests[1].url,'http://127.0.0.1:60405/v1/runs/root/events/stream?after=0');
  for(const request of requests){assert.equal(request.options.credentials,'same-origin');assert.equal(request.options.redirect,'error');assert.equal(request.options.headers.Authorization,undefined);}assert.equal(requests[1].options.headers.Accept,'text/event-stream');
 });
+test('browser session client accepts successful no-content native operations',async()=>{const client=new BrowserSessionClient('http://127.0.0.1:60405',{fetchImpl:async()=>new Response(null,{status:204})});assert.deepEqual(await client.request('/v1/vcs/init',{}),{});});
 test('browser allows a bounded A2A follow-up request to span native peer discovery and reply',async()=>{
  const timeouts=[],calls=[],client=new BrowserSessionClient('http://127.0.0.1:60405',{requestSignal:timeout=>{timeouts.push(timeout);return undefined;},fetchImpl:async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>({})};}});await client.followUpA2aTask('a2a-operation',1,'synthetic reply');assert.deepEqual(timeouts,[45000]);assert.ok(calls[0].url.endsWith('/a2a/follow-up'));
 });

@@ -20,7 +20,7 @@ checked out locally. [Pinned source](https://github.com/anomalyco/opencode/tree/
 track the current V2 surface and can move independently of the source tag;
 source-defined API contracts take precedence for this inventory.
 
-## Latest local source checkpoint (2026-10-10, `4b7eb96`)
+## Latest feature checkpoint before the VCS change (2026-10-10, `4b7eb96`)
 
 The latest committed source adds trusted embedded xlang3 Python tool
 registrations to the C++ AgentRunner. Its guarded 7-contract regression gate
@@ -57,8 +57,10 @@ provider-reported usage/backend timings appeared in the sidebar in both the
 in-app browser and external Microsoft Edge. The old unlinked `60415` browser tab is excluded from this acceptance. Exact evidence
 and limits: [saved-profile UI run](evidence/browser-live-saved-profile-ui-20261010.json).
 
-The current OpenAPI audit contains **141 operations**: **25** have a mapped C++
-source candidate, **116** remain unmapped, and **zero** are verified parity.
+The current OpenAPI audit contains **141 operations**: **26** have a mapped C++
+source candidate, **115** remain unmapped, and **zero** are verified parity.
+Native Git initialization adds one reviewed source candidate; it does not
+establish full VCS or operation-level parity.
 Compared with v2.0.16, v2.0.26 adds five operations: credential creation/listing,
 server connect/pair, and VCS initialization. These operation IDs are unchanged
 from v2.0.24 through v2.0.26. The audit embeds all **256** pinned
@@ -66,6 +68,18 @@ schema components and resolves all **885** JSON references, including each
 operation's request and response definitions. Its generation is deterministic
 and refreshes native source hashes. A mapping or passing component contract
 alone does not prove end-to-end feature equivalence.
+
+### Native Git initialization checkpoint
+
+`POST /v1/vcs/init` now initializes Git inside the C++ runtime's opened
+workspace, using the bounded Windows process adapter and no caller-selected
+directory or executable. The local owner view can invoke it; concurrent calls
+serialize, and an existing repository returns a conflict. The actual xMind
+binary contract verified the created `.git` marker and Git's reported root,
+authorization, duplicate initialization and unsupported providers. Browser
+contracts verify that the local view forwards the success response. Git status,
+branches, diffs and browser/VS Code command affordances are still missing. See
+[local VCS evidence](evidence/native-vcs-init-local-20261010.json).
 
 ## OpenCode V2 functional baseline
 
@@ -88,7 +102,7 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | Models and providers | Provider authentication, broad provider/model catalogue, per-session model selection, variants and provider/model request settings | Encrypted multi-provider profiles, native discovery and several native wire protocols exist. Broad provider/model capability acceptance, variants, general settings precedence and complete live-client tests remain incomplete. |
 | MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP MCP and scoped OAuth work exist; OAuth renewal/interoperability, resources/prompts/subscriptions, plugin lifecycle and complete command parity remain incomplete. |
 | Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Backend-owned approvals and effect receipts are implemented for scoped operations. General policy rules, durable change snapshots/reversal and full export/sharing contracts remain incomplete. |
-| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 25 have reviewed native source candidates, 116 are unmapped, and none has verified operation-level parity. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
+| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 26 have reviewed native source candidates, 115 are unmapped, and none has verified operation-level parity. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
 
 This is a feature-level checklist, not an assertion that the cited docs are a
 complete specification of every v2.0.26 implementation detail. For API work,
