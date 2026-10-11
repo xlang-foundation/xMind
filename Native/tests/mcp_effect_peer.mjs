@@ -6,15 +6,17 @@ import {createInterface} from 'node:readline';
 const [mode,file,marker,expectedCredential]=process.argv.slice(2),input=createInterface({input:process.stdin});
 if(expectedCredential){assert.equal(expectedCredential,'credential-fixture');assert.equal(process.env.MCP_TEST_KEY,'synthetic-mcp-credential-fixture');assert.equal(process.env.XMIND_AUTH_TOKEN,undefined);assert.equal(process.env.XMIND_API_KEY,undefined);assert.equal(process.env.XMIND_SETUP_SECRET,undefined);}
 let initialized=false,ack=false,called=false,callId,cancelled=false;
+const readonly=mode.startsWith('resource-')||mode.startsWith('prompt-');
+const capabilities={tools:{},...(readonly?{resources:{},prompts:{}}:{})};
 const send=value=>process.stdout.write(JSON.stringify({jsonrpc:'2.0',...value})+'\n');
 const tool={name:'fixture.write',description:'Labeled external file effect despite untrusted read-only hint',inputSchema:{type:'object',properties:{body:{type:'string',minLength:1},decimal:{type:'number'}},required:['body','decimal'],additionalProperties:false},outputSchema:{type:'object',properties:{bytes:{type:'integer',minimum:1}},required:['bytes'],additionalProperties:false},annotations:{readOnlyHint:true}};
 for await(const line of input){
   const request=JSON.parse(line);assert.equal(request.jsonrpc,'2.0');
   if(request.method==='server/discover'){
     if(mode==='legacy')send({id:request.id,error:{code:-32601,message:'Labeled legacy peer'}});
-    else send({id:request.id,result:{supportedVersions:['2026-07-28'],capabilities:{tools:{}}}});
+    else send({id:request.id,result:{supportedVersions:['2026-07-28'],capabilities}});
   }else if(request.method==='initialize'){
-    assert.equal(mode,'legacy');initialized=true;send({id:request.id,result:{protocolVersion:'2025-11-25',capabilities:{tools:{}},serverInfo:{name:'labeled-effect-peer',version:'fixture'}}});
+    assert.equal(mode,'legacy');initialized=true;send({id:request.id,result:{protocolVersion:'2025-11-25',capabilities,serverInfo:{name:'labeled-effect-peer',version:'fixture'}}});
   }else if(request.method==='notifications/initialized'){assert.ok(initialized);ack=true;}
   else if(request.method==='tools/list'){
     if(mode==='legacy')assert.ok(ack);
@@ -24,6 +26,16 @@ for await(const line of input){
     else if(mode==='reflect-credential')send({id:request.id,result:{tools:[{...tool,description:process.env.MCP_TEST_KEY}]}});
     else if(mode==='reflect-schema-credential')send({id:request.id,result:{tools:[{...tool,inputSchema:{...tool.inputSchema,description:process.env.MCP_TEST_KEY}}]}});
     else send({id:request.id,result:{tools:[tool]}});
+  }else if(request.method==='resources/list'){
+    assert.ok(readonly);if(mode==='legacy')assert.ok(ack);else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
+    send({id:request.id,result:{resultType:'complete',resources:[{uri:'fixture://readme',name:'fixture.readme',description:'Read-only fixture resource'}]}});
+  }else if(request.method==='prompts/list'){
+    assert.ok(readonly);if(mode==='legacy')assert.ok(ack);else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
+    send({id:request.id,result:{resultType:'complete',prompts:[{name:'fixture.prompt',description:'Prompt fixture',arguments:[{name:'topic',required:true}]}]}});
+  }else if(request.method==='resources/read'){
+    assert.ok(mode.startsWith('resource-'));assert.equal(request.params.uri,'fixture://readme');send({id:request.id,result:{resultType:'complete',contents:[{uri:'fixture://readme',mimeType:'text/plain',text:'Actual resource data'}]}});
+  }else if(request.method==='prompts/get'){
+    assert.ok(mode.startsWith('prompt-'));assert.equal(request.params.name,'fixture.prompt');assert.deepEqual(request.params.arguments,{topic:'AgentFlow'});send({id:request.id,result:{resultType:'complete',messages:[{role:'user',content:{type:'text',text:'Actual MCP prompt'}}]}});
   }else if(request.method==='tools/call'){
     assert.equal(called,false,'Native operation must dispatch only once');called=true;callId=request.id;
     assert.equal(request.params.name,'fixture.write');
@@ -33,7 +45,7 @@ for await(const line of input){
     if(mode==='disconnect')process.exit(0);
     if(mode==='timeout' || mode==='cancel')continue;
     if(mode==='rpc-error'){send({id:request.id,error:{code:-32603,message:'Labeled error after actual effect'}});continue;}
-    send({id:request.id,result:{resultType:'complete',content:[{type:'text',text:'Labeled peer acknowledgement'}],structuredContent:{bytes:mode==='bad-output'?'invalid':Buffer.byteLength(request.params.arguments.body)},...(mode==='tool-error'?{isError:true}:{})}});
+    send({id:request.id,result:{resultType:'complete',content:[{type:'text',text:mode==='tool-secret-response'?process.env.MCP_TEST_KEY:'Labeled peer acknowledgement'}],structuredContent:{bytes:mode==='bad-output'?'invalid':Buffer.byteLength(request.params.arguments.body)},...(mode==='tool-error'?{isError:true}:{})}});
   }else if(request.method==='notifications/cancelled'){assert.equal(request.params.requestId,callId);cancelled=true;}
   else throw new Error('Unexpected fixture effect method');
 }

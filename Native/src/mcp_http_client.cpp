@@ -19,6 +19,9 @@ void session(const std::string& value) {
 std::string binding(const McpToolDescription& tool) {
     return Json::array({tool.name,tool.description,tool.input_schema_json,tool.annotations_json,tool.output_schema_json.value_or("")}).dump();
 }
+void cursor(const std::optional<std::string>& value){if(value&&(value->empty()||value->size()>4096||value->find('\0')!=std::string::npos))throw std::invalid_argument("Invalid MCP metadata cursor");}
+void identity(const std::string& value,const char* label,std::size_t limit){if(value.empty()||value.size()>limit||value.find('\0')!=std::string::npos)throw std::invalid_argument(std::string("Invalid MCP ")+label);}
+void capability(const McpServerDescription& server,const char* name){if(!Json::parse(server.capabilities_json).contains(name))throw McpProtocolError(std::string("MCP server did not advertise ")+name);}
 }
 struct McpHttpClient::Impl {
     std::string endpoint,legacy_protocol="2025-11-25";
@@ -118,6 +121,26 @@ McpToolPage McpHttpClient::list_tools(std::optional<std::string> cursor,Deadline
         }
         page.tools=std::move(accepted);return page;
     }catch(...){state.retire();throw;}
+}
+McpMetadataPage McpHttpClient::list_resources(std::optional<std::string> next,Deadline deadline,std::stop_token cancel){
+    auto& state=*impl_;if(!ready())throw McpProtocolError("MCP HTTP client is not ready");cursor(next);capability(state.handshake.server(),"resources");
+    try{Json params=Json::object();if(next)params["cursor"]=*next;const auto request=state.requests.prepare("resources/list",params.dump(),state.handshake.server().era);bool attempted=false;return mcp_decode_resource_page(state.exchange(request.frame,state.handshake.server().era,request.request.id,deadline,cancel,attempted)->response);}
+    catch(...){state.retire();throw;}
+}
+McpReadOnlyReply McpHttpClient::read_resource(const std::string& uri,Deadline deadline,std::stop_token cancel){
+    auto& state=*impl_;if(!ready())throw McpProtocolError("MCP HTTP client is not ready");identity(uri,"resource URI",8192);capability(state.handshake.server(),"resources");
+    try{const auto request=state.requests.prepare("resources/read",Json{{"uri",uri}}.dump(),state.handshake.server().era);bool attempted=false;const auto reply=state.exchange(request.frame,state.handshake.server().era,request.request.id,deadline,cancel,attempted);if(!reply)throw McpProtocolError("MCP resource read ended without a correlated result");return mcp_decode_resource_reply(reply->request.id,reply->response);}
+    catch(...){state.retire();throw;}
+}
+McpMetadataPage McpHttpClient::list_prompts(std::optional<std::string> next,Deadline deadline,std::stop_token cancel){
+    auto& state=*impl_;if(!ready())throw McpProtocolError("MCP HTTP client is not ready");cursor(next);capability(state.handshake.server(),"prompts");
+    try{Json params=Json::object();if(next)params["cursor"]=*next;const auto request=state.requests.prepare("prompts/list",params.dump(),state.handshake.server().era);bool attempted=false;return mcp_decode_prompt_page(state.exchange(request.frame,state.handshake.server().era,request.request.id,deadline,cancel,attempted)->response);}
+    catch(...){state.retire();throw;}
+}
+McpReadOnlyReply McpHttpClient::get_prompt(const std::string& name,std::string_view arguments,Deadline deadline,std::stop_token cancel){
+    auto& state=*impl_;if(!ready())throw McpProtocolError("MCP HTTP client is not ready");identity(name,"prompt name",128);capability(state.handshake.server(),"prompts");if(arguments.size()>65536)throw std::invalid_argument("MCP prompt arguments exceed limits");const auto compact=mcp_compact_object(arguments);
+    try{const auto request=state.requests.prepare("prompts/get",Json{{"name",name},{"arguments",Json::parse(compact)}}.dump(),state.handshake.server().era);bool attempted=false;const auto reply=state.exchange(request.frame,state.handshake.server().era,request.request.id,deadline,cancel,attempted);if(!reply)throw McpProtocolError("MCP prompt retrieval ended without a correlated result");return mcp_decode_prompt_reply(reply->request.id,reply->response);}
+    catch(...){state.retire();throw;}
 }
 McpToolReply McpHttpClient::call_tool(const std::string& name,std::string_view arguments,Deadline deadline,std::stop_token cancel) {
     auto& state=*impl_;bool attempted=false;std::string request_id,response;

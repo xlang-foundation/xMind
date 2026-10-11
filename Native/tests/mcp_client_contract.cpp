@@ -22,6 +22,17 @@ void success(char** argv,const std::string& mode) {
         require(page.next_cursor=="opaque-page-2","Opaque cursor must remain exact");
         const auto last=client.list_tools(page.next_cursor,std::chrono::steady_clock::now()+5s);require(last.tools.empty() && !last.next_cursor,"Cursor must be sent to the actual peer");
     }
+    const auto resources=client.list_resources({},std::chrono::steady_clock::now()+5s);
+    require(resources.entries_json.size()==1 && nlohmann::json::parse(resources.entries_json[0])["uri"]=="file:///fixture/readme.md","Actual peer resource catalogue must reach the native owner");
+    require(resources.next_cursor=="resource-page-2","Resource pagination cursor must remain exact");
+    const auto last_resources=client.list_resources(resources.next_cursor,std::chrono::steady_clock::now()+5s);
+    require(last_resources.entries_json.empty()&&!last_resources.next_cursor,"Resource cursor must be sent to the peer");
+    const auto resource=client.read_resource("file:///fixture/readme.md",std::chrono::steady_clock::now()+5s);
+    require(!resource.request_id.empty()&&nlohmann::json::parse(resource.result_json)["contents"][0]["text"]=="fixture resource body","Actual peer resource contents and correlated request identity must be retained");
+    const auto prompts=client.list_prompts({},std::chrono::steady_clock::now()+5s);
+    require(prompts.entries_json.size()==1&&nlohmann::json::parse(prompts.entries_json[0])["arguments"][0]["name"]=="topic","Actual peer prompt definitions must reach the native owner");
+    const auto prompt=client.get_prompt("fixture.prompt",R"({"topic":"AgentFlow"})",std::chrono::steady_clock::now()+5s);
+    require(!prompt.request_id.empty()&&nlohmann::json::parse(prompt.result_json)["messages"][0]["content"]["text"]=="Discuss AgentFlow","Actual peer prompt messages and correlated request identity must be retained");
     client.shutdown();require(!client.ready(),"Closed client cannot remain ready");
     require(client.status().exit_code==0,"Catalogue peer must accept the actual request/response sequence and shutdown");
     rejected([&]{client.connect(std::chrono::steady_clock::now()+5s);});

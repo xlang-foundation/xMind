@@ -372,16 +372,30 @@ void dynamic_effect_authority(const OperationSpec& spec,const DynamicPlanRecord&
     if(spec.tool!="mcp_tool")return;
     if(!captured->contains("mcp_binding")||!(*captured)["mcp_binding"].is_object())throw Conflict("Dynamic MCP tool lacks its native registry binding");
     const auto& binding=(*captured)["mcp_binding"];const auto proposal=Json::parse(spec.arguments_json);
-    if(binding.size()!=9||proposal.size()!=(proposal.contains("instructions")?11u:10u))throw Conflict("Dynamic MCP registry binding has unexpected fields");
+    const bool readonly_binding=binding.contains("kind");
     if(proposal.contains("instructions"))dynamic_mcp_instruction_snapshot(proposal["instructions"],spec.workspace);
-    for(const auto* field:{"server_config_id","config_revision","peer_tool","alias","catalogue_fingerprint","protocol_version","input_schema_json","output_schema_json","annotations_json"})if(!binding.contains(field)||!proposal.contains(field)||binding[field].type()!=proposal[field].type()||binding[field]!=proposal[field])throw Conflict("Dynamic MCP proposal differs from its captured native registry binding");
-    for(const auto* field:{"server_config_id","peer_tool","protocol_version","input_schema_json","annotations_json"})if(!binding[field].is_string()||binding[field].get_ref<const std::string&>().empty()||binding[field].get_ref<const std::string&>().find('\0')!=std::string::npos)throw Conflict("Dynamic MCP registry metadata is invalid");
-    if(binding["server_config_id"].get_ref<const std::string&>().size()>128||binding["peer_tool"].get_ref<const std::string&>().size()>256||binding["protocol_version"].get_ref<const std::string&>().size()>64||!binding["config_revision"].is_number_integer()||binding["config_revision"]<1||binding["config_revision"]>9007199254740991||!binding["catalogue_fingerprint"].is_string())throw Conflict("Dynamic MCP registry identity is invalid");
+    if(readonly_binding){
+        const auto kind=binding["kind"].is_string()?binding["kind"].get<std::string>():std::string{};
+        const auto expected_fields=kind=="resource"?12u:kind=="prompt"?11u:0u;
+        if(!expected_fields||binding.size()!=expected_fields||proposal.size()!=expected_fields+1+(proposal.contains("instructions")?1u:0u))throw Conflict("Dynamic MCP read binding has unexpected fields");
+        auto actual=proposal;actual.erase("arguments_json");actual.erase("instructions");if(actual!=binding)throw Conflict("Dynamic MCP read differs from its captured native binding");
+        for(const auto* field:{"server_config_id","kind","peer_name","alias","catalogue_fingerprint","protocol_version","input_schema_json","annotations_json","metadata_json"})if(!binding.contains(field)||!binding[field].is_string()||binding[field].get_ref<const std::string&>().empty()||binding[field].get_ref<const std::string&>().find('\0')!=std::string::npos)throw Conflict("Dynamic MCP read metadata is invalid");
+        if(kind=="resource"&&(!binding.contains("resource_uri")||!binding["resource_uri"].is_string()||binding["resource_uri"].get_ref<const std::string&>().empty()))throw Conflict("Dynamic MCP resource URI is invalid");
+        if(!binding["config_revision"].is_number_integer()||binding["config_revision"]<1||binding["config_revision"]>9007199254740991||!binding["catalogue_fingerprint"].is_string()||!binding["output_schema_json"].is_null())throw Conflict("Dynamic MCP read identity is invalid");
+        const auto metadata=object_json(binding["metadata_json"].get<std::string>(),262144);(void)metadata;(void)object_json(binding["input_schema_json"].get<std::string>(),262144);(void)object_json(binding["annotations_json"].get<std::string>(),262144);
+    }else{
+        if(binding.size()!=9||proposal.size()!=(proposal.contains("instructions")?11u:10u))throw Conflict("Dynamic MCP registry binding has unexpected fields");
+        for(const auto* field:{"server_config_id","config_revision","peer_tool","alias","catalogue_fingerprint","protocol_version","input_schema_json","output_schema_json","annotations_json"})if(!binding.contains(field)||!proposal.contains(field)||binding[field].type()!=proposal[field].type()||binding[field]!=proposal[field])throw Conflict("Dynamic MCP proposal differs from its captured native registry binding");
+        for(const auto* field:{"server_config_id","peer_tool","protocol_version","input_schema_json","annotations_json"})if(!binding[field].is_string()||binding[field].get_ref<const std::string&>().empty()||binding[field].get_ref<const std::string&>().find('\0')!=std::string::npos)throw Conflict("Dynamic MCP registry metadata is invalid");
+        if(binding["server_config_id"].get_ref<const std::string&>().size()>128||binding["peer_tool"].get_ref<const std::string&>().size()>256||binding["protocol_version"].get_ref<const std::string&>().size()>64||!binding["config_revision"].is_number_integer()||binding["config_revision"]<1||binding["config_revision"]>9007199254740991||!binding["catalogue_fingerprint"].is_string())throw Conflict("Dynamic MCP registry identity is invalid");
+        const auto fingerprint=binding["catalogue_fingerprint"].get<std::string>();if(fingerprint.size()!=64||fingerprint.find_first_not_of("0123456789abcdef")!=std::string::npos||model_tool!="mcp_"+fingerprint.substr(0,48)||binding["alias"]!=model_tool)throw Conflict("Dynamic MCP registry fingerprint differs from its alias");
+        (void)object_json(binding["annotations_json"].get<std::string>(),262144);
+    }
     const auto fingerprint=binding["catalogue_fingerprint"].get<std::string>();
     if(fingerprint.size()!=64||fingerprint.find_first_not_of("0123456789abcdef")!=std::string::npos||model_tool!="mcp_"+fingerprint.substr(0,48)||binding["alias"]!=model_tool)throw Conflict("Dynamic MCP registry fingerprint differs from its alias");
     if(!captured->contains("input_schema_json")||!(*captured)["input_schema_json"].is_string()||(*captured)["input_schema_json"]!=binding["input_schema_json"]||!proposal.contains("arguments_json")||!proposal["arguments_json"].is_string())throw Conflict("Dynamic MCP proposal lacks its exact sealed schema and arguments");
-    (void)object_json(binding["input_schema_json"].get<std::string>(),262144);(void)object_json(binding["annotations_json"].get<std::string>(),262144);(void)object_json(proposal["arguments_json"].get<std::string>());
-    if(!binding["output_schema_json"].is_null()){if(!binding["output_schema_json"].is_string())throw Conflict("Dynamic MCP output schema is invalid");(void)object_json(binding["output_schema_json"].get<std::string>(),262144);}
+    (void)object_json(binding["input_schema_json"].get<std::string>(),262144);(void)object_json(proposal["arguments_json"].get<std::string>());
+    if(!readonly_binding&&!binding["output_schema_json"].is_null()){if(!binding["output_schema_json"].is_string())throw Conflict("Dynamic MCP output schema is invalid");(void)object_json(binding["output_schema_json"].get<std::string>(),262144);}
     if(spec.resources!=std::vector<std::string>{"mcp-server:"+binding["server_config_id"].get<std::string>()})throw Conflict("Dynamic MCP proposal resource differs from its captured server");
     // Registry validates arguments against this schema before requesting the
     // operation. The exact raw payload remains separately controller-approved.

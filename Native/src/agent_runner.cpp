@@ -285,12 +285,12 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());trusted.tools.push_back(PatchTool::definition());}
     if(process_)trusted.tools.push_back(process_->definition());
     if(language_servers_)for(auto& definition:language_servers_->definitions())trusted.tools.push_back(std::move(definition));
-    struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<McpToolRegistry> registry;};
+    struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<std::vector<SecretBytes>> private_credentials=std::make_unique<std::vector<SecretBytes>>();std::unique_ptr<McpToolRegistry> registry;};
     std::vector<McpRuntime> peers;std::set<std::string> aliases;for(const auto& definition:trusted.tools)aliases.insert(definition.name);
     for(const auto& server:settings_.mcp_servers){
         if(!server.enabled)continue;check();
-        check();McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,deadline,token);
-        runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,deadline,token);
+        check();McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,deadline,token,runtime.private_credentials.get());
+        runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,deadline,token,runtime.private_credentials.get());
         for(const auto& definition:runtime.registry->definitions()){
             if(trusted.tools.size()>=64||!aliases.insert(definition.name).second)throw ModelRequestCapacityExceeded("Idle model tool catalogue exceeds limits or has an alias collision");
             trusted.tools.push_back(definition);
@@ -471,7 +471,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             JsonSchema schema(registration.definition.input_schema_json);(void)schema;
             request.tools.push_back(registration.definition);
         }
-        struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<McpToolRegistry> registry;};
+        struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<std::vector<SecretBytes>> private_credentials=std::make_unique<std::vector<SecretBytes>>();std::unique_ptr<McpToolRegistry> registry;};
         std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;Json approval_bindings=Json::array();
         std::unique_ptr<A2aAgentToolRegistry> a2a_tools;
         const auto native_tools=request.tools;
@@ -482,9 +482,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!server.enabled)continue;cancelled(token);
             persistence_.append_event(id,"mcp.connecting",Json{{"server_id",server.id},{"config_revision",server.revision}}.dump()).get();
             cancelled(token);if(std::chrono::steady_clock::now()>=run_deadline)throw RootBudgetDeadlineExceeded("Root execution deadline elapsed before MCP launch");
-            McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,run_deadline,token);
+            McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,run_deadline,token,runtime.private_credentials.get());
             persistence_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",runtime.client->server().protocol_version}}.dump()).get();
-            runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,run_deadline,token);
+            runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,run_deadline,token,runtime.private_credentials.get());
             const auto definitions=runtime.registry->definitions();
             for(const auto& definition:definitions){if(request.tools.size()>=64 || !mcp_tools.emplace(definition.name,runtime.registry.get()).second)throw std::invalid_argument("Model tool catalogue exceeds limits or has an alias collision");request.tools.push_back(definition);}
             const auto bindings=Json::parse(runtime.registry->approval_bindings_json());

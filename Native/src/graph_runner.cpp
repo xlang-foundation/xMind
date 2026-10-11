@@ -139,12 +139,12 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
             const auto available=[&]{if(cancel.stop_requested())throw McpTransportCancelled("Graph MCP execution cancelled before launch");if(std::chrono::steady_clock::now()>=deadline)throw McpTransportTimeout("Graph MCP execution deadline elapsed");};
             available();
             store_.append_event(id,"mcp.connecting",Json{{"server_id",server.id},{"config_revision",server.revision},{"source","graph"}}.dump()).get();
-            available();std::unique_ptr<McpToolClient> client;
-            try{client=connect_mcp_client(server,store_,deadline,cancel);}
+            available();std::unique_ptr<McpToolClient> client;std::vector<SecretBytes> private_credentials;
+            try{client=connect_mcp_client(server,store_,deadline,cancel,&private_credentials);}
             catch(const NotFound&){throw McpCredentialUnavailable("Graph MCP credential is unavailable");}
             catch(const Conflict&){throw McpCredentialUnavailable("Graph MCP credential binding is unavailable");}
             store_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",client->server().protocol_version},{"source","graph"}}.dump()).get();
-            McpToolRegistry registry(*client,store_,*workspace_,server.id,server.revision,deadline,cancel);
+            McpToolRegistry registry(*client,store_,*workspace_,server.id,server.revision,deadline,cancel,&private_credentials);
             const auto definitions=registry.definitions();
             store_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()},{"source","graph"}}.dump()).get();
             if(std::none_of(definitions.begin(),definitions.end(),[&](const auto& definition){return definition.name==name;}))return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_mcp_alias_unavailable"})").get();

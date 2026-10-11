@@ -501,7 +501,7 @@ function profileRoutes(){
 byId('provider-profile').onchange=()=>{byId('provider-key').value='';byId('settings-status').textContent='';profileRoutes();api.postMessage({type:'discardProviderKey'});};
 byId('provider-name').onchange=()=>{byId('provider-key').value='';api.postMessage({type:'discardProviderKey'});};
 byId('profile-use').onclick=()=>{byId('provider-key').value='';api.postMessage({type:'select-provider',id:byId('provider-profile').value});};
-byId('settings').onclick=()=>{byId('provider-key').value='';settings.showModal();byId('provider-key').focus();api.postMessage({type:'mcp-refresh'});};
+byId('settings').onclick=()=>{byId('provider-key').value='';byId('settings-status').textContent='';settings.showModal();byId('provider-key').focus();api.postMessage({type:'mcp-refresh'});};
 byId('mcp-refresh').onclick=()=>api.postMessage({type:'mcp-refresh'});
 function renderMcpSettings(message){
   const list=byId('mcp-servers');list.replaceChildren();byId('mcp-refresh').disabled=!!message.busy;

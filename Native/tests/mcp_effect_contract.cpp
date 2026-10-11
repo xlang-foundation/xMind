@@ -46,21 +46,30 @@ struct Task {
         bindings(discovered_bindings.get_future().share()),result(std::async(std::launch::async,[this,&store,argv,root,run,id,mode,arguments,shared_server_root]{
             const auto started=std::chrono::steady_clock::now();const char* phase="connect";
             const auto peer_root=shared_server_root.value_or(root);const auto config_id="fixture-server-"+peer_root.filename().string();
-            WorkspaceTools workspace(root.string());McpStdioClient client({argv[1],argv[3],{argv[2],mode,(peer_root/"effect.txt").string(),(peer_root/"effect.marker").string()},{}});
+            WorkspaceTools workspace(root.string());McpStdioConfiguration client_config{argv[1],argv[3],{argv[2],mode,(peer_root/"effect.txt").string(),(peer_root/"effect.marker").string()},{}};std::vector<SecretBytes> private_credentials;
+            if(mode=="reflect-credential"||mode=="reflect-schema-credential"||mode=="tool-secret-response"){
+                const std::string fixture_key="synthetic-mcp-credential-fixture";client_config.arguments.push_back("credential-fixture");client_config.environment.push_back({"MCP_TEST_KEY",fixture_key});
+                private_credentials.emplace_back(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(fixture_key.data()),fixture_key.size()));
+            }
+            McpStdioClient client(client_config);
             try {
                 client.connect(std::chrono::steady_clock::now()+5s,cancel.get_token());
                 phase="catalogue";
                 McpToolClient& owned_peer=client;
-                McpToolRegistry registry(owned_peer,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token());
-                const auto definitions=registry.definitions();require(definitions.size()==1 && definitions[0].name.starts_with("mcp_") && definitions[0].name.size()==52,"Native registry must derive a bounded alias from trusted identity and exact snapshot");
-                require(definitions[0].description.find("Peer tool name (untrusted metadata): \"fixture.write\"")!=std::string::npos,"Model catalogue must expose the original peer tool identity as quoted untrusted metadata");
-                const auto snapshot=registry.approval_bindings_json();const auto metadata=Json::parse(snapshot);
-                require(metadata.is_array()&&metadata.size()==1&&metadata[0].is_object()&&metadata[0].size()==9,"Private approval snapshot must contain one exact bounded metadata object per actual alias");
-                for(const auto* field:{"server_config_id","config_revision","peer_tool","alias","catalogue_fingerprint","protocol_version","input_schema_json","output_schema_json","annotations_json"})require(metadata[0].contains(field),"Approval metadata must contain only the immutable registered binding fields");
-                require(metadata[0]["alias"]==definitions[0].name&&metadata[0]["input_schema_json"]==definitions[0].input_schema_json&&metadata[0]["protocol_version"]==(mode=="legacy"?"2025-11-25":"2026-07-28"),"Private binding must preserve the actual alias, exact schema text and negotiated protocol");
+                McpToolRegistry registry(owned_peer,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token(),&private_credentials);
+                const auto definitions=registry.definitions();const auto snapshot=registry.approval_bindings_json();const auto metadata=Json::parse(snapshot);
+                const bool reading=mode.starts_with("resource-")||mode.starts_with("prompt-");const auto desired_kind=mode.starts_with("resource-")?"resource":mode.starts_with("prompt-")?"prompt":"tool";
+                require(definitions.size()==(reading?3u:1u),"Native registry must expose every advertised MCP kind with bounded aliases");
+                const auto binding=std::find_if(metadata.begin(),metadata.end(),[&](const auto& value){return value.value("kind",std::string("tool"))==desired_kind;});require(binding!=metadata.end(),"Private approval snapshot must bind the selected MCP entry kind");
+                const auto selected=std::find_if(definitions.begin(),definitions.end(),[&](const auto& value){return value.name==binding->at("alias").get<std::string>();});require(selected!=definitions.end()&&selected->name.starts_with("mcp_")&&selected->name.size()==52,"Native registry must derive a bounded alias from trusted identity and exact snapshot");
+                if(desired_kind==std::string("tool"))require(selected->description.find("Peer name (untrusted metadata): \"fixture.write\"")!=std::string::npos,"Model catalogue must expose the original peer tool identity as quoted untrusted metadata");
+                require(metadata.is_array()&&metadata.size()==(reading?3u:1u),"Private approval snapshot must contain exact bounded metadata for each advertised kind");
+                if(desired_kind==std::string("tool")){require(binding->size()==9,"Tool approval binding preserves its existing durable contract");for(const auto* field:{"server_config_id","config_revision","peer_tool","alias","catalogue_fingerprint","protocol_version","input_schema_json","output_schema_json","annotations_json"})require(binding->contains(field),"Tool approval metadata must bind its exact immutable description");}
+                else{for(const auto* field:{"server_config_id","config_revision","kind","peer_name","alias","catalogue_fingerprint","protocol_version","input_schema_json","output_schema_json","annotations_json","metadata_json"})require(binding->contains(field),"Read-only approval metadata must bind the full immutable peer description");}
+                require(binding->at("alias")==selected->name&&binding->at("input_schema_json")==selected->input_schema_json&&binding->at("protocol_version")== (mode=="legacy"?"2025-11-25":"2026-07-28"),"Private binding must preserve the actual alias, exact schema text and negotiated protocol");
                 discovered_bindings.set_value(snapshot);
                 phase="invoke";
-                const auto alias=mode=="unknown-alias"?"fixture.write":definitions[0].name;
+                const auto alias=mode=="unknown-alias"?"fixture.write":selected->name;
                 const auto deadline=std::chrono::steady_clock::now()+(mode=="stopped-before-dispatch"?1500ms:mode=="timeout"?1500ms:5s);
                 InstructionPrecondition guidance;if(mode=="skill-changed"){RepositoryInstructionContext context(workspace,workspace.repository_instructions());context.prepare();context.skills().activate(R"({"id":"inspect"})");context.prepare();guidance=context.precondition(".");}
                 const auto output=registry.invoke(id,run,alias,arguments,expiry(),deadline,cancel.get_token(),std::move(guidance));
@@ -97,7 +106,7 @@ int main(int argc,char** argv){
                 require(proposal.state==OperationState::awaiting_approval && contents(workspace/"effect.txt").empty(),"Untrusted readOnlyHint must never bypass real controller approval");
                 require(task.result.wait_for(30ms)==std::future_status::timeout,"Waiting must not imply permission");
                 const auto payload=Json::parse(proposal.spec.arguments_json);
-                require(payload["server_config_id"]=="fixture-server-"+std::string(mode) && payload["config_revision"]==7 && payload["peer_tool"]=="fixture.write" && payload["catalogue_fingerprint"].get<std::string>().size()==64,"Approval must bind trusted configuration, peer name and schema snapshot");
+                require(payload["server_config_id"]=="fixture-server-"+std::string(mode) && payload["config_revision"]==7 && payload["peer_tool"]=="fixture.write" && !payload.contains("kind") && payload["catalogue_fingerprint"].get<std::string>().size()==64,"Tool approval must preserve trusted configuration, peer name and its durable schema binding");
                 require(payload["arguments_json"].get<std::string>().find("1.00000000000000000001")!=std::string::npos,"Durable proposal must retain exact approved numeric bytes");
                 auto actual_binding=payload;require(actual_binding.erase("arguments_json")==1,"Operation must retain its exact approved arguments separately from private authority metadata");
                 require(actual_binding==Json::parse(task.bindings.get()).at(0),"Actual durable MCP proposal must use exactly the same discovered binding as the sealed private snapshot");
@@ -107,6 +116,24 @@ int main(int argc,char** argv){
                 Task duplicate(store,argv,workspace,mode,mode,mode);rejects<Conflict>([&]{duplicate.result.get();});require(contents(workspace/"effect.txt")=="actual native MCP effect\n","One operation identity must not replay an actual peer effect");
                 store.transition(mode,RunState::running,RunState::completed).get();
             }
+            for(const auto& item:std::vector<std::pair<std::string,std::string>>{{"resource-read","{}"},{"prompt-read",R"({"topic":"AgentFlow"})"}}){
+                const auto& mode=item.first;const auto workspace=root(mode);start(store,mode);Task task(store,argv,workspace,mode,mode,mode,item.second);const auto proposal=proposed(store,mode);
+                const auto payload=Json::parse(proposal.spec.arguments_json);const auto expected_kind=mode.starts_with("resource-")?"resource":"prompt";
+                require(proposal.state==OperationState::awaiting_approval&&payload["kind"]==expected_kind&&contents(workspace/"effect.txt").empty(),"MCP resource/prompt reads must require explicit durable approval before peer access");
+                require(task.result.wait_for(30ms)==std::future_status::timeout,"MCP resource/prompt read must wait for approval");
+                store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();const auto actual=Json::parse(task.result.get());
+                require(actual["kind"]==expected_kind&&actual["acknowledged_by_peer"]==true&&actual["independently_verified"]==false,"Read-only MCP result must record its exact operation kind and peer acknowledgement");
+                const auto response=Json::parse(actual["response_json"].get<std::string>());
+                if(expected_kind==std::string("resource"))require(response["result"]["contents"][0]["text"]=="Actual resource data"&&payload["resource_uri"]=="fixture://readme","Actual resource data and fixed URI must be bound to the approved call");
+                else require(response["result"]["messages"][0]["content"]["text"]=="Actual MCP prompt"&&payload["peer_name"]=="fixture.prompt"&&payload["arguments_json"]==R"({"topic":"AgentFlow"})","Actual prompt message and exact approved arguments must be retained");
+                require(store.operation(mode).get().state==OperationState::succeeded&&contents(workspace/"effect.txt").empty(),"Approved MCP reads must complete durably without inventing a peer write");store.transition(mode,RunState::running,RunState::completed).get();
+            }
+            {
+                const std::string mode="resource-denied";const auto workspace=root(mode);start(store,mode);Task task(store,argv,workspace,mode,mode,mode,"{}");const auto proposal=proposed(store,mode);require(proposal.state==OperationState::awaiting_approval,"Resource read must not silently bypass controller approval");store.decide_operation(mode,OperationDecision::deny,"fixture-controller").get();rejects<PermissionDenied>([&]{task.result.get();});require(store.operation(mode).get().state==OperationState::denied&&contents(workspace/"effect.txt").empty(),"Denied resource read must not invoke the peer");store.transition(mode,RunState::running,RunState::failed).get();
+            }
+            {
+                const std::string mode="tool-secret-response";const auto workspace=root(mode);start(store,mode);Task task(store,argv,workspace,mode,mode,mode);proposed(store,mode);store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();rejects<McpEffectUncertain>([&]{task.result.get();});const auto operation=store.operation(mode).get();require(operation.state==OperationState::uncertain&&Json::parse(operation.result_json)["reason"]=="mcp_secret_reflection"&&operation.result_json.find("synthetic-mcp-credential-fixture")==std::string::npos,"A peer-reflected credential must quarantine an acknowledged tool result without storing or exposing the secret");require(contents(workspace/"effect.txt")=="actual native MCP effect\n","Secret reflection detection must not rewrite or replay the acknowledged external effect");store.transition(mode,RunState::running,RunState::failed).get();
+            }
             for(const auto* mode:{"denied","cancel-wait","stopped-before-dispatch"}){
                 const auto workspace=root(mode);start(store,mode);Task task(store,argv,workspace,mode,mode,mode);proposed(store,mode);
                 if(std::string(mode)=="denied"){store.decide_operation(mode,OperationDecision::deny,"fixture-controller").get();rejects<PermissionDenied>([&]{task.result.get();});}
@@ -114,9 +141,9 @@ int main(int argc,char** argv){
                 else{std::this_thread::sleep_for(1600ms);store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();rejects<McpEffectNotDispatched>([&]{task.result.get();});require(store.operation(mode).get().state==OperationState::failed,"Known pre-dispatch stop must not invent uncertainty");}
                 require(contents(workspace/"effect.txt").empty(),"Denied/cancelled/stopped proposal must not invoke the external tool");store.transition(mode,RunState::running,RunState::failed).get();
             }
-            for(const auto* mode:{"bad-catalog-schema","duplicate-page","cursor-cycle","unknown-alias","invalid-arguments"}){
+            for(const auto* mode:{"bad-catalog-schema","duplicate-page","cursor-cycle","unknown-alias","invalid-arguments","reflect-credential","reflect-schema-credential"}){
                 const auto workspace=root(mode);start(store,mode);Task task(store,argv,workspace,mode,mode,mode,std::string(mode)=="invalid-arguments"?R"({"body":3,"decimal":1})":R"({"body":"blocked","decimal":1.00000000000000000001})");
-                if(std::string(mode)=="duplicate-page" || std::string(mode)=="cursor-cycle")rejects<McpProtocolError>([&]{task.result.get();});else rejects<std::invalid_argument>([&]{task.result.get();});
+                if(std::string(mode)=="duplicate-page" || std::string(mode)=="cursor-cycle" || std::string(mode)=="reflect-credential" || std::string(mode)=="reflect-schema-credential")rejects<McpProtocolError>([&]{task.result.get();});else rejects<std::invalid_argument>([&]{task.result.get();});
                 rejects<NotFound>([&]{store.operation(mode).get();});require(contents(workspace/"effect.txt").empty(),"Invalid schema/catalog/alias/arguments must not create approval or dispatch");store.transition(mode,RunState::running,RunState::failed).get();
             }
             for(const auto* mode:{"disconnect","timeout","cancel","rpc-error","tool-error","bad-output"}){

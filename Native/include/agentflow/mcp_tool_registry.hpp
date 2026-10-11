@@ -3,11 +3,13 @@
 #include "agentflow/permission_waiter.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/instruction_precondition.hpp"
+#include "agentflow/secret_protection.hpp"
 
 namespace agentflow {
 struct McpEffectUncertain : std::runtime_error {using std::runtime_error::runtime_error;};
 struct McpOutcomeUnrecorded : std::runtime_error {using std::runtime_error::runtime_error;};
 struct McpEffectNotDispatched : std::runtime_error {using std::runtime_error::runtime_error;};
+struct McpReadFailed : std::runtime_error {using std::runtime_error::runtime_error;};
 // Owning backend adapter; config identity/revision comes from trusted backend
 // configuration, workspace identity from the opened directory. One caller.
 // Discovery completes before any alias becomes usable. All remote calls require
@@ -18,7 +20,7 @@ class McpToolRegistry {
 public:
     McpToolRegistry(McpToolClient& client,PersistenceService& store,WorkspaceTools& workspace,
         std::string config_id,std::int64_t config_revision,McpToolClient::Deadline deadline,
-        std::stop_token cancel={});
+        std::stop_token cancel={},const std::vector<SecretBytes>* private_credentials=nullptr);
     ~McpToolRegistry();
     McpToolRegistry(const McpToolRegistry&)=delete;
     McpToolRegistry& operator=(const McpToolRegistry&)=delete;

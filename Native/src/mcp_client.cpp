@@ -29,6 +29,17 @@ struct McpStdioClient::Impl {
     McpWireMessage pop() {
         auto message=std::move(incoming.front());incoming.pop_front();queued_bytes-=message.raw_json.size()+message.payload_json.size();return message;
     }
+    McpCorrelatedReply exchange(const std::string& method,const std::string& params_json,Deadline deadline,std::stop_token cancel) {
+        const auto request=requests.prepare(method,params_json,handshake.server().era);process.write(request.frame,deadline,cancel);unsolicited=0;
+        for(;;){
+            if(incoming.empty())read(deadline,cancel);
+            while(!incoming.empty()){
+                const auto message=pop();if(peer_message(message,deadline,cancel))continue;
+                const auto reply=requests.receive(message);if(!reply)continue;
+                if(reply->request.id!=request.request.id)throw McpProtocolError("MCP read-only response identity changed");return *reply;
+            }
+        }
+    }
     bool peer_message(const McpWireMessage& message,Deadline deadline,std::stop_token cancel) {
         if(message.kind==McpMessageKind::notification || message.kind==McpMessageKind::request) {
             if(++unsolicited>256)throw McpProtocolError("MCP unsolicited message limit exceeded");
@@ -103,6 +114,36 @@ McpToolPage McpStdioClient::list_tools(std::optional<std::string> cursor,Deadlin
         }
         return std::move(*page);
     }catch(...) {state.retire();throw;}
+}
+McpMetadataPage McpStdioClient::list_resources(std::optional<std::string> cursor,Deadline deadline,std::stop_token cancel){
+    auto& state=*impl_;if(!ready()){if(state.live)state.retire();throw McpProtocolError("MCP client is not ready");}
+    if(cursor&&(cursor->empty()||cursor->size()>4096||cursor->find('\0')!=std::string::npos))throw std::invalid_argument("Invalid MCP resource cursor");
+    if(!Json::parse(state.handshake.server().capabilities_json).contains("resources"))throw McpProtocolError("MCP server did not advertise resources");
+    Json params=Json::object();if(cursor)params["cursor"]=*cursor;
+    try{return mcp_decode_resource_page(state.exchange("resources/list",params.dump(),deadline,cancel).response);}
+    catch(...){state.retire();throw;}
+}
+McpReadOnlyReply McpStdioClient::read_resource(const std::string& uri,Deadline deadline,std::stop_token cancel){
+    auto& state=*impl_;if(!ready()){if(state.live)state.retire();throw McpProtocolError("MCP client is not ready");}
+    if(uri.empty()||uri.size()>8192||uri.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid MCP resource URI");
+    if(!Json::parse(state.handshake.server().capabilities_json).contains("resources"))throw McpProtocolError("MCP server did not advertise resources");
+    try{const auto reply=state.exchange("resources/read",Json{{"uri",uri}}.dump(),deadline,cancel);return mcp_decode_resource_reply(reply.request.id,reply.response);}
+    catch(...){state.retire();throw;}
+}
+McpMetadataPage McpStdioClient::list_prompts(std::optional<std::string> cursor,Deadline deadline,std::stop_token cancel){
+    auto& state=*impl_;if(!ready()){if(state.live)state.retire();throw McpProtocolError("MCP client is not ready");}
+    if(cursor&&(cursor->empty()||cursor->size()>4096||cursor->find('\0')!=std::string::npos))throw std::invalid_argument("Invalid MCP prompt cursor");
+    if(!Json::parse(state.handshake.server().capabilities_json).contains("prompts"))throw McpProtocolError("MCP server did not advertise prompts");
+    Json params=Json::object();if(cursor)params["cursor"]=*cursor;
+    try{return mcp_decode_prompt_page(state.exchange("prompts/list",params.dump(),deadline,cancel).response);}
+    catch(...){state.retire();throw;}
+}
+McpReadOnlyReply McpStdioClient::get_prompt(const std::string& name,std::string_view arguments,Deadline deadline,std::stop_token cancel){
+    auto& state=*impl_;if(!ready()){if(state.live)state.retire();throw McpProtocolError("MCP client is not ready");}
+    if(name.empty()||name.size()>128||name.find('\0')!=std::string::npos||arguments.size()>65536)throw std::invalid_argument("Invalid MCP prompt request");
+    if(!Json::parse(state.handshake.server().capabilities_json).contains("prompts"))throw McpProtocolError("MCP server did not advertise prompts");
+    try{const auto request=Json{{"name",name},{"arguments",Json::parse(mcp_compact_object(arguments))}}.dump();const auto reply=state.exchange("prompts/get",request,deadline,cancel);return mcp_decode_prompt_reply(reply.request.id,reply.response);}
+    catch(...){state.retire();throw;}
 }
 bool McpStdioClient::ready() const {
     if(!impl_->live || impl_->closed)return false;

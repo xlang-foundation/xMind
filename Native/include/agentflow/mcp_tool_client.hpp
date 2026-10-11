@@ -22,6 +22,13 @@ struct McpToolPage {
     std::vector<McpToolDescription> tools;
     std::optional<std::string> next_cursor;
 };
+struct McpMetadataPage {
+    // Each entry is a validated MCP Resource or Prompt object. Preserve the
+    // exact peer JSON for fingerprinting and durable approval binding.
+    std::vector<std::string> entries_json;
+    std::optional<std::string> next_cursor;
+};
+struct McpReadOnlyReply {std::string request_id,response_json,result_json;};
 class McpToolRegistry;
 // One native access owner; discovery is metadata, not execution permission.
 // All transport bindings dispatch only through the same journal-backed registry.
@@ -32,6 +39,18 @@ public:
     virtual ~McpToolClient()=default;
     virtual McpToolPage list_tools(std::optional<std::string> cursor,Deadline deadline,
         std::stop_token cancel={})=0;
+    virtual McpMetadataPage list_resources(std::optional<std::string>,Deadline,std::stop_token={}) {
+        throw McpProtocolError("MCP resource discovery is not implemented by this client");
+    }
+    virtual McpReadOnlyReply read_resource(const std::string&,Deadline,std::stop_token={}) {
+        throw McpProtocolError("MCP resource reads are not implemented by this client");
+    }
+    virtual McpMetadataPage list_prompts(std::optional<std::string>,Deadline,std::stop_token={}) {
+        throw McpProtocolError("MCP prompt discovery is not implemented by this client");
+    }
+    virtual McpReadOnlyReply get_prompt(const std::string&,std::string_view,Deadline,std::stop_token={}) {
+        throw McpProtocolError("MCP prompt retrieval is not implemented by this client");
+    }
     virtual bool ready() const=0;
     virtual const McpServerDescription& server() const=0;
     virtual void shutdown() noexcept=0;

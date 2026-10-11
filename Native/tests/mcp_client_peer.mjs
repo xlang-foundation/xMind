@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import {createInterface} from 'node:readline';
 const mode=process.argv[2], input=createInterface({input:process.stdin});
-let initialized=false,ack=false,listing,ping=false,unsupported=false,pages=0,cancelled=false;
+let initialized=false,ack=false,listing,ping=false,unsupported=false,pages=0,cancelled=false,resourcePages=0,promptPages=0;
 const send=value=>process.stdout.write(JSON.stringify({jsonrpc:'2.0',...value})+'\n');
 const tool={name:'fixture.read',description:'Untrusted labeled fixture description',inputSchema:{type:'object',properties:{path:{type:'string'}},required:['path']},annotations:{readOnlyHint:true}};
 function page(request){
@@ -38,16 +38,31 @@ for await(const line of input){
     assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
     assert.deepEqual(request.params._meta['io.modelcontextprotocol/clientCapabilities'],{});
     if(mode==='legacy')send({id:request.id,error:{code:-32601,message:'Labeled legacy fixture'}});
-    else send({id:request.id,result:{supportedVersions:['2026-07-28'],capabilities:{tools:{}}}});
+    else send({id:request.id,result:{supportedVersions:['2026-07-28'],capabilities:{tools:{},resources:{},prompts:{}}}});
   }else if(request.method==='initialize'){
     assert.equal(mode,'legacy');assert.equal(initialized,false);initialized=true;
-    send({id:request.id,result:{protocolVersion:'2025-11-25',capabilities:{tools:{}},serverInfo:{name:'labeled-client-peer',version:'fixture'}}});
+    send({id:request.id,result:{protocolVersion:'2025-11-25',capabilities:{tools:{},resources:{},prompts:{}},serverInfo:{name:'labeled-client-peer',version:'fixture'}}});
   }else if(request.method==='notifications/initialized'){
     assert.equal(mode,'legacy');assert.ok(initialized);assert.equal(ack,false);ack=true;
   }else if(request.method==='tools/list'){
     if(mode==='legacy'){assert.ok(ack);assert.equal(request.params._meta,undefined);}
     else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
     page(request);
+  }else if(request.method==='resources/list'){
+    if(mode==='legacy')assert.equal(request.params._meta,undefined);else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
+    resourcePages++;
+    if(resourcePages===1){assert.equal(request.params.cursor,undefined);send({id:request.id,result:{resultType:'complete',resources:[{uri:'file:///fixture/readme.md',name:'fixture.readme',mimeType:'text/markdown',description:'Untrusted resource description'}],nextCursor:'resource-page-2'}});}
+    else{assert.equal(request.params.cursor,'resource-page-2');send({id:request.id,result:{resultType:'complete',resources:[]}});}
+  }else if(request.method==='resources/read'){
+    assert.equal(request.params.uri,'file:///fixture/readme.md');
+    send({id:request.id,result:{resultType:'complete',contents:[{uri:request.params.uri,mimeType:'text/markdown',text:'fixture resource body'}]}});
+  }else if(request.method==='prompts/list'){
+    if(mode==='legacy')assert.equal(request.params._meta,undefined);else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
+    promptPages++;assert.equal(request.params.cursor,undefined);
+    send({id:request.id,result:{resultType:'complete',prompts:[{name:'fixture.prompt',description:'Untrusted prompt description',arguments:[{name:'topic',description:'Topic text',required:true}]}]}});
+  }else if(request.method==='prompts/get'){
+    assert.equal(request.params.name,'fixture.prompt');assert.deepEqual(request.params.arguments,{topic:'AgentFlow'});
+    send({id:request.id,result:{resultType:'complete',description:'Fixture prompt',messages:[{role:'user',content:{type:'text',text:'Discuss AgentFlow'}}]}});
   }else if(request.method==='notifications/cancelled'){
     assert.ok(mode==='timeout' || mode==='cancel' || mode==='modern-request' || mode==='flood' || mode==='unknown-id');
     assert.equal(request.params.requestId,listing);cancelled=true;
