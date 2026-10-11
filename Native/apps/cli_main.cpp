@@ -437,7 +437,7 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                 std::cerr<<"Review the exact operation above. Enter /allow "<<operationId<<", /deny "<<operationId<<", /cancel or /exit to detach.\n";
                 std::string decision;
                 if(!input||!input->read_line(decision))throw std::runtime_error("CLI detached before a decision; backend execution remains owned by the server");
-                if(decision=="/exit"){if(input->source_closed())throw std::runtime_error("CLI detached before a decision; backend execution remains owned by the server");std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
+                if(decision=="/exit"){std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
                 std::string route;Json body;
                 if(decision=="/cancel"){route=path+"/cancel";body=Json::object();}
                 else if(decision=="/allow "+operationId || decision=="/deny "+operationId){route="/v1/operations/"+operationId+"/decision";body={{"decision",decision.starts_with("/allow ")?"allow":"deny"}};}
@@ -467,7 +467,7 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                     if(!questions.empty()||resume){
                         std::cout<<Json{{"type","plan_human_review"},{"snapshot",snapshot}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Plan review output is unavailable");
                         std::cerr<<"Enter /input REQUEST_ID JSON for a displayed question"<<(resume?", /resume":"")<<", /cancel or /exit to detach.\n";
-                        std::string answer;if(!input||!input->read_line(answer))throw std::runtime_error("CLI detached before plan input; backend execution remains owned by the server");if(answer=="/exit"){if(input->source_closed())throw std::runtime_error("CLI detached before plan input; backend execution remains owned by the server");std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
+                        std::string answer;if(!input||!input->read_line(answer))throw std::runtime_error("CLI detached before plan input; backend execution remains owned by the server");if(answer=="/exit"){std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
                         std::string route;Json input;
                         if(answer=="/cancel"){route=path+"/cancel";input=Json::object();}
                         else if(answer=="/resume"&&resume){route=path+"/plan/resume";input={{"expected_revision",revision},{"expected_state_sequence",sequence}};}
@@ -495,7 +495,7 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                     std::cout<<Json{{"type","graph_human_review"},{"root_run_id",run},{"checkpoint_revision",revision},{"steps",steps}}.dump()<<'\n'<<std::flush;
                     if(!std::cout)throw std::runtime_error("Graph review output is unavailable");
                     std::cerr<<"Enter /input NODE_ID JSON for a displayed step, /cancel or /exit to detach.\n";
-                    std::string answer;if(!input||!input->read_line(answer))throw std::runtime_error("CLI detached before graph input; backend execution remains owned by the server");if(answer=="/exit"){if(input->source_closed())throw std::runtime_error("CLI detached before graph input; backend execution remains owned by the server");std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
+                    std::string answer;if(!input||!input->read_line(answer))throw std::runtime_error("CLI detached before graph input; backend execution remains owned by the server");if(answer=="/exit"){std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
                     std::string route;Json body;
                     if(answer=="/cancel"){route=path+"/cancel";body=Json::object();}
                     else if(answer.starts_with("/input ")){const auto split=answer.find(' ',7);const auto node=split==std::string::npos?std::string{}:answer.substr(7,split-7);const auto input=split==std::string::npos?std::string{}:answer.substr(split+1);if(!waiting.contains(node)||input.empty()||input.size()>65536){std::cerr<<"No input sent. Use a displayed node and bounded JSON.\n";continue;}route="/v1/graph-runs/"+run+"/human/"+node;body={{"input_json",input},{"expected_checkpoint_revision",revision}};}
@@ -834,7 +834,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
         const auto watched=watch_run(client,headers,id,0,graphSubmission,true,&input);if(watched==run_detached)return exit_status();last_result=watched;profile_result=0;
         std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
     }
-    if(!std::cin.eof())throw std::runtime_error("Chat input is unavailable");
+    if(!input.source_closed())throw std::runtime_error("Chat input is unavailable");
     return exit_status();
 }
 

@@ -722,10 +722,18 @@ if(BUILD_TESTING)
     add_custom_command(TARGET agentflow_language_server_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_language_server_contract>")
     if(AGENTFLOW_RUST_ANALYZER_EXECUTABLE)
+      find_program(AGENTFLOW_CARGO_EXECUTABLE cargo HINTS "$ENV{USERPROFILE}/.cargo/bin")
+      if(AGENTFLOW_CARGO_EXECUTABLE)
+        add_test(NAME native_language_server_rust_fixture_check COMMAND "${AGENTFLOW_CARGO_EXECUTABLE}" check --offline --manifest-path "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/lsp-rust/Cargo.toml")
+        set_tests_properties(native_language_server_rust_fixture_check PROPERTIES FIXTURES_SETUP rust_analyzer_semantic_project TIMEOUT 60)
+      endif()
       add_test(NAME native_language_server_rust_analyzer_contract COMMAND agentflow_language_server_contract
         "${AGENTFLOW_RUST_ANALYZER_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/lsp-rust" "src/lib.rs"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
       set_tests_properties(native_language_server_rust_analyzer_contract PROPERTIES TIMEOUT 120)
+      if(AGENTFLOW_CARGO_EXECUTABLE)
+        set_tests_properties(native_language_server_rust_analyzer_contract PROPERTIES FIXTURES_REQUIRED rust_analyzer_semantic_project)
+      endif()
     endif()
     add_executable(agentflow_language_server_configuration_contract tests/language_server_configuration_contract.cpp)
     target_include_directories(agentflow_language_server_configuration_contract PRIVATE third_party)

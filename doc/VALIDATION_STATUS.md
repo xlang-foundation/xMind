@@ -1,5 +1,19 @@
 # Current native validation
 
+## Current Release native gate — 2026-10-11
+
+The complete Release `ALL_BUILD` succeeds. The full CTest run completed **132/134**;
+the two failures were a legacy delegation fixture expecting schema v14 and a
+scripted CLI `/exit` being rejected when stdin closed immediately after the
+command. Both are fixed. The delegation migration and agent edit/approval HTTP
+contracts then passed together (**2/2**); the related v15 migration, persistence,
+process observer, shell approval, CLI patch and Rust Analyzer contracts also
+passed in focused runs. Rust Analyzer now receives an offline Cargo fixture
+check before the semantic LSP contract, preventing cold-index false failures.
+All 134 tests have passed across the full run and targeted reruns; the full
+134-test suite has not yet been repeated after those final fixes. This is local
+Release validation, not installed IDE or packaged release acceptance.
+
 ## Shared-client saved-provider status — 2026-10-11
 
 VSIX `0.1.9` is installed as `agentflow-local.agentflow@0.1.9`. Settings now

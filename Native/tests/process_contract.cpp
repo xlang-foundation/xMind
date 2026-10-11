@@ -47,7 +47,7 @@ int main(int argc,char** argv) {
             auto c=config(argv,"flood",directory/"flood.txt");c.output_limit=8192;std::size_t observed=0;
             const auto result=ForegroundProcess::run(c,{},[&](bool,std::string_view bytes){observed+=bytes.size();});
             require(result.exit_code==0 && result.stdout_count==512*1024 && result.stderr_count==512*1024,"Both actual high-volume pipes must drain without deadlock");
-            require(result.truncated && result.stdout_bytes.size()+result.stderr_bytes.size()==8192 && observed==8192,"Retention and observer must obey one bounded output budget");
+            require(result.truncated && result.stdout_bytes.size()+result.stderr_bytes.size()==8192 && observed==result.stdout_count+result.stderr_count,"Retention must obey its bounded budget while the observer receives every raw byte");
             require(file(directory/"flood.txt")=="both channels drained","Child must finish both actual writes");
         }
         {
