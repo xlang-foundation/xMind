@@ -7,8 +7,10 @@
 #include <algorithm>
 #include <array>
 #include <condition_variable>
+#include <cstdint>
 #include <cwctype>
 #include <initializer_list>
+#include <limits>
 #include <mutex>
 #include <vector>
 
@@ -138,8 +140,12 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         default:throw std::invalid_argument("Unsupported provider credential header");
     }
     if(!bearer&&input.credential_header!=CredentialHeader::bearer)throw std::invalid_argument("Provider API-key header requires a credential");
-    if(input.protocol!=ProviderHttpProtocol::generic&&input.protocol!=ProviderHttpProtocol::anthropic)
+    if(input.protocol!=ProviderHttpProtocol::generic&&input.protocol!=ProviderHttpProtocol::anthropic&&input.protocol!=ProviderHttpProtocol::a2a_jsonrpc)
         throw std::invalid_argument("Unsupported provider HTTP protocol");
+    if(input.protocol==ProviderHttpProtocol::a2a_jsonrpc&&input.a2a_version!=""&&input.a2a_version!="0.3"&&input.a2a_version!="1.0")
+        throw std::invalid_argument("Unsupported A2A HTTP protocol version");
+    if(input.protocol!=ProviderHttpProtocol::a2a_jsonrpc&&!input.a2a_version.empty())
+        throw std::invalid_argument("A2A protocol version requires an A2A request");
     if(cancel.stop_requested()) throw TransportCancelled("Provider request cancelled");
     const auto deadline=Clock::now()+input.deadline;
     const auto parsed=endpoint(input.url);
@@ -151,6 +157,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     headers.value=kind==TransferKind::json_get?L"":formMode?L"Content-Type: application/x-www-form-urlencoded\r\n":L"Content-Type: application/json\r\n";
     headers.value+=mcp?L"Accept: application/json, text/event-stream\r\n":json?L"Accept: application/json\r\n":L"Accept: text/event-stream\r\n";
     if(input.protocol==ProviderHttpProtocol::anthropic)headers.value+=L"anthropic-version: 2023-06-01\r\n";
+    if(input.protocol==ProviderHttpProtocol::a2a_jsonrpc&&!input.a2a_version.empty())headers.value+=L"A2A-Version: "+wide(input.a2a_version)+L"\r\n";
     if(mcp) {
         auto projected=mcp_http_request_headers(input.body,mcp->era,mcp->legacy_protocol);
         if(mcp->input_schema) {
@@ -237,6 +244,10 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
                 auto parsed=nlohmann::json::parse(body.value,nullptr,false);
                 if(parsed.is_object() && parsed.contains("error") && parsed["error"].is_object()) {
                     const auto& error=parsed["error"];
+                    if(input.protocol==ProviderHttpProtocol::a2a_jsonrpc&&error.contains("code")&&error["code"].is_number_integer())try{
+                        if(error["code"].is_number_unsigned()){const auto code=error["code"].get<std::uint64_t>();if(code<=static_cast<std::uint64_t>(std::numeric_limits<int>::max()))failure.json_rpc_code=static_cast<int>(code);}
+                        else {const auto code=error["code"].get<std::int64_t>();if(code>=std::numeric_limits<int>::min()&&code<=std::numeric_limits<int>::max())failure.json_rpc_code=static_cast<int>(code);}
+                    }catch(const std::exception&){}
                     auto allowed=[&](const char* key,std::initializer_list<std::string_view> values){
                         if(!error.contains(key)||!error[key].is_string()) return std::string{};
                         const auto& value=error[key].get_ref<const std::string&>();
@@ -260,6 +271,12 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     }
     auto media=lower(std::wstring(content.data()));media=media.substr(0,media.find(L';'));
     while(!media.empty() && (media.back()==L' ' || media.back()==L'\t')) media.pop_back();
+    if(input.observe_response){
+        std::string content_type,version;
+        for(auto c:media){if(c<32||c>126)throw TransportError("Invalid HTTP response content type");content_type+=static_cast<char>(c);}
+        if(input.protocol==ProviderHttpProtocol::a2a_jsonrpc){const auto value=response_field(request.value,L"A2A-Version");if(value)version=*value;}
+        input.observe_response(static_cast<int>(status),content_type,version);
+    }
     if(mcp) {
         McpHttpResponseHead head;head.status=static_cast<int>(status);
         for(auto c:media){if(c<32 || c>126)throw TransportError("Invalid MCP response content type");head.media_type+=static_cast<char>(c);}

@@ -14,17 +14,20 @@ struct TransportCancelled : TransportError {using TransportError::TransportError
 struct TransportTimeout : TransportError {using TransportError::TransportError;};
 struct ProviderHttpError : TransportError {
     int status;
+    int json_rpc_code=0;
     std::string type,code,param;
     explicit ProviderHttpError(int code):TransportError("Provider returned HTTP "+std::to_string(code)),status(code) {}
 };
 // Backend-selected credential placement; callers cannot supply arbitrary headers.
 enum class CredentialHeader {bearer,x_api_key,x_goog_api_key};
-enum class ProviderHttpProtocol {generic,anthropic};
+enum class ProviderHttpProtocol {generic,anthropic,a2a_jsonrpc};
 struct HttpStreamRequest {
     std::string url,body;
     std::chrono::milliseconds deadline{120000},idle_timeout{60000};
     CredentialHeader credential_header=CredentialHeader::bearer;
     ProviderHttpProtocol protocol=ProviderHttpProtocol::generic;
+    std::string a2a_version;
+    std::function<void(int,const std::string&,const std::string&)> observe_response;
 };
 // Platform transport, outside the core. HTTPS uses OS certificate verification;
 // unencrypted HTTP is accepted only for explicitly configured loopback endpoints.

@@ -9,6 +9,18 @@ streaming, listing and cancellation. The native `delegate_tasks` tool creates
 bounded local read-only agents. xMind does not yet connect to a separately
 configured remote A2A agent, and local delegation is not outbound A2A support.
 
+The working tree now contains a low-level native JSON-RPC client for an
+owner-configured AgentCard URL. It uses the native HTTP transport, supports
+JSON-RPC send/get/cancel operations for A2A 1.0 and the legacy 0.3 method names,
+and downgrades only when a version-1 card request returns the A2A
+`VersionNotSupportedError` code. It honors a directly configured card path,
+checks response correlation, bounds and redacts peer errors, and currently
+accepts only interfaces on the configured card origin. A local loopback peer
+contract is being added; this does not establish independent SDK acceptance.
+The client is not yet registered in the runtime, persistence, AgentRunner,
+graph, CLI, browser or VS Code, and it does not yet support streaming or
+durable recovery after uncertain remote dispatch.
+
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),
 [streaming](native-a2a-streaming.md) and the [AgentFlow plan](../AGENTFLOW_PLAN.md).
@@ -65,6 +77,9 @@ registered delegation policy.
 1. Pin the A2A specification revision and SDK peer revision used for this
    implementation. Verify the exact current 1.0 and supported 0.3 wire shapes,
    card security, JSON-RPC error mapping, interface binding and state model.
+   The [current versioning contract](https://github.com/a2aproject/A2A/blob/main/docs/specification.md#36-versioning)
+   requires `A2A-Version` on each 1.0 request; downgrade is permitted only
+   after the peer reports `VersionNotSupportedError` (-32009).
 2. Use the official SDK as an independent native-client peer. Verify discovery,
    successful send, task return, `GetTask`, stream and resubscription,
    `input-required` follow-up, cancellation, artifacts, malformed cards,
