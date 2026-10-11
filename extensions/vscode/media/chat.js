@@ -21,6 +21,17 @@ function refreshPendingApprovals(){
 byId('approval-review').onclick=()=>{const item=pendingApprovals()[0];if(item)operationRows.get(item.id).section.scrollIntoView({block:'start',behavior:'auto'});else refreshPendingApprovals();};
 const processStreams=new Map();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
+function appendRunActivity(event){
+  let summary='';
+  if(event?.kind==='a2a.task_event'&&event.data&&typeof event.data==='object'){
+    const record=event.data.data,response=record?.event;
+    if(record&&typeof record==='object'&&response&&typeof response==='object'){
+      const state=response.status?.state||response.task?.status?.state,task=response.id||response.taskId||response.task?.id;
+      summary='A2A task update'+(typeof record.agent_id==='string'?' · '+record.agent_id:'')+(typeof state==='string'?' · '+state:'')+(typeof task==='string'?' · '+task:'')+(Number.isSafeInteger(record.event_sequence)?' · event '+record.event_sequence:'')+'\n';
+    }
+  }
+  byId('events').textContent+=summary+JSON.stringify(event)+'\n';
+}
 let skillSnapshot,skillPending=false;
 const skillRows=new Map();
 function skillControls(){const disabled=skillPending||sessionBusy||activeRun||!skillSnapshot?.selection?.editable;for(const row of skillRows.values())row.button.disabled=disabled;byId('skills-clear').disabled=disabled;}
@@ -315,7 +326,7 @@ function ownedView(parent,children,histories){
   }
 }
 function ownedEvent(message){
-  const event=message.event;byId('events').textContent+=JSON.stringify(event)+'\n';const row=ownedRows.get(message.child_id);if(!row)return;if(event.kind==='process.output'){processOutput(event.data);return;}
+  const event=message.event;appendRunActivity(event);const row=ownedRows.get(message.child_id);if(!row)return;if(event.kind==='process.output'){processOutput(event.data);return;}
   if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn'){row.stream.replaceChildren();row.text='';row.usage=undefined;return;}
   // Replayed events of a retired child never synthesize a second live answer.
   if(row.state!=='running'||!['model.text','model.refusal','model.usage','model.done'].includes(event.kind))return;
@@ -549,7 +560,7 @@ window.addEventListener('message',event=>{
     if(combined.length>262144){byId('status').textContent='Context was not added: the draft is too large. Select a smaller range.';return;}
     prompt.value=combined;resizePrompt();prompt.focus();
   }
-  else if(m.type==='event'){const event=m.event;byId('events').textContent+=JSON.stringify(event)+'\n';if(event.kind==='run.failed')runFailure(event.data);else if(event.kind==='process.output')processOutput(event.data);else if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
+  else if(m.type==='event'){const event=m.event;appendRunActivity(event);if(event.kind==='run.failed')runFailure(event.data);else if(event.kind==='process.output')processOutput(event.data);else if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live)live.classList.remove('streaming');}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
   else if(m.type==='operations'){
     operations(m.operations);
   }
