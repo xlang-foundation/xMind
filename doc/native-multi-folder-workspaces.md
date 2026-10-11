@@ -16,9 +16,10 @@ to the primary folder, reopen each admitted root and verify its identity. The
 run stores its exact membership revision and folder bindings; admitted agent
 children reuse that snapshot. VS Code can explicitly attach another folder
 already open in its window through **xMind: Add Opened Folder to Workspace**;
-the native host retains the existing primary identity. Graph-node tools,
-edits, approvals, process, Git/language-server routing, CLI membership controls
-and folder removal still bind only the primary folder. The local browser displays each attached
+the native host retains the existing primary identity. The CLI can initialize
+the selected folder as a workspace and attach additional folders to that same
+workspace. Graph-node tools, edits, approvals, process, Git/language-server
+routing and folder removal still bind only the primary folder. The local browser displays each attached
 folder as its own tree and reads previews through a native route that resolves
 the selected workspace's folder ID, re-opens the directory and verifies its
 native identity on every request.
@@ -42,11 +43,13 @@ See the [current browser behavior and gap](browser-view.md#multi-folder-workspac
    their start. New runs use the new revision.
 
 The local browser's picker can choose only paths on the xMind host. Browser
-creation/attachment and the explicit VS Code attachment command persist in the
-same profile registry. VS Code still starts from one selected opened root;
-other opened folders become members only when the user invokes the command.
-The CLI still uses its single `--workspace` root and does not mutate this
-registry. A future Nexus connection can supply a
+creation/attachment, CLI commands and the explicit VS Code attachment command
+persist in the same profile registry. VS Code still starts from one selected
+opened root; other opened folders become members only when the user invokes the
+command. The CLI's `workspace init` uses `--workspace DIR` (or the current
+directory) as the first folder. `workspace add-folder FOLDER` attaches another
+folder to the workspace selected by `--workspace DIR`; `workspace info` shows
+its primary folder and members. A future Nexus connection can supply a
 server-authorized workspace record through the same protocol; it cannot turn a
 client path into server authority.
 
@@ -124,3 +127,8 @@ and folder context and offers commands to list workspaces and add a folder.
   from local SQLite without replaying work or exposing secrets.
 
 The one-root selector and its existing tests do not satisfy this acceptance.
+
+- Initialize a CLI workspace from its first folder, attach a second folder, and
+  verify the workspace ID and primary-folder identity stay stable while the
+  membership revision increments. Duplicate and overlapping roots must be
+  rejected without changing membership.

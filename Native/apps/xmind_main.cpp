@@ -1,8 +1,11 @@
 #include "agentflow/program_entries.hpp"
 #include "agentflow/local_profile.hpp"
+#include "agentflow/workspace_registry.hpp"
+#include "agentflow/workspace_tools.hpp"
 #include "nlohmann/json.hpp"
 #include <charconv>
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -22,6 +25,9 @@ void help(){
         "  xmind --port PORT [--workspace DIR] [COMMAND ARGS...]\n"
         "  xmind [local profile options] profile-info\n"
         "  xmind [local profile options] workspaces\n"
+        "  xmind [local profile options] workspace init\n"
+        "  xmind --workspace DIR workspace info\n"
+        "  xmind --workspace DIR workspace add-folder FOLDER\n"
         "  xmind [connection options] mcp-auth\n"
         "  xmind [connection options] mcp-login SERVER\n"
         "  xmind [connection options] mcp-refresh SERVER\n"
@@ -38,6 +44,7 @@ void help(){
         "  xmind admin [native administration arguments]\n"
         "  xmind schema-worker   (private bounded schema protocol)\n\n"
         "Without --port, the console discovers or starts its persistent local workspace profile.\n"
+        "workspace init uses --workspace (or the current directory) as the first folder. Add folders later with workspace add-folder; the selected primary folder stays the same.\n"
         "--config selects provider YAML; --python-tools-config selects trusted embedded xlang3 tools; --language-server-config selects trusted LSP servers; --process-config selects trusted process profiles.\n"
         "--upgrade-backend safely replaces the managed profile runtime when the current owner supports it.\n"
         "Explicit --port attaches to an operator-selected backend using XMIND_AUTH_TOKEN.\n"
@@ -50,6 +57,35 @@ int port_number(const std::string& value){
         throw std::invalid_argument("Invalid console port; use 1..65535");
     return port;
 }
+std::string path_text(const std::filesystem::path& path){
+    const auto value=path.u8string();
+    return {reinterpret_cast<const char*>(value.data()),value.size()};
+}
+#if defined(_WIN32)
+std::string package_root(){
+    std::wstring image(32768,L'\0');
+    const auto size=GetModuleFileNameW(nullptr,image.data(),static_cast<DWORD>(image.size()));
+    if(size==0||size>=image.size())throw std::runtime_error("Cannot resolve the unified xMind package directory");
+    image.resize(size);
+    if(_wcsicmp(std::filesystem::path(image).filename().c_str(),L"xmind.exe")!=0)
+        throw std::runtime_error("Workspace registry commands require the unified xmind.exe package");
+    return path_text(std::filesystem::path(image).parent_path());
+}
+agentflow::WorkspaceRegistry workspace_registry(const agentflow::LocalProfileConnection& connection){
+    const auto profile_root=std::filesystem::u8path(connection.directory).parent_path();
+    const auto root=path_text(profile_root);
+    const auto package=std::filesystem::u8path(package_root());
+    return agentflow::WorkspaceRegistry(path_text(profile_root/L"workspaces.sqlite"),
+        {path_text(package/L"modules"),path_text(package/L"stdlib")},root);
+}
+nlohmann::json workspace_json(const agentflow::WorkspaceGroupRecord& group){
+    auto folders=nlohmann::json::array();
+    for(const auto& folder:group.folders)
+        folders.push_back({{"folder_id",folder.folder_id},{"name",folder.name},{"root",folder.root},{"ordinal",folder.ordinal}});
+    return {{"workspace_id",group.workspace_id},{"name",group.name},{"revision",group.revision},
+            {"primary_folder_id",group.primary_folder_id},{"folders",std::move(folders)}};
+}
+#endif
 int dispatch(int argc,char** argv){
     if(argc<1||!argv||!argv[0])throw std::invalid_argument("Missing program identity");
     if(argc==2&&(std::string_view(argv[1])=="--help"||std::string_view(argv[1])=="help")){help();return 0;}
@@ -98,6 +134,44 @@ int dispatch(int argc,char** argv){
         for(const auto& value:agentflow::list_local_workspace_profiles(options.profile_root))
             workspaces.push_back({{"workspace_id",value.workspace_id},{"root",value.root},{"name",value.name}});
         std::cout<<nlohmann::json{{"workspaces",std::move(workspaces)}}.dump()<<'\n';return 0;
+    }
+    if(first<argc&&std::string_view(argv[first])=="workspace"){
+        if(named_port)throw std::invalid_argument("Workspace registry commands require a managed local profile");
+        if(first+1>=argc)throw std::invalid_argument("workspace requires init, info, or add-folder");
+        const std::string_view action=argv[first+1];
+        if(action=="init"){
+            if(first+2!=argc)throw std::invalid_argument("workspace init takes its primary folder from --workspace or the current directory");
+#if defined(_WIN32)
+            const auto connected=profile();
+            auto registry=workspace_registry(connected);
+            std::cout<<workspace_json(registry.create(connected.workspace)).dump()<<'\n';return 0;
+#else
+            throw std::invalid_argument("Managed local profiles currently require Windows");
+#endif
+        }
+        if(action=="info"){
+            if(first+2!=argc)throw std::invalid_argument("workspace info accepts no arguments");
+#if defined(_WIN32)
+            options.require_existing_profile=true;
+            const auto connected=profile();
+            auto registry=workspace_registry(connected);
+            std::cout<<workspace_json(registry.get(agentflow::WorkspaceTools(connected.workspace).identity())).dump()<<'\n';return 0;
+#else
+            throw std::invalid_argument("Managed local profiles currently require Windows");
+#endif
+        }
+        if(action=="add-folder"){
+            if(first+3!=argc||!argv[first+2]||!*argv[first+2])throw std::invalid_argument("workspace add-folder requires one existing folder path");
+#if defined(_WIN32)
+            options.require_existing_profile=true;
+            const auto connected=profile();
+            auto registry=workspace_registry(connected);
+            std::cout<<workspace_json(registry.add_folder(agentflow::WorkspaceTools(connected.workspace).identity(),argv[first+2])).dump()<<'\n';return 0;
+#else
+            throw std::invalid_argument("Managed local profiles currently require Windows");
+#endif
+        }
+        throw std::invalid_argument("Unknown workspace command");
     }
     std::string chat="chat";
     std::vector<char*> forwarded{argv[0],port.data()};

@@ -77,8 +77,9 @@ tools can read from the captured member-folder set; edits and processes, plus
 Git and language-server routing, still use the primary folder. VS Code can add
 another folder from its opened workspace through **xMind: Add Opened Folder to
 Workspace**; this does not create a `.code-workspace` file or change the primary
-root. The CLI still uses one `--workspace` root and does not yet mutate the
-membership registry.
+root. The CLI uses one primary `--workspace` root and can initialize its
+workspace, inspect its members and attach additional folders through the shared
+native membership registry.
 
 ### Current multi-folder integration and remaining gaps
 
