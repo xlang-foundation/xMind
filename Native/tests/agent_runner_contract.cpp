@@ -1,6 +1,9 @@
 #include "agentflow/agent_runner.hpp"
+#include "agentflow/xlang_authoring_program.hpp"
+#include "agentflow/xlang_python_config.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "nlohmann/json.hpp"
+#include <filesystem>
 #include <iostream>
 #include <thread>
 #include <condition_variable>
@@ -59,8 +62,14 @@ int main(int argc,char** argv) {
         bool started=false,completed=false;
         for(const auto& event:store.events("main").get()) {if(event.kind=="tool.started") started=true;if(event.kind=="tool.completed") completed=true;}
         require(started && completed,"Actual tool execution events must persist");
+        const auto code_root_path=std::filesystem::absolute(std::filesystem::u8path(argv[4])).u8string();
+        const std::string code_root(reinterpret_cast<const char*>(code_root_path.data()),code_root_path.size());
+        const auto authored=run_xlang_authoring_program(argv[2],argv[3],code_root,"fixture_tools");
+        const auto imported=import_xlang_python_tool_config(store,authored.python_tools_config_json);
+        const auto registered=load_xlang_python_tool_config(store);
+        require(imported.tools.size()==1&&registered.code_root==code_root&&registered.tools.size()==1&&registered.tools[0].name=="python_uppercase","AgentRunner tools must originate from the xlang3 authoring API and load from SQLite");
         store.create_session("python-tool","Embedded xlang3 model tool fixture").get();auto python=settings;python.provider.endpoint=base+"/python-tool";
-        python.xlang_python_tools.push_back({ModelToolDefinition{"python_uppercase","Convert the supplied text to uppercase",R"({"type":"object","properties":{"text":{"type":"string"}},"required":["text"],"additionalProperties":false})"},XlangPythonCallable(argv[2],argv[3],argv[4],"fixture_tools","uppercase")});
+        for(const auto& tool:registered.tools)python.xlang_python_tools.push_back({ModelToolDefinition{tool.name,tool.description,tool.input_schema_json},XlangPythonCallable(argv[2],argv[3],registered.code_root,tool.module,tool.function)});
         AgentRunner python_runner(store,python);python_runner.start("python-tool","python-tool","Call the registered Python tool on xMind");
         require(python_runner.execute("python-tool").state==RunState::completed,"Registered xlang3 callable must execute through the actual model/tool loop");
         const auto python_history=store.history("python-tool").get();require(python_history.size()==4,"Actual xlang3 tool result and model continuation must be persisted together");

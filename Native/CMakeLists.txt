@@ -756,7 +756,7 @@ if(BUILD_TESTING)
     endif()
     add_executable(agentflow_agent_runner_contract tests/agent_runner_contract.cpp)
     target_include_directories(agentflow_agent_runner_contract PRIVATE third_party)
-    target_link_libraries(agentflow_agent_runner_contract PRIVATE agentflow_agent)
+    target_link_libraries(agentflow_agent_runner_contract PRIVATE agentflow_agent agentflow_runtime agentflow_xlang_python)
     add_custom_command(TARGET agentflow_agent_runner_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_runner_contract>")
     if(AGENTFLOW_NODE_EXECUTABLE)

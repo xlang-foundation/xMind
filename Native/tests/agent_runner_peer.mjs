@@ -76,7 +76,10 @@ const server=createServer((request,response)=>{
 });
 try {
   await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual file content written by fixture\n');
-  await writeFile(join(workspace,'fixture_tools.py'),"def uppercase(args):\n    return {'value': args['text'].upper()}\n");
+  await writeFile(join(workspace,'fixture_tools.py'),
+    "def configure(xmind):\n"
+    +"    xmind.tool({'name': 'python_uppercase', 'description': 'Convert the supplied text to uppercase', 'input_schema': {'type': 'object', 'properties': {'text': {'type': 'string'}}, 'required': ['text'], 'additionalProperties': False}, 'module': 'fixture_tools', 'function': 'uppercase'})\n"
+    +"def uppercase(args):\n    return {'value': args['text'].upper()}\n");
   await mkdir(join(workspace,'.agents','skills','inspect'),{recursive:true});await writeFile(join(workspace,'.agents','skills','inspect','SKILL.md'),'---\nname: inspect\ndescription: Synthetic skill catalogue description\n---\nSynthetic active skill body: inspect the actual companion bytes.\n');await writeFile(join(workspace,'.agents','skills','inspect','helper.txt'),'Actual native skill companion bytes\n');
   await mkdir(join(workspace,'.agents','skills','large'));await writeFile(join(workspace,'.agents','skills','large','SKILL.md'),'---\nname: large\ndescription: Synthetic instruction budget fixture\n---\nSynthetic oversized active skill body '+ 'x'.repeat(14500));
   await mkdir(join(workspace,'.agents','skills','manual'));await writeFile(join(workspace,'.agents','skills','manual','SKILL.md'),'---\nname: User-only guide\ndisable-model-invocation: true\n---\nSynthetic user-only active body: inspect actual companion bytes.\n');await writeFile(join(workspace,'.agents','skills','manual','helper.txt'),'Actual user-only companion bytes\n');
