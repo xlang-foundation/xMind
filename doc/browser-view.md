@@ -88,7 +88,7 @@ not implemented yet. Unlike VS Code,
 a browser tab has no opened-folder context. On the profile-aware `xmind view`
 host, the selector is populated from the native protected profile
 catalogue and displays the workspace name and root; **New workspace** is
-enabled when that host supports registration. When VS Code opens the browser
+enabled when that host supports creation. When VS Code opens the browser
 for its single-folder `serve` backend, the adapter reads the authenticated
 workspace and exposes it as a fixed one-item selector. That keeps the opened
 folder attached to the browser without pretending that this backend can add or
@@ -96,7 +96,7 @@ switch local profiles.
 
 Workspace selection must be owned by the native host. The browser sends an
 opaque workspace selection for switching and a user-entered folder path for
-registration. The host resolves and canonicalizes both on the native side,
+workspace creation. The host resolves and canonicalizes both on the native side,
 checks them against its protected profile-storage boundary, and binds the view
 to a workspace-specific backend and profile before exposing sessions or
 admitting work. A workspace change must refresh the view's session,
@@ -111,7 +111,7 @@ accepts one absolute local or UNC folder path over the same-origin browser
 session. The native host opens and canonicalizes the existing directory,
 rejects inaccessible roots and overlap with private profile storage, creates or
 reuses its protected local profile, then rotates the browser's HttpOnly
-credential onto that workspace. Registration and profile switching are only
+credential onto that workspace. Workspace creation and profile switching are only
 available through the view adapter, which keeps the rotated credential out of
 page JavaScript. The local web UI cannot browse the client's filesystem; the
 submitted path refers to the machine running the native host. Selecting a
@@ -120,7 +120,7 @@ models and graphs.
 The VS Code view remains bound to its original workspace, and runs already
 admitted on either backend stay there. Native two-profile switching and stale
 credential rejection pass the local-view contract; browser selection,
-registration routing and cookie rotation pass the webpage contract.
+workspace creation routing and cookie rotation pass the webpage contract.
 
 ## Start
 

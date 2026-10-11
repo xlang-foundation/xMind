@@ -538,11 +538,11 @@ int run_local_view(int argc, char **argv) {
                                        "application/json");
                     return;
                 }
-                if (request.path == "/v1/workspaces/add" && request.method == "POST") {
+                if (request.path == "/v1/workspaces/create" && request.method == "POST") {
                     if (host || request.target != request.path ||
                         request.get_header_value_count("X-XMind-View-Origin") != 1 ||
                         request.get_header_value("Content-Type") != "application/json") {
-                        response(output, 400, "Invalid workspace registration request");
+                        response(output, 400, "Invalid workspace creation request");
                         return;
                     }
                     std::lock_guard switch_lock(browser_switch_mutex);
@@ -553,14 +553,14 @@ int run_local_view(int argc, char **argv) {
                     }
                     std::set<std::string> keys;
                     const auto selection = Json::parse(body, [&](int depth, Json::parse_event_t event, Json &value) {
-                        require(depth <= 2, "Invalid workspace registration");
+                        require(depth <= 2, "Invalid workspace creation");
                         if (event == Json::parse_event_t::key)
-                            require(keys.insert(value.get<std::string>()).second, "Duplicate workspace registration field");
+                            require(keys.insert(value.get<std::string>()).second, "Duplicate workspace creation field");
                         return true;
                     });
                     require(selection.is_object() && selection.size() == 1 && selection.contains("root") &&
                                 selection.at("root").is_string(),
-                            "Workspace registration requires one absolute folder path");
+                            "Workspace creation requires one absolute folder path");
                     const auto requested_root = selection.at("root").get<std::string>();
                     const bool drive_path = requested_root.size() >= 3 &&
                                             ((requested_root[0] >= 'A' && requested_root[0] <= 'Z') ||
@@ -612,7 +612,7 @@ int run_local_view(int argc, char **argv) {
                     }
                     }
                     require(agentflow::WorkspaceTools(target->workspace).identity() == requested_id,
-                            "Native workspace identity changed during registration");
+                            "Native workspace identity changed during creation");
                     const auto issued = issue_browser_session(target, browser_origin);
                     const auto replacement = issued.at("credential").get<std::string>();
                     httplib::Client metadata_client("127.0.0.1", target->port);
@@ -632,7 +632,7 @@ int run_local_view(int argc, char **argv) {
                         if (previous == browser_sessions.end() || previous->second.workspace_id != current_id ||
                             previous->second.browser_origin != browser_origin) {
                             revoke_browser_session(replacement, target, browser_origin);
-                            response(output, 409, "Browser workspace changed during registration");
+                            response(output, 409, "Browser workspace changed during creation");
                             return;
                         }
                         if (!revoke_browser_session(supplied.substr(5), current, browser_origin)) {
