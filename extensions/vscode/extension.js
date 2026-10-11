@@ -601,6 +601,16 @@ async function activate(context) {
              !observed || observed.workspace_id!==proposal.workspace_id || typeof observed.path!=='string' || typeof observed.file_id!=='string' || !/^[a-f0-9]{64}$/.test(observed.content_sha256) || !Number.isSafeInteger(observed.size) || observed.size<0 || observed.size>1048576 ||
              !['before','after','different'].includes(inspection.match) || typeof inspection.same_file!=='boolean' || (!inspection.same_file && inspection.match!=='different') || !Number.isSafeInteger(inspection.observed_unix_ms) || inspection.observed_unix_ms<=0 || inspection.observed_unix_ms>8640000000000000 || inspection.quarantine_released!==false) throw new Error('The inspection does not match the selected uncertain edit. Refresh its current state.');
           post({type:'edit-inspection',id:proposal.id,inspection});
+        } else if (message.type === 'inspect-a2a-task' && typeof message.id === 'string') {
+          if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before contacting a registered A2A peer.');
+          const proposal=reviewed.get(message.id);
+          if(!proposal || !observedOperation(proposal.run_id) || proposal.state!=='succeeded' || proposal.tool!=='a2a_delegate') throw new Error('Select an acknowledged A2A task in the selected run before refreshing it.');
+          let receipt;try{receipt=JSON.parse(proposal.result_json);}catch{throw new Error('The saved A2A task receipt is invalid.');}
+          if(receipt?.acknowledged_by_peer!==true||typeof receipt.agent_id!=='string'||typeof receipt.task_id!=='string'||!receipt.task_id)throw new Error('This A2A operation has no inspectable remote task ID.');
+          const version=generation,inspection=await client.inspectA2aTask(proposal.id);
+          if(panel!==view || version!==generation) return;
+          if(!inspection||inspection.operation_id!==proposal.id||inspection.agent_id!==receipt.agent_id||inspection.task_id!==receipt.task_id||!inspection.task||typeof inspection.task!=='object'||Array.isArray(inspection.task)||JSON.stringify(inspection.task).length>524288||!Number.isSafeInteger(inspection.inspected_unix_ms)||inspection.inspected_unix_ms<=0||inspection.inspected_unix_ms>8640000000000000)throw new Error('The remote task snapshot does not match the saved A2A operation.');
+          post({type:'a2a-task-inspection',id:proposal.id,inspection});
         } else if (['decide','review'].includes(message.type) && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before deciding an operation.');
           if (message.type === 'decide' && message.decision !== 'allow' && message.decision !== 'deny') throw new Error('Decision must be allow or deny.');

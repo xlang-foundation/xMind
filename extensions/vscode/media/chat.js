@@ -6,6 +6,8 @@ let renameCapability=false,renameSnapshot;
 let currentWorkspaceRoot;
 const operationSections=new Map();
 const operationRows=new Map();
+const a2aTaskInspections=new Map();
+let currentOperations=[];
 let pendingOperations=[];
 function pendingApprovals(){return pendingOperations.filter(item=>Date.now()<item.expires_unix_ms&&operationRows.get(item.id)?.section.isConnected);}
 function refreshPendingApprovals(){
@@ -200,10 +202,11 @@ function runFailure(data){
 }
 function stream(text){if(!live){live=node('article',undefined,'message assistant streaming');live.append(node('h4','xMind · responding'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));byId('live').append(live);byId('empty').hidden=true;}streamText+=text;markdown(live.querySelector('.message-body'),streamText);metrics(live.querySelector('.metrics'),{usage:streamUsage});}
 function operations(items){
+  currentOperations=items;
   const container=byId('operations'),ids=new Set(items.map(item=>item.id)),sections=[];
   for(const [id,row] of operationRows)if(!ids.has(id)){row.section.remove();operationRows.delete(id);operationSections.delete(id);}
   for(const item of items){
-    const signature=JSON.stringify(item),previous=operationRows.get(item.id);
+    const signature=JSON.stringify([item,a2aTaskInspections.get(item.id)||null]),previous=operationRows.get(item.id);
     if(previous?.signature===signature){
       if(Date.now()>=item.expires_unix_ms)for(const button of previous.section.querySelectorAll('button'))button.disabled=true;
       sections.push(previous.section);continue;
@@ -263,6 +266,15 @@ function operations(items){
   refreshPendingApprovals();
 }
 function operationExtras(section,item,reviewable=true){
+  if(item.tool==='a2a_delegate'&&item.state==='succeeded'){
+    let receipt;try{receipt=JSON.parse(item.result_json);}catch{}
+    if(receipt?.acknowledged_by_peer===true&&typeof receipt.agent_id==='string'&&typeof receipt.task_id==='string'&&receipt.task_id){
+      section.append(node('p','Remote agent '+receipt.agent_id+' · task '+receipt.task_id+' · initial acknowledgement; inspect the peer for current state.','inspection-note'));
+      const latest=a2aTaskInspections.get(item.id);
+      if(latest){const state=latest.task?.status?.state,detail=node('details',undefined,'a2a-task-inspection');detail.append(node('summary','Latest remote task observation'+(typeof state==='string'?' · '+state:'')),node('p','Observed '+new Date(latest.inspected_unix_ms).toISOString()+' · observation only; xMind does not infer or change the remote task state.','inspection-note'),node('pre',JSON.stringify(latest.task,null,2)));section.append(detail);}
+      const button=node('button','Refresh remote task','a2a-inspect');button.onclick=()=>{button.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id});};section.append(button);
+    }
+  }
   if(item.tool==='mcp_tool'){
     try{const plan=JSON.parse(item.arguments_json);section.append(node('p','External tool: '+plan.server_config_id+' / '+plan.peer_tool+' · configuration '+plan.config_revision));}catch{}
     if(item.state==='awaiting_approval')section.append(node('p','The external server can perform effects beyond this workspace. Its read-only hints do not grant permission.'));
@@ -549,8 +561,12 @@ window.addEventListener('message',event=>{
       section.append(detail);
     }
   }
+  else if(m.type==='a2a-task-inspection'){
+    const item=currentOperations.find(value=>value.id===m.id),inspection=m.inspection;
+    if(item?.tool==='a2a_delegate'&&item.state==='succeeded'&&inspection&&inspection.operation_id===item.id&&typeof inspection.agent_id==='string'&&typeof inspection.task_id==='string'&&inspection.task&&typeof inspection.task==='object'&&!Array.isArray(inspection.task)&&JSON.stringify(inspection.task).length<=524288&&Number.isSafeInteger(inspection.inspected_unix_ms)&&inspection.inspected_unix_ms>0&&inspection.inspected_unix_ms<=8640000000000000){a2aTaskInspections.set(item.id,inspection);operations(currentOperations);}
+  }
   else if(m.type==='status'){byId('status').textContent=m.text;activeRun=['queued','running','paused'].includes(m.text);skillControls();agentControls();byId('send').disabled=!canExecute()||activeRun||sessionBusy;byId('cancel').hidden=!activeRun;}
-  else if(m.type==='error'){for(const row of graphRows.values())if(row.button)row.button.disabled=false;for(const row of planRows.values())row.submitting=false;const graphResume=byId('graph-resume');if(graphResume)graphResume.disabled=displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true;const resume=byId('plan-resume');if(resume)delete resume.dataset.submitting;planControls();if(displayedContext)contextView(displayedContext);byId('status').textContent=m.text;if(settings.open){byId('settings-status').textContent=m.text;byId('settings-save').disabled=false;}}
+  else if(m.type==='error'){for(const button of document.querySelectorAll('button.a2a-inspect'))button.disabled=false;for(const row of graphRows.values())if(row.button)row.button.disabled=false;for(const row of planRows.values())row.submitting=false;const graphResume=byId('graph-resume');if(graphResume)graphResume.disabled=displayedGraph?.run.id!==byId('runs').value||displayedGraph?.context?.resumable!==true;const resume=byId('plan-resume');if(resume)delete resume.dataset.submitting;planControls();if(displayedContext)contextView(displayedContext);byId('status').textContent=m.text;if(settings.open){byId('settings-status').textContent=m.text;byId('settings-save').disabled=false;}}
   // Keep review position stable while backend-owned effects await a decision.
   // The notice navigates to the proposal; it never sends an approval itself.
   if(follow&&!refreshPendingApprovals())scroll.scrollTop=scroll.scrollHeight;

@@ -100,6 +100,7 @@ try {
     assert.deepEqual(cli('a2a-agents'),{revision:0,agents:[]},'A2A registry starts empty and is available through the native CLI');
     const secret='synthetic-cli-a2a-bearer-'+randomBytes(8).toString('hex'),registered=spawnSync(cliExe,[String(port),'a2a-register','research.cli','https://peer.invalid/agent-card.json','true','0','XMIND_A2A_TEST_TOKEN'],{env:{...env,XMIND_A2A_TEST_TOKEN:secret},encoding:'utf8',timeout:15000,windowsHide:true});
     assert.equal(registered.status,0,registered.stderr);assert.ok(!registered.stdout.includes(secret)&&!registered.stderr.includes(secret),'A2A bearer must not appear in CLI output');const added=JSON.parse(registered.stdout);assert.equal(added.agent.id,'research.cli');assert.equal(added.agent.has_bearer,true);assert.deepEqual(cli('a2a-agents').agents,[added.agent]);
+    const unavailable=spawnSync(cliExe,[String(port),'a2a-inspect','missing-a2a-operation'],{env,encoding:'utf8',timeout:15000,windowsHide:true});assert.notEqual(unavailable.status,0);assert.match(unavailable.stderr,/HTTP 404/,'A2A task inspection must route through the shared native server endpoint');
     assert.deepEqual(cli('a2a-enable','research.cli','false','1'),{agent:{...added.agent,revision:2,enabled:false}});
     assert.deepEqual(cli('a2a-remove','research.cli','2'),{removed:true,id:'research.cli'});assert.deepEqual(cli('a2a-agents'),{revision:3,agents:[]});
   }

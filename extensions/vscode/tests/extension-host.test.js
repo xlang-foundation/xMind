@@ -82,6 +82,7 @@ function harness(options={}) {
     else if(target.pathname==='/v1/runs/finished/operations') data=operations;
     else if(target.pathname===`/v1/operations/${operations[0]?.id||'edit'}`) data=pendingOperation?await pendingOperation:operations[0];
     else if(target.pathname==='/v1/operations/edit/inspection') data=await options.inspection;
+    else if(target.pathname===`/v1/operations/${operations[0]?.id}/a2a/inspect`){assert.equal(requestOptions.method,'POST');assert.deepEqual(JSON.parse(requestOptions.body),{});data=options.a2aInspection;}
     else if(target.pathname==='/v1/operations/edit/decision') {
       const body=JSON.parse(requestOptions.body);decisions.push(body);
       operations=[{...operations[0],state:body.decision==='allow'?'ready':'denied',decision_actor:'fixture-controller'}];data=operations[0];
@@ -318,6 +319,12 @@ test('native terminal state refreshes transcript and stops polling with durable 
 });
 
 const pendingEdit={id:'edit',run_id:'finished',workspace_id:'verified-fixture-root',tool:'replace_file',state:'awaiting_approval',expires_unix_ms:Date.now()+600000,decision_actor:'',result_json:'{}',arguments_json:JSON.stringify({before_content:'actual before fixture',after_content:'<script>untrusted file text</script>',before_sha256:'fixture-hash',file_id:'fixture-file'})};
+test('VS Code refreshes only an acknowledged outbound A2A task from its saved operation',async()=>{
+  const operation={id:'a2a-operation',run_id:'finished',workspace_id:'verified-fixture-root',tool:'a2a_delegate',state:'succeeded',expires_unix_ms:0,decision_actor:'local-owner',arguments_json:'{}',result_json:JSON.stringify({acknowledged_by_peer:true,agent_id:'research.peer',task_id:'remote-task'})};
+  const inspection={operation_id:operation.id,agent_id:'research.peer',task_id:'remote-task',task:{id:'remote-task',status:{state:'TASK_STATE_COMPLETED'}},inspected_unix_ms:Date.now()};
+  const h=harness({running:true,operations:[operation],a2aInspection:inspection});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.some(item=>item.id===operation.id)));
+  view.receive({type:'inspect-a2a-task',id:operation.id});await until(()=>view.posted.some(message=>message.type==='a2a-task-inspection'&&message.id===operation.id));assert.ok(h.requests.includes('/v1/operations/a2a-operation/a2a/inspect'));view.close();
+});
 const providerFixture={revision:0,provider:'openai',model:'',endpoint:'https://api.openai.com/v1/chat/completions',configured:false};
 test('saved Responses enrollment restores discovery and reports the native wire',async()=>{
   const h=harness({providerSetup:{...providerFixture,revision:1,configured:true,model:'fixture-other',wire:'responses',endpoint:'https://api.openai.com/v1/responses'}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(m=>m.type==='model-list'));assert.ok(view.posted.some(m=>m.type==='provider-wire'&&m.wire==='responses'));view.receive({type:'model',id:'fixture-model'});await until(()=>h.providerRequests.length===1);assert.ok(!Object.hasOwn(h.providerRequests[0],'api_key'));await until(()=>view.posted.some(m=>m.type==='capabilities'&&m.model==='fixture-model'));view.close();

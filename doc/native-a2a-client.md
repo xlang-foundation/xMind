@@ -60,13 +60,15 @@ known task using only the peer ID, registration revision, card URL, interface,
 and task ID sealed into its succeeded operation. It refuses uncertain sends,
 registration/interface changes, and missing task IDs, and persists the peer's
 latest returned task snapshot in xlang3 SQLite. The local browser allowlist
-forwards this route using the HttpOnly view session. The native contract checks
-owner authentication, same-origin view access, exact saved task ID, durable
-inspection, and that uncertain dispatches do not issue a second remote effect.
-This is explicit polling; streamed observation/resumption, input-required
-follow-up, cancellation, artifacts, CLI/VS Code controls, and a rendered UI for
-task inspection remain open. These are required before claiming full outbound
-A2A parity.
+forwards this route using the HttpOnly view session. The CLI exposes
+`a2a-inspect OPERATION_ID`, and the shared webpage/VS Code operation view offers
+an explicit “Refresh remote task” control for acknowledged tasks. Contracts
+check owner authentication, same-origin browser forwarding, exact saved task
+ID, durable inspection, CLI routing, client identity checks, and that uncertain
+dispatches do not issue a second remote effect. This is explicit polling;
+streamed observation/resumption, input-required follow-up, cancellation,
+artifacts and cross-client rendered acceptance remain open. These are required
+before claiming full outbound A2A parity.
 
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),
