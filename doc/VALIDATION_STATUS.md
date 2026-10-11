@@ -10,10 +10,12 @@ an implicit config change, protected owner handoff, and preservation of SQLite
 sessions, history and graph results across restart. The VS Code suite passes
 **296/296** and the browser suite **85/85**.
 
-The full native CTest gate and full native local-view contract were not rerun
-on this checkpoint; rendered managed-client process execution is unverified.
-No shell or process profile is seeded. A trusted profile must be configured
-before `run_process` is advertised. Exact implementation and limits are in
+The focused native local-view contract now passes against the Release binary
+with a configured profile; the authenticated view reads only profile ID,
+revision and timeout. The full native CTest gate remains unrerun, and rendered
+managed-client process execution is unverified. No shell or process profile
+is seeded. A trusted profile must be configured before `run_process` is
+advertised. Exact implementation and limits are in
 [native process tools](native-process-tools.md).
 
 ## MCP resources and prompts — 2026-10-11

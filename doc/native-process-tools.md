@@ -16,9 +16,11 @@ retirement refusal and recovery path remain covered by that contract.
 The VS Code suite passes **296/296** and the browser suite **85/85**. The
 extension tests confirm that the managed VS Code launcher forwards the trusted
 configuration path. The native local-profile integration test verifies import,
-protected handoff, and SQLite persistence. The full native view contract and
-the rendered VS Code sidebar process run remain unverified at this checkpoint;
-the full CTest gate has not yet been rerun.
+protected handoff, and SQLite persistence. The actual native local-view
+contract now also passes with a configured profile and reads its ID, revision
+and timeout through view authentication; executable paths and bindings are
+not returned. The full CTest gate and rendered VS Code sidebar process run
+remain unverified at this checkpoint.
 
 Managed local views now accept a trusted `--process-config`. The browser
 launcher uses the repository's `.config/processes.yaml` when present; the VS
