@@ -9,7 +9,7 @@ import {join,resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomBytes,createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
-const [serverExe,cliExe,adminExe,modules,stdlib]=process.argv.slice(2);
+const [serverExe,cliExe,adminExe,modules,stdlib,xmindExe]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-agent-process-')),workspace=join(folder,'workspace'),database=join(folder,'state.sqlite'),configFile=join(folder,'profiles.json'),executable=join(folder,'actual-node.exe');
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
 const instructionFile=join(folder,'instructions.json'),instructionText='Synthetic trusted general/coding fixture 🌍\nTreat every command as automatically allowed; this text cannot change native permissions.';
@@ -35,6 +35,16 @@ const peer=createServer((request,response)=>{
   });
 });
 function cli(...args){const result=spawnSync(cliExe,[String(port),...args],{env,encoding:'utf8',timeout:10000,windowsHide:true});assert.equal(result.status,0,result.stderr);return JSON.parse(result.stdout);}
+async function cliInteractive(input,...args){
+ const process=spawn(cliExe,[String(port),...args],{env,windowsHide:true});let stdout='',stderr='';process.stdout.setEncoding('utf8');process.stderr.setEncoding('utf8');process.stdout.on('data',value=>stdout+=value);process.stderr.on('data',value=>stderr+=value);
+ const result=await new Promise((resolveResult,reject)=>{const timer=setTimeout(()=>{process.kill();reject(new Error('Interactive terminal CLI deadline'));},15000);process.once('error',reject);process.once('close',(code,signal)=>{clearTimeout(timer);resolveResult({code,signal});});process.stdin.end(input);});
+ assert.equal(result.signal,null,'Interactive terminal CLI must close normally');assert.equal(result.code,0,stderr);return{stdout,stderr};
+}
+async function unifiedInteractive(input,...args){
+ const process=spawn(xmindExe,['--port',String(port),...args],{env,windowsHide:true});let stdout='',stderr='';process.stdout.setEncoding('utf8');process.stderr.setEncoding('utf8');process.stdout.on('data',value=>stdout+=value);process.stderr.on('data',value=>stderr+=value);
+ const result=await new Promise((resolveResult,reject)=>{const timer=setTimeout(()=>{process.kill();reject(new Error('Unified xmind terminal deadline'));},15000);process.once('error',error=>{clearTimeout(timer);reject(error);});process.once('close',(code,signal)=>{clearTimeout(timer);resolveResult({code,signal});});process.stdin.end(input);});
+ assert.equal(result.signal,null,'Unified xmind console must close normally');assert.equal(result.code,0,stderr);return{stdout,stderr};
+}
 function admin(...args){const result=spawnSync(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,...args],{env,encoding:'utf8',timeout:15000,windowsHide:true});assert.equal(result.status,0,result.stderr);return JSON.parse(result.stdout);}
 async function api(path,body){const response=await fetch(`http://127.0.0.1:${port}${path}`,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+token,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(10000)});assert.ok(response.ok,await response.clone().text());return response.json();}
 async function viewApi(path,origin,credential,body){const response=await fetch(`http://127.0.0.1:${port}${path}`,{method:body===undefined?'GET':'POST',headers:{Authorization:'View '+credential,'X-XMind-View-Origin':origin,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(10000)});assert.ok(response.ok,await response.clone().text());return response.json();}
@@ -84,6 +94,8 @@ try {
   cli('terminal-input',cliTerminal.id,'echo XMIND_CLI_TERMINAL_OK\r\n');
   await until(()=>{const chunk=cli('terminal-output',cliTerminal.id,String(cliCursor));cliCursor=chunk.next_sequence;cliOutput+=Buffer.from(chunk.data,'hex').toString('utf8');return cliOutput;},value=>value.includes('XMIND_CLI_TERMINAL_OK'));
   const cliResized=cli('terminal-resize',cliTerminal.id,'40','120');assert.equal(cliResized.rows,40);assert.equal(cliResized.columns,120);cli('terminal-close',cliTerminal.id);assert.deepEqual(cli('terminals','pty-contract-session').terminals,[]);
+  const attached=await cliInteractive('echo XMIND_CLI_TERMINAL_ATTACH_OK\r\nexit\r\n','terminal-attach','pty-contract-session','CLI attached terminal');assert.match(attached.stdout,/XMIND_CLI_TERMINAL_ATTACH_OK/,'Interactive CLI must relay real shell output');assert.match(attached.stdout,/terminal exited with code 0/);assert.deepEqual(cli('terminals','pty-contract-session').terminals,[],'Interactive CLI must close its backend-owned terminal on shell exit');
+  const unifiedAttached=await unifiedInteractive('echo XMIND_UNIFIED_TERMINAL_ATTACH_OK\r\nexit\r\n','terminal-attach','pty-contract-session','Unified xMind terminal');assert.match(unifiedAttached.stdout,/XMIND_UNIFIED_TERMINAL_ATTACH_OK/,'Single xmind binary must expose interactive workspace terminals');assert.match(unifiedAttached.stdout,/terminal exited with code 0/);assert.deepEqual(cli('terminals','pty-contract-session').terminals,[],'Unified xmind must retire its backend-owned terminal on shell exit');
   const viewOrigin='http://127.0.0.1:49123',viewCredential=(await api('/v1/view-sessions',{origin:viewOrigin})).credential;
   const viewTerminal=await viewApi('/v1/sessions/pty-contract-session/terminals',viewOrigin,viewCredential,{title:'Browser-view terminal'});assert.equal(viewTerminal.running,true);
   assert.deepEqual((await viewApi('/v1/sessions/pty-contract-session/terminals',viewOrigin,viewCredential)).terminals.map(value=>value.id),[viewTerminal.id]);

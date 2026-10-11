@@ -22,11 +22,13 @@ Authenticated local clients use these HTTP operations:
 The console client exposes the same lifecycle as `terminals SESSION`,
 `terminal-create SESSION [TITLE]`, `terminal-output ID [AFTER]`,
 `terminal-input ID UTF8`, `terminal-resize ID ROWS COLUMNS` and
-`terminal-close ID`. VS Code opens the backend-owned shell in its native
-terminal panel through a pseudoterminal bridge. The bridge pins one workspace,
+`terminal-close ID`. `terminal-attach SESSION [TITLE]` opens a line-oriented
+interactive shell, relays backend output, and sends completed input lines to
+the terminal. VS Code opens the same backend-owned shell in its native terminal
+panel through a pseudoterminal bridge. The bridge pins one workspace,
 conversation and server generation, then relays terminal bytes without
-interpreting or estimating output. Full-screen interactive attach remains
-outstanding in the console client.
+interpreting or estimating output. Keystroke-level full-screen terminal
+application support remains outstanding in the console client.
 
 The in-memory output ring retains at most 1 MiB per terminal. Each response
 returns the next sequence, whether older bytes were truncated, and actual
@@ -39,6 +41,7 @@ The native contract launches the real system command shell in an isolated
 fixture workspace, waits for its initial prompt, sends a synthetic echo command,
 checks exact output replay, resizes the pseudoconsole, observes shell exit and
 closes the session. The HTTP integration contract runs the same lifecycle
-through the actual native server. VS Code bridge tests cover UTF-8 chunk
-boundaries, input and resize routing, and workspace revocation. Neither native
-contract runs a command in the user's workspace.
+through the actual native server. It also attaches the CLI to a real fixture
+shell, sends commands and confirms output and cleanup. VS Code bridge tests
+cover UTF-8 chunk boundaries, input and resize routing, and workspace
+revocation. Neither native contract runs a command in the user's workspace.

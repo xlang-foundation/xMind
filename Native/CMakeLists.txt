@@ -608,7 +608,7 @@ if(BUILD_TESTING)
     set_tests_properties(native_process_executor_contract PROPERTIES TIMEOUT 60)
     add_test(NAME native_agent_process_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_process_http_contract.mjs"
       "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>" "$<TARGET_FILE:xmind_admin>"
-      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "$<TARGET_FILE:xmind>")
     set_tests_properties(native_agent_process_http_contract PROPERTIES TIMEOUT 90)
     add_executable(agentflow_process_contract tests/process_contract.cpp)
     target_include_directories(agentflow_process_contract PRIVATE third_party)

@@ -204,6 +204,22 @@ Input is currently read between turns and at approval/human prompts. Concurrent
 stdin controls during model streaming, rich terminal diffs, attachment/context
 controls and full TUI/OpenCode CLI parity remain required.
 
+## Workspace shell attachment
+
+`terminal-attach SESSION [TITLE]` creates a native terminal pinned to the
+selected server workspace and the chosen persisted conversation. The CLI
+streams exact PTY bytes while accepting completed command lines; `exit` closes
+the shell. When attached to a real Windows console, VT output is enabled and
+the original console settings are restored on return. Pipe-based invocation
+uses UTF-8 lines so the same command can be exercised by the native server
+contract. Full-screen applications, per-key editing and mouse/alternate-screen
+parity remain open.
+
+The actual-server process contract starts the shell in an isolated fixture,
+sends `echo XMIND_CLI_TERMINAL_ATTACH_OK` and `exit`, checks relayed output and
+exit status, and verifies that the terminal was removed from its conversation.
+The fixture never targets the user's workspace.
+
 ## Generic provider-profile controls
 
 These commands use the backend's public profile registry and advertised routes.
