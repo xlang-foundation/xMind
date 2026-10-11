@@ -1,4 +1,6 @@
 #include "agentflow/a2a_agent_registry.hpp"
+#include "agentflow/http_server.hpp"
+#include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <chrono>
@@ -7,6 +9,7 @@
 #include <random>
 #include <stdexcept>
 #include <string>
+#include <thread>
 
 namespace {
 using Json=nlohmann::json;
@@ -42,7 +45,23 @@ int main(int argc,char** argv){
         {
             agentflow::PersistenceService persistence(database,imports);agentflow::A2aRemoteAgentRegistry reopened(persistence);const auto snapshot=reopened.list();require(snapshot.revision==9&&snapshot.entries.size()==1&&snapshot.entries[0].id=="research.public","Owner registrations must survive embedded-xlang3 SQLite reopen");require(!reopened.resolve("research.public").bearer,"Public registration must remain secret-free after reopen");persistence.close();
         }
-        std::cout<<"Native A2A registry passed xlang3 SQLite owner registration, revision conflicts, encrypted bearer references, key rotation/clearing, disable/remove semantics, retired IDs and restart resolution. Remote task execution and cross-client APIs remain open.\n";
+        {
+            agentflow::PersistenceService persistence(database,imports);const std::string token="synthetic-a2a-registry-owner-token-32-bytes";agentflow::HttpServer server(persistence,token);const auto port=server.bind(0);require(port>0,"A2A registry API failed to bind");std::thread worker([&]{server.listen();});
+            try{
+                httplib::Client client("127.0.0.1",port);client.set_connection_timeout(2,0);client.set_read_timeout(5,0);const httplib::Headers headers{{"Authorization","Bearer "+token}};
+                std::shared_ptr<httplib::Response> response;for(int attempt=0;attempt<30;++attempt){response=client.Get("/v1/a2a/agents",headers);if(response)break;std::this_thread::sleep_for(std::chrono::milliseconds(10));}require(response&&response->status==200,"Authenticated A2A registry listing failed");auto listing=Json::parse(response->body);require(listing["revision"]==9&&listing["agents"].size()==1&&listing["agents"][0]["id"]=="research.public","HTTP listing must expose the persisted registry snapshot");
+                const std::string view_origin="http://127.0.0.1:54321";auto enrolled=client.Post("/v1/view-sessions",headers,Json{{"origin",view_origin}}.dump(),"application/json");require(enrolled&&enrolled->status==200,"Local browser session enrollment failed");const auto view_credential=Json::parse(enrolled->body).at("credential").get<std::string>();const httplib::Headers view_headers{{"Authorization","View "+view_credential},{"X-XMind-View-Origin",view_origin}};auto view_listing=client.Get("/v1/a2a/agents",view_headers);require(view_listing&&view_listing->status==200,"Same-origin local view session must be able to use the A2A registry API");
+                auto unauthorized=client.Get("/v1/a2a/agents");require(unauthorized&&unauthorized->status==401,"A2A owner registry must require owner authentication");
+                auto post=[&](const std::string& path,const Json& input){return client.Post(path,headers,input.dump(),"application/json");};
+                auto created=post("/v1/a2a/agents/register",Json{{"id","research.http"},{"card_url","https://agents.example.test/http.json"},{"enabled",true},{"expected_agent_revision",0},{"bearer_token","fixture-http-only-secret"}});require(created&&created->status==200,"A2A registration HTTP endpoint failed");require(created->body.find("fixture-http-only-secret")==std::string::npos,"A2A registration response leaked its bearer value");auto safe=Json::parse(created->body)["agent"];require(safe["has_bearer"]==true&&safe["enabled"]==true,"A2A registration must return safe credential-presence metadata");
+                auto catalog=client.Get("/v1/a2a/agents",headers);require(catalog&&catalog->status==200&&catalog->body.find("fixture-http-only-secret")==std::string::npos,"A2A catalog must never return bearer values");
+                auto stale=post("/v1/a2a/agents/register",Json{{"id","research.http"},{"card_url","https://agents.example.test/other.json"},{"enabled",true},{"expected_agent_revision",0}});require(stale&&stale->status==409,"A2A HTTP registration must enforce expected revisions");
+                auto disabled=post("/v1/a2a/agents/research.http/enabled",Json{{"enabled",false},{"expected_agent_revision",1}});require(disabled&&disabled->status==200&&Json::parse(disabled->body)["agent"]["enabled"]==false,"A2A HTTP enablement must update with optimistic concurrency");
+                auto removed=post("/v1/a2a/agents/research.http/remove",Json{{"expected_agent_revision",2}});require(removed&&removed->status==204,"A2A HTTP removal must honor the current registration revision");
+                auto malformed=client.Post("/v1/a2a/agents/register?next=1",headers,"{}","application/json");require(malformed&&malformed->status==400,"Malformed A2A query must not be accepted");
+            }catch(...){server.stop();worker.join();throw;}server.stop();worker.join();persistence.close();
+        }
+        std::cout<<"Native A2A registry passed xlang3 SQLite persistence, authenticated owner HTTP registration/list/enable/remove, revision conflicts, encrypted bearer references, no-secret responses, key rotation/clearing, disable/remove semantics, retired IDs and restart resolution. Remote agent dispatch and cross-client APIs remain open.\n";
     }catch(const std::exception& error){std::cerr<<"Native A2A registry contract failed: "<<error.what()<<"\n";return 1;}
     return 0;
 }

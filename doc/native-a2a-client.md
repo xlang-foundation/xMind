@@ -33,12 +33,18 @@ advertise bearer authentication. Focused loopback assertions cover refusal and
 credential withholding; hosted native compilation and CTest remain pending.
 An owner-managed native registry now persists peer IDs, card URLs, enabled
 state and revisions through xlang3 SQLite. Bearer bytes are stored in the
-scoped encrypted credential repository; catalog and browser-safe metadata hold
-only an opaque reference. Rotation publishes the new reference before deleting
-the old credential. A restart contract now covers registration, disable,
-rotation, clearing and retired-ID behavior. This registry is not yet exposed by
-owner HTTP/CLI/VS Code APIs or connected to AgentRunner/graphs; outbound
-streaming and durable recovery after uncertain remote dispatch remain open.
+scoped encrypted credential repository; catalog and API metadata contain only
+an opaque reference and a `has_bearer` flag. Rotation publishes the new
+reference before deleting the old credential. The owner API now exposes
+revision-checked list/register/enable/remove operations, accepts credentials
+only in the registration request, and never returns them. The local browser
+adapter allowlists these routes for the same-origin local view; it forwards
+the view-session credential internally and never asks the user for a server
+token. Native and adapter contracts cover owner authentication, revision
+conflicts, no-secret responses, route boundaries, rotation, clearing, retired
+IDs and restart behavior. The registry is not yet connected to AgentRunner,
+graphs, CLI or VS Code; outbound streaming and durable recovery after uncertain
+remote dispatch remain open.
 
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),

@@ -3,6 +3,12 @@ const workspaceSkillRouteTest=require('node:test'),workspaceSkillRouteAssert=req
 workspaceSkillRouteTest('session skill controls expose only exact GET and POST routes',async()=>{
  const {allowedApiRoute}=await import('../server.mjs');for(const method of ['GET','POST','PUT','PATCH','DELETE','HEAD'])workspaceSkillRouteAssert.equal(allowedApiRoute('/v1/sessions/session/skills',method),['GET','POST'].includes(method));for(const route of ['/v1/sessions/session/skills/load','/v1/sessions/session/skills/','/v1/sessions/session/skills/../credentials'])workspaceSkillRouteAssert.equal(allowedApiRoute(route,'GET'),false);
 });
+workspaceSkillRouteTest('A2A owner routes are narrowly allowlisted for local browser forwarding',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs');
+ workspaceSkillRouteAssert.equal(allowedApiRoute('/v1/a2a/agents','GET'),true);workspaceSkillRouteAssert.equal(allowedApiRoute('/v1/a2a/agents','POST'),false);
+ for(const path of ['/v1/a2a/agents/register','/v1/a2a/agents/research.alpha/enabled','/v1/a2a/agents/research.alpha/remove']){workspaceSkillRouteAssert.equal(allowedApiRoute(path,'POST'),true);for(const method of ['GET','PUT','PATCH','DELETE','HEAD'])workspaceSkillRouteAssert.equal(allowedApiRoute(path,method),false);}
+ for(const path of ['/v1/a2a/agents/','/v1/a2a/agents/research%2Falpha/enabled','/v1/a2a/agents/research.alpha/remove/extra'])for(const method of ['GET','POST'])workspaceSkillRouteAssert.equal(allowedApiRoute(path,method),false);
+});
 workspaceSkillRouteTest('workspace skill catalogue is an exact read-only browser route',async()=>{
  const {allowedApiRoute}=await import('../server.mjs');
  for(const route of ['/v1/workspace','/v1/workspace/skills']){workspaceSkillRouteAssert.equal(allowedApiRoute(route,'GET'),true);for(const method of ['POST','PUT','DELETE'])workspaceSkillRouteAssert.equal(allowedApiRoute(route,method),false);}

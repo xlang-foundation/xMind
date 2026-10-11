@@ -11,6 +11,9 @@
 #include "agentflow/backend_owner_control.hpp"
 #include "agentflow/mcp_oauth_setup.hpp"
 #include "agentflow/http_stream_transport.hpp"
+#if defined(_WIN32)
+#include "agentflow/a2a_agent_registry.hpp"
+#endif
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <charconv>
@@ -23,6 +26,7 @@
 #include <chrono>
 #include <regex>
 #include <optional>
+#include <span>
 #include <string_view>
 #if defined(_WIN32)
 #include "agentflow/view_sessions.hpp"
@@ -270,6 +274,9 @@ struct HttpServer::Impl {
     std::unique_ptr<ViewSessions> view_sessions;
 #endif
     PersistenceService& persistence;
+#if defined(_WIN32)
+    A2aRemoteAgentRegistry remote_agents;
+#endif
     RunExecutor* executor;
     BackendOwnerControl* owner_control;
     McpOAuthSetup* mcp_oauth;
@@ -354,7 +361,11 @@ struct HttpServer::Impl {
             return false;
         });
     }
-    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth):persistence(store),executor(execution),owner_control(owner),mcp_oauth(oauth),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
+    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth):persistence(store),
+#if defined(_WIN32)
+        remote_agents(store),
+#endif
+        executor(execution),owner_control(owner),mcp_oauth(oauth),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
         validate_local_auth_token(token);
 #if defined(_WIN32)
         if(owner_control&&!owner_control->covers(store,execution,graphs))throw std::invalid_argument("Native owner controller does not cover this transport");
@@ -379,7 +390,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|models|agents|graphs|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|models|agents|graphs|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -523,6 +534,29 @@ struct HttpServer::Impl {
             const auto definition=executor->agent_definition(request.matches[1].str());
             reply(response,{{"agent",{{"id",definition.id},{"revision",definition.revision},{"model_id",definition.model_id.empty()?Json(nullptr):Json(definition.model_id)},{"instructions",definition.instructions}}}});
         }));
+#if defined(_WIN32)
+        const auto encode_remote_agent=[](const A2aRemoteAgentDescriptor& agent){return Json{{"id",agent.id},{"revision",agent.revision},{"card_url",agent.card_url},{"enabled",agent.enabled},{"has_bearer",agent.has_bearer}};};
+        const auto expected_agent_revision=[](const Json& input){constexpr std::int64_t maximum=9007199254740991;if(!input.contains("expected_agent_revision")||!input["expected_agent_revision"].is_number_integer()||input["expected_agent_revision"]<0||input["expected_agent_revision"]>maximum)throw std::invalid_argument("Invalid expected A2A agent revision");return input["expected_agent_revision"].get<std::int64_t>();};
+        server.Get("/v1/a2a/agents",guarded([this,encode_remote_agent](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("A2A remote-agent registry does not accept query parameters");
+            const auto catalog=remote_agents.list();auto entries=Json::array();for(const auto& entry:catalog.entries)entries.push_back(encode_remote_agent(entry));reply(response,{{"revision",catalog.revision},{"agents",std::move(entries)}});
+        }));
+        server.Post("/v1/a2a/agents/register",guarded([this,encode_remote_agent,expected_agent_revision](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("A2A registration does not accept query parameters");
+            auto input=body(request,{"id","card_url","enabled","expected_agent_revision","bearer_token","clear_bearer"});
+            if(!input.contains("enabled")||!input.at("enabled").is_boolean())throw std::invalid_argument("Missing or invalid enabled state");
+            const auto revision=expected_agent_revision(input);std::optional<SecretBytes> bearer;bool clear=false;
+            if(input.contains("bearer_token")){if(!input.at("bearer_token").is_string())throw std::invalid_argument("Invalid A2A bearer credential");auto& value=input.at("bearer_token").get_ref<Json::string_t&>();if(value.empty()||value.size()>4096||std::any_of(value.begin(),value.end(),[](unsigned char c){return c<0x21||c>0x7e;}))throw std::invalid_argument("Invalid A2A bearer credential");const auto* bytes=reinterpret_cast<const std::uint8_t*>(value.data());bearer.emplace(std::span<const std::uint8_t>(bytes,value.size()));std::fill(value.begin(),value.end(),'\\0');}
+            if(input.contains("clear_bearer")){if(!input.at("clear_bearer").is_boolean())throw std::invalid_argument("Invalid clear_bearer flag");clear=input.at("clear_bearer").get<bool>();}
+            const auto saved=remote_agents.register_agent(string_field(input,"id",64),string_field(input,"card_url",8192),input.at("enabled").get<bool>(),revision,std::move(bearer),clear);reply(response,{{"agent",encode_remote_agent(saved)}});
+        }));
+        server.Post(R"(/v1/a2a/agents/([A-Za-z0-9_.-]{1,64})/enabled)",guarded([this,encode_remote_agent,expected_agent_revision](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("A2A enablement does not accept query parameters");const auto input=body(request,{"enabled","expected_agent_revision"});if(!input.contains("enabled")||!input.at("enabled").is_boolean())throw std::invalid_argument("Missing or invalid enabled state");const auto saved=remote_agents.set_enabled(request.matches[1].str(),input.at("enabled").get<bool>(),expected_agent_revision(input));reply(response,{{"agent",encode_remote_agent(saved)}});
+        }));
+        server.Post(R"(/v1/a2a/agents/([A-Za-z0-9_.-]{1,64})/remove)",guarded([this,expected_agent_revision](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("A2A removal does not accept query parameters");const auto input=body(request,{"expected_agent_revision"});remote_agents.remove(request.matches[1].str(),expected_agent_revision(input));response.status=204;
+        }));
+#endif
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/agent)",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session agent selection does not accept query parameters");
             if(!executor||!executor->supports_agent_selection())throw RunUnavailable("Conversation agent selection is unavailable");

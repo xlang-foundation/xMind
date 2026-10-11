@@ -284,7 +284,8 @@ if(BUILD_TESTING)
     add_test(NAME native_a2a_client_sdk_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/a2a_client_sdk_peer.mjs" "$<TARGET_FILE:agentflow_a2a_client_sdk_contract>")
     set_tests_properties(native_a2a_client_sdk_contract PROPERTIES TIMEOUT 35)
     add_executable(agentflow_a2a_agent_registry_contract tests/a2a_agent_registry_contract.cpp)
-    target_link_libraries(agentflow_a2a_agent_registry_contract PRIVATE agentflow_a2a ws2_32 crypt32)
+    target_include_directories(agentflow_a2a_agent_registry_contract PRIVATE third_party third_party/cpp-httplib)
+    target_link_libraries(agentflow_a2a_agent_registry_contract PRIVATE agentflow_http agentflow_a2a ws2_32 crypt32)
     add_custom_command(TARGET agentflow_a2a_agent_registry_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_a2a_agent_registry_contract>")
     add_test(NAME native_a2a_agent_registry_contract COMMAND agentflow_a2a_agent_registry_contract
