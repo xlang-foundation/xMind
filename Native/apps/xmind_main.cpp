@@ -32,6 +32,8 @@ void help(){
         "  xmind [connection options] git-status\n"
         "  xmind [connection options] git-info\n"
         "  xmind [connection options] git-branches\n"
+        "  xmind [connection options] git-base\n"
+        "  xmind [connection options] git-diff MODE [BASE [CONTEXT]]\n"
         "  xmind view --ready-file FILE [local profile options]\n"
         "  xmind admin [native administration arguments]\n"
         "  xmind schema-worker   (private bounded schema protocol)\n\n"

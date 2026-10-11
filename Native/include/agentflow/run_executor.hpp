@@ -19,6 +19,8 @@ struct ProviderProfileAdmission {std::string id;std::int64_t revision=0;};
 struct ExecutionWorkspaceMetadata {bool configured=false;std::string root,workspace_id,authority_id;};
 struct WorkspaceSkillCatalogue {ExecutionWorkspaceMetadata workspace;std::string catalogue_json;};
 struct WorkspaceVcsFileStatus {std::string file;std::uint64_t additions=0,deletions=0;std::string status;};
+struct WorkspaceVcsFileDiff {std::string file,patch,status;std::uint64_t additions=0,deletions=0;};
+struct WorkspaceVcsReviewBase {std::string name,ref,source;};
 struct WorkspaceVcsInfo {std::string current_branch,default_branch;std::vector<std::string> local_branches;bool repository=false;};
 struct WorkspaceAdmission {std::string workspace_id,authority_id;};
 struct WorkspaceSessionSkills {ExecutionWorkspaceMetadata workspace;SessionSkillState state;};
@@ -39,6 +41,8 @@ public:
     virtual void initialize_vcs(std::string_view){throw RunUnavailable("Workspace version control initialization is unavailable");}
     virtual std::vector<WorkspaceVcsFileStatus> vcs_status()const{throw RunUnavailable("Workspace version control status is unavailable");}
     virtual WorkspaceVcsInfo vcs_info()const{throw RunUnavailable("Workspace version control metadata is unavailable");}
+    virtual std::optional<WorkspaceVcsReviewBase> vcs_base()const{throw RunUnavailable("Workspace VCS review base is unavailable");}
+    virtual std::vector<WorkspaceVcsFileDiff> vcs_diff(std::string_view,std::optional<std::string>,unsigned)const{throw RunUnavailable("Workspace VCS diff is unavailable");}
     virtual bool supports_workspace_browsing()const{return false;}
     virtual WorkspaceListing browse_workspace_files(const std::string&)const{throw RunUnavailable("Workspace browsing is unavailable");}
     virtual WorkspaceFile browse_workspace_file(const std::string&)const{throw RunUnavailable("Workspace file preview is unavailable");}

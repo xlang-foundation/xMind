@@ -59,6 +59,28 @@ WorkspaceVcsInfo ExecutionPlatform::vcs_info()const{
     throw RunUnavailable("Version control metadata is unavailable on this platform");
 #endif
 }
+std::optional<WorkspaceVcsReviewBase> ExecutionPlatform::vcs_base()const{
+#if defined(_WIN32)
+    if(!workspace_binding_)throw RunUnavailable("VCS review base requires an opened workspace");
+    const auto workspace=execution_workspace();
+    try{const auto value=workspace_vcs_base(*workspace_binding_);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
+        if(!value)return {};return WorkspaceVcsReviewBase{value->name,value->ref,value->source};}
+    catch(const VcsStatusFailure&){throw;}
+#else
+    throw RunUnavailable("VCS review base is unavailable on this platform");
+#endif
+}
+std::vector<WorkspaceVcsFileDiff> ExecutionPlatform::vcs_diff(std::string_view mode,std::optional<std::string> base,unsigned context)const{
+#if defined(_WIN32)
+    if(!workspace_binding_)throw RunUnavailable("VCS diff requires an opened workspace");
+    const auto workspace=execution_workspace();
+    try{const auto values=workspace_vcs_diff(*workspace_binding_,mode,std::move(base),context);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
+        std::vector<WorkspaceVcsFileDiff> result;result.reserve(values.size());for(const auto& value:values)result.push_back({value.file,value.patch,value.status,value.additions,value.deletions});return result;}
+    catch(const VcsStatusFailure&){throw;}
+#else
+    throw RunUnavailable("VCS diff is unavailable on this platform");
+#endif
+}
 WorkspaceListing ExecutionPlatform::browse_workspace_files(const std::string& path)const{
     if(!workspace_binding_)throw RunUnavailable("Workspace browsing requires an opened root");
     const auto workspace=execution_workspace();auto listing=workspace_binding_->browse_files(path);

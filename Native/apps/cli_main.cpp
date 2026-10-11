@@ -741,7 +741,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
             for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
             return value;
         };
-        using Json=nlohmann::json;std::string path,chat_model,mcp_id;Json body;bool post=false,watch=false,graph_watch=false,chat=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false,vcs_status=false,vcs_info=false,vcs_branches=false;std::int64_t watch_cursor=0;
+        using Json=nlohmann::json;std::string path,chat_model,mcp_id;Json body;bool post=false,watch=false,graph_watch=false,chat=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false,vcs_status=false,vcs_info=false,vcs_branches=false,vcs_base=false,vcs_diff=false;std::int64_t watch_cursor=0;
         if(command=="health" && argc==3) path="/v1/health";
         else if(command=="chat" && argc>=3 && argc<=5){chat=true;if(argc>=4)path=id(argv[3]);if(argc==5)chat_model=argv[4];}
         else if(command=="sessions" && argc==3) path="/v1/sessions";
@@ -759,6 +759,8 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         else if(command=="git-status"&&argc==3){path="/v1/vcs/status";vcs_status=true;}
         else if(command=="git-info"&&argc==3){path="/v1/vcs/info";vcs_info=true;}
         else if(command=="git-branches"&&argc==3){path="/v1/vcs/branches";vcs_branches=true;}
+        else if(command=="git-base"&&argc==3){path="/v1/vcs/base";vcs_base=true;}
+        else if(command=="git-diff"&&argc>=4&&argc<=6){const std::string mode=argv[3];path="/v1/vcs/diff?mode="+httplib::encode_query_component(mode);if(argc>=5)path+="&base="+httplib::encode_query_component(argv[4]);if(argc==6)path+="&context="+httplib::encode_query_component(argv[5]);vcs_diff=true;}
         else if(command=="operations" && argc==4) path="/v1/runs/"+id(argv[3])+"/operations";
         else if(command=="children"&&argc==4)path="/v1/runs/"+id(argv[3])+"/children";
         else if(command=="child-history"&&argc==5)path="/v1/runs/"+id(argv[3])+"/children/"+id(argv[4])+"/history";
@@ -917,6 +919,14 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         if(vcs_branches){
             if(!result.is_array()||result.size()>4096)throw std::runtime_error("Invalid native Git branch response");
             for(const auto& branch:result)if(!branch.is_string()||branch.get_ref<const std::string&>().empty()||branch.get_ref<const std::string&>().size()>1024||branch.get_ref<const std::string&>().find_first_of("\r\n")!=std::string::npos||branch.get_ref<const std::string&>().find('\0')!=std::string::npos)throw std::runtime_error("Invalid native Git branch entry");
+        }
+        if(vcs_base){
+            if(!result.is_null()&&(!result.is_object()||result.size()!=3||!result.contains("name")||!result["name"].is_string()||result["name"].get_ref<const std::string&>().empty()||!result.contains("ref")||!result["ref"].is_string()||result["ref"].get_ref<const std::string&>().size()<40||!result.contains("source")||!result["source"].is_string()||(result["source"]!="default"&&result["source"]!="reflog")))throw std::runtime_error("Invalid native Git review base response");
+        }
+        if(vcs_diff){
+            if(!result.is_array()||result.size()>4096)throw std::runtime_error("Invalid native Git diff response");
+            const auto count=[](const Json& value){return value.is_number_unsigned()&&value.get<std::uint64_t>()<=9007199254740991ULL;};
+            for(const auto& item:result)if(!item.is_object()||item.size()!=5||!item.contains("file")||!item["file"].is_string()||item["file"].get_ref<const std::string&>().empty()||item["file"].get_ref<const std::string&>().size()>32768||!item.contains("patch")||!item["patch"].is_string()||item["patch"].get_ref<const std::string&>().size()>10*1024*1024||!item.contains("additions")||!count(item["additions"])||!item.contains("deletions")||!count(item["deletions"])||!item.contains("status")||!item["status"].is_string()||(item["status"]!="added"&&item["status"]!="deleted"&&item["status"]!="modified"))throw std::runtime_error("Invalid native Git diff entry");
         }
         if(command=="session-skills")skill_snapshot(result,id(argv[3]));
         if(command=="set-skills")skill_acknowledgement(result,id(argv[3]),body);

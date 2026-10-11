@@ -56,14 +56,22 @@ commands without `--workspace` retain the operator-selected backend behavior.
 `xmind git-status` reads the selected backend's opened workspace through the
 native `GET /v1/vcs/status` endpoint and prints validated JSON file statuses and
 line counts. It does not accept a caller-selected path, so managed profiles,
-the browser, and VS Code use the same workspace authority. Branch listings,
-review-base comparison, full diffs and rename/binary parity are not implemented
-yet. See [CLI Git status evidence](evidence/cli-git-status-local-20261011.json)
+the browser, and VS Code use the same workspace authority. See
+[CLI Git status evidence](evidence/cli-git-status-local-20261011.json)
 and the [native Git status contract](evidence/native-vcs-status-local-20261011.json).
 
 `xmind git-info` returns the Git provider and current/default branch metadata;
 `xmind git-branches` lists local branches. Both use the opened workspace and
 the same native backend. They do not accept a caller-supplied repository path.
+
+`xmind git-base` reports an inferred review base, when the selected branch's
+remote default or creation reflog identifies one. `xmind git-diff MODE [BASE
+[CONTEXT]]` prints validated per-file patches for `working`, `branch` or
+`committed` comparisons. It uses the same opened workspace, supports an
+explicit base for ambiguous branch history, and bounds patch responses at 4 MiB.
+The CLI contract checks authenticated routing and malformed-reply rejection;
+the actual Git branch and patch behavior is exercised by the backend HTTP
+contract. Rename/binary review rendering is not included yet.
 
 ## Multiline requests
 

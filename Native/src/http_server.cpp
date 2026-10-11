@@ -401,7 +401,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|agents|graphs|vcs/(init|status|info|branches)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -616,6 +616,17 @@ struct HttpServer::Impl {
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("VCS branches use the opened workspace and accept no query parameters");
             if(!executor)throw RunUnavailable("Version control branches require an opened workspace");
             std::lock_guard lock(vcs_initialization_mutex);reply(response,executor->vcs_info().local_branches);
+        }));
+        server.Get("/v1/vcs/base",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("VCS review base uses the opened workspace and accepts no query parameters");
+            if(!executor)throw RunUnavailable("VCS review base requires an opened workspace");
+            std::lock_guard lock(vcs_initialization_mutex);const auto value=executor->vcs_base();if(value)reply(response,{{"name",value->name},{"ref",value->ref},{"source",value->source}});else reply(response,nullptr);
+        }));
+        server.Get("/v1/vcs/diff",guarded([this](const Request& request,Response& response){
+            if(request.params.size()>3||!request.has_param("mode")||request.params.count("mode")!=1||request.params.count("base")>1||request.params.count("context")>1||(!request.params.empty()&&std::any_of(request.params.begin(),request.params.end(),[](const auto& item){return item.first!="mode"&&item.first!="base"&&item.first!="context";})))throw std::invalid_argument("VCS diff requires one mode and accepts only base/context options");
+            const auto mode=request.get_param_value("mode");std::optional<std::string> base;if(request.has_param("base"))base=request.get_param_value("base");unsigned context=3;
+            if(request.has_param("context")){const auto value=request.get_param_value("context");unsigned parsed=0;const auto result=std::from_chars(value.data(),value.data()+value.size(),parsed);if(value.empty()||result.ec!=std::errc{}||result.ptr!=value.data()+value.size()||parsed>1000)throw std::invalid_argument("VCS diff context must be an integer between 0 and 1000");context=parsed;}
+            if(!executor)throw RunUnavailable("VCS diff requires an opened workspace");std::lock_guard lock(vcs_initialization_mutex);auto values=Json::array();for(const auto& item:executor->vcs_diff(mode,std::move(base),context))values.push_back({{"file",item.file},{"patch",item.patch},{"additions",item.additions},{"deletions",item.deletions},{"status",item.status}});reply(response,values);
         }));
         server.Get("/v1/workspace/files",guarded([this](const Request& request,Response& response){
             const auto path=workspace_browse_path(request);if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Workspace browsing requires an opened root");

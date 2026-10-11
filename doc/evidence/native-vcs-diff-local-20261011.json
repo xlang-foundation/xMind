@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-11",
+  "operation_ids": ["vcs.base", "vcs.diff"],
+  "pinned_upstream": "OpenCode v2.0.26",
+  "agentflow_routes": ["GET /v1/vcs/base", "GET /v1/vcs/diff"],
+  "implementation": {
+    "runtime": "Native C++ Git review-base and diff through ExecutionPlatform and the opened WorkspaceTools root",
+    "modes": ["working", "branch", "committed"],
+    "base": "Explicit commit references, remote default branch or branch-creation reflog; unresolved histories require an explicit base",
+    "limits": "Fixed Git argument vectors; 30-second aggregate deadline; 4 MiB bounded process and aggregate patch output; 4,096 files; 1,000 context-line maximum",
+    "authority": "Authenticated workspace owner or same-machine browser view; no caller-selected workspace path; serialized with repository operations"
+  },
+  "validation": {
+    "native_build": "Visual Studio CMake Release build of xmind, xmind_cli and agentflow_backend_owner_http_contract passed",
+    "native_http_contract": "native_backend_owner_http_contract passed against actual xMind and xlang3-backed SQLite",
+    "native_http_scope": "Created a real temporary Git repository; checked no inferred default base, exact working changes, reflog-inferred branch base, committed comparison, untracked files, query validation and local-view authorization.",
+    "cli_contract": "native_cli_vcs_diff_contract passed authenticated route construction, base/context URL encoding, null-base handling and malformed-response rejection.",
+    "browser_contract": "node --test views/browser/tests/*.test.cjs passed 82 tests, including read-only allowlisting for base and diff routes.",
+    "inventory_audit": "141 pinned operations; 31 native source candidates; 110 unmapped; 0 verified operation-level parity."
+  },
+  "remaining": [
+    "Rendered browser and VS Code diff viewers are not implemented.",
+    "Rename detection, binary review experience, non-Windows execution and full OpenCode VCS operation parity remain incomplete."
+  ]
+}

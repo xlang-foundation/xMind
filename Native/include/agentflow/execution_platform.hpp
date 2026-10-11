@@ -17,6 +17,8 @@ public:
     void initialize_vcs(std::string_view provider)override;
     std::vector<WorkspaceVcsFileStatus> vcs_status()const override;
     WorkspaceVcsInfo vcs_info()const override;
+    std::optional<WorkspaceVcsReviewBase> vcs_base()const override;
+    std::vector<WorkspaceVcsFileDiff> vcs_diff(std::string_view,std::optional<std::string>,unsigned)const override;
     bool supports_workspace_browsing()const override{return static_cast<bool>(workspace_binding_);}
     WorkspaceListing browse_workspace_files(const std::string& path)const override;
     WorkspaceFile browse_workspace_file(const std::string& path)const override;
