@@ -744,8 +744,21 @@ class ProviderProfileController {
       if(!saved){if(!key)throw new Error('Enter a key for the new provider profile');id=route.provider+'-'+globalThis.crypto.randomUUID();}
       this.post({type:'settings-state',busy:true,text:'Fetching models from '+(route.provider==='anthropic'?'Claude':route.provider)+'…'});
       if(!this.current(epoch))throw new Error('Backend changed during provider setup');
-      const captured=this.binding(id),savedCredential=!!saved&&key===undefined;
-      const catalogue=await this.client.discoverProfileModels(id,savedCredential?saved.route_id:route_id,key,this.state.revision);
+      let captured=this.binding(id);const savedCredential=!!saved&&key===undefined;let catalogue;
+      try{catalogue=await this.client.discoverProfileModels(id,savedCredential?saved.route_id:route_id,key,this.state.revision);}
+      catch(error){
+        // Another xMind view can update provider metadata while this page is
+        // open. Saved-key discovery is read-only, so refresh once and retry
+        // only while the selected profile identity and route are unchanged.
+        if(error.status!==409||!savedCredential)throw error;
+        const active=captured.active;
+        const refreshed=await this.refresh();if(!this.current(epoch))return true;if(!refreshed)throw error;
+        const latest=this.state.profiles.find(value=>value.id===id);
+        if(this.state.active!==active||!latest||latest.route_id!==saved.route_id||latest.provider!==saved.provider)
+          throw new Error('Provider settings changed. Review the selected profile and fetch models again.');
+        captured=this.binding(id);
+        catalogue=await this.client.discoverProfileModels(id,latest.route_id,undefined,this.state.revision);
+      }
       if(!this.current(epoch))return true;
       if(!this.bound(captured))throw new Error('Provider settings changed. Fetch models again.');
       if(!catalogue.models.length)throw new Error('The provider returned no models');

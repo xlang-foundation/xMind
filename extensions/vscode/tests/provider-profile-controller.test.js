@@ -40,6 +40,19 @@ test('saved-credential discovery survives close and conversation discard, with e
  }finally{controller.dispose();}assert.equal(controller.savedCatalogue,undefined);
 });
 
+test('saved-key discovery refreshes one stale profile revision and retries without changing identity',async()=>{
+ let state=registry();const posted=[],calls=[];
+ const controller=new ProviderProfileController({providerProfiles:async()=>state,discoverProfileModels:async(...args)=>{calls.push(args);if(calls.length===1){state={...state,revision:5,profiles:[{...state.profiles[0],revision:5}]};throw Object.assign(new Error('Provider profile discovery revision changed'),{status:409});}return {models:[{id:'fresh-model'}]};}},value=>posted.push(value));
+ try{await controller.discover();assert.deepEqual(calls,[['openai','openai.responses',undefined,4],['openai','openai.responses',undefined,5]]);assert.deepEqual(controller.savedCatalogue.ids,['fresh-model']);assert.equal(Object.hasOwn(controller.savedCatalogue,'key'),false);assert.match(posted.findLast(value=>value.type==='settings-state').text,/Fetched 1 openai models using this profile's saved key/);}
+ finally{controller.dispose();}
+});
+
+test('saved-key discovery does not retry after the selected profile identity changes',async()=>{
+ let state=registry();const calls=[],controller=new ProviderProfileController({providerProfiles:async()=>state,discoverProfileModels:async(...args)=>{calls.push(args);state={...state,revision:5,active:''};throw Object.assign(new Error('Provider profile discovery revision changed'),{status:409});}},()=>{});
+ try{await assert.rejects(controller.discover(),/Review the selected profile/);assert.equal(calls.length,1);assert.equal(controller.state.active,'');assert.equal(controller.savedCatalogue,undefined);}
+ finally{controller.dispose();}
+});
+
 test('external profile, registry, route or backend identity changes retire saved catalogue without a model write',async()=>{
  for(const change of [s=>({...s,revision:5}),s=>({...s,active:''}),s=>({...s,profiles:[{...s.profiles[0],revision:5}]}),s=>({...s,profiles:[{...s.profiles[0],route_id:'openai.chat'}]}),s=>({...s,routes:s.routes.map(r=>r.id==='openai.responses'?{...r,wire:'chat-completions'}:r)})]){
   let state=registry(),writes=0;const controller=new ProviderProfileController({providerProfiles:async()=>state,discoverProfileModels:async()=>({models:[{id:'discovered-only'}]}),saveProviderProfile:async()=>{writes++;}},()=>{});
