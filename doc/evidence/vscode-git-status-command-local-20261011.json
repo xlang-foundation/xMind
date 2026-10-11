@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-11",
+  "operation_id": "vcs.status",
+  "client": "VS Code command palette",
+  "command": "xMind: Show Git Status",
+  "implementation": {
+    "source": "Thin extension host calls native GET /v1/vcs/status; C++ remains the source of Git data and workspace authority.",
+    "workspace_binding": "Uses the currently opened and admitted xMind workspace; revalidates its backend ticket after the read.",
+    "display": "QuickPick rows show each changed path, native status and exact added/deleted line counts. Empty results avoid claiming a repository exists."
+  },
+  "validation": {
+    "extension_tests": "node --test extensions/vscode/tests/*.test.js passed 276 tests, including the current-folder Git status command and safe empty-result message.",
+    "package": "npm run package --prefix extensions/vscode produced extensions/vscode/agentflow-0.1.5.vsix and verified 1,896 native runtime files.",
+    "installed_extension": "VS Code CLI reports agentflow-local.agentflow@0.1.5 installed.",
+    "rendered_ide": false,
+    "command_palette_visibility": "Unverified because the Windows UI helper failed with GetCursorPos: Access is denied.",
+    "live_native_request": false
+  },
+  "remaining": [
+    "Rendered VS Code acceptance and full Git status parity remain incomplete."
+  ]
+}

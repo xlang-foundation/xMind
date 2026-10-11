@@ -92,10 +92,18 @@ xlang3/SQLite HTTP contract verified a clean repository, an untracked file with
 a space in its path and exact two-line counts, then a committed file changed
 with one addition and one deletion; bearer and local-view authorization and
 query rejection were also checked. The browser workspace includes a Git status
-control, with adapter and rendering coverage in the 80-test browser suite; a
-fresh rendered-browser check has not yet been done. CLI and VS Code status
-controls, branches, review base, diffs, rename/binary behavior and broader VCS
-equivalence remain incomplete. See [local status evidence](evidence/native-vcs-status-local-20261011.json).
+control, with adapter and rendering coverage in the 81-test browser suite; a
+fresh rendered-browser check has not yet been done. VS Code's `xMind: Show Git
+Status` command is bound to the opened workspace and lists backend-reported
+paths and line counts; its host contract is covered by the extension suite, not
+a rendered IDE check. Branch listing, review base, full diffs, rename/binary
+behavior and broader VCS equivalence remain incomplete. The console CLI exposes
+`xmind git-status` through the same native endpoint, validates the response and
+prints JSON; its contract uses an authenticated synthetic HTTP peer, while the
+backend contract above exercises actual Git in the opened workspace. See [CLI
+status evidence](evidence/cli-git-status-local-20261011.json), [native status
+evidence](evidence/native-vcs-status-local-20261011.json) and [VS Code status
+evidence](evidence/vscode-git-status-command-local-20261011.json).
 
 ## OpenCode V2 functional baseline
 

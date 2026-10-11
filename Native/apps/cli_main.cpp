@@ -732,7 +732,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
 
 int cli_main(int argc,char** argv,const std::string& workspace,const std::function<agentflow::LocalProfileConnection()>& profile) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, events, watch, models, agents, session-agent SESSION, set-agent SESSION AGENT_ID|default EXPECTED_REVISION AGENT_REVISION, skills, session-skills, set-skills SESSION SNAPSHOT_JSON_FILE [ID...], provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, inspect-plan ROOT, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, a2a-agents, a2a-register ID CARD_URL true|false EXPECTED_REVISION [BEARER_ENV], a2a-enable ID true|false EXPECTED_REVISION, a2a-remove ID EXPECTED_REVISION, a2a-inspect OPERATION_ID, a2a-cancel OPERATION_ID, a2a-follow-up OPERATION_ID SEQUENCE MESSAGE, process-profiles, operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, history, runs, run, cancel, status, git-status, events, watch, models, agents, session-agent SESSION, set-agent SESSION AGENT_ID|default EXPECTED_REVISION AGENT_REVISION, skills, session-skills, set-skills SESSION SNAPSHOT_JSON_FILE [ID...], provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, inspect-plan ROOT, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, a2a-agents, a2a-register ID CARD_URL true|false EXPECTED_REVISION [BEARER_ENV], a2a-enable ID true|false EXPECTED_REVISION, a2a-remove ID EXPECTED_REVISION, a2a-inspect OPERATION_ID, a2a-cancel OPERATION_ID, a2a-follow-up OPERATION_ID SEQUENCE MESSAGE, process-profiles, operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -741,7 +741,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
             for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
             return value;
         };
-        using Json=nlohmann::json;std::string path,chat_model,mcp_id;Json body;bool post=false,watch=false,graph_watch=false,chat=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false;std::int64_t watch_cursor=0;
+        using Json=nlohmann::json;std::string path,chat_model,mcp_id;Json body;bool post=false,watch=false,graph_watch=false,chat=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false,vcs_status=false;std::int64_t watch_cursor=0;
         if(command=="health" && argc==3) path="/v1/health";
         else if(command=="chat" && argc>=3 && argc<=5){chat=true;if(argc>=4)path=id(argv[3]);if(argc==5)chat_model=argv[4];}
         else if(command=="sessions" && argc==3) path="/v1/sessions";
@@ -756,6 +756,7 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         }
         else if(command=="runs" && argc==4) path="/v1/sessions/"+id(argv[3])+"/runs";
         else if(command=="status" && argc==4) path="/v1/runs/"+id(argv[3]);
+        else if(command=="git-status"&&argc==3){path="/v1/vcs/status";vcs_status=true;}
         else if(command=="operations" && argc==4) path="/v1/runs/"+id(argv[3])+"/operations";
         else if(command=="children"&&argc==4)path="/v1/runs/"+id(argv[3])+"/children";
         else if(command=="child-history"&&argc==5)path="/v1/runs/"+id(argv[3])+"/children/"+id(argv[4])+"/history";
@@ -898,6 +899,13 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
             return 1;
         }
         const auto result=Json::parse(response->body);
+        if(vcs_status){
+            if(!result.is_array()||result.size()>4096)throw std::runtime_error("Invalid native Git status response");
+            for(const auto& item:result){
+                const auto count=[](const Json& value){return value.is_number_unsigned()&&value.get<std::uint64_t>()<=9007199254740991ULL;};
+                if(!item.is_object()||item.size()!=4||!item.contains("file")||!item["file"].is_string()||item["file"].get_ref<const std::string&>().empty()||item["file"].get_ref<const std::string&>().size()>32768||item["file"].get_ref<const std::string&>().find('\0')!=std::string::npos||!item.contains("additions")||!count(item["additions"])||!item.contains("deletions")||!count(item["deletions"])||!item.contains("status")||!item["status"].is_string()||(item["status"]!="added"&&item["status"]!="deleted"&&item["status"]!="modified"))throw std::runtime_error("Invalid native Git status entry");
+            }
+        }
         if(command=="session-skills")skill_snapshot(result,id(argv[3]));
         if(command=="set-skills")skill_acknowledgement(result,id(argv[3]),body);
         std::cout<<result.dump(2)<<'\n';return 0;

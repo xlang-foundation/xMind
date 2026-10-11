@@ -22842,7 +22842,7 @@
         "sourceSha256": "d3065834149ea2fea7f8e41b539fe73bc21e6a3ab703f411f876b68f0454c133",
         "surface": "GET /v1/vcs/status",
         "sourceAnchor": "executor->vcs_status",
-        "gap": "Native Git status reports changed paths and line counts only for the opened workspace; branch details, review base, branch listing, diffs, rename parity and cross-platform acceptance remain incomplete.",
+        "gap": "Native Git status reports changed paths and line counts only for the opened workspace; browser, VS Code and CLI have read controls, while branch details, review base, branch listing, diffs, rename parity and cross-platform acceptance remain incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },

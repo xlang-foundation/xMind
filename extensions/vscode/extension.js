@@ -712,6 +712,20 @@ async function activate(context) {
       vscode.window.showInformationMessage(`Git repository initialized in ${owner.metadata.root}.`);
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.gitStatus',async()=>{
+    try{
+      if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before reading Git status.');
+      await open();const target=client,view=panel,owner=workspaceBackend.active;
+      if(!target||!owner||!view)throw new Error('Connect the opened workspace before reading Git status.');
+      const ticket=await workspaceBackend.prepare();workspaceBackend.assert(ticket);
+      if(ticket.origin!==target.baseUrl||owner.origin!==ticket.origin)throw new Error('The selected workspace backend changed.');
+      const values=await target.vcsStatus();workspaceBackend.assert(ticket);
+      if(panel!==view||client!==target)throw new Error('The xMind view changed while reading Git status.');
+      if(!values.length){vscode.window.showInformationMessage(`No changed files reported by Git for ${owner.metadata.root}. The workspace may not be a Git repository.`);return;}
+      const items=values.map(item=>({label:`${item.status}  ${JSON.stringify(item.file)}`,description:`+${item.additions} −${item.deletions}`}));
+      await vscode.window.showQuickPick(items,{title:`Git status · ${owner.metadata.root}`,placeHolder:`${values.length} changed file${values.length===1?'':'s'} · line counts appear beside each path`});
+    }catch(error){vscode.window.showErrorMessage(error.message);}
+  }));
   if(vscode.workspace.onDidChangeWorkspaceFolders)context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(()=>{
     reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
   }));

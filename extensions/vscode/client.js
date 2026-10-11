@@ -52,6 +52,7 @@ class BackendClient {
   health() { return this.request('/v1/health'); }
   async workspace() { return validateWorkspace(await this.request('/v1/workspace')); }
   initializeGitRepository() { return this.request('/v1/vcs/init',{}); }
+  async vcsStatus() { return validateVcsStatus(await this.request('/v1/vcs/status')); }
   models() { return this.request('/v1/models'); }
   graphs() { return this.request('/v1/graphs'); }
   delegation() { return this.request('/v1/agent/delegation'); }
@@ -196,6 +197,15 @@ function validateWorkspace(value){
   if(typeof value.configured!=='boolean')throw new Error('Invalid backend workspace metadata.');
   if(!value.configured){if(value.root!==null||value.workspace_id!==null||value.authority_id!==null)throw new Error('Invalid backend workspace metadata.');}
   else if(typeof value.root!=='string'||!value.root||value.root.length>32760||/[\x00-\x1f]/.test(value.root)||typeof value.workspace_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(value.workspace_id)||typeof value.authority_id!=='string'||!/^[a-f0-9]{32}$/.test(value.authority_id))throw new Error('Invalid backend workspace identity.');
+  return value;
+}
+function validateVcsStatus(value){
+  if(!Array.isArray(value)||value.length>4096)throw new Error('Invalid native Git status');
+  for(const item of value){
+    if(!item||typeof item.file!=='string'||!item.file||item.file.length>32768||/[\x00]/.test(item.file)||
+      !Number.isSafeInteger(item.additions)||item.additions<0||!Number.isSafeInteger(item.deletions)||item.deletions<0||
+      !['added','deleted','modified'].includes(item.status))throw new Error('Invalid native Git status');
+  }
   return value;
 }
 
@@ -684,5 +694,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
-else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
+else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};

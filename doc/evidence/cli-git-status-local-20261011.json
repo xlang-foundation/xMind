@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-11",
+  "command": "xmind git-status",
+  "route": "GET /v1/vcs/status",
+  "implementation": {
+    "runtime": "Native CLI calls the shared xMind Server endpoint; it does not start or embed a separate Git implementation.",
+    "validation": "Rejects malformed status entries, non-unsigned or unsafe line counts, unknown status values and oversized responses.",
+    "output": "Emits the validated native status array as JSON."
+  },
+  "validation": {
+    "contract": "native_cli_vcs_status_contract passed against the built xmind_cli executable, checking bearer-authenticated GET routing, exact path and response validation.",
+    "peer_scope": "Synthetic HTTP response peer; real Git status behavior is covered separately by native-vcs-status-local-20261011.json."
+  },
+  "remaining": [
+    "CLI accepts no workspace-path override; the backend remains bound to its opened workspace.",
+    "Branches, review base, branch listing, diffs, rename/binary behavior and full OpenCode V2 parity remain incomplete."
+  ]
+}

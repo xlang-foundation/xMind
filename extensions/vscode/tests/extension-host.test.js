@@ -23,6 +23,7 @@ function harness(options={}) {
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
     if(target.pathname==='/v1/vcs/init'){vcsInitializations.push(JSON.parse(requestOptions.body));return {ok:true,status:204,json:async()=>{throw new Error('204 responses have no JSON body');}};}
+    if(target.pathname==='/v1/vcs/status')return {ok:true,json:async()=>options.vcsStatus||[]};
     if(target.pathname.startsWith('/v1/mcp/authorization/'))return options.mcp?{ok:true,json:async()=>options.mcp(target.pathname,requestOptions)}:{ok:false,status:404,json:async()=>({detail:'Synthetic backend has no MCP login API'})};
     let data;
     if(target.pathname.endsWith('/context/compact')){const body=JSON.parse(requestOptions.body);contextRequests.push(body);options.contextRecord={...options.contextRecord,head_revision:options.contextRecord.head_revision+1};data={id:body.id,state:'pending'};}
@@ -107,7 +108,7 @@ function harness(options={}) {
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
       executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(['workbench.view.extension.xmind','workbench.view.explorer'].includes(name))return;assert.equal(name,'xmind.workspace.focus');if(options.clearEditorOnSidebar)vscode.window.activeTextEditor=undefined;sidebarProvider.resolveWebviewView(makeView());}},
-    window:{activeTextEditor:options.editor,showQuickPick:async(items,settings)=>{pickers.push({items,settings});return items.find(item=>item.label===options.modelInput);},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}assert.equal(prompt.password,true);return token;},showErrorMessage:message=>{errors.push(message);return options.errorChoice;},showInformationMessage:message=>{information.push(message);return undefined;},showWarningMessage:async(message,...choices)=>{warnings.push({message,choices});return typeof options.cancelChoice==='function'?await options.cancelChoice():options.cancelChoice;},
+    window:{activeTextEditor:options.editor,showQuickPick:async(items,settings)=>{pickers.push({items,settings});return items.find(item=>item.label===(options.quickPickLabel??options.modelInput));},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}assert.equal(prompt.password,true);return token;},showErrorMessage:message=>{errors.push(message);return options.errorChoice;},showInformationMessage:message=>{information.push(message);return undefined;},showWarningMessage:async(message,...choices)=>{warnings.push({message,choices});return typeof options.cancelChoice==='function'?await options.cancelChoice():options.cancelChoice;},
       registerWebviewViewProvider:(id,provider)=>{assert.equal(id,'xmind.workspace');sidebarProvider=provider;return {dispose(){}};}}
   };
   function makeView(){
@@ -613,6 +614,14 @@ test('Git initialization command confirms the selected VS Code workspace and use
  const h=harness({cancelChoice:'Initialize Git'});await h.activation;await h.commands.get('agentflow.initializeGit')();assert.equal(h.vcsInitializations.length,1);assert.deepEqual(h.vcsInitializations[0],{});assert.match(h.warnings[0].message,/D:\\TestProj/);assert.equal(h.warnings[0].choices[0].modal,true);assert.deepEqual(h.warnings[0].choices.slice(1),['Initialize Git']);assert.deepEqual(h.information,['Git repository initialized in D:\\TestProj.']);h.views[0].close();
 });
 test('Git initialization command cancellation does not send a backend mutation',async()=>{const h=harness();await h.activation;await h.commands.get('agentflow.initializeGit')();assert.equal(h.warnings.length,1);assert.equal(h.vcsInitializations.length,0);h.views[0].close();});
+
+test('Git status command uses the opened workspace and shows native file counts',async()=>{
+ const h=harness({vcsStatus:[{file:'src/main.cpp',additions:3,deletions:1,status:'modified'},{file:'new file.txt',additions:2,deletions:0,status:'added'}],quickPickLabel:'modified  "src/main.cpp"'});await h.activation;await h.commands.get('agentflow.gitStatus')();
+ assert.ok(h.requests.includes('/v1/vcs/status'));assert.match(h.pickers.at(-1).settings.title,/D:\\TestProj/);assert.deepEqual(JSON.parse(JSON.stringify(h.pickers.at(-1).items)),[{label:'modified  "src/main.cpp"',description:'+3 −1'},{label:'added  "new file.txt"',description:'+2 −0'}]);assert.deepEqual(h.errors,[]);h.views[0].close();
+});
+test('Git status command explains empty status without claiming Git was initialized',async()=>{
+ const h=harness({vcsStatus:[]});await h.activation;await h.commands.get('agentflow.gitStatus')();assert.match(h.information[0],/No changed files reported by Git/);assert.match(h.information[0],/may not be a Git repository/);h.views[0].close();
+});
 
 test('all patch action comparisons use revalidated read-only backend snapshots and never grant',async()=>{
  for(const action of ['add','update','delete','move']){

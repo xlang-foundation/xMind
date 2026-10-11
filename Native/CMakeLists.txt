@@ -952,6 +952,9 @@ if(BUILD_TESTING)
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/http_cli_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>"
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_http_cli_contract PROPERTIES TIMEOUT 90)
+    add_test(NAME native_cli_vcs_status_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_vcs_status_contract.mjs" "$<TARGET_FILE:xmind_cli>")
+    set_tests_properties(native_cli_vcs_status_contract PROPERTIES TIMEOUT 20)
     if(WIN32)
       add_test(NAME native_unified_program_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/unified_program_contract.mjs" "$<TARGET_FILE:xmind>"

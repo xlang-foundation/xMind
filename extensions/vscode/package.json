@@ -68,6 +68,10 @@
       {
         "command": "agentflow.initializeGit",
         "title": "xMind: Initialize Git Repository"
+      },
+      {
+        "command": "agentflow.gitStatus",
+        "title": "xMind: Show Git Status"
       }
     ],
     "configuration": {

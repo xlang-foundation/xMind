@@ -16,12 +16,12 @@ Managed profile startup on other hosts and first-use acceptance from the
 current installed package remain unverified; agent-worker execution is pending.
 No legacy profile migration is required.
 
-The current native Release build passed all **118 local CTest contracts**. The
-actual `native_local_profile_contract` and `native_local_view_contract` exercise
-the unified binary, managed workspace startup, xlang3-backed SQLite, console
-reattachment, and the production host/browser adapters. They make no installed
-or rendered VS Code claim and issue no provider request. The exact hosted native
-gate for the newer MCP renewal source is still pending separately.
+The preceding full native Release gate passed **118 local CTest contracts**.
+This Git-status checkpoint rebuilt the unified binary and CLI, then passed
+`native_http_cli_contract`, `native_cli_vcs_status_contract` and
+`native_backend_owner_http_contract`. The latter exercises actual Git status
+through the opened workspace and xlang3-backed SQLite. This focused run did not
+rerun all native CTest contracts or establish a rendered IDE check.
 
 `agents` lists persisted named-agent IDs, revisions and optional model IDs.
 `agent-definition ID` retrieves one persisted definition, including its
@@ -49,6 +49,16 @@ admission. Client exit still leaves backend execution alive.
 
 Managed profile discovery/startup is verified on Windows. Explicit `--port`
 commands without `--workspace` retain the operator-selected backend behavior.
+
+## Git status
+
+`xmind git-status` reads the selected backend's opened workspace through the
+native `GET /v1/vcs/status` endpoint and prints validated JSON file statuses and
+line counts. It does not accept a caller-selected path, so managed profiles,
+the browser, and VS Code use the same workspace authority. Branch listings,
+review-base comparison, full diffs and rename/binary parity are not implemented
+yet. See [CLI Git status evidence](evidence/cli-git-status-local-20261011.json)
+and the [native Git status contract](evidence/native-vcs-status-local-20261011.json).
 
 ## Multiline requests
 
