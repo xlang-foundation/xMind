@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-11",
+  "repository": "xlang-foundation/xMind",
+  "revision": "d24fe0f",
+  "scope": "An xlang3-authored callable is persisted and executed by the native AgentRunner tool loop.",
+  "configuration": {
+    "authoring_api": "xmind.tool",
+    "tool": "python_uppercase",
+    "catalog_storage": "xlang3 SQLite through PersistenceService",
+    "reloaded_before_execution": true
+  },
+  "execution": {
+    "runner": "Native AgentRunner",
+    "provider_peer": "synthetic local HTTP/SSE protocol fixture",
+    "provider_peer_is_live_model": false,
+    "tool_input": {"text": "xMind"},
+    "tool_result": {"value": "XMIND"},
+    "result_returned_to_model": true,
+    "assistant_continuation_persisted": true
+  },
+  "validation": {
+    "build": "Release agentflow_agent_runner_contract",
+    "ctest": {
+      "command": "ctest --test-dir build/goal-current -C Release -R 'native_agent_runner_contract|embedded_xlang_authoring_program_contract|native_xlang_python_config_contract' --output-on-failure",
+      "passed": 3,
+      "failed": 0
+    }
+  },
+  "limits": [
+    "This contract does not sandbox trusted xlang3 code.",
+    "The synthetic provider does not establish live-model behavior.",
+    "This does not establish full OpenCode 2 operation parity."
+  ]
+}

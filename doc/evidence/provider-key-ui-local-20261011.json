@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-11",
+  "repository": "xlang-foundation/xMind",
+  "source_revision": "3681c2e",
+  "runtime": {
+    "verified_package": ".agentflow/provider-sync-runtime-3681c2e-b",
+    "native_binary_sha256": "cbffb58e81842edc3cf481e565ac2db1f73b920228472b9aa8d499023c87f22f",
+    "workspace": "D:/CantorAI2026/xMind",
+    "profile_store": "C:/Users/shaw9/.xMind/p"
+  },
+  "view": {
+    "url": "http://127.0.0.1:60415/ui/",
+    "backend_origin": "http://127.0.0.1:57545",
+    "connected_to_local_node": true,
+    "workspace_files_rendered": true
+  },
+  "provider_discovery": {
+    "provider": "DeepSeek",
+    "profile_id": "deepseek",
+    "used_saved_encrypted_credential": true,
+    "browser_supplied_api_key": false,
+    "models_returned": ["deepseek-flash", "deepseek-v4-pro"],
+    "ui_status": "Fetched 2 deepseek models using this profile's saved key. The key stays in local xMind."
+  },
+  "limits": [
+    "This verifies saved-key catalogue discovery, not a live inference request.",
+    "The key value is intentionally absent and remains backend-only.",
+    "Verification was in the available local browser surface, not an external browser or installed VS Code host."
+  ]
+}

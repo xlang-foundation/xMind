@@ -219,6 +219,14 @@ The same validators, model/tool allowlists, graph permissions and native runtime
 remain authoritative after import, so YAML/Markdown and program-defined
 catalogs converge on the same runtime definitions.
 
+The native AgentRunner regression contract verifies the callable path
+end-to-end: an xlang3 program declares the tool, the native importer stores it
+in SQLite, the runtime reloads the registration, and AgentRunner returns the
+actual xlang3 result to the synthetic model peer before persisting its
+continuation. This proves the integration path, not live-provider behavior or
+isolation of trusted code. See the
+[contract evidence](evidence/agentflow-xlang-tool-runner-local-20261011.json).
+
 ## YAML subset and limits
 
 YAML is parsed by the native yaml-cpp dependency and immediately converted to

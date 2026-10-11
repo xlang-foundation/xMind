@@ -20,15 +20,33 @@ checked out locally. [Pinned source](https://github.com/anomalyco/opencode/tree/
 track the current V2 surface and can move independently of the source tag;
 source-defined API contracts take precedence for this inventory.
 
-## Latest feature checkpoint before the VCS change (2026-10-10, `4b7eb96`)
+## Latest native coding/runtime checkpoint (2026-10-11, `d24fe0f`)
 
-The latest committed source adds trusted embedded xlang3 Python tool
-registrations to the C++ AgentRunner. Its guarded 7-contract regression gate
-passed, and the xlang3 Unicode working-directory runtime fix is committed and
-pushed on its separate compatibility branch. Earlier full native, browser and
-VS Code gates remain as cited in their checkpoint records; they do not establish
-full OpenCode parity or current installed acceptance. The refreshed V2 API
-inventory is recorded below and is not a product-completion score.
+Named YAML agent definitions and graph agent nodes carry optional tool
+allowlists. The native loop filters the authorized catalogue for single-agent
+sessions and each graph agent independently; caller graph nodes cannot
+override backend-pinned bindings. Definition revisions rotate when bindings
+change, and session snapshots retain them.
+
+Trusted xlang3 programming mode declares agents, graphs and callable tools
+through the native `xmind.agent`, `xmind.graph` and `xmind.tool` API. The C++
+AgentRunner contract authors a callable with xlang3, imports its declaration
+into xlang3-backed SQLite, reloads it, then executes the actual model/tool
+continuation using that persisted registration. The authoring, tool-catalogue
+and AgentRunner contracts passed locally (3/3); the inference peer is
+synthetic, while the xlang3 callable and durable conversation are real. This
+does not sandbox trusted code, provide hard interruption, or establish full
+programming-mode catalog replacement and graph execution parity. See the
+[authoring contract](authoring.md) and
+[execution evidence](evidence/agentflow-xlang-tool-runner-local-20261011.json).
+
+The pinned OpenCode inventory remains **141 operations**, with **31** mapped
+native source candidates, **110** unmapped, and **zero** operations with
+verified parity. Earlier full native, browser and VS Code gates remain scoped
+to their cited revisions; they do not establish full parity or current
+installed acceptance.
+
+## Per-agent native tool bindings (`449c085`)
 
 ## Per-agent native tool bindings (`449c085`)
 
@@ -39,10 +57,10 @@ nodes cannot override a named profile's backend-pinned bindings. Definition
 revisions rotate when bindings change, session snapshots retain them, and a
 stale or unavailable tool binding fails before inference. The focused Release
 build and four native graph, graph-runner, agent-service and HTTP contracts
-passed locally. The parity inventory remains unchanged: **111 OpenCode 2
-operations are unmapped and zero have verified operation-level parity**.
-Arbitrary xlang3 Python callables and the in-process programming API remain
-unimplemented. [Authoring contract](authoring.md).
+passed locally. The initial implementation did not expose callable tools from
+the xlang3 programming API; that gap is closed at the scoped level described
+above. Broader OpenCode operation parity remains incomplete. [Authoring
+contract](authoring.md).
 
 A subsequent live local-browser check fetched saved-credential model catalogues
 for Claude, Gemini, DeepSeek and OpenAI (13/11/2/20 models) and restored the
@@ -56,6 +74,14 @@ encrypted saved credential. The VS Code Settings success message now makes
 saved-key discovery explicit. The package is installed as 0.1.6, but a fresh
 rendered-sidebar result is not yet verified; see the
 [scoped saved-key evidence](evidence/provider-saved-key-live-backend-20261011.json).
+
+The local browser was restarted on the verified runtime containing the
+provider-YAML synchronization fix. A fresh page connected to the same local
+profile store and reported that it fetched two DeepSeek models using the saved
+key. The browser received model IDs and a success status only; no credential
+was returned to it. This checks catalogue discovery, not live inference or
+external-browser/installed-editor behavior. See
+[provider-key UI evidence](evidence/provider-key-ui-local-20261011.json).
 
 The rendered browser was then opened as a fresh same-machine view, connected to
 the local process without a server-token or provider-key prompt, and used its
