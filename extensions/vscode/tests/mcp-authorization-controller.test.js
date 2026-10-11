@@ -11,6 +11,13 @@ function fixture(reply){
   const controller=new McpAuthorizationController(client,message=>messages.push(message),{save:entries=>saved.push(structuredClone(entries)),requestId:()=>binding.id,schedule:fn=>{scheduled.add(fn);return fn;},unschedule:fn=>scheduled.delete(fn)});
   return {controller,calls,messages,saved,scheduled};
 }
+test('MCP settings use browser timer functions with the Window receiver',async()=>{
+ const original=globalThis.clearTimeout,calls=[];
+ globalThis.clearTimeout=function(timer){assert.equal(this,globalThis,'clearTimeout must retain its browser global receiver');calls.push(timer);return original.call(globalThis,timer);};
+ const controller=new McpAuthorizationController({mcpAuthorizationServers:async()=>({servers:[]})},()=>{});
+ try{await controller.read();controller.dispose();assert.ok(calls.length>=2);}
+ finally{controller.dispose();globalThis.clearTimeout=original;}
+});
 test('MCP renewal persists its old-grant identity before POST and restores a lost reply with GET only',async()=>{
  const renewalBinding={...binding,credential_revision:7},configured={...server,state:'authorized',credential_revision:7};let posted=false;
  const f=fixture(({path,method})=>{if(path.endsWith('/servers'))return {servers:[configured]};if(method==='POST'){assert.equal(path,'/v1/mcp/authorization/renewals');assert.deepEqual(f.saved.at(-1),[renewalBinding]);posted=true;throw new Error('Synthetic lost renewal acknowledgement');}assert.ok(posted);return attempt({credential_revision:8,state:'connected'});});

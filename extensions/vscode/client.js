@@ -573,7 +573,7 @@ function validatePlanObservation(value,root){
 }
 
 class McpAuthorizationController {
-  constructor(client,post,{current=()=>true,save=()=>{},requestId=()=>globalThis.crypto.randomUUID(),schedule=(fn)=>setTimeout(fn,1000),unschedule=clearTimeout}={}){
+  constructor(client,post,{current=()=>true,save=()=>{},requestId=()=>globalThis.crypto.randomUUID(),schedule=(fn)=>globalThis.setTimeout(fn,1000),unschedule=(timer)=>globalThis.clearTimeout(timer)}={}){
     this.client=client;this.post=post;this.current=current;this.save=save;this.requestId=requestId;this.schedule=schedule;this.unschedule=unschedule;this.attempts=new Map();this.servers=[];this.epoch=0;this.available=false;this.busy=false;this.error='';
   }
   active(epoch=this.epoch){return !this.disposed&&epoch===this.epoch&&this.current();}
