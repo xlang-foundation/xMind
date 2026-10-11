@@ -7,21 +7,14 @@ and Hover alongside the existing diagnostics collection. Requests are bound to
 the active workspace and unsaved editor buffer; returned locations are confined
 to that workspace. Stale, cancelled and disconnected responses cannot surface.
 The full VS Code extension suite passes **290/290**. The focused native
-Rust Analyzer Release contract also passes against the pinned xlang3
-compatibility worktree and verifies native HTTP editor symbols, unsaved
-document symbols, diagnostics and workspace authority. The new UI mapping is
-contract-tested, but actual installed-IDE definition/reference/hover results
-and formatter behavior remain unverified. See [language-server scope](native-language-server.md)
-and the [parity baseline](PARITY.md).
-
-An additional real Rust Analyzer semantic probe on the call-site fixture did
-not establish definition, references or hover: those queries returned `null`,
-and Rust Analyzer reported that Cargo metadata could not launch `cargo`
-(`Not enough quota is available to process this command`, Windows error 1816)
-inside the native language-server process. Raising the test child-process
-budget did not clear the failure on this host; the native limit was restored.
-Syntax-based symbols and diagnostics still pass. Treat semantic navigation as
-unverified pending a rerun on a host where Rust Analyzer can launch Cargo.
+Rust Analyzer Release contract passes against the pinned xlang3 compatibility
+worktree and verifies native HTTP symbols, unsaved document symbols,
+diagnostics, workspace authority, real definitions/references/hover, and a
+definition query through the authenticated browser-view API. The LSP bridge
+retries bounded `ContentModified` replies while Rust Analyzer updates its
+analysis. Actual installed-IDE navigation and formatter behavior remain
+unverified. See [language-server scope](native-language-server.md) and the
+[parity baseline](PARITY.md).
 
 The graph service and unified graph HTTP/CLI tests pass **2/2** after aligning
 their expected imported-agent metadata with the nullable `tools` field. The

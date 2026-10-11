@@ -47,9 +47,9 @@ languages. Provider requests use the unsaved editor buffer and workspace
 authority; returned locations outside the opened folder are dropped. Automated
 extension contracts cover request mapping, hover rendering, workspace bounds
 and stale/cancelled replies. Semantic definition/reference/hover behavior has
-not yet been accepted against real project code in the installed IDE. A real
-Rust Analyzer call-site probe returned `null` for those queries while Cargo
-metadata failed to launch `cargo` with Windows error 1816 (process quota) inside
-the native language-server process; see [validation status](VALIDATION_STATUS.md).
-Formatter discovery and a complete edit/build/diagnose repair loop also remain
-open.
+passed against a real Rust Analyzer call-site fixture. Native authenticated
+HTTP and the authorized browser-view path also return its definition locations.
+The client retries a bounded number of standard `ContentModified` responses
+while project analysis changes. Installed-IDE behavior, formatter discovery and
+a complete edit/build/diagnose repair loop remain open; see
+[validation status](VALIDATION_STATUS.md).

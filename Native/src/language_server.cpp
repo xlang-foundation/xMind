@@ -59,33 +59,49 @@ struct LanguageServerClient::Impl {
     Impl(WorkspaceTools& value,const LanguageServerProfile& setting):workspace(value),profile(setting){}
 
     Json exchange(const std::string& method,Json params,Clock::time_point deadline,std::stop_token cancel){
-        const auto id="xmind-"+std::to_string(next++);
-        channel->send(Json{{"jsonrpc","2.0"},{"id",id},{"method",method},{"params",std::move(params)}},deadline,cancel);
-        for(;;){
-            const auto message=channel->receive(deadline,cancel);
-            if(!message.is_object())continue;
-            if(message.value("method",std::string{})=="textDocument/publishDiagnostics"){
-                const auto payload=message.value("params",Json::object());const auto uri=payload.value("uri",std::string{});
-                if(!uri.empty())published_diagnostics[uri]=payload.value("diagnostics",Json::array());continue;
-            }
-            if(message.value("id",Json())==id){if(message.contains("error"))throw std::runtime_error("Language server rejected the request");return message.value("result",Json());}
-            if(message.contains("method")&&message.contains("id")){
-                const auto server_id=message["id"];const auto server_method=message.value("method",std::string{});Json response={{"jsonrpc","2.0"},{"id",server_id}};
-                if(server_method=="workspace/configuration"){
-                    const auto requested=message.value("params",Json::object()).value("items",Json::array());Json result=Json::array();
-                    if(requested.is_array())for(std::size_t i=0;i<requested.size();++i)result.push_back(Json::object());
-                    response["result"]=std::move(result);
-                }else if(server_method=="workspace/applyEdit")response["result"]={{"applied",false},{"failureReason","Language servers cannot edit workspace files through this read-only client"}};
-                else if(server_method=="window/workDoneProgress/create"||server_method=="client/registerCapability"||server_method=="client/unregisterCapability"||server_method=="window/showMessageRequest")response["result"]=nullptr;
-                else response["error"]={{"code",-32601},{"message","Client request is not supported"}};
-                channel->send(response,deadline,cancel);
+        for(unsigned attempt=0;attempt<4;++attempt){
+            const auto id="xmind-"+std::to_string(next++);
+            channel->send(Json{{"jsonrpc","2.0"},{"id",id},{"method",method},{"params",params}},deadline,cancel);
+            for(;;){
+                const auto message=channel->receive(deadline,cancel);
+                if(!message.is_object())continue;
+                if(message.value("method",std::string{})=="textDocument/publishDiagnostics"){
+                    const auto payload=message.value("params",Json::object());const auto uri=payload.value("uri",std::string{});
+                    if(!uri.empty())published_diagnostics[uri]=payload.value("diagnostics",Json::array());continue;
+                }
+                if(message.value("id",Json())==id){
+                    if(message.contains("error")){
+                        const auto& error=message["error"];
+                        if(error.is_object()&&error.value("code",0)==-32801&&attempt<3)break;
+                        std::string detail;
+                        if(error.is_object()&&error.contains("message")&&error["message"].is_string())for(const unsigned char ch:error["message"].get<std::string>()){
+                            if(detail.size()>=512)break;if(ch=='\r'||ch=='\n'||ch=='\t')detail.push_back(' ');else if(ch>=0x20&&ch!=0x7f)detail.push_back(static_cast<char>(ch));
+                        }
+                        throw std::runtime_error(detail.empty()?"Language server rejected the request":"Language server rejected the request: "+detail);
+                    }
+                    return message.value("result",Json());
+                }
+                if(message.contains("method")&&message.contains("id")){
+                    const auto server_id=message["id"];const auto server_method=message.value("method",std::string{});Json response={{"jsonrpc","2.0"},{"id",server_id}};
+                    if(server_method=="workspace/configuration"){
+                        const auto requested=message.value("params",Json::object()).value("items",Json::array());Json result=Json::array();
+                        if(requested.is_array())for(std::size_t i=0;i<requested.size();++i)result.push_back(Json::object());
+                        response["result"]=std::move(result);
+                    }else if(server_method=="workspace/applyEdit")response["result"]={{"applied",false},{"failureReason","Language servers cannot edit workspace files through this read-only client"}};
+                    else if(server_method=="window/workDoneProgress/create"||server_method=="client/registerCapability"||server_method=="client/unregisterCapability"||server_method=="window/showMessageRequest")response["result"]=nullptr;
+                    else response["error"]={{"code",-32601},{"message","Client request is not supported"}};
+                    channel->send(response,deadline,cancel);
+                }
             }
         }
+        throw std::runtime_error("Language-server retry budget exhausted");
     }
     void start(Clock::time_point deadline,std::stop_token cancel){
         if(initialized)return;
         if(ForegroundProcess::executable_identity(profile.executable)!=profile.executable_id)throw ToolAccessDenied("Configured language-server executable changed after registration");
-        McpStdioConfiguration config{profile.executable,workspace.root_path(),profile.arguments,profile.environment,4*1024*1024,512*1024*1024,std::chrono::seconds(45),8};
+        // Rust language servers launch Cargo and compiler helpers while
+        // indexing a project; allow that bounded child tree to start.
+        McpStdioConfiguration config{profile.executable,workspace.root_path(),profile.arguments,profile.environment,4*1024*1024,512*1024*1024,std::chrono::seconds(45),32};
         process=std::make_unique<McpStdioProcess>(config);channel=std::make_unique<LspChannel>(*process);
         const auto root=std::filesystem::u8path(workspace.root_path());const auto root_uri=file_uri(root);
         (void)exchange("initialize",Json{{"processId",nullptr},{"rootUri",root_uri},{"workspaceFolders",Json::array({{{"uri",root_uri},{"name",root.filename().string()}}})},{"capabilities",{{"textDocument",{{"hover",{{"contentFormat",Json::array({"plaintext","markdown"})}}},{"definition",{{"linkSupport",true}}},{"references",{{"dynamicRegistration",false}}},{"documentSymbol",{{"hierarchicalDocumentSymbolSupport",true}}}}}}},{"clientInfo",{{"name","xMind"},{"version","native"}}}} ,deadline,cancel);

@@ -42,11 +42,21 @@ void http_contract(const std::string& executable,const std::string& workspace_pa
     Json input={{"path",path},{"method","documentSymbol"},{"line",0},{"character",0}};input.update(binding);
     const auto response=client.Post("/v1/language-server/query",headers,input.dump(),"application/json");require(response&&response->status==200,"Authenticated workspace-bound LSP query must reach the registered language server");const auto result=Json::parse(response->body);
     require(result["server_id"]=="rust-analyzer"&&result["path"]==path&&result["result"].is_array()&&result["result"].size()==2&&result["result"][0]["name"]=="add","HTTP editor query must return actual Rust Analyzer symbols from the opened workspace");
+    auto definition_input=input;definition_input["method"]="definition";definition_input["line"]=5;definition_input["character"]=5;
+    Json definition_result;
+    for(int attempt=0;attempt<30;++attempt){
+        const auto definition_response=client.Post("/v1/language-server/query",headers,definition_input.dump(),"application/json");require(definition_response&&definition_response->status==200,"Authenticated HTTP editor navigation query must reach Rust Analyzer");
+        definition_result=Json::parse(definition_response->body)["result"];
+        if(definition_result.is_array()&&!definition_result.empty())break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+    require(definition_result.is_array()&&!definition_result.empty()&&(definition_result[0].contains("targetUri")||definition_result[0].contains("uri")),"Native HTTP must preserve real Rust Analyzer definition locations for the editor");
     auto unsaved=input;unsaved["document_text"]="pub fn add(left: i32, right: i32) -> i32 { left + right }\npub fn call_add() -> i32 { add(1, 2) }\npub fn unsaved_marker() {}\n";const auto edited=client.Post("/v1/language-server/query",headers,unsaved.dump(),"application/json");require(edited&&edited->status==200,"Editor query must accept the current unsaved document buffer");const auto edited_result=Json::parse(edited->body);require(edited_result["result"].is_array()&&edited_result["result"].size()==3&&edited_result["result"][2]["name"]=="unsaved_marker","Real Rust Analyzer symbols must reflect an unsaved editor-only declaration");
     const auto restored=client.Post("/v1/language-server/query",headers,input.dump(),"application/json");require(restored&&restored->status==200&&Json::parse(restored->body)["result"].size()==2,"Restoring the workspace file text must remove the unsaved symbol without changing the file");
     const auto view_issue=client.Post("/v1/view-sessions",headers,Json{{"origin","http://127.0.0.1:42424"}}.dump(),"application/json");require(view_issue&&view_issue->status==200,"Local browser view must enroll before using workspace-bound LSP metadata");const auto view_token=Json::parse(view_issue->body).at("credential").get<std::string>();const httplib::Headers view_headers{{"Authorization","View "+view_token},{"X-XMind-View-Origin","http://127.0.0.1:42424"}};
     const auto profiles=client.Get("/v1/language-servers",view_headers);require(profiles&&profiles->status==200&&Json::parse(profiles->body)["profiles"].size()==1,"Authorized local views must discover sanitized language-server profiles");
     const auto view_response=client.Post("/v1/language-server/query",view_headers,input.dump(),"application/json");require(view_response&&view_response->status==200&&Json::parse(view_response->body)["result"]==result["result"],"Authorized local views must query the same native language-server process");
+    const auto view_definition=client.Post("/v1/language-server/query",view_headers,definition_input.dump(),"application/json");require(view_definition&&view_definition->status==200&&Json::parse(view_definition->body)["result"]==definition_result,"Authorized browser views must preserve native semantic navigation results");
     auto stale=input;stale["expected_workspace_authority_id"]=std::string(32,'0');const auto rejected=client.Post("/v1/language-server/query",headers,stale.dump(),"application/json");require(rejected&&rejected->status==409,"Stale workspace authority must be rejected before language-server dispatch");
     httplib::Client anonymous_client("127.0.0.1",port);const auto anonymous=anonymous_client.Post("/v1/language-server/query",input.dump(),"application/json");require(anonymous&&anonymous->status==401,"Editor LSP query must retain native backend authentication");
 }
@@ -64,10 +74,23 @@ int main(int argc,char** argv){
         require(symbols["result"][0]["name"]=="add"&&symbols["result"][1]["name"]=="call_add","Real rust-analyzer symbols must match the Rust fixture");
         const auto repeated=request("documentSymbol");
         require(repeated["result"]==symbols["result"],"A persistent language-server process must answer repeated workspace requests consistently");
+        Json definition;
+        for(int attempt=0;attempt<30;++attempt){
+            definition=Json::parse(registry.query(LanguageServerRequest{path,"definition",5,5}))["result"];
+            if(definition.is_array()&&!definition.empty())break;
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+        require(definition.is_array()&&!definition.empty(),"Real rust-analyzer must resolve a call-site definition through the native editor query");
+        const auto& target=definition.front();
+        require((target.contains("targetUri")||target.contains("uri"))&&(target.contains("targetSelectionRange")||target.contains("range")),"Definition results must contain a VS Code-mappable workspace URI and selection range");
+        const auto references=Json::parse(registry.query(LanguageServerRequest{path,"references",5,5}))["result"];
+        require(references.is_array()&&references.size()>=2,"Real rust-analyzer must find the declaration and call-site references");
+        const auto hover=Json::parse(registry.query(LanguageServerRequest{path,"hover",5,5}))["result"];
+        require(hover.is_object()&&hover.contains("contents")&&!hover["contents"].is_null(),"Real rust-analyzer must return usable hover content for the call-site symbol");
         const auto diagnostics=request("diagnostics");
         require(diagnostics["result"].is_object()&&diagnostics["result"]["items"].is_array()&&diagnostics["result"]["items"].empty(),"Real rust-analyzer must report the valid fixture without diagnostics");
         const auto editor=registry.query(LanguageServerRequest{path,"documentSymbol",0,0});require(Json::parse(editor)["result"]==symbols["result"],"Editor and AgentRunner queries must share the same trusted server-selection behavior");
         http_contract(argv[1],argv[2],path,argv[4],argv[5]);
-        std::cout<<"Actual rust-analyzer verified persistent native stdio, AgentRunner tool queries, workspace-authority-bound authenticated HTTP editor queries, repeated symbols and clean diagnostics. xlang3 SQLite initialized the real backend; no model or synthetic LSP peer used\n";return 0;
+        std::cout<<"Actual rust-analyzer verified persistent native stdio, AgentRunner tool queries, workspace-authority-bound authenticated HTTP editor queries, symbols, definition, references, hover and clean diagnostics. xlang3 SQLite initialized the real backend; no model or synthetic LSP peer used\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }

@@ -154,11 +154,12 @@ for configured language-server languages. Requests use the opened document's
 current buffer and authenticated workspace authority; locations outside the
 opened workspace are discarded, and stale or cancelled replies are ignored.
 The complete extension suite passed **290/290**, including navigation mapping,
-hover rendering, workspace filtering and stale-result cases. Rust Analyzer's
-native HTTP/editor contract still passes its real symbol, diagnostic and
-workspace-authority checks. This does not yet establish live definition,
-reference or hover results in the installed IDE; formatter integration and
-project repair loops remain open. See [language-server integration](native-language-server.md).
+hover rendering, workspace filtering and stale-result cases. The real
+Rust Analyzer contract now passes symbols, diagnostics, definition, references
+and hover through the native client, plus a definition through authenticated
+HTTP and browser-view requests. This does not establish navigation in the
+installed IDE; formatter integration and project repair loops remain open. See
+[language-server integration](native-language-server.md).
 
 ## OpenCode V2 functional baseline
 
@@ -779,7 +780,7 @@ removed Python prototype's status table; it is not a completion score.
 | Context compaction | Native Responses checkpoints/counting, session/mid-run and manual/automatic paths, private provider state and actual budgets passed their scoped complete gate, including the later serializer repair; [design and evidence](native-context-compaction-design.md) | Complete non-Responses provider strategies and live coding/installed thin-client acceptance using the current package format; local contracts do not establish full compaction completion |
 | Snapshots and recovery | Durable uncertainty inspection and non-replay safeguards cover selected effects | General reviewable snapshots, restoration and attributed reconciliation |
 | Attachments and references | Thin VS Code selection captures a workspace-bound, labelled buffer as an editable sidebar draft; source, filesystem and archive scopes are recorded in [editor selection](vscode-editor-selection.md). Native CLI work retains [its scope](native-interactive-cli.md) | Installed/rendered selection, native structured file-context/snapshot contracts across clients, complete model-input and multimodal acceptance |
-| Formatters and diagnostics | Required by the native coding goal | Rust Analyzer diagnostics are available to AgentRunner through the trusted read-only LSP tool and pass a real native bridge contract. VS Code diagnostics publication/navigation, formatter discovery/configuration, definition/hover/reference semantics and real project repair loops remain unverified |
+| Formatters and diagnostics | Required by the native coding goal | Rust Analyzer diagnostics and semantic navigation pass the real native bridge contract; VS Code provider mapping passes extension tests. Installed-IDE acceptance, formatter discovery/configuration and real project repair loops remain unverified |
 | Search and network configuration | Native HTTP/TLS and workspace search components exist | Configured network/search behavior across coding workflows |
 | Session sharing | Local backend sessions are shared across authorized views | Explicit export/sharing behavior and access-controlled output; team sharing belongs to Nexus |
 | CLI/TUI | The unified `xmind` console supports authenticated conversation/run/approval/inspection flows, provider catalogue/setup/selection, MCP sign-in/status/watch/cancel, revision-bound admission and signed native history. Windows managed profile discovery/start and shared CLI/view backend ownership pass actual local native contracts | Complete interactive coding/terminal UX, managed profile bootstrap on non-Windows hosts, current installed-package first-use and live provider acceptance |
