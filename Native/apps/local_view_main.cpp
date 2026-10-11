@@ -397,6 +397,69 @@ int run_local_view(int argc, char **argv) {
                 std::string body = request.body;
                 std::string requested_browser_origin;
                 const std::string browser_origin = request.get_header_value("X-XMind-View-Origin");
+                const bool folder_listing = request.path == "/v1/workspace/folders/files";
+                const bool folder_preview = request.path == "/v1/workspace/folders/file";
+                if ((folder_listing || folder_preview) && request.method == "GET") {
+                    if (host || request.get_header_value_count("X-XMind-View-Origin") != 1) {
+                        response(output, 400, "Workspace folder browsing requires a browser view session");
+                        return;
+                    }
+                    const auto [workspace_id, target] = browser_workspace(supplied, browser_origin);
+                    if (!validate_browser_session(supplied, target, browser_origin)) {
+                        response(output, 401, "Browser view session expired or was revoked");
+                        return;
+                    }
+                    bool has_folder_id = false, has_path = false;
+                    for (const auto &[key, value] : request.params) {
+                        if (key == "folder_id") {
+                            require(!has_folder_id && !value.empty() && value.size() <= 256,
+                                    "Workspace folder ID must appear once");
+                            has_folder_id = true;
+                        } else if (key == "path") {
+                            require(!has_path && !value.empty() && value.size() <= 32768,
+                                    "Workspace folder path must appear at most once and fit limits");
+                            has_path = true;
+                        } else {
+                            throw std::invalid_argument("Unexpected workspace folder query parameter");
+                        }
+                    }
+                    require(has_folder_id && request.target.find('?') != std::string::npos,
+                            "Workspace folder browsing requires one folder ID");
+                    const auto folder_id = request.get_param_value("folder_id");
+                    const auto relative_path = has_path ? request.get_param_value("path") : ".";
+                    if (folder_preview)
+                        require(has_path && relative_path != ".", "Workspace file path is required");
+                    const auto group = workspace_registry->get(workspace_id);
+                    const auto folder = std::find_if(group.folders.begin(), group.folders.end(),
+                        [&](const auto &member) { return member.folder_id == folder_id; });
+                    if (folder == group.folders.end()) {
+                        response(output, 404, "Folder is not a member of the selected workspace");
+                        return;
+                    }
+                    agentflow::WorkspaceTools verified_folder(folder->root);
+                    require(verified_folder.identity() == folder->identity &&
+                                verified_folder.root_path() == folder->root,
+                            "Workspace folder native identity changed since registration");
+                    if (folder_listing) {
+                        const auto listing = verified_folder.browse_files(relative_path);
+                        Json entries = Json::array();
+                        for (const auto &entry : listing.entries)
+                            entries.push_back({{"name", entry.name}, {"kind", entry.kind}});
+                        output.status = 200;
+                        output.set_content(Json{{"workspace_id", workspace_id}, {"revision", group.revision},
+                                                {"folder_id", folder_id}, {"path", relative_path},
+                                                {"entries", std::move(entries)}, {"truncated", listing.truncated}}.dump(),
+                                           "application/json");
+                    } else {
+                        const auto file = verified_folder.browse_file(relative_path);
+                        output.status = 200;
+                        output.set_content(Json{{"workspace_id", workspace_id}, {"revision", group.revision},
+                                                {"folder_id", folder_id}, {"path", file.path},
+                                                {"content", file.content}}.dump(),
+                                           "application/json");
+                    }
+                    return;
+                }
                 if (request.path == "/v1/workspaces" && request.method == "GET") {
                     if (host || request.target != request.path ||
                         request.get_header_value_count("X-XMind-View-Origin") != 1) {

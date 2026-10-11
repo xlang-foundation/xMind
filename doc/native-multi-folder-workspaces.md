@@ -10,9 +10,12 @@ with one folder and **Add folder** attaches more folders to the same workspace;
 the selected workspace and browser session stay in place. The C++ registry
 contract covers creation, folder attachment, reopen, private-root/overlap
 rejection and concurrent membership changes. Agent execution, file operations,
-approvals, process/Git/language-server routing and folder removal still bind
-only the primary folder; this is workspace membership support, not complete
-multi-folder execution.
+approvals, process/Git/language-server routing, CLI/VS Code folder controls and
+folder removal still bind only the primary folder. The local browser displays
+each attached folder as its own tree and reads previews through a native route
+that resolves the selected workspace's folder ID, re-opens the directory and
+verifies its native identity on every request. These are read-only previews;
+they do not grant agent tools edit or process authority in secondary folders.
 See the [current browser behavior and gap](browser-view.md#multi-folder-workspace-target).
 
 ## User workflow
@@ -30,13 +33,15 @@ See the [current browser behavior and gap](browser-view.md#multi-folder-workspac
    directory. Existing runs retain the exact membership snapshot admitted at
    their start. New runs use the new revision.
 
-The local browser's picker can choose only paths on the xMind host. VS Code
-starts from `workspace.workspaceFolders`, not the repository containing the
-extension or a generated `.code-workspace` file. The CLI uses the same native
-workspace registry. All three clients observe and mutate the same backend
-workspace record. A future Nexus connection can supply a server-authorized
-workspace record through the same protocol; it cannot turn a client path into
-server authority.
+The local browser's picker can choose only paths on the xMind host. Currently
+the local browser alone reads and writes multi-folder membership. VS Code still
+starts from the editor's single opened workspace root, and the CLI still uses
+its single `--workspace` root; neither currently observes or mutates this
+membership registry. The extension must use `workspace.workspaceFolders`, not
+the repository containing the extension or a generated `.code-workspace` file,
+when that integration is implemented. A future Nexus connection can supply a
+server-authorized workspace record through the same protocol; it cannot turn a
+client path into server authority.
 
 ## Native authority and identity
 
@@ -81,8 +86,8 @@ and skills are discovered per root and retain their source-folder provenance.
 Delegation, graphs, MCP and A2A inherit only the admitted workspace snapshot;
 they cannot expand membership themselves.
 
-The browser canvas shows one file tree per member folder, with independent Git
-state and explicit folder selection for previews. The VS Code extension uses
+The browser canvas shows one file tree per member folder, with explicit folder
+selection for previews. Git remains bound to the primary folder. The VS Code extension uses
 the editor's multi-root folders and scopes edits, terminals, language servers
 and approvals to the owning folder. The CLI reports the selected workspace and
 folder context and offers commands to list workspaces and add a folder.

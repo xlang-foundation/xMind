@@ -69,22 +69,21 @@ same captured membership. File reads, edits, Git operations, skills,
 instructions, and process execution must enforce the corresponding opened
 folder handle and approval boundary.
 
-This is the target contract, not the current implementation. At source
-`99447ca`, native execution and persisted local profiles still bind one root
-per workspace. The browser selector lists those independent single-folder
-profiles. A live attempt to switch profiles also reverted to the original root
-with `Workspace switch failed · signal is aborted without reason`; the page
-must verify the native switch acknowledgement and reload all workspace-bound
-state before it reports success. Do not present the one-root profile selector
-as multi-folder support.
+The local browser now implements membership creation and read-only browsing:
+**New workspace** chooses the primary folder, **Add folder** attaches another
+folder to the same workspace, and each member is shown in its own file tree.
+Folder reads use the member folder ID and native handle identity. Agent file
+tools, edits and processes, plus Git and language-server routing, still use the
+primary folder. CLI and VS Code do not yet consume the membership registry.
 
 ### Current single-folder implementation
 
 The browser shows its active local profile, offers a selector for other local
 profiles and provides **New workspace** for an existing folder. The selected
-folder becomes that workspace's primary folder; the current runtime still binds
-one folder per profile, so attaching another folder to the same workspace is
-not implemented yet. Unlike VS Code,
+folder becomes that workspace's primary folder; **Add folder** adds more
+folders while keeping the selected workspace and session. The browser canvas
+can preview files from each attached folder, but agent execution remains
+single-root. Unlike VS Code,
 a browser tab has no opened-folder context. On the profile-aware `xmind view`
 host, the selector is populated from the native protected profile
 catalogue and displays the workspace name and root; **New workspace** is

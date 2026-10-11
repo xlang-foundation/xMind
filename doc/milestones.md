@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+## Native browser previews across attached workspace folders — 2026-10-11
+
+The local browser now renders one file tree per registered workspace folder.
+Folder reads carry the member folder ID; the native local-view gateway resolves
+that ID only inside the active workspace, reopens the folder and compares its
+native identity before reading. The local-view contract checks two roots with
+the same relative filename, distinct content and rejection of an unregistered
+folder. Agent file tools/edits, processes, Git and language servers still use
+the primary folder; this checkpoint enables read-only browser previews across
+members. See [native multi-folder workspace contract](native-multi-folder-workspaces.md).
+
 ## Native workspace-group registry foundation — 2026-10-11
 
 The profile-aware local view now records a workspace group in a protected
