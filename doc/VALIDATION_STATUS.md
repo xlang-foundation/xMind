@@ -1,5 +1,21 @@
 # Current native validation
 
+## Managed trusted process-profile configuration — 2026-10-11
+
+Commit `b0dd491` wires `.config/processes.yaml` into the managed browser and
+VS Code development launchers and supports a machine-level VS Code setting for
+packaged installs. The Release `xmind` target builds. The focused native
+local-profile integration contract passes: trusted profile import, refusal of
+an implicit config change, protected owner handoff, and preservation of SQLite
+sessions, history and graph results across restart. The VS Code suite passes
+**296/296** and the browser suite **85/85**.
+
+The full native CTest gate and full native local-view contract were not rerun
+on this checkpoint; rendered managed-client process execution is unverified.
+No shell or process profile is seeded. A trusted profile must be configured
+before `run_process` is advertised. Exact implementation and limits are in
+[native process tools](native-process-tools.md).
+
 ## MCP resources and prompts — 2026-10-11
 
 The Release build succeeds for the dynamic-plan MCP contract, MCP client and

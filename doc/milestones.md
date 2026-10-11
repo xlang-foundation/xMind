@@ -1,5 +1,18 @@
 # Reviewable milestones
 
+## Managed views load trusted process profiles — 2026-10-11
+
+Commit `b0dd491` passes trusted process-profile configuration through the
+managed browser and VS Code launchers into the native `xmind view` process.
+Native code imports the file into the xlang3-backed registry. A changed file
+requires a protected backend-owner handoff; existing sessions, history and
+graph results survive the restart. Removing the file after import leaves the
+persisted registry available. The focused native local-profile contract
+passes, VS Code passes **296/296**, and browser tests pass **85/85**. The full
+native gate and rendered managed-client process run remain unverified, and no
+shell profile is seeded. See [validation status](VALIDATION_STATUS.md) and
+[process tooling](native-process-tools.md).
+
 ## Saved provider key discovery recovers from stale profile state (2026-10-11)
 
 The local browser initially received a provider-profile revision conflict while
