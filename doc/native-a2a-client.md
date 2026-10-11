@@ -9,14 +9,19 @@ streaming, listing and cancellation. The native `delegate_tasks` tool creates
 bounded local read-only agents. xMind does not yet connect to a separately
 configured remote A2A agent, and local delegation is not outbound A2A support.
 
+Interop baseline: official A2A protocol tag `v1.0.1`
+(`3303592588e388e62e0f69f701af531d2f4e3991`), with legacy wire coverage from
+tag `v0.3.0`. The official JavaScript peer is pinned as `@a2a-js/sdk` 1.3.0
+with its package integrity in `Native/tests/sdk/package-lock.json`.
+
 The working tree now contains a low-level native JSON-RPC client for an
 owner-configured AgentCard URL. It uses the native HTTP transport, supports
 JSON-RPC send/get/cancel operations for A2A 1.0 and the legacy 0.3 method names,
-and downgrades only when a version-1 card request returns the A2A
-`VersionNotSupportedError` code. It honors a directly configured card path,
-checks response correlation, bounds and redacts peer errors, and currently
-accepts only interfaces on the configured card origin. A local loopback peer
-contract is being added; this does not establish independent SDK acceptance.
+and downgrades only on an explicit version-not-supported response that
+advertises 0.3 support. It honors a directly configured card path, checks
+response correlation, bounds and redacts peer errors, and currently accepts
+only interfaces on the configured card origin. A local loopback peer contract
+is being added; this does not establish independent SDK acceptance.
 The client is not yet registered in the runtime, persistence, AgentRunner,
 graph, CLI, browser or VS Code, and it does not yet support streaming or
 durable recovery after uncertain remote dispatch.
@@ -75,11 +80,12 @@ registered delegation policy.
 ## Acceptance gates
 
 1. Pin the A2A specification revision and SDK peer revision used for this
-   implementation. Verify the exact current 1.0 and supported 0.3 wire shapes,
-   card security, JSON-RPC error mapping, interface binding and state model.
-   The [current versioning contract](https://github.com/a2aproject/A2A/blob/main/docs/specification.md#36-versioning)
-   requires `A2A-Version` on each 1.0 request; downgrade is permitted only
-   after the peer reports `VersionNotSupportedError` (-32009).
+   implementation. Verify the exact current 1.0.1 and supported 0.3 wire
+   shapes, card security, JSON-RPC error mapping, interface binding and state
+   model. The [pinned 1.0.1 specification](https://github.com/a2aproject/A2A/blob/v1.0.1/docs/specification.md#64-version-negotiation-error)
+   requires `A2A-Version` on versioned requests and specifies an
+   `application/problem+json` version error with `supportedVersions`; the
+   client may fall back only when that list includes 0.3.
 2. Use the official SDK as an independent native-client peer. Verify discovery,
    successful send, task return, `GetTask`, stream and resubscription,
    `input-required` follow-up, cancellation, artifacts, malformed cards,

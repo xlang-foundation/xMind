@@ -75,7 +75,7 @@ A2aRemoteAgentInfo A2aJsonRpcClient::discover(std::chrono::milliseconds timeout,
     const auto root=origin(state.card_url).value;std::string bytes;bool requested_v1=true;
     auto modern=state.request(card_path(state.card_url),timeout,"1.0");
     try{bytes=get_json(modern,state.bearer?&*state.bearer:nullptr,cancel);}
-    catch(const ProviderHttpError& error){if(error.status!=400||error.json_rpc_code!=-32009)throw;requested_v1=false;auto legacy=state.request(card_path(state.card_url),timeout,"0.3");bytes=get_json(legacy,state.bearer?&*state.bearer:nullptr,cancel);}
+    catch(const ProviderHttpError& error){const bool legacy_supported=error.json_rpc_code==-32009||error.a2a_supports_legacy_03;if(error.status!=400||!error.a2a_version_not_supported||!legacy_supported)throw;requested_v1=false;auto legacy=state.request(card_path(state.card_url),timeout,"0.3");bytes=get_json(legacy,state.bearer?&*state.bearer:nullptr,cancel);}
     Json card;try{card=Json::parse(bytes);}catch(const Json::exception&){throw TransportError("A2A peer returned an invalid AgentCard");}
     if(!card.is_object())throw TransportError("A2A peer returned an invalid AgentCard");A2aRemoteAgentInfo info;
     try{

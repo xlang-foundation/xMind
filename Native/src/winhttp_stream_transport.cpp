@@ -226,7 +226,8 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
             auto diagnosticMedia=hasMime?lower(std::wstring(mime.data())):std::wstring{};
             diagnosticMedia=diagnosticMedia.substr(0,diagnosticMedia.find(L';'));
             while(!diagnosticMedia.empty() && (diagnosticMedia.back()==L' ' || diagnosticMedia.back()==L'\t')) diagnosticMedia.pop_back();
-            if(diagnosticMedia==L"application/json") {
+            const bool a2a_problem=input.protocol==ProviderHttpProtocol::a2a_jsonrpc&&diagnosticMedia==L"application/problem+json";
+            if(diagnosticMedia==L"application/json"||a2a_problem) {
                 struct Body {std::string value;~Body(){if(!value.empty()) SecureZeroMemory(value.data(),value.size());}} body;
                 body.value.reserve(32768);
                 const auto diagnosticDeadline=std::min(deadline,Clock::now()+std::chrono::seconds(2));
@@ -242,12 +243,17 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
                     body.value.append(buffer.data(),read);SecureZeroMemory(buffer.data(),read);
                 }
                 auto parsed=nlohmann::json::parse(body.value,nullptr,false);
+                if(a2a_problem&&parsed.is_object()&&parsed.value("type",std::string{})=="https://a2a-protocol.org/errors/version-not-supported"){
+                    failure.a2a_version_not_supported=true;
+                    if(parsed.contains("supportedVersions")&&parsed["supportedVersions"].is_array())for(const auto& version:parsed["supportedVersions"])if(version.is_string()&&version=="0.3")failure.a2a_supports_legacy_03=true;
+                }
                 if(parsed.is_object() && parsed.contains("error") && parsed["error"].is_object()) {
                     const auto& error=parsed["error"];
                     if(input.protocol==ProviderHttpProtocol::a2a_jsonrpc&&error.contains("code")&&error["code"].is_number_integer())try{
                         if(error["code"].is_number_unsigned()){const auto code=error["code"].get<std::uint64_t>();if(code<=static_cast<std::uint64_t>(std::numeric_limits<int>::max()))failure.json_rpc_code=static_cast<int>(code);}
                         else {const auto code=error["code"].get<std::int64_t>();if(code>=std::numeric_limits<int>::min()&&code<=std::numeric_limits<int>::max())failure.json_rpc_code=static_cast<int>(code);}
                     }catch(const std::exception&){}
+                    if(input.protocol==ProviderHttpProtocol::a2a_jsonrpc&&failure.json_rpc_code==-32009)failure.a2a_version_not_supported=true;
                     auto allowed=[&](const char* key,std::initializer_list<std::string_view> values){
                         if(!error.contains(key)||!error[key].is_string()) return std::string{};
                         const auto& value=error[key].get_ref<const std::string&>();

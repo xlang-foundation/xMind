@@ -15,6 +15,7 @@ struct TransportTimeout : TransportError {using TransportError::TransportError;}
 struct ProviderHttpError : TransportError {
     int status;
     int json_rpc_code=0;
+    bool a2a_version_not_supported=false,a2a_supports_legacy_03=false;
     std::string type,code,param;
     explicit ProviderHttpError(int code):TransportError("Provider returned HTTP "+std::to_string(code)),status(code) {}
 };
