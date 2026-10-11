@@ -64,6 +64,19 @@ test('footer saved-provider chooser uses public profiles, preserves actual selec
  }finally{r.dom.window.close();}
 });
 
+test('model picker explains that a saved provider must be chosen before model discovery',()=>{
+ const r=renderer(),doc=r.dom.window.document,model=doc.querySelector('footer #model');
+ try{
+  const profiles=[{id:'claude-key-only',provider:'anthropic',model:'',route_id:'anthropic.messages',revision:1}],routes=[{id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',discovery:true}];
+  r.send({type:'provider-profiles',active:'',profiles,routes});r.send({type:'model-list',models:[]});
+  assert.equal(model.options[0].textContent,'Choose a saved provider');assert.match(model.title,/Choose a provider below to load models from its saved profile/);assert.doesNotMatch(model.title,/enter your provider key/i);
+  r.send({type:'provider-profiles',active:'claude-key-only',profiles,routes});r.send({type:'model-list',models:[]});
+  assert.equal(model.options[0].textContent,'Retry model discovery');assert.match(model.title,/saved provider in Settings/);assert.doesNotMatch(model.title,/enter your provider key/i);
+  r.send({type:'provider-profiles',active:'',profiles:[],routes:[]});r.send({type:'model-list',models:[]});
+  assert.equal(model.options[0].textContent,'Add a provider in Settings');assert.match(model.title,/add a provider/);
+ }finally{r.dom.window.close();}
+});
+
 test('DeepSeek Settings enrollment uses the footer model chooser and saved response metrics',()=>{
   const r=renderer(),doc=r.dom.window.document,key='synthetic-deepseek-renderer-key',model='deepseek-flash';
   try{

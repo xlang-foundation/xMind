@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+## Saved-provider model picker guidance (2026-10-11)
+
+When saved provider profiles exist but none is active, the footer model picker
+now directs the user to choose a saved provider below. If the active profile
+has no discovered model list, it explains that discovery can be retried using
+the saved profile in Settings; it no longer asks the user to re-enter a key.
+With no saved profiles, it directs the user to add one in Settings. This copy
+change does not activate a provider or alter model-selection behavior. The
+focused renderer suite passes **74/74**, the complete VS Code suite **269/269**,
+and the browser suite **72/72**. These tests use synthetic provider metadata;
+they do not establish live provider discovery or installed-client acceptance.
+
 ## Outbound A2A task cancellation (2026-10-10)
 
 The native server now has an explicit, one-shot `CancelTask` route for a saved,
