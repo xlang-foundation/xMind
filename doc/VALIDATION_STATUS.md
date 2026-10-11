@@ -8,14 +8,16 @@ effect contracts, AgentRunner and graph execution. Focused CTest passes **10/10*
 `native_mcp_effect_contract`, `native_mcp_http_readonly_contract`, graph
 stdio/HTTP MCP, AgentRunner HTTP MCP, modern and legacy official MCP SDK peers,
 and unified HTTP MCP. The stdio peers exercise resource and prompt
-listing/retrieval; a local Streamable HTTP peer checks resource pagination/read
-and prompt list/get. Effects require approval and retain actual results, and
-configured-credential reflection is rejected safely. The combined renderer
-and browser-controller suite passes **117/117**.
+listing/retrieval; a local Streamable HTTP peer checks pagination and correlated
+calls. The pinned official MCP server SDK 2.3.1 now exercises resource/prompt
+discovery and retrieval through the configured native HTTP client and approval
+registry, including allow, deny and SQLite reopen. Tool effects retain actual
+results, and configured-credential reflection is rejected safely. The combined
+renderer and browser-controller suite passes **117/117**.
 
-This is not a full native CTest run on the new commit. Official SDK HTTP
-resource/prompt interoperability, installed VS Code coding, and live MCP coding
-interoperability remain unverified.
+This is not a full native CTest run on the new commit. Broader HTTP/SSE
+interoperability, installed VS Code coding, and live MCP coding remain
+unverified.
 
 ## Native editor formatting checkpoint — 2026-10-11
 

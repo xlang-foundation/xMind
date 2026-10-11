@@ -32,6 +32,11 @@ struct Directory {
     ~Directory(){if(path.parent_path()==parent && path.filename().string().starts_with("xmind-mcp-effect-")){std::error_code ignored;std::filesystem::remove_all(path,ignored);}}
 };
 std::string contents(const std::filesystem::path& file){std::ifstream input(file,std::ios::binary);return {std::istreambuf_iterator<char>(input),std::istreambuf_iterator<char>()};}
+std::string registry_alias(McpToolRegistry& registry,const std::string& kind,const std::string& peer){
+    const auto definitions=registry.definitions();const auto bindings=Json::parse(registry.approval_bindings_json());require(bindings.is_array()&&bindings.size()==definitions.size(),"MCP definitions and native approval bindings must remain aligned");
+    for(std::size_t i=0;i<bindings.size();++i){const auto& binding=bindings[i];const bool match=kind=="tool"?!binding.contains("kind")&&binding.value("peer_tool",std::string{})==peer:binding.value("kind",std::string{})==kind&&binding.value("peer_name",std::string{})==peer;if(match)return definitions[i].name;}
+    throw std::runtime_error("Expected discovered MCP fixture entry was not registered");
+}
 void start(PersistenceService& store,const std::string& run){store.create_session(run+"-session","labeled MCP effect fixture").get();store.start_prompt_run(run,run+"-session",R"({"content":"labeled MCP effect fixture"})").get();store.transition(run,RunState::queued,RunState::running).get();}
 std::int64_t expiry(){return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+600000;}
 Operation proposed(PersistenceService& store,const std::string& id){
@@ -170,8 +175,9 @@ int main(int argc,char** argv){
                     return std::async(std::launch::async,[&,workspace,id,server]{
                         auto client=connect_mcp_client(server,store,std::chrono::steady_clock::now()+5s);
                         WorkspaceTools tools(workspace.string());McpToolRegistry registry(*client,store,tools,server.id,server.revision,std::chrono::steady_clock::now()+5s);
-                        const auto definitions=registry.definitions();require(definitions.size()==1 && definitions[0].input_schema_json.find("x-mcp-header")!=std::string::npos,"Actual HTTP SDK schema/header declarations must reach the native registry");
-                        return registry.invoke(id,id,definitions[0].name,R"({"body":"actual native HTTP MCP effect 雪\n","decimal":1.00000000000000000001})",expiry(),std::chrono::steady_clock::now()+5s);
+                        const auto definitions=registry.definitions();require(definitions.size()==3,"Actual official HTTP SDK tools, resources and prompts must reach the native registry");
+                        const auto alias=registry_alias(registry,"tool","fixture.write");const auto definition=std::find_if(definitions.begin(),definitions.end(),[&](const auto& value){return value.name==alias;});require(definition!=definitions.end()&&definition->input_schema_json.find("x-mcp-header")!=std::string::npos,"Actual HTTP SDK tool schema/header declarations must remain available");
+                        return registry.invoke(id,id,alias,R"({"body":"actual native HTTP MCP effect 雪\n","decimal":1.00000000000000000001})",expiry(),std::chrono::steady_clock::now()+5s);
                     });
                 };
                 auto result=invoke();const auto proposal=proposed(store,id);require(proposal.state==OperationState::awaiting_approval && contents(remote).empty(),"HTTP read-only hints cannot bypass durable approval or execute early");
@@ -181,6 +187,35 @@ int main(int argc,char** argv){
                 else {const auto output=Json::parse(result.get());require(output["acknowledged_by_peer"]==true && contents(remote)=="actual native HTTP MCP effect 雪\n" && store.operation(id).get().state==OperationState::succeeded,"Approved HTTP JSON/SSE effect must have actual disk bytes and durable acknowledgement");auto duplicate=invoke();rejects<Conflict>([&]{duplicate.get();});require(contents(remote)=="actual native HTTP MCP effect 雪\n","Duplicate approved HTTP operation must not dispatch again");}
                 store.transition(id,RunState::running,mode=="normal-json" || mode=="normal-sse"?RunState::completed:RunState::failed).get();
             }
+            {
+                const auto server=*std::find_if(http_settings.begin(),http_settings.end(),[](const auto& value){return value.id=="official-http-normal-json";});
+                const auto invoke_read=[&](const std::string& id,const std::string& kind,const std::string& arguments){
+                    const auto workspace=root(id);start(store,id);
+                    auto future=std::async(std::launch::async,[&,workspace,id,kind,arguments,server]{
+                        std::vector<SecretBytes> private_credentials;auto client=connect_mcp_client(server,store,std::chrono::steady_clock::now()+10s,{},&private_credentials);
+                        WorkspaceTools tools(workspace.string());McpToolRegistry registry(*client,store,tools,server.id,server.revision,std::chrono::steady_clock::now()+10s,{},&private_credentials);
+                        require(registry.definitions().size()==3,"Official HTTP SDK resource, prompt and tool definitions must all be registered");
+                        const auto alias=registry_alias(registry,kind,kind=="resource"?"fixture.readme":"fixture.prompt");
+                        return registry.invoke(id,id,alias,arguments,expiry(),std::chrono::steady_clock::now()+10s);
+                    });
+                    const auto proposal=proposed(store,id);const auto payload=Json::parse(proposal.spec.arguments_json);
+                    require(proposal.state==OperationState::awaiting_approval&&payload["kind"]==kind,"Official HTTP resource/prompt calls must require approval with an exact kind binding");
+                    if(kind=="resource")require(payload["resource_uri"]=="fixture://official/readme","Approval must bind the official SDK resource URI");
+                    else require(payload["peer_name"]=="fixture.prompt"&&payload["arguments_json"]==arguments,"Approval must bind the official SDK prompt and exact arguments");
+                    return std::pair<std::future<std::string>,std::string>{std::move(future),id};
+                };
+                {
+                    auto pending=invoke_read("http-read-resource-allow","resource","{}");store.decide_operation(pending.second,OperationDecision::allow,"fixture-controller").get();const auto outcome=Json::parse(pending.first.get());
+                    const auto wire=Json::parse(outcome["response_json"].get<std::string>());require(outcome["kind"]=="resource"&&wire["result"]["contents"][0]["text"]=="Official HTTP resource body"&&store.operation(pending.second).get().state==OperationState::succeeded,"Approved official HTTP resource content must be returned and durably recorded");store.transition(pending.second,RunState::running,RunState::completed).get();
+                }
+                {
+                    auto pending=invoke_read("http-read-prompt-allow","prompt",R"({"topic":"AgentFlow"})");store.decide_operation(pending.second,OperationDecision::allow,"fixture-controller").get();const auto outcome=Json::parse(pending.first.get());
+                    const auto wire=Json::parse(outcome["response_json"].get<std::string>());require(outcome["kind"]=="prompt"&&wire["result"]["messages"][0]["content"]["text"]=="Official HTTP prompt for AgentFlow"&&store.operation(pending.second).get().state==OperationState::succeeded,"Approved official HTTP prompt content must be returned and durably recorded");store.transition(pending.second,RunState::running,RunState::completed).get();
+                }
+                {
+                    auto pending=invoke_read("http-read-resource-denied","resource","{}");store.decide_operation(pending.second,OperationDecision::deny,"fixture-controller").get();rejects<PermissionDenied>([&]{pending.first.get();});require(store.operation(pending.second).get().state==OperationState::denied,"Denied official HTTP resource read must remain denied");store.transition(pending.second,RunState::running,RunState::failed).get();
+                }
+            }
             fault_root=root("journal-fault");start(store,"journal-fault");
             {XlangSqlite inject(database,imports);inject.execute("CREATE TRIGGER reject_mcp_success BEFORE UPDATE OF state ON operations WHEN NEW.id='journal-fault' AND NEW.state='succeeded' BEGIN SELECT RAISE(ABORT,'fixture MCP outcome storage fault'); END");}
             Task fault(store,argv,fault_root,"journal-fault","journal-fault","normal");proposed(store,"journal-fault");store.decide_operation("journal-fault",OperationDecision::allow,"fixture-controller").get();rejects<McpOutcomeUnrecorded>([&]{fault.result.get();});require(contents(fault_root/"effect.txt")=="actual native MCP effect\n" && store.operation("journal-fault").get().state==OperationState::executing,"Outcome storage failure must preserve the real claimed effect for restart recovery");store.close();
@@ -188,6 +223,7 @@ int main(int argc,char** argv){
         {
             PersistenceService reopened(database,imports);require(reopened.operation("normal").get().state==OperationState::succeeded && reopened.operation("disconnect").get().state==OperationState::uncertain,"Acknowledged/uncertain peer outcomes must survive backend reopen");
             require(reopened.operation("http-normal-json").get().state==OperationState::succeeded && reopened.operation("http-normal-sse").get().state==OperationState::succeeded && reopened.operation("http-disconnect").get().state==OperationState::uncertain,"Actual HTTP SDK acknowledgements and lost-reply uncertainty must survive xlang3 SQLite restart");
+            require(reopened.operation("http-read-resource-allow").get().state==OperationState::succeeded&&reopened.operation("http-read-prompt-allow").get().state==OperationState::succeeded&&reopened.operation("http-read-resource-denied").get().state==OperationState::denied,"Actual official HTTP resource/prompt outcomes and denial must survive xlang3 SQLite restart");
             require(reopened.operation("journal-fault").get().state==OperationState::uncertain && reopened.run("journal-fault").get().state==RunState::failed,"Unrecorded claimed effect must be quarantined on restart");
             require(contents(fault_root/"effect.txt")=="actual native MCP effect\n","Restart must never replay a claimed external effect");reopened.close();
         }

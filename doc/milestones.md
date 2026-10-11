@@ -12,10 +12,13 @@ stored shape for dynamic-plan compatibility.
 The Release build passes ten focused native CTest contracts covering real
 stdio peers, modern and legacy protocol behavior, approval/denial, dynamic-plan
 compatibility, graph MCP, existing HTTP MCP flows, and a local Streamable HTTP
-peer for resource pagination/read and prompt list/get. The combined UI renderer
-and browser-controller tests pass **117/117**. Official SDK HTTP
-resource/prompt interoperability and broader live MCP coding remain incomplete.
-The implementation and HTTP transport contract are checked in on
+peer for resource pagination/read and prompt list/get. The pinned official MCP
+server SDK 2.3.1 now also runs resource/prompt discovery and approved or denied
+retrieval through the configured native HTTP client, registry and durable
+xlang3-backed journal; allowed and denied outcomes survive reopen. The combined
+UI renderer and browser-controller tests pass **117/117**. Subscriptions,
+additional HTTP/SSE behaviors and broader live MCP coding remain incomplete.
+The implementation and contracts are checked in on
 `checkpoint/native-persistence-m1`.
 
 ## Saved provider profiles work in a fresh local browser view (2026-10-10)

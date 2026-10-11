@@ -316,8 +316,9 @@ commit. This is no installed/rendered acceptance of the current implementation.
 
 - Verify hosted packaging, installed public agent/graph HTTP-MCP workflows and
   rendered approval UI against the current source.
-- Expand resources/prompts, server-request replies and notification/subscription
-  ownership. Verify older initialization/session expiry, resumable GET and
+- Extend resource/prompt coverage beyond current list/read/get calls; implement
+  server-request replies and notification/subscription ownership. Verify older
+  initialization/session expiry, resumable GET and
   DELETE separately; empty/non-JSON discovery fallback remains unfinished.
 - Verify concurrent independent HTTP owners and credential/destination isolation.
 - Exercise positive trusted HTTPS OAuth discovery, registration, callback/state,
