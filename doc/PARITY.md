@@ -32,6 +32,12 @@ OpenCode API inventory remains **25 source candidates, 111 unmapped operations,
 zero verified operation-level parity**. No hosted packaging or current
 installed-client acceptance is claimed for this checkpoint.
 
+A subsequent live local-browser check fetched saved-credential model catalogues
+for Claude, Gemini, DeepSeek and OpenAI (13/11/2/20 models) and restored the
+prior DeepSeek selection. The page received model IDs only. This is not an
+inference, streaming, or installed VS Code result; see the
+[catalogue evidence](evidence/provider-catalogues-live-browser-20261010.json).
+
 The current OpenAPI audit contains **136 operations**: **25** have a mapped C++
 source candidate, **111** remain unmapped, and **zero** are verified parity.
 The audit embeds all **245** pinned schema components and resolves all **855**

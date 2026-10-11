@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-10 America/Los_Angeles",
+  "scope": "Live saved-credential model-catalogue discovery through the connected local xMind browser UI",
+  "source_commit": "dd79822",
+  "method": "Selected each saved provider in the UI and confirmed its model selector was enabled and populated by backend discovery.",
+  "providers": [
+    {
+      "profile_id": "claude",
+      "route_id": "anthropic.messages",
+      "result": "passed",
+      "model_count": 13,
+      "selected_model": "claude-haiku-4-5-20251001"
+    },
+    {
+      "profile_id": "gemini",
+      "route_id": "gemini.generate-content",
+      "result": "passed",
+      "model_count": 11,
+      "selected_model": "models/gemini-2.5-flash"
+    },
+    {
+      "profile_id": "deepseek",
+      "route_id": "deepseek.chat",
+      "result": "passed",
+      "model_count": 2,
+      "selected_model": "deepseek-flash"
+    },
+    {
+      "profile_id": "openai",
+      "route_id": "openai.responses",
+      "result": "passed",
+      "model_count": 20,
+      "selected_model": "gpt-4.1-mini"
+    }
+  ],
+  "credential_values_recorded": false,
+  "provider_inference_tested": false,
+  "restored_selection": {
+    "profile_id": "deepseek",
+    "model": "deepseek-flash"
+  },
+  "limitations": "This proves live model-catalogue authentication and rendered UI population only. It does not prove inference, streaming, tool calls, or installed VS Code acceptance."
+}

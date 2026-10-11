@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+## Live saved-provider catalogues in the local browser (2026-10-10)
+
+From the connected xMind browser, selecting each saved Claude, Gemini,
+DeepSeek and OpenAI profile made the UI fetch and display its live model
+catalogue using the backend-held credential. The model selectors populated with
+13, 11, 2 and 20 models respectively. No key value was returned to the page;
+the previous DeepSeek / `deepseek-flash` selection was restored afterward.
+This verifies provider catalogue authentication and rendered population, not
+inference or streaming. [Exact evidence](evidence/provider-catalogues-live-browser-20261010.json).
+
 ## Native outbound A2A SDK and CLI contract repair (2026-10-10)
 
 The native outbound client now passes the pinned official A2A JavaScript SDK
