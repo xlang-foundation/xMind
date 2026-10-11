@@ -1,5 +1,26 @@
 # Reviewable milestones
 
+## Native outbound A2A SDK and CLI contract repair (2026-10-10)
+
+The native outbound client now passes the pinned official A2A JavaScript SDK
+1.3.0 peer for authenticated AgentCard discovery, `SendMessage`, `GetTask`,
+wrapped `SendStreamingMessage` events and `CancelTask`. The contract accepts
+the SDK's legal `Task` result wrapper. Windows response-header enumeration now
+preserves all `WWW-Authenticate` challenges, accepts repeated identical
+`A2A-Version` values while rejecting conflicting values, and is checked by the
+native HTTP transport contract. CLI A2A inspect/cancel send the required empty
+JSON object and return the server's real 404 for unknown operations.
+
+The Release build passed and all **7 A2A CTest contracts** passed; the focused
+Windows transport and CLI HTTP contracts also passed. The full **122-test
+native gate passed 118/122**. Four unrelated managed-profile/repository/handoff
+contracts remain open: local profile and view startup fail converting a Unicode
+workspace path in the current Windows locale, `xlang_repository_contract`
+reports that it cannot open its database, and the owner-handoff fixture reports
+`No module named '_sqlite3'`. The latter two require xlang3/runtime diagnosis;
+they are not counted as passing. Provider replies in these contracts are
+synthetic; this checkpoint does not claim full A2A or OpenCode parity.
+
 ## Same-machine browser reconnects to the active xMind process (2026-10-11)
 
 The browser adapter now resolves its matching local launcher credential when a

@@ -102,7 +102,7 @@ Endpoint endpoint(const std::string& input) {
     result.path.assign(parts.lpszUrlPath,parts.dwUrlPathLength);if(result.path.empty())result.path=L"/";
     if(parts.dwExtraInfoLength)result.path.append(parts.lpszExtraInfo,parts.dwExtraInfoLength);return result;
 }
-std::optional<std::string> response_field(HINTERNET request,const wchar_t* name,bool combine=false) {
+std::optional<std::string> response_field(HINTERNET request,const wchar_t* name,bool combine=false,bool allow_identical=false) {
     std::array<wchar_t,8192> buffer{};DWORD index=0;std::optional<std::string> result;
     for(std::size_t count=0;;++count) {
         DWORD size=static_cast<DWORD>(sizeof(buffer));
@@ -110,12 +110,15 @@ std::optional<std::string> response_field(HINTERNET request,const wchar_t* name,
             if(GetLastError()==ERROR_WINHTTP_HEADER_NOT_FOUND)return result;
             throw TransportError("Missing or oversized MCP HTTP response metadata");
         }
-        if(count>=16 || size%sizeof(wchar_t) || size>=sizeof(buffer) || (result && !combine))throw TransportError("Ambiguous or oversized MCP HTTP response metadata");
-        if(!result)result.emplace();else *result+=", ";
+        if(count>=16 || size%sizeof(wchar_t) || size>=sizeof(buffer))throw TransportError("Ambiguous or oversized MCP HTTP response metadata");
+        std::string value;
         for(const auto c:std::wstring_view(buffer.data(),size/sizeof(wchar_t))) {
             if(c!=L'\t' && (c<32 || c>126))throw TransportError("Invalid MCP HTTP response metadata");
-            result->push_back(static_cast<char>(c));
+            value.push_back(static_cast<char>(c));
         }
+        if(!result)result=std::move(value);
+        else if(combine){result->append(", ");result->append(value);}
+        else if(!allow_identical||*result!=value)throw TransportError("Ambiguous HTTP response metadata");
         if(result->size()>8192)throw TransportError("Oversized MCP HTTP response metadata");
     }
 }
@@ -285,7 +288,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     if(input.observe_response){
         std::string content_type,version;
         for(auto c:media){if(c<32||c>126)throw TransportError("Invalid HTTP response content type");content_type+=static_cast<char>(c);}
-        if(input.protocol==ProviderHttpProtocol::a2a_jsonrpc){const auto value=response_field(request.value,L"A2A-Version");if(value)version=*value;}
+        if(input.protocol==ProviderHttpProtocol::a2a_jsonrpc){const auto value=response_field(request.value,L"A2A-Version",false,true);if(value)version=*value;}
         input.observe_response(static_cast<int>(status),content_type,version);
     }
     if(mcp) {

@@ -12,6 +12,7 @@
 #include "agentflow/mcp_oauth_setup.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #if defined(_WIN32)
+#include "agentflow/a2a_client.hpp"
 #include "agentflow/a2a_agent_registry.hpp"
 #endif
 #include "httplib.h"
@@ -968,7 +969,7 @@ struct HttpServer::Impl {
             const auto agent_id=string_field(binding,"agent_id",64),card_url=string_field(binding,"card_url",8192),version=string_field(binding,"protocol_version",16),endpoint=string_field(binding,"endpoint",8192),task_id=string_field(result,"task_id",256);
             const auto expected_revision=binding["agent_revision"].get<std::int64_t>();
             if(expected_revision<1||expected_revision>9007199254740991LL||task_id.find_first_of("\r\n")!=std::string::npos)throw Conflict("Stored A2A task binding is invalid");
-            const auto category="native-a2a-task-followups",record_id=operation.id+"-"+std::to_string(sequence);
+            const std::string category="native-a2a-task-followups",record_id=operation.id+"-"+std::to_string(sequence);
             if(sequence>1){
                 std::optional<std::string> prior;try{prior=persistence.information(category,operation.id+"-"+std::to_string(sequence-1)).get();}catch(const NotFound&){}
                 if(!prior)throw Conflict("A2A follow-ups must continue in order from an acknowledged response");

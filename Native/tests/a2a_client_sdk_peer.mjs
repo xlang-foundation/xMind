@@ -61,7 +61,7 @@ try{
       child.once('exit',(code,signal)=>{clearTimeout(timer);resolve({code,signal});});
     });
     assert.equal(result.code,0,`Native SDK-peer client failed (${result.signal||result.code}): ${stderr}`);
-    assert.match(stdout,/independent official A2A SDK 1\.3\.0 AgentCard discovery, SendMessage, GetTask, wrapped SendStreamingMessage task\/status events and CancelTask/);
+    assert.match(stdout,/independent official SDK 1\.3\.0 AgentCard discovery, SendMessage, GetTask, wrapped SendStreamingMessage task\/status events and CancelTask/);
     process.stdout.write(stdout);
   }
 }finally{

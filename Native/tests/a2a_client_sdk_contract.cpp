@@ -23,8 +23,9 @@ int main(int argc,char** argv){
         agentflow::A2aJsonRpcClient client(card,secret(token));
         const auto remote=client.discover(10s);require(remote.protocol_version=="1.0"&&remote.name=="Pinned official A2A SDK peer","Native discovery did not parse the independently served SDK AgentCard");
         const auto sent=Json::parse(client.send_message(R"({"message":{"messageId":"xmind-sdk-peer-1","role":"ROLE_USER","parts":[{"text":"native client SDK acceptance"}]}})",10s));
-        require(sent.contains("id")&&sent.at("id").is_string()&&!sent.at("id").get_ref<const std::string&>().empty(),"SDK peer did not create a task for SendMessage");
-        const auto id=sent.at("id").get<std::string>();
+        const auto task=sent.contains("task")?sent.at("task"):sent;
+        require(task.contains("id")&&task.at("id").is_string()&&!task.at("id").get_ref<const std::string&>().empty(),"SDK peer did not create a task for SendMessage");
+        const auto id=task.at("id").get<std::string>();
         const auto fetched=Json::parse(client.get_task(Json{{"id",id}}.dump(),10s));require(fetched.at("id")==id&&fetched.contains("status"),"SDK peer task was not retrievable through GetTask");
         std::vector<Json> stream_events;client.stream_message(R"({"message":{"messageId":"xmind-sdk-stream-1","role":"ROLE_USER","parts":[{"text":"native stream against the official SDK peer"}]}})",10s,[&](const std::string& event){stream_events.push_back(Json::parse(event));});require(stream_events.size()>=2&&stream_events.front().contains("task")&&stream_events.back().contains("statusUpdate"),"Official A2A SDK peer did not deliver wrapped task/status StreamResponse events to the native client");
         const auto cancelled=Json::parse(client.cancel_task(Json{{"id",id}}.dump(),10s));require(cancelled.at("id")==id&&cancelled.contains("status"),"SDK peer task was not cancellable through CancelTask");
