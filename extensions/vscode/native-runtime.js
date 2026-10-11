@@ -104,12 +104,13 @@ async function resolveNativeRuntime(context, hostEnv, userSettings = {}, depende
     stdlib = absolute(userSettings.stdlibSource, 'Pure standard-library source'); await regular(stdlib, true, io);
     for (const name of REQUIRED_STDLIB) await regular(path.join(stdlib, ...name.split('/')), false, io);
   }
-  // Pass the ONE explicit user/machine-owned path only. Native owns parsing,
-  // encrypted storage and import; no workspace file search or key access here.
+  // Pass explicit user/machine-owned paths only. Native owns provider-key
+  // import and trusted LSP profile registration; this host reads neither file.
   const providerConfig = userSettings.providerConfigPath ? absolute(userSettings.providerConfigPath, 'Provider configuration') : undefined;
+  const languageServerConfig = userSettings.languageServerConfigPath ? absolute(userSettings.languageServerConfigPath, 'Language-server configuration') : undefined;
   const program = 'xmind.exe';
   return { nativeProgram: path.join(verified.runtimeRoot, program), modules: path.join(verified.runtimeRoot, 'modules'), stdlib,
-    providerConfig, privateStateRoot, runtimeRoot: verified.runtimeRoot, manifestSha256: verified.manifestSha256,
+    providerConfig, languageServerConfig, privateStateRoot, runtimeRoot: verified.runtimeRoot, manifestSha256: verified.manifestSha256,
     serverSha256: verified.manifest.files[program],
     qualified: samePath(stdlib,path.join(verified.runtimeRoot,'stdlib')) };
 }

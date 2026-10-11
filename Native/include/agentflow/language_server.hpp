@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/mcp_stdio.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include <cstdint>
 #include <string>
 #include <memory>
 #include <vector>
@@ -8,8 +9,10 @@
 namespace agentflow {
 struct LanguageServerProfile {
     std::string id,executable,executable_id,language_id;
+    std::int64_t revision=0;
     std::vector<std::string> extensions,arguments;
     std::vector<std::pair<std::string,std::string>> environment;
+    std::string environment_credential_id;
     std::chrono::milliseconds request_timeout{30000};
 };
 struct LanguageServerRequest {

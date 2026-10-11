@@ -6,7 +6,7 @@
 #include <vector>
 namespace agentflow {
 struct LocalProfileOptions {
-    std::string workspace, profile_root, provider_config, graphs_config, python_tools_config;
+    std::string workspace, profile_root, provider_config, graphs_config, python_tools_config, language_server_config;
     std::optional<bool> approved_edits;
     bool require_existing_profile = false;
     bool upgrade_backend = false;

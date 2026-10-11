@@ -137,6 +137,11 @@ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,
         process_=std::make_unique<ProcessExecutor>(persistence_,*workspace_,*settings_.workspace,settings_.process_profiles);
         settings_.process_profiles=process_->profiles();
     }
+    if(!settings_.language_servers.empty()){
+        if(!workspace_)throw std::invalid_argument("Language servers require a verified workspace");
+        language_servers_=std::make_unique<LanguageServerToolRegistry>(*workspace_,settings_.language_servers);
+        settings_.language_servers=language_servers_->profiles();
+    }
     if(settings_.mcp_servers.size()>16)throw std::invalid_argument("MCP server count exceeds limits");
     std::set<std::string> mcp_ids;
     for(const auto& server:settings_.mcp_servers){if(server.id.empty() || server.revision<=0 || !mcp_ids.insert(server.id).second)throw std::invalid_argument("Invalid registered MCP configuration");if(server.enabled && !workspace_)throw std::invalid_argument("MCP execution requires a verified workspace and model tool capability");}
@@ -278,6 +283,7 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     if(workspace_){trusted.tools=workspace_->definitions();for(auto& definition:SkillContext::definitions())trusted.tools.push_back(std::move(definition));}
     if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());trusted.tools.push_back(PatchTool::definition());}
     if(process_)trusted.tools.push_back(process_->definition());
+    if(language_servers_)for(auto& definition:language_servers_->definitions())trusted.tools.push_back(std::move(definition));
     struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<McpToolRegistry> registry;};
     std::vector<McpRuntime> peers;std::set<std::string> aliases;for(const auto& definition:trusted.tools)aliases.insert(definition.name);
     for(const auto& server:settings_.mcp_servers){
@@ -452,6 +458,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(PatchTool::definition());
         if(process_)request.tools.push_back(process_->definition());
+        if(language_servers_)for(auto& definition:language_servers_->definitions())request.tools.push_back(std::move(definition));
         std::map<std::string,const XlangPythonToolRegistration*> xlang_tools;
         for(const auto& registration:settings_.xlang_python_tools){
             validate_agent_tool_allowlist(std::vector<std::string>{registration.definition.name});
@@ -688,6 +695,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     } else if(call.name=="run_process" && process_) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(process_->invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance)));
+                    } else if(call.name=="language_server"&&language_servers_) {
+                        output=Json::parse(language_servers_->invoke(call.arguments_json,token));
                     } else if(call.name=="delegate_tasks"&&budget&&!leaf&&delegation_&&settings_.delegation){
                         auto frozen=settings_;frozen.provider=provider;frozen.tool_allowlist=effective_tool_allowlist;
                         output=Json::parse(delegation_->invoke(id,call,reply.dump(),frozen,budget,token));

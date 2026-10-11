@@ -114,13 +114,20 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
     text(settings.instructions,65536,false);text(settings.instruction_policy.instructions,32768,false);
     if(!settings.workspace&&!for_context)throw std::invalid_argument("Planning authority requires a configured workspace");
     if(!settings.workspace&&workspace!="workspace:none")throw std::invalid_argument("Absent context workspace identity differs");
-    if(settings.selectable_models.size()>64||settings.process_profiles.size()>16)
+    if(settings.selectable_models.size()>64||settings.process_profiles.size()>16||settings.language_servers.size()>16)
         throw std::invalid_argument("Private agent authority catalogue exceeds limits");
     for(const auto& selectable:settings.selectable_models)text(selectable,256);
     for(const auto& profile:settings.process_profiles){text(profile.id,64);text(profile.executable,32768);text(profile.executable_id,4096);
         if(profile.prefix_arguments.size()>32||profile.revision<1||profile.max_timeout.count()<1||profile.max_timeout.count()>600000)
             throw std::invalid_argument("Private agent authority process policy exceeds limits");
         for(const auto& argument:profile.prefix_arguments)text(argument,4096,false);
+    }
+    for(const auto& profile:settings.language_servers){
+        text(profile.id,64);text(profile.executable,32768);text(profile.executable_id,4096);text(profile.language_id,64);
+        if(profile.revision<1||profile.extensions.empty()||profile.extensions.size()>32||profile.arguments.size()>32||profile.environment.size()>64||profile.request_timeout<std::chrono::seconds(1)||profile.request_timeout>std::chrono::minutes(2))throw std::invalid_argument("Private language-server authority exceeds limits");
+        for(const auto& extension:profile.extensions)text(extension,16);
+        for(const auto& argument:profile.arguments)text(argument,4096,false);
+        for(const auto& [name,value]:profile.environment){text(name,256);text(value,32768,false);}
     }
     if((!for_context&&settings.provider.tools!=Capability::supported)||settings.max_turns<1||settings.max_turns>128||
         settings.run_timeout.count()<1||settings.run_timeout.count()>3600000||
@@ -143,7 +150,7 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
             {"tools",capability(settings.provider.tools)},{"stream_usage",capability(settings.provider.stream_usage)},
             {"output_limit",capability(settings.provider.output_limit)},{"reasoning",capability(settings.provider.reasoning)},
             {"deadline_ms",settings.provider.deadline.count()},{"idle_timeout_ms",settings.provider.idle_timeout.count()}}},
-        {"credential_versions",Json::array()},{"process_profiles",Json::array()},{"mcp_servers",Json::array()}};
+        {"credential_versions",Json::array()},{"process_profiles",Json::array()},{"language_servers",Json::array()},{"mcp_servers",Json::array()}};
     encoded["max_output_tokens"]=settings.max_output_tokens?Json(*settings.max_output_tokens):Json(nullptr);
     encoded["provider"]["reasoning_effort"]=settings.provider.reasoning_effort?Json(effort(*settings.provider.reasoning_effort)):Json(nullptr);
     if(settings.provider.chat_dialect==ChatDialect::deepseek){
@@ -186,6 +193,12 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
         encoded["process_profiles"].push_back({{"id",profile.id},
         {"revision",profile.revision},{"executable",profile.executable},{"executable_id",profile.executable_id},
         {"prefix_arguments",profile.prefix_arguments},{"max_timeout_ms",profile.max_timeout.count()}});
+    }
+    for(const auto& profile:settings.language_servers){
+        Json environment=Json::array();for(const auto& [name,value]:profile.environment)environment.push_back({{"name",name},{"value_sha256",digest(value)}});
+        encoded["language_servers"].push_back({{"id",profile.id},{"revision",profile.revision},{"executable",profile.executable},{"executable_id",profile.executable_id},
+            {"language_id",profile.language_id},{"extensions",profile.extensions},{"arguments",profile.arguments},{"environment",std::move(environment)},
+            {"request_timeout_ms",profile.request_timeout.count()}});
     }
     for(const auto& server:settings.mcp_servers){Json references=Json::array();
         for(const auto& credential:server.credentials)references.push_back({{"name",credential.name},{"scope",credential.scope},{"id",credential.id}});

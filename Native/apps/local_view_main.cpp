@@ -148,6 +148,8 @@ int run_local_view(int argc, char **argv) {
                 options.graphs_config = value;
             else if (key == "--python-tools-config")
                 options.python_tools_config = value;
+            else if (key == "--language-server-config")
+                options.language_server_config = value;
             else if (key == "--ready-file")
                 ready = value;
             else

@@ -1,0 +1,48 @@
+# Native language-server integration
+
+xMind starts configured language servers inside the native backend and exposes
+their read-only queries to AgentRunner as one `language_server` tool. The model
+can select only a registered server, a workspace-relative file, and one of
+`hover`, `definition`, `references`, `documentSymbol`, or `diagnostics`. It
+cannot choose the executable, arguments, environment, or a path outside the
+active workspace. Language servers cannot apply edits through this client.
+
+Register servers from a trusted JSON or YAML file at backend startup. For
+example:
+
+```yaml
+profiles:
+  - id: rust-analyzer
+    executable: C:/tools/rust-analyzer.exe
+    language_id: rust
+    extensions: [.rs]
+    arguments: []
+    request_timeout_ms: 30000
+```
+
+`executable` must be an absolute path to an existing file. `extensions` must
+list one or more file suffixes. Optional `environment` values and `arguments`
+are trusted owner configuration, never model input. The runtime records the
+profile in its local SQLite store, assigns a revision, and binds the executable
+identity and environment hashes into AgentFlow authority. Re-importing the same
+profile is idempotent; changing or retiring it advances the revision. Changing
+the startup configuration of an existing managed local profile requires an
+explicit backend reconfiguration rather than silently replacing its authority.
+
+Use `xmind serve --language-server-config FILE` for a directly managed server,
+or `xmind --workspace DIR --language-server-config FILE chat` to configure a
+new local workspace profile. `xmind view --workspace DIR --language-server-config
+FILE --ready-file FILE` passes the same trusted profile into the local browser
+backend. Local profile settings are pinned when that workspace backend is
+created. VS Code's managed backend accepts the same file through the machine
+setting `agentflow.languageServerConfigPath`; a development host may use the
+repository `.config/language-servers.yaml` automatically when that file exists.
+The extension passes the path to xMind without reading the configuration.
+
+The real Rust Analyzer contract verifies persistent workspace initialization,
+repeated document symbols, clean pull diagnostics, and profile import/revision
+behavior against SQLite. It does not yet verify definition, references, or
+hover semantics against real project code. The VS Code extension does not yet
+publish diagnostics or expose language-server navigation commands, formatter
+discovery is absent, and no complete edit/build/diagnose repair loop has been
+accepted in VS Code.

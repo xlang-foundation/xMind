@@ -9,6 +9,7 @@
 #include "agentflow/context_manager.hpp"
 #include "agentflow/context_control.hpp"
 #include "agentflow/xlang_python.hpp"
+#include "agentflow/language_server_tools.hpp"
 
 namespace agentflow {
 class DelegationExecutor;
@@ -36,6 +37,7 @@ struct AgentSettings {
     std::vector<McpServerSetting> mcp_servers;
     bool a2a_enabled=true;
     std::vector<ProcessProfile> process_profiles;
+    std::vector<LanguageServerProfile> language_servers;
     AgentInstructionPolicy instruction_policy;
     std::optional<ProviderExecutionIdentity> provider_identity;
     // Explicit registered read-only leaf policy; the parent keeps its own tools.
@@ -80,6 +82,7 @@ private:
     AgentSettings settings_;
     std::unique_ptr<WorkspaceTools> workspace_;
     std::unique_ptr<ProcessExecutor> process_;
+    std::unique_ptr<LanguageServerToolRegistry> language_servers_;
     std::shared_ptr<DelegationExecutor> delegation_;
     std::shared_ptr<DynamicPlanExecutor> planning_;
     std::unique_ptr<A2aRemoteAgentRegistry> a2a_registry_;

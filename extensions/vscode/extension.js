@@ -789,7 +789,7 @@ async function activate(context) {
     reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
   }));
   if(vscode.workspace.onDidChangeConfiguration)context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event=>{
-    if(['backendMode','backendUrl','runtimeDirectory','stdlibSource','providerConfigPath','workspaceEdits'].some(key=>event.affectsConfiguration('agentflow.'+key)))reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
+    if(['backendMode','backendUrl','runtimeDirectory','stdlibSource','providerConfigPath','languageServerConfigPath','workspaceEdits'].some(key=>event.affectsConfiguration('agentflow.'+key)))reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
   }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.selection', async () => {
     const editor = vscode.window.activeTextEditor;

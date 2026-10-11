@@ -22,6 +22,7 @@
 #include "agentflow/execution_platform.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/process_configuration.hpp"
+#include "agentflow/language_server_configuration.hpp"
 #include "agentflow/backend_owner_control.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/local_profile.hpp"
@@ -62,8 +63,8 @@ int run_server(int argc,char** argv) {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--python-tools-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket" && key!="--profile-state") || !options.emplace(key,argv[i+1]).second)
-                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--python-tools-config FILE] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE]");
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--language-server-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--python-tools-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket" && key!="--profile-state") || !options.emplace(key,argv[i+1]).second)
+                throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--python-tools-config FILE] [--language-server-config FILE] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
         int port=8765;
@@ -78,6 +79,7 @@ int run_server(int argc,char** argv) {
         if(options.contains("--runtime-manifest-sha256")||options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Native owner replacement currently requires Windows");
         if(options.contains("--mcp-config"))throw std::invalid_argument("Native MCP configuration currently requires Windows");
         if(options.contains("--process-config"))throw std::invalid_argument("Native process configuration currently requires Windows");
+        if(options.contains("--language-server-config"))throw std::invalid_argument("Native language-server configuration currently requires Windows");
         if(options.contains("--graphs-config"))throw std::invalid_argument("Native graph execution currently requires Windows");
         if(options.contains("--provider-config"))throw std::invalid_argument("Native provider configuration currently requires Windows");
 #endif
@@ -124,7 +126,7 @@ int run_server(int argc,char** argv) {
             const auto root=std::filesystem::u8path(runtime_generation->binding().root);
             if(std::filesystem::canonical(std::filesystem::u8path(options.at("--modules")))!=std::filesystem::canonical(root/"modules")||std::filesystem::canonical(std::filesystem::u8path(options.at("--stdlib")))!=std::filesystem::canonical(root/"stdlib"))throw std::invalid_argument("Qualified startup requires the verified package's import roots");
             if(options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket")){
-                for(const auto* key:{"--model","--model-endpoint","--provider-config","--mcp-config","--process-config","--instructions-config","--graphs-config","--python-tools-config"})if(options.contains(key))throw std::invalid_argument("Replacement startup retains saved configuration; startup overrides are not allowed");
+                for(const auto* key:{"--model","--model-endpoint","--provider-config","--mcp-config","--process-config","--language-server-config","--instructions-config","--graphs-config","--python-tools-config"})if(options.contains(key))throw std::invalid_argument("Replacement startup retains saved configuration; startup overrides are not allowed");
                 if(options.contains("--owner-receipt"))bootstrap=agentflow::qualify_backend_bootstrap(startup_receipt(options.at("--owner-receipt")),*runtime_generation,*startup_workspace,auth,options.contains("--workspace-edits"));
                 else legacy=agentflow::LegacyOwnerBootstrap{options.at("--legacy-owner-ticket"),agentflow::qualify_backend_target(*runtime_generation,*startup_workspace,auth,options.contains("--workspace-edits"))};
             }
@@ -187,6 +189,12 @@ int run_server(int argc,char** argv) {
             std::ifstream file(std::filesystem::u8path(options.at("--process-config")),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted process configuration file");
             std::string source;char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Process configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted process configuration file");process_profiles=process_configurations.apply(source);
         }else process_profiles=process_configurations.load();
+        agentflow::LanguageServerConfigurationStore language_server_configurations(persistence);
+        std::vector<agentflow::LanguageServerProfile> language_servers;
+        if(options.contains("--language-server-config")){
+            std::ifstream file(std::filesystem::u8path(options.at("--language-server-config")),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted language-server configuration");
+            std::string source;char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Language-server configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted language-server configuration");language_servers=language_server_configurations.apply(source);
+        }else language_servers=language_server_configurations.load();
         for(const auto& item:process_profiles)process_metadata.push_back({item.id,item.revision,item.max_timeout.count()});
         for(const auto& item:mcp_settings)mcp_metadata.push_back({item.id,item.revision,item.enabled,item.transport});
         std::unique_ptr<agentflow::WorkspaceTools> recovery_workspace;
@@ -201,6 +209,7 @@ int run_server(int argc,char** argv) {
             settings.approved_edits=options.contains("--workspace-edits");
             settings.mcp_servers=mcp_settings;
             settings.process_profiles=process_profiles;
+            settings.language_servers=language_servers;
             settings.instruction_policy=instruction_policy;
             settings.xlang_python_tools=xlang_python_tools;
             if(options.contains("--models")) {std::istringstream configured(options.at("--models"));std::string model;while(std::getline(configured,model,',')){if(model.empty())throw std::invalid_argument("Empty configured model");settings.selectable_models.push_back(model);}if(options.at("--models").empty() || options.at("--models").back()==',')throw std::invalid_argument("Empty configured model");}
@@ -230,7 +239,7 @@ int run_server(int argc,char** argv) {
         }
 #if defined(_WIN32)
         if(!executor){
-            agentflow::AgentSettings settings;settings.mcp_servers=mcp_settings;settings.process_profiles=process_profiles;settings.instruction_policy=instruction_policy;settings.xlang_python_tools=xlang_python_tools;
+            agentflow::AgentSettings settings;settings.mcp_servers=mcp_settings;settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.instruction_policy=instruction_policy;settings.xlang_python_tools=xlang_python_tools;
             if(options.contains("--workspace"))settings.workspace=options.at("--workspace");settings.approved_edits=options.contains("--workspace-edits");
             // The configured profile generation enables the registered leaf
             // policy only when its actual workspace/model tools are eligible.

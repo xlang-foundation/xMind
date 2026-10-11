@@ -31,7 +31,7 @@ function invoke(exe,args,{cwd=initial,extraEnv={}}={}){
  });
 }
 async function command(exe,args,options){const result=await invoke(exe,args,options);assert.equal(result.code,0,result.stderr||result.stdout);assert.equal(result.signal,null);return JSON.parse(result.stdout);}
-async function profilePid(exe,root,workspace){const value=await command(exe,['--profile-root',root,'--workspace',workspace,'profile-info'],{cwd:workspace});pids.add(value.process_id);return value;}
+async function profilePid(exe,root,workspace,languageServers){const args=['--profile-root',root,'--workspace',workspace];if(languageServers)args.push('--language-server-config',languageServers);args.push('profile-info');const value=await command(exe,args,{cwd:workspace});pids.add(value.process_id);return value;}
 async function waitReady(){const deadline=Date.now()+60000;while(Date.now()<deadline){if(viewProcess.exitCode!==null)throw Error('Native view exited before readiness');try{return JSON.parse(await fs.readFile(ready,'utf8'));}catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;await new Promise(resolve=>setTimeout(resolve,50));}}throw Error('Native view readiness timed out');}
 async function stop(pid){const observed=await command(path.join(runtime,'xmind.exe'),['admin','inspect-owner-process',String(pid)]);const exit=await command(path.join(runtime,'xmind.exe'),['admin','observe-owner-exit',String(pid),observed.process_birth,'10000']);assert.equal(exit.exited,true);pids.delete(pid);}
 
@@ -48,9 +48,9 @@ try{
  const sourceFile=path.join(base,'source-manifest.json');await fs.writeFile(sourceFile,source);
  await stageNativeRuntime({explicitStage:true,bundle,bundleManifest:sourceFile,bundleManifestSha256:createHash('sha256').update(source).digest('hex'),stdlibSource:stdlib,stdlibLicense:await fs.access(path.join(path.dirname(stdlib),'LICENSE')).then(()=>path.join(path.dirname(stdlib),'LICENSE'),()=>path.join(path.dirname(stdlib),'LICENSE.txt')),out:runtime});
  cp.execFileSync(process.execPath,[new URL('../../views/browser/build.mjs',import.meta.url).pathname.slice(1),assets],{windowsHide:true,stdio:'ignore'});
- const exe=path.join(runtime,'xmind.exe'),emptyProfile=await profilePid(exe,profiles,existing);
+ const exe=path.join(runtime,'xmind.exe'),languageServers=path.join(base,'language-servers.json');await fs.writeFile(languageServers,JSON.stringify({profiles:[{id:'fixture-lsp',executable:exe,language_id:'fixture',extensions:['.txt'],request_timeout_ms:1000}]}));const emptyProfile=await profilePid(exe,profiles,existing,languageServers);
  const token=randomBytes(32).toString('hex');
- const viewArgs=['view','--workspace',initial,'--profile-root',profiles,'--ready-file',ready,'--config',yaml];
+ const viewArgs=['view','--workspace',initial,'--profile-root',profiles,'--ready-file',ready,'--config',yaml,'--language-server-config',languageServers];
  viewProcess=cp.spawn(exe,viewArgs,{cwd:initial,env:{...env,XMIND_VIEW_TOKEN:token},windowsHide:true,stdio:['ignore','ignore','pipe']});
  viewProcess.stderr.on('data',bytes=>{if(viewError.length<4096)viewError+=bytes.toString('utf8').slice(0,4096-viewError.length);});
  const readyRecord=await waitReady();assert.equal(readyRecord.workspace.root,await fs.realpath(initial));assert.equal(readyRecord.started_backend,true);pids.add(readyRecord.backend_process_id);
@@ -63,7 +63,7 @@ try{
  let discovered=await publicProfiles();assert.deepEqual(discovered.profiles.map(value=>value.id).sort(),['claude','openai']);assert.ok(!JSON.stringify(discovered).includes('synthetic-openai-key-never-sent'));assert.ok(!JSON.stringify(discovered).includes('synthetic-claude-key-never-sent'));
  const add=await fetch(browserOrigin+'/ui/workspaces/add',{method:'POST',headers:{...headers,Cookie:cookie},body:JSON.stringify({root:added})});assert.equal(add.status,200,await add.clone().text());cookie=add.headers.get('set-cookie').split(';')[0];
  discovered=await publicProfiles();assert.deepEqual(discovered.profiles.map(value=>value.id).sort(),['claude','openai']);assert.ok(!JSON.stringify(discovered).includes('synthetic-openai-key-never-sent'));
- assert.ok(emptyProfile.process_id);await profilePid(exe,profiles,added);passed=true;
+ assert.ok(emptyProfile.process_id);await profilePid(exe,profiles,added,languageServers);passed=true;
  console.log(JSON.stringify({actualNativeView:true,existingEmptyProfileImportsSharedYaml:true,newWorkspaceImportsSharedYaml:true,keysReturnedToBrowser:false,providerRequests:0,actualViewWorkspaceConfig:true}));
 }finally{
  await browser?.close().catch(()=>{});
