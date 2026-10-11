@@ -404,7 +404,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|language-servers|language-server/query|process/profiles|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|language-servers|language-server/query|process/profiles|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -966,6 +966,22 @@ struct HttpServer::Impl {
         }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/operations)",guarded([this](const Request& request,Response& response) {
             reply(response,encode_all(persistence.operations(identifier(request.matches[1])).get()));
+        }));
+        server.Get(R"(/v1/operations/([A-Za-z0-9_-]+)/output)",guarded([this](const Request& request,Response& response) {
+            for(const auto& [name,value]:request.params){(void)value;if(name!="channel"&&name!="after"&&name!="limit")throw std::invalid_argument("Unknown process output query");}
+            auto parameter=[&](const char* name,std::uint64_t fallback,std::uint64_t maximum){
+                if(!request.has_param(name))return fallback;if(request.get_param_value_count(name)!=1)throw std::invalid_argument("Duplicate process output query");
+                const auto value=request.get_param_value(name);std::uint64_t parsed_value=0;const auto parsed=std::from_chars(value.data(),value.data()+value.size(),parsed_value);
+                if(value.empty()||parsed.ec!=std::errc{}||parsed.ptr!=value.data()+value.size()||parsed_value>maximum)throw std::invalid_argument("Invalid process output query");return parsed_value;
+            };
+            const auto channel=request.has_param("channel")?request.get_param_value("channel"):std::string("stdout");
+            if(request.has_param("channel")&&request.get_param_value_count("channel")!=1)throw std::invalid_argument("Duplicate process output channel");
+            const auto offset=parameter("after",0,static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()));
+            const auto limit=parameter("limit",65536,262144);if(limit==0)throw std::invalid_argument("Invalid process output page size");
+            const auto page=persistence.read_process_output(identifier(request.matches[1]),channel,offset,static_cast<std::size_t>(limit)).get();
+            static constexpr char digits[]="0123456789abcdef";std::string encoded;encoded.reserve(page.bytes.size()*2);
+            for(unsigned char byte:page.bytes){encoded.push_back(digits[byte>>4]);encoded.push_back(digits[byte&15]);}
+            reply(response,{{"operation_id",page.artifact.operation_id},{"run_id",page.artifact.run_id},{"state",page.artifact.state},{"channel",page.channel},{"encoding","hex"},{"data",std::move(encoded)},{"offset",page.offset},{"total_bytes",page.total_bytes},{"next_offset",page.offset+page.bytes.size()},{"complete",page.artifact.state=="complete"}});
         }));
         server.Get(R"(/v1/operations/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {
             reply(response,encode(persistence.operation(identifier(request.matches[1])).get()));

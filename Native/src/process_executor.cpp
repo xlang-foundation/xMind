@@ -34,7 +34,8 @@ public:
     OutputJournal(PersistenceService& store,const std::string& run,const std::string& operation,const std::string& profile)
         :store_(store),run_(run),operation_(operation),profile_(profile) {}
     void append(bool error,std::string_view bytes) {
-        const auto channel=error?1:0;auto& pending=pending_[channel];pending.append(bytes);
+        constexpr std::size_t event_limit=65536;const auto pending_total=pending_[0].size()+pending_[1].size();const auto saved=static_cast<std::size_t>(offsets_[0]+offsets_[1])+pending_total;if(saved>=event_limit)return;
+        const auto keep=std::min(bytes.size(),event_limit-saved);if(!keep)return;const auto channel=error?1:0;auto& pending=pending_[channel];pending.append(bytes.data(),keep);
         while(pending.size()>=4096)flush(channel,4096);
         const auto now=std::chrono::steady_clock::now();
         if(!pending.empty() && early_<64 && (early_==0 || now-last_>=std::chrono::milliseconds(100))) {
@@ -52,6 +53,16 @@ private:
     PersistenceService& store_;const std::string& run_;const std::string& operation_;const std::string& profile_;
     std::string pending_[2];std::uint64_t offsets_[2]{};std::size_t early_=0;
     std::chrono::steady_clock::time_point last_{};
+};
+class OutputArtifactWriter {
+public:
+    OutputArtifactWriter(PersistenceService& store,const std::string& run,const std::string& operation)
+        :store_(store),run_(run),operation_(operation),state_(store.begin_process_output(operation,run).get()){}
+    ~OutputArtifactWriter(){if(!finished_)try{state_=store_.finish_process_output(operation_,run_,false).get();}catch(...) {}}
+    void append(bool error,std::string_view bytes){if(bytes.empty())return;store_.append_process_output(operation_,run_,error,std::string(bytes)).get();state_.stdout_bytes+=(error?0:bytes.size());state_.stderr_bytes+=(error?bytes.size():0);}
+    ProcessOutputArtifact finish(bool complete){if(!finished_){state_=store_.finish_process_output(operation_,run_,complete).get();finished_=true;}return state_;}
+private:
+    PersistenceService& store_;const std::string& run_;const std::string& operation_;ProcessOutputArtifact state_;bool finished_=false;
 };
 }
 ProcessExecutor::ProcessExecutor(PersistenceService& store,WorkspaceTools& workspace,std::string root,std::vector<ProcessProfile> profiles)
@@ -94,16 +105,16 @@ std::string ProcessExecutor::execute_claimed(const std::string& id,const std::st
         ProcessConfiguration launch,std::stop_token cancel) {
     auto finish=[&](OperationState state,const std::string& result){try{store_.finish_operation(id,state,result).get();}catch(...){throw ProcessOutcomeUnrecorded("Process outcome could not be recorded; claimed-effect recovery is required");}};
     try {
-        OutputJournal output(store_,run,id,profile);
+        OutputJournal output(store_,run,id,profile);OutputArtifactWriter artifact(store_,run,id);
         ProcessResult result;
-        try {result=ForegroundProcess::run(launch,cancel,[&](bool error,std::string_view bytes){output.append(error,bytes);});}
-        catch(const ProcessBeforeDispatchError&){finish(OperationState::failed,R"({"reason":"process_not_dispatched"})");throw;}
-        catch(const std::invalid_argument&){finish(OperationState::failed,R"({"reason":"invalid_process_before_dispatch"})");throw;}
-        catch(const ProcessEffectUncertain&){finish(OperationState::uncertain,R"({"reason":"process_effect_uncertain"})");throw;}
-        catch(...){finish(OperationState::uncertain,R"({"reason":"unexpected_process_failure"})");throw ProcessEffectUncertain("Process dispatch outcome is not established");}
-        output.finish();
+        try {result=ForegroundProcess::run(launch,cancel,[&](bool error,std::string_view bytes){artifact.append(error,bytes);output.append(error,bytes);});}
+        catch(const ProcessBeforeDispatchError&){(void)artifact.finish(true);finish(OperationState::failed,R"({"reason":"process_not_dispatched"})");throw;}
+        catch(const std::invalid_argument&){(void)artifact.finish(true);finish(OperationState::failed,R"({"reason":"invalid_process_before_dispatch"})");throw;}
+        catch(const ProcessEffectUncertain&){(void)artifact.finish(false);finish(OperationState::uncertain,R"({"reason":"process_effect_uncertain"})");throw;}
+        catch(...){(void)artifact.finish(false);finish(OperationState::uncertain,R"({"reason":"unexpected_process_failure"})");throw ProcessEffectUncertain("Process dispatch outcome is not established");}
+        output.finish();const auto captured_output=artifact.finish(true);
         const auto termination=result.termination==ProcessTermination::exited?"exited":result.termination==ProcessTermination::cancelled?"cancelled":"timed_out";
-        const auto encoded=Json{{"operation_id",id},{"job_id",id},{"profile_id",profile},{"pid",result.pid},{"exit_code",result.exit_code},{"termination",termination},{"elapsed_ms",result.elapsed_ms},{"stdout",captured(result.stdout_bytes,result.stdout_count)},{"stderr",captured(result.stderr_bytes,result.stderr_count)},{"truncated",result.truncated},{"process_tree_retired",true},{"independently_verified",false}}.dump();
+        const auto encoded=Json{{"operation_id",id},{"job_id",id},{"profile_id",profile},{"pid",result.pid},{"exit_code",result.exit_code},{"termination",termination},{"elapsed_ms",result.elapsed_ms},{"stdout",captured(result.stdout_bytes,result.stdout_count)},{"stderr",captured(result.stderr_bytes,result.stderr_count)},{"truncated",result.truncated},{"output_artifact",{{"operation_id",id},{"stdout_bytes",captured_output.stdout_bytes},{"stderr_bytes",captured_output.stderr_bytes},{"state",captured_output.state}}},{"process_tree_retired",true},{"independently_verified",false}}.dump();
         if(result.termination!=ProcessTermination::exited){finish(OperationState::uncertain,encoded);throw ProcessEffectUncertain("Interrupted process tree was retired; possible effects remain quarantined");}
         finish(OperationState::succeeded,encoded);return encoded;
     }catch(const ProcessOutcomeUnrecorded&){throw;}

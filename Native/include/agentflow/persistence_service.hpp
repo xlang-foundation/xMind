@@ -139,6 +139,10 @@ public:
     std::future<Run> transition(std::string id,RunState expected,RunState next,std::string json="{}");
     std::future<Event> append_event(std::string id,std::string kind,std::string json);
     std::future<std::vector<Event>> events(std::string id,std::int64_t after=0);
+    std::future<ProcessOutputArtifact> begin_process_output(std::string operation_id,std::string run_id);
+    std::future<ProcessOutputArtifact> append_process_output(std::string operation_id,std::string run_id,bool stderr_channel,std::string bytes);
+    std::future<ProcessOutputArtifact> finish_process_output(std::string operation_id,std::string run_id,bool complete);
+    std::future<ProcessOutputPage> read_process_output(std::string operation_id,std::string channel,std::uint64_t offset,std::size_t limit);
     std::future<void> append_message(std::string id,std::string role,std::string json);
     std::future<std::vector<Message>> history(std::string id);
     std::future<void> put_information(std::string category,std::string id,std::string json);

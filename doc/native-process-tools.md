@@ -45,9 +45,9 @@ not silently clear the saved registry. No process profile or shell is seeded
 by default. `run_process` appears only when a trusted profile is registered.
 
 This closes profile enrollment/refresh for the managed views; it does not
-complete a coding shell. Shell discovery and command semantics, full-output
-artifacts, full restart recovery, rendered managed-client process acceptance,
-and full OpenCode command parity remain open. The existing PTY test uses
+complete a coding shell. Shell discovery and command semantics, full restart
+reconciliation, rendered managed-client process acceptance, and full OpenCode
+command parity remain open. The existing PTY test uses
 synthetic shell I/O and does not run a command in the user's workspace.
 
 ## Background command parity contract
@@ -65,15 +65,21 @@ before it accepts a model's final response; actual joined results are supplied
 to a continuation. Run cancellation requests process-tree retirement. Output
 continues into the existing bounded event journal while a canceled/failed run's
 process operation is still executing. Restart recovery marks an in-flight
-claim uncertain and never replays it. The event and captured-result limit is
-still 64 KiB; there is no separately retrievable full-output artifact, and the
-worker itself does not survive a native backend restart. A PTY session is a
-separate interactive-terminal feature.
+claim uncertain and never replays it. Bounded event and model-result output
+remain capped at 64 KiB; a separate SQLite artifact preserves complete stdout
+and stderr in byte-addressed pages up to 64 MiB per operation. `GET
+/v1/operations/{id}/output` and CLI `process-output OP CHANNEL [AFTER [LIMIT]]`
+return hex-encoded pages so arbitrary child bytes are safe in HTTP/JSON and
+terminals. Completed artifacts survive restart; an artifact still capturing
+when the backend stops is sealed as incomplete during claim recovery. The worker
+itself does not survive a native backend restart. A PTY session is a separate
+interactive-terminal feature.
 
 The focused `native_process_executor_contract` and
-`native_agent_process_http_contract` pass on this implementation. They exercise
-real Windows child processes, exact approval, streamed SQLite events, a
-synthetic-model start/wait/final flow, CLI/HTTP replay, and cancellation. They
+`native_agent_process_http_contract` exercise real Windows child processes,
+exact approval, streamed SQLite events, a synthetic-model start/wait/final
+flow, full-output pagination beyond the bounded 64 KiB summaries, CLI/HTTP
+reads, restart replay, and cancellation. They
 do not exercise a live model, the rendered browser/VS Code process UI, or full
 OpenCode background-job parity.
 
@@ -108,8 +114,8 @@ The native implementation must preserve these lifecycle guarantees:
 
 The per-run event API now admits late process-output chunks only for an
 operation owned by that run that remains executing. Resource ownership remains
-held until operation completion. The native start/wait/join lifecycle is
-implemented, but the full-output artifact, restart reconciliation, rendered
+held until operation completion. The native start/wait/join lifecycle and
+bounded full-output artifact are implemented. Restart reconciliation, rendered
 browser and VS Code process flows, and full acceptance remain outstanding.
 
 The `37e153b` hosted gate built and passed 51 native contracts but its approved

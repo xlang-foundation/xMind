@@ -159,7 +159,8 @@ bool drain(CapturePipe& pipe,bool error,ProcessResult& result,std::size_t limit,
     if(!read)throw ProcessEffectUncertain("Available process output could not be captured");
     auto& count=error?result.stderr_count:result.stdout_count;count+=read;
     const auto retained=result.stdout_bytes.size()+result.stderr_bytes.size();const auto keep=std::min<std::size_t>(read,limit-retained);
-    if(keep){auto& output=error?result.stderr_bytes:result.stdout_bytes;output.append(bytes.data(),keep);if(observer){try{observer(error,std::string_view(bytes.data(),keep));}catch(...){throw ProcessEffectUncertain(error?"stderr_observer_failed":"stdout_observer_failed");}}}
+    if(keep){auto& output=error?result.stderr_bytes:result.stdout_bytes;output.append(bytes.data(),keep);}
+    if(observer){try{observer(error,std::string_view(bytes.data(),read));}catch(...){throw ProcessEffectUncertain(error?"stderr_observer_failed":"stdout_observer_failed");}}
     if(keep<read)result.truncated=true;return true;
 }
 }

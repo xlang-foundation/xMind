@@ -247,6 +247,10 @@ std::future<Event> PersistenceService::append_event(std::string id,std::string k
 std::future<std::vector<Event>> PersistenceService::events(std::string id,std::int64_t after) {
     return impl_->observe([id=std::move(id),after](Repository& repository){return repository.events(id,after);});
 }
+std::future<ProcessOutputArtifact> PersistenceService::begin_process_output(std::string operation_id,std::string run_id){return impl_->submit([operation_id=std::move(operation_id),run_id=std::move(run_id)](Repository& repository){return repository.begin_process_output(operation_id,run_id);});}
+std::future<ProcessOutputArtifact> PersistenceService::append_process_output(std::string operation_id,std::string run_id,bool stderr_channel,std::string bytes){return impl_->submit([operation_id=std::move(operation_id),run_id=std::move(run_id),stderr_channel,bytes=std::move(bytes)](Repository& repository){return repository.append_process_output(operation_id,run_id,stderr_channel,bytes);});}
+std::future<ProcessOutputArtifact> PersistenceService::finish_process_output(std::string operation_id,std::string run_id,bool complete){return impl_->submit([operation_id=std::move(operation_id),run_id=std::move(run_id),complete](Repository& repository){return repository.finish_process_output(operation_id,run_id,complete);});}
+std::future<ProcessOutputPage> PersistenceService::read_process_output(std::string operation_id,std::string channel,std::uint64_t offset,std::size_t limit){return impl_->observe([operation_id=std::move(operation_id),channel=std::move(channel),offset,limit](Repository& repository){return repository.read_process_output(operation_id,channel,offset,limit);});}
 std::future<void> PersistenceService::append_message(std::string id,std::string role,std::string json) {
     return impl_->submit([id=std::move(id),role=std::move(role),json=std::move(json)](Repository& repository){repository.append_message(id,role,json);});
 }

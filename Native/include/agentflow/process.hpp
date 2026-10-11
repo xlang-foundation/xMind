@@ -45,8 +45,9 @@ public:
     using OutputObserver=std::function<void(bool stderr_channel,std::string_view bytes)>;
     static std::string directory_identity(const std::string& absolute_directory);
     static std::string executable_identity(const std::string& absolute_executable);
-    // Observer receives at most output_limit retained raw bytes in total. Its
-    // failure after dispatch terminates the job and reports effect uncertainty.
+    // Observer receives every raw output byte. ProcessResult separately retains
+    // at most output_limit bytes total. Observer failure after dispatch retires
+    // the job and reports effect uncertainty.
     static ProcessResult run(const ProcessConfiguration& configuration,
         std::stop_token cancel={},OutputObserver observer={});
 };

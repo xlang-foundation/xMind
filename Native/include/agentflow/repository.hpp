@@ -153,6 +153,10 @@ public:
     Event append_event(const std::string& id,const std::string& kind,const std::string& json);
     std::vector<Event> events(const std::string& id,std::int64_t after=0);
     std::vector<Event> event_batch(const std::string& id,std::int64_t after,std::size_t count);
+    ProcessOutputArtifact begin_process_output(const std::string& operation_id,const std::string& run_id);
+    ProcessOutputArtifact append_process_output(const std::string& operation_id,const std::string& run_id,bool stderr_channel,const std::string& bytes);
+    ProcessOutputArtifact finish_process_output(const std::string& operation_id,const std::string& run_id,bool complete);
+    ProcessOutputPage read_process_output(const std::string& operation_id,const std::string& channel,std::uint64_t offset,std::size_t limit);
     void append_message(const std::string& id,const std::string& role,const std::string& json);
     std::vector<Message> history(const std::string& id);
     void put_information(const std::string& category,const std::string& id,const std::string& json);

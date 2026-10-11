@@ -21,5 +21,15 @@ struct Session { std::string id, title; };
 struct Run { std::string id, session_id; RunState state; std::string parent_id,node_id;bool graph_root=false;std::string provider_context_json; };
 struct Event { std::int64_t sequence; std::string run_id, kind, json; };
 struct Message { std::int64_t sequence; std::string role, json; };
+struct ProcessOutputArtifact {
+    std::string operation_id,run_id,state;
+    std::uint64_t stdout_bytes=0,stderr_bytes=0;
+};
+struct ProcessOutputPage {
+    ProcessOutputArtifact artifact;
+    std::string channel;
+    std::uint64_t offset=0,total_bytes=0;
+    std::string bytes;
+};
 
 }

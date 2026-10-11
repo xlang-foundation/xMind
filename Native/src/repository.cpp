@@ -517,7 +517,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>14)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>15)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -546,7 +546,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>14) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>15) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -763,6 +763,11 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     }
     if(version<13)db.execute("PRAGMA user_version=13");
     if(version<14){db.execute("CREATE TABLE session_agents(session_id TEXT PRIMARY KEY NOT NULL REFERENCES sessions(id),selection_json TEXT NOT NULL CHECK(length(CAST(selection_json AS BLOB))<=65536 AND json_valid(selection_json) AND json_type(selection_json)='object'),revision INTEGER NOT NULL CHECK(revision>0))");db.execute("PRAGMA user_version=14");}
+    if(version<15){
+        db.execute("CREATE TABLE process_output_artifacts(operation_id TEXT PRIMARY KEY NOT NULL REFERENCES operations(id) ON DELETE CASCADE,run_id TEXT NOT NULL REFERENCES runs(id),state TEXT NOT NULL CHECK(state IN ('capturing','complete','incomplete')),stdout_bytes INTEGER NOT NULL DEFAULT 0 CHECK(stdout_bytes>=0),stderr_bytes INTEGER NOT NULL DEFAULT 0 CHECK(stderr_bytes>=0))");
+        db.execute("CREATE TABLE process_output_chunks(operation_id TEXT NOT NULL REFERENCES process_output_artifacts(operation_id) ON DELETE CASCADE,channel TEXT NOT NULL CHECK(channel IN ('stdout','stderr')),byte_offset INTEGER NOT NULL CHECK(byte_offset>=0),data BLOB NOT NULL CHECK(length(data)>0 AND length(data)<=8192),PRIMARY KEY(operation_id,channel,byte_offset))");
+        db.execute("PRAGMA user_version=15");
+    }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
     if(bootstrap)stage_backend_owner(db,*startup_lease,startup_generation,bootstrap);
@@ -1843,6 +1848,37 @@ std::vector<Event> Repository::events(const std::string& id,std::int64_t after) 
         result.push_back({integer(row[0]),id,text(row[1]),text(row[2])});
     return result;
 }
+ProcessOutputArtifact Repository::begin_process_output(const std::string& operation_id,const std::string& run_id){
+    identifier(operation_id);identifier(run_id);auto& db=impl_->database;Transaction transaction(db);const auto op=operation(operation_id);
+    if(op.spec.run_id!=run_id||op.spec.tool!="run_process"||op.state!=OperationState::executing)throw Conflict("Process output requires its claimed run_process operation");
+    const auto owner=run(run_id);if(terminal(owner.state)){Json args;try{args=Json::parse(op.spec.arguments_json);}catch(...){throw DatabaseError("Saved process binding is invalid");}if(!args.value("background",false))throw Conflict("Only an owned background process can capture output after its run ends");}
+    changed_one(db.execute("INSERT INTO process_output_artifacts(operation_id,run_id,state,stdout_bytes,stderr_bytes) VALUES(?,?,'capturing',0,0)",{operation_id,run_id}));transaction.commit();return {operation_id,run_id,"capturing",0,0};
+}
+ProcessOutputArtifact Repository::append_process_output(const std::string& operation_id,const std::string& run_id,bool stderr_channel,const std::string& bytes){
+    identifier(operation_id);identifier(run_id);if(bytes.empty()||bytes.size()>8192)throw std::invalid_argument("Process output chunk exceeds its storage bound");auto& db=impl_->database;Transaction transaction(db);const auto op=operation(operation_id);
+    if(op.spec.run_id!=run_id||op.spec.tool!="run_process"||op.state!=OperationState::executing)throw Conflict("Process output is not owned by an executing run_process operation");
+    const auto rows=db.execute("SELECT state,stdout_bytes,stderr_bytes FROM process_output_artifacts WHERE operation_id=? AND run_id=?",{operation_id,run_id}).rows;if(rows.empty())throw NotFound("Process output artifact not found");if(text(rows[0][0])!="capturing")throw Conflict("Process output artifact is sealed");
+    auto stdout_bytes=static_cast<std::uint64_t>(integer(rows[0][1])),stderr_bytes=static_cast<std::uint64_t>(integer(rows[0][2]));const auto offset=stderr_channel?stderr_bytes:stdout_bytes;
+    constexpr std::uint64_t maximum=64u*1024u*1024u;if(stdout_bytes+stderr_bytes>maximum-bytes.size())throw Conflict("Process output artifact exceeded its 64 MiB capture limit");
+    const auto channel=stderr_channel?"stderr":"stdout";const SqlBytes blob(bytes.begin(),bytes.end());changed_one(db.execute("INSERT INTO process_output_chunks(operation_id,channel,byte_offset,data) VALUES(?,?,?,?)",{operation_id,std::string(channel),static_cast<std::int64_t>(offset),blob}));
+    if(stderr_channel)stderr_bytes+=bytes.size();else stdout_bytes+=bytes.size();changed_one(db.execute("UPDATE process_output_artifacts SET stdout_bytes=?,stderr_bytes=? WHERE operation_id=? AND state='capturing'",{static_cast<std::int64_t>(stdout_bytes),static_cast<std::int64_t>(stderr_bytes),operation_id}));
+    transaction.commit();return {operation_id,run_id,"capturing",stdout_bytes,stderr_bytes};
+}
+ProcessOutputArtifact Repository::finish_process_output(const std::string& operation_id,const std::string& run_id,bool complete){
+    identifier(operation_id);identifier(run_id);auto& db=impl_->database;Transaction transaction(db);const auto op=operation(operation_id);if(op.spec.run_id!=run_id||op.spec.tool!="run_process")throw NotFound("Process output artifact owner is invalid");
+    const auto rows=db.execute("SELECT state,stdout_bytes,stderr_bytes FROM process_output_artifacts WHERE operation_id=? AND run_id=?",{operation_id,run_id}).rows;if(rows.empty())throw NotFound("Process output artifact not found");const auto state=std::string(text(rows[0][0]));const std::string desired=complete?"complete":"incomplete";
+    if(state=="capturing"){changed_one(db.execute("UPDATE process_output_artifacts SET state=? WHERE operation_id=? AND run_id=? AND state='capturing'",{desired,operation_id,run_id}));}
+    else if(state!=desired)throw Conflict("Process output artifact completion state changed");
+    transaction.commit();return {operation_id,run_id,desired,static_cast<std::uint64_t>(integer(rows[0][1])),static_cast<std::uint64_t>(integer(rows[0][2]))};
+}
+ProcessOutputPage Repository::read_process_output(const std::string& operation_id,const std::string& channel,std::uint64_t offset,std::size_t limit){
+    identifier(operation_id);if(channel!="stdout"&&channel!="stderr")throw std::invalid_argument("Invalid process output channel");if(limit<1||limit>262144||offset>static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()))throw std::invalid_argument("Invalid process output range");
+    auto& db=impl_->database;Transaction transaction(db);const auto rows=db.execute("SELECT run_id,state,stdout_bytes,stderr_bytes FROM process_output_artifacts WHERE operation_id=?",{operation_id}).rows;if(rows.empty())throw NotFound("Process output artifact not found");
+    ProcessOutputArtifact artifact{operation_id,text(rows[0][0]),text(rows[0][1]),static_cast<std::uint64_t>(integer(rows[0][2])),static_cast<std::uint64_t>(integer(rows[0][3]))};const auto total=channel=="stdout"?artifact.stdout_bytes:artifact.stderr_bytes;if(offset>total)throw std::invalid_argument("Process output offset exceeds captured bytes");
+    const auto end=std::min<std::uint64_t>(total,offset+limit);std::string bytes;bytes.reserve(static_cast<std::size_t>(end-offset));
+    for(const auto& row:db.execute("SELECT byte_offset,data FROM process_output_chunks WHERE operation_id=? AND channel=? AND byte_offset<? AND byte_offset+length(data)>? ORDER BY byte_offset",{operation_id,channel,static_cast<std::int64_t>(end),static_cast<std::int64_t>(offset)}).rows){const auto chunk_offset=static_cast<std::uint64_t>(integer(row[0]));const auto& blob=std::get<SqlBytes>(row[1]);const auto first=static_cast<std::size_t>(offset>chunk_offset?offset-chunk_offset:0),last=static_cast<std::size_t>(std::min<std::uint64_t>(blob.size(),end-chunk_offset));if(last>first)bytes.append(reinterpret_cast<const char*>(blob.data()+first),last-first);}
+    if(bytes.size()!=end-offset)throw DatabaseError("Process output artifact has a gap");transaction.commit();return {std::move(artifact),channel,offset,total,std::move(bytes)};
+}
 void Repository::append_message(const std::string& id,const std::string& role,const std::string& json) {
     identifier(role); Transaction transaction(impl_->database); session(id);
     if(!impl_->database.execute("SELECT id FROM context_idle_owners WHERE session_id=? AND state='active'",{id}).rows.empty())throw Conflict("Session has an exclusive maintenance owner");
@@ -2184,6 +2220,7 @@ std::size_t Repository::recover_interrupted(const BackendLease& owner) {
         for(const auto& value:executing) {
             auto operation=decode_operation(value,db);
             changed_one(db.execute("UPDATE operations SET state='uncertain',result=? WHERE id=? AND state='executing'",{std::string(R"({"reason":"server_restart"})"),operation.id}));
+            db.execute("UPDATE process_output_artifacts SET state='incomplete' WHERE operation_id=? AND state='capturing'",{operation.id});
             operation.state=OperationState::uncertain;impl_->operation_state_event(operation);
         }
         impl_->cancel_waiting(id);

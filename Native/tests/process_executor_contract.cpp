@@ -27,6 +27,11 @@ std::pair<std::string,std::string> output(PersistenceService& store,const std::s
     require(events<=82 && channels[0].size()+channels[1].size()<=65536,"One operation must bound durable retained output and event count");
     return {channels[0],channels[1]};
 }
+std::pair<std::string,std::string> full_output(PersistenceService& store,const std::string& operation) {
+    std::string channels[2];
+    for(int channel=0;channel<2;++channel){std::uint64_t offset=0;const auto name=channel?"stderr":"stdout";for(;;){const auto page=store.read_process_output(operation,name,offset,262144).get();require(page.artifact.state=="complete"&&page.channel==name&&page.offset==offset&&page.total_bytes==(channel?page.artifact.stderr_bytes:page.artifact.stdout_bytes),"Full process output artifact must expose stable paginated metadata");channels[channel]+=page.bytes;offset+=page.bytes.size();if(offset==page.total_bytes)break;require(!page.bytes.empty(),"Full process output page must advance its offset");}}
+    return {std::move(channels[0]),std::move(channels[1])};
+}
 struct Task {
     std::stop_source stop;std::future<std::string> result;
     Task(ProcessExecutor& executor,std::string id,std::string args,std::string run="run",std::int64_t expiry=0,bool background=false)
@@ -90,6 +95,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         const auto streaming_deadline=std::chrono::steady_clock::now()+5s;
         while(output(store,"streamed").first.empty() && std::chrono::steady_clock::now()<streaming_deadline)std::this_thread::sleep_for(10ms);
         require(output(store,"streamed").first=="Actual streamed output 🌍\n" && streamed.result.wait_for(0ms)==std::future_status::timeout && store.operation("streamed").get().state==OperationState::executing,"Actual output must be journalled while the child remains running");
+        const auto live_artifact=store.read_process_output("streamed","stdout",0,65536).get();require(live_artifact.artifact.state=="capturing"&&live_artifact.bytes=="Actual streamed output 🌍\n","Full-output pages must be readable while a process is still running");
         {std::ofstream acknowledge(root/"streamed.txt.ack");acknowledge<<"actual output observed before exit";require(bool(acknowledge),"Actual fixture acknowledgement must be written");}
         const auto streamed_result=Json::parse(streamed.result.get());require(output(store,"streamed").first==streamed_result["stdout"]["data"].get<std::string>(),"Final buffered output must be flushed before result acknowledgement");
         phase("background-process");owner(store,"background-run","background-session");
@@ -123,6 +129,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         Task flood(executor,"flood",args("flood","flood.txt"));proposed(store,"flood");store.decide_operation("flood",OperationDecision::allow,"actual-fixture-controller").get();const auto flooded=Json::parse(flood.result.get());const auto retained=output(store,"flood");
         require(flooded["stdout"]["byte_count"]==512*1024 && flooded["stderr"]["byte_count"]==512*1024 && flooded["truncated"]==true && retained.first.size()+retained.second.size()==65536,"Actual high-volume output must drain beyond the bounded durable capture");
         require(retained==std::pair{flooded["stdout"]["data"].get<std::string>(),flooded["stderr"]["data"].get<std::string>()},"Truncated replay must match the exact retained result channels");
+        const auto complete=full_output(store,"flood");require(complete.first==std::string(512*1024,'o')&&complete.second==std::string(512*1024,'e'),"Complete output artifact must preserve all actual stdout and stderr beyond bounded events and model output");
         {
             phase("changed-executable");
             const auto copy=root/"changed-node.exe";std::filesystem::copy_file(std::filesystem::u8path(argv[1]),copy);
@@ -141,6 +148,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         phase("restart-recovery");
         PersistenceService reopened(database,imports);require(reopened.operation("storage-fault").get().state==OperationState::uncertain && reopened.run("fault-run").get().state==RunState::failed && file(root/"fault.txt")=="actual child effect","Restart must quarantine effect and never replay/erase it");
         require(output(reopened,"binary")==std::pair{std::string("\xff\0\xfe\n",4),std::string("\x80\r\0",3)},"Output journal must survive actual SQLite close/reopen without byte loss");
+        require(full_output(reopened,"flood")==std::pair{std::string(512*1024,'o'),std::string(512*1024,'e')},"Complete process artifact must survive SQLite close/reopen without truncation");
         phase("cross-workspace-quarantine");
         const auto other=root.parent_path()/"other-workspace";std::filesystem::create_directory(other);WorkspaceTools second(other.string());ProcessExecutor executor(reopened,second,other.string(),profiles);owner(reopened,"blocked-run","blocked-session");
         Task blocked(executor,"blocked",args("normal","blocked.txt"),"blocked-run");proposed(reopened,"blocked");reopened.decide_operation("blocked",OperationDecision::allow,"actual-fixture-controller").get();rejects<WorkspaceEffectUncertain>([&]{blocked.result.get();});require(!std::filesystem::exists(other/"blocked.txt"),"Stable profile resource must quarantine another workspace after uncertain dispatch");phase("recovery-close");reopened.close();
