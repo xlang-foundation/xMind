@@ -86,6 +86,13 @@ metrics remain unavailable. Human questions, context controls and approvals
 retain their native ownership and revision checks. Comparing an edit does not
 grant it, and uncertain effects offer no retry.
 
+The command palette also provides **xMind: Show Git Status**, **xMind: Review
+Git Diff**, and **xMind: Initialize Git Repository** for the connected VS Code
+workspace. Review Git Diff reads patches from Native, prompts for a base only
+when the backend cannot infer one, and opens the selected patch in VS Code's
+diff language mode. This source command is covered by the extension-host suite;
+the installed package and rendered IDE workflow remain unverified.
+
 The footer displays the backend's actual file policy when Native advertises it:
 **File changes require approval** or **Read only: file changes disabled**.
 Changing the setting does not enable writing in an already-running owner.

@@ -132,6 +132,21 @@ The pinned OpenCode audit now maps **31** native source candidates, with **110**
 unmapped and zero verified operation-level parity. See the
 [native diff evidence](evidence/native-vcs-diff-local-20261011.json).
 
+### Git diff client checkpoint (2026-10-11)
+
+The webpage workspace view now selects working-tree, branch or committed
+comparisons, lists native changed-file counts and renders the selected unified
+patch with text-only insertion. Branch/committed comparison automatically uses
+the native inferred base, or asks for an explicit branch/commit when none is
+available. The VS Code command palette's **xMind: Review Git Diff** follows the
+same backend/workspace contract and opens the returned patch in VS Code's diff
+language mode. Both clients recheck their selected workspace before displaying
+results; browser workspace changes clear retained patches. The production
+client contract suites passed **280 VS Code** and **84 webpage** tests. These
+are host/DOM contract results, not a rendered external browser or installed IDE
+acceptance; side-by-side source comparison and approval/recovery UX remain open.
+See the [VCS review client evidence](evidence/vcs-review-clients-local-20261011.json).
+
 ## OpenCode V2 functional baseline
 
 The source/API pin is v2.0.26. The following broader behavior baseline is drawn
@@ -153,7 +168,7 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | Models and providers | Provider authentication, broad provider/model catalogue, per-session model selection, variants and provider/model request settings | Encrypted multi-provider profiles, native discovery and several native wire protocols exist. Broad provider/model capability acceptance, variants, general settings precedence and complete live-client tests remain incomplete. |
 | MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP MCP and scoped OAuth work exist; OAuth renewal/interoperability, resources/prompts/subscriptions, plugin lifecycle and complete command parity remain incomplete. |
 | Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Backend-owned approvals and effect receipts are implemented for scoped operations. General policy rules, durable change snapshots/reversal and full export/sharing contracts remain incomplete. |
-| Version control | Initialize Git, inspect status/branches and compare working-tree or branch diffs for coding/review flows | Native Git init/status/info/local branch list and working/branch/committed diffs operate on the opened workspace; actual backend HTTP and CLI contracts pass, and the browser adapter exposes read-only endpoints. Review UI, CLI live-package acceptance, VS Code diff view, rename/binary cases, other providers and full VCS parity remain open. |
+| Version control | Initialize Git, inspect status/branches and compare working-tree or branch diffs for coding/review flows | Native Git init/status/info/local branch list and working/branch/committed diffs operate on the opened workspace; browser and VS Code patch viewers, actual backend HTTP and CLI contracts pass. Rendered/installed acceptance, side-by-side source comparison, rename/binary cases, other providers and full VCS parity remain open. |
 | HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 31 have reviewed native source candidates, 110 are unmapped, and none has verified operation-level parity. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
 
 This is a feature-level checklist, not an assertion that the cited docs are a

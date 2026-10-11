@@ -726,6 +726,34 @@ async function activate(context) {
       await vscode.window.showQuickPick(items,{title:`Git status · ${owner.metadata.root}`,placeHolder:`${values.length} changed file${values.length===1?'':'s'} · line counts appear beside each path`});
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.gitDiff',async()=>{
+    try{
+      if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before reviewing Git changes.');
+      await open();const target=client,view=panel,owner=workspaceBackend.active;
+      if(!target||!owner||!view)throw new Error('Connect the opened workspace before reviewing Git changes.');
+      const ticket=await workspaceBackend.prepare();workspaceBackend.assert(ticket);
+      if(ticket.origin!==target.baseUrl||owner.origin!==ticket.origin)throw new Error('The selected workspace backend changed.');
+      const modeChoice=await vscode.window.showQuickPick([
+        {label:'Working tree',description:'Compare HEAD with tracked and untracked workspace changes',mode:'working'},
+        {label:'Branch changes',description:'Compare the review base with the current working tree',mode:'branch'},
+        {label:'Committed changes',description:'Compare the review base with the current branch commits',mode:'committed'}
+      ],{title:`Git comparison · ${owner.metadata.root}`,placeHolder:'Choose what to compare'});
+      if(!modeChoice)return;if(panel!==view||client!==target)throw new Error('The xMind workspace changed before the Git comparison.');workspaceBackend.assert(ticket);
+      let base;
+      if(modeChoice.mode!=='working'){
+        const inferred=await target.vcsBase();workspaceBackend.assert(ticket);base=inferred?.ref;
+        if(!base){base=await vscode.window.showInputBox({title:'xMind: Git base reference',prompt:'xMind could not infer this branch’s review base. Enter a branch name or commit ID.',placeHolder:'main or commit SHA',ignoreFocusOut:true});if(base===undefined)return;if(panel!==view||client!==target)throw new Error('The xMind workspace changed while selecting a Git base.');workspaceBackend.assert(ticket);}
+      }
+      const diffs=await target.vcsDiff(modeChoice.mode,base,3);workspaceBackend.assert(ticket);
+      if(panel!==view||client!==target)throw new Error('The xMind workspace changed while reading Git changes.');
+      if(!diffs.length){vscode.window.showInformationMessage(`No ${modeChoice.mode==='working'?'working-tree':modeChoice.mode} Git changes in ${owner.metadata.root}.`);return;}
+      const selected=await vscode.window.showQuickPick(diffs.map(item=>({label:`${item.status}  ${JSON.stringify(item.file)}`,description:`+${item.additions} −${item.deletions}`,item})),{title:`Git diff · ${owner.metadata.root}`,placeHolder:`${diffs.length} file${diffs.length===1?'':'s'} · select a patch to inspect`});
+      if(!selected)return;if(panel!==view||client!==target)throw new Error('The xMind workspace changed before opening the Git patch.');workspaceBackend.assert(ticket);
+      const document=await vscode.workspace.openTextDocument({language:'diff',content:selected.item.patch});
+      if(panel!==view||client!==target)throw new Error('The xMind workspace changed before displaying the Git patch.');workspaceBackend.assert(ticket);
+      await vscode.window.showTextDocument(document,{preview:true});
+    }catch(error){vscode.window.showErrorMessage(error.message);}
+  }));
   if(vscode.workspace.onDidChangeWorkspaceFolders)context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(()=>{
     reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
   }));

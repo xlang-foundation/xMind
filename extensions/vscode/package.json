@@ -72,6 +72,10 @@
       {
         "command": "agentflow.gitStatus",
         "title": "xMind: Show Git Status"
+      },
+      {
+        "command": "agentflow.gitDiff",
+        "title": "xMind: Review Git Diff"
       }
     ],
     "configuration": {

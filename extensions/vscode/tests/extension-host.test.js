@@ -11,7 +11,7 @@ const {planFixture,inputMessage}=require('./plan-fixture');
 
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
-  const commands=new Map(),secrets=new Map(),requests=[],views=[],intervals=new Map(),streams=[],scheduledTasks=[],vcsInitializations=[],information=[];
+  const commands=new Map(),secrets=new Map(),requests=[],views=[],intervals=new Map(),streams=[],scheduledTasks=[],vcsInitializations=[],information=[],openedDocuments=[],shownDocuments=[];
   const state=new Map(),errors=[],comparisons=[],bootstrapTasks=[],ready=[],warnings=[];let documentProvider;
   let pendingHistory;
   let pendingOperation;
@@ -24,6 +24,8 @@ function harness(options={}) {
     const target=new URL(url);requests.push(target.pathname+target.search);
     if(target.pathname==='/v1/vcs/init'){vcsInitializations.push(JSON.parse(requestOptions.body));return {ok:true,status:204,json:async()=>{throw new Error('204 responses have no JSON body');}};}
     if(target.pathname==='/v1/vcs/status')return {ok:true,json:async()=>options.vcsStatus||[]};
+    if(target.pathname==='/v1/vcs/base')return {ok:true,json:async()=>options.vcsBase??null};
+    if(target.pathname==='/v1/vcs/diff')return {ok:true,json:async()=>options.vcsDiff||[]};
     if(target.pathname.startsWith('/v1/mcp/authorization/'))return options.mcp?{ok:true,json:async()=>options.mcp(target.pathname,requestOptions)}:{ok:false,status:404,json:async()=>({detail:'Synthetic backend has no MCP login API'})};
     let data;
     if(target.pathname.endsWith('/context/compact')){const body=JSON.parse(requestOptions.body);contextRequests.push(body);options.contextRecord={...options.contextRecord,head_revision:options.contextRecord.head_revision+1};data={id:body.id,state:'pending'};}
@@ -104,11 +106,11 @@ function harness(options={}) {
   const vscode={
     ExtensionMode:{Development:2},ConfigurationTarget:{Global:1},
     Uri:{joinPath:(root,...parts)=>[root,...parts].join('/'),parse:value=>({toString:()=>value})},
-    workspace:{isTrusted:true,workspaceFolders:[{name:'TestProj',uri:{fsPath:'D:\\TestProj',toString:()=> 'file:///D:/TestProj'}}],onDidChangeWorkspaceFolders:callback=>{folderListener=callback;return {dispose(){}};},getConfiguration:()=>({get:()=> 'http://localhost:8765',update:async()=>{}}),registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
+    workspace:{isTrusted:true,workspaceFolders:[{name:'TestProj',uri:{fsPath:'D:\\TestProj',toString:()=> 'file:///D:/TestProj'}}],onDidChangeWorkspaceFolders:callback=>{folderListener=callback;return {dispose(){}};},getConfiguration:()=>({get:()=> 'http://localhost:8765',update:async()=>{}}),openTextDocument:async options=>{openedDocuments.push(options);return {language:options.language,getText:()=>options.content};},registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
       executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(['workbench.view.extension.xmind','workbench.view.explorer'].includes(name))return;assert.equal(name,'xmind.workspace.focus');if(options.clearEditorOnSidebar)vscode.window.activeTextEditor=undefined;sidebarProvider.resolveWebviewView(makeView());}},
-    window:{activeTextEditor:options.editor,showQuickPick:async(items,settings)=>{pickers.push({items,settings});return items.find(item=>item.label===(options.quickPickLabel??options.modelInput));},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}assert.equal(prompt.password,true);return token;},showErrorMessage:message=>{errors.push(message);return options.errorChoice;},showInformationMessage:message=>{information.push(message);return undefined;},showWarningMessage:async(message,...choices)=>{warnings.push({message,choices});return typeof options.cancelChoice==='function'?await options.cancelChoice():options.cancelChoice;},
+    window:{activeTextEditor:options.editor,showQuickPick:async(items,settings)=>{pickers.push({items,settings});const label=options.quickPickLabels?.length?options.quickPickLabels.shift():(options.quickPickLabel??options.modelInput);return items.find(item=>item.label===label);},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}if(prompt.title==='xMind: Git base reference'){assert.notEqual(prompt.password,true);return options.baseInput;}assert.equal(prompt.password,true);return token;},showTextDocument:async(document,settings)=>{shownDocuments.push({document,settings});return {};},showErrorMessage:message=>{errors.push(message);return options.errorChoice;},showInformationMessage:message=>{information.push(message);return undefined;},showWarningMessage:async(message,...choices)=>{warnings.push({message,choices});return typeof options.cancelChoice==='function'?await options.cancelChoice():options.cancelChoice;},
       registerWebviewViewProvider:(id,provider)=>{assert.equal(id,'xmind.workspace');sidebarProvider=provider;return {dispose(){}};}}
   };
   function makeView(){
@@ -140,7 +142,7 @@ function harness(options={}) {
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     backendOwners,changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
@@ -621,6 +623,12 @@ test('Git status command uses the opened workspace and shows native file counts'
 });
 test('Git status command explains empty status without claiming Git was initialized',async()=>{
  const h=harness({vcsStatus:[]});await h.activation;await h.commands.get('agentflow.gitStatus')();assert.match(h.information[0],/No changed files reported by Git/);assert.match(h.information[0],/may not be a Git repository/);h.views[0].close();
+});
+test('Git review command opens a backend patch in VS Code diff syntax at the selected workspace',async()=>{
+ const patch='diff --git a/src/main.cpp b/src/main.cpp\n-old\n+new\n',h=harness({quickPickLabels:['Working tree','modified  "src/main.cpp"'],vcsDiff:[{file:'src/main.cpp',patch,additions:1,deletions:1,status:'modified'}]});await h.activation;await h.commands.get('agentflow.gitDiff')();assert.ok(h.requests.includes('/v1/vcs/diff?mode=working&context=3'));assert.deepEqual(JSON.parse(JSON.stringify(h.openedDocuments)),[{language:'diff',content:patch}]);assert.equal(h.shownDocuments.length,1);assert.deepEqual(JSON.parse(JSON.stringify(h.shownDocuments[0].settings)),{preview:true});assert.deepEqual(h.errors,[]);h.views[0].close();
+});
+test('branch diff asks for an explicit base only when no native base is available',async()=>{
+ const h=harness({quickPickLabels:['Branch changes','added  "new file.txt"'],vcsBase:null,baseInput:'main',vcsDiff:[{file:'new file.txt',patch:'diff --git a/new b/new\n+line\n',additions:1,deletions:0,status:'added'}]});await h.activation;await h.commands.get('agentflow.gitDiff')();assert.ok(h.requests.includes('/v1/vcs/base'));assert.ok(h.requests.some(route=>route.startsWith('/v1/vcs/diff?mode=branch&')&&route.includes('base=main')),JSON.stringify({requests:h.requests,errors:h.errors,prompts:h.inputPrompts}));assert.notEqual(h.inputPrompts.find(prompt=>prompt.title==='xMind: Git base reference').password,true);assert.equal(h.openedDocuments[0].language,'diff');assert.deepEqual(h.errors,[]);h.views[0].close();
 });
 
 test('all patch action comparisons use revalidated read-only backend snapshots and never grant',async()=>{

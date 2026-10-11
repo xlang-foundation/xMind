@@ -53,6 +53,13 @@ class BackendClient {
   async workspace() { return validateWorkspace(await this.request('/v1/workspace')); }
   initializeGitRepository() { return this.request('/v1/vcs/init',{}); }
   async vcsStatus() { return validateVcsStatus(await this.request('/v1/vcs/status')); }
+  async vcsBase() { return validateVcsBase(await this.request('/v1/vcs/base')); }
+  async vcsDiff(mode,base,context=3) {
+    if(!['working','branch','committed'].includes(mode)||!Number.isSafeInteger(context)||context<0||context>1000)throw new Error('Invalid Git diff selection.');
+    if(base!==undefined&&(typeof base!=='string'||!base||base.length>1024||/[\r\n\0]/.test(base)))throw new Error('Invalid Git base reference.');
+    const query=new URLSearchParams({mode,context:String(context)});if(base!==undefined)query.set('base',base);
+    return validateVcsDiff(await this.request('/v1/vcs/diff?'+query.toString()));
+  }
   models() { return this.request('/v1/models'); }
   graphs() { return this.request('/v1/graphs'); }
   delegation() { return this.request('/v1/agent/delegation'); }
@@ -206,6 +213,16 @@ function validateVcsStatus(value){
       !Number.isSafeInteger(item.additions)||item.additions<0||!Number.isSafeInteger(item.deletions)||item.deletions<0||
       !['added','deleted','modified'].includes(item.status))throw new Error('Invalid native Git status');
   }
+  return value;
+}
+function validateVcsBase(value){
+  if(value===null)return null;
+  if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==3||typeof value.name!=='string'||!value.name||value.name.length>1024||/[\r\n\0]/.test(value.name)||typeof value.ref!=='string'||!/^[a-f0-9]{40,64}$/.test(value.ref)||!['default','reflog'].includes(value.source))throw new Error('Invalid native Git review base.');
+  return value;
+}
+function validateVcsDiff(value){
+  if(!Array.isArray(value)||value.length>4096)throw new Error('Invalid native Git diff.');
+  for(const item of value)if(!item||typeof item!=='object'||Array.isArray(item)||Object.keys(item).length!==5||typeof item.file!=='string'||!item.file||item.file.length>32768||/[\0]/.test(item.file)||typeof item.patch!=='string'||new TextEncoder().encode(item.patch).length>4*1024*1024||!Number.isSafeInteger(item.additions)||item.additions<0||!Number.isSafeInteger(item.deletions)||item.deletions<0||!['added','deleted','modified'].includes(item.status))throw new Error('Invalid native Git diff entry.');
   return value;
 }
 
@@ -694,5 +711,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
-else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
+else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};

@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-11",
+  "scope": "Browser and VS Code clients for native Git review patches",
+  "native_routes": ["GET /v1/vcs/base", "GET /v1/vcs/diff"],
+  "browser": {
+    "workflow": "Choose working tree, branch or committed comparison; use inferred base or enter one; select changed file and render the native patch as text in the workspace review area.",
+    "workspace_binding": "Uses the connected selected-workspace backend; changing workspace clears patch rows and rendered patch contents.",
+    "validation": "Strict per-file metadata and patch-size checks; patch is inserted with textContent, not interpreted as markup."
+  },
+  "vscode": {
+    "command": "xMind: Review Git Diff",
+    "workflow": "Select comparison, provide a review base if native inference is unavailable, select a changed file and open its backend-produced patch using VS Code diff language mode.",
+    "workspace_binding": "Checks workspace trust, authenticated selected backend, native workspace ticket and view identity before and after user prompts and before display."
+  },
+  "validation": {
+    "vscode_contracts": "node --test extensions/vscode/tests/*.test.js passed 280 tests.",
+    "browser_contracts": "node --test views/browser/tests/*.test.cjs passed 84 tests.",
+    "vscode_review_tests": "Provider client routing/validation and extension-host command interaction are included in the 280 tests.",
+    "browser_review_tests": "Mode/base selection, changed-file rendering, text-only patch output and empty-base guidance are included in the 84 tests."
+  },
+  "limits": [
+    "These DOM and extension-host tests are not rendered external-browser or installed-IDE acceptance.",
+    "VS Code opens a unified patch document, not a side-by-side original/current workspace diff.",
+    "Rename detection, binary review UX, patch application and complete OpenCode VCS parity remain incomplete."
+  ]
+}
