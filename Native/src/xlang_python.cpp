@@ -17,7 +17,7 @@ bool identifier(const std::string& value,bool dotted=false){
     }
     return !start;
 }
-void cancelled(std::stop_token token){if(token.stop_requested())throw std::runtime_error("xlang3 tool call cancelled");}
+void cancelled(std::stop_token token){if(token.stop_requested())throw XlangPythonCancelled();}
 }
 
 XlangPythonCallable::XlangPythonCallable(std::string modules_root,std::string stdlib_root,
@@ -46,23 +46,23 @@ std::string XlangPythonCallable::invoke_json(const std::string& arguments_json,s
     X::Value encoded;
     const auto input=arguments.dump();
     if(!json.fn("loads").Call(std::vector<X::Value>{X::Value(runtime,input)},encoded))
-        throw std::runtime_error("xlang3 tool argument conversion failed");
+        throw XlangPythonExecutionError();
     cancelled(cancel);
-    X::Module module(runtime,module_.c_str());
+    auto module=[&](){try{return X::Module(runtime,module_.c_str());}catch(...){throw XlangPythonExecutionError();}}();
     const auto callable=module[function_];
-    if(!callable.IsValid())throw std::runtime_error("xlang3 tool entry point is unavailable");
+    if(!callable.IsValid())throw XlangPythonExecutionError();
     X::Value result;
     if(!callable.Call(std::vector<X::Value>{encoded},result))
-        throw std::runtime_error("xlang3 tool execution failed");
+        throw XlangPythonExecutionError();
     cancelled(cancel);
     X::Value output;
     if(!json.fn("dumps").Call(std::vector<X::Value>{result},output)||!output.IsString())
-        throw std::runtime_error("xlang3 tool result is not JSON serializable");
+        throw XlangPythonExecutionError();
     auto serialized=output.ToString();
-    if(serialized.size()>1024*1024)throw std::runtime_error("xlang3 tool result exceeds limits");
+    if(serialized.size()>1024*1024)throw XlangPythonExecutionError();
     // The native side remains the protocol authority; reject non-JSON and
     // non-finite values even if the runtime serializer accepts them.
-    try{(void)Json::parse(serialized);}catch(...){throw std::runtime_error("xlang3 tool result is not valid JSON");}
+    try{(void)Json::parse(serialized);}catch(...){throw XlangPythonExecutionError();}
     return serialized;
 }
 

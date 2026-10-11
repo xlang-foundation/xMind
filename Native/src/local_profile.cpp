@@ -364,6 +364,8 @@ void shape(const Json &value, const Store &store, const WorkspaceTools &workspac
             value.at("pid").get<std::uint64_t>() <= MAXDWORD && value.contains("port") &&
             value.at("port").is_number_integer() && value.at("port") >= 0 && value.at("port") <= 65535 &&
             value.contains("approved_edits") && value.at("approved_edits").is_boolean());
+    for(const auto* field:{"provider_config","graphs_config","python_tools_config"})
+        if(value.contains(field)&&!value.at(field).get<std::string>().empty())require(absolute(value.at(field).get<std::string>()).is_absolute());
     require(value.value("phase", std::string{}) == "preparing" ||
             value.value("phase", std::string{}) == "starting" ||
             value.value("phase", std::string{}) == "ready");
@@ -521,12 +523,13 @@ Child launch(Store &store, Json &state) {
         args.push_back(L"--workspace-edits");
         args.push_back(L"approved");
     }
-    for (const auto *field : {"provider_config", "graphs_config"}) {
+    for (const auto *field : {"provider_config", "graphs_config", "python_tools_config"}) {
         if(state.contains("owner_receipt"))break;
         const auto value = state.value(field, std::string{});
         if (!value.empty()) {
-            args.push_back(std::string(field) == "provider_config" ? L"--provider-config"
-                                                                   : L"--graphs-config");
+            const auto option=std::string(field)=="provider_config"?L"--provider-config":
+                (std::string(field)=="graphs_config"?L"--graphs-config":L"--python-tools-config");
+            args.push_back(option);
             args.push_back(wide(value));
         }
     }
@@ -734,8 +737,9 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         std::string loaded_manifest;
         if(options.upgrade_backend&&!state.contains("owner_receipt")&&!state.contains("upgrade_intent"))
             loaded_manifest=context_digest(file_bytes(absolute(loaded_root())/L"native-runtime-manifest.json",4*1024*1024));
-        for (const auto &[field, value] : std::array<std::pair<const char *, std::string>, 2>{
-                 {{"provider_config", options.provider_config}, {"graphs_config", options.graphs_config}}})
+        for (const auto &[field, value] : std::array<std::pair<const char *, std::string>, 3>{
+                 {{"provider_config", options.provider_config}, {"graphs_config", options.graphs_config},
+                  {"python_tools_config", options.python_tools_config}}})
             if (!value.empty())
                 require(state.value(field, std::string{}) == text(absolute(value)),
                         "Profile launch configuration changed; update the existing backend explicitly");
@@ -806,6 +810,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             {"provider_config",
              options.provider_config.empty() ? "" : text(absolute(options.provider_config))},
             {"graphs_config", options.graphs_config.empty() ? "" : text(absolute(options.graphs_config))}};
+        state["python_tools_config"]=options.python_tools_config.empty()?"":text(absolute(options.python_tools_config));
         store.write(state);
     }
     if (state.at("phase") == "preparing") {

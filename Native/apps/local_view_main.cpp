@@ -146,6 +146,8 @@ int run_local_view(int argc, char **argv) {
                 options.provider_config = value;
             else if (key == "--graphs-config")
                 options.graphs_config = value;
+            else if (key == "--python-tools-config")
+                options.python_tools_config = value;
             else if (key == "--ready-file")
                 ready = value;
             else

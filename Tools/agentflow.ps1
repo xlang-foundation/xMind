@@ -20,6 +20,7 @@ param(
     [string]$McpConfig,
     [string]$InstructionsConfig,
     [string]$GraphsConfig,
+    [string]$PythonToolsConfig,
     [string]$ProviderConfig,
     [ValidateSet('unknown','unsupported','supported')][string]$ModelTools='unknown',
     [Parameter(ValueFromRemainingArguments=$true)][string[]]$ClientArguments
@@ -60,6 +61,7 @@ if($Action -eq 'Serve') {
     if($McpConfig) {$serverArguments+=@('--mcp-config',$McpConfig)}
     if($InstructionsConfig) {$serverArguments+=@('--instructions-config',$InstructionsConfig)}
     if($GraphsConfig) {$serverArguments+=@('--graphs-config',$GraphsConfig)}
+    if($PythonToolsConfig) {$serverArguments+=@('--python-tools-config',[System.IO.Path]::GetFullPath($PythonToolsConfig))}
     & $binary @serverArguments
 } elseif($Action -eq 'Chat') {
     if($ClientArguments.Count -gt 0){throw 'Use -Session and -Model for Chat, or -Action Client for raw commands.'}

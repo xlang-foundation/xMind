@@ -59,6 +59,15 @@ int main(int argc,char** argv) {
         bool started=false,completed=false;
         for(const auto& event:store.events("main").get()) {if(event.kind=="tool.started") started=true;if(event.kind=="tool.completed") completed=true;}
         require(started && completed,"Actual tool execution events must persist");
+        store.create_session("python-tool","Embedded xlang3 model tool fixture").get();auto python=settings;python.provider.endpoint=base+"/python-tool";
+        python.xlang_python_tools.push_back({ModelToolDefinition{"python_uppercase","Convert the supplied text to uppercase",R"({"type":"object","properties":{"text":{"type":"string"}},"required":["text"],"additionalProperties":false})"},XlangPythonCallable(argv[2],argv[3],argv[4],"fixture_tools","uppercase")});
+        AgentRunner python_runner(store,python);python_runner.start("python-tool","python-tool","Call the registered Python tool on xMind");
+        require(python_runner.execute("python-tool").state==RunState::completed,"Registered xlang3 callable must execute through the actual model/tool loop");
+        const auto python_history=store.history("python-tool").get();require(python_history.size()==4,"Actual xlang3 tool result and model continuation must be persisted together");
+        const auto python_result=Json::parse(Json::parse(python_history[2].json).at("content").get<std::string>());require(python_result==Json{{"value","XMIND"}},"Actual xlang3 result must reach the model as JSON tool content");
+        store.create_session("python-tool-filtered","Named agent xlang3 allowlist fixture").get();auto filtered=python;filtered.provider.endpoint=base+"/python-tool-filtered";filtered.tool_allowlist=std::vector<std::string>{"read_file"};
+        AgentRunner filtered_runner(store,filtered);filtered_runner.start("python-tool-filtered","python-tool-filtered","Do not expose the registered Python tool");
+        require(filtered_runner.execute("python-tool-filtered").state==RunState::completed,"Agent allowlists must narrow the registered xlang3 tool catalogue");
         store.create_session("skill","Native skill execution fixture").get();auto skilled=settings;skilled.provider.endpoint=base+"/skill";AgentRunner skill_runner(store,skilled);skill_runner.start("skill","skill","Load the synthetic workspace skill and inspect its actual companion file");
         require(skill_runner.execute("skill").state==RunState::completed,"Native skill loading must complete its actual model/tool loop");const auto skill_history=store.history("skill").get();require(skill_history.size()==7,"Actual skill turn and same-batch deferral must persist as one matched conversation");
         const auto blocked=Json::parse(Json::parse(skill_history[3].json).at("content").get<std::string>());require(blocked.at("error").at("code")=="repository_instructions_required","Companion read in the activation batch must wait for delivered skill guidance");

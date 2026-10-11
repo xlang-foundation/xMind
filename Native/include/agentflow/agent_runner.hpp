@@ -8,6 +8,7 @@
 #include "agentflow/dynamic_plan_records.hpp"
 #include "agentflow/context_manager.hpp"
 #include "agentflow/context_control.hpp"
+#include "agentflow/xlang_python.hpp"
 
 namespace agentflow {
 class DelegationExecutor;
@@ -45,6 +46,9 @@ struct AgentSettings {
     std::optional<ContextRuntimePolicy> context;
     // Used for trusted delegated leaves and explicit named-agent bindings.
     std::optional<std::vector<std::string>> tool_allowlist;
+    // Explicitly registered trusted, in-process xlang3 callables. These join
+    // the backend catalogue and remain subject to the selected agent allowlist.
+    std::vector<XlangPythonToolRegistration> xlang_python_tools;
 };
 std::string provider_context_json(const AgentSettings& settings,const std::string& model_id={});
 // Shared native single-agent/model-tool loop, callable by backend workers and

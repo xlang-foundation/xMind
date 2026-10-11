@@ -4,6 +4,7 @@
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/a2a_tool_registry.hpp"
+#include "agentflow/json_schema.hpp"
 #include "agentflow/a2a_agent_registry.hpp"
 #include "agentflow/create_executor.hpp"
 #include "agentflow/patch_tool.hpp"
@@ -451,6 +452,17 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(PatchTool::definition());
         if(process_)request.tools.push_back(process_->definition());
+        std::map<std::string,const XlangPythonToolRegistration*> xlang_tools;
+        for(const auto& registration:settings_.xlang_python_tools){
+            validate_agent_tool_allowlist(std::vector<std::string>{registration.definition.name});
+            if(registration.definition.description.empty()||registration.definition.description.size()>4096||
+                registration.definition.input_schema_json.empty()||registration.definition.input_schema_json.size()>65536||
+                request.tools.size()>=64||std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& tool){return tool.name==registration.definition.name;})||
+                !xlang_tools.emplace(registration.definition.name,&registration).second)
+                throw std::invalid_argument("Invalid or colliding trusted xlang3 tool registration");
+            JsonSchema schema(registration.definition.input_schema_json);(void)schema;
+            request.tools.push_back(registration.definition);
+        }
         struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<McpToolRegistry> registry;};
         std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;Json approval_bindings=Json::array();
         std::unique_ptr<A2aAgentToolRegistry> a2a_tools;
@@ -614,7 +626,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 }
                 return persistence_.complete_run(id,reply.dump()).get();
             }
-            if(response.finish_reason!="tool_calls" || !workspace_) throw ModelProtocolError("Model did not produce a complete supported turn");
+            if(response.finish_reason!="tool_calls" || (!workspace_&&xlang_tools.empty())) throw ModelProtocolError("Model did not produce a complete supported turn");
             const auto is_planning=[](const auto& call){return call.name=="plan_tasks"||call.name=="revise_plan"||call.name=="inspect_plan";};
             if(std::any_of(response.tool_calls.begin(),response.tool_calls.end(),is_planning)){
                 if(!dynamic_root||response.tool_calls.size()!=1)throw ModelProtocolError("Planning must be the sole tool call of its owning ordinary Agent turn");
@@ -679,6 +691,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     } else if(call.name=="delegate_tasks"&&budget&&!leaf&&delegation_&&settings_.delegation){
                         auto frozen=settings_;frozen.provider=provider;frozen.tool_allowlist=effective_tool_allowlist;
                         output=Json::parse(delegation_->invoke(id,call,reply.dump(),frozen,budget,token));
+                    } else if(const auto registered=xlang_tools.find(call.name);registered!=xlang_tools.end()) {
+                        JsonSchema schema(registered->second->definition.input_schema_json);schema.validate_object(call.arguments_json);
+                        output=Json::parse(registered->second->callable.invoke_json(call.arguments_json,token));
                     } else if(const auto registered=mcp_tools.find(call.name);registered!=mcp_tools.end()) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance)));
@@ -702,6 +717,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const ToolGuidanceChanged&) {output={{"error",{{"code","repository_instructions_required"},{"message","Approved proposal was retired without dispatch because repository guidance changed. Updated guidance will be supplied before a new call and new approval."}}}};}
                 catch(const ToolContentConflict&) {output={{"error",{{"code","content_conflict"},{"message","File contents, identity, replacement count or target absence no longer match the operation"}}}};}
                 catch(const ToolCancelled&) {throw;}
+                catch(const XlangPythonCancelled&) {throw ToolCancelled("Trusted xlang3 tool call cancelled");}
+                catch(const XlangPythonExecutionError&) {output={{"error",{{"code","xlang3_tool_failed"},{"message","Trusted xlang3 tool execution failed"}}}};}
                 catch(const ToolAccessDenied&) {output={{"error",{{"code","access_denied"},{"message","Workspace policy denied this operation"}}}};}
                 catch(const ToolFileError&) {output={{"error",{{"code","file_unavailable"},{"message","File is unavailable, binary, outside limits or unreadable"}}}};}
                 catch(const std::invalid_argument&) {output={{"error",{{"code","invalid_arguments"},{"message","Arguments do not match the tool contract"}}}};}

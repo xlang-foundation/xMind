@@ -111,6 +111,43 @@ definition and cannot grant tool permissions. Its revision and byte count are
 printed, while the document body stays in xlang3-backed local SQLite. The
 backend applies the usual prompt and tool policy when constructing model input.
 
+## Trusted xlang3 Python tools
+
+The native AgentRunner can register trusted xlang3 callables from an explicit
+startup YAML file:
+
+```yaml
+code_root: "D:/work/my-agent-code"
+tools:
+  - name: text.uppercase
+    description: Convert text to uppercase.
+    module: text_tools
+    function: uppercase
+    input_schema:
+      type: object
+      properties:
+        text: {type: string}
+      required: [text]
+      additionalProperties: false
+```
+
+`text_tools.py` exports `def uppercase(args): ...`; it receives a JSON object
+and returns a JSON-serializable value. Pass the file with
+`xmind view --python-tools-config FILE`, the local console's
+`--python-tools-config FILE`, `xmind serve --python-tools-config FILE`, or
+`Tools/agentflow.ps1 -Action Serve -PythonToolsConfig FILE`. The trusted
+catalogue is stored through xlang3 SQLite and restored when the local backend
+restarts. Changed configuration applies on the next backend launch. Registered
+tools enter the regular model catalogue, and named-agent `tools` allowlists
+continue to narrow which ones a conversation may use.
+
+These functions execute in-process with the xMind server's privileges. They
+are trusted code, not a sandbox; they can perform effects outside xMind's
+workspace approval APIs. A synchronous function that blocks cannot be forcibly
+interrupted, so cancellation is checked immediately before and after its call.
+Hard interruption and full effect mediation remain open work for out-of-process
+execution and the programming API.
+
 ## YAML subset and limits
 
 YAML is parsed by the native yaml-cpp dependency and immediately converted to
@@ -124,17 +161,13 @@ supported. JSON input remains accepted.
 ## Still required for the agreed product
 
 The current slice supports reusable named YAML agents in graph nodes, per-node
-inline instructions, per-agent native tool allowlists, and revisioned
-single-agent conversation selection. Arbitrary xlang3 `.py` callables and the
-in-process programming API remain incomplete. A low-level trusted callable
-bridge now embeds xlang3, imports a Python module from an explicit code root,
-passes a JSON object to its function, and accepts only a JSON result. Its runtime
-and values are created and destroyed on the invoking thread. This bridge is not
-yet connected to agent YAML, the model tool catalogue, or the native tool
-permission/approval APIs; do not treat it as registered AgentFlow functionality.
-Trusted xlang3 code is in-process code and is not an OS sandbox. Workspace
-Markdown skill discovery and selection are implemented, while the full
-command/skill lifecycle still has documented gaps.
+inline instructions, per-agent native tool allowlists, revisioned single-agent
+conversation selection, and trusted startup-registered xlang3 Python tools in
+the AgentRunner catalogue. The broader in-process programming API, native
+effect mediation for trusted code, and forcibly interruptible/out-of-process
+Python calls remain incomplete. Workspace Markdown skill discovery and
+selection are implemented, while the full command/skill lifecycle still has
+documented gaps.
 Those authoring styles must eventually produce the same validated native
 definitions, tool registry and permission receipts; parser acceptance alone
 does not establish runtime behavior. See the
