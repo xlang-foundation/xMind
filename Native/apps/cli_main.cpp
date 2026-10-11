@@ -21,6 +21,9 @@
 #include <array>
 #include <random>
 #include <map>
+#include <condition_variable>
+#include <deque>
+#include <mutex>
 #if defined(_WIN32)
 #include <windows.h>
 #include <bcrypt.h>
@@ -821,11 +824,32 @@ int terminal_attach(agentflow::ConsoleTransport& client,int port,const std::stri
     const auto initial_sequence=terminal_sequence(metadata["output_sequence"]);(void)initial_sequence;
     const auto terminal=metadata["id"].get<std::string>();std::atomic_bool finished=false,stop=false;std::exception_ptr observation_error;std::string observation_message;
 #if defined(_WIN32)
-    const auto send_input=[&](const std::wstring& wide){if(wide.empty())return;const auto data=utf8_argument(wide);const auto response=client.Post("/v1/terminals/"+terminal+"/input",headers,Json{{"data",data}}.dump(),"application/json");if(!response||response->status!=200)throw std::runtime_error("Terminal input was not accepted");};
+    std::mutex input_mutex;std::condition_variable input_ready;std::deque<std::string> pending_input;std::size_t pending_input_bytes=0;bool stop_input=false;std::exception_ptr input_error;
+    const auto enqueue_input=[&](const std::wstring& wide){
+        if(wide.empty())return;const auto data=utf8_argument(wide);std::lock_guard lock(input_mutex);
+        if(pending_input_bytes+data.size()>1024*1024)throw std::runtime_error("Terminal input queue is full");
+        pending_input_bytes+=data.size();pending_input.push_back(data);input_ready.notify_one();
+    };
     const auto resize_terminal=[&]{
-        const auto size=console.dimensions();const auto response=client.Post("/v1/terminals/"+terminal+"/resize",headers,Json{{"rows",size.first},{"columns",size.second}}.dump(),"application/json");
+        const auto size=console.dimensions();agentflow::ConsoleTransport resize_client(port,workspace);resize_client.set_connection_timeout(2,0);resize_client.set_read_timeout(5,0);resize_client.set_write_timeout(2,0);resize_client.set_follow_location(false);
+        const auto response=resize_client.Post("/v1/terminals/"+terminal+"/resize",headers,Json{{"rows",size.first},{"columns",size.second}}.dump(),"application/json");
         if(!response||response->status!=200)throw std::runtime_error("Terminal resize was not accepted");
     };
+    std::thread input_worker([&]{
+        try{
+            agentflow::ConsoleTransport input_client(port,workspace);input_client.set_connection_timeout(2,0);input_client.set_read_timeout(5,0);input_client.set_write_timeout(2,0);input_client.set_follow_location(false);
+            while(true){std::string batch;
+                {std::unique_lock lock(input_mutex);input_ready.wait_for(lock,std::chrono::milliseconds(5),[&]{return stop_input||finished.load(std::memory_order_acquire);});
+                    if(finished.load(std::memory_order_acquire)){pending_input.clear();pending_input_bytes=0;break;}
+                    while(!pending_input.empty()&&batch.size()+pending_input.front().size()<=64*1024){batch+=pending_input.front();pending_input_bytes-=pending_input.front().size();pending_input.pop_front();}
+                    if(batch.empty()&&stop_input)break;
+                }
+                if(batch.empty())continue;
+                const auto response=input_client.Post("/v1/terminals/"+terminal+"/input",headers,Json{{"data",batch}}.dump(),"application/json");
+                if(!response||response->status!=200)throw std::runtime_error("Terminal input was not accepted");
+            }
+        }catch(...){input_error=std::current_exception();finished.store(true,std::memory_order_release);input_ready.notify_all();}
+    });
 #endif
     std::thread output([&]{
         try{
@@ -880,7 +904,7 @@ int terminal_attach(agentflow::ConsoleTransport& client,int port,const std::stri
                     (modifiers&(SHIFT_PRESSED))!=0,
                     (modifiers&(LEFT_ALT_PRESSED|RIGHT_ALT_PRESSED))!=0);
                 const auto repeats=std::min<DWORD>(key.wRepeatCount,128);
-                for(DWORD repeat=0;repeat<repeats;++repeat)send_input(value);
+                for(DWORD repeat=0;repeat<repeats;++repeat)enqueue_input(value);
             }
         }else
 #endif
@@ -893,18 +917,21 @@ int terminal_attach(agentflow::ConsoleTransport& client,int port,const std::stri
         }
     }catch(...){stop.store(true,std::memory_order_release);
 #if defined(_WIN32)
+        {std::lock_guard lock(input_mutex);stop_input=true;}input_ready.notify_all();if(input_worker.joinable())input_worker.join();
         stop_resize.store(true,std::memory_order_release);if(resize_events.joinable())resize_events.join();
 #endif
         if(output.joinable())output.join();client.Post("/v1/terminals/"+terminal+"/close",headers,"{}","application/json");throw;}
     if(requested_exit){const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(3);while(!finished.load(std::memory_order_acquire)&&std::chrono::steady_clock::now()<deadline)std::this_thread::sleep_for(std::chrono::milliseconds(25));}
     stop.store(true,std::memory_order_release);
 #if defined(_WIN32)
+    {std::lock_guard lock(input_mutex);stop_input=true;}input_ready.notify_all();if(input_worker.joinable())input_worker.join();
     stop_resize.store(true,std::memory_order_release);if(resize_events.joinable())resize_events.join();
 #endif
     if(output.joinable())output.join();
     const auto closed=client.Post("/v1/terminals/"+terminal+"/close",headers,"{}","application/json");if(!closed||closed->status!=200)throw std::runtime_error("Could not retire the workspace terminal");
 #if defined(_WIN32)
     if(resize_error)try{std::rethrow_exception(resize_error);}catch(const std::exception& error){throw std::runtime_error(error.what());}
+    if(input_error)try{std::rethrow_exception(input_error);}catch(const std::exception& error){throw std::runtime_error(error.what());}
 #endif
     if(observation_error)throw std::runtime_error(observation_message);
     return 0;

@@ -75,7 +75,7 @@ int wmain(int argc, wchar_t** argv) {
     std::atomic_bool resized{false};
     std::atomic<unsigned long long> input_bytes{0}, output_bytes{0};
     std::thread resize([&] {
-        std::this_thread::sleep_for(std::chrono::milliseconds(700));
+        std::this_thread::sleep_for(std::chrono::milliseconds(550));
         if (WaitForSingleObject(process.hProcess, 0) == WAIT_TIMEOUT)
             resized.store(SUCCEEDED(ResizePseudoConsole(console, COORD{110, 42})), std::memory_order_release);
     });

@@ -47,7 +47,7 @@ async function unifiedInteractive(input,...args){
 }
 async function conptyInteractive(...args){
  const process=spawn(conptyHarness,[xmindExe,'--port',String(port),...args],{env,windowsHide:true});let stdout='',stderr='';process.stdout.setEncoding('utf8');process.stderr.setEncoding('utf8');process.stdout.on('data',value=>stdout+=value);process.stderr.on('data',value=>stderr+=value);
- const result=await new Promise((resolveResult,reject)=>{const timer=setTimeout(()=>{process.kill();reject(new Error('Nested ConPTY terminal deadline'));},20000);process.once('error',error=>{clearTimeout(timer);reject(error);});process.once('close',(code,signal)=>{clearTimeout(timer);resolveResult({code,signal});});(async()=>{await delay(1200);process.stdin.end('echo XMIND_CONPTY_KEYBOARD_OK\rmode con\rexit\r');})();});
+ const result=await new Promise((resolveResult,reject)=>{const timer=setTimeout(()=>{process.kill();reject(new Error('Nested ConPTY terminal deadline'));},20000);process.once('error',error=>{clearTimeout(timer);reject(error);});process.once('close',(code,signal)=>{clearTimeout(timer);resolveResult({code,signal});});(async()=>{await delay(500);process.stdin.end('ping -n 3 127.0.0.1 >nul\recho XMIND_CONPTY_KEYBOARD_OK\rmode con\rexit\r');})();});
  assert.equal(result.signal,null,'Nested ConPTY client must close normally');assert.equal(result.code,0,stderr);return{stdout,stderr};
 }
 function admin(...args){const result=spawnSync(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,...args],{env,encoding:'utf8',timeout:15000,windowsHide:true});assert.equal(result.status,0,result.stderr);return JSON.parse(result.stdout);}
