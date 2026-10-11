@@ -1,0 +1,50 @@
+{
+  "scope": "Actual same-machine browser coding run using a saved provider profile, native create_file approval, and a real xlang3-backed xMind backend.",
+  "view": "http://127.0.0.1:60415/ui/",
+  "workspace": "D:/CantorAI2026/xMind",
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "provider_key_entered_in_page": false,
+  "run_id": "90049479d1dc07d02ea5740767c7f9f7",
+  "run_state": "completed",
+  "tool_call_count": 1,
+  "operation": {
+    "id": "12d84e55b1cad0b00d63d859adef2b15",
+    "tool": "create_file",
+    "decision": "allow",
+    "state": "succeeded",
+    "path": "build/agentflow-live-coding-smoke.md",
+    "content": "xMind live coding tool path verified.\n"
+  },
+  "provider_usage": {
+    "tool_request": {
+      "input_tokens": 5456,
+      "output_tokens": 310,
+      "total_tokens": 5766,
+      "cached_tokens": 5248,
+      "reasoning_tokens": 222
+    },
+    "final_response": {
+      "input_tokens": 5909,
+      "output_tokens": 46,
+      "total_tokens": 5955,
+      "cached_tokens": 0,
+      "reasoning_tokens": 0
+    }
+  },
+  "filesystem_verification": {
+    "exact_content_verified": true,
+    "gitignored": true,
+    "removed_after_verification": true,
+    "git_status_after_cleanup": "clean"
+  },
+  "runtime": {
+    "native_revision": "3681c2e5073426b6ac80ade97785e8f07da2f341",
+    "native_executable_sha256": "cbffb58e81842edc3cf481e565ac2db1f73b920228472b9aa8d499023c87f22f",
+    "revision_is_ancestor_of_validated_source": "8f6cd2c"
+  },
+  "limits": [
+    "The running executable is not byte-identical to the current build/native/Release/xmind.exe.",
+    "This validates one browser create_file workflow and one provider/model only; it does not validate VS Code, shell/process execution, or full OpenCode parity."
+  ]
+}

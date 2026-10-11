@@ -9,13 +9,27 @@ browser Settings panel displayed this text for DeepSeek. A live click on
 **Fetch models** then returned two DeepSeek model IDs from the selected saved
 profile, without a key in the request from the page. The selected profile's
 existing connectivity run also returned `OK`. This verifies saved-key reuse
-for this DeepSeek profile only; other providers and coding/tool runs were not
-retested. The packaged native-runtime verifier passed
+for this DeepSeek profile only. One browser file-creation run is described
+below; other providers and broader coding workflows were not retested. The
+packaged native-runtime verifier passed
 with 1,899 files; VS Code tests pass **298/298** and browser tests **85/85**.
 VS Code installation is verified, while activation/rendering in an existing
 editor window remains unverified. This change does not validate the broader
 provider matrix, native process coding, or full OpenCode parity. See [sanitized
 browser evidence](evidence/provider-key-status-live-browser-20261011.json).
+
+## Live browser coding-file approval — 2026-10-11
+
+The connected browser used the saved DeepSeek profile to complete a real
+`create_file` tool call. The UI displayed the exact path and one-line content,
+required approval, and recorded the operation as succeeded. The file was
+created under the Git-ignored `build/` directory, its exact bytes were checked,
+and the disposable file was removed; the working tree remained clean. Run
+`90049479d1dc07d02ea5740767c7f9f7` reported provider input/output metrics in
+the sidebar. The running native executable identifies revision `3681c2e`, an
+ancestor of this source, but differs from the current Release binary. This is
+one actual browser create-file path, not VS Code acceptance, process/shell
+execution, or broad coding parity. See [sanitized run evidence](evidence/live-deepseek-browser-create-file-20261011.json).
 
 ## Managed trusted process-profile configuration — 2026-10-11
 

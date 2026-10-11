@@ -1,5 +1,18 @@
 # Reviewable milestones
 
+## Live browser coding write uses saved provider and approval — 2026-10-11
+
+The connected xMind browser completed a real DeepSeek coding run that requested
+one `create_file` operation, displayed its exact path/content and awaited the
+native approval. After approval, the operation and run completed, and the
+sidebar displayed provider-supplied input/output metrics. The one-line smoke
+file was written under the ignored `build/` directory, verified byte-for-byte,
+then removed; the repository working tree remained clean. The running native
+revision was `3681c2e`, an ancestor of current source but not byte-identical to
+the current Release binary. This verifies one browser create-file workflow;
+live VS Code coding, shell/process execution and full OpenCode parity remain
+open. [Sanitized evidence](evidence/live-deepseek-browser-create-file-20261011.json).
+
 ## Interactive console can cancel or detach from a live run — 2026-10-11
 
 While the native CLI watches a streamed run, `/cancel` sends cancellation to
