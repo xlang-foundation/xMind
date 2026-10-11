@@ -31,9 +31,14 @@ only no-auth alternatives or HTTP Bearer, refuses unsupported requirements,
 and withholds a configured bearer from subsequent calls when the card does not
 advertise bearer authentication. Focused loopback assertions cover refusal and
 credential withholding; hosted native compilation and CTest remain pending.
-The client is not yet registered in the runtime, persistence, AgentRunner,
-graph, CLI, browser or VS Code, and it does not yet support streaming or
-durable recovery after uncertain remote dispatch.
+An owner-managed native registry now persists peer IDs, card URLs, enabled
+state and revisions through xlang3 SQLite. Bearer bytes are stored in the
+scoped encrypted credential repository; catalog and browser-safe metadata hold
+only an opaque reference. Rotation publishes the new reference before deleting
+the old credential. A restart contract now covers registration, disable,
+rotation, clearing and retired-ID behavior. This registry is not yet exposed by
+owner HTTP/CLI/VS Code APIs or connected to AgentRunner/graphs; outbound
+streaming and durable recovery after uncertain remote dispatch remain open.
 
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),

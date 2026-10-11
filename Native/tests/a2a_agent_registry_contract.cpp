@@ -1,0 +1,48 @@
+#include "agentflow/a2a_agent_registry.hpp"
+#include "nlohmann/json.hpp"
+#include <algorithm>
+#include <chrono>
+#include <filesystem>
+#include <iostream>
+#include <random>
+#include <stdexcept>
+#include <string>
+
+namespace {
+using Json=nlohmann::json;
+void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
+template<class E,class F>void rejects(F&& action,const char* message){try{action();}catch(const E&){return;}throw std::runtime_error(message);}
+agentflow::SecretBytes secret(const std::string& value){return agentflow::SecretBytes({reinterpret_cast<const std::uint8_t*>(value.data()),value.size()});}
+bool equals(const agentflow::SecretBytes& value,const std::string& expected){const auto bytes=value.view();return bytes.size()==expected.size()&&std::equal(bytes.begin(),bytes.end(),reinterpret_cast<const std::uint8_t*>(expected.data()));}
+struct Directory {std::filesystem::path path;Directory(){std::random_device random;path=std::filesystem::temp_directory_path()/std::filesystem::path("xmind-a2a-registry-"+std::to_string(random())+"-"+std::to_string(random()));if(!std::filesystem::create_directory(path))throw std::runtime_error("Cannot create A2A registry fixture directory");}~Directory(){std::error_code ignored;std::filesystem::remove_all(path,ignored);}};
+}
+int main(int argc,char** argv){
+    if(argc!=3)return 2;
+    try{
+        Directory directory;const auto database=(directory.path/"registry.sqlite").string();const std::vector<std::string> imports{argv[1],argv[2]};const std::string first="fixture-a2a-bearer-initial",rotated="fixture-a2a-bearer-rotated";
+        {
+            agentflow::PersistenceService persistence(database,imports);agentflow::A2aRemoteAgentRegistry registry(persistence);
+            require(registry.list().revision==0&&registry.list().entries.empty(),"Empty registry must have a stable initial snapshot");
+            rejects<std::invalid_argument>([&]{registry.register_agent("research.insecure","http://agents.example.test/card.json",true,0);},"Remote cleartext A2A endpoints must be rejected at registration");
+            const auto loopback=registry.register_agent("research.loopback","http://127.0.0.1:6550/card.json",false,0);require(loopback.revision==1,"Local loopback test peers may use HTTP");registry.remove(loopback.id,1);
+            const auto added=registry.register_agent("research.alpha","https://agents.example.test/cards/alpha.json",true,0,secret(first));require(added.revision==1&&added.enabled&&added.has_bearer,"Owner registration must assign the first stable revision without exposing its credential");
+            auto list=registry.list();require(list.revision==3&&list.entries.size()==1&&list.entries[0].id==added.id&&list.entries[0].has_bearer,"Remote agent catalogue must expose registered safe metadata");
+            const auto stored=persistence.information("native-a2a-agents","catalog").get();require(stored.find(first)==std::string::npos&&stored.find("credential_id")!=std::string::npos,"The public registry record must contain only an opaque credential reference");
+            auto credentials=persistence.credentials("a2a-remote-agents").get();require(credentials.size()==1&&credentials[0].purpose=="a2a.remote-agent.research.alpha","Bearer values must be stored through the scoped encrypted credential repository");
+            {auto resolved=registry.resolve(added.id);require(resolved.bearer&&equals(*resolved.bearer,first)&&resolved.descriptor.revision==1,"Resolution must return the registered peer key only to the native owner");}
+            rejects<agentflow::Conflict>([&]{registry.register_agent("research.alpha","https://other.example.test/card.json",true,0);},"Stale owner revision must not replace a registration");
+            const auto disabled=registry.set_enabled(added.id,false,1);require(disabled.revision==2&&!disabled.enabled&&disabled.has_bearer,"Disabling a registration must preserve but prevent use of its scoped credential");rejects<std::invalid_argument>([&]{(void)registry.resolve(added.id);},"Disabled peers must not resolve for dispatch");
+            const auto enabled=registry.set_enabled(added.id,true,2);require(enabled.revision==3&&enabled.enabled,"Re-enabling a peer must advance its owner revision");{auto resolved=registry.resolve(added.id);require(resolved.bearer&&equals(*resolved.bearer,first),"Enable changes must preserve the currently registered key");}
+            const auto changed=registry.register_agent(added.id,"https://agents.example.test/cards/beta.json",true,3,secret(rotated));require(changed.revision==4&&changed.card_url.ends_with("beta.json"),"Endpoint and key rotation must publish together at one new registration revision");credentials=persistence.credentials("a2a-remote-agents").get();require(credentials.size()==1,"Replaced remote keys must be removed after new metadata is published");{auto resolved=registry.resolve(added.id);require(resolved.bearer&&equals(*resolved.bearer,rotated),"Registry resolution must match the committed key rotation");}
+            const auto public_peer=registry.register_agent("research.public","https://agents.example.test/public.json",true,0);require(!public_peer.has_bearer,"Public peers must not acquire credentials by default");const auto public_resolved=registry.resolve(public_peer.id);require(!public_resolved.bearer,"Public peer resolution must remain credential-free");
+            const auto cleared=registry.register_agent(added.id,changed.card_url,true,4,{},true);require(cleared.revision==5&&!cleared.has_bearer&&persistence.credentials("a2a-remote-agents").get().empty(),"Credential removal must sever and retire its encrypted value");
+            rejects<agentflow::Conflict>([&]{registry.remove(added.id,4);},"Removal must reject stale revisions");registry.remove(added.id,5);require(registry.list().entries.size()==1,"Removal must retain the other registered remote agent");rejects<agentflow::Conflict>([&]{registry.register_agent(added.id,changed.card_url,true,0);},"Retired remote agent IDs must not be reused");
+            persistence.close();
+        }
+        {
+            agentflow::PersistenceService persistence(database,imports);agentflow::A2aRemoteAgentRegistry reopened(persistence);const auto snapshot=reopened.list();require(snapshot.revision==9&&snapshot.entries.size()==1&&snapshot.entries[0].id=="research.public","Owner registrations must survive embedded-xlang3 SQLite reopen");require(!reopened.resolve("research.public").bearer,"Public registration must remain secret-free after reopen");persistence.close();
+        }
+        std::cout<<"Native A2A registry passed xlang3 SQLite owner registration, revision conflicts, encrypted bearer references, key rotation/clearing, disable/remove semantics, retired IDs and restart resolution. Remote task execution and cross-client APIs remain open.\n";
+    }catch(const std::exception& error){std::cerr<<"Native A2A registry contract failed: "<<error.what()<<"\n";return 1;}
+    return 0;
+}
