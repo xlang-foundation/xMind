@@ -10,6 +10,18 @@ the previous DeepSeek / `deepseek-flash` selection was restored afterward.
 This verifies provider catalogue authentication and rendered population, not
 inference or streaming. [Exact evidence](evidence/provider-catalogues-live-browser-20261010.json).
 
+## Live Gemini inference and native file-tool call (2026-10-10)
+
+The saved Gemini credential completed a real UI inference on the discovered
+`models/gemini-3.8-flash` model, then used the native `read_file` tool to read
+the repository README and return its first heading (`xMind`). No files were
+changed. The earlier `models/gemini-2.5-flash` attempt returned HTTP 404, so
+catalogue discovery alone does not establish that every discovered model is
+usable by an account. The UI kept the credential backend-side and was restored
+to DeepSeek / `deepseek-flash` afterward. This verifies one live Gemini model
+and one read-only tool call; it does not establish full Gemini capability or
+coding-workflow parity. [Exact evidence](evidence/live-gemini-inference-20261010.json).
+
 ## Native outbound A2A SDK and CLI contract repair (2026-10-10)
 
 The native outbound client now passes the pinned official A2A JavaScript SDK

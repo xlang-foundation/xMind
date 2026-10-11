@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-10 America/Los_Angeles",
+  "scope": "Live Gemini inference and read-only native tool call through the connected local xMind browser UI",
+  "workspaceRevision": "0f7c781",
+  "ui": "http://127.0.0.1:60415/ui/",
+  "providerProfile": "gemini",
+  "credentialValuesRecorded": false,
+  "tests": [
+    {
+      "model": "models/gemini-2.5-flash",
+      "request": "Connectivity prompt requesting exactly OK and no tools",
+      "result": "failed",
+      "httpStatus": 404,
+      "interpretation": "A saved credential can discover this model, but this request was not accepted for the selected model."
+    },
+    {
+      "model": "models/gemini-3.8-flash",
+      "request": "Connectivity prompt requesting exactly OK and no tools",
+      "result": "passed",
+      "response": "OK",
+      "usage": {
+        "inputTokens": 4906,
+        "outputTokens": 1,
+        "totalTokens": 4966,
+        "reasoningTokens": 59
+      },
+      "timingSeconds": {
+        "firstToken": 5.94,
+        "total": 5.95
+      }
+    },
+    {
+      "model": "models/gemini-3.8-flash",
+      "request": "Use read_file to read README.md and return only its first Markdown heading; do not edit or create files",
+      "result": "passed",
+      "nativeToolRequests": 1,
+      "response": "xMind",
+      "usage": {
+        "inputTokens": 4998,
+        "outputTokens": 18,
+        "totalTokens": 5069,
+        "reasoningTokens": 53
+      },
+      "followUpUsage": {
+        "inputTokens": 11932,
+        "outputTokens": 3,
+        "totalTokens": 11969,
+        "reasoningTokens": 34
+      },
+      "timingSeconds": {
+        "firstToken": 1.88,
+        "total": 1.88
+      }
+    }
+  ],
+  "providerKeySentToBrowser": false,
+  "workspaceFilesChanged": false,
+  "restoredSelection": {
+    "profile": "deepseek",
+    "model": "deepseek-flash"
+  },
+  "limitations": "Live acceptance covers Gemini 3.8 Flash text inference and a single native read_file call on this connected local UI only. It does not establish other Gemini models, function-call edge cases, full coding tasks, installed VS Code acceptance, or broad OpenCode parity. The older 2.5 Flash 404 response body was not captured."
+}
