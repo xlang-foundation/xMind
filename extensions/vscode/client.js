@@ -748,7 +748,7 @@ class ProviderProfileController {
       if(!catalogue.models.length)throw new Error('The provider returned no models');
       this.draft={...captured,route_id,key,savedCredential,ids:catalogue.models.map(value=>value.id),expires:key===undefined?Infinity:Date.now()+300000};key=undefined;
       if(savedCredential)this.savedCatalogue={...captured,route_id:saved.route_id,ids:[...this.draft.ids],expires:Infinity,savedCredential:true};
-      this.models(saved?.model);const confirmation=savedCredential?`Fetched ${this.draft.ids.length} models using this profile's saved key. Choose one in the sidebar to save the model.`:'Choose a model below to save this profile';this.post({type:'settings-state',busy:false,complete:true,text:confirmation});
+      this.models(saved?.model);const confirmation=savedCredential?`Fetched ${this.draft.ids.length} ${saved.provider} models using this profile's saved key. The key stays in local xMind.`:'Choose a model below to save this profile';this.post({type:'settings-state',busy:false,complete:true,text:confirmation});if(savedCredential)this.post({type:'status',text:confirmation});
       if(this.draft.key!==undefined)this.timer=setTimeout(()=>{if(this.current(epoch)){this.invalidate();this.post({type:'settings-state',busy:false,text:'Unsaved key expired · fetch models again'});}},300000);
       return true;
     }catch(error){if(this.current(epoch))this.post({type:'settings-state',busy:false,text:error.message});throw error;}finally{key=undefined;}
