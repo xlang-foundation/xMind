@@ -1,5 +1,21 @@
 # Reviewable milestones
 
+## Saved provider keys on the rebuilt local browser (2026-10-10)
+
+Using the rebuilt native runtime and the repository's single
+`.config/providers.yaml`, the same-machine browser page discovered live model
+catalogues for Claude, Gemini, DeepSeek and OpenAI (13, 11, 2 and 20 models).
+Each profile then completed a real short text request with its saved backend
+credential: Claude Haiku 4.5, Gemini 3.8 Flash, DeepSeek Flash and OpenAI
+gpt-5.6-sol all returned `OK`; the UI displayed provider-supplied token usage
+and measured timings. No provider key value or server token was requested in
+the connected page. The exact native executable, xlang3 runtime, local runtime
+manifest, run IDs and metrics are recorded in
+[live provider evidence](evidence/live-provider-profiles-current-native-browser-20261010.json).
+This is live text-only acceptance on an unsigned local development runtime;
+it does not prove streaming, tool use, coding edits, installed VS Code
+acceptance or complete provider compatibility.
+
 ## Live saved-provider catalogues in the local browser (2026-10-10)
 
 From the connected xMind browser, selecting each saved Claude, Gemini,

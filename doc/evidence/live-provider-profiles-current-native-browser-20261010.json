@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-10 America/Los_Angeles",
+  "scope": "Live saved-provider model discovery and text inference in the rebuilt local xMind browser UI",
+  "workspaceRevision": "65f20505321e67dffcb495ff38e735781a9fdc8e",
+  "xlang3Revision": "7b8b32ae3a0e6a99fac7babd97362736099448fb",
+  "runtime": {
+    "scope": "Local development runtime only; unsigned and not release eligible",
+    "nativeExecutableSha256": "c4adf884da6f959429f79b01be40d754badca5ca485dd9e68ed4b207174acdad",
+    "xlang3RuntimeSha256": "4c0959726dfdaf8c12321188da524808e516cf224bab5ae590b3bd05a4349c07",
+    "runtimeManifestSha256": "f2159b301ab1fb3ba508ccae8a5e23d167353aafd605a7dbef3969451e7bb7da"
+  },
+  "ui": "http://127.0.0.1:49358/ui/",
+  "providerConfiguration": ".config/providers.yaml",
+  "credentialValuesRecorded": false,
+  "providerKeyValueVisibleInUi": false,
+  "sameMachineServerTokenPrompted": false,
+  "catalogues": [
+    { "profileId": "claude", "result": "passed", "modelCount": 13 },
+    { "profileId": "gemini", "result": "passed", "modelCount": 11 },
+    { "profileId": "deepseek", "result": "passed", "modelCount": 2 },
+    { "profileId": "openai", "result": "passed", "modelCount": 20 }
+  ],
+  "inferences": [
+    {
+      "profileId": "gemini",
+      "model": "models/gemini-3.8-flash",
+      "runId": "82ef8c93a669ccbbdf7c20470be0965a",
+      "result": "passed",
+      "response": "OK",
+      "usage": { "inputTokens": 4898, "outputTokens": 1, "totalTokens": 4899 },
+      "timingSeconds": { "firstToken": 1.62, "total": 1.63 }
+    },
+    {
+      "profileId": "openai",
+      "model": "gpt-5.6-sol",
+      "wire": "Responses",
+      "runId": "a4064b31f91d8b613ff4253b7d33eafc",
+      "result": "passed",
+      "response": "OK",
+      "usage": { "inputTokens": 3825, "outputTokens": 5, "totalTokens": 3830, "cachedTokens": 0, "reasoningTokens": 0 },
+      "timingSeconds": { "firstToken": 1.74, "total": 1.92 }
+    },
+    {
+      "profileId": "deepseek",
+      "model": "deepseek-flash",
+      "wire": "Chat Completions",
+      "runId": "6c3cc39cf2c7f2b7862a96760764fd7e",
+      "result": "passed",
+      "response": "OK",
+      "usage": { "inputTokens": 5405, "outputTokens": 2, "totalTokens": 5407, "cachedTokens": 5248, "reasoningTokens": 0 },
+      "timingSeconds": { "firstToken": 0.95, "total": 1.06 }
+    },
+    {
+      "profileId": "claude",
+      "model": "claude-haiku-4-5-20251001",
+      "wire": "Messages",
+      "runId": "87f9aac1d2c1fb33fa83017da6cd2dc5",
+      "result": "passed",
+      "response": "OK",
+      "usage": { "inputUncachedTokens": 6082, "outputTokens": 4, "cacheWriteTokens": 0, "cachedTokens": 0, "totalTokens": null },
+      "timingSeconds": { "firstToken": 0.70, "total": 0.73 }
+    }
+  ],
+  "testPrompt": "Reply exactly OK. Do not call tools, read files, or change anything.",
+  "workspaceChangesRequested": false,
+  "limitations": "This proves live catalogue discovery and one short text inference for the selected model on each saved profile using this local development runtime. It does not prove streaming, tool use, coding edits, installed VS Code acceptance, or complete provider compatibility."
+}

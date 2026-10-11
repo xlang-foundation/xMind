@@ -1,5 +1,19 @@
 # Current native validation
 
+## Rebuilt local browser provider acceptance — 2026-10-10
+
+The rebuilt local development runtime at source `65f20505321e67dffcb495ff38e735781a9fdc8e`
+loaded the repository `.config/providers.yaml` into its native backend. In the
+same-machine browser, live model discovery returned 13 Claude, 11 Gemini, 2
+DeepSeek and 20 OpenAI models. A short real text inference returned `OK` for
+Claude Haiku 4.5, Gemini 3.8 Flash, DeepSeek Flash and OpenAI gpt-5.6-sol; the
+page rendered each run's provider usage and measured latency without asking for
+a provider key or server token. The exact four run IDs, metrics, xlang3/runtime
+identity and limits are recorded in
+[live provider evidence](evidence/live-provider-profiles-current-native-browser-20261010.json).
+This is local development-runtime browser acceptance only. It does not prove
+streaming, tool/edit execution or installed VS Code behavior.
+
 ## Same-machine webpage attach and current hosted views — 2026-10-10
 
 The active local browser launcher advertises `http://127.0.0.1:60430/ui/`;
