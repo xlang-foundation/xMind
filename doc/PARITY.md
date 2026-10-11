@@ -586,8 +586,8 @@ generates [OPENCODE_API_INVENTORY.json](OPENCODE_API_INVENTORY.json): **136
 operations**, with upstream parameters/body/responses and acceptance requirements.
 The historical upstream audit lists 139; the pinned schema count is authoritative.
 
-Removed-prototype mappings are absent. The native mapping identifies **23
-partial C++ source candidates and 113 unmapped operations**. Each candidate
+Removed-prototype mappings are absent. The native mapping identifies **25
+partial C++ source candidates and 111 unmapped operations**. Each candidate
 records a checked source anchor, SHA-256, surface and explicit gap. Unmapped
 means no reviewed mapping, not proof that no related component exists. Source
 presence and hashes do not establish behavioral equivalence or executed
