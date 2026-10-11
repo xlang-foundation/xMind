@@ -43,8 +43,11 @@ the view-session credential internally and never asks the user for a server
 token. Native and adapter contracts cover owner authentication, revision
 conflicts, no-secret responses, route boundaries, rotation, clearing, retired
 IDs and restart behavior. The registry is not yet connected to AgentRunner,
-graphs, CLI or VS Code; outbound streaming and durable recovery after uncertain
-remote dispatch remain open.
+graphs or VS Code. The native CLI now exposes `a2a-agents`, `a2a-register`,
+`a2a-enable` and `a2a-remove`; registration reads an optional bearer from a
+named environment variable and redacts it from output. Its Windows HTTP
+contract is pending. Outbound AgentRunner/graph dispatch, streaming and durable
+recovery after uncertain remote dispatch remain open.
 
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),

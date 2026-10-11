@@ -96,6 +96,13 @@ try {
   assert.equal(await raw(`Host: untrusted.example\r\nAuthorization: Bearer ${token}`),400);
   assert.equal(await raw(`Host: 127.0.0.1:${port}\r\nAuthorization: Bearer ${token}\r\nAuthorization: Bearer ${token}`),401);
   assert.deepEqual(cli('sessions'), []);
+  if(process.platform==='win32'){
+    assert.deepEqual(cli('a2a-agents'),{revision:0,agents:[]},'A2A registry starts empty and is available through the native CLI');
+    const secret='synthetic-cli-a2a-bearer-'+randomBytes(8).toString('hex'),registered=spawnSync(cliExe,[String(port),'a2a-register','research.cli','https://peer.invalid/agent-card.json','true','0','XMIND_A2A_TEST_TOKEN'],{env:{...env,XMIND_A2A_TEST_TOKEN:secret},encoding:'utf8',timeout:15000,windowsHide:true});
+    assert.equal(registered.status,0,registered.stderr);assert.ok(!registered.stdout.includes(secret)&&!registered.stderr.includes(secret),'A2A bearer must not appear in CLI output');const added=JSON.parse(registered.stdout);assert.equal(added.agent.id,'research.cli');assert.equal(added.agent.has_bearer,true);assert.deepEqual(cli('a2a-agents').agents,[added.agent]);
+    assert.deepEqual(cli('a2a-enable','research.cli','false','1'),{agent:{...added.agent,revision:2,enabled:false}});
+    assert.deepEqual(cli('a2a-remove','research.cli','2'),{removed:true,id:'research.cli'});assert.deepEqual(cli('a2a-agents'),{revision:3,agents:[]});
+  }
   const deepRequest=await fetch(`http://127.0.0.1:${port}/v1/sessions`,{
     method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
     body:'{"title":'+'['.repeat(10000)+'"nested"'+']'.repeat(10000)+'}',signal:AbortSignal.timeout(5000)
