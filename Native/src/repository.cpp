@@ -1926,7 +1926,13 @@ BackendOwnerState Repository::request_backend_retirement(const BackendLease& lea
 }
 BackendOwnerState Repository::activate_backend_replacement(const BackendLease& lease,const BackendOwnerReceipt& expected,const BackendOwnerTarget& target){
     if(!lease.covers(impl_->path))throw Conflict("Activation requires this database lease");receipt_json(expected);target_json(target);auto& db=impl_->database;Transaction tx(db);const auto previous=owner_record(db);if(!previous)throw NotFound("Native owner is absent");const auto prior=decode_owner(*previous);
-    if(!prior.quiesced||!prior.replacement_prepared||prior.retirement_requested||!prior.replacement_target||*prior.replacement_target!=target||prior.database_path!=lease.canonical_database_path()||BackendOwnerReceipt{prior.generation,prior.receipt_id,prior.revision}!=expected)throw Conflict("Prepared replacement precondition changed");
+    if(!prior.quiesced)throw Conflict("Prepared replacement owner is not quiesced");
+    if(!prior.replacement_prepared)throw Conflict("Prepared replacement was not marked ready");
+    if(prior.retirement_requested)throw Conflict("Prepared replacement owner is still retiring");
+    if(!prior.replacement_target)throw Conflict("Prepared replacement target is absent");
+    if(*prior.replacement_target!=target)throw Conflict("Prepared replacement target changed");
+    if(prior.database_path!=lease.canonical_database_path())throw Conflict("Prepared replacement database changed");
+    if(BackendOwnerReceipt{prior.generation,prior.receipt_id,prior.revision}!=expected)throw Conflict("Prepared replacement receipt changed");
     require_database_idle(db);if(!prior.legacy_ticket_id.empty()){verify_legacy_owner_saved_records(db);consume_legacy_owner_ticket(db,prior.legacy_ticket_id);}owner_revision(prior.revision+1);BackendOwnerState active{prior.generation,prior.revision+1,false,{}};write_owner(db,active,previous);tx.commit();return active;
 }
 void Repository::put_information(const std::string& category,const std::string& id,const std::string& json) {

@@ -27,8 +27,8 @@ namespace fs = std::filesystem;
 struct ProfileRequestError : std::runtime_error {
     int status;
     std::string body;
-    ProfileRequestError(int value, std::string response)
-        : std::runtime_error("Managed backend owner request was rejected: " + response),
+    ProfileRequestError(int value, const std::string& path, std::string response)
+        : std::runtime_error("Managed backend owner request was rejected: " + path + ": " + response),
           status(value), body(std::move(response)) {}
 };
 void require(bool condition, const char *message = "Local profile validation failed; stored state was preserved") {
@@ -612,12 +612,12 @@ bool authenticated(const Json &state) {
     }
 }
 Json profile_request(int port,const std::string& token,const std::string& path,const Json* payload=nullptr){
-    httplib::Client client("127.0.0.1",port);client.set_connection_timeout(1,0);client.set_read_timeout(5,0);client.set_write_timeout(5,0);client.set_follow_location(false);
+    httplib::Client client("127.0.0.1",port);client.set_connection_timeout(1,0);client.set_read_timeout(60,0);client.set_write_timeout(15,0);client.set_follow_location(false);
     const httplib::Headers headers{{"Authorization","Bearer "+token}};
     const auto response=payload?client.Post(path,headers,payload->dump(),"application/json"):client.Get(path,headers);
-    require(response!=nullptr,"Managed backend owner request failed");
+    if(!response)throw std::runtime_error(std::string("Managed backend owner request failed: ")+(payload?"POST ":"GET ")+path+" (transport "+std::to_string(static_cast<int>(response.error()))+")");
     require(response->body.size()<=128*1024,"Managed backend owner response exceeds limits");
-    if(response->status<200||response->status>=300)throw ProfileRequestError(response->status,response->body);
+    if(response->status<200||response->status>=300)throw ProfileRequestError(response->status,path,response->body);
     return parse(response->body);
 }
 std::pair<fs::path,std::string> stage_current_runtime(Store& store,const WorkspaceTools& workspace){
@@ -632,7 +632,7 @@ std::pair<fs::path,std::string> stage_current_runtime(Store& store,const Workspa
     }
     auto output=destination.open(L"native-runtime-manifest.json",GENERIC_WRITE,CREATE_NEW);DWORD written=0;
     require(WriteFile(output.value,raw.data(),static_cast<DWORD>(raw.size()),&written,nullptr)!=0&&written==raw.size()&&FlushFileBuffers(output.value)!=0,"Cannot publish the replacement runtime manifest");
-    output.value=INVALID_HANDLE_VALUE;
+    require(CloseHandle(output.value)!=0,"Cannot close replacement runtime manifest");output.value=INVALID_HANDLE_VALUE;
     VerifiedRuntimeGeneration verified(VerifiedRuntimeGeneration::managed_profile_copy(text(destination.directory),digest,workspace.root_path()));verified.revalidate();
     return {destination.directory,digest};
 }
@@ -775,7 +775,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             if(!deferred_busy_upgrade){
                 bool replacement_already_running=false;
                 if(state.contains("owner_receipt")&&state.at("phase")=="ready"&&state.at("pid").get<std::uint32_t>()){
-                    try{verify_process(state);replacement_already_running=true;}catch(...){}
+                    try{auto replacement=state;replacement["runtime"]=state.at("replacement_runtime");replacement["manifest"]=state.at("replacement_manifest");verify_process(replacement);replacement_already_running=true;}catch(...){}
                 }
                 if(!replacement_already_running)retire_for_upgrade(store,state,workspace);
             }
