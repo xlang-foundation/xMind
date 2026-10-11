@@ -14,12 +14,14 @@ the registry transactionally at each single-agent root admission. Its native
 read/list/search/glob tools accept an optional registered `folder_id`, default
 to the primary folder, reopen each admitted root and verify its identity. The
 run stores its exact membership revision and folder bindings; admitted agent
-children reuse that snapshot. VS Code can explicitly attach another folder
+children reuse that snapshot. New graph roots also persist membership atomically
+with graph admission; direct graph read nodes and graph-agent children use that
+same immutable set. VS Code can explicitly attach another folder
 already open in its window through **xMind: Add Opened Folder to Workspace**;
 the native host retains the existing primary identity. The CLI can initialize
 the selected folder as a workspace and attach additional folders to that same
-workspace. Graph-node tools, edits, approvals, process, Git/language-server
-routing and folder removal still bind only the primary folder. The local browser displays each attached
+workspace. Graph edits, approvals, process, Git/language-server routing and
+folder removal still bind only the primary folder. The local browser displays each attached
 folder as its own tree and reads previews through a native route that resolves
 the selected workspace's folder ID, re-opens the directory and verifies its
 native identity on every request.
@@ -93,13 +95,15 @@ captured workspace revision. Git status and diff are per folder because one
 workspace may contain several independent repositories. Language servers are
 started with the folder root that owns the document. Repository instructions
 and skills are discovered per root and retain their source-folder provenance.
-Delegation, graphs, MCP and A2A inherit only the admitted workspace snapshot;
-they cannot expand membership themselves.
+Delegation, single-agent runs, graph read nodes, graph-agent children, MCP and
+A2A inherit only the admitted workspace snapshot; they cannot expand membership
+themselves. Graph write nodes remain scoped to the primary folder.
 
 The browser canvas shows one file tree per member folder, with explicit folder
 selection for previews. Git remains bound to the primary folder. VS Code can
 attach opened folders; read/list/search/glob agent tools then use the captured
-registry membership. Edits, terminals, language servers and approvals remain
+registry membership in single-agent runs and read-only graph nodes. Edits,
+terminals, language servers and approvals remain
 bound to the selected primary folder. The CLI reports the selected workspace
 and folder context and offers commands to list workspaces and add a folder.
 

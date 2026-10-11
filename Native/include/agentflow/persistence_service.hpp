@@ -108,7 +108,7 @@ public:
     std::future<std::vector<OwnedChildRecord>> owned_children(std::string parent);
     std::future<std::vector<Message>> owned_child_history(std::string parent,std::string child);
     std::future<std::vector<Event>> tree_events(std::string parent,std::int64_t after=0,std::size_t count=256);
-    std::future<Run> start_graph_run(std::string id,std::string session_id,std::string graph_id,std::int64_t revision,GraphPlan plan,std::string prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<GraphContextSpec> context={});
+    std::future<Run> start_graph_run(std::string id,std::string session_id,std::string graph_id,std::int64_t revision,GraphPlan plan,std::string prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<GraphContextSpec> context={},std::optional<WorkspaceMembershipSnapshot> membership={});
     std::future<GraphContextOwnerRecord> graph_context_owner(std::string root);
     std::future<GraphContextOpenRecord> open_graph_context_owner(GraphContextOpenSpec spec);
     std::future<GraphContextOpenRecord> resume_graph_context_owner(GraphContextOpenSpec spec);

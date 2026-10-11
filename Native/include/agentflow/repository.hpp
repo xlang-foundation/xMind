@@ -10,6 +10,7 @@
 #include "agentflow/agent_definition_records.hpp"
 #include "agentflow/backend_owner.hpp"
 #include "agentflow/mcp_oauth_refresh_records.hpp"
+#include "agentflow/workspace_tools.hpp"
 #include <memory>
 #include <vector>
 #include <optional>
@@ -119,7 +120,7 @@ public:
     std::vector<OwnedChildRecord> owned_children(const std::string& parent);
     std::vector<Message> owned_child_history(const std::string& parent,const std::string& child);
     std::vector<Event> tree_events(const std::string& parent,std::int64_t after=0,std::size_t count=256);
-    Run start_graph_run(const std::string& id,const std::string& session_id,const std::string& graph_id,std::int64_t revision,const GraphPlan& plan,const std::string& prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<GraphContextSpec> context={});
+    Run start_graph_run(const std::string& id,const std::string& session_id,const std::string& graph_id,std::int64_t revision,const GraphPlan& plan,const std::string& prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<GraphContextSpec> context={},std::optional<WorkspaceMembershipSnapshot> membership={});
     GraphContextOwnerRecord graph_context_owner(const std::string& root);
     GraphContextOpenRecord open_graph_context_owner(const GraphContextOpenSpec& spec);
     GraphContextOpenRecord resume_graph_context_owner(const GraphContextOpenSpec& spec);

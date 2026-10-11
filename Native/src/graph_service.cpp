@@ -173,6 +173,7 @@ Run GraphService::submit_graph(std::string id,std::string session,std::string gr
         const auto models=impl_->runner.models();if(agent && !models.empty())model=models.front();
     }
     impl_->runner.validate(entry->plan,model);
+    const auto membership=impl_->runner.workspace_membership_admission();
     const auto budget=impl_->runner.execution_budget(entry->plan,model);
     const auto context_authority=impl_->runner.execution_context(entry->plan,model);
     auto input_record=Json{{"content",std::move(prompt)},{"model_id",model}};const auto context=impl_->runner.provider_context(model);if(!context.empty())input_record["provider_context"]=Json::parse(context);const auto input=input_record.dump();
@@ -180,7 +181,7 @@ Run GraphService::submit_graph(std::string id,std::string session,std::string gr
     const auto [owned,inserted]=impl_->active.emplace(id,job);if(!inserted)throw Conflict("Graph is already owned");
     try {impl_->pending.push_back(job);}catch(...){impl_->active.erase(owned);throw;}
     Run result;
-    try {result=impl_->store.start_graph_run(id,session,graph,revision,entry->plan,input,budget,context_authority).get();}
+    try {result=impl_->store.start_graph_run(id,session,graph,revision,entry->plan,input,budget,context_authority,membership).get();}
     catch(...){impl_->pending.pop_back();impl_->active.erase(owned);throw;}
     lock.unlock();impl_->changed.notify_one();return result;
 }

@@ -331,7 +331,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     std::unique_ptr<WorkspaceToolSet> run_workspace_tools;
     if(workspace_&&settings_.workspace_membership_snapshot){
         auto membership=admitted.parent_id.empty()?saved_workspace_membership(persistence_,id):
-            (budget?saved_workspace_membership(persistence_,budget->root_id()):std::optional<WorkspaceMembershipSnapshot>{});
+            (budget?saved_workspace_membership(persistence_,budget->root_id()):saved_workspace_membership(persistence_,admitted.parent_id));
         if(!membership&&admitted.parent_id.empty())membership=settings_.workspace_membership_snapshot();
         if(membership){
         if(membership->workspace_id!=workspace_->identity()||membership->folders.empty()||membership->folders.front().root!=workspace_->root_path())

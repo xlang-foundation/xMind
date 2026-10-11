@@ -42,6 +42,20 @@ bool same_context(const GraphContextSpec& left,const GraphContextSpec& right){
     }return true;
 }
 struct McpCredentialUnavailable : std::runtime_error {using std::runtime_error::runtime_error;};
+std::optional<WorkspaceMembershipSnapshot> saved_graph_workspace_membership(PersistenceService& persistence,const std::string& owner){
+    std::optional<WorkspaceMembershipSnapshot> result;
+    for(const auto& event:persistence.events(owner).get())if(event.kind=="agent.workspace_membership"){
+        if(result)throw ToolAccessDenied("Graph contains duplicate workspace membership snapshots");
+        const auto value=Json::parse(event.json);
+        if(!value.is_object()||!value.contains("workspace_id")||!value["workspace_id"].is_string()||
+            !value.contains("revision")||!value["revision"].is_number_integer()||!value.contains("folders")||!value["folders"].is_array()||
+            value["folders"].empty()||value["folders"].size()>256)throw ToolAccessDenied("Saved graph workspace membership is invalid");
+        WorkspaceMembershipSnapshot snapshot;snapshot.workspace_id=value["workspace_id"].get<std::string>();snapshot.revision=value["revision"].get<std::int64_t>();
+        for(const auto& folder:value["folders"]){if(!folder.is_object()||!folder.contains("folder_id")||!folder["folder_id"].is_string()||!folder.contains("root")||!folder["root"].is_string())throw ToolAccessDenied("Saved graph folder binding is invalid");snapshot.folders.push_back({folder["folder_id"].get<std::string>(),folder["root"].get<std::string>()});}
+        result=std::move(snapshot);
+    }
+    return result;
+}
 }
 GraphRunner::GraphRunner(PersistenceService& store,AgentSettings settings,std::size_t count):store_(store),settings_(std::move(settings)),limit_(count){
     if(count<1 || count>8 || settings_.run_timeout.count()<1 || settings_.run_timeout>std::chrono::hours(1))throw std::invalid_argument("Invalid graph execution budget");
@@ -100,6 +114,15 @@ std::optional<GraphContextSpec> GraphRunner::execution_context(const GraphPlan& 
     }
     result.backend_identity=context_digest("native.graph.context.v1:"+plan.json()+":"+bindings.dump());return result;
 }
+std::optional<WorkspaceMembershipSnapshot> GraphRunner::workspace_membership_admission()const{
+    if(!settings_.workspace_membership_snapshot)return {};
+    if(!workspace_)throw ToolAccessDenied("Graph workspace membership requires a verified primary folder");
+    auto snapshot=settings_.workspace_membership_snapshot();
+    if(snapshot.workspace_id!=workspace_->identity()||snapshot.folders.empty()||snapshot.folders.front().folder_id!=snapshot.workspace_id||snapshot.folders.front().root!=workspace_->root_path())
+        throw ToolAccessDenied("Graph workspace membership differs from the selected primary folder");
+    WorkspaceToolSet verified(snapshot.workspace_id,snapshot.revision,snapshot.folders);
+    return snapshot;
+}
 std::optional<GraphContextOwnerRecord> GraphRunner::captured_context(const std::string& id)const{
     try{return store_.graph_context_owner(id).get();}catch(const NotFound&){return {};}
 }
@@ -121,7 +144,7 @@ Run GraphRunner::retire(const std::string& id,RunState state,const std::string& 
     if(captured_context(id))return store_.retire_graph_context_owner(id,state,reason).get();
     return store_.retire_graph_run(id,state,reason).get();
 }
-Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_token cancel,std::chrono::steady_clock::time_point deadline,bool shared_context){
+Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_token cancel,std::chrono::steady_clock::time_point deadline,bool shared_context,std::shared_ptr<const WorkspaceToolSet> workspace_tools){
     if(cancel.stop_requested())return store_.transition(id,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_graph_tool"})").get();
     if(std::chrono::steady_clock::now()>=deadline)return store_.transition(id,RunState::queued,RunState::failed,R"({"reason":"graph_tool_deadline_before_start"})").get();
     store_.transition(id,RunState::queued,RunState::running).get();
@@ -184,7 +207,8 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
             if(name=="edit_file")result=Json::parse(EditExecutor(store_,*workspace_).invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
             else if(name=="create_file")result=Json::parse(CreateExecutor(store_,*workspace_).invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
             else result=Json::parse(process_->invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
-        }else result=Json::parse(workspace_->invoke(name,source,cancel));
+        }else if(workspace_tools&&(name=="read_repository_instructions"||name=="read_file"||name=="list_files"||name=="search_files"||name=="glob_files"))result=Json::parse(workspace_tools->invoke(name,source,cancel));
+        else result=Json::parse(workspace_->invoke(name,source,cancel));
         store_.append_event(id,"tool.completed",Json{{"name",name},{"data",result},{"source","graph"}}.dump()).get();result["source"]="graph_tool";return store_.complete_run(id,result.dump()).get();
     }catch(const EditOutcomeUnrecorded&){throw;}catch(const ProcessOutcomeUnrecorded&){throw;}catch(const McpOutcomeUnrecorded&){throw;}
     catch(const McpEffectUncertain&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_mcp_effect_uncertain"})").get();}
@@ -215,6 +239,12 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
 Run GraphRunner::execute(const std::string& id,std::stop_token external,bool preserve_human_pause){
     auto root=store_.graph_run(id).get();if(root.input_json.empty())throw RunUnavailable("Legacy graph input requires review before execution");const auto input=Json::parse(root.input_json);if(!input.contains("content") || !input["content"].is_string())throw std::invalid_argument("Graph input requires task content");
     const auto model=input.value("model_id",std::string{});const GraphPlan plan(root.specification_json);validate(plan,model);
+    std::shared_ptr<const WorkspaceToolSet> run_workspace_tools;
+    if(const auto membership=saved_graph_workspace_membership(store_,id)){
+        if(!workspace_||membership->workspace_id!=workspace_->identity()||membership->folders.empty()||membership->folders.front().root!=workspace_->root_path())
+            throw ToolAccessDenied("Saved graph membership does not match its primary folder");
+        run_workspace_tools=std::make_shared<WorkspaceToolSet>(membership->workspace_id,membership->revision,membership->folders);
+    }
     const auto context=captured_context(id);
     if(context){
         try{validate_context_owner(id);}catch(const GraphContextUnavailable&){
@@ -301,7 +331,7 @@ Run GraphRunner::execute(const std::string& id,std::stop_token external,bool pre
             // Allocate tracking before launching: once a worker exists, no
             // allocation failure may relabel its effects as "not dispatched".
             flights.push_back({child_id,{},slot});
-            try{const auto selected=prepared.definition.model_id.empty()?model:prepared.definition.model_id;flights.back().result=std::async(std::launch::async,[this,child_id,prepared=std::move(prepared),selected,deadline,budget,token=stop.get_token()]() mutable {return prepared.definition.kind==GraphNodeKind::agent?agents_->execute(child_id,token,selected,budget,prepared.definition.instructions,prepared.definition.tools):tool(child_id,std::move(prepared),token,deadline,static_cast<bool>(budget));});}
+            try{const auto selected=prepared.definition.model_id.empty()?model:prepared.definition.model_id;flights.back().result=std::async(std::launch::async,[this,child_id,prepared=std::move(prepared),selected,deadline,budget,token=stop.get_token(),run_workspace_tools]() mutable {return prepared.definition.kind==GraphNodeKind::agent?agents_->execute(child_id,token,selected,budget,prepared.definition.instructions,prepared.definition.tools):tool(child_id,std::move(prepared),token,deadline,static_cast<bool>(budget),run_workspace_tools);});}
             catch(...){if(slot)budget->release_leaf();flights.pop_back();store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"graph_worker_launch_failed"})").get();store_.settle_graph_child(child_id).get();stop.request_stop();}continue;
         }
         if(flights.empty() && decisions.waiting_human.empty())throw DatabaseError("Graph has no runnable or waiting work");

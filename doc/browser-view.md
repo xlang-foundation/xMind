@@ -90,8 +90,11 @@ folders while keeping the selected workspace and session. The browser canvas
 can preview files from each attached folder. In the profile-aware local backend,
 single-agent file reads, listings, searches and globs can select an attached
 folder by ID; ordinary root runs capture the membership revision and child
-agents reuse that snapshot. Editing and creation proposals, processes, Git,
-language-server roots and graph-node runs still use the primary folder. Unlike VS Code,
+agents reuse that snapshot. Direct graph read nodes and graph-agent children
+use the membership captured when the graph run is admitted. Editing and
+creation proposals, processes, Git and language-server roots still use the
+primary folder. The CLI can initialize a workspace from one folder and attach
+more folders to it. Unlike VS Code,
 a browser tab has no opened-folder context. On the profile-aware `xmind view`
 host, the selector is populated from the native protected profile
 catalogue and displays the workspace name and root; **New workspace** is

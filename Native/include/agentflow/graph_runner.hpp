@@ -16,6 +16,7 @@ public:
     std::string provider_context(const std::string& model_id={}) const;
     std::optional<RootBudgetSpec> execution_budget(const GraphPlan&,const std::string& model_id={}) const;
     std::optional<GraphContextSpec> execution_context(const GraphPlan&,const std::string& model_id={}) const;
+    std::optional<WorkspaceMembershipSnapshot> workspace_membership_admission() const;
     std::optional<GraphContextOwnerRecord> captured_context(const std::string& root_id) const;
     // Metadata-only adoption/input preflight. Never opens a clock or a peer.
     void validate_context_owner(const std::string& root_id) const;
@@ -26,7 +27,8 @@ public:
     Run execute(const std::string& root_id,std::stop_token cancel={},bool preserve_human_pause=false);
 private:
     Run tool(const std::string& child_id,GraphPreparedNode node,std::stop_token cancel,
-        std::chrono::steady_clock::time_point deadline,bool shared_context=false);
+        std::chrono::steady_clock::time_point deadline,bool shared_context,
+        std::shared_ptr<const WorkspaceToolSet> workspace_tools);
     PersistenceService& store_;
     AgentSettings settings_;
     std::size_t limit_;
