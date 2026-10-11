@@ -71,12 +71,14 @@ implemented. Neither embedded execution nor shared-memory IPC is an OS sandbox.
 The current authoring foundation accepts bounded YAML/JSON graph catalogs,
 reusable bounded YAML/JSON named agent catalogs, YAML or JSON global
 instruction records, and plain Markdown instruction files through offline
-native administration. Named definitions currently bind prompt guidance and
-an optional model to graph nodes; import pins each resolved definition into the
-immutable graph revision. These records are persisted through embedded xlang3
+native administration. Named definitions bind prompt guidance, optional model
+and optional tool allowlist to graph nodes; import pins each resolved definition
+into the immutable graph revision. These records are persisted through embedded xlang3
 SQLite. Revisioned single-agent session selection and workspace Markdown skill
-catalogues are implemented in the shared backend and thin clients. Per-agent
-tool bindings, `.py` tool registration and the xlang3 programming API remain
+catalogues are implemented in the shared backend and thin clients. Optional
+per-agent native tool allowlists now narrow the already-authorized native/MCP/A2A
+catalogue and are pinned through named definitions, graph revisions and session
+snapshots. `.py` tool registration and the xlang3 programming API remain
 incomplete. See [authoring formats and current coverage](authoring.md).
 
 ## Planning, AgentFlow and scheduling

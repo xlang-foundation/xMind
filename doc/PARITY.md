@@ -32,6 +32,20 @@ These are local checks, not hosted release or rendered installed-editor
 acceptance. The broader OpenCode API inventory remains **25 source candidates,
 111 unmapped operations, zero verified operation-level parity**.
 
+## Per-agent native tool bindings (`449c085`)
+
+Named YAML agent definitions and graph agent nodes can now carry an optional
+tool allowlist. The native loop filters the existing authorized catalogue for
+single-agent sessions and each parallel graph agent independently; caller graph
+nodes cannot override a named profile's backend-pinned bindings. Definition
+revisions rotate when bindings change, session snapshots retain them, and a
+stale or unavailable tool binding fails before inference. The focused Release
+build and four native graph, graph-runner, agent-service and HTTP contracts
+passed locally. The parity inventory remains unchanged: **111 OpenCode 2
+operations are unmapped and zero have verified operation-level parity**.
+Arbitrary xlang3 Python callables and the in-process programming API remain
+unimplemented. [Authoring contract](authoring.md).
+
 A subsequent live local-browser check fetched saved-credential model catalogues
 for Claude, Gemini, DeepSeek and OpenAI (13/11/2/20 models) and restored the
 prior DeepSeek selection. The page received model IDs only. This is not an
