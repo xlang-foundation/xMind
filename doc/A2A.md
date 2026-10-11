@@ -8,5 +8,6 @@ Current implementation and verification limits:
 - [Message admission and replay](../doc/native-a2a-message-admission.md).
 - [Streaming and observation](../doc/native-a2a-streaming.md).
 - [Versioned A2A adapter](../doc/native-a2a-v1.md).
+- [Outbound A2A client and remote delegation requirements](../doc/native-a2a-client.md).
 
 These component contracts do not establish complete A2A compliance or all remote-agent capabilities.
