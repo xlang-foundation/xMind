@@ -2,10 +2,18 @@
 
 ## Status
 
-This is the target contract for browser, CLI and VS Code. It is not yet
-implemented. At source `d8c9d9c`, `WorkspaceTools`, workspace admission,
-process execution, Git and the local profile catalogue still bind one folder
-per workspace. See the [current browser behavior and gap](browser-view.md#multi-folder-workspace-target).
+This is the target contract for browser, CLI and VS Code. The local xlang3
+SQLite registry now persists a workspace's primary folder, member-folder
+identities, ordering and membership revision, and the native local-view
+catalogue returns that metadata. In the local browser, **New workspace** starts
+with one folder and **Add folder** attaches more folders to the same workspace;
+the selected workspace and browser session stay in place. The C++ registry
+contract covers creation, folder attachment, reopen, private-root/overlap
+rejection and concurrent membership changes. Agent execution, file operations,
+approvals, process/Git/language-server routing and folder removal still bind
+only the primary folder; this is workspace membership support, not complete
+multi-folder execution.
+See the [current browser behavior and gap](browser-view.md#multi-folder-workspace-target).
 
 ## User workflow
 

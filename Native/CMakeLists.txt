@@ -247,7 +247,7 @@ add_executable(xmind_persistence_demo demos/persistence_demo.cpp)
 # Primary product executable. Separate handlers remain for internal contracts;
 # the production distribution contains only xmind and xlang3 dependencies.
 if(WIN32)
-  add_library(agentflow_local_profile STATIC src/local_profile.cpp)
+  add_library(agentflow_local_profile STATIC src/local_profile.cpp src/workspace_registry.cpp)
   target_include_directories(agentflow_local_profile PUBLIC include PRIVATE third_party third_party/cpp-httplib)
   target_link_libraries(agentflow_local_profile PRIVATE agentflow_core agentflow_secrets agentflow_workspace agentflow_runtime_generation agentflow_owner_process ws2_32 crypt32 bcrypt advapi32 shell32 ole32 Threads::Threads)
 endif()
@@ -1056,6 +1056,13 @@ if(BUILD_TESTING)
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/local_view_provider_config_contract.mjs" "$<TARGET_FILE:xmind>"
         "${AGENTFLOW_XLANG3_SHARED}" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
       set_tests_properties(native_local_view_provider_config_contract PROPERTIES TIMEOUT 240)
+      add_executable(agentflow_workspace_registry_contract tests/workspace_registry_contract.cpp)
+      target_link_libraries(agentflow_workspace_registry_contract PRIVATE agentflow_local_profile)
+      add_custom_command(TARGET agentflow_workspace_registry_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+        "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_workspace_registry_contract>")
+      add_test(NAME native_workspace_registry_contract COMMAND agentflow_workspace_registry_contract
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      set_tests_properties(native_workspace_registry_contract PROPERTIES TIMEOUT 45)
     endif()
   else()
     message(WARNING "Node.js is required to run the independent HTTP/CLI contract")

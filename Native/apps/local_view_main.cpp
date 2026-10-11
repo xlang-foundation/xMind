@@ -3,6 +3,7 @@
 #include "agentflow/owner_process.hpp"
 #include "agentflow/runtime_generation.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include "agentflow/workspace_registry.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #define NOMINMAX
@@ -104,7 +105,7 @@ std::optional<std::string> choose_workspace_folder() {
     if (failure) std::rethrow_exception(failure);
     return selected;
 }
-void verify_client_image() {
+std::string verify_client_image() {
     std::wstring image(32768, L'\0');
     const auto used = GetModuleFileNameW(nullptr, image.data(), static_cast<DWORD>(image.size()));
     require(used && used < image.size(), "Cannot qualify native view image");
@@ -121,6 +122,7 @@ void verify_client_image() {
     // The retained backend and this client must each qualify their own image.
     agentflow::VerifiedRuntimeGeneration generation(directory, agentflow::context_digest(manifest));
     generation.require_loaded_server_image();
+    return directory;
 }
 } // namespace
 
@@ -177,13 +179,21 @@ int run_local_view(int argc, char **argv) {
         options.upgrade_backend = true;
         options.defer_busy_upgrade = true;
         agentflow::validate_local_view_ready(ready, options.workspace);
-        verify_client_image();
+        const auto client_package_root = verify_client_image();
         auto connection = std::make_shared<agentflow::LocalProfileConnection>(
             agentflow::connect_local_profile(options));
         const auto profile_root =
             std::filesystem::path(connection->directory).parent_path().u8string();
         const std::string profile_root_utf8(reinterpret_cast<const char *>(profile_root.data()),
                                             profile_root.size());
+        const auto profile_registry_path = std::filesystem::path(profile_root) / L"workspaces.sqlite";
+        const auto profile_registry_bytes = profile_registry_path.u8string();
+        const std::string profile_registry_file(reinterpret_cast<const char *>(profile_registry_bytes.data()),
+                                                profile_registry_bytes.size());
+        auto workspace_registry = std::make_shared<agentflow::WorkspaceRegistry>(
+            profile_registry_file,
+            std::vector<std::string>{client_package_root + "/modules", client_package_root + "/stdlib"},
+            profile_root_utf8);
         const auto selected_workspace_id = agentflow::WorkspaceTools(connection->workspace).identity();
         std::mutex browser_state_mutex;
         std::mutex browser_switch_mutex;
@@ -399,9 +409,16 @@ int run_local_view(int argc, char **argv) {
                         return;
                     }
                     Json entries = Json::array();
-                    for (const auto &profile : agentflow::list_local_workspace_profiles(profile_root_utf8))
-                        entries.push_back({{"workspace_id", profile.workspace_id}, {"root", profile.root},
-                                           {"name", profile.name}});
+                    for (const auto &profile : agentflow::list_local_workspace_profiles(profile_root_utf8)) {
+                        const auto group = workspace_registry->create(profile.root);
+                        Json folders = Json::array();
+                        for (const auto &folder : group.folders)
+                            folders.push_back({{"folder_id", folder.folder_id}, {"name", folder.name},
+                                               {"root", folder.root}, {"ordinal", folder.ordinal}});
+                        entries.push_back({{"workspace_id", group.workspace_id}, {"root", group.folders.front().root},
+                                           {"name", group.name}, {"revision", group.revision},
+                                           {"primary_folder_id", group.primary_folder_id}, {"folders", std::move(folders)}});
+                    }
                     output.status = 200;
                     output.set_content(Json{{"can_add", true},
                                             {"selected_workspace_id", workspace_id},
@@ -440,6 +457,59 @@ int run_local_view(int argc, char **argv) {
                     output.set_content(Json{{"cancelled", !chosen.has_value()},
                                             {"root", chosen ? Json(*chosen) : Json(nullptr)}}.dump(),
                                        "application/json");
+                    return;
+                }
+                if (request.path == "/v1/workspaces/add" && request.method == "POST") {
+                    if (host || request.target != request.path ||
+                        request.get_header_value_count("X-XMind-View-Origin") != 1 ||
+                        request.get_header_value("Content-Type") != "application/json") {
+                        response(output, 400, "Invalid workspace folder attachment request");
+                        return;
+                    }
+                    const auto [current_id, current] = browser_workspace(supplied, browser_origin);
+                    if (!validate_browser_session(supplied, current, browser_origin)) {
+                        response(output, 401, "Browser view session expired or was revoked");
+                        return;
+                    }
+                    std::set<std::string> keys;
+                    const auto input = Json::parse(body, [&](int depth, Json::parse_event_t event, Json &value) {
+                        require(depth <= 2, "Invalid workspace folder attachment");
+                        if (event == Json::parse_event_t::key)
+                            require(keys.insert(value.get<std::string>()).second,
+                                    "Duplicate workspace folder attachment field");
+                        return true;
+                    });
+                    require(input.is_object() && input.size() == 2 && input.contains("workspace_id") &&
+                                input.at("workspace_id").is_string() && input.at("workspace_id") == current_id &&
+                                input.contains("root") && input.at("root").is_string(),
+                            "Attach a folder to the currently selected workspace");
+                    const auto requested_root = input.at("root").get<std::string>();
+                    const bool drive_path = requested_root.size() >= 3 &&
+                                            ((requested_root[0] >= 'A' && requested_root[0] <= 'Z') ||
+                                             (requested_root[0] >= 'a' && requested_root[0] <= 'z')) &&
+                                            requested_root[1] == ':' &&
+                                            (requested_root[2] == '\\' || requested_root[2] == '/');
+                    const bool unc_path = requested_root.starts_with("\\\\");
+                    require(!requested_root.empty() && requested_root.size() <= 32760 &&
+                                std::none_of(requested_root.begin(), requested_root.end(), [](unsigned char c) { return c < 32; }) &&
+                                (drive_path || unc_path),
+                            "Workspace folder must be an absolute local or UNC path");
+                    try {
+                        const auto group = workspace_registry->add_folder(current_id, requested_root);
+                        Json folders = Json::array();
+                        for (const auto &folder : group.folders)
+                            folders.push_back({{"folder_id", folder.folder_id}, {"name", folder.name},
+                                               {"root", folder.root}, {"ordinal", folder.ordinal}});
+                        output.status = 200;
+                        output.set_content(Json{{"workspace_id", group.workspace_id}, {"name", group.name},
+                                                {"root", group.folders.front().root}, {"revision", group.revision},
+                                                {"primary_folder_id", group.primary_folder_id}, {"folders", std::move(folders)}}.dump(),
+                                           "application/json");
+                    } catch (const std::invalid_argument &error) {
+                        response(output, 400, error.what());
+                    } catch (const std::out_of_range &error) {
+                        response(output, 404, error.what());
+                    }
                     return;
                 }
                 if (request.path == "/v1/workspaces/select" && request.method == "POST") {
@@ -582,6 +652,10 @@ int run_local_view(int argc, char **argv) {
                     }
                     const auto requested_id = requested_workspace->identity();
                     const auto canonical_root = requested_workspace->root_path();
+                    const auto group = workspace_registry->create(canonical_root);
+                    require(group.workspace_id == requested_id && group.primary_folder_id == requested_id &&
+                                !group.folders.empty() && group.folders.front().root == canonical_root,
+                            "Native workspace registry resolved a different primary folder");
                     std::shared_ptr<agentflow::LocalProfileConnection> target;
                     {
                         std::lock_guard lock(browser_state_mutex);

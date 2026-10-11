@@ -1,5 +1,22 @@
 # Reviewable milestones
 
+## Native workspace-group registry foundation — 2026-10-11
+
+The profile-aware local view now records a workspace group in a protected
+local SQLite database accessed only through embedded xlang3. A workspace is
+anchored to its primary directory identity; folder attachments retain verified
+native directory identities and ordinals, and increment a durable membership
+revision. Registry checks reject duplicate, nested/overlapping and
+profile-storage roots. The local workspace catalogue returns the persisted
+revision, primary folder and folder list. The local browser can create a
+workspace from one folder, then attach another folder to the same workspace
+without switching its active session. The focused registry contract verifies
+reopen plus concurrent attachments, and the native local-view contract checks
+actual create, attach, duplicate rejection and unchanged workspace identity.
+Agent tools, approvals, processes, Git, language servers and VS Code/CLI folder
+controls still use only the primary root.
+See [native multi-folder workspace contract](native-multi-folder-workspaces.md).
+
 ## Latest native LSP and profile validation — 2026-10-11
 
 The native language-server client now retries transient request-cancelled,
