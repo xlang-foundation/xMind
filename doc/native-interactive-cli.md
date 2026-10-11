@@ -183,7 +183,7 @@ or interrupting the client leaves backend execution ownership unchanged.
 | `/models`, `/model ID`, `/model` | Inspect backend-enabled execution models, select an advertised model for this chat, or clear the local override |
 | `/watch RUN_ID`, `/graph-watch ROOT_ID` | Attach existing single-agent or graph work and replay durable state without admitting another run |
 | `/graphs`, `/graph GRAPH_ID REQUEST` | Inspect registered backend graphs or explicitly admit one at its observed catalogue revision |
-| `/help`, `/exit` | Show commands or leave between turns; prefix a literal slash request with `//` |
+| `/help`, `/exit`, `/cancel` | Show commands or leave; during an active run `/cancel` requests backend cancellation and `/exit` detaches without cancelling. Prefix a literal slash request with `//` |
 
 Model-free backends still permit history/run inspection and registered human/tool
 graphs. New agent requests reread execution availability; unavailable execution
@@ -191,6 +191,13 @@ creates no session, user message or run. Unknown commands/IDs and rejected
 admission preserve selection. HTTP admission errors do not fabricate a run or
 assistant response and do not trigger resubmission. An unknown transport outcome
 requires inspecting recorded runs before an explicit resubmission.
+
+Chat keeps a bounded input queue active while a run streams. `/cancel` sends one
+backend cancellation request and continues observing until the server records a
+terminal state. `/exit` detaches immediately and leaves the server-owned run
+untouched. Other lines entered during a run remain queued for normal processing
+after that turn. Closed scripted input is drained as commands instead of being
+interpreted as a live cancellation or detach request.
 
 At an actual approval prompt, `/allow ID` and `/deny ID` use only the displayed
 owned operation; the backend revalidates its exact plan, arguments and expiry.
@@ -200,9 +207,10 @@ observation continues to the actual terminal event; an acknowledgement is not
 a completed cancellation. EOF or `/exit` at either prompt detaches without
 approval, human input or cancellation. No approval is automatic.
 
-Input is currently read between turns and at approval/human prompts. Concurrent
-stdin controls during model streaming, rich terminal diffs, attachment/context
-controls and full TUI/OpenCode CLI parity remain required.
+The focused native agent HTTP contract exercises live-process cancellation and
+detach against an active synthetic stream. Rich terminal diffs,
+attachment/context controls during streaming and full TUI/OpenCode CLI parity
+remain required.
 
 ## Workspace shell attachment
 

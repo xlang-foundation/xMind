@@ -119,6 +119,13 @@ async function chatResult(expectedExit,input,...args){
  const process=spawn(cliExe,[String(port),'chat',...args],{env:baseEnv,windowsHide:true});let output='',errors='';process.stdout.on('data',bytes=>output+=bytes);process.stderr.on('data',bytes=>errors+=bytes);const timer=setTimeout(()=>process.kill(),12000);
  const result=await new Promise((yes,no)=>{process.once('error',no);process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});process.stdin.end(input);});assert.equal(result.signal,null,'Interactive CLI must finish without being killed');assert.equal(result.code,expectedExit,errors);assert.ok(!output.includes(key));return output.trim()?output.trim().split('\n').map(line=>JSON.parse(line)):[];
 }
+function liveChat(sessionId){
+ const process=spawn(cliExe,[String(port),'chat',sessionId],{env:baseEnv,windowsHide:true});let output='',errors='';
+ process.stdout.on('data',bytes=>output+=bytes);process.stderr.on('data',bytes=>errors+=bytes);
+ const records=()=>output.split(/\r?\n/).filter(Boolean).flatMap(line=>{try{return [JSON.parse(line)];}catch{return [];}});
+ const waitFor=async(predicate,label)=>until(()=>records(),predicate,label);
+ return {process,records,waitFor,errors:()=>errors,output:()=>output};
+}
 const chat=(input,...args)=>chatResult(0,input,...args);
 try {
   await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual workspace content\n');
@@ -195,6 +202,29 @@ try {
   const literal=await chat('//literal fixture request\n/exit\n'),literalSession=literal.find(record=>record.type==='session').session_id;assert.equal(cli('history',literalSession)[0].data.content,'/literal fixture request','Escaped slash requests must persist literally');
 
   for(const id of ['held','queued','overflow']) await session(id);
+  await session('active-control');
+  const activeControl=liveChat('active-control');activeControl.process.stdin.write('hold-stream\n');
+  const activeRunRecords=await activeControl.waitFor(records=>records.some(record=>record.type==='run'),'CLI active-run admission');
+  const activeRunRecord=activeRunRecords.find(record=>record.type==='run');
+  const activeRun=activeRunRecord.run;assert.equal(activeRun.session_id,'active-control');await streaming(activeRun.id);
+  activeControl.process.stdin.write('/cancel\n');
+  try{await terminal(activeRun.id,'cancelled');}catch(error){throw new Error(error.message+'\n'+activeControl.errors()+'\n'+activeControl.output());}
+  const cancelledRecords=await activeControl.waitFor(records=>records.some(record=>record.type==='turn_finished'),'CLI active cancellation result');
+  const cancelledTurn=cancelledRecords.find(record=>record.type==='turn_finished');
+  assert.equal(cancelledTurn.type,'turn_finished');assert.equal(cancelledTurn.exit_status,2);
+  assert.ok(activeControl.records().some(record=>record.type==='run_cancel_result'),'The interactive CLI must send cancellation while it is observing a live turn');
+  activeControl.process.stdin.write('/exit\n');
+  const activeControlExit=await new Promise((yes,no)=>{const timer=setTimeout(()=>activeControl.process.kill(),10000);activeControl.process.once('error',no);activeControl.process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});});
+  assert.equal(activeControlExit.signal,null);assert.equal(activeControlExit.code,2,activeControl.errors());assert.ok(!activeControl.output().includes(key));
+  await session('active-detach');
+  const activeDetach=liveChat('active-detach');activeDetach.process.stdin.write('hold-stream\n');
+  const detachedRunRecords=await activeDetach.waitFor(records=>records.some(record=>record.type==='run'),'CLI detachable active-run admission');
+  const detachedRunRecord=detachedRunRecords.find(record=>record.type==='run');
+  const detachedRun=detachedRunRecord.run;await streaming(detachedRun.id);activeDetach.process.stdin.write('/exit\n');
+  const detachedExit=await new Promise((yes,no)=>{const timer=setTimeout(()=>activeDetach.process.kill(),10000);activeDetach.process.once('error',no);activeDetach.process.once('close',(code,signal)=>{clearTimeout(timer);yes({code,signal});});});
+  assert.equal(detachedExit.signal,null);assert.equal(detachedExit.code,0,activeDetach.errors());
+  assert.equal((await api(`/v1/runs/${detachedRun.id}`)).data.state,'running','/exit must detach without cancelling the server-owned run');
+  cli('cancel',detachedRun.id);await terminal(detachedRun.id,'cancelled');
   assert.equal((await api('/v1/runs',{id:'held-run',session_id:'held',prompt:'hold-stream'})).status,202);
   await streaming('held-run');
   assert.equal((await api('/v1/runs',{id:'duplicate-session',session_id:'held',prompt:'must not persist'})).status,409);

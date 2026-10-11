@@ -24,6 +24,8 @@
 #include <condition_variable>
 #include <deque>
 #include <mutex>
+#include <memory>
+#include <optional>
 #if defined(_WIN32)
 #include <windows.h>
 #include <bcrypt.h>
@@ -271,7 +273,94 @@ nlohmann::json provider_rejection(const std::string& source){
 // Observation only: ending this client never grants, cancels or owns execution.
 // Each flushed NDJSON record is an actual persisted backend event. Its seq can
 // be supplied on reconnect; process-output hex is never written as terminal code.
-int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& headers,const std::string& run,std::int64_t cursor,bool graph=false,bool interactive=false) {
+class ChatInput {
+    struct State {
+        std::mutex mutex;
+        std::condition_variable changed;
+        std::deque<std::string> ready,deferred;
+        std::size_t queued_bytes{},queued_lines{};
+        bool eof{},stopped{};
+        std::exception_ptr error;
+    };
+public:
+    ChatInput():state_(std::make_shared<State>()),reader_([state=state_]{
+        try {
+            const auto enqueue=[&](std::string line){
+                if(!line.empty()&&line.back()=='\r')line.pop_back();
+                if(line.size()>1024*1024)throw std::invalid_argument("Chat line exceeds limits");
+                std::unique_lock lock(state->mutex);
+                state->changed.wait(lock,[&]{return state->stopped||(state->queued_lines<256&&state->queued_bytes+line.size()<=1024*1024);});
+                if(state->stopped)return;
+                state->queued_bytes+=line.size();++state->queued_lines;state->ready.push_back(std::move(line));
+                state->changed.notify_all();
+            };
+#if defined(_WIN32)
+            const auto handle=GetStdHandle(STD_INPUT_HANDLE);DWORD mode{};
+            if(handle==INVALID_HANDLE_VALUE||handle==nullptr)throw std::runtime_error("Chat input is unavailable");
+            if(GetConsoleMode(handle,&mode)){
+                const auto enqueue_wide=[&](const std::wstring& value){const auto length=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),nullptr,0,nullptr,nullptr);if(length<0||length>1024*1024||(length==0&&!value.empty()))throw std::invalid_argument("Invalid or oversized UTF-16 chat input");std::string line(static_cast<std::size_t>(length),'\0');if(length&&WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,value.data(),static_cast<int>(value.size()),line.data(),length,nullptr,nullptr)!=length)throw std::invalid_argument("Invalid UTF-16 chat input");enqueue(std::move(line));};
+                std::wstring pending;std::vector<wchar_t> buffer(32768);bool previous_cr=false;
+                for(;;){DWORD count{};if(!ReadConsoleW(handle,buffer.data(),static_cast<DWORD>(buffer.size()),&count,nullptr))break;if(count==0)break;
+                    for(DWORD index=0;index<count;++index){const auto character=buffer[index];if(character==L'\r'){enqueue_wide(pending);pending.clear();previous_cr=true;}else if(character==L'\n'){if(!previous_cr)enqueue_wide(pending);pending.clear();previous_cr=false;}else{previous_cr=false;pending.push_back(character);if(pending.size()>1024*1024)throw std::invalid_argument("Chat line exceeds limits");}}
+                }
+                if(!pending.empty())enqueue_wide(pending);
+            }else{
+                std::string pending;std::array<char,4096> buffer{};
+                for(;;){DWORD count{};if(!ReadFile(handle,buffer.data(),static_cast<DWORD>(buffer.size()),&count,nullptr)||count==0)break;std::vector<std::string> lines;
+                    for(DWORD index=0;index<count;++index){if(buffer[index]=='\n'){lines.push_back(std::move(pending));pending.clear();}else{pending.push_back(buffer[index]);if(pending.size()>1024*1024)throw std::invalid_argument("Chat line exceeds limits");}}
+                    DWORD available{};const bool pipe_closed=!PeekNamedPipe(handle,nullptr,0,nullptr,&available,nullptr)&&GetLastError()==ERROR_BROKEN_PIPE;
+                    if(pipe_closed){std::lock_guard lock(state->mutex);state->eof=true;}
+                    for(auto& line:lines)enqueue(std::move(line));
+                    if(pipe_closed)break;
+                }
+                if(!pending.empty())enqueue(std::move(pending));
+            }
+#else
+            std::string line;while(std::getline(std::cin,line))enqueue(std::move(line));
+#endif
+            std::lock_guard lock(state->mutex);state->eof=true;state->changed.notify_all();
+        } catch(...) {
+            std::lock_guard lock(state->mutex);state->error=std::current_exception();state->eof=true;state->changed.notify_all();
+        }
+    }){}
+    ChatInput(const ChatInput&)=delete;ChatInput& operator=(const ChatInput&)=delete;
+    ~ChatInput(){
+        {std::lock_guard lock(state_->mutex);state_->stopped=true;state_->changed.notify_all();}
+        // std::getline may be waiting for the next terminal line. The reader
+        // owns shared state, so it can safely finish after this chat returns.
+        if(reader_.joinable())reader_.detach();
+    }
+    bool read_line(std::string& line){
+        auto state=state_;std::unique_lock lock(state->mutex);
+        state->changed.wait(lock,[&]{return state->stopped||state->error||!state->deferred.empty()||!state->ready.empty()||state->eof;});
+        if(state->error)std::rethrow_exception(state->error);
+        if(!state->deferred.empty()){line=std::move(state->deferred.front());state->deferred.pop_front();}
+        else if(!state->ready.empty()){line=std::move(state->ready.front());state->ready.pop_front();}
+        else return false;
+        state->queued_bytes-=line.size();--state->queued_lines;state->changed.notify_all();return true;
+    }
+    bool source_closed()const{
+        std::lock_guard lock(state_->mutex);return state_->eof;
+    }
+    std::optional<std::string> control_line(){
+        auto state=state_;std::lock_guard lock(state->mutex);
+        if(state->error)std::rethrow_exception(state->error);
+        // Closed input is a complete scripted conversation; leave its queued
+        // commands for normal processing after the current turn.
+        if(state->eof)return std::nullopt;
+        if(state->ready.empty())return std::nullopt;
+        auto line=std::move(state->ready.front());state->ready.pop_front();
+        if(line=="/cancel"||line=="/exit"){
+            state->queued_bytes-=line.size();--state->queued_lines;state->changed.notify_all();return line;
+        }
+        state->deferred.push_back(std::move(line));state->changed.notify_all();return std::nullopt;
+    }
+private:
+    std::shared_ptr<State> state_;
+    std::thread reader_;
+};
+constexpr int run_detached=3;
+int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& headers,const std::string& run,std::int64_t cursor,bool graph=false,bool interactive=false,ChatInput* input=nullptr) {
     using Json=nlohmann::json;const auto path="/v1/runs/"+run;
     auto read=[&](const std::string& route) {
         auto response=client.Get(route,headers);if(!response)throw std::runtime_error("Cannot reach xMind Server during observation");
@@ -306,6 +395,7 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
         }
         if(!tree||events.size()<256)break;}
     };
+    bool cancellation_requested=false;
     for(;;) {
         emit();const auto state=read(path);
         if(!state.is_object() || state.value("id",std::string{})!=run || !state.contains("state") || !state["state"].is_string())throw std::runtime_error("Invalid backend run identity or state");
@@ -317,6 +407,20 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
         }
         if(value!="queued" && value!="running" && value!="paused")throw std::runtime_error("Unknown backend run state");
         if(interactive){
+            if(input){
+                const auto control=input->control_line();
+                if(control&&*control=="/exit"){
+                    std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";
+                    return run_detached;
+                }
+                if(control&&*control=="/cancel"&&!cancellation_requested){
+                    const auto response=client.Post(path+"/cancel",headers,Json::object().dump(),"application/json");
+                    if(!response)throw std::runtime_error("Cannot reach xMind Server to cancel the active run");
+                    if(response->status<200||response->status>=300)std::cerr<<"Backend rejected cancellation (HTTP "<<response->status<<"). Refreshing run state.\n";
+                    else {std::cout<<Json{{"type","run_cancel_result"},{"result",Json::parse(response->body)}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Cancellation result output is unavailable");cancellation_requested=true;}
+                    continue; // Re-read durable state; never ask for new approval after cancellation.
+                }
+            }
             auto operations=Json::array();const auto owned=owners();
             for(const auto& owner:owned){const auto batch=read("/v1/runs/"+owner+"/operations");if(!batch.is_array())throw std::runtime_error("Invalid backend operation list");for(const auto& operation:batch){if(!operation.is_object()||operation.value("run_id",std::string{})!=owner)throw std::runtime_error("Invalid operation ownership");operations.push_back(operation);}}
             bool interacted=false;
@@ -332,9 +436,8 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                 if(!std::cout)throw std::runtime_error("Approval review output is unavailable");
                 std::cerr<<"Review the exact operation above. Enter /allow "<<operationId<<", /deny "<<operationId<<", /cancel or /exit to detach.\n";
                 std::string decision;
-                if(!std::getline(std::cin,decision))throw std::runtime_error("CLI detached before a decision; backend execution remains owned by the server");
-                if(!decision.empty() && decision.back()=='\r')decision.pop_back();
-                if(decision=="/exit")throw std::runtime_error("CLI detached before a decision; backend execution remains owned by the server");
+                if(!input||!input->read_line(decision))throw std::runtime_error("CLI detached before a decision; backend execution remains owned by the server");
+                if(decision=="/exit"){if(input->source_closed())throw std::runtime_error("CLI detached before a decision; backend execution remains owned by the server");std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
                 std::string route;Json body;
                 if(decision=="/cancel"){route=path+"/cancel";body=Json::object();}
                 else if(decision=="/allow "+operationId || decision=="/deny "+operationId){route="/v1/operations/"+operationId+"/decision";body={{"decision",decision.starts_with("/allow ")?"allow":"deny"}};}
@@ -364,7 +467,7 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                     if(!questions.empty()||resume){
                         std::cout<<Json{{"type","plan_human_review"},{"snapshot",snapshot}}.dump()<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("Plan review output is unavailable");
                         std::cerr<<"Enter /input REQUEST_ID JSON for a displayed question"<<(resume?", /resume":"")<<", /cancel or /exit to detach.\n";
-                        std::string answer;if(!std::getline(std::cin,answer))throw std::runtime_error("CLI detached before plan input; backend execution remains owned by the server");if(!answer.empty()&&answer.back()=='\r')answer.pop_back();if(answer=="/exit")throw std::runtime_error("CLI detached before plan input; backend execution remains owned by the server");
+                        std::string answer;if(!input||!input->read_line(answer))throw std::runtime_error("CLI detached before plan input; backend execution remains owned by the server");if(answer=="/exit"){if(input->source_closed())throw std::runtime_error("CLI detached before plan input; backend execution remains owned by the server");std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
                         std::string route;Json input;
                         if(answer=="/cancel"){route=path+"/cancel";input=Json::object();}
                         else if(answer=="/resume"&&resume){route=path+"/plan/resume";input={{"expected_revision",revision},{"expected_state_sequence",sequence}};}
@@ -392,7 +495,7 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                     std::cout<<Json{{"type","graph_human_review"},{"root_run_id",run},{"checkpoint_revision",revision},{"steps",steps}}.dump()<<'\n'<<std::flush;
                     if(!std::cout)throw std::runtime_error("Graph review output is unavailable");
                     std::cerr<<"Enter /input NODE_ID JSON for a displayed step, /cancel or /exit to detach.\n";
-                    std::string answer;if(!std::getline(std::cin,answer))throw std::runtime_error("CLI detached before graph input; backend execution remains owned by the server");if(!answer.empty()&&answer.back()=='\r')answer.pop_back();if(answer=="/exit")throw std::runtime_error("CLI detached before graph input; backend execution remains owned by the server");
+                    std::string answer;if(!input||!input->read_line(answer))throw std::runtime_error("CLI detached before graph input; backend execution remains owned by the server");if(answer=="/exit"){if(input->source_closed())throw std::runtime_error("CLI detached before graph input; backend execution remains owned by the server");std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}
                     std::string route;Json body;
                     if(answer=="/cancel"){route=path+"/cancel";body=Json::object();}
                     else if(answer.starts_with("/input ")){const auto split=answer.find(' ',7);const auto node=split==std::string::npos?std::string{}:answer.substr(7,split-7);const auto input=split==std::string::npos?std::string{}:answer.substr(split+1);if(!waiting.contains(node)||input.empty()||input.size()>65536){std::cerr<<"No input sent. Use a displayed node and bounded JSON.\n";continue;}route="/v1/graph-runs/"+run+"/human/"+node;body={{"input_json",input},{"expected_checkpoint_revision",revision}};}
@@ -429,6 +532,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
     // Validate a supplied session without starting work or creating a duplicate.
     Json history;
     if(!session.empty()){history=request("/v1/sessions/"+session+"/history");if(!history.is_array())throw std::runtime_error("Invalid session history");}
+    ChatInput input;
     std::cerr<<"xMind chat: enter a request, /help for commands, /exit to leave. Backend runs survive disconnect.\n";
     if(!session.empty()){
         std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'
@@ -437,8 +541,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
     }
     int last_result=0,profile_result=0,skill_result=0,agent_result=0,mcp_result=0;std::string prompt;
     const auto exit_status=[&]{return last_result!=0?last_result:profile_result!=0?profile_result:skill_result!=0?skill_result:agent_result!=0?agent_result:mcp_result;};
-    while(std::cerr<<"xMind > "<<std::flush,std::getline(std::cin,prompt)) {
-        if(!prompt.empty() && prompt.back()=='\r')prompt.pop_back();
+    while(std::cerr<<"xMind > "<<std::flush,input.read_line(prompt)) {
         if(prompt=="/exit")return exit_status();
         if(prompt.find_first_not_of(" \t\r\n")==std::string::npos)continue;
         if(prompt=="/help"){
@@ -446,6 +549,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             std::cerr<<"/compose [GRAPH_ID] collects a multiline request until /send; /discard cancels it. Use //send or //discard for those literal lines. Other slash lines remain request text. Unfinished EOF and blocks over 1 MiB are discarded without submission.\n";
             std::cerr<<"Context controls: context SESSION [MODEL], compact-context SESSION HEAD_REV REQUEST_ID [MODEL], context-request SESSION REQUEST_ID [MODEL]. Resume a ready closed graph with resume-graph ROOT CHECKPOINT_REV.\n";
             std::cerr<<"/runs lists recorded root runs in the selected conversation; use /watch or /graph-watch to attach one.\n";
+            std::cerr<<"During an active turn, /cancel requests backend cancellation and /exit detaches while the run continues; other input waits until the turn finishes.\n";
             std::cerr<<"Agent /watch includes actual owned inspection or coding children and native plan questions when supported. Direct commands: children RUN, child-history PARENT CHILD, tree-events RUN [CURSOR], delegation, planning, inspect-plan RUN.\n";
             std::cerr<<"/graphs lists registered backend graphs; /graph GRAPH_ID REQUEST starts one at its displayed catalog revision.\n";
             std::cerr<<"/watch RUN_ID attaches an existing single-agent run; /graph-watch ROOT_ID attaches a graph with explicit input/approvals. Neither submits another run.\n";
@@ -520,7 +624,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             const auto saved=request("/v1/sessions/"+owner+"/history");if(!saved.is_array())throw std::runtime_error("Invalid attached conversation history");
             session=owner;
             std::cout<<Json{{"type","session"},{"session_id",session}}.dump()<<'\n'<<Json{{"type","history"},{"session_id",session},{"history",saved}}.dump()<<'\n'<<Json{{"type","run_attached"},{"run",run}}.dump()<<'\n'<<std::flush;
-            last_result=watch_run(client,headers,id,0,graphAttachment,true);profile_result=0;
+            const auto watched=watch_run(client,headers,id,0,graphAttachment,true,&input);if(watched==run_detached)return exit_status();last_result=watched;profile_result=0;
             std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
             continue;
         }
@@ -661,8 +765,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
             std::cerr<<"Compose request: /send submits, /discard cancels.\n";
             std::cout<<Json{{"type","compose_started"},{"graph_id",graphId}}.dump()<<'\n'<<std::flush;
             prompt.clear();std::string line;bool submitted=false,discarded=false,invalid=false;
-            while(std::getline(std::cin,line)){
-                if(!line.empty()&&line.back()=='\r')line.pop_back();
+            while(input.read_line(line)){
                 if(line=="/send"){submitted=true;break;}
                 if(line=="/discard"){discarded=true;break;}
                 if(line=="//send"||line=="//discard")line.erase(0,1);
@@ -728,7 +831,7 @@ int chat_session(agentflow::ConsoleTransport& client,const httplib::Headers& hea
         if(!run.is_object() || run.value("session_id",std::string{})!=session || run.value("graph_root",false)!=graphSubmission || !run.contains("id") || !run["id"].is_string())throw std::runtime_error("Invalid chat run admission");const auto id=run["id"].get<std::string>();
         if(id.empty() || id.size()>128 || id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::runtime_error("Invalid chat run identity");
         std::cout<<Json{{"type","run"},{"run",run}}.dump()<<'\n'<<std::flush;
-        last_result=watch_run(client,headers,id,0,graphSubmission,true);profile_result=0;
+        const auto watched=watch_run(client,headers,id,0,graphSubmission,true,&input);if(watched==run_detached)return exit_status();last_result=watched;profile_result=0;
         std::cout<<Json{{"type","turn_finished"},{"run_id",id},{"exit_status",last_result}}.dump()<<'\n'<<std::flush;
     }
     if(!std::cin.eof())throw std::runtime_error("Chat input is unavailable");
