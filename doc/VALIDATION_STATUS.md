@@ -22,6 +22,20 @@ xlang3 repository contract passes **1/1** with the pinned compatibility
 worktree's SQLite package; the separate `build/native` cache points at an older
 package and is not the configured project build.
 
+## Saved provider key reuse from the local webpage backend — 2026-10-11
+
+The backend attached to the open same-machine webpage reported the active
+DeepSeek profile and returned `deepseek-flash` and `deepseek-v4-pro` for a
+provider-catalogue request containing only profile ID, route and revision. No
+provider key was sent to or read back by the page. This confirms the native
+runtime used its saved credential; it does not claim a rendered-page click or
+live inference. The 0.1.6 VS Code extension now confirms in Settings when model
+discovery used the saved key. Its 290-test extension suite, 85-test browser
+suite and verified VSIX packaging passed. The package was installed and the
+regular TestProj VS Code host restarted; a fresh rendered-sidebar check remains
+unverified because desktop window capture returned an access-denied error. See
+[live saved-key evidence](evidence/provider-saved-key-live-backend-20261011.json).
+
 ## Full current local gate — 2026-10-10
 
 The current Release `ALL_BUILD` passes the complete native suite **122/122**

@@ -50,6 +50,13 @@ prior DeepSeek selection. The page received model IDs only. This is not an
 inference, streaming, or installed VS Code result; see the
 [catalogue evidence](evidence/provider-catalogues-live-browser-20261010.json).
 
+The same-machine page's current DeepSeek backend was rechecked on 2026-10-11:
+model discovery without an `api_key` field returned two catalogue IDs from its
+encrypted saved credential. The VS Code Settings success message now makes
+saved-key discovery explicit. The package is installed as 0.1.6, but a fresh
+rendered-sidebar result is not yet verified; see the
+[scoped saved-key evidence](evidence/provider-saved-key-live-backend-20261011.json).
+
 The rendered browser was then opened as a fresh same-machine view, connected to
 the local process without a server-token or provider-key prompt, and used its
 saved OpenAI profile for a completed `gpt-5.6-sol` request. The response and

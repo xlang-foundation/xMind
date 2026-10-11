@@ -1,0 +1,20 @@
+{
+  "observedAt": "2026-10-11T11:25:18Z",
+  "scope": "Live native backend attached to the same-machine webpage; saved-key model discovery only",
+  "webpage": "http://127.0.0.1:60415/ui/",
+  "backend": "http://127.0.0.1:57905",
+  "activeProfile": "deepseek",
+  "route": "deepseek.chat",
+  "selectedModel": "deepseek-flash",
+  "discoveryRequest": {
+    "fields": ["id", "route_id", "expected_revision"],
+    "apiKeySent": false
+  },
+  "modelsReturned": ["deepseek-flash", "deepseek-v4-pro"],
+  "result": "Native runtime used the encrypted saved credential successfully.",
+  "limits": [
+    "The provider key was not read back or exposed to the page.",
+    "This was a direct authenticated request to the webpage's attached backend, not a rendered-page click.",
+    "Catalogue discovery does not establish a live inference or tool run."
+  ]
+}
