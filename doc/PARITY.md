@@ -147,6 +147,19 @@ are host/DOM contract results, not a rendered external browser or installed IDE
 acceptance; side-by-side source comparison and approval/recovery UX remain open.
 See the [VCS review client evidence](evidence/vcs-review-clients-local-20261011.json).
 
+### VS Code language-server navigation checkpoint (2026-10-11)
+
+The VS Code extension now registers definition, references and hover providers
+for configured language-server languages. Requests use the opened document's
+current buffer and authenticated workspace authority; locations outside the
+opened workspace are discarded, and stale or cancelled replies are ignored.
+The complete extension suite passed **290/290**, including navigation mapping,
+hover rendering, workspace filtering and stale-result cases. Rust Analyzer's
+native HTTP/editor contract still passes its real symbol, diagnostic and
+workspace-authority checks. This does not yet establish live definition,
+reference or hover results in the installed IDE; formatter integration and
+project repair loops remain open. See [language-server integration](native-language-server.md).
+
 ## OpenCode V2 functional baseline
 
 The source/API pin is v2.0.26. The following broader behavior baseline is drawn
@@ -164,7 +177,7 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | --- | --- | --- |
 | Runtime and clients | Full-screen and minimal interactive CLI, automation command, shared background service, explicit standalone/remote connection, web and desktop clients | One persistent native `xmind` backend, console CLI, browser UI and VS Code sidebar are in scope. Full interactive coding UX, consistent installed-client behavior and endpoint-by-endpoint compatibility remain incomplete; standalone Electron is explicitly Nexus-only. |
 | Agents and orchestration | Build/Plan primary agents; foreground/background subagents; Markdown and config agents; per-agent model, visibility, permissions, step limits and defaults | Native single-agent and graph execution, YAML/Markdown authoring and named tool bindings exist. Exact primary/subagent modes, dynamic delegation, graph planning, configuration precedence and rendered selection remain incomplete. |
-| Coding harness | Workspace read/edit, shell, search, LSP, custom tools, skills, attachments/references and review/undo workflows | Native file/search/process tools, approved edits, skills and selected editor context have scoped evidence. A persistent native Content-Length LSP bridge now supports trusted server profiles, includes a read-only `language_server` tool in AgentRunner's catalogue, binds executable/profile/environment identity into authority, and passes real rust-analyzer symbol/clean-diagnostics plus SQLite configuration contracts. Definition/hover/reference acceptance, VS Code diagnostics/navigation UI, formatter integration, general shell/PTY, broad attachments, complete diff/recovery and full-project coding workflows remain incomplete. See [native language-server integration](native-language-server.md). |
+| Coding harness | Workspace read/edit, shell, search, LSP, custom tools, skills, attachments/references and review/undo workflows | Native file/search/process tools, approved edits, skills and selected editor context have scoped evidence. A persistent native Content-Length LSP bridge now supports trusted server profiles, includes a read-only `language_server` tool in AgentRunner's catalogue, binds executable/profile/environment identity into authority, and passes real rust-analyzer symbol/clean-diagnostics plus SQLite configuration contracts. VS Code diagnostics and fixture-tested definition/hover/reference providers are implemented; rendered/installed live acceptance, formatter integration, general shell/PTY, broad attachments, complete diff/recovery and full-project coding workflows remain incomplete. See [native language-server integration](native-language-server.md). |
 | Models and providers | Provider authentication, broad provider/model catalogue, per-session model selection, variants and provider/model request settings | Encrypted multi-provider profiles, native discovery and several native wire protocols exist. Saved credentials stay in the backend; clients receive public profile/model metadata only. When opaque history cannot cross provider wires, the backend preserves the conversation and the shared browser/VS Code failure card now explains that the request stopped before contacting the provider and that the saved key was not the cause. Cross-wire history conversion, variants, general settings precedence and broad live-client acceptance remain incomplete. See [provider wire recovery evidence](evidence/provider-wire-recovery-local-20261011.json). |
 | MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP MCP and scoped OAuth work exist; OAuth renewal/interoperability, resources/prompts/subscriptions, plugin lifecycle and complete command parity remain incomplete. |
 | Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Backend-owned approvals and effect receipts are implemented for scoped operations. General policy rules, durable change snapshots/reversal and full export/sharing contracts remain incomplete. |

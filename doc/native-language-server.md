@@ -41,8 +41,11 @@ The extension passes the path to xMind without reading the configuration.
 
 The real Rust Analyzer contract verifies persistent workspace initialization,
 repeated document symbols, clean pull diagnostics, and profile import/revision
-behavior against SQLite. It does not yet verify definition, references, or
-hover semantics against real project code. The VS Code extension does not yet
-publish diagnostics or expose language-server navigation commands, formatter
-discovery is absent, and no complete edit/build/diagnose repair loop has been
-accepted in VS Code.
+behavior against SQLite. The VS Code extension publishes those diagnostics and
+now registers definition, references and hover providers for configured
+languages. Provider requests use the unsaved editor buffer and workspace
+authority; returned locations outside the opened folder are dropped. Automated
+extension contracts cover request mapping, hover rendering, workspace bounds
+and stale/cancelled replies. Semantic definition/reference/hover behavior has
+not yet been accepted against real project code in the installed IDE. Formatter
+discovery and a complete edit/build/diagnose repair loop also remain open.

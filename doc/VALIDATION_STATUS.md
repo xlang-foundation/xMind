@@ -1,5 +1,25 @@
 # Current native validation
 
+## VS Code language-server navigation checkpoint — 2026-10-11
+
+Configured language servers now back VS Code Go to Definition, Find References
+and Hover alongside the existing diagnostics collection. Requests are bound to
+the active workspace and unsaved editor buffer; returned locations are confined
+to that workspace. Stale, cancelled and disconnected responses cannot surface.
+The full VS Code extension suite passes **290/290**. The focused native
+Rust Analyzer Release contract also passes against the pinned xlang3
+compatibility worktree and verifies native HTTP editor symbols, unsaved
+document symbols, diagnostics and workspace authority. The new UI mapping is
+contract-tested, but actual installed-IDE definition/reference/hover results
+and formatter behavior remain unverified. See [language-server scope](native-language-server.md)
+and the [parity baseline](PARITY.md).
+
+The graph service and unified graph HTTP/CLI tests pass **2/2** after aligning
+their expected imported-agent metadata with the nullable `tools` field. The
+xlang3 repository contract passes **1/1** with the pinned compatibility
+worktree's SQLite package; the separate `build/native` cache points at an older
+package and is not the configured project build.
+
 ## Full current local gate — 2026-10-10
 
 The current Release `ALL_BUILD` passes the complete native suite **122/122**

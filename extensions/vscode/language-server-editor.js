@@ -11,6 +11,7 @@ function lspPosition(vscode,value){
     if(!value||!Number.isSafeInteger(value.line)||value.line<0||!Number.isSafeInteger(value.character)||value.character<0)return;
   return new vscode.Position(value.line,value.character);
 }
+function lspRange(vscode,value){const start=lspPosition(vscode,value?.start),end=lspPosition(vscode,value?.end);return start&&end?new vscode.Range(start,end):undefined;}
 class LanguageServerEditor {
   constructor(vscode,workspaceBackend){
     this.vscode=vscode;this.workspaceBackend=workspaceBackend;this.client=undefined;this.epoch=-1;this.profiles=[];this.disposables=[];this.timers=new Map();this.sequences=new Map();this.collection=vscode.languages.createDiagnosticCollection('xMind');
@@ -28,6 +29,11 @@ class LanguageServerEditor {
     this.disposables.push(this.vscode.workspace.onDidChangeTextDocument(event=>schedule(event.document,650)));
     this.disposables.push(this.vscode.workspace.onDidSaveTextDocument(document=>schedule(document,0)));
     this.disposables.push(this.vscode.workspace.onDidCloseTextDocument(document=>{const key=document.uri.toString();clearTimeout(this.timers.get(key));this.timers.delete(key);this.sequences.delete(key);this.collection.delete(document.uri);}));
+    const languages=new Set();for(const profile of this.profiles){if(languages.has(profile.language_id))continue;languages.add(profile.language_id);
+      this.disposables.push(this.vscode.languages.registerDefinitionProvider(profile.language_id,{provideDefinition:(document,position,token)=>this.navigate(document,position,'definition',token)}));
+      this.disposables.push(this.vscode.languages.registerReferenceProvider(profile.language_id,{provideReferences:(document,position,_context,token)=>this.navigate(document,position,'references',token)}));
+      this.disposables.push(this.vscode.languages.registerHoverProvider(profile.language_id,{provideHover:(document,position,token)=>this.hover(document,position,token)}));
+    }
     for(const document of this.vscode.workspace.textDocuments||[])schedule(document,100);
   }
   supports(document){
@@ -57,6 +63,36 @@ class LanguageServerEditor {
       else if(error.status===409)this.collection.clear();
     }
   }
+  async query(document,position,method,token){
+    const client=this.client,epoch=this.epoch;if(!this.active(client,epoch)||!this.supports(document)||!(this.vscode.workspace.textDocuments||[]).includes(document)||token?.isCancellationRequested)return;
+    const owner=this.workspaceBackend.active,relative=workspaceRelativePath(owner.canonical,document.uri.fsPath);if(!relative)return;
+    const version=document.version,line=position?.line,character=position?.character;if(!Number.isSafeInteger(line)||line<0||!Number.isSafeInteger(character)||character<0)return;
+    const ticket=await this.workspaceBackend.prepare();this.workspaceBackend.assert(ticket);
+    if(!this.active(client,epoch)||document.version!==version||token?.isCancellationRequested||ticket.origin!==client.baseUrl)return;
+    const response=await client.languageServerQuery({path:relative,method,line,character,documentText:document.getText()},ticket.fields);this.workspaceBackend.assert(ticket);
+    if(!this.active(client,epoch)||document.version!==version||token?.isCancellationRequested||!(this.vscode.workspace.textDocuments||[]).includes(document)||response.path!==relative||response.method!==method)return;
+    return response.result;
+  }
+  async navigate(document,position,method,token){
+    const result=await this.query(document,position,method,token);if(result==null)return;
+    const locations=Array.isArray(result)?result:[result];if(locations.length>10000)return;
+    const mapped=[];for(const item of locations){if(!item||typeof item!=='object')continue;
+      const uriText=typeof item.uri==='string'?item.uri:item.targetUri;if(typeof uriText!=='string'||uriText.length>32768)continue;
+      let uri;try{uri=this.vscode.Uri.parse(uriText);}catch{continue;}if(uri.scheme!=='file'||!workspaceRelativePath(this.workspaceBackend.active?.canonical,uri.fsPath))continue;
+      const range=lspRange(this.vscode,item.range||item.targetSelectionRange||item.targetRange);if(range)mapped.push(new this.vscode.Location(uri,range));
+    }return mapped.length?mapped:undefined;
+  }
+  async hover(document,position,token){
+    const result=await this.query(document,position,'hover',token);if(!result||typeof result!=='object'||Array.isArray(result))return;
+    const values=Array.isArray(result.contents)?result.contents:[result.contents];if(!values.length)return;
+    const markdown=new this.vscode.MarkdownString();markdown.isTrusted=false;markdown.supportHtml=false;let used=0;
+    for(const value of values){if(used>=65536)break;if(typeof value==='string'){const text=value.slice(0,65536-used);markdown.appendMarkdown(text);used+=text.length;}
+      else if(value&&typeof value==='object'&&typeof value.value==='string'){
+        const text=value.value.slice(0,65536-used);if(value.kind==='plaintext')markdown.appendText(text);else if(typeof value.language==='string'&&/^[A-Za-z0-9_+.-]{1,64}$/.test(value.language))markdown.appendCodeblock(text,value.language);else markdown.appendMarkdown(text);used+=text.length;
+      }
+    }
+    if(!used)return;const range=lspRange(this.vscode,result.range);return new this.vscode.Hover(markdown,range);
+  }
   dispose(){this.disconnect();this.collection.dispose();}
 }
-module.exports={LanguageServerEditor,workspaceRelativePath};
+module.exports={LanguageServerEditor,workspaceRelativePath,lspPosition,lspRange};
