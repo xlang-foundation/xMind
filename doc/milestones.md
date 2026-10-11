@@ -1,5 +1,13 @@
 # Reviewable milestones
 
+## Complete Release native gate — 2026-10-11
+
+The full Release build succeeds, and all **134/134** CTest contracts now pass
+in one run after the final delegation-migration and CLI-exit fixes. The run
+covers native AgentFlow, MCP/A2A, persistence, profiles, process tools and local
+view integration. It does not prove packaged or rendered IDE acceptance.
+[Exact CTest output](evidence/native-full-release-ctest-20261011.log).
+
 ## Saved-key native CLI process run — 2026-10-11
 
 The current Release `xmind_server` and `xmind_cli` ran a real DeepSeek

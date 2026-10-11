@@ -2,17 +2,14 @@
 
 ## Current Release native gate — 2026-10-11
 
-The complete Release `ALL_BUILD` succeeds. The full CTest run completed **132/134**;
-the two failures were a legacy delegation fixture expecting schema v14 and a
-scripted CLI `/exit` being rejected when stdin closed immediately after the
-command. Both are fixed. The delegation migration and agent edit/approval HTTP
-contracts then passed together (**2/2**); the related v15 migration, persistence,
-process observer, shell approval, CLI patch and Rust Analyzer contracts also
-passed in focused runs. Rust Analyzer now receives an offline Cargo fixture
-check before the semantic LSP contract, preventing cold-index false failures.
-All 134 tests have passed across the full run and targeted reruns; the full
-134-test suite has not yet been repeated after those final fixes. This is local
-Release validation, not installed IDE or packaged release acceptance.
+The complete Release `ALL_BUILD` succeeds. The full CTest suite now passes
+**134/134 in one run** after the delegation schema fixture and scripted CLI
+`/exit` fixes. The run includes the Rust Analyzer fixture/semantic checks,
+native provider profiles, MCP/A2A, graph execution, processes, persistence,
+browser/local-view and credential contracts. Exact CTest output is preserved
+in [the full Release run log](evidence/native-full-release-ctest-20261011.log).
+This is local Release validation; the captured contracts explicitly do not
+claim installed IDE or rendered IDE acceptance.
 
 ## Live saved-key native CLI process run — 2026-10-11
 
