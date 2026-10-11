@@ -18,6 +18,20 @@ Baseline: `anomalyco/opencode` tag `v2.0.16`, commit
 [documentation](https://opencode.ai/v2/docs). Documentation can differ from this
 release; inspect the pinned source before finalizing each acceptance criterion.
 
+## Latest local source checkpoint (2026-10-10, `60e454c`)
+
+The A2A native client passes the pinned official 1.3.0 JavaScript SDK peer,
+including wrapped `SendMessage` tasks and streamed task/status events. All nine
+focused A2A, Windows HTTP transport and CLI contracts pass after a full Release
+build. The full local native gate passes **118/122**. Four contracts remain
+open: two managed local-profile/view startups fail on Unicode workspace paths,
+`xlang_repository_contract` cannot open its database, and the managed handoff
+fixture cannot import `_sqlite3`. These are recorded in
+[`milestones.md`](milestones.md); they are not parity passes. The broader
+OpenCode API inventory remains **25 source candidates, 111 unmapped operations,
+zero verified operation-level parity**. No hosted packaging or current
+installed-client acceptance is claimed for this checkpoint.
+
 The current OpenAPI audit contains **136 operations**: **25** have a mapped C++
 source candidate, **111** remain unmapped, and **zero** are verified parity.
 The audit embeds all **245** pinned schema components and resolves all **855**
