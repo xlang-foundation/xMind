@@ -145,8 +145,60 @@ These functions execute in-process with the xMind server's privileges. They
 are trusted code, not a sandbox; they can perform effects outside xMind's
 workspace approval APIs. A synchronous function that blocks cannot be forcibly
 interrupted, so cancellation is checked immediately before and after its call.
-Hard interruption and full effect mediation remain open work for out-of-process
-execution and the programming API.
+Hard interruption and full effect mediation remain open work for an isolated
+out-of-process runtime.
+
+## Trusted xlang3 programming mode
+
+For definitions that are easier to express as code, xMind can execute a trusted
+xlang3 Python module with a native declaration API. The module exports
+`configure(xmind)` and declares named agents and graphs:
+
+```python
+def configure(xmind):
+    xmind.agent({
+        "id": "security_reviewer",
+        "model_id": "claude-sonnet",
+        "instructions": "Review the selected change and cite concrete evidence.",
+        "tools": ["read_file", "search_files"],
+    })
+    xmind.graph({
+        "id": "review",
+        "spec": {
+            "nodes": [{
+                "id": "inspect",
+                "type": "agent",
+                "agent_id": "security_reviewer",
+                "prompt": "Review the selected change.",
+            }],
+        },
+    })
+```
+
+Run it with the backend stopped:
+
+```powershell
+xmind admin --db PROFILE_DB --modules XLANG3_MODULES --stdlib PYTHON_STDLIB `
+  import-program CODE_ROOT security_team configure
+```
+
+`security_team.py` is imported from `CODE_ROOT`; the function name is explicit.
+Pass the same profile database and xlang3 runtime roots that the backend uses.
+The program receives only `agent(definition)` and `graph(definition)` calls.
+Definitions are converted to JSON and passed through the existing native
+catalog validators and xlang3 SQLite stores. Importing never starts an agent or
+graph. When both kinds are declared, agents are applied before graphs so
+`agent_id` references resolve. The command reports catalog revisions and public
+IDs, not instructions or keys. Declaring at least one item of a kind applies
+that kind as a complete catalog and retires omitted prior definitions; omitting
+all calls of that kind leaves its existing catalog untouched.
+
+The module runs as trusted xlang3 code with the admin process's operating-system
+privileges. This API does not sandbox Python or mediate arbitrary local effects.
+It does not expose provider credentials or persistence handles to the module.
+The same validators, model/tool allowlists, graph permissions and native runtime
+remain authoritative after import, so YAML/Markdown and program-defined
+catalogs converge on the same runtime definitions.
 
 ## YAML subset and limits
 
@@ -162,12 +214,12 @@ supported. JSON input remains accepted.
 
 The current slice supports reusable named YAML agents in graph nodes, per-node
 inline instructions, per-agent native tool allowlists, revisioned single-agent
-conversation selection, and trusted startup-registered xlang3 Python tools in
-the AgentRunner catalogue. The broader in-process programming API, native
-effect mediation for trusted code, and forcibly interruptible/out-of-process
-Python calls remain incomplete. Workspace Markdown skill discovery and
-selection are implemented, while the full command/skill lifecycle still has
-documented gaps.
+conversation selection, trusted startup-registered xlang3 Python tools in the
+AgentRunner catalogue, and trusted xlang3 programs that register named agent
+and graph definitions through the native authoring API. Native effect mediation
+for trusted code and forcibly interruptible/out-of-process Python calls remain
+incomplete. Workspace Markdown skill discovery and selection are implemented,
+while the full command/skill lifecycle still has documented gaps.
 Those authoring styles must eventually produce the same validated native
 definitions, tool registry and permission receipts; parser acceptance alone
 does not establish runtime behavior. See the

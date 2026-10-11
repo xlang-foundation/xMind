@@ -71,14 +71,18 @@ implemented. Neither embedded execution nor shared-memory IPC is an OS sandbox.
 The current authoring foundation accepts bounded YAML/JSON graph catalogs,
 reusable bounded YAML/JSON named agent catalogs, YAML or JSON global
 instruction records, and plain Markdown instruction files through offline
-native administration. Named definitions bind prompt guidance, optional model
-and optional tool allowlist to graph nodes; import pins each resolved definition
-into the immutable graph revision. These records are persisted through embedded xlang3
-SQLite. Revisioned single-agent session selection and workspace Markdown skill
+native administration. Trusted xlang3 `configure(xmind)` programs can declare
+named agents and graph catalogs through a narrow native API; the same existing
+catalog validators and xlang3 SQLite stores remain authoritative. Named
+definitions bind prompt guidance, optional model and optional tool allowlist to
+graph nodes; import pins each resolved definition into the immutable graph
+revision. These records are persisted through embedded xlang3 SQLite.
+Revisioned single-agent session selection and workspace Markdown skill
 catalogues are implemented in the shared backend and thin clients. Optional
 per-agent native tool allowlists now narrow the already-authorized native/MCP/A2A
 catalogue and are pinned through named definitions, graph revisions and session
-snapshots. `.py` tool registration and the xlang3 programming API remain
+snapshots. The programming API currently declares catalogs only; a fuller API
+for composing callable agent behavior and custom runtime tools remains
 incomplete. See [authoring formats and current coverage](authoring.md).
 
 ## Planning, AgentFlow and scheduling
@@ -186,9 +190,9 @@ integration through real pause, incremental resume, reconnect, detach and an
 approved file effect; exact scope is recorded in
 [native event-feed evidence](native-event-stream.md). A fresh rendered
 installation and live-provider SSE remain separate acceptance. Pending delivery
-also includes complete agent/tool authoring and xlang3 Python registration,
-reusable nested super-agents, shared scheduling/worker placement, xlang3 IPC,
-Local/Nexus connection integration and remaining provider/coding parity.
+also includes callable agent/tool authoring, reusable nested super-agents,
+shared scheduling/worker placement, xlang3 IPC, Local/Nexus connection
+integration and remaining provider/coding parity.
 
 The [committed event transport](native-event-stream.md) passed its full native
 gate at `7a148ff`, then the production reader, browser subscription, active-feed

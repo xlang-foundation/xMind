@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-11",
+  "scope": "Actual xlang3 programming-mode contract plus unified xmind admin CLI catalog import into an isolated xlang3 SQLite database.",
+  "build": "build/goal-current, Release, configured with D:/CantorAI2026/xlang3/build/Release",
+  "contract": "embedded_xlang_authoring_program_contract passed against actual xlang3 runtime",
+  "related_contracts": [
+    "embedded_xlang_python_callable_contract: passed",
+    "embedded_xlang_authoring_program_contract: passed"
+  ],
+  "integration": {
+    "command": "xmind admin --db <isolated sqlite> --modules D:/CantorAI2026/xlang3/build/Release/modules --stdlib C:/Python/Python314/Lib import-program <code_root> integration_author configure",
+    "binary": "build/goal-current/Release/xmind.exe",
+    "declarations": [
+      "integration_reviewer agent, revision 1",
+      "integration_review graph with one agent node referencing integration_reviewer, revision 1"
+    ],
+    "repeat_import": "Agent and graph catalog revisions remained 1 on identical rerun",
+    "execution_available": false,
+    "api_key_used": false,
+    "provider_inference_performed": false
+  },
+  "limitations": [
+    "Trusted Python remains unsandboxed and has admin-process OS privileges.",
+    "Programming API declares named agents and graphs; callable agent behaviors and custom runtime-tool composition remain incomplete.",
+    "No OpenCode feature parity completion is claimed."
+  ]
+}

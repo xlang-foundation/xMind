@@ -4,6 +4,7 @@
 #include "agentflow/agent_instructions.hpp"
 #include "agentflow/agent_definitions.hpp"
 #include "agentflow/graph.hpp"
+#include "agentflow/xlang_authoring_program.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/owner_process.hpp"
 #include "agentflow/legacy_owner.hpp"
@@ -93,7 +94,7 @@ int run_admin(int argc,char** argv){
             const agentflow::LegacyOwnerBootstrap boot{identity.str(),qualified};database.begin();try{const auto snapshot=agentflow::snapshot_legacy_database(database);agentflow::publish_legacy_owner_ticket(database,lease,boot,{pid,argv[command+5],argv[command+6]},snapshot);database.commit();}catch(...){database.rollback();throw;}
             std::cout<<nlohmann::json{{"legacy_ticket_id",boot.ticket_id},{"admission_closed",true},{"quiescence_receipt",false},{"schema_migrated",false}}.dump()<<'\n';return 0;
         }
-        if(command>=argc)throw std::invalid_argument("Commands: import-agents FILE; import-graphs FILE; import-instructions FILE; import-processes FILE; import-mcp FILE; discover-mcp SERVER_ID WORKSPACE; put-mcp-credential SERVER_ID ENV_NAME SECRET_SOURCE_ENV. Run while the backend is stopped.");
+        if(command>=argc)throw std::invalid_argument("Commands: import-agents FILE; import-graphs FILE; import-program CODE_ROOT MODULE FUNCTION; import-instructions FILE; import-processes FILE; import-mcp FILE; discover-mcp SERVER_ID WORKSPACE; put-mcp-credential SERVER_ID ENV_NAME SECRET_SOURCE_ENV. Run while the backend is stopped.");
         agentflow::PersistenceService store(options.at("--db"),{options.at("--modules"),options.at("--stdlib")});agentflow::McpConfigurationStore configurations(store);
         using Json=nlohmann::json;const std::string action=argv[command];
         if(action=="import-agents" && command+2==argc){
@@ -106,6 +107,24 @@ int run_admin(int argc,char** argv){
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Graph catalog exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted graph catalog");
             const auto catalog=agentflow::GraphCatalogStore(store).apply(source);auto graphs=Json::array();for(const auto& graph:catalog.entries)graphs.push_back({{"id",graph.id},{"revision",graph.revision},{"node_count",graph.plan.nodes().size()}});
             std::cout<<Json{{"catalog_revision",catalog.revision},{"graphs",std::move(graphs)},{"execution_available",false}}.dump()<<'\n';
+        }else if(action=="import-program" && command+4==argc){
+            const auto code_root_path=std::filesystem::absolute(std::filesystem::u8path(argv[command+1])).u8string();
+            const std::string code_root(reinterpret_cast<const char*>(code_root_path.data()),code_root_path.size());
+            const auto output=agentflow::run_xlang_authoring_program(options.at("--modules"),options.at("--stdlib"),
+                code_root,argv[command+2],argv[command+3]);
+            if(output.agents_json.empty()&&output.graphs_json.empty())throw std::invalid_argument("The xlang3 authoring program did not declare agents or graphs");
+            Json result{{"execution_available",false},{"program_module",argv[command+2]}};
+            if(!output.agents_json.empty()){
+                const auto catalog=agentflow::AgentDefinitionStore(store).apply(output.agents_json);auto agents=Json::array();
+                for(const auto& agent:catalog.entries)agents.push_back({{"id",agent.id},{"revision",agent.revision},{"model_id",agent.model_id.empty()?Json(nullptr):Json(agent.model_id)},{"tools",agent.tools?Json(*agent.tools):Json(nullptr)}});
+                result["agent_catalog_revision"]=catalog.revision;result["agents"]=std::move(agents);
+            }
+            if(!output.graphs_json.empty()){
+                const auto catalog=agentflow::GraphCatalogStore(store).apply(output.graphs_json);auto graphs=Json::array();
+                for(const auto& graph:catalog.entries)graphs.push_back({{"id",graph.id},{"revision",graph.revision},{"node_count",graph.plan.nodes().size()}});
+                result["graph_catalog_revision"]=catalog.revision;result["graphs"]=std::move(graphs);
+            }
+            std::cout<<result.dump()<<'\n';
         }else if(action=="import-instructions" && command+2==argc){
             std::ifstream file(std::filesystem::u8path(argv[command+1]),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted instruction configuration");std::string source;char byte;
             while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Instruction configuration exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted instruction configuration");
