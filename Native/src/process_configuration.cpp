@@ -54,12 +54,12 @@ std::set<std::string> retired(const Json& saved,const std::vector<ProcessProfile
 }
 }
 std::vector<ProcessProfile> ProcessConfigurationStore::load(){const auto saved=stored(store_);const auto values=list(saved,true);(void)retired(saved,values);return values;}
-std::vector<ProcessProfile> ProcessConfigurationStore::apply(const std::string& source) {
+std::vector<ProcessProfile> ProcessConfigurationStore::apply(const std::string& source,bool replacement_bootstrap) {
     const auto desired=parse(source);fields(desired,{"profiles"});auto values=list(desired,false);const auto saved=stored(store_);const auto previous=list(saved,true);auto retired_ids=retired(saved,previous);
     std::map<std::string,ProcessProfile> old;for(const auto& p:previous)old.emplace(p.id,p);std::set<std::string> active;Json profiles=Json::array();
     for(auto& p:values){if(retired_ids.contains(p.id))throw Conflict("Process profile identity is retired");active.insert(p.id);p.executable_id=ForegroundProcess::executable_identity(p.executable);p.revision=1;const auto found=old.find(p.id);
         if(found!=old.end()){p.revision=found->second.revision;if(encode(p,false)!=encode(found->second,false)){if(p.revision>=revision_limit)throw Conflict("Process profile revision exhausted");++p.revision;}}profiles.push_back(encode(p));}
     for(const auto& [name,p]:old){(void)p;if(!active.contains(name))retired_ids.insert(name);}if(retired_ids.size()>4096)throw Conflict("Retired process profile limit reached");
-    const auto result=Json{{"version",1},{"profiles",profiles},{"retired_ids",retired_ids}}.dump();if(result.size()>256*1024)throw Conflict("Stored process configuration exceeds limits");store_.put_information("native-process","profiles",result).get();return values;
+    const auto result=Json{{"version",1},{"profiles",profiles},{"retired_ids",retired_ids}}.dump();if(result.size()>256*1024)throw Conflict("Stored process configuration exceeds limits");if(replacement_bootstrap)store_.put_process_profiles_for_replacement(result).get();else store_.put_information("native-process","profiles",result).get();return values;
 }
 }

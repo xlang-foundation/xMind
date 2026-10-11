@@ -21,11 +21,12 @@ struct PersistenceService::Impl {
     std::thread worker;
     std::size_t limit;
     bool accepting=true;
+    const bool replacement_bootstrap;
     // The lease pointer exists only while the worker-owned Repository is alive.
     BackendLease* owner_lease=nullptr;
     const std::string generation=owner_nonce();
 
-    Impl(std::string path,std::vector<std::string> roots,std::size_t max_pending,std::optional<BackendOwnerBootstrap> bootstrap,std::optional<LegacyOwnerBootstrap> legacy):limit(max_pending) {
+    Impl(std::string path,std::vector<std::string> roots,std::size_t max_pending,std::optional<BackendOwnerBootstrap> bootstrap,std::optional<LegacyOwnerBootstrap> legacy):limit(max_pending),replacement_bootstrap(bootstrap.has_value()) {
         if(limit==0) throw std::invalid_argument("Persistence queue capacity must be positive");
         std::promise<void> ready;auto initialized=ready.get_future();
         worker=std::thread([this,path=std::move(path),roots=std::move(roots),bootstrap=std::move(bootstrap),legacy=std::move(legacy),ready=std::move(ready)]() mutable {
@@ -254,6 +255,14 @@ std::future<std::vector<Message>> PersistenceService::history(std::string id) {
 }
 std::future<void> PersistenceService::put_information(std::string category,std::string id,std::string json) {
     return impl_->submit([category=std::move(category),id=std::move(id),json=std::move(json)](Repository& repository){repository.put_information(category,id,json);});
+}
+std::future<void> PersistenceService::put_process_profiles_for_replacement(std::string json) {
+    if(!impl_->replacement_bootstrap)throw Conflict("Process profiles may bypass quiescence only during a protected replacement startup");
+    return impl_->submit([this,json=std::move(json)](Repository& repository){
+        const auto owner=repository.backend_owner();
+        if(owner.generation!=impl_->generation||!owner.quiesced)throw Conflict("Process-profile replacement import requires the protected quiesced owner");
+        repository.put_information("native-process","profiles",json);
+    },false);
 }
 std::future<std::string> PersistenceService::information(std::string category,std::string id) {
     return impl_->observe([category=std::move(category),id=std::move(id)](Repository& repository){return repository.information(category,id);});

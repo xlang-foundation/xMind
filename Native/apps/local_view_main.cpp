@@ -150,6 +150,8 @@ int run_local_view(int argc, char **argv) {
                 options.python_tools_config = value;
             else if (key == "--language-server-config")
                 options.language_server_config = value;
+            else if (key == "--process-config")
+                options.process_config = value;
             else if (key == "--ready-file")
                 ready = value;
             else

@@ -12,7 +12,8 @@ param(
     [ValidateRange(1024,65535)][int]$DebugPort=57217,
     [string]$GraphsConfig,
     [string]$ProviderConfig,
-    [string]$LanguageServerConfig
+    [string]$LanguageServerConfig,
+    [string]$ProcessConfig
 )
 $ErrorActionPreference='Stop'
 if([bool]$Model -ne [bool]$ModelEndpoint){throw 'Provide both -Model and -ModelEndpoint.'}
@@ -23,7 +24,7 @@ if($ApprovedEdits -and -not $Workspace){throw 'Approved file edits require a wor
 if($Workspace -and $ModelTools -ne 'supported'){throw 'Workspace execution requires -ModelTools supported.'}
 if($ProviderKeyEnvironment -notmatch '^[A-Za-z_][A-Za-z0-9_]*$'){throw 'Invalid provider key environment name.'}
 if($ProviderKeyEnvironment -eq 'XMIND_AUTH_TOKEN' -or $ProviderKeyEnvironment -like 'XMIND_UI_*'){throw 'Select a provider credential variable, not a preview authentication variable.'}
-foreach($uiArgument in @($CodeExecutable,$RuntimeDirectory,$BundleDirectory,$ServerExecutable,$StdlibSource,$Model,$ModelEndpoint,$SelectableModels,$CredentialId,$Workspace,$GraphsConfig,$ProviderConfig,$LanguageServerConfig)){
+foreach($uiArgument in @($CodeExecutable,$RuntimeDirectory,$BundleDirectory,$ServerExecutable,$StdlibSource,$Model,$ModelEndpoint,$SelectableModels,$CredentialId,$Workspace,$GraphsConfig,$ProviderConfig,$LanguageServerConfig,$ProcessConfig)){
     if($uiArgument -and $uiArgument.IndexOfAny([char[]]@([char]0,[char]10,[char]13,[char]34)) -ge 0){throw 'Preview arguments cannot contain quotes or control characters.'}
 }
 $uiProject=Split-Path $PSScriptRoot -Parent
@@ -96,6 +97,11 @@ try {
         if(Test-Path -LiteralPath $uiLanguageServerTemplate -PathType Leaf){$LanguageServerConfig=$uiLanguageServerTemplate}
     }
     if($LanguageServerConfig){$uiArgs+=@('--language-server-config',('"'+[System.IO.Path]::GetFullPath($LanguageServerConfig)+'"'))}
+    if(-not $ProcessConfig){
+        $uiProcessTemplate=Join-Path $uiProject '.config/processes.yaml'
+        if(Test-Path -LiteralPath $uiProcessTemplate -PathType Leaf){$ProcessConfig=$uiProcessTemplate}
+    }
+    if($ProcessConfig){$uiArgs+=@('--process-config',('"'+[System.IO.Path]::GetFullPath($ProcessConfig)+'"'))}
     if($Workspace){$uiArgs+=@('--workspace',('"'+[System.IO.Path]::GetFullPath($Workspace)+'"'))}
     if($ApprovedEdits){$uiArgs+=@('--workspace-edits','approved')}
     if($GraphsConfig){$uiArgs+=@('--graphs-config',('"'+[System.IO.Path]::GetFullPath($GraphsConfig)+'"'))}

@@ -126,7 +126,8 @@ int run_server(int argc,char** argv) {
             const auto root=std::filesystem::u8path(runtime_generation->binding().root);
             if(std::filesystem::canonical(std::filesystem::u8path(options.at("--modules")))!=std::filesystem::canonical(root/"modules")||std::filesystem::canonical(std::filesystem::u8path(options.at("--stdlib")))!=std::filesystem::canonical(root/"stdlib"))throw std::invalid_argument("Qualified startup requires the verified package's import roots");
             if(options.contains("--owner-receipt")||options.contains("--legacy-owner-ticket")){
-                for(const auto* key:{"--model","--model-endpoint","--provider-config","--mcp-config","--process-config","--language-server-config","--instructions-config","--graphs-config","--python-tools-config"})if(options.contains(key))throw std::invalid_argument("Replacement startup retains saved configuration; startup overrides are not allowed");
+                for(const auto* key:{"--model","--model-endpoint","--provider-config","--mcp-config","--language-server-config","--instructions-config","--graphs-config","--python-tools-config"})if(options.contains(key))throw std::invalid_argument("Replacement startup retains saved configuration; startup overrides are not allowed");
+                if(options.contains("--process-config")&&!options.contains("--owner-receipt"))throw std::invalid_argument("Only a managed native owner handoff may apply a trusted process configuration");
                 if(options.contains("--owner-receipt"))bootstrap=agentflow::qualify_backend_bootstrap(startup_receipt(options.at("--owner-receipt")),*runtime_generation,*startup_workspace,auth,options.contains("--workspace-edits"));
                 else legacy=agentflow::LegacyOwnerBootstrap{options.at("--legacy-owner-ticket"),agentflow::qualify_backend_target(*runtime_generation,*startup_workspace,auth,options.contains("--workspace-edits"))};
             }
@@ -187,7 +188,7 @@ int run_server(int argc,char** argv) {
         std::vector<agentflow::ProcessProfile> process_profiles;
         if(options.contains("--process-config")) {
             std::ifstream file(std::filesystem::u8path(options.at("--process-config")),std::ios::binary);if(!file)throw std::invalid_argument("Cannot read trusted process configuration file");
-            std::string source;char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Process configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted process configuration file");process_profiles=process_configurations.apply(source);
+            std::string source;char byte;while(file.get(byte)){if(source.size()>=256*1024)throw std::invalid_argument("Process configuration file exceeds limits");source.push_back(byte);}if(!file.eof())throw std::invalid_argument("Cannot read trusted process configuration file");process_profiles=process_configurations.apply(source,options.contains("--owner-receipt"));
         }else process_profiles=process_configurations.load();
         agentflow::LanguageServerConfigurationStore language_server_configurations(persistence);
         std::vector<agentflow::LanguageServerProfile> language_servers;

@@ -119,6 +119,12 @@
           "scope": "machine",
           "description": "Optional absolute path to trusted native language-server profiles. Development installs automatically use the repository .config/language-servers.yaml when present; opened workspace folders are never searched."
         },
+        "agentflow.processConfigPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Optional absolute path to trusted native process profiles. Development installs automatically use the repository .config/processes.yaml when present; opened workspace folders are never searched."
+        },
         "agentflow.workspaceEdits": {
           "type": "boolean",
           "default": true,

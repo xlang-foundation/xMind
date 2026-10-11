@@ -364,8 +364,15 @@ void shape(const Json &value, const Store &store, const WorkspaceTools &workspac
             value.at("pid").get<std::uint64_t>() <= MAXDWORD && value.contains("port") &&
             value.at("port").is_number_integer() && value.at("port") >= 0 && value.at("port") <= 65535 &&
             value.contains("approved_edits") && value.at("approved_edits").is_boolean());
-    for(const auto* field:{"provider_config","graphs_config","python_tools_config","language_server_config"})
+    for(const auto* field:{"provider_config","graphs_config","python_tools_config","language_server_config","process_config"})
         if(value.contains(field)&&!value.at(field).get<std::string>().empty())require(absolute(value.at(field).get<std::string>()).is_absolute());
+    require((!value.contains("process_config")||value.at("process_config").get<std::string>().empty())
+                ?(!value.contains("process_config_digest")||value.at("process_config_digest").get<std::string>().empty())
+                :hex(value.value("process_config_digest",std::string{}),64),
+            "Saved process configuration fingerprint is invalid");
+    if(value.contains("process_config_pending"))require(value.at("process_config_pending").is_boolean()&&
+        (!value.at("process_config_pending").get<bool>()||(value.contains("process_config")&&!value.at("process_config").get<std::string>().empty())),
+        "Saved process configuration update is invalid");
     require(value.value("phase", std::string{}) == "preparing" ||
             value.value("phase", std::string{}) == "starting" ||
             value.value("phase", std::string{}) == "ready");
@@ -523,13 +530,15 @@ Child launch(Store &store, Json &state) {
         args.push_back(L"--workspace-edits");
         args.push_back(L"approved");
     }
-    for (const auto *field : {"provider_config", "graphs_config", "python_tools_config", "language_server_config"}) {
-        if(state.contains("owner_receipt"))break;
+    for (const auto *field : {"provider_config", "graphs_config", "python_tools_config", "language_server_config", "process_config"}) {
+        if(state.contains("owner_receipt")&&std::string(field)!="process_config")continue;
+        if(std::string(field)=="process_config"&&!state.value("process_config_pending",false))continue;
         const auto value = state.value(field, std::string{});
         if (!value.empty()) {
             const auto option=std::string(field)=="provider_config"?L"--provider-config":
                 (std::string(field)=="graphs_config"?L"--graphs-config":
-                 (std::string(field)=="python_tools_config"?L"--python-tools-config":L"--language-server-config"));
+                 (std::string(field)=="python_tools_config"?L"--python-tools-config":
+                  (std::string(field)=="process_config"?L"--process-config":L"--language-server-config")));
             args.push_back(option);
             args.push_back(wide(value));
         }
@@ -744,10 +753,22 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             if (!value.empty())
                 require(state.value(field, std::string{}) == text(absolute(value)),
                         "Profile launch configuration changed; update the existing backend explicitly");
+        const auto requested_process_path=options.process_config.empty()?std::string{}:text(absolute(options.process_config));
+        const auto requested_process_digest=options.process_config.empty()?std::string{}:context_digest(file_bytes(absolute(options.process_config),256*1024));
+        const bool process_configuration_changed=!options.process_config.empty()&&
+            (state.value("process_config",std::string{})!=requested_process_path||
+             state.value("process_config_digest",std::string{})!=requested_process_digest);
+        if(state.contains("owner_receipt")&&process_configuration_changed)
+            throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing process configuration");
+        if(process_configuration_changed&&!options.upgrade_backend)
+            throw std::invalid_argument("Process configuration changed; update the existing backend explicitly");
+        if(state.contains("upgrade_intent")&&process_configuration_changed){
+            state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;store.write(state);
+        }
         if (options.approved_edits)
             require(state.at("approved_edits") == *options.approved_edits,
                     "Profile edit policy changed; update the existing backend explicitly");
-        if(state.contains("owner_receipt")||(options.upgrade_backend&&(state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
+        if(state.contains("owner_receipt")||(options.upgrade_backend&&(process_configuration_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
             bool deferred_busy_upgrade=false;
             if(!state.contains("owner_receipt")){
                 if(!state.contains("upgrade_intent")){
@@ -755,7 +776,9 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                     const auto current_owner=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner");
                     require(current_owner.value("retirement_supported",false),"Current managed runtime does not support profile-preserving upgrade");
                     auto [target,digest]=stage_current_runtime(store,workspace);
-                    state["replacement_runtime"]=text(target);state["replacement_manifest"]=digest;state["replacement_port"]=state.at("port");state["upgrade_intent"]=true;store.write(state);
+                    state["replacement_runtime"]=text(target);state["replacement_manifest"]=digest;state["replacement_port"]=state.at("port");
+                    if(process_configuration_changed){state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;}
+                    state["upgrade_intent"]=true;store.write(state);
                 }
                 const auto ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
                 const auto owner=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner");
@@ -813,6 +836,9 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             {"graphs_config", options.graphs_config.empty() ? "" : text(absolute(options.graphs_config))}};
         state["python_tools_config"]=options.python_tools_config.empty()?"":text(absolute(options.python_tools_config));
         state["language_server_config"]=options.language_server_config.empty()?"":text(absolute(options.language_server_config));
+        state["process_config"]=options.process_config.empty()?"":text(absolute(options.process_config));
+        state["process_config_digest"]=options.process_config.empty()?"":context_digest(file_bytes(absolute(options.process_config),256*1024));
+        state["process_config_pending"]=!options.process_config.empty();
         store.write(state);
     }
     if (state.at("phase") == "preparing") {
@@ -901,6 +927,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                     require(!owner.value("quiesced",true),"Replacement owner remains quiesced; reconnect to resume activation");
                     state.erase("owner_receipt");state.erase("replacement_port");state.erase("replacement_manifest");state.erase("replacement_runtime");store.write(state);
                 }
+                if(state.value("process_config_pending",false)){state.erase("process_config_pending");store.write(state);}
                 break;
             }
         }

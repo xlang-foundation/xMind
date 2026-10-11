@@ -54,6 +54,18 @@ async function languageServerConfigurationPath(context,vscode,io,setting){
     return candidate;
   }catch(error){if(error.code==='ENOENT')return undefined;throw error;}
 }
+async function processConfigurationPath(context,vscode,io,setting){
+  if(setting)return setting;
+  if(vscode.ExtensionMode?.Development===undefined||context.extensionMode!==vscode.ExtensionMode.Development)return undefined;
+  const extensionRoot=context.extensionUri?.fsPath;
+  if(typeof extensionRoot!=='string'||!path.isAbsolute(extensionRoot))return undefined;
+  const candidate=path.resolve(extensionRoot,'..','..','.config','processes.yaml');
+  try{
+    const info=await io.lstat(candidate);
+    if(!info.isFile()||info.isSymbolicLink()||canonicalPath(await io.realpath(candidate))!==canonicalPath(candidate))throw new Error('Development process configuration is aliased or not a regular file.');
+    return candidate;
+  }catch(error){if(error.code==='ENOENT')return undefined;throw error;}
+}
 
 class WorkspaceBackend {
   constructor(vscode,context,resolveRuntime,dependencies={}){
@@ -109,7 +121,7 @@ class WorkspaceBackend {
     const canonical=canonicalPath(await this.deps.fs.realpath(selection.folder.uri.fsPath));
     const roots=await Promise.all(selection.roots.map(async root=>canonicalPath(await this.deps.fs.realpath(root.fsPath))));
     const scope=crypto.createHash('sha256').update(keyPath(canonical)).digest('hex');
-    const config={runtimeDirectory:machineSetting(this.vscode,'runtimeDirectory'),stdlibSource:machineSetting(this.vscode,'stdlibSource'),providerConfigPath:await providerConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'providerConfigPath')),languageServerConfigPath:await languageServerConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'languageServerConfigPath'))};
+    const config={runtimeDirectory:machineSetting(this.vscode,'runtimeDirectory'),stdlibSource:machineSetting(this.vscode,'stdlibSource'),providerConfigPath:await providerConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'providerConfigPath')),languageServerConfigPath:await languageServerConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'languageServerConfigPath')),processConfigPath:await processConfigurationPath(this.context,this.vscode,this.deps.fs,machineSetting(this.vscode,'processConfigPath'))};
     const runtime=await this.resolveRuntime(this.context,{platform:this.deps.platform,arch:this.deps.arch,remoteName:this.vscode.env?.remoteName??null},config);
     if(runtime.qualified!==true)throw new Error('Managed profiles require bundled verified pure-library sources. Clear stdlibSource or use an external development server.');
     if(!current())throw new Error('Workspace changed while preparing its backend.');
@@ -157,6 +169,7 @@ class WorkspaceBackend {
     if(roots.some(root=>contained(root,profileRoot)||contained(profileRoot,root)))throw new Error('Local profile storage overlaps an opened workspace.');
     const args=['view','--workspace',canonical,'--profile-root',profileRoot,'--ready-file',ready];
     if(runtime.languageServerConfig)args.push('--language-server-config',runtime.languageServerConfig);
+    if(runtime.processConfig)args.push('--process-config',runtime.processConfig);
     if(machineSetting(this.vscode,'workspaceEdits')===false)args.push('--read-only');
     if(!current())throw new Error('Workspace changed before starting its native view.');
     const env={...this.deps.env,XMIND_VIEW_TOKEN:token};for(const key of Object.keys(env))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY'||key==='XMIND_AUTH_TOKEN')delete env[key];
@@ -231,4 +244,4 @@ class WorkspaceBackend {
     this.assert(ticket);const actual=await this.observe(active);this.assert(ticket);return {origin:active.origin,...actual,provider_import_pending:this.providerImportPending===true};
   }
 }
-module.exports={WorkspaceBackend,workspaceMetadata,canonicalPath,machineSetting,providerConfigurationPath,languageServerConfigurationPath};
+module.exports={WorkspaceBackend,workspaceMetadata,canonicalPath,machineSetting,providerConfigurationPath,languageServerConfigurationPath,processConfigurationPath};

@@ -9,7 +9,7 @@ class ProcessConfigurationStore {
 public:
     explicit ProcessConfigurationStore(PersistenceService& store):store_(store) {}
     std::vector<ProcessProfile> load();
-    std::vector<ProcessProfile> apply(const std::string& desired_json);
+    std::vector<ProcessProfile> apply(const std::string& desired_json,bool replacement_bootstrap=false);
 private:
     PersistenceService& store_;
 };

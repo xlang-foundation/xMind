@@ -2,35 +2,40 @@
 
 ## Current integrated local acceptance (2026-10-11)
 
-The current native source checkpoint `7acf21f` built in Release and passed the
-complete local CTest gate: **132/132** in **604.75 seconds**. The full log is
-`build/goal-current/Testing/Temporary/LastTest.log`; its SHA-256 is recorded in
-[package preview evidence](evidence/vscode-0.1.7-package-preview.json).
-Relevant passing contracts include the native process adapter, configuration
-store, approved executor, server/CLI model continuation, output journaling and
-persistent ConPTY sessions. They exercise real Windows processes, xlang3-backed
-SQLite, approval/denial/cancellation, executable and workspace binding,
-output bounds, restart quarantine and process-tree cleanup. The model peer is
-synthetic. The PTY test uses synthetic shell I/O and does not run a command in
-the user's workspace.
+The previous full native gate at source `7acf21f` built in Release and passed
+**132/132** CTest contracts in **604.75 seconds**. Its complete log remains at
+`build/goal-current/Testing/Temporary/LastTest.log`; provenance is recorded in
+[package preview evidence](evidence/vscode-0.1.7-package-preview.json). The
+current process-profile integration changes rebuilt the unified Release binary.
+The focused managed-profile restart contract passes: a changed trusted process
+configuration refuses an implicit update, performs a protected owner handoff,
+imports the revised registry while the replacement is quiesced, and preserves
+the existing SQLite sessions, history, and graph results. The active-graph
+retirement refusal and recovery path remain covered by that contract.
 
-This current local gate supersedes the historical pending or failed process
-gate observations below for local native execution. It does not turn those
-older hosted attempts into passes or establish current hosted acceptance.
-The 0.1.7 extension suite separately passes **295/295**, and the extension
-activates in its isolated package-test profile; a rendered VS Code sidebar
-process run remains unverified.
+The VS Code suite passes **296/296** and the browser suite **85/85**. The
+extension tests confirm that the managed VS Code launcher forwards the trusted
+configuration path. The native local-profile integration test verifies import,
+protected handoff, and SQLite persistence. The full native view contract and
+the rendered VS Code sidebar process run remain unverified at this checkpoint;
+the full CTest gate has not yet been rerun.
 
-One integration gap prevents treating these components as a ready coding
-shell in the usual managed local view: `xmind view` and the VS Code workspace
-launcher do not currently accept or forward `--process-config`. No process
-profile is seeded by default, so the managed browser/VS Code agent does not
-advertise `run_process` merely because a user has a trusted process profile
-in another server. The standalone server/admin/CLI path can load profiles.
-The next implementation step is managed-view profile enrollment and refresh,
-followed by a reviewed shell-command tool contract. Exact shell discovery,
-background jobs, full-output artifacts, interruption-safe recovery and full
-OpenCode command parity remain open.
+Managed local views now accept a trusted `--process-config`. The browser
+launcher uses the repository's `.config/processes.yaml` when present; the VS
+Code development extension uses that same repository file, and packaged
+installs can set the machine-level `agentflow.processConfigPath`. Opened
+workspaces are never searched for executable profiles. Native xMind reads and
+imports the file; hosts pass only its path. The protected profile records the
+path and content digest. Editing that file requires the managed owner handoff;
+an explicit `profiles: []` retires configured IDs, while removing the file does
+not silently clear the saved registry. No process profile or shell is seeded
+by default. `run_process` appears only when a trusted profile is registered.
+
+This closes profile enrollment/refresh for the managed views; it does not
+complete a coding shell. Shell discovery and command semantics, durable
+background jobs, full-output artifacts, interruption-safe recovery, and full
+OpenCode command parity remain open. The existing PTY test uses synthetic
+shell I/O and does not run a command in the user's workspace.
 
 The `37e153b` hosted gate built and passed 51 native contracts but its approved
 process-executor fixture exceeded the unchanged 45-second outer timeout.
