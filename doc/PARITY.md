@@ -12,25 +12,23 @@ history preserves them, but prototype checks and source mappings do not count
 as native delivery. See [native ownership](NATIVE_ARCHITECTURE.md) and
 [cleanup](cleanup.md).
 
-Baseline: `anomalyco/opencode` tag `v2.0.16`, commit
-`3a103fe0aff726a4edc7492f03f7b88195d9e4c9`, verified with `git ls-remote`.
-[Pinned source](https://github.com/anomalyco/opencode/tree/v2.0.16),
-[documentation](https://opencode.ai/v2/docs). Documentation can differ from this
-release; inspect the pinned source before finalizing each acceptance criterion.
+Baseline: `anomalyco/opencode` tag `v2.0.26`, commit
+`9b4ec5714d481559990db0a816d5dec19541a814`, verified against the remote tag and
+checked out locally. [Pinned source](https://github.com/anomalyco/opencode/tree/v2.0.26),
+[release](https://github.com/anomalyco/opencode/releases/tag/v2.0.26), and
+[V2 documentation](https://opencode.ai/v2/docs) checked 2026-10-10. The docs
+track the current V2 surface and can move independently of the source tag;
+source-defined API contracts take precedence for this inventory.
 
-## Latest local source checkpoint (2026-10-10, `10d2a9a`)
+## Latest local source checkpoint (2026-10-10, `4b7eb96`)
 
-The A2A native client passes the pinned official 1.3.0 JavaScript SDK peer,
-including wrapped `SendMessage` tasks and streamed task/status events. The full
-local Release build and native gate pass **122/122** in **547.58 seconds**;
-current reruns pass the previously failing Unicode-path profile/view startups,
-xlang3 repository open and backend handoff. The same source passes **272/272
-VS Code extension** and **75/75 browser** contracts, plus actual native/browser
-graph, cookie-restart, history and no-replay integration. Exact artifact hashes,
-raw logs and scope are in the [local gate evidence](evidence/native-122-and-views-local-20261010.json).
-These are local checks, not hosted release or rendered installed-editor
-acceptance. The broader OpenCode API inventory remains **25 source candidates,
-111 unmapped operations, zero verified operation-level parity**.
+The latest committed source adds trusted embedded xlang3 Python tool
+registrations to the C++ AgentRunner. Its guarded 7-contract regression gate
+passed, and the xlang3 Unicode working-directory runtime fix is committed and
+pushed on its separate compatibility branch. Earlier full native, browser and
+VS Code gates remain as cited in their checkpoint records; they do not establish
+full OpenCode parity or current installed acceptance. The refreshed V2 API
+inventory is recorded below and is not a product-completion score.
 
 ## Per-agent native tool bindings (`449c085`)
 
@@ -59,12 +57,44 @@ provider-reported usage/backend timings appeared in the sidebar in both the
 in-app browser and external Microsoft Edge. The old unlinked `60415` browser tab is excluded from this acceptance. Exact evidence
 and limits: [saved-profile UI run](evidence/browser-live-saved-profile-ui-20261010.json).
 
-The current OpenAPI audit contains **136 operations**: **25** have a mapped C++
-source candidate, **111** remain unmapped, and **zero** are verified parity.
-The audit embeds all **245** pinned schema components and resolves all **855**
-JSON references, including the operation request and response definitions. Its
-generation is deterministic and refreshes native source hashes. A mapping or
-passing component contract alone does not prove end-to-end feature equivalence.
+The current OpenAPI audit contains **141 operations**: **25** have a mapped C++
+source candidate, **116** remain unmapped, and **zero** are verified parity.
+Compared with v2.0.16, v2.0.26 adds five operations: credential creation/listing,
+server connect/pair, and VCS initialization. These operation IDs are unchanged
+from v2.0.24 through v2.0.26. The audit embeds all **256** pinned
+schema components and resolves all **885** JSON references, including each
+operation's request and response definitions. Its generation is deterministic
+and refreshes native source hashes. A mapping or passing component contract
+alone does not prove end-to-end feature equivalence.
+
+## OpenCode V2 functional baseline
+
+The source/API pin is v2.0.26. The following broader behavior baseline is drawn
+from the official [V2 CLI](https://opencode.ai/v2/docs/cli/),
+[agents](https://opencode.ai/v2/docs/agents/),
+[models](https://opencode.ai/v2/docs/models/),
+[tools](https://opencode.ai/v2/docs/tools/),
+[MCP](https://opencode.ai/v2/docs/mcp-servers/),
+[permissions](https://opencode.ai/v2/docs/permissions/) and
+[sharing](https://opencode.ai/v2/docs/sharing/) documentation, checked on
+2026-10-10. The local coverage column describes the OSS target and current
+evidence; it does not count Nexus-only or unverified behavior as parity.
+
+| Area | OpenCode V2 behavior to match | xMind OSS evidence and remaining gap |
+| --- | --- | --- |
+| Runtime and clients | Full-screen and minimal interactive CLI, automation command, shared background service, explicit standalone/remote connection, web and desktop clients | One persistent native `xmind` backend, console CLI, browser UI and VS Code sidebar are in scope. Full interactive coding UX, consistent installed-client behavior and endpoint-by-endpoint compatibility remain incomplete; standalone Electron is explicitly Nexus-only. |
+| Agents and orchestration | Build/Plan primary agents; foreground/background subagents; Markdown and config agents; per-agent model, visibility, permissions, step limits and defaults | Native single-agent and graph execution, YAML/Markdown authoring and named tool bindings exist. Exact primary/subagent modes, dynamic delegation, graph planning, configuration precedence and rendered selection remain incomplete. |
+| Coding harness | Workspace read/edit, shell, search, LSP, custom tools, skills, attachments/references and review/undo workflows | Native file/search/process tools, approved edits, skills and selected editor context have scoped evidence. General shell/PTY, LSP, broad attachments, complete diff/recovery and full-project coding workflows remain incomplete. |
+| Models and providers | Provider authentication, broad provider/model catalogue, per-session model selection, variants and provider/model request settings | Encrypted multi-provider profiles, native discovery and several native wire protocols exist. Broad provider/model capability acceptance, variants, general settings precedence and complete live-client tests remain incomplete. |
+| MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP MCP and scoped OAuth work exist; OAuth renewal/interoperability, resources/prompts/subscriptions, plugin lifecycle and complete command parity remain incomplete. |
+| Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Backend-owned approvals and effect receipts are implemented for scoped operations. General policy rules, durable change snapshots/reversal and full export/sharing contracts remain incomplete. |
+| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 25 have reviewed native source candidates, 116 are unmapped, and none has verified operation-level parity. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
+
+This is a feature-level checklist, not an assertion that the cited docs are a
+complete specification of every v2.0.26 implementation detail. For API work,
+the tag's committed OpenAPI schema is the exact contract; for client behavior,
+acceptance must cite the corresponding source behavior and a real native/client
+test before a row can be called complete.
 Refresh with `node Tools/audit-opencode.mjs`; the generated
 [inventory](OPENCODE_API_INVENTORY.json) records the exact request, response,
 schema and operation-specific acceptance criteria.
@@ -623,12 +653,13 @@ Complete coding, provider, protocol, CLI and editor acceptance remains required.
 The pinned source lives in the ignored `.agentflow/reference/opencode` checkout.
 `Tools/audit-opencode.mjs` verifies its commit and reads the committed OpenAPI
 schema, so local reference edits cannot silently change the baseline. It
-generates [OPENCODE_API_INVENTORY.json](OPENCODE_API_INVENTORY.json): **136
+generates [OPENCODE_API_INVENTORY.json](OPENCODE_API_INVENTORY.json): **141
 operations**, with upstream parameters/body/responses and acceptance requirements.
-The historical upstream audit lists 139; the pinned schema count is authoritative.
+Earlier upstream audit snapshots counted 139; the pinned schema count is
+authoritative.
 
 Removed-prototype mappings are absent. The native mapping identifies **25
-partial C++ source candidates and 111 unmapped operations**. Each candidate
+partial C++ source candidates and 116 unmapped operations**. Each candidate
 records a checked source anchor, SHA-256, surface and explicit gap. Unmapped
 means no reviewed mapping, not proof that no related component exists. Source
 presence and hashes do not establish behavioral equivalence or executed

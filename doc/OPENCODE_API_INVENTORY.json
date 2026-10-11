@@ -1,11 +1,11 @@
 {
-  "source": "https://github.com/anomalyco/opencode/tree/v2.0.16",
-  "revision": "3a103fe0aff726a4edc7492f03f7b88195d9e4c9",
+  "source": "https://github.com/anomalyco/opencode/tree/v2.0.26",
+  "revision": "9b4ec5714d481559990db0a816d5dec19541a814",
   "statusScope": "Historical Python prototype mappings were removed with that implementation. nativeStatus and nativeEvidence describe reviewed C++ source candidates. Unmapped is not proof of absence; no operation is verified parity.",
   "nativeSourceHashFormat": "SHA-256 of UTF-8 source text with CRLF normalized to LF; source candidates may include uncommitted changes at audit time.",
   "schema": "packages/protocol/openapi.json",
-  "schemaSha256": "8ab6ec800922fc68890c68134320b4063fb317e0d944252d232083e12d32f4e9",
-  "schemaReferenceCount": 855,
+  "schemaSha256": "17951689576c124f66a8b0270d759429f46d2235293b1ec228e889994ac56e5b",
+  "schemaReferenceCount": 885,
   "pinnedComponents": {
     "schemas": {
       "Agent.Color": {
@@ -762,6 +762,27 @@
         ],
         "additionalProperties": false
       },
+      "Config.Model.Capabilities": {
+        "type": "object",
+        "properties": {
+          "tools": {
+            "type": "boolean"
+          },
+          "input": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "output": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
       "Config.Model.CostEncoded": {
         "type": "object",
         "properties": {
@@ -861,7 +882,7 @@
             "type": "object"
           },
           "capabilities": {
-            "$ref": "#/components/schemas/Model.Capabilities"
+            "$ref": "#/components/schemas/Config.Model.Capabilities"
           },
           "variants": {
             "type": "array",
@@ -974,8 +995,31 @@
               }
             ]
           },
+          "headerTimeout": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean",
+                "enum": [
+                  false
+                ]
+              }
+            ]
+          },
           "chunkTimeout": {
-            "type": "number"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean",
+                "enum": [
+                  false
+                ]
+              }
+            ]
           },
           "compaction": {
             "$ref": "#/components/schemas/Provider.Compaction"
@@ -1196,6 +1240,9 @@
               "key",
               "oauth"
             ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/Connection.Status"
           }
         },
         "required": [
@@ -1217,6 +1264,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Connection.Status"
           }
         },
         "required": [
@@ -1232,6 +1282,155 @@
           },
           {
             "$ref": "#/components/schemas/Connection.EnvInfo"
+          }
+        ]
+      },
+      "Connection.Status": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "needs_auth"
+                ]
+              }
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "Credential.CreateInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "integrationID": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/Credential.Value"
+          },
+          "activate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "integrationID",
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "Credential.Entry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "integrationID": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "value": {
+            "$ref": "#/components/schemas/Credential.Value"
+          }
+        },
+        "required": [
+          "id",
+          "integrationID",
+          "label",
+          "active",
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "Credential.Key": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "key"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/Form.Answer_1"
+          }
+        },
+        "required": [
+          "type",
+          "key"
+        ],
+        "additionalProperties": false
+      },
+      "Credential.OAuth": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "oauth"
+            ]
+          },
+          "methodID": {
+            "type": "string"
+          },
+          "refresh": {
+            "type": "string"
+          },
+          "access": {
+            "type": "string"
+          },
+          "expires": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "metadata": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "type",
+          "methodID",
+          "refresh",
+          "access",
+          "expires"
+        ],
+        "additionalProperties": false
+      },
+      "Credential.Value": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/Credential.OAuth"
+          },
+          {
+            "$ref": "#/components/schemas/Credential.Key"
           }
         ]
       },
@@ -1345,6 +1544,12 @@
         "additionalProperties": false
       },
       "Form.Answer": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/Form.Value"
+        }
+      },
+      "Form.Answer_1": {
         "type": "object",
         "additionalProperties": {
           "$ref": "#/components/schemas/Form.Value"
@@ -1870,6 +2075,9 @@
                 "enum": [
                   "cancelled"
                 ]
+              },
+              "message": {
+                "type": "string"
               }
             },
             "required": [
@@ -3783,6 +3991,34 @@
       "Money.USDPerMillionTokens": {
         "type": "number"
       },
+      "PairingCode": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "expires_in": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "code",
+          "expires_in"
+        ],
+        "additionalProperties": false
+      },
+      "PairingSession": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "additionalProperties": false
+      },
       "Permission.Effect": {
         "type": "string",
         "enum": [
@@ -4870,8 +5106,31 @@
               }
             ]
           },
+          "headerTimeout": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean",
+                "enum": [
+                  false
+                ]
+              }
+            ]
+          },
           "chunkTimeout": {
-            "type": "number"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean",
+                "enum": [
+                  false
+                ]
+              }
+            ]
           },
           "compaction": {
             "$ref": "#/components/schemas/Provider.Compaction"
@@ -5190,6 +5449,29 @@
               "tmp"
             ],
             "additionalProperties": false
+          },
+          "capabilities": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "persistentPty": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -6891,6 +7173,18 @@
             "type": "integer",
             "minimum": 100,
             "maximum": 599
+          },
+          "response": {
+            "type": "object",
+            "properties": {
+              "body": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -7386,6 +7680,9 @@
           "exit": {
             "type": "number"
           },
+          "signal": {
+            "type": "string"
+          },
           "metadata": {
             "type": "object"
           },
@@ -7741,6 +8038,29 @@
           "committed"
         ]
       },
+      "VcsInitNotSupportedErrorEncoded": {
+        "type": "object",
+        "properties": {
+          "_tag": {
+            "type": "string",
+            "enum": [
+              "VcsInitNotSupportedError"
+            ]
+          },
+          "providerID": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "_tag",
+          "providerID",
+          "message"
+        ],
+        "additionalProperties": false
+      },
       "WebSearch.Provider": {
         "type": "object",
         "properties": {
@@ -7884,6 +8204,12 @@
       "WorktreeErrorEncoded": {
         "type": "object",
         "properties": {
+          "_tag": {
+            "type": "string",
+            "enum": [
+              "WorktreeError"
+            ]
+          },
           "name": {
             "type": "string",
             "enum": [
@@ -7914,6 +8240,7 @@
           }
         },
         "required": [
+          "_tag",
           "name",
           "data"
         ],
@@ -7923,7 +8250,7 @@
     "securitySchemes": {}
   },
   "schemaReferences": "Operation request/response JSON Pointers are retained and resolve against the embedded pinnedComponents definitions. Non-API behavior is outside this OpenAPI inventory.",
-  "operationCount": 136,
+  "operationCount": 141,
   "operations": [
     {
       "method": "GET",
@@ -7937,7 +8264,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/agents",
         "sourceAnchor": "executor->agent_definitions",
         "gap": "Only persisted ID/revision/model metadata is returned; OpenCode mode, permission, description, hidden/default and source metadata remain incomplete.",
@@ -8047,7 +8374,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/agents/{id}",
         "sourceAnchor": "executor->agent_definition",
         "gap": "Persisted model and instructions are readable; OpenCode mode, permission, description, hidden/default and source metadata remain incomplete.",
@@ -8410,6 +8737,156 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/api/credential",
+      "operationId": "credential.list",
+      "summary": "List credentials",
+      "tags": [
+        "credential"
+      ],
+      "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
+      "agentflowEvidence": null,
+      "upstreamContract": {
+        "parameters": [],
+        "requestBody": null,
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Credential.Entry"
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "InvalidRequestError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestErrorEncoded"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UnauthorizedError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorEncoded"
+                }
+              }
+            }
+          }
+        }
+      },
+      "acceptanceCriteria": {
+        "family": "credential",
+        "behavior": "Validate credential storage, update, activation and removal with secret redaction, correct provider scoping and failure recovery.",
+        "contract": "Compare the pinned request parameters/body, response schemas/statuses and source behavior with the AgentFlow equivalent. Different API paths are allowed; observable capability parity is required.",
+        "evidence": "Run the operation-specific success and failure scenarios through the actual xlang3 backend, then verify corresponding CLI/editor workflows where exposed. Record commands/results; source presence alone is insufficient."
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/credential",
+      "operationId": "credential.create",
+      "summary": "Create credential",
+      "tags": [
+        "credential"
+      ],
+      "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
+      "agentflowEvidence": null,
+      "upstreamContract": {
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credential.CreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Credential.Entry"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "InvalidRequestError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestErrorEncoded"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UnauthorizedError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorEncoded"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ConflictError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictErrorEncoded"
+                }
+              }
+            }
+          }
+        }
+      },
+      "acceptanceCriteria": {
+        "family": "credential",
+        "behavior": "Validate credential storage, update, activation and removal with secret redaction, correct provider scoping and failure recovery.",
+        "contract": "Compare the pinned request parameters/body, response schemas/statuses and source behavior with the AgentFlow equivalent. Different API paths are allowed; observable capability parity is required.",
+        "evidence": "Run the operation-specific success and failure scenarios through the actual xlang3 backend, then verify corresponding CLI/editor workflows where exposed. Record commands/results; source presence alone is insufficient."
+      }
+    },
+    {
       "method": "DELETE",
       "path": "/api/credential/{credentialID}",
       "operationId": "credential.remove",
@@ -8747,7 +9224,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "Native per-run durable event observation",
         "sourceAnchor": "persistence.events",
         "gap": "Per-run event reads support client polling; upstream global/location subscription semantics remain incomplete.",
@@ -8910,7 +9387,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "POST /v1/provider/configuration",
         "sourceAnchor": "\"/v1/provider/configuration\"",
         "gap": "Optimistic provider enrollment exists; general effective configuration precedence and reload remain incomplete.",
@@ -8975,7 +9452,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/agent_runner.cpp",
-        "sourceSha256": "7f706dcc90154f1e3eaad0276625b050b7b6e6df4b3101be653a79878eb0abca",
+        "sourceSha256": "e8cfb84d3f095f9356d28fbfa62d4e021b4c2dd47c9f9b9020c085816c1a367a",
         "surface": "Reviewed native edit_file/create_file tools",
         "sourceAnchor": "CreateExecutor",
         "gap": "Approved exact edits and creation exist; general upstream filesystem write API and its full semantics remain incomplete.",
@@ -11012,7 +11489,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/runs/{id}/events",
         "sourceAnchor": "persistence.events",
         "gap": "Run events are not a complete upstream session log with its filtering and response contract.",
@@ -12469,7 +12946,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/health",
         "sourceAnchor": "\"/v1/health\"",
         "gap": "Native health/capabilities exist; the full pinned identity/version response remains incomplete.",
@@ -13943,7 +14420,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/mcp/servers",
         "sourceAnchor": "\"/v1/mcp/servers\"",
         "gap": "Saved stdio server metadata exists; upstream connection lifecycle fields, HTTP/OAuth and live model/tool acceptance remain incomplete.",
@@ -14152,7 +14629,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/models; POST /v1/provider/profiles/models",
         "sourceAnchor": "\"/v1/models\"",
         "gap": "Enabled models and native OpenAI/Claude/Gemini/DeepSeek profile discovery exist; broad provider capabilities and upstream catalogue fields remain incomplete.",
@@ -14385,6 +14862,61 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/api/pair",
+      "operationId": "server.pair",
+      "summary": "Create pairing code",
+      "tags": [
+        "server"
+      ],
+      "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
+      "agentflowEvidence": null,
+      "upstreamContract": {
+        "parameters": [],
+        "requestBody": null,
+        "responses": {
+          "200": {
+            "description": "PairingCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairingCode"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "InvalidRequestError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestErrorEncoded"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UnauthorizedError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorEncoded"
+                }
+              }
+            }
+          }
+        }
+      },
+      "acceptanceCriteria": {
+        "family": "info",
+        "behavior": "Validate server identity, version and advertised capabilities against the running backend.",
+        "contract": "Compare the pinned request parameters/body, response schemas/statuses and source behavior with the AgentFlow equivalent. Different API paths are allowed; observable capability parity is required.",
+        "evidence": "Run the operation-specific success and failure scenarios through the actual xlang3 backend, then verify corresponding CLI/editor workflows where exposed. Record commands/results; source presence alone is insufficient."
+      }
+    },
+    {
       "method": "GET",
       "path": "/api/permission/request",
       "operationId": "permission.request.list",
@@ -14396,7 +14928,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/runs/{id}/operations",
         "sourceAnchor": "persistence.operations",
         "gap": "Only run-scoped operations exist; a global/location pending permission catalogue is absent.",
@@ -15152,7 +15684,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/provider/profiles",
         "sourceAnchor": "\"/v1/provider/profiles\"",
         "gap": "An encrypted multi-provider profile registry exists; upstream provider fields, broad provider coverage and per-model acceptance remain incomplete.",
@@ -15272,7 +15804,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/provider/profiles",
         "sourceAnchor": "\"/v1/provider/profiles\"",
         "gap": "Public saved profile metadata exists; the upstream provider-by-ID response and broader native provider behavior remain incomplete.",
@@ -16487,7 +17019,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/sessions",
         "sourceAnchor": "\"/v1/sessions\"",
         "gap": "Location/project scoping, filters and pagination remain to be compared.",
@@ -16700,7 +17232,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "POST /v1/sessions",
         "sourceAnchor": "persistence.create_session",
         "gap": "The upstream session fields, agent/environment configuration and full creation lifecycle remain incomplete.",
@@ -16717,6 +17249,17 @@
                 "type": "object",
                 "properties": {
                   "id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^ses"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "parentID": {
                     "anyOf": [
                       {
                         "type": "string",
@@ -16830,6 +17373,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UnauthorizedErrorEncoded"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "SessionNotFoundError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionNotFoundErrorEncoded"
                 }
               }
             }
@@ -17007,7 +17560,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "POST /v1/sessions/{id}/title",
         "sourceAnchor": "persistence.rename_session",
         "gap": "Only optimistic title updates exist; other upstream session metadata changes remain incomplete.",
@@ -18270,6 +18823,21 @@
               "pattern": "^frm_"
             },
             "required": true
+          },
+          {
+            "name": "message",
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required": false
           }
         ],
         "requestBody": null,
@@ -18941,7 +19509,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "POST /v1/runs/{id}/cancel",
         "sourceAnchor": "executor->cancel",
         "gap": "Run cancellation exists; session-level interruption and resumable upstream semantics remain incomplete.",
@@ -19050,7 +19618,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/sessions/{id}/history",
         "sourceAnchor": "persistence.history",
         "gap": "Durable role/data history exists; upstream message IDs, typed parts and pagination need comparison.",
@@ -19330,7 +19898,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "Native per-run model override",
         "sourceAnchor": "executor->submit_model",
         "gap": "A per-run override is not persistent session model switching; upstream behavior remains incomplete.",
@@ -19534,7 +20102,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "GET /v1/runs/{id}/operations",
         "sourceAnchor": "persistence.operations",
         "gap": "Run-scoped effect proposals exist; full session permission categories and lifecycle remain incomplete.",
@@ -19895,7 +20463,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "POST /v1/operations/{id}/decision",
         "sourceAnchor": "persistence.decide_operation",
         "gap": "Single-use allow/deny exists; upstream saved rules and permission category behavior remain incomplete.",
@@ -20018,7 +20586,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "2f1d77ec6812990d9214e59810899a63b2159fbec8da76e56c5e8fd9bfb6d51c",
+        "sourceSha256": "2d46cc96fd8050f1aa8890acf80616f0b4e24c52943a2823cb2906241980a592",
         "surface": "POST /v1/runs",
         "sourceAnchor": "executor->submit_model",
         "gap": "Native model/tool admission exists; attachments, queued input and upstream session input ordering remain incomplete.",
@@ -22121,6 +22689,137 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/api/vcs/init",
+      "operationId": "vcs.init",
+      "summary": "Initialize VCS repository",
+      "tags": [
+        "vcs"
+      ],
+      "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
+      "agentflowEvidence": null,
+      "upstreamContract": {
+        "parameters": [
+          {
+            "name": "location",
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "directory": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required": false,
+            "style": "deepObject",
+            "explode": true
+          },
+          {
+            "name": "provider",
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required": false
+          }
+        ],
+        "requestBody": null,
+        "responses": {
+          "204": {
+            "description": "<No Content>"
+          },
+          "400": {
+            "description": "InvalidRequestError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidRequestErrorEncoded"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidRequestErrorEncoded"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UnauthorizedError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedErrorEncoded"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ConflictError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictErrorEncoded"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "VcsInitNotSupportedError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VcsInitNotSupportedErrorEncoded"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "ServiceUnavailableError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableErrorEncoded"
+                }
+              }
+            }
+          }
+        }
+      },
+      "acceptanceCriteria": {
+        "family": "vcs",
+        "behavior": "Compare real Git repositories for branches, status, diffs and review base; validate dirty files, renames, binary changes and error cases.",
+        "contract": "Compare the pinned request parameters/body, response schemas/statuses and source behavior with the AgentFlow equivalent. Different API paths are allowed; observable capability parity is required.",
+        "evidence": "Run the operation-specific success and failure scenarios through the actual xlang3 backend, then verify corresponding CLI/editor workflows where exposed. Record commands/results; source presence alone is insufficient."
+      }
+    },
+    {
       "method": "GET",
       "path": "/api/vcs/status",
       "operationId": "vcs.status",
@@ -22779,6 +23478,77 @@
       "acceptanceCriteria": {
         "family": "worktree",
         "behavior": "Validate real Git worktree creation, discovery, refresh and safe removal with preservation of user changes and recorded session associations.",
+        "contract": "Compare the pinned request parameters/body, response schemas/statuses and source behavior with the AgentFlow equivalent. Different API paths are allowed; observable capability parity is required.",
+        "evidence": "Run the operation-specific success and failure scenarios through the actual xlang3 backend, then verify corresponding CLI/editor workflows where exposed. Record commands/results; source presence alone is insufficient."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/auth/connect/{code}",
+      "operationId": "server.connect",
+      "summary": "Redeem pairing code",
+      "tags": [
+        "server"
+      ],
+      "status": "missing",
+      "nativeStatus": "unmapped",
+      "nativeEvidence": null,
+      "agentflowEvidence": null,
+      "upstreamContract": {
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": null,
+        "responses": {
+          "200": {
+            "description": "PairingSession",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairingSession"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "InvalidRequestError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestErrorEncoded"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UnauthorizedError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/UnauthorizedErrorEncoded"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnauthorizedErrorEncoded"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "acceptanceCriteria": {
+        "family": "info",
+        "behavior": "Validate server identity, version and advertised capabilities against the running backend.",
         "contract": "Compare the pinned request parameters/body, response schemas/statuses and source behavior with the AgentFlow equivalent. Different API paths are allowed; observable capability parity is required.",
         "evidence": "Run the operation-specific success and failure scenarios through the actual xlang3 backend, then verify corresponding CLI/editor workflows where exposed. Record commands/results; source presence alone is insufficient."
       }

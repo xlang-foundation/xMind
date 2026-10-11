@@ -8,9 +8,9 @@ import { nativePartial } from './opencode-native-mapping.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const reference = resolve(root, '.agentflow/reference/opencode');
-const expected = '3a103fe0aff726a4edc7492f03f7b88195d9e4c9';
+const expected = '9b4ec5714d481559990db0a816d5dec19541a814';
 const revision = execFileSync('git', ['-C', reference, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-if (revision !== expected) throw new Error('Reference revision differs from pinned OpenCode v2.0.16');
+if (revision !== expected) throw new Error('Reference revision differs from pinned OpenCode v2.0.26');
 // Read the committed object so a dirty reference checkout cannot alter the pin.
 const schemaBytes = execFileSync('git', ['-C', reference, 'show', expected + ':packages/protocol/openapi.json'], { maxBuffer: 16 * 1024 * 1024 });
 const schema = JSON.parse(schemaBytes.toString('utf8'));
@@ -62,7 +62,7 @@ for (const [path, methods] of Object.entries(schema.paths)) {
 }
 operations.sort((a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method));
 for (const id of Object.keys(nativePartial)) if (!operations.some(operation => operation.operationId === id)) throw new Error(`Native mapping is outside the pinned schema: ${id}`);
-const inventory = { source: 'https://github.com/anomalyco/opencode/tree/v2.0.16', revision,
+const inventory = { source: 'https://github.com/anomalyco/opencode/tree/v2.0.26', revision,
   statusScope: 'Historical Python prototype mappings were removed with that implementation. nativeStatus and nativeEvidence describe reviewed C++ source candidates. Unmapped is not proof of absence; no operation is verified parity.',
   nativeSourceHashFormat: 'SHA-256 of UTF-8 source text with CRLF normalized to LF; source candidates may include uncommitted changes at audit time.',
   schema: 'packages/protocol/openapi.json', schemaSha256: createHash('sha256').update(schemaBytes).digest('hex'),
