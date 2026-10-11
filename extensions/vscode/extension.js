@@ -758,6 +758,22 @@ async function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.selectWorkspaceRoot',async()=>{
     try{await reconnectWorkspace(true);}catch(error){vscode.window.showErrorMessage(error.message);}
   }));
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.addWorkspaceFolder',async()=>{
+    try{
+      if(!vscode.workspace.isTrusted)throw new Error('Trust the opened workspace before attaching a folder to xMind.');
+      await open();const target=client,owner=workspaceBackend.active;
+      if(!target||!owner)throw new Error('Connect the opened workspace before adding a folder.');
+      const ticket=await workspaceBackend.prepare();workspaceBackend.assert(ticket);
+      if(ticket.origin!==target.baseUrl||owner.origin!==ticket.origin)throw new Error('The selected xMind workspace changed.');
+      const roots=owner.roots||[],primary=owner.canonical.toLowerCase(),candidates=roots.filter(folder=>typeof folder.fsPath==='string'&&folder.fsPath.toLowerCase()!==primary);
+      if(!candidates.length){vscode.window.showInformationMessage('Open another folder in this VS Code window, then run xMind: Add Opened Folder to Workspace.');return;}
+      const selected=await vscode.window.showQuickPick(candidates.map(folder=>({label:folder.name,description:folder.fsPath,folder})),{title:'xMind: Add Opened Folder to Workspace',placeHolder:'Choose a folder already open in this VS Code window'});
+      if(!selected)return;if(client!==target||workspaceBackend.active!==owner)throw new Error('The xMind workspace changed before the folder was attached.');workspaceBackend.assert(ticket);
+      const group=await target.addWorkspaceFolder(selected.folder.fsPath);workspaceBackend.assert(ticket);
+      if(client!==target||workspaceBackend.active!==owner)throw new Error('The xMind workspace changed while the folder was attached.');
+      vscode.window.showInformationMessage(`Added ${selected.folder.name} to the xMind workspace · ${group.folders.length} folders.`);
+    }catch(error){vscode.window.showErrorMessage(error.message);}
+  }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.initializeGit',async()=>{
     try{
       if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before initializing Git.');

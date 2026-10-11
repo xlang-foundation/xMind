@@ -22,6 +22,8 @@ function harness(options={}) {
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
+    if(target.pathname==='/v1/workspace'){const owner=backendOwners[0];assert.ok(owner);return {ok:true,json:async()=>owner.metadata};}
+    if(target.pathname==='/v1/workspaces/add'){const body=JSON.parse(requestOptions.body),owner=backendOwners[0];assert.equal(body.workspace_id,owner.metadata.workspace_id);assert.equal(body.root,options.workspaceFolderToAdd||'D:\\Shared');return {ok:true,json:async()=>({workspace_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,revision:2,primary_folder_id:owner.metadata.workspace_id,folders:[{folder_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,ordinal:0},{folder_id:'windows-local-file-v1:2:shared',name:'Shared',root:body.root,ordinal:1}]})};}
     if(target.pathname==='/v1/vcs/init'){vcsInitializations.push(JSON.parse(requestOptions.body));return {ok:true,status:204,json:async()=>{throw new Error('204 responses have no JSON body');}};}
     if(target.pathname==='/v1/vcs/status')return {ok:true,json:async()=>options.vcsStatus||[]};
     if(target.pathname==='/v1/vcs/base')return {ok:true,json:async()=>options.vcsBase??null};
@@ -106,7 +108,7 @@ function harness(options={}) {
   const vscode={
     ExtensionMode:{Development:2},ConfigurationTarget:{Global:1},
     Uri:{joinPath:(root,...parts)=>[root,...parts].join('/'),parse:value=>({toString:()=>value})},
-    workspace:{isTrusted:true,workspaceFolders:[{name:'TestProj',uri:{fsPath:'D:\\TestProj',toString:()=> 'file:///D:/TestProj'}}],onDidChangeWorkspaceFolders:callback=>{folderListener=callback;return {dispose(){}};},getConfiguration:()=>({get:()=> 'http://localhost:8765',update:async()=>{}}),openTextDocument:async options=>{openedDocuments.push(options);return {language:options.language,getText:()=>options.content};},registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
+    workspace:{isTrusted:true,workspaceFolders:options.workspaceFolders||[{name:'TestProj',uri:{fsPath:'D:\\TestProj',toString:()=> 'file:///D:/TestProj'}}],onDidChangeWorkspaceFolders:callback=>{folderListener=callback;return {dispose(){}};},getConfiguration:()=>({get:()=> 'http://localhost:8765',update:async()=>{}}),openTextDocument:async options=>{openedDocuments.push(options);return {language:options.language,getText:()=>options.content};},registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
       executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(['workbench.view.extension.xmind','workbench.view.explorer'].includes(name))return;assert.equal(name,'xmind.workspace.focus');if(options.clearEditorOnSidebar)vscode.window.activeTextEditor=undefined;sidebarProvider.resolveWebviewView(makeView());}},
@@ -132,7 +134,7 @@ function harness(options={}) {
     signature(){return JSON.stringify(vscode.workspace.workspaceFolders.map(folder=>folder.uri.toString()));}
     requestBackendUpgrade(){backendUpgradeRequests.push(this.epoch);}
     stateFields(){return options.stateScope;}
-    async connect(){const root=vscode.workspace.workspaceFolders[0].uri.fsPath,epoch=this.epoch;await options.beforeConnect?.(root);if(epoch!==this.epoch)throw new Error('Workspace changed while preparing its backend');let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,roots:vscode.workspace.workspaceFolders.map(value=>({fsPath:value.uri.fsPath})),epoch:this.epoch,backendChangePending:options.backendChangePending===true};return this.active;}
+    async connect(){const root=vscode.workspace.workspaceFolders[0].uri.fsPath,epoch=this.epoch;await options.beforeConnect?.(root);if(epoch!==this.epoch)throw new Error('Workspace changed while preparing its backend');let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,canonical:root,roots:vscode.workspace.workspaceFolders.map(value=>({name:value.name,fsPath:value.uri.fsPath})),epoch:this.epoch,backendChangePending:options.backendChangePending===true};return this.active;}
     async attach(){return this.connect();}
     async prepare(){if(!this.active)throw new Error('Workspace disconnected');return {origin:this.active.origin,epoch:this.epoch,fields:{expected_workspace_id:this.active.metadata.workspace_id,expected_workspace_authority_id:this.active.metadata.authority_id}};}
     assert(ticket){if(!this.active||ticket.epoch!==this.epoch||ticket.origin!==this.active.origin)throw new Error('Workspace changed');}
@@ -628,6 +630,12 @@ test('Git initialization command confirms the selected VS Code workspace and use
  const h=harness({cancelChoice:'Initialize Git'});await h.activation;await h.commands.get('agentflow.initializeGit')();assert.equal(h.vcsInitializations.length,1);assert.deepEqual(h.vcsInitializations[0],{});assert.match(h.warnings[0].message,/D:\\TestProj/);assert.equal(h.warnings[0].choices[0].modal,true);assert.deepEqual(h.warnings[0].choices.slice(1),['Initialize Git']);assert.deepEqual(h.information,['Git repository initialized in D:\\TestProj.']);h.views[0].close();
 });
 test('Git initialization command cancellation does not send a backend mutation',async()=>{const h=harness();await h.activation;await h.commands.get('agentflow.initializeGit')();assert.equal(h.warnings.length,1);assert.equal(h.vcsInitializations.length,0);h.views[0].close();});
+
+test('VS Code can explicitly attach another opened folder to its native workspace',async()=>{
+ const folders=[{name:'TestProj',uri:{fsPath:'D:\\TestProj',toString:()=> 'file:///D:/TestProj'}},{name:'Shared',uri:{fsPath:'D:\\Shared',toString:()=> 'file:///D:/Shared'}}],h=harness({workspaceFolders:folders,quickPickLabel:'Shared',workspaceFolderToAdd:'D:\\Shared'});
+ await h.activation;await h.commands.get('agentflow.addWorkspaceFolder')();
+ assert.ok(h.requests.includes('/v1/workspaces/add'),JSON.stringify({requests:h.requests,errors:h.errors,pickers:h.pickers}));assert.deepEqual(h.information,['Added Shared to the xMind workspace · 2 folders.']);assert.deepEqual(h.errors,[]);h.views[0].close();
+});
 
 test('Git status command uses the opened workspace and shows native file counts',async()=>{
  const h=harness({vcsStatus:[{file:'src/main.cpp',additions:3,deletions:1,status:'modified'},{file:'new file.txt',additions:2,deletions:0,status:'added'}],quickPickLabel:'modified  "src/main.cpp"'});await h.activation;await h.commands.get('agentflow.gitStatus')();

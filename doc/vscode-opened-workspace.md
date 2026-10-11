@@ -85,3 +85,21 @@ manifest and complete inventory were verified before launch. The host exited
 successfully. The fresh isolated test profile used the standard workspace-trust
 test flag; model inference and rendered screenshot acceptance were not performed.
 [Current package host evidence](evidence/native-ci-staging-vscode-opened-folder.json).
+
+## Opened-folder membership command — 2026-10-11
+
+The extension now exposes **xMind: Add Opened Folder to Workspace**. It offers
+folders from the current `workspace.workspaceFolders`, sends the selected
+absolute root through the authenticated local view host, and verifies the
+native response retains the selected primary workspace ID/root and ordered
+membership. It does not synthesize a `.code-workspace` file or switch the
+primary root. Duplicate or invalid registrations remain native errors.
+
+The VS Code client/host suites passed **115/115**, and the native
+`native_local_view_contract` passed with an actual unified xMind executable.
+The latter proves host-authenticated folder attachment preserves the primary
+identity and membership revision. VS Code folder addition is currently
+exercised at the host/controller fixture boundary, not in an installed or
+rendered IDE; attached-folder agent reads through that VS Code-launched profile
+and runtime are not yet verified. Editing, Git, process and language-server
+tools remain primary-folder-only.

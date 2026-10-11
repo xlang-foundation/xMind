@@ -51,6 +51,15 @@ class BackendClient {
   }
   health() { return this.request('/v1/health'); }
   async workspace() { return validateWorkspace(await this.request('/v1/workspace')); }
+  async addWorkspaceFolder(root) {
+    if(typeof root!=='string'||!root||root.length>32760||/[\x00-\x1f]/.test(root)||!(/^[A-Za-z]:[\\/]/.test(root)||/^\\\\[^\\/]+\\[^\\/]+(?:\\|$)/.test(root)))throw new Error('Choose an absolute local or UNC workspace folder.');
+    const workspace=await this.workspace(),value=await this.request('/v1/workspaces/add',{workspace_id:workspace.workspace_id,root},30000);
+    exactFields(value,['workspace_id','name','root','revision','primary_folder_id','folders']);
+    if(value.workspace_id!==workspace.workspace_id||typeof value.name!=='string'||!value.name||typeof value.root!=='string'||!Number.isSafeInteger(value.revision)||value.revision<1||value.primary_folder_id!==workspace.workspace_id||!Array.isArray(value.folders)||!value.folders.length||value.folders.length>256)throw new Error('The native host returned invalid workspace membership.');
+    const ids=new Set();for(let ordinal=0;ordinal<value.folders.length;ordinal++){const folder=value.folders[ordinal];exactFields(folder,['folder_id','name','root','ordinal']);if(typeof folder.folder_id!=='string'||!folder.folder_id||ids.has(folder.folder_id)||typeof folder.name!=='string'||!folder.name||typeof folder.root!=='string'||!Number.isSafeInteger(folder.ordinal)||folder.ordinal!==ordinal)throw new Error('The native host returned an invalid workspace folder.');ids.add(folder.folder_id);}
+    if(value.folders[0].folder_id!==value.primary_folder_id||value.folders[0].root!==value.root||value.folders[0].root!==workspace.root)throw new Error('The native host changed the workspace primary folder.');
+    return value;
+  }
   async languageServerProfiles() {
     const value=await this.request('/v1/language-servers');exactFields(value,['profiles']);
     if(!Array.isArray(value.profiles)||value.profiles.length>16)throw new Error('Invalid native language-server catalogue.');

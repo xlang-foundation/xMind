@@ -73,8 +73,12 @@ The local browser now implements membership creation and read-only browsing:
 **New workspace** chooses the primary folder, **Add folder** attaches another
 folder to the same workspace, and each member is shown in its own file tree.
 Folder reads use the member folder ID and native handle identity. Agent file
-tools, edits and processes, plus Git and language-server routing, still use the
-primary folder. CLI and VS Code do not yet consume the membership registry.
+tools can read from the captured member-folder set; edits and processes, plus
+Git and language-server routing, still use the primary folder. VS Code can add
+another folder from its opened workspace through **xMind: Add Opened Folder to
+Workspace**; this does not create a `.code-workspace` file or change the primary
+root. The CLI still uses one `--workspace` root and does not yet mutate the
+membership registry.
 
 ### Current multi-folder integration and remaining gaps
 

@@ -14,9 +14,11 @@ the registry transactionally at each single-agent root admission. Its native
 read/list/search/glob tools accept an optional registered `folder_id`, default
 to the primary folder, reopen each admitted root and verify its identity. The
 run stores its exact membership revision and folder bindings; admitted agent
-children reuse that snapshot. Graph-node tools, edits, approvals, process,
-Git/language-server routing, CLI/VS Code folder controls and folder removal
-still bind only the primary folder. The local browser displays each attached
+children reuse that snapshot. VS Code can explicitly attach another folder
+already open in its window through **xMind: Add Opened Folder to Workspace**;
+the native host retains the existing primary identity. Graph-node tools,
+edits, approvals, process, Git/language-server routing, CLI membership controls
+and folder removal still bind only the primary folder. The local browser displays each attached
 folder as its own tree and reads previews through a native route that resolves
 the selected workspace's folder ID, re-opens the directory and verifies its
 native identity on every request.
@@ -33,17 +35,18 @@ See the [current browser behavior and gap](browser-view.md#multi-folder-workspac
    selected workspace, the folder list shows each member and which one is
    primary. Adding or removing a member changes the workspace membership
    revision.
-4. Removing a folder detaches it from the workspace; it never deletes the
+4. VS Code's **Add Opened Folder to Workspace** command attaches a folder from
+   `workspace.workspaceFolders` to its current native profile. It does not
+   create a `.code-workspace` file or change the primary root. Removing a folder detaches it from the workspace; it never deletes the
    directory. Existing runs retain the exact membership snapshot admitted at
    their start. New runs use the new revision.
 
-The local browser's picker can choose only paths on the xMind host. The local
-browser alone currently creates and attaches membership. VS Code still starts
-from the editor's single opened workspace root, and the CLI still uses its
-single `--workspace` root; neither currently observes or mutates this registry.
-The extension must use `workspace.workspaceFolders`, not the repository
-containing the extension or a generated `.code-workspace` file, when that
-integration is implemented. A future Nexus connection can supply a
+The local browser's picker can choose only paths on the xMind host. Browser
+creation/attachment and the explicit VS Code attachment command persist in the
+same profile registry. VS Code still starts from one selected opened root;
+other opened folders become members only when the user invokes the command.
+The CLI still uses its single `--workspace` root and does not mutate this
+registry. A future Nexus connection can supply a
 server-authorized workspace record through the same protocol; it cannot turn a
 client path into server authority.
 
@@ -91,10 +94,11 @@ Delegation, graphs, MCP and A2A inherit only the admitted workspace snapshot;
 they cannot expand membership themselves.
 
 The browser canvas shows one file tree per member folder, with explicit folder
-selection for previews. Git remains bound to the primary folder. The VS Code extension uses
-the editor's multi-root folders and scopes edits, terminals, language servers
-and approvals to the owning folder. The CLI reports the selected workspace and
-folder context and offers commands to list workspaces and add a folder.
+selection for previews. Git remains bound to the primary folder. VS Code can
+attach opened folders; read/list/search/glob agent tools then use the captured
+registry membership. Edits, terminals, language servers and approvals remain
+bound to the selected primary folder. The CLI reports the selected workspace
+and folder context and offers commands to list workspaces and add a folder.
 
 ## Required acceptance
 

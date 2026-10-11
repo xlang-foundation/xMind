@@ -523,16 +523,20 @@ int run_local_view(int argc, char **argv) {
                     return;
                 }
                 if (request.path == "/v1/workspaces/add" && request.method == "POST") {
-                    if (host || request.target != request.path ||
-                        request.get_header_value_count("X-XMind-View-Origin") != 1 ||
+                    if (request.target != request.path ||
+                        (!host && request.get_header_value_count("X-XMind-View-Origin") != 1) ||
                         request.get_header_value("Content-Type") != "application/json") {
                         response(output, 400, "Invalid workspace folder attachment request");
                         return;
                     }
-                    const auto [current_id, current] = browser_workspace(supplied, browser_origin);
-                    if (!validate_browser_session(supplied, current, browser_origin)) {
-                        response(output, 401, "Browser view session expired or was revoked");
-                        return;
+                    const auto current_id = host ? agentflow::WorkspaceTools(connection->workspace).identity() :
+                        browser_workspace(supplied, browser_origin).first;
+                    if (!host) {
+                        const auto [latest_id, current] = browser_workspace(supplied, browser_origin);
+                        if (latest_id != current_id || !validate_browser_session(supplied, current, browser_origin)) {
+                            response(output, 401, "Browser view session expired or was revoked");
+                            return;
+                        }
                     }
                     std::set<std::string> keys;
                     const auto input = Json::parse(body, [&](int depth, Json::parse_event_t event, Json &value) {
