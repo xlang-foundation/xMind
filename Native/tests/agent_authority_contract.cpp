@@ -66,6 +66,7 @@ int main(){try{
     different=base;different.provider_identity->profile_revision=4;require(identity(different,metadata)!=bound,"Admitted provider generation was not bound");
     different=base;different.provider.deadline+=std::chrono::milliseconds(1);require(identity(different,metadata)!=bound,"Transport policy was not bound");
     different=base;different.approved_edits=false;require(identity(different,metadata)!=bound,"Effect capability was not bound");
+    different=base;different.a2a_enabled=false;require(identity(different,metadata)!=bound,"Remote-agent capability was not bound");
     different=base;different.process_profiles.front().prefix_arguments.push_back("changed");require(identity(different,metadata)!=bound,"Trusted process command was not bound");
     different=base;different.process_profiles.front().executable_id="other-executable-object";require(identity(different,metadata)!=bound,"Executable identity was not bound");
     different=base;different.mcp_servers.front().arguments.push_back("changed");require(identity(different,versions(different))!=bound,"MCP command/purpose was not bound");
