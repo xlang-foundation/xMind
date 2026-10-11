@@ -40,5 +40,6 @@ input{font:inherit;color:var(--vscode-input-foreground);background:var(--vscode-
 .approval-notice[hidden]{display:none}
 .approval-notice button{flex:none}
 #events{max-height:240px;overflow:auto}
+.provider-key-status{border-left:3px solid var(--vscode-testing-iconPassed,#73c991);background:var(--vscode-input-background);padding:6px 8px;border-radius:4px;font-size:12px}
 #mcp-settings{margin-top:20px;padding-top:12px;border-top:1px solid var(--vscode-panel-border)}.mcp-heading,.mcp-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}.mcp-heading h3{margin:0;font-size:14px}.mcp-server{padding:10px 0;border-bottom:1px solid var(--vscode-panel-border);overflow-wrap:anywhere}.mcp-actions{justify-content:flex-start}#mcp-status{font-size:12px;overflow-wrap:anywhere}
 #operations .a2a-follow-up-input{display:block;width:100%;box-sizing:border-box;resize:vertical;min-height:4.5rem;margin:.5rem 0;padding:.55rem .65rem;border:1px solid var(--vscode-input-border,var(--vscode-panel-border));border-radius:4px;background:var(--vscode-input-background);color:var(--vscode-input-foreground);font:inherit}#operations .a2a-follow-up-input[readonly]{opacity:.8}#operations .a2a-follow-up{margin-bottom:.5rem}

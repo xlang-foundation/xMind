@@ -496,6 +496,7 @@ function profileRoutes(){
   const choose=byId('provider-name');choose.replaceChildren();for(const route of routes){const option=node('option',providerLabel(route.provider)+' · '+providerWireLabels[route.wire]);option.value=route.id;choose.append(option);}
   if(selected)choose.value=selected.route_id;else if(routes.some(value=>value.id==='openai.responses'))choose.value='openai.responses';
   byId('provider-key').required=!selected;byId('provider-key-label').textContent=selected?'API key (optional)':'API key';byId('provider-key-help').textContent=selected?'Leave blank to use the saved key. Enter a new key only to replace it.':'Enter the key for this new profile, then choose a model below after fetching.';
+  const keyStatus=byId('provider-key-status');keyStatus.hidden=!selected;keyStatus.textContent=selected?'Saved provider key is configured on this xMind backend and will be used automatically. You do not need to enter it here.':'';
   choose.disabled=!routes.length;byId('profile-use').disabled=!selected||selected.id===profileState.active;
 }
 byId('provider-profile').onchange=()=>{byId('provider-key').value='';byId('settings-status').textContent='';profileRoutes();api.postMessage({type:'discardProviderKey'});};
