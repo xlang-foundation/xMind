@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-11",
+  "scope": "Local development package preview; not a clean reproducible release artifact.",
+  "xmind": {
+    "revision": "7acf21fc54bb5f3e14369cb86c3879e27643b3ce",
+    "branch": "checkpoint/native-persistence-m1",
+    "nativeBinary": "build/goal-current/Release/xmind.exe",
+    "nativeBinarySha256": "f0fbe2d43201222a04b38e581f004d0189cf102b8187e3c92a27b09805b301b8"
+  },
+  "xlang3": {
+    "revision": "8151a334a5e2ed0183b40ba6a98d1010b6cd96ae",
+    "workingTreeDirty": true,
+    "runtime": "Prebuilt configured Release runtime/modules; no xlang3 files changed during packaging."
+  },
+  "nativeTests": {
+    "passed": 132,
+    "failed": 0,
+    "log": "build/goal-current/Testing/Temporary/LastTest.log",
+    "logSha256": "cb273e5e8c0ffc07bea0a55ae7fd39572075402bd9a7170467aadbe85bb04a40"
+  },
+  "vscodeTests": {
+    "passed": 295,
+    "failed": 0
+  },
+  "package": {
+    "file": "extensions/vscode/agentflow-0.1.7.vsix",
+    "version": "0.1.7",
+    "bytes": 18897572,
+    "sha256": "e2445e0a3ee892e45a056c2ec90b933d88f56a2dd96e0729fd17f71b5f7eb2fe",
+    "nativeRuntimeFiles": 1899,
+    "nativeRuntimeManifestSha256": "175bcdb47b9179ab8cb7dbbbdfd32d901fe624994135c82525c7f8556b3ce0ea",
+    "privateStatePackaged": false,
+    "verifiedBrowserAssets": 20,
+    "isolatedInstallation": "agentflow-local.agentflow@0.1.7",
+    "extensionActivated": true,
+    "renderedSidebarAcceptance": false
+  },
+  "browser": {
+    "savedCredentialModelDiscovery": "Live local page fetched 20 OpenAI model IDs using its encrypted saved credential; the credential value was not returned to the browser."
+  },
+  "packaging": {
+    "providerConfigurationRead": false,
+    "nativeExecutedByPackaging": false
+  }
+}

@@ -17,6 +17,27 @@ extension suite passes **295/295**; native local-view, local-profile and shared
 provider-config contracts pass **3/3**. Installed VS Code packaging and full
 OpenCode parity remain separate work.
 
+## Local xMind 0.1.7 VS Code package preview (2026-10-11)
+
+The browser assets now rebuild from the same saved-key recovery controller as
+the VS Code client. After rebuilding the live browser assets and reconnecting,
+the real page fetched its saved provider's model catalogue without showing or
+requesting the secret again. The UI confirmed that the key stayed in local
+xMind. The Settings key field is intentionally blank when reusing a saved
+credential.
+
+The local 0.1.7 VSIX uses the current xMind Release binary and the configured
+xlang3 Release runtime/modules, with source hashes verified in its native
+runtime manifest. The complete native suite passed **132/132** and the VS Code
+suite passed **295/295**. The VSIX contains 1,899 runtime files and passed the
+20-asset/private-state package check. It installed and activated as
+`agentflow-local.agentflow@0.1.7` in the isolated package-test profile.
+[Package evidence](evidence/vscode-0.1.7-package-preview.json). The xlang3
+checkout at `8151a334` was dirty when its already-built binaries were packaged;
+this is a local preview, not a clean reproducible release artifact. No xlang3
+files were changed by packaging. The broader OpenCode feature-parity audit and
+rendered VS Code sidebar acceptance remain open.
+
 ## Native MCP resources and prompts (2026-10-11)
 
 The C++ MCP clients now list resources/prompts and read resources/get prompts
