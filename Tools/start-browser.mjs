@@ -11,10 +11,10 @@ import {verifyNativeRuntime} from '../extensions/vscode/native-runtime.js';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const options=new Map();
 for(let i=2;i<process.argv.length;i+=2){
-  if(!['--backend','--state','--assets','--runtime','--workspace','--profile-root','--ready-root','--port','--provider-config'].includes(process.argv[i])||!process.argv[i+1]||options.has(process.argv[i]))throw new Error('Invalid browser launcher arguments');
+  if(!['--backend','--state','--assets','--runtime','--built-server','--workspace','--profile-root','--ready-root','--port','--provider-config'].includes(process.argv[i])||!process.argv[i+1]||options.has(process.argv[i]))throw new Error('Invalid browser launcher arguments');
   options.set(process.argv[i],process.argv[i+1]);
 }
-if(options.has('--backend')&&['--runtime','--workspace','--profile-root','--ready-root','--provider-config'].some(name=>options.has(name)))throw new Error('--backend cannot be combined with native profile launch options');
+if(options.has('--backend')&&['--runtime','--built-server','--workspace','--profile-root','--ready-root','--provider-config'].some(name=>options.has(name)))throw new Error('--backend cannot be combined with native profile launch options');
 const env=process.env;
 const localAppData=env.LOCALAPPDATA||join(env.USERPROFILE||root,'AppData','Local');
 const state=resolve(options.get('--state')||join(localAppData,'xMind','BrowserView'));
@@ -28,7 +28,7 @@ let backend=viewOrigin,nativePid,tokenFile,localAccessToken;
 if(!backend){
   const runtime=resolve(options.get('--runtime')||join(root,'extensions','vscode','native-runtime'));
   const verified=await verifyNativeRuntime(runtime);
-  const builtServer=join(root,'build','skill-state-native','Release','xmind.exe');
+  const builtServer=options.has('--built-server')?resolve(options.get('--built-server')):join(root,'build','skill-state-native','Release','xmind.exe');
   try{
     const builtHash=createHash('sha256').update(await readFile(builtServer)).digest('hex');
     if(verified.manifest.files['xmind.exe']!==builtHash)throw new Error('The selected verified runtime does not match the current native build. Package the current xmind.exe into a verified runtime and pass it with --runtime.');
