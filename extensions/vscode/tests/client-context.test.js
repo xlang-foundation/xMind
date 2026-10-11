@@ -4,6 +4,9 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const {BackendClient,ContextViewController,validateContextObservation,validateGraphContext}=require('../client');
 const token='synthetic-context-adapter-token-'.padEnd(64,'x');
 const record=()=>({session_id:'session',model_id:'model:variant/v1',enabled:true,automatic:false,head_revision:4,source_watermark:9,manual:null,checkpoint:{id:'checkpoint',provider_elapsed_ms:12,preparation_elapsed_ms:14,usage:{input_tokens:41,output_tokens:9}}});
+test('A2A follow-up sends bounded sequenced text to its saved operation route',async()=>{
+ const calls=[],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>({})};});await client.followUpA2aTask('a2a-operation',2,'Need the missing detail');assert.ok(calls[0].url.endsWith('/v1/operations/a2a-operation/a2a/follow-up'));assert.deepEqual(JSON.parse(calls[0].options.body),{sequence:2,message:'Need the missing detail'});assert.throws(()=>client.followUpA2aTask('a2a-operation',0,'invalid'));assert.throws(()=>client.followUpA2aTask('a2a-operation',1,'  '));assert.equal(calls.length,1);
+});
 test('context routes preserve actual supplied metrics, model/query and idempotent request/profile preconditions',async()=>{
  const calls=[],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>url.includes('/graph-runs/')?{id:'root',session_id:'session',state:'paused',parent_id:'',node_id:'',graph_root:true}:url.includes('/requests/')||options.method==='POST'?{id:'request',state:'pending'}:record()};});
  const actual=await client.context('session','model:variant/v1');await client.contextRequest('session','request','model:variant/v1');

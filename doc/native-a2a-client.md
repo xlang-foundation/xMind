@@ -67,8 +67,7 @@ check owner authentication, same-origin browser forwarding, exact saved task
 ID, durable inspection, CLI routing, client identity checks, and that uncertain
 dispatches do not issue a second remote effect. This is explicit polling;
 initial task events now stream for peers that advertise the capability, while
-resubscription/recovery, input-required follow-up, artifacts and cross-client
-rendered acceptance remain open. These are required
+resubscription/recovery, artifacts and cross-client rendered acceptance remain open. These are required
 before claiming full outbound A2A parity.
 
 An explicit outbound cancellation route is now also wired to acknowledged
@@ -84,8 +83,22 @@ unknown and requires inspection; it is never replayed. The webpage asks for
 browser confirmation and VS Code asks through its modal confirmation before
 sending. This path currently exercises v1 JSON-RPC `CancelTask`; independent
 SDK cancellation, post-restart rendering of the durable control outcome, stream
-resumption, input-required follow-up, artifacts and complete peer acceptance
-remain open.
+resumption, artifacts and complete peer acceptance remain open.
+
+An input-required remote task can now receive a sequenced follow-up through
+`POST /v1/operations/{id}/a2a/follow-up`, the `a2a-follow-up` CLI command, and
+the shared webpage/VS Code operation panel. The server rechecks the registered
+peer revision and interface, fetches the saved remote task, and accepts a
+follow-up only while that task reports `input-required`. Each user message is
+bound to its operation, agent revision, task ID and monotonically increasing
+sequence in xlang3 SQLite. A compare-and-swap claim precedes the send boundary;
+the peer acknowledgement is persisted, while a lost reply is marked uncertain
+and is never replayed. A follow-up known not to have dispatched can be retried
+only with the same text. Inspection returns the durable sequence and retry
+state for reconnecting clients. The native contract covers owner/view
+authentication, task/context and message binding, ordered acknowledgments,
+duplicate rejection, uncertainty quarantine and restart inspection. Hosted
+Windows compilation and execution of this expanded contract remain pending.
 
 The native outbound JSON-RPC client exposes capability-gated SSE methods for
 `SendStreamingMessage` and `SubscribeToTask`, mapping their A2A 1.0 and 0.3

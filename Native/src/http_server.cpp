@@ -393,7 +393,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|models|agents|graphs|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|models|agents|graphs|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -916,7 +916,10 @@ struct HttpServer::Impl {
             bool saved=false;
             for(int attempt=0;attempt<8&&!saved;++attempt){std::optional<std::string> previous;try{previous=persistence.information("native-a2a-task-observations",operation.id).get();}catch(const NotFound&){}try{persistence.compare_information("native-a2a-task-observations",operation.id,record.dump(),std::move(previous)).get();saved=true;}catch(const Conflict&){if(attempt==7)throw;}}
             std::string cancel_state="not_attempted";std::optional<std::string> control_text;try{control_text=persistence.information("native-a2a-task-controls",operation.id).get();}catch(const NotFound&){}if(control_text){Json control;try{control=Json::parse(*control_text);}catch(const Json::exception&){throw DatabaseError("Stored A2A cancellation receipt is invalid");}if(!control.is_object()||control.value("version",0)!=1||control.value("operation_id",std::string{})!=operation.id||control.value("agent_id",std::string{})!=agent_id||control.value("agent_revision",std::int64_t{})!=expected_revision||control.value("task_id",std::string{})!=task_id||!control.contains("state")||!control["state"].is_string()||(control["state"]!="outcome_unknown"&&control["state"]!="acknowledged"))throw DatabaseError("Stored A2A cancellation receipt does not match its saved task");cancel_state=control["state"].get<std::string>();}
-            reply(response,{{"operation_id",operation.id},{"agent_id",agent_id},{"task_id",task_id},{"task",std::move(remote)},{"inspected_unix_ms",record["inspected_unix_ms"]},{"cancel_state",cancel_state}});
+            std::int64_t follow_up_sequence=0;std::string follow_up_state="none";
+            for(std::int64_t sequence=1;sequence<=64;++sequence){std::optional<std::string> saved;try{saved=persistence.information("native-a2a-task-followups",operation.id+"-"+std::to_string(sequence)).get();}catch(const NotFound&){}if(!saved)break;Json follow_up;try{follow_up=Json::parse(*saved);}catch(const Json::exception&){throw DatabaseError("Stored A2A follow-up receipt is invalid");}if(!follow_up.is_object()||follow_up.value("version",0)!=1||follow_up.value("operation_id",std::string{})!=operation.id||follow_up.value("agent_id",std::string{})!=agent_id||follow_up.value("agent_revision",std::int64_t{})!=expected_revision||follow_up.value("task_id",std::string{})!=task_id||follow_up.value("sequence",std::int64_t{})!=sequence||!follow_up.contains("state")||!follow_up["state"].is_string())throw DatabaseError("Stored A2A follow-up receipt does not match its saved task");const auto state=follow_up["state"].get<std::string>();if(state=="acknowledged"){follow_up_sequence=sequence;follow_up_state="acknowledged";continue;}if(state=="outcome_unknown"||state=="ready"||state=="dispatching"||state=="not_dispatched"){follow_up_state=state;break;}throw DatabaseError("Stored A2A follow-up state is invalid");}
+            Json inspected={{"operation_id",operation.id},{"agent_id",agent_id},{"task_id",task_id},{"task",std::move(remote)},{"inspected_unix_ms",record["inspected_unix_ms"]},{"cancel_state",cancel_state},{"follow_up_sequence",follow_up_sequence},{"follow_up_state",follow_up_state}};if(follow_up_state=="ready"||follow_up_state=="dispatching"||follow_up_state=="not_dispatched"){try{const auto pending=persistence.information("native-a2a-task-followups",operation.id+"-"+std::to_string(follow_up_sequence+1)).get();const auto retry=Json::parse(pending);if(retry.is_object()&&retry.contains("message")&&retry["message"].is_string()&&retry["message"].get_ref<const std::string&>().size()<=32768)inspected["follow_up_retry_message"]=retry["message"];}catch(const NotFound&){}catch(const Json::exception&){throw DatabaseError("Stored A2A follow-up message is invalid");}}
+            reply(response,std::move(inspected));
         }));
         server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/a2a/cancel)",guarded([this](const Request& request,Response& response) {
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("A2A task cancellation request exceeds limits");
@@ -948,6 +951,62 @@ struct HttpServer::Impl {
             Json acknowledged=intent;acknowledged["state"]="acknowledged";acknowledged["task_json"]=remote;acknowledged["acknowledged_unix_ms"]=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
             persistence.compare_information(category,operation.id,acknowledged.dump(),intent_json).get();
             reply(response,{{"operation_id",operation.id},{"agent_id",agent_id},{"task_id",task_id},{"task",remote},{"cancel_state","acknowledged"},{"requested_unix_ms",requested}});
+        }));
+        server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/a2a/follow-up)",guarded([this](const Request& request,Response& response) {
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>200000)throw std::invalid_argument("A2A follow-up request exceeds limits");
+            const auto input=body(request,{"sequence","message"});
+            if(!input.contains("sequence")||!input["sequence"].is_number_integer())throw std::invalid_argument("A2A follow-up sequence is required");
+            const auto sequence=input["sequence"].get<std::int64_t>();if(sequence<1||sequence>64)throw std::invalid_argument("A2A follow-up sequence is out of range");
+            const auto text=string_field(input,"message",32768);
+            const auto operation=persistence.operation(identifier(request.matches[1])).get();
+            if(operation.spec.tool!="a2a_delegate")throw NotFound("A2A delegation operation not found");
+            if(operation.state!=OperationState::succeeded)throw Conflict("Only an acknowledged A2A task can receive a follow-up");
+            Json binding,result;
+            try{binding=Json::parse(operation.spec.arguments_json);result=Json::parse(operation.result_json);}catch(const Json::exception&){throw DatabaseError("Stored A2A task receipt is invalid");}
+            if(!binding.is_object()||!binding.contains("agent_id")||!binding["agent_id"].is_string()||!binding.contains("agent_revision")||!binding["agent_revision"].is_number_integer()||!binding.contains("card_url")||!binding["card_url"].is_string()||!binding.contains("protocol_version")||!binding["protocol_version"].is_string()||!binding.contains("endpoint")||!binding["endpoint"].is_string()||
+               !result.is_object()||!result.value("acknowledged_by_peer",false)||!result.contains("task_id")||!result["task_id"].is_string())throw Conflict("A2A operation has no acknowledged task to continue");
+            const auto agent_id=string_field(binding,"agent_id",64),card_url=string_field(binding,"card_url",8192),version=string_field(binding,"protocol_version",16),endpoint=string_field(binding,"endpoint",8192),task_id=string_field(result,"task_id",256);
+            const auto expected_revision=binding["agent_revision"].get<std::int64_t>();
+            if(expected_revision<1||expected_revision>9007199254740991LL||task_id.find_first_of("\r\n")!=std::string::npos)throw Conflict("Stored A2A task binding is invalid");
+            const auto category="native-a2a-task-followups",record_id=operation.id+"-"+std::to_string(sequence);
+            if(sequence>1){
+                std::optional<std::string> prior;try{prior=persistence.information(category,operation.id+"-"+std::to_string(sequence-1)).get();}catch(const NotFound&){}
+                if(!prior)throw Conflict("A2A follow-ups must continue in order from an acknowledged response");
+                Json previous;try{previous=Json::parse(*prior);}catch(const Json::exception&){throw DatabaseError("Stored A2A follow-up receipt is invalid");}
+                if(!previous.is_object()||previous.value("version",0)!=1||previous.value("operation_id",std::string{})!=operation.id||previous.value("agent_id",std::string{})!=agent_id||previous.value("agent_revision",std::int64_t{})!=expected_revision||previous.value("task_id",std::string{})!=task_id||previous.value("sequence",std::int64_t{})!=sequence-1||previous.value("state",std::string{})!="acknowledged")throw Conflict("The previous A2A follow-up is not safely acknowledged");
+            }
+            auto resolved=remote_agents.resolve(agent_id);
+            if(resolved.descriptor.revision!=expected_revision||resolved.descriptor.card_url!=card_url)throw Conflict("A2A registration changed; refusing to continue through a different peer identity");
+            A2aJsonRpcClient peer(card_url,std::move(resolved.bearer));const auto discovered=peer.discover(std::chrono::seconds(5));
+            if(discovered.protocol_version!=version||discovered.endpoint!=endpoint)throw Conflict("A2A peer interface changed since task admission");
+            const auto current=Json::parse(peer.get_task(Json{{"id",task_id}}.dump(),std::chrono::seconds(10)));
+            if(!current.is_object()||current.size()>128||!current.contains("id")||!current["id"].is_string()||current["id"]!=task_id||!current.contains("status")||!current["status"].is_object())throw TransportError("A2A peer returned an invalid follow-up task snapshot");
+            const auto remote_state=current["status"].value("state",std::string{});
+            if(remote_state!="TASK_STATE_INPUT_REQUIRED"&&remote_state!="input-required")throw Conflict("The remote task is not waiting for input; refresh it before replying");
+            std::string context_id;if(current.contains("contextId")&&current["contextId"].is_string())context_id=current["contextId"].get<std::string>();else if(result.contains("context_id")&&result["context_id"].is_string())context_id=result["context_id"].get<std::string>();
+            Json message={{"messageId","xmind-"+operation.id+"-followup-"+std::to_string(sequence)},{"role",version=="1.0"?"user":"ROLE_USER"},{"taskId",task_id}};
+            if(!context_id.empty())message["contextId"]=context_id;
+            if(version=="1.0")message["parts"]=Json::array({Json{{"kind","text"},{"text",text}}});else message["parts"]=Json::array({Json{{"text",text}}});
+            const Json params={{"message",message}};
+            Json attempt={{"version",1},{"operation_id",operation.id},{"agent_id",agent_id},{"agent_revision",expected_revision},{"task_id",task_id},{"sequence",sequence},{"message_id",message["messageId"]},{"message",text},{"state","ready"},{"requested_unix_ms",std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()}};
+            std::string ready_json=attempt.dump();std::optional<std::string> existing;try{existing=persistence.information(category,record_id).get();}catch(const NotFound&){}
+            if(existing){Json previous;try{previous=Json::parse(*existing);}catch(const Json::exception&){throw DatabaseError("Stored A2A follow-up receipt is invalid");}const auto previous_state=previous.is_object()?previous.value("state",std::string{}):std::string{};if(!previous.is_object()||(previous_state!="not_dispatched"&&previous_state!="ready"&&previous_state!="dispatching")||previous.value("message",std::string{})!=text||previous.value("task_id",std::string{})!=task_id||previous.value("sequence",std::int64_t{})!=sequence)throw Conflict("This A2A follow-up was already attempted; inspect the remote task instead of replaying it");if(previous_state!="ready"){try{persistence.compare_information(category,record_id,ready_json,std::move(existing)).get();}catch(const Conflict&){throw Conflict("A2A follow-up changed concurrently; refresh the remote task");}}}
+            else{try{persistence.compare_information(category,record_id,ready_json,std::nullopt).get();}catch(const Conflict&){throw Conflict("This A2A follow-up was already attempted; inspect the remote task instead of replaying it");}}
+            Json claimed=attempt;claimed["state"]="dispatching";claimed["attempt_id"]=new_id();const auto claimed_json=claimed.dump();try{persistence.compare_information(category,record_id,claimed_json,ready_json).get();}catch(const Conflict&){throw Conflict("A2A follow-up changed concurrently; refresh the remote task");}
+            bool dispatched=false;std::string uncertain_json;
+            try{
+                const auto response_json=peer.send_message(params.dump(),std::chrono::seconds(15),{},[&]{Json sent=claimed;sent["state"]="outcome_unknown";uncertain_json=sent.dump();persistence.compare_information(category,record_id,uncertain_json,claimed_json).get();dispatched=true;});
+                const auto acknowledged=Json::parse(response_json);Json task=acknowledged.contains("task")&&acknowledged["task"].is_object()?acknowledged["task"]:acknowledged;
+                if(!task.is_object()||task.size()>128||!task.contains("id")||!task["id"].is_string()||task["id"]!=task_id)throw TransportError("A2A peer returned a different task after follow-up");
+                if(task.contains("contextId")&&task["contextId"].is_string()&&!context_id.empty()&&task["contextId"]!=context_id)throw TransportError("A2A peer changed task context after follow-up");
+                if(task.dump().size()>384*1024)throw TransportError("A2A follow-up task exceeds the local observation limit");
+                Json saved=attempt;saved["state"]="acknowledged";saved["task_json"]=task;saved["acknowledged_unix_ms"]=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                persistence.compare_information(category,record_id,saved.dump(),uncertain_json).get();
+                reply(response,{{"operation_id",operation.id},{"agent_id",agent_id},{"task_id",task_id},{"sequence",sequence},{"task",task},{"follow_up_state","acknowledged"},{"requested_unix_ms",attempt["requested_unix_ms"]}});
+            }catch(...){
+                if(!dispatched){try{Json not_sent=attempt;not_sent["state"]="not_dispatched";persistence.compare_information(category,record_id,not_sent.dump(),claimed_json).get();}catch(...){}}
+                throw;
+            }
         }));
 #endif
         if(recovery) {

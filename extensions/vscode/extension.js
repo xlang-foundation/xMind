@@ -623,6 +623,21 @@ async function activate(context) {
           if(panel!==view||version!==generation)return;
           if(!cancellation||cancellation.operation_id!==proposal.id||cancellation.agent_id!==receipt.agent_id||cancellation.task_id!==receipt.task_id||cancellation.cancel_state!=='acknowledged'||!cancellation.task||typeof cancellation.task!=='object'||Array.isArray(cancellation.task)||cancellation.task.id!==receipt.task_id||!Number.isSafeInteger(cancellation.requested_unix_ms)||cancellation.requested_unix_ms<=0||cancellation.requested_unix_ms>8640000000000000)throw new Error('The remote cancellation response does not match the saved A2A operation.');
           post({type:'a2a-task-cancellation',id:proposal.id,cancellation});
+        } else if (message.type === 'follow-up-a2a-task' && typeof message.id === 'string') {
+          if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before replying to a registered A2A peer.');
+          const proposal=reviewed.get(message.id);
+          if(!proposal||!observedOperation(proposal.run_id)||proposal.state!=='succeeded'||proposal.tool!=='a2a_delegate')throw new Error('Select an acknowledged A2A task in the selected run before replying.');
+          let receipt;try{receipt=JSON.parse(proposal.result_json);}catch{throw new Error('The saved A2A task receipt is invalid.');}
+          if(receipt?.acknowledged_by_peer!==true||typeof receipt.agent_id!=='string'||typeof receipt.task_id!=='string'||!receipt.task_id)throw new Error('This A2A operation has no acknowledged remote task.');
+          const sequence=message.sequence;if(!Number.isSafeInteger(sequence)||sequence<1||sequence>64||typeof message.message!=='string'||!message.message.trim()||message.message.length>32768)throw new Error('Invalid A2A follow-up message.');
+          const version=generation,followUp=await client.followUpA2aTask(proposal.id,sequence,message.message);
+          if(panel!==view||version!==generation)return;
+          if(!followUp||followUp.operation_id!==proposal.id||followUp.agent_id!==receipt.agent_id||followUp.task_id!==receipt.task_id||followUp.sequence!==sequence||followUp.follow_up_state!=='acknowledged'||!followUp.task||typeof followUp.task!=='object'||Array.isArray(followUp.task)||followUp.task.id!==receipt.task_id||!Number.isSafeInteger(followUp.requested_unix_ms)||followUp.requested_unix_ms<=0||followUp.requested_unix_ms>8640000000000000)throw new Error('The remote follow-up acknowledgement does not match the saved A2A operation.');
+          post({type:'a2a-task-follow-up',id:proposal.id,followUp});
+          const inspection=await client.inspectA2aTask(proposal.id);
+          if(panel!==view||version!==generation)return;
+          if(!inspection||inspection.operation_id!==proposal.id||inspection.agent_id!==receipt.agent_id||inspection.task_id!==receipt.task_id||!inspection.task||typeof inspection.task!=='object'||Array.isArray(inspection.task)||!Number.isSafeInteger(inspection.follow_up_sequence)||inspection.follow_up_sequence<0||inspection.follow_up_sequence>64||typeof inspection.follow_up_state!=='string'||!Number.isSafeInteger(inspection.inspected_unix_ms))throw new Error('The remote task refresh did not match the saved A2A operation.');
+          post({type:'a2a-task-inspection',id:proposal.id,inspection});
         } else if (['decide','review'].includes(message.type) && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before deciding an operation.');
           if (message.type === 'decide' && message.decision !== 'allow' && message.decision !== 'deny') throw new Error('Decision must be allow or deny.');

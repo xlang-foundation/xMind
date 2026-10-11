@@ -180,6 +180,10 @@ class BackendClient {
   inspectEdit(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/inspection`); }
   inspectA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/inspect`, {}); }
   cancelA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/cancel`, {}); }
+  followUpA2aTask(id,sequence,message) {
+    executionIdentity(id);if(!Number.isSafeInteger(sequence)||sequence<1||sequence>64||typeof message!=='string'||!message.trim()||message.length>32768||message.includes('\0'))throw new Error('Invalid A2A follow-up message');
+    return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/follow-up`,{sequence,message},45000);
+  }
   decide(id, decision) {
     if (decision !== 'allow' && decision !== 'deny') throw new Error('Decision must be allow or deny.');
     return this.request(`/v1/operations/${encodeURIComponent(id)}/decision`, { decision });
