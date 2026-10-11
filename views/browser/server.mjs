@@ -29,7 +29,8 @@ export function allowedApiRoute(path,method){
 }
 export async function createBrowserServer({backend,assetRoot,localAccessToken}){
  const destination=origin(backend),directory=await realpath(resolve(assetRoot));
- if(localAccessToken!==undefined&&!/^[\x21-\x7e]{32,256}$/.test(localAccessToken))throw new Error('Invalid local browser access credential');
+ if(localAccessToken!==undefined&&typeof localAccessToken!=='function'&&!/^[\x21-\x7e]{32,256}$/.test(localAccessToken))throw new Error('Invalid local browser access credential');
+ const currentLocalAccessToken=async()=>{const value=typeof localAccessToken==='function'?await localAccessToken():localAccessToken;if(value!==undefined&&(typeof value!=='string'||!/^[\x21-\x7e]{32,256}$/.test(value)))throw new Error('Invalid local browser access credential');return value;};
  async function readAssets(){const snapshot=new Map();let total=0;for(const [route,[name,mime]] of Object.entries(assets)){const file=await realpath(join(directory,name));if(file!==join(directory,name))throw new Error('Browser assets must remain in the configured directory');const bytes=await readFile(file);total+=bytes.length;if(bytes.length>2*1024*1024||total>8*1024*1024)throw new Error('Browser assets exceed limits');snapshot.set(route,{bytes,mime});}return snapshot;}
  let files=await readAssets();
  let viewOrigin,cookieName;
@@ -47,7 +48,8 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
     if(url.search||request.headers.origin!==viewOrigin||request.method!=='POST'||request.headers['content-type']!=='application/json'){reply(403,{detail:'Same-origin session access required'});return;}
     let size=0;for await(const chunk of request){size+=chunk.length;if(size>4096){reply(413,{detail:'Session request exceeds limits'});return;}}
     if(url.pathname.endsWith('/disconnect')){const current=sessionFor(request);response.setHeader('Set-Cookie',`${cookieName}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0`);if(current){const revoked=await nativeSession('/revoke',viewHeaders(current));if(revoked.status!==200&&revoked.status!==401){reply(502,{detail:'View session revocation could not be confirmed'});return;}}reply(200,{connected:false});return;}
-    const authorization=request.headers.authorization||(localAccessToken&&!sessionFor(request)?'Bearer '+localAccessToken:undefined);
+    const localCredential=await currentLocalAccessToken();
+    const authorization=request.headers.authorization||(localCredential&&!sessionFor(request)?'Bearer '+localCredential:undefined);
     if(authorization){
      if(!/^Bearer [\x21-\x7e]{32,256}$/.test(authorization)){reply(401,{detail:'Local xMind could not authenticate this browser view'});return;}
      const issued=await nativeSession('',{Authorization:authorization},{origin:viewOrigin});
@@ -59,11 +61,11 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
      const previous=sessionFor(request);if(previous){const revoked=await nativeSession('/revoke',viewHeaders(previous));if(revoked.status!==200&&revoked.status!==401)throw new Error('Previous view revocation failed');}
      response.setHeader('Set-Cookie',`${cookieName}=${credential}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}`);reply(200,{connected:true});return;
     }
-    const current=sessionFor(request);if(!current){reply(401,{connected:false});return;}const restored=await nativeSession('/current',viewHeaders(current));if(restored.status===200){reply(200,{connected:true});return;}if(restored.status!==401||!localAccessToken){reply(restored.status===401?401:502,{connected:false});return;}
+    const current=sessionFor(request);if(!current){reply(401,{connected:false});return;}const restored=await nativeSession('/current',viewHeaders(current));if(restored.status===200){reply(200,{connected:true});return;}if(restored.status!==401||!localCredential){reply(restored.status===401?401:502,{connected:false});return;}
     // A native restart can invalidate an old browser cookie while this local
     // adapter still owns the launch credential. Recover silently so a page
     // refresh never asks the user to copy a server token.
-    const issued=await nativeSession('',{Authorization:'Bearer '+localAccessToken},{origin:viewOrigin});if(issued.status!==200){reply(issued.status===401?401:issued.status===409?429:502,{detail:issued.status===409?'Too many active browser sessions':'Local xMind could not restore this browser view'});return;}const {credential,expires_unix_ms:expires,max_age_seconds:maxAge}=issued.data;if(!/^[0-9a-f]{64}\.[0-9a-f]{64}$/.test(credential)||!Number.isSafeInteger(expires)||expires<1||!Number.isSafeInteger(maxAge)||maxAge<1||maxAge>28800){reply(502,{error_code:'invalid_view_session',detail:'The server returned an invalid access session. Update the server and browser adapter together.'});return;}response.setHeader('Set-Cookie',`${cookieName}=${credential}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}`);reply(200,{connected:true});return;
+    const issued=await nativeSession('',{Authorization:'Bearer '+localCredential},{origin:viewOrigin});if(issued.status!==200){reply(issued.status===401?401:issued.status===409?429:502,{detail:issued.status===409?'Too many active browser sessions':'Local xMind could not restore this browser view'});return;}const {credential,expires_unix_ms:expires,max_age_seconds:maxAge}=issued.data;if(!/^[0-9a-f]{64}\.[0-9a-f]{64}$/.test(credential)||!Number.isSafeInteger(expires)||expires<1||!Number.isSafeInteger(maxAge)||maxAge<1||maxAge>28800){reply(502,{error_code:'invalid_view_session',detail:'The server returned an invalid access session. Update the server and browser adapter together.'});return;}response.setHeader('Set-Cookie',`${cookieName}=${credential}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}`);reply(200,{connected:true});return;
    }
    if(url.pathname==='/ui/workspaces'||url.pathname==='/ui/workspaces/select'||url.pathname==='/ui/workspaces/add'||url.pathname==='/ui/workspaces/pick'){
     const selecting=url.pathname.endsWith('/select'),adding=url.pathname.endsWith('/add'),picking=url.pathname.endsWith('/pick'),mutating=selecting||adding||picking;

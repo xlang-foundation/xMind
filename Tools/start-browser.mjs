@@ -24,6 +24,19 @@ const port=Number(options.get('--port')||60405);
 if(!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid browser view port');
 await mkdir(state,{recursive:true});
 
+async function activeCredential(){
+  try{
+    const activeFile=join(state,'active.json'),activeInfo=await lstat(activeFile);
+    if(!activeInfo.isFile()||activeInfo.isSymbolicLink()||activeInfo.size>16384)return;
+    const active=JSON.parse(await readFile(activeFile,'utf8'));
+    if(active.backend!==backend)return;
+    const candidate=join(state,'auth.token'),tokenInfo=await lstat(candidate);
+    if(!tokenInfo.isFile()||tokenInfo.isSymbolicLink()||tokenInfo.nlink!==1||tokenInfo.size!==64)return;
+    const token=(await readFile(candidate,'utf8')).trim();
+    if(/^[0-9a-f]{64}$/.test(token))return {path:candidate,token};
+  }catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;}
+}
+
 let backend=viewOrigin,nativePid,tokenFile,localAccessToken;
 if(!backend){
   const runtime=resolve(options.get('--runtime')||join(root,'extensions','vscode','native-runtime'));
@@ -80,22 +93,11 @@ if(!backend){
   if(metadata.process_id!==nativePid||typeof metadata.origin!=='string'||!/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}$/.test(metadata.origin)||metadata.workspace?.configured!==true||typeof metadata.workspace.root!=='string'||metadata.workspace.root.toLowerCase()!==workspace.toLowerCase())throw new Error('Native view metadata does not match the selected workspace.');
   backend=metadata.origin;
 }else{
-  // Reuse only a credential belonging to this user's active xMind browser
-  // launch and only when its recorded native origin matches the attachment.
-  // The value remains in this process; it is never sent to browser JavaScript.
-  try{
-    const activeFile=join(state,'active.json'),activeInfo=await lstat(activeFile);
-    if(activeInfo.isFile()&&!activeInfo.isSymbolicLink()&&activeInfo.size<=16384){
-      const active=JSON.parse(await readFile(activeFile,'utf8'));
-      if(active.backend===backend){
-        const candidate=join(state,'auth.token'),tokenInfo=await lstat(candidate);
-        if(tokenInfo.isFile()&&!tokenInfo.isSymbolicLink()&&tokenInfo.nlink===1&&tokenInfo.size===64){
-          const token=(await readFile(candidate,'utf8')).trim();
-          if(/^[0-9a-f]{64}$/.test(token)){tokenFile=candidate;localAccessToken=token;}
-        }
-      }
-    }
-  }catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;}
+  // A view may start just before the native launcher writes its active record.
+  // Resolve only the matching same-user credential when a page connects; keep
+  // the value in this process and never send it to browser JavaScript.
+  localAccessToken=async()=>{const active=await activeCredential();tokenFile=active?.path;return active?.token;};
+  const active=await activeCredential();tokenFile=active?.path;
 }
 
 const view=await createBrowserServer({backend,assetRoot:assets,localAccessToken});

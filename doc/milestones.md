@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+## Same-machine browser reconnects to the active xMind process (2026-10-11)
+
+The browser adapter now resolves its matching local launcher credential when a
+page connects, so a view started before xMind publishes its active profile can
+attach without asking for a server token or requiring the user to find a new
+URL. The credential remains in the adapter process and the browser receives
+only its scoped HttpOnly view session. The focused browser connection and
+adapter suites pass **26/26**; the complete browser suite and hosted isolated
+gate are pending. This does not remove native owner authentication.
+
 ## Saved-provider model picker guidance (2026-10-11)
 
 When saved provider profiles exist but none is active, the footer model picker
@@ -9,7 +19,7 @@ the saved profile in Settings; it no longer asks the user to re-enter a key.
 With no saved profiles, it directs the user to add one in Settings. This copy
 change does not activate a provider or alter model-selection behavior. The
 focused renderer suite passes **74/74**, the complete VS Code suite **269/269**,
-and the browser suite **72/72**. These tests use synthetic provider metadata;
+and the browser suite **73/73**. These tests use synthetic provider metadata;
 they do not establish live provider discovery or installed-client acceptance.
 
 ## Outbound A2A task cancellation (2026-10-10)

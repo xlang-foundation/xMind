@@ -74,9 +74,10 @@ contract and a current packaged runtime are pending the hosted gate; the live
 observation does not establish workspace browsing success.
 
 The same-machine page requires no user-entered server access token. The
-production browser adapter contract passes **6/6**, including local session
-enrollment with the launcher-held credential and workspace catalogue access.
-Rendered inspection found that the open `60415` page is tokenless but its
+browser adapter resolves its matching launcher credential when the page
+connects, including if the view started just before the active launch record
+appeared. The focused connection and adapter suites pass **26/26**. Rendered
+inspection found that the open `60415` page is tokenless but its
 **Add workspace** control is disabled, so it does not prove the profile-aware
 folder registration flow. Port `60405` still serves an obsolete token-entry
 page. The profile-aware page and current-runtime workspace read remain the
