@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+## Interactive console can cancel or detach from a live run — 2026-10-11
+
+While the native CLI watches a streamed run, `/cancel` sends cancellation to
+the shared backend and continues observing until its terminal event. `/exit`
+detaches the console and leaves the server-owned run running. Ordinary input
+typed during a run waits until the current turn ends. The Release build and
+seven focused native/CLI CTest contracts pass locally, covering single-agent
+cancellation and detach, graph observation and checkpoints, approvals,
+context, skills, HTTP CLI and provider-profile commands. Full CTest, hosted
+package acceptance and full OpenCode interactive-CLI parity remain open. See
+the [interactive CLI contract](native-interactive-cli.md).
+
 ## Saved provider keys are clearly identified in client Settings — 2026-10-11
 
 The shared browser and VS Code renderer now says when the selected profile has

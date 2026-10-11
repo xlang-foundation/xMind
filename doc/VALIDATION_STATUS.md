@@ -5,8 +5,12 @@
 VSIX `0.1.9` is installed as `agentflow-local.agentflow@0.1.9`. Settings now
 states explicitly that a selected saved provider key is available to the local
 backend and will be reused; the replacement field stays blank. The actual
-browser Settings panel displayed this text for DeepSeek. No provider request
-was made to verify the indicator. The packaged native-runtime verifier passed
+browser Settings panel displayed this text for DeepSeek. A live click on
+**Fetch models** then returned two DeepSeek model IDs from the selected saved
+profile, without a key in the request from the page. The selected profile's
+existing connectivity run also returned `OK`. This verifies saved-key reuse
+for this DeepSeek profile only; other providers and coding/tool runs were not
+retested. The packaged native-runtime verifier passed
 with 1,899 files; VS Code tests pass **298/298** and browser tests **85/85**.
 VS Code installation is verified, while activation/rendering in an existing
 editor window remains unverified. This change does not validate the broader
@@ -39,6 +43,19 @@ managed-client process execution is unverified. No shell or process profile
 is seeded. A trusted profile must be configured before `run_process` is
 advertised. Exact implementation and limits are in
 [native process tools](native-process-tools.md).
+
+## Interactive CLI cancellation and detach — 2026-10-11
+
+The console now reads input while it observes an active single-agent or graph
+run. `/cancel` requests backend cancellation and keeps observing the terminal
+event; `/exit` detaches observation while the server-owned run continues.
+Other typed lines remain queued for the next prompt. The behavior is covered
+by focused Release CTest contracts for streamed agent runs, graph runs and
+approval/graph checkpoints. The seven relevant native/CLI contracts passed
+locally (**7/7**), including context, skill catalogue, HTTP CLI and provider
+profile commands. This is not a full native gate or hosted/package acceptance;
+the interactive contract is documented in
+[native interactive CLI](native-interactive-cli.md).
 
 ## MCP resources and prompts — 2026-10-11
 

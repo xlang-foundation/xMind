@@ -56,10 +56,12 @@ extension never receive executable bindings. The browser uses the repository
 `.config/processes.yaml` when present; VS Code development uses that file and
 packaged installs can set `agentflow.processConfigPath`. There is no default
 profile or shell, so `run_process` appears only after the owner configures one.
-The next coding-runtime work is an end-to-end approved process run from each
-managed client, followed by reviewed shell-command semantics, durable
-background output/jobs, terminal lifecycle acceptance and full project coding
-workflows.
+The native foreground/background executor now has actual Windows-child,
+approval, event streaming, 64 MiB paged-output artifact, restart uncertainty,
+and synthetic-model HTTP/CLI continuation contracts. The shared browser and
+VS Code adapters have bounded output renderer/host contracts. An actual
+approved process run from each managed client, shell-profile usability,
+terminal lifecycle acceptance and full project coding workflows remain open.
 
 VS Code also has a confirmation-gated **xMind: Apply Trusted Runtime
 Configuration** command. It reconnects through Native with the one-shot
@@ -87,8 +89,24 @@ suite passes **85/85** and the VS Code suite **298/298**. VSIX packaging verifie
 the 1,899-file native runtime, and the installed extension list reports
 `agentflow-local.agentflow@0.1.9`. The shared renderer is updated in both
 clients, but a newly rendered VS Code sidebar has not been observed yet. This
-UX checkpoint does not change native inference behavior or the **zero**
-operation-level parity count. [Sanitized browser evidence](evidence/provider-key-status-live-browser-20261011.json).
+UX checkpoint has since been verified by a live browser model-discovery request:
+the active DeepSeek profile returned two model IDs from its saved key, and its
+selected connectivity run returned `OK`. The secret remained backend-owned;
+the other provider profiles were not retested in this check. It does not change
+the **zero** operation-level parity count. [Sanitized browser evidence](evidence/provider-key-status-live-browser-20261011.json).
+
+## Interactive CLI run control (2026-10-11)
+
+The C++ console accepts `/cancel` while observing a live single-agent or graph
+run and remains attached until the backend emits the terminal event. `/exit`
+detaches observation while the backend-owned run continues; ordinary input is
+queued for the next prompt. The exact pushed source, `5e964f5`, passes seven
+focused Release CTest contracts covering agent cancellation/detach, graph
+control/checkpoints, approval prompts, context, skills, HTTP CLI and provider
+profiles. This closes those interactive behaviors at the tested CLI contract
+scope only; full-screen CLI parity, cross-client run-control parity, hosted
+package acceptance and the full native gate remain open. See
+[CLI lifecycle details](native-interactive-cli.md#conversations-observation-and-approvals).
 
 ## MCP resources and prompts (2026-10-11)
 
