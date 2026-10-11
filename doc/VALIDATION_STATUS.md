@@ -1,5 +1,22 @@
 # Current native validation
 
+## MCP resources and prompts — 2026-10-11
+
+The Release build succeeds for the dynamic-plan MCP contract, MCP client and
+effect contracts, AgentRunner and graph execution. Focused CTest passes **10/10**:
+`native_dynamic_plan_mcp_contract`, `native_mcp_client_contract`,
+`native_mcp_effect_contract`, `native_mcp_http_readonly_contract`, graph
+stdio/HTTP MCP, AgentRunner HTTP MCP, modern and legacy official MCP SDK peers,
+and unified HTTP MCP. The stdio peers exercise resource and prompt
+listing/retrieval; a local Streamable HTTP peer checks resource pagination/read
+and prompt list/get. Effects require approval and retain actual results, and
+configured-credential reflection is rejected safely. The combined renderer
+and browser-controller suite passes **117/117**.
+
+This is not a full native CTest run on the new commit. Official SDK HTTP
+resource/prompt interoperability, installed VS Code coding, and live MCP coding
+interoperability remain unverified.
+
 ## Native editor formatting checkpoint — 2026-10-11
 
 The VS Code extension now registers a document-formatting provider for each

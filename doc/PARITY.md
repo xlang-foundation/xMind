@@ -46,6 +46,25 @@ verified parity. Earlier full native, browser and VS Code gates remain scoped
 to their cited revisions; they do not establish full parity or current
 installed acceptance.
 
+## MCP resources and prompts (2026-10-11)
+
+The native MCP registry now discovers resources and prompts alongside tools for
+single-agent and graph execution. Each item is exposed through the existing
+model tool catalogue and requires durable controller approval before a resource
+read or prompt retrieval. Approval binds the configured server revision, peer
+identity, exact metadata/schema and resource URI where applicable; successful
+results are journaled, and peer-reflected configured credentials are withheld.
+Existing MCP tool approval records retain their prior durable binding shape.
+Native stdio and HTTP clients implement list/read/get requests.
+
+The Release build and ten focused native CTest contracts pass, including real
+stdio peers for modern/legacy protocol behavior, approval/denial, dynamic-plan
+compatibility, graph MCP, existing HTTP MCP flows, and a local Streamable HTTP
+peer exercising resource pagination/read and prompt list/get. The combined
+renderer and browser-controller suite passes **117/117**. Official SDK HTTP
+resource/prompt interoperability and broad live MCP coding remain open. This is
+scoped implementation evidence, not operation-level OpenCode parity.
+
 ## Per-agent native tool bindings (`449c085`)
 
 ## Per-agent native tool bindings (`449c085`)
@@ -791,8 +810,8 @@ operations**, with upstream parameters/body/responses and acceptance requirement
 Earlier upstream audit snapshots counted 139; the pinned schema count is
 authoritative.
 
-Removed-prototype mappings are absent. The native mapping identifies **25
-partial C++ source candidates and 116 unmapped operations**. Each candidate
+Removed-prototype mappings are absent. The native mapping identifies **31
+partial C++ source candidates and 110 unmapped operations**. Each candidate
 records a checked source anchor, SHA-256, surface and explicit gap. Unmapped
 means no reviewed mapping, not proof that no related component exists. Source
 presence and hashes do not establish behavioral equivalence or executed
@@ -813,7 +832,7 @@ removed Python prototype's status table; it is not a completion score.
 | Instructions and agent presets | Native repository guidance discovery, source binding, durable approval checks and explicit workspace.inspect revision1 leaf policy | Full instruction scoping/configuration and broader reproducible presets |
 | Skills and commands | Native workspace discovery/loading, catalogue inspection, model activation, user attachments/removal and persisted selections have scoped native and actual OpenAI/other-provider acceptance; see [skills](native-skills.md) | Full command/skill lifecycle, source management, URL/embedded sources, broader scoping and current installed/rendered acceptance |
 | Plugins | Native ownership is specified | Lifecycle, hooks, isolation and compatibility acceptance |
-| MCP | Configured native stdio/HTTP tools, schema worker, approvals and modern/legacy official SDK peers have scoped contracts. Hosted trusted synthetic login/callbacks and durable encrypted grants are verified. Manual renewal service and console/Settings controls have separate acceptance in [renewal](native-mcp-renewal.md) | Integrated trusted renewal for the new source, real authority login, registration/CIMD/DCR, automatic renewal/revocation and running-owner coordination, uncertain grant recovery, resources/prompts/subscriptions, broader SDK features and full live coding interoperability |
+| MCP | Configured native stdio/HTTP tools, schema worker, approvals and modern/legacy official SDK peers have scoped contracts. Native resources/list-read and prompts/list-get use the same approval registry and durable journal; real stdio contracts cover discovery, arguments, approval and secret-reflection handling, with a local Streamable HTTP peer contract for pagination and correlated read/get calls. Hosted trusted synthetic login/callbacks and durable encrypted grants are verified. Manual renewal service and console/Settings controls have separate acceptance in [renewal](native-mcp-renewal.md) | Official SDK HTTP resource/prompt interoperability, trusted renewal for the new source, real authority login, registration/CIMD/DCR, automatic renewal/revocation and running-owner coordination, uncertain grant recovery, subscriptions, broader SDK features and full live coding interoperability |
 | Permissions and policies | Backend-owned durable grant/deny/cancel and effect ownership have actual file/process/peer fixtures | Complete policy rules, recovery and consistent enforcement across exposed tools/protocols |
 | Context compaction | Native Responses checkpoints/counting, session/mid-run and manual/automatic paths, private provider state and actual budgets passed their scoped complete gate, including the later serializer repair; [design and evidence](native-context-compaction-design.md) | Complete non-Responses provider strategies and live coding/installed thin-client acceptance using the current package format; local contracts do not establish full compaction completion |
 | Snapshots and recovery | Durable uncertainty inspection and non-replay safeguards cover selected effects | General reviewable snapshots, restoration and attributed reconciliation |

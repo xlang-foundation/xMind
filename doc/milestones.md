@@ -1,5 +1,23 @@
 # Reviewable milestones
 
+## Native MCP resources and prompts (2026-10-11)
+
+The C++ MCP clients now list resources/prompts and read resources/get prompts
+over stdio and HTTP. The native agent and graph registries expose them as
+approval-gated model tools, bind exact peer metadata, schemas and resource URIs
+into durable operations, journal returned data, and reject peer responses that
+reflect configured credentials. Existing tool approval records retain their
+stored shape for dynamic-plan compatibility.
+
+The Release build passes ten focused native CTest contracts covering real
+stdio peers, modern and legacy protocol behavior, approval/denial, dynamic-plan
+compatibility, graph MCP, existing HTTP MCP flows, and a local Streamable HTTP
+peer for resource pagination/read and prompt list/get. The combined UI renderer
+and browser-controller tests pass **117/117**. Official SDK HTTP
+resource/prompt interoperability and broader live MCP coding remain incomplete.
+The implementation and HTTP transport contract are checked in on
+`checkpoint/native-persistence-m1`.
+
 ## Saved provider profiles work in a fresh local browser view (2026-10-10)
 
 A fresh same-machine page connected to its local xMind process without a server
