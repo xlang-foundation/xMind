@@ -43,6 +43,36 @@ establish full coding workflows, installed-editor acceptance, worker/IPC
 placement, or OpenCode parity. See the [multi-folder workspace contract](native-multi-folder-workspaces.md)
 and [worker/IPC acceptance gap](native-ipc-worker-design.md).
 
+## Follow-on workspace UI and coding-tool checkpoints (`b2c4087`, `499dba2`)
+
+The browser now keeps the active workspace and conversation as its primary
+surface: the workspace file canvas is on the left, the agent session is on the
+right, and workspace switching/folder membership are configured from the
+top-bar dialog. The browser workflow was exercised by switching between two
+local workspaces and back. Provider discovery used the four locally saved
+credentials without exposing them to the page; a live OpenAI response displayed
+provider-reported token counts and measured timings. The browser contract suite
+passed 91/91.
+
+The native single-agent coding loop now resolves read/list/search/glob and
+`edit_file`/`create_file` calls against the run's captured workspace membership.
+Attached-folder write approvals retain the workspace revision, folder ID and
+root identity; uncertain edit recovery resolves the same admitted snapshot.
+Windows Release build and five focused native contracts passed (workspace
+tools, agent runner, graph runner, create executor and edit executor). The
+secondary-folder edit fixture verified the primary file remained unchanged.
+Commits `b2c4087` and `499dba2` are pushed to
+`checkpoint/native-persistence-m1`.
+
+The OpenCode inventory was regenerated from the unchanged pinned
+`v2.0.26` source commit after these changes: **141 operations, 31 native source
+candidates, 110 unmapped, and zero verified operation-level parity**. This
+checkpoint does not establish rendered multi-folder acceptance in the browser
+or VS Code. Cross-root `apply_patch`, graph write nodes, process execution,
+Git, language-server routing and complete CLI/VS Code coding workflows remain
+incomplete. The source hash inventory is in
+[`OPENCODE_API_INVENTORY.json`](OPENCODE_API_INVENTORY.json).
+
 ## Latest native coding/runtime checkpoint (2026-10-11, VS Code package `0.1.8`)
 
 Named YAML agent definitions and graph agent nodes carry optional tool

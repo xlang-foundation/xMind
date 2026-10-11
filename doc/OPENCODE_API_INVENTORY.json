@@ -9452,7 +9452,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/agent_runner.cpp",
-        "sourceSha256": "57949d9cdbbc07d898070db860a2823a6ece825bd3111b0870831d988e382cf0",
+        "sourceSha256": "df22dbc943ff6c04a7155aefc844790e97b7e358247962e55f39545d3342c93f",
         "surface": "Reviewed native edit_file/create_file tools",
         "sourceAnchor": "CreateExecutor",
         "gap": "Approved exact edits and creation exist; general upstream filesystem write API and its full semantics remain incomplete.",
@@ -12570,7 +12570,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/workspace_tools.cpp",
-        "sourceSha256": "07aa2fe018a292951610e99f19f36a22f52b3d847c47c151d988b4efeab12f11",
+        "sourceSha256": "8981fb420eb0a94d930ac4d03e20f2e2fbd5c28b3884a8454e0f6e2ba9f7ed20",
         "surface": "Native glob_files tool",
         "sourceAnchor": "\"glob_files\"",
         "gap": "Glob-based file-path discovery exists; upstream fuzzy filename queries, file/directory filters, entry metadata and navigation API contracts remain incomplete.",
@@ -12715,7 +12715,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/workspace_tools.cpp",
-        "sourceSha256": "07aa2fe018a292951610e99f19f36a22f52b3d847c47c151d988b4efeab12f11",
+        "sourceSha256": "8981fb420eb0a94d930ac4d03e20f2e2fbd5c28b3884a8454e0f6e2ba9f7ed20",
         "surface": "Native list_files tool",
         "sourceAnchor": "\"list_files\"",
         "gap": "Bounded workspace directory listing exists; upstream filesystem API response and client navigation remain incomplete.",
@@ -12841,7 +12841,7 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/workspace_tools.cpp",
-        "sourceSha256": "07aa2fe018a292951610e99f19f36a22f52b3d847c47c151d988b4efeab12f11",
+        "sourceSha256": "8981fb420eb0a94d930ac4d03e20f2e2fbd5c28b3884a8454e0f6e2ba9f7ed20",
         "surface": "Native read_file tool",
         "sourceAnchor": "\"read_file\"",
         "gap": "Full UTF-8 reads and bounded line pages exist; upstream binary payloads, filesystem API response shapes and permission behavior remain to be compared.",

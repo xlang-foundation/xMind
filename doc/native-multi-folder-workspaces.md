@@ -16,12 +16,20 @@ to the primary folder, reopen each admitted root and verify its identity. The
 run stores its exact membership revision and folder bindings; admitted agent
 children reuse that snapshot. New graph roots also persist membership atomically
 with graph admission; direct graph read nodes and graph-agent children use that
-same immutable set. VS Code can explicitly attach another folder
+same immutable set. Single-agent `edit_file` and `create_file` calls now accept
+the same optional `folder_id`; the proposed operation binds the workspace ID,
+folder ID, membership revision and selected root identity. Server-side uncertain
+edit recovery reloads the admitted membership snapshot before inspecting the
+selected file. Focused Release contracts passed for workspace tools, agent
+runner, graph runner, create executor and edit executor (5/5); the attached
+edit contract approved a real filesystem change in the secondary folder and
+verified the primary copy stayed unchanged. This proves the native contract
+with local fixtures, not rendered multi-folder client acceptance. VS Code can explicitly attach another folder
 already open in its window through **xMind: Add Opened Folder to Workspace**;
 the native host retains the existing primary identity. The CLI can initialize
 the selected folder as a workspace and attach additional folders to that same
-workspace. Graph edits, approvals, process, Git/language-server routing and
-folder removal still bind only the primary folder. The local browser displays each attached
+workspace. Graph write nodes, `apply_patch`, process, Git/language-server
+routing and folder removal still bind only the primary folder. The local browser displays each attached
 folder as its own tree and reads previews through a native route that resolves
 the selected workspace's folder ID, re-opens the directory and verifies its
 native identity on every request.
@@ -84,12 +92,13 @@ handle and revalidates the handle identity before effects.
 
 ## Tool and client contract
 
-File tools take an optional `folder_id` and a path relative to that folder. If
-`folder_id` is omitted, it resolves to the primary folder. Results identify the
-folder alongside the relative path; this keeps identical names in separate
-roots unambiguous. Multi-file edit proposals may span roots only when every
-file names its folder explicitly. Backend-private directories remain denied
-inside every root.
+Single-agent read/list/search/glob tools and the `edit_file`/`create_file`
+write tools take an optional `folder_id` and a path relative to that folder. If
+`folder_id` is omitted, they resolve to the primary folder. Results identify
+the folder alongside the relative path; this keeps identical names in separate
+roots unambiguous. A write approval is bound to the captured workspace
+revision, selected folder and root identity. Cross-root `apply_patch` is not
+implemented; backend-private directories remain denied inside every root.
 
 `run_process` uses the primary folder as its default working directory. A
 different folder must be selected by folder ID and the actual working directory
@@ -104,11 +113,12 @@ themselves. Graph write nodes remain scoped to the primary folder.
 
 The browser canvas shows one file tree per member folder, with explicit folder
 selection for previews. Git remains bound to the primary folder. VS Code can
-attach opened folders; read/list/search/glob agent tools then use the captured
-registry membership in single-agent runs and read-only graph nodes. Edits,
-terminals, language servers and approvals remain
-bound to the selected primary folder. The CLI reports the selected workspace
-and folder context and offers commands to list workspaces and add a folder.
+attach opened folders; single-agent read/list/search/glob/edit/create tools use
+the captured registry membership, while direct graph reads and graph-agent
+children use that snapshot for reads. Graph write nodes, terminals, language
+servers, Git and `apply_patch` remain bound to the primary folder. CLI workspace
+membership commands exist, but full multi-folder effect acceptance through
+CLI/VS Code/browser remains open.
 
 ## Required acceptance
 
