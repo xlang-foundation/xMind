@@ -243,6 +243,13 @@ const processOutcomeFixture=()=>{
     stdout:{encoding:'utf-8',data:output,byte_count:90,retained_bytes:Buffer.byteLength(output)},
     stderr:{encoding:'hex',data:'ff00fe0a',byte_count:4,retained_bytes:4},truncated:true,process_tree_retired:true,independently_verified:false};
 };
+test('completed command cards page through full SQLite output and visibly escape control bytes',()=>{
+ const r=renderer(),doc=r.dom.window.document,base=processOutcomeFixture(),result={...base,stdout:{...base.stdout,byte_count:100},output_artifact:{operation_id:'fixture-command',stdout_bytes:100,stderr_bytes:4,state:'complete'}},operation={...processProposalFixture(),state:'succeeded',result_json:JSON.stringify(result)};
+ try{r.send({type:'operations',operations:[operation]});const buttons=[...doc.querySelectorAll('.process-artifact button')];assert.deepEqual(buttons.map(button=>button.textContent),['Previous page','Load full stdout','Next page']);assert.equal(buttons[2].hidden,true);buttons[1].click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'process-output',id:operation.id,channel:'stdout',after:0});
+  const page={operation_id:operation.id,run_id:'run',state:'complete',channel:'stdout',encoding:'hex',data:'1b5b33316d',offset:0,total_bytes:100,next_offset:5,complete:true};r.send({type:'process-output-page',id:operation.id,channel:'stdout',page});const widget=doc.querySelector('.process-artifact');assert.equal(widget.querySelector('pre').textContent,'\\u001b[31m');assert.match(widget.textContent,/Bytes 0–5 of 100 · UTF-8; controls escaped/);assert.equal(widget.querySelector('script'),null);const next=widget.querySelectorAll('button')[2];assert.equal(next.hidden,false);next.click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'process-output',id:operation.id,channel:'stdout',after:5});
+  r.send({type:'process-output-error',id:operation.id,channel:'stdout',text:'Synthetic page failure'});assert.match(widget.textContent,/Could not load saved output/);
+ }finally{r.dom.window.close();}
+});
 const processOutputFixture=(data,offset=0,channel='stdout',id='fixture-stream')=>({type:'event',event:{kind:'process.output',data:{operation_id:id,profile_id:'fixture-profile',channel,encoding:'hex',offset,retained_bytes:data.length/2,data}}});
 
 test('model protocol failure shows only recognized diagnostics and preserves conversation context',()=>{

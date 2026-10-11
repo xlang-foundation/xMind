@@ -7,6 +7,12 @@ const {SkillViewController,validateSessionSkills}=require('../client');
 const skillWorkspace='windows-local-file-v1:synthetic-test-workspace',skillAuthority='a'.repeat(32);
 const skillState=(ids=[],revision=0,editable=true)=>({session_id:'session',workspace_id:skillWorkspace,authority_id:skillAuthority,revision,ids,manual_ids:ids,editable});
 const skillCatalogue={workspace_id:skillWorkspace,authority_id:skillAuthority,skills:[{id:'manual',name:'User guide',path:'.agents/skills/manual.md',model_invocable:false}]};
+test('process output client validates paginated byte artifacts without text coercion',async()=>{
+ const requests=[],page={operation_id:'process-op',run_id:'run-root',state:'complete',channel:'stderr',encoding:'hex',data:'ff0080',offset:12,total_bytes:15,next_offset:15,complete:true};
+ const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>page};});
+ assert.deepEqual(await client.processOutput('process-op','stderr',12,64),page);assert.equal(new URL(requests[0].url).pathname,'/v1/operations/process-op/output');assert.equal(new URL(requests[0].url).search,'?channel=stderr&after=12&limit=64');
+ for(const args of [['process-op','input',0,64],['process-op','stdout',-1,64],['process-op','stdout',0,262144]])await assert.rejects(client.processOutput(...args),/process output/i);page.next_offset=16;await assert.rejects(client.processOutput('process-op','stderr',12,64),/native process output page/i);
+});
 test('language-server formatting carries bounded options and workspace authority',async()=>{
  const requests=[],binding={expected_workspace_id:skillWorkspace,expected_workspace_authority_id:skillAuthority},client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>({server_id:'rust',language_id:'rust',path:'src/lib.rs',method:'formatting',result:[],diagnostics:[]})};});
  await client.languageServerQuery({path:'src/lib.rs',method:'formatting',documentText:'fn main(){}',formattingOptions:{tabSize:2,insertSpaces:true}},binding);

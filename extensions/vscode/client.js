@@ -237,6 +237,12 @@ class BackendClient {
   cancel(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/cancel`, {}); }
   operations(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/operations`); }
   operation(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}`); }
+  async processOutput(id,channel,after=0,limit=65536) {
+    executionIdentity(id);if(!['stdout','stderr'].includes(channel)||!Number.isSafeInteger(after)||after<0||!Number.isSafeInteger(limit)||limit<1||limit>65536)throw new Error('Invalid process output page request.');
+    const value=await this.request(`/v1/operations/${encodeURIComponent(id)}/output?channel=${channel}&after=${after}&limit=${limit}`);
+    if(!value||value.operation_id!==id||!/^[-A-Za-z0-9_]{1,128}$/.test(value.run_id)||value.channel!==channel||value.encoding!=='hex'||!['capturing','complete','incomplete'].includes(value.state)||typeof value.complete!=='boolean'||value.complete!==(value.state==='complete')||!Number.isSafeInteger(value.offset)||value.offset!==after||!Number.isSafeInteger(value.total_bytes)||value.total_bytes<0||value.total_bytes>64*1024*1024||!Number.isSafeInteger(value.next_offset)||typeof value.data!=='string'||!/^(?:[0-9a-f]{2})*$/.test(value.data)||value.data.length/2>limit||value.next_offset!==after+value.data.length/2||value.next_offset>value.total_bytes||value.complete&&value.next_offset<value.total_bytes)throw new Error('Invalid native process output page.');
+    return value;
+  }
   inspectEdit(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/inspection`); }
   inspectA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/inspect`, {}); }
   cancelA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/cancel`, {}); }

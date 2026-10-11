@@ -597,6 +597,14 @@ async function activate(context) {
           const link = new URL(message.url);
           if (!['https:','http:'].includes(link.protocol)) throw new Error('Only HTTP/HTTPS links can be opened.');
           await vscode.env.openExternal(vscode.Uri.parse(link.href));
+        } else if (message.type === 'process-output' && typeof message.id === 'string') {
+          const proposal=reviewed.get(message.id);if(!proposal||!observedOperation(proposal.run_id)||proposal.state!=='succeeded'||proposal.tool!=='run_process'||!['stdout','stderr'].includes(message.channel)||!Number.isSafeInteger(message.after)||message.after<0)throw new Error('Select a completed command output artifact in the selected run.');
+          let result;try{result=JSON.parse(proposal.result_json);}catch{throw new Error('The saved process result is invalid.');}const artifact=result?.output_artifact;
+          if(!artifact||artifact.operation_id!==proposal.id||artifact.state!=='complete'||!Number.isSafeInteger(artifact.stdout_bytes)||!Number.isSafeInteger(artifact.stderr_bytes)||artifact.stdout_bytes+artifact.stderr_bytes>64*1024*1024)throw new Error('The saved process output artifact is unavailable.');
+          const version=generation,page=await client.processOutput(proposal.id,message.channel,message.after,65536);
+          if(panel!==view||version!==generation||reviewed.get(proposal.id)!==proposal)return;
+          if(page.run_id!==proposal.run_id||page.total_bytes!==artifact[message.channel+'_bytes'])throw new Error('The process output artifact changed.');
+          post({type:'process-output-page',id:proposal.id,channel:message.channel,page});
         } else if (message.type === 'inspect-edit' && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before inspecting an edit.');
           const proposal=reviewed.get(message.id);
@@ -666,7 +674,7 @@ async function activate(context) {
           post({ type: 'operations', operations: [...reviewed.values()].map(operation=>({...operation,node_id:graphChildren.get(operation.run_id)?.node_id})) });
           await poll();
         }
-      } catch (error) { if (panel === view&&workspaceBackend.epoch===workspaceEpoch) post({ type: 'error', text: error.message }); }
+      } catch (error) { if (panel === view&&workspaceBackend.epoch===workspaceEpoch) post(message?.type==='process-output'?{type:'process-output-error',id:message.id,channel:message.channel,text:error.message}:{type:'error',text:error.message}); }
         finally{if(panel===view&&workspaceBackend.epoch===workspaceEpoch)await readContext().catch(error=>{if(workspaceBackend.epoch===workspaceEpoch)post({type:'error',text:error.message});});} });
     }, null, context.subscriptions);
   }

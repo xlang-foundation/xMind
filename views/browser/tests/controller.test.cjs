@@ -2,6 +2,13 @@ const {test}=require('node:test'),assert=require('node:assert/strict');const {Br
 const {planFixture,inputMessage}=require('../../../extensions/vscode/tests/plan-fixture');
 // Synthetic domain replies around the actual browser controller and shared
 // subscription. These tests do not supply native/provider execution.
+test('browser retrieves bounded saved process output pages only for an observed completed command',async()=>{
+ const id='process-op',run='run-root',artifact={operation_id:id,stdout_bytes:70000,stderr_bytes:3,state:'complete'},operation={id,run_id:run,workspace_id:'workspace',tool:'run_process',state:'succeeded',arguments_json:'{}',expires_unix_ms:0,result_json:JSON.stringify({output_artifact:artifact})},page={operation_id:id,run_id:run,state:'complete',channel:'stdout',encoding:'hex',data:'f09f',offset:0,total_bytes:70000,next_offset:2,complete:true},calls=[],posted=[];
+ const client={operation:async()=>operation,processOutput:async(...args)=>{calls.push(args);return page;}};const view=new BrowserController(client,message=>posted.push(message));view.session='session';view.runId=run;view.runs=[{id:run,state:'completed'}];view.operations.set(id,operation);
+ try{await view.handle({type:'process-output',id,channel:'stdout',after:0});assert.deepEqual(calls,[[id,'stdout',0,65536]]);assert.equal(posted.at(-1).type,'process-output-page');assert.deepEqual(posted.at(-1).page,page);
+  const before=calls.length;await view.handle({type:'process-output',id:'foreign-op',channel:'stdout',after:0});assert.equal(calls.length,before);assert.equal(posted.at(-1).type,'process-output-error');
+ }finally{view.dispose();}
+});
 test('browser session client shares the committed parser using cookies without bearer access',async()=>{
  const run={id:'root',session_id:'session',state:'completed',parent_id:'',node_id:'',graph_root:false},event={seq:7,run_id:'root',kind:'model.text',data:{text:'Synthetic cookie stream 雪'}},frame=(type,value,id)=>`${id===undefined?'':'id: '+id+'\n'}event: ${type}\ndata: ${JSON.stringify(value)}\n\n`,requests=[],delivered=[];
  const wire=frame('observation',{run,scope:'run',after:0})+frame('committed',event,7)+frame('end',{reason:'terminal',after:7});

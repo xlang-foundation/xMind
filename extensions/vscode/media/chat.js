@@ -20,6 +20,7 @@ function refreshPendingApprovals(){
 }
 byId('approval-review').onclick=()=>{const item=pendingApprovals()[0];if(item)operationRows.get(item.id).section.scrollIntoView({block:'start',behavior:'auto'});else refreshPendingApprovals();};
 const processStreams=new Map();
+const processArtifactWidgets=new Map();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
 function appendRunActivity(event){
   let summary='';
@@ -107,8 +108,25 @@ function processOutcome(value){
     if(!channel||!['utf-8','hex'].includes(channel.encoding)||typeof channel.data!=='string'||channel.data.length>524288||(channel.encoding==='hex'&&(!/^(?:[0-9a-fA-F]{2})*$/.test(channel.data)))||!Number.isSafeInteger(channel.byte_count)||!Number.isSafeInteger(channel.retained_bytes)||channel.retained_bytes<0||channel.byte_count<channel.retained_bytes)return;
     if(channel.retained_bytes!==(channel.encoding==='hex'?channel.data.length/2:new TextEncoder().encode(channel.data).length))return;
   }
+  if(value.output_artifact!==undefined){const artifact=value.output_artifact;if(!artifact||artifact.operation_id!==value.operation_id||!Number.isSafeInteger(artifact.stdout_bytes)||!Number.isSafeInteger(artifact.stderr_bytes)||artifact.stdout_bytes<0||artifact.stderr_bytes<0||artifact.stdout_bytes+artifact.stderr_bytes>64*1024*1024||!['complete','incomplete'].includes(artifact.state)||artifact.stdout_bytes!==value.stdout.byte_count||artifact.stderr_bytes!==value.stderr.byte_count)return;}
   return value;
 }
+function processArtifactWidget(section,result,channel,retained){
+  const artifact=result.output_artifact,bytes=artifact?.[channel+'_bytes'];if(artifact?.state!=='complete'||!Number.isSafeInteger(bytes)||bytes<=retained)return;
+  const key=result.operation_id+':'+channel,box=node('div',undefined,'process-artifact'),status=node('p',count(bytes)+' complete bytes · load a page to inspect the saved output.','inspection-note'),pre=node('pre',''),controls=node('div',undefined,'process-artifact-controls');
+  const previous=node('button','Previous page'),next=node('button','Load full '+channel),nextPage=node('button','Next page');previous.disabled=true;nextPage.hidden=true;
+  const request=after=>{if(box.dataset.busy==='true')return;box.dataset.busy='true';box.dataset.requested=String(after);status.textContent='Loading saved '+channel+' output…';api.postMessage({type:'process-output',id:result.operation_id,channel,after});};
+  next.onclick=()=>request(0);previous.onclick=()=>request(Math.max(0,Number(box.dataset.offset||0)-65536));nextPage.onclick=()=>request(Number(box.dataset.next||0));
+  controls.append(previous,next,nextPage);box.append(status,pre,controls);section.append(box);processArtifactWidgets.set(key,{box,status,pre,previous,next,nextPage,total:bytes});
+}
+function processArtifactPage(message){
+  const widget=processArtifactWidgets.get(message?.id+':'+message?.channel),page=message?.page;
+  if(!widget||!page||page.operation_id!==message.id||page.channel!==message.channel||page.encoding!=='hex'||page.complete!==true||page.state!=='complete'||!Number.isSafeInteger(page.offset)||page.offset<0||!Number.isSafeInteger(page.total_bytes)||page.total_bytes!==widget.total||!Number.isSafeInteger(page.next_offset)||typeof page.data!=='string'||!/^(?:[0-9a-f]{2})*$/.test(page.data)||page.data.length/2>65536||page.next_offset!==page.offset+page.data.length/2||page.next_offset>page.total_bytes||page.offset!==Number(widget.box.dataset.requested||0))return;
+  const bytes=Uint8Array.from(page.data.match(/../g)||[],part=>parseInt(part,16));let visible=page.data,encoding='hex';
+  try{visible=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes).replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));encoding='UTF-8; controls escaped';}catch{}
+  widget.box.dataset.busy='false';widget.box.dataset.offset=String(page.offset);widget.box.dataset.next=String(page.next_offset);widget.box.dataset.requested=String(page.offset);widget.status.textContent='Bytes '+count(page.offset)+'–'+count(page.next_offset)+' of '+count(page.total_bytes)+' · '+encoding;widget.pre.textContent=visible;widget.next.textContent='Reload first '+message.channel;widget.nextPage.hidden=page.next_offset>=page.total_bytes;widget.previous.disabled=page.offset===0;
+}
+function processArtifactError(message){const widget=processArtifactWidgets.get(message?.id+':'+message?.channel);if(!widget)return;widget.box.dataset.busy='false';widget.status.textContent='Could not load saved output: '+(typeof message.text==='string'?message.text:'backend request failed');}
 function renderProcessOutcome(section,result){
   const view=node('div',undefined,'process-result'),labels={exited:'Exited',cancelled:'Cancelled',timed_out:'Timed out'};
   view.append(node('strong',labels[result.termination]+' · exit '+result.exit_code,result.termination==='exited'&&result.exit_code===0?'':'process-interrupted'));
@@ -119,14 +137,14 @@ function renderProcessOutcome(section,result){
     detail.append(node('summary',key+' · '+count(channel.byte_count)+' bytes · '+count(channel.retained_bytes)+' retained'+(channel.encoding==='hex'?' · hex':'')));
     // Controls are visible escapes; markup and terminal escapes never execute.
     const visible=channel.encoding==='hex'?channel.data:channel.data.replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));
-    detail.append(node('pre',visible,'process-'+key));view.append(detail);
+    detail.append(node('pre',visible,'process-'+key));view.append(detail);processArtifactWidget(view,result,key,channel.retained_bytes);
     if(channel.encoding==='utf-8'&&visible!==channel.data)detail.append(node('p','Control bytes are shown as Unicode escapes.','inspection-note'));
   }
   if(result.truncated)view.append(node('p','Output exceeded the retained capture limit. Byte counts include drained output.','inspection-note'));
   view.append(node('p','Exit status and output are observed process results. File or remote effects have not been independently verified.','inspection-note'));
   section.append(view);
 }
-function resetProcessStreams(){processStreams.clear();byId('process-streams').replaceChildren();}
+function resetProcessStreams(){processStreams.clear();processArtifactWidgets.clear();byId('process-streams').replaceChildren();}
 function processOutput(value){
   if(!value||typeof value.operation_id!=='string'||!value.operation_id||value.operation_id.length>256||typeof value.profile_id!=='string'||!value.profile_id||value.profile_id.length>64||!['stdout','stderr'].includes(value.channel)||value.encoding!=='hex'||!Number.isSafeInteger(value.offset)||value.offset<0||!Number.isSafeInteger(value.retained_bytes)||value.retained_bytes<1||value.retained_bytes>4096||typeof value.data!=='string'||value.data.length!==value.retained_bytes*2||!/^[0-9a-f]+$/.test(value.data)||value.offset+value.retained_bytes>65536)return;
   let state=processStreams.get(value.operation_id);
@@ -587,6 +605,8 @@ window.addEventListener('message',event=>{
       section.append(detail);
     }
   }
+  else if(m.type==='process-output-page')processArtifactPage(m);
+  else if(m.type==='process-output-error')processArtifactError(m);
   else if(m.type==='a2a-task-inspection'){
     const item=currentOperations.find(value=>value.id===m.id),inspection=m.inspection;
     if(item?.tool==='a2a_delegate'&&item.state==='succeeded'&&inspection&&inspection.operation_id===item.id&&typeof inspection.agent_id==='string'&&typeof inspection.task_id==='string'&&inspection.task&&typeof inspection.task==='object'&&!Array.isArray(inspection.task)&&JSON.stringify(inspection.task).length<=524288&&['not_attempted','outcome_unknown','acknowledged'].includes(inspection.cancel_state)&&Number.isSafeInteger(inspection.inspected_unix_ms)&&inspection.inspected_unix_ms>0&&inspection.inspected_unix_ms<=8640000000000000){a2aTaskInspections.set(item.id,inspection);operations(currentOperations);}

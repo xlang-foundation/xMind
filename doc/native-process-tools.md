@@ -79,9 +79,11 @@ The focused `native_process_executor_contract` and
 `native_agent_process_http_contract` exercise real Windows child processes,
 exact approval, streamed SQLite events, a synthetic-model start/wait/final
 flow, full-output pagination beyond the bounded 64 KiB summaries, CLI/HTTP
-reads, restart replay, and cancellation. They
-do not exercise a live model, the rendered browser/VS Code process UI, or full
-OpenCode background-job parity.
+reads, restart replay, and cancellation. Shared browser/VS Code renderer and
+host-adapter contracts now cover loading bounded stdout/stderr pages for an
+observed completed command, including escaped invalid bytes and ownership
+checks. These tests do not exercise a live model, an installed rendered
+browser/VS Code process UI, or full OpenCode background-job parity.
 
 The native implementation must preserve these lifecycle guarantees:
 
@@ -114,9 +116,10 @@ The native implementation must preserve these lifecycle guarantees:
 
 The per-run event API now admits late process-output chunks only for an
 operation owned by that run that remains executing. Resource ownership remains
-held until operation completion. The native start/wait/join lifecycle and
-bounded full-output artifact are implemented. Restart reconciliation, rendered
-browser and VS Code process flows, and full acceptance remain outstanding.
+held until operation completion. The native start/wait/join lifecycle, bounded
+full-output artifact, and read-only paged-output controls in the shared
+browser/VS Code renderer are implemented. Restart reconciliation, installed
+rendered-client process acceptance, and full acceptance remain outstanding.
 
 The `37e153b` hosted gate built and passed 51 native contracts but its approved
 process-executor fixture exceeded the unchanged 45-second outer timeout.
