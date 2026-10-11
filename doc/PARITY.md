@@ -20,7 +20,7 @@ checked out locally. [Pinned source](https://github.com/anomalyco/opencode/tree/
 track the current V2 surface and can move independently of the source tag;
 source-defined API contracts take precedence for this inventory.
 
-## Latest native coding/runtime checkpoint (2026-10-11, `d24fe0f`)
+## Latest native coding/runtime checkpoint (2026-10-11, package `bd14273`; native source `7acf21f`)
 
 Named YAML agent definitions and graph agent nodes carry optional tool
 allowlists. The native loop filters the authorized catalogue for single-agent
@@ -39,6 +39,24 @@ does not sandbox trusted code, provide hard interruption, or establish full
 programming-mode catalog replacement and graph execution parity. See the
 [authoring contract](authoring.md) and
 [execution evidence](evidence/agentflow-xlang-tool-runner-local-20261011.json).
+
+The native source also builds in Release and passes the complete local CTest
+gate, **132/132** in **604.75 seconds**. The gate includes actual Windows
+process adapter/configuration/executor checks, approved process continuation
+through the authenticated server and CLI, durable output events, process-tree
+cleanup, and persistent ConPTY lifecycle. The full log digest and exact
+runtime/package scope are recorded in the
+[0.1.7 package evidence](evidence/vscode-0.1.7-package-preview.json). The
+extension suite passes **295/295** and the package activates in an isolated
+VS Code profile; rendered sidebar acceptance remains open.
+
+The managed local browser and VS Code launcher still do not pass a trusted
+process-profile configuration into `xmind view`; no process profile is seeded
+by default. Consequently, these component/server/CLI contracts do not prove
+that the ordinary managed local agent can execute a coding shell. Profile
+enrollment and refresh in managed views, then explicit reviewed shell-command
+semantics, are the next coding-runtime work. A passing PTY lifecycle fixture
+uses synthetic shell I/O and is not a real workspace coding command.
 
 The pinned OpenCode inventory remains **141 operations**, with **31** mapped
 native source candidates, **110** unmapped, and **zero** operations with
@@ -237,7 +255,7 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | --- | --- | --- |
 | Runtime and clients | Full-screen and minimal interactive CLI, automation command, shared background service, explicit standalone/remote connection, web and desktop clients | One persistent native `xmind` backend, console CLI, browser UI and VS Code sidebar are in scope. Full interactive coding UX, consistent installed-client behavior and endpoint-by-endpoint compatibility remain incomplete; standalone Electron is explicitly Nexus-only. |
 | Agents and orchestration | Build/Plan primary agents; foreground/background subagents; Markdown and config agents; per-agent model, visibility, permissions, step limits and defaults | Native single-agent and graph execution, YAML/Markdown authoring and named tool bindings exist. Exact primary/subagent modes, dynamic delegation, graph planning, configuration precedence and rendered selection remain incomplete. |
-| Coding harness | Workspace read/edit, shell, search, LSP, custom tools, skills, attachments/references and review/undo workflows | Native file/search/process tools, approved edits, skills and selected editor context have scoped evidence. A persistent native Content-Length LSP bridge supports trusted server profiles and a read-only AgentRunner tool, binds executable/profile/environment identity into authority, and passes real rust-analyzer symbol/diagnostics/navigation/formatting plus SQLite contracts. VS Code provides diagnostics, definition/hover/reference and user-triggered formatting; a rendered extension-development-host format/save cycle passes. Packaged-extension acceptance, formatter discovery, general shell/PTY, broad attachments, complete diff/recovery and full-project coding workflows remain incomplete. See [native language-server integration](native-language-server.md). |
+| Coding harness | Workspace read/edit, shell, search, LSP, custom tools, skills, attachments/references and review/undo workflows | Native file/search/process tools, approved edits and durable foreground output pass scoped native/server/CLI contracts. Managed browser/VS Code view startup does not load trusted process profiles, so its agent does not get `run_process` by default; reviewed shell-command semantics, general interactive PTY use, background jobs, full-output artifacts, broad attachments, complete diff/recovery and full-project coding workflows remain incomplete. A persistent native Content-Length LSP bridge supports trusted server profiles and a read-only AgentRunner tool, binds executable/profile/environment identity into authority, and passes real rust-analyzer symbol/diagnostics/navigation/formatting plus SQLite contracts. VS Code provides diagnostics, definition/hover/reference and user-triggered formatting; a rendered extension-development-host format/save cycle passes. Current packaged-extension acceptance is limited to installation/activation; rendered sidebar process use remains unverified. See [native language-server integration](native-language-server.md) and [process tooling](native-process-tools.md). |
 | Models and providers | Provider authentication, broad provider/model catalogue, per-session model selection, variants and provider/model request settings | Encrypted multi-provider profiles, native discovery and several native wire protocols exist. Saved credentials stay in the backend; clients receive public profile/model metadata only. When opaque history cannot cross provider wires, the backend preserves the conversation and the shared browser/VS Code failure card now explains that the request stopped before contacting the provider and that the saved key was not the cause. Cross-wire history conversion, variants, general settings precedence and broad live-client acceptance remain incomplete. See [provider wire recovery evidence](evidence/provider-wire-recovery-local-20261011.json). |
 | MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP tools, resource reads and prompt retrieval use durable approval; modern/legacy stdio peers and official v2 HTTP SDK resource/prompt flows have scoped contracts. OAuth renewal, subscriptions and additional HTTP/SSE behaviors, plugin lifecycle and complete command parity remain incomplete. |
 | Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Backend-owned approvals and effect receipts are implemented for scoped operations. General policy rules, durable change snapshots/reversal and full export/sharing contracts remain incomplete. |

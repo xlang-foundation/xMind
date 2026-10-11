@@ -1,5 +1,37 @@
 # Native coding process tools — implementation contract
 
+## Current integrated local acceptance (2026-10-11)
+
+The current native source checkpoint `7acf21f` built in Release and passed the
+complete local CTest gate: **132/132** in **604.75 seconds**. The full log is
+`build/goal-current/Testing/Temporary/LastTest.log`; its SHA-256 is recorded in
+[package preview evidence](evidence/vscode-0.1.7-package-preview.json).
+Relevant passing contracts include the native process adapter, configuration
+store, approved executor, server/CLI model continuation, output journaling and
+persistent ConPTY sessions. They exercise real Windows processes, xlang3-backed
+SQLite, approval/denial/cancellation, executable and workspace binding,
+output bounds, restart quarantine and process-tree cleanup. The model peer is
+synthetic. The PTY test uses synthetic shell I/O and does not run a command in
+the user's workspace.
+
+This current local gate supersedes the historical pending or failed process
+gate observations below for local native execution. It does not turn those
+older hosted attempts into passes or establish current hosted acceptance.
+The 0.1.7 extension suite separately passes **295/295**, and the extension
+activates in its isolated package-test profile; a rendered VS Code sidebar
+process run remains unverified.
+
+One integration gap prevents treating these components as a ready coding
+shell in the usual managed local view: `xmind view` and the VS Code workspace
+launcher do not currently accept or forward `--process-config`. No process
+profile is seeded by default, so the managed browser/VS Code agent does not
+advertise `run_process` merely because a user has a trusted process profile
+in another server. The standalone server/admin/CLI path can load profiles.
+The next implementation step is managed-view profile enrollment and refresh,
+followed by a reviewed shell-command tool contract. Exact shell discovery,
+background jobs, full-output artifacts, interruption-safe recovery and full
+OpenCode command parity remain open.
+
 The `37e153b` hosted gate built and passed 51 native contracts but its approved
 process-executor fixture exceeded the unchanged 45-second outer timeout.
 [Exact gate provenance](evidence/native-cli-recovery-corrected-gate-failure-provenance.json)
