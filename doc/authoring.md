@@ -126,9 +126,15 @@ supported. JSON input remains accepted.
 The current slice supports reusable named YAML agents in graph nodes, per-node
 inline instructions, per-agent native tool allowlists, and revisioned
 single-agent conversation selection. Arbitrary xlang3 `.py` callables and the
-in-process programming API remain incomplete. Workspace Markdown skill discovery and
-selection are implemented, while the full command/skill lifecycle still has
-documented gaps.
+in-process programming API remain incomplete. A low-level trusted callable
+bridge now embeds xlang3, imports a Python module from an explicit code root,
+passes a JSON object to its function, and accepts only a JSON result. Its runtime
+and values are created and destroyed on the invoking thread. This bridge is not
+yet connected to agent YAML, the model tool catalogue, or the native tool
+permission/approval APIs; do not treat it as registered AgentFlow functionality.
+Trusted xlang3 code is in-process code and is not an OS sandbox. Workspace
+Markdown skill discovery and selection are implemented, while the full
+command/skill lifecycle still has documented gaps.
 Those authoring styles must eventually produce the same validated native
 definitions, tool registry and permission receipts; parser acceptance alone
 does not establish runtime behavior. See the
