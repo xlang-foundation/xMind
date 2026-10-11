@@ -675,7 +675,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance)));
                     } else if(a2a_tools&&call.name.starts_with("a2a_delegate_")) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
-                        output=Json::parse(a2a_tools->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance)));
+                        const auto a2a_operation=operation_id();
+                        output=Json::parse(a2a_tools->invoke(a2a_operation,id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance),[&](const std::string& event){
+                            cancelled(token);persistence_.append_event(id,"a2a.task_event",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"data",Json::parse(event)}}.dump()).get();
+                        }));
                     } else output=Json::parse(workspace_->invoke(call.name,call.arguments_json,token));
                     success=guidance_ready&&(call.name!="apply_patch"||output.value("state",std::string{})=="succeeded");
                 }

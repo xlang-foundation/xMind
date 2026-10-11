@@ -11,15 +11,17 @@ inspection reports the durable cancellation outcome after reload. The browser
 and extension contracts pass locally (**71/71** and **267/267**). The native
 Windows contract has not yet been built or run; CMake/MSBuild are unavailable in
 this development shell, so the pushed Windows workflow must verify it. A2A SDK
-interoperability, streaming/resumption, input-required follow-up, artifacts and
-full task recovery remain open.
+interoperability, durable stream resumption, input-required follow-up, artifacts
+and full task recovery remain open.
 
-The outbound A2A client is being extended with capability-gated SSE
-`SendStreamingMessage` and `SubscribeToTask` methods for protocol 1.0 and 0.3.
-The client now validates response correlation and bounds event frames, with a
-synthetic loopback contract for task/status replay. This does not yet route
-remote events through AgentFlow run history or UI, and the native source has
-not yet been compiled; hosted Windows validation is required.
+The outbound A2A client provides capability-gated SSE `SendStreamingMessage`
+and `SubscribeToTask` methods for protocol 1.0 and 0.3. AgentRunner now routes
+advertised streaming sends through that client and persists each returned task
+event in the run journal; non-streaming peers retain blocking `SendMessage`.
+The registry contract covers two live events and durable event counts. A
+structured activity renderer, inbound resubscription/recovery integration,
+official SDK streaming peer contract, and native compilation remain open;
+hosted Windows validation is required.
 
 Managed profile runtime upgrade is now wired into the native profile launcher.
 The console supports `--upgrade-backend`; the native browser/VS Code adapter

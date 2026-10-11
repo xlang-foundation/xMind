@@ -6,6 +6,7 @@
 #include "agentflow/permission_waiter.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include <chrono>
+#include <functional>
 #include <map>
 #include <memory>
 #include <stop_token>
@@ -31,7 +32,8 @@ public:
     std::vector<std::string> unavailable_agent_ids()const;
     std::string invoke(const std::string& operation_id,const std::string& run_id,const std::string& alias,
         const std::string& arguments,std::int64_t approval_expiry,std::chrono::steady_clock::time_point deadline,
-        std::stop_token cancel={},InstructionPrecondition guidance={});
+        std::stop_token cancel={},InstructionPrecondition guidance={},
+        std::function<void(const std::string&)> on_task_event={});
 private:
     struct Entry;
     A2aRemoteAgentRegistry& registrations_;

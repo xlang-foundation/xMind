@@ -66,8 +66,9 @@ an explicit “Refresh remote task” control for acknowledged tasks. Contracts
 check owner authentication, same-origin browser forwarding, exact saved task
 ID, durable inspection, CLI routing, client identity checks, and that uncertain
 dispatches do not issue a second remote effect. This is explicit polling;
-streamed observation/resumption, input-required follow-up, artifacts and
-cross-client rendered acceptance remain open. These are required
+initial task events now stream for peers that advertise the capability, while
+resubscription/recovery, input-required follow-up, artifacts and cross-client
+rendered acceptance remain open. These are required
 before claiming full outbound A2A parity.
 
 An explicit outbound cancellation route is now also wired to acknowledged
@@ -86,15 +87,20 @@ SDK cancellation, post-restart rendering of the durable control outcome, stream
 resumption, input-required follow-up, artifacts and complete peer acceptance
 remain open.
 
-The native outbound JSON-RPC client now exposes capability-gated SSE methods
-for `SendStreamingMessage` and `SubscribeToTask`, mapping their A2A 1.0 and 0.3
+The native outbound JSON-RPC client exposes capability-gated SSE methods for
+`SendStreamingMessage` and `SubscribeToTask`, mapping their A2A 1.0 and 0.3
 method names. It validates the response media type/version, JSON-RPC request
 correlation and event boundaries before delivering one result object per SSE
 event, with bounded frame sizes and the existing transport deadline and
-cancellation behavior. This is currently a client/transport capability: the
-AgentFlow A2A tool still uses blocking `SendMessage`, so remote progress is not
-yet journaled or rendered as part of a running agent turn. The independent
-official SDK peer stream contract is also still required.
+cancellation behavior. `A2aAgentToolRegistry` now selects the streaming send
+when the AgentCard advertises it, retaining blocking `SendMessage` for peers
+without streaming. The AgentRunner persists each remote result as an
+`a2a.task_event` while the call is active, so the existing event stream,
+reconnect and run-history paths can observe it; the operation still records the
+final acknowledged task and follows the same no-retry uncertain-outcome rule.
+The registry contract now checks delivery and durable event counts. A visible,
+structured activity rendering and the independent official SDK peer stream
+contract are still required.
 
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),

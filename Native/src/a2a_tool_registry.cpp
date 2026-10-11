@@ -74,7 +74,7 @@ std::string A2aAgentToolRegistry::approval_bindings_json()const{
 std::vector<std::string> A2aAgentToolRegistry::unavailable_agent_ids()const{return unavailable_;}
 std::string A2aAgentToolRegistry::invoke(const std::string& id,const std::string& run,const std::string& alias,
     const std::string& arguments,std::int64_t expiry,std::chrono::steady_clock::time_point deadline,
-    std::stop_token cancel,InstructionPrecondition guidance){
+    std::stop_token cancel,InstructionPrecondition guidance,std::function<void(const std::string&)> on_task_event){
     auto& state=*this;const auto found=entries_.find(alias);if(found==entries_.end())throw A2aEffectNotDispatched("A2A peer is no longer part of the discovered run catalogue");
     const auto approved=mcp_compact_object(arguments);Json args;
     try{args=Json::parse(approved);}catch(...){throw std::invalid_argument("Invalid A2A delegation arguments");}
@@ -99,11 +99,22 @@ std::string A2aAgentToolRegistry::invoke(const std::string& id,const std::string
     if(cancel.stop_requested()||std::chrono::steady_clock::now()>=deadline){finish(OperationState::failed,Json{{"reason","stopped_before_a2a_dispatch"},{"agent_id",entry.registration.id},{"message_id",message_id}}.dump());throw A2aEffectNotDispatched("A2A task stopped before dispatch");}
     try{if(guidance.verify)guidance.verify(cancel);}catch(const ToolGuidanceChanged&){finish(OperationState::failed,Json{{"reason","repository_instructions_changed_before_a2a_dispatch"}}.dump());throw;}
     catch(...){finish(OperationState::failed,Json{{"reason","guidance_unavailable_before_a2a_dispatch"}}.dump());throw A2aEffectNotDispatched("Repository guidance could not be verified before A2A dispatch");}
-    bool dispatched=false;std::string response;
+    bool dispatched=false;std::string response;std::size_t event_sequence=0;std::string streamed_task_id,streamed_context_id;
     try{
         const auto remaining=std::chrono::ceil<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now());
         if(remaining.count()<=0)throw TransportTimeout("A2A deadline elapsed before dispatch");
-        response=entry.client->send_message(params.dump(),remaining,cancel,[&]{validate_registration();dispatched=true;});
+        const auto request=params.dump();
+        if(entry.peer.streaming){
+            entry.client->stream_message(request,remaining,[&](const std::string& event_json){
+                Json event;try{event=Json::parse(event_json);}catch(...){throw A2aOutcomeUnrecorded("A2A stream event could not be decoded");}
+                if(event.contains("id")&&event["id"].is_string())streamed_task_id=event["id"].get<std::string>();
+                if(event.contains("taskId")&&event["taskId"].is_string())streamed_task_id=event["taskId"].get<std::string>();
+                if(event.contains("contextId")&&event["contextId"].is_string())streamed_context_id=event["contextId"].get<std::string>();
+                response=event_json;
+                if(on_task_event)on_task_event(Json{{"operation_id",id},{"agent_id",entry.registration.id},
+                    {"event_sequence",++event_sequence},{"event",std::move(event)}}.dump());
+            },cancel,[&]{validate_registration();dispatched=true;});
+        }else response=entry.client->send_message(request,remaining,cancel,[&]{validate_registration();dispatched=true;});
     }catch(...){
         const auto failure=std::current_exception();
         if(dispatched){finish(OperationState::uncertain,Json{{"reason","a2a_dispatch_outcome_unknown"},{"agent_id",entry.registration.id},{"agent_revision",entry.registration.revision},{"message_id",message_id}}.dump());throw A2aEffectUncertain("A2A request may have reached the remote agent; automatic retry is forbidden");}
@@ -112,8 +123,8 @@ std::string A2aAgentToolRegistry::invoke(const std::string& id,const std::string
     try{
         const auto actual=Json::parse(response);if(!actual.is_object())throw std::invalid_argument("Invalid A2A task result");
         Json task_result=actual.contains("task")&&actual["task"].is_object()?actual["task"]:actual;
-        std::string task_id;if(task_result.contains("id")&&task_result["id"].is_string())task_id=task_result["id"].get<std::string>();
-        std::string context_id;if(task_result.contains("contextId")&&task_result["contextId"].is_string())context_id=task_result["contextId"].get<std::string>();
+        std::string task_id=streamed_task_id;if(task_result.contains("id")&&task_result["id"].is_string())task_id=task_result["id"].get<std::string>();else if(task_id.empty()&&task_result.contains("taskId")&&task_result["taskId"].is_string())task_id=task_result["taskId"].get<std::string>();
+        std::string context_id=streamed_context_id;if(task_result.contains("contextId")&&task_result["contextId"].is_string())context_id=task_result["contextId"].get<std::string>();
         if(task_id.empty()&&!actual.contains("message")&&!actual.contains("kind"))throw std::invalid_argument("A2A SendMessage returned neither a task nor a message");
         const auto result=Json{{"operation_id",id},{"agent_id",entry.registration.id},{"agent_revision",entry.registration.revision},
             {"message_id",message_id},{"task_id",task_id},{"context_id",context_id},{"acknowledged_by_peer",true},
