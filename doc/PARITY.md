@@ -38,6 +38,13 @@ prior DeepSeek selection. The page received model IDs only. This is not an
 inference, streaming, or installed VS Code result; see the
 [catalogue evidence](evidence/provider-catalogues-live-browser-20261010.json).
 
+The rendered browser was then opened as a fresh same-machine view, connected to
+the local process without a server-token or provider-key prompt, and used its
+saved OpenAI profile for a completed `gpt-5.6-sol` request. The response and
+provider-reported usage/backend timings appeared in the sidebar. The old
+unlinked `60415` browser tab is excluded from this acceptance. Exact evidence
+and limits: [saved-profile UI run](evidence/browser-live-saved-profile-ui-20261010.json).
+
 The current OpenAPI audit contains **136 operations**: **25** have a mapped C++
 source candidate, **111** remain unmapped, and **zero** are verified parity.
 The audit embeds all **245** pinned schema components and resolves all **855**

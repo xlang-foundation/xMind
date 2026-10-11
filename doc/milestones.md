@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+## Saved provider profiles work in a fresh local browser view (2026-10-10)
+
+A fresh same-machine page connected to its local xMind process without a server
+token or provider-key prompt, then displayed the four saved providers and the
+active OpenAI model catalogue. The key remains backend-owned; the Settings key
+field is blank when reusing it. From the rendered browser, OpenAI
+`gpt-5.6-sol` returned `UI_OK`; the page showed provider-reported tokens and
+backend-measured timings. The older `60415` tab was unlinked and is not the
+working view. [Exact rendered acceptance and limits](evidence/browser-live-saved-profile-ui-20261010.json).
+
 ## Full local native and client gate restored (2026-10-10)
 
 The Release `ALL_BUILD` and complete native CTest gate passed **122/122** in

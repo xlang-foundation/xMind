@@ -1,0 +1,46 @@
+{
+  "scope": "Rendered same-machine browser acceptance for saved provider profiles and one live OpenAI response",
+  "observed_local_date": "2026-10-10",
+  "runtime_source_revision": "65f20505321e67dffcb495ff38e735781a9fdc8e",
+  "evidence_documentation_commit": "43f11cad090a6c258165b7f8e98bec1468e7e061",
+  "runtime_executable": ".agentflow/local-dev-runtime-65f2050/xmind.exe",
+  "runtime_executable_sha256": "c4adf884da6f959429f79b01be40d754badca5ca485dd9e68ed4b207174acdad",
+  "xlang3_runtime_sha256": "4c0959726dfdaf8c12321188da524808e516cf224bab5ae590b3bd05a4349c07",
+  "runtime_manifest_sha256": "f2159b301ab1fb3ba508ccae8a5e23d167353aafd605a7dbef3969451e7bb7da",
+  "view_origin": "http://127.0.0.1:49358/ui/",
+  "workspace": "D:/CantorAI2026/xMind",
+  "configuration": ".config/providers.yaml",
+  "provider_secret_handling": "The configuration contained four api_key entries. No key value was read into the UI, copied into a prompt, included in navigation, or recorded in this evidence. Settings leaves the key field blank to reuse the saved backend credential.",
+  "connection": "A fresh page showed Connect to local xMind. After connecting, the same-machine page displayed the active workspace, four saved provider choices and the active OpenAI model catalogue without asking for a server token or provider key.",
+  "catalogues": {
+    "claude": 13,
+    "gemini": 11,
+    "deepseek": 2,
+    "openai": 20
+  },
+  "live_run": {
+    "run_id": "b57114bfb5b23214e137d6f9d2047a6d",
+    "state": "completed",
+    "provider": "OpenAI · Responses",
+    "model": "gpt-5.6-sol",
+    "reply": "UI_OK",
+    "tokens": {
+      "input": 3815,
+      "output": 6,
+      "total": 3821,
+      "cached": 3802,
+      "reasoning": 0,
+      "source": "provider-reported"
+    },
+    "timings_seconds": {
+      "first_token": 1.07,
+      "elapsed": 1.24,
+      "source": "backend-measured"
+    }
+  },
+  "negative_observation": "The older open tab at 127.0.0.1:60415 reported that local xMind access was unavailable. It was not the connected view used for this acceptance.",
+  "limits": [
+    "Local development runtime only; this is not hosted-release or installed-IDE acceptance.",
+    "The live response verifies one text-only OpenAI request and model/token/timing rendering, not streaming, tools, edits or complete provider compatibility."
+  ]
+}
