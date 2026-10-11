@@ -1,5 +1,28 @@
 # Current native validation
 
+## Same-machine webpage attach and current hosted views — 2026-10-10
+
+The active local browser launcher advertises `http://127.0.0.1:60430/ui/`;
+the route returns HTTP 200 and serves the workspace selector and right-sidebar
+markup without a server-token field. Local browser connection and adapter
+contracts pass **20/20**, covering automatic same-machine session enrollment,
+refresh, workspace selection and folder picking. The already-open `60415` tab
+shows an authenticated local connection and history, but retains an older
+Connect control; it is not fresh rendered acceptance of the active `60430`
+view.
+
+Hosted run
+[38099857512](https://github.com/xlang-foundation/xMind/actions/runs/38099857512)
+passes **264 VS Code and 67 browser contracts** and confirms tracked source,
+vendored files and generated browser assets were unchanged during the suite.
+It does not execute the native backend or prove installed-editor interaction.
+Native run
+[38098811196](https://github.com/xlang-foundation/xMind/actions/runs/38098811196)
+is still compiling the pinned xlang3 runtime and full native suite; the newer
+run for `bd7aa30` is queued behind it. The guarded local native build correctly
+deferred before configuration because a live xlang3 performance benchmark is
+running. Native release acceptance remains open.
+
 ## Browser recheck — 2026-10-10
 
 The open `60415` page connects to the same-machine xMind backend without a
