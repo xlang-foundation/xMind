@@ -5,6 +5,7 @@ import {mkdir,readFile,writeFile,lstat,realpath,stat} from 'node:fs/promises';
 import {createHash,randomBytes,randomUUID} from 'node:crypto';
 import {resolve,join,relative,isAbsolute} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {buildBrowserAssets} from '../views/browser/build.mjs';
 import {createBrowserServer} from '../views/browser/server.mjs';
 import {verifyNativeRuntime} from '../extensions/vscode/native-runtime.js';
 
@@ -19,6 +20,7 @@ const env=process.env;
 const localAppData=env.LOCALAPPDATA||join(env.USERPROFILE||root,'AppData','Local');
 const state=resolve(options.get('--state')||join(localAppData,'xMind','BrowserView'));
 const assets=resolve(options.get('--assets')||join(root,'.agentflow','browser-assets'));
+await buildBrowserAssets(assets);
 const viewOrigin=options.get('--backend');
 const port=Number(options.get('--port')||60405);
 if(!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid browser view port');
