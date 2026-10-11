@@ -2,11 +2,12 @@ import {mkdtempSync,mkdirSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {resolve,join,sep} from 'node:path';
 import {spawnSync} from 'node:child_process';
-const [binary,node,fixture,modules,stdlib]=process.argv.slice(2);
+const [binary,node,fixture,modules,stdlib,powershell]=process.argv.slice(2);
+if(!powershell)throw new Error('A real PowerShell executable is required for the shell-profile contract');
 const root=mkdtempSync(join(tmpdir(),'xmind-approved-process-')),workspace=join(root,'workspace');
 try {
   mkdirSync(workspace);
-  const result=spawnSync(binary,[node,fixture,workspace,modules,stdlib],{encoding:'utf8',windowsHide:true,timeout:45000});
+  const result=spawnSync(binary,[node,fixture,workspace,modules,stdlib,powershell],{encoding:'utf8',windowsHide:true,timeout:45000});
   process.stdout.write(result.stdout||'');process.stderr.write(result.stderr||'');
   if(result.error)throw result.error;if(result.status!==0)throw new Error('Actual approved native process contract exit '+result.status);
 } finally {

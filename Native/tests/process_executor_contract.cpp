@@ -50,7 +50,7 @@ void owner(PersistenceService& store,const std::string& run="run",const std::str
     store.create_session(session,"Actual approved process contract").get();store.start_prompt_run(run,session,R"({"content":"actual native process fixture"})").get();store.transition(run,RunState::queued,RunState::running).get();
 }
 }
-int main(int argc,char** argv){if(argc!=6)return 2;try{
+int main(int argc,char** argv){if(argc!=7)return 2;try{
     const auto started=std::chrono::steady_clock::now();
     const auto phase=[&](const char* name){std::cerr<<"[process-contract] phase="<<name<<" elapsed_ms="<<std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-started).count()<<'\n'<<std::flush;};
     phase("workspace-setup");
@@ -86,6 +86,16 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         require(Json::parse(result["stdout"]["data"].get<std::string>())["inherited"]==false && store.operation("allowed").get().state==OperationState::succeeded,"Actual output and successful journal required");
         require(output(store,"allowed")==std::pair{result["stdout"]["data"].get<std::string>(),result["stderr"]["data"].get<std::string>()},"Durable channels must equal actual observed output bytes");
         rejects<Conflict>([&]{executor.invoke("allowed","run",args("normal","duplicate.txt"),now()+600000);});require(!std::filesystem::exists(root/"duplicate.txt"),"Duplicate operation must not dispatch again");
+        phase("approved-powershell-shell");
+        const auto shell_effect=root/"powershell-shell-effect.txt";
+        const auto shell_script="[IO.File]::WriteAllText('"+shell_effect.string()+"','actual approved shell effect'); [Console]::Out.Write('actual shell output')";
+        ProcessExecutor shell_executor(store,workspace,root.string(),{{"powershell",argv[6],1,{"-NoLogo","-NoProfile","-NonInteractive","-Command"},10s}});
+        const auto shell_request=Json{{"profile","powershell"},{"arguments",Json::array({shell_script})},{"workdir","."}}.dump();
+        Task shell(shell_executor,"powershell-shell",shell_request);const auto shell_proposal=proposed(store,"powershell-shell");const auto shell_payload=Json::parse(shell_proposal.spec.arguments_json);
+        require(shell_payload["profile_id"]=="powershell"&&shell_payload["executable"]==argv[6]&&shell_payload["arguments"]==Json::array({"-NoLogo","-NoProfile","-NonInteractive","-Command",shell_script})&&shell_payload["workdir"]==".","Shell approval must bind the trusted PowerShell executable, fixed parser flags and exact reviewed command text");
+        require(!std::filesystem::exists(shell_effect),"A shell command must not execute before approval");store.decide_operation("powershell-shell",OperationDecision::allow,"actual-fixture-controller").get();
+        const auto shell_result=Json::parse(shell.result.get());require(shell_result["exit_code"]==0&&shell_result["termination"]=="exited"&&shell_result["stdout"]["data"]=="actual shell output"&&file(shell_effect)=="actual approved shell effect"&&store.operation("powershell-shell").get().state==OperationState::succeeded,"Approved PowerShell command must create its exact actual effect and return captured output");
+        require(output(store,"powershell-shell")==std::pair{shell_result["stdout"]["data"].get<std::string>(),shell_result["stderr"]["data"].get<std::string>()},"PowerShell result channels must be durably journalled");
         phase("binary-output");
         Task binary(executor,"binary",args("bytes","unused.txt"));proposed(store,"binary");store.decide_operation("binary",OperationDecision::allow,"actual-fixture-controller").get();const auto bytes=Json::parse(binary.result.get());
         require(bytes["exit_code"]==7 && bytes["stdout"]["encoding"]=="hex" && bytes["stdout"]["data"]=="ff00fe0a" && bytes["stderr"]["data"]=="800d00" && store.operation("binary").get().state==OperationState::succeeded,"Nonzero exit and invalid raw bytes must be explicitly encoded and journalled");
@@ -172,5 +182,5 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         if(std::string(mode)=="cancel")require(file(directory/"effect.txt")=="actual effect before cancellation","Cancellation must not claim rollback or remove effect");phase("interruption-close");store.close();
     }
     phase("complete");
-    std::cout<<"Native process executor passed actual approved child effects, deny/cancel/expiry, exact profiles/arguments/workdir, stale directory, explicit binary output/nonzero exit, duplicate rejection, real result-storage fault, uncertain restart and cross-workspace profile quarantine, timeout and post-effect cancellation. Model/server/editor integration remains separate.\n";return 0;
+    std::cout<<"Native process executor passed actual approved child effects, deny/cancel/expiry, exact profiles/arguments/workdir, one real PowerShell shell-text profile and approval, stale directory, explicit binary output/nonzero exit, duplicate rejection, real result-storage fault, uncertain restart and cross-workspace profile quarantine, timeout and post-effect cancellation. Shell discovery/semantics parity and model/server/editor integration remain separate.\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

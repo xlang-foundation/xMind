@@ -58,6 +58,24 @@ is seeded. A trusted profile must be configured before `run_process` is
 advertised. Exact implementation and limits are in
 [native process tools](native-process-tools.md).
 
+## Native shell-profile approval check — 2026-10-11
+
+The Release `agentflow_process_executor_contract` now invokes the installed
+PowerShell executable through a trusted profile. It verifies that the exact
+executable, fixed `-NoLogo -NoProfile -NonInteractive -Command` prefix and
+script are recorded in a pending approval; the disposable file effect is
+absent until approval, then the exact file and captured/journalled output are
+verified. `native_process_executor_contract` passes (**1/1**). The Release
+`xmind`, `xmind_server`, `xmind_cli` and `xmind_admin` targets build, and
+`native_agent_process_http_contract` passes (**1/1**) for the existing actual
+server/CLI process lifecycle contract.
+
+This verifies a configured PowerShell profile at the native executor and a
+separate process path through HTTP/CLI. The tests do not combine PowerShell
+with a model-driven server run, nor render a shell approval in browser or VS
+Code. Shell discovery, command semantics parity and a seeded shell remain
+incomplete; full native CTest remains unrun.
+
 ## Interactive CLI cancellation and detach — 2026-10-11
 
 The console now reads input while it observes an active single-agent or graph

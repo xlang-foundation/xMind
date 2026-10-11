@@ -621,11 +621,12 @@ if(BUILD_TESTING)
     add_executable(agentflow_process_executor_contract tests/process_executor_contract.cpp)
     target_include_directories(agentflow_process_executor_contract PRIVATE third_party)
     target_link_libraries(agentflow_process_executor_contract PRIVATE agentflow_process_effects)
+    find_program(AGENTFLOW_POWERSHELL_EXECUTABLE NAMES pwsh.exe powershell.exe REQUIRED)
     add_custom_command(TARGET agentflow_process_executor_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_process_executor_contract>")
     add_test(NAME native_process_executor_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/process_executor_peer.mjs"
       "$<TARGET_FILE:agentflow_process_executor_contract>" "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/process_peer.mjs"
-      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "${AGENTFLOW_POWERSHELL_EXECUTABLE}")
     set_tests_properties(native_process_executor_contract PROPERTIES TIMEOUT 60)
     add_executable(agentflow_conpty_cli_harness tests/conpty_cli_harness.cpp)
     add_test(NAME native_agent_process_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_process_http_contract.mjs"
