@@ -13,7 +13,7 @@ WebRTC and Electron IDE.
 | Models and credentials | [Provider setup](provider-setup.md), [credential storage](credential-storage.md) |
 | General agents and graphs | [Agent loop](native-agent-loop.md), [delegation](native-delegation.md), [graph service](native-graph-service.md) |
 | Long conversations | [JSON POST foundation](native-context-transport.md), [native compaction implementation and remaining acceptance](native-context-compaction-design.md) |
-| Coding tools and approvals | [Workspace tools](native-workspace-tools.md), [file creation](native-file-creation.md), [process tools](native-process-tools.md), [permissions](PERMISSIONS.md) |
+| Coding tools and approvals | [Workspace tools](native-workspace-tools.md), [multi-folder workspace target](native-multi-folder-workspaces.md), [file creation](native-file-creation.md), [process tools](native-process-tools.md), [permissions](PERMISSIONS.md) |
 | Protocols and profiles | [MCP](native-mcp.md), [A2A](A2A.md), [connection profiles](connection-profiles.md) |
 | Coverage and verification | [Validation status](VALIDATION_STATUS.md), [parity baseline](PARITY.md), [model coverage](MODEL_SUPPORT.md), [milestones](milestones.md) |
 | Source layout | [Cleanup](cleanup.md) |

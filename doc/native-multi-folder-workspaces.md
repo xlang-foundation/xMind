@@ -1,0 +1,105 @@
+# Native multi-folder workspaces
+
+## Status
+
+This is the target contract for browser, CLI and VS Code. It is not yet
+implemented. At source `d8c9d9c`, `WorkspaceTools`, workspace admission,
+process execution, Git and the local profile catalogue still bind one folder
+per workspace. See the [current browser behavior and gap](browser-view.md#multi-folder-workspace-target).
+
+## User workflow
+
+1. **Create workspace** chooses an existing local folder. That folder becomes
+   the first member and the primary folder. The workspace name initially comes
+   from the folder name and can be renamed without renaming the directory.
+2. **Add folder** attaches another existing folder to the selected workspace.
+   It does not create another workspace and does not move or copy files.
+3. The workspace selector switches between named workspaces. Inside the
+   selected workspace, the folder list shows each member and which one is
+   primary. Adding or removing a member changes the workspace membership
+   revision.
+4. Removing a folder detaches it from the workspace; it never deletes the
+   directory. Existing runs retain the exact membership snapshot admitted at
+   their start. New runs use the new revision.
+
+The local browser's picker can choose only paths on the xMind host. VS Code
+starts from `workspace.workspaceFolders`, not the repository containing the
+extension or a generated `.code-workspace` file. The CLI uses the same native
+workspace registry. All three clients observe and mutate the same backend
+workspace record. A future Nexus connection can supply a server-authorized
+workspace record through the same protocol; it cannot turn a client path into
+server authority.
+
+## Native authority and identity
+
+A workspace has a stable opaque ID, a name, a monotonically increasing
+membership revision, a primary folder ID and an ordered set of member folders.
+Each folder has its own opaque ID, display name, canonical root path and
+opened-directory identity. IDs are data, never filesystem paths. The native
+host canonicalizes and opens every folder and rejects inaccessible roots,
+reparse/alias escapes, duplicate identities, overlapping roots and roots inside
+private xMind profile/configuration storage.
+
+The execution authority is the workspace ID plus the membership revision and
+the ordered folder identities. Each admitted run receives an immutable handle
+set for that revision. Workspace and folder IDs in tool calls must resolve
+against that captured set. An approval records the workspace revision and
+folder ID, so changing membership cannot redirect an approved edit or process
+to another folder. Session, run, plan, graph and operation records retain the
+workspace ID and admission revision.
+
+Workspace membership and identity metadata live in local xlang3-managed SQLite
+storage. API responses expose member IDs and display paths but never local
+browser credentials or provider keys. The membership record does not grant
+access by path spelling alone: execution still traverses each opened directory
+handle and revalidates the handle identity before effects.
+
+## Tool and client contract
+
+File tools take an optional `folder_id` and a path relative to that folder. If
+`folder_id` is omitted, it resolves to the primary folder. Results identify the
+folder alongside the relative path; this keeps identical names in separate
+roots unambiguous. Multi-file edit proposals may span roots only when every
+file names its folder explicitly. Backend-private directories remain denied
+inside every root.
+
+`run_process` uses the primary folder as its default working directory. A
+different folder must be selected by folder ID and the actual working directory
+must remain beneath its opened handle. Its approval binds that folder and the
+captured workspace revision. Git status and diff are per folder because one
+workspace may contain several independent repositories. Language servers are
+started with the folder root that owns the document. Repository instructions
+and skills are discovered per root and retain their source-folder provenance.
+Delegation, graphs, MCP and A2A inherit only the admitted workspace snapshot;
+they cannot expand membership themselves.
+
+The browser canvas shows one file tree per member folder, with independent Git
+state and explicit folder selection for previews. The VS Code extension uses
+the editor's multi-root folders and scopes edits, terminals, language servers
+and approvals to the owning folder. The CLI reports the selected workspace and
+folder context and offers commands to list workspaces and add a folder.
+
+## Required acceptance
+
+- Create a workspace from one real folder, then attach a second folder with
+  colliding relative filenames; prove the native identities and reads stay
+  distinct in browser, CLI and VS Code.
+- Read, search, edit-preview and approve an edit in each folder. Verify an
+  escaped path, an unregistered folder ID and a removed folder ID are rejected
+  before filesystem effects.
+- Run a process in each folder. Verify default cwd is the primary folder,
+  explicit cwd is pinned to the selected folder, and approval rejects changed
+  membership or executable identity.
+- Show independent Git state for two repositories and language-server root
+  selection for documents in each folder.
+- Add a folder while a run is active. Prove the admitted run remains pinned to
+  its old revision and a later run sees the new revision.
+- Switch named workspaces in the browser and VS Code. Prove sessions/history
+  are scoped to the workspace, late events do not cross the switch, and a
+  failed switch preserves the previously selected workspace without a stale
+  label.
+- Restart the managed backend and verify the workspace name, root ordering,
+  primary folder, membership revision, sessions and provider credentials reopen
+  from local SQLite without replaying work or exposing secrets.
+
+The one-root selector and its existing tests do not satisfy this acceptance.
