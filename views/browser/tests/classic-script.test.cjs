@@ -119,8 +119,8 @@ test('production classic scripts share a realm without collisions and restore ow
         assert.equal(typeof window.acquireVsCodeApi,'undefined','The webpage has no VS Code host fallback');
       }
     }
-    for(let attempts=0;attempts<100&&!document.getElementById('workspace-info').textContent.startsWith('Connected');++attempts)await new Promise(resolve=>setImmediate(resolve));
-    assert.match(document.getElementById('workspace-info').textContent,/Connected to xMind on this computer/);assert.match(document.getElementById('workspace-info').textContent,/Workspace: D:\\Projects\\Example/);
+    for(let attempts=0;attempts<100&&!document.getElementById('workspace-info').textContent.includes('Workspace: D:\\Projects\\Example');++attempts)await new Promise(resolve=>setImmediate(resolve));
+    assert.match(document.getElementById('workspace-info').textContent,/Connected to xMind on this computer · Local node/);assert.match(document.getElementById('workspace-info').textContent,/Workspace: D:\\Projects\\Example/);assert.match(document.getElementById('workspace-info').textContent,/Agent runs and file tools use this folder in this xMind process/);assert.match(document.getElementById('workspace-info').textContent,/right sidebar/);
     for(let attempts=0;attempts<100&&!document.getElementById('workspace-files').textContent.includes('needs an update');++attempts)await new Promise(resolve=>setImmediate(resolve));assert.match(document.getElementById('workspace-files').textContent,/This xMind runtime needs an update to browse workspace files/);
     assert.equal(document.getElementById('connection').open,false);
     assert.equal(document.getElementById('sessions').value,parent.session_id);
