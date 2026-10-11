@@ -160,6 +160,8 @@ public:
     const std::string& workspace_id()const{return workspace_id_;}
     std::int64_t revision()const{return revision_;}
     const std::vector<WorkspaceToolFolder>& folders()const{return folders_;}
+    std::size_t folder_index(const std::string& folder_id)const;
+    WorkspaceTools& folder_tools(std::size_t index)const;
     std::vector<ModelToolDefinition> definitions()const;
     std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={})const;
 private:

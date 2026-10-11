@@ -8,7 +8,7 @@ EditRecoveryInspection EditExecutor::inspect_uncertain(const std::string& id,std
     using Json=nlohmann::json;
     const auto operation=store_.operation(id).get();
     if(operation.state!=OperationState::uncertain || operation.spec.tool!="replace_file") throw Conflict("Operation is not an uncertain file edit");
-    if(operation.spec.workspace!=workspace_.identity()) throw ToolAccessDenied("Recovery inspection belongs to another workspace");
+    if(operation.spec.workspace!=owner_workspace_) throw ToolAccessDenied("Recovery inspection belongs to another workspace");
     const auto owner=store_.run(operation.spec.run_id).get();
     if(owner.state!=RunState::failed && owner.state!=RunState::cancelled) throw Conflict("Recovery inspection requires a retired owner");
     const auto plan=Json::parse(operation.spec.arguments_json,[](int depth,Json::parse_event_t,Json&) {
@@ -16,6 +16,10 @@ EditRecoveryInspection EditExecutor::inspect_uncertain(const std::string& id,std
     });
     for(const auto* key:{"path","file_id","before_sha256","after_sha256"})
         if(!plan.contains(key) || !plan[key].is_string()) throw std::invalid_argument("Recovery proposal has no verified file preconditions");
+    if(plan.contains("folder_id")&&plan.value("folder_id",std::string{})!=folder_id_)throw ToolAccessDenied("Recovery inspection belongs to another workspace folder");
+    if(plan.contains("workspace_id")&&plan.value("workspace_id",std::string{})!=owner_workspace_)throw ToolAccessDenied("Recovery workspace group changed");
+    if(plan.contains("workspace_revision")&&(!plan["workspace_revision"].is_number_integer()||plan["workspace_revision"].get<std::int64_t>()!=workspace_revision_))throw ToolAccessDenied("Recovery membership revision changed");
+    if(plan.contains("target_workspace_id")&&plan.value("target_workspace_id",std::string{})!=workspace_.identity())throw ToolAccessDenied("Recovery folder identity changed");
     const auto observed=workspace_.fingerprint_file(plan["path"].get<std::string>(),cancel);
     const bool same_file=observed.file_id==plan["file_id"].get<std::string>();
     auto match=EditSnapshotMatch::different;
@@ -25,7 +29,7 @@ EditRecoveryInspection EditExecutor::inspect_uncertain(const std::string& id,std
     return {operation,observed,match,same_file,now};
 }
 ModelToolDefinition EditExecutor::definition() {
-    return {"edit_file","Propose an exact literal replacement in a UTF-8 workspace file. Always waits for controller approval; stale files are rejected. Report only the returned actual outcome.",R"({"type":"object","properties":{"path":{"type":"string"},"old_text":{"type":"string","minLength":1},"new_text":{"type":"string"},"expected_occurrences":{"type":"integer","minimum":1,"maximum":1024}},"required":["path","old_text","new_text"],"additionalProperties":false})"};
+    return {"edit_file","Propose an exact literal replacement in a UTF-8 workspace file. Always waits for controller approval; stale files are rejected. Report only the returned actual outcome.",R"({"type":"object","properties":{"path":{"type":"string"},"old_text":{"type":"string","minLength":1},"new_text":{"type":"string"},"expected_occurrences":{"type":"integer","minimum":1,"maximum":1024},"folder_id":{"type":"string","description":"Optional registered workspace folder ID; omit it to use the primary folder."}},"required":["path","old_text","new_text"],"additionalProperties":false})"};
 }
 std::string EditExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance) {
     using Json=nlohmann::json;
@@ -37,14 +41,15 @@ std::string EditExecutor::invoke(const std::string& id,const std::string& run,co
         else if(event==Json::parse_event_t::object_end) fields.pop_back();
         else if(event==Json::parse_event_t::key && !fields.back().insert(parsed.get<std::string>()).second) throw std::invalid_argument("Duplicate edit argument");return true;
     });} catch(const Json::exception&) {throw std::invalid_argument("Invalid edit argument JSON");}
-    if(!args.is_object() || args.size()<3 || args.size()>4) throw std::invalid_argument("Invalid edit argument fields");
-    for(auto it=args.begin();it!=args.end();++it) if(it.key()!="path" && it.key()!="old_text" && it.key()!="new_text" && it.key()!="expected_occurrences") throw std::invalid_argument("Unknown edit argument");
+    if(!args.is_object() || args.size()<3 || args.size()>5) throw std::invalid_argument("Invalid edit argument fields");
+    for(auto it=args.begin();it!=args.end();++it) if(it.key()!="path" && it.key()!="old_text" && it.key()!="new_text" && it.key()!="expected_occurrences" && it.key()!="folder_id") throw std::invalid_argument("Unknown edit argument");
     for(const auto* field:{"path","old_text","new_text"}) if(!args.contains(field) || !args[field].is_string()) throw std::invalid_argument("Missing edit text argument");
     std::size_t count=1;
     if(args.contains("expected_occurrences")) {
         const auto& number=args["expected_occurrences"];
         if(!number.is_number_integer() || number<1 || number>1024) throw std::invalid_argument("Invalid edit occurrence count");count=number.get<std::size_t>();
     }
+    if(args.contains("folder_id")&&(!args["folder_id"].is_string()||args["folder_id"].get<std::string>()!=folder_id_))throw ToolAccessDenied("Edit folder does not match its admitted workspace folder");
     auto plan=workspace_.plan_replacement(args["path"].get<std::string>(),args["old_text"].get<std::string>(),args["new_text"].get<std::string>(),count,cancel);
     const auto actual=execute(id,run,std::move(plan),expiry,cancel,std::move(guidance));
     return Json{{"operation_id",id},{"path",actual.path},{"file_id",actual.file_id},{"content_sha256",actual.content_sha256},{"size",actual.content.size()}}.dump();
@@ -53,10 +58,11 @@ WorkspaceSnapshot EditExecutor::execute(const std::string& id,const std::string&
     WorkspaceEditPlan plan,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance) {
     using Json=nlohmann::json;
     const auto workspace=workspace_.identity();
-    if(plan.before.workspace_id!=workspace) throw ToolAccessDenied("Edit proposal belongs to another workspace");
+    if(plan.before.workspace_id!=workspace) throw ToolAccessDenied("Edit proposal belongs to another workspace folder");
     // Owned plan bytes cannot change while the controller reviews them. The
     // repository bounds this JSON before any grant or filesystem effect.
-    OperationSpec spec{run,workspace,"replace_file",Json{
+    OperationSpec spec{run,owner_workspace_,"replace_file",Json{
+        {"workspace_id",owner_workspace_},{"folder_id",folder_id_},{"workspace_revision",workspace_revision_},{"target_workspace_id",workspace},
         {"path",plan.before.path},{"file_id",plan.before.file_id},
         {"before_content",plan.before.content},{"before_sha256",plan.before.content_sha256},
         {"after_content",plan.after_content},{"after_sha256",plan.after_sha256},

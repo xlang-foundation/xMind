@@ -130,7 +130,18 @@ WorkspaceToolSet::WorkspaceToolSet(std::string workspace_id,std::int64_t revisio
 }
 
 std::vector<ModelToolDefinition> WorkspaceToolSet::definitions()const{
-    return WorkspaceTools::definitions();
+    auto result=WorkspaceTools::definitions();
+    for(auto& definition:result){Json schema=Json::parse(definition.input_schema_json);schema["properties"]["folder_id"]={{"type","string"},{"description","Optional registered workspace folder ID; omit it to use the primary folder."}};definition.input_schema_json=schema.dump();definition.description+=" Optional folder_id selects a registered workspace folder; without it, the primary folder is used.";}
+    return result;
+}
+
+std::size_t WorkspaceToolSet::folder_index(const std::string& folder_id)const{
+    const auto found=std::find_if(folders_.begin(),folders_.end(),[&](const auto& folder){return folder.folder_id==folder_id;});
+    if(found==folders_.end())throw ToolAccessDenied("Folder is not a member of the admitted workspace revision");
+    return static_cast<std::size_t>(found-folders_.begin());
+}
+WorkspaceTools& WorkspaceToolSet::folder_tools(std::size_t index)const{
+    if(index>=tools_.size())throw std::out_of_range("Workspace folder index is invalid");return *tools_[index];
 }
 
 std::string WorkspaceToolSet::invoke(const std::string& name,const std::string& source,std::stop_token cancel)const{

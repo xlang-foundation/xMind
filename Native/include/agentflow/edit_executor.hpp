@@ -23,7 +23,8 @@ public:
 // Journal failures after claim require stopping execution and recovery, never retry.
 class EditExecutor : public EditRecoveryReader {
 public:
-    EditExecutor(PersistenceService& store,WorkspaceTools& workspace):store_(store),workspace_(workspace) {}
+    EditExecutor(PersistenceService& store,WorkspaceTools& workspace,std::string owner_workspace={},std::string folder_id={},std::int64_t workspace_revision=1)
+        :store_(store),workspace_(workspace),owner_workspace_(owner_workspace.empty()?workspace.identity():std::move(owner_workspace)),folder_id_(folder_id.empty()?workspace.identity():std::move(folder_id)),workspace_revision_(workspace_revision) {}
     WorkspaceSnapshot execute(const std::string& operation_id,const std::string& run_id,
         WorkspaceEditPlan plan,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={});
     static ModelToolDefinition definition();
@@ -35,5 +36,7 @@ public:
 private:
     PersistenceService& store_;
     WorkspaceTools& workspace_;
+    std::string owner_workspace_,folder_id_;
+    std::int64_t workspace_revision_=1;
 };
 }

@@ -78,6 +78,17 @@ int main(int argc,char** argv) {
             require(nlohmann::json::parse(outcome.result_json)["after_sha256"]==workspace.snapshot_file("actual.txt").content_sha256,"Outcome must match actual filesystem hash");
             rejects<Conflict>([&]{executor.execute("allowed","run",plan,expiry());});
             require(workspace.read_file("actual.txt").content==actual.content,"Duplicate operation must not repeat effect");
+            const auto attached_root=directory.path/"attached";std::filesystem::create_directory(attached_root);const auto attached_file=attached_root/"actual.txt";
+            {std::ofstream output(attached_file,std::ios::binary);output<<"attached original\n";}
+            WorkspaceTools attached(attached_root.string());const auto attached_id=attached.identity();
+            WorkspaceToolSet members(workspace.identity(),2,{{workspace.identity(),workspace.root_path()},{attached_id,attached.root_path()}});
+            store.append_event("run","agent.workspace_membership",nlohmann::json{{"workspace_id",workspace.identity()},{"revision",2},{"primary_folder_id",workspace.identity()},{"folders",nlohmann::json::array({{{"folder_id",workspace.identity()},{"root",workspace.root_path()}},{{"folder_id",attached_id},{"root",attached.root_path()}}})},{"snapshot","run_admission"}}.dump()).get();
+            EditExecutor attached_executor(store,members.folder_tools(1),members.workspace_id(),attached_id,members.revision());
+            auto attached_effect=std::async(std::launch::async,[&]{return attached_executor.invoke("attached-edit","run",nlohmann::json{{"path","actual.txt"},{"old_text","attached original"},{"new_text","attached changed"},{"folder_id",attached_id}}.dump(),expiry());});
+            const auto attached_proposal=proposed(store,"attached-edit");const auto attached_payload=nlohmann::json::parse(attached_proposal.spec.arguments_json);
+            require(attached_proposal.spec.workspace==workspace.identity()&&attached_payload["workspace_id"]==workspace.identity()&&attached_payload["folder_id"]==attached_id&&attached_payload["workspace_revision"]==2&&attached_payload["target_workspace_id"]==attached.identity(),"Attached-folder approval must bind group, folder identity, target root identity and admitted revision");
+            store.decide_operation("attached-edit",OperationDecision::allow,"test-controller").get();const auto attached_result=nlohmann::json::parse(attached_effect.get());
+            require(attached_result["content_sha256"]==attached.snapshot_file("actual.txt").content_sha256&&attached.read_file("actual.txt").content=="attached changed\n"&&workspace.read_file("actual.txt").content==actual.content,"An approved attached-folder edit must modify exactly the selected folder and preserve the primary copy");
             store.transition("run",RunState::running,RunState::completed).get();
             store.start_prompt_run("journal-fault-run","session",R"({"content":"journal fault contract"})").get();store.transition("journal-fault-run",RunState::queued,RunState::running).get();
             // Fixture-only storage fault at the real durable outcome boundary.

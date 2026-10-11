@@ -4,11 +4,12 @@ namespace agentflow {
 // Uses the same claimed file-effect ownership/fail-stop contract as edits.
 class CreateExecutor {
 public:
-    CreateExecutor(PersistenceService& store,WorkspaceTools& workspace):store_(store),workspace_(workspace){}
+    CreateExecutor(PersistenceService& store,WorkspaceTools& workspace,std::string owner_workspace={},std::string folder_id={},std::int64_t workspace_revision=1)
+        :store_(store),workspace_(workspace),owner_workspace_(owner_workspace.empty()?workspace.identity():std::move(owner_workspace)),folder_id_(folder_id.empty()?workspace.identity():std::move(folder_id)),workspace_revision_(workspace_revision){}
     static ModelToolDefinition definition();
     std::string invoke(const std::string& operation_id,const std::string& run_id,const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={});
     WorkspaceSnapshot execute(const std::string& operation_id,const std::string& run_id,WorkspaceCreatePlan plan,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={});
 private:
-    PersistenceService& store_;WorkspaceTools& workspace_;
+    PersistenceService& store_;WorkspaceTools& workspace_;std::string owner_workspace_,folder_id_;std::int64_t workspace_revision_=1;
 };
 }

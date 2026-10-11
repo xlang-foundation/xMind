@@ -30,10 +30,34 @@
 #include "agentflow/mcp_oauth_service.hpp"
 #include "agentflow/xlang_python_config.hpp"
 #include "agentflow/pty_sessions.hpp"
+#include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <bcrypt.h>
 namespace {
+class LocalWorkspaceEditRecovery final : public agentflow::EditRecoveryReader {
+public:
+    LocalWorkspaceEditRecovery(agentflow::PersistenceService& store,std::string primary_root):store_(store),primary_(std::move(primary_root)){}
+    agentflow::EditRecoveryInspection inspect_uncertain(const std::string& id,std::stop_token cancel={})override{
+        const auto operation=store_.operation(id).get();const auto proposal=nlohmann::json::parse(operation.spec.arguments_json);
+        agentflow::WorkspaceTools primary(primary_);
+        if(!proposal.contains("folder_id"))return agentflow::EditExecutor(store_,primary).inspect_uncertain(id,cancel);
+        if(proposal.value("folder_id",std::string{})==primary.identity()&&proposal.value("target_workspace_id",std::string{})==primary.identity()&&operation.spec.workspace==primary.identity())return agentflow::EditExecutor(store_,primary,operation.spec.workspace,primary.identity(),proposal.value("workspace_revision",std::int64_t{1})).inspect_uncertain(id,cancel);
+        if(!proposal.contains("workspace_id")||!proposal["workspace_id"].is_string()||proposal["workspace_id"].get<std::string>()!=operation.spec.workspace||
+           !proposal.contains("workspace_revision")||!proposal["workspace_revision"].is_number_integer()||proposal["workspace_revision"].get<std::int64_t>()<1)
+            throw agentflow::ToolAccessDenied("Recovery proposal has no valid workspace membership binding");
+        std::optional<agentflow::WorkspaceMembershipSnapshot> membership;
+        for(const auto& event:store_.events(operation.spec.run_id).get())if(event.kind=="agent.workspace_membership"){
+            if(membership)throw agentflow::ToolAccessDenied("Run contains duplicate workspace membership snapshots");
+            const auto value=nlohmann::json::parse(event.json);if(!value.is_object()||!value.contains("workspace_id")||!value["workspace_id"].is_string()||!value.contains("revision")||!value["revision"].is_number_integer()||!value.contains("folders")||!value["folders"].is_array()||value["folders"].empty()||value["folders"].size()>256)throw agentflow::ToolAccessDenied("Saved workspace membership snapshot is invalid");
+            agentflow::WorkspaceMembershipSnapshot saved;saved.workspace_id=value["workspace_id"].get<std::string>();saved.revision=value["revision"].get<std::int64_t>();for(const auto& folder:value["folders"]){if(!folder.is_object()||!folder.contains("folder_id")||!folder["folder_id"].is_string()||!folder.contains("root")||!folder["root"].is_string())throw agentflow::ToolAccessDenied("Saved workspace folder binding is invalid");saved.folders.push_back({folder["folder_id"].get<std::string>(),folder["root"].get<std::string>()});}membership=std::move(saved);
+        }
+        if(!membership||membership->workspace_id!=operation.spec.workspace||membership->revision!=proposal["workspace_revision"].get<std::int64_t>()||membership->folders.empty()||membership->folders.front().root!=primary.root_path())throw agentflow::ToolAccessDenied("Recovery workspace membership differs from the admitted run");
+        agentflow::WorkspaceToolSet tools(membership->workspace_id,membership->revision,membership->folders);const auto& folder_id=proposal["folder_id"].get<std::string>();const auto index=tools.folder_index(folder_id);auto& target=tools.folder_tools(index);
+        return agentflow::EditExecutor(store_,target,membership->workspace_id,folder_id,membership->revision).inspect_uncertain(id,cancel);
+    }
+private:agentflow::PersistenceService& store_;std::string primary_;
+};
 std::mutex control_mutex;
 agentflow::HttpServer* active_server=nullptr;
 std::string loaded_runtime_root(){std::wstring image(32768,L'\0');const auto count=GetModuleFileNameW(nullptr,image.data(),static_cast<DWORD>(image.size()));if(!count||count>=image.size())throw std::runtime_error("Cannot qualify native process image");image.resize(count);const auto value=std::filesystem::path(image).parent_path().u8string();return {reinterpret_cast<const char*>(value.data()),value.size()};}
@@ -233,7 +257,7 @@ int run_server(int argc,char** argv) {
         for(const auto& item:process_profiles)process_metadata.push_back({item.id,item.revision,item.max_timeout.count()});
         for(const auto& item:mcp_settings)mcp_metadata.push_back({item.id,item.revision,item.enabled,item.transport});
         std::unique_ptr<agentflow::WorkspaceTools> recovery_workspace;
-        std::unique_ptr<agentflow::EditExecutor> recovery;
+        std::unique_ptr<agentflow::EditRecoveryReader> recovery;
 #endif
         if(options.contains("--model")) {
 #if defined(_WIN32)
@@ -314,7 +338,7 @@ int run_server(int argc,char** argv) {
         }
         if(options.contains("--workspace") || options.contains("--inspection-workspace")) {
             recovery_workspace=std::make_unique<agentflow::WorkspaceTools>(options.at(options.contains("--workspace")?"--workspace":"--inspection-workspace"));
-            recovery=std::make_unique<agentflow::EditExecutor>(persistence,*recovery_workspace);
+            recovery=std::make_unique<LocalWorkspaceEditRecovery>(persistence,recovery_workspace->root_path());
         }
 #else
         if(options.contains("--inspection-workspace")) throw std::invalid_argument("Native file inspection currently requires Windows");
