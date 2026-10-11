@@ -34,14 +34,56 @@ provider key.
 
 The C++ server owns execution, tools, graphs, permissions, providers and history. SQLite I/O remains in embedded xlang3. The Node HTTP adapter serves validated view-asset snapshots and forwards a finite allowlist of API requests to a configured loopback native server. A page reload loads a complete new snapshot from its configured asset directory without restarting the adapter or losing its authenticated sessions. Boundary, route, size and CSP restrictions still apply; a rejected bundle does not revoke backend access. Closing the view does not cancel execution. This is a local HTTP transport. Team deployment, WebRTC and the standalone Electron IDE belong to private Nexus.
 
-The left side is the workspace canvas: its folder selector switches a local profile, and **Add folder** opens the native folder picker and registers a persistent profile on the same xMind node. Runs start in that selected workspace and execute in the xMind backend process. The file list and preview are read-only native workspace-handle reads; directory links and Git metadata are omitted, and backend-private `.config` and `.agentflow` paths remain denied. Git status plus working-tree, branch and committed diffs use native Git data scoped to that selected workspace; patch text is displayed as text in the workspace review area. The right sidebar holds conversation history, the active chat, run activity and approvals; provider and discovered-model selection stay below the composer. Agent edits still appear as approval proposals, and full editor, multi-file diff and recovery workflows remain open coding-parity work.
+Today, the left side is the workspace canvas: its folder selector switches a
+single-folder local profile, and **Add folder** registers the chosen existing
+folder as another profile on the same xMind node. Runs start in that selected
+profile and execute in the xMind backend process. The file list and preview are
+read-only native workspace-handle reads; directory links and Git metadata are
+omitted, and backend-private `.config` and `.agentflow` paths remain denied.
+Git status plus working-tree, branch and committed diffs use native Git data
+scoped to that selected profile; patch text is displayed as text in the
+workspace review area. The right sidebar holds conversation history, the
+active chat, run activity and approvals; provider and discovered-model
+selection stay below the composer. Agent edits still appear as approval
+proposals, and full editor, multi-file diff and recovery workflows remain open
+coding-parity work.
 
 ## Workspace selection
 
-The browser shows its active server workspace, offers a selector for other
-local profiles and provides **Add workspace** for an existing folder. Unlike VS
-Code, a browser tab has no opened-folder context. On the profile-aware `xmind
-view` host, the selector is populated from the native protected profile
+### Multi-folder workspace target
+
+A workspace is a native-owned group of folders, not one folder profile. The
+user creates a workspace by choosing its first existing folder; **Add folder**
+then attaches another folder to that same workspace. The workspace selector
+switches between these groups, while the workspace canvas shows and lets the
+user manage their member folders. It must not create a new workspace whenever
+an additional folder is attached.
+
+Every member folder is canonicalized and opened by the native host. The user
+explicitly grants each folder by adding it. Tool paths identify a member folder
+and a relative path, so equal relative paths in different folders stay
+unambiguous. A run captures the workspace membership revision at admission;
+adding or removing a folder cannot retarget work that is already running.
+Process working directories and language-server roots are selected from that
+same captured membership. File reads, edits, Git operations, skills,
+instructions, and process execution must enforce the corresponding opened
+folder handle and approval boundary.
+
+This is the target contract, not the current implementation. At source
+`99447ca`, native execution and persisted local profiles still bind one root
+per workspace. The browser selector lists those independent single-folder
+profiles. A live attempt to switch profiles also reverted to the original root
+with `Workspace switch failed · signal is aborted without reason`; the page
+must verify the native switch acknowledgement and reload all workspace-bound
+state before it reports success. Do not present the one-root profile selector
+as multi-folder support.
+
+### Current single-folder implementation
+
+The browser shows its active local profile, offers a selector for other local
+profiles and provides **Add workspace** for an existing folder. Unlike VS Code,
+a browser tab has no opened-folder context. On the profile-aware `xmind view`
+host, the selector is populated from the native protected profile
 catalogue and displays the workspace name and root; **Add workspace** is
 enabled when that host supports registration. When VS Code opens the browser
 for its single-folder `serve` backend, the adapter reads the authenticated
