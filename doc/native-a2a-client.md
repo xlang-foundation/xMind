@@ -86,6 +86,16 @@ SDK cancellation, post-restart rendering of the durable control outcome, stream
 resumption, input-required follow-up, artifacts and complete peer acceptance
 remain open.
 
+The native outbound JSON-RPC client now exposes capability-gated SSE methods
+for `SendStreamingMessage` and `SubscribeToTask`, mapping their A2A 1.0 and 0.3
+method names. It validates the response media type/version, JSON-RPC request
+correlation and event boundaries before delivering one result object per SSE
+event, with bounded frame sizes and the existing transport deadline and
+cancellation behavior. This is currently a client/transport capability: the
+AgentFlow A2A tool still uses blocking `SendMessage`, so remote progress is not
+yet journaled or rendered as part of a running agent turn. The independent
+official SDK peer stream contract is also still required.
+
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),
 [streaming](native-a2a-streaming.md) and the [AgentFlow plan](../AGENTFLOW_PLAN.md).

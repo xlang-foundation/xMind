@@ -14,6 +14,13 @@ this development shell, so the pushed Windows workflow must verify it. A2A SDK
 interoperability, streaming/resumption, input-required follow-up, artifacts and
 full task recovery remain open.
 
+The outbound A2A client is being extended with capability-gated SSE
+`SendStreamingMessage` and `SubscribeToTask` methods for protocol 1.0 and 0.3.
+The client now validates response correlation and bounds event frames, with a
+synthetic loopback contract for task/status replay. This does not yet route
+remote events through AgentFlow run history or UI, and the native source has
+not yet been compiled; hosted Windows validation is required.
+
 Managed profile runtime upgrade is now wired into the native profile launcher.
 The console supports `--upgrade-backend`; the native browser/VS Code adapter
 requests it automatically when its verified package differs from the saved

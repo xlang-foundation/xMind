@@ -11,6 +11,7 @@
 namespace agentflow {
 struct A2aRemoteAgentInfo {
     std::string name,description,agent_version,protocol_version,endpoint,skills_json;
+    bool streaming=false;
 };
 struct A2aRemoteError : std::runtime_error {
     int code;
@@ -27,7 +28,11 @@ public:
     A2aJsonRpcClient& operator=(const A2aJsonRpcClient&)=delete;
     A2aRemoteAgentInfo discover(std::chrono::milliseconds timeout,std::stop_token cancel={});
     std::string send_message(std::string_view params_json,std::chrono::milliseconds timeout,std::stop_token cancel={},std::function<void()> on_sending={});
+    void stream_message(std::string_view params_json,std::chrono::milliseconds timeout,
+        const std::function<void(const std::string&)>& on_event,std::stop_token cancel={},std::function<void()> on_sending={});
     std::string get_task(std::string_view params_json,std::chrono::milliseconds timeout,std::stop_token cancel={});
+    void resubscribe_to_task(std::string_view params_json,std::chrono::milliseconds timeout,
+        const std::function<void(const std::string&)>& on_event,std::stop_token cancel={});
     std::string cancel_task(std::string_view params_json,std::chrono::milliseconds timeout,std::stop_token cancel={});
     bool ready()const;
     A2aRemoteAgentInfo remote()const;
