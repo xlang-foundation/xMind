@@ -199,7 +199,7 @@ std::optional<DynamicPlanCapabilities> AgentRunner::execution_capabilities(const
     if(settings_.approved_edits||process_||a2a_available||std::any_of(settings_.mcp_servers.begin(),settings_.mcp_servers.end(),[](const auto& server){return server.enabled;})){
         auto coding=inspect;coding.id="workspace.coding";coding.readonly=false;
         if(settings_.approved_edits){coding.tools.push_back("edit_file");coding.tools.push_back("create_file");coding.tools.push_back("apply_patch");}
-        if(process_)coding.tools.push_back("run_process");caps.presets.push_back(std::move(coding));
+        if(process_){coding.tools.push_back("run_process");coding.tools.push_back("wait_process");}caps.presets.push_back(std::move(coding));
     }
     return caps;
 }
@@ -283,7 +283,7 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     if(!instructions.empty())trusted.messages.push_back({MessageRole::system,std::move(instructions)});
     if(workspace_){trusted.tools=workspace_->definitions();for(auto& definition:SkillContext::definitions())trusted.tools.push_back(std::move(definition));}
     if(settings_.approved_edits){trusted.tools.push_back(EditExecutor::definition());trusted.tools.push_back(CreateExecutor::definition());trusted.tools.push_back(PatchTool::definition());}
-    if(process_)trusted.tools.push_back(process_->definition());
+    if(process_){trusted.tools.push_back(process_->definition());trusted.tools.push_back(process_->wait_definition());}
     if(language_servers_)for(auto& definition:language_servers_->definitions())trusted.tools.push_back(std::move(definition));
     struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<std::vector<SecretBytes>> private_credentials=std::make_unique<std::vector<SecretBytes>>();std::unique_ptr<McpToolRegistry> registry;};
     std::vector<McpRuntime> peers;std::set<std::string> aliases;for(const auto& definition:trusted.tools)aliases.insert(definition.name);
@@ -458,7 +458,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(PatchTool::definition());
-        if(process_)request.tools.push_back(process_->definition());
+        if(process_){request.tools.push_back(process_->definition());request.tools.push_back(process_->wait_definition());}
         if(language_servers_)for(auto& definition:language_servers_->definitions())request.tools.push_back(std::move(definition));
         std::map<std::string,const XlangPythonToolRegistration*> xlang_tools;
         for(const auto& registration:settings_.xlang_python_tools){
@@ -546,6 +546,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             commit_plan_result(actual);refresh_tools();
         }
         std::string delivered_repository_metadata;
+        std::vector<std::string> joined_process_notes;
         std::unique_ptr<ContextManager> context_manager;
         if(settings_.context)context_manager=std::make_unique<ContextManager>(persistence_,provider,*settings_.context,message);
         for(std::size_t turn=0;turn<settings_.max_turns;++turn) {
@@ -568,6 +569,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             std::optional<ContextOwner> context_owner;
             auto trusted_current=request;trusted_current.messages.resize(instruction_messages);trusted_current.canonical_window.reset();
             if(context_manager){
+                for(const auto& note:joined_process_notes)trusted_current.messages.push_back({MessageRole::system,note});
                 if(!budget)throw ContextUnavailable("Context execution has no owned native budget");
                 ContextOwner owner;owner.scope={admitted.parent_id.empty()?ContextScopeKind::session:ContextScopeKind::execution,
                     admitted.parent_id.empty()?admitted.session_id:id};
@@ -627,6 +629,17 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 std::rethrow_exception(failure);}
             cancelled(token);
             if(response.finish_reason=="stop"){
+                if(process_){const auto joined=process_->join_run(id,token);if(!joined.empty()){
+                    Json observations=Json::array();for(const auto& value:joined){const auto full=Json::parse(value);Json summary={{"job_id",full.value("job_id",std::string{})},{"state",full.value("state",std::string{})}};if(full.contains("result")&&full["result"].is_object()){
+                        const auto& result=full["result"];for(const auto* field:{"profile_id","exit_code","termination","elapsed_ms","truncated"})if(result.contains(field))summary[field]=result[field];
+                        for(const auto* channel:{"stdout","stderr"})if(result.contains(channel)&&result[channel].is_object()){const auto& actual=result[channel];Json bounded=actual;const auto bytes=actual.value("data",std::string{});if(bytes.size()>1024){bounded["data"]=bytes.substr(0,1024);bounded["summary_truncated"]=true;}summary[channel]=std::move(bounded);}
+                    }observations.push_back(std::move(summary));}
+                    const auto note=Json{{"reason","background_processes_joined_before_final_response"},{"jobs",observations}}.dump();
+                    if(note.size()>65536)throw ModelRequestCapacityExceeded("Joined process results exceed the model continuation limit");
+                    const auto observation="The native runtime waited for every background process started by this run. These are their actual terminal results; inspect them and then provide the final response: "+note;
+                    joined_process_notes.push_back(observation);if(!context_manager)request.messages.push_back({MessageRole::system,observation});
+                    continue;
+                }}
                 if(dynamic_root){
                     const auto plan=persistence_.dynamic_plan_for_root(id).get();
                     if(plan&&!inspect_dynamic_plan(*plan).finished)return terminate(RunState::failed,{{"reason","dynamic_plan_incomplete"}});
@@ -695,7 +708,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         output=Json::parse(PatchTool(persistence_,*workspace_,*repository_context).execute(operation_id(),id,std::move(*prepared_patch),expiry,token));
                     } else if(call.name=="run_process" && process_) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
-                        output=Json::parse(process_->invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance)));
+                        output=Json::parse(process_->invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance),true));
+                    } else if(call.name=="wait_process"&&process_) {
+                        output=Json::parse(process_->wait(id,call.arguments_json,token));
+                        if(output.value("state",std::string{})=="uncertain")success=false;
                     } else if(call.name=="language_server"&&language_servers_) {
                         output=Json::parse(language_servers_->invoke(call.arguments_json,token));
                     } else if(call.name=="delegate_tasks"&&budget&&!leaf&&delegation_&&settings_.delegation){

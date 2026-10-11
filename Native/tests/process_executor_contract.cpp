@@ -29,8 +29,8 @@ std::pair<std::string,std::string> output(PersistenceService& store,const std::s
 }
 struct Task {
     std::stop_source stop;std::future<std::string> result;
-    Task(ProcessExecutor& executor,std::string id,std::string args,std::string run="run",std::int64_t expiry=0)
-        :result(std::async(std::launch::async,[this,&executor,id=std::move(id),args=std::move(args),run=std::move(run),expiry]{return executor.invoke(id,run,args,expiry?expiry:now()+600000,stop.get_token());})) {}
+    Task(ProcessExecutor& executor,std::string id,std::string args,std::string run="run",std::int64_t expiry=0,bool background=false)
+        :result(std::async(std::launch::async,[this,&executor,id=std::move(id),args=std::move(args),run=std::move(run),expiry,background]{return executor.invoke(id,run,args,expiry?expiry:now()+600000,stop.get_token(),{},background);})) {}
     ~Task(){stop.request_stop();if(result.valid())result.wait();}
 };
 Operation proposed(PersistenceService& store,const std::string& id) {
@@ -38,8 +38,8 @@ Operation proposed(PersistenceService& store,const std::string& id) {
     while(std::chrono::steady_clock::now()<deadline){try{const auto p=store.operation(id).get();require(p.state==OperationState::awaiting_approval,"Command must await actual approval");return p;}catch(const NotFound&){std::this_thread::sleep_for(10ms);}}
     throw std::runtime_error("Process approval proposal deadline");
 }
-std::string args(const std::string& mode,const std::string& marker,const std::string& workdir=".") {
-    return Json{{"profile","fixture"},{"arguments",Json::array({mode,marker})},{"workdir",workdir}}.dump();
+std::string args(const std::string& mode,const std::string& marker,const std::string& workdir=".",bool background=false) {
+    return Json{{"profile","fixture"},{"arguments",Json::array({mode,marker})},{"workdir",workdir},{"background",background}}.dump();
 }
 void owner(PersistenceService& store,const std::string& run="run",const std::string& session="session"){
     store.create_session(session,"Actual approved process contract").get();store.start_prompt_run(run,session,R"({"content":"actual native process fixture"})").get();store.transition(run,RunState::queued,RunState::running).get();
@@ -92,6 +92,33 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         require(output(store,"streamed").first=="Actual streamed output 🌍\n" && streamed.result.wait_for(0ms)==std::future_status::timeout && store.operation("streamed").get().state==OperationState::executing,"Actual output must be journalled while the child remains running");
         {std::ofstream acknowledge(root/"streamed.txt.ack");acknowledge<<"actual output observed before exit";require(bool(acknowledge),"Actual fixture acknowledgement must be written");}
         const auto streamed_result=Json::parse(streamed.result.get());require(output(store,"streamed").first==streamed_result["stdout"]["data"].get<std::string>(),"Final buffered output must be flushed before result acknowledgement");
+        phase("background-process");owner(store,"background-run","background-session");
+        Task background(executor,"background",args("stream-wait","background.txt",".",true),"background-run",0,true);proposed(store,"background");
+        const auto background_proposal=store.operation("background").get();require(Json::parse(background_proposal.spec.arguments_json)["background"]==true,"Approval must bind the asynchronous execution mode");
+        store.decide_operation("background",OperationDecision::allow,"actual-fixture-controller").get();const auto started_job=Json::parse(background.result.get());
+        require(started_job["job_id"]=="background"&&started_job["state"]=="running"&&store.operation("background").get().state==OperationState::executing,"Background start must return while the exact process operation remains claimed");
+        rejects<ToolAccessDenied>([&]{executor.wait("another-run",Json{{"job_id","background"}}.dump());});
+        const auto early_wait=Json::parse(executor.wait("background-run",Json{{"job_id","background"},{"timeout_ms",10}}.dump()));require(early_wait["state"]=="running","Waiting must report a still-running owned job without releasing its profile resource");
+        const auto background_deadline=std::chrono::steady_clock::now()+2s;while(!std::filesystem::exists(root/"background.txt")&&std::chrono::steady_clock::now()<background_deadline)std::this_thread::sleep_for(10ms);
+        require(std::filesystem::exists(root/"background.txt"),"Background child must dispatch after approval");
+        while(output(store,"background","background-run").first.empty()&&std::chrono::steady_clock::now()<background_deadline)std::this_thread::sleep_for(10ms);
+        require(output(store,"background","background-run").first=="Actual streamed output 🌍\n","Background stdout must stream into the durable run journal");
+        store.transition("background-run",RunState::running,RunState::failed,R"({"reason":"fixture_client_cancelled_run"})").get();
+        {std::ofstream acknowledge(root/"background.txt.ack");acknowledge<<"actual background output observed";require(bool(acknowledge),"Background child acknowledgement must be written");}
+        const auto joined=executor.join_run("background-run");require(joined.size()==1,"Run join must observe each actual background result once");
+        const auto completed_job=Json::parse(joined.front());require(completed_job["state"]=="succeeded"&&completed_job["result"]["exit_code"]==0&&store.operation("background").get().state==OperationState::succeeded,"Wait/join must publish actual exit and output result");
+        require(output(store,"background","background-run").first=="Actual streamed output 🌍\nActual final output\n","Owned process output must remain durably appendable after a client-cancelled run becomes terminal");
+        require(executor.join_run("background-run").empty(),"Completed background operations must not replay from a second join");
+        phase("background-cancellation");const auto cancel_root=root.parent_path()/"cancel-workspace";std::filesystem::create_directory(cancel_root);WorkspaceTools cancel_workspace(cancel_root.string());ProcessExecutor cancel_executor(store,cancel_workspace,cancel_root.string(),{{"cancel-fixture",argv[1],1,{argv[2]},10s}});owner(store,"background-cancel-run","background-cancel-session");
+        auto cancel_arguments=Json::parse(args("cancel-effect","background-cancel-effect.txt",".",true));cancel_arguments["profile"]="cancel-fixture";
+        Task cancelled_background(cancel_executor,"background-cancel",cancel_arguments.dump(),"background-cancel-run",0,true);proposed(store,"background-cancel");store.decide_operation("background-cancel",OperationDecision::allow,"actual-fixture-controller").get();
+        const auto cancel_started=Json::parse(cancelled_background.result.get());require(cancel_started["state"]=="running","Cancelled background work must first return its actual job identity");
+        const auto cancel_deadline=std::chrono::steady_clock::now()+2s;while(!std::filesystem::exists(cancel_root/"background-cancel-effect.txt")&&std::chrono::steady_clock::now()<cancel_deadline)std::this_thread::sleep_for(10ms);
+        require(std::filesystem::exists(cancel_root/"background-cancel-effect.txt"),"Cancellation fixture must record its real pre-cancel effect");cancelled_background.stop.request_stop();
+        while(store.operation("background-cancel").get().state==OperationState::executing&&std::chrono::steady_clock::now()<cancel_deadline)std::this_thread::sleep_for(10ms);require(store.operation("background-cancel").get().state!=OperationState::executing,"Cancellation must durably retire the background process before its owner proceeds");
+        const auto cancelled_job=Json::parse(cancel_executor.wait("background-cancel-run",Json{{"job_id",cancel_started["job_id"]}}.dump()));
+        require(cancelled_job["state"]=="uncertain"&&cancelled_job["result"]["termination"]=="cancelled"&&cancelled_job["result"]["process_tree_retired"]==true&&store.operation("background-cancel").get().state==OperationState::uncertain,"Cancellation must retire the actual child and quarantine its unverified pre-cancel effects");
+        store.transition("background-cancel-run",RunState::running,RunState::failed,R"({"reason":"fixture_owner_cancelled"})").get();
         phase("output-flood");
         Task flood(executor,"flood",args("flood","flood.txt"));proposed(store,"flood");store.decide_operation("flood",OperationDecision::allow,"actual-fixture-controller").get();const auto flooded=Json::parse(flood.result.get());const auto retained=output(store,"flood");
         require(flooded["stdout"]["byte_count"]==512*1024 && flooded["stderr"]["byte_count"]==512*1024 && flooded["truncated"]==true && retained.first.size()+retained.second.size()==65536,"Actual high-volume output must drain beyond the bounded durable capture");

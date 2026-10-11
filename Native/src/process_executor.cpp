@@ -5,6 +5,8 @@
 #include <windows.h>
 #include <algorithm>
 #include <filesystem>
+#include <memory>
+#include <mutex>
 #include <set>
 
 namespace agentflow {
@@ -72,17 +74,53 @@ ModelToolDefinition ProcessExecutor::definition() const {
     properties["arguments"]={{"type","array"},{"items",{{"type","string"},{"maxLength",4096}}},{"maxItems",32}};
     properties["workdir"]={{"type","string"},{"maxLength",4096}};
     properties["timeout_ms"]={{"type","integer"},{"minimum",1},{"maximum",600000}};
+    properties["background"]={{"type","boolean"}};
     const auto schema=Json{{"type","object"},{"properties",properties},{"required",Json::array({"profile","arguments"})},{"additionalProperties",false}}.dump();
-    return {"run_process","Propose a foreground command through a registered backend profile with literal arguments and a relative workspace directory. Always requires controller approval. A configured shell profile may interpret its arguments as shell text. Report actual exit/output only; timeout or cancellation after dispatch quarantines possible effects.",
+    return {"run_process","Propose a command through a registered backend profile with literal arguments and a relative workspace directory. Always requires controller approval. Set background=true for long-running work; then call wait_process with the returned job_id before giving a final answer. Background commands keep their exact approval, timeout and workspace/profile resource lock. A configured shell profile may interpret its arguments as shell text.",
         schema};
 }
-std::string ProcessExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance) {
+ModelToolDefinition ProcessExecutor::wait_definition() const {
+    const auto schema=Json{{"type","object"},{"properties",{{"job_id",{{"type","string"},{"minLength",1},{"maxLength",128}}},{"timeout_ms",{{"type","integer"},{"minimum",1},{"maximum",600000}}}}},{"required",Json::array({"job_id"})},{"additionalProperties",false}}.dump();
+    return {"wait_process","Wait for a background run_process job owned by this run and return its actual exit status and retained output. Use the job_id returned by run_process; if it is still running, call again. Never report completion before this tool returns a terminal state.",schema};
+}
+ProcessExecutor::~ProcessExecutor(){
+    std::lock_guard lock(workers_mutex_);for(auto& worker:workers_)worker.thread.request_stop();workers_.clear();
+}
+void ProcessExecutor::reap_workers(){
+    std::lock_guard lock(workers_mutex_);
+    for(auto it=workers_.begin();it!=workers_.end();){if(it->done->load(std::memory_order_acquire)){if(it->thread.joinable())it->thread.join();it=workers_.erase(it);}else ++it;}
+}
+std::string ProcessExecutor::execute_claimed(const std::string& id,const std::string& run,const std::string& profile,
+        ProcessConfiguration launch,std::stop_token cancel) {
+    auto finish=[&](OperationState state,const std::string& result){try{store_.finish_operation(id,state,result).get();}catch(...){throw ProcessOutcomeUnrecorded("Process outcome could not be recorded; claimed-effect recovery is required");}};
+    try {
+        OutputJournal output(store_,run,id,profile);
+        ProcessResult result;
+        try {result=ForegroundProcess::run(launch,cancel,[&](bool error,std::string_view bytes){output.append(error,bytes);});}
+        catch(const ProcessBeforeDispatchError&){finish(OperationState::failed,R"({"reason":"process_not_dispatched"})");throw;}
+        catch(const std::invalid_argument&){finish(OperationState::failed,R"({"reason":"invalid_process_before_dispatch"})");throw;}
+        catch(const ProcessEffectUncertain&){finish(OperationState::uncertain,R"({"reason":"process_effect_uncertain"})");throw;}
+        catch(...){finish(OperationState::uncertain,R"({"reason":"unexpected_process_failure"})");throw ProcessEffectUncertain("Process dispatch outcome is not established");}
+        output.finish();
+        const auto termination=result.termination==ProcessTermination::exited?"exited":result.termination==ProcessTermination::cancelled?"cancelled":"timed_out";
+        const auto encoded=Json{{"operation_id",id},{"job_id",id},{"profile_id",profile},{"pid",result.pid},{"exit_code",result.exit_code},{"termination",termination},{"elapsed_ms",result.elapsed_ms},{"stdout",captured(result.stdout_bytes,result.stdout_count)},{"stderr",captured(result.stderr_bytes,result.stderr_count)},{"truncated",result.truncated},{"process_tree_retired",true},{"independently_verified",false}}.dump();
+        if(result.termination!=ProcessTermination::exited){finish(OperationState::uncertain,encoded);throw ProcessEffectUncertain("Interrupted process tree was retired; possible effects remain quarantined");}
+        finish(OperationState::succeeded,encoded);return encoded;
+    }catch(const ProcessOutcomeUnrecorded&){throw;}
+    catch(const ProcessEffectUncertain&){throw;}
+    catch(const ProcessBeforeDispatchError&){throw;}
+    catch(const std::invalid_argument&){throw;}
+    catch(...){throw ProcessOutcomeUnrecorded("Claimed process outcome could not be encoded or preserved; recovery is required");}
+}
+std::string ProcessExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background) {
     if(source.size()>65536)throw std::invalid_argument("Process arguments exceed limits");
     Json args;try{args=Json::parse(mcp_compact_object(source));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid process argument JSON");}
-    for(auto it=args.begin();it!=args.end();++it)if(it.key()!="profile" && it.key()!="arguments" && it.key()!="workdir" && it.key()!="timeout_ms")throw std::invalid_argument("Unknown process argument");
+    for(auto it=args.begin();it!=args.end();++it)if(it.key()!="profile" && it.key()!="arguments" && it.key()!="workdir" && it.key()!="timeout_ms" && it.key()!="background")throw std::invalid_argument("Unknown process argument");
     if(!args.contains("profile") || !args["profile"].is_string() || !args.contains("arguments") || !args["arguments"].is_array() || args["arguments"].size()>32)throw std::invalid_argument("Invalid process profile/arguments");
     const auto selected=args["profile"].get<std::string>();const auto found=std::find_if(profiles_.begin(),profiles_.end(),[&](const auto& p){return p.id==selected;});
     if(found==profiles_.end())throw std::invalid_argument("Unknown registered process profile");
+    if(args.contains("background")&&!args["background"].is_boolean())throw std::invalid_argument("Invalid process background mode");
+    const bool background=args.value("background",false);if(background&&!allow_background)throw std::invalid_argument("Background process execution requires an agent owner");
     ProcessConfiguration launch;launch.executable=found->executable;launch.arguments=found->prefix_arguments;launch.timeout=found->max_timeout;launch.output_limit=65536;
     launch.executable_id=found->executable_id;
     for(const auto& arg:args["arguments"]){if(!arg.is_string() || !text(arg.get<std::string>()))throw std::invalid_argument("Invalid literal process argument");launch.arguments.push_back(arg.get<std::string>());}
@@ -96,29 +134,47 @@ std::string ProcessExecutor::invoke(const std::string& id,const std::string& run
     if(ForegroundProcess::directory_identity(root_)!=launch.workspace_root_id)throw ToolAccessDenied("Process workspace path identity changed");
     launch.working_directory=utf8((std::filesystem::u8path(root_)/path).lexically_normal());launch.working_directory_id=ForegroundProcess::directory_identity(launch.working_directory);
     if(launch.working_directory_id!=public_directory_id)throw ToolAccessDenied("Process working directory changed during public workspace admission");
-    OperationSpec spec{run,launch.workspace_root_id,"run_process",Json{{"profile_id",found->id},{"profile_revision",found->revision},{"executable",launch.executable},{"executable_id",launch.executable_id},{"arguments",launch.arguments},{"workdir",utf8(path.lexically_normal())},{"directory_id",launch.working_directory_id},{"timeout_ms",launch.timeout.count()},{"output_limit",launch.output_limit}}.dump(),{"process-profile:"+found->id}};
+    OperationSpec spec{run,launch.workspace_root_id,"run_process",Json{{"profile_id",found->id},{"profile_revision",found->revision},{"executable",launch.executable},{"executable_id",launch.executable_id},{"arguments",launch.arguments},{"workdir",utf8(path.lexically_normal())},{"directory_id",launch.working_directory_id},{"timeout_ms",launch.timeout.count()},{"output_limit",launch.output_limit},{"background",background}}.dump(),{"process-profile:"+found->id}};
     guidance.validate();if(guidance.verify){auto payload=Json::parse(spec.arguments_json);payload["repository_guidance"]=Json::parse(guidance.metadata_json);spec.arguments_json=payload.dump();}
     PermissionWaiter(store_).acquire(id,spec,expiry,cancel);
-    auto finish=[&](OperationState state,const std::string& result){try{store_.finish_operation(id,state,result).get();}catch(...){throw ProcessOutcomeUnrecorded("Process outcome could not be recorded; claimed-effect recovery is required");}};
-    if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish(OperationState::failed,R"({"reason":"repository_guidance_changed_or_unavailable_before_effect"})");throw;}}
-    try {
-        OutputJournal output(store_,run,id,found->id);
-        ProcessResult result;
-        try {result=ForegroundProcess::run(launch,cancel,[&](bool error,std::string_view bytes){output.append(error,bytes);});}
-        catch(const ProcessBeforeDispatchError&){finish(OperationState::failed,R"({"reason":"process_not_dispatched"})");throw;}
-        catch(const std::invalid_argument&){finish(OperationState::failed,R"({"reason":"invalid_process_before_dispatch"})");throw;}
-        catch(const ProcessEffectUncertain&){finish(OperationState::uncertain,R"({"reason":"process_effect_uncertain"})");throw;}
-        catch(...){finish(OperationState::uncertain,R"({"reason":"unexpected_process_failure"})");throw ProcessEffectUncertain("Process dispatch outcome is not established");}
-        output.finish();
-        const auto termination=result.termination==ProcessTermination::exited?"exited":result.termination==ProcessTermination::cancelled?"cancelled":"timed_out";
-        const auto encoded=Json{{"operation_id",id},{"profile_id",found->id},{"pid",result.pid},{"exit_code",result.exit_code},{"termination",termination},{"elapsed_ms",result.elapsed_ms},{"stdout",captured(result.stdout_bytes,result.stdout_count)},{"stderr",captured(result.stderr_bytes,result.stderr_count)},{"truncated",result.truncated},{"process_tree_retired",true},{"independently_verified",false}}.dump();
-        if(result.termination!=ProcessTermination::exited){finish(OperationState::uncertain,encoded);throw ProcessEffectUncertain("Interrupted process tree was retired; possible effects remain quarantined");}
-        // Nonzero is an observed command result, not a claim of no effects.
-        finish(OperationState::succeeded,encoded);return encoded;
-    }catch(const ProcessOutcomeUnrecorded&){throw;}
-    catch(const ProcessEffectUncertain&){throw;}
-    catch(const ProcessBeforeDispatchError&){throw;}
-    catch(const std::invalid_argument&){throw;}
-    catch(...){throw ProcessOutcomeUnrecorded("Claimed process outcome could not be encoded or preserved; recovery is required");}
+    auto finish_before_dispatch=[&](const std::string& reason){try{store_.finish_operation(id,OperationState::failed,Json{{"reason",reason}}.dump()).get();}catch(...){throw ProcessOutcomeUnrecorded("Process outcome could not be recorded; claimed-effect recovery is required");}};
+    if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish_before_dispatch("repository_guidance_changed_or_unavailable_before_effect");throw;}}
+    if(!background)return execute_claimed(id,run,found->id,std::move(launch),cancel);
+    reap_workers();
+    auto done=std::make_shared<std::atomic_bool>(false);
+    {
+        std::lock_guard lock(workers_mutex_);
+        if(workers_.size()>=16){finish_before_dispatch("background_process_capacity_exceeded");throw ProcessBeforeDispatchError("Background process capacity is full");}
+        try {
+            workers_.reserve(workers_.size()+1);
+            auto* const self=this;const auto profile=found->id;auto owned_launch=std::move(launch);
+            std::jthread worker([self,id,run,profile,launch=std::move(owned_launch),done,owner_cancel=cancel](std::stop_token shutdown)mutable{
+                std::stop_source stop;std::stop_callback stop_shutdown(shutdown,[&]{stop.request_stop();});std::stop_callback stop_owner(owner_cancel,[&]{stop.request_stop();});
+                try{(void)self->execute_claimed(id,run,profile,std::move(launch),stop.get_token());}
+                catch(...){try{const auto current=self->store_.operation(id).get();if(current.state==OperationState::executing)self->store_.finish_operation(id,OperationState::uncertain,R"({"reason":"background_process_worker_failed"})").get();}catch(...) {}}
+                done->store(true,std::memory_order_release);
+            });
+            workers_.push_back({done,std::move(worker)});
+        }catch(const ProcessOutcomeUnrecorded&){throw;}
+        catch(...){finish_before_dispatch("background_process_start_failed");throw ProcessBeforeDispatchError("Background process could not be started");}
+    }
+    return Json{{"job_id",id},{"operation_id",id},{"profile_id",found->id},{"state","running"},{"background",true}}.dump();
+}
+std::string ProcessExecutor::wait(const std::string& run,const std::string& source,std::stop_token cancel){
+    Json args;try{args=Json::parse(mcp_compact_object(source));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid background process wait arguments");}
+    if(!args.is_object()||!args.contains("job_id")||!args["job_id"].is_string()||args["job_id"].get_ref<const std::string&>().empty()||args["job_id"].get_ref<const std::string&>().size()>128||args.size()>(args.contains("timeout_ms")?2u:1u))throw std::invalid_argument("Invalid background process job ID");
+    for(auto it=args.begin();it!=args.end();++it)if(it.key()!="job_id"&&it.key()!="timeout_ms")throw std::invalid_argument("Unknown background process wait argument");
+    std::int64_t timeout=600000;if(args.contains("timeout_ms")){if(!args["timeout_ms"].is_number_integer()||args["timeout_ms"]<1||args["timeout_ms"]>600000)throw std::invalid_argument("Invalid background process wait timeout");timeout=args["timeout_ms"].get<std::int64_t>();}
+    const auto id=args["job_id"].get<std::string>();const auto deadline=std::chrono::steady_clock::now()+std::chrono::milliseconds(timeout);
+    for(;;){if(cancel.stop_requested())throw ToolCancelled("Background process wait was cancelled");const auto op=store_.operation(id).get();if(op.spec.run_id!=run||op.spec.tool!="run_process")throw ToolAccessDenied("Background process belongs to another run");
+        Json binding;try{binding=Json::parse(op.spec.arguments_json);}catch(...){throw DatabaseError("Saved process binding is invalid");}if(!binding.value("background",false))throw std::invalid_argument("Operation is not a background process job");
+        if(op.state!=OperationState::executing){Json result={{"job_id",id},{"operation_id",id},{"state",to_string(op.state)}};if(op.state==OperationState::succeeded||op.state==OperationState::failed||op.state==OperationState::uncertain){try{result["result"]=Json::parse(op.result_json);}catch(...){throw DatabaseError("Saved process result is invalid");}}return result.dump();}
+        if(std::chrono::steady_clock::now()>=deadline)return Json{{"job_id",id},{"operation_id",id},{"state","running"}}.dump();std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+}
+std::vector<std::string> ProcessExecutor::join_run(const std::string& run,std::stop_token cancel){
+    std::vector<std::string> completed;for(;;){if(cancel.stop_requested())throw ToolCancelled("Background process join was cancelled");const auto operations=store_.operations(run).get();auto found=std::find_if(operations.begin(),operations.end(),[](const auto& operation){if(operation.state!=OperationState::executing||operation.spec.tool!="run_process")return false;try{return Json::parse(operation.spec.arguments_json).value("background",false);}catch(...){return false;}});if(found==operations.end())return completed;
+        const auto waited=Json::parse(wait(run,Json{{"job_id",found->id}}.dump(),cancel));if(waited.value("state",std::string{})=="running")continue;if(waited.value("state",std::string{})=="uncertain")throw ProcessEffectUncertain("Background process outcome is uncertain");completed.push_back(waited.dump());
+    }
 }
 }

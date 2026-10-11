@@ -3,6 +3,10 @@
 #include "agentflow/permission_waiter.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/instruction_precondition.hpp"
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <thread>
 
 namespace agentflow {
 struct ProcessOutcomeUnrecorded : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -21,15 +25,25 @@ class ProcessExecutor {
 public:
     ProcessExecutor(PersistenceService& store,WorkspaceTools& workspace,
         std::string workspace_root,std::vector<ProcessProfile> profiles);
+    ~ProcessExecutor();
     ModelToolDefinition definition() const;
+    ModelToolDefinition wait_definition() const;
     // Backend-private immutable bindings, including resolved executable IDs.
     const std::vector<ProcessProfile>& profiles() const noexcept{return profiles_;}
     std::string invoke(const std::string& operation_id,const std::string& run_id,
-        const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={});
+        const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={},bool allow_background=false);
+    std::string wait(const std::string& run_id,const std::string& arguments_json,std::stop_token cancel={});
+    std::vector<std::string> join_run(const std::string& run_id,std::stop_token cancel={});
 private:
+    struct Worker {std::shared_ptr<std::atomic_bool> done;std::jthread thread;};
+    void reap_workers();
+    std::string execute_claimed(const std::string& operation_id,const std::string& run_id,const std::string& profile_id,
+        ProcessConfiguration launch,std::stop_token cancel);
     PersistenceService& store_;
     WorkspaceTools& workspace_;
     std::string root_;
     std::vector<ProcessProfile> profiles_;
+    std::mutex workers_mutex_;
+    std::vector<Worker> workers_;
 };
 }

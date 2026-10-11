@@ -22,6 +22,14 @@ and timeout through view authentication; executable paths and bindings are
 not returned. The full CTest gate and rendered VS Code sidebar process run
 remain unverified at this checkpoint.
 
+The current working-tree background-process checkpoint passes four focused
+native contracts: `native_process_executor_contract`,
+`native_agent_process_http_contract`, `native_agent_runner_contract`, and
+`native_graph_runner_contract`. Actual Windows children verify start/wait/join,
+approval binding, bounded streaming, cancellation quarantine and the agent's
+synthetic-model continuation through HTTP/CLI. The full CTest gate and rendered
+browser/VS Code process flows have not been rerun for this change.
+
 Managed local views now accept a trusted `--process-config`. The browser
 launcher uses the repository's `.config/processes.yaml` when present; the VS
 Code development extension uses that same repository file, and packaged
@@ -37,10 +45,10 @@ not silently clear the saved registry. No process profile or shell is seeded
 by default. `run_process` appears only when a trusted profile is registered.
 
 This closes profile enrollment/refresh for the managed views; it does not
-complete a coding shell. Shell discovery and command semantics, durable
-background jobs, full-output artifacts, interruption-safe recovery, and full
-OpenCode command parity remain open. The existing PTY test uses synthetic
-shell I/O and does not run a command in the user's workspace.
+complete a coding shell. Shell discovery and command semantics, full-output
+artifacts, full restart recovery, rendered managed-client process acceptance,
+and full OpenCode command parity remain open. The existing PTY test uses
+synthetic shell I/O and does not run a command in the user's workspace.
 
 ## Background command parity contract
 
@@ -48,10 +56,26 @@ The pinned OpenCode V2 shell contract allows a command to run in the
 background, returns control immediately, reports completion to the owning
 session, and retains complete output in managed storage. See the official
 [V2 tool contract](https://opencode.ai/v2/docs/tools/), checked 2026-10-11.
-The current xMind `run_process` remains synchronous, keeps at most 64 KiB of
-output in the event journal, and has no durable job record or full-output
-artifact. A PTY session is a separate interactive-terminal feature and does not
-close this gap.
+The native AgentRunner now supports `run_process(background=true)` and
+`wait_process`. Each start uses the same exact approval and backend-owned
+profile/workspace bindings as foreground execution, returns its operation ID
+as the job ID, and keeps the claimed operation/resource lock until the process
+tree exits and its result is recorded. The owning run joins unfinished jobs
+before it accepts a model's final response; actual joined results are supplied
+to a continuation. Run cancellation requests process-tree retirement. Output
+continues into the existing bounded event journal while a canceled/failed run's
+process operation is still executing. Restart recovery marks an in-flight
+claim uncertain and never replays it. The event and captured-result limit is
+still 64 KiB; there is no separately retrievable full-output artifact, and the
+worker itself does not survive a native backend restart. A PTY session is a
+separate interactive-terminal feature.
+
+The focused `native_process_executor_contract` and
+`native_agent_process_http_contract` pass on this implementation. They exercise
+real Windows child processes, exact approval, streamed SQLite events, a
+synthetic-model start/wait/final flow, CLI/HTTP replay, and cancellation. They
+do not exercise a live model, the rendered browser/VS Code process UI, or full
+OpenCode background-job parity.
 
 The native implementation must preserve these lifecycle guarantees:
 
@@ -82,14 +106,11 @@ The native implementation must preserve these lifecycle guarantees:
   models a persisted wait/join dependency. A graph cannot complete successfully
   merely because it launched an unobserved background effect.
 
-The current per-run event API rejects output appends after a run becomes
-terminal, and operation-resource ownership is released only when the operation
-finishes. Those native invariants are why the job lifecycle, output artifact,
-wait/join behavior and recovery record must be implemented together rather
-than by detaching the existing foreground call in a worker thread. No
-background-command acceptance is claimed until the complete native, CLI,
-browser and VS Code flow exercises actual child processes and a real backend
-restart.
+The per-run event API now admits late process-output chunks only for an
+operation owned by that run that remains executing. Resource ownership remains
+held until operation completion. The native start/wait/join lifecycle is
+implemented, but the full-output artifact, restart reconciliation, rendered
+browser and VS Code process flows, and full acceptance remain outstanding.
 
 The `37e153b` hosted gate built and passed 51 native contracts but its approved
 process-executor fixture exceeded the unchanged 45-second outer timeout.

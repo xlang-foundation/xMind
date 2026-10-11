@@ -1805,7 +1805,11 @@ Run Repository::transition(const std::string& id,RunState expected,RunState next
     auto& db=impl_->database; Transaction transaction(db); auto result=run(id);
     if(result.graph_root&&!db.execute("SELECT root_run_id FROM graph_context_owners WHERE root_run_id=?",{id}).rows.empty())throw Conflict("Registered graph context lifecycle requires its typed owner operation");
     impl_->root_boundary(result,next);
-    if(impl_->has_operations(id,"'executing'")) throw Conflict("Run has an executing operation");
+    const auto executing=db.execute("SELECT tool,arguments FROM operations WHERE run_id=? AND state='executing'",{id}).rows;
+    if(!executing.empty()) {
+        if(next!=RunState::failed&&next!=RunState::cancelled)throw Conflict("Run has an executing operation");
+        for(const auto& operation:executing){bool background=false;try{const auto args=Json::parse(text(operation[1]));background=args.value("background",false);}catch(...){throw DatabaseError("Executing operation binding is invalid");}if(text(operation[0])!="run_process"||!background)throw Conflict("Run has an executing non-background operation");}
+    }
     if(next==RunState::completed && impl_->has_operations(id,"'awaiting_approval','ready','uncertain'")) throw Conflict("Run has unresolved operations");
     const auto changed=db.execute("UPDATE runs SET state=? WHERE id=? AND state=?",{state_name(next),id,state_name(expected)});
     if(changed.affected_rows==0) throw Conflict("Run state changed");
@@ -1817,7 +1821,15 @@ Run Repository::transition(const std::string& id,RunState expected,RunState next
 Event Repository::append_event(const std::string& id,const std::string& kind,const std::string& json) {
     identifier(kind); if(kind.rfind("context.",0)==0 || kind.rfind("run.",0)==0 || kind.rfind("operation.",0)==0 || kind.rfind("delegation.",0)==0 || kind.rfind("budget.",0)==0 || kind.rfind("plan.",0)==0 || kind.rfind("skill.",0)==0) throw std::invalid_argument("Lifecycle events require their owning repository operation");
     Transaction transaction(impl_->database);
-    if(terminal(run(id).state)) throw Conflict("Run is terminal");
+    const auto owner_run=run(id);
+    if(terminal(owner_run.state)) {
+        if(kind!="process.output")throw Conflict("Run is terminal");
+        Json payload;try{payload=Json::parse(object_json(json));}catch(...){throw std::invalid_argument("Invalid terminal process output event");}
+        if(!payload.contains("operation_id")||!payload["operation_id"].is_string())throw std::invalid_argument("Terminal process output must name its operation");
+        const auto operation=Repository::operation(payload["operation_id"].get<std::string>());
+        if(operation.spec.run_id!=id||operation.spec.tool!="run_process"||operation.state!=OperationState::executing)
+            throw Conflict("Terminal output is not owned by an executing process operation");
+    }
     auto result=impl_->event(id,kind,json); transaction.commit(); return result;
 }
 std::vector<Event> Repository::event_batch(const std::string& id,std::int64_t after,std::size_t count){
