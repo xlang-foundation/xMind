@@ -146,6 +146,8 @@ std::vector<WorkspaceGroupRecord> WorkspaceRegistry::list()const{
     return result;
 }
 WorkspaceGroupRecord WorkspaceRegistry::get(const std::string& id)const{
-    XlangSqlite db(database_,xlang_import_roots_);schema(db);return read_group(db,id);
+    XlangSqlite db(database_,xlang_import_roots_);schema(db);db.begin();
+    try{auto result=read_group(db,id);db.commit();return result;}
+    catch(...){try{db.rollback();}catch(...){}throw;}
 }
 }

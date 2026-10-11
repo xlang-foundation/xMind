@@ -20,6 +20,19 @@ const server=createServer((request,response)=>{
       assert.deepEqual(body.tools.map(item=>item.function.name),expectedTools);
       if(request.url==='/error') {response.writeHead(429,{'Content-Type':'application/json'});response.end('{"error":"do-not-log-provider-body"}');return;}
       response.writeHead(200,{'Content-Type':'text/event-stream'});
+      if(request.url.startsWith('/multi-folder')){
+        const folderId=new URL(request.url,'http://fixture.local').searchParams.get('folder_id');assert.ok(folderId,'Native fixture must bind the secondary folder ID into the provider route');
+        const systemMessage=body.messages.find(item=>['system','developer'].includes(item.role));assert.ok(systemMessage?.content.includes(`folder_id=${folderId}`),'Agent context must disclose the exact admitted folder IDs so it can select an attached folder: '+String(systemMessage?.content));
+        assert.ok(body.tools.find(item=>item.function.name==='read_file').function.parameters.properties.folder_id,'Agent tool schema must expose explicit folder selection');
+        const previous=body.messages.at(-1);let delta,finish;
+        if(previous.role==='user'){
+          delta={tool_calls:[{index:0,id:'attached-read',type:'function',function:{name:'read_file',arguments:JSON.stringify({path:'README.md',folder_id:folderId})}}]};finish='tool_calls';
+        }else{
+          assert.equal(previous.role,'tool');const result=JSON.parse(previous.content);assert.equal(result.content,'Attached folder content\n');assert.equal(result.folder_id,folderId);assert.equal(result.workspace_revision,2);
+          delta={content:'Synthetic model verified the registered secondary folder read.'};finish='stop';
+        }
+        response.write('data: '+JSON.stringify({choices:[{index:0,delta,finish_reason:finish}]})+'\n\n');response.end('data: [DONE]\n\n');return;
+      }
       if(request.url==='/manual-attached'){
         const turn=++manualRequests;assert.ok(body.messages[0].content.includes('Synthetic user-only active body'));assert.ok(body.messages[0].content.includes('"activation_origin":"user"'));let delta,finish;
         if(turn===1){assert.equal(body.messages.at(-1).role,'user');delta={tool_calls:[{index:0,id:'manual-companion-read',type:'function',function:{name:'read_file',arguments:'{"path":".agents/skills/manual/helper.txt"}'}}]};finish='tool_calls';}
@@ -71,11 +84,11 @@ const server=createServer((request,response)=>{
         response.write('data: '+JSON.stringify({choices:[{index:0,delta:{tool_calls:[{index:0,id:`call-${requests}`,type:'function',function:{name:'read_file',arguments:JSON.stringify({path})}}]},finish_reason:'tool_calls'}]})+'\n\n');
       }
       response.write('data: '+JSON.stringify({choices:[],usage:{prompt_tokens:8,completion_tokens:5,total_tokens:13}})+'\n\n');response.end('data: [DONE]\n\n');
-    } catch(error) {failure=error;response.writeHead(400);response.end();}
+    } catch(error) {failure=error;if(!response.headersSent)response.writeHead(400);response.end();}
   });
 });
 try {
-  await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual file content written by fixture\n');
+  await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual file content written by fixture\n');await mkdir(join(folder,'attached'));await writeFile(join(folder,'attached','README.md'),'Attached folder content\n');
   await writeFile(join(workspace,'fixture_tools.py'),
     "def configure(xmind):\n"
     +"    xmind.tool({'name': 'python_uppercase', 'description': 'Convert the supplied text to uppercase', 'input_schema': {'type': 'object', 'properties': {'text': {'type': 'string'}}, 'required': ['text'], 'additionalProperties': False}, 'module': 'fixture_tools', 'function': 'uppercase'})\n"
@@ -84,6 +97,6 @@ try {
   await mkdir(join(workspace,'.agents','skills','large'));await writeFile(join(workspace,'.agents','skills','large','SKILL.md'),'---\nname: large\ndescription: Synthetic instruction budget fixture\n---\nSynthetic oversized active skill body '+ 'x'.repeat(14500));
   await mkdir(join(workspace,'.agents','skills','manual'));await writeFile(join(workspace,'.agents','skills','manual','SKILL.md'),'---\nname: User-only guide\ndisable-model-invocation: true\n---\nSynthetic user-only active body: inspect actual companion bytes.\n');await writeFile(join(workspace,'.agents','skills','manual','helper.txt'),'Actual user-only companion bytes\n');
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
-  const result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:30000});
-  if(failure) throw failure;assert.equal(requests,22);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);
+  let result;try{result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:30000});}catch(error){if(failure)throw failure;throw error;}
+  if(failure) throw failure;assert.equal(requests,24);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);
 } finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await rm(folder,{recursive:true,force:true});}

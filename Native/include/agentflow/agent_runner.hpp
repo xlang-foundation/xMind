@@ -10,6 +10,7 @@
 #include "agentflow/context_control.hpp"
 #include "agentflow/xlang_python.hpp"
 #include "agentflow/language_server_tools.hpp"
+#include <functional>
 
 namespace agentflow {
 class DelegationExecutor;
@@ -27,6 +28,9 @@ struct AgentDelegationPolicy {
 struct AgentSettings {
     ChatProviderConfig provider;
     std::optional<std::string> workspace;
+    // Local managed profiles can reload the persisted member list at each root
+    // run admission. The returned object is captured once for that run.
+    std::function<WorkspaceMembershipSnapshot()> workspace_membership_snapshot;
     bool approved_edits=false;
     std::vector<std::string> selectable_models;
     std::optional<CredentialReference> credential;

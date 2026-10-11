@@ -519,6 +519,8 @@ Child launch(Store &store, Json &state) {
                                    wide(state.at("manifest").get<std::string>()),
                                    L"--profile-state",
                                    (store.directory / L"profile.state").native()};
+    args.push_back(L"--workspace-registry");
+    args.push_back((store.directory.parent_path()/L"workspaces.sqlite").native());
     if(state.contains("owner_receipt")){
         const auto& receipt=state.at("owner_receipt");
         args.push_back(L"--owner-receipt");

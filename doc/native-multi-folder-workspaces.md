@@ -9,13 +9,17 @@ catalogue returns that metadata. In the local browser, **New workspace** starts
 with one folder and **Add folder** attaches more folders to the same workspace;
 the selected workspace and browser session stay in place. The C++ registry
 contract covers creation, folder attachment, reopen, private-root/overlap
-rejection and concurrent membership changes. Agent execution, file operations,
-approvals, process/Git/language-server routing, CLI/VS Code folder controls and
-folder removal still bind only the primary folder. The local browser displays
-each attached folder as its own tree and reads previews through a native route
-that resolves the selected workspace's folder ID, re-opens the directory and
-verifies its native identity on every request. These are read-only previews;
-they do not grant agent tools edit or process authority in secondary folders.
+rejection and concurrent membership changes. A managed local backend now reads
+the registry transactionally at each single-agent root admission. Its native
+read/list/search/glob tools accept an optional registered `folder_id`, default
+to the primary folder, reopen each admitted root and verify its identity. The
+run stores its exact membership revision and folder bindings; admitted agent
+children reuse that snapshot. Graph-node tools, edits, approvals, process,
+Git/language-server routing, CLI/VS Code folder controls and folder removal
+still bind only the primary folder. The local browser displays each attached
+folder as its own tree and reads previews through a native route that resolves
+the selected workspace's folder ID, re-opens the directory and verifies its
+native identity on every request.
 See the [current browser behavior and gap](browser-view.md#multi-folder-workspace-target).
 
 ## User workflow
@@ -33,13 +37,13 @@ See the [current browser behavior and gap](browser-view.md#multi-folder-workspac
    directory. Existing runs retain the exact membership snapshot admitted at
    their start. New runs use the new revision.
 
-The local browser's picker can choose only paths on the xMind host. Currently
-the local browser alone reads and writes multi-folder membership. VS Code still
-starts from the editor's single opened workspace root, and the CLI still uses
-its single `--workspace` root; neither currently observes or mutates this
-membership registry. The extension must use `workspace.workspaceFolders`, not
-the repository containing the extension or a generated `.code-workspace` file,
-when that integration is implemented. A future Nexus connection can supply a
+The local browser's picker can choose only paths on the xMind host. The local
+browser alone currently creates and attaches membership. VS Code still starts
+from the editor's single opened workspace root, and the CLI still uses its
+single `--workspace` root; neither currently observes or mutates this registry.
+The extension must use `workspace.workspaceFolders`, not the repository
+containing the extension or a generated `.code-workspace` file, when that
+integration is implemented. A future Nexus connection can supply a
 server-authorized workspace record through the same protocol; it cannot turn a
 client path into server authority.
 

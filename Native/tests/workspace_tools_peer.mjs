@@ -6,9 +6,9 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {createHash} from 'node:crypto';
 const execute=promisify(execFile),folder=await mkdtemp(join(tmpdir(),'xmind-workspace-'));
-const root=join(folder,'workspace'),outside=join(folder,'workspace-other');
+const root=join(folder,'workspace'),outside=join(folder,'workspace-other'),attached=join(folder,'workspace-attached');
 try {
-  await Promise.all([mkdir(join(root,'sub','.CoNfIg'),{recursive:true}),mkdir(join(root,'.config'),{recursive:true}),mkdir(join(root,'.configurable'),{recursive:true}),mkdir(join(root,'.agentflow'),{recursive:true}),mkdir(join(root,'sub','.AgEnTfLoW'),{recursive:true}),mkdir(join(root,'.agentflow-guide'),{recursive:true}),mkdir(join(root,'.git'),{recursive:true}),mkdir(join(root,'many'),{recursive:true}),mkdir(join(outside,'sub'),{recursive:true})]);
+  await Promise.all([mkdir(join(root,'sub','.CoNfIg'),{recursive:true}),mkdir(join(root,'.config'),{recursive:true}),mkdir(join(root,'.configurable'),{recursive:true}),mkdir(join(root,'.agentflow'),{recursive:true}),mkdir(join(root,'sub','.AgEnTfLoW'),{recursive:true}),mkdir(join(root,'.agentflow-guide'),{recursive:true}),mkdir(join(root,'.git'),{recursive:true}),mkdir(join(root,'many'),{recursive:true}),mkdir(join(outside,'sub'),{recursive:true}),mkdir(attached,{recursive:true})]);
   // Only disposable synthetic secret/guidance markers. No user configuration
   // is read, copied or passed to the native fixture.
   const privateRoot='api_key: SyntheticPrivateConfigValue-workspace-only\nalpha[.]needle private root\n';
@@ -45,6 +45,8 @@ try {
   ]);
   await Promise.all([
     writeFile(join(root,'README.txt'),'first\r\nalpha[.]needle 中\r\nlast\n'),
+    writeFile(join(root,'same-name.txt'),'primary folder bytes\n'),
+    writeFile(join(attached,'same-name.txt'),'attached folder bytes\n'),
     writeFile(join(root,'edit.txt'),'original\n'),
     writeFile(join(root,'edit-copy.txt'),'original\n'),
     writeFile(join(root,'sub','inside.txt'),'alpha[.]needle nested\n'),
@@ -98,6 +100,9 @@ try {
   const expectedHash=createHash('sha256').update(await readFile(join(root,'README.txt'))).digest('hex');
   const expectedAfterHash=createHash('sha256').update((await readFile(join(root,'README.txt'),'utf8')).replace('alpha[.]needle','beta-native')).digest('hex');
   const result=await execute(process.argv[2],[root,outside,expectedHash,expectedAfterHash],{windowsHide:true,timeout:20000});
+  const toolSet=JSON.parse((await execute(process.argv[2],['--tool-set',root,attached],{windowsHide:true,timeout:5000})).stdout);
+  assert.equal(toolSet.same_relative_path_distinct_bytes,true,'A native multi-folder tool snapshot must distinguish identical relative paths');
+  assert.equal(toolSet.unregistered_folder_rejected,true,'A native multi-folder tool snapshot must reject IDs outside its admitted membership');
   assert.equal(await readFile(join(root,'.config','providers.yaml'),'utf8'),privateRoot,'Rejected native access/edit attempts must preserve synthetic private configuration');
   assert.equal(await readFile(join(root,'sub','.CoNfIg','nested.yaml'),'utf8'),privateNested,'Nested private configuration must remain unchanged');
   assert.equal(await readFile(join(root,'.agentflow','owner.token'),'utf8'),privateState,'Rejected native state reads/edits must preserve the synthetic owner-token fixture');

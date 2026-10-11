@@ -76,14 +76,17 @@ Folder reads use the member folder ID and native handle identity. Agent file
 tools, edits and processes, plus Git and language-server routing, still use the
 primary folder. CLI and VS Code do not yet consume the membership registry.
 
-### Current single-folder implementation
+### Current multi-folder integration and remaining gaps
 
 The browser shows its active local profile, offers a selector for other local
 profiles and provides **New workspace** for an existing folder. The selected
 folder becomes that workspace's primary folder; **Add folder** adds more
 folders while keeping the selected workspace and session. The browser canvas
-can preview files from each attached folder, but agent execution remains
-single-root. Unlike VS Code,
+can preview files from each attached folder. In the profile-aware local backend,
+single-agent file reads, listings, searches and globs can select an attached
+folder by ID; ordinary root runs capture the membership revision and child
+agents reuse that snapshot. Editing and creation proposals, processes, Git,
+language-server roots and graph-node runs still use the primary folder. Unlike VS Code,
 a browser tab has no opened-folder context. On the profile-aware `xmind view`
 host, the selector is populated from the native protected profile
 catalogue and displays the workspace name and root; **New workspace** is

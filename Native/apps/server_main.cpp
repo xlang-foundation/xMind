@@ -25,6 +25,7 @@
 #include "agentflow/language_server_configuration.hpp"
 #include "agentflow/backend_owner_control.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include "agentflow/workspace_registry.hpp"
 #include "agentflow/local_profile.hpp"
 #include "agentflow/mcp_oauth_service.hpp"
 #include "agentflow/xlang_python_config.hpp"
@@ -63,7 +64,7 @@ int run_server(int argc,char** argv) {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--language-server-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--python-tools-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket" && key!="--profile-state") || !options.emplace(key,argv[i+1]).second)
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--workspace-registry" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--language-server-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--python-tools-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket" && key!="--profile-state") || !options.emplace(key,argv[i+1]).second)
                 throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--python-tools-config FILE] [--language-server-config FILE] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
@@ -135,6 +136,29 @@ int run_server(int argc,char** argv) {
 #endif
         agentflow::PersistenceService persistence(options.at("--db"),{options.at("--modules"),options.at("--stdlib")},1024,bootstrap,legacy);
 #if defined(_WIN32)
+        std::shared_ptr<agentflow::WorkspaceRegistry> workspace_registry;
+        if(options.contains("--workspace-registry")){
+            if(!options.contains("--workspace"))throw std::invalid_argument("A workspace registry requires the native execution workspace");
+            const auto registry_path=std::filesystem::absolute(std::filesystem::u8path(options.at("--workspace-registry"))).lexically_normal();
+            if(registry_path.filename()!=L"workspaces.sqlite")throw std::invalid_argument("Invalid local workspace registry location");
+            const auto registry_path_value=registry_path.u8string();
+            const auto private_root=registry_path.parent_path().u8string();
+            workspace_registry=std::make_shared<agentflow::WorkspaceRegistry>(
+                std::string(reinterpret_cast<const char*>(registry_path_value.data()),registry_path_value.size()),
+                std::vector<std::string>{options.at("--modules"),options.at("--stdlib")},
+                std::string(reinterpret_cast<const char*>(private_root.data()),private_root.size()));
+        }
+        const auto bind_workspace_membership=[&](agentflow::AgentSettings& settings){
+            if(!settings.workspace||!workspace_registry)return;
+            const auto workspace_id=agentflow::WorkspaceTools(*settings.workspace).identity();
+            const auto registry=workspace_registry;
+            settings.workspace_membership_snapshot=[registry,workspace_id]{
+                const auto group=registry->get(workspace_id);agentflow::WorkspaceMembershipSnapshot snapshot;
+                snapshot.workspace_id=group.workspace_id;snapshot.revision=group.revision;snapshot.folders.reserve(group.folders.size());
+                for(const auto& folder:group.folders)snapshot.folders.push_back({folder.folder_id,folder.root});
+                return snapshot;
+            };
+        };
         std::vector<agentflow::XlangPythonToolRegistration> xlang_python_tools;
         auto python_config=agentflow::load_xlang_python_tool_config(persistence);
         if(options.contains("--python-tools-config")){
@@ -207,6 +231,7 @@ int run_server(int argc,char** argv) {
             if(options.contains("--model-wire")&&options.at("--model-wire")=="responses")settings.provider.wire=agentflow::ProviderWire::responses;
             if(settings.provider.endpoint.size()>8192) throw std::invalid_argument("Provider endpoint exceeds its limit");
             if(options.contains("--workspace")) settings.workspace=options.at("--workspace");
+            bind_workspace_membership(settings);
             settings.approved_edits=options.contains("--workspace-edits");
             settings.mcp_servers=mcp_settings;
             settings.process_profiles=process_profiles;
@@ -242,6 +267,7 @@ int run_server(int argc,char** argv) {
         if(!executor){
             agentflow::AgentSettings settings;settings.mcp_servers=mcp_settings;settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.instruction_policy=instruction_policy;settings.xlang_python_tools=xlang_python_tools;
             if(options.contains("--workspace"))settings.workspace=options.at("--workspace");settings.approved_edits=options.contains("--workspace-edits");
+            bind_workspace_membership(settings);
             // The configured profile generation enables the registered leaf
             // policy only when its actual workspace/model tools are eligible.
             if(settings.workspace)settings.delegation=agentflow::AgentDelegationPolicy{};

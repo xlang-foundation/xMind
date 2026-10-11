@@ -84,6 +84,21 @@ std::string execution_identity(const AgentSettings& settings,const std::string& 
     else if(settings.provider.chat_dialect!=ChatDialect::openai)throw std::invalid_argument("Invalid native chat dialect");
     return identity.dump();
 }
+std::optional<WorkspaceMembershipSnapshot> saved_workspace_membership(PersistenceService& persistence,const std::string& owner){
+    std::optional<WorkspaceMembershipSnapshot> result;
+    for(const auto& event:persistence.events(owner).get())if(event.kind=="agent.workspace_membership"){
+        if(result)throw ToolAccessDenied("Run contains duplicate workspace membership snapshots");
+        const auto value=Json::parse(event.json);
+        if(!value.is_object()||!value.contains("workspace_id")||!value["workspace_id"].is_string()||
+            !value.contains("revision")||!value["revision"].is_number_integer()||!value.contains("folders")||!value["folders"].is_array()||
+            value["folders"].empty()||value["folders"].size()>256)
+            throw ToolAccessDenied("Saved workspace membership snapshot is invalid");
+        WorkspaceMembershipSnapshot snapshot;snapshot.workspace_id=value["workspace_id"].get<std::string>();snapshot.revision=value["revision"].get<std::int64_t>();
+        for(const auto& folder:value["folders"]){if(!folder.is_object()||!folder.contains("folder_id")||!folder["folder_id"].is_string()||!folder.contains("root")||!folder["root"].is_string())throw ToolAccessDenied("Saved workspace folder binding is invalid");snapshot.folders.push_back({folder["folder_id"].get<std::string>(),folder["root"].get<std::string>()});}
+        result=std::move(snapshot);
+    }
+    return result;
+}
 std::string tool_catalogue(const std::vector<ModelToolDefinition>& definitions,const Json& actual_bindings){
     if(!actual_bindings.is_array())throw DynamicPlanUnavailable("Actual external-agent approval bindings are not a native array");
     std::map<std::string,Json> bindings;
@@ -313,6 +328,17 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     auto effective_tool_allowlist=tool_allowlist?std::move(tool_allowlist):settings_.tool_allowlist;
     validate_agent_tool_allowlist(effective_tool_allowlist);
     const auto admitted=persistence_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
+    std::unique_ptr<WorkspaceToolSet> run_workspace_tools;
+    if(workspace_&&settings_.workspace_membership_snapshot){
+        auto membership=admitted.parent_id.empty()?saved_workspace_membership(persistence_,id):
+            (budget?saved_workspace_membership(persistence_,budget->root_id()):std::optional<WorkspaceMembershipSnapshot>{});
+        if(!membership&&admitted.parent_id.empty())membership=settings_.workspace_membership_snapshot();
+        if(membership){
+        if(membership->workspace_id!=workspace_->identity()||membership->folders.empty()||membership->folders.front().root!=workspace_->root_path())
+            throw ToolAccessDenied("Current workspace membership does not match the admitted primary folder");
+        run_workspace_tools=std::make_unique<WorkspaceToolSet>(std::move(membership->workspace_id),membership->revision,std::move(membership->folders));
+        }
+    }
     bool leaf=false,dynamic_child=false,graph_agent=false;std::optional<DynamicPlanCapabilities> child_caps;std::optional<DynamicPresetCapability> child_preset;
     if(!admitted.parent_id.empty()){
         const auto admission=persistence_.child_admission(id).get();dynamic_child=admission.kind==ChildAdmissionKind::dynamic_agent;
@@ -402,6 +428,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         return persistence_.transition(id,RunState::running,state,reason.dump()).get();
     };
     try {
+        if(run_workspace_tools&&!saved_workspace_membership(persistence_,id)){Json folders=Json::array();for(const auto& folder:run_workspace_tools->folders())folders.push_back({{"folder_id",folder.folder_id},{"root",folder.root}});
+            persistence_.append_event(id,"agent.workspace_membership",Json{{"workspace_id",run_workspace_tools->workspace_id()},{"revision",run_workspace_tools->revision()},{"primary_folder_id",run_workspace_tools->folders().front().folder_id},{"folders",std::move(folders)},{"snapshot","run_admission"}}.dump()).get();}
         const auto local_deadline=std::chrono::steady_clock::now()+settings_.run_timeout;
         if(!leaf&&admitted.parent_id.empty()&&execution_budget(provider.model)){
             const auto saved=persistence_.root_budget(id).get();const auto expected=execution_budget(provider.model);
@@ -433,7 +461,16 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             agent_instructions.append("\n\nSelected agent instructions (trusted backend snapshot):\n");
             agent_instructions+=graph_instructions;
         }
-        auto instructions=agent_instructions;std::unique_ptr<RepositoryInstructionContext> repository_context;
+        auto append_workspace_membership=[&](std::string& target){if(!run_workspace_tools)return;
+            target.append("\n\nRegistered workspace folders for native file tools (membership captured for this run). Omit folder_id for the primary folder; specify the listed folder_id to read another folder. Treat folder names as labels, not paths.\n");
+            for(std::size_t index=0;index<run_workspace_tools->folders().size();++index){
+                const auto& folder=run_workspace_tools->folders()[index];auto name=std::filesystem::u8path(folder.root).filename().u8string();
+                std::string label(reinterpret_cast<const char*>(name.data()),name.size());if(label.empty())label="workspace folder";
+                if(label.size()>64){std::size_t length=64;while(length&&(static_cast<unsigned char>(label[length])&0xc0)==0x80)--length;label.resize(length);}
+                target+="- folder_id="+folder.folder_id+" name="+label+(index==0?" (primary)\n":" (attached)\n");
+            }
+        };
+        auto instructions=agent_instructions;append_workspace_membership(instructions);std::unique_ptr<RepositoryInstructionContext> repository_context;
         if(workspace_){
             const auto sources=workspace_->repository_instructions(".",token);auto metadata=Json::array();
             for(const auto& source:sources){
@@ -454,7 +491,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!settings_.context)for(const auto& stored:persistence_.run_history(id).get())request.messages.push_back(message(stored));
         };
         reload_history();
-        if(workspace_){request.tools=workspace_->definitions();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
+        if(workspace_){request.tools=run_workspace_tools?run_workspace_tools->definitions():workspace_->definitions();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(CreateExecutor::definition());
         if(settings_.approved_edits) request.tools.push_back(PatchTool::definition());
@@ -555,6 +592,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(dynamic_root){if(!planning_->healthy())throw DynamicOutcomeUnrecorded("Native planning owner is faulted");validate_dynamic_owner(id,provider.model);}
             if(repository_context){
                 auto current=agent_instructions+repository_context->prepare(token);
+                append_workspace_membership(current);
                 if(!settings_.instruction_policy.instructions.empty()){current.append(instruction_prefix);current+=settings_.instruction_policy.instructions;}
                 if(current.size()>65536)throw ToolFileError("Combined agent instructions exceed limits");
                 request.messages.front().content=std::move(current);
@@ -694,7 +732,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     if(repository_context&&call.name=="load_skill")guidance_ready=repository_context->ready(repository_context->skills().activation_directory(call.arguments_json,token),token);
                     if(repository_context&&mcp_tools.contains(call.name)){guidance_ready=guidance_ready&&repository_context->ready(".",token);if(guidance_ready)guidance=repository_context->precondition(".");}
                     if(call.name=="apply_patch"&&settings_.approved_edits&&repository_context){prepared_patch=PatchTool(persistence_,*workspace_,*repository_context).prepare(call.arguments_json,token);guidance_ready=prepared_patch.has_value()&&guidance_ready;}
-                    if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}}}};}
+            if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}}}};}
                     else if(call.name=="list_skills"&&repository_context){try{if(mcp_compact_object(call.arguments_json)!="{}")throw std::invalid_argument("Skill listing takes no arguments");}catch(const McpProtocolError&){throw std::invalid_argument("Invalid skill listing arguments");}output=Json::parse(repository_context->skills().catalogue_json(token));}
                     else if(call.name=="load_skill"&&repository_context){const auto base_bytes=agent_instructions.size()+(settings_.instruction_policy.instructions.empty()?0:instruction_prefix.size()+settings_.instruction_policy.instructions.size());output=Json::parse(repository_context->activate_skill(call.arguments_json,base_bytes,token));}
                     else if(call.name=="edit_file" && settings_.approved_edits) {
@@ -729,7 +767,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         output=Json::parse(a2a_tools->invoke(a2a_operation,id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance),[&](const std::string& event){
                             cancelled(token);persistence_.append_event(id,"a2a.task_event",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"data",Json::parse(event)}}.dump()).get();
                         }));
-                    } else output=Json::parse(workspace_->invoke(call.name,call.arguments_json,token));
+                    } else output=Json::parse(run_workspace_tools?run_workspace_tools->invoke(call.name,call.arguments_json,token):workspace_->invoke(call.name,call.arguments_json,token));
                     success=guidance_ready&&(call.name!="apply_patch"||output.value("state",std::string{})=="succeeded");
                 }
                 catch(const PermissionCancelled&) {throw;}

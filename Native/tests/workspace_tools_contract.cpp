@@ -78,6 +78,19 @@ int main(int argc,char** argv) {
             std::cout<<Json{{"files",plan.files.size()},{"workspace_id",plan.workspace_id},{"updated_before_sha256",edited.before.content_sha256},{"removed_before_sha256",removed.before.content_sha256},{"moved_before_sha256",moved.before.content_sha256},{"planning_only",true}}.dump()<<'\n';return 0;
         }
         if(std::string(argv[1])=="--guidance") {WorkspaceTools tools(argv[2]);std::cout<<tools.invoke("read_repository_instructions",Json{{"directory",argv[3]}}.dump())<<'\n';return 0;}
+        if(std::string(argv[1])=="--tool-set") {
+            WorkspaceTools primary(argv[2]),attached(argv[3]);
+            WorkspaceToolSet tools(primary.identity(),7,{{primary.identity(),primary.root_path()},{attached.identity(),attached.root_path()}});
+            const auto definitions=tools.definitions();require(std::any_of(definitions.begin(),definitions.end(),[](const auto& item){return item.name=="read_file"&&Json::parse(item.input_schema_json)["properties"].contains("folder_id");}),"Folder-aware tool schemas must expose an optional registered folder ID");
+            const auto first=Json::parse(tools.invoke("read_file",R"({"path":"same-name.txt"})"));
+            const auto second=Json::parse(tools.invoke("read_file",Json{{"path","same-name.txt"},{"folder_id",attached.identity()}}.dump()));
+            require(first.at("content")=="primary folder bytes\n"&&first.at("folder_id")==primary.identity(),"Omitting folder_id must preserve primary-folder behavior and identify the source");
+            require(second.at("content")=="attached folder bytes\n"&&second.at("folder_id")==attached.identity(),"Explicit folder_id must select only its registered folder");
+            require(first.at("workspace_id")==primary.identity()&&second.at("workspace_id")==primary.identity()&&second.at("workspace_revision")==7,"Tool outputs must retain workspace membership provenance");
+            rejects<ToolAccessDenied>([&]{tools.invoke("read_file",R"({"path":"same-name.txt","folder_id":"unregistered-folder"})");});
+            rejects<std::invalid_argument>([&]{tools.invoke("read_file",R"({"path":"same-name.txt","folder_id":"x","folder_id":"y"})");});
+            std::cout<<Json{{"workspace_id",primary.identity()},{"membership_revision",7},{"primary_folder_id",primary.identity()},{"attached_folder_id",attached.identity()},{"same_relative_path_distinct_bytes",true},{"unregistered_folder_rejected",true}}.dump()<<'\n';return 0;
+        }
         if(std::string(argv[1])=="--guidance-context") {
             WorkspaceTools tools(argv[2]);RepositoryInstructionContext context(tools,tools.repository_instructions());
             const auto initial=context.prepare();require(context.ready("."),"Root guidance must be delivered");

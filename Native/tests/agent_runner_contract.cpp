@@ -62,6 +62,19 @@ int main(int argc,char** argv) {
         bool started=false,completed=false;
         for(const auto& event:store.events("main").get()) {if(event.kind=="tool.started") started=true;if(event.kind=="tool.completed") completed=true;}
         require(started && completed,"Actual tool execution events must persist");
+        const auto attached_root=std::filesystem::path(argv[4]).parent_path()/L"attached";
+        WorkspaceTools primary(argv[4]),attached(attached_root.string());
+        const auto primary_id=primary.identity(),attached_id=attached.identity(),primary_root=primary.root_path(),attached_canonical=attached.root_path();
+        auto multi=settings;multi.provider.endpoint=base+"/multi-folder?folder_id="+attached_id;
+        multi.workspace_membership_snapshot=[=]{return WorkspaceMembershipSnapshot{primary_id,2,{{primary_id,primary_root},{attached_id,attached_canonical}}};};
+        store.create_session("multi-folder","Admitted multi-folder read fixture").get();AgentRunner multi_runner(store,multi);multi_runner.start("multi-folder","multi-folder","Read the attached folder explicitly");
+        require(multi_runner.execute("multi-folder").state==RunState::completed,"AgentRunner must dispatch an explicit secondary-folder read through its captured membership");
+        const auto multi_history=store.history("multi-folder").get();require(multi_history.size()==4,"Folder-qualified native reads must remain in the normal persisted tool loop");
+        const auto multi_result=Json::parse(Json::parse(multi_history[2].json).at("content").get<std::string>());
+        require(multi_result.at("content")=="Attached folder content\n"&&multi_result.at("folder_id")==attached_id&&multi_result.at("workspace_id")==primary_id&&multi_result.at("workspace_revision")==2,"Tool result must identify the exact attached member and admitted revision");
+        bool captured_membership=false;for(const auto& event:store.events("multi-folder").get())if(event.kind=="agent.workspace_membership"){
+            const auto membership=Json::parse(event.json);captured_membership=membership.at("revision")==2&&membership.at("folders").size()==2&&membership.at("folders")[1].at("root")==attached_canonical;
+        }require(captured_membership,"Run admission must durably retain the exact folder identities and roots used by child executions");
         const auto code_root_path=std::filesystem::absolute(std::filesystem::u8path(argv[4])).u8string();
         const std::string code_root(reinterpret_cast<const char*>(code_root_path.data()),code_root_path.size());
         const auto authored=run_xlang_authoring_program(argv[2],argv[3],code_root,"fixture_tools");

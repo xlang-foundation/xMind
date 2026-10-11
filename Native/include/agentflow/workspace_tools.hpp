@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/model_provider.hpp"
 #include "agentflow/file_patch.hpp"
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string_view>
@@ -145,5 +146,26 @@ private:
     WorkspaceSnapshot read_snapshot(const std::string& path,bool capture_version,std::stop_token cancel,bool require_text=true,std::size_t max_bytes=1024*1024,std::size_t* bytes_read=nullptr) const;
     struct Impl;
     std::unique_ptr<Impl> impl_;
+};
+
+struct WorkspaceToolFolder {std::string folder_id,root;};
+struct WorkspaceMembershipSnapshot {std::string workspace_id;std::int64_t revision=0;std::vector<WorkspaceToolFolder> folders;};
+// Immutable membership snapshot for one admitted tool catalogue. Each member
+// is independently opened and identity-checked; folder IDs never become paths.
+class WorkspaceToolSet {
+public:
+    WorkspaceToolSet(std::string workspace_id,std::int64_t revision,std::vector<WorkspaceToolFolder> folders);
+    WorkspaceToolSet(const WorkspaceToolSet&)=delete;
+    WorkspaceToolSet& operator=(const WorkspaceToolSet&)=delete;
+    const std::string& workspace_id()const{return workspace_id_;}
+    std::int64_t revision()const{return revision_;}
+    const std::vector<WorkspaceToolFolder>& folders()const{return folders_;}
+    std::vector<ModelToolDefinition> definitions()const;
+    std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={})const;
+private:
+    std::string workspace_id_;
+    std::int64_t revision_=0;
+    std::vector<WorkspaceToolFolder> folders_;
+    std::vector<std::unique_ptr<WorkspaceTools>> tools_;
 };
 }

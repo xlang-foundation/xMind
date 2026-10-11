@@ -1,5 +1,21 @@
 # Reviewable milestones
 
+## Single-agent file tools use admitted workspace membership — 2026-10-11
+
+The managed backend receives the protected local xlang3/SQLite workspace
+registry path. Each single-agent root run transactionally captures its current
+workspace revision and opens/identity-checks every member. Native read, list,
+search and glob tools accept an explicit registered `folder_id`; omission keeps
+the primary-folder default. Results include workspace, folder and revision
+provenance. The durable root-run snapshot is reused by its admitted agent
+children, so attaching another folder mid-run cannot redirect that run; a later
+root run observes the newer registry revision. Five focused native contracts
+pass, including an actual AgentRunner/provider/tool loop reading a same-named
+file from the attached root, plus local-profile launch/handoff, registry and
+local-view coverage. Graph-node tool routing, edit/approval/process/Git/LSP
+folder routing, and CLI/VS Code membership controls remain open. See the
+[multi-folder workspace contract](native-multi-folder-workspaces.md).
+
 ## Native browser previews across attached workspace folders — 2026-10-11
 
 The local browser now renders one file tree per registered workspace folder.
