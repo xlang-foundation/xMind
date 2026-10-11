@@ -7,7 +7,7 @@ not evidence of an integrated xMind worker or a faster product.
 ## Verified SDK foundation
 
 The existing pinned xlang3 SDK revision
-`7b8b32ae3a0e6a99fac7babd97362736099448fb` exposes native C++
+`8151a334a5e2ed0183b40ba6a98d1010b6cd96ae` exposes native C++
 `X::Runtime::ImportRemote(name, endpoint)` and the C API
 `x3_runtime_probe_remote(runtime, endpoint, timeout_ms, info)`.
 Its existing shared-memory endpoint scheme is `lrpc:`. The script-side APIs
