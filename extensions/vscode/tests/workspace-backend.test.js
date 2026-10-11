@@ -41,6 +41,9 @@ test('trusted process profiles reach native only through machine settings or the
  const development=harness({settings:{processConfigPath:''},processConfigFile:true});await development.manager.connect();const devLaunch=development.launches[0],devFlag=devLaunch.args.indexOf('--process-config');assert.ok(devFlag>0);assert.equal(devLaunch.args[devFlag+1],development.processConfigCandidate);
  const packaged=harness({settings:{processConfigPath:''},processConfigFile:true,extensionMode:1});await packaged.manager.connect();assert.ok(!packaged.launches[0].args.includes('--process-config'));
 });
+test('an explicit trusted runtime update requests one protected native backend upgrade',async()=>{
+ const h=harness();h.manager.requestBackendUpgrade();await h.manager.connect();assert.ok(h.launches[0].args.includes('--upgrade-backend'));assert.equal(h.manager.backendUpgradeRequested,false,'Successful startup consumes the one-shot owner-upgrade request');
+});
 test('packaged Windows profile remains short and canonical despite redirected LocalAppData',async()=>{
  const h=harness();h.deps.env.LOCALAPPDATA='C:\\Users\\shaw9\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Local';const owner=await h.manager.connect(),root=h.launches[0].args[h.launches[0].args.indexOf('--profile-root')+1];assert.equal(root,'C:\\User\\.xMind\\p');assert.ok(root.length<=84);assert.equal(owner.canonical,'D:\\Projects\\Example');
 });

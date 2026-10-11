@@ -71,10 +71,11 @@ class WorkspaceBackend {
   constructor(vscode,context,resolveRuntime,dependencies={}){
     this.vscode=vscode;this.context=context;this.resolveRuntime=resolveRuntime;
     this.deps={fs,spawn,fetch:(...args)=>fetch(...args),random:()=>crypto.randomBytes(32).toString('hex'),directoryNonce:()=>crypto.randomBytes(16).toString('hex'),sleep:ms=>new Promise(resolve=>setTimeout(resolve,ms)),now:()=>Date.now(),platform:process.platform,arch:process.arch,env:process.env,...dependencies};
-    this.epoch=0;this.adapters=new Map();this.active=undefined;this.disposed=false;this.connecting=undefined;
+    this.epoch=0;this.adapters=new Map();this.active=undefined;this.disposed=false;this.connecting=undefined;this.backendUpgradeRequested=false;
   }
   signature(){return JSON.stringify((this.vscode.workspace.workspaceFolders||[]).map(folder=>folder.uri.toString()));}
   invalidate(){this.epoch++;this.active=undefined;}
+  requestBackendUpgrade(){this.backendUpgradeRequested=true;}
   dispose(){this.disposed=true;this.invalidate();for(const owner of this.adapters.values())this.closeAdapter(owner);this.adapters.clear();/* Only view adapters close; native backends persist. */}
   async selectedFolder(forcePick=false){
     if(!this.vscode.workspace.isTrusted)throw new Error('Trust the workspace before starting its local xMind backend.');
@@ -111,11 +112,11 @@ class WorkspaceBackend {
         continue;
       }
       const operation={epoch:this.epoch,promise:undefined};
-      operation.promise=this.open(forcePick).finally(()=>{if(this.connecting===operation)this.connecting=undefined;});
+      operation.promise=this.open(forcePick,this.backendUpgradeRequested).finally(()=>{if(this.connecting===operation)this.connecting=undefined;});
       this.connecting=operation;return operation.promise;
     }
   }
-  async open(forcePick){
+  async open(forcePick,upgradeBackend=false){
     const epoch=this.epoch,selection=await this.selectedFolder(forcePick);
     const current=()=>!this.disposed&&this.vscode.workspace.isTrusted&&!this.vscode.env?.remoteName&&this.epoch===epoch&&selection.signature===this.signature();
     const canonical=canonicalPath(await this.deps.fs.realpath(selection.folder.uri.fsPath));
@@ -168,6 +169,7 @@ class WorkspaceBackend {
     }
     if(roots.some(root=>contained(root,profileRoot)||contained(profileRoot,root)))throw new Error('Local profile storage overlaps an opened workspace.');
     const args=['view','--workspace',canonical,'--profile-root',profileRoot,'--ready-file',ready];
+    if(upgradeBackend)args.push('--upgrade-backend');
     if(runtime.languageServerConfig)args.push('--language-server-config',runtime.languageServerConfig);
     if(runtime.processConfig)args.push('--process-config',runtime.processConfig);
     if(machineSetting(this.vscode,'workspaceEdits')===false)args.push('--read-only');
@@ -196,7 +198,7 @@ class WorkspaceBackend {
       await this.observe(owner);
       await this.importProviders(owner.origin,token,runtime.providerConfig);
       if(!current())throw new Error('Workspace changed while authenticating its native view.');
-      this.adapters.set(scope,owner);this.active={...owner,epoch,signature:selection.signature,roots:selection.roots};return this.active;
+      this.adapters.set(scope,owner);this.active={...owner,epoch,signature:selection.signature,roots:selection.roots};if(upgradeBackend)this.backendUpgradeRequested=false;return this.active;
     }catch(error){if(owner)this.closeAdapter(owner);else if(child.exitCode==null)child.kill();throw error;}
   }
   stateFields(){return this.active?.profileDirectory?{workspace_id:this.active.metadata.workspace_id,profile_directory:this.active.profileDirectory}:undefined;}

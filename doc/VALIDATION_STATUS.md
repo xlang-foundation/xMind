@@ -8,7 +8,16 @@ packaged installs. The Release `xmind` target builds. The focused native
 local-profile integration contract passes: trusted profile import, refusal of
 an implicit config change, protected owner handoff, and preservation of SQLite
 sessions, history and graph results across restart. The VS Code suite passes
-**296/296** and the browser suite **85/85**.
+**298/298** and the browser suite **85/85**.
+
+VS Code offers a confirmation-gated **xMind: Apply Trusted Runtime
+Configuration** command. The host requests `--upgrade-backend` only after the
+user confirms; a successful launch consumes the one-shot request. The command
+and argument handoff have isolated host tests. VS Code package `0.1.8` was
+built as a 1,938-file, 18.02 MB VSIX with the verified native runtime and
+installed locally; `code --list-extensions` reports
+`agentflow-local.agentflow@0.1.8`. The real backend upgrade prompt and actual
+managed-client process execution remain unverified.
 
 The focused native local-view contract now passes against the Release binary
 with a configured profile; the authenticated view reads only profile ID,

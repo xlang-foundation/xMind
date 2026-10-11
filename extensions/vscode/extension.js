@@ -707,6 +707,22 @@ async function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.configureToken', async initialToken => {
     try { await configureToken(initialToken); } catch (error) { vscode.window.showErrorMessage(error.message); }
   }));
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.applyRuntimeConfiguration',async()=>{
+    try{
+      if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before updating its managed xMind backend.');
+      if(previewOrigin||machineSetting(vscode,'backendMode')==='external')throw new Error('Apply trusted runtime configuration from the machine that owns the managed local backend.');
+      const selection=await workspaceBackend.selectedFolder(false),root=selection?.folder?.uri?.fsPath;
+      if(typeof root!=='string'||!root)throw new Error('Open a workspace folder before updating the managed xMind backend.');
+      const epoch=workspaceBackend.epoch,signature=workspaceBackend.signature();
+      const answer=await vscode.window.showWarningMessage(`Apply the current trusted runtime and process configuration to the local xMind backend for ${root}? The backend will restart while keeping saved sessions and history. Active work is not replayed.`,{modal:true},'Apply and reconnect');
+      if(answer!=='Apply and reconnect')return;
+      if(epoch!==workspaceBackend.epoch||signature!==workspaceBackend.signature())throw new Error('The selected workspace changed before the backend update.');
+      workspaceBackend.requestBackendUpgrade();
+      await reconnectWorkspace();
+      await open();
+      vscode.window.showInformationMessage('Trusted xMind runtime configuration applied. Saved sessions and history remain on the backend.');
+    }catch(error){vscode.window.showErrorMessage(error.message);}
+  }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.openBrowser',async()=>{
     try{
       if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before connecting a browser view.');

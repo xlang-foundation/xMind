@@ -20,7 +20,7 @@ checked out locally. [Pinned source](https://github.com/anomalyco/opencode/tree/
 track the current V2 surface and can move independently of the source tag;
 source-defined API contracts take precedence for this inventory.
 
-## Latest native coding/runtime checkpoint (2026-10-11, commit `b0dd491`)
+## Latest native coding/runtime checkpoint (2026-10-11, VS Code package `0.1.8`)
 
 Named YAML agent definitions and graph agent nodes carry optional tool
 allowlists. The native loop filters the authorized catalogue for single-agent
@@ -46,7 +46,7 @@ the [0.1.7 package evidence](evidence/vscode-0.1.7-package-preview.json). The
 new managed-view process-profile wiring builds in Release. Its focused native
 local-profile contract verifies trusted configuration import, refusal of an
 implicit change, protected backend-owner handoff, and SQLite session/history/
-graph preservation across restart. The VS Code suite passes **296/296** and
+graph preservation across restart. The VS Code suite passes **298/298** and
 the browser suite **85/85**. The complete native gate and actual populated
 VS Code process-run acceptance have not been rerun on this checkpoint.
 
@@ -60,6 +60,14 @@ The next coding-runtime work is an end-to-end approved process run from each
 managed client, followed by reviewed shell-command semantics, durable
 background output/jobs, terminal lifecycle acceptance and full project coding
 workflows.
+
+VS Code also has a confirmation-gated **xMind: Apply Trusted Runtime
+Configuration** command. It reconnects through Native with the one-shot
+`--upgrade-backend` request so edits to trusted process-profile contents can be
+imported while preserving saved data. The command and native argument handoff
+are covered by the host suite. The rebuilt 0.1.8 VSIX was installed locally;
+invoking the command against a real backend and reviewing its rendered prompt
+remain unverified.
 
 The pinned OpenCode inventory remains **141 operations**, with **31** mapped
 native source candidates, **110** unmapped, and **zero** operations with

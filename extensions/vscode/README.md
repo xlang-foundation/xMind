@@ -1,9 +1,10 @@
 # xMind for VS Code
 
-The native shared-profile view adapter is a candidate whose native readiness
-probe is still failing. The installed 0.1.5 package is unchanged. See
-[acceptance boundary](../../doc/native-view-adapter.md) before building/installing
-a package from this source.
+The native shared-profile view adapter passes its focused Release integration
+contract, including authenticated process-profile metadata. The 0.1.8 VSIX was
+built from this source and installed locally. Rendered process approval and
+runtime-configuration handoff remain unverified; see
+[validation status](../../doc/VALIDATION_STATUS.md).
 
 xMind uses a dedicated right-hand secondary sidebar, with Explorer on the left
 and the composer and model chooser at the bottom. C++ owns execution,
@@ -37,9 +38,10 @@ recovery. The editor verifies returned workspace authority before admission.
 
 Closing the host closes its adapters and should leave backend work alive.
 Selections are scoped to the native workspace/profile, so an adapter port change
-does not reset conversation/model choices. The JavaScript owner registry and
-upgrade commands are removed. Native owner-control contracts remain separate
-from UI access; no legacy installation/profile conversion is required.
+does not reset conversation/model choices. Backend ownership remains native.
+**xMind: Apply Trusted Runtime Configuration** is the explicit,
+confirmation-gated command for a profile-preserving backend upgrade after
+trusted settings change; no legacy profile conversion is required.
 
 These are implementation contracts pending native/installed acceptance.
 
@@ -55,6 +57,7 @@ paths are read from machine/global settings, never selected-project settings.
 | `agentflow.stdlibSource` | Optional trusted pure standard-library source directory for development; otherwise use bundled source. |
 | `agentflow.providerConfigPath` | Optional absolute provider YAML path imported by Native. Development Host automatically uses this repository's `.config/providers.yaml`; the extension passes only its path and never searches the opened project. |
 | `agentflow.languageServerConfigPath` | Optional absolute trusted native LSP profile YAML path. Development Host automatically uses this repository's `.config/language-servers.yaml` when present; the extension never searches the opened project. |
+| `agentflow.processConfigPath` | Optional absolute trusted native process profile YAML path. Development Host automatically uses this repository's `.config/processes.yaml` when present; the extension never searches the opened project. |
 | `agentflow.workspaceEdits` | Default `true` for newly started managed backends: file creation/edit proposals require native approval before writing. Explicit `false` starts a read-only owner. Existing profiles retain their native startup policy; changed explicit launch options are rejected. |
 | `agentflow.backendUrl` | External mode's explicitly configured loopback origin. |
 
@@ -62,6 +65,10 @@ An unset provider path starts Native unconfigured so Settings can enroll a
 provider. With a configured path, every new managed backend imports that same
 file through Native; the host does not copy keys into arguments, conversations
 or workspace state. [Provider setup](https://github.com/xlang-foundation/xMind/blob/checkpoint/native-persistence-m1/doc/provider-setup.md).
+After changing a trusted runtime, language-server, or process profile path,
+run **xMind: Apply Trusted Runtime Configuration**. It requests a protected
+native owner handoff after confirmation; sessions and history persist and
+already dispatched work is never replayed.
 
 External mode requires its actual backend root to match the selected folder.
 Unknown workspace metadata, a different root or a changed generation blocks
@@ -91,8 +98,9 @@ The command palette also provides **xMind: Show Git Status**, **xMind: Review
 Git Diff**, and **xMind: Initialize Git Repository** for the connected VS Code
 workspace. Review Git Diff reads patches from Native, prompts for a base only
 when the backend cannot infer one, and opens the selected patch in VS Code's
-diff language mode. This source command is covered by the extension-host suite;
-the installed package and rendered IDE workflow remain unverified.
+diff language mode. These source commands are covered by the extension-host
+suite; the updated package is installed, while rendered approval, process-run
+and runtime-upgrade workflows remain unverified.
 
 The footer displays the backend's actual file policy when Native advertises it:
 **File changes require approval** or **Read only: file changes disabled**.

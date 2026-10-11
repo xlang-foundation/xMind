@@ -13,7 +13,7 @@ imports the revised registry while the replacement is quiesced, and preserves
 the existing SQLite sessions, history, and graph results. The active-graph
 retirement refusal and recovery path remain covered by that contract.
 
-The VS Code suite passes **296/296** and the browser suite **85/85**. The
+The VS Code suite passes **298/298** and the browser suite **85/85**. The
 extension tests confirm that the managed VS Code launcher forwards the trusted
 configuration path. The native local-profile integration test verifies import,
 protected handoff, and SQLite persistence. The actual native local-view
@@ -25,10 +25,13 @@ remain unverified at this checkpoint.
 Managed local views now accept a trusted `--process-config`. The browser
 launcher uses the repository's `.config/processes.yaml` when present; the VS
 Code development extension uses that same repository file, and packaged
-installs can set the machine-level `agentflow.processConfigPath`. Opened
-workspaces are never searched for executable profiles. Native xMind reads and
-imports the file; hosts pass only its path. The protected profile records the
-path and content digest. Editing that file requires the managed owner handoff;
+installs can set the machine-level `agentflow.processConfigPath`. VS Code's
+**xMind: Apply Trusted Runtime Configuration** command asks before requesting
+the protected backend-owner handoff needed after a trusted config change;
+saved sessions and history persist, while dispatched work is never replayed.
+Opened workspaces are never searched for executable profiles. Native xMind
+reads and imports the file; hosts pass only its path. The protected profile
+records the path and content digest. Editing that file requires the managed owner handoff;
 an explicit `profiles: []` retires configured IDs, while removing the file does
 not silently clear the saved registry. No process profile or shell is seeded
 by default. `run_process` appears only when a trusted profile is registered.

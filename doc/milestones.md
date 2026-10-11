@@ -1,5 +1,18 @@
 # Reviewable milestones
 
+## Explicit trusted runtime refresh in VS Code — 2026-10-11
+
+VS Code now registers **xMind: Apply Trusted Runtime Configuration**. After
+the user confirms, the host reconnects with Native's protected
+`--upgrade-backend` path, allowing changed trusted process-profile contents to
+be imported without losing sessions or history. Host tests verify cancellation
+does not request the upgrade, confirmation requests it once, and a successful
+launch consumes that request. The full extension suite passes **298/298**.
+VSIX `0.1.8` packages the verified native runtime (1,899 runtime files), was
+installed locally, and appears as `agentflow-local.agentflow@0.1.8`. Real
+backend confirmation/handoff and an approved process command in the rendered
+sidebar remain unverified.
+
 ## Managed views load trusted process profiles — 2026-10-11
 
 Commit `b0dd491` passes trusted process-profile configuration through the
@@ -8,8 +21,10 @@ Native code imports the file into the xlang3-backed registry. A changed file
 requires a protected backend-owner handoff; existing sessions, history and
 graph results survive the restart. Removing the file after import leaves the
 persisted registry available. The native local-view contract also reads the
-sanitized process-profile catalogue through view authentication. The focused
-native profile/view contracts pass, VS Code passes **296/296**, and browser
+sanitized process-profile catalogue through view authentication. VS Code now
+has an explicit confirmation-gated command to apply trusted runtime/process
+configuration using the protected owner handoff. The focused native
+profile/view contracts pass, VS Code passes **298/298**, and browser
 tests pass **85/85**. The full native gate and rendered managed-client process
 run remain unverified, and no shell profile is seeded. See [validation
 status](VALIDATION_STATUS.md) and [process tooling](native-process-tools.md).

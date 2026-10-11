@@ -12,7 +12,7 @@ const {planFixture,inputMessage}=require('./plan-fixture');
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
   const commands=new Map(),secrets=new Map(),requests=[],views=[],intervals=new Map(),streams=[],scheduledTasks=[],vcsInitializations=[],information=[],openedDocuments=[],shownDocuments=[];
-  const state=new Map(),errors=[],comparisons=[],bootstrapTasks=[],ready=[],warnings=[],languageServerEditorCalls=[];let documentProvider;
+  const state=new Map(),errors=[],comparisons=[],bootstrapTasks=[],ready=[],warnings=[],languageServerEditorCalls=[],backendUpgradeRequests=[];let documentProvider;
   let pendingHistory;
   let pendingOperation;
   let operations=options.operations||[];
@@ -128,7 +128,9 @@ function harness(options={}) {
     constructor(){this.epoch=0;this.active=undefined;}
     invalidate(){this.epoch++;this.active=undefined;}
     dispose(){this.invalidate();}
-    async selectedFolder(){return {};}
+    async selectedFolder(){return {folder:vscode.workspace.workspaceFolders[0]};}
+    signature(){return JSON.stringify(vscode.workspace.workspaceFolders.map(folder=>folder.uri.toString()));}
+    requestBackendUpgrade(){backendUpgradeRequests.push(this.epoch);}
     stateFields(){return options.stateScope;}
     async connect(){const root=vscode.workspace.workspaceFolders[0].uri.fsPath,epoch=this.epoch;await options.beforeConnect?.(root);if(epoch!==this.epoch)throw new Error('Workspace changed while preparing its backend');let owner=backendOwners.find(value=>value.metadata.root===root);if(!owner){owner={origin:'http://127.0.0.1:'+(8765+backendOwners.length),metadata:{configured:true,root,workspace_id:'windows-local-file-v1:1:'+backendOwners.length,authority_id:'b'.repeat(32)}};backendOwners.push(owner);await context.secrets.store('xmind.auth:'+owner.origin,token);}this.active={...owner,roots:vscode.workspace.workspaceFolders.map(value=>({fsPath:value.uri.fsPath})),epoch:this.epoch,backendChangePending:options.backendChangePending===true};return this.active;}
     async attach(){return this.connect();}
@@ -149,12 +151,16 @@ function harness(options={}) {
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
   return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
-    backendOwners,changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
+    backendOwners,backendUpgradeRequests,changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
     pauseOperation(promise) {pendingOperation=promise;},
     pauseHistory(promise) {pendingHistory=promise;}};
 }
+
+test('applying trusted runtime configuration requires explicit confirmation before reconnecting',async()=>{
+ let answer;const h=harness({cancelChoice:()=>answer});await h.activation;await h.commands.get('agentflow.applyRuntimeConfiguration')();assert.equal(h.backendUpgradeRequests.length,0);assert.equal(h.views.length,0);assert.match(h.warnings[0].message,/saved sessions and history/);answer='Apply and reconnect';await h.commands.get('agentflow.applyRuntimeConfiguration')();assert.equal(h.backendUpgradeRequests.length,1);assert.equal(h.backendUpgradeRequests[0],0);assert.equal(h.views.length,1);assert.ok(h.information.some(message=>/Trusted xMind runtime configuration applied/.test(message)));assert.deepEqual(h.errors,[]);
+});
 
 test('sidebar MCP login is bound to its backend and closing the sidebar detaches without cancelling',async()=>{
  const server={id:'tools.peer',config_revision:1,credential_revision:0,enabled:true,configured:true,state:'needs_login',expires_unix_ms:null};let value;const admissions=[];

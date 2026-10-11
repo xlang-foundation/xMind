@@ -2,7 +2,7 @@
   "name": "agentflow",
   "displayName": "xMind",
   "description": "Shared native xMind agent sessions and coding workflows in VS Code.",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "publisher": "agentflow-local",
   "repository": {
     "type": "git",
@@ -52,6 +52,10 @@
       {
         "command": "agentflow.openTerminal",
         "title": "xMind: Open Workspace Terminal"
+      },
+      {
+        "command": "agentflow.applyRuntimeConfiguration",
+        "title": "xMind: Apply Trusted Runtime Configuration"
       },
       {
         "command": "agentflow.selection",
@@ -123,7 +127,7 @@
           "type": "string",
           "default": "",
           "scope": "machine",
-          "description": "Optional absolute path to trusted native process profiles. Development installs automatically use the repository .config/processes.yaml when present; opened workspace folders are never searched."
+          "description": "Optional absolute path to trusted native process profiles. Development installs automatically use the repository .config/processes.yaml when present; opened workspaces are never searched. Run xMind: Apply Trusted Runtime Configuration after changing it."
         },
         "agentflow.workspaceEdits": {
           "type": "boolean",
