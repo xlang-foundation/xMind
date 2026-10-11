@@ -42,6 +42,7 @@ std::string LanguageServerToolRegistry::invoke(const std::string& source,std::st
     if(!args.is_object())throw std::invalid_argument("Invalid language-server tool arguments");
     for(auto it=args.begin();it!=args.end();++it)if(it.key()!="server_id"&&it.key()!="method"&&it.key()!="path"&&it.key()!="line"&&it.key()!="character")throw std::invalid_argument("Unknown language-server tool argument");
     for(const auto* key:{"server_id","method","path"})if(!args.contains(key)||!args[key].is_string())throw std::invalid_argument("Invalid language-server tool arguments");
+    const auto method=args["method"].get<std::string>();if(method!="hover"&&method!="definition"&&method!="references"&&method!="documentSymbol"&&method!="diagnostics")throw ToolAccessDenied("The AgentRunner language-server tool is read-only");
     const auto id=args["server_id"].get<std::string>();const auto found=clients_.find(id);if(found==clients_.end())throw ToolAccessDenied("Language-server profile is not registered");
     LanguageServerRequest request;request.path=args["path"].get<std::string>();request.method=args["method"].get<std::string>();request.line=position(args,"line");request.character=position(args,"character");
     return found->second->request(request,cancel);

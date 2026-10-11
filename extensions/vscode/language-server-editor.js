@@ -33,6 +33,7 @@ class LanguageServerEditor {
       this.disposables.push(this.vscode.languages.registerDefinitionProvider(profile.language_id,{provideDefinition:(document,position,token)=>this.navigate(document,position,'definition',token)}));
       this.disposables.push(this.vscode.languages.registerReferenceProvider(profile.language_id,{provideReferences:(document,position,_context,token)=>this.navigate(document,position,'references',token)}));
       this.disposables.push(this.vscode.languages.registerHoverProvider(profile.language_id,{provideHover:(document,position,token)=>this.hover(document,position,token)}));
+      this.disposables.push(this.vscode.languages.registerDocumentFormattingEditProvider(profile.language_id,{provideDocumentFormattingEdits:(document,options,token)=>this.format(document,options,token)}));
     }
     for(const document of this.vscode.workspace.textDocuments||[])schedule(document,100);
   }
@@ -63,15 +64,36 @@ class LanguageServerEditor {
       else if(error.status===409)this.collection.clear();
     }
   }
-  async query(document,position,method,token){
+  async query(document,position,method,token,formattingOptions){
     const client=this.client,epoch=this.epoch;if(!this.active(client,epoch)||!this.supports(document)||!(this.vscode.workspace.textDocuments||[]).includes(document)||token?.isCancellationRequested)return;
     const owner=this.workspaceBackend.active,relative=workspaceRelativePath(owner.canonical,document.uri.fsPath);if(!relative)return;
-    const version=document.version,line=position?.line,character=position?.character;if(!Number.isSafeInteger(line)||line<0||!Number.isSafeInteger(character)||character<0)return;
+    const version=document.version,line=position?.line??0,character=position?.character??0;if(!Number.isSafeInteger(line)||line<0||!Number.isSafeInteger(character)||character<0)return;
     const ticket=await this.workspaceBackend.prepare();this.workspaceBackend.assert(ticket);
     if(!this.active(client,epoch)||document.version!==version||token?.isCancellationRequested||ticket.origin!==client.baseUrl)return;
-    const response=await client.languageServerQuery({path:relative,method,line,character,documentText:document.getText()},ticket.fields);this.workspaceBackend.assert(ticket);
+    const response=await client.languageServerQuery({path:relative,method,line,character,documentText:document.getText(),...(formattingOptions?{formattingOptions}:{})},ticket.fields);this.workspaceBackend.assert(ticket);
     if(!this.active(client,epoch)||document.version!==version||token?.isCancellationRequested||!(this.vscode.workspace.textDocuments||[]).includes(document)||response.path!==relative||response.method!==method)return;
     return response.result;
+  }
+  async format(document,options,token){
+    if(!options||!Number.isSafeInteger(options.tabSize)||options.tabSize<1||options.tabSize>16||typeof options.insertSpaces!=='boolean')return;
+    const formattingOptions={tabSize:options.tabSize,insertSpaces:options.insertSpaces};
+    for(const [source,target] of [['trimTrailingWhitespace','trimTrailingWhitespace'],['insertFinalNewline','insertFinalNewline'],['trimFinalNewlines','trimFinalNewlines']])if(typeof options[source]==='boolean')formattingOptions[target]=options[source];
+    const result=await this.query(document,undefined,'formatting',token,formattingOptions);
+    if(result===null)return;if(!Array.isArray(result)||result.length>10000)return;
+    const source=document.getText();if(Buffer.byteLength(source,'utf8')>900*1024)return;
+    const checked=[];let bytes=0;
+    for(const item of result){
+      if(!item||typeof item!=='object'||typeof item.newText!=='string'||Buffer.byteLength(item.newText,'utf8')>900*1024)return;
+      bytes+=Buffer.byteLength(item.newText,'utf8');if(bytes>900*1024)return;
+      const range=lspRange(this.vscode,item.range);if(!range)return;
+      for(const point of [range.start,range.end])if(point.line>=document.lineCount||point.character>document.lineAt(point.line).text.length)return;
+      const start=document.offsetAt(range.start),end=document.offsetAt(range.end);
+      if(!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||end<start||end>source.length)return;
+      checked.push({start,end,range,newText:item.newText});
+    }
+    checked.sort((left,right)=>left.start-right.start||left.end-right.end);
+    for(let index=1;index<checked.length;index++)if(checked[index].start<checked[index-1].end||(checked[index].start===checked[index-1].start&&checked[index].end===checked[index].start))return;
+    return checked.map(value=>new this.vscode.TextEdit(value.range,value.newText));
   }
   async navigate(document,position,method,token){
     const result=await this.query(document,position,method,token);if(result==null)return;

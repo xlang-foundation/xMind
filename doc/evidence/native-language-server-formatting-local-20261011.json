@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-11",
+  "scope": "Native language-server document formatting and VS Code editor mapping",
+  "result": "passed",
+  "native_build": {
+    "target": "agentflow_language_server_contract",
+    "configuration": "Release",
+    "result": "passed"
+  },
+  "real_language_server": {
+    "name": "rust-analyzer",
+    "binary": "installed Rust toolchain rust-analyzer executable",
+    "fixture": "Native/tests/fixtures/lsp-rust",
+    "result": "passed",
+    "verified": [
+      "persistent native stdio client",
+      "AgentRunner language-server tool remains read-only",
+      "authenticated HTTP formatting with workspace authority",
+      "document symbols",
+      "definition",
+      "references",
+      "hover",
+      "clean diagnostics",
+      "native xlang3 SQLite backend initialization"
+    ]
+  },
+  "vscode_tests": {
+    "command": "node --test extensions/vscode/tests/language-server-editor.test.js extensions/vscode/tests/client.test.js",
+    "passed": 45,
+    "failed": 0,
+    "result": "passed",
+    "verified": [
+      "workspace-authority-bound formatting request options",
+      "unsaved editor buffer and indentation settings",
+      "overlapping formatting edits are rejected"
+    ]
+  },
+  "limitations": [
+    "Installed IDE rendered formatting acceptance was not performed.",
+    "Formatter discovery and configuration UX remain open.",
+    "No project repair loop was evaluated."
+  ]
+}

@@ -55,6 +55,7 @@ struct LanguageServerClient::Impl {
     std::map<std::string,Json> published_diagnostics;
     std::uint64_t next=1;
     bool initialized=false;
+    bool document_formatting=false;
 
     Impl(WorkspaceTools& value,const LanguageServerProfile& setting):workspace(value),profile(setting){}
 
@@ -104,7 +105,8 @@ struct LanguageServerClient::Impl {
         McpStdioConfiguration config{profile.executable,workspace.root_path(),profile.arguments,profile.environment,4*1024*1024,512*1024*1024,std::chrono::seconds(45),32};
         process=std::make_unique<McpStdioProcess>(config);channel=std::make_unique<LspChannel>(*process);
         const auto root=std::filesystem::u8path(workspace.root_path());const auto root_uri=file_uri(root);
-        (void)exchange("initialize",Json{{"processId",nullptr},{"rootUri",root_uri},{"workspaceFolders",Json::array({{{"uri",root_uri},{"name",root.filename().string()}}})},{"capabilities",{{"textDocument",{{"hover",{{"contentFormat",Json::array({"plaintext","markdown"})}}},{"definition",{{"linkSupport",true}}},{"references",{{"dynamicRegistration",false}}},{"documentSymbol",{{"hierarchicalDocumentSymbolSupport",true}}}}}}},{"clientInfo",{{"name","xMind"},{"version","native"}}}} ,deadline,cancel);
+        const auto capabilities=exchange("initialize",Json{{"processId",nullptr},{"rootUri",root_uri},{"workspaceFolders",Json::array({{{"uri",root_uri},{"name",root.filename().string()}}})},{"capabilities",{{"textDocument",{{"hover",{{"contentFormat",Json::array({"plaintext","markdown"})}}},{"definition",{{"linkSupport",true}}},{"references",{{"dynamicRegistration",false}}},{"documentSymbol",{{"hierarchicalDocumentSymbolSupport",true}}},{"formatting",{{"dynamicRegistration",false}}}}}}},{"clientInfo",{{"name","xMind"},{"version","native"}}}} ,deadline,cancel);
+        const auto formatting=capabilities.is_object()?capabilities.value("capabilities",Json::object()).value("documentFormattingProvider",Json()):Json();document_formatting=formatting.is_boolean()?formatting.get<bool>():formatting.is_object();
         channel->send(Json{{"jsonrpc","2.0"},{"method","initialized"},{"params",Json::object()}},deadline,cancel);initialized=true;
     }
     void open(const std::string& uri,const std::string& language,const std::string& path,const std::string& text,Clock::time_point deadline,std::stop_token cancel){
@@ -121,7 +123,7 @@ struct LanguageServerClient::Impl {
     }
     void stop()noexcept{
         if(process){try{const auto deadline=Clock::now()+std::chrono::seconds(2);(void)exchange("shutdown",nullptr,deadline,{});channel->send(Json{{"jsonrpc","2.0"},{"method","exit"},{"params",nullptr}},deadline,{});}catch(...){}process->shutdown();}
-        channel.reset();process.reset();initialized=false;documents.clear();published_diagnostics.clear();
+        channel.reset();process.reset();initialized=false;document_formatting=false;documents.clear();published_diagnostics.clear();
     }
 };
 
@@ -136,12 +138,13 @@ LanguageServerClient::LanguageServerClient(WorkspaceTools& workspace,LanguageSer
 LanguageServerClient::~LanguageServerClient(){if(impl_){std::lock_guard lock(impl_->mutex);impl_->stop();}}
 std::string LanguageServerClient::request(const LanguageServerRequest& call,std::stop_token cancel)const{
     static const std::vector<std::string> methods{"hover","definition","references","documentSymbol","diagnostics"};
-    if(call.method.empty()||std::find(methods.begin(),methods.end(),call.method)==methods.end())throw std::invalid_argument("Unsupported language-server method");
+    if(call.method.empty()||(call.method!="formatting"&&std::find(methods.begin(),methods.end(),call.method)==methods.end()))throw std::invalid_argument("Unsupported language-server method");
+    if((call.method=="formatting")!=call.formatting_options.has_value()||(call.formatting_options&&(call.formatting_options->tab_size<1||call.formatting_options->tab_size>16)))throw std::invalid_argument("Invalid language-server formatting options");
     const auto extension=lower(std::filesystem::u8path(call.path).extension().string());if(std::none_of(profile_.extensions.begin(),profile_.extensions.end(),[&](const auto& value){return lower(value)==extension;}))throw ToolAccessDenied("No configured language server owns this file type");
     auto file=workspace_.read_file(call.path,cancel);if(call.document_text)file.content=*call.document_text;if(file.content.size()>1024*1024)throw ToolFileError("Language-server document exceeds limits");
     std::lock_guard lock(impl_->mutex);const auto deadline=Clock::now()+profile_.request_timeout;
     const auto root=std::filesystem::u8path(workspace_.root_path());const auto uri=file_uri(root/std::filesystem::u8path(call.path));
-    try{impl_->start(deadline,cancel);impl_->open(uri,profile_.language_id,call.path,file.content,deadline,cancel);}
+    try{impl_->start(deadline,cancel);if(call.method=="formatting"&&!impl_->document_formatting)throw std::runtime_error("Configured language server does not support document formatting");impl_->open(uri,profile_.language_id,call.path,file.content,deadline,cancel);}
     catch(...){impl_->stop();throw;}
     try{
     Json params={{"textDocument",{{"uri",uri}}}};
@@ -149,7 +152,14 @@ std::string LanguageServerClient::request(const LanguageServerRequest& call,std:
         params["position"]={{"line",call.line},{"character",call.character}};
         if(call.method=="references")params["context"]={{"includeDeclaration",true}};
     }
-    const auto method=call.method=="documentSymbol"?"textDocument/documentSymbol":call.method=="diagnostics"?"textDocument/diagnostic":"textDocument/"+call.method;
+    if(call.method=="formatting"){
+        auto options=Json{{"tabSize",call.formatting_options->tab_size},{"insertSpaces",call.formatting_options->insert_spaces}};
+        if(call.formatting_options->trim_trailing_whitespace)options["trimTrailingWhitespace"]=*call.formatting_options->trim_trailing_whitespace;
+        if(call.formatting_options->insert_final_newline)options["insertFinalNewline"]=*call.formatting_options->insert_final_newline;
+        if(call.formatting_options->trim_final_newlines)options["trimFinalNewlines"]=*call.formatting_options->trim_final_newlines;
+        params["options"]=std::move(options);
+    }
+    const auto method=call.method=="documentSymbol"?"textDocument/documentSymbol":call.method=="diagnostics"?"textDocument/diagnostic":call.method=="formatting"?"textDocument/formatting":"textDocument/"+call.method;
     Json result;
     if(call.method=="diagnostics"){
         try{result=impl_->exchange(method,params,deadline,cancel);}catch(const std::runtime_error&){const auto found=impl_->published_diagnostics.find(uri);if(found!=impl_->published_diagnostics.end())result=Json{{"kind","full"},{"items",found->second}};else throw;}

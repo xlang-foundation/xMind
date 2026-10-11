@@ -645,12 +645,19 @@ struct HttpServer::Impl {
         server.Post("/v1/language-server/query",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>1024*1024)throw std::invalid_argument("Invalid language-server query target or size");
             if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Language-server queries require an opened workspace");
-            const auto value=body(request,{"path","method","line","character","document_text","expected_workspace_id","expected_workspace_authority_id"});
-            const auto binding=workspace_admission(value);if(!binding||!value.contains("path")||!value.contains("method")||value.size()<4||value.size()>7)throw std::invalid_argument("Language-server queries require a path, method and workspace authority");
+            const auto value=body(request,{"path","method","line","character","document_text","formatting_options","expected_workspace_id","expected_workspace_authority_id"});
+            const auto binding=workspace_admission(value);if(!binding||!value.contains("path")||!value.contains("method")||value.size()<4||value.size()>8)throw std::invalid_argument("Language-server queries require a path, method and workspace authority");
             const auto coordinate=[&](const char* field){if(!value.contains(field))return std::size_t{0};const auto& item=value[field];if(!item.is_number_integer()||item<0||item>1000000)throw std::invalid_argument("Language-server cursor position exceeds limits");return static_cast<std::size_t>(item.get<std::uint64_t>());};
             const auto actual=executor->execution_workspace();validate_workspace_admission(*binding,actual);
             LanguageServerRequest query;query.path=string_field(value,"path",4096);query.method=string_field(value,"method",32);query.line=coordinate("line");query.character=coordinate("character");
             if(value.contains("document_text")){if(!value["document_text"].is_string()||value["document_text"].get_ref<const std::string&>().size()>900*1024)throw std::invalid_argument("Editor document exceeds language-server limits");query.document_text=value["document_text"].get<std::string>();}
+            if(value.contains("formatting_options")){
+                const auto& options=value["formatting_options"];if(!options.is_object()||options.size()<2||options.size()>5||!options.contains("tab_size")||!options["tab_size"].is_number_integer()||options["tab_size"]<1||options["tab_size"]>16||!options.contains("insert_spaces")||!options["insert_spaces"].is_boolean())throw std::invalid_argument("Invalid editor formatting options");
+                for(auto it=options.begin();it!=options.end();++it)if(it.key()!="tab_size"&&it.key()!="insert_spaces"&&it.key()!="trim_trailing_whitespace"&&it.key()!="insert_final_newline"&&it.key()!="trim_final_newlines")throw std::invalid_argument("Invalid editor formatting options");
+                LanguageServerRequest::FormattingOptions parsed;parsed.tab_size=options["tab_size"].get<std::size_t>();parsed.insert_spaces=options["insert_spaces"].get<bool>();
+                const auto optional_bool=[&](const char* key,std::optional<bool>& output){if(options.contains(key)){if(!options[key].is_boolean())throw std::invalid_argument("Invalid editor formatting options");output=options[key].get<bool>();}};
+                optional_bool("trim_trailing_whitespace",parsed.trim_trailing_whitespace);optional_bool("insert_final_newline",parsed.insert_final_newline);optional_bool("trim_final_newlines",parsed.trim_final_newlines);query.formatting_options=parsed;
+            }
             const auto result=executor->language_server_query(query);validate_workspace_admission(*binding,executor->execution_workspace());reply(response,Json::parse(result));
         }));
         server.Get("/v1/workspace/skills",guarded([this](const Request& request,Response& response){

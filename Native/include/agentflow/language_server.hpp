@@ -20,6 +20,11 @@ struct LanguageServerRequest {
     std::string path,method;
     std::size_t line=0,character=0;
     std::optional<std::string> document_text;
+    struct FormattingOptions {
+        std::size_t tab_size=4;bool insert_spaces=true;
+        std::optional<bool> trim_trailing_whitespace,insert_final_newline,trim_final_newlines;
+    };
+    std::optional<FormattingOptions> formatting_options;
 };
 // A bounded, one-request native LSP client. The server executable, arguments,
 // environment and file-extension binding come only from trusted backend
