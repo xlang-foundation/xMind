@@ -1,5 +1,22 @@
 # Reviewable milestones
 
+## Saved provider key discovery recovers from stale profile state (2026-10-11)
+
+The local browser initially received a provider-profile revision conflict while
+discovering models for the saved DeepSeek profile. Refreshing the same page
+restored its latest profile metadata and the native backend fetched two models
+using the encrypted saved key; the browser received only model IDs and a status
+message. The Settings password field stays blank by design when reusing a
+saved key.
+
+Commit `5a434a0` makes this recovery automatic in the shared browser/VS Code
+profile controller: after a revision conflict it refreshes once and retries
+saved-key discovery only if the same profile, route and active selection still
+match. It never retries an unsaved key or a changed selection. The complete
+extension suite passes **295/295**; native local-view, local-profile and shared
+provider-config contracts pass **3/3**. Installed VS Code packaging and full
+OpenCode parity remain separate work.
+
 ## Native MCP resources and prompts (2026-10-11)
 
 The C++ MCP clients now list resources/prompts and read resources/get prompts
