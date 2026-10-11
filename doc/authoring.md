@@ -173,6 +173,21 @@ def configure(xmind):
             }],
         },
     })
+    xmind.tool({
+        "name": "review.checklist",
+        "description": "Return a review checklist for supplied text.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"text": {"type": "string"}},
+            "required": ["text"],
+            "additionalProperties": False,
+        },
+        "module": "security_team",
+        "function": "checklist",
+    })
+
+def checklist(args):
+    return {"items": ["Check the evidence", "Check error handling"], "scope": args["text"]}
 ```
 
 Run it with the backend stopped:
@@ -184,14 +199,18 @@ xmind admin --db PROFILE_DB --modules XLANG3_MODULES --stdlib PYTHON_STDLIB `
 
 `security_team.py` is imported from `CODE_ROOT`; the function name is explicit.
 Pass the same profile database and xlang3 runtime roots that the backend uses.
-The program receives only `agent(definition)` and `graph(definition)` calls.
+The program receives native `agent(definition)`, `graph(definition)`, and
+`tool(definition)` calls.
 Definitions are converted to JSON and passed through the existing native
 catalog validators and xlang3 SQLite stores. Importing never starts an agent or
 graph. When both kinds are declared, agents are applied before graphs so
 `agent_id` references resolve. The command reports catalog revisions and public
-IDs, not instructions or keys. Declaring at least one item of a kind applies
-that kind as a complete catalog and retires omitted prior definitions; omitting
-all calls of that kind leaves its existing catalog untouched.
+IDs, not instructions or keys. A program-defined tool has the same definition
+as an entry in the trusted Python tools configuration and is later invoked
+through the existing AgentRunner tool loop. Its module and function resolve
+under `CODE_ROOT`. Declaring at least one agent, graph, or tool applies that
+kind as a complete catalog and retires or replaces omitted prior definitions;
+omitting all calls of a kind leaves its existing catalog untouched.
 
 The module runs as trusted xlang3 code with the admin process's operating-system
 privileges. This API does not sandbox Python or mediate arbitrary local effects.

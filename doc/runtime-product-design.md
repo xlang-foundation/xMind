@@ -81,9 +81,10 @@ Revisioned single-agent session selection and workspace Markdown skill
 catalogues are implemented in the shared backend and thin clients. Optional
 per-agent native tool allowlists now narrow the already-authorized native/MCP/A2A
 catalogue and are pinned through named definitions, graph revisions and session
-snapshots. The programming API currently declares catalogs only; a fuller API
-for composing callable agent behavior and custom runtime tools remains
-incomplete. See [authoring formats and current coverage](authoring.md).
+snapshots. The programming API declares catalogs and binds trusted xlang3 tool
+functions into the existing native tool loop. A fuller API for composing
+callable agent behavior and dynamic runtime services remains incomplete. See
+[authoring formats and current coverage](authoring.md).
 
 ## Planning, AgentFlow and scheduling
 

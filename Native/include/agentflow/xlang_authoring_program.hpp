@@ -9,11 +9,12 @@ namespace agentflow {
 struct XlangAuthoringProgramOutput {
     std::string agents_json;
     std::string graphs_json;
+    std::string python_tools_config_json;
 };
 
 // Executes configure(xmind) from a trusted Python module under xlang3. The
-// xmind argument is a native API exposing agent(definition) and
-// graph(definition); it cannot access persistence or effect authorities.
+// xmind argument is a native API exposing agent(definition), graph(definition),
+// and tool(definition); it cannot access persistence or effect authorities.
 XlangAuthoringProgramOutput run_xlang_authoring_program(
     const std::string& modules_root,const std::string& stdlib_root,
     const std::string& code_root,const std::string& module,

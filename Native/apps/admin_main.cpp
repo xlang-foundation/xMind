@@ -4,6 +4,7 @@
 #include "agentflow/agent_instructions.hpp"
 #include "agentflow/agent_definitions.hpp"
 #include "agentflow/graph.hpp"
+#include "agentflow/xlang_python_config.hpp"
 #include "agentflow/xlang_authoring_program.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/owner_process.hpp"
@@ -112,8 +113,13 @@ int run_admin(int argc,char** argv){
             const std::string code_root(reinterpret_cast<const char*>(code_root_path.data()),code_root_path.size());
             const auto output=agentflow::run_xlang_authoring_program(options.at("--modules"),options.at("--stdlib"),
                 code_root,argv[command+2],argv[command+3]);
-            if(output.agents_json.empty()&&output.graphs_json.empty())throw std::invalid_argument("The xlang3 authoring program did not declare agents or graphs");
+            if(output.agents_json.empty()&&output.graphs_json.empty()&&output.python_tools_config_json.empty())throw std::invalid_argument("The xlang3 authoring program did not declare agents, graphs or tools");
             Json result{{"execution_available",false},{"program_module",argv[command+2]}};
+            if(!output.python_tools_config_json.empty()){
+                const auto config=agentflow::import_xlang_python_tool_config(store,output.python_tools_config_json);auto tools=Json::array();
+                for(const auto& tool:config.tools)tools.push_back(tool.name);
+                result["python_tools"]=std::move(tools);
+            }
             if(!output.agents_json.empty()){
                 const auto catalog=agentflow::AgentDefinitionStore(store).apply(output.agents_json);auto agents=Json::array();
                 for(const auto& agent:catalog.entries)agents.push_back({{"id",agent.id},{"revision",agent.revision},{"model_id",agent.model_id.empty()?Json(nullptr):Json(agent.model_id)},{"tools",agent.tools?Json(*agent.tools):Json(nullptr)}});
