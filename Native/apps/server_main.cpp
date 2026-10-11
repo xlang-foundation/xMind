@@ -27,6 +27,7 @@
 #include "agentflow/local_profile.hpp"
 #include "agentflow/mcp_oauth_service.hpp"
 #include "agentflow/xlang_python_config.hpp"
+#include "agentflow/pty_sessions.hpp"
 #define NOMINMAX
 #include <windows.h>
 #include <bcrypt.h>
@@ -34,6 +35,7 @@ namespace {
 std::mutex control_mutex;
 agentflow::HttpServer* active_server=nullptr;
 std::string loaded_runtime_root(){std::wstring image(32768,L'\0');const auto count=GetModuleFileNameW(nullptr,image.data(),static_cast<DWORD>(image.size()));if(!count||count>=image.size())throw std::runtime_error("Cannot qualify native process image");image.resize(count);const auto value=std::filesystem::path(image).parent_path().u8string();return {reinterpret_cast<const char*>(value.data()),value.size()};}
+std::string system_command_shell(){std::array<wchar_t,32768> directory{};const auto count=GetSystemDirectoryW(directory.data(),static_cast<UINT>(directory.size()));if(!count||count>=directory.size())throw std::runtime_error("Cannot locate the native terminal shell");const auto path=(std::filesystem::path(std::wstring(directory.data(),count))/L"cmd.exe").u8string();return {reinterpret_cast<const char*>(path.data()),path.size()};}
 agentflow::BackendOwnerReceipt startup_receipt(const std::string& value){const auto first=value.find(':'),last=value.rfind(':');if(first!=32||last==first||last+33!=value.size())throw std::invalid_argument("Invalid native replacement receipt");std::int64_t revision=0;const auto parsed=std::from_chars(value.data()+first+1,value.data()+last,revision);const auto generation=value.substr(0,first),id=value.substr(last+1);if(parsed.ec!=std::errc{}||parsed.ptr!=value.data()+last||revision<1||revision>=9007199254740991LL||generation.find_first_not_of("0123456789abcdef")!=std::string::npos||id.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid native replacement receipt");return {generation,id,revision};}
 std::string provider_purpose(const std::string& endpoint,const char* domain="provider:chat:") {
     BCRYPT_ALG_HANDLE algorithm=nullptr;std::array<UCHAR,32> hash{};
@@ -275,6 +277,8 @@ int run_server(int argc,char** argv) {
         std::unique_ptr<agentflow::BackendOwnerControl> owner_control;
         if(runtime_generation){const bool managed_profile=options.contains("--profile-state");if(managed_profile)runtime_generation->require_loaded_server_image();else runtime_generation->require_current_server();const auto actual=executor->execution_workspace();if(actual.root!=startup_workspace->root_path()||actual.workspace_id!=startup_workspace->identity())throw std::runtime_error("Qualified execution workspace changed during startup");owner_control=std::make_unique<agentflow::BackendOwnerControl>(persistence,*executor,*runtime_generation,graph_execution,auth,managed_profile);}
         auto mcp_oauth=std::make_unique<agentflow::McpOAuthService>(persistence,mcp_settings);
+        std::unique_ptr<agentflow::PtySessions> terminals;
+        if(executor&&options.contains("--workspace"))terminals=std::make_unique<agentflow::PtySessions>(executor->execution_workspace().root,system_command_shell());
 #endif
         agentflow::HttpServer server(persistence,auth,executor.get()
 #if defined(_WIN32)
@@ -284,7 +288,7 @@ int run_server(int argc,char** argv) {
 #endif
             ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()},provider_setup,graph_execution,provider_profiles
 #if defined(_WIN32)
-            ,owner_control.get(),mcp_oauth.get()
+            ,owner_control.get(),mcp_oauth.get(),terminals.get()
 #endif
         );const auto bound=server.bind(port);
 #if defined(_WIN32)

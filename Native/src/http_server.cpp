@@ -33,6 +33,7 @@
 #if defined(_WIN32)
 #include "agentflow/view_sessions.hpp"
 #include "agentflow/vcs_service.hpp"
+#include "agentflow/pty_sessions.hpp"
 #endif
 
 namespace agentflow {
@@ -274,6 +275,7 @@ template<class Handler> auto guard_errors(Handler handler) {
         catch(const ToolGuidanceChanged&) {reply(response,{{"detail","Selected workspace guidance changed or is unavailable; refresh skills"}},409);}
         catch(const ToolFileError&) {reply(response,{{"detail","Workspace file unavailable for inspection"}},409);}
         catch(const Json::exception&) {reply(response,{{"detail","Invalid JSON request"}},400);}
+        catch(const std::out_of_range&) {reply(response,{{"detail","Resource not found"}},404);}
         catch(const std::invalid_argument& error) {reply(response,{{"detail",error.what()}},400);}
         catch(...) {reply(response,{{"detail","Backend operation failed"}},500);}
     };
@@ -290,6 +292,7 @@ struct HttpServer::Impl {
     RunExecutor* executor;
     BackendOwnerControl* owner_control;
     McpOAuthSetup* mcp_oauth;
+    PtySessions* terminals;
     EditRecoveryReader* recovery;
     std::vector<McpServerMetadata> mcp_servers;
     std::vector<ProcessProfileMetadata> process_profiles;
@@ -372,11 +375,11 @@ struct HttpServer::Impl {
             return false;
         });
     }
-    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth):persistence(store),
+    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth,PtySessions* pty):persistence(store),
 #if defined(_WIN32)
         remote_agents(store),
 #endif
-        executor(execution),owner_control(owner),mcp_oauth(oauth),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
+        executor(execution),owner_control(owner),mcp_oauth(oauth),terminals(pty),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
         validate_local_auth_token(token);
 #if defined(_WIN32)
         if(owner_control&&!owner_control->covers(store,execution,graphs))throw std::invalid_argument("Native owner controller does not cover this transport");
@@ -401,7 +404,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -820,6 +823,17 @@ struct HttpServer::Impl {
             server.Get(R"(/v1/mcp/authorization/attempts/([A-Za-z0-9_-]+))",guarded([this,encode_authorization](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("MCP authorization status does not accept query parameters");reply(response,encode_authorization(mcp_oauth->status(identifier(request.matches[1]))));}));
             server.Post(R"(/v1/mcp/authorization/attempts/([A-Za-z0-9_-]+)/cancel)",guarded([this,encode_authorization](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("MCP authorization cancellation does not accept query parameters");body(request,{});reply(response,encode_authorization(mcp_oauth->cancel(identifier(request.matches[1]))),202);}));
         }
+        const auto encode_terminal=[](const PtySessionMetadata& value){return Json{{"id",value.id},{"session_id",value.session_id},{"title",value.title},{"rows",value.rows},{"columns",value.columns},{"running",value.running},{"exit_code",value.running?Json(nullptr):Json(value.exit_code)},{"output_sequence",value.output_sequence}};};
+        const auto terminal_size=[](const Json& value,const char* key,std::uint16_t fallback){if(!value.contains(key))return fallback;if(!value.at(key).is_number_integer()||value.at(key)<0||value.at(key)>65535)throw std::invalid_argument("Invalid terminal dimensions");return static_cast<std::uint16_t>(value.at(key).get<unsigned>());};
+        if(terminals){
+            server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/terminals)",guarded([this,encode_terminal](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Terminal listing does not accept query parameters");const auto session=identifier(request.matches[1]);(void)persistence.session(session).get();Json items=Json::array();for(const auto& item:terminals->list(session))items.push_back(encode_terminal(item));reply(response,{{"terminals",std::move(items)}});}));
+            server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/terminals)",guarded([this,encode_terminal,terminal_size](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Terminal creation does not accept query parameters");const auto input=body(request,{"title","rows","columns"});const auto session=identifier(request.matches[1]);(void)persistence.session(session).get();const auto title=input.contains("title")?string_field(input,"title",128):std::string("Terminal");reply(response,encode_terminal(terminals->create(session,title,terminal_size(input,"rows",24),terminal_size(input,"columns",80))),201);}));
+            server.Get(R"(/v1/terminals/([0-9a-f]{32}))",guarded([this,encode_terminal](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Terminal metadata does not accept query parameters");reply(response,encode_terminal(terminals->get(request.matches[1])));}));
+            server.Get(R"(/v1/terminals/([0-9a-f]{32})/output)",guarded([this](const Request& request,Response& response){for(const auto& [name,value]:request.params){(void)value;if(name!="after")throw std::invalid_argument("Unknown terminal output query");}const auto after=cursor(request);if(after>9007199254740991LL)throw std::invalid_argument("Terminal cursor exceeds public integer limits");const auto chunk=terminals->read(request.matches[1],static_cast<std::uint64_t>(after),64*1024,std::chrono::milliseconds(0));static constexpr char digits[]="0123456789abcdef";std::string encoded;encoded.reserve(chunk.data.size()*2);for(unsigned char byte:chunk.data){encoded.push_back(digits[byte>>4]);encoded.push_back(digits[byte&15]);}reply(response,{{"encoding","hex"},{"data",std::move(encoded)},{"next_sequence",chunk.next_sequence},{"truncated",chunk.truncated},{"running",chunk.running},{"exit_code",chunk.running?Json(nullptr):Json(chunk.exit_code)}});}));
+            server.Post(R"(/v1/terminals/([0-9a-f]{32})/input)",guarded([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Terminal input does not accept query parameters");const auto input=body(request,{"data"});terminals->write(request.matches[1],string_field(input,"data",64*1024));reply(response,{{"written",true}});}));
+            server.Post(R"(/v1/terminals/([0-9a-f]{32})/resize)",guarded([this,terminal_size,encode_terminal](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Terminal resize does not accept query parameters");const auto input=body(request,{"rows","columns"});if(!input.contains("rows")||!input.contains("columns"))throw std::invalid_argument("Terminal resize requires rows and columns");reply(response,encode_terminal(terminals->resize(request.matches[1],terminal_size(input,"rows",0),terminal_size(input,"columns",0))));}));
+            server.Post(R"(/v1/terminals/([0-9a-f]{32})/close)",guarded([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Terminal close does not accept query parameters");body(request,{});terminals->close(request.matches[1]);reply(response,{{"closed",true}});}));
+        }
         server.Get("/v1/sessions",guarded([this](const Request&,Response& response) {reply(response,encode_all(persistence.sessions().get()));}));
         server.Get("/v1/process/profiles",guarded([this](const Request& request,Response& response) {
             if(!request.params.empty())throw std::invalid_argument("Process metadata does not accept query parameters");
@@ -1101,7 +1115,7 @@ struct HttpServer::Impl {
         }
     }
 };
-HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs,profile_setup,owner,oauth)) {}
+HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth,PtySessions* terminals):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs,profile_setup,owner,oauth,terminals)) {}
 HttpServer::~HttpServer(){stop();}
 int HttpServer::bind(int port) {
     if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");

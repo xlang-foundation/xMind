@@ -37,6 +37,7 @@ const peer=createServer((request,response)=>{
 function cli(...args){const result=spawnSync(cliExe,[String(port),...args],{env,encoding:'utf8',timeout:10000,windowsHide:true});assert.equal(result.status,0,result.stderr);return JSON.parse(result.stdout);}
 function admin(...args){const result=spawnSync(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,...args],{env,encoding:'utf8',timeout:15000,windowsHide:true});assert.equal(result.status,0,result.stderr);return JSON.parse(result.stdout);}
 async function api(path,body){const response=await fetch(`http://127.0.0.1:${port}${path}`,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+token,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(10000)});assert.ok(response.ok,await response.clone().text());return response.json();}
+async function viewApi(path,origin,credential,body){const response=await fetch(`http://127.0.0.1:${port}${path}`,{method:body===undefined?'GET':'POST',headers:{Authorization:'View '+credential,'X-XMind-View-Origin':origin,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(10000)});assert.ok(response.ok,await response.clone().text());return response.json();}
 async function until(read,predicate){const end=Date.now()+10000;while(Date.now()<end){const value=await read();if(predicate(value))return value;if(peerError)throw peerError;await delay(20);}throw new Error('Actual process contract observation deadline');}
 async function start(model){
   const args=['--db',database,'--modules',modules,'--stdlib',stdlib,'--port','0'];
@@ -67,6 +68,26 @@ try {
   const instructionMetadata={revision:1,byte_count:Buffer.byteLength(instructionText)};assert.deepEqual(admin('import-instructions',instructionFile),instructionMetadata);assert.deepEqual(admin('import-instructions',instructionFile),instructionMetadata,'Unchanged administrative import must preserve the backend revision');
   assert.deepEqual(admin('import-processes',configFile),{profiles:[{id:'fixture',revision:1}]});
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));await start(true);
+  await api('/v1/sessions',{id:'pty-contract-session',title:'Synthetic terminal contract'});
+  const terminal=await api('/v1/sessions/pty-contract-session/terminals',{title:'Contract terminal',rows:30,columns:100});
+  assert.match(terminal.id,/^[0-9a-f]{32}$/);assert.equal(terminal.running,true);assert.equal(terminal.rows,30);assert.equal(terminal.columns,100);
+  assert.deepEqual((await api('/v1/sessions/pty-contract-session/terminals')).terminals.map(value=>value.id),[terminal.id]);
+  let terminalCursor=0,terminalOutput='';
+  await until(async()=>{const chunk=await api(`/v1/terminals/${terminal.id}/output?after=${terminalCursor}`);assert.equal(chunk.encoding,'hex');terminalCursor=chunk.next_sequence;terminalOutput+=Buffer.from(chunk.data,'hex').toString('utf8');return terminalOutput;},value=>value.includes('>'));
+  await api(`/v1/terminals/${terminal.id}/input`,{data:'echo XMIND_HTTP_TERMINAL_OK\r\n'});
+  await until(async()=>{const chunk=await api(`/v1/terminals/${terminal.id}/output?after=${terminalCursor}`);terminalCursor=chunk.next_sequence;terminalOutput+=Buffer.from(chunk.data,'hex').toString('utf8');return terminalOutput;},value=>value.includes('XMIND_HTTP_TERMINAL_OK'));
+  const resized=await api(`/v1/terminals/${terminal.id}/resize`,{rows:35,columns:110});assert.equal(resized.rows,35);assert.equal(resized.columns,110);
+  await api(`/v1/terminals/${terminal.id}/input`,{data:'exit\r\n'});const terminalExit=await until(()=>api(`/v1/terminals/${terminal.id}`),value=>!value.running);assert.equal(terminalExit.running,false);
+  await api(`/v1/terminals/${terminal.id}/close`,{});assert.deepEqual((await api('/v1/sessions/pty-contract-session/terminals')).terminals,[]);
+  const cliTerminal=cli('terminal-create','pty-contract-session','CLI terminal');assert.match(cliTerminal.id,/^[0-9a-f]{32}$/);
+  let cliCursor=0,cliOutput='';await until(()=>{const chunk=cli('terminal-output',cliTerminal.id,String(cliCursor));cliCursor=chunk.next_sequence;cliOutput+=Buffer.from(chunk.data,'hex').toString('utf8');return cliOutput;},value=>value.includes('>'));
+  cli('terminal-input',cliTerminal.id,'echo XMIND_CLI_TERMINAL_OK\r\n');
+  await until(()=>{const chunk=cli('terminal-output',cliTerminal.id,String(cliCursor));cliCursor=chunk.next_sequence;cliOutput+=Buffer.from(chunk.data,'hex').toString('utf8');return cliOutput;},value=>value.includes('XMIND_CLI_TERMINAL_OK'));
+  const cliResized=cli('terminal-resize',cliTerminal.id,'40','120');assert.equal(cliResized.rows,40);assert.equal(cliResized.columns,120);cli('terminal-close',cliTerminal.id);assert.deepEqual(cli('terminals','pty-contract-session').terminals,[]);
+  const viewOrigin='http://127.0.0.1:49123',viewCredential=(await api('/v1/view-sessions',{origin:viewOrigin})).credential;
+  const viewTerminal=await viewApi('/v1/sessions/pty-contract-session/terminals',viewOrigin,viewCredential,{title:'Browser-view terminal'});assert.equal(viewTerminal.running,true);
+  assert.deepEqual((await viewApi('/v1/sessions/pty-contract-session/terminals',viewOrigin,viewCredential)).terminals.map(value=>value.id),[viewTerminal.id]);
+  await viewApi(`/v1/terminals/${viewTerminal.id}/close`,viewOrigin,viewCredential,{});await viewApi('/v1/view-sessions/revoke',viewOrigin,viewCredential,{});
   assert.deepEqual(cli('process-profiles'),{profiles:[{id:'fixture',revision:1,max_timeout_ms:10000}],runtime_state:'per_operation'});
   assert.deepEqual(cli('instructions'),{...instructionMetadata,scope:'server',runtime_state:'startup_snapshot'});assert.equal(JSON.stringify(await api('/v1/agent/instructions')).includes(instructionText),false,'Public discovery cannot expose instruction text');
   const metadata=JSON.stringify(await api('/v1/process/profiles'));assert.ok(!metadata.includes(executable)&&!metadata.includes('executable_id'),'Public registry must not expose command/binding metadata');
