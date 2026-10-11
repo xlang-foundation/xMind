@@ -179,6 +179,7 @@ class BackendClient {
   operation(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}`); }
   inspectEdit(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/inspection`); }
   inspectA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/inspect`, {}); }
+  cancelA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/cancel`, {}); }
   decide(id, decision) {
     if (decision !== 'allow' && decision !== 'deny') throw new Error('Decision must be allow or deny.');
     return this.request(`/v1/operations/${encodeURIComponent(id)}/decision`, { decision });

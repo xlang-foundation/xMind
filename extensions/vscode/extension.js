@@ -609,8 +609,20 @@ async function activate(context) {
           if(receipt?.acknowledged_by_peer!==true||typeof receipt.agent_id!=='string'||typeof receipt.task_id!=='string'||!receipt.task_id)throw new Error('This A2A operation has no inspectable remote task ID.');
           const version=generation,inspection=await client.inspectA2aTask(proposal.id);
           if(panel!==view || version!==generation) return;
-          if(!inspection||inspection.operation_id!==proposal.id||inspection.agent_id!==receipt.agent_id||inspection.task_id!==receipt.task_id||!inspection.task||typeof inspection.task!=='object'||Array.isArray(inspection.task)||JSON.stringify(inspection.task).length>524288||!Number.isSafeInteger(inspection.inspected_unix_ms)||inspection.inspected_unix_ms<=0||inspection.inspected_unix_ms>8640000000000000)throw new Error('The remote task snapshot does not match the saved A2A operation.');
+          if(!inspection||inspection.operation_id!==proposal.id||inspection.agent_id!==receipt.agent_id||inspection.task_id!==receipt.task_id||!inspection.task||typeof inspection.task!=='object'||Array.isArray(inspection.task)||JSON.stringify(inspection.task).length>524288||!['not_attempted','outcome_unknown','acknowledged'].includes(inspection.cancel_state)||!Number.isSafeInteger(inspection.inspected_unix_ms)||inspection.inspected_unix_ms<=0||inspection.inspected_unix_ms>8640000000000000)throw new Error('The remote task snapshot does not match the saved A2A operation.');
           post({type:'a2a-task-inspection',id:proposal.id,inspection});
+        } else if (message.type === 'cancel-a2a-task' && typeof message.id === 'string') {
+          if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before cancelling a registered A2A task.');
+          const proposal=reviewed.get(message.id);
+          if(!proposal||!observedOperation(proposal.run_id)||proposal.state!=='succeeded'||proposal.tool!=='a2a_delegate')throw new Error('Select an acknowledged A2A task in the selected run before cancelling it.');
+          let receipt;try{receipt=JSON.parse(proposal.result_json);}catch{throw new Error('The saved A2A task receipt is invalid.');}
+          if(receipt?.acknowledged_by_peer!==true||typeof receipt.agent_id!=='string'||typeof receipt.task_id!=='string'||!receipt.task_id)throw new Error('This A2A operation has no cancellable remote task ID.');
+          const choice=await vscode.window.showWarningMessage('Send a cancellation request to remote agent '+receipt.agent_id+' for task '+receipt.task_id+'? If its outcome is uncertain, xMind will not replay it.',{modal:true},'Cancel remote task');
+          if(choice!=='Cancel remote task'||panel!==view)return;
+          const version=generation,cancellation=await client.cancelA2aTask(proposal.id);
+          if(panel!==view||version!==generation)return;
+          if(!cancellation||cancellation.operation_id!==proposal.id||cancellation.agent_id!==receipt.agent_id||cancellation.task_id!==receipt.task_id||cancellation.cancel_state!=='acknowledged'||!cancellation.task||typeof cancellation.task!=='object'||Array.isArray(cancellation.task)||cancellation.task.id!==receipt.task_id||!Number.isSafeInteger(cancellation.requested_unix_ms)||cancellation.requested_unix_ms<=0||cancellation.requested_unix_ms>8640000000000000)throw new Error('The remote cancellation response does not match the saved A2A operation.');
+          post({type:'a2a-task-cancellation',id:proposal.id,cancellation});
         } else if (['decide','review'].includes(message.type) && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before deciding an operation.');
           if (message.type === 'decide' && message.decision !== 'allow' && message.decision !== 'deny') throw new Error('Decision must be allow or deny.');

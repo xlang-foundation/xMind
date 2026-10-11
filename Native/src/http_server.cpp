@@ -393,7 +393,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|models|agents|graphs|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/inspect))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|models|agents|graphs|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(inspection|decision|a2a/(inspect|cancel)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -915,7 +915,39 @@ struct HttpServer::Impl {
             if(record.dump().size()>512*1024)throw TransportError("Persisted A2A task snapshot exceeds the local inspection limit");
             bool saved=false;
             for(int attempt=0;attempt<8&&!saved;++attempt){std::optional<std::string> previous;try{previous=persistence.information("native-a2a-task-observations",operation.id).get();}catch(const NotFound&){}try{persistence.compare_information("native-a2a-task-observations",operation.id,record.dump(),std::move(previous)).get();saved=true;}catch(const Conflict&){if(attempt==7)throw;}}
-            reply(response,{{"operation_id",operation.id},{"agent_id",agent_id},{"task_id",task_id},{"task",std::move(remote)},{"inspected_unix_ms",record["inspected_unix_ms"]}});
+            std::string cancel_state="not_attempted";std::optional<std::string> control_text;try{control_text=persistence.information("native-a2a-task-controls",operation.id).get();}catch(const NotFound&){}if(control_text){Json control;try{control=Json::parse(*control_text);}catch(const Json::exception&){throw DatabaseError("Stored A2A cancellation receipt is invalid");}if(!control.is_object()||control.value("version",0)!=1||control.value("operation_id",std::string{})!=operation.id||control.value("agent_id",std::string{})!=agent_id||control.value("agent_revision",std::int64_t{})!=expected_revision||control.value("task_id",std::string{})!=task_id||!control.contains("state")||!control["state"].is_string()||(control["state"]!="outcome_unknown"&&control["state"]!="acknowledged"))throw DatabaseError("Stored A2A cancellation receipt does not match its saved task");cancel_state=control["state"].get<std::string>();}
+            reply(response,{{"operation_id",operation.id},{"agent_id",agent_id},{"task_id",task_id},{"task",std::move(remote)},{"inspected_unix_ms",record["inspected_unix_ms"]},{"cancel_state",cancel_state}});
+        }));
+        server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/a2a/cancel)",guarded([this](const Request& request,Response& response) {
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("A2A task cancellation request exceeds limits");
+            (void)body(request,{});
+            const auto operation=persistence.operation(identifier(request.matches[1])).get();
+            if(operation.spec.tool!="a2a_delegate")throw NotFound("A2A delegation operation not found");
+            if(operation.state!=OperationState::succeeded)throw Conflict("Only an acknowledged A2A task can be cancelled");
+            Json binding,result;
+            try{binding=Json::parse(operation.spec.arguments_json);result=Json::parse(operation.result_json);}catch(const Json::exception&){throw DatabaseError("Stored A2A task receipt is invalid");}
+            if(!binding.is_object()||!binding.contains("agent_id")||!binding["agent_id"].is_string()||!binding.contains("agent_revision")||!binding["agent_revision"].is_number_integer()||!binding.contains("card_url")||!binding["card_url"].is_string()||!binding.contains("protocol_version")||!binding["protocol_version"].is_string()||!binding.contains("endpoint")||!binding["endpoint"].is_string()||
+               !result.is_object()||!result.value("acknowledged_by_peer",false)||!result.contains("task_id")||!result["task_id"].is_string())throw Conflict("A2A operation has no acknowledged task to cancel");
+            const auto agent_id=string_field(binding,"agent_id",64),card_url=string_field(binding,"card_url",8192),version=string_field(binding,"protocol_version",16),endpoint=string_field(binding,"endpoint",8192),task_id=string_field(result,"task_id",256);
+            const auto expected_revision=binding["agent_revision"].get<std::int64_t>();
+            if(expected_revision<1||expected_revision>9007199254740991LL||task_id.find_first_of("\r\n")!=std::string::npos)throw Conflict("Stored A2A task binding is invalid");
+            auto resolved=remote_agents.resolve(agent_id);
+            if(resolved.descriptor.revision!=expected_revision||resolved.descriptor.card_url!=card_url)throw Conflict("A2A registration changed; refusing to cancel through a different peer identity");
+            A2aJsonRpcClient peer(card_url,std::move(resolved.bearer));
+            const auto discovered=peer.discover(std::chrono::seconds(5));
+            if(discovered.protocol_version!=version||discovered.endpoint!=endpoint)throw Conflict("A2A peer interface changed since task admission");
+            const auto category="native-a2a-task-controls";
+            const auto requested=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            Json intent={{"version",1},{"operation_id",operation.id},{"agent_id",agent_id},{"agent_revision",expected_revision},{"task_id",task_id},{"state","outcome_unknown"},{"requested_unix_ms",requested}};
+            const auto intent_json=intent.dump();
+            try{persistence.compare_information(category,operation.id,intent_json,std::nullopt).get();}
+            catch(const Conflict&){throw Conflict("A2A cancellation was already attempted; inspect the remote task instead of replaying cancellation");}
+            const auto remote=Json::parse(peer.cancel_task(Json{{"id",task_id}}.dump(),std::chrono::seconds(10)));
+            if(!remote.is_object()||remote.size()>128||!remote.contains("id")||!remote["id"].is_string()||remote["id"]!=task_id)throw TransportError("A2A peer returned an invalid cancellation task");
+            if(remote.dump().size()>384*1024)throw TransportError("A2A cancellation task exceeds the local observation limit");
+            Json acknowledged=intent;acknowledged["state"]="acknowledged";acknowledged["task_json"]=remote;acknowledged["acknowledged_unix_ms"]=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            persistence.compare_information(category,operation.id,acknowledged.dump(),intent_json).get();
+            reply(response,{{"operation_id",operation.id},{"agent_id",agent_id},{"task_id",task_id},{"task",remote},{"cancel_state","acknowledged"},{"requested_unix_ms",requested}});
         }));
 #endif
         if(recovery) {

@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+## Outbound A2A task cancellation (2026-10-10)
+
+The native server now has an explicit, one-shot `CancelTask` route for a saved,
+acknowledged outbound task. The intent is durably recorded before dispatch and
+is bound to the admitted peer revision and task ID. A second request is rejected;
+timeouts and uncertain responses require task inspection. CLI, browser and VS
+Code expose explicit cancellation, with a browser or editor confirmation, and
+inspection reports the durable cancellation outcome after reload. The browser
+and extension contracts pass locally (**71/71** and **267/267**). The native
+Windows contract has not yet been built or run; CMake/MSBuild are unavailable in
+this development shell, so the pushed Windows workflow must verify it. A2A SDK
+interoperability, streaming/resumption, input-required follow-up, artifacts and
+full task recovery remain open.
+
 Managed profile runtime upgrade is now wired into the native profile launcher.
 The console supports `--upgrade-backend`; the native browser/VS Code adapter
 requests it automatically when its verified package differs from the saved

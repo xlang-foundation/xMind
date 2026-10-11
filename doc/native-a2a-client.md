@@ -66,9 +66,25 @@ an explicit “Refresh remote task” control for acknowledged tasks. Contracts
 check owner authentication, same-origin browser forwarding, exact saved task
 ID, durable inspection, CLI routing, client identity checks, and that uncertain
 dispatches do not issue a second remote effect. This is explicit polling;
-streamed observation/resumption, input-required follow-up, cancellation,
-artifacts and cross-client rendered acceptance remain open. These are required
+streamed observation/resumption, input-required follow-up, artifacts and
+cross-client rendered acceptance remain open. These are required
 before claiming full outbound A2A parity.
+
+An explicit outbound cancellation route is now also wired to acknowledged
+operation IDs. The owner or enrolled same-origin browser view must send a
+separate cancellation command; local run cancellation and disconnect never
+cancel a remote task. Before sending the mutating cancellation request, the
+backend durably creates a one-shot control record bound to the saved operation,
+peer revision and task ID. The record is written with create-only compare-and-swap so concurrent or
+later requests cannot dispatch another `CancelTask`. The returned task state
+is the peer's actual acknowledgement. Any lost reply, timeout, malformed
+response, or persistence failure after the one-shot record leaves the outcome
+unknown and requires inspection; it is never replayed. The webpage asks for
+browser confirmation and VS Code asks through its modal confirmation before
+sending. This path currently exercises v1 JSON-RPC `CancelTask`; independent
+SDK cancellation, post-restart rendering of the durable control outcome, stream
+resumption, input-required follow-up, artifacts and complete peer acceptance
+remain open.
 
 This is an implementation requirement, not a claim of A2A completion. See the
 [local server boundary](A2A.md), [v1 wire](native-a2a-v1.md),

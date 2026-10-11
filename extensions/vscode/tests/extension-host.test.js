@@ -12,7 +12,7 @@ const {planFixture,inputMessage}=require('./plan-fixture');
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
   const commands=new Map(),secrets=new Map(),requests=[],views=[],intervals=new Map(),streams=[],scheduledTasks=[];
-  const state=new Map(),errors=[],comparisons=[],bootstrapTasks=[],ready=[];let documentProvider;
+  const state=new Map(),errors=[],comparisons=[],bootstrapTasks=[],ready=[],warnings=[];let documentProvider;
   let pendingHistory;
   let pendingOperation;
   let operations=options.operations||[];
@@ -83,6 +83,7 @@ function harness(options={}) {
     else if(target.pathname===`/v1/operations/${operations[0]?.id||'edit'}`) data=pendingOperation?await pendingOperation:operations[0];
     else if(target.pathname==='/v1/operations/edit/inspection') data=await options.inspection;
     else if(target.pathname===`/v1/operations/${operations[0]?.id}/a2a/inspect`){assert.equal(requestOptions.method,'POST');assert.deepEqual(JSON.parse(requestOptions.body),{});data=options.a2aInspection;}
+    else if(target.pathname===`/v1/operations/${operations[0]?.id}/a2a/cancel`){assert.equal(requestOptions.method,'POST');assert.deepEqual(JSON.parse(requestOptions.body),{});data=options.a2aCancellation;}
     else if(target.pathname==='/v1/operations/edit/decision') {
       const body=JSON.parse(requestOptions.body);decisions.push(body);
       operations=[{...operations[0],state:body.decision==='allow'?'ready':'denied',decision_actor:'fixture-controller'}];data=operations[0];
@@ -104,7 +105,7 @@ function harness(options={}) {
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
       executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(['workbench.view.extension.xmind','workbench.view.explorer'].includes(name))return;assert.equal(name,'xmind.workspace.focus');if(options.clearEditorOnSidebar)vscode.window.activeTextEditor=undefined;sidebarProvider.resolveWebviewView(makeView());}},
-    window:{activeTextEditor:options.editor,showQuickPick:async(items,settings)=>{pickers.push({items,settings});return items.find(item=>item.label===options.modelInput);},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}assert.equal(prompt.password,true);return token;},showErrorMessage:message=>{errors.push(message);return options.errorChoice;},
+    window:{activeTextEditor:options.editor,showQuickPick:async(items,settings)=>{pickers.push({items,settings});return items.find(item=>item.label===options.modelInput);},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}assert.equal(prompt.password,true);return token;},showErrorMessage:message=>{errors.push(message);return options.errorChoice;},showWarningMessage:async(message,...choices)=>{warnings.push({message,choices});return typeof options.cancelChoice==='function'?await options.cancelChoice():options.cancelChoice;},
       registerWebviewViewProvider:(id,provider)=>{assert.equal(id,'xmind.workspace');sidebarProvider=provider;return {dispose(){}};}}
   };
   function makeView(){
@@ -136,7 +137,7 @@ function harness(options={}) {
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     backendOwners,changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
@@ -321,9 +322,14 @@ test('native terminal state refreshes transcript and stops polling with durable 
 const pendingEdit={id:'edit',run_id:'finished',workspace_id:'verified-fixture-root',tool:'replace_file',state:'awaiting_approval',expires_unix_ms:Date.now()+600000,decision_actor:'',result_json:'{}',arguments_json:JSON.stringify({before_content:'actual before fixture',after_content:'<script>untrusted file text</script>',before_sha256:'fixture-hash',file_id:'fixture-file'})};
 test('VS Code refreshes only an acknowledged outbound A2A task from its saved operation',async()=>{
   const operation={id:'a2a-operation',run_id:'finished',workspace_id:'verified-fixture-root',tool:'a2a_delegate',state:'succeeded',expires_unix_ms:0,decision_actor:'local-owner',arguments_json:'{}',result_json:JSON.stringify({acknowledged_by_peer:true,agent_id:'research.peer',task_id:'remote-task'})};
-  const inspection={operation_id:operation.id,agent_id:'research.peer',task_id:'remote-task',task:{id:'remote-task',status:{state:'TASK_STATE_COMPLETED'}},inspected_unix_ms:Date.now()};
+  const inspection={operation_id:operation.id,agent_id:'research.peer',task_id:'remote-task',task:{id:'remote-task',status:{state:'TASK_STATE_COMPLETED'}},inspected_unix_ms:Date.now(),cancel_state:'not_attempted'};
   const h=harness({running:true,operations:[operation],a2aInspection:inspection});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.some(item=>item.id===operation.id)));
   view.receive({type:'inspect-a2a-task',id:operation.id});await until(()=>view.posted.some(message=>message.type==='a2a-task-inspection'&&message.id===operation.id));assert.ok(h.requests.includes('/v1/operations/a2a-operation/a2a/inspect'));view.close();
+});
+test('VS Code requires modal owner confirmation before issuing one saved-task A2A cancellation',async()=>{
+  const operation={id:'a2a-operation',run_id:'finished',workspace_id:'verified-fixture-root',tool:'a2a_delegate',state:'succeeded',expires_unix_ms:0,decision_actor:'local-owner',arguments_json:'{}',result_json:JSON.stringify({acknowledged_by_peer:true,agent_id:'research.peer',task_id:'remote-task'})},cancellation={operation_id:operation.id,agent_id:'research.peer',task_id:'remote-task',task:{id:'remote-task',status:{state:'TASK_STATE_CANCELED'}},cancel_state:'acknowledged',requested_unix_ms:Date.now()};let choice;
+  const h=harness({running:true,operations:[operation],a2aCancellation:cancellation,cancelChoice:()=>choice});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='operations'&&message.operations.some(item=>item.id===operation.id)));
+  view.receive({type:'cancel-a2a-task',id:operation.id});await until(()=>h.warnings.length===1);assert.ok(!h.requests.some(route=>route.endsWith('/a2a/cancel')),'an unconfirmed task must not be cancelled');assert.equal(h.warnings[0].choices[0].modal,true);choice='Cancel remote task';view.receive({type:'cancel-a2a-task',id:operation.id});await until(()=>view.posted.some(message=>message.type==='a2a-task-cancellation'&&message.id===operation.id));assert.equal(h.requests.filter(route=>route.endsWith('/a2a/cancel')).length,1);view.close();
 });
 const providerFixture={revision:0,provider:'openai',model:'',endpoint:'https://api.openai.com/v1/chat/completions',configured:false};
 test('saved Responses enrollment restores discovery and reports the native wire',async()=>{
