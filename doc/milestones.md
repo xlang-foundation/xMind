@@ -8,6 +8,19 @@ covers native AgentFlow, MCP/A2A, persistence, profiles, process tools and local
 view integration. It does not prove packaged or rendered IDE acceptance.
 [Exact CTest output](evidence/native-full-release-ctest-20261011.log).
 
+## Current browser and VS Code source gates — 2026-10-11
+
+At the current checkout, the VS Code extension suite passes **300/300** and the
+browser client suite passes **86/86**. Exact output is preserved in
+[VS Code evidence](evidence/vscode-current-source-20261011.log) and
+[browser evidence](evidence/browser-current-source-20261011.log). The installed
+VS Code extension is `agentflow-local.agentflow@0.1.9`; these contract suites
+do not establish that the sidebar rendered or connected in the active editor.
+Windows desktop inspection was attempted but denied access, so rendered VS Code
+acceptance remains open. The connected browser separately displays the four
+saved provider profiles and their available model selection; secret key values
+remain backend-owned.
+
 ## Saved-key native CLI process run — 2026-10-11
 
 The current Release `xmind_server` and `xmind_cli` ran a real DeepSeek

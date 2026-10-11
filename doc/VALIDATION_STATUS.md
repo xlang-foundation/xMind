@@ -11,6 +11,19 @@ in [the full Release run log](evidence/native-full-release-ctest-20261011.log).
 This is local Release validation; the captured contracts explicitly do not
 claim installed IDE or rendered IDE acceptance.
 
+## Current browser and VS Code source suites — 2026-10-11
+
+At the same checkout, `npm test` in `extensions/vscode` passes **300/300** and
+`node --test views/browser/tests/*.test.cjs` from the repository root passes
+**86/86**. Exact TAP output is preserved in
+[VS Code evidence](evidence/vscode-current-source-20261011.log) and
+[browser evidence](evidence/browser-current-source-20261011.log). The installed
+VS Code package is `agentflow-local.agentflow@0.1.9`, but the Windows desktop
+inspection API denied access twice during the rendered-sidebar check. No
+rendered VS Code acceptance is claimed. The live browser page shows the saved
+Claude, Gemini, DeepSeek and OpenAI profiles; provider secrets remain in the
+local backend and are not rendered.
+
 ## Live saved-key native CLI process run — 2026-10-11
 
 The current `build/native/contract-bin/Release` server and CLI completed one
