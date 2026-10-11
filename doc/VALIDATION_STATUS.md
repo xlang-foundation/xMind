@@ -2,14 +2,17 @@
 
 ## Current Release native gate — 2026-10-11
 
-The complete Release `ALL_BUILD` succeeds. The full CTest suite now passes
-**134/134 in one run** after the delegation schema fixture and scripted CLI
-`/exit` fixes. The run includes the Rust Analyzer fixture/semantic checks,
-native provider profiles, MCP/A2A, graph execution, processes, persistence,
-browser/local-view and credential contracts. Exact CTest output is preserved
-in [the full Release run log](evidence/native-full-release-ctest-20261011.log).
-This is local Release validation; the captured contracts explicitly do not
-claim installed IDE or rendered IDE acceptance.
+The complete Release `ALL_BUILD` succeeds. The full CTest suite previously
+passed **134/134 in one run** after the delegation schema fixture and scripted
+CLI `/exit` fixes. A subsequent run for the LSP retry change passed 133/134;
+the only failure was the local-profile contract's 90-second subprocess limit
+during runtime upgrade. Raising the command ceiling to 180 seconds and the CTest
+ceiling to 300 seconds produced a focused CTest pass (**1/1, 161.79 seconds**).
+The entire suite has not been rerun after that harness adjustment. See the
+[focused retry and profile-contract record](evidence/native-lsp-retry-focused-20261011.md),
+[earlier complete Release run](evidence/native-full-release-ctest-20261011.log),
+and [intervening 133/134 run](evidence/native-lsp-retry-ctest-20261011.log).
+Local Release validation does not claim installed IDE acceptance.
 
 ## Current browser and VS Code source suites — 2026-10-11
 

@@ -73,7 +73,7 @@ struct LanguageServerClient::Impl {
                 if(message.value("id",Json())==id){
                     if(message.contains("error")){
                         const auto& error=message["error"];
-                        if(error.is_object()&&error.value("code",0)==-32801&&attempt<3)break;
+                        if(error.is_object()&&attempt<3&&(error.value("code",0)==-32800||error.value("code",0)==-32801||error.value("code",0)==-32802)){std::this_thread::sleep_for(std::chrono::milliseconds(50));break;}
                         std::string detail;
                         if(error.is_object()&&error.contains("message")&&error["message"].is_string())for(const unsigned char ch:error["message"].get<std::string>()){
                             if(detail.size()>=512)break;if(ch=='\r'||ch=='\n'||ch=='\t')detail.push_back(' ');else if(ch>=0x20&&ch!=0x7f)detail.push_back(static_cast<char>(ch));

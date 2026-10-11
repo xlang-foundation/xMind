@@ -1,12 +1,20 @@
 # Reviewable milestones
 
-## Complete Release native gate — 2026-10-11
+## Latest native LSP and profile validation — 2026-10-11
 
-The full Release build succeeds, and all **134/134** CTest contracts now pass
-in one run after the final delegation-migration and CLI-exit fixes. The run
-covers native AgentFlow, MCP/A2A, persistence, profiles, process tools and local
-view integration. It does not prove packaged or rendered IDE acceptance.
-[Exact CTest output](evidence/native-full-release-ctest-20261011.log).
+The native language-server client now retries transient request-cancelled,
+content-modified and server-cancelled replies with a bounded delay; the focused
+Rust Analyzer contract passes three times consecutively. The local-profile
+upgrade contract also passes after raising its subprocess ceiling from 90 to
+180 seconds (**1/1 in 161.79 seconds**). The last full CTest run before this
+test-harness adjustment passed 133/134; the entire suite has not been rerun.
+[Focused evidence and limitations](evidence/native-lsp-retry-focused-20261011.md).
+
+The preceding complete Release gate passed **134/134** contracts in one run
+after the final delegation-migration and CLI-exit fixes. It covers native
+AgentFlow, MCP/A2A, persistence, profiles, process tools and local view
+integration; it does not prove packaged or rendered IDE acceptance.
+[Exact earlier CTest output](evidence/native-full-release-ctest-20261011.log).
 
 ## Current browser and VS Code source gates — 2026-10-11
 

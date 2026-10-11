@@ -51,8 +51,9 @@ extension contracts cover request mapping, hover rendering, workspace bounds
 and stale/cancelled replies. Semantic definition/reference/hover behavior has
 passed against a real Rust Analyzer call-site fixture. Native authenticated
 HTTP and the authorized browser-view path also return its definition locations.
-The client retries a bounded number of standard `ContentModified` responses
-while project analysis changes. Formatting uses VS Code's current unsaved
+The client retries up to four times with a short bounded delay for the LSP
+`RequestCancelled`, `ContentModified`, and `ServerCancelled` responses while
+project analysis changes. Formatting uses VS Code's current unsaved
 buffer and indentation options, checks returned edits against the document,
 and applies them through the editor formatter API. A rendered VS Code Extension
 Development Host formatted and saved a Rust fixture through the configured
