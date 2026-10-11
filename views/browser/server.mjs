@@ -47,9 +47,9 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
     if(url.pathname.endsWith('/disconnect')){const current=sessionFor(request);response.setHeader('Set-Cookie',`${cookieName}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0`);if(current){const revoked=await nativeSession('/revoke',viewHeaders(current));if(revoked.status!==200&&revoked.status!==401){reply(502,{detail:'View session revocation could not be confirmed'});return;}}reply(200,{connected:false});return;}
     const authorization=request.headers.authorization||(localAccessToken&&!sessionFor(request)?'Bearer '+localAccessToken:undefined);
     if(authorization){
-     if(!/^Bearer [\x21-\x7e]{32,256}$/.test(authorization)){reply(401,{detail:'Invalid server access token'});return;}
+     if(!/^Bearer [\x21-\x7e]{32,256}$/.test(authorization)){reply(401,{detail:'Local xMind could not authenticate this browser view'});return;}
      const issued=await nativeSession('',{Authorization:authorization},{origin:viewOrigin});
-     if(issued.status!==200){reply(issued.status===401?401:issued.status===409?429:502,{detail:issued.status===409?'Too many active browser sessions':'Server access token was not accepted or session enrollment is unavailable'});return;}
+     if(issued.status!==200){reply(issued.status===401?401:issued.status===409?429:502,{detail:issued.status===409?'Too many active browser sessions':'Local xMind could not attach this browser view'});return;}
      const {credential,expires_unix_ms:expires,max_age_seconds:maxAge}=issued.data;
      // Native UTC owns expiry. Use its bounded duration for the browser cookie
      // rather than requiring identical native/Node clock precision.
@@ -63,7 +63,7 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
     const selecting=url.pathname.endsWith('/select'),adding=url.pathname.endsWith('/add'),picking=url.pathname.endsWith('/pick'),mutating=selecting||adding||picking;
     const originMatches=request.headers.origin===viewOrigin,originAbsent=request.headers.origin===undefined;
     if(url.search||(mutating?!originMatches:!originAbsent&&!originMatches)||request.method!==(mutating?'POST':'GET')||(mutating&&request.headers['content-type']!=='application/json')){reply(403,{detail:'Same-origin workspace access required'});return;}
-    const credential=sessionFor(request);if(!credential){reply(401,{detail:'Connect to a native xMind Server first'});return;}
+    const credential=sessionFor(request);if(!credential){reply(401,{detail:'Connect to local xMind on this computer first'});return;}
     let body={};if(mutating){let raw='';for await(const chunk of request){raw+=chunk.toString('utf8');if(Buffer.byteLength(raw)>4096){reply(413,{detail:'Workspace request exceeds limits'});return;}}try{body=JSON.parse(raw);}catch{reply(400,{detail:'Invalid workspace request'});return;}const valid=selecting?body&&!Array.isArray(body)&&Object.keys(body).length===1&&typeof body.workspace_id==='string'&&/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(body.workspace_id):picking?body&&!Array.isArray(body)&&Object.keys(body).length===0:body&&!Array.isArray(body)&&Object.keys(body).length===1&&typeof body.root==='string'&&body.root.length>0&&body.root.length<=32760;if(!valid){reply(400,{detail:selecting?'Select a workspace from the native catalogue':picking?'The local folder picker requires an empty request':'Enter one absolute workspace folder path'});return;}}
     const nativePath='/v1/workspaces'+(selecting?'/select':adding?'/add':picking?'/pick':''),selected=await nativeJson(nativePath,mutating?'POST': 'GET',viewHeaders(credential),mutating?body:undefined,mutating?120000:15000);
     if(!mutating&&(selected.status===401||selected.status===404)){
