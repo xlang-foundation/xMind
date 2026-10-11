@@ -698,6 +698,20 @@ async function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.selectWorkspaceRoot',async()=>{
     try{await reconnectWorkspace(true);}catch(error){vscode.window.showErrorMessage(error.message);}
   }));
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.initializeGit',async()=>{
+    try{
+      if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before initializing Git.');
+      await open();const target=client,view=panel,owner=workspaceBackend.active;
+      if(!target||!owner||!view)throw new Error('Connect the opened workspace before initializing Git.');
+      const ticket=await workspaceBackend.prepare();workspaceBackend.assert(ticket);
+      if(ticket.origin!==target.baseUrl||owner.origin!==ticket.origin)throw new Error('The selected workspace backend changed.');
+      const answer=await vscode.window.showWarningMessage(`Initialize a Git repository in ${owner.metadata.root}? This creates .git metadata in that folder.`,{modal:true},'Initialize Git');
+      if(answer!=='Initialize Git')return;
+      if(panel!==view||client!==target)throw new Error('The xMind view changed before Git initialization.');workspaceBackend.assert(ticket);
+      await target.initializeGitRepository();
+      vscode.window.showInformationMessage(`Git repository initialized in ${owner.metadata.root}.`);
+    }catch(error){vscode.window.showErrorMessage(error.message);}
+  }));
   if(vscode.workspace.onDidChangeWorkspaceFolders)context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(()=>{
     reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
   }));

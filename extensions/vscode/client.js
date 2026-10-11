@@ -45,12 +45,13 @@ class BackendClient {
       signal: AbortSignal.timeout(timeoutMs),
       redirect: 'error'
     });
-    const data = await response.json();
+    const data = response.status===204?{}:await response.json();
     if (!response.ok) { const error=new Error(typeof data.detail === 'string' ? data.detail : `Backend returned ${response.status}`);error.status=response.status;throw error; }
     return data;
   }
   health() { return this.request('/v1/health'); }
   async workspace() { return validateWorkspace(await this.request('/v1/workspace')); }
+  initializeGitRepository() { return this.request('/v1/vcs/init',{}); }
   models() { return this.request('/v1/models'); }
   graphs() { return this.request('/v1/graphs'); }
   delegation() { return this.request('/v1/agent/delegation'); }

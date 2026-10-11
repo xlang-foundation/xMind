@@ -11,7 +11,7 @@ const {planFixture,inputMessage}=require('./plan-fixture');
 
 function harness(options={}) {
   const token='synthetic-extension-host-access-token';
-  const commands=new Map(),secrets=new Map(),requests=[],views=[],intervals=new Map(),streams=[],scheduledTasks=[];
+  const commands=new Map(),secrets=new Map(),requests=[],views=[],intervals=new Map(),streams=[],scheduledTasks=[],vcsInitializations=[],information=[];
   const state=new Map(),errors=[],comparisons=[],bootstrapTasks=[],ready=[],warnings=[];let documentProvider;
   let pendingHistory;
   let pendingOperation;
@@ -22,6 +22,7 @@ function harness(options={}) {
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
+    if(target.pathname==='/v1/vcs/init'){vcsInitializations.push(JSON.parse(requestOptions.body));return {ok:true,status:204,json:async()=>{throw new Error('204 responses have no JSON body');}};}
     if(target.pathname.startsWith('/v1/mcp/authorization/'))return options.mcp?{ok:true,json:async()=>options.mcp(target.pathname,requestOptions)}:{ok:false,status:404,json:async()=>({detail:'Synthetic backend has no MCP login API'})};
     let data;
     if(target.pathname.endsWith('/context/compact')){const body=JSON.parse(requestOptions.body);contextRequests.push(body);options.contextRecord={...options.contextRecord,head_revision:options.contextRecord.head_revision+1};data={id:body.id,state:'pending'};}
@@ -106,7 +107,7 @@ function harness(options={}) {
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
       executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(['workbench.view.extension.xmind','workbench.view.explorer'].includes(name))return;assert.equal(name,'xmind.workspace.focus');if(options.clearEditorOnSidebar)vscode.window.activeTextEditor=undefined;sidebarProvider.resolveWebviewView(makeView());}},
-    window:{activeTextEditor:options.editor,showQuickPick:async(items,settings)=>{pickers.push({items,settings});return items.find(item=>item.label===options.modelInput);},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}assert.equal(prompt.password,true);return token;},showErrorMessage:message=>{errors.push(message);return options.errorChoice;},showWarningMessage:async(message,...choices)=>{warnings.push({message,choices});return typeof options.cancelChoice==='function'?await options.cancelChoice():options.cancelChoice;},
+    window:{activeTextEditor:options.editor,showQuickPick:async(items,settings)=>{pickers.push({items,settings});return items.find(item=>item.label===options.modelInput);},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}assert.equal(prompt.password,true);return token;},showErrorMessage:message=>{errors.push(message);return options.errorChoice;},showInformationMessage:message=>{information.push(message);return undefined;},showWarningMessage:async(message,...choices)=>{warnings.push({message,choices});return typeof options.cancelChoice==='function'?await options.cancelChoice():options.cancelChoice;},
       registerWebviewViewProvider:(id,provider)=>{assert.equal(id,'xmind.workspace');sidebarProvider=provider;return {dispose(){}};}}
   };
   function makeView(){
@@ -138,7 +139,7 @@ function harness(options={}) {
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     backendOwners,changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
@@ -607,6 +608,11 @@ test('normal development bootstrap completes activation before resolving the sid
   assert.equal(h.ready[0].location,'secondarySidebar');assert.equal(h.ready[0].origin,'http://127.0.0.1:8765');
   assert.ok(!JSON.stringify(h.ready).includes(h.token));assert.ok(!h.views[0].webview.html.includes(h.token));h.views[0].close();
 });
+
+test('Git initialization command confirms the selected VS Code workspace and uses its connected backend',async()=>{
+ const h=harness({cancelChoice:'Initialize Git'});await h.activation;await h.commands.get('agentflow.initializeGit')();assert.equal(h.vcsInitializations.length,1);assert.deepEqual(h.vcsInitializations[0],{});assert.match(h.warnings[0].message,/D:\\TestProj/);assert.equal(h.warnings[0].choices[0].modal,true);assert.deepEqual(h.warnings[0].choices.slice(1),['Initialize Git']);assert.deepEqual(h.information,['Git repository initialized in D:\\TestProj.']);h.views[0].close();
+});
+test('Git initialization command cancellation does not send a backend mutation',async()=>{const h=harness();await h.activation;await h.commands.get('agentflow.initializeGit')();assert.equal(h.warnings.length,1);assert.equal(h.vcsInitializations.length,0);h.views[0].close();});
 
 test('all patch action comparisons use revalidated read-only backend snapshots and never grant',async()=>{
  for(const action of ['add','update','delete','move']){

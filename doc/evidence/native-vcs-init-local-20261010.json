@@ -16,12 +16,13 @@
     "build": "cmake --build build/native --config Release --target xmind agentflow_backend_owner_http_contract --parallel 4",
     "native_contract": "native_backend_owner_http_contract passed",
     "native_contract_scope": "Actual unified xMind executable, xlang3 SQLite-backed backend, authenticated HTTP route, temporary workspace, actual Git init, .git directory verification, git rev-parse --show-toplevel root equality, concurrent initialization, repeat-init conflict, unknown/unsupported provider handling, bearer and local-view authorization.",
-    "browser_contract": "node --test views/browser/tests/server.test.cjs views/browser/tests/controller.test.cjs passed 52 tests, including local-view forwarding of the native 204 response.",
+    "browser_contract": "node --test views/browser/tests/*.test.cjs passed 79 tests, including the browser workspace action and local-view forwarding of the native 204 response.",
+    "vscode_contract": "node --test extensions/vscode/tests/*.test.js passed 274 tests, including selected-workspace binding and confirmation for the Git initialization command.",
+    "asset_build": "node views/browser/build.mjs; JavaScript syntax checks and git diff --check passed.",
     "inventory_audit": "141 pinned operations; 26 native source candidates; 115 unmapped; 0 verified operation-level parity."
   },
   "remaining": [
     "Git status, branches, diffs, review base, and other VCS providers are not implemented.",
-    "The browser and VS Code user flows do not yet expose a repository initialization command.",
     "This focused route contract does not establish full OpenCode vcs.init contract equivalence or operation-level parity."
   ]
 }

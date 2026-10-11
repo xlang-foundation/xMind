@@ -64,6 +64,10 @@
       {
         "command": "agentflow.selectWorkspaceRoot",
         "title": "xMind: Select Active Workspace Root"
+      },
+      {
+        "command": "agentflow.initializeGit",
+        "title": "xMind: Initialize Git Repository"
       }
     ],
     "configuration": {

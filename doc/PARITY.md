@@ -76,9 +76,11 @@ workspace, using the bounded Windows process adapter and no caller-selected
 directory or executable. The local owner view can invoke it; concurrent calls
 serialize, and an existing repository returns a conflict. The actual xMind
 binary contract verified the created `.git` marker and Git's reported root,
-authorization, duplicate initialization and unsupported providers. Browser
-contracts verify that the local view forwards the success response. Git status,
-branches, diffs and browser/VS Code command affordances are still missing. See
+authorization, duplicate initialization and unsupported providers. The browser
+workspace header and VS Code command palette now expose the operation, bound to
+the connected workspace and guarded by confirmation. Browser and VS Code
+contracts cover success, cancellation and existing-repository errors. Git
+status, branches, diffs and other VCS providers remain unimplemented. See
 [local VCS evidence](evidence/native-vcs-init-local-20261010.json).
 
 ## OpenCode V2 functional baseline
