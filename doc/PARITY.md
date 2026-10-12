@@ -362,9 +362,23 @@ provider runtimes forward the selection to the same native execution platform.
 The xlang3-backed HTTP contract initializes Git in a secondary folder, checks
 its independent status, verifies the primary folder was untouched, and rejects
 an unregistered ID. The Git launcher also stopped duplicating ordinary
-inherited environment variables. Browser and VS Code review controls and CLI
-still use the primary folder until they expose a folder selector. See the
-[multi-folder VCS evidence](evidence/native-vcs-multifolder-local-20261011.json).
+inherited environment variables. The browser Git panel still uses the primary
+folder. See the [multi-folder VCS evidence](evidence/native-vcs-multifolder-local-20261011.json).
+
+### VS Code and CLI Git folder selection checkpoint (2026-10-11)
+
+`GET /v1/workspace/membership` returns the connected profile's registered
+folders to the trusted local VS Code host. The extension uses this membership
+for folder QuickPicks and revalidates its workspace ticket before each Git
+operation; the selected secondary ID is forwarded to native VCS routes. CLI
+Git commands accept optional folder IDs for status/info/branches/base and
+`--folder-id ID` for diff; `xmind workspace info` lists those IDs. The actual
+local-view/xlang3 integration verified membership after attaching a second
+folder. The VS Code host suite passed 304 tests, including secondary-folder
+initialize/status/diff selection; all three native CLI Git contracts passed
+authenticated ID routing and response validation. Browser Git selection,
+rendered VS Code acceptance and complete multi-folder coding remain open. See
+the [Git folder selector evidence](evidence/vcs-folder-selectors-local-20261011.json).
 
 ### VS Code language-server navigation checkpoint (2026-10-11)
 

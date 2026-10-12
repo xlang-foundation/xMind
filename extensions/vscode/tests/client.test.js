@@ -13,6 +13,13 @@ test('opened workspace folder attachment preserves the native primary workspace 
  const result=await client.addWorkspaceFolder('D:\\\\Shared');assert.equal(result.revision,2);assert.equal(result.folders.length,2);assert.deepEqual(requests.map(value=>[new URL(value.url).pathname,value.options.method]),[['/v1/workspace','GET'],['/v1/workspaces/add','POST']]);assert.deepEqual(JSON.parse(requests[1].options.body),{workspace_id:workspace.workspace_id,root:'D:\\\\Shared'});
  await assert.rejects(client.addWorkspaceFolder('relative-folder'),/absolute local or UNC/);
 });
+test('registered workspace membership is fetched and validated for native folder selection',async()=>{
+ const workspace={configured:true,root:'D:\\TestProj',workspace_id:'windows-local-file-v1:1:testproj',authority_id:'a'.repeat(32)},group={workspace_id:workspace.workspace_id,name:'TestProj',root:workspace.root,revision:3,primary_folder_id:workspace.workspace_id,folders:[{folder_id:workspace.workspace_id,name:'TestProj',root:workspace.root,ordinal:0},{folder_id:'windows-local-file-v1:2:shared',name:'Shared',root:'D:\\Shared',ordinal:1}]},requests=[];
+ const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async url=>{requests.push(url);return{ok:true,json:async()=>url.endsWith('/v1/workspace')?workspace:group};});
+ assert.deepEqual(await client.workspaceMembership(),group);assert.deepEqual(requests.map(url=>new URL(url).pathname),['/v1/workspace','/v1/workspace/membership']);
+ const invalid=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async url=>({ok:true,json:async()=>url.endsWith('/v1/workspace')?workspace:{...group,folders:[...group.folders,{...group.folders[1],ordinal:2}]}}));
+ await assert.rejects(invalid.workspaceMembership(),/invalid workspace folder/i);
+});
 test('process output client validates paginated byte artifacts without text coercion',async()=>{
  const requests=[],page={operation_id:'process-op',run_id:'run-root',state:'complete',channel:'stderr',encoding:'hex',data:'ff0080',offset:12,total_bytes:15,next_offset:15,complete:true};
  const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>page};});

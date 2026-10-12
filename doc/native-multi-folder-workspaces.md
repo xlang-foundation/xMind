@@ -125,17 +125,17 @@ retain per-operation controller approval, bound to the selected folder and
 workspace revision.
 
 The browser canvas shows one file tree per member folder, with explicit folder
-selection for previews. The browser and VS Code Git review controls still
-default to the primary folder; the shared native endpoints and VS Code client
-now accept explicit folder IDs. VS Code can
+selection for previews. VS Code's Git initialize/status/review commands now
+offer registered folders from the backend membership; the CLI Git commands
+accept a `FOLDER_ID` (or `--folder-id ID` for `git-diff`). The browser Git panel
+still uses the primary folder. VS Code can
 attach opened folders; single-agent read/list/search/glob/edit/create/patch and
 process tools use the captured registry membership. Direct graph reads,
 graph-agent children and graph read/write/patch/process nodes use that same
 snapshot. A single patch call selects one member folder; it cannot span roots.
-Terminals and language-server UI remain bound to the primary folder. CLI
-workspace membership commands exist, but explicit Git-folder selection in the
-CLI/browser/VS Code controls and full multi-folder effect acceptance remain
-open.
+Terminals and language-server UI remain bound to the primary folder. Browser
+Git-folder selection, multi-folder language-server routing and full
+multi-folder effect acceptance remain open.
 
 ## Required acceptance
 
@@ -148,9 +148,9 @@ open.
 - Run a process in each folder. Verify default cwd is the primary folder,
   explicit cwd is pinned to the selected folder, and approval rejects changed
   membership or executable identity.
-- Show independent Git state for two repositories through native HTTP, then
-  expose and verify folder selection in the CLI/browser/VS Code controls;
-  verify language-server root selection for documents in each folder.
+- Show independent Git state for two repositories through native HTTP, CLI and
+  VS Code; expose and verify browser folder selection; verify language-server
+  root selection for documents in each folder.
 - Add a folder while a run is active. Prove the admitted run remains pinned to
   its old revision and a later run sees the new revision.
 - Switch named workspaces in the browser and VS Code. Prove sessions/history

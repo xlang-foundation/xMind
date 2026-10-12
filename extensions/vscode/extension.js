@@ -774,6 +774,13 @@ async function activate(context) {
       vscode.window.showInformationMessage(`Added ${selected.folder.name} to the xMind workspace · ${group.folders.length} folders.`);
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
+  async function chooseGitFolder(target,owner,ticket,title){
+    const group=await target.workspaceMembership();workspaceBackend.assert(ticket);
+    if(group.workspace_id!==owner.metadata.workspace_id||group.root.toLowerCase()!==owner.metadata.root.toLowerCase())throw new Error('The native workspace membership changed. Reconnect before using Git.');
+    if(group.folders.length===1)return group.folders[0];
+    const selected=await vscode.window.showQuickPick(group.folders.map(folder=>({label:folder.name,description:folder.root,folder})),{title,placeHolder:'Choose the registered folder whose Git repository to use'});
+    if(!selected)return undefined;workspaceBackend.assert(ticket);return selected.folder;
+  }
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.initializeGit',async()=>{
     try{
       if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before initializing Git.');
@@ -781,11 +788,12 @@ async function activate(context) {
       if(!target||!owner||!view)throw new Error('Connect the opened workspace before initializing Git.');
       const ticket=await workspaceBackend.prepare();workspaceBackend.assert(ticket);
       if(ticket.origin!==target.baseUrl||owner.origin!==ticket.origin)throw new Error('The selected workspace backend changed.');
-      const answer=await vscode.window.showWarningMessage(`Initialize a Git repository in ${owner.metadata.root}? This creates .git metadata in that folder.`,{modal:true},'Initialize Git');
+      const folder=await chooseGitFolder(target,owner,ticket,'xMind: Choose Git Folder');if(!folder)return;
+      const answer=await vscode.window.showWarningMessage(`Initialize a Git repository in ${folder.root}? This creates .git metadata in that folder.`,{modal:true},'Initialize Git');
       if(answer!=='Initialize Git')return;
       if(panel!==view||client!==target)throw new Error('The xMind view changed before Git initialization.');workspaceBackend.assert(ticket);
-      await target.initializeGitRepository();
-      vscode.window.showInformationMessage(`Git repository initialized in ${owner.metadata.root}.`);
+      await target.initializeGitRepository(folder.ordinal===0?undefined:folder.folder_id);
+      vscode.window.showInformationMessage(`Git repository initialized in ${folder.root}.`);
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.gitStatus',async()=>{
@@ -795,11 +803,12 @@ async function activate(context) {
       if(!target||!owner||!view)throw new Error('Connect the opened workspace before reading Git status.');
       const ticket=await workspaceBackend.prepare();workspaceBackend.assert(ticket);
       if(ticket.origin!==target.baseUrl||owner.origin!==ticket.origin)throw new Error('The selected workspace backend changed.');
-      const values=await target.vcsStatus();workspaceBackend.assert(ticket);
+      const folder=await chooseGitFolder(target,owner,ticket,'xMind: Git Status Folder');if(!folder)return;
+      const values=await target.vcsStatus(folder.ordinal===0?undefined:folder.folder_id);workspaceBackend.assert(ticket);
       if(panel!==view||client!==target)throw new Error('The xMind view changed while reading Git status.');
-      if(!values.length){vscode.window.showInformationMessage(`No changed files reported by Git for ${owner.metadata.root}. The workspace may not be a Git repository.`);return;}
+      if(!values.length){vscode.window.showInformationMessage(`No changed files reported by Git for ${folder.root}. The folder may not be a Git repository.`);return;}
       const items=values.map(item=>({label:`${item.status}  ${JSON.stringify(item.file)}`,description:`+${item.additions} −${item.deletions}`}));
-      await vscode.window.showQuickPick(items,{title:`Git status · ${owner.metadata.root}`,placeHolder:`${values.length} changed file${values.length===1?'':'s'} · line counts appear beside each path`});
+      await vscode.window.showQuickPick(items,{title:`Git status · ${folder.root}`,placeHolder:`${values.length} changed file${values.length===1?'':'s'} · line counts appear beside each path`});
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.gitDiff',async()=>{
@@ -809,21 +818,23 @@ async function activate(context) {
       if(!target||!owner||!view)throw new Error('Connect the opened workspace before reviewing Git changes.');
       const ticket=await workspaceBackend.prepare();workspaceBackend.assert(ticket);
       if(ticket.origin!==target.baseUrl||owner.origin!==ticket.origin)throw new Error('The selected workspace backend changed.');
+      const folder=await chooseGitFolder(target,owner,ticket,'xMind: Git Review Folder');if(!folder)return;
       const modeChoice=await vscode.window.showQuickPick([
         {label:'Working tree',description:'Compare HEAD with tracked and untracked workspace changes',mode:'working'},
         {label:'Branch changes',description:'Compare the review base with the current working tree',mode:'branch'},
         {label:'Committed changes',description:'Compare the review base with the current branch commits',mode:'committed'}
-      ],{title:`Git comparison · ${owner.metadata.root}`,placeHolder:'Choose what to compare'});
+      ],{title:`Git comparison · ${folder.root}`,placeHolder:'Choose what to compare'});
       if(!modeChoice)return;if(panel!==view||client!==target)throw new Error('The xMind workspace changed before the Git comparison.');workspaceBackend.assert(ticket);
       let base;
+      const folderId=folder.ordinal===0?undefined:folder.folder_id;
       if(modeChoice.mode!=='working'){
-        const inferred=await target.vcsBase();workspaceBackend.assert(ticket);base=inferred?.ref;
+        const inferred=await target.vcsBase(folderId);workspaceBackend.assert(ticket);base=inferred?.ref;
         if(!base){base=await vscode.window.showInputBox({title:'xMind: Git base reference',prompt:'xMind could not infer this branch’s review base. Enter a branch name or commit ID.',placeHolder:'main or commit SHA',ignoreFocusOut:true});if(base===undefined)return;if(panel!==view||client!==target)throw new Error('The xMind workspace changed while selecting a Git base.');workspaceBackend.assert(ticket);}
       }
-      const diffs=await target.vcsDiff(modeChoice.mode,base,3);workspaceBackend.assert(ticket);
+      const diffs=await target.vcsDiff(modeChoice.mode,base,3,folderId);workspaceBackend.assert(ticket);
       if(panel!==view||client!==target)throw new Error('The xMind workspace changed while reading Git changes.');
-      if(!diffs.length){vscode.window.showInformationMessage(`No ${modeChoice.mode==='working'?'working-tree':modeChoice.mode} Git changes in ${owner.metadata.root}.`);return;}
-      const selected=await vscode.window.showQuickPick(diffs.map(item=>({label:`${item.status}  ${JSON.stringify(item.file)}`,description:`+${item.additions} −${item.deletions}`,item})),{title:`Git diff · ${owner.metadata.root}`,placeHolder:`${diffs.length} file${diffs.length===1?'':'s'} · select a patch to inspect`});
+      if(!diffs.length){vscode.window.showInformationMessage(`No ${modeChoice.mode==='working'?'working-tree':modeChoice.mode} Git changes in ${folder.root}.`);return;}
+      const selected=await vscode.window.showQuickPick(diffs.map(item=>({label:`${item.status}  ${JSON.stringify(item.file)}`,description:`+${item.additions} −${item.deletions}`,item})),{title:`Git diff · ${folder.root}`,placeHolder:`${diffs.length} file${diffs.length===1?'':'s'} · select a patch to inspect`});
       if(!selected)return;if(panel!==view||client!==target)throw new Error('The xMind workspace changed before opening the Git patch.');workspaceBackend.assert(ticket);
       const document=await vscode.workspace.openTextDocument({language:'diff',content:selected.item.patch});
       if(panel!==view||client!==target)throw new Error('The xMind workspace changed before displaying the Git patch.');workspaceBackend.assert(ticket);

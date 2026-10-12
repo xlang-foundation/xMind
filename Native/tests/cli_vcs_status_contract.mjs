@@ -6,8 +6,8 @@ import {randomBytes} from 'node:crypto';
 const [cliExe]=process.argv.slice(2);assert.ok(cliExe,'Pass the native xMind CLI executable');
 const token=randomBytes(32).toString('hex'),calls=[];
 let payload=[{file:'src/file with spaces.cpp',additions:3,deletions:1,status:'modified'}];
-const invoke=(port,env)=>new Promise((resolve,reject)=>{
-  const child=spawn(cliExe,[String(port),'git-status'],{env,windowsHide:true,stdio:['ignore','pipe','pipe']});let stdout='',stderr='';
+const invoke=(port,env,args=[])=>new Promise((resolve,reject)=>{
+  const child=spawn(cliExe,[String(port),'git-status',...args],{env,windowsHide:true,stdio:['ignore','pipe','pipe']});let stdout='',stderr='';
   const timer=setTimeout(()=>child.kill(),10000);child.stdout.on('data',chunk=>stdout+=chunk);child.stderr.on('data',chunk=>stderr+=chunk);
   child.once('error',error=>{clearTimeout(timer);reject(error);});child.once('close',(status,signal)=>{clearTimeout(timer);resolve({status,signal,stdout,stderr});});
 });
@@ -21,9 +21,11 @@ try{
   const result=await invoke(port,env);
   assert.equal(result.status,0,result.stderr||'CLI failed');assert.deepEqual(JSON.parse(result.stdout),payload);
   assert.deepEqual(calls,[{method:'GET',path:'/v1/vcs/status',authorization:`Bearer ${token}`}]);
+  const selected=await invoke(port,env,['windows-local-file-v1:2:shared']);assert.equal(selected.status,0,selected.stderr);assert.deepEqual(JSON.parse(selected.stdout),payload);
+  assert.equal(calls[1].path,'/v1/vcs/status?folder_id=windows-local-file-v1:2:shared');
   payload=[{file:'src/main.cpp',additions:-1,deletions:0,status:'modified'}];
   const malformed=await invoke(port,env);
   assert.equal(malformed.status,1);assert.match(malformed.stderr,/Invalid native Git status entry/);
-  assert.equal(calls.length,2);
-  console.log('Native CLI Git status contract passed authenticated GET routing and strict response validation.');
+  assert.equal(calls.length,3);
+  console.log('Native CLI Git status contract passed authenticated folder routing and strict response validation.');
 }finally{await new Promise(resolve=>server.close(resolve));}

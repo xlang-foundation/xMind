@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-11",
+  "scope": "Expose registered multi-folder Git routing in VS Code and CLI",
+  "validation": {
+    "native_build": "CMake RelWithDebInfo builds of xmind and xmind_cli passed.",
+    "local_view_contract": "native_local_view_contract passed against the actual xMind executable and xlang3-backed SQLite; the authenticated membership response matched the second-folder registry revision and query parameters were rejected.",
+    "cli_contracts": "native_cli_vcs_status_contract, native_cli_vcs_metadata_contract and native_cli_vcs_diff_contract passed authenticated explicit-folder routing and strict response validation.",
+    "vscode_suite": "node --test extensions/vscode/tests/*.test.js passed 304 tests, including registered membership validation and selection for Git initialize, status and diff in the secondary folder.",
+    "vscode_package": "VSIX 0.1.9 packaged with its verified 1,899-file native runtime and installed; code --list-extensions reports agentflow-local.agentflow@0.1.9."
+  },
+  "behavior": {
+    "vscode": "Git commands fetch the connected profile's native workspace membership and let the user choose a registered folder; workspace admission is revalidated before each operation.",
+    "cli": "git-status, git-info, git-branches and git-base accept an optional positional FOLDER_ID; git-diff accepts --folder-id ID. xmind workspace info lists folder IDs.",
+    "authority": "The new membership route is available only to the local backend owner and returns roots from the verified registry; VCS routes still resolve folder IDs against the current native admission snapshot."
+  },
+  "remaining": [
+    "The browser Git panel still targets the primary folder.",
+    "Rendered installed VS Code acceptance was not verified because the computer-use helper could not bind its current window handle; multi-folder language-server UI and complete coding parity remain open."
+  ]
+}

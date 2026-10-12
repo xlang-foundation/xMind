@@ -460,6 +460,34 @@ int run_local_view(int argc, char **argv) {
                     }
                     return;
                 }
+                if (request.path == "/v1/workspace/membership" && request.method == "GET") {
+                    if (!host || request.target != request.path) {
+                        response(output, 400, "Workspace membership requires the local backend owner");
+                        return;
+                    }
+                    try {
+                        const agentflow::WorkspaceTools primary(connection->workspace);
+                        const auto group = workspace_registry->get(primary.identity());
+                        require(!group.folders.empty() && group.primary_folder_id == primary.identity() &&
+                                    group.folders.front().root == primary.root_path(),
+                                "Registered workspace primary folder differs from the connected backend");
+                        Json folders = Json::array();
+                        for (const auto &folder : group.folders)
+                            folders.push_back({{"folder_id", folder.folder_id}, {"name", folder.name},
+                                               {"root", folder.root}, {"ordinal", folder.ordinal}});
+                        output.status = 200;
+                        output.set_content(Json{{"workspace_id", group.workspace_id}, {"name", group.name},
+                                                {"root", group.folders.front().root}, {"revision", group.revision},
+                                                {"primary_folder_id", group.primary_folder_id},
+                                                {"folders", std::move(folders)}}.dump(),
+                                           "application/json");
+                    } catch (const std::out_of_range &error) {
+                        response(output, 404, error.what());
+                    } catch (const std::invalid_argument &error) {
+                        response(output, 409, error.what());
+                    }
+                    return;
+                }
                 if (request.path == "/v1/workspaces" && request.method == "GET") {
                     if (host || request.target != request.path ||
                         request.get_header_value_count("X-XMind-View-Origin") != 1) {
