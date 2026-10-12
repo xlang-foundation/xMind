@@ -5,9 +5,11 @@
 #include "nlohmann/json.hpp"
 #include <filesystem>
 #include <iostream>
+#include <fstream>
 #include <thread>
 #include <condition_variable>
 #include <mutex>
+#include <cstdlib>
 
 using namespace agentflow;
 using Json=nlohmann::json;
@@ -75,6 +77,18 @@ int main(int argc,char** argv) {
         bool captured_membership=false;for(const auto& event:store.events("multi-folder").get())if(event.kind=="agent.workspace_membership"){
             const auto membership=Json::parse(event.json);captured_membership=membership.at("revision")==2&&membership.at("folders").size()==2&&membership.at("folders")[1].at("root")==attached_canonical;
         }require(captured_membership,"Run admission must durably retain the exact folder identities and roots used by child executions");
+        const auto* system_root=std::getenv("SystemRoot");if(!system_root||!*system_root)throw std::runtime_error("SystemRoot is required for the native Windows process fixture");
+        const auto powershell=(std::filesystem::u8path(system_root)/L"System32"/L"WindowsPowerShell"/L"v1.0"/L"powershell.exe").string();
+        auto multi_process=multi;multi_process.provider.endpoint=base+"/multi-folder-process?folder_id="+attached_id;
+        multi_process.process_profiles.push_back({"powershell",powershell,1,{"-NoLogo","-NoProfile","-NonInteractive","-Command"},std::chrono::seconds(30),{},true});
+        const std::string process_path="agent-process-folder.txt";const std::string command="[IO.File]::WriteAllText('"+process_path+"',(Get-Location).Path)";
+        store.create_session("multi-process","Agent process targets the captured secondary folder").get();AgentRunner process_runner(store,multi_process);process_runner.start("multi-process","multi-process","Run a process in the explicitly attached folder");
+        require(process_runner.execute("multi-process").state==RunState::completed,"AgentRunner must complete the actual process tool round-trip in the attached folder");
+        const auto attached_process_effect=std::filesystem::u8path(attached_canonical)/process_path;const auto primary_process_effect=std::filesystem::u8path(primary_root)/process_path;
+        require(std::filesystem::is_regular_file(attached_process_effect)&&!std::filesystem::exists(primary_process_effect),"Agent process must create its actual effect only in the explicitly selected attached folder");
+        {std::ifstream effect(attached_process_effect,std::ios::binary);std::string location;std::getline(effect,location);require(std::filesystem::path(location).lexically_normal()==std::filesystem::path(attached_canonical).lexically_normal(),"Agent process cwd must be the selected attached folder root");}
+        const auto process_operations=store.operations("multi-process").get();require(process_operations.size()==1&&process_operations.front().state==OperationState::succeeded&&process_operations.front().decision_actor=="trusted-process-profile:powershell","Agent process must persist successful trusted-profile grant attribution");
+        const auto process_history=store.history("multi-process").get();require(process_history.size()==4&&Json::parse(Json::parse(process_history[2].json).at("content").get<std::string>()).at("exit_code")==0,"Agent process output and result must round-trip through persisted tool history");
         const auto code_root_path=std::filesystem::absolute(std::filesystem::u8path(argv[4])).u8string();
         const std::string code_root(reinterpret_cast<const char*>(code_root_path.data()),code_root_path.size());
         const auto authored=run_xlang_authoring_program(argv[2],argv[3],code_root,"fixture_tools");
