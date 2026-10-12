@@ -172,7 +172,7 @@ AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,
         policy.max_parent_turns=static_cast<std::int64_t>(settings_.max_turns);
     }
     if(settings_.context){
-        if(settings_.max_turns>16)throw std::invalid_argument("Context-enabled ordinary agents require bounded logical turns");
+        if(settings_.max_turns>32)throw std::invalid_argument("Context-enabled ordinary agents require bounded logical turns");
         ContextManager validate(persistence_,settings_.provider,*settings_.context,message);
     }
 }

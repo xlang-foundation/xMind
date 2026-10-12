@@ -30,6 +30,7 @@ void metrics(const Message& row,std::int64_t input,std::int64_t output){const au
 AgentSettings settings(const std::string& endpoint,const std::string& workspace){
     AgentSettings result;result.provider={endpoint,"synthetic-dynamic-engine",Capability::supported,Capability::supported,Capability::supported};result.provider.wire=ProviderWire::anthropic_messages;result.provider.deadline=8s;result.provider.idle_timeout=6s;
     result.workspace=workspace;result.approved_edits=true;result.max_turns=8;result.max_output_tokens=256;result.run_timeout=30s;
+    result.planning=DynamicPlanningPolicy{};
     result.instructions="Explicit synthetic dynamic-plan provider fixture; only actual native outcomes are evidence.";
     result.credential=CredentialReference{"fixture","dynamic-engine-provider","provider:synthetic-dynamic-engine"};return result;
 }
@@ -42,6 +43,8 @@ int main(int argc,char** argv){
         DynamicPlanRecord before;std::vector<Message> paused_history;std::vector<OwnedChildRecord> original_children;
         {
             PersistenceService store(database,imports);const std::string key=fixture_key;store.put_credential("fixture","dynamic-engine-provider","provider:synthetic-dynamic-engine","Synthetic fixture credential",SecretBytes({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()}),0).get();
+            auto ordinary=frozen;ordinary.planning.reset();AgentService ordinary_service(store,ordinary,1,4);
+            require(!ordinary_service.supports_dynamic_planning(),"Ordinary coding Agent must not silently switch into planning mode");
             store.create_session("main-session","Actual same-plan revision and independently approved coding").get();AgentService service(store,frozen,2,8);
             require(service.supports_dynamic_planning()&&!service.supports_delegation(),"Eligible ordinary Agent offers planning without silently enabling legacy delegation");
             service.submit("main-root","main-session","fixture-main-parent: Investigate both files, observe failure, revise the same plan, ask a human, then apply a separately reviewed edit and verify actual bytes.");

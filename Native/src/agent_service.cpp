@@ -24,10 +24,8 @@ void controller(const std::string& actor){
         throw std::invalid_argument("Invalid authenticated plan controller");
 }
 AgentSettings ordinary_settings(AgentSettings settings){
-    // Existing workspace/tool and turn authority admits this ordinary Agent
-    // policy. Larger turn allowances remain unchanged rather than being clamped.
-    if(!settings.planning&&settings.workspace&&settings.provider.tools==Capability::supported&&settings.max_turns<=16)
-        settings.planning=DynamicPlanningPolicy{};
+    // Ordinary agents use the direct model/tool loop. Planning is enabled only
+    // when the caller explicitly selects a DynamicPlanningPolicy.
     return settings;
 }
 bool runnable(const DynamicPlanRecord& plan){const auto decision=inspect_dynamic_plan(plan);return !decision.halted&&(!decision.ready.empty()||decision.report_ready);}
