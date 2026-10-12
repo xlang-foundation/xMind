@@ -317,6 +317,7 @@ function operationExtras(section,item,reviewable=true){
       const latest=a2aTaskInspections.get(item.id);
       if(latest){const state=latest.task?.status?.state,detail=node('details',undefined,'a2a-task-inspection');detail.append(node('summary','Latest remote task observation'+(typeof state==='string'?' · '+state:'')),node('p','Observed '+new Date(latest.inspected_unix_ms).toISOString()+' · observation only; the original send remains uncertain.','inspection-note'),node('pre',JSON.stringify(latest.task,null,2)));section.append(detail);}
       const button=node('button','Inspect known remote task','a2a-inspect');button.onclick=()=>{button.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id});};section.append(button);
+      const artifacts=node('button','Fetch remote artifacts','a2a-inspect');artifacts.onclick=()=>{artifacts.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id,includeArtifacts:true});};section.append(artifacts);
     }
   }
   if(item.tool==='a2a_delegate'&&item.state==='succeeded'){
@@ -326,6 +327,7 @@ function operationExtras(section,item,reviewable=true){
       const latest=a2aTaskInspections.get(item.id);
       if(latest){const state=latest.task?.status?.state,detail=node('details',undefined,'a2a-task-inspection');detail.append(node('summary','Latest remote task observation'+(typeof state==='string'?' · '+state:'')),node('p','Observed '+new Date(latest.inspected_unix_ms).toISOString()+' · observation only; xMind does not infer or change the remote task state.','inspection-note'),node('pre',JSON.stringify(latest.task,null,2)));section.append(detail);}
       const button=node('button','Refresh remote task','a2a-inspect');button.onclick=()=>{button.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id});};section.append(button);
+      const artifacts=node('button','Fetch remote artifacts','a2a-inspect');artifacts.onclick=()=>{artifacts.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id,includeArtifacts:true});};section.append(artifacts);
       const remoteState=latest?.task?.status?.state,inputRequired=remoteState==='TASK_STATE_INPUT_REQUIRED'||remoteState==='input-required',followState=latest?.follow_up_state;
       if(inputRequired&&['outcome_unknown','ready','not_dispatched'].includes(followState)&&followState==='outcome_unknown')section.append(node('p','The last remote reply may have been delivered. xMind will not replay it; inspect the task or contact the peer owner.','inspection-note'));
       else if(inputRequired&&Number.isSafeInteger(latest?.follow_up_sequence)&&latest.follow_up_sequence<64){

@@ -73,12 +73,18 @@ registration/interface changes, and missing task IDs, and persists the peer's
 latest returned task snapshot in xlang3 SQLite. The local browser allowlist
 forwards this route using the HttpOnly view session. The CLI exposes
 `a2a-inspect OPERATION_ID`, and the shared webpage/VS Code operation view offers
-an explicit “Refresh remote task” control for acknowledged tasks. Contracts
+an explicit “Refresh remote task” control for acknowledged tasks. An explicit
+`--include-artifacts` CLI option and “Fetch remote artifacts” control request
+A2A `GetTask` with `includeArtifacts: true`; this keeps artifact transfer
+opt-in and leaves ordinary refreshes small. Returned artifact data stays in the
+read-only task snapshot and is displayed as untrusted JSON. xMind does not
+follow artifact URLs or write remote content into the workspace. The native
+inspection limit remains 384 KiB for the task snapshot. Contracts
 check owner authentication, same-origin browser forwarding, exact saved task
 ID, durable inspection, CLI routing, client identity checks, and that uncertain
 dispatches do not issue a second remote effect. This is explicit polling;
 initial task events now stream for peers that advertise the capability, while
-resubscription/recovery, artifacts and cross-client rendered acceptance remain open. These are required
+resubscription/recovery and cross-client rendered acceptance remain open. These are required
 before claiming full outbound A2A parity.
 
 An explicit outbound cancellation route is now also wired to acknowledged

@@ -633,7 +633,7 @@ async function activate(context) {
           let receipt;try{receipt=JSON.parse(proposal.result_json);}catch{throw new Error('The saved A2A task receipt is invalid.');}
           const acknowledged=proposal.state==='succeeded'&&receipt?.acknowledged_by_peer===true,observedBeforeFailure=proposal.state==='uncertain'&&receipt?.reason==='a2a_dispatch_outcome_unknown';
           if((!acknowledged&&!observedBeforeFailure)||typeof receipt.agent_id!=='string'||typeof receipt.task_id!=='string'||!receipt.task_id)throw new Error('This A2A operation has no inspectable remote task ID.');
-          const version=generation,inspection=await client.inspectA2aTask(proposal.id);
+          const version=generation,inspection=await client.inspectA2aTask(proposal.id,message.includeArtifacts===true);
           if(panel!==view || version!==generation) return;
           if(!inspection||inspection.operation_id!==proposal.id||inspection.agent_id!==receipt.agent_id||inspection.task_id!==receipt.task_id||!inspection.task||typeof inspection.task!=='object'||Array.isArray(inspection.task)||JSON.stringify(inspection.task).length>524288||!['not_attempted','outcome_unknown','acknowledged'].includes(inspection.cancel_state)||!Number.isSafeInteger(inspection.inspected_unix_ms)||inspection.inspected_unix_ms<=0||inspection.inspected_unix_ms>8640000000000000)throw new Error('The remote task snapshot does not match the saved A2A operation.');
           post({type:'a2a-task-inspection',id:proposal.id,inspection});

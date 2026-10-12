@@ -256,7 +256,7 @@ class BackendClient {
     return value;
   }
   inspectEdit(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/inspection`); }
-  inspectA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/inspect`, {}); }
+  inspectA2aTask(id, includeArtifacts = false) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/inspect`, includeArtifacts ? {include_artifacts:true} : {}); }
   cancelA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/cancel`, {}); }
   followUpA2aTask(id,sequence,message) {
     executionIdentity(id);if(!Number.isSafeInteger(sequence)||sequence<1||sequence>64||typeof message!=='string'||!message.trim()||message.length>32768||message.includes('\0'))throw new Error('Invalid A2A follow-up message');

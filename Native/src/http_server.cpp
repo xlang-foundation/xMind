@@ -1002,7 +1002,9 @@ struct HttpServer::Impl {
 #if defined(_WIN32)
         server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/a2a/inspect)",guarded([this](const Request& request,Response& response) {
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("A2A task inspection request exceeds limits");
-            (void)body(request,{});
+            const auto inspect_request=body(request,{"include_artifacts"});
+            if(inspect_request.contains("include_artifacts")&&!inspect_request["include_artifacts"].is_boolean())throw std::invalid_argument("A2A artifact option must be boolean");
+            const bool include_artifacts=inspect_request.value("include_artifacts",false);
             const auto operation=persistence.operation(identifier(request.matches[1])).get();
             if(operation.spec.tool!="a2a_delegate")throw NotFound("A2A delegation operation not found");
             Json binding,result;
@@ -1020,7 +1022,7 @@ struct HttpServer::Impl {
             A2aJsonRpcClient peer(card_url,std::move(resolved.bearer));
             const auto discovered=peer.discover(std::chrono::seconds(5));
             if(discovered.protocol_version!=version||discovered.endpoint!=endpoint)throw Conflict("A2A peer interface changed since task admission");
-            const auto remote=Json::parse(peer.get_task(Json{{"id",task_id}}.dump(),std::chrono::seconds(10)));
+            const auto remote=Json::parse(peer.get_task(Json{{"id",task_id},{"includeArtifacts",include_artifacts}}.dump(),std::chrono::seconds(10)));
             if(!remote.is_object()||remote.size()>128)throw TransportError("A2A peer returned an invalid task snapshot");
             const auto encoded=remote.dump();if(encoded.size()>384*1024)throw TransportError("A2A task snapshot exceeds the local inspection limit");
             Json record={{"version",1},{"operation_id",operation.id},{"agent_id",agent_id},{"agent_revision",expected_revision},{"task_id",task_id},{"task_json",remote},{"inspected_unix_ms",std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()}};

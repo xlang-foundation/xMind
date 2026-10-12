@@ -27,4 +27,6 @@ Validation on the current worktree:
 The remote peer is a local synthetic protocol fixture and the event-journal
 failure is injected at the callback boundary. This verifies durable recovery
 and inspection behavior, not a live external A2A service, stream resubscription,
-remote artifact handling, or rendered/installed live-model interoperability.
+or rendered/installed live-model interoperability. A later local slice adds
+explicit `includeArtifacts` task inspection; peer correctness and artifact UI
+rendering still require the independent-peer gate.
