@@ -127,15 +127,15 @@ workspace revision.
 The browser canvas shows one file tree per member folder, with explicit folder
 selection for previews. VS Code's Git initialize/status/review commands now
 offer registered folders from the backend membership; the CLI Git commands
-accept a `FOLDER_ID` (or `--folder-id ID` for `git-diff`). The browser Git panel
-still uses the primary folder. VS Code can
+accept a `FOLDER_ID` (or `--folder-id ID` for `git-diff`). The browser Git
+panel lists registered folders and routes initialization, status, base
+detection and diffs through the selected folder ID. VS Code can
 attach opened folders; single-agent read/list/search/glob/edit/create/patch and
 process tools use the captured registry membership. Direct graph reads,
 graph-agent children and graph read/write/patch/process nodes use that same
 snapshot. A single patch call selects one member folder; it cannot span roots.
-Terminals and language-server UI remain bound to the primary folder. Browser
-Git-folder selection, multi-folder language-server routing and full
-multi-folder effect acceptance remain open.
+Terminals and language-server UI remain bound to the primary folder. Multi-folder
+language-server routing and full multi-folder effect acceptance remain open.
 
 ## Required acceptance
 

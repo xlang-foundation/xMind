@@ -46,12 +46,18 @@ TestProj browser run executed its real Vue/Vite `npm.cmd run build` with exit
 code 0. These results establish local native and browser-build behavior, not
 live-model/VS Code multi-folder acceptance.
 
+The browser Git panel now offers every registered workspace folder and scopes
+repository initialization, status, review-base detection and diffs to the
+selected `folder_id`. Its secondary-folder contract verifies selection and
+routing for each of those operations. Multi-root language-server selection
+and rendered VS Code acceptance remain open.
+
 The pinned source inventory has been regenerated from the exact v2.0.26
 schema: **141 operations, 31 native source candidates, 110 unmapped, and zero
 verified operation-level parity**. A source candidate means reviewed code
 exists; it is not feature parity. Remaining work includes end-to-end
-multi-folder CLI and installed VS Code acceptance, Git-folder selection in
-client controls, multi-root language servers, broader provider/model conformance, and the substantial unmapped
+multi-folder CLI and installed VS Code acceptance, multi-root language servers,
+broader provider/model conformance, and the substantial unmapped
 OpenCode coding/runtime surface. Private Nexus server,
 PostgreSQL, WebRTC and Electron remain outside the xMind OSS scope.
 
@@ -362,7 +368,7 @@ provider runtimes forward the selection to the same native execution platform.
 The xlang3-backed HTTP contract initializes Git in a secondary folder, checks
 its independent status, verifies the primary folder was untouched, and rejects
 an unregistered ID. The Git launcher also stopped duplicating ordinary
-inherited environment variables. The browser Git panel still uses the primary
+inherited environment variables. At this checkpoint the browser Git panel still used the primary
 folder. See the [multi-folder VCS evidence](evidence/native-vcs-multifolder-local-20261011.json).
 
 ### VS Code and CLI Git folder selection checkpoint (2026-10-11)
@@ -376,9 +382,19 @@ Git commands accept optional folder IDs for status/info/branches/base and
 local-view/xlang3 integration verified membership after attaching a second
 folder. The VS Code host suite passed 304 tests, including secondary-folder
 initialize/status/diff selection; all three native CLI Git contracts passed
-authenticated ID routing and response validation. Browser Git selection,
-rendered VS Code acceptance and complete multi-folder coding remain open. See
+authenticated ID routing and response validation. Rendered VS Code acceptance and complete multi-folder coding remain open. See
 the [Git folder selector evidence](evidence/vcs-folder-selectors-local-20261011.json).
+
+### Browser Git folder selector checkpoint (2026-10-11)
+
+The webpage now lists each registered workspace folder in the Git review
+controls. Initialization, status, inferred review base and diffs carry the
+selected secondary `folder_id`; late responses are ignored after a folder
+switch. Browser contract coverage passed **94/94**. The currently running local
+page returned HTTP 200 and served the new selector. This verifies the deployed
+page asset is fresh; the secondary-folder requests are exercised by the browser
+DOM contract, not by a live Git repository in that browser session. See the
+[browser Git selector evidence](evidence/browser-git-folder-selector-local-20261011.json).
 
 ### VS Code language-server navigation checkpoint (2026-10-11)
 

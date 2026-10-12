@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-11",
+  "feature": "Browser Git folder selection for native multi-folder workspaces",
+  "implementation": {
+    "selector": "workspace-vcs-folder",
+    "routes": [
+      "POST /v1/vcs/init",
+      "GET /v1/vcs/status",
+      "GET /v1/vcs/info",
+      "GET /v1/vcs/base",
+      "GET /v1/vcs/diff"
+    ],
+    "selection_source": "registered workspace membership returned by native catalogue",
+    "path_input": false,
+    "stale_response_guard": "folder ID and workspace generation checked after asynchronous requests"
+  },
+  "validation": {
+    "browser_contract_command": "node --test views/browser/tests/*.test.cjs",
+    "browser_contract_tests": 94,
+    "browser_contract_failures": 0,
+    "live_page": "http://127.0.0.1:60415/ui/",
+    "live_page_http_status": 200,
+    "live_page_contains_folder_selector": true,
+    "secondary_folder_git_request_routing": "verified by browser DOM contract fixtures, not a live Git repository"
+  }
+}
