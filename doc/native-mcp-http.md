@@ -106,10 +106,23 @@ credential resolution and the production factory. The independent SDK host
 verifies peer disk bytes and exact tool-call counts. This establishes neither
 live model execution nor rendered UI acceptance.
 
-OAuth, empty/non-JSON older discovery fallback, older server-request replies,
-resumable GET/DELETE, notification subscription ownership and graphical connection
-controls remain unfinished. The current owner explicitly fails unsupported
-responses rather than admitting tool effects through another transport.
+Modern `subscriptions/listen` on the HTTP owner is now implemented as a
+request-scoped SSE operation. The public call validates the server's first
+acknowledgement, the acknowledged filter, every subscription ID and every
+delivered notification against the accepted filter. It returns only after a
+correlated graceful completion; transport cancellation closes the stream and
+retires the owner. A real loopback HTTP peer verifies resource updates, list
+changes, filter acknowledgment and rejection of an unrequested event. It uses
+the `2026-07-28` protocol, not the removed GET/Last-Event-ID behavior.
+The Release target builds; the focused subscription contract passes, and the
+six dependent wire/client/graph/agent/unified HTTP contracts pass **6/6**.
+[Exact CTest output](evidence/native-mcp-subscriptions-http-local-20261012.log).
+
+This is transport-level support, not yet AgentRunner subscription lifecycle or
+stdio subscriptions. OAuth, empty/non-JSON older discovery fallback, older
+server-request replies, resumable GET/DELETE and graphical connection controls
+remain unfinished. The current owner explicitly fails unsupported responses
+rather than admitting tool effects through another transport.
 
 The following are xMind implementation decisions, not claims of delivered
 protocol support:

@@ -1,5 +1,21 @@
 # Current native validation
 
+## MCP 2026-07-28 HTTP subscriptions/listen — 2026-10-12
+
+The Release `agentflow_mcp_http_readonly_contract` target builds, and the
+focused CTest passes **1/1**. Its real loopback Streamable HTTP peer exercises a
+request-scoped SSE stream, header binding, first-message acknowledgement,
+acknowledged-filter validation, resource-update and tools-list notifications,
+subscription-ID correlation and graceful completion. A second connection
+proves an unrequested prompts-list notification retires the owner. The public
+native HTTP client exposes the accepted filter and validated notifications;
+this contract does not prove AgentRunner or stdio subscription lifecycle,
+reconnect, installed-client or live external-server acceptance. No external
+service or credential was used. The broader dependent MCP wire/client,
+graph-MCP, AgentRunner HTTP-MCP and unified-server contracts pass **6/6**;
+[exact CTest output](evidence/native-mcp-subscriptions-http-local-20261012.log).
+See [transport scope](native-mcp-http.md).
+
 ## Live TestProj Model Zoo browser acceptance — 2026-10-12
 
 The completed DeepSeek `deepseek-flash` xMind browser run used the real

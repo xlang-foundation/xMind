@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+## MCP modern HTTP subscriptions/listen — 2026-10-12
+
+The native Streamable HTTP client now supports MCP's `2026-07-28`
+`subscriptions/listen` request-scoped SSE stream. It validates the required
+first acknowledgement, accepted filters, subscription IDs, notification
+types/URIs and graceful completion; caller cancellation is wired to close the
+HTTP response stream. A real loopback peer verifies resource and tools-list
+updates plus fail-closed behavior for an unrequested prompt-list update. The
+Release client target builds; the focused contract passes **1/1** and the six
+dependent wire/client/graph/AgentRunner/unified HTTP contracts pass **6/6**.
+AgentRunner subscription lifecycle, stdio, reconnection and broader live SDK
+acceptance remain open. See [validation scope](VALIDATION_STATUS.md#mcp-2026-07-28-http-subscriptionslisten--2026-10-12)
+and [exact test output](evidence/native-mcp-subscriptions-http-local-20261012.log).
+
 ## Live coding acceptance through the xMind browser — 2026-10-12
 
 The actual local xMind page ran a scoped DeepSeek coding task against

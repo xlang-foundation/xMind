@@ -23,15 +23,19 @@ const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',()=>{
     try {
       requests++;const body=JSON.parse(source),prompt=body.messages.findLast(message=>message.role==='user').content;
-      const names=body.tools.map(tool=>tool.function.name);assert.deepEqual(names.slice(0,7),['read_repository_instructions','read_file','list_files','search_files','glob_files','list_skills','load_skill']);
-      assert.equal(names.length,12);assert.match(names[7],/^mcp_[a-f0-9]{48}$/);assert.deepEqual(names.slice(8),['delegate_tasks','plan_tasks','revise_plan','inspect_plan']);assert.equal(body.stream_options.include_usage,true);
+      const names=body.tools.map(tool=>tool.function.name),mcpNames=names.filter(name=>/^mcp_[a-f0-9]{48}$/.test(name));
+      assert.deepEqual(names.slice(0,7),['read_repository_instructions','read_file','list_files','search_files','glob_files','list_skills','load_skill']);assert.equal(mcpNames.length,1,JSON.stringify(names));assert.ok(names.includes('delegate_tasks'));
+      const allowedExtras=new Set(['run_process','wait_process','plan_tasks','revise_plan','inspect_plan','delegate_tasks',mcpNames[0]]);assert.ok(names.slice(7).every(name=>allowedExtras.has(name)),JSON.stringify(names));
+      if(names.includes('run_process'))assert.ok(names.includes('wait_process'),'Process execution must expose its paired join tool');
+      const planningNames=['plan_tasks','revise_plan','inspect_plan'].filter(name=>names.includes(name));assert.ok(planningNames.length===0||planningNames.length===3,'Planning tools must be exposed as a complete set');
+      assert.equal(new Set(names).size,names.length,'Tool names must be unique');assert.equal(body.stream_options.include_usage,true);
       assert.equal(source.includes(secret),false);const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
       if(tool){
         const outcome=JSON.parse(tool.content);continuations.set(prompt,outcome);
         if(prompt==='allowed'){assert.equal(outcome.acknowledged_by_peer,true);assert.equal(outcome.independently_verified,false);assert.equal(JSON.parse(outcome.response_json).result.structuredContent.bytes,7);}
         else assert.equal(outcome.error.code,'permission_denied');
         delta={content:'Synthetic model continuation after actual MCP outcome'};finish='stop';
-      }else{delta={tool_calls:[{index:0,id:`fixture-${prompt}`,type:'function',function:{name:names[7],arguments:`{"body":${JSON.stringify(prompt)},"decimal":1.00000000000000000001}`}}]};finish='tool_calls';}
+      }else{delta={tool_calls:[{index:0,id:`fixture-${prompt}`,type:'function',function:{name:mcpNames[0],arguments:`{"body":${JSON.stringify(prompt)},"decimal":1.00000000000000000001}`}}]};finish='tool_calls';}
       response.writeHead(200,{'Content-Type':'text/event-stream'});
       response.end(`data: ${JSON.stringify({choices:[{index:0,delta,finish_reason:null}]})}\n\ndata: ${JSON.stringify({choices:[{index:0,delta:{},finish_reason:finish}]})}\n\ndata: ${JSON.stringify({choices:[],usage:{prompt_tokens:13,completion_tokens:7,total_tokens:20}})}\n\ndata: [DONE]\n\n`);
     }catch(error){peerError=error;response.writeHead(500);response.end('synthetic fixture failed');}
