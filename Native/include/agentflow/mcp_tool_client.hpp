@@ -2,6 +2,7 @@
 #include "agentflow/mcp_handshake.hpp"
 #include "agentflow/mcp_transport.hpp"
 #include <optional>
+#include <functional>
 #include <stop_token>
 #include <string>
 #include <string_view>
@@ -29,6 +30,14 @@ struct McpMetadataPage {
     std::optional<std::string> next_cursor;
 };
 struct McpReadOnlyReply {std::string request_id,response_json,result_json;};
+struct McpSubscriptionFilter {
+    bool tools_list_changed=false,prompts_list_changed=false,resources_list_changed=false;
+    std::vector<std::string> resource_subscriptions;
+};
+struct McpSubscriptionAcknowledgement {
+    std::string subscription_id;
+    McpSubscriptionFilter notifications;
+};
 class McpToolRegistry;
 // One native access owner; discovery is metadata, not execution permission.
 // All transport bindings dispatch only through the same journal-backed registry.
@@ -50,6 +59,12 @@ public:
     }
     virtual McpReadOnlyReply get_prompt(const std::string&,std::string_view,Deadline,std::stop_token={}) {
         throw McpProtocolError("MCP prompt retrieval is not implemented by this client");
+    }
+    // Long-lived modern-protocol request. A separate access owner should be
+    // used when the caller also needs to make ordinary requests concurrently.
+    virtual McpSubscriptionAcknowledgement listen_subscriptions(const McpSubscriptionFilter&,
+        const std::function<void(const McpWireMessage&)>&,Deadline,std::stop_token={}) {
+        throw McpProtocolError("MCP subscriptions/listen is not implemented by this client");
     }
     virtual bool ready() const=0;
     virtual const McpServerDescription& server() const=0;

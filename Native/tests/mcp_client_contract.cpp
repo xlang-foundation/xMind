@@ -54,13 +54,39 @@ void cancellation(char** argv) {
     require(stopped && !client.ready() && std::chrono::steady_clock::now()-start<2s,"Actual waiting catalogue read must cancel and retire promptly");
     require(client.status().exit_code==0,"Cancelled peer must observe cancellation and clean EOF");
 }
+void subscription(char** argv) {
+    McpStdioClient client(configuration(argv,"subscription"));client.connect(std::chrono::steady_clock::now()+5s);
+    McpSubscriptionFilter requested;requested.tools_list_changed=true;requested.resource_subscriptions={"file:///fixture/readme.md"};
+    std::vector<std::string> events;
+    const auto accepted=client.listen_subscriptions(requested,[&](const McpWireMessage& message){events.push_back(message.method);},std::chrono::steady_clock::now()+5s);
+    require(accepted.subscription_id.size()>0&&accepted.notifications.tools_list_changed,"Stdio subscription acknowledgement must be retained");
+    require(accepted.notifications.resource_subscriptions==requested.resource_subscriptions,"Stdio subscription resource filters must be acknowledged exactly");
+    require(events==std::vector<std::string>{"notifications/resources/updated","notifications/tools/list_changed"},"Only validated post-ack subscription events reach the callback");
+    client.shutdown();require(client.status().exit_code==0,"Subscription peer must verify completion and exit cleanly");
+}
+void subscription_cancellation(char** argv) {
+    McpStdioClient client(configuration(argv,"subscription-cancel"));client.connect(std::chrono::steady_clock::now()+5s);
+    McpSubscriptionFilter requested;requested.tools_list_changed=true;
+    std::stop_source cancel;std::jthread request([&]{std::this_thread::sleep_for(100ms);cancel.request_stop();});
+    bool stopped=false;try{(void)client.listen_subscriptions(requested,{},std::chrono::steady_clock::now()+5s,cancel.get_token());}catch(const McpTransportCancelled&){stopped=true;}
+    require(stopped&&!client.ready(),"Cancelling stdio subscriptions retires the stream owner without inventing completion");
+    require(client.status().exit_code==0,"Subscription peer must observe cancellation and clean EOF");
+}
+void subscription_rejection(char** argv,const std::string& mode) {
+    McpStdioClient client(configuration(argv,mode));client.connect(std::chrono::steady_clock::now()+5s);
+    McpSubscriptionFilter requested;requested.tools_list_changed=true;
+    bool failed=false;try{(void)client.listen_subscriptions(requested,{},std::chrono::steady_clock::now()+5s);}catch(const McpProtocolError&){failed=true;}
+    require(failed&&!client.ready(),"Unrequested MCP subscription acknowledgement/event must retire the stdio owner");
+    require(client.status().exit_code==0,"Rejected subscription peer must observe cancellation and clean EOF");
+}
 }
 int main(int argc,char** argv){
     if(argc!=4)return 2;
     try {
         success(argv,"modern");success(argv,"legacy");
         for(const auto* mode:{"duplicate","bad-schema","unknown-id","modern-request","modern-input-required","flood","closed","timeout"})failure(argv,mode);
-        cancellation(argv);
+        cancellation(argv);subscription(argv);subscription_cancellation(argv);
+        subscription_rejection(argv,"subscription-bad-ack");subscription_rejection(argv,"subscription-bad-event");
         std::cout<<"Native MCP stdio owner passed independent real subprocess catalogues, pagination, legacy ping/unsupported-method handling, bounded notifications, malformed results, cancellation/timeout/EOF and no reconnect/replay. No tool execution, schema validation or full MCP integration claimed\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }

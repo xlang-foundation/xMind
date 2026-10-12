@@ -5,14 +5,6 @@
 #include <memory>
 namespace agentflow {
 struct McpBearerValidity {std::int64_t acquired_unix_ms;std::optional<std::int64_t> expires_unix_ms;};
-struct McpSubscriptionFilter {
-    bool tools_list_changed=false,prompts_list_changed=false,resources_list_changed=false;
-    std::vector<std::string> resource_subscriptions;
-};
-struct McpSubscriptionAcknowledgement {
-    std::string subscription_id;
-    McpSubscriptionFilter notifications;
-};
 // Native HTTP access owner. Trusted endpoint/credential only; one calling
 // thread. Tool dispatch remains private to the durable approval registry.
 // An interrupted owner is retired, never reconnected or used to replay effects.
@@ -31,7 +23,7 @@ public:
     // Blocks until the server gracefully closes the request-scoped SSE stream
     // or the caller cancels it. Cancellation closes that HTTP response stream.
     McpSubscriptionAcknowledgement listen_subscriptions(const McpSubscriptionFilter& requested,
-        const std::function<void(const McpWireMessage&)>& on_notification,Deadline deadline,std::stop_token cancel={});
+        const std::function<void(const McpWireMessage&)>& on_notification,Deadline deadline,std::stop_token cancel={}) override;
     bool ready() const override;
     const McpServerDescription& server() const override;
     std::size_t rejected_tools() const;

@@ -1,5 +1,20 @@
 # Current native validation
 
+## MCP 2026-07-28 subscriptions/listen on HTTP and stdio — 2026-10-12
+
+The shared MCP client contract now exposes `listen_subscriptions` for both
+native transports, backed by one validator for requested/accepted filters,
+acknowledgement ordering, subscription IDs, event types/URIs and graceful
+completion. The stdio fixture exercises valid resource and tools-list updates,
+rejects an unrequested filter and resource URI, and confirms cancellation
+retires its owner without fabricating completion. The HTTP fixture retains its
+real loopback SSE checks, including cancellation and rejection of an
+unrequested notification. Release runtime targets build; the focused
+stdio/HTTP, graph, AgentRunner and unified HTTP contracts pass **6/6**. This
+does not prove AgentRunner subscription lifecycle, persistence/recovery,
+catalogue refresh, concurrent subscription ownership or live external-peer
+acceptance. [Exact CTest output](evidence/native-mcp-subscriptions-transports-local-20261012.log).
+
 ## MCP 2026-07-28 HTTP subscriptions/listen — 2026-10-12
 
 The Release `agentflow_mcp_http_readonly_contract` target builds, and the

@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import {createInterface} from 'node:readline';
 const mode=process.argv[2], input=createInterface({input:process.stdin});
-let initialized=false,ack=false,listing,ping=false,unsupported=false,pages=0,cancelled=false,resourcePages=0,promptPages=0;
+let initialized=false,ack=false,listing,ping=false,unsupported=false,pages=0,cancelled=false,resourcePages=0,promptPages=0,subscriptionRequest;
 const send=value=>process.stdout.write(JSON.stringify({jsonrpc:'2.0',...value})+'\n');
 const tool={name:'fixture.read',description:'Untrusted labeled fixture description',inputSchema:{type:'object',properties:{path:{type:'string'}},required:['path']},annotations:{readOnlyHint:true}};
 function page(request){
@@ -38,7 +38,7 @@ for await(const line of input){
     assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
     assert.deepEqual(request.params._meta['io.modelcontextprotocol/clientCapabilities'],{});
     if(mode==='legacy')send({id:request.id,error:{code:-32601,message:'Labeled legacy fixture'}});
-    else send({id:request.id,result:{supportedVersions:['2026-07-28'],capabilities:{tools:{},resources:{},prompts:{}}}});
+    else send({id:request.id,result:{supportedVersions:['2026-07-28'],capabilities:mode.startsWith('subscription')?{tools:{listChanged:true},resources:{subscribe:true,listChanged:true},prompts:{}}:{tools:{},resources:{},prompts:{}}}});
   }else if(request.method==='initialize'){
     assert.equal(mode,'legacy');assert.equal(initialized,false);initialized=true;
     send({id:request.id,result:{protocolVersion:'2025-11-25',capabilities:{tools:{},resources:{},prompts:{}},serverInfo:{name:'labeled-client-peer',version:'fixture'}}});
@@ -63,9 +63,21 @@ for await(const line of input){
   }else if(request.method==='prompts/get'){
     assert.equal(request.params.name,'fixture.prompt');assert.deepEqual(request.params.arguments,{topic:'AgentFlow'});
     send({id:request.id,result:{resultType:'complete',description:'Fixture prompt',messages:[{role:'user',content:{type:'text',text:'Discuss AgentFlow'}}]}});
+  }else if(request.method==='subscriptions/listen'){
+    assert.ok(mode.startsWith('subscription'));
+    subscriptionRequest=request.id;
+    assert.deepEqual(request.params.notifications,mode==='subscription'?{toolsListChanged:true,resourceSubscriptions:['file:///fixture/readme.md']}:{toolsListChanged:true});
+    if(mode==='subscription-cancel')continue;
+    const filters=mode==='subscription'?{toolsListChanged:true,resourceSubscriptions:['file:///fixture/readme.md']}:{toolsListChanged:true,...(mode==='subscription-bad-ack'?{promptsListChanged:true}:{})};
+    send({method:'notifications/subscriptions/acknowledged',params:{_meta:{'io.modelcontextprotocol/subscriptionId':request.id},notifications:filters}});
+    if(mode==='subscription-bad-ack')continue;
+    if(mode==='subscription-bad-event'){send({method:'notifications/resources/updated',params:{_meta:{'io.modelcontextprotocol/subscriptionId':request.id},uri:'file:///fixture/not-requested.md'}});continue;}
+    send({method:'notifications/resources/updated',params:{_meta:{'io.modelcontextprotocol/subscriptionId':request.id},uri:'file:///fixture/readme.md'}});
+    send({method:'notifications/tools/list_changed',params:{_meta:{'io.modelcontextprotocol/subscriptionId':request.id}}});
+    send({id:request.id,result:{resultType:'complete',_meta:{'io.modelcontextprotocol/subscriptionId':request.id}}});
   }else if(request.method==='notifications/cancelled'){
-    assert.ok(mode==='timeout' || mode==='cancel' || mode==='modern-request' || mode==='flood' || mode==='unknown-id');
-    assert.equal(request.params.requestId,listing);cancelled=true;
+    assert.ok(mode==='timeout' || mode==='cancel' || mode==='modern-request' || mode==='flood' || mode==='unknown-id' || mode.startsWith('subscription-'));
+    assert.equal(request.params.requestId,mode.startsWith('subscription-')?subscriptionRequest:listing);cancelled=true;
   }else throw new Error('Unexpected client fixture method');
 }
-if(mode==='timeout' || mode==='cancel')assert.ok(cancelled,'Interrupted owner must attempt cancellation before closing input');
+if(mode==='timeout' || mode==='cancel' || mode.startsWith('subscription-'))assert.ok(cancelled,'Interrupted owner must attempt cancellation before closing input');

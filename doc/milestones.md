@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+## MCP subscription contract shared by HTTP and stdio — 2026-10-12
+
+`McpToolClient` now exposes the long-lived `listen_subscriptions` operation;
+the HTTP SSE and stdio pipe clients share filter, acknowledgement, event and
+completion validation. Stdio callbacks receive only validated events after
+the acknowledgement. Cancellation and invalid acknowledgements/events retire
+the process owner without replay or invented completion. Six dependent
+Release contracts pass. AgentRunner ownership, event persistence/recovery and
+catalogue refresh still need implementation. [Validation and limits](VALIDATION_STATUS.md#mcp-2026-07-28-subscriptionslisten-on-http-and-stdio--2026-10-12).
+
 ## MCP modern HTTP subscriptions/listen — 2026-10-12
 
 The native Streamable HTTP client now supports MCP's `2026-07-28`

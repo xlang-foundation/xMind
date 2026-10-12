@@ -1,4 +1,5 @@
 #include "agentflow/mcp_client.hpp"
+#include "agentflow/mcp_subscriptions.hpp"
 #include "agentflow/mcp_tool_codec.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
@@ -144,6 +145,35 @@ McpReadOnlyReply McpStdioClient::get_prompt(const std::string& name,std::string_
     if(!Json::parse(state.handshake.server().capabilities_json).contains("prompts"))throw McpProtocolError("MCP server did not advertise prompts");
     try{const auto request=Json{{"name",name},{"arguments",Json::parse(mcp_compact_object(arguments))}}.dump();const auto reply=state.exchange("prompts/get",request,deadline,cancel);return mcp_decode_prompt_reply(reply.request.id,reply.response);}
     catch(...){state.retire();throw;}
+}
+McpSubscriptionAcknowledgement McpStdioClient::listen_subscriptions(const McpSubscriptionFilter& requested,
+    const std::function<void(const McpWireMessage&)>& on_notification,Deadline deadline,std::stop_token cancel) {
+    auto& state=*impl_;if(!ready()){if(state.live)state.retire();throw McpProtocolError("MCP client is not ready");}
+    try {
+        const auto params=mcp_subscription_request_params(requested);
+        const auto request=state.requests.prepare("subscriptions/listen",params,McpWireEra::modern);
+        McpSubscriptionTracker tracker(requested,state.handshake.server(),request.request.id);
+        state.unsolicited=0;state.process.write(request.frame,deadline,cancel);
+        std::optional<McpCorrelatedReply> completion;
+        while(!completion) {
+            if(state.incoming.empty())state.read(deadline,cancel);
+            while(!state.incoming.empty()) {
+                const auto message=state.pop();
+                if(message.kind==McpMessageKind::notification) {
+                    tracker.notification(message);
+                    if(message.method!="notifications/subscriptions/acknowledged"&&on_notification)on_notification(message);
+                    continue;
+                }
+                if(state.peer_message(message,deadline,cancel))continue;
+                const auto reply=state.requests.receive(message);if(!reply)continue;
+                if(reply->request.id!=request.request.id)throw McpProtocolError("MCP subscription completion identity changed");
+                completion=*reply;
+            }
+        }
+        tracker.complete(completion->response);
+        if(!tracker.acknowledgement())throw McpProtocolError("MCP subscription stream closed before acknowledgement");
+        return *tracker.acknowledgement();
+    }catch(...) {state.retire();throw;}
 }
 bool McpStdioClient::ready() const {
     if(!impl_->live || impl_->closed)return false;

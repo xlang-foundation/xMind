@@ -106,23 +106,28 @@ credential resolution and the production factory. The independent SDK host
 verifies peer disk bytes and exact tool-call counts. This establishes neither
 live model execution nor rendered UI acceptance.
 
-Modern `subscriptions/listen` on the HTTP owner is now implemented as a
-request-scoped SSE operation. The public call validates the server's first
-acknowledgement, the acknowledged filter, every subscription ID and every
-delivered notification against the accepted filter. It returns only after a
-correlated graceful completion; transport cancellation closes the stream and
-retires the owner. A real loopback HTTP peer verifies resource updates, list
-changes, filter acknowledgment and rejection of an unrequested event. It uses
-the `2026-07-28` protocol, not the removed GET/Last-Event-ID behavior.
-The Release target builds; the focused subscription contract passes, and the
-six dependent wire/client/graph/agent/unified HTTP contracts pass **6/6**.
-[Exact CTest output](evidence/native-mcp-subscriptions-http-local-20261012.log).
+Modern `subscriptions/listen` uses a shared `McpSubscriptionTracker` for
+protocol validation across both native client bindings. The HTTP owner handles
+the request-scoped SSE response; the stdio owner routes the JSON-RPC messages
+on its process pipe. Both require the first acknowledgement, validate accepted
+filters and subscription IDs, reject notifications outside the accepted
+filters, return only after correlated graceful completion, and retire the
+owner on cancellation or protocol failure. Callbacks receive only validated
+post-ack events. The stdio owner is single-threaded and blocks while listening;
+callers needing ordinary MCP requests at the same time should create a separate
+trusted owner for the subscription stream.
 
-This is transport-level support, not yet AgentRunner subscription lifecycle or
-stdio subscriptions. OAuth, empty/non-JSON older discovery fallback, older
-server-request replies, resumable GET/DELETE and graphical connection controls
-remain unfinished. The current owner explicitly fails unsupported responses
-rather than admitting tool effects through another transport.
+Real HTTP and stdio peers verify resource/list-change delivery, acknowledgement
+validation, rejected unrequested events and cancellation. The six dependent
+wire/client/graph/AgentRunner/unified HTTP contracts pass **6/6**;
+[exact CTest output](evidence/native-mcp-subscriptions-transports-local-20261012.log).
+This establishes transport-client support only, not AgentRunner subscription
+lifecycle, event persistence/recovery, automatic catalog refresh/re-discovery,
+concurrent subscriptions on one owner, or live external-peer acceptance.
+OAuth, empty/non-JSON older discovery fallback, older server-request replies,
+resumable GET/DELETE and graphical connection controls remain unfinished. The
+current owner explicitly fails unsupported responses rather than admitting
+tool effects through another transport.
 
 The following are xMind implementation decisions, not claims of delivered
 protocol support:

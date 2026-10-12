@@ -22,6 +22,8 @@ public:
     McpReadOnlyReply read_resource(const std::string& uri,Deadline deadline,std::stop_token cancel={}) override;
     McpMetadataPage list_prompts(std::optional<std::string> cursor,Deadline deadline,std::stop_token cancel={}) override;
     McpReadOnlyReply get_prompt(const std::string& name,std::string_view arguments_json,Deadline deadline,std::stop_token cancel={}) override;
+    McpSubscriptionAcknowledgement listen_subscriptions(const McpSubscriptionFilter& requested,
+        const std::function<void(const McpWireMessage&)>& on_notification,Deadline deadline,std::stop_token cancel={}) override;
     bool ready() const override;
     const McpServerDescription& server() const override;
     McpStdioStatus status() const;
