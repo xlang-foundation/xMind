@@ -24,12 +24,13 @@ write artifact bytes into a workspace.
   and `agentflow_a2a_agent_registry_contract`: passed.
 - Focused A2A client, official-SDK and registry CTests: **3/3 passed**. The
   native client contract asserts that explicit `includeArtifacts: true` reaches
-  the JSON-RPC peer. The HTTP registry contract then posts
-  `include_artifacts: true`, verifies the returned artifact text and confirms
+  the JSON-RPC peer. The independent official A2A JS SDK 1.3.0 peer contract
+  emits an actual text artifact, and both its SDK client and xMind's native
+  client verify the returned artifact body. The HTTP registry contract posts
+  `include_artifacts: true`, verifies the returned artifact text, and confirms
   that the same observed response is persisted in xlang3 SQLite.
 - `git diff --check`: passed.
 
-The local peer is synthetic. The official SDK contract did not test an artifact
-response with actual parts. The JS fixtures exercise UI request propagation and
-escaped rendering, not live external-peer or installed-client behavior.
+The peers are local fixtures, not live external agents. The JS fixtures exercise
+UI request propagation and escaped rendering, not installed-client behavior.
 Packaged-client acceptance and the broader A2A parity gate remain open.
