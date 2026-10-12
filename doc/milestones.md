@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+## Release validation checkpoint — 2026-10-11
+
+The complete native Release build succeeds. The current 136-contract CTest run
+passes 135; the remaining failure is the real rust-analyzer semantic navigation
+contract, where call-site definition returns `null`. The standalone offline
+Cargo fixture check passes, while the failed query is reproduced in a focused
+rerun. The local-profile lifecycle and local browser-view integration contracts
+pass. This is a near-complete validation checkpoint, not a green release gate.
+See the [current validation record](VALIDATION_STATUS.md) and [CTest output](evidence/native-current-release-ctest-20261011.log).
+
 ## Single-agent file tools use admitted workspace membership — 2026-10-11
 
 The managed backend receives the protected local xlang3/SQLite workspace
@@ -50,9 +60,9 @@ The native language-server client now retries transient request-cancelled,
 content-modified and server-cancelled replies with a bounded delay; the focused
 Rust Analyzer contract passes three times consecutively. The local-profile
 upgrade contract also passes after raising its subprocess ceiling from 90 to
-180 seconds (**1/1 in 161.79 seconds**). A current full Release gate was
-attempted with `Tools/native-milestone.ps1 -Action Build` but deferred at its
-benchmark preflight while xlang3 benchmark processes were active. The full
+180 seconds (**1/1 in 161.79 seconds**). A current full Release gate passed
+dependency verification, CMake configuration and `ALL_BUILD`; newly active
+xlang3 benchmarks caused its contract guard to defer before CTest. The full
 suite remains unverified after the timeout adjustment.
 [Focused evidence and limitations](evidence/native-lsp-retry-focused-20261011.md).
 

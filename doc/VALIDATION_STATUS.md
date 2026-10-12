@@ -2,17 +2,21 @@
 
 ## Current Release native gate — 2026-10-11
 
-The complete Release `ALL_BUILD` succeeded at the preceding checkpoint. The
-full CTest suite passed **134/134** before the LSP retry test-harness timeout
-was raised. After increasing its subprocess ceiling from 90 to 180 seconds,
-the focused local-profile upgrade contract passed **1/1 in 161.79 seconds**.
-The current full Release workflow was attempted through
-`Tools/native-milestone.ps1 -Action Build`, but its preflight deferred while
-live xlang3 benchmarks were running. No current-source full native CTest result
-is claimed. See the
-[focused retry and profile-contract record](evidence/native-lsp-retry-focused-20261011.md),
+The complete Release `ALL_BUILD` succeeded after the benchmark guard deferred
+two attempts while xlang3 benchmarks were active. Current Release CTest then
+completed **135/136** contracts in 659.65 seconds. The only failure is
+`native_language_server_rust_analyzer_contract`: rust-analyzer returned `null`
+for the call-site definition query, so native definition navigation and the
+remaining checks in that integration test are unverified. A focused rerun
+reproduced the failure; the Rust fixture's offline Cargo check passes. The long
+local-profile lifecycle, local-view and provider-config contracts all passed.
+Exact output is preserved in
+[current Release CTest evidence](evidence/native-current-release-ctest-20261011.log).
+The [focused profile retry record](evidence/native-lsp-retry-focused-20261011.md),
 [earlier complete Release run](evidence/native-full-release-ctest-20261011.log),
-and [intervening 133/134 run](evidence/native-lsp-retry-ctest-20261011.log).
+and [intervening 133/134 run](evidence/native-lsp-retry-ctest-20261011.log)
+remain historical results, not proof that the current Release suite is fully
+green. Local Release validation does not claim installed IDE acceptance.
 Local Release validation does not claim installed IDE acceptance.
 
 ## Current browser and VS Code source suites — 2026-10-11
