@@ -11,7 +11,7 @@ write artifact bytes into a workspace.
 
 ## Local verification
 
-- VS Code extension/host/renderer suite: **316/316 passed**.
+- VS Code extension/host/renderer suite: **318/318 passed**.
 - Browser controller and integration suite: **97/97 passed**.
 - The renderer test verifies that artifact fetching is a separate,
   explicit control, emits `includeArtifacts: true`, and renders a script-shaped
@@ -20,11 +20,16 @@ write artifact bytes into a workspace.
 - `node tools/audit-opencode.mjs`: **141 pinned operations, 32 native source
   candidates, 109 unmapped, zero verified operation-level parity**. The source
   hashes were regenerated against current native source.
+- Visual Studio 18 Release build of `xmind`, `agentflow_a2a_client_contract`
+  and `agentflow_a2a_agent_registry_contract`: passed.
+- Focused A2A client, official-SDK and registry CTests: **3/3 passed**. The
+  native client contract asserts that explicit `includeArtifacts: true` reaches
+  the JSON-RPC peer. The HTTP registry contract then posts
+  `include_artifacts: true`, verifies the returned artifact text and confirms
+  that the same observed response is persisted in xlang3 SQLite.
 - `git diff --check`: passed.
 
-The native C++ build and CTest could not run in this shell: CMake, MSBuild and
-the Visual C++ compiler are unavailable. The native route and updated A2A
-client contract therefore remain uncompiled/unexecuted here. The JS fixtures
-exercise client request propagation and escaped rendering, not an independent
-or live A2A peer. Official SDK/peer conformance, packaged-client acceptance and
-the broader A2A parity gate remain open.
+The local peer is synthetic. The official SDK contract did not test an artifact
+response with actual parts. The JS fixtures exercise UI request propagation and
+escaped rendering, not live external-peer or installed-client behavior.
+Packaged-client acceptance and the broader A2A parity gate remain open.
