@@ -185,8 +185,12 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
             // A registered direct graph step is controller-declared rather than
             // model-generated. Capture all discovered scopes before proposal;
             // later changes still retire the batch and fail this graph node.
-            RepositoryInstructionContext instructions(*workspace_,workspace_->repository_instructions(".",cancel));instructions.prepare(cancel);
-            PatchTool patch(store_,*workspace_,instructions);auto prepared=patch.prepare(source,cancel);
+            const auto args=Json::parse(source);std::size_t patch_folder_index=0;
+            if(workspace_tools&&args.contains("folder_id")){if(!args["folder_id"].is_string())throw std::invalid_argument("Invalid graph patch folder ID");patch_folder_index=workspace_tools->folder_index(args["folder_id"].get<std::string>());}
+            WorkspaceTools* patch_workspace=workspace_tools?&workspace_tools->folder_tools(patch_folder_index):workspace_.get();
+            const auto owner_workspace=workspace_tools?workspace_tools->workspace_id():workspace_->identity();const auto patch_folder_id=workspace_tools?workspace_tools->folders()[patch_folder_index].folder_id:workspace_->identity();const auto workspace_revision=workspace_tools?workspace_tools->revision():1;
+            RepositoryInstructionContext instructions(*patch_workspace,patch_workspace->repository_instructions(".",cancel));instructions.prepare(cancel);
+            PatchTool patch(store_,*patch_workspace,instructions,owner_workspace,patch_folder_id,workspace_revision,patch_folder_index==0);auto prepared=patch.prepare(source,cancel);
             if(!prepared){instructions.prepare(cancel);prepared=patch.prepare(source,cancel);}
             if(!prepared)throw ToolGuidanceChanged("Graph patch guidance changed during preparation");
             const auto lifetime=shared_context?std::max<std::int64_t>(1,std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now()).count()):settings_.run_timeout.count();

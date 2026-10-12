@@ -94,12 +94,13 @@ handle and revalidates the handle identity before effects.
 
 Single-agent and graph read/list/search/glob tools and the `edit_file`/
 `create_file` write tools take an optional `folder_id` and a path relative to
-that folder. If
-`folder_id` is omitted, they resolve to the primary folder. Results identify
-the folder alongside the relative path; this keeps identical names in separate
-roots unambiguous. A write approval is bound to the captured workspace
-revision, selected folder and root identity. Cross-root `apply_patch` is not
-implemented; backend-private directories remain denied inside every root.
+that folder. If `folder_id` is omitted, they resolve to the primary folder.
+Results identify the folder alongside the relative path; this keeps identical
+names in separate roots unambiguous. A write approval is bound to the captured
+workspace revision, selected folder and root identity. `apply_patch` also
+accepts an optional `folder_id` and applies its complete batch within that one
+member folder; a single patch batch cannot span multiple roots. Backend-private
+directories remain denied inside every root.
 
 `run_process` uses the primary folder as its default working directory. A
 different folder must be selected by folder ID and the actual working directory
@@ -114,19 +115,21 @@ started with the folder root that owns the document. Repository instructions
 and skills are discovered per root and retain their source-folder provenance.
 Delegation, single-agent runs, graph read/write nodes, graph-agent children, MCP
 and A2A inherit only the admitted workspace snapshot; they cannot expand
-membership themselves. Graph `run_process` nodes can also select a registered
-folder from that immutable snapshot. Graph `edit_file` and `create_file` retain
-their existing per-operation controller approval, bound to the selected folder
-and workspace revision. Cross-root `apply_patch` remains unsupported.
+membership themselves. `apply_patch` is scoped to one selected member per call.
+Graph `run_process` nodes can also select a registered folder from that
+immutable snapshot. Graph `edit_file`, `create_file` and each patch-file effect
+retain per-operation controller approval, bound to the selected folder and
+workspace revision.
 
 The browser canvas shows one file tree per member folder, with explicit folder
 selection for previews. Git remains bound to the primary folder. VS Code can
-attach opened folders; single-agent read/list/search/glob/edit/create and
+attach opened folders; single-agent read/list/search/glob/edit/create/patch and
 process tools use the captured registry membership. Direct graph reads,
-graph-agent children and graph read/write/process nodes use that same snapshot.
-Terminals, language servers, Git and `apply_patch` remain bound to the primary
-folder. CLI workspace membership commands exist, but full multi-folder effect
-acceptance through CLI/VS Code/browser remains open.
+graph-agent children and graph read/write/patch/process nodes use that same
+snapshot. A single patch call selects one member folder; it cannot span roots.
+Terminals, language servers and Git remain bound to the primary folder. CLI
+workspace membership commands exist, but full multi-folder effect acceptance
+through CLI/VS Code/browser remains open.
 
 ## Required acceptance
 

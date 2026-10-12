@@ -720,7 +720,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 try {
                     bool guidance_ready=true;InstructionPrecondition guidance;std::optional<PreparedPatch> prepared_patch;
                     RepositoryInstructionContext* selected_repository_context=repository_context.get();WorkspaceTools* selected_workspace=workspace_.get();std::string selected_folder_id=workspace_?workspace_->identity():std::string{};
-                    const bool folder_scoped=call.name=="read_file"||call.name=="edit_file"||call.name=="create_file"||call.name=="list_files"||call.name=="search_files"||call.name=="glob_files"||call.name=="run_process";
+                    const bool folder_scoped=call.name=="read_file"||call.name=="edit_file"||call.name=="create_file"||call.name=="list_files"||call.name=="search_files"||call.name=="glob_files"||call.name=="run_process"||call.name=="apply_patch";
                     std::size_t selected_folder_index=0;
                     Json scoped_args;
                     if(folder_scoped){try{scoped_args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid scoped tool JSON");}
@@ -743,7 +743,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     }
                     if(repository_context&&call.name=="load_skill")guidance_ready=repository_context->ready(repository_context->skills().activation_directory(call.arguments_json,token),token);
                     if(repository_context&&mcp_tools.contains(call.name)){guidance_ready=guidance_ready&&repository_context->ready(".",token);if(guidance_ready)guidance=repository_context->precondition(".");}
-                    if(call.name=="apply_patch"&&settings_.approved_edits&&repository_context){prepared_patch=PatchTool(persistence_,*workspace_,*repository_context).prepare(call.arguments_json,token);guidance_ready=prepared_patch.has_value()&&guidance_ready;}
+                    if(call.name=="apply_patch"&&settings_.approved_edits&&selected_repository_context){prepared_patch=PatchTool(persistence_,*selected_workspace,*selected_repository_context,run_workspace_tools?run_workspace_tools->workspace_id():selected_folder_id,selected_folder_id,run_workspace_tools?run_workspace_tools->revision():1,selected_folder_index==0).prepare(call.arguments_json,token);guidance_ready=prepared_patch.has_value()&&guidance_ready;}
             if(!guidance_ready){output={{"error",{{"code","repository_instructions_required"},{"message","No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}}}};}
                     else if(call.name=="list_skills"&&repository_context){try{if(mcp_compact_object(call.arguments_json)!="{}")throw std::invalid_argument("Skill listing takes no arguments");}catch(const McpProtocolError&){throw std::invalid_argument("Invalid skill listing arguments");}output=Json::parse(repository_context->skills().catalogue_json(token));}
                     else if(call.name=="load_skill"&&repository_context){const auto base_bytes=agent_instructions.size()+(settings_.instruction_policy.instructions.empty()?0:instruction_prefix.size()+settings_.instruction_policy.instructions.size());output=Json::parse(repository_context->activate_skill(call.arguments_json,base_bytes,token));}
@@ -753,9 +753,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     } else if(call.name=="create_file" && settings_.approved_edits) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(CreateExecutor(persistence_,*selected_workspace,run_workspace_tools?run_workspace_tools->workspace_id():selected_folder_id,selected_folder_id,run_workspace_tools?run_workspace_tools->revision():1).invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance)));
-                    } else if(call.name=="apply_patch"&&settings_.approved_edits&&repository_context&&prepared_patch){
+                    } else if(call.name=="apply_patch"&&settings_.approved_edits&&selected_repository_context&&prepared_patch){
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
-                        output=Json::parse(PatchTool(persistence_,*workspace_,*repository_context).execute(operation_id(),id,std::move(*prepared_patch),expiry,token));
+                        output=Json::parse(PatchTool(persistence_,*selected_workspace,*selected_repository_context,run_workspace_tools?run_workspace_tools->workspace_id():selected_folder_id,selected_folder_id,run_workspace_tools?run_workspace_tools->revision():1,selected_folder_index==0).execute(operation_id(),id,std::move(*prepared_patch),expiry,token));
                     } else if(call.name=="run_process" && process_) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(run_workspace_tools?process_->invoke_in_workspace(operation_id(),id,call.arguments_json,expiry,*run_workspace_tools,selected_folder_index,token,std::move(guidance),true):process_->invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance),true));

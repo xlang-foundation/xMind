@@ -6,8 +6,8 @@
 namespace agentflow {
 using Json=nlohmann::json;
 ModelToolDefinition PatchTool::definition(){return {"apply_patch",
-    "Propose a UTF-8 multi-file workspace patch. Use *** Begin Patch and *** End Patch, with *** Add File: path (+ lines), *** Update File: path (@@ and space/+/- lines), optional *** Move to: destination after Update, or *** Delete File: path. Paths must be relative. Exact context only; ambiguous/fuzzy matches are rejected. create_parents explicitly permits missing folders. Each file requires its own controller approval. The batch is not atomic: successful earlier changes remain if a later file is denied, fails or becomes uncertain. The result reports actual per-file outcomes; never claim all files changed from a partial result. Changed repository/skill guidance must reach the next model request before more effects. Never retry an uncertain effect.",
-    R"({"type":"object","properties":{"patch_text":{"type":"string","minLength":1,"maxLength":65536},"create_parents":{"type":"boolean"}},"required":["patch_text"],"additionalProperties":false})"};}
+    "Propose a UTF-8 multi-file workspace patch. Use *** Begin Patch and *** End Patch, with *** Add File: path (+ lines), *** Update File: path (@@ and space/+/- lines), optional *** Move to: destination after Update, or *** Delete File: path. Paths must be relative. Set folder_id to an admitted workspace member to target it; one patch call cannot span roots. Exact context only; ambiguous/fuzzy matches are rejected. create_parents explicitly permits missing folders. Each file requires its own controller approval. The batch is not atomic: successful earlier changes remain if a later file is denied, fails or becomes uncertain. The result reports actual per-file outcomes; never claim all files changed from a partial result. Changed repository/skill guidance must reach the next model request before more effects. Never retry an uncertain effect.",
+    R"({"type":"object","properties":{"patch_text":{"type":"string","minLength":1,"maxLength":65536},"create_parents":{"type":"boolean"},"folder_id":{"type":"string","description":"Optional registered workspace folder ID; omit it to use the primary folder."}},"required":["patch_text"],"additionalProperties":false})"};}
 std::optional<InstructionPrecondition> PatchTool::guidance(const std::vector<std::string>& scopes,std::stop_token cancel){
     if(scopes.empty()||scopes.size()>2)throw std::invalid_argument("Patch file guidance requires one or two scopes");
     bool ready=true;for(const auto& directory:scopes){const auto current=context_.ready(directory,cancel);ready=current&&ready;}
@@ -43,7 +43,9 @@ std::optional<PreparedPatch> PatchTool::prepare(const std::string& arguments,std
     if(arguments.size()>262144)throw std::invalid_argument("Encoded patch arguments exceed bounds");
     Json input;try{input=Json::parse(mcp_compact_object(arguments));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid strict patch arguments");}
     if(!input.contains("patch_text")||!input["patch_text"].is_string()||(input.contains("create_parents")&&!input["create_parents"].is_boolean()))throw std::invalid_argument("Invalid patch fields");
-    for(auto it=input.begin();it!=input.end();++it)if(it.key()!="patch_text"&&it.key()!="create_parents")throw std::invalid_argument("Unsupported patch authority field");
+    if(input.contains("folder_id")&&(!input["folder_id"].is_string()||input["folder_id"].get<std::string>()!=folder_id_))throw ToolAccessDenied("Patch folder does not match its admitted workspace folder");
+    if(!primary_folder_&&!input.contains("folder_id"))throw ToolAccessDenied("An attached patch folder must be selected explicitly");
+    for(auto it=input.begin();it!=input.end();++it)if(it.key()!="patch_text"&&it.key()!="create_parents"&&it.key()!="folder_id")throw std::invalid_argument("Unsupported patch authority field");
     if(cancel.stop_requested())throw ToolCancelled("Patch preparation was cancelled");
     const auto files=parse_file_patch(input.at("patch_text").get<std::string>());const auto create_parents=input.value("create_parents",false);
     bool ready=true;
@@ -58,7 +60,7 @@ std::optional<PreparedPatch> PatchTool::prepare(const std::string& arguments,std
     return prepared;
 }
 std::string PatchTool::execute(std::string patch_id,std::string run,PreparedPatch prepared,std::int64_t expiry,std::stop_token cancel){
-    return PatchExecutor(store_,workspace_).execute(std::move(patch_id),std::move(run),std::move(prepared.plan),expiry,cancel,std::move(prepared.guidance),[this](std::size_t,const WorkspacePatchFilePlan& plan,std::stop_token token){
+    return PatchExecutor(store_,workspace_,owner_workspace_,folder_id_,workspace_revision_).execute(std::move(patch_id),std::move(run),std::move(prepared.plan),expiry,cancel,std::move(prepared.guidance),[this](std::size_t,const WorkspacePatchFilePlan& plan,std::stop_token token){
         auto current=guidance(directories(plan,token),token);if(!current)throw ToolGuidanceChanged("Updated patch scope guidance must reach the model before another proposal");return std::move(*current);
     });
 }

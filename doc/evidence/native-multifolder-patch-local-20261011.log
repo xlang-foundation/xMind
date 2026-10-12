@@ -1,0 +1,17 @@
+Test project D:/CantorAI2026/xMind/build/native
+    Start 41: native_graph_runner_contract
+1/6 Test #41: native_graph_runner_contract ..........   Passed    3.18 sec
+    Start 73: native_agent_runner_contract
+2/6 Test #73: native_agent_runner_contract ..........   Passed    6.62 sec
+    Start 76: native_file_patch_contract
+3/6 Test #76: native_file_patch_contract ............   Passed    0.01 sec
+    Start 81: native_patch_file_executor_contract
+4/6 Test #81: native_patch_file_executor_contract ...   Passed    1.41 sec
+    Start 82: native_patch_executor_contract
+5/6 Test #82: native_patch_executor_contract ........   Passed    1.58 sec
+    Start 83: native_patch_tool_contract
+6/6 Test #83: native_patch_tool_contract ............   Passed    0.92 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) =  13.74 sec

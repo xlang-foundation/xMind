@@ -9,7 +9,7 @@ std::string PatchExecutor::execute(std::string patch_id,std::string run,Workspac
     if(plan.workspace_id!=workspace_.identity())throw ToolAccessDenied("Patch batch belongs to another workspace");
     if(plan.files.empty()||plan.files.size()>128)throw std::invalid_argument("Invalid patch batch size");
     if(guidance.empty())guidance.resize(plan.files.size());if(guidance.size()!=plan.files.size())throw std::invalid_argument("Patch guidance count differs");
-    PatchFileExecutor file_executor(store_,workspace_);Json manifest=Json::array();
+    PatchFileExecutor file_executor(store_,workspace_,owner_workspace_,folder_id_,workspace_revision_);Json manifest=Json::array();
     for(std::size_t index=0;index<plan.files.size();++index){
         const auto id=patch_id+"-"+std::to_string(index);
         auto spec=file_executor.proposal(id,run,plan.files[index],{patch_id,index,plan.files.size()},guidance[index]);const auto payload=Json::parse(spec.arguments_json);
@@ -69,7 +69,7 @@ std::string PatchExecutor::execute(std::string patch_id,std::string run,Workspac
         catch(...){throw EditOutcomeUnrecorded("Patch coordination failed; inspect recorded per-file outcomes before further effects");}
         try{
             const auto operation=store_.operation(id).get();
-            if(operation.spec.run_id!=run||operation.spec.workspace!=plan.workspace_id||operation.spec.tool!="patch_file")throw EditOutcomeUnrecorded("Patch operation ownership differs");
+            if(operation.spec.run_id!=run||operation.spec.workspace!=owner_workspace_||operation.spec.tool!="patch_file")throw EditOutcomeUnrecorded("Patch operation ownership differs");
             if(operation.state==OperationState::executing||operation.state==OperationState::ready||operation.state==OperationState::awaiting_approval)throw EditOutcomeUnrecorded("Patch file remains unresolved");
             auto outcome=manifest[index];outcome["state"]=to_string(operation.state);outcome["result"]=Json::parse(operation.result_json);outcomes.push_back(outcome);
             if(operation.state==OperationState::succeeded){

@@ -9,7 +9,8 @@ OperationSpec PatchFileExecutor::proposal(const std::string& id,const std::strin
     if(identity.patch_id.empty()||identity.patch_id.size()>192||identity.patch_id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos||
        identity.file_count<1||identity.file_count>128||identity.index>=identity.file_count||id!=identity.patch_id+"-"+std::to_string(identity.index))throw std::invalid_argument("Invalid patch operation identity");
     guidance.validate();const auto workspace=workspace_.identity();
-    Json payload={{"patch_id",identity.patch_id},{"patch_index",identity.index},{"patch_file_count",identity.file_count}};
+    Json payload={{"patch_id",identity.patch_id},{"patch_index",identity.index},{"patch_file_count",identity.file_count},
+        {"workspace_id",owner_workspace_},{"folder_id",folder_id_},{"workspace_revision",workspace_revision_},{"target_workspace_id",workspace}};
     std::visit([&](const auto& file){
         using T=std::decay_t<decltype(file)>;
         if constexpr(std::is_same_v<T,WorkspaceCreatePlan>){
@@ -39,7 +40,7 @@ OperationSpec PatchFileExecutor::proposal(const std::string& id,const std::strin
     }
     if(guidance.verify)payload["repository_guidance"]=Json::parse(guidance.metadata_json);
     auto source=payload.dump();if(source.size()>2*1024*1024)throw std::invalid_argument("Encoded patch proposal exceeds the durable operation limit");
-    return {run,workspace,"patch_file",std::move(source)};
+    return {run,owner_workspace_,"patch_file",std::move(source)};
 }
 std::string PatchFileExecutor::execute(const std::string& id,const std::string& run,WorkspacePatchFilePlan plan,
     PatchFileIdentity identity,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance){
