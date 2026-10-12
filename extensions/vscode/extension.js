@@ -445,6 +445,15 @@ async function activate(context) {
           await readAgentSelection();
         } else if(message.type==='open-terminal'){
           try{await openTerminalView();}catch(error){post({type:'status',text:error.message});vscode.window.showErrorMessage(error.message);}
+        } else if(message.type==='git-menu'){
+          if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before using Git with xMind.');
+          const choice=await vscode.window.showQuickPick([
+            {label:'Git status',description:'List changed files in a workspace folder',command:'agentflow.gitStatus'},
+            {label:'Review Git diff',description:'Inspect a native workspace patch in VS Code',command:'agentflow.gitDiff'},
+            {label:'Initialize Git repository',description:'Create .git metadata in a selected workspace folder',command:'agentflow.initializeGit'}
+          ],{title:'xMind: Workspace Git',placeHolder:'Choose a Git operation'});
+          if(!choice||panel!==view)return;
+          await vscode.commands.executeCommand(choice.command);
         } else if(message.type==='mcp-refresh'){
           await readMcp();
         } else if(['mcp-start','mcp-renew','mcp-cancel','mcp-open'].includes(message.type)){

@@ -19,6 +19,9 @@ function renderer(){
   for(const file of ['patch-review.js','node_modules/marked/lib/marked.umd.js','node_modules/dompurify/dist/purify.min.js','media/chat.js']) dom.window.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
   return {dom,posted,send:data=>dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}))};
 }
+test('workspace Git has an accessible SVG toolbar entry that opens the native action menu',()=>{
+ const r=renderer(),doc=r.dom.window.document;try{const button=doc.getElementById('git');assert.equal(button.getAttribute('aria-label'),'Workspace Git');assert.ok(button.querySelector('svg'));button.click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'git-menu'});}finally{r.dom.window.close();}
+});
 test('MCP Settings renders native outcomes and sends only server-bound sign-in intent',()=>{
  const r=renderer(),doc=r.dom.window.document;try{
   doc.getElementById('settings').click();assert.equal(r.posted.at(-1).type,'mcp-refresh');assert.ok(doc.querySelector('#provider-settings #mcp-settings'));assert.equal(doc.querySelector('footer #mcp-settings'),null);

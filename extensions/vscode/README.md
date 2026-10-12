@@ -96,11 +96,12 @@ grant it, and uncertain effects offer no retry.
 
 The command palette also provides **xMind: Show Git Status**, **xMind: Review
 Git Diff**, and **xMind: Initialize Git Repository** for the connected VS Code
-workspace. Review Git Diff reads patches from Native, prompts for a base only
-when the backend cannot infer one, and opens the selected patch in VS Code's
-diff language mode. These source commands are covered by the extension-host
-suite; the updated package is installed, while rendered approval, process-run
-and runtime-upgrade workflows remain unverified.
+workspace. The sidebar toolbar's **Workspace Git** menu exposes the same three
+guarded commands beside the conversation and terminal controls. Review Git Diff
+reads patches from Native, prompts for a base only when the backend cannot
+infer one, and opens the selected patch in VS Code's diff language mode. The
+menu is covered by source renderer/host tests; packaging and actual installed
+VS Code display for this toolbar change remain pending.
 
 The footer displays the backend's actual file policy when Native advertises it:
 **File changes require approval** or **Read only: file changes disabled**.
