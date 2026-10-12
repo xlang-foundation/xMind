@@ -49,14 +49,39 @@ Opened workspaces are never searched for executable profiles. Native xMind
 reads and imports the file; hosts pass only its path. The protected profile
 records the path and content digest. Editing that file requires the managed owner handoff;
 an explicit `profiles: []` retires configured IDs, while removing the file does
-not silently clear the saved registry. No process profile or shell is seeded
-by default. `run_process` appears only when a trusted profile is registered.
+not silently clear the saved registry. On a fresh Windows server with no
+process registry or explicit process config, xMind registers its built-in
+PowerShell profile (with `cmd.exe` as a system fallback). Default-profile
+commands run without a per-command approval prompt for the local coding
+workflow. A persisted custom or explicitly empty
+registry is preserved and never reseeded. The trusted `auto_approve` setting
+is available only to an administrator who intentionally configures a profile.
 
 This closes profile enrollment/refresh for the managed views; it does not
 complete a coding shell. Shell discovery and command semantics, full restart
 reconciliation, rendered managed-client process acceptance, and full OpenCode
 command parity remain open. The existing PTY test uses
 synthetic shell I/O and does not run a command in the user's workspace.
+
+## Default Windows shell bootstrap — 2026-10-11
+
+On Windows startup, a process registry with no stored value receives the
+built-in PowerShell profile. The server resolves the absolute system
+PowerShell executable, fixes its no-profile/noninteractive command prefix,
+binds its executable identity, assigns a bounded timeout and stores the
+registry through embedded xlang3. If that PowerShell executable is absent,
+the system `cmd.exe` profile is used. Both defaults have `auto_approve: true`;
+commands still retain durable process identity and result records. A saved custom registry or
+explicitly empty list prevents bootstrap, and later startup never repopulates
+it. The public process-profile catalogue omits executable paths and bindings.
+
+The process-configuration contract verifies first-run initialization,
+no-prompt state, persistence and resistance to custom/empty registry
+replacement. The actual Release managed-local-view contract starts a fresh
+workspace profile without `--process-config` and verifies the public catalogue
+and its path secrecy. Release build plus process configuration, process
+executor and agent-process HTTP contracts pass; rendered browser/VS Code
+command execution and model-driven project build acceptance remain open.
 
 ## Background command parity contract
 
@@ -189,7 +214,7 @@ The pinned OpenCode reference is `v2.0.16`, commit `3a103fe0aff726a4edc7492f03f7
 
 ## First native component
 
-The first component runs a foreground command through a trusted, explicitly configured Windows executable. It must support build/test tools with literal argument vectors; a separately configured shell profile can interpret a reviewed command string. Executable/profile lookup belongs to the backend, never the model or editor. Models cannot select an arbitrary executable path, supply environment values, disable ownership, or declare a command safe. All commands require an exact recorded approval, including commands described as read-only.
+The first component runs a foreground command through a trusted Windows executable. The managed Windows server registers a built-in PowerShell profile when no process registry exists, falling back to system `cmd.exe`; these built-in local profiles run without per-command approval prompts. Explicit trusted configuration may register another executable or set `auto_approve: true`. Executable/profile lookup belongs to the backend, never the model or editor. Models cannot select an arbitrary executable path, supply environment values, disable ownership, or declare a command safe.
 
 Use a dedicated C++ process adapter and executor. The existing MCP stdio adapter is a protocol transport: it discards stderr content and requires newline-framed writes. Passing build output through it would lose evidence and mix protocol ownership with coding processes. Common Windows handle/quoting/launch helpers can be factored only with regression coverage for existing MCP and schema workers.
 
@@ -197,7 +222,7 @@ The prepared adapter supports trusted absolute local-drive directories with reta
 
 The executor uses the embedded-xlang3 operation journal. Backend-created immutable profiles choose an executable and fixed prefix; model arguments choose a registered profile, literal argument vector, relative directory and bounded timeout. A proposal retains the complete launched argument vector, profile revision, directory identity and budgets. It claims the workspace and stable `process-profile:<id>` resource before dispatch. The adapter retains the enclosing workspace identity as well as the selected nested directory. Completed zero/nonzero exits are acknowledged process results with `independently_verified:false`; invalid text bytes are encoded as hex. Timeout/cancellation after dispatch and failed output observation preserve quarantine. Failed outcome storage leaves the executing claim for restart and causes the conditional agent loop to fail-stop through the existing service health path. The direct executor contract passed actual SQLite outcome faults, recovery, another-workspace quarantine, real timeout and cancellation after an actual file effect at the exact partial CI source scopes above. This does not establish the still-failing adapter contract or a complete process gate.
 
-`AgentSettings.process_profiles` conditionally advertises/routes `run_process` through this executor. Source now connects the persisted registry through server startup and offline administration; no profile is seeded by default. Independent model/server/admin/CLI continuation and restart tests are prepared with synthetic inference and actual file/process effects. Populated editor execution, credential/environment configuration, durable output streaming, retained full-output artifacts and broader restart/background behavior remain incomplete. A synchronous adapter observer must be bounded by its caller; the adapter does not preempt an arbitrary blocked C++ callback.
+`AgentSettings.process_profiles` conditionally advertises/routes `run_process` through this executor. Source connects the persisted registry through server startup and offline administration; a missing registry receives the built-in trusted Windows shell, while a saved empty list stays empty. Independent model/server/admin/CLI continuation and restart tests use synthetic inference and actual file/process effects. Populated editor execution, credential/environment configuration, durable output streaming, retained full-output artifacts and broader restart/background behavior remain incomplete. A synchronous adapter observer must be bounded by its caller; the adapter does not preempt an arbitrary blocked C++ callback.
 
 ## Durable foreground output
 

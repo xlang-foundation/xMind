@@ -55,6 +55,7 @@ std::set<std::string> retired(const Json& saved,const std::vector<ProcessProfile
 }
 }
 std::vector<ProcessProfile> ProcessConfigurationStore::load(){const auto saved=stored(store_);const auto values=list(saved,true);(void)retired(saved,values);return values;}
+std::vector<ProcessProfile> ProcessConfigurationStore::load_or_initialize(const std::function<std::string()>& defaults){try{(void)store_.information("native-process","profiles").get();}catch(const NotFound&){return apply(defaults());}return load();}
 std::vector<ProcessProfile> ProcessConfigurationStore::apply(const std::string& source,bool replacement_bootstrap) {
     const auto desired=parse(source);fields(desired,{"profiles"});auto values=list(desired,false);const auto saved=stored(store_);const auto previous=list(saved,true);auto retired_ids=retired(saved,previous);
     std::map<std::string,ProcessProfile> old;for(const auto& p:previous)old.emplace(p.id,p);std::set<std::string> active;Json profiles=Json::array();

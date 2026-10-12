@@ -18,12 +18,13 @@ struct Directory {
 int main(int argc,char** argv){if(argc!=4)return 2;try{
     Directory folder;const auto executable=folder.path/"actual-native-copy.exe",workspace=folder.path/"workspace";std::filesystem::copy_file(std::filesystem::u8path(argv[1]),executable);std::filesystem::create_directory(workspace);
     const auto database=(folder.path/"state.sqlite").string();const std::vector<std::string> imports{argv[2],argv[3]};
-    Json p{{"id","fixture"},{"executable",executable.string()},{"prefix_arguments",Json::array({"literal fixture argument"})},{"max_timeout_ms",120000}};
+    Json p{{"id","fixture"},{"executable",executable.string()},{"prefix_arguments",Json::array({"literal fixture argument"})},{"max_timeout_ms",120000},{"auto_approve",true}};
     const auto desired=[&]{return Json{{"profiles",Json::array({p})}}.dump();};
-    const auto yaml=[&]{return std::string("profiles:\n  - id: fixture\n    executable: ")+Json(executable.string()).dump()+"\n    prefix_arguments:\n      - literal fixture argument\n    max_timeout_ms: 120000\n";};std::string binding;
+    const auto yaml=[&]{return std::string("profiles:\n  - id: fixture\n    executable: ")+Json(executable.string()).dump()+"\n    prefix_arguments:\n      - literal fixture argument\n    max_timeout_ms: 120000\n    auto_approve: true\n";};std::string binding;
     {
-        PersistenceService store(database,imports);ProcessConfigurationStore configurations(store);require(configurations.load().empty(),"Absent registry must not invent executable profiles");
-        const auto first=configurations.apply(yaml());require(first.size()==1,"YAML import must create exactly one profile");binding=first[0].executable_id;require(first[0].revision==1 && binding==ForegroundProcess::executable_identity(executable.string()),"Import must bind an actual native file and assign revision");
+        PersistenceService store(database,imports);ProcessConfigurationStore configurations(store);require(configurations.load().empty(),"Absent registry must remain empty until the host explicitly initializes its built-in profiles");
+        const auto first=configurations.load_or_initialize(yaml);require(first.size()==1&&first[0].auto_approve,"First-run trusted shell initialization must not require approval before each command");binding=first[0].executable_id;require(first[0].revision==1 && binding==ForegroundProcess::executable_identity(executable.string()),"Initialization must bind an actual native file and assign revision");
+        require(configurations.load_or_initialize([]()->std::string{throw std::runtime_error("Defaults must remain unevaluated when a registry is saved");})[0].revision==1,"A saved custom profile registry must never be replaced by built-in defaults");
         require(configurations.apply(desired())[0].revision==1,"JSON and YAML imports of identical metadata/bytes must preserve revision");const auto before=store.information("native-process","profiles").get();
         for(const auto* field:{"revision","executable_id","environment","credentials"}){auto invalid=p;invalid[field]="untrusted fixture value";rejects<std::invalid_argument>([&]{configurations.apply(Json{{"profiles",Json::array({invalid})}}.dump());});}
         auto relative=p;relative["executable"]="relative.exe";rejects<std::invalid_argument>([&]{configurations.apply(Json{{"profiles",Json::array({relative})}}.dump());});
@@ -37,7 +38,7 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
     }
     {
         PersistenceService store(database,imports);ProcessConfigurationStore configurations(store);const auto restored=configurations.load();require(restored.size()==1 && restored[0].revision==3 && restored[0].executable_id==binding,"Actual binding and metadata must survive native store reopen");
-        configurations.apply(R"({"profiles":[]})");rejects<Conflict>([&]{configurations.apply(desired());});require(configurations.load().empty(),"Retired profile IDs must not be reused");store.close();
+        configurations.apply(R"({"profiles":[]})");rejects<Conflict>([&]{configurations.apply(desired());});require(configurations.load().empty(),"Retired profile IDs must not be reused");require(configurations.load_or_initialize([]()->std::string{throw std::runtime_error("Defaults must remain unevaluated for an explicit empty registry");}).empty(),"An explicitly stored empty profile list must not be repopulated on startup");store.close();
     }
     std::cout<<"Native process configuration passed actual executable binding/hash changes, embedded-xlang3 storage/reopen, backend revisions, rejected replacement preservation, spoof/plain environment/credential/duplicate rejection and permanent profile retirement. No child/model/UI activation claimed.\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

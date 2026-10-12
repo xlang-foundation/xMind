@@ -88,7 +88,10 @@ ModelToolDefinition ProcessExecutor::definition() const {
     properties["timeout_ms"]={{"type","integer"},{"minimum",1},{"maximum",600000}};
     properties["background"]={{"type","boolean"}};
     const auto schema=Json{{"type","object"},{"properties",properties},{"required",Json::array({"profile","arguments"})},{"additionalProperties",false}}.dump();
-    return {"run_process","Run a command through a registered backend profile with literal arguments and a relative workspace directory. The trusted backend profile determines whether each operation requires approval. Set background=true for long-running work; then call wait_process with the returned job_id before giving a final answer. Background commands keep their exact authorization, timeout and workspace/profile resource lock. A configured shell profile may interpret its arguments as shell text.",
+    std::string description="Run a command through a registered backend profile with literal arguments and a relative workspace directory. The trusted backend profile determines whether each operation requires approval. Set background=true for long-running work; then call wait_process with the returned job_id before giving a final answer. Background commands keep their exact authorization, timeout and workspace/profile resource lock. A configured shell profile may interpret its arguments as shell text.";
+    if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="powershell";}))description+=" For the powershell profile, pass one complete PowerShell script as arguments[0]; it uses a no-profile, noninteractive PowerShell process and runs without a per-command approval prompt.";
+    if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="cmd";}))description+=" For the cmd profile, pass one complete Windows command as arguments[0]; it uses the system command processor and runs without a per-command approval prompt.";
+    return {"run_process",std::move(description),
         schema};
 }
 ModelToolDefinition ProcessExecutor::wait_definition() const {
