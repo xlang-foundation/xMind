@@ -97,6 +97,19 @@ std::vector<wchar_t> environment(const ProcessConfiguration& config) {
     if(!n || n>=buffer.size())fail("Cannot obtain process system directory");entries[L"SystemRoot"]=std::wstring(buffer.data(),n);
     const auto t=GetTempPathW(static_cast<DWORD>(buffer.size()),buffer.data());if(!t || t>=buffer.size())fail("Cannot obtain process temporary directory");
     entries[L"TEMP"]=std::wstring(buffer.data(),t);entries[L"TMP"]=entries[L"TEMP"];
+    // Keep the child environment useful for ordinary workspace builds while
+    // excluding provider credentials and unrelated secrets inherited by the
+    // xMind server. PATH is required for shells such as PowerShell to resolve
+    // node/npm and the toolchains intentionally installed on this machine.
+    constexpr std::array<const wchar_t*,12> inherited{
+        L"WINDIR",L"PATH",L"ComSpec",L"PATHEXT",L"USERPROFILE",L"LOCALAPPDATA",
+        L"APPDATA",L"HOMEDRIVE",L"HOMEPATH",L"HOME",L"ProgramFiles",L"ProgramFiles(x86)"};
+    for(const auto* name:inherited) {
+        const auto length=GetEnvironmentVariableW(name,buffer.data(),static_cast<DWORD>(buffer.size()));
+        if(!length)continue;
+        if(length>=buffer.size())throw ProcessBeforeDispatchError("Inherited process environment value exceeds limits");
+        entries[name]=std::wstring(buffer.data(),length);
+    }
     if(config.environment.size()>64)throw std::invalid_argument("Process environment exceeds limits");
     for(const auto& [key,value]:config.environment) {
         const auto name=wide(key);if(name.empty() || name.size()>256 || name.find(L'=')!=std::wstring::npos)throw std::invalid_argument("Invalid process environment name");

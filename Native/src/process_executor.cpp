@@ -84,10 +84,11 @@ ModelToolDefinition ProcessExecutor::definition() const {
     properties["profile"]={{"type","string"},{"enum",ids}};
     properties["arguments"]={{"type","array"},{"items",{{"type","string"},{"maxLength",4096}}},{"maxItems",32}};
     properties["workdir"]={{"type","string"},{"maxLength",4096}};
+    properties["folder_id"]={{"type","string"},{"description","Optional registered workspace folder ID; omit it to use the primary folder."}};
     properties["timeout_ms"]={{"type","integer"},{"minimum",1},{"maximum",600000}};
     properties["background"]={{"type","boolean"}};
     const auto schema=Json{{"type","object"},{"properties",properties},{"required",Json::array({"profile","arguments"})},{"additionalProperties",false}}.dump();
-    return {"run_process","Propose a command through a registered backend profile with literal arguments and a relative workspace directory. Always requires controller approval. Set background=true for long-running work; then call wait_process with the returned job_id before giving a final answer. Background commands keep their exact approval, timeout and workspace/profile resource lock. A configured shell profile may interpret its arguments as shell text.",
+    return {"run_process","Run a command through a registered backend profile with literal arguments and a relative workspace directory. The trusted backend profile determines whether each operation requires approval. Set background=true for long-running work; then call wait_process with the returned job_id before giving a final answer. Background commands keep their exact authorization, timeout and workspace/profile resource lock. A configured shell profile may interpret its arguments as shell text.",
         schema};
 }
 ModelToolDefinition ProcessExecutor::wait_definition() const {
@@ -124,9 +125,22 @@ std::string ProcessExecutor::execute_claimed(const std::string& id,const std::st
     catch(...){throw ProcessOutcomeUnrecorded("Claimed process outcome could not be encoded or preserved; recovery is required");}
 }
 std::string ProcessExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background) {
+    return invoke_scoped(id,run,source,expiry,workspace_,root_,workspace_.identity(),workspace_.identity(),1,true,cancel,std::move(guidance),allow_background);
+}
+std::string ProcessExecutor::invoke_in_workspace(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,const WorkspaceToolSet& membership,std::size_t folder_index,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background){
+    if(folder_index>=membership.folders().size()||membership.revision()<1||membership.workspace_id().empty())throw ToolAccessDenied("Process folder is not in the admitted workspace snapshot");
+    const auto& binding=membership.folders()[folder_index];auto& selected=membership.folder_tools(folder_index);
+    if(selected.identity()!=binding.folder_id||selected.root_path()!=binding.root)throw ToolAccessDenied("Process folder identity differs from the admitted workspace snapshot");
+    return invoke_scoped(id,run,source,expiry,selected,binding.root,membership.workspace_id(),binding.folder_id,membership.revision(),folder_index==0,cancel,std::move(guidance),allow_background);
+}
+std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,WorkspaceTools& workspace,const std::string& root,std::string workspace_id,std::string folder_id,std::int64_t workspace_revision,bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background) {
     if(source.size()>65536)throw std::invalid_argument("Process arguments exceed limits");
+    if(workspace_id.empty()||folder_id.empty()||workspace_revision<1||workspace.identity()!=folder_id||workspace.root_path()!=root)throw ToolAccessDenied("Process folder binding is invalid");
     Json args;try{args=Json::parse(mcp_compact_object(source));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid process argument JSON");}
-    for(auto it=args.begin();it!=args.end();++it)if(it.key()!="profile" && it.key()!="arguments" && it.key()!="workdir" && it.key()!="timeout_ms" && it.key()!="background")throw std::invalid_argument("Unknown process argument");
+    if(!args.is_object())throw std::invalid_argument("Invalid process argument object");
+    for(auto it=args.begin();it!=args.end();++it)if(it.key()!="profile" && it.key()!="arguments" && it.key()!="workdir" && it.key()!="folder_id" && it.key()!="timeout_ms" && it.key()!="background")throw std::invalid_argument("Unknown process argument");
+    if(args.contains("folder_id")&&(!args["folder_id"].is_string()||args["folder_id"].get<std::string>()!=folder_id))throw ToolAccessDenied("Process folder does not match its admitted workspace folder");
+    if(!args.contains("folder_id")&&!primary_folder)throw ToolAccessDenied("An attached process folder must be selected explicitly");
     if(!args.contains("profile") || !args["profile"].is_string() || !args.contains("arguments") || !args["arguments"].is_array() || args["arguments"].size()>32)throw std::invalid_argument("Invalid process profile/arguments");
     const auto selected=args["profile"].get<std::string>();const auto found=std::find_if(profiles_.begin(),profiles_.end(),[&](const auto& p){return p.id==selected;});
     if(found==profiles_.end())throw std::invalid_argument("Unknown registered process profile");
@@ -140,14 +154,15 @@ std::string ProcessExecutor::invoke(const std::string& id,const std::string& run
     const auto path=std::filesystem::u8path(relative);
     if(relative.empty() || path.is_absolute() || path.has_root_name() || path.has_root_directory())throw ToolAccessDenied("Process workdir must be relative to its workspace");
     for(const auto& part:path)if(part==L"..")throw ToolAccessDenied("Process directory traversal is forbidden");
-    const auto public_directory_id=workspace_.directory_identity(relative,cancel);
-    launch.workspace_root=root_;launch.workspace_root_id=workspace_.identity();
-    if(ForegroundProcess::directory_identity(root_)!=launch.workspace_root_id)throw ToolAccessDenied("Process workspace path identity changed");
-    launch.working_directory=utf8((std::filesystem::u8path(root_)/path).lexically_normal());launch.working_directory_id=ForegroundProcess::directory_identity(launch.working_directory);
+    const auto public_directory_id=workspace.directory_identity(relative,cancel);
+    launch.workspace_root=root;launch.workspace_root_id=workspace.identity();
+    if(ForegroundProcess::directory_identity(root)!=launch.workspace_root_id)throw ToolAccessDenied("Process workspace path identity changed");
+    launch.working_directory=utf8((std::filesystem::u8path(root)/path).lexically_normal());launch.working_directory_id=ForegroundProcess::directory_identity(launch.working_directory);
     if(launch.working_directory_id!=public_directory_id)throw ToolAccessDenied("Process working directory changed during public workspace admission");
-    OperationSpec spec{run,launch.workspace_root_id,"run_process",Json{{"profile_id",found->id},{"profile_revision",found->revision},{"executable",launch.executable},{"executable_id",launch.executable_id},{"arguments",launch.arguments},{"workdir",utf8(path.lexically_normal())},{"directory_id",launch.working_directory_id},{"timeout_ms",launch.timeout.count()},{"output_limit",launch.output_limit},{"background",background}}.dump(),{"process-profile:"+found->id}};
+    OperationSpec spec{run,workspace_id,"run_process",Json{{"workspace_id",workspace_id},{"workspace_revision",workspace_revision},{"folder_id",folder_id},{"target_workspace_id",launch.workspace_root_id},{"profile_id",found->id},{"profile_revision",found->revision},{"executable",launch.executable},{"executable_id",launch.executable_id},{"arguments",launch.arguments},{"workdir",utf8(path.lexically_normal())},{"directory_id",launch.working_directory_id},{"timeout_ms",launch.timeout.count()},{"output_limit",launch.output_limit},{"background",background}}.dump(),{"process-profile:"+found->id}};
     guidance.validate();if(guidance.verify){auto payload=Json::parse(spec.arguments_json);payload["repository_guidance"]=Json::parse(guidance.metadata_json);spec.arguments_json=payload.dump();}
-    PermissionWaiter(store_).acquire(id,spec,expiry,cancel);
+    const auto trusted_actor=found->auto_approve?"trusted-process-profile:"+found->id:std::string{};
+    PermissionWaiter(store_).acquire(id,spec,expiry,cancel,trusted_actor);
     auto finish_before_dispatch=[&](const std::string& reason){try{store_.finish_operation(id,OperationState::failed,Json{{"reason",reason}}.dump()).get();}catch(...){throw ProcessOutcomeUnrecorded("Process outcome could not be recorded; claimed-effect recovery is required");}};
     if(guidance.verify){try{guidance.verify(cancel);}catch(...){finish_before_dispatch("repository_guidance_changed_or_unavailable_before_effect");throw;}}
     if(!background)return execute_claimed(id,run,found->id,std::move(launch),cancel);

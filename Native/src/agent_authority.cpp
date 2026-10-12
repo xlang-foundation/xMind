@@ -192,7 +192,7 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
         text(profile.executable_id,4096);
         encoded["process_profiles"].push_back({{"id",profile.id},
         {"revision",profile.revision},{"executable",profile.executable},{"executable_id",profile.executable_id},
-        {"prefix_arguments",profile.prefix_arguments},{"max_timeout_ms",profile.max_timeout.count()}});
+        {"prefix_arguments",profile.prefix_arguments},{"max_timeout_ms",profile.max_timeout.count()},{"auto_approve",profile.auto_approve}});
     }
     for(const auto& profile:settings.language_servers){
         Json environment=Json::array();for(const auto& [name,value]:profile.environment)environment.push_back({{"name",name},{"value_sha256",digest(value)}});

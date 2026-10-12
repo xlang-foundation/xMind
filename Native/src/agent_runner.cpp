@@ -720,11 +720,12 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 try {
                     bool guidance_ready=true;InstructionPrecondition guidance;std::optional<PreparedPatch> prepared_patch;
                     RepositoryInstructionContext* selected_repository_context=repository_context.get();WorkspaceTools* selected_workspace=workspace_.get();std::string selected_folder_id=workspace_?workspace_->identity():std::string{};
-                    const bool folder_scoped=call.name=="read_file"||call.name=="edit_file"||call.name=="create_file"||call.name=="list_files"||call.name=="search_files"||call.name=="glob_files";
+                    const bool folder_scoped=call.name=="read_file"||call.name=="edit_file"||call.name=="create_file"||call.name=="list_files"||call.name=="search_files"||call.name=="glob_files"||call.name=="run_process";
+                    std::size_t selected_folder_index=0;
                     Json scoped_args;
                     if(folder_scoped){try{scoped_args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid scoped tool JSON");}
-                        if(run_workspace_tools){std::size_t target_index=0;if(scoped_args.contains("folder_id")){if(!scoped_args["folder_id"].is_string())throw std::invalid_argument("Workspace folder ID must be text");target_index=run_workspace_tools->folder_index(scoped_args["folder_id"].get<std::string>());}selected_workspace=&run_workspace_tools->folder_tools(target_index);selected_folder_id=run_workspace_tools->folders()[target_index].folder_id;
-                            if(target_index>0){active_attached_guidance.insert(selected_folder_id);auto found=attached_repository_contexts.find(selected_folder_id);if(found==attached_repository_contexts.end()){auto sources=selected_workspace->repository_instructions(".",token);auto context=std::make_unique<RepositoryInstructionContext>(*selected_workspace,sources);if(sources.empty())context->prepare(token);found=attached_repository_contexts.emplace(selected_folder_id,std::move(context)).first;}selected_repository_context=found->second.get();}
+                        if(run_workspace_tools){if(scoped_args.contains("folder_id")){if(!scoped_args["folder_id"].is_string())throw std::invalid_argument("Workspace folder ID must be text");selected_folder_index=run_workspace_tools->folder_index(scoped_args["folder_id"].get<std::string>());}selected_workspace=&run_workspace_tools->folder_tools(selected_folder_index);selected_folder_id=run_workspace_tools->folders()[selected_folder_index].folder_id;
+                            if(selected_folder_index>0){active_attached_guidance.insert(selected_folder_id);auto found=attached_repository_contexts.find(selected_folder_id);if(found==attached_repository_contexts.end()){auto sources=selected_workspace->repository_instructions(".",token);auto context=std::make_unique<RepositoryInstructionContext>(*selected_workspace,sources);if(sources.empty())context->prepare(token);found=attached_repository_contexts.emplace(selected_folder_id,std::move(context)).first;}selected_repository_context=found->second.get();}
                         }else if(scoped_args.contains("folder_id")&&scoped_args["folder_id"].get<std::string>()!=selected_folder_id)throw ToolAccessDenied("Folder is not a member of the admitted workspace revision");
                     }
                     if(selected_repository_context&&call.name!="list_skills"&&call.name!="load_skill")guidance_ready=selected_repository_context->skills().ready(token);
@@ -757,7 +758,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         output=Json::parse(PatchTool(persistence_,*workspace_,*repository_context).execute(operation_id(),id,std::move(*prepared_patch),expiry,token));
                     } else if(call.name=="run_process" && process_) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
-                        output=Json::parse(process_->invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance),true));
+                        output=Json::parse(run_workspace_tools?process_->invoke_in_workspace(operation_id(),id,call.arguments_json,expiry,*run_workspace_tools,selected_folder_index,token,std::move(guidance),true):process_->invoke(operation_id(),id,call.arguments_json,expiry,token,std::move(guidance),true));
                     } else if(call.name=="wait_process"&&process_) {
                         output=Json::parse(process_->wait(id,call.arguments_json,token));
                         if(output.value("state",std::string{})=="uncertain")success=false;

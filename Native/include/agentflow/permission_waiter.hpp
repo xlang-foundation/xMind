@@ -15,7 +15,7 @@ class PermissionWaiter {
 public:
     explicit PermissionWaiter(PersistenceService& persistence):persistence_(persistence) {}
     Operation acquire(const std::string& id,const OperationSpec& actual,
-        std::int64_t expires_unix_ms,std::stop_token cancel={});
+        std::int64_t expires_unix_ms,std::stop_token cancel={},std::string trusted_actor={});
 private:
     PersistenceService& persistence_;
 };

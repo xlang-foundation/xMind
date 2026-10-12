@@ -16,6 +16,7 @@ struct ProcessProfile {
     std::vector<std::string> prefix_arguments;
     std::chrono::milliseconds max_timeout{120000};
     std::string executable_id;
+    bool auto_approve=false;
 };
 // Backend-owned immutable profile snapshot. The model chooses a registered ID
 // and literal arguments, never an executable, environment, identity or grant.
@@ -32,11 +33,18 @@ public:
     const std::vector<ProcessProfile>& profiles() const noexcept{return profiles_;}
     std::string invoke(const std::string& operation_id,const std::string& run_id,
         const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={},bool allow_background=false);
+    std::string invoke_in_workspace(const std::string& operation_id,const std::string& run_id,
+        const std::string& arguments_json,std::int64_t expires_unix_ms,const WorkspaceToolSet& membership,
+        std::size_t folder_index,std::stop_token cancel={},InstructionPrecondition guidance={},bool allow_background=true);
     std::string wait(const std::string& run_id,const std::string& arguments_json,std::stop_token cancel={});
     std::vector<std::string> join_run(const std::string& run_id,std::stop_token cancel={});
 private:
     struct Worker {std::shared_ptr<std::atomic_bool> done;std::jthread thread;};
     void reap_workers();
+    std::string invoke_scoped(const std::string& operation_id,const std::string& run_id,
+        const std::string& arguments_json,std::int64_t expires_unix_ms,WorkspaceTools& workspace,
+        const std::string& root,std::string workspace_id,std::string folder_id,std::int64_t workspace_revision,
+        bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background);
     std::string execute_claimed(const std::string& operation_id,const std::string& run_id,const std::string& profile_id,
         ProcessConfiguration launch,std::stop_token cancel);
     PersistenceService& store_;

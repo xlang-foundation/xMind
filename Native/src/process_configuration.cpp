@@ -29,13 +29,14 @@ Json parse(const std::string& source){
     catch(const std::invalid_argument&){throw std::invalid_argument("Invalid process configuration JSON or YAML");}
 }
 ProcessProfile profile(const Json& value,bool stored) {
-    fields(value,{"id","executable","prefix_arguments","max_timeout_ms","revision","executable_id"});
+    fields(value,{"id","executable","prefix_arguments","max_timeout_ms","auto_approve","revision","executable_id"});
     if(!stored && (value.contains("revision") || value.contains("executable_id")))throw std::invalid_argument("Process revision/executable binding are backend-owned");
     ProcessProfile result;result.id=text(value,"id",64);id(result.id);result.executable=text(value,"executable",32768);
     if(!std::filesystem::u8path(result.executable).is_absolute())throw std::invalid_argument("Process executable must be absolute");
     if(!value.contains("prefix_arguments") || !value["prefix_arguments"].is_array() || value["prefix_arguments"].size()>32)throw std::invalid_argument("Invalid process prefix arguments");
     for(const auto& arg:value["prefix_arguments"]){if(!arg.is_string())throw std::invalid_argument("Process prefix arguments must be strings");auto s=arg.get<std::string>();if(s.size()>4096 || s.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid process prefix argument");result.prefix_arguments.push_back(std::move(s));}
     if(!value.contains("max_timeout_ms") || !value["max_timeout_ms"].is_number_integer() || value["max_timeout_ms"]<1 || value["max_timeout_ms"]>600000)throw std::invalid_argument("Invalid process timeout budget");result.max_timeout=std::chrono::milliseconds(value["max_timeout_ms"].get<std::int64_t>());
+    if(value.contains("auto_approve")&&!value["auto_approve"].is_boolean())throw std::invalid_argument("Invalid process approval mode");result.auto_approve=value.value("auto_approve",false);
     result.revision=0;if(stored){if(!value.contains("revision") || !value["revision"].is_number_integer() || value["revision"]<1 || value["revision"]>revision_limit)throw std::invalid_argument("Invalid stored process revision");result.revision=value["revision"].get<std::int64_t>();result.executable_id=text(value,"executable_id",512);if(!result.executable_id.starts_with("windows-local-executable-v1:"))throw std::invalid_argument("Invalid stored executable binding");}
     return result;
 }
@@ -43,7 +44,7 @@ std::vector<ProcessProfile> list(const Json& value,bool stored) {
     if(!value.contains("profiles") || !value["profiles"].is_array() || value["profiles"].size()>16)throw std::invalid_argument("Invalid process profile count");
     std::set<std::string> seen;std::vector<ProcessProfile> result;for(const auto& item:value["profiles"]){auto p=profile(item,stored);if(!seen.insert(p.id).second)throw std::invalid_argument("Duplicate process profile identity");result.push_back(std::move(p));}return result;
 }
-Json encode(const ProcessProfile& p,bool revision=true){Json value{{"id",p.id},{"executable",p.executable},{"prefix_arguments",p.prefix_arguments},{"max_timeout_ms",p.max_timeout.count()},{"executable_id",p.executable_id}};if(revision)value["revision"]=p.revision;return value;}
+Json encode(const ProcessProfile& p,bool revision=true){Json value{{"id",p.id},{"executable",p.executable},{"prefix_arguments",p.prefix_arguments},{"max_timeout_ms",p.max_timeout.count()},{"auto_approve",p.auto_approve},{"executable_id",p.executable_id}};if(revision)value["revision"]=p.revision;return value;}
 Json stored(PersistenceService& store) {
     try {auto value=parse(store.information("native-process","profiles").get());fields(value,{"version","profiles","retired_ids"});if(!value.contains("version") || value["version"]!=1 || !value.contains("retired_ids") || !value["retired_ids"].is_array() || value["retired_ids"].size()>4096)throw std::invalid_argument("Invalid stored process configuration version");return value;}
     catch(const NotFound&){return {{"version",1},{"profiles",Json::array()},{"retired_ids",Json::array()}};}

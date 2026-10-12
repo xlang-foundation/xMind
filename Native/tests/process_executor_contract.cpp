@@ -1,6 +1,8 @@
 #include "agentflow/process_executor.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "nlohmann/json.hpp"
+#define NOMINMAX
+#include <windows.h>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -86,15 +88,36 @@ int main(int argc,char** argv){if(argc!=7)return 2;try{
         require(Json::parse(result["stdout"]["data"].get<std::string>())["inherited"]==false && store.operation("allowed").get().state==OperationState::succeeded,"Actual output and successful journal required");
         require(output(store,"allowed")==std::pair{result["stdout"]["data"].get<std::string>(),result["stderr"]["data"].get<std::string>()},"Durable channels must equal actual observed output bytes");
         rejects<Conflict>([&]{executor.invoke("allowed","run",args("normal","duplicate.txt"),now()+600000);});require(!std::filesystem::exists(root/"duplicate.txt"),"Duplicate operation must not dispatch again");
+        phase("trusted-process-profile");
+        ProcessExecutor trusted_executor(store,workspace,root.string(),{{"trusted-fixture",argv[1],1,{argv[2]},10s,{},true}});
+        const auto trusted_arguments=Json{{"profile","trusted-fixture"},{"arguments",Json::array({"normal","trusted-approved.txt"})},{"workdir","."}}.dump();
+        const auto trusted_result=Json::parse(trusted_executor.invoke("trusted-approved","run",trusted_arguments,now()+600000));
+        const auto trusted_operation=store.operation("trusted-approved").get();
+        require(trusted_result["exit_code"]==0&&file(root/"trusted-approved.txt")=="actual child effect"&&trusted_operation.state==OperationState::succeeded&&trusted_operation.decision_actor=="trusted-process-profile:trusted-fixture","Explicitly trusted profile must execute once without a controller prompt and durably record its grant");
+        ProcessExecutor ordinary_executor(store,workspace,root.string(),profiles);
+        Task ordinary_after_trust(ordinary_executor,"ordinary-after-trust",args("normal","ordinary-after-trust.txt"));proposed(store,"ordinary-after-trust");store.decide_operation("ordinary-after-trust",OperationDecision::deny,"actual-fixture-controller").get();rejects<PermissionDenied>([&]{ordinary_after_trust.result.get();});
+        phase("attached-workspace-dispatch");
+        const auto attached_root=root/"attached";std::filesystem::create_directories(attached_root);WorkspaceTools attached_tools(attached_root.string());
+        WorkspaceToolSet membership(workspace.identity(),2,{{workspace.identity(),root.string()},{attached_tools.identity(),attached_root.string()}});
+        auto attached_request=Json::parse(args("normal","attached-effect.txt"));attached_request["folder_id"]=attached_tools.identity();
+        rejects<ToolAccessDenied>([&]{executor.invoke_in_workspace("attached-missing-folder","run",args("normal","unauthorized.txt"),now()+600000,membership,1);});
+        rejects<ToolAccessDenied>([&]{executor.invoke_in_workspace("attached-wrong-folder","run",(Json{{"profile","fixture"},{"arguments",Json::array({"normal","unauthorized.txt"})},{"folder_id",workspace.identity()}}).dump(),now()+600000,membership,1);});
+        rejects<NotFound>([&]{store.operation("attached-missing-folder").get();});rejects<NotFound>([&]{store.operation("attached-wrong-folder").get();});
+        auto attached_future=std::async(std::launch::async,[&]{return executor.invoke_in_workspace("attached-allowed","run",attached_request.dump(),now()+600000,membership,1);});
+        const auto attached_proposal=proposed(store,"attached-allowed");const auto attached_payload=Json::parse(attached_proposal.spec.arguments_json);
+        require(attached_proposal.spec.workspace==membership.workspace_id()&&attached_payload["workspace_id"]==membership.workspace_id()&&attached_payload["workspace_revision"]==2&&attached_payload["folder_id"]==attached_tools.identity()&&attached_payload["target_workspace_id"]==attached_tools.identity()&&attached_payload["workdir"]==".","Attached process approval must capture the exact admitted workspace and folder revision");
+        require(!std::filesystem::exists(attached_root/"attached-effect.txt"),"Attached process must await approval");store.decide_operation("attached-allowed",OperationDecision::allow,"actual-fixture-controller").get();
+        const auto attached_result=Json::parse(attached_future.get());require(attached_result["exit_code"]==0&&attached_result["process_tree_retired"]==true&&file(attached_root/"attached-effect.txt")=="actual child effect"&&!std::filesystem::exists(root/"attached-effect.txt")&&store.operation("attached-allowed").get().state==OperationState::succeeded,"Approved process must execute only in the explicitly selected attached folder");
         phase("approved-powershell-shell");
         const auto shell_effect=root/"powershell-shell-effect.txt";
-        const auto shell_script="[IO.File]::WriteAllText('"+shell_effect.string()+"','actual approved shell effect'); [Console]::Out.Write('actual shell output')";
+        if(!SetEnvironmentVariableW(L"XMIND_PROCESS_SECRET_SENTINEL",L"must-not-reach-child"))throw std::runtime_error("Cannot set process-environment isolation fixture");
+        const auto shell_script="[IO.File]::WriteAllText('"+shell_effect.string()+"','actual approved shell effect'); [Console]::Out.Write(\"$([bool]$env:PATH)|$([bool]$env:XMIND_PROCESS_SECRET_SENTINEL)|\"); node --version";
         ProcessExecutor shell_executor(store,workspace,root.string(),{{"powershell",argv[6],1,{"-NoLogo","-NoProfile","-NonInteractive","-Command"},10s}});
         const auto shell_request=Json{{"profile","powershell"},{"arguments",Json::array({shell_script})},{"workdir","."}}.dump();
         Task shell(shell_executor,"powershell-shell",shell_request);const auto shell_proposal=proposed(store,"powershell-shell");const auto shell_payload=Json::parse(shell_proposal.spec.arguments_json);
         require(shell_payload["profile_id"]=="powershell"&&shell_payload["executable"]==argv[6]&&shell_payload["arguments"]==Json::array({"-NoLogo","-NoProfile","-NonInteractive","-Command",shell_script})&&shell_payload["workdir"]==".","Shell approval must bind the trusted PowerShell executable, fixed parser flags and exact reviewed command text");
         require(!std::filesystem::exists(shell_effect),"A shell command must not execute before approval");store.decide_operation("powershell-shell",OperationDecision::allow,"actual-fixture-controller").get();
-        const auto shell_result=Json::parse(shell.result.get());require(shell_result["exit_code"]==0&&shell_result["termination"]=="exited"&&shell_result["stdout"]["data"]=="actual shell output"&&file(shell_effect)=="actual approved shell effect"&&store.operation("powershell-shell").get().state==OperationState::succeeded,"Approved PowerShell command must create its exact actual effect and return captured output");
+        const auto shell_result=Json::parse(shell.result.get());SetEnvironmentVariableW(L"XMIND_PROCESS_SECRET_SENTINEL",nullptr);const auto shell_output=shell_result["stdout"]["data"].get<std::string>();require(shell_result["exit_code"]==0&&shell_result["termination"]=="exited"&&shell_output.starts_with("True|False|v")&&file(shell_effect)=="actual approved shell effect"&&store.operation("powershell-shell").get().state==OperationState::succeeded,"Approved PowerShell must resolve node through the inherited PATH while excluding unrelated secret environment variables");
         require(output(store,"powershell-shell")==std::pair{shell_result["stdout"]["data"].get<std::string>(),shell_result["stderr"]["data"].get<std::string>()},"PowerShell result channels must be durably journalled");
         phase("binary-output");
         Task binary(executor,"binary",args("bytes","unused.txt"));proposed(store,"binary");store.decide_operation("binary",OperationDecision::allow,"actual-fixture-controller").get();const auto bytes=Json::parse(binary.result.get());
@@ -182,5 +205,5 @@ int main(int argc,char** argv){if(argc!=7)return 2;try{
         if(std::string(mode)=="cancel")require(file(directory/"effect.txt")=="actual effect before cancellation","Cancellation must not claim rollback or remove effect");phase("interruption-close");store.close();
     }
     phase("complete");
-    std::cout<<"Native process executor passed actual approved child effects, deny/cancel/expiry, exact profiles/arguments/workdir, one real PowerShell shell-text profile and approval, stale directory, explicit binary output/nonzero exit, duplicate rejection, real result-storage fault, uncertain restart and cross-workspace profile quarantine, timeout and post-effect cancellation. Shell discovery/semantics parity and model/server/editor integration remain separate.\n";return 0;
+    std::cout<<"Native process executor passed actual approved child effects, deny/cancel/expiry, exact profiles/arguments/workdir, trusted-profile grant audit, real PowerShell PATH inheritance with secret isolation, stale directory, explicit binary output/nonzero exit, duplicate rejection, real result-storage fault, uncertain restart and cross-workspace profile quarantine, timeout and post-effect cancellation. Shell discovery/semantics parity and model/server/editor integration remain separate.\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

@@ -4,9 +4,10 @@
 #include <mutex>
 
 namespace agentflow {
-Operation PermissionWaiter::acquire(const std::string& id,const OperationSpec& spec,std::int64_t expiry,std::stop_token cancel) {
+Operation PermissionWaiter::acquire(const std::string& id,const OperationSpec& spec,std::int64_t expiry,std::stop_token cancel,std::string trusted_actor) {
     if(cancel.stop_requested()) throw PermissionCancelled("Operation cancelled before proposal");
     persistence_.request_operation(id,spec,expiry).get();
+    if(!trusted_actor.empty())persistence_.decide_operation(id,OperationDecision::allow,std::move(trusted_actor)).get();
     std::mutex mutex;std::condition_variable_any changed;std::unique_lock lock(mutex);
     for(;;) {
         if(cancel.stop_requested()) {
