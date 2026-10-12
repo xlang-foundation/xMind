@@ -310,6 +310,15 @@ function operations(items){
   refreshPendingApprovals();
 }
 function operationExtras(section,item,reviewable=true){
+  if(item.tool==='a2a_delegate'&&item.state==='uncertain'){
+    let receipt;try{receipt=JSON.parse(item.result_json);}catch{}
+    if(receipt?.reason==='a2a_dispatch_outcome_unknown'&&typeof receipt.agent_id==='string'&&typeof receipt.task_id==='string'&&receipt.task_id){
+      section.append(node('p','The A2A send was interrupted after the peer exposed task '+receipt.task_id+'. Its final acknowledgement is unknown; inspect the known task without replaying the send.','inspection-note'));
+      const latest=a2aTaskInspections.get(item.id);
+      if(latest){const state=latest.task?.status?.state,detail=node('details',undefined,'a2a-task-inspection');detail.append(node('summary','Latest remote task observation'+(typeof state==='string'?' · '+state:'')),node('p','Observed '+new Date(latest.inspected_unix_ms).toISOString()+' · observation only; the original send remains uncertain.','inspection-note'),node('pre',JSON.stringify(latest.task,null,2)));section.append(detail);}
+      const button=node('button','Inspect known remote task','a2a-inspect');button.onclick=()=>{button.disabled=true;api.postMessage({type:'inspect-a2a-task',id:item.id});};section.append(button);
+    }
+  }
   if(item.tool==='a2a_delegate'&&item.state==='succeeded'){
     let receipt;try{receipt=JSON.parse(item.result_json);}catch{}
     if(receipt?.acknowledged_by_peer===true&&typeof receipt.agent_id==='string'&&typeof receipt.task_id==='string'&&receipt.task_id){
@@ -623,7 +632,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='process-output-error')processArtifactError(m);
   else if(m.type==='a2a-task-inspection'){
     const item=currentOperations.find(value=>value.id===m.id),inspection=m.inspection;
-    if(item?.tool==='a2a_delegate'&&item.state==='succeeded'&&inspection&&inspection.operation_id===item.id&&typeof inspection.agent_id==='string'&&typeof inspection.task_id==='string'&&inspection.task&&typeof inspection.task==='object'&&!Array.isArray(inspection.task)&&JSON.stringify(inspection.task).length<=524288&&['not_attempted','outcome_unknown','acknowledged'].includes(inspection.cancel_state)&&Number.isSafeInteger(inspection.inspected_unix_ms)&&inspection.inspected_unix_ms>0&&inspection.inspected_unix_ms<=8640000000000000){a2aTaskInspections.set(item.id,inspection);operations(currentOperations);}
+    if(item?.tool==='a2a_delegate'&&['succeeded','uncertain'].includes(item.state)&&inspection&&inspection.operation_id===item.id&&typeof inspection.agent_id==='string'&&typeof inspection.task_id==='string'&&inspection.task&&typeof inspection.task==='object'&&!Array.isArray(inspection.task)&&JSON.stringify(inspection.task).length<=524288&&['not_attempted','outcome_unknown','acknowledged'].includes(inspection.cancel_state)&&Number.isSafeInteger(inspection.inspected_unix_ms)&&inspection.inspected_unix_ms>0&&inspection.inspected_unix_ms<=8640000000000000){a2aTaskInspections.set(item.id,inspection);operations(currentOperations);}
   }
   else if(m.type==='a2a-task-cancellation'){
     const item=currentOperations.find(operation=>operation.id===m.id),cancellation=m.cancellation;if(item?.tool==='a2a_delegate'&&item.state==='succeeded'&&cancellation&&cancellation.operation_id===item.id&&typeof cancellation.agent_id==='string'&&typeof cancellation.task_id==='string'&&cancellation.cancel_state==='acknowledged'&&cancellation.task&&typeof cancellation.task==='object'&&!Array.isArray(cancellation.task)&&cancellation.task.id===cancellation.task_id&&Number.isSafeInteger(cancellation.requested_unix_ms)&&cancellation.requested_unix_ms>0&&cancellation.requested_unix_ms<=8640000000000000){a2aTaskCancellations.set(item.id,cancellation);operations(currentOperations);}

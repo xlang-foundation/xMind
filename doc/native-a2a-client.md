@@ -55,6 +55,17 @@ the remote effect. The extended native contract covers approved dispatch,
 denial without dispatch, exact message identity, returned task IDs and
 post-dispatch failure quarantine; hosted Windows build/execution is pending.
 
+If a streaming event has already exposed a task ID before a later stream or
+event-journal failure, the uncertain operation now retains that task/context
+identity. The owner can issue read-only `a2a/inspect` against the exact saved
+peer registration and task ID, including after xlang3 SQLite close/reopen. The
+operation remains uncertain; observation does not acknowledge the original
+send, resume the stream, or enable cancellation/follow-up. An uncertain send
+without an observed task ID still cannot be inspected or replayed. The focused
+native contract injects failure after the first task event and verifies no
+second send. Current native, VS Code and browser test results are recorded in
+[observed-task recovery evidence](evidence/native-a2a-observed-task-recovery-local-20261011.md).
+
 An owner-authenticated `POST /v1/operations/{id}/a2a/inspect` now refreshes a
 known task using only the peer ID, registration revision, card URL, interface,
 and task ID sealed into its succeeded operation. It refuses uncertain sends,

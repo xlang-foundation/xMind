@@ -1005,11 +1005,13 @@ struct HttpServer::Impl {
             (void)body(request,{});
             const auto operation=persistence.operation(identifier(request.matches[1])).get();
             if(operation.spec.tool!="a2a_delegate")throw NotFound("A2A delegation operation not found");
-            if(operation.state!=OperationState::succeeded)throw Conflict("Only an acknowledged A2A task can be inspected; uncertain sends must never be replayed");
             Json binding,result;
             try{binding=Json::parse(operation.spec.arguments_json);result=Json::parse(operation.result_json);}catch(const Json::exception&){throw DatabaseError("Stored A2A task receipt is invalid");}
             if(!binding.is_object()||!binding.contains("agent_id")||!binding["agent_id"].is_string()||!binding.contains("agent_revision")||!binding["agent_revision"].is_number_integer()||!binding.contains("card_url")||!binding["card_url"].is_string()||!binding.contains("protocol_version")||!binding["protocol_version"].is_string()||!binding.contains("endpoint")||!binding["endpoint"].is_string()||
-               !result.is_object()||!result.value("acknowledged_by_peer",false)||!result.contains("task_id")||!result["task_id"].is_string())throw Conflict("A2A operation has no inspectable acknowledged task");
+               !result.is_object())throw Conflict("A2A operation has no inspectable task binding");
+            const bool acknowledged=operation.state==OperationState::succeeded&&result.value("acknowledged_by_peer",false);
+            const bool interrupted_with_task_id=operation.state==OperationState::uncertain&&result.value("reason",std::string{})=="a2a_dispatch_outcome_unknown";
+            if(!result.contains("task_id")||!result["task_id"].is_string()||(!acknowledged&&!interrupted_with_task_id))throw Conflict("Only an acknowledged A2A task or an uncertain send with an observed task ID can be inspected; sends are never replayed");
             const auto agent_id=string_field(binding,"agent_id",64),card_url=string_field(binding,"card_url",8192),version=string_field(binding,"protocol_version",16),endpoint=string_field(binding,"endpoint",8192),task_id=string_field(result,"task_id",256);
             const auto expected_revision=binding["agent_revision"].get<std::int64_t>();
             if(expected_revision<1||expected_revision>9007199254740991LL||task_id.find_first_of("\r\n")!=std::string::npos)throw Conflict("Stored A2A task binding is invalid");

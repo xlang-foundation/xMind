@@ -118,7 +118,7 @@ std::string A2aAgentToolRegistry::invoke(const std::string& id,const std::string
         }else response=entry.client->send_message(request,remaining,cancel,[&]{validate_registration();dispatched=true;});
     }catch(...){
         const auto failure=std::current_exception();
-        if(dispatched){finish(OperationState::uncertain,Json{{"reason","a2a_dispatch_outcome_unknown"},{"agent_id",entry.registration.id},{"agent_revision",entry.registration.revision},{"message_id",message_id}}.dump());throw A2aEffectUncertain("A2A request may have reached the remote agent; automatic retry is forbidden");}
+        if(dispatched){Json outcome={{"reason","a2a_dispatch_outcome_unknown"},{"agent_id",entry.registration.id},{"agent_revision",entry.registration.revision},{"message_id",message_id}};if(!streamed_task_id.empty())outcome["task_id"]=streamed_task_id;if(!streamed_context_id.empty())outcome["context_id"]=streamed_context_id;finish(OperationState::uncertain,outcome.dump());throw A2aEffectUncertain("A2A request may have reached the remote agent; automatic retry is forbidden");}
         finish(OperationState::failed,Json{{"reason","a2a_not_dispatched"},{"agent_id",entry.registration.id},{"message_id",message_id}}.dump());try{std::rethrow_exception(failure);}catch(const TransportCancelled&){throw;}catch(const std::exception&){throw A2aEffectNotDispatched("A2A request was stopped before remote dispatch");}
     }
     try{

@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+## Recover A2A tasks observed before a stream failure — 2026-10-11
+
+When a remote A2A stream delivered a task ID and a later event failed to persist,
+the send was correctly marked uncertain but its known task/context IDs were
+discarded. The native effect journal now retains those observed IDs. Its
+owner-authenticated inspect route can fetch current state from the same pinned
+peer after the xlang3/SQLite store is reopened. Inspection is read-only: the
+initial send remains uncertain, is never retried, and does not gain cancel or
+follow-up actions. An uncertain send with no task ID remains quarantined without
+peer contact. Release compilation passed; three native A2A contracts, **314**
+VS Code tests and **96** browser tests pass. The callback failure and peer are
+synthetic; live external A2A/installed-client interoperability remains open.
+See [exact scope and evidence](evidence/native-a2a-observed-task-recovery-local-20261011.md).
+
 ## Release validation checkpoint — 2026-10-11
 
 The complete native Release build and all **136/136** CTest contracts pass.
