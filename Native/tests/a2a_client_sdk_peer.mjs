@@ -30,7 +30,7 @@ const taskContexts=new Map();
 const executor={
   async execute(context,eventBus){
     taskContexts.set(context.taskId,context.contextId);
-    eventBus.publish(AgentEvent.task({id:context.taskId,contextId:context.contextId,status:{state:TaskState.TASK_STATE_SUBMITTED,timestamp:new Date().toISOString()},artifacts:[],history:[context.userMessage],metadata:{}}));
+    eventBus.publish(AgentEvent.task({id:context.taskId,contextId:context.contextId,status:{state:TaskState.TASK_STATE_SUBMITTED,timestamp:new Date().toISOString()},artifacts:[{artifactId:'sdk-artifact',name:'SDK artifact contract',description:'Real text artifact from the official SDK peer',parts:[{content:{$case:'text',value:'Official SDK artifact payload'}}],metadata:{},extensions:[]}],history:[context.userMessage],metadata:{}}));
     eventBus.publish(AgentEvent.statusUpdate({taskId:context.taskId,contextId:context.contextId,status:{state:TaskState.TASK_STATE_INPUT_REQUIRED,timestamp:new Date().toISOString()},metadata:{}}));
   },
   async cancelTask(taskId,eventBus){
@@ -50,9 +50,17 @@ try{
     const peer=await new ClientFactory({cardResolver:new DefaultAgentCardResolver({fetchImpl:authenticatedFetch}),transports:[new JsonRpcTransportFactory({fetchImpl:authenticatedFetch})]}).createFromUrl(`http://127.0.0.1:${appServer.address().port}`);
     process.stdout.write('SDK peer self-check: discovered\n');
     const result=await deadline('SendMessage',peer.sendMessage({message:{messageId:'sdk-self-check',role:Role.ROLE_USER,parts:[{content:{$case:'text',value:'test the pinned peer'}}]}}));
-    assert.ok(result.id);const fetched=await deadline('GetTask',peer.getTask({id:result.id}));assert.equal(fetched.id,result.id);const streamed=[];for await(const event of peer.sendMessageStream({message:{messageId:'sdk-self-check-stream',role:Role.ROLE_USER,parts:[{content:{$case:'text',value:'test the pinned stream peer'}}]}}))streamed.push(event);assert.ok(streamed.length>=2&&streamed.some(event=>event.payload?.$case==='task')&&streamed.some(event=>event.payload?.$case==='statusUpdate'));const cancelled=await deadline('CancelTask',peer.cancelTask({id:result.id}));assert.equal(cancelled.id,result.id);
-    process.stdout.write('Pinned SDK peer self-check passed card discovery, authenticated SendMessage/GetTask/SendStreamingMessage/CancelTask.\n');
+    assert.ok(result.id);const fetched=await deadline('GetTask',peer.getTask({id:result.id}));assert.equal(fetched.id,result.id);assert.equal(fetched.artifacts[0].parts[0].content.$case,'text');assert.equal(fetched.artifacts[0].parts[0].content.value,'Official SDK artifact payload');const streamed=[];for await(const event of peer.sendMessageStream({message:{messageId:'sdk-self-check-stream',role:Role.ROLE_USER,parts:[{content:{$case:'text',value:'test the pinned stream peer'}}]}}))streamed.push(event);assert.ok(streamed.length>=2&&streamed.some(event=>event.payload?.$case==='task')&&streamed.some(event=>event.payload?.$case==='statusUpdate'));const cancelled=await deadline('CancelTask',peer.cancelTask({id:result.id}));assert.equal(cancelled.id,result.id);
+    process.stdout.write('Pinned SDK peer self-check passed card discovery, authenticated SendMessage/GetTask with a real artifact part/SendStreamingMessage/CancelTask.\n');
   }else{
+    const sdkOrigin=`http://127.0.0.1:${appServer.address().port}`;
+    const sdkFetch=(destination,options={})=>{const headers=new Headers(options.headers);headers.set('Authorization','Bearer '+token);return fetch(destination,{...options,headers,redirect:'error'});};
+    const sdkClient=await new ClientFactory({cardResolver:new DefaultAgentCardResolver({fetchImpl:sdkFetch}),transports:[new JsonRpcTransportFactory({fetchImpl:sdkFetch})]}).createFromUrl(sdkOrigin);
+    const sdkSent=await sdkClient.sendMessage({message:{messageId:'sdk-native-contract',role:Role.ROLE_USER,parts:[{content:{$case:'text',value:'verify SDK artifact response'}}]}});
+    const sdkFetched=await sdkClient.getTask({id:sdkSent.id});
+    assert.equal(sdkFetched.artifacts[0].parts[0].content.$case,'text');
+    assert.equal(sdkFetched.artifacts[0].parts[0].content.value,'Official SDK artifact payload');
+    process.stdout.write('Official SDK client verified the text artifact response.\n');
     const child=spawn(executable,[url,token],{stdio:['ignore','pipe','pipe'],windowsHide:true});let stdout='',stderr='';
     child.stdout.setEncoding('utf8').on('data',chunk=>stdout+=chunk);child.stderr.setEncoding('utf8').on('data',chunk=>stderr+=chunk);
     const result=await new Promise((resolve,reject)=>{
@@ -61,7 +69,7 @@ try{
       child.once('exit',(code,signal)=>{clearTimeout(timer);resolve({code,signal});});
     });
     assert.equal(result.code,0,`Native SDK-peer client failed (${result.signal||result.code}): ${stderr}`);
-    assert.match(stdout,/independent official SDK 1\.3\.0 AgentCard discovery, SendMessage, GetTask, wrapped SendStreamingMessage task\/status events and CancelTask/);
+    assert.match(stdout,/independent official SDK 1\.3\.0 AgentCard discovery, SendMessage, GetTask with a real text artifact part, wrapped SendStreamingMessage task\/status events and CancelTask/);
     process.stdout.write(stdout);
   }
 }finally{
