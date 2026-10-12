@@ -1,6 +1,8 @@
 #pragma once
 #include "agentflow/agent_service.hpp"
 #include "agentflow/graph_service.hpp"
+#include <map>
+#include <mutex>
 namespace agentflow {
 // A configured backend execution generation. Provider changes are permitted
 // only when both single-agent and graph ownership have become idle.
@@ -62,6 +64,7 @@ public:
     Run resume_graph(const std::string& root,const std::string& actor,std::int64_t revision)override;
     GraphContextMetadata graph_context(const std::string& root)const override;
 private:
+    struct LanguageServerWorkspace;
     std::unique_ptr<WorkspaceToolSet> workspace_membership()const;
     WorkspaceTools& vcs_folder(WorkspaceToolSet& membership,const std::string& folder_id)const;
     PersistenceService& store_;
@@ -70,6 +73,8 @@ private:
     std::string workspace_authority_;
     std::function<WorkspaceMembershipSnapshot()> workspace_membership_snapshot_;
     std::shared_ptr<LanguageServerToolRegistry> language_servers_;
+    mutable std::mutex language_server_workspaces_mutex_;
+    mutable std::map<std::string,std::shared_ptr<LanguageServerWorkspace>> language_server_workspaces_;
     std::unique_ptr<AgentService> agents_;
     std::unique_ptr<GraphService> graphs_;
 };

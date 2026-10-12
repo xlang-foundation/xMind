@@ -62,3 +62,24 @@ AgentRunner's model-visible language-server tool stays read-only. Packaged
 extension acceptance, formatter discovery/configuration and a complete
 edit/build/diagnose repair loop remain open; see [validation status](VALIDATION_STATUS.md) and
 [the 2026-10-11 formatting contract](evidence/native-language-server-formatting-local-20261011.json).
+
+## Multi-folder editor routing
+
+An authenticated `/v1/language-server/query` may include a registered
+`folder_id`. Native checks that ID against a fresh workspace-membership snapshot,
+opens that member's root, and keeps its language-server process separate from
+the primary root's process. The query path remains relative to the selected
+root. Responses echo the selected ID, and removed or unregistered folders are
+rejected before dispatch; cached servers for removed members are retired.
+
+VS Code loads the registered membership and maps each open file to exactly one
+member root. Diagnostics, navigation and formatting for attached folders carry
+that member's ID. A document outside every registered folder receives no
+language-server result. The native multi-folder contract uses real Rust Analyzer
+projects with identical `src/lib.rs` paths and proves each query resolves the
+symbol from its own root, then rejects unknown and removed IDs. See
+[multi-folder language-server evidence](evidence/native-multifolder-lsp-local-20261011.json).
+
+AgentRunner's model-visible `language_server` tool still uses the primary root;
+propagating the admitted multi-folder snapshot into model tool calls remains
+open.

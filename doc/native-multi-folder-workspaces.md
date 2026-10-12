@@ -134,8 +134,11 @@ attach opened folders; single-agent read/list/search/glob/edit/create/patch and
 process tools use the captured registry membership. Direct graph reads,
 graph-agent children and graph read/write/patch/process nodes use that same
 snapshot. A single patch call selects one member folder; it cannot span roots.
-Terminals and language-server UI remain bound to the primary folder. Multi-folder
-language-server routing and full multi-folder effect acceptance remain open.
+Terminals remain bound to the primary folder. VS Code diagnostics, navigation
+and formatting select the registered root containing each document; native
+requests validate membership and return the selected folder ID. Model-visible
+`language_server` calls still use the primary root. Full multi-folder effect
+acceptance remains open.
 
 ## Required acceptance
 
@@ -149,8 +152,11 @@ language-server routing and full multi-folder effect acceptance remain open.
   explicit cwd is pinned to the selected folder, and approval rejects changed
   membership or executable identity.
 - Show independent Git state for two repositories through native HTTP, CLI and
-  VS Code; expose and verify browser folder selection; verify language-server
-  root selection for documents in each folder.
+  VS Code; expose and verify browser folder selection. The native HTTP, CLI,
+  VS Code host and browser folder-routing contracts now cover these paths; a
+  live two-repository editor/browser acceptance run remains open. Verify
+  language-server roots for documents in each folder; real native Rust Analyzer
+  and VS Code routing contracts now cover this path.
 - Add a folder while a run is active. Prove the admitted run remains pinned to
   its old revision and a later run sees the new revision.
 - Switch named workspaces in the browser and VS Code. Prove sessions/history
@@ -161,7 +167,7 @@ language-server routing and full multi-folder effect acceptance remain open.
   primary folder, membership revision, sessions and provider credentials reopen
   from local SQLite without replaying work or exposing secrets.
 
-The one-root selector and its existing tests do not satisfy this acceptance.
+Focused contracts do not establish the complete multi-folder acceptance above.
 
 - Initialize a CLI workspace from its first folder, attach a second folder, and
   verify the workspace ID and primary-folder identity stay stable while the

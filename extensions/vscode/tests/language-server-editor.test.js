@@ -32,6 +32,26 @@ test('VS Code skips files outside the selected root and clears on backend discon
  const f=fixture();await f.editor.connect(f.client);f.document.uri.fsPath='C:\\Outside\\secret.rs';f.emit('save',f.document);await delay(10);assert.equal(f.queries.length,0);f.editor.disconnect();assert.equal(f.items.size,0);
 });
 
+test('VS Code routes an attached-folder document to its registered language-server root',async()=>{
+ const f=fixture(),primary='windows-local-file-v1:primary',secondary='windows-local-file-v1:attached';
+ f.backend.active.metadata={workspace_id:primary};f.client.workspaceMembership=async()=>({folders:[
+  {folder_id:primary,name:'Project',root:'C:\\Project',ordinal:0},
+  {folder_id:secondary,name:'SharedLib',root:'C:\\SharedLib',ordinal:1}
+ ]});f.document.uri.fsPath=path.win32.join('C:\\SharedLib','src','lib.rs');
+ await f.editor.connect(f.client);await delay(20);f.emit('save',f.document);await delay(20);
+ const sent=f.queries.at(-1);assert.equal(sent.query.path,'src/lib.rs');assert.equal(sent.query.folderId,secondary);
+ f.setAnswer(async query=>query.method==='definition'?{server_id:'rust',language_id:'rust',path:'src/lib.rs',method:'definition',result:[{uri:'file:///C:/SharedLib/src/definition.rs',range:{start:{line:1,character:0},end:{line:1,character:4}}}],diagnostics:[]}:null);
+ const locations=await f.providers.definition[0].provider.provideDefinition(f.document,new Position(0,2),{isCancellationRequested:false});
+ assert.equal(locations.length,1);assert.equal(locations[0].uri.fsPath,path.win32.join('C:\\SharedLib','src','definition.rs'));assert.equal(f.queries.at(-1).query.folderId,secondary);f.editor.dispose();
+});
+
+test('VS Code refreshes membership when a newly registered folder is opened later',async()=>{
+ const f=fixture(),primary='windows-local-file-v1:primary',secondary='windows-local-file-v1:attached';let folders=[{folder_id:primary,name:'Project',root:'C:\\Project',ordinal:0}];
+ f.backend.active.metadata={workspace_id:primary};f.client.workspaceMembership=async()=>({folders});await f.editor.connect(f.client);await delay(120);
+ folders=[...folders,{folder_id:secondary,name:'SharedLib',root:'C:\\SharedLib',ordinal:1}];f.document.uri.fsPath=path.win32.join('C:\\SharedLib','src','lib.rs');f.editor.membershipRefreshedAt=0;f.emit('save',f.document);await delay(25);
+ assert.equal(f.queries.at(-1).query.path,'src/lib.rs');assert.equal(f.queries.at(-1).query.folderId,secondary);f.editor.dispose();
+});
+
 test('a stale diagnostic response cannot republish after workspace authority changes',async()=>{
  const f=fixture();let resolve;f.setAnswer(()=>new Promise(done=>{resolve=done;}));await f.editor.connect(f.client);f.emit('save',f.document);await delay(5);f.backend.epoch++;
  resolve({server_id:'rust',language_id:'rust',path:'src/lib.rs',method:'diagnostics',result:{kind:'full',items:[]},diagnostics:[]});await delay(10);assert.equal(f.items.size,0);f.editor.dispose();

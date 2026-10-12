@@ -771,6 +771,7 @@ async function activate(context) {
       if(!selected)return;if(client!==target||workspaceBackend.active!==owner)throw new Error('The xMind workspace changed before the folder was attached.');workspaceBackend.assert(ticket);
       const group=await target.addWorkspaceFolder(selected.folder.fsPath);workspaceBackend.assert(ticket);
       if(client!==target||workspaceBackend.active!==owner)throw new Error('The xMind workspace changed while the folder was attached.');
+      await languageServerEditor.connect(target);workspaceBackend.assert(ticket);
       vscode.window.showInformationMessage(`Added ${selected.folder.name} to the xMind workspace · ${group.folders.length} folders.`);
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));

@@ -25,6 +25,9 @@ struct LanguageServerRequest {
         std::optional<bool> trim_trailing_whitespace,insert_final_newline,trim_final_newlines;
     };
     std::optional<FormattingOptions> formatting_options;
+    // Optional registered workspace member for editor requests. This is an
+    // opaque membership ID; it is never interpreted as a filesystem path.
+    std::string folder_id;
 };
 // A bounded, one-request native LSP client. The server executable, arguments,
 // environment and file-extension binding come only from trusted backend

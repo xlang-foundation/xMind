@@ -32,6 +32,14 @@ test('language-server formatting carries bounded options and workspace authority
  assert.deepEqual(JSON.parse(requests[0].options.body),{path:'src/lib.rs',method:'formatting',line:0,character:0,document_text:'fn main(){}',formatting_options:{tab_size:2,insert_spaces:true},expected_workspace_id:skillWorkspace,expected_workspace_authority_id:skillAuthority});
  await assert.rejects(client.languageServerQuery({path:'src/lib.rs',method:'formatting',formattingOptions:{tabSize:0,insertSpaces:true}},binding),/formatting/i);await assert.rejects(client.languageServerQuery({path:'src/lib.rs',method:'hover',formattingOptions:{tabSize:2,insertSpaces:true}},binding),/formatting/i);assert.equal(requests.length,1);
 });
+test('language-server query binds an optional registered folder ID and checks the echoed identity',async()=>{
+ const folderId='windows-local-file-v1:attached',requests=[],binding={expected_workspace_id:skillWorkspace,expected_workspace_authority_id:skillAuthority},client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>({server_id:'rust',language_id:'rust',path:'src/lib.rs',method:'diagnostics',result:{kind:'full',items:[]},diagnostics:[],folder_id:folderId})};});
+ await client.languageServerQuery({path:'src/lib.rs',method:'diagnostics',folderId},binding);
+ assert.deepEqual(JSON.parse(requests[0].options.body),{path:'src/lib.rs',method:'diagnostics',line:0,character:0,folder_id:folderId,expected_workspace_id:skillWorkspace,expected_workspace_authority_id:skillAuthority});
+ await assert.rejects(client.languageServerQuery({path:'src/lib.rs',method:'diagnostics',folderId:'D:\\Outside'},binding),/language-server query/i);
+ const wrong=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async()=>({ok:true,json:async()=>({server_id:'rust',language_id:'rust',path:'src/lib.rs',method:'diagnostics',result:null,diagnostics:[],folder_id:'windows-local-file-v1:other'})}));
+ await assert.rejects(wrong.languageServerQuery({path:'src/lib.rs',method:'diagnostics',folderId},binding),/language-server response/i);
+});
 test('terminal client authenticates each session-bound lifecycle request and validates byte cursors',async()=>{
  const id='e'.repeat(32),requests=[],metadata={id,session_id:'session-one',title:'Terminal',rows:24,columns:80,running:true,exit_code:null,output_sequence:7};
  const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{

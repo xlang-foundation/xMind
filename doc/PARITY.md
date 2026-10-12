@@ -50,14 +50,15 @@ The browser Git panel now offers every registered workspace folder and scopes
 repository initialization, status, review-base detection and diffs to the
 selected `folder_id`. Its secondary-folder contract verifies selection and
 routing for each of those operations. Multi-root language-server selection
-and rendered VS Code acceptance remain open.
+is now covered by the native and VS Code host contracts. Model-visible LSP
+selection and rendered VS Code acceptance remain open.
 
 The pinned source inventory has been regenerated from the exact v2.0.26
 schema: **141 operations, 31 native source candidates, 110 unmapped, and zero
 verified operation-level parity**. A source candidate means reviewed code
 exists; it is not feature parity. Remaining work includes end-to-end
-multi-folder CLI and installed VS Code acceptance, multi-root language servers,
-broader provider/model conformance, and the substantial unmapped
+multi-folder CLI and installed VS Code acceptance, model-visible multi-folder
+LSP, broader provider/model conformance, and the substantial unmapped
 OpenCode coding/runtime surface. Private Nexus server,
 PostgreSQL, WebRTC and Electron remain outside the xMind OSS scope.
 
@@ -414,6 +415,21 @@ acceptance of the packaged extension; formatter discovery and project repair
 loops remain open. See
 [language-server integration](native-language-server.md) and
 [formatting evidence](evidence/native-language-server-formatting-local-20261011.json).
+
+### Multi-folder language-server routing checkpoint (2026-10-11)
+
+The native LSP HTTP query accepts an optional registered `folder_id`, routes to
+a separately cached server rooted in that member folder, echoes the selected
+identity and retires cached servers when membership no longer includes them.
+The VS Code editor maps documents to their registered member root for
+diagnostics, navigation and formatting, and reloads membership after folder
+attachment. A real Rust Analyzer contract proved identical `src/lib.rs` paths
+resolve to different primary/secondary symbols and reject unregistered or
+removed IDs. The focused native fixture and HTTP contract passed **2/2**; the
+VS Code suite passed **307/307**. AgentRunner's model-visible LSP tool remains
+primary-root only, and a live installed VS Code multi-folder session is not yet
+verified. See
+[multi-folder LSP evidence](evidence/native-multifolder-lsp-local-20261011.json).
 
 ## OpenCode V2 functional baseline
 

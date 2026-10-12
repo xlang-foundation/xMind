@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-11",
+  "feature": "Registered-folder language-server routing for multi-folder workspaces",
+  "native": {
+    "route": "POST /v1/language-server/query",
+    "folder_id": "Optional opaque workspace membership ID; resolved against a fresh snapshot",
+    "isolation": "One cached language-server registry and native root per registered member folder",
+    "retirement": "Cached non-member servers are removed on the next selected-folder request",
+    "response_binding": "Secondary-folder responses echo folder_id",
+    "effects": "Read-only language-server queries; unregistered and removed IDs return HTTP 403"
+  },
+  "vscode": {
+    "document_root": "Each file is mapped to exactly one registered member root",
+    "operations": [
+      "diagnostics",
+      "definition",
+      "references",
+      "hover",
+      "formatting"
+    ],
+    "membership_refresh": "Loaded on connection and after Add Opened Folder; unknown-root requests refresh membership",
+    "package_version": "0.1.10",
+    "package_sha256": "F271F51770A4AFDF0DFD3CA13CCA0771116EC5293EB14A792EBE12586D12624C",
+    "installed_locally": true
+  },
+  "validation": {
+    "native_contract": "native_multifolder_language_server_contract",
+    "native_fixture_tests": 2,
+    "native_fixture_failures": 0,
+    "language_server": "Real Rust Analyzer",
+    "collision_fixture": "Primary and secondary roots both contain src/lib.rs and resolve to distinct symbols",
+    "removed_and_unregistered_ids": "rejected",
+    "vscode_host_tests": 307,
+    "vscode_host_failures": 0,
+    "existing_single_root_rust_analyzer_contract": "passed on final rerun",
+    "live_installed_multifolder_vscode_session": "not verified",
+    "model_visible_agent_language_server_tool": "still primary-root only"
+  }
+}

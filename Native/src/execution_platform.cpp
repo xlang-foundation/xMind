@@ -1,6 +1,7 @@
 #include "agentflow/execution_platform.hpp"
 #include "agentflow/skill_context.hpp"
 #include "agentflow/agent_definitions.hpp"
+#include "nlohmann/json.hpp"
 #if defined(_WIN32)
 #include "agentflow/vcs_service.hpp"
 #endif
@@ -8,8 +9,19 @@
 #include <random>
 #include <sstream>
 #include <iomanip>
+#include <set>
 namespace agentflow {
 namespace {std::string workspace_nonce(){std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)value<<std::setw(8)<<random();return value.str();}}
+struct ExecutionPlatform::LanguageServerWorkspace {
+    LanguageServerWorkspace(const std::string& folder_id,std::string folder_root,const std::vector<LanguageServerProfile>& profiles)
+        :root(std::move(folder_root)),workspace(root){
+        if(workspace.identity()!=folder_id||workspace.root_path()!=root)throw ToolAccessDenied("Registered language-server folder identity changed");
+        registry=std::make_unique<LanguageServerToolRegistry>(workspace,profiles);
+    }
+    std::string root;
+    WorkspaceTools workspace;
+    std::unique_ptr<LanguageServerToolRegistry> registry;
+};
 ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings settings,std::size_t workers,std::size_t capacity):store_(store) {
     workspace_membership_snapshot_=settings.workspace_membership_snapshot;
     if(settings.workspace){workspace_binding_=std::make_unique<WorkspaceTools>(*settings.workspace);settings.workspace=workspace_binding_->root_path();workspace_authority_=workspace_nonce();}
@@ -122,7 +134,32 @@ std::vector<LanguageServerMetadata> ExecutionPlatform::language_server_profiles(
 }
 std::string ExecutionPlatform::language_server_query(const LanguageServerRequest& request){
     if(!workspace_binding_||!language_servers_)throw RunUnavailable("Language-server queries require an opened workspace and trusted server profile");
-    return language_servers_->query(request);
+    if(request.folder_id.empty()||request.folder_id==workspace_binding_->identity()){
+        auto primary=request;primary.folder_id.clear();return language_servers_->query(primary);
+    }
+    auto membership=workspace_membership();std::size_t selected=0;
+    {
+        std::lock_guard lock(language_server_workspaces_mutex_);std::set<std::string> current;
+        for(const auto& member:membership->folders())current.insert(member.folder_id);
+        for(auto item=language_server_workspaces_.begin();item!=language_server_workspaces_.end();)
+            if(!current.contains(item->first))item=language_server_workspaces_.erase(item);else ++item;
+        selected=membership->folder_index(request.folder_id);
+    }
+    if(selected==0){auto primary=request;primary.folder_id.clear();return language_servers_->query(primary);}
+    const auto& folder=membership->folders()[selected];std::shared_ptr<LanguageServerWorkspace> target;
+    {
+        std::lock_guard lock(language_server_workspaces_mutex_);
+        const auto found=language_server_workspaces_.find(folder.folder_id);
+        if(found!=language_server_workspaces_.end()){
+            if(found->second->root!=folder.root)throw ToolAccessDenied("Registered language-server folder root changed");
+            target=found->second;
+        }else{
+            target=std::make_shared<LanguageServerWorkspace>(folder.folder_id,folder.root,language_servers_->profiles());
+            language_server_workspaces_.emplace(folder.folder_id,target);
+        }
+    }
+    auto scoped=request;scoped.folder_id.clear();auto result=nlohmann::json::parse(target->registry->query(scoped));
+    result["folder_id"]=folder.folder_id;return result.dump();
 }
 WorkspaceSessionSkills ExecutionPlatform::session_skills(const std::string& session)const{
     if(!workspace_binding_)throw RunUnavailable("Session skills require an opened root");const auto workspace=execution_workspace();

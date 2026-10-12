@@ -14,16 +14,18 @@ function lspPosition(vscode,value){
 function lspRange(vscode,value){const start=lspPosition(vscode,value?.start),end=lspPosition(vscode,value?.end);return start&&end?new vscode.Range(start,end):undefined;}
 class LanguageServerEditor {
   constructor(vscode,workspaceBackend){
-    this.vscode=vscode;this.workspaceBackend=workspaceBackend;this.client=undefined;this.epoch=-1;this.profiles=[];this.disposables=[];this.timers=new Map();this.sequences=new Map();this.collection=vscode.languages.createDiagnosticCollection('xMind');
+    this.vscode=vscode;this.workspaceBackend=workspaceBackend;this.client=undefined;this.epoch=-1;this.profiles=[];this.folders=[];this.membershipRefreshedAt=0;this.disposables=[];this.timers=new Map();this.sequences=new Map();this.collection=vscode.languages.createDiagnosticCollection('xMind');
   }
   active(client=this.client,epoch=this.epoch){return client&&this.client===client&&this.epoch===epoch&&this.workspaceBackend.epoch===epoch&&this.workspaceBackend.active?.origin===client.baseUrl&&this.vscode.workspace.isTrusted&&this.vscode.env?.remoteName===undefined;}
   clear(){for(const timer of this.timers.values())clearTimeout(timer);this.timers.clear();this.sequences.clear();this.collection.clear();}
-  disconnect(){for(const item of this.disposables.splice(0))item.dispose();this.clear();this.profiles=[];this.client=undefined;this.epoch=-1;}
+  disconnect(){for(const item of this.disposables.splice(0))item.dispose();this.clear();this.profiles=[];this.folders=[];this.membershipRefreshedAt=0;this.client=undefined;this.epoch=-1;}
   async connect(client){
     this.disconnect();const owner=this.workspaceBackend.active;if(!owner||owner.origin!==client?.baseUrl||!this.vscode.workspace.isTrusted||this.vscode.env?.remoteName)return;
     const epoch=this.workspaceBackend.epoch;this.client=client;this.epoch=epoch;
-    try{this.profiles=await client.languageServerProfiles();}catch(error){this.disconnect();if(error.status!==404)throw error;return;}
-    if(!this.active(client,epoch))return;
+    let profiles;try{profiles=await client.languageServerProfiles();}catch(error){if(!this.active(client,epoch))return;this.disconnect();if(error.status!==404)throw error;return;}
+    let folders=[{folder_id:owner.metadata?.workspace_id,root:owner.canonical,ordinal:0}];
+    if(typeof client.workspaceMembership==='function')try{folders=(await client.workspaceMembership()).folders;}catch(error){if(error.status!==404){if(!this.active(client,epoch))return;this.disconnect();throw error;}}
+    if(!this.active(client,epoch))return;this.profiles=profiles;this.folders=folders;
     const schedule=(document,delay)=>{if(document?.uri?.scheme!=='file'||!this.supports(document))return;const key=document.uri.toString();const sequence=(this.sequences.get(key)||0)+1;this.sequences.set(key,sequence);clearTimeout(this.timers.get(key));this.timers.set(key,setTimeout(()=>{this.timers.delete(key);this.refresh(document,key,sequence).catch(()=>{});},delay));};
     this.disposables.push(this.vscode.workspace.onDidOpenTextDocument(document=>schedule(document,250)));
     this.disposables.push(this.vscode.workspace.onDidChangeTextDocument(event=>schedule(event.document,650)));
@@ -42,13 +44,24 @@ class LanguageServerEditor {
     for(const profile of this.profiles)for(const value of profile.extensions)if(value.toLowerCase()===extension)count++;
     return count===1;
   }
+  folderFor(document){
+    if(document?.uri?.scheme!=='file'||typeof document.uri.fsPath!=='string')return;
+    const matches=[];for(const folder of this.folders){const relative=workspaceRelativePath(folder.root,document.uri.fsPath);if(relative)matches.push({folder,path:relative});}
+    if(matches.length!==1)return;const match=matches[0];return {path:match.path,folderId:match.folder.ordinal===0?undefined:match.folder.folder_id};
+  }
+  async folderForCurrent(document,client=this.client,epoch=this.epoch){
+    let target=this.folderFor(document);if(target||typeof client?.workspaceMembership!=='function'||Date.now()-this.membershipRefreshedAt<1500)return target;
+    this.membershipRefreshedAt=Date.now();try{const membership=await client.workspaceMembership();if(!this.active(client,epoch))return;this.folders=membership.folders;}catch(error){if(error.status!==404)throw error;}
+    return this.active(client,epoch)?this.folderFor(document):undefined;
+  }
+  containsRegisteredFile(file){return this.folders.some(folder=>workspaceRelativePath(folder.root,file));}
   async refresh(document,key=document.uri.toString(),sequence=this.sequences.get(key)){
     const client=this.client,epoch=this.epoch;if(!this.active(client,epoch)||!this.supports(document)||!(this.vscode.workspace.textDocuments||[]).includes(document))return;
-    const owner=this.workspaceBackend.active,relative=workspaceRelativePath(owner.canonical,document.uri.fsPath);if(!relative)return;
+    const target=await this.folderForCurrent(document,client,epoch);if(!target)return;const relative=target.path;
     const version=document.version,text=document.getText();const ticket=await this.workspaceBackend.prepare();this.workspaceBackend.assert(ticket);
     if(!this.active(client,epoch)||this.sequences.get(key)!==sequence||document.version!==version||ticket.origin!==client.baseUrl)return;
     try{
-      const response=await client.languageServerQuery({path:relative,method:'diagnostics',documentText:text},ticket.fields);
+      const response=await client.languageServerQuery({path:relative,method:'diagnostics',documentText:text,...(target.folderId?{folderId:target.folderId}:{})},ticket.fields);
       this.workspaceBackend.assert(ticket);
       if(!this.active(client,epoch)||this.sequences.get(key)!==sequence||document.version!==version||!(this.vscode.workspace.textDocuments||[]).includes(document))return;
       const values=Array.isArray(response.result?.items)?response.result.items:response.diagnostics;
@@ -66,11 +79,11 @@ class LanguageServerEditor {
   }
   async query(document,position,method,token,formattingOptions){
     const client=this.client,epoch=this.epoch;if(!this.active(client,epoch)||!this.supports(document)||!(this.vscode.workspace.textDocuments||[]).includes(document)||token?.isCancellationRequested)return;
-    const owner=this.workspaceBackend.active,relative=workspaceRelativePath(owner.canonical,document.uri.fsPath);if(!relative)return;
+    const target=await this.folderForCurrent(document,client,epoch);if(!target)return;const relative=target.path;
     const version=document.version,line=position?.line??0,character=position?.character??0;if(!Number.isSafeInteger(line)||line<0||!Number.isSafeInteger(character)||character<0)return;
     const ticket=await this.workspaceBackend.prepare();this.workspaceBackend.assert(ticket);
     if(!this.active(client,epoch)||document.version!==version||token?.isCancellationRequested||ticket.origin!==client.baseUrl)return;
-    const response=await client.languageServerQuery({path:relative,method,line,character,documentText:document.getText(),...(formattingOptions?{formattingOptions}:{})},ticket.fields);this.workspaceBackend.assert(ticket);
+    const response=await client.languageServerQuery({path:relative,method,line,character,documentText:document.getText(),...(target.folderId?{folderId:target.folderId}:{}),...(formattingOptions?{formattingOptions}:{})},ticket.fields);this.workspaceBackend.assert(ticket);
     if(!this.active(client,epoch)||document.version!==version||token?.isCancellationRequested||!(this.vscode.workspace.textDocuments||[]).includes(document)||response.path!==relative||response.method!==method)return;
     return response.result;
   }
@@ -100,7 +113,7 @@ class LanguageServerEditor {
     const locations=Array.isArray(result)?result:[result];if(locations.length>10000)return;
     const mapped=[];for(const item of locations){if(!item||typeof item!=='object')continue;
       const uriText=typeof item.uri==='string'?item.uri:item.targetUri;if(typeof uriText!=='string'||uriText.length>32768)continue;
-      let uri;try{uri=this.vscode.Uri.parse(uriText);}catch{continue;}if(uri.scheme!=='file'||!workspaceRelativePath(this.workspaceBackend.active?.canonical,uri.fsPath))continue;
+      let uri;try{uri=this.vscode.Uri.parse(uriText);}catch{continue;}if(uri.scheme!=='file'||!this.containsRegisteredFile(uri.fsPath))continue;
       const range=lspRange(this.vscode,item.range||item.targetSelectionRange||item.targetRange);if(range)mapped.push(new this.vscode.Location(uri,range));
     }return mapped.length?mapped:undefined;
   }
