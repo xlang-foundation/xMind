@@ -10,12 +10,27 @@
 #include <condition_variable>
 #include <mutex>
 #include <cstdlib>
+#include <algorithm>
+#include <atomic>
 
 using namespace agentflow;
 using Json=nlohmann::json;
 using namespace std::chrono_literals;
 namespace {
 void require(bool value,const char* message) {if(!value) throw std::runtime_error(message);}
+std::string env(const char* name){const auto* value=std::getenv(name);return value?value:"";}
+LanguageServerProfile rust_profile(const std::string& executable){
+    LanguageServerProfile profile;profile.id="rust-analyzer";profile.executable=executable;profile.language_id="rust";profile.extensions={".rs"};profile.request_timeout=std::chrono::seconds(90);
+    const auto path=env("PATH");if(!path.empty())profile.environment.emplace_back("PATH",std::filesystem::u8path(executable).parent_path().string()+";"+path);
+    const auto rustup=env("RUSTUP_HOME");if(!rustup.empty())profile.environment.emplace_back("RUSTUP_HOME",rustup);
+    const auto user=env("USERPROFILE");if(!user.empty()){profile.environment.emplace_back("USERPROFILE",user);profile.environment.emplace_back("HOME",user);profile.environment.emplace_back("CARGO_HOME",user+"/.cargo");}
+    return profile;
+}
+void create_rust_project(const std::filesystem::path& root,const std::string& package,const std::string& symbol){
+    std::filesystem::create_directories(root/"src");
+    std::ofstream manifest(root/"Cargo.toml",std::ios::binary);manifest<<"[package]\nname = \""<<package<<"\"\nversion = \"0.1.0\"\nedition = \"2021\"\n[lib]\npath = \"src/lib.rs\"\n";manifest.close();
+    std::ofstream source(root/"src/lib.rs",std::ios::binary);source<<"pub fn "<<symbol<<"() {}\n";
+}
 template<class Error,class Function> void rejects(Function action) {
     try {action();} catch(const Error&) {return;} throw std::runtime_error("Expected rejection did not occur");
 }
@@ -45,7 +60,7 @@ Run cancel_after_stream(AgentRunner& runner,PersistenceService& store,const std:
 }
 }
 int main(int argc,char** argv) {
-    if(argc!=6) return 2;
+    if(argc!=6&&argc!=7) return 2;
     try {
         const std::vector<std::string> roots{argv[2],argv[3]};
         PersistenceService store(argv[1],roots);
@@ -77,6 +92,31 @@ int main(int argc,char** argv) {
         bool captured_membership=false;for(const auto& event:store.events("multi-folder").get())if(event.kind=="agent.workspace_membership"){
             const auto membership=Json::parse(event.json);captured_membership=membership.at("revision")==2&&membership.at("folders").size()==2&&membership.at("folders")[1].at("root")==attached_canonical;
         }require(captured_membership,"Run admission must durably retain the exact folder identities and roots used by child executions");
+        if(argc==7){
+            const auto profile=rust_profile(argv[6]);create_rust_project(std::filesystem::u8path(primary_root),"agentflow_lsp_primary","primary_symbol");create_rust_project(std::filesystem::u8path(attached_canonical),"agentflow_lsp_attached","attached_symbol");
+            const auto late_root=(std::filesystem::path(argv[4]).parent_path()/L"late-attached").string();WorkspaceTools late(late_root);const auto late_id=late.identity(),late_canonical=late.root_path();std::atomic_bool late_attached=false;
+            create_rust_project(std::filesystem::u8path(late_canonical),"agentflow_lsp_late","late_symbol");
+            auto lsp=multi;lsp.provider.endpoint=base+"/multi-folder-lsp?folder_id="+attached_id+"&late_folder_id="+late_id;lsp.language_servers.push_back(profile);
+            lsp.workspace_membership_snapshot=[=,&late_attached]{WorkspaceMembershipSnapshot snapshot{primary_id,late_attached?3:2,{{primary_id,primary_root},{attached_id,attached_canonical}}};if(late_attached)snapshot.folders.push_back({late_id,late_canonical});return snapshot;};
+            lsp.language_server_dispatch=[profile,&late_attached,late_id](const std::string& server_id,const LanguageServerRequest& request,const std::vector<WorkspaceToolFolder>& folders){
+                if(folders.size()==2&&std::any_of(folders.begin(),folders.end(),[&](const auto& member){return member.folder_id==late_id;}))throw std::runtime_error("A folder attached during the provider turn must not enter the run's admitted snapshot");
+                late_attached=true;
+                const auto selected=std::find_if(folders.begin(),folders.end(),[&](const auto& member){return member.folder_id==request.folder_id;});
+                if(selected==folders.end())throw ToolAccessDenied("Model language-server folder is not admitted for this run");
+                if(server_id!=profile.id)throw ToolAccessDenied("Model selected an unregistered language-server profile");
+                WorkspaceTools selected_workspace(selected->root);LanguageServerToolRegistry selected_registry(selected_workspace,{profile});auto scoped=request;scoped.folder_id.clear();auto result=Json::parse(selected_registry.query(scoped,server_id));result["folder_id"]=selected->folder_id;return result.dump();
+            };
+            store.create_session("multi-folder-lsp","Agent model language-server query in an admitted folder").get();AgentRunner lsp_runner(store,lsp);lsp_runner.start("multi-folder-lsp","multi-folder-lsp","Inspect the attached Rust file with the language server");
+            require(lsp_runner.execute("multi-folder-lsp").state==RunState::completed,"AgentRunner must complete a provider-issued language-server tool call against the admitted secondary folder");
+            const auto lsp_history=store.history("multi-folder-lsp").get();require(lsp_history.size()==6,"Model language-server success, late-folder rejection and final answer must persist across the real tool loop");
+            const auto lsp_result=Json::parse(Json::parse(lsp_history[2].json).at("content").get<std::string>());require(lsp_result.at("folder_id")==attached_id&&lsp_result.at("result").is_array()&&!lsp_result.at("result").empty()&&lsp_result.at("result")[0].at("name")=="attached_symbol","AgentRunner must return real Rust Analyzer symbols from the exact attached-folder root");
+            const auto late_rejection=Json::parse(Json::parse(lsp_history[4].json).at("content").get<std::string>());require(late_rejection.at("error").at("code")=="access_denied","A folder attached after this run started must be rejected from its captured language-server tool schema");
+            const auto next_membership=lsp.workspace_membership_snapshot();require(next_membership.revision==3&&next_membership.folders.size()==3&&next_membership.folders.back().folder_id==late_id,"A later run must see the newly attached folder in the newer membership revision");
+            auto lsp_later=lsp;lsp_later.provider.endpoint=base+"/multi-folder-lsp-later?folder_id="+late_id;store.create_session("multi-folder-lsp-later","Later agent run sees the newly attached folder").get();AgentRunner lsp_later_runner(store,lsp_later);lsp_later_runner.start("multi-folder-lsp-later","multi-folder-lsp-later","Inspect the newly attached Rust folder");
+            require(lsp_later_runner.execute("multi-folder-lsp-later").state==RunState::completed,"A later AgentRunner run must query the newly admitted folder");const auto later_history=store.history("multi-folder-lsp-later").get();require(later_history.size()==4,"Later folder query and model response must persist as one native tool round-trip");
+            const auto later_result=Json::parse(Json::parse(later_history[2].json).at("content").get<std::string>());require(later_result.at("folder_id")==late_id&&later_result.at("result")[0].at("name")=="late_symbol","The next admitted run must use the new folder root and its own Rust Analyzer symbol");
+            bool revision_three=false;for(const auto& event:store.events("multi-folder-lsp-later").get())if(event.kind=="agent.workspace_membership")revision_three=Json::parse(event.json).at("revision")==3;require(revision_three,"The later model tool call must be durably tied to workspace membership revision 3");
+        }
         const auto* system_root=std::getenv("SystemRoot");if(!system_root||!*system_root)throw std::runtime_error("SystemRoot is required for the native Windows process fixture");
         const auto powershell=(std::filesystem::u8path(system_root)/L"System32"/L"WindowsPowerShell"/L"v1.0"/L"powershell.exe").string();
         auto multi_process=multi;multi_process.provider.endpoint=base+"/multi-folder-process?folder_id="+attached_id;

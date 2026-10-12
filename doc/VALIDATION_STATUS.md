@@ -165,7 +165,8 @@ editor buffer, workspace authority and VS Code indentation settings through the
 native authenticated HTTP bridge. The native client checks that the configured
 server advertises formatting support; results are validated for document
 bounds and overlapping edits before VS Code applies them. The model-visible
-AgentRunner language-server tool remains read-only.
+AgentRunner language-server tool remains read-only and accepts an optional
+folder ID from the run-pinned workspace snapshot.
 
 The Release `agentflow_language_server_contract` target builds, and its direct
 run against the installed Rust Analyzer passes real stdio initialization,
@@ -198,6 +199,13 @@ remain unverified. Updated scope is in
 [formatting evidence](evidence/native-language-server-formatting-local-20261011.json).
 
 ## VS Code language-server navigation checkpoint — 2026-10-11
+
+The AgentRunner contract now performs provider-driven `language_server` tool
+calls against admitted folders with real Rust Analyzer. During one run it adds
+a third folder and verifies the pinned run rejects it; the next run uses
+revision 3 and returns the new folder's distinct symbol. The synthetic-provider
+native contract passes (**1/1**); it does not claim live model or installed
+multi-folder VS Code acceptance.
 
 Configured language servers now back VS Code Go to Definition, Find References
 and Hover alongside the existing diagnostics collection. Requests are bound to

@@ -36,6 +36,9 @@
     "live_installed_multifolder_vscode_session": "not verified",
     "model_visible_agent_language_server_tool": "accepts optional folder_id selected only from the run-admitted workspace membership snapshot; primary folder remains the default",
     "model_tool_contract": "Real Rust Analyzer returned the secondary folder's distinct symbol; unadmitted folder ID was rejected before dispatch",
-    "provider_driven_model_tool_turn": "not verified"
+    "provider_driven_model_tool_turn": "AgentRunner completed a synthetic-provider language_server tool loop using real Rust Analyzer",
+    "run_snapshot_pinning": "The model queried the admitted secondary folder; a third folder attached during the run was rejected; the following AgentRunner run used revision 3 and Rust Analyzer returned that folder's distinct late_symbol",
+    "agent_runner_contract": "passed 1/1 with a synthetic provider and real Rust Analyzer",
+    "live_model_turn": "not verified"
   }
 }

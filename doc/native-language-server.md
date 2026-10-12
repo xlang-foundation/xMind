@@ -84,7 +84,9 @@ AgentRunner's model-visible `language_server` tool accepts the optional
 `folder_id` from the run's admitted workspace snapshot. Without it, queries use
 the primary folder. The native dispatcher routes each selected member to its
 own cached language-server registry and does not consult live membership during
-the run. The focused contract exercises a model-tool invocation with the
-captured two-folder list, verifies the secondary symbol result, and proves an
-unadmitted ID is rejected before dispatch. A full provider-driven agent turn
-using the model tool and a rendered multi-folder VS Code session remain open.
+the run. The AgentRunner contract now drives the complete native tool loop with
+a synthetic provider peer and real Rust Analyzer: it verifies the secondary
+symbol result, adds a third folder during the run, and confirms it is rejected
+by the pinned snapshot. A second AgentRunner run then uses revision 3 and returns
+the new folder's distinct Rust symbol. A live-model turn and rendered
+multi-folder VS Code session remain open.

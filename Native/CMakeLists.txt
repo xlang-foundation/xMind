@@ -791,10 +791,17 @@ if(BUILD_TESTING)
     add_custom_command(TARGET agentflow_agent_runner_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_runner_contract>")
     if(AGENTFLOW_NODE_EXECUTABLE)
-      add_test(NAME native_agent_runner_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_runner_peer.mjs" "$<TARGET_FILE:agentflow_agent_runner_contract>"
-        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
-      set_tests_properties(native_agent_runner_contract PROPERTIES TIMEOUT 45)
+      if(AGENTFLOW_RUST_ANALYZER_EXECUTABLE)
+        add_test(NAME native_agent_runner_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+          "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_runner_peer.mjs" "$<TARGET_FILE:agentflow_agent_runner_contract>"
+          "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "${AGENTFLOW_RUST_ANALYZER_EXECUTABLE}")
+        set_tests_properties(native_agent_runner_contract PROPERTIES TIMEOUT 120)
+      else()
+        add_test(NAME native_agent_runner_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+          "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_runner_peer.mjs" "$<TARGET_FILE:agentflow_agent_runner_contract>"
+          "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+        set_tests_properties(native_agent_runner_contract PROPERTIES TIMEOUT 45)
+      endif()
     endif()
     add_executable(agentflow_gemini_agent_contract tests/gemini_agent_contract.cpp)
     target_include_directories(agentflow_gemini_agent_contract PRIVATE third_party)

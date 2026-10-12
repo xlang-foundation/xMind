@@ -7,7 +7,7 @@ import {promisify} from 'node:util';
 import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-const [executable,modules,stdlib]=process.argv.slice(2),execute=promisify(execFile);
+const [executable,modules,stdlib,rustAnalyzer]=process.argv.slice(2),execute=promisify(execFile);
 const folder=await mkdtemp(join(tmpdir(),'xmind-agent-')),workspace=join(folder,'workspace');
 let failure,requests=0,skillRequests=0,skillCapacityRequests=0,skillFollowRequests=0,manualRequests=0,clearRequests=0,pythonRequests=0,pythonFilteredRequests=0;
 const server=createServer((request,response)=>{
@@ -16,10 +16,41 @@ const server=createServer((request,response)=>{
       requests++;assert.equal(request.headers.authorization,'Bearer engine-protocol-test-not-a-real-key');
       assert.ok(!source.includes('engine-protocol-test-not-a-real-key'));
       const body=JSON.parse(source);assert.equal(body.model,'fixture-deployment');assert.equal(body.stream,true);
-      const expectedTools=request.url==='/python-tool-filtered'?['read_file']:['read_repository_instructions','read_file','list_files','search_files','glob_files','list_skills','load_skill'];if(request.url==='/python-tool')expectedTools.push('python_uppercase');if(request.url.startsWith('/multi-folder-process'))expectedTools.push('run_process','wait_process');if(request.url.startsWith('/multi-folder-patch'))expectedTools.push('edit_file','create_file','apply_patch');
+      const expectedTools=request.url==='/python-tool-filtered'?['read_file']:['read_repository_instructions','read_file','list_files','search_files','glob_files','list_skills','load_skill'];if(request.url==='/python-tool')expectedTools.push('python_uppercase');if(request.url.startsWith('/multi-folder-process'))expectedTools.push('run_process','wait_process');if(request.url.startsWith('/multi-folder-patch'))expectedTools.push('edit_file','create_file','apply_patch');if(request.url.startsWith('/multi-folder-lsp'))expectedTools.push('language_server');
       assert.deepEqual(body.tools.map(item=>item.function.name),expectedTools);
       if(request.url==='/error') {response.writeHead(429,{'Content-Type':'application/json'});response.end('{"error":"do-not-log-provider-body"}');return;}
       response.writeHead(200,{'Content-Type':'text/event-stream'});
+      if(request.url.startsWith('/multi-folder-lsp-later')){
+        assert.ok(rustAnalyzer,'The model-visible language-server contract requires the real Rust Analyzer executable');
+        const folderId=new URL(request.url,'http://fixture.local').searchParams.get('folder_id');assert.ok(folderId,'The subsequent model turn must select the newly admitted folder');
+        const systemMessage=body.messages.find(item=>['system','developer'].includes(item.role));assert.ok(systemMessage?.content.includes(`folder_id=${folderId}`),'The later-run system context must contain the newly admitted folder ID');
+        const previous=body.messages.at(-1);let delta,finish;
+        if(previous.role==='user'){
+          delta={tool_calls:[{index:0,id:'newly-admitted-language-server',type:'function',function:{name:'language_server',arguments:JSON.stringify({server_id:'rust-analyzer',method:'documentSymbol',path:'src/lib.rs',folder_id:folderId})}}]};finish='tool_calls';
+        }else{
+          assert.equal(previous.role,'tool');const result=JSON.parse(previous.content);assert.equal(result.folder_id,folderId);assert.equal(result.result[0].name,'late_symbol',JSON.stringify(result));
+          delta={content:'Synthetic model verified the new folder became available in the following admitted run.'};finish='stop';
+        }
+        response.write('data: '+JSON.stringify({choices:[{index:0,delta,finish_reason:finish}]})+'\n\n');response.end('data: [DONE]\n\n');return;
+      }
+      if(request.url.startsWith('/multi-folder-lsp')){
+        assert.ok(rustAnalyzer,'The model-visible language-server contract requires the real Rust Analyzer executable');
+        const route=new URL(request.url,'http://fixture.local'),folderId=route.searchParams.get('folder_id'),lateFolderId=route.searchParams.get('late_folder_id');assert.ok(folderId&&lateFolderId,'Native LSP run must bind both admitted and subsequently attached folder identities into the provider route');
+        const systemMessage=body.messages.find(item=>['system','developer'].includes(item.role));assert.ok(systemMessage?.content.includes(`folder_id=${folderId}`),'The admitted folder ID must be visible to the model');
+        const tool=body.tools.find(item=>item.function.name==='language_server');assert.ok(tool?.function.parameters.properties.folder_id,'The model-visible LSP schema must allow an admitted folder ID');
+        const previous=body.messages.at(-1);let delta,finish;
+        const turn=body.messages.filter(item=>item.role==='assistant'&&item.tool_calls?.some(call=>call.function?.name==='language_server')).length;
+        if(previous.role==='user'){
+          delta={tool_calls:[{index:0,id:'attached-language-server',type:'function',function:{name:'language_server',arguments:JSON.stringify({server_id:'rust-analyzer',method:'documentSymbol',path:'src/lib.rs',folder_id:folderId})}}]};finish='tool_calls';
+        }else if(turn===1){
+          assert.equal(previous.role,'tool');const result=JSON.parse(previous.content);assert.equal(result.folder_id,folderId);assert.equal(result.result[0].name,'attached_symbol',JSON.stringify(result));
+          delta={tool_calls:[{index:0,id:'late-language-server',type:'function',function:{name:'language_server',arguments:JSON.stringify({server_id:'rust-analyzer',method:'documentSymbol',path:'src/lib.rs',folder_id:lateFolderId})}}]};finish='tool_calls';
+        }else{
+          assert.equal(turn,2);assert.equal(previous.role,'tool');assert.equal(JSON.parse(previous.content).error.code,'access_denied','The active run must reject membership attached after admission');
+          delta={content:'Synthetic model verified real Rust Analyzer symbols from the admitted attached folder.'};finish='stop';
+        }
+        response.write('data: '+JSON.stringify({choices:[{index:0,delta,finish_reason:finish}]})+'\n\n');response.end('data: [DONE]\n\n');return;
+      }
       if(request.url.startsWith('/multi-folder-patch')){
         const folderId=new URL(request.url,'http://fixture.local').searchParams.get('folder_id');assert.ok(folderId,'Native patch fixture must bind the secondary folder ID into the provider route');
         const systemMessage=body.messages.find(item=>['system','developer'].includes(item.role));assert.ok(systemMessage?.content.includes(`folder_id=${folderId}`),'Agent context must disclose the admitted folder identity to the coding agent');
@@ -114,7 +145,7 @@ const server=createServer((request,response)=>{
   });
 });
 try {
-  await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual file content written by fixture\n');await mkdir(join(folder,'attached'));await writeFile(join(folder,'attached','README.md'),'Attached folder content\n');
+  await mkdir(workspace);await writeFile(join(workspace,'README.md'),'Actual file content written by fixture\n');await mkdir(join(folder,'attached'));await writeFile(join(folder,'attached','README.md'),'Attached folder content\n');await mkdir(join(folder,'late-attached'));
   await writeFile(join(workspace,'fixture_tools.py'),
     "def configure(xmind):\n"
     +"    xmind.tool({'name': 'python_uppercase', 'description': 'Convert the supplied text to uppercase', 'input_schema': {'type': 'object', 'properties': {'text': {'type': 'string'}}, 'required': ['text'], 'additionalProperties': False}, 'module': 'fixture_tools', 'function': 'uppercase'})\n"
@@ -123,6 +154,6 @@ try {
   await mkdir(join(workspace,'.agents','skills','large'));await writeFile(join(workspace,'.agents','skills','large','SKILL.md'),'---\nname: large\ndescription: Synthetic instruction budget fixture\n---\nSynthetic oversized active skill body '+ 'x'.repeat(14500));
   await mkdir(join(workspace,'.agents','skills','manual'));await writeFile(join(workspace,'.agents','skills','manual','SKILL.md'),'---\nname: User-only guide\ndisable-model-invocation: true\n---\nSynthetic user-only active body: inspect actual companion bytes.\n');await writeFile(join(workspace,'.agents','skills','manual','helper.txt'),'Actual user-only companion bytes\n');
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
-  let result;try{result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:30000});}catch(error){if(failure)throw failure;throw error;}
-  if(failure) throw failure;assert.equal(requests,28);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);
+  let result;try{result=await execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`,...(rustAnalyzer?[rustAnalyzer]:[])],{windowsHide:true,timeout:60000});}catch(error){if(failure)throw failure;throw error;}
+  if(failure) throw failure;assert.equal(requests,rustAnalyzer?33:28);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);
 } finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await rm(folder,{recursive:true,force:true});}

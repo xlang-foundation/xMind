@@ -50,15 +50,17 @@ The browser Git panel now offers every registered workspace folder and scopes
 repository initialization, status, review-base detection and diffs to the
 selected `folder_id`. Its secondary-folder contract verifies selection and
 routing for each of those operations. Multi-root language-server selection
-is now covered by the native and VS Code host contracts. Model-visible LSP
-selection and rendered VS Code acceptance remain open.
+is covered by the native and VS Code host contracts. AgentRunner now also has
+a synthetic provider-driven turn using real Rust Analyzer that queries the
+admitted secondary root and rejects a folder attached during the run. Rendered
+multi-folder VS Code acceptance remains open.
 
 The pinned source inventory has been regenerated from the exact v2.0.26
 schema: **141 operations, 31 native source candidates, 110 unmapped, and zero
 verified operation-level parity**. A source candidate means reviewed code
 exists; it is not feature parity. Remaining work includes end-to-end
-multi-folder CLI and installed VS Code acceptance, model-visible multi-folder
-LSP, broader provider/model conformance, and the substantial unmapped
+multi-folder CLI and installed VS Code acceptance, broader provider/model
+conformance, and the substantial unmapped
 OpenCode coding/runtime surface. Private Nexus server,
 PostgreSQL, WebRTC and Electron remain outside the xMind OSS scope.
 
