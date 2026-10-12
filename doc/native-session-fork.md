@@ -22,8 +22,13 @@ xmind_cli fork-session SESSION [BEFORE_MESSAGE_ID]
 
 Focused native contracts exercise full and exclusive-boundary forks, message
 ID mapping, source isolation, wrong/malformed boundaries, agent/skill snapshot
-copying, HTTP and CLI access, and xlang3 SQLite restart recovery. The operation
-is recorded as a native source candidate, not verified OpenCode parity. Browser
-and VS Code do not yet expose a fork control; OpenCode's wider session metadata,
-typed message parts, and provider usage/cost behavior remain outside this slice.
+copying, HTTP and CLI access, and xlang3 SQLite restart recovery. Browser and
+VS Code now expose a per-message “Fork before this message” control when the
+backend advertises native fork support. Both clients bind the request to the
+selected saved conversation, reject malformed/foreign boundaries and active
+runs, validate the native receipt, and switch to the new child session. The
+browser and VS Code controller/renderer suites cover those paths. The operation
+is recorded as a native source candidate, not verified OpenCode parity;
+OpenCode's wider session metadata, typed message parts, and provider usage/cost
+behavior remain outside this slice.
 See the pinned [OpenCode parity inventory](PARITY.md).

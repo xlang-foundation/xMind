@@ -234,6 +234,13 @@ test('conversation rename keeps expected title and draft through conflicts, and 
   const sessions=doc.getElementById('sessions');sessions.value='second';sessions.dispatchEvent(new r.dom.window.Event('change'));assert.equal(dialog.open,false);assert.equal(title.value,'');r.send({type:'rename-result',id:'first',success:true});assert.equal(doc.getElementById('prompt').value,'Keep composer draft');
   const sent=r.posted.length;doc.getElementById('rename').click();doc.getElementById('rename-cancel').click();assert.equal(r.posted.length,sent);r.send({type:'capabilities',execution:false,models:[]});assert.equal(doc.getElementById('rename').hidden,true);r.dom.window.close();
 });
+test('saved transcript exposes a bounded fork-before control only when the backend supports it',()=>{
+ const r=renderer(),doc=r.dom.window.document;r.send({type:'sessions',sessions:[{id:'saved',title:'Saved'}],selected:'saved'});r.send({type:'capabilities',execution:false,forkSessions:true,models:[]});
+ r.send({type:'history',history:[{id:'msg_7',seq:7,role:'assistant',data:{content:'Persisted answer'}},{role:'assistant',data:{content:'Unidentified message'}},{id:'bad-id',role:'user',data:{content:'Malformed identity'}}]});
+ const buttons=[...doc.querySelectorAll('.message-fork')];assert.equal(buttons.length,1);assert.equal(buttons[0].textContent,'Fork before this message');buttons[0].click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'fork-session',id:'saved',before:'msg_7'});
+ r.send({type:'runs',runs:[{id:'active',state:'running'}],selected:'active',busy:true});assert.equal(buttons[0].disabled,true);r.send({type:'fork-result',id:'saved',before:'msg_7',success:false,text:'Run active'});assert.equal(doc.getElementById('status').textContent,'Run active');
+ r.send({type:'capabilities',execution:false,models:[]});assert.equal(buttons[0].disabled,true);r.dom.window.close();
+});
 test('footer displays only a recognized backend-reported provider wire',()=>{
   const r=renderer(),label=r.dom.window.document.getElementById('provider-mode');r.send({type:'provider-wire',wire:'responses'});assert.equal(label.textContent,'Responses');assert.equal(label.hidden,false);r.send({type:'provider-wire',wire:'chat-completions'});assert.equal(label.textContent,'Chat Completions');r.send({type:'provider-wire',wire:'<script>fixtureAttack()</script>'});assert.equal(label.hidden,true);assert.equal(label.textContent,'');
 });

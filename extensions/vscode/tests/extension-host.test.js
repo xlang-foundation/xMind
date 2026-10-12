@@ -17,7 +17,7 @@ function harness(options={}) {
   let pendingOperation;
   let operations=options.operations||[];
   let sidebarProvider,folderListener;const backendOwners=[];
-  const renameRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[];
+  const renameRequests=[],forkRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
@@ -71,7 +71,10 @@ function harness(options={}) {
         const value=JSON.parse(requestOptions.body);providerRequests.push(value);options.health={agent_execution:true,status:'ok'};options.catalogue={default_model:value.model,models:[{id:value.model}]};data={...options.providerSetup,revision:options.providerSetup.revision+1,configured:true,model:value.model};
       }else data=options.providerSetup;
     }
-    else if(target.pathname==='/v1/sessions') data=[{id:'saved',title:options.savedTitle||'Saved session'}];
+    else if(target.pathname==='/v1/sessions') data=[{id:'saved',title:options.savedTitle||'Saved session'},...(options.createdFork?[{id:'forked',title:'Saved session (fork #1)'}]:[])];
+    else if(target.pathname==='/v1/sessions/saved/fork'){const body=JSON.parse(requestOptions.body);forkRequests.push(body);options.createdFork=true;data={id:'forked',title:'Saved session (fork #1)',parent_id:'saved',fork:{session_id:'saved',boundary_type:'before',message_id:body.before}};}
+    else if(target.pathname==='/v1/sessions/forked/history') data=transcript;
+    else if(target.pathname==='/v1/sessions/forked/runs') data=[];
     else if(target.pathname==='/v1/sessions/saved/title'){const value=JSON.parse(requestOptions.body);renameRequests.push(value);if(options.renameConflict)return {ok:false,status:409,json:async()=>({detail:'Title changed'})};options.savedTitle=value.title;data={id:'saved',title:value.title};}
     else if(target.pathname==='/v1/sessions/saved/history') data=pendingHistory?await pendingHistory:transcript;
     else if(target.pathname==='/v1/sessions/saved/runs') data=options.runs||[{id:'finished',state:options.running?'running':'completed'}];
@@ -153,7 +156,7 @@ function harness(options={}) {
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     backendOwners,backendUpgradeRequests,changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
@@ -406,6 +409,15 @@ test('sidebar rename binds selected session and original title, refreshes metada
     assert.deepEqual(h.renameRequests,[{title:'Renamed fixture',expected_title:'Saved session'}]);assert.equal(view.posted.findLast(message=>message.type==='rename-result').success,!conflict);
     assert.equal(h.requests.filter(route=>route==='/v1/sessions/saved/history').length,historyReads);assert.ok(!h.requests.includes('/v1/runs'));view.close();
   }
+});
+test('VS Code forks only the active saved conversation boundary and selects the native child',async()=>{
+ const h=harness({health:{agent_execution:false,status:'ok',session_fork:true}});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});
+ try{
+  await until(()=>view.posted.some(message=>message.type==='sessions'&&message.selected==='saved'));
+  view.receive({type:'fork-session',id:'foreign',before:'msg_2'});await until(()=>view.posted.some(message=>message.type==='fork-result'&&message.success===false));assert.deepEqual(h.forkRequests,[]);
+  view.receive({type:'fork-session',id:'saved',before:'msg_2'});await until(()=>view.posted.some(message=>message.type==='fork-result'&&message.id==='saved'&&message.before==='msg_2'));assert.equal(view.posted.findLast(message=>message.type==='fork-result'&&message.id==='saved').success,true);assert.equal(h.forkRequests.length,1);
+  assert.deepEqual(h.forkRequests,[{before:'msg_2'}]);assert.ok(view.posted.some(message=>message.type==='sessions'&&message.selected==='forked'));assert.ok(h.requests.includes('/v1/sessions/forked/history'));assert.ok(h.requests.includes('/v1/sessions/forked/runs'));assert.ok(!h.requests.includes('/v1/runs'));
+ }finally{view.close();}
 });
 test('invalid keys and unsupported provider destinations never transmit credentials',async()=>{
   for(const options of [{key:'bad key'},{key:'synthetic-key',providerSetup:{...providerFixture,endpoint:'https://outside.invalid'}}]){

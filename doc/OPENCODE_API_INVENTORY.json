@@ -18475,7 +18475,7 @@
         "sourceSha256": "9d870999c9aa9cb8b95bf16c1825b59e0e2d064008c8fc7145849710ec406349",
         "surface": "POST /v1/sessions/{id}/fork; xmind_cli fork-session",
         "sourceAnchor": "persistence.fork_session",
-        "gap": "Durable full/before-message transcript branches, ancestry and agent/workspace-skill snapshots exist; browser/VS Code fork controls and full upstream session metadata remain incomplete.",
+        "gap": "Durable full/before-message transcript branches, ancestry and agent/workspace-skill snapshots exist with guarded browser/VS Code per-message controls; full upstream session metadata remains incomplete.",
         "verifiedParity": false,
         "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
       },

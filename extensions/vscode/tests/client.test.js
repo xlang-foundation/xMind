@@ -26,6 +26,13 @@ test('process output client validates paginated byte artifacts without text coer
  assert.deepEqual(await client.processOutput('process-op','stderr',12,64),page);assert.equal(new URL(requests[0].url).pathname,'/v1/operations/process-op/output');assert.equal(new URL(requests[0].url).search,'?channel=stderr&after=12&limit=64');
  for(const args of [['process-op','input',0,64],['process-op','stdout',-1,64],['process-op','stdout',0,262144]])await assert.rejects(client.processOutput(...args),/process output/i);page.next_offset=16;await assert.rejects(client.processOutput('process-op','stderr',12,64),/native process output page/i);
 });
+test('session fork client binds the selected source and exact before-message boundary',async()=>{
+ const requests=[],receipt={id:'forked',title:'Saved session (fork #1)',parent_id:'saved',fork:{session_id:'saved',boundary_type:'before',message_id:'msg_9'}};
+ const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>receipt};});
+ assert.deepEqual(await client.forkSession('saved','msg_9'),receipt);assert.equal(new URL(requests[0].url).pathname,'/v1/sessions/saved/fork');assert.deepEqual(JSON.parse(requests[0].options.body),{before:'msg_9'});assert.equal(requests[0].options.method,'POST');
+ await assert.rejects(client.forkSession('saved','foreign'),/fork boundary/i);assert.equal(requests.length,1);
+ const malformed=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async()=>({ok:true,json:async()=>({...receipt,parent_id:'other'})}));await assert.rejects(malformed.forkSession('saved','msg_9'),/fork session receipt/i);
+});
 test('language-server formatting carries bounded options and workspace authority',async()=>{
  const requests=[],binding={expected_workspace_id:skillWorkspace,expected_workspace_authority_id:skillAuthority},client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>({server_id:'rust',language_id:'rust',path:'src/lib.rs',method:'formatting',result:[],diagnostics:[]})};});
  await client.languageServerQuery({path:'src/lib.rs',method:'formatting',documentText:'fn main(){}',formattingOptions:{tabSize:2,insertSpaces:true}},binding);

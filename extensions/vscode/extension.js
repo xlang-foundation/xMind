@@ -273,7 +273,7 @@ async function activate(context) {
     const previousProfile=profileController?.state;await profileController?.refresh();
     if(version!==generation||!panel)return;
     if(previousProfile&&(previousProfile.revision!==profileController.state?.revision||previousProfile.active!==profileController.state?.active)){
-      const current=await capabilities();if(version!==generation||!panel)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
+      const current=await capabilities();if(version!==generation||!panel)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:selectedModel});
     }
     const retainedCatalogue=profileController?.models(selectedModel);
     sessionRuns=runs;
@@ -435,7 +435,7 @@ async function activate(context) {
           post({type:'workspace',root:connection.metadata.root,roots:connection.roots,managed:!previewOrigin&&machineSetting(vscode,'backendMode')!=='external',backendChangePending:connection.backendChangePending===true});
           contextReadyView=view;const pending=pendingEditorContexts;pendingEditorContexts=[];
           for(const item of pending)if(item.view===view&&item.client===client&&item.generation===generation&&item.epoch===workspaceBackend.epoch)post(item.message);
-          post({ type: 'capabilities', execution: health.agent_execution, renameSessions:health.session_rename===true,agentSelection:health.agent_selection===true, model:selectedModel, models:modelCatalogue.models });
+          post({ type: 'capabilities', execution: health.agent_execution, renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,agentSelection:health.agent_selection===true, model:selectedModel, models:modelCatalogue.models });
           await refresh();
           if (sessionId) await selectSession(sessionId);
           await refreshGraphs();
@@ -462,11 +462,11 @@ async function activate(context) {
         } else if (message.type === 'discardProviderKey') {
           providerSelection=undefined;profileController?.invalidate();
           const version=generation;await profileController?.refresh();if(panel!==view||version!==generation)return;
-          const current=await capabilities();if(panel!==view||version!==generation)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue,selectedModel);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});profileController?.models(selectedModel);
+          const current=await capabilities();if(panel!==view||version!==generation)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue,selectedModel);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:selectedModel});profileController?.models(selectedModel);
         } else if(message.type==='select-provider'){
           const version=generation;if(!await profileController.select(message.id)||panel!==view||version!==generation)return;
           const current=await capabilities();if(panel!==view||version!==generation||configuredOrigin()!==client.baseUrl)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);
-          post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
+          post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:selectedModel});
           await context.workspaceState.update(modelStateKey,{...connectionState(),id:selectedModel});await configureModel();
         } else if (message.type === 'refresh') {
           providerSelection=undefined;
@@ -477,7 +477,7 @@ async function activate(context) {
           if(panel!==view || version!==generation) return;
           health=current.health;modelCatalogue=current.catalogue;
           selectedModel=chooseModel(modelCatalogue,selectedModel);
-          post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
+          post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:selectedModel});
           await refresh();
           if(panel!==view || version!==generation) return;
           if(sessionId) await selectSession(sessionId);
@@ -489,14 +489,14 @@ async function activate(context) {
         else if (message.type === 'model' && typeof message.id === 'string') {
           const modelVersion=generation;
           let saved;try{saved=await profileController?.save(message.id);}catch(error){
-            if(panel===view&&modelVersion===generation&&configuredOrigin()===client.baseUrl){const current=await capabilities();if(panel!==view||modelVersion!==generation||configuredOrigin()!==client.baseUrl)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});}
+            if(panel===view&&modelVersion===generation&&configuredOrigin()===client.baseUrl){const current=await capabilities();if(panel!==view||modelVersion!==generation||configuredOrigin()!==client.baseUrl)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:selectedModel});}
             throw error;
           }
           if(saved){
             if(panel!==view||modelVersion!==generation||configuredOrigin()!==client.baseUrl)return;
             const current=await capabilities();health=current.health;modelCatalogue=current.catalogue;
             if(panel!==view||modelVersion!==generation||configuredOrigin()!==client.baseUrl)return;
-            post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:message.id});profileController.models(message.id);
+            post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:message.id});profileController.models(message.id);
           }else if(providerSelection){
             const selection=providerSelection;
             if(selection.target!==client || selection.origin!==configuredOrigin() || Date.now()>selection.expires){providerSelection=undefined;throw new Error('Model discovery expired. Fetch models again in Settings.');}
@@ -505,7 +505,7 @@ async function activate(context) {
             post({type:'provider-wire',wire:providerEnrollmentWire(configured)});
             selection.key=undefined;selection.revision=configured.revision;selection.expires=Infinity;
             const current=await capabilities();health=current.health;modelCatalogue=current.catalogue;
-            post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:selection.ids.map(id=>({id})),model:message.id});
+            post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:selection.ids.map(id=>({id})),model:message.id});
             post({type:'status',text:'Model configured · send a message to verify provider access'});
           }else if (!modelCatalogue.models.some(model => model.id === message.id)) throw new Error('Fetch models in Settings before choosing this model.');
           selectedModel = message.id;
@@ -545,6 +545,15 @@ async function activate(context) {
           const version=generation;
           try{if(health.session_rename!==true||message.id!==sessionId||typeof message.title!=='string'||typeof message.expected_title!=='string')throw new Error('Select a conversation on a backend supporting rename.');await client.renameSession(sessionId,message.title,message.expected_title);if(panel!==view||version!==generation)return;await refresh();if(panel===view&&version===generation)post({type:'rename-result',id:message.id,success:true});}
           catch(error){if(panel===view&&version===generation)post({type:'rename-result',id:message.id,success:false,text:error.status===409?'Conversation title changed. Refresh history and reopen Rename before saving.':error.message});}
+        } else if(message.type==='fork-session'){
+          const version=generation,target=client;
+          try{
+            if(health?.session_fork!==true||message.id!==sessionId||typeof message.before!=='string'||!/^msg_[1-9][0-9]*$/.test(message.before))throw new Error('Select a saved message in a conversation on a backend supporting fork.');
+            if(busySession())throw new Error('Wait for this conversation run to finish before forking it.');
+            const fork=await target.forkSession(sessionId,message.before);if(panel!==view||client!==target||version!==generation)return;
+            if(fork.parent_id!==message.id||fork.fork.message_id!==message.before)throw new Error('Native fork receipt does not match the selected source message.');
+            await selectSession(fork.id);if(panel!==view||client!==target||sessionId!==fork.id)return;await refresh();if(panel===view&&client===target&&sessionId===fork.id)post({type:'fork-result',id:message.id,before:message.before,success:true,session_id:fork.id});
+          }catch(error){if(panel===view&&version===generation)post({type:'fork-result',id:message.id,before:message.before,success:false,text:error.status===409?'This conversation changed or has an active run. Refresh it before forking.':error.message});}
         } else if (message.type === 'select-run' && typeof message.id === 'string') {
           await selectRun(message.id);
         } else if (message.type === 'send' && typeof message.prompt === 'string' && message.prompt.trim()) {
@@ -573,7 +582,7 @@ async function activate(context) {
             if(changed){
               const current=await capabilities();if(panel!==view||generation!==runVersion||client!==admissionClient)return;
               health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);
-              post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,models:modelCatalogue.models,model:selectedModel});
+              post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:selectedModel});
               await refreshGraphs();await context.workspaceState.update(modelStateKey,{...connectionState(),id:selectedModel});
               if(panel!==view||generation!==runVersion||client!==admissionClient)return;
               throw new Error('Provider settings changed in another view. Review the current profile and submit again. Your draft has been kept.');

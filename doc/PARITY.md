@@ -69,7 +69,8 @@ forks through the actual xlang3/SQLite repository, versioned HTTP server and
 CLI. Focused contracts verify exclusive cutoffs, stable `msg_<seq>` IDs,
 lineage, transcript immutability, agent/skill state copies and restart recovery.
 The inventory marks `session.fork` as a partial native source candidate. Browser
-and VS Code fork controls and full OpenCode Session.Info parity remain open;
+and VS Code now expose guarded per-message fork controls, backed by focused
+controller/renderer contracts. Full OpenCode Session.Info parity remains open;
 see [native session fork](native-session-fork.md).
 
 ## Workspace/browser baseline checkpoint (`4831636`, 2026-10-11)
@@ -479,7 +480,7 @@ evidence; it does not count Nexus-only or unverified behavior as parity.
 | MCP and extensions | stdio/HTTP MCP configuration and authentication; tools and integrations; plugins and custom commands | Native stdio/HTTP tools, resource reads and prompt retrieval use durable approval; modern/legacy stdio peers and official v2 HTTP SDK resource/prompt flows have scoped contracts. OAuth renewal, subscriptions and additional HTTP/SSE behaviors, plugin lifecycle and complete command parity remain incomplete. |
 | Permissions and change safety | Ordered allow/ask/deny rules over tools/resources, session permissions, change review, undo/redo and sharing controls | Backend-owned approvals and effect receipts are implemented for scoped operations. General policy rules, durable change snapshots/reversal and full export/sharing contracts remain incomplete. |
 | Version control | Initialize Git, inspect status/branches and compare working-tree or branch diffs for coding/review flows | Native Git init/status/info/local branch list and working/branch/committed diffs operate on the opened workspace; browser and VS Code patch viewers, actual backend HTTP and CLI contracts pass. Rendered/installed acceptance, side-by-side source comparison, rename/binary cases, other providers and full VCS parity remain open. |
-| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 32 have reviewed native source candidates, 109 are unmapped, and none has verified operation-level parity. Native full/before-message session forking has HTTP and CLI contracts; browser/VS Code fork controls and broad endpoint parity remain incomplete. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
+| HTTP and automation API | Versioned session, event, filesystem, agent, model, provider, tool and server APIs in the pinned OpenAPI schema | 141 operations are inventoried; 32 have reviewed native source candidates, 109 are unmapped, and none has verified operation-level parity. Native full/before-message session forking has HTTP, CLI, browser and VS Code contracts; broad endpoint parity remains incomplete. See [the generated inventory](OPENCODE_API_INVENTORY.json). |
 
 This is a feature-level checklist, not an assertion that the cited docs are a
 complete specification of every v2.0.26 implementation detail. For API work,

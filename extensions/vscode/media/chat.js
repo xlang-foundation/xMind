@@ -2,7 +2,8 @@
 const api=globalThis.xMindView||acquireVsCodeApi(),byId=id=>document.getElementById(id);
 const patchReview=globalThis.XMindPatchReview.patchReview;
 let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null;
-let renameCapability=false,renameSnapshot;
+let renameCapability=false,forkCapability=false,forkPending=false,renameSnapshot;
+const forkButtons=new Set();
 let currentWorkspaceRoot;
 const operationSections=new Map();
 const operationRows=new Map();
@@ -164,7 +165,8 @@ function processOutput(value){
   try{text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes).replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));encoding='UTF-8; controls escaped';}catch{}
   channel.pre.textContent=text;channel.summary.textContent=value.channel+' · '+count(bytes.length)+' retained bytes · '+encoding;
 }
-function entry(role,data,parent=byId('history')){
+function refreshForkControls(){for(const button of forkButtons)button.disabled=!forkCapability||sessionBusy||forkPending||!byId('sessions').value;}
+function entry(role,data,parent=byId('history'),messageId){
   byId('empty').hidden=true;
   const card=node('article',undefined,'message '+role);card.append(node('h4',role==='assistant'?'xMind':role==='user'?'You':role));
   if(role==='tool'){
@@ -177,6 +179,9 @@ function entry(role,data,parent=byId('history')){
     const detail=node('details',undefined,'tool');detail.append(node('summary','Observed join outputs · '+data.nodes.length+' nodes'),node('pre',JSON.stringify(data.nodes,null,2)));card.append(detail);
   }
   else {const content=node('div',undefined,'message-body markdown');markdown(content,data.content||data.refusal||'');card.append(content);if(data.tool_calls?.length){const detail=node('details',undefined,'tool');detail.append(node('summary',data.tool_calls.length+' tool request(s)'),node('pre',JSON.stringify(data.tool_calls,null,2)));card.append(detail);}if(role==='assistant'){const info=node('div',undefined,'metrics');metrics(info,data);card.append(info);}}
+  if((role==='user'||role==='assistant')&&typeof messageId==='string'&&/^msg_[1-9][0-9]*$/.test(messageId)){
+    const fork=node('button','Fork before this message','message-fork');fork.type='button';fork.title='Create a new conversation ending immediately before this message';fork.disabled=!forkCapability||sessionBusy||forkPending;fork.onclick=()=>{if(fork.disabled)return;forkPending=true;refreshForkControls();api.postMessage({type:'fork-session',id:byId('sessions').value,before:messageId});};forkButtons.add(fork);card.append(fork);
+  }
   parent.append(card);return card;
 }
 function resetLive(){byId('live').replaceChildren();live=undefined;streamText='';streamUsage=null;}
@@ -481,7 +486,7 @@ byId('workflow').onchange=()=>{workflowExecutable=!!byId('workflow').selectedOpt
 function send(){if(canExecute()&&!activeRun&&!sessionBusy&&byId('prompt').value.trim())api.postMessage({type:'send',prompt:byId('prompt').value});}
 for(const type of ['new','refresh','cancel'])byId(type).onclick=()=>api.postMessage({type});
 byId('terminal').onclick=()=>api.postMessage({type:'open-terminal'});
-byId('sessions').onchange=()=>{refreshRename();api.postMessage({type:'select',id:byId('sessions').value});};byId('send').onclick=send;
+byId('sessions').onchange=()=>{refreshRename();forkPending=false;refreshForkControls();api.postMessage({type:'select',id:byId('sessions').value});};byId('send').onclick=send;
 byId('runs').onchange=()=>api.postMessage({type:'select-run',id:byId('runs').value});
 byId('model').onchange=()=>api.postMessage({type:'model',id:byId('model').value});
 byId('prompt').onkeydown=event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}};
@@ -564,17 +569,18 @@ window.addEventListener('message',event=>{
   else if(m.type==='owned-event')ownedEvent(m);
   else if(m.type==='graph'){clearPlan();graphView(m.record,m.children,m.histories);}
   else if(m.type==='graph-event')graphEvent(m);
-  else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.title);option.value=session.id;option.dataset.sessionId=session.id;option.selected=session.id===m.selected;byId('sessions').append(option);}refreshRename();}
+  else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.title);option.value=session.id;option.dataset.sessionId=session.id;option.selected=session.id===m.selected;byId('sessions').append(option);}forkPending=false;refreshRename();refreshForkControls();}
   else if(m.type==='rename-result'){if(renameSnapshot?.id===m.id){byId('rename-save').disabled=false;byId('rename-status').textContent=m.text||'';if(m.success)renameDialog.close();}}
+  else if(m.type==='fork-result'){forkPending=false;refreshForkControls();if(!m.success)byId('status').textContent=m.text||'Fork was not created.';else byId('status').textContent='Fork created. The new conversation is selected.';}
   else if(m.type==='runs'){
-    sessionBusy=m.busy;skillControls();agentControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
+    sessionBusy=m.busy;refreshForkControls();skillControls();agentControls();byId('run-picker').hidden=!m.runs.length;byId('runs').replaceChildren();
     for(const run of m.runs){const option=node('option',run.state+' · '+run.id);option.value=run.id;option.selected=run.id===m.selected;byId('runs').append(option);}
     renderRunContext(m.runs.find(run=>run.id===m.selected));
     if(displayedPlan&&displayedPlan.run.id!==m.selected)clearPlan();planControls();if(displayedGraph&&displayedGraph.run.id!==m.selected)clearGraph();
     byId('send').disabled=!canExecute()||activeRun||sessionBusy;
   }
   else if(m.type==='reset-run'){operations([]);clearPlan();resetLive();resetFailure();resetProcessStreams();byId('events').textContent='';renderRunContext();}
-  else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();byId('events').textContent='';}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data);}
+  else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();forkButtons.clear();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();byId('events').textContent='';}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data,undefined,item.id);refreshForkControls();}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
   else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);profiles.value=m.active;profileRoutes();}
@@ -582,7 +588,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
   else if(m.type==='mcp-authorization'){renderMcpSettings(m);}
   else if(m.type==='mcp-error'){byId('mcp-status').textContent=m.text;}
-  else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;refreshRename();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
+  else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;forkCapability=m.forkSessions===true;refreshRename();refreshForkControls();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
   else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();byId('events').textContent='';}
   else if(m.type==='draft'){byId('prompt').value=m.text;resizePrompt();}
   else if(m.type==='append-context'){

@@ -211,6 +211,13 @@ class BackendClient {
     terminalIdentity(id);const value=await this.request(`/v1/terminals/${id}/close`,{});exactFields(value,['closed']);if(value.closed!==true)throw new Error('Terminal did not close');
   }
   renameSession(id,title,expectedTitle) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/title`,{title,expected_title:expectedTitle}); }
+  async forkSession(id,before) {
+    executionIdentity(id);
+    if(before!==null&&before!==undefined&&(typeof before!=='string'||!/^msg_[1-9][0-9]*$/.test(before)))throw new Error('Invalid fork boundary message ID');
+    const value=await this.request(`/v1/sessions/${encodeURIComponent(id)}/fork`,{before:before??null});
+    if(!value||typeof value.id!=='string'||!value.id||value.parent_id!==id||!value.fork||value.fork.session_id!==id||value.fork.boundary_type!==(before==null?'through':'before')||value.fork.message_id!==(before??null))throw new Error('Invalid native fork session receipt');
+    return value;
+  }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
   run(session_id, prompt, model_id,binding) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}),...profileBindingFields(binding) }); }

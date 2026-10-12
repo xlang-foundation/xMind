@@ -196,6 +196,14 @@ test('rename sends the displayed expected title only for the selected supported 
  conflict=true;await view.handle({type:'rename-session',id:'selected',title:'Draft',expected_title:'Stale'});assert.equal(posted.at(-1).success,false);assert.match(posted.at(-1).text,/title changed/);
  view.health={};await view.handle({type:'rename-session',id:'selected',title:'New',expected_title:'Old'});assert.equal(calls.length,2);view.dispose();
 });
+test('browser fork uses the selected saved message boundary and refuses foreign or busy sources',async()=>{
+ const posted=[],calls=[],client={forkSession:async(...args)=>{calls.push(args);return{id:'forked',title:'Source (fork #1)',parent_id:'source',fork:{session_id:'source',boundary_type:'before',message_id:'msg_7'}};}};
+ const view=new BrowserController(client,value=>posted.push(value));view.health={session_fork:true};view.session='source';view.select=async id=>{view.stop();view.session=id;};
+ await view.handle({type:'fork-session',id:'foreign',before:'msg_7'});assert.equal(calls.length,0);assert.equal(posted.at(-1).success,false);
+ await view.handle({type:'fork-session',id:'source',before:'bad'});assert.equal(calls.length,0);
+ await view.handle({type:'fork-session',id:'source',before:'msg_7'});assert.deepEqual(calls,[['source','msg_7']]);assert.equal(view.session,'forked');assert.deepEqual(posted.at(-1),{type:'fork-result',id:'source',before:'msg_7',success:true,session_id:'forked'});
+ view.session='source';view.runs=[{id:'active',state:'running'}];await view.handle({type:'fork-session',id:'source',before:'msg_7'});assert.equal(calls.length,1);assert.match(posted.at(-1).text,/finish/i);view.dispose();
+});
 test('Responses saved-key discovery and model selection preserve backend-reported wire',async()=>{
  const posted=[],setup={provider:'openai',wire:'responses',endpoint:'https://api.openai.com/v1/responses',revision:3,configured:true,model:'gpt-5.6-sol'};let discovered=0,configured=0;
  const client={providerConfiguration:async()=>setup,discoverProviderModels:async(key,revision)=>{assert.equal(key,undefined);assert.equal(revision,3);discovered++;return {models:[{id:'gpt-5.6-sol'}]};},configureProvider:async(id,key,revision)=>{assert.equal(id,'gpt-5.6-sol');assert.equal(key,undefined);assert.equal(revision,3);configured++;return {...setup,revision:4};},health:async()=>({agent_execution:true}),models:async()=>({default_model:'gpt-5.6-sol',models:[{id:'gpt-5.6-sol'}]})};
