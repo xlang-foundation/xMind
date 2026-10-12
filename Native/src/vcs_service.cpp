@@ -49,11 +49,10 @@ std::filesystem::path git_executable(){
     throw VcsInitializationFailure(503,"Git is not available on this machine");
 }
 std::vector<std::pair<std::string,std::string>> git_environment(){
-    std::vector<std::pair<std::string,std::string>> result;
-    for(const auto& item:std::initializer_list<std::pair<const wchar_t*,const char*>>{{L"PATH","PATH"},{L"USERPROFILE","USERPROFILE"},{L"APPDATA","APPDATA"}})
-        if(const auto value=environment_value(item.first))result.emplace_back(item.second,utf8(*value));
-    if(const auto profile=environment_value(L"USERPROFILE"))result.emplace_back("HOME",utf8(*profile));
-    return result;
+    // ForegroundProcess supplies the bounded ordinary environment (including
+    // PATH) and deliberately rejects overrides of inherited names. Git gets
+    // only its isolation controls below; never duplicate host environment keys.
+    return {};
 }
 ProcessResult run_git(const std::string& executable,WorkspaceTools& workspace,std::vector<std::string> arguments,
     std::size_t output_limit=1024*1024,std::chrono::milliseconds timeout=std::chrono::seconds(10)){
@@ -61,7 +60,7 @@ ProcessResult run_git(const std::string& executable,WorkspaceTools& workspace,st
     launch.working_directory_id=workspace.directory_identity(".");launch.workspace_root=launch.working_directory;
     launch.workspace_root_id=workspace.identity();launch.arguments={"--no-optional-locks","-c","core.autocrlf=false","-c","core.fsmonitor=false","-c","core.quotepath=false","-c","diff.external=","--no-pager"};
     launch.arguments.insert(launch.arguments.end(),std::make_move_iterator(arguments.begin()),std::make_move_iterator(arguments.end()));
-    launch.environment=git_environment();launch.environment.emplace_back("GIT_OPTIONAL_LOCKS","0");launch.environment.emplace_back("GIT_TERMINAL_PROMPT","0");launch.environment.emplace_back("GIT_CONFIG_NOSYSTEM","1");launch.timeout=timeout;launch.output_limit=output_limit;
+    launch.environment=git_environment();launch.environment.emplace_back("GIT_OPTIONAL_LOCKS","0");launch.environment.emplace_back("GIT_TERMINAL_PROMPT","0");launch.environment.emplace_back("GIT_CONFIG_NOSYSTEM","1");launch.environment.emplace_back("GIT_CONFIG_GLOBAL","NUL");launch.timeout=timeout;launch.output_limit=output_limit;
     try{return ForegroundProcess::run(launch);}
     catch(const ProcessBeforeDispatchError&){throw VcsStatusFailure(503,"Git status could not be started safely");}
     catch(const ProcessEffectUncertain&){throw VcsStatusFailure(503,"Git status was interrupted; refresh repository state before retrying");}
@@ -298,7 +297,7 @@ void initialize_workspace_vcs(WorkspaceTools& workspace,std::string_view provide
     const auto root=workspace.root_path(),root_id=workspace.identity();
     ProcessConfiguration launch;launch.executable=utf8(git_executable());launch.working_directory=root;
     launch.working_directory_id=workspace.directory_identity(".");launch.workspace_root=root;launch.workspace_root_id=root_id;
-    launch.arguments={"init"};launch.environment=git_environment();launch.timeout=std::chrono::seconds(30);launch.output_limit=8192;
+    launch.arguments={"init"};launch.environment=git_environment();launch.environment.emplace_back("GIT_CONFIG_NOSYSTEM","1");launch.environment.emplace_back("GIT_CONFIG_GLOBAL","NUL");launch.timeout=std::chrono::seconds(30);launch.output_limit=8192;
     ProcessResult result;
     try{result=ForegroundProcess::run(launch);}
     catch(const ProcessBeforeDispatchError&){throw VcsInitializationFailure(503,"Git initialization could not be started safely");}

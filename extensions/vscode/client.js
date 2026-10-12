@@ -81,13 +81,13 @@ class BackendClient {
     if(typeof value.server_id!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(value.server_id)||typeof value.language_id!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(value.language_id)||value.path!==path||value.method!==method||!Array.isArray(value.diagnostics)||value.diagnostics.length>10000)throw new Error('Invalid native language-server response.');
     return value;
   }
-  initializeGitRepository() { return this.request('/v1/vcs/init',{}); }
-  async vcsStatus() { return validateVcsStatus(await this.request('/v1/vcs/status')); }
-  async vcsBase() { return validateVcsBase(await this.request('/v1/vcs/base')); }
-  async vcsDiff(mode,base,context=3) {
+  initializeGitRepository(folderId) { return this.request('/v1/vcs/init',{...(folderId===undefined?{}:{folder_id:validateVcsFolderId(folderId)})}); }
+  async vcsStatus(folderId) { return validateVcsStatus(await this.request('/v1/vcs/status'+vcsFolderQuery(folderId))); }
+  async vcsBase(folderId) { return validateVcsBase(await this.request('/v1/vcs/base'+vcsFolderQuery(folderId))); }
+  async vcsDiff(mode,base,context=3,folderId) {
     if(!['working','branch','committed'].includes(mode)||!Number.isSafeInteger(context)||context<0||context>1000)throw new Error('Invalid Git diff selection.');
     if(base!==undefined&&(typeof base!=='string'||!base||base.length>1024||/[\r\n\0]/.test(base)))throw new Error('Invalid Git base reference.');
-    const query=new URLSearchParams({mode,context:String(context)});if(base!==undefined)query.set('base',base);
+    const query=new URLSearchParams({mode,context:String(context)});if(base!==undefined)query.set('base',base);if(folderId!==undefined)query.set('folder_id',validateVcsFolderId(folderId));
     return validateVcsDiff(await this.request('/v1/vcs/diff?'+query.toString()));
   }
   models() { return this.request('/v1/models'); }
@@ -292,6 +292,8 @@ function validateWorkspace(value){
   else if(typeof value.root!=='string'||!value.root||value.root.length>32760||/[\x00-\x1f]/.test(value.root)||typeof value.workspace_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(value.workspace_id)||typeof value.authority_id!=='string'||!/^[a-f0-9]{32}$/.test(value.authority_id))throw new Error('Invalid backend workspace identity.');
   return value;
 }
+function validateVcsFolderId(value){if(typeof value!=='string'||!value||value.length>256||/[\x00-\x1f]/.test(value))throw new Error('Invalid Git workspace folder selection.');return value;}
+function vcsFolderQuery(folderId){return folderId===undefined?'':'?'+new URLSearchParams({folder_id:validateVcsFolderId(folderId)}).toString();}
 function validateVcsStatus(value){
   if(!Array.isArray(value)||value.length>4096)throw new Error('Invalid native Git status');
   for(const item of value){

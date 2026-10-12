@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-11",
+  "scope": "Registered-folder routing for native Git operations",
+  "routes": [
+    "POST /v1/vcs/init",
+    "GET /v1/vcs/status",
+    "GET /v1/vcs/info",
+    "GET /v1/vcs/branches",
+    "GET /v1/vcs/base",
+    "GET /v1/vcs/diff"
+  ],
+  "selection": "Optional folder_id resolves only against a freshly reopened immutable workspace membership snapshot; omission selects the primary folder; no caller-controlled root paths are accepted.",
+  "validation": {
+    "native_build": "CMake RelWithDebInfo targets xmind and agentflow_backend_owner_http_contract passed.",
+    "native_http_contract": "native_backend_owner_http_contract passed against the actual xMind executable and xlang3-backed SQLite.",
+    "native_http_scope": "Initialized Git in a registered secondary folder, confirmed the primary folder remained without .git, reported the secondary untracked file, and received HTTP 403 for an unregistered folder ID.",
+    "vscode_client_contract": "node --test extensions/vscode/tests/vcs.test.js passed both Git review client tests, including folder_id query encoding.",
+    "git_environment": "Actual native initialization confirmed Git process environment no longer duplicates inherited reserved variables."
+  },
+  "remaining": [
+    "Browser, VS Code commands and CLI do not yet expose folder selection for Git operations.",
+    "Rendered multi-folder acceptance and full OpenCode VCS operation parity remain incomplete."
+  ]
+}

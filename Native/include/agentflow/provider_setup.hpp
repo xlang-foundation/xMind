@@ -25,6 +25,11 @@ public:
     Run submit_model(std::string id,std::string session,std::string prompt,std::string model) override;
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
     std::vector<std::string> models() const override;
+    void initialize_vcs(std::string_view provider,std::string folder_id={})override;
+    std::vector<WorkspaceVcsFileStatus> vcs_status(std::string folder_id={})const override;
+    WorkspaceVcsInfo vcs_info(std::string folder_id={})const override;
+    std::optional<WorkspaceVcsReviewBase> vcs_base(std::string folder_id={})const override;
+    std::vector<WorkspaceVcsFileDiff> vcs_diff(std::string_view,std::optional<std::string>,unsigned,std::string folder_id={})const override;
     bool supports_delegation() const override;
     bool supports_dynamic_planning() const override;
     Run plan_input(const std::string& root,const std::string& request,std::string input_json,

@@ -14,11 +14,11 @@ public:
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
     std::vector<std::string> models() const override;
     ExecutionWorkspaceMetadata execution_workspace()const override;
-    void initialize_vcs(std::string_view provider)override;
-    std::vector<WorkspaceVcsFileStatus> vcs_status()const override;
-    WorkspaceVcsInfo vcs_info()const override;
-    std::optional<WorkspaceVcsReviewBase> vcs_base()const override;
-    std::vector<WorkspaceVcsFileDiff> vcs_diff(std::string_view,std::optional<std::string>,unsigned)const override;
+    void initialize_vcs(std::string_view provider,std::string folder_id={})override;
+    std::vector<WorkspaceVcsFileStatus> vcs_status(std::string folder_id={})const override;
+    WorkspaceVcsInfo vcs_info(std::string folder_id={})const override;
+    std::optional<WorkspaceVcsReviewBase> vcs_base(std::string folder_id={})const override;
+    std::vector<WorkspaceVcsFileDiff> vcs_diff(std::string_view,std::optional<std::string>,unsigned,std::string folder_id={})const override;
     bool supports_workspace_browsing()const override{return static_cast<bool>(workspace_binding_);}
     WorkspaceListing browse_workspace_files(const std::string& path)const override;
     WorkspaceFile browse_workspace_file(const std::string& path)const override;
@@ -62,10 +62,13 @@ public:
     Run resume_graph(const std::string& root,const std::string& actor,std::int64_t revision)override;
     GraphContextMetadata graph_context(const std::string& root)const override;
 private:
+    std::unique_ptr<WorkspaceToolSet> workspace_membership()const;
+    WorkspaceTools& vcs_folder(WorkspaceToolSet& membership,const std::string& folder_id)const;
     PersistenceService& store_;
     bool file_edit_proposals_=false;
     std::unique_ptr<WorkspaceTools> workspace_binding_;
     std::string workspace_authority_;
+    std::function<WorkspaceMembershipSnapshot()> workspace_membership_snapshot_;
     std::shared_ptr<LanguageServerToolRegistry> language_servers_;
     std::unique_ptr<AgentService> agents_;
     std::unique_ptr<GraphService> graphs_;

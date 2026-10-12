@@ -343,6 +343,11 @@ Run ProviderProfileRuntime::submit_profile(std::string id,std::string session,st
 Run ProviderProfileRuntime::submit_graph_profile(std::string id,std::string session,std::string graph,std::int64_t revision,std::string prompt,std::string model,ProviderProfileAdmission expected){std::lock_guard lock(impl_->mutex);impl_->admission(expected);return impl_->service->submit_graph(std::move(id),std::move(session),std::move(graph),revision,std::move(prompt),std::move(model));}
 Run ProviderProfileRuntime::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){std::lock_guard lock(impl_->mutex);return impl_->service->submit_message(std::move(id),std::move(context),std::move(message),std::move(content),std::move(identity));}
 ExecutionWorkspaceMetadata ProviderProfileRuntime::execution_workspace()const{std::lock_guard lock(impl_->mutex);return impl_->workspace_metadata();}
+void ProviderProfileRuntime::initialize_vcs(std::string_view provider,std::string folder_id){std::lock_guard lock(impl_->mutex);impl_->service->initialize_vcs(provider,std::move(folder_id));}
+std::vector<WorkspaceVcsFileStatus> ProviderProfileRuntime::vcs_status(std::string folder_id)const{std::lock_guard lock(impl_->mutex);return impl_->service->vcs_status(std::move(folder_id));}
+WorkspaceVcsInfo ProviderProfileRuntime::vcs_info(std::string folder_id)const{std::lock_guard lock(impl_->mutex);return impl_->service->vcs_info(std::move(folder_id));}
+std::optional<WorkspaceVcsReviewBase> ProviderProfileRuntime::vcs_base(std::string folder_id)const{std::lock_guard lock(impl_->mutex);return impl_->service->vcs_base(std::move(folder_id));}
+std::vector<WorkspaceVcsFileDiff> ProviderProfileRuntime::vcs_diff(std::string_view mode,std::optional<std::string> base,unsigned context,std::string folder_id)const{std::lock_guard lock(impl_->mutex);return impl_->service->vcs_diff(mode,std::move(base),context,std::move(folder_id));}
 bool ProviderProfileRuntime::supports_workspace_browsing()const{std::lock_guard lock(impl_->mutex);return static_cast<bool>(impl_->workspace_binding);}
 WorkspaceListing ProviderProfileRuntime::browse_workspace_files(const std::string& path)const{
     std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Workspace browsing requires an opened root");

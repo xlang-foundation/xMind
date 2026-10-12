@@ -40,11 +40,11 @@ public:
     virtual Run submit(std::string id,std::string session_id,std::string prompt)=0;
     virtual std::vector<std::string> models() const {return {};}
     virtual ExecutionWorkspaceMetadata execution_workspace()const{return {};}
-    virtual void initialize_vcs(std::string_view){throw RunUnavailable("Workspace version control initialization is unavailable");}
-    virtual std::vector<WorkspaceVcsFileStatus> vcs_status()const{throw RunUnavailable("Workspace version control status is unavailable");}
-    virtual WorkspaceVcsInfo vcs_info()const{throw RunUnavailable("Workspace version control metadata is unavailable");}
-    virtual std::optional<WorkspaceVcsReviewBase> vcs_base()const{throw RunUnavailable("Workspace VCS review base is unavailable");}
-    virtual std::vector<WorkspaceVcsFileDiff> vcs_diff(std::string_view,std::optional<std::string>,unsigned)const{throw RunUnavailable("Workspace VCS diff is unavailable");}
+    virtual void initialize_vcs(std::string_view,std::string={}){throw RunUnavailable("Workspace version control initialization is unavailable");}
+    virtual std::vector<WorkspaceVcsFileStatus> vcs_status(std::string={})const{throw RunUnavailable("Workspace version control status is unavailable");}
+    virtual WorkspaceVcsInfo vcs_info(std::string={})const{throw RunUnavailable("Workspace version control metadata is unavailable");}
+    virtual std::optional<WorkspaceVcsReviewBase> vcs_base(std::string={})const{throw RunUnavailable("Workspace VCS review base is unavailable");}
+    virtual std::vector<WorkspaceVcsFileDiff> vcs_diff(std::string_view,std::optional<std::string>,unsigned,std::string={})const{throw RunUnavailable("Workspace VCS diff is unavailable");}
     virtual bool supports_workspace_browsing()const{return false;}
     virtual WorkspaceListing browse_workspace_files(const std::string&)const{throw RunUnavailable("Workspace browsing is unavailable");}
     virtual WorkspaceFile browse_workspace_file(const std::string&)const{throw RunUnavailable("Workspace file preview is unavailable");}

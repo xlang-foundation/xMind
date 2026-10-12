@@ -109,8 +109,11 @@ the proposal binds that folder and captured workspace revision. An explicitly
 trusted profile can durably authorize its own process operations without a
 per-operation prompt. The user-configured trust decision is scoped to that
 registered local profile and remains visible as the operation's decision actor.
-Git status and diff are per folder because one
-workspace may contain several independent repositories. Language servers are
+Git status, initialization, branch metadata and diffs can target one admitted
+folder per request because one workspace may contain several independent
+repositories. The native HTTP API accepts a registered `folder_id`; it resolves
+that ID against a fresh immutable membership snapshot and never accepts a root
+path. Omitting the ID selects the primary folder. Language servers are
 started with the folder root that owns the document. Repository instructions
 and skills are discovered per root and retain their source-folder provenance.
 Delegation, single-agent runs, graph read/write nodes, graph-agent children, MCP
@@ -122,14 +125,17 @@ retain per-operation controller approval, bound to the selected folder and
 workspace revision.
 
 The browser canvas shows one file tree per member folder, with explicit folder
-selection for previews. Git remains bound to the primary folder. VS Code can
+selection for previews. The browser and VS Code Git review controls still
+default to the primary folder; the shared native endpoints and VS Code client
+now accept explicit folder IDs. VS Code can
 attach opened folders; single-agent read/list/search/glob/edit/create/patch and
 process tools use the captured registry membership. Direct graph reads,
 graph-agent children and graph read/write/patch/process nodes use that same
 snapshot. A single patch call selects one member folder; it cannot span roots.
-Terminals, language servers and Git remain bound to the primary folder. CLI
-workspace membership commands exist, but full multi-folder effect acceptance
-through CLI/VS Code/browser remains open.
+Terminals and language-server UI remain bound to the primary folder. CLI
+workspace membership commands exist, but explicit Git-folder selection in the
+CLI/browser/VS Code controls and full multi-folder effect acceptance remain
+open.
 
 ## Required acceptance
 
@@ -142,8 +148,9 @@ through CLI/VS Code/browser remains open.
 - Run a process in each folder. Verify default cwd is the primary folder,
   explicit cwd is pinned to the selected folder, and approval rejects changed
   membership or executable identity.
-- Show independent Git state for two repositories and language-server root
-  selection for documents in each folder.
+- Show independent Git state for two repositories through native HTTP, then
+  expose and verify folder selection in the CLI/browser/VS Code controls;
+  verify language-server root selection for documents in each folder.
 - Add a folder while a run is active. Prove the admitted run remains pinned to
   its old revision and a later run sees the new revision.
 - Switch named workspaces in the browser and VS Code. Prove sessions/history

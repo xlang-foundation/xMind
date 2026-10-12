@@ -11,6 +11,7 @@
 namespace agentflow {
 namespace {std::string workspace_nonce(){std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)value<<std::setw(8)<<random();return value.str();}}
 ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings settings,std::size_t workers,std::size_t capacity):store_(store) {
+    workspace_membership_snapshot_=settings.workspace_membership_snapshot;
     if(settings.workspace){workspace_binding_=std::make_unique<WorkspaceTools>(*settings.workspace);settings.workspace=workspace_binding_->root_path();workspace_authority_=workspace_nonce();}
     if(workspace_binding_&&!settings.language_servers.empty()){
         language_servers_=std::make_shared<LanguageServerToolRegistry>(*workspace_binding_,settings.language_servers);
@@ -31,54 +32,67 @@ Run ExecutionPlatform::submit_message(std::string id,std::string context,std::st
 ExecutionWorkspaceMetadata ExecutionPlatform::execution_workspace()const{
     if(!workspace_binding_)return {};return {true,workspace_binding_->root_path(),workspace_binding_->identity(),workspace_authority_};
 }
-void ExecutionPlatform::initialize_vcs(std::string_view provider){
+std::unique_ptr<WorkspaceToolSet> ExecutionPlatform::workspace_membership()const{
+    if(!workspace_binding_)throw RunUnavailable("Version control requires an opened workspace");
+    auto snapshot=workspace_membership_snapshot_?workspace_membership_snapshot_():WorkspaceMembershipSnapshot{
+        workspace_binding_->identity(),1,{{workspace_binding_->identity(),workspace_binding_->root_path()}}};
+    if(snapshot.workspace_id!=workspace_binding_->identity()||snapshot.revision<1||snapshot.folders.empty()||
+       snapshot.folders.front().folder_id!=workspace_binding_->identity()||snapshot.folders.front().root!=workspace_binding_->root_path())
+        throw ToolAccessDenied("Current workspace membership does not match the opened primary folder");
+    return std::make_unique<WorkspaceToolSet>(std::move(snapshot.workspace_id),snapshot.revision,std::move(snapshot.folders));
+}
+WorkspaceTools& ExecutionPlatform::vcs_folder(WorkspaceToolSet& membership,const std::string& folder_id)const{
+    const auto index=folder_id.empty()?std::size_t{0}:membership.folder_index(folder_id);
+    return membership.folder_tools(index);
+}
+void ExecutionPlatform::initialize_vcs(std::string_view provider,std::string folder_id){
 #if defined(_WIN32)
     if(!workspace_binding_)throw RunUnavailable("Version control initialization requires an opened workspace");
     const auto workspace=execution_workspace();
-    try{initialize_workspace_vcs(*workspace_binding_,provider);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());}
+    try{auto membership=workspace_membership();initialize_workspace_vcs(vcs_folder(*membership,folder_id),provider);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());}
     catch(const VcsInitializationFailure&){throw;}
 #else
     (void)provider;throw RunUnavailable("Version control initialization is unavailable on this platform");
 #endif
 }
-std::vector<WorkspaceVcsFileStatus> ExecutionPlatform::vcs_status()const{
+std::vector<WorkspaceVcsFileStatus> ExecutionPlatform::vcs_status(std::string folder_id)const{
 #if defined(_WIN32)
     if(!workspace_binding_)throw RunUnavailable("Version control status requires an opened workspace");
     const auto workspace=execution_workspace();
-    try{const auto values=workspace_vcs_status(*workspace_binding_);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
+    try{auto membership=workspace_membership();const auto values=workspace_vcs_status(vcs_folder(*membership,folder_id));validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
         std::vector<WorkspaceVcsFileStatus> result;result.reserve(values.size());for(const auto& value:values)result.push_back({value.file,value.additions,value.deletions,value.status});return result;}
     catch(const VcsStatusFailure&){throw;}
 #else
     throw RunUnavailable("Version control status is unavailable on this platform");
 #endif
 }
-WorkspaceVcsInfo ExecutionPlatform::vcs_info()const{
+WorkspaceVcsInfo ExecutionPlatform::vcs_info(std::string folder_id)const{
 #if defined(_WIN32)
     if(!workspace_binding_)throw RunUnavailable("Version control metadata requires an opened workspace");
     const auto workspace=execution_workspace();
-    try{const auto value=workspace_vcs_info(*workspace_binding_);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
+    try{auto membership=workspace_membership();const auto value=workspace_vcs_info(vcs_folder(*membership,folder_id));validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
         return {value.current_branch,value.default_branch,value.local_branches,value.repository};}
     catch(const VcsStatusFailure&){throw;}
 #else
     throw RunUnavailable("Version control metadata is unavailable on this platform");
 #endif
 }
-std::optional<WorkspaceVcsReviewBase> ExecutionPlatform::vcs_base()const{
+std::optional<WorkspaceVcsReviewBase> ExecutionPlatform::vcs_base(std::string folder_id)const{
 #if defined(_WIN32)
     if(!workspace_binding_)throw RunUnavailable("VCS review base requires an opened workspace");
     const auto workspace=execution_workspace();
-    try{const auto value=workspace_vcs_base(*workspace_binding_);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
+    try{auto membership=workspace_membership();const auto value=workspace_vcs_base(vcs_folder(*membership,folder_id));validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
         if(!value)return {};return WorkspaceVcsReviewBase{value->name,value->ref,value->source};}
     catch(const VcsStatusFailure&){throw;}
 #else
     throw RunUnavailable("VCS review base is unavailable on this platform");
 #endif
 }
-std::vector<WorkspaceVcsFileDiff> ExecutionPlatform::vcs_diff(std::string_view mode,std::optional<std::string> base,unsigned context)const{
+std::vector<WorkspaceVcsFileDiff> ExecutionPlatform::vcs_diff(std::string_view mode,std::optional<std::string> base,unsigned context,std::string folder_id)const{
 #if defined(_WIN32)
     if(!workspace_binding_)throw RunUnavailable("VCS diff requires an opened workspace");
     const auto workspace=execution_workspace();
-    try{const auto values=workspace_vcs_diff(*workspace_binding_,mode,std::move(base),context);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
+    try{auto membership=workspace_membership();const auto values=workspace_vcs_diff(vcs_folder(*membership,folder_id),mode,std::move(base),context);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());
         std::vector<WorkspaceVcsFileDiff> result;result.reserve(values.size());for(const auto& value:values)result.push_back({value.file,value.patch,value.status,value.additions,value.deletions});return result;}
     catch(const VcsStatusFailure&){throw;}
 #else

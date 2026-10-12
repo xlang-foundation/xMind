@@ -597,39 +597,42 @@ struct HttpServer::Impl {
         }));
         server.Post("/v1/vcs/init",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>8192)throw std::invalid_argument("Invalid VCS initialization request");
-            const auto value=request.body.empty()?Json::object():body(request,{"provider"});
+            const auto value=request.body.empty()?Json::object():body(request,{"provider","folder_id"});
             const auto provider=value.contains("provider")?string_field(value,"provider",64):std::string("git");
+            const auto folder_id=value.contains("folder_id")?string_field(value,"folder_id",256):std::string{};
             if(!executor)throw RunUnavailable("Version control initialization requires an opened workspace");
-            std::lock_guard lock(vcs_initialization_mutex);executor->initialize_vcs(provider);response.status=204;response.set_header("Cache-Control","no-store");
+            std::lock_guard lock(vcs_initialization_mutex);executor->initialize_vcs(provider,folder_id);response.status=204;response.set_header("Cache-Control","no-store");
         }));
         server.Get("/v1/vcs/status",guarded([this](const Request& request,Response& response){
-            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("VCS status uses the opened workspace and accepts no query parameters");
+            if(request.params.size()>1||request.params.count("folder_id")>1||(!request.params.empty()&&request.params.count("folder_id")!=1))throw std::invalid_argument("VCS status accepts only one folder_id");
+            const auto folder_id=request.has_param("folder_id")?request.get_param_value("folder_id"):std::string{};if(folder_id.size()>256)throw std::invalid_argument("VCS folder ID exceeds limits");
             if(!executor)throw RunUnavailable("Version control status requires an opened workspace");
-            std::lock_guard lock(vcs_initialization_mutex);auto values=Json::array();for(const auto& item:executor->vcs_status())values.push_back({{"file",item.file},{"additions",item.additions},{"deletions",item.deletions},{"status",item.status}});
+            std::lock_guard lock(vcs_initialization_mutex);auto values=Json::array();for(const auto& item:executor->vcs_status(folder_id))values.push_back({{"file",item.file},{"additions",item.additions},{"deletions",item.deletions},{"status",item.status}});
             reply(response,values);
         }));
         server.Get("/v1/vcs/info",guarded([this](const Request& request,Response& response){
-            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("VCS metadata uses the opened workspace and accepts no query parameters");
+            if(request.params.size()>1||(!request.params.empty()&&request.params.count("folder_id")!=1))throw std::invalid_argument("VCS metadata accepts only one folder_id");const auto folder_id=request.has_param("folder_id")?request.get_param_value("folder_id"):std::string{};if(folder_id.size()>256)throw std::invalid_argument("VCS folder ID exceeds limits");
             if(!executor)throw RunUnavailable("Version control metadata requires an opened workspace");
-            std::lock_guard lock(vcs_initialization_mutex);const auto value=executor->vcs_info();
+            std::lock_guard lock(vcs_initialization_mutex);const auto value=executor->vcs_info(folder_id);
             Json branch=Json::object();if(!value.current_branch.empty())branch["current"]=value.current_branch;if(!value.default_branch.empty())branch["default"]=value.default_branch;
             Json metadata={{"branch",std::move(branch)}};if(value.repository)metadata["provider"]="git";reply(response,metadata);
         }));
         server.Get("/v1/vcs/branches",guarded([this](const Request& request,Response& response){
-            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("VCS branches use the opened workspace and accept no query parameters");
+            if(request.params.size()>1||(!request.params.empty()&&request.params.count("folder_id")!=1))throw std::invalid_argument("VCS branches accept only one folder_id");const auto folder_id=request.has_param("folder_id")?request.get_param_value("folder_id"):std::string{};if(folder_id.size()>256)throw std::invalid_argument("VCS folder ID exceeds limits");
             if(!executor)throw RunUnavailable("Version control branches require an opened workspace");
-            std::lock_guard lock(vcs_initialization_mutex);reply(response,executor->vcs_info().local_branches);
+            std::lock_guard lock(vcs_initialization_mutex);reply(response,executor->vcs_info(folder_id).local_branches);
         }));
         server.Get("/v1/vcs/base",guarded([this](const Request& request,Response& response){
-            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("VCS review base uses the opened workspace and accepts no query parameters");
+            if(request.params.size()>1||(!request.params.empty()&&request.params.count("folder_id")!=1))throw std::invalid_argument("VCS review base accepts only one folder_id");const auto folder_id=request.has_param("folder_id")?request.get_param_value("folder_id"):std::string{};if(folder_id.size()>256)throw std::invalid_argument("VCS folder ID exceeds limits");
             if(!executor)throw RunUnavailable("VCS review base requires an opened workspace");
-            std::lock_guard lock(vcs_initialization_mutex);const auto value=executor->vcs_base();if(value)reply(response,{{"name",value->name},{"ref",value->ref},{"source",value->source}});else reply(response,nullptr);
+            std::lock_guard lock(vcs_initialization_mutex);const auto value=executor->vcs_base(folder_id);if(value)reply(response,{{"name",value->name},{"ref",value->ref},{"source",value->source}});else reply(response,nullptr);
         }));
         server.Get("/v1/vcs/diff",guarded([this](const Request& request,Response& response){
-            if(request.params.size()>3||!request.has_param("mode")||request.params.count("mode")!=1||request.params.count("base")>1||request.params.count("context")>1||(!request.params.empty()&&std::any_of(request.params.begin(),request.params.end(),[](const auto& item){return item.first!="mode"&&item.first!="base"&&item.first!="context";})))throw std::invalid_argument("VCS diff requires one mode and accepts only base/context options");
+            if(request.params.size()>4||!request.has_param("mode")||request.params.count("mode")!=1||request.params.count("base")>1||request.params.count("context")>1||request.params.count("folder_id")>1||(!request.params.empty()&&std::any_of(request.params.begin(),request.params.end(),[](const auto& item){return item.first!="mode"&&item.first!="base"&&item.first!="context"&&item.first!="folder_id";})))throw std::invalid_argument("VCS diff requires one mode and accepts only base/context/folder_id options");
+            const auto folder_id=request.has_param("folder_id")?request.get_param_value("folder_id"):std::string{};if(folder_id.size()>256)throw std::invalid_argument("VCS folder ID exceeds limits");
             const auto mode=request.get_param_value("mode");std::optional<std::string> base;if(request.has_param("base"))base=request.get_param_value("base");unsigned context=3;
             if(request.has_param("context")){const auto value=request.get_param_value("context");unsigned parsed=0;const auto result=std::from_chars(value.data(),value.data()+value.size(),parsed);if(value.empty()||result.ec!=std::errc{}||result.ptr!=value.data()+value.size()||parsed>1000)throw std::invalid_argument("VCS diff context must be an integer between 0 and 1000");context=parsed;}
-            if(!executor)throw RunUnavailable("VCS diff requires an opened workspace");std::lock_guard lock(vcs_initialization_mutex);auto values=Json::array();for(const auto& item:executor->vcs_diff(mode,std::move(base),context))values.push_back({{"file",item.file},{"patch",item.patch},{"additions",item.additions},{"deletions",item.deletions},{"status",item.status}});reply(response,values);
+            if(!executor)throw RunUnavailable("VCS diff requires an opened workspace");std::lock_guard lock(vcs_initialization_mutex);auto values=Json::array();for(const auto& item:executor->vcs_diff(mode,std::move(base),context,folder_id))values.push_back({{"file",item.file},{"patch",item.patch},{"additions",item.additions},{"deletions",item.deletions},{"status",item.status}});reply(response,values);
         }));
         server.Get("/v1/workspace/files",guarded([this](const Request& request,Response& response){
             const auto path=workspace_browse_path(request);if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Workspace browsing requires an opened root");

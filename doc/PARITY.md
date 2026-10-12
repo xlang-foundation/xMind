@@ -50,8 +50,8 @@ The pinned source inventory has been regenerated from the exact v2.0.26
 schema: **141 operations, 31 native source candidates, 110 unmapped, and zero
 verified operation-level parity**. A source candidate means reviewed code
 exists; it is not feature parity. Remaining work includes end-to-end
-multi-folder CLI and installed VS Code acceptance, multi-root Git and language
-servers, broader provider/model conformance, and the substantial unmapped
+multi-folder CLI and installed VS Code acceptance, Git-folder selection in
+client controls, multi-root language servers, broader provider/model conformance, and the substantial unmapped
 OpenCode coding/runtime surface. Private Nexus server,
 PostgreSQL, WebRTC and Electron remain outside the xMind OSS scope.
 
@@ -104,8 +104,8 @@ The OpenCode inventory was regenerated from the unchanged pinned
 candidates, 110 unmapped, and zero verified operation-level parity**. This
 checkpoint does not establish rendered multi-folder acceptance in the browser
 or VS Code. Cross-root `apply_patch`, graph write nodes, process execution,
-Git, language-server routing and complete CLI/VS Code coding workflows remain
-incomplete. The source hash inventory is in
+client-visible Git folder selection, language-server routing and complete
+CLI/VS Code coding workflows remain incomplete. The source hash inventory is in
 [`OPENCODE_API_INVENTORY.json`](OPENCODE_API_INVENTORY.json).
 
 ## Latest native coding/runtime checkpoint (2026-10-11, VS Code package `0.1.8`)
@@ -350,6 +350,21 @@ client contract suites passed **280 VS Code** and **84 webpage** tests. These
 are host/DOM contract results, not a rendered external browser or installed IDE
 acceptance; side-by-side source comparison and approval/recovery UX remain open.
 See the [VCS review client evidence](evidence/vcs-review-clients-local-20261011.json).
+
+### Multi-folder native Git routing checkpoint (2026-10-11)
+
+VCS initialization, status, branch metadata, review base and diff now accept an
+optional registered `folder_id`. The C++ runtime rebuilds an immutable
+`WorkspaceToolSet` from the current membership snapshot for each operation,
+uses the primary folder when the ID is omitted, and rejects unregistered IDs;
+requests cannot provide a filesystem path. The provider-profile and legacy
+provider runtimes forward the selection to the same native execution platform.
+The xlang3-backed HTTP contract initializes Git in a secondary folder, checks
+its independent status, verifies the primary folder was untouched, and rejects
+an unregistered ID. The Git launcher also stopped duplicating ordinary
+inherited environment variables. Browser and VS Code review controls and CLI
+still use the primary folder until they expose a folder selector. See the
+[multi-folder VCS evidence](evidence/native-vcs-multifolder-local-20261011.json).
 
 ### VS Code language-server navigation checkpoint (2026-10-11)
 

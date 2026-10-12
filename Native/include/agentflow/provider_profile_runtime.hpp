@@ -52,6 +52,11 @@ public:
     Run submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity) override;
     std::vector<std::string> models() const override;
     ExecutionWorkspaceMetadata execution_workspace()const override;
+    void initialize_vcs(std::string_view provider,std::string folder_id={})override;
+    std::vector<WorkspaceVcsFileStatus> vcs_status(std::string folder_id={})const override;
+    WorkspaceVcsInfo vcs_info(std::string folder_id={})const override;
+    std::optional<WorkspaceVcsReviewBase> vcs_base(std::string folder_id={})const override;
+    std::vector<WorkspaceVcsFileDiff> vcs_diff(std::string_view,std::optional<std::string>,unsigned,std::string folder_id={})const override;
     bool supports_workspace_browsing()const override;
     WorkspaceListing browse_workspace_files(const std::string& path)const override;
     WorkspaceFile browse_workspace_file(const std::string& path)const override;
