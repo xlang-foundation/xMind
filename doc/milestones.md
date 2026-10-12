@@ -50,8 +50,10 @@ The native language-server client now retries transient request-cancelled,
 content-modified and server-cancelled replies with a bounded delay; the focused
 Rust Analyzer contract passes three times consecutively. The local-profile
 upgrade contract also passes after raising its subprocess ceiling from 90 to
-180 seconds (**1/1 in 161.79 seconds**). The last full CTest run before this
-test-harness adjustment passed 133/134; the entire suite has not been rerun.
+180 seconds (**1/1 in 161.79 seconds**). A current full Release gate was
+attempted with `Tools/native-milestone.ps1 -Action Build` but deferred at its
+benchmark preflight while xlang3 benchmark processes were active. The full
+suite remains unverified after the timeout adjustment.
 [Focused evidence and limitations](evidence/native-lsp-retry-focused-20261011.md).
 
 The preceding complete Release gate passed **134/134** contracts in one run
@@ -62,11 +64,11 @@ integration; it does not prove packaged or rendered IDE acceptance.
 
 ## Current browser and VS Code source gates — 2026-10-11
 
-At the current checkout, the VS Code extension suite passes **300/300** and the
-browser client suite passes **86/86**. Exact output is preserved in
+At the current checkout, the VS Code extension suite passes **310/310** and the
+browser client suite passes **95/95**. Exact output is preserved in
 [VS Code evidence](evidence/vscode-current-source-20261011.log) and
 [browser evidence](evidence/browser-current-source-20261011.log). The installed
-VS Code extension is `agentflow-local.agentflow@0.1.9`; these contract suites
+VS Code extension is `agentflow-local.agentflow@0.1.10`; these contract suites
 do not establish that the sidebar rendered or connected in the active editor.
 Windows desktop inspection was attempted but denied access, so rendered VS Code
 acceptance remains open. The connected browser separately displays the four

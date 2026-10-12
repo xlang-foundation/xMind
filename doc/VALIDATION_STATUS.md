@@ -2,13 +2,14 @@
 
 ## Current Release native gate — 2026-10-11
 
-The complete Release `ALL_BUILD` succeeds. The full CTest suite previously
-passed **134/134 in one run** after the delegation schema fixture and scripted
-CLI `/exit` fixes. A subsequent run for the LSP retry change passed 133/134;
-the only failure was the local-profile contract's 90-second subprocess limit
-during runtime upgrade. Raising the command ceiling to 180 seconds and the CTest
-ceiling to 300 seconds produced a focused CTest pass (**1/1, 161.79 seconds**).
-The entire suite has not been rerun after that harness adjustment. See the
+The complete Release `ALL_BUILD` succeeded at the preceding checkpoint. The
+full CTest suite passed **134/134** before the LSP retry test-harness timeout
+was raised. After increasing its subprocess ceiling from 90 to 180 seconds,
+the focused local-profile upgrade contract passed **1/1 in 161.79 seconds**.
+The current full Release workflow was attempted through
+`Tools/native-milestone.ps1 -Action Build`, but its preflight deferred while
+live xlang3 benchmarks were running. No current-source full native CTest result
+is claimed. See the
 [focused retry and profile-contract record](evidence/native-lsp-retry-focused-20261011.md),
 [earlier complete Release run](evidence/native-full-release-ctest-20261011.log),
 and [intervening 133/134 run](evidence/native-lsp-retry-ctest-20261011.log).
@@ -16,9 +17,9 @@ Local Release validation does not claim installed IDE acceptance.
 
 ## Current browser and VS Code source suites — 2026-10-11
 
-At the same checkout, `npm test` in `extensions/vscode` passes **307/307** and
+At the same checkout, `npm test` in `extensions/vscode` passes **310/310** and
 `node --test views/browser/tests/*.test.cjs` from the repository root passes
-**94/94**. Exact TAP output is preserved in
+**95/95**. Exact current TAP output is preserved in
 [VS Code evidence](evidence/vscode-current-source-20261011.log) and
 [browser evidence](evidence/browser-current-source-20261011.log). The installed
 VS Code package is `agentflow-local.agentflow@0.1.10`. The local browser page
@@ -27,6 +28,20 @@ returns 401 without the browser's HttpOnly view session. External Edge visual
 inspection could not proceed because the computer-use helper could not
 confidently verify the current URL. No rendered VS Code or authenticated live
 browser action is claimed here.
+
+## Live model-driven coding run reached its turn limit — 2026-10-11
+
+A local xMind browser-profile run against a Model Zoo test workspace used the
+saved DeepSeek profile, inspected the Vue project and completed a real
+`npm.cmd run build` with exit code 0. The model then proposed several scoped
+`HomeView.vue` edits; the run ultimately ended with `model_turn_limit` before
+finishing its redesign. One observed model call reported 47,875 input tokens.
+The page changes were completed manually and separately verified, so they do
+not count as a completed xMind coding-agent run. This is negative live
+acceptance evidence for a multi-step coding task; the local service binary's
+exact source revision was not established. Reduce repeated context cost and
+verify the effective model-turn budget before claiming smooth coding-agent
+completion.
 
 ## Live saved-key native CLI process run — 2026-10-11
 
