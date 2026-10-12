@@ -1,6 +1,6 @@
 # Current native validation
 
-## MCP 2026-07-28 subscriptions/listen on HTTP and stdio — 2026-10-12
+## MCP 2026-07-28 subscriptions/listen for agents and graphs — 2026-10-12
 
 The shared `McpToolClient::listen_subscriptions` validator covers stdio and
 HTTP. AgentRunner now opens a separate listener for modern peers that advertise
@@ -10,16 +10,18 @@ listener before terminal state is committed.
 Events include only validated method and refresh metadata: payloads and resource
 URIs are excluded, and each listener is capped at 64 notification events with
 one overflow record. Held-open synthetic stdio and Streamable HTTP AgentRunner
-integrations each send 70 notifications with a credential-shaped value in
-every peer payload and verify sanitization, the cap, overflow marker, live
-stream cancellation and durable closure before `run.completed`. The HTTP
-integration also verifies an MCP effect waits for controller approval and
-provider token metrics persist. Dedicated stdio and HTTP transport contracts
-verify the validated acknowledgement callback runs before notification
-callbacks. Graph/MCP, AgentRunner, stdio/HTTP transport and official
-modern/legacy SDK contracts pass **9/9**.
-Graph-owned listeners, crash recovery/reconnect, automatic in-run catalogue
-refresh and live external-peer acceptance remain open. [Exact Release CTest output](evidence/native-agent-mcp-subscriptions-http-local-20261012.log);
+integrations send 70 notifications with credential-shaped values and verify
+sanitization, the cap, overflow marker, cancellation and durable closure
+before run completion. Direct graph MCP tool children use the same observer;
+stdio graph tests verify closure for approved, denied and cancelled runs, and
+an HTTP graph test verifies the live SSE path and closure before child
+completion. The HTTP AgentRunner integration also verifies an MCP effect waits
+for controller approval and provider token metrics persist. Dedicated stdio
+and HTTP transport contracts verify acknowledgement ordering. Graph/MCP,
+AgentRunner, stdio/HTTP transport and official modern/legacy SDK contracts pass
+**10/10**.
+Crash recovery/reconnect, automatic in-run catalogue refresh and live
+external-peer acceptance remain open. [Exact Release CTest output](evidence/native-mcp-subscription-lifecycle-local-20261012.log);
 [transport scope](native-mcp-http.md).
 
 ## MCP 2026-07-28 HTTP subscriptions/listen — 2026-10-12
@@ -33,7 +35,7 @@ proves an unrequested prompts-list notification retires the owner. The public
 native HTTP client exposes the accepted filter and validated notifications.
 The separate AgentRunner HTTP integration proves held-open listener
 cancellation, durable pre-terminal closure and an approval-gated tool effect;
-see [the expanded lifecycle contract](evidence/native-agent-mcp-subscriptions-http-local-20261012.log).
+see [the expanded lifecycle contract](evidence/native-mcp-subscription-lifecycle-local-20261012.log).
 Reconnect, installed-client or live external-server acceptance remain
 unverified. No external service or credential was used. The earlier transport
 checkpoint's dependent MCP wire/client, graph-MCP, AgentRunner HTTP-MCP and

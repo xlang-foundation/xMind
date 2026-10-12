@@ -124,9 +124,11 @@ wire/client/graph/AgentRunner/unified HTTP contracts pass **6/6**;
 This transport checkpoint documents the HTTP client contract. Separate stdio
 and HTTP AgentRunner integration fixtures now verify sanitized durable
 run-event persistence and listener cancellation before terminal state. HTTP
-AgentRunner also has an approval-gated effect acceptance. Graph listener
-ownership, crash recovery/reconnect, automatic catalog refresh/re-discovery,
-concurrent subscriptions on one owner, or live external-peer acceptance remain
+AgentRunner also has an approval-gated effect acceptance. Direct graph MCP
+children use the same shared observer; stdio approved/denied/cancelled paths
+and an HTTP approved path have scoped lifecycle coverage. Crash
+recovery/reconnect, automatic catalog refresh/re-discovery, concurrent
+subscriptions on one owner, or live external-peer acceptance remain
 unverified.
 OAuth, empty/non-JSON older discovery fallback, older server-request replies,
 resumable GET/DELETE and graphical connection controls remain unfinished. The

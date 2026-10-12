@@ -3,7 +3,7 @@
 #include "nlohmann/json.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
-#include "agentflow/mcp_subscriptions.hpp"
+#include "agentflow/mcp_run_subscription_observer.hpp"
 #include "agentflow/a2a_tool_registry.hpp"
 #include "agentflow/json_schema.hpp"
 #include "agentflow/a2a_agent_registry.hpp"
@@ -34,72 +34,6 @@ namespace agentflow {
 namespace {
 using Json=nlohmann::json;
 constexpr std::string_view instruction_prefix="\n\nBackend-configured agent instructions (native permissions and execution evidence remain authoritative):\n";
-class McpRunSubscriptionObserver {
-public:
-    McpRunSubscriptionObserver(PersistenceService& store,std::string run,std::string server,
-        std::int64_t revision,std::unique_ptr<McpToolClient> client,McpSubscriptionFilter filter,
-        McpToolClient::Deadline deadline)
-        :store_(store),run_(std::move(run)),server_(std::move(server)),revision_(revision),
-         client_(std::move(client)),filter_(std::move(filter)),deadline_(deadline) {}
-    ~McpRunSubscriptionObserver(){stop();}
-    McpRunSubscriptionObserver(const McpRunSubscriptionObserver&)=delete;
-    McpRunSubscriptionObserver& operator=(const McpRunSubscriptionObserver&)=delete;
-    void start() {
-        if(worker_.joinable())throw std::logic_error("MCP subscription observer already started");
-        persist("mcp.subscription.started",Json{{"filter",filter_json(filter_)}});
-        worker_=std::jthread([this](std::stop_token stop){observe(stop);});
-    }
-    void stop() noexcept {
-        if(worker_.joinable()){worker_.request_stop();worker_.join();}
-        if(client_)client_->shutdown();
-    }
-private:
-    static Json filter_json(const McpSubscriptionFilter& filter) {
-        return Json{{"tools_list_changed",filter.tools_list_changed},
-            {"prompts_list_changed",filter.prompts_list_changed},
-            {"resources_list_changed",filter.resources_list_changed}};
-    }
-    void persist(const char* kind,Json data) {
-        data["server_id"]=server_;data["config_revision"]=revision_;
-        store_.append_event(run_,kind,data.dump()).get();
-    }
-    void observe(std::stop_token stop) noexcept {
-        std::size_t notifications=0;bool overflow_recorded=false;
-        try {
-            const auto accepted=client_->listen_subscriptions(filter_,[&](const McpWireMessage& message) {
-                if(notifications>=64) {
-                    if(!overflow_recorded){overflow_recorded=true;persist("mcp.subscription.overflow",Json{{"limit",64}});}
-                    return;
-                }
-                ++notifications;
-                const bool refresh=message.method=="notifications/tools/list_changed"||
-                    message.method=="notifications/prompts/list_changed"||
-                    message.method=="notifications/resources/list_changed";
-                // Persist protocol-validated metadata only. Peer payloads and
-                // resource URIs may contain secrets and never enter run events.
-                persist("mcp.subscription.notification",Json{{"method",message.method},
-                    {"refresh_next_run",refresh}});
-            },deadline_,stop,[&](const McpSubscriptionAcknowledgement& accepted) {
-                persist("mcp.subscription.acknowledged",Json{{"filter",filter_json(accepted.notifications)}});
-            });
-            (void)accepted;
-            persist("mcp.subscription.closed",Json{{"outcome","completed"},{"notification_count",notifications}});
-        } catch(...) {
-            try {
-                persist("mcp.subscription.closed",Json{{"outcome",stop.stop_requested()?"stopped":"failed"},
-                    {"reason",stop.stop_requested()?"run_ended":"peer_or_protocol_failure"},
-                    {"notification_count",notifications}});
-            } catch(...) {}
-        }
-    }
-    PersistenceService& store_;
-    std::string run_,server_;
-    std::int64_t revision_;
-    std::unique_ptr<McpToolClient> client_;
-    McpSubscriptionFilter filter_;
-    McpToolClient::Deadline deadline_;
-    std::jthread worker_;
-};
 std::string operation_id() {std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i) value<<std::setw(8)<<random();return value.str();}
 std::string public_context_usage(const std::string& raw){
     const auto actual=Json::parse(raw);if(actual.is_null())return "null";
@@ -599,30 +533,16 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!bindings.is_array())throw DynamicPlanUnavailable("Native MCP registry returned invalid approval bindings");
             for(const auto& binding:bindings)approval_bindings.push_back(binding);
             persistence_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()}}.dump()).get();
-            const auto peer=runtime.client->server();
-            if(peer.era==McpWireEra::modern&&peer.protocol_version=="2026-07-28") {
-                const auto capabilities=Json::parse(peer.capabilities_json);
-                McpSubscriptionFilter filter;
-                const auto advertises=[&](const char* group) {
-                    return capabilities.contains(group)&&capabilities.at(group).is_object()&&
-                        capabilities.at(group).contains("listChanged")&&
-                        capabilities.at(group).at("listChanged").is_boolean()&&
-                        capabilities.at(group).at("listChanged").get<bool>();
-                };
-                filter.tools_list_changed=advertises("tools");
-                filter.prompts_list_changed=advertises("prompts");
-                filter.resources_list_changed=advertises("resources");
-                if(filter.tools_list_changed||filter.prompts_list_changed||filter.resources_list_changed) {
-                    try {
-                        auto observer_client=connect_mcp_client(server,persistence_,run_deadline,token);
-                        auto observer=std::make_unique<McpRunSubscriptionObserver>(persistence_,id,
-                            server.id,server.revision,std::move(observer_client),filter,run_deadline);
-                        observer->start();mcp_observers.push_back(std::move(observer));
-                    } catch(const std::exception&) {
-                        persistence_.append_event(id,"mcp.subscription.unavailable",
-                            Json{{"server_id",server.id},{"config_revision",server.revision},
-                                 {"reason","listener_unavailable"}}.dump()).get();
-                    }
+            if(const auto filter=mcp_run_subscription_filter(runtime.client->server())) {
+                try {
+                    auto observer_client=connect_mcp_client(server,persistence_,run_deadline,token);
+                    auto observer=std::make_unique<McpRunSubscriptionObserver>(persistence_,id,
+                        server.id,server.revision,std::move(observer_client),*filter,run_deadline);
+                    observer->start();mcp_observers.push_back(std::move(observer));
+                } catch(const std::exception&) {
+                    persistence_.append_event(id,"mcp.subscription.unavailable",
+                        Json{{"server_id",server.id},{"config_revision",server.revision},
+                             {"reason","listener_unavailable"}}.dump()).get();
                 }
             }
             mcp_runtimes.push_back(std::move(runtime));

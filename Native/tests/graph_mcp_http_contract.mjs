@@ -16,7 +16,7 @@ const effect=join(workspace,'effect.txt'),marker=join(root,'effect.marker'),conf
 const body='Actual approved native graph MCP bytes\n',token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};
 const peer=fileURLToPath(new URL('./mcp_effect_peer.mjs',import.meta.url));
 let child,client,port;
-const setting={id:'graph-external',transport:'stdio',enabled:true,executable:process.execPath,working_directory:workspace,arguments:[peer,'modern',effect,marker],credentials:[]};
+const setting={id:'graph-external',transport:'stdio',enabled:true,executable:process.execPath,working_directory:workspace,arguments:[peer,'subscription',effect,marker],credentials:[]};
 async function admin(...args){const output=await execute(adminExe,['--db',database,'--modules',modules,'--stdlib',stdlib,...args],{env,windowsHide:true,timeout:35000});return JSON.parse(output.stdout);}
 async function cli(...args){const output=await execute(cliExe,[String(port),...args],{env,windowsHide:true,timeout:12000});return JSON.parse(output.stdout);}
 async function start(){
@@ -29,6 +29,7 @@ async function stop(){if(!child||child.exitCode!==null)return;const finished=new
 async function wait(action,predicate,label){const end=Date.now()+10000;for(;;){const value=await action();if(predicate(value))return value;if(Date.now()>=end)throw new Error(label+' timed out');await new Promise(yes=>setTimeout(yes,10));}}
 async function state(id,wanted){return wait(()=>client.graph(id),value=>value.run.state===wanted,'Graph state '+wanted);}
 async function pending(id){return wait(async()=>{for(const branch of await client.graphChildren(id)){const operation=(await client.operations(branch.id)).find(value=>value.state==='awaiting_approval');if(operation)return operation;}},Boolean,'Actual graph MCP proposal');}
+async function assertSubscriptionClosed(id){const leaf=(await client.graphChildren(id)).find(value=>value.node_id==='external');assert.ok(leaf);const events=await wait(()=>client.graphEvents(id,0),items=>items.some(value=>value.run_id===leaf.id&&value.kind==='mcp.subscription.closed'),'graph MCP listener closure');assert.equal(events.find(value=>value.run_id===leaf.id&&value.kind==='mcp.subscription.closed').data.outcome,'stopped');}
 async function absent(path){await assert.rejects(readFile(path),error=>error.code==='ENOENT');}
 async function submit(){const session=await client.createSession('Actual native MCP graph contract');return {session,run:await client.graphRun(session.id,'mcp.read',1,'Run the registered external tool graph')};}
 async function human(id){const paused=await state(id,'paused');return client.graphInput(id,'human','{"accepted":true}',paused.checkpoint_revision);}
@@ -55,17 +56,26 @@ try {
  await stop();await start();await state(allowed.run.id,'paused');await human(allowed.run.id);
  const proposal=await pending(allowed.run.id),args=JSON.parse(proposal.arguments_json);
  assert.equal(proposal.tool,'mcp_tool');assert.equal(args.server_config_id,setting.id);assert.equal(args.config_revision,1);assert.equal(args.alias,tool.alias);assert.equal(args.peer_tool,'fixture.write');assert.ok(args.arguments_json.includes('1.00000000000000000001'));assert.equal(proposal.state,'awaiting_approval');await absent(effect);
+ const externalChild=(await client.graphChildren(allowed.run.id)).find(value=>value.node_id==='external');assert.ok(externalChild);
+ const subscriptionEvents=await wait(()=>client.graphEvents(allowed.run.id,0),events=>events.some(value=>value.run_id===externalChild.id&&value.kind==='mcp.subscription.overflow'),'graph MCP notification overflow');
+ const childSubscriptionEvents=subscriptionEvents.filter(value=>value.run_id===externalChild.id&&value.kind.startsWith('mcp.subscription.'));
+ assert.ok(childSubscriptionEvents.some(value=>value.kind==='mcp.subscription.acknowledged'));
+ assert.equal(childSubscriptionEvents.filter(value=>value.kind==='mcp.subscription.notification').length,64);
+ assert.equal(childSubscriptionEvents.filter(value=>value.kind==='mcp.subscription.overflow').length,1);
+ assert.equal(JSON.stringify(childSubscriptionEvents).includes('untrusted-peer-payload'),false,'Graph run journal must exclude untrusted MCP notification payloads');
  await cli('decide',proposal.id,'allow');const completed=await state(allowed.run.id,'completed');assert.equal(await readFile(effect,'utf8'),body);
+ assert.equal(await readFile(marker+'.subscription-closed','utf8'),'peer observed listener EOF');
  assert.equal(completed.checkpoint.nodes.find(value=>value.id==='read').output.content,body);
  assert.equal((await client.operation(proposal.id)).state,'succeeded');
  const branches=await cli('graph-children',allowed.run.id);assert.equal(branches.length,2);
  const external=branches.find(value=>value.node_id==='external');const history=await client.graphChildHistory(allowed.run.id,external.id);const answer=history.at(-1).data;
  assert.equal(answer.source,'graph_tool');assert.equal(answer.acknowledged_by_peer,true);assert.equal(answer.independently_verified,false);assert.equal(answer.operation_id,proposal.id);assert.equal(JSON.parse(answer.response_json).result.structuredContent.bytes,Buffer.byteLength(body));
  const events=await client.graphEvents(allowed.run.id,0);assert.ok(events.some(value=>value.run_id===external.id&&value.kind==='mcp.discovered'));assert.ok(events.some(value=>value.kind==='operation.succeeded'));
+ const subscriptionClosed=events.find(value=>value.run_id===external.id&&value.kind==='mcp.subscription.closed'),externalCompleted=events.find(value=>value.run_id===external.id&&value.kind==='run.completed');assert.ok(subscriptionClosed);assert.equal(subscriptionClosed.data.outcome,'stopped');assert.ok(externalCompleted);assert.ok(subscriptionClosed.seq<externalCompleted.seq,'Graph MCP listener must close before child terminal event');
  const cursor=events.find(value=>value.run_id===external.id&&value.kind==='mcp.discovered').seq;assert.deepEqual(await client.graphEvents(allowed.run.id,cursor),events.filter(value=>value.seq>cursor));
  assert.equal((await client.history(allowed.session.id)).at(-1).data.source,'graph_join');
- const denied=await submit();await human(denied.run.id);const deniedProposal=await pending(denied.run.id);await cli('decide',deniedProposal.id,'deny');await state(denied.run.id,'failed');assert.equal((await client.operation(deniedProposal.id)).state,'denied');assert.equal(await readFile(effect,'utf8'),body);
- const cancelled=await submit();await human(cancelled.run.id);const cancelledProposal=await pending(cancelled.run.id);await cli('cancel',cancelled.run.id);await state(cancelled.run.id,'cancelled');assert.equal((await client.operation(cancelledProposal.id)).state,'cancelled');assert.equal(await readFile(effect,'utf8'),body);
+ const denied=await submit();await human(denied.run.id);const deniedProposal=await pending(denied.run.id);await cli('decide',deniedProposal.id,'deny');await state(denied.run.id,'failed');await assertSubscriptionClosed(denied.run.id);assert.equal((await client.operation(deniedProposal.id)).state,'denied');assert.equal(await readFile(effect,'utf8'),body);
+ const cancelled=await submit();await human(cancelled.run.id);const cancelledProposal=await pending(cancelled.run.id);await cli('cancel',cancelled.run.id);await state(cancelled.run.id,'cancelled');await assertSubscriptionClosed(cancelled.run.id);assert.equal((await client.operation(cancelledProposal.id)).state,'cancelled');assert.equal(await readFile(effect,'utf8'),body);
  // A stale paused graph survives server restart for inspection/cancellation;
  // human input must fail before changing its durable checkpoint or scheduling.
  const stale=await submit(),paused=await state(stale.run.id,'paused');await stop();

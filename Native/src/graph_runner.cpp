@@ -5,6 +5,7 @@
 #include "agentflow/create_executor.hpp"
 #include "agentflow/patch_tool.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
+#include "agentflow/mcp_run_subscription_observer.hpp"
 #include "agentflow/schema_worker.hpp"
 #include "agentflow/agent_authority.hpp"
 #define NOMINMAX
@@ -172,9 +173,25 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
             store_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()},{"source","graph"}}.dump()).get();
             if(std::none_of(definitions.begin(),definitions.end(),[&](const auto& definition){return definition.name==name;}))return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_mcp_alias_unavailable"})").get();
             available();
+            std::unique_ptr<McpRunSubscriptionObserver> observer;
+            if(const auto filter=mcp_run_subscription_filter(client->server())) {
+                try {
+                    auto observer_client=connect_mcp_client(server,store_,deadline,cancel);
+                    observer=std::make_unique<McpRunSubscriptionObserver>(store_,id,server.id,
+                        server.revision,std::move(observer_client),*filter,deadline);
+                    observer->start();
+                } catch(const std::exception&) {
+                    store_.append_event(id,"mcp.subscription.unavailable",
+                        Json{{"server_id",server.id},{"config_revision",server.revision},
+                             {"source","graph"},{"reason","listener_unavailable"}}.dump()).get();
+                    observer.reset();
+                }
+            }
             const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now()).count();
             const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+std::max<std::int64_t>(remaining,1);
-            result=Json::parse(registry.invoke(identifier(),id,name,source,expiry,deadline,cancel));
+            try{result=Json::parse(registry.invoke(identifier(),id,name,source,expiry,deadline,cancel));}
+            catch(...){if(observer)observer->stop();throw;}
+            if(observer)observer->stop();
             result["source"]="graph_tool";
             const auto output=result.dump();
             // The durable MCP operation has already succeeded. An oversized

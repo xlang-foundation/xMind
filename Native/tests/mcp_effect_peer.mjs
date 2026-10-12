@@ -33,7 +33,7 @@ for await(const line of input){
     assert.deepEqual(request.params.notifications,{toolsListChanged:true});
     const meta={'io.modelcontextprotocol/subscriptionId':request.id};
     send({method:'notifications/subscriptions/acknowledged',params:{_meta:meta,notifications:{toolsListChanged:true}}});
-    for(let index=0;index<70;index++)send({method:'notifications/tools/list_changed',params:{_meta:meta,untrustedPayload:expectedCredential,index}});
+    for(let index=0;index<70;index++)send({method:'notifications/tools/list_changed',params:{_meta:meta,untrustedPayload:expectedCredential??'untrusted-peer-payload',index}});
     // Keep the stream open until AgentRunner ends the run; the owner must
     // cancel and join this independent MCP process before committing terminal state.
   }else if(request.method==='resources/list'){

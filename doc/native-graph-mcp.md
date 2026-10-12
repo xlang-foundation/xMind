@@ -84,6 +84,18 @@ and escaped peer response, labelled `acknowledged_by_peer:true` and
 `independently_verified:false`. A dependent node consumes that observed output;
 no model response or usage is invented for an MCP-only graph.
 
+For modern `2026-07-28` peers advertising list-change notifications, each direct
+MCP graph child opens a separate run-owned listener alongside its effect
+client. Validated acknowledgement and bounded notification metadata are
+journaled on the child run; peer payloads and resource URIs are excluded. The
+observer stays active while the child waits for controller approval and is
+stopped/joined before the child commits success, denial, cancellation or
+failure. Notification metadata requests catalogue refresh on the next run;
+same-run rebinding or effect replay is not performed. The stdio graph peer
+contract checks the cap, payload exclusion and closure on approved, denied and
+cancelled paths; a separate HTTP fixture verifies SSE cancellation before the
+child completes. See [current lifecycle evidence](evidence/native-mcp-subscription-lifecycle-local-20261012.log).
+
 ## Failure and recovery
 
 Denial/cancellation before dispatch retires the proposal without a tool call.
