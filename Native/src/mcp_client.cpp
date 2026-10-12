@@ -147,7 +147,8 @@ McpReadOnlyReply McpStdioClient::get_prompt(const std::string& name,std::string_
     catch(...){state.retire();throw;}
 }
 McpSubscriptionAcknowledgement McpStdioClient::listen_subscriptions(const McpSubscriptionFilter& requested,
-    const std::function<void(const McpWireMessage&)>& on_notification,Deadline deadline,std::stop_token cancel) {
+    const std::function<void(const McpWireMessage&)>& on_notification,Deadline deadline,std::stop_token cancel,
+    const std::function<void(const McpSubscriptionAcknowledgement&)>& on_acknowledgement) {
     auto& state=*impl_;if(!ready()){if(state.live)state.retire();throw McpProtocolError("MCP client is not ready");}
     try {
         const auto params=mcp_subscription_request_params(requested);
@@ -161,7 +162,9 @@ McpSubscriptionAcknowledgement McpStdioClient::listen_subscriptions(const McpSub
                 const auto message=state.pop();
                 if(message.kind==McpMessageKind::notification) {
                     tracker.notification(message);
-                    if(message.method!="notifications/subscriptions/acknowledged"&&on_notification)on_notification(message);
+                    if(message.method=="notifications/subscriptions/acknowledged") {
+                        if(on_acknowledgement)on_acknowledgement(*tracker.acknowledgement());
+                    } else if(on_notification)on_notification(message);
                     continue;
                 }
                 if(state.peer_message(message,deadline,cancel))continue;

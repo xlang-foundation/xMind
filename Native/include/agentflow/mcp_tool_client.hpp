@@ -63,7 +63,8 @@ public:
     // Long-lived modern-protocol request. A separate access owner should be
     // used when the caller also needs to make ordinary requests concurrently.
     virtual McpSubscriptionAcknowledgement listen_subscriptions(const McpSubscriptionFilter&,
-        const std::function<void(const McpWireMessage&)>&,Deadline,std::stop_token={}) {
+        const std::function<void(const McpWireMessage&)>&,Deadline,std::stop_token={},
+        const std::function<void(const McpSubscriptionAcknowledgement&)>& on_acknowledgement={}) {
         throw McpProtocolError("MCP subscriptions/listen is not implemented by this client");
     }
     virtual bool ready() const=0;

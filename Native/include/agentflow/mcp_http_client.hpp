@@ -23,7 +23,8 @@ public:
     // Blocks until the server gracefully closes the request-scoped SSE stream
     // or the caller cancels it. Cancellation closes that HTTP response stream.
     McpSubscriptionAcknowledgement listen_subscriptions(const McpSubscriptionFilter& requested,
-        const std::function<void(const McpWireMessage&)>& on_notification,Deadline deadline,std::stop_token cancel={}) override;
+        const std::function<void(const McpWireMessage&)>& on_notification,Deadline deadline,std::stop_token cancel={},
+        const std::function<void(const McpSubscriptionAcknowledgement&)>& on_acknowledgement={}) override;
     bool ready() const override;
     const McpServerDescription& server() const override;
     std::size_t rejected_tools() const;

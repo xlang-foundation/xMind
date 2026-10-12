@@ -57,11 +57,12 @@ void cancellation(char** argv) {
 void subscription(char** argv) {
     McpStdioClient client(configuration(argv,"subscription"));client.connect(std::chrono::steady_clock::now()+5s);
     McpSubscriptionFilter requested;requested.tools_list_changed=true;requested.resource_subscriptions={"file:///fixture/readme.md"};
-    std::vector<std::string> events;
-    const auto accepted=client.listen_subscriptions(requested,[&](const McpWireMessage& message){events.push_back(message.method);},std::chrono::steady_clock::now()+5s);
+    std::vector<std::string> events;bool acknowledged=false;
+    const auto accepted=client.listen_subscriptions(requested,[&](const McpWireMessage& message){events.push_back(message.method);},std::chrono::steady_clock::now()+5s,{},
+        [&](const McpSubscriptionAcknowledgement& value){acknowledged=true;require(value.notifications.tools_list_changed,"Validated stdio acknowledgement must reach its immediate callback");events.push_back("acknowledged");});
     require(accepted.subscription_id.size()>0&&accepted.notifications.tools_list_changed,"Stdio subscription acknowledgement must be retained");
     require(accepted.notifications.resource_subscriptions==requested.resource_subscriptions,"Stdio subscription resource filters must be acknowledged exactly");
-    require(events==std::vector<std::string>{"notifications/resources/updated","notifications/tools/list_changed"},"Only validated post-ack subscription events reach the callback");
+    require(acknowledged&&events==std::vector<std::string>{"acknowledged","notifications/resources/updated","notifications/tools/list_changed"},"Validated acknowledgement must reach its callback before post-ack events");
     client.shutdown();require(client.status().exit_code==0,"Subscription peer must verify completion and exit cleanly");
 }
 void subscription_cancellation(char** argv) {

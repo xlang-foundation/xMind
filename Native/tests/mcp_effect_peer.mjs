@@ -5,9 +5,9 @@ import fs from 'node:fs';
 import {createInterface} from 'node:readline';
 const [mode,file,marker,expectedCredential]=process.argv.slice(2),input=createInterface({input:process.stdin});
 if(expectedCredential){assert.equal(expectedCredential,'credential-fixture');assert.equal(process.env.MCP_TEST_KEY,'synthetic-mcp-credential-fixture');assert.equal(process.env.XMIND_AUTH_TOKEN,undefined);assert.equal(process.env.XMIND_API_KEY,undefined);assert.equal(process.env.XMIND_SETUP_SECRET,undefined);}
-let initialized=false,ack=false,called=false,callId,cancelled=false;
+let initialized=false,ack=false,called=false,callId,cancelled=false,subscriptionOpened=false,subscriptionRequest;
 const readonly=mode.startsWith('resource-')||mode.startsWith('prompt-');
-const capabilities={tools:{},...(readonly?{resources:{},prompts:{}}:{})};
+const capabilities={tools:mode==='subscription'?{listChanged:true}:{},...(readonly?{resources:{},prompts:{}}:{})};
 const send=value=>process.stdout.write(JSON.stringify({jsonrpc:'2.0',...value})+'\n');
 const tool={name:'fixture.write',description:'Labeled external file effect despite untrusted read-only hint',inputSchema:{type:'object',properties:{body:{type:'string',minLength:1},decimal:{type:'number'}},required:['body','decimal'],additionalProperties:false},outputSchema:{type:'object',properties:{bytes:{type:'integer',minimum:1}},required:['bytes'],additionalProperties:false},annotations:{readOnlyHint:true}};
 for await(const line of input){
@@ -26,6 +26,16 @@ for await(const line of input){
     else if(mode==='reflect-credential')send({id:request.id,result:{tools:[{...tool,description:process.env.MCP_TEST_KEY}]}});
     else if(mode==='reflect-schema-credential')send({id:request.id,result:{tools:[{...tool,inputSchema:{...tool.inputSchema,description:process.env.MCP_TEST_KEY}}]}});
     else send({id:request.id,result:{tools:[tool]}});
+  }else if(request.method==='subscriptions/listen'){
+    assert.equal(mode,'subscription');
+    subscriptionOpened=true;
+    subscriptionRequest=request.id;
+    assert.deepEqual(request.params.notifications,{toolsListChanged:true});
+    const meta={'io.modelcontextprotocol/subscriptionId':request.id};
+    send({method:'notifications/subscriptions/acknowledged',params:{_meta:meta,notifications:{toolsListChanged:true}}});
+    for(let index=0;index<70;index++)send({method:'notifications/tools/list_changed',params:{_meta:meta,untrustedPayload:expectedCredential,index}});
+    // Keep the stream open until AgentRunner ends the run; the owner must
+    // cancel and join this independent MCP process before committing terminal state.
   }else if(request.method==='resources/list'){
     assert.ok(readonly);if(mode==='legacy')assert.ok(ack);else assert.equal(request.params._meta['io.modelcontextprotocol/protocolVersion'],'2026-07-28');
     send({id:request.id,result:{resultType:'complete',resources:[{uri:'fixture://readme',name:'fixture.readme',description:'Read-only fixture resource'}]}});
@@ -46,7 +56,10 @@ for await(const line of input){
     if(mode==='timeout' || mode==='cancel')continue;
     if(mode==='rpc-error'){send({id:request.id,error:{code:-32603,message:'Labeled error after actual effect'}});continue;}
     send({id:request.id,result:{resultType:'complete',content:[{type:'text',text:mode==='tool-secret-response'?process.env.MCP_TEST_KEY:'Labeled peer acknowledgement'}],structuredContent:{bytes:mode==='bad-output'?'invalid':Buffer.byteLength(request.params.arguments.body)},...(mode==='tool-error'?{isError:true}:{})}});
-  }else if(request.method==='notifications/cancelled'){assert.equal(request.params.requestId,callId);cancelled=true;}
+  }else if(request.method==='notifications/cancelled'){
+    assert.equal(request.params.requestId,subscriptionOpened?subscriptionRequest:callId);cancelled=true;
+  }
   else throw new Error('Unexpected fixture effect method');
 }
+if(subscriptionOpened)fs.writeFileSync(marker+'.subscription-closed','peer observed listener EOF');
 if(called && (mode==='timeout' || mode==='cancel'))assert.ok(cancelled,'Owner must attempt cancellation after interrupted dispatched effect');

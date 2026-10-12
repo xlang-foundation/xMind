@@ -17,10 +17,11 @@ int main(int argc,char** argv){
         const auto resource=client.read_resource("fixture://http/readme",deadline);require(!resource.request_id.empty()&&nlohmann::json::parse(resource.result_json)["contents"][0]["text"]=="HTTP resource body","HTTP resource result must retain validated content and correlation identity");
         const auto prompts=client.list_prompts({},deadline);require(prompts.entries_json.size()==1&&nlohmann::json::parse(prompts.entries_json[0])["name"]=="fixture.http.prompt","HTTP prompt catalogue must reach the native owner");
         const auto prompt=client.get_prompt("fixture.http.prompt",R"({"topic":"AgentFlow"})",deadline);require(!prompt.request_id.empty()&&nlohmann::json::parse(prompt.result_json)["messages"][0]["content"]["text"]=="HTTP prompt for AgentFlow","HTTP prompt result must retain its exact message and correlation identity");
-        McpSubscriptionFilter requested;requested.tools_list_changed=true;requested.resource_subscriptions={"fixture://http/readme"};std::vector<std::string> updates;
-        const auto subscription=client.listen_subscriptions(requested,[&](const McpWireMessage& event){updates.push_back(event.method);},deadline);
+        McpSubscriptionFilter requested;requested.tools_list_changed=true;requested.resource_subscriptions={"fixture://http/readme"};std::vector<std::string> updates;bool acknowledged=false;
+        const auto subscription=client.listen_subscriptions(requested,[&](const McpWireMessage& event){updates.push_back(event.method);},deadline,{},
+            [&](const McpSubscriptionAcknowledgement& value){acknowledged=true;require(value.notifications.tools_list_changed,"Validated HTTP acknowledgement must reach its immediate callback");updates.push_back("acknowledged");});
         require(subscription.subscription_id.size()>8&&subscription.notifications.tools_list_changed&&subscription.notifications.resource_subscriptions==requested.resource_subscriptions,"MCP subscription acknowledgement must preserve the honored requested filters");
-        require(updates==std::vector<std::string>{"notifications/resources/updated","notifications/tools/list_changed"},"MCP subscription stream must deliver only validated resource and list-change notifications before graceful close");
+        require(acknowledged&&updates==std::vector<std::string>{"acknowledged","notifications/resources/updated","notifications/tools/list_changed"},"Validated HTTP acknowledgement must reach its callback before notifications and graceful close");
         client.shutdown();require(!client.ready(),"Closed HTTP client cannot remain ready");
         McpHttpClient unrequested(argv[1]);unrequested.connect(deadline);McpSubscriptionFilter resource_only;resource_only.resource_subscriptions={"fixture://http/readme"};bool rejected=false;
         try{(void)unrequested.listen_subscriptions(resource_only,{},deadline);}catch(const McpProtocolError&){rejected=true;}

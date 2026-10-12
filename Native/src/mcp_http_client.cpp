@@ -147,14 +147,18 @@ McpReadOnlyReply McpHttpClient::get_prompt(const std::string& name,std::string_v
     catch(...){state.retire();throw;}
 }
 McpSubscriptionAcknowledgement McpHttpClient::listen_subscriptions(const McpSubscriptionFilter& requested,
-    const std::function<void(const McpWireMessage&)>& on_notification,Deadline deadline,std::stop_token cancel) {
+    const std::function<void(const McpWireMessage&)>& on_notification,Deadline deadline,std::stop_token cancel,
+    const std::function<void(const McpSubscriptionAcknowledgement&)>& on_acknowledgement) {
     auto& state=*impl_;if(!ready())throw McpProtocolError("MCP HTTP client is not ready");
     try {
         const auto params=mcp_subscription_request_params(requested);
         const auto request=state.requests.prepare("subscriptions/listen",params,McpWireEra::modern);
         McpSubscriptionTracker tracker(requested,state.handshake.server(),request.request.id);
         bool attempted=false;const auto reply=state.exchange(request.frame,McpWireEra::modern,request.request.id,deadline,cancel,attempted,{},false,nullptr,[&](const McpWireMessage& message){
-            tracker.notification(message);if(message.method!="notifications/subscriptions/acknowledged"&&on_notification)on_notification(message);
+            tracker.notification(message);
+            if(message.method=="notifications/subscriptions/acknowledged") {
+                if(on_acknowledgement)on_acknowledgement(*tracker.acknowledgement());
+            } else if(on_notification)on_notification(message);
         },true);
         if(!reply)throw McpProtocolError("MCP subscription stream closed without a completion response");
         tracker.complete(reply->response);
