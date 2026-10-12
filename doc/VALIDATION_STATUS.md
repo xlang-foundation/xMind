@@ -1,5 +1,21 @@
 # Current native validation
 
+## Live TestProj Model Zoo browser acceptance — 2026-10-12
+
+The completed DeepSeek `deepseek-flash` xMind browser run used the real
+`D:\CantorAI2026\TestProj` workspace and made one scoped `HomeView.vue`
+change: a request token prevents an older catalog response from overwriting a
+newer search/filter result. Its post-edit `npm.cmd run build` passed (Vite
+6.4.4, 36 modules, exit code 0). In the rendered Model Zoo page, search,
+Text Generation filtering, no-result state, reset, page 2, name sorting and
+GPT-2 detail navigation all worked against the already-running frontend/API.
+The page was restored to its default catalog view. This verifies an actual
+browser flow in the TestProj workspace, not xMind's own browser UI or the
+standalone project runtime lifecycle. xMind did not start the frontend/API;
+pytest, small-viewport breakpoints and project Git provenance remain
+unverified. Exact run ID, source-file hash, checks and limits are recorded in
+[the live-browser evidence](evidence/testproj-model-zoo-live-browser-20261012.json).
+
 ## Current Release native gate — 2026-10-11
 
 The complete Release `ALL_BUILD` succeeded after the benchmark guard deferred

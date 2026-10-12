@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-12",
+  "scope": "live local TestProj Model Zoo browser acceptance",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "xmind_source_revision": "ca993f65ea3c87da8a5ff4471fd33a2bc76afa2c",
+  "xmind_run_id": "4a99e2f5fdbff7c4eec201390746874d",
+  "provider": {
+    "id": "deepseek",
+    "model": "deepseek-flash",
+    "credential": "reused from the local xMind profile; no key was sent to the browser"
+  },
+  "application": {
+    "frontend_origin": "http://127.0.0.1:5173/",
+    "api_origin": "http://127.0.0.1:8000",
+    "api_process_started_by_xmind_run": false,
+    "frontend_process_started_by_xmind_run": false,
+    "initial_catalog": "12 models, 10 task facets, 5 framework facets"
+  },
+  "xmind_run": {
+    "state": "completed",
+    "changed_files": [
+      "model-zoo/frontend/src/views/HomeView.vue"
+    ],
+    "change": "Ignore stale catalog responses after a newer search/filter request starts.",
+    "production_build": {
+      "command": "npm.cmd run build",
+      "working_directory": "model-zoo/frontend",
+      "exit_code": 0,
+      "vite": "6.4.4",
+      "transformed_modules": 36,
+      "duration_ms": 612
+    }
+  },
+  "edited_file_sha256": "284c1e4b419b8572e49d2aba1cf22e79d94fd68714dcd84f0b74290a2c94cf70",
+  "browser_checks": [
+    "Initial catalog rendered with API-backed counts and model cards.",
+    "Searching GPT-2 returned exactly one model.",
+    "Selecting Text Generation returned GPT-2 as the one matching model.",
+    "GPT-2 detail navigation rendered metadata, links, benchmark sample values and the demo-data disclosure.",
+    "A search with no matches rendered the empty state.",
+    "Reset restored all 12 models and the default first page.",
+    "Next displayed models 10–12 on page 2.",
+    "Name (A–Z) sorting reordered page 2 as expected; the catalog was restored to its default view afterward."
+  ],
+  "not_verified": [
+    "The xMind run did not start or restart the TestProj frontend or API servers; both were already available.",
+    "No pytest or backend-specific test suite was run.",
+    "Responsive breakpoints were inspected only as source, not exercised at multiple viewport sizes.",
+    "TestProj is not a Git repository, so no project Git diff or commit provenance is available."
+  ]
+}

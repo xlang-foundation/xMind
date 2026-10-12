@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+## Live coding acceptance through the xMind browser — 2026-10-12
+
+The actual local xMind page ran a scoped DeepSeek coding task against
+`D:\CantorAI2026\TestProj`. It fixed stale asynchronous catalog responses in
+`HomeView.vue`; the post-edit Vite production build passed. The rendered Model
+Zoo app then passed live search, task filtering, no-result/reset, pagination,
+sorting and detail navigation against its already-running local API. Commands
+used the trusted local PowerShell profile without command-by-command approval;
+the one file edit was separately approved. This is browser coding-flow
+acceptance for TestProj, not VS Code, CLI, or starting the project's services.
+See [exact scope and limits](evidence/testproj-model-zoo-live-browser-20261012.json).
+
 ## Recover A2A tasks observed before a stream failure — 2026-10-11
 
 When a remote A2A stream delivered a task ID and a later event failed to persist,
