@@ -20,7 +20,38 @@ checked out locally. [Pinned source](https://github.com/anomalyco/opencode/tree/
 track the current V2 surface and can move independently of the source tag;
 source-defined API contracts take precedence for this inventory.
 
-## Current workspace/browser checkpoint (`4831636`, 2026-10-11)
+## Latest verified native coding checkpoint (`f5d5c15`, 2026-10-11)
+
+Single-agent and graph runs now route reads, process execution, file creation
+and file edits through the exact multi-folder workspace snapshot captured at
+admission. Graph `create_file` and `edit_file` proposals are still approved by
+the controller; their durable journals bind the workspace revision, selected
+folder and native root identity. Process profiles can be explicitly marked
+trusted to record a durable profile-scoped grant instead of prompting for each
+process. The child receives the ordinary Windows toolchain environment needed
+to resolve `node`/`npm`, while unrelated inherited provider secrets remain
+excluded.
+
+Actual AgentRunner and GraphRunner contracts use synthetic model peers but
+launch real PowerShell processes and verify effects in only the selected
+secondary folder. The graph contract also approves and verifies an actual
+secondary-folder creation and edit. The three focused process/agent/graph
+contracts pass ([captured CTest output](evidence/native-multifolder-effects-local-20261011.log));
+the unified `xmind` RelWithDebInfo executable builds. Separately, the live TestProj
+browser run executed its real Vue/Vite `npm.cmd run build` with exit code 0.
+These results establish local native and browser-build behavior, not
+live-model/VS Code multi-folder acceptance.
+
+The pinned source inventory has been regenerated from the exact v2.0.26
+schema: **141 operations, 31 native source candidates, 110 unmapped, and zero
+verified operation-level parity**. A source candidate means reviewed code
+exists; it is not feature parity. Remaining work includes end-to-end
+multi-folder CLI and installed VS Code acceptance, cross-root `apply_patch`,
+multi-root Git and language servers, broader provider/model conformance, and
+the substantial unmapped OpenCode coding/runtime surface. Private Nexus server,
+PostgreSQL, WebRTC and Electron remain outside the xMind OSS scope.
+
+## Workspace/browser baseline checkpoint (`4831636`, 2026-10-11)
 
 The browser exposes separate **New workspace** and **Add folder** operations.
 Creation starts from one selected folder as the primary folder; later additions
