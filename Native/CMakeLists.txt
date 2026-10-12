@@ -1023,6 +1023,10 @@ if(BUILD_TESTING)
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_mcp_http_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>" "$<TARGET_FILE:xmind_admin>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
       set_tests_properties(native_agent_mcp_http_contract PROPERTIES TIMEOUT 90)
+      add_test(NAME native_agent_mcp_http_subscription_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_mcp_http_subscription_contract.mjs" "$<TARGET_FILE:xmind_server>" "$<TARGET_FILE:xmind_cli>" "$<TARGET_FILE:xmind_admin>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      set_tests_properties(native_agent_mcp_http_subscription_contract PROPERTIES TIMEOUT 90)
       if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/sdk/node_modules/@modelcontextprotocol/server/package.json" OR
          NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/sdk/node_modules/@modelcontextprotocol/sdk/package.json")
         message(FATAL_ERROR "Official SDK interoperability fixtures require npm ci --ignore-scripts in Native/tests/sdk; refusing partial native coverage")

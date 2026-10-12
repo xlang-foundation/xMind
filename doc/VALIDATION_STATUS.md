@@ -9,16 +9,17 @@ to the run journal as soon as the acknowledgement is validated, and joins the
 listener before terminal state is committed.
 Events include only validated method and refresh metadata: payloads and resource
 URIs are excluded, and each listener is capped at 64 notification events with
-one overflow record. The held-open synthetic stdio integration sends 70
-notifications, places a credential-shaped value in every peer payload, and
-verifies sanitizing, the 64-event cap, overflow marker, active stream
-cancellation and pre-terminal closure. Dedicated stdio and HTTP contracts
+one overflow record. Held-open synthetic stdio and Streamable HTTP AgentRunner
+integrations each send 70 notifications with a credential-shaped value in
+every peer payload and verify sanitization, the cap, overflow marker, live
+stream cancellation and durable closure before `run.completed`. The HTTP
+integration also verifies an MCP effect waits for controller approval and
+provider token metrics persist. Dedicated stdio and HTTP transport contracts
 verify the validated acknowledgement callback runs before notification
 callbacks. Graph/MCP, AgentRunner, stdio/HTTP transport and official
-modern/legacy SDK contracts pass **8/8**.
-HTTP AgentRunner lifecycle, graph-owned listeners, crash recovery/reconnect,
-automatic in-run catalogue refresh and live external-peer acceptance remain
-open. [Exact Release CTest output](evidence/native-agent-mcp-subscriptions-local-20261012.log);
+modern/legacy SDK contracts pass **9/9**.
+Graph-owned listeners, crash recovery/reconnect, automatic in-run catalogue
+refresh and live external-peer acceptance remain open. [Exact Release CTest output](evidence/native-agent-mcp-subscriptions-http-local-20261012.log);
 [transport scope](native-mcp-http.md).
 
 ## MCP 2026-07-28 HTTP subscriptions/listen — 2026-10-12
@@ -29,12 +30,14 @@ request-scoped SSE stream, header binding, first-message acknowledgement,
 acknowledged-filter validation, resource-update and tools-list notifications,
 subscription-ID correlation and graceful completion. A second connection
 proves an unrequested prompts-list notification retires the owner. The public
-native HTTP client exposes the accepted filter and validated notifications;
-this transport-level contract does not prove HTTP AgentRunner lifecycle,
-reconnect, installed-client or live external-server acceptance. The separate
-AgentRunner lifecycle contract exercises stdio. No external
-service or credential was used. The broader dependent MCP wire/client,
-graph-MCP, AgentRunner HTTP-MCP and unified-server contracts pass **6/6**;
+native HTTP client exposes the accepted filter and validated notifications.
+The separate AgentRunner HTTP integration proves held-open listener
+cancellation, durable pre-terminal closure and an approval-gated tool effect;
+see [the expanded lifecycle contract](evidence/native-agent-mcp-subscriptions-http-local-20261012.log).
+Reconnect, installed-client or live external-server acceptance remain
+unverified. No external service or credential was used. The earlier transport
+checkpoint's dependent MCP wire/client, graph-MCP, AgentRunner HTTP-MCP and
+unified-server contracts passed **6/6**;
 [exact CTest output](evidence/native-mcp-subscriptions-http-local-20261012.log).
 See [transport scope](native-mcp-http.md).
 

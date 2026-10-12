@@ -7,14 +7,15 @@ including an immediate callback for the validated acknowledgement. AgentRunner
 owns a separate listener per peer advertising list-change notifications,
 journals sanitized acknowledgement/notification/closure events, caps each
 listener at 64 notification records and joins listeners before a run becomes
-terminal. The held-open stdio contract verifies a 70-event burst,
-payload/credential exclusion, overflow reporting, stream cancellation and
-closure ordering. Graph, AgentRunner, HTTP/stdio and official modern/legacy SDK
-contracts pass **8/8**.
-HTTP AgentRunner integration, graph-run listener ownership, crash recovery and
-reconnect, live external-peer acceptance and automatic same-run catalogue
-refresh remain open. [Validation and limits](VALIDATION_STATUS.md#mcp-2026-07-28-subscriptionslisten-on-http-and-stdio--2026-10-12)
-and [exact test output](evidence/native-agent-mcp-subscriptions-local-20261012.log).
+terminal. Held-open stdio and Streamable HTTP AgentRunner contracts verify
+70-event bursts, payload/credential exclusion, overflow reporting, stream
+cancellation and closure ordering. The HTTP run also proves its MCP tool waits
+for controller approval and its listener closes before `run.completed`.
+Graph, AgentRunner, HTTP/stdio and official modern/legacy SDK contracts pass
+**9/9**. Graph-run listener ownership, crash recovery/reconnect, live
+external-peer acceptance and automatic same-run catalogue refresh remain open.
+[Validation and limits](VALIDATION_STATUS.md#mcp-2026-07-28-subscriptionslisten-on-http-and-stdio--2026-10-12)
+and [exact test output](evidence/native-agent-mcp-subscriptions-http-local-20261012.log).
 
 ## MCP modern HTTP subscriptions/listen — 2026-10-12
 
@@ -26,9 +27,9 @@ HTTP response stream. A real loopback peer verifies resource and tools-list
 updates plus fail-closed behavior for an unrequested prompt-list update. The
 Release client target builds; the focused contract passes **1/1** and the six
 dependent wire/client/graph/AgentRunner/unified HTTP contracts pass **6/6**.
-HTTP-specific AgentRunner lifecycle, reconnect and broader live SDK acceptance
-remain open. AgentRunner stdio lifecycle evidence is recorded in the preceding
-milestone. See [validation scope](VALIDATION_STATUS.md#mcp-2026-07-28-http-subscriptionslisten--2026-10-12)
+HTTP-specific AgentRunner lifecycle is subsequently covered by the expanded
+held-open integration in the preceding milestone; reconnect and broader live
+SDK acceptance remain open. See [validation scope](VALIDATION_STATUS.md#mcp-2026-07-28-http-subscriptionslisten--2026-10-12)
 and [exact test output](evidence/native-mcp-subscriptions-http-local-20261012.log).
 
 ## Live coding acceptance through the xMind browser — 2026-10-12
