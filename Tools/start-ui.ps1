@@ -42,7 +42,7 @@ if(Test-Path -LiteralPath (Join-Path $uiState 'active.json')){
 }
 if(Get-NetTCPConnection -State Listen -LocalPort $DebugPort -ErrorAction SilentlyContinue){throw 'The selected development-host debug port is already in use.'}
 if(-not (Test-Path -LiteralPath $CodeExecutable)) {throw 'Select an installed VS Code executable or unpack the official portable ZIP under .agentflow/ui-host/vscode.'}
-$uiServer=if($ServerExecutable){[System.IO.Path]::GetFullPath($ServerExecutable)}else{Join-Path $uiProject 'build\native\Release\xmind.exe'}
+$uiServer=if($ServerExecutable){[System.IO.Path]::GetFullPath($ServerExecutable)}else{Join-Path $uiProject 'build\native\contract-bin\Release\xmind.exe'}
 $uiBuildProvenance=$null
 if($BundleDirectory){
     if($RuntimeDirectory){throw 'Select a complete native bundle or a runtime directory, not both.'}
