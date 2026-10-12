@@ -3,7 +3,7 @@
 export const partial = {};
 
 const requirements = {
-  session: 'Persist the full session lifecycle, typed messages, input ordering and configuration; validate restart, concurrent inputs, cross-client consistency and missing/terminal session errors.',
+  session: 'Persist the full session lifecycle, typed messages, input ordering and configuration; validate full/before-message forks, restart, concurrent inputs, cross-client consistency and missing/terminal session errors.',
   permission: 'Persist and enforce explicit scoped decisions consistently across local tools, remote tools and clients; validate denial, cancellation, replay, races and saved-rule revocation.',
   fs: 'Validate workspace boundaries, path encoding, symlinks, binary/large files, errors and permission enforcement using real temporary repositories.',
   model: 'Validate model discovery/default selection and per-model capabilities using the pinned LiteLLM reference, configured deployments and actual provider contracts on xlang3.',

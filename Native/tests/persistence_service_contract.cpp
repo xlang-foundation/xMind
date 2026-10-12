@@ -94,6 +94,19 @@ int main(int argc,char** argv) {
             }));
             for(auto& producer:producers) producer.get();
             require(service.history("shared").get().size()==100,"Concurrent clients must persist all requests");
+            const auto message_boundary=service.history("shared").get().at(49).sequence;
+            service.replace_session_agent("shared",AgentDefinition{"fork-reviewer",1,"deepseek-flash","Use the review agent."},0).get();
+            service.replace_session_skills("shared",SkillSelections{"workspace-scope",{"review-skill"},{"review-skill"}},0).get();
+            const auto before_fork_history=service.history("shared").get();
+            const auto forked=service.fork_session("forked","shared",message_boundary).get();
+            require(forked.id=="forked"&&forked.parent_id=="shared"&&forked.fork_boundary_sequence==message_boundary&&forked.fork_boundary_type=="before"&&forked.title=="Owned request (fork #1)","Fork must persist source lineage, exclusive boundary and derived title");
+            const auto fork_history=service.history("forked").get();
+            require(fork_history.size()==49&&fork_history.back().json==before_fork_history[48].json,"Fork must copy exactly the settled transcript before its boundary");
+            require(service.history("shared").get().size()==100,"Fork cannot mutate source history");
+            const auto fork_agent=service.session_agent("forked").get();require(fork_agent.selected&&fork_agent.selected->id=="fork-reviewer","Fork must copy the session agent selection");
+            const auto fork_skills=service.session_skills("forked","workspace-scope").get();require(fork_skills.revision==1&&fork_skills.selections.ids==std::vector<std::string>{"review-skill"},"Fork must copy workspace-scoped skill selections");
+            const auto full_fork=service.fork_session("forked-full","shared").get();require(service.history("forked-full").get().size()==100&&full_fork.fork_boundary_type=="through","Fork without a boundary must include the complete settled transcript");
+            rejects<NotFound>([&]{service.fork_session("fork-missing","shared",999999).get();});
             service.create_run("race","shared").get();
             auto a=service.transition("race",RunState::queued,RunState::running);
             auto b=service.transition("race",RunState::queued,RunState::running);
@@ -118,6 +131,9 @@ int main(int argc,char** argv) {
         {
             PersistenceService reopened(path,roots);
             require(reopened.history("shared").get().size()==125,"Drained requests must survive restart");
+            const auto restored_fork=reopened.session("forked").get();require(restored_fork.parent_id=="shared"&&restored_fork.fork_boundary_type=="before"&&reopened.history("forked").get().size()==49,"Fork lineage and transcript must survive xlang3 repository restart");
+            require(reopened.session_agent("forked").get().selected->id=="fork-reviewer"&&reopened.session_skills("forked","workspace-scope").get().selections.ids==std::vector<std::string>{"review-skill"},"Forked conversation configuration must survive restart");
+            require(reopened.history("forked-full").get().size()==100,"Full branch history must survive restart");
             require(reopened.run("race").get().state==RunState::failed,"Next owner must recover running root");
             require(reopened.events("interrupted").get().size()==2,"Startup recovery must be idempotent");
         }

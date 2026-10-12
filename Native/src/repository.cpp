@@ -517,7 +517,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>15)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>16)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -546,7 +546,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>15) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>16) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -768,6 +768,10 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
         db.execute("CREATE TABLE process_output_chunks(operation_id TEXT NOT NULL REFERENCES process_output_artifacts(operation_id) ON DELETE CASCADE,channel TEXT NOT NULL CHECK(channel IN ('stdout','stderr')),byte_offset INTEGER NOT NULL CHECK(byte_offset>=0),data BLOB NOT NULL CHECK(length(data)>0 AND length(data)<=8192),PRIMARY KEY(operation_id,channel,byte_offset))");
         db.execute("PRAGMA user_version=15");
     }
+    if(version<16){
+        db.execute("CREATE TABLE session_forks(session_id TEXT PRIMARY KEY NOT NULL REFERENCES sessions(id),parent_session_id TEXT NOT NULL REFERENCES sessions(id),boundary_sequence INTEGER NOT NULL CHECK(boundary_sequence>0),boundary_type TEXT NOT NULL CHECK(boundary_type IN ('before','through')),CHECK(session_id!=parent_session_id))");
+        db.execute("PRAGMA user_version=16");
+    }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.
     if(bootstrap)stage_backend_owner(db,*startup_lease,startup_generation,bootstrap);
@@ -868,7 +872,30 @@ Session Repository::create_session(const std::string& id,const std::string& titl
     identifier(id); Transaction transaction(impl_->database);
     if(!impl_->database.execute("SELECT id FROM sessions WHERE id=?",{id}).rows.empty()) throw Conflict("Session already exists");
     changed_one(impl_->database.execute("INSERT INTO sessions(id,title) VALUES(?,?)",{id,title}));
-    transaction.commit(); return {id,title};
+    transaction.commit(); return {id,title,{},{},{}};
+}
+Session Repository::fork_session(const std::string& id,const std::string& source,std::optional<std::int64_t> before_sequence) {
+    identifier(id);identifier(source);if(id==source|| (before_sequence&&*before_sequence<1))throw std::invalid_argument("Invalid session fork boundary");
+    auto& db=impl_->database;Transaction tx(db);const auto parent=session(source);
+    if(!db.execute("SELECT id FROM sessions WHERE id=?",{id}).rows.empty())throw Conflict("Fork session already exists");
+    std::int64_t boundary=0;const std::string boundary_type=before_sequence?"before":"through";
+    if(before_sequence){
+        const auto found=db.execute("SELECT seq FROM messages WHERE session_id=? AND seq=? AND execution_run_id IS NULL",{source,*before_sequence}).rows;
+        if(found.empty())throw NotFound("Fork boundary message not found in session");boundary=integer(found[0][0]);
+    }else{
+        const auto found=db.execute("SELECT max(seq) FROM messages WHERE session_id=? AND execution_run_id IS NULL",{source}).rows;
+        if(found.empty()||std::holds_alternative<std::nullptr_t>(found[0][0]))throw NotFound("Cannot fork an empty session");boundary=integer(found[0][0]);
+    }
+    const auto fork_number=integer(db.execute("SELECT count(*) FROM session_forks WHERE parent_session_id=?",{source}).rows.at(0).at(0))+1;
+    auto title=parent.title+" (fork #"+std::to_string(fork_number)+")";
+    changed_one(db.execute("INSERT INTO sessions(id,title) VALUES(?,?)",{id,title}));
+    const auto comparison=boundary_type=="before"?"<":"<=";
+    const auto sql="INSERT INTO messages(session_id,role,payload) SELECT ?,m.role,m.payload FROM messages m WHERE m.session_id=? AND m.execution_run_id IS NULL AND m.seq"+std::string(comparison)+"? AND NOT EXISTS(SELECT 1 FROM task_messages t JOIN runs r ON r.id=t.run_id WHERE t.message_seq=m.seq AND r.state IN ('queued','running','paused')) ORDER BY m.seq";
+    db.execute(sql,{id,source,boundary});
+    db.execute("INSERT INTO session_agents(session_id,selection_json,revision) SELECT ?,selection_json,revision FROM session_agents WHERE session_id=?",{id,source});
+    db.execute("INSERT INTO session_skills(session_id,workspace_id,selections_json,revision) SELECT ?,workspace_id,selections_json,revision FROM session_skills WHERE session_id=?",{id,source});
+    changed_one(db.execute("INSERT INTO session_forks(session_id,parent_session_id,boundary_sequence,boundary_type) VALUES(?,?,?,?)",{id,source,boundary,boundary_type}));
+    const auto result=session(id);tx.commit();return result;
 }
 DynamicFrontierClaim Repository::admit_dynamic_frontier(const DynamicFrontierSpec& spec){
     if(spec.tasks.empty()||spec.tasks.size()>2)throw std::invalid_argument("Dynamic frontier must contain one or two native agents");auto& db=impl_->database;Transaction tx(db);auto p=dynamic_plan(spec.plan_id);dynamic_cas(p,spec.expected_revision,spec.expected_state_sequence,spec.backend_identity);const auto root=run(p.root_run_id);const auto budget=root_budget(root.id);const auto call=dynamic_plan_call(spec.plan_call_id);
@@ -1068,13 +1095,13 @@ Session Repository::rename_session(const std::string& id,const std::string& titl
     transaction.commit();return {id,title};
 }
 Session Repository::session(const std::string& id) {
-    const auto result=impl_->database.execute("SELECT id,title FROM sessions WHERE id=?",{id});
+    const auto result=impl_->database.execute("SELECT s.id,s.title,COALESCE(f.parent_session_id,''),f.boundary_sequence,COALESCE(f.boundary_type,'') FROM sessions s LEFT JOIN session_forks f ON f.session_id=s.id WHERE s.id=?",{id});
     if(result.rows.empty()) throw NotFound("Session not found");
-    return {text(result.rows[0][0]),text(result.rows[0][1])};
+    const auto& row=result.rows[0];Session value{text(row[0]),text(row[1]),text(row[2]),{},text(row[4])};if(!std::holds_alternative<std::nullptr_t>(row[3]))value.fork_boundary_sequence=integer(row[3]);return value;
 }
 std::vector<Session> Repository::sessions() {
     std::vector<Session> result;
-    for(const auto& row:impl_->database.execute("SELECT id,title FROM sessions ORDER BY rowid").rows) result.push_back({text(row[0]),text(row[1])});
+    for(const auto& row:impl_->database.execute("SELECT s.id,s.title,COALESCE(f.parent_session_id,''),f.boundary_sequence,COALESCE(f.boundary_type,'') FROM sessions s LEFT JOIN session_forks f ON f.session_id=s.id ORDER BY s.rowid").rows){Session value{text(row[0]),text(row[1]),text(row[2]),{},text(row[4])};if(!std::holds_alternative<std::nullptr_t>(row[3]))value.fork_boundary_sequence=integer(row[3]);result.push_back(std::move(value));}
     return result;
 }
 Run Repository::run(const std::string& id) {

@@ -142,6 +142,9 @@ std::future<Run> PersistenceService::complete_dynamic_owner(std::string root,std
 std::future<Session> PersistenceService::create_session(std::string id,std::string title) {
     return impl_->submit([id=std::move(id),title=std::move(title)](Repository& repository){return repository.create_session(id,title);});
 }
+std::future<Session> PersistenceService::fork_session(std::string id,std::string source,std::optional<std::int64_t> before) {
+    return impl_->submit([id=std::move(id),source=std::move(source),before](Repository& repository){return repository.fork_session(id,source,before);});
+}
 std::future<Session> PersistenceService::session(std::string id) {
     return impl_->observe([id=std::move(id)](Repository& repository){return repository.session(id);});
 }

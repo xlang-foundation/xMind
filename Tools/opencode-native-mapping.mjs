@@ -7,6 +7,7 @@ export const nativePartial = {
   'session.list': [http, 'GET /v1/sessions', '"/v1/sessions"', 'Location/project scoping, filters and pagination remain to be compared.'],
   'session.create': [http, 'POST /v1/sessions', 'persistence.create_session', 'The upstream session fields, agent/environment configuration and full creation lifecycle remain incomplete.'],
   'session.update': [http, 'POST /v1/sessions/{id}/title', 'persistence.rename_session', 'Only optimistic title updates exist; other upstream session metadata changes remain incomplete.'],
+  'session.fork': [http, 'POST /v1/sessions/{id}/fork; xmind_cli fork-session', 'persistence.fork_session', 'Durable full/before-message transcript branches, ancestry and agent/workspace-skill snapshots exist; browser/VS Code fork controls and full upstream session metadata remain incomplete.'],
   'session.message.list': [http, 'GET /v1/sessions/{id}/history', 'persistence.history', 'Durable role/data history exists; upstream message IDs, typed parts and pagination need comparison.'],
   'session.prompt': [http, 'POST /v1/runs', 'executor->submit_model', 'Native model/tool admission exists; attachments, queued input and upstream session input ordering remain incomplete.'],
   'session.interrupt': [http, 'POST /v1/runs/{id}/cancel', 'executor->cancel', 'Run cancellation exists; session-level interruption and resumable upstream semantics remain incomplete.'],

@@ -165,7 +165,7 @@ std::string new_id() {
     value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i) value<<std::setw(8)<<random();
     return value.str();
 }
-Json encode(const Session& value) {return {{"id",value.id},{"title",value.title}};}
+Json encode(const Session& value) {Json result={{"id",value.id},{"title",value.title}};if(!value.parent_id.empty()){result["parent_id"]=value.parent_id;result["fork"]={{"session_id",value.parent_id},{"boundary_type",value.fork_boundary_type},{"message_id",value.fork_boundary_sequence?Json("msg_"+std::to_string(*value.fork_boundary_sequence)):Json(nullptr)}};}return result;}
 Json encode(const Run& value) {Json result={{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)},
     {"parent_id",value.parent_id},{"node_id",value.node_id},{"graph_root",value.graph_root}};if(!value.provider_context_json.empty())result["provider_context"]=Json::parse(value.provider_context_json);return result;}
 Json encode(const OwnedChildRecord& value){Json result={{"run",encode(value.run)},{"kind",value.kind},{"batch_id",value.batch_id},{"task_id",value.task_id},{"preset_id",value.preset_id},{"preset_revision",value.preset_revision}};if(value.kind=="dynamic_agent"){result["plan_id"]=value.plan_id;result["node_label"]=value.node_label;result["claim_id"]=value.claim_id;result["definition_revision"]=value.definition_revision;result["claim_revision"]=value.claim_revision;}return result;}
@@ -215,7 +215,7 @@ Json graph_record(const GraphRootRecord& root) {
         {"spec",Json::parse(root.specification_json)},{"input",root.input_json.empty()?Json(nullptr):Json::parse(root.input_json)}};
 }
 Json encode(const Event& value) {return {{"seq",value.sequence},{"run_id",value.run_id},{"kind",value.kind},{"data",Json::parse(value.json)}};}
-Json encode(const Message& value) {return {{"seq",value.sequence},{"role",value.role},{"data",Json::parse(value.json)}};}
+Json encode(const Message& value) {return {{"id","msg_"+std::to_string(value.sequence)},{"seq",value.sequence},{"role",value.role},{"data",Json::parse(value.json)}};}
 Json encode(const Operation& value) {
     // Keep exact argument bytes: clients must not reserialize numeric/content
     // values and present a different payload as the granted operation.
@@ -880,6 +880,16 @@ struct HttpServer::Impl {
             const auto value=body(request,{"title","expected_title"});
             if(!value.contains("expected_title")||!value["expected_title"].is_string())throw std::invalid_argument("Expected title is required");
             reply(response,encode(persistence.rename_session(identifier(request.matches[1]),string_field(value,"title"),value["expected_title"].get<std::string>()).get()));
+        }));
+        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/fork)",guarded([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session fork does not accept query parameters");
+            const auto value=body(request,{"before"});std::optional<std::int64_t> before;
+            if(value.contains("before")&&!value["before"].is_null()){
+                if(!value["before"].is_string())throw std::invalid_argument("Fork boundary must be a message ID or null");const auto source=value["before"].get<std::string>();
+                if(!source.starts_with("msg_")||source.size()<5||source.find_first_not_of("0123456789",4)!=std::string::npos)throw std::invalid_argument("Fork boundary must match ^msg_[0-9]+$");
+                std::int64_t sequence=0;const auto parsed=std::from_chars(source.data()+4,source.data()+source.size(),sequence);if(parsed.ec!=std::errc{}||parsed.ptr!=source.data()+source.size()||sequence<1||sequence>9007199254740991LL)throw std::invalid_argument("Invalid fork message sequence");before=sequence;
+            }
+            reply(response,encode(persistence.fork_session(new_id(),identifier(request.matches[1]),before).get()));
         }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/history)",guarded([this](const Request& request,Response& response) {
             reply(response,encode_all(persistence.history(identifier(request.matches[1])).get()));

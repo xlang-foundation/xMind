@@ -9,6 +9,11 @@
 inline void remove_skill_schema_fixture(agentflow::XlangSqlite& database){
     const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
     auto version=scalar("PRAGMA user_version");if(version==12)return;
+    if(version==16){
+        if(scalar("SELECT count(*) FROM session_forks")!=0)
+            throw std::runtime_error("Legacy fixture cannot discard actual session fork lineage");
+        database.execute("DROP TABLE session_forks");database.execute("PRAGMA user_version=15");version=15;
+    }
     if(version==15){
         if(scalar("SELECT count(*) FROM process_output_artifacts")!=0||scalar("SELECT count(*) FROM process_output_chunks")!=0)
             throw std::runtime_error("Legacy fixture cannot discard actual process output artifacts");
