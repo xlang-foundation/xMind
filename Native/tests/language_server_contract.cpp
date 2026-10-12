@@ -45,7 +45,7 @@ void http_contract(const std::string& executable,const std::string& workspace_pa
     require(result["server_id"]=="rust-analyzer"&&result["path"]==path&&result["result"].is_array()&&result["result"].size()==2&&result["result"][0]["name"]=="add","HTTP editor query must return actual Rust Analyzer symbols from the opened workspace");
     auto definition_input=input;definition_input["method"]="definition";definition_input["line"]=5;definition_input["character"]=5;
     Json definition_result;
-    for(int attempt=0;attempt<30;++attempt){
+    for(int attempt=0;attempt<120;++attempt){
         const auto definition_response=client.Post("/v1/language-server/query",headers,definition_input.dump(),"application/json");require(definition_response&&definition_response->status==200,"Authenticated HTTP editor navigation query must reach Rust Analyzer");
         definition_result=Json::parse(definition_response->body)["result"];
         if(definition_result.is_array()&&!definition_result.empty())break;
@@ -95,7 +95,7 @@ int main(int argc,char** argv){
         const auto repeated=request("documentSymbol");
         require(repeated["result"]==symbols["result"],"A persistent language-server process must answer repeated workspace requests consistently");
         Json definition;
-        for(int attempt=0;attempt<30;++attempt){
+        for(int attempt=0;attempt<120;++attempt){
             definition=Json::parse(registry.query(LanguageServerRequest{path,"definition",5,5}))["result"];
             if(definition.is_array()&&!definition.empty())break;
             std::this_thread::sleep_for(std::chrono::milliseconds(500));

@@ -3,21 +3,23 @@
 ## Current Release native gate — 2026-10-11
 
 The complete Release `ALL_BUILD` succeeded after the benchmark guard deferred
-two attempts while xlang3 benchmarks were active. Current Release CTest then
-completed **135/136** contracts in 659.65 seconds. The only failure is
-`native_language_server_rust_analyzer_contract`: rust-analyzer returned `null`
-for the call-site definition query, so native definition navigation and the
-remaining checks in that integration test are unverified. A focused rerun
-reproduced the failure; the Rust fixture's offline Cargo check passes. The long
-local-profile lifecycle, local-view and provider-config contracts all passed.
-Exact output is preserved in
-[current Release CTest evidence](evidence/native-current-release-ctest-20261011.log).
+two attempts while xlang3 benchmarks were active. The current Release CTest run
+passes **136/136** contracts in 646.64 seconds. It includes the real
+rust-analyzer definition, references, hover, formatting and diagnostics flow.
+An earlier run returned `null` within the old 15-second retry. The contract now
+allows up to 60 seconds for semantic readiness; focused and full reruns passed.
+The timing evidence does not establish whether cold indexing or system load
+caused the original miss. The focused language-server rerun passed **2/2**,
+including its Cargo fixture prerequisite. The long local-profile lifecycle,
+local-view and provider-config contracts also pass.
+See [current full Release CTest evidence](evidence/native-current-release-ctest-retry-20261011.log),
+[focused rust-analyzer evidence](evidence/native-rust-analyzer-focused-20261011.log),
+and the [earlier run that exposed the cold-indexing timing issue](evidence/native-current-release-ctest-20261011.log).
 The [focused profile retry record](evidence/native-lsp-retry-focused-20261011.md),
 [earlier complete Release run](evidence/native-full-release-ctest-20261011.log),
 and [intervening 133/134 run](evidence/native-lsp-retry-ctest-20261011.log)
-remain historical results, not proof that the current Release suite is fully
-green. Local Release validation does not claim installed IDE acceptance.
-Local Release validation does not claim installed IDE acceptance.
+remain historical results. Local Release validation does not claim installed
+IDE acceptance.
 
 ## Current browser and VS Code source suites — 2026-10-11
 

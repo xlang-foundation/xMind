@@ -731,7 +731,7 @@ if(BUILD_TESTING)
       add_test(NAME native_language_server_rust_analyzer_contract COMMAND agentflow_language_server_contract
         "${AGENTFLOW_RUST_ANALYZER_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/lsp-rust" "src/lib.rs"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
-      set_tests_properties(native_language_server_rust_analyzer_contract PROPERTIES TIMEOUT 120)
+      set_tests_properties(native_language_server_rust_analyzer_contract PROPERTIES TIMEOUT 300)
       if(AGENTFLOW_CARGO_EXECUTABLE)
         set_tests_properties(native_language_server_rust_analyzer_contract PROPERTIES FIXTURES_REQUIRED rust_analyzer_semantic_project)
       endif()

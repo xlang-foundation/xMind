@@ -2,13 +2,16 @@
 
 ## Release validation checkpoint — 2026-10-11
 
-The complete native Release build succeeds. The current 136-contract CTest run
-passes 135; the remaining failure is the real rust-analyzer semantic navigation
-contract, where call-site definition returns `null`. The standalone offline
-Cargo fixture check passes, while the failed query is reproduced in a focused
-rerun. The local-profile lifecycle and local browser-view integration contracts
-pass. This is a near-complete validation checkpoint, not a green release gate.
-See the [current validation record](VALIDATION_STATUS.md) and [CTest output](evidence/native-current-release-ctest-20261011.log).
+The complete native Release build and all **136/136** CTest contracts pass.
+Rust-analyzer semantic navigation first returned `null` within the test's
+15-second retry window. The native contract now allows 60 seconds for semantic
+readiness; focused and full reruns pass, though the evidence does not establish
+whether cold indexing or system load caused the first miss. Long local-profile,
+local-view and provider-configuration contracts also pass. This validates
+source-level Release behavior, not installed IDE acceptance. See the
+[current validation record](VALIDATION_STATUS.md),
+[full CTest output](evidence/native-current-release-ctest-retry-20261011.log),
+and [focused rust-analyzer output](evidence/native-rust-analyzer-focused-20261011.log).
 
 ## Single-agent file tools use admitted workspace membership — 2026-10-11
 
