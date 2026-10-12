@@ -199,14 +199,15 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
             }
         }else if(name=="edit_file" || name=="create_file" || name=="run_process"){
             const auto args=Json::parse(source);const auto field=name=="run_process"?"workdir":"path";std::string directory=".";WorkspaceTools* effect_workspace=workspace_.get();std::size_t process_folder_index=0;
-            if(name=="run_process"&&workspace_tools){if(args.contains("folder_id")){if(!args["folder_id"].is_string())throw std::invalid_argument("Invalid graph process folder ID");process_folder_index=workspace_tools->folder_index(args["folder_id"].get<std::string>());}effect_workspace=&workspace_tools->folder_tools(process_folder_index);}
+            if(workspace_tools){if(args.contains("folder_id")){if(!args["folder_id"].is_string())throw std::invalid_argument("Invalid graph effect folder ID");process_folder_index=workspace_tools->folder_index(args["folder_id"].get<std::string>());}effect_workspace=&workspace_tools->folder_tools(process_folder_index);}
             if(args.contains(field)){if(!args[field].is_string())throw std::invalid_argument("Invalid graph effect scope");directory=args[field].get<std::string>();}else if(name!="run_process")throw std::invalid_argument("Graph file effect requires a path");
             if(name!="run_process")directory=RepositoryInstructionContext::file_directory(directory);
             RepositoryInstructionContext instructions(*effect_workspace,effect_workspace->repository_instructions(".",cancel));instructions.ready(directory,cancel);instructions.prepare(cancel);auto guard=instructions.precondition(directory);
             const auto lifetime=shared_context?std::max<std::int64_t>(1,std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now()).count()):settings_.run_timeout.count();
             const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+lifetime;
-            if(name=="edit_file")result=Json::parse(EditExecutor(store_,*workspace_).invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
-            else if(name=="create_file")result=Json::parse(CreateExecutor(store_,*workspace_).invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
+            const auto owner_workspace=workspace_tools?workspace_tools->workspace_id():workspace_->identity();const auto effect_folder_id=workspace_tools?workspace_tools->folders()[process_folder_index].folder_id:workspace_->identity();const auto workspace_revision=workspace_tools?workspace_tools->revision():1;
+            if(name=="edit_file")result=Json::parse(EditExecutor(store_,*effect_workspace,owner_workspace,effect_folder_id,workspace_revision).invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
+            else if(name=="create_file")result=Json::parse(CreateExecutor(store_,*effect_workspace,owner_workspace,effect_folder_id,workspace_revision).invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
             else result=Json::parse(workspace_tools?process_->invoke_in_workspace(identifier(),id,source,expiry,*workspace_tools,process_folder_index,cancel,std::move(guard)):process_->invoke(identifier(),id,source,expiry,cancel,std::move(guard)));
         }else if(workspace_tools&&(name=="read_repository_instructions"||name=="read_file"||name=="list_files"||name=="search_files"||name=="glob_files"))result=Json::parse(workspace_tools->invoke(name,source,cancel));
         else result=Json::parse(workspace_->invoke(name,source,cancel));

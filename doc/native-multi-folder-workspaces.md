@@ -92,8 +92,9 @@ handle and revalidates the handle identity before effects.
 
 ## Tool and client contract
 
-Single-agent read/list/search/glob tools and the `edit_file`/`create_file`
-write tools take an optional `folder_id` and a path relative to that folder. If
+Single-agent and graph read/list/search/glob tools and the `edit_file`/
+`create_file` write tools take an optional `folder_id` and a path relative to
+that folder. If
 `folder_id` is omitted, they resolve to the primary folder. Results identify
 the folder alongside the relative path; this keeps identical names in separate
 roots unambiguous. A write approval is bound to the captured workspace
@@ -111,21 +112,21 @@ Git status and diff are per folder because one
 workspace may contain several independent repositories. Language servers are
 started with the folder root that owns the document. Repository instructions
 and skills are discovered per root and retain their source-folder provenance.
-Delegation, single-agent runs, graph read nodes, graph-agent children, MCP and
-A2A inherit only the admitted workspace snapshot; they cannot expand membership
-themselves. Direct graph `run_process` nodes can select a registered folder from
-that immutable snapshot. Graph file-write nodes remain scoped to the primary
-folder.
+Delegation, single-agent runs, graph read/write nodes, graph-agent children, MCP
+and A2A inherit only the admitted workspace snapshot; they cannot expand
+membership themselves. Graph `run_process` nodes can also select a registered
+folder from that immutable snapshot. Graph `edit_file` and `create_file` retain
+their existing per-operation controller approval, bound to the selected folder
+and workspace revision. Cross-root `apply_patch` remains unsupported.
 
 The browser canvas shows one file tree per member folder, with explicit folder
 selection for previews. Git remains bound to the primary folder. VS Code can
 attach opened folders; single-agent read/list/search/glob/edit/create and
 process tools use the captured registry membership. Direct graph reads,
-graph-agent children and graph `run_process` nodes use that same snapshot.
-Graph file-write nodes, terminals, language servers, Git and `apply_patch`
-remain bound to the primary folder. CLI workspace membership commands exist,
-but full multi-folder effect acceptance through CLI/VS Code/browser remains
-open.
+graph-agent children and graph read/write/process nodes use that same snapshot.
+Terminals, language servers, Git and `apply_patch` remain bound to the primary
+folder. CLI workspace membership commands exist, but full multi-folder effect
+acceptance through CLI/VS Code/browser remains open.
 
 ## Required acceptance
 
