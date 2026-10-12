@@ -80,6 +80,11 @@ projects with identical `src/lib.rs` paths and proves each query resolves the
 symbol from its own root, then rejects unknown and removed IDs. See
 [multi-folder language-server evidence](evidence/native-multifolder-lsp-local-20261011.json).
 
-AgentRunner's model-visible `language_server` tool still uses the primary root;
-propagating the admitted multi-folder snapshot into model tool calls remains
-open.
+AgentRunner's model-visible `language_server` tool accepts the optional
+`folder_id` from the run's admitted workspace snapshot. Without it, queries use
+the primary folder. The native dispatcher routes each selected member to its
+own cached language-server registry and does not consult live membership during
+the run. The focused contract exercises a model-tool invocation with the
+captured two-folder list, verifies the secondary symbol result, and proves an
+unadmitted ID is rejected before dispatch. A full provider-driven agent turn
+using the model tool and a rendered multi-folder VS Code session remain open.

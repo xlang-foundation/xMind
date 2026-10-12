@@ -31,6 +31,9 @@ struct AgentSettings {
     // Local managed profiles can reload the persisted member list at each root
     // run admission. The returned object is captured once for that run.
     std::function<WorkspaceMembershipSnapshot()> workspace_membership_snapshot;
+    // Dispatches model-visible language-server queries using only the immutable
+    // folder membership admitted for that run.
+    LanguageServerDispatch language_server_dispatch;
     bool approved_edits=false;
     std::vector<std::string> selectable_models;
     std::optional<CredentialReference> credential;

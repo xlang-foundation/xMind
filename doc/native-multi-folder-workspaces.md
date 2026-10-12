@@ -28,8 +28,9 @@ with local fixtures, not rendered multi-folder client acceptance. VS Code can ex
 already open in its window through **xMind: Add Opened Folder to Workspace**;
 the native host retains the existing primary identity. The CLI can initialize
 the selected folder as a workspace and attach additional folders to that same
-workspace. Graph write nodes, `apply_patch`, process, Git/language-server
-routing and folder removal still bind only the primary folder. The local browser displays each attached
+workspace. Graph write nodes, `apply_patch`, and process tools use the admitted
+folder snapshot. Git/language-server routing and folder removal are separately
+validated against membership. The local browser displays each attached
 folder as its own tree and reads previews through a native route that resolves
 the selected workspace's folder ID, re-opens the directory and verifies its
 native identity on every request.
@@ -137,7 +138,10 @@ snapshot. A single patch call selects one member folder; it cannot span roots.
 Terminals remain bound to the primary folder. VS Code diagnostics, navigation
 and formatting select the registered root containing each document; native
 requests validate membership and return the selected folder ID. Model-visible
-`language_server` calls still use the primary root. Full multi-folder effect
+`language_server` calls may select only a folder from the run's captured
+membership snapshot; omission selects the primary root. The focused native
+contract verifies that the selected folder's symbols are returned and an
+unadmitted folder is rejected before dispatch. Full multi-folder effect
 acceptance remains open.
 
 ## Required acceptance
@@ -158,7 +162,8 @@ acceptance remains open.
   language-server roots for documents in each folder; real native Rust Analyzer
   and VS Code routing contracts now cover this path.
 - Add a folder while a run is active. Prove the admitted run remains pinned to
-  its old revision and a later run sees the new revision.
+  its old revision and a later run sees the new revision across model-visible
+  language-server calls as well as workspace tools.
 - Switch named workspaces in the browser and VS Code. Prove sessions/history
   are scoped to the workspace, late events do not cross the switch, and a
   failed switch preserves the previously selected workspace without a stale

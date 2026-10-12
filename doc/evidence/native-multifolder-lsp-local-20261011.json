@@ -34,6 +34,8 @@
     "vscode_host_failures": 0,
     "existing_single_root_rust_analyzer_contract": "passed on final rerun",
     "live_installed_multifolder_vscode_session": "not verified",
-    "model_visible_agent_language_server_tool": "still primary-root only"
+    "model_visible_agent_language_server_tool": "accepts optional folder_id selected only from the run-admitted workspace membership snapshot; primary folder remains the default",
+    "model_tool_contract": "Real Rust Analyzer returned the secondary folder's distinct symbol; unadmitted folder ID was rejected before dispatch",
+    "provider_driven_model_tool_turn": "not verified"
   }
 }

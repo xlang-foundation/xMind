@@ -3,8 +3,10 @@
 #include "agentflow/model_provider.hpp"
 #include <map>
 #include <memory>
+#include <functional>
 
 namespace agentflow {
+using LanguageServerDispatch = std::function<std::string(const std::string&,const LanguageServerRequest&,const std::vector<WorkspaceToolFolder>&)>;
 // Backend-owned language-server tools. The model chooses only a configured
 // server, workspace-relative document, LSP operation and cursor position.
 class LanguageServerToolRegistry {
@@ -14,8 +16,10 @@ public:
     LanguageServerToolRegistry(const LanguageServerToolRegistry&)=delete;
     LanguageServerToolRegistry& operator=(const LanguageServerToolRegistry&)=delete;
     std::vector<ModelToolDefinition> definitions() const;
-    std::string invoke(const std::string& arguments_json,std::stop_token cancel={});
+    std::string invoke(const std::string& arguments_json,std::stop_token cancel={},
+        const std::vector<WorkspaceToolFolder>* admitted_folders=nullptr,const LanguageServerDispatch& dispatch={});
     std::string query(const LanguageServerRequest& request,std::stop_token cancel={});
+    std::string query(const LanguageServerRequest& request,const std::string& server_id,std::stop_token cancel={});
     const std::vector<LanguageServerProfile>& profiles() const noexcept{return profiles_;}
 private:
     WorkspaceTools& workspace_;

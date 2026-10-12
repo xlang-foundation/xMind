@@ -763,7 +763,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         output=Json::parse(process_->wait(id,call.arguments_json,token));
                         if(output.value("state",std::string{})=="uncertain")success=false;
                     } else if(call.name=="language_server"&&language_servers_) {
-                        output=Json::parse(language_servers_->invoke(call.arguments_json,token));
+                        const auto* admitted_folders=run_workspace_tools?&run_workspace_tools->folders():nullptr;
+                        output=Json::parse(language_servers_->invoke(call.arguments_json,token,admitted_folders,settings_.language_server_dispatch));
                     } else if(call.name=="delegate_tasks"&&budget&&!leaf&&delegation_&&settings_.delegation){
                         auto frozen=settings_;frozen.provider=provider;frozen.tool_allowlist=effective_tool_allowlist;
                         output=Json::parse(delegation_->invoke(id,call,reply.dump(),frozen,budget,token));

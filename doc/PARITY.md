@@ -425,10 +425,13 @@ The VS Code editor maps documents to their registered member root for
 diagnostics, navigation and formatting, and reloads membership after folder
 attachment. A real Rust Analyzer contract proved identical `src/lib.rs` paths
 resolve to different primary/secondary symbols and reject unregistered or
-removed IDs. The focused native fixture and HTTP contract passed **2/2**; the
-VS Code suite passed **307/307**. AgentRunner's model-visible LSP tool remains
-primary-root only, and a live installed VS Code multi-folder session is not yet
-verified. See
+removed IDs. AgentRunner's model-visible tool now accepts a `folder_id` only
+from the workspace membership captured for that run; its focused native
+contract verified secondary symbol dispatch and rejection before dispatch for
+an unadmitted ID. The native language-server, multi-folder and AgentRunner
+contracts passed **4/4**. The VS Code suite passed **307/307**. A full
+provider-driven model tool turn and a live installed VS Code multi-folder
+session are not yet verified. See
 [multi-folder LSP evidence](evidence/native-multifolder-lsp-local-20261011.json).
 
 ## OpenCode V2 functional baseline

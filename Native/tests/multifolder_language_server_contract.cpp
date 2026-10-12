@@ -14,6 +14,7 @@ using namespace agentflow;
 namespace {
 using Json=nlohmann::json;
 void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
+template<class Error,class Function> void rejects(Function action){try{action();}catch(const Error&){return;}throw std::runtime_error("Expected rejection did not occur");}
 std::string env(const char* name){const auto* value=std::getenv(name);return value?value:"";}
 std::string utf8(const std::filesystem::path& value){const auto text=value.u8string();return {reinterpret_cast<const char*>(text.data()),text.size()};}
 struct TempDirectory {
@@ -56,6 +57,17 @@ int main(int argc,char** argv){
             throw std::runtime_error("Rust Analyzer did not return symbols from the requested workspace folder: "+expected);
         };
         symbols_for({},"primary_only");symbols_for(secondary_id,"secondary_only");
+        LanguageServerToolRegistry agent_tools(primary,{rust_profile(argv[1])});
+        const std::vector<WorkspaceToolFolder> admitted{{workspace_id,primary_root},{secondary_id,secondary_root}};
+        const auto tool_result=Json::parse(agent_tools.invoke(Json{{"server_id","rust-analyzer"},{"method","documentSymbol"},{"path","src/lib.rs"},{"folder_id",secondary_id}}.dump(),{},&admitted,
+            [&](const std::string& server_id,const LanguageServerRequest& request,const std::vector<WorkspaceToolFolder>& folders){
+                require(server_id=="rust-analyzer","Agent language-server calls must retain the selected trusted profile");
+                require(folders.size()==2&&folders[1].folder_id==secondary_id&&folders[1].root==secondary_root,"Agent language-server dispatch must receive the immutable admitted folder roots");
+                return runtime.language_server_query(request);
+            }));
+        require(tool_result.is_object()&&tool_result.at("result").is_array()&&!tool_result.at("result").empty()&&tool_result.at("result")[0].value("name","")=="secondary_only","Model-visible language-server tool must query the selected admitted folder");
+        rejects<ToolAccessDenied>([&]{agent_tools.invoke(Json{{"server_id","rust-analyzer"},{"method","documentSymbol"},{"path","src/lib.rs"},{"folder_id","windows-local-file-v1:unregistered"}}.dump(),{},&admitted,
+            [&](const std::string&,const LanguageServerRequest&,const std::vector<WorkspaceToolFolder>&)->std::string{throw std::runtime_error("Unadmitted model folder must never reach dispatch");} );});
         Json unknown{{"path","src/lib.rs"},{"method","documentSymbol"},{"folder_id","windows-local-file-v1:unregistered"}};unknown.update(binding);const auto unknown_response=client.Post("/v1/language-server/query",headers,unknown.dump(),"application/json");require(unknown_response&&unknown_response->status==403,"Unregistered folder IDs must be rejected before language-server dispatch");
         secondary_registered=false;Json removed{{"path","src/lib.rs"},{"method","documentSymbol"},{"folder_id",secondary_id}};removed.update(binding);const auto removed_response=client.Post("/v1/language-server/query",headers,removed.dump(),"application/json");require(removed_response&&removed_response->status==403,"Folder IDs removed from current membership must be rejected");
         std::cout<<"Real Rust Analyzer resolved colliding src/lib.rs paths under their selected registered roots; unknown and removed folder IDs were rejected.\n";return 0;

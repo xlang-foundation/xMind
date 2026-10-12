@@ -66,6 +66,7 @@ public:
 private:
     struct LanguageServerWorkspace;
     std::unique_ptr<WorkspaceToolSet> workspace_membership()const;
+    std::string language_server_query_admitted(const LanguageServerRequest& request,const std::vector<WorkspaceToolFolder>& folders,bool prune_cache,const std::string& server_id={});
     WorkspaceTools& vcs_folder(WorkspaceToolSet& membership,const std::string& folder_id)const;
     PersistenceService& store_;
     bool file_edit_proposals_=false;

@@ -28,6 +28,9 @@ ExecutionPlatform::ExecutionPlatform(PersistenceService& store,AgentSettings set
     if(workspace_binding_&&!settings.language_servers.empty()){
         language_servers_=std::make_shared<LanguageServerToolRegistry>(*workspace_binding_,settings.language_servers);
         settings.language_server_registry=language_servers_;
+        settings.language_server_dispatch=[this](const std::string& server_id,const LanguageServerRequest& request,const std::vector<WorkspaceToolFolder>& folders){
+            return language_server_query_admitted(request,folders,false,server_id);
+        };
     }
     file_edit_proposals_=workspace_binding_&&settings.approved_edits;
     if(!settings.provider.model.empty())agents_=std::make_unique<AgentService>(store,settings,workers,capacity);
@@ -134,19 +137,28 @@ std::vector<LanguageServerMetadata> ExecutionPlatform::language_server_profiles(
 }
 std::string ExecutionPlatform::language_server_query(const LanguageServerRequest& request){
     if(!workspace_binding_||!language_servers_)throw RunUnavailable("Language-server queries require an opened workspace and trusted server profile");
-    if(request.folder_id.empty()||request.folder_id==workspace_binding_->identity()){
-        auto primary=request;primary.folder_id.clear();return language_servers_->query(primary);
+    auto membership=workspace_membership();
+    return language_server_query_admitted(request,membership->folders(),true,{});
+}
+std::string ExecutionPlatform::language_server_query_admitted(const LanguageServerRequest& request,const std::vector<WorkspaceToolFolder>& folders,bool prune_cache,const std::string& server_id){
+    if(!workspace_binding_||!language_servers_)throw RunUnavailable("Language-server queries require an opened workspace and trusted server profile");
+    if(folders.empty()||folders.front().folder_id!=workspace_binding_->identity()||folders.front().root!=workspace_binding_->root_path())
+        throw ToolAccessDenied("Admitted language-server membership does not match the primary workspace folder");
+    const auto requested=request.folder_id;
+    std::size_t selected=0;
+    if(!requested.empty()&&requested!=workspace_binding_->identity()){
+        const auto found=std::find_if(folders.begin(),folders.end(),[&](const auto& folder){return folder.folder_id==requested;});
+        if(found==folders.end())throw ToolAccessDenied("Language-server folder is not part of the admitted workspace membership");
+        selected=static_cast<std::size_t>(std::distance(folders.begin(),found));
     }
-    auto membership=workspace_membership();std::size_t selected=0;
     {
-        std::lock_guard lock(language_server_workspaces_mutex_);std::set<std::string> current;
-        for(const auto& member:membership->folders())current.insert(member.folder_id);
-        for(auto item=language_server_workspaces_.begin();item!=language_server_workspaces_.end();)
-            if(!current.contains(item->first))item=language_server_workspaces_.erase(item);else ++item;
-        selected=membership->folder_index(request.folder_id);
+        std::lock_guard lock(language_server_workspaces_mutex_);
+        if(prune_cache){std::set<std::string> current;for(const auto& member:folders)current.insert(member.folder_id);
+            for(auto item=language_server_workspaces_.begin();item!=language_server_workspaces_.end();)
+                if(!current.contains(item->first))item=language_server_workspaces_.erase(item);else ++item;}
     }
-    if(selected==0){auto primary=request;primary.folder_id.clear();return language_servers_->query(primary);}
-    const auto& folder=membership->folders()[selected];std::shared_ptr<LanguageServerWorkspace> target;
+    if(selected==0){auto primary=request;primary.folder_id.clear();return server_id.empty()?language_servers_->query(primary):language_servers_->query(primary,server_id);}
+    const auto& folder=folders[selected];std::shared_ptr<LanguageServerWorkspace> target;
     {
         std::lock_guard lock(language_server_workspaces_mutex_);
         const auto found=language_server_workspaces_.find(folder.folder_id);
@@ -158,7 +170,7 @@ std::string ExecutionPlatform::language_server_query(const LanguageServerRequest
             language_server_workspaces_.emplace(folder.folder_id,target);
         }
     }
-    auto scoped=request;scoped.folder_id.clear();auto result=nlohmann::json::parse(target->registry->query(scoped));
+    auto scoped=request;scoped.folder_id.clear();auto result=nlohmann::json::parse(server_id.empty()?target->registry->query(scoped):target->registry->query(scoped,server_id));
     result["folder_id"]=folder.folder_id;return result.dump();
 }
 WorkspaceSessionSkills ExecutionPlatform::session_skills(const std::string& session)const{
