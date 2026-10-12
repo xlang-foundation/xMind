@@ -9,6 +9,9 @@ const operationSections=new Map();
 const operationRows=new Map();
 const a2aTaskInspections=new Map();
 const a2aTaskCancellations=new Map();
+const RUN_ACTIVITY_MAX_LINES=240,RUN_ACTIVITY_MAX_CHARS=128*1024,RUN_ACTIVITY_MAX_LINE_CHARS=4096;
+const RUN_ACTIVITY_STREAM_KINDS=new Set(['model.reasoning','model.text','model.refusal','model.tool_delta','model.usage','model.done','process.output']);
+const runActivityLineLengths=[];let runActivityCharCount=0;
 let currentOperations=[];
 let pendingOperations=[];
 function pendingApprovals(){return pendingOperations.filter(item=>Date.now()<item.expires_unix_ms&&operationRows.get(item.id)?.section.isConnected);}
@@ -24,6 +27,7 @@ const processStreams=new Map();
 const processArtifactWidgets=new Map();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
 function appendRunActivity(event){
+  if(!event||RUN_ACTIVITY_STREAM_KINDS.has(event.kind))return;
   let summary='';
   if(event?.kind==='a2a.task_event'&&event.data&&typeof event.data==='object'){
     const record=event.data.data,response=record?.event;
@@ -33,8 +37,12 @@ function appendRunActivity(event){
       summary='A2A task update'+(typeof record.agent_id==='string'?' · '+record.agent_id:'')+(typeof state==='string'?' · '+state:'')+(typeof task==='string'?' · '+task:'')+(Number.isSafeInteger(record.event_sequence)?' · event '+record.event_sequence:'')+'\n';
     }
   }
-  byId('events').textContent+=summary+JSON.stringify(event)+'\n';
+  let line=summary+JSON.stringify(event)+'\n';
+  if(line.length>RUN_ACTIVITY_MAX_LINE_CHARS)line=line.slice(0,RUN_ACTIVITY_MAX_LINE_CHARS-32)+' … [activity event truncated]\n';
+  const output=byId('events');output.appendChild(document.createTextNode(line));runActivityLineLengths.push(line.length);runActivityCharCount+=line.length;
+  while(runActivityLineLengths.length>RUN_ACTIVITY_MAX_LINES||runActivityCharCount>RUN_ACTIVITY_MAX_CHARS){runActivityCharCount-=runActivityLineLengths.shift();if(output.firstChild)output.removeChild(output.firstChild);}
 }
+function clearRunActivity(){runActivityLineLengths.length=0;runActivityCharCount=0;byId('events').replaceChildren();}
 let skillSnapshot,skillPending=false;
 const skillRows=new Map();
 function skillControls(){const disabled=skillPending||sessionBusy||activeRun||!skillSnapshot?.selection?.editable;for(const row of skillRows.values())row.button.disabled=disabled;byId('skills-clear').disabled=disabled;}
@@ -473,7 +481,7 @@ function contextView(record){
 }
 byId('context-compact').onclick=()=>{if(!displayedContext?.enabled||contextSubmitting||byId('context-compact').disabled||displayedContext.session_id!==byId('sessions').value||displayedContext.model_id!==byId('model').value)return;contextSubmitting=true;byId('context-compact').disabled=true;api.postMessage({type:'context-compact',session:displayedContext.session_id,model:displayedContext.model_id,expected_head_revision:displayedContext.head_revision});};
 function graphEvent(message){
-  const event=message.event;byId('events').textContent+=JSON.stringify(event)+'\n';if(event.kind==='process.output'){processOutput(event.data);return;}
+  const event=message.event;appendRunActivity(event);if(event.kind==='process.output'){processOutput(event.data);return;}
   const row=graphRows.get(message.node_id);if(!row)return;
   if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn'){row.stream.replaceChildren();row.text='';row.usage=undefined;return;}
   if(!['model.text','model.refusal','model.usage','model.done'].includes(event.kind))return;
@@ -579,8 +587,8 @@ window.addEventListener('message',event=>{
     if(displayedPlan&&displayedPlan.run.id!==m.selected)clearPlan();planControls();if(displayedGraph&&displayedGraph.run.id!==m.selected)clearGraph();
     byId('send').disabled=!canExecute()||activeRun||sessionBusy;
   }
-  else if(m.type==='reset-run'){operations([]);clearPlan();resetLive();resetFailure();resetProcessStreams();byId('events').textContent='';renderRunContext();}
-  else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();forkButtons.clear();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();byId('events').textContent='';}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data,undefined,item.id);refreshForkControls();}
+  else if(m.type==='reset-run'){operations([]);clearPlan();resetLive();resetFailure();resetProcessStreams();clearRunActivity();renderRunContext();}
+  else if(m.type==='history'||m.type==='transcript'){byId('history').replaceChildren();forkButtons.clear();if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();clearRunActivity();}byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;for(const item of m.history)entry(item.role,item.data,undefined,item.id);refreshForkControls();}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
   else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);profiles.value=m.active;profileRoutes();}
@@ -589,7 +597,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='mcp-authorization'){renderMcpSettings(m);}
   else if(m.type==='mcp-error'){byId('mcp-status').textContent=m.text;}
   else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;forkCapability=m.forkSessions===true;refreshRename();refreshForkControls();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
-  else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();byId('events').textContent='';}
+  else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();clearRunActivity();}
   else if(m.type==='draft'){byId('prompt').value=m.text;resizePrompt();}
   else if(m.type==='append-context'){
     if(!currentWorkspaceRoot||m.root!==currentWorkspaceRoot||typeof m.text!=='string'||!m.text||m.text.length>49152)return;

@@ -524,6 +524,22 @@ test('A2A input-required tasks expose a sequenced reply form and quarantine unce
 test('streamed A2A task events show peer, state, task and sequence in selected run activity',()=>{
  const r=renderer(),events=r.dom.window.document.getElementById('events');try{r.send({type:'event',event:{seq:7,run_id:'run',kind:'a2a.task_event',data:{activity_id:'run:turn:0',call_id:'tool-call',name:'a2a_delegate_peer',data:{operation_id:'a2a-operation',agent_id:'research.peer',event_sequence:2,event:{statusUpdate:{taskId:'remote-task',status:{state:'TASK_STATE_WORKING'}}}}}}});assert.match(events.textContent,/A2A task update · research\.peer · TASK_STATE_WORKING · remote-task · event 2/);assert.match(events.textContent,/"operation_id":"a2a-operation"/);assert.equal(events.querySelector('script'),null);}finally{r.dom.window.close();}
 });
+test('run activity skips streamed token deltas and remains bounded for long tool sessions',()=>{
+ const r=renderer(),events=r.dom.window.document.getElementById('events');try{
+  r.send({type:'event',event:{seq:1,run_id:'run',kind:'run.running',data:{}}});
+  for(let i=0;i<250;i++)for(const kind of ['model.reasoning','model.text','model.tool_delta','process.output'])r.send({type:'event',event:{seq:i+2,run_id:'run',kind,data:{text:'large streamed token fixture'}}});
+  assert.match(events.textContent,/"kind":"run\.running"/);assert.doesNotMatch(events.textContent,/large streamed token fixture/);
+  for(let i=0;i<300;i++)r.send({type:'event',event:{seq:1002+i,run_id:'run',kind:'tool.completed',data:{name:'fixture_tool',index:i}}});
+  const lines=events.textContent.trim().split('\n');assert.ok(lines.length<=240);assert.doesNotMatch(events.textContent,/"seq":1002/);assert.match(events.textContent,/"seq":1301/);
+ }finally{r.dom.window.close();}
+});
+test('graph event activity skips streamed deltas and shares the bounded run log',()=>{
+ const r=renderer(),events=r.dom.window.document.getElementById('events');try{
+  for(let i=0;i<250;i++)r.send({type:'graph-event',node_id:'fixture-node',event:{seq:i+1,run_id:'run',kind:'model.text',data:{text:'large graph token fixture'}}});
+  for(let i=0;i<300;i++)r.send({type:'graph-event',node_id:'fixture-node',event:{seq:1001+i,run_id:'run',kind:'tool.completed',data:{name:'fixture_tool',index:i}}});
+  const lines=events.textContent.trim().split('\n');assert.ok(lines.length<=240);assert.doesNotMatch(events.textContent,/large graph token fixture/);assert.doesNotMatch(events.textContent,/"seq":1001/);assert.match(events.textContent,/"seq":1300/);
+ }finally{r.dom.window.close();}
+});
 test('durable response profile badges use recorded identities and reject malformed metadata',()=>{
   const r=renderer(),context={profile_id:'saved-profile',profile_revision:2,route_id:'anthropic.messages',provider:'anthropic',wire:'anthropic-messages',model_id:'fixture-claude'};
   const show=value=>r.send({type:'history',history:[{role:'assistant',data:{content:'Synthetic renderer response',provider_context:value}}]});show(context);
