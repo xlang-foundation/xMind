@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <chrono>
 #include <limits>
+#include <cstdint>
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
@@ -45,6 +46,17 @@ bool terminal(RunState state){return state==RunState::completed||state==RunState
 std::string assistant_text(const Json& value){
     auto content=value.value("content",std::string{});const auto refusal=value.value("refusal",std::string{});
     if(!refusal.empty()){if(!content.empty())content+='\n';content+=refusal;}return content;
+}
+bool valid_utf8(const std::string& value){
+    for(std::size_t i=0;i<value.size();){const auto a=static_cast<unsigned char>(value[i++]);if(a<0x80)continue;
+        unsigned count=0;std::uint32_t code=0,min=0;if(a>=0xc2&&a<=0xdf){count=1;code=a&0x1f;min=0x80;}else if(a>=0xe0&&a<=0xef){count=2;code=a&0x0f;min=0x800;}else if(a>=0xf0&&a<=0xf4){count=3;code=a&0x07;min=0x10000;}else return false;
+        if(i+count>value.size())return false;for(unsigned n=0;n<count;++n){const auto b=static_cast<unsigned char>(value[i++]);if((b&0xc0)!=0x80)return false;code=(code<<6)|(b&0x3f);}if(code<min||code>0x10ffff||(code>=0xd800&&code<=0xdfff))return false;
+    }return true;
+}
+std::string decode_base64(const std::string& input){
+    if(input.size()%4)throw RpcError{-32602,"Invalid params"};auto digit=[](unsigned char c)->int{if(c>='A'&&c<='Z')return c-'A';if(c>='a'&&c<='z')return c-'a'+26;if(c>='0'&&c<='9')return c-'0'+52;if(c=='+')return 62;if(c=='/')return 63;return -1;};std::string output;output.reserve(input.size()/4*3);
+    for(std::size_t i=0;i<input.size();i+=4){const bool last=i+4==input.size();const int a=digit(input[i]),b=digit(input[i+1]);if(a<0||b<0)throw RpcError{-32602,"Invalid params"};const bool pad2=input[i+2]=='=',pad3=input[i+3]=='=';if(pad2){if(!pad3||!last||(b&15))throw RpcError{-32602,"Invalid params"};output.push_back(static_cast<char>((a<<2)|(b>>4)));}else{const int c=digit(input[i+2]);if(c<0)throw RpcError{-32602,"Invalid params"};output.push_back(static_cast<char>((a<<2)|(b>>4)));if(pad3){if(!last||(c&3))throw RpcError{-32602,"Invalid params"};output.push_back(static_cast<char>((b<<4)|(c>>2)));}else{const int d=digit(input[i+3]);if(d<0)throw RpcError{-32602,"Invalid params"};output.push_back(static_cast<char>((b<<4)|(c>>2)));output.push_back(static_cast<char>((c<<6)|d));}}if(output.size()>65536)throw RpcError{-32602,"Invalid params"};}
+    return output;
 }
 const char* state(RunState value){switch(value){case RunState::queued:return "submitted";case RunState::running:return "working";case RunState::paused:return "input-required";case RunState::completed:return "completed";case RunState::failed:return "failed";case RunState::cancelled:return "canceled";}throw RpcError{-32603,"Internal error"};}
 const char* wire_state(RunState value,A2aVersion version){if(version==A2aVersion::legacy)return state(value);switch(value){case RunState::queued:return "TASK_STATE_SUBMITTED";case RunState::running:return "TASK_STATE_WORKING";case RunState::paused:return "TASK_STATE_INPUT_REQUIRED";case RunState::completed:return "TASK_STATE_COMPLETED";case RunState::failed:return "TASK_STATE_FAILED";case RunState::cancelled:return "TASK_STATE_CANCELED";}throw RpcError{-32603,"Internal error"};}
@@ -178,11 +190,15 @@ std::optional<std::string> A2aTaskControl::dispatch(const std::string& source,A2
                 if(message.contains("taskId")&&message["taskId"]=="")message.erase("taskId");if(message.contains("contextId")&&message["contextId"]=="")message.erase("contextId");if(message.contains("referenceTaskIds")&&message["referenceTaskIds"]==Json::array())message.erase("referenceTaskIds");
                 if(message.contains("parts")&&message["parts"].is_array())for(auto& part:message["parts"]){
                     fields(part,{"text","raw","url","data","metadata","mediaType","filename"},-32602);
-                    if(part.contains("raw")||part.contains("url"))throw RpcError{-32005,"File input is not supported"};
-                    const bool text_part_present=part.contains("text"),data_part_present=part.contains("data");
-                    if(text_part_present==data_part_present)throw RpcError{-32005,"Incompatible content types"};
+                    if(part.contains("url"))throw RpcError{-32005,"Remote file references are not supported"};
+                    const bool text_part_present=part.contains("text"),data_part_present=part.contains("data"),raw_part_present=part.contains("raw");
+                    if(static_cast<int>(text_part_present)+static_cast<int>(data_part_present)+static_cast<int>(raw_part_present)!=1)throw RpcError{-32005,"Incompatible content types"};
                     if(part.contains("metadata")&&!part["metadata"].is_object())throw RpcError{-32602,"Invalid params"};
-                    if(text_part_present){
+                    if(raw_part_present){
+                        if(!part["raw"].is_string())throw RpcError{-32602,"Invalid params"};
+                        if(!part.contains("mediaType")||!part["mediaType"].is_string()||part["mediaType"]!="text/plain")throw RpcError{-32005,"Only inline text/plain files are supported"};
+                        if(part.contains("filename")&&(!part["filename"].is_string()||part["filename"].get<std::string>().size()>255||part["filename"].get<std::string>().find('\0')!=std::string::npos))throw RpcError{-32602,"Invalid params"};part["kind"]="file";
+                    }else if(text_part_present){
                         if(part.contains("mediaType")){if(part["mediaType"]!=""&&part["mediaType"]!="text/plain")throw RpcError{-32005,"Incompatible content types"};part.erase("mediaType");}
                         if(part.contains("filename")){if(part["filename"]!="")throw RpcError{-32005,"File input is not supported"};part.erase("filename");}
                         if(!part["text"].is_string())throw RpcError{-32602,"Invalid params"};part["kind"]="text";
@@ -208,6 +224,11 @@ std::optional<std::string> A2aTaskControl::dispatch(const std::string& source,A2
                     if(version_==A2aVersion::legacy&&!part["data"].is_object())throw RpcError{-32602,"Invalid params"};
                     if(part.contains("mediaType")&&(!part["mediaType"].is_string()||part["mediaType"]!="application/json"))throw RpcError{-32005,"Incompatible content types"};
                     if(!first_part)content+='\n';first_part=false;content+="Structured A2A JSON data (untrusted input):\n"+part["data"].dump();
+                }else if(kind=="file"){
+                    std::string encoded,filename; if(version_==A2aVersion::v1){fields(part,{"kind","raw","filename","mediaType","metadata"},-32602);if(!part.contains("raw")||!part["raw"].is_string()||!part.contains("mediaType")||part["mediaType"]!="text/plain")throw RpcError{-32005,"Only inline text/plain files are supported"};encoded=part["raw"].get<std::string>();if(part.contains("filename")){if(!part["filename"].is_string())throw RpcError{-32602,"Invalid params"};filename=part["filename"].get<std::string>();}}
+                    else{fields(part,{"kind","file","metadata"},-32602);if(!part.contains("file")||!part["file"].is_object())throw RpcError{-32602,"Invalid params"};const auto& file=part["file"];if(file.contains("bytes")||file.contains("uri")||file.contains("fileWithUri"))throw RpcError{-32005,"Only inline text/plain files are supported"};fields(file,{"name","mimeType","fileWithBytes"},-32602);if(!file.contains("fileWithBytes")||!file["fileWithBytes"].is_string()||!file.contains("mimeType")||file["mimeType"]!="text/plain")throw RpcError{-32005,"Only inline text/plain files are supported"};encoded=file["fileWithBytes"].get<std::string>();if(file.contains("name")){if(!file["name"].is_string())throw RpcError{-32602,"Invalid params"};filename=file["name"].get<std::string>();}}
+                    if(filename.size()>255||filename.find('\0')!=std::string::npos)throw RpcError{-32602,"Invalid params"};const auto decoded=decode_base64(encoded);if(decoded.find('\0')!=std::string::npos||!valid_utf8(decoded))throw RpcError{-32005,"File is not valid UTF-8 text"};
+                    if(!first_part)content+='\n';first_part=false;content+="Attached text file (untrusted; filename "+Json(filename).dump()+"):\n"+decoded;
                 }else throw RpcError{-32005,"Incompatible content types"};
             }
             if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw RpcError{-32602,"Invalid params"};message.erase("contextId");const auto identity=message.dump();
