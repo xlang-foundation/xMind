@@ -306,3 +306,20 @@ test('origin-scoped authentication and native request bodies', async () => {
     assert.throws(()=>new BackendClient(url,()=>token),/origin/);
   }
 });
+
+test('Local/Nexus connection catalog validates metadata and uses revision-checked public writes',async()=>{
+ const {validateConnectionProfiles}=require('../client'),requests=[];let state={revision:1,active_id:'local',profiles:[{id:'local',name:'Local',kind:'local',origin:'',revision:1,status:'connected',command_routing:true,authenticated:true}]};
+ const client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{
+  const body=options.body?JSON.parse(options.body):undefined;requests.push({url,options,body});
+  if(!body)return{ok:true,json:async()=>structuredClone(state)};
+  assert.equal(body.expected_revision,state.revision);assert.ok(!Object.hasOwn(body,'access_token'));
+  const old=new Map(state.profiles.map(value=>[value.id,value]));state={revision:state.revision+1,active_id:state.active_id,profiles:body.profiles.map(value=>value.id==='local'?{...old.get('local'),name:value.name}:{...value,revision:old.get(value.id)?.revision||state.revision+1,status:'not_connected',command_routing:false,authenticated:false})};
+  return{ok:true,json:async()=>structuredClone(state)};
+ });
+ assert.deepEqual(await client.connectionProfiles(),state);
+ const saved=await client.saveConnectionProfile('engineering','CantorAI Nexus','https://nexus.example.com/xmind');assert.equal(saved.revision,2);assert.equal(saved.active_id,'local');assert.equal(saved.profiles[1].status,'not_connected');
+ assert.deepEqual(requests.map(value=>[new URL(value.url).pathname,value.options.method]),[['/v1/connections','GET'],['/v1/connections','GET'],['/v1/connections','POST']]);assert.deepEqual(requests[2].body,{profiles:[{id:'local',name:'Local',kind:'local',origin:''},{id:'engineering',name:'CantorAI Nexus',kind:'nexus',origin:'https://nexus.example.com/xmind'}],expected_revision:1});
+ const removed=await client.removeConnectionProfile('engineering');assert.equal(removed.profiles.length,1);assert.equal(removed.revision,3);
+ assert.throws(()=>validateConnectionProfiles({...state,profiles:[...state.profiles,{id:'not-ready',name:'Not ready',kind:'nexus',origin:'https://nexus.example.com',revision:1,status:'connected',command_routing:true,authenticated:true}]}),/Nexus connection state/);
+ await assert.rejects(client.saveConnectionProfile('bad','Bad','http://nexus.example.com'),/HTTPS server URL/);await assert.rejects(client.removeConnectionProfile('local'),/cannot be removed/);
+});

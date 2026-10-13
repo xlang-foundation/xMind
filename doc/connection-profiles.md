@@ -7,8 +7,10 @@ selection. Local selection is revision-checked. A configured Nexus endpoint is
 reported as `not_connected`, and selection fails closed until authentication
 and remote command/event routing exist. The native CLI can list, save and remove
 connection metadata and select an available profile; it cannot activate an
-unauthenticated Nexus profile. The browser does not yet expose a profile picker.
-Model-provider profiles are a separate configuration domain.
+unauthenticated Nexus profile. Browser Settings can inspect the catalog and
+save/remove Nexus address metadata; it does not yet select a remote profile or
+authenticate to Nexus. Model-provider profiles are a separate configuration
+domain.
 
 ![Connection architecture](connection-profiles.svg)
 
@@ -84,8 +86,12 @@ profile does not transfer, cancel or reinterpret already admitted work.
    binding; exercise unavailable, expired and incompatible connections.
 4. Authorized workspace enrollment, fenced leases and durable effect receipts;
    validate two workers, revocation, reassignment and lost replies.
-5. CLI catalog management is implemented; browser and right VS Code profile
-   selection still need integration against these real backends.
+5. CLI catalog management is implemented. Browser Settings reads the native
+   catalog and saves/removes public Nexus metadata through the browser adapter's
+   allowlisted `GET`/`POST /v1/connections` route. The right VS Code Settings
+   panel shares the same client contract. Neither view can select an
+   unauthenticated Nexus connection; actual remote selection, authentication,
+   routing and model catalog binding remain pending.
 
 The private server owns team policy, PostgreSQL and scheduling. Cantor Cluster
 will attach behind that private scheduler/worker boundary. It must preserve

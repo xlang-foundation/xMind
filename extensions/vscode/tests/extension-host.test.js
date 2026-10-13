@@ -17,7 +17,7 @@ function harness(options={}) {
   let pendingOperation;
   let operations=options.operations||[];
   let sidebarProvider,folderListener;const backendOwners=[];
-  const renameRequests=[],forkRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[];
+  const renameRequests=[],forkRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],connectionUpdates=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
@@ -26,6 +26,12 @@ function harness(options={}) {
     if(target.pathname==='/v1/workspace/membership'){const owner=backendOwners[0];assert.ok(owner);return {ok:true,json:async()=>options.workspaceMembership||({workspace_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,revision:1,primary_folder_id:owner.metadata.workspace_id,folders:[{folder_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,ordinal:0}]})};}
     if(target.pathname==='/v1/workspaces/add'){const body=JSON.parse(requestOptions.body),owner=backendOwners[0];assert.equal(body.workspace_id,owner.metadata.workspace_id);assert.equal(body.root,options.workspaceFolderToAdd||'D:\\Shared');return {ok:true,json:async()=>({workspace_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,revision:2,primary_folder_id:owner.metadata.workspace_id,folders:[{folder_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,ordinal:0},{folder_id:'windows-local-file-v1:2:shared',name:'Shared',root:body.root,ordinal:1}]})};}
     if(target.pathname==='/v1/vcs/init'){vcsInitializations.push(JSON.parse(requestOptions.body));return {ok:true,status:204,json:async()=>{throw new Error('204 responses have no JSON body');}};}
+    if(target.pathname==='/v1/connections'){
+      if(requestOptions.method!=='POST')return {ok:true,json:async()=>options.connectionCatalog||{revision:1,active_id:'local',profiles:[{id:'local',name:'Local',kind:'local',origin:'',revision:1,status:'connected',command_routing:true,authenticated:true}]}};
+      const body=JSON.parse(requestOptions.body);connectionUpdates.push(body);const revision=(options.connectionCatalog?.revision||1)+1;
+      options.connectionCatalog={revision,active_id:'local',profiles:body.profiles.map(profile=>profile.kind==='local'?{...profile,revision:1,status:'connected',command_routing:true,authenticated:true}:{...profile,revision,status:'not_connected',command_routing:false,authenticated:false})};
+      return {ok:true,json:async()=>options.connectionCatalog};
+    }
     if(target.pathname==='/v1/vcs/status')return {ok:true,json:async()=>options.vcsStatus||[]};
     if(target.pathname==='/v1/vcs/base')return {ok:true,json:async()=>options.vcsBase??null};
     if(target.pathname==='/v1/vcs/diff')return {ok:true,json:async()=>options.vcsDiff||[]};
@@ -156,7 +162,7 @@ function harness(options={}) {
   const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
+  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
     backendOwners,backendUpgradeRequests,changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
@@ -173,6 +179,18 @@ test('sidebar MCP login is bound to its backend and closing the sidebar detaches
  const h=harness({mcp:(path,options)=>{if(path.endsWith('/servers'))return {servers:[server]};if(path==='/v1/mcp/authorization/attempts'){const request=JSON.parse(options.body);admissions.push(request);value={id:request.request_id,server_id:request.server_id,config_revision:1,credential_revision:0,state:'discovering',authorization_url:null,expires_unix_ms:9999999999999,reason:null,cancellation_requested:false};}return value;}});await h.commands.get('agentflow.open')();const view=h.views[0];
  try{view.receive({type:'mcp-refresh'});await until(()=>view.posted.findLast(m=>m.type==='mcp-authorization')?.busy===false);view.receive({type:'mcp-start',server:server.id});await until(()=>view.posted.findLast(m=>m.type==='mcp-authorization')?.attempts.length===1);assert.equal(admissions.length,1);assert.equal(admissions[0].expected_config_revision,1);assert.equal(admissions[0].expected_credential_revision,0);assert.deepEqual(Object.keys(admissions[0]).sort(),['expected_config_revision','expected_credential_revision','request_id','server_id']);const saved=h.state.get('xmind.mcp.login');assert.equal(saved.url,'http://127.0.0.1:8765');assert.equal(saved.attempts[0].id,admissions[0].request_id);assert.ok(!JSON.stringify(saved).includes('authorization_url'));}
  finally{view.close();}assert.ok(!h.requests.some(path=>path.endsWith('/cancel')));
+});
+test('right sidebar Settings manages public connection metadata through its opened workspace backend',async()=>{
+ const h=harness();await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{
+  view.receive({type:'connections-refresh'});await until(()=>view.posted.findLast(m=>m.type==='connections-state')?.state?.profiles?.length===1);
+  assert.equal(view.posted.findLast(m=>m.type==='connections-state').state.active_id,'local');
+  view.receive({type:'connection-save',id:'nexus-engineering',name:'Engineering',origin:'https://nexus.example.com/xmind'});
+  await until(()=>view.posted.findLast(m=>m.type==='connections-state')?.completed==='connection-save');
+  let state=view.posted.findLast(m=>m.type==='connections-state').state;assert.equal(state.profiles.length,2);assert.equal(state.profiles[1].status,'not_connected');
+  view.receive({type:'connection-remove',id:'nexus-engineering'});await until(()=>view.posted.findLast(m=>m.type==='connections-state')?.completed==='connection-remove');
+  state=view.posted.findLast(m=>m.type==='connections-state').state;assert.equal(state.profiles.length,1);assert.equal(state.active_id,'local');assert.equal(h.connectionUpdates.length,2);assert.ok(!JSON.stringify(h.connectionUpdates).includes('credential'));
+ }finally{view.close();}
 });
 test('sidebar renders committed subscription events and refreshes metadata without a periodic timer',async()=>{
  const h=harness({running:true});await h.commands.get('agentflow.open')();const view=h.views[0];

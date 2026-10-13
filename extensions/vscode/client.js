@@ -162,6 +162,21 @@ class BackendClient {
     profileIdentity(id);profileRevision(expected_revision);
     return validateProviderProfiles(await this.request('/v1/provider/profiles/select',{id,expected_revision}));
   }
+  async connectionProfiles() { return validateConnectionProfiles(await this.request('/v1/connections')); }
+  async saveConnectionProfile(id,name,origin) {
+    connectionIdentity(id);connectionName(name);connectionOrigin(origin);
+    if(id==='local')throw new Error('The Local connection profile cannot be replaced.');
+    const current=await this.connectionProfiles(),profiles=current.profiles.map(({id,name,kind,origin})=>({id,name,kind,origin})),profile={id,name,kind:'nexus',origin};
+    const existing=profiles.findIndex(value=>value.id===id);if(existing<0)profiles.push(profile);else profiles[existing]=profile;
+    if(profiles.length>32)throw new Error('Connection catalog is full.');
+    return validateConnectionProfiles(await this.request('/v1/connections',{profiles,expected_revision:current.revision}));
+  }
+  async removeConnectionProfile(id) {
+    connectionIdentity(id);if(id==='local')throw new Error('The Local connection profile cannot be removed.');
+    const current=await this.connectionProfiles(),profiles=current.profiles.filter(value=>value.id!==id).map(({id,name,kind,origin})=>({id,name,kind,origin}));
+    if(profiles.length===current.profiles.length)throw new Error('Nexus connection profile was not found.');
+    return validateConnectionProfiles(await this.request('/v1/connections',{profiles,expected_revision:current.revision}));
+  }
   sessions() { return this.request('/v1/sessions'); }
   skills() { return this.request('/v1/workspace/skills'); }
   async sessionSkills(id) { executionIdentity(id);return validateSessionSkills(await this.request(`/v1/sessions/${encodeURIComponent(id)}/skills`),id); }
@@ -665,6 +680,21 @@ class McpAuthorizationController {
   open(serverId,link){mcpServerIdentity(serverId);const value=this.attempts.get(serverId)?.value;if(!this.active()||!value||value.state!=='awaiting_callback'||value.cancellation_requested||Date.now()>=value.expires_unix_ms)throw new Error('Wait for the current MCP authorization link.');validateMcpAuthorizationAttempt(value);return link(value.authorization_url);}
 }
 function exactFields(value,fields){if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field)))throw new Error('Invalid provider profile metadata');}
+function connectionIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(value))throw new Error('Invalid connection profile identity.');return value;}
+function connectionName(value){if(typeof value!=='string'||!value.trim()||value.length>128||/[\r\n\0]/.test(value))throw new Error('Enter a connection name (up to 128 characters).');return value;}
+function connectionOrigin(value){if(typeof value!=='string'||value.length>8192||!value.startsWith('https://')||/[\\?#@\s\0-\x1f]/.test(value))throw new Error('Enter an HTTPS server URL without credentials, query or fragment.');return value;}
+function validateConnectionProfiles(value){
+  const fields=['revision','active_id','profiles'];if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field))||!Number.isSafeInteger(value.revision)||value.revision<1||!Array.isArray(value.profiles)||!value.profiles.length||value.profiles.length>32)throw new Error('Invalid connection profile catalog.');
+  connectionIdentity(value.active_id);const ids=new Set();let local=false,active=false;
+  for(const profile of value.profiles){
+    const profileFields=['id','name','kind','origin','revision','status','command_routing','authenticated'];if(!profile||typeof profile!=='object'||Array.isArray(profile)||Object.keys(profile).length!==profileFields.length||profileFields.some(field=>!Object.hasOwn(profile,field)))throw new Error('Invalid connection profile.');
+    connectionIdentity(profile.id);connectionName(profile.name);if(ids.has(profile.id)||!Number.isSafeInteger(profile.revision)||profile.revision<1||profile.revision>value.revision||typeof profile.command_routing!=='boolean'||typeof profile.authenticated!=='boolean')throw new Error('Invalid connection profile identity or revision.');ids.add(profile.id);
+    if(profile.kind==='local'){if(profile.id!=='local'||profile.origin!==''||profile.status!=='connected'||!profile.command_routing||!profile.authenticated)throw new Error('Invalid Local connection state.');local=true;}
+    else if(profile.kind==='nexus'){connectionOrigin(profile.origin);if(profile.id==='local'||profile.status!=='not_connected'||profile.command_routing||profile.authenticated)throw new Error('Invalid Nexus connection state.');}
+    else throw new Error('Unsupported connection profile kind.');active||=profile.id===value.active_id;
+  }
+  if(!local||!active)throw new Error('Connection catalog must contain Local and its active profile.');return value;
+}
 function mcpFields(value,fields){if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field)))throw new Error('Invalid MCP authorization metadata');}
 function mcpServerIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(value))throw new Error('Invalid MCP server identity');return value;}
 function validateMcpAuthorizationServers(value){
@@ -822,5 +852,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
 else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};

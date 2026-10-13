@@ -24,7 +24,7 @@ test('workspace Git has an accessible SVG toolbar entry that opens the native ac
 });
 test('MCP Settings renders native outcomes and sends only server-bound sign-in intent',()=>{
  const r=renderer(),doc=r.dom.window.document;try{
-  doc.getElementById('settings').click();assert.equal(r.posted.at(-1).type,'mcp-refresh');assert.ok(doc.querySelector('#provider-settings #mcp-settings'));assert.equal(doc.querySelector('footer #mcp-settings'),null);
+  doc.getElementById('settings').click();assert.deepEqual(r.posted.slice(-2).map(message=>message.type),['mcp-refresh','connections-refresh']);assert.ok(doc.querySelector('#provider-settings #mcp-settings'));assert.ok(doc.querySelector('#provider-settings #connection-settings'));assert.equal(doc.querySelector('footer #mcp-settings'),null);
   const server={id:'tools.peer',enabled:true,configured:true,state:'needs_login'},attempt={server_id:server.id,state:'awaiting_callback',cancellation_requested:false};
   r.send({type:'mcp-authorization',available:true,servers:[server],attempts:[],busy:false,error:''});doc.querySelector('#mcp-servers button').click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'mcp-start',server:server.id});
   r.send({type:'mcp-authorization',available:true,servers:[server],attempts:[attempt],busy:false,error:''});const buttons=[...doc.querySelectorAll('#mcp-servers button')];assert.deepEqual(buttons.map(b=>b.textContent),['Open sign-in page','Cancel request']);buttons[0].click();assert.equal(r.posted.at(-1).type,'mcp-open');buttons[1].click();assert.equal(r.posted.at(-1).type,'mcp-cancel');

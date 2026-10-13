@@ -456,6 +456,16 @@ async function activate(context) {
           await vscode.commands.executeCommand(choice.command);
         } else if(message.type==='mcp-refresh'){
           await readMcp();
+        } else if(['connections-refresh','connection-save','connection-remove'].includes(message.type)){
+          const connectionClient=client,connectionGeneration=generation,connectionEpoch=workspaceBackend.epoch;
+          const current=()=>panel===view&&client===connectionClient&&generation===connectionGeneration&&workspaceBackend.epoch===connectionEpoch&&configuredOrigin()===connectionClient.baseUrl;
+          const report=(state,completed)=>{if(current())post({type:'connections-state',state,...(completed?{completed}:{})});};
+          try{
+            if(message.type!=='connections-refresh'&&current())post({type:'connections-state',busy:true,text:message.type==='connection-save'?'Saving Nexus address…':'Removing connection…'});
+            if(message.type==='connection-save')await connectionClient.saveConnectionProfile(message.id,message.name,message.origin);
+            else if(message.type==='connection-remove')await connectionClient.removeConnectionProfile(message.id);
+            report(await connectionClient.connectionProfiles(),message.type==='connections-refresh'?undefined:message.type);
+          }catch(error){if(current())post({type:'connections-state',error:error.message});}
         } else if(['mcp-start','mcp-renew','mcp-cancel','mcp-open'].includes(message.type)){
           try{if(!mcpRestored)await readMcp();if(message.type==='mcp-start')await mcpController.start(message.server);else if(message.type==='mcp-renew')await mcpController.start(message.server,true);else if(message.type==='mcp-cancel')await mcpController.cancel(message.server);else await mcpController.open(message.server,url=>vscode.env.openExternal(vscode.Uri.parse(url)));}
           catch(error){post({type:'mcp-error',text:error.message});}

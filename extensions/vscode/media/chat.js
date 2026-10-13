@@ -554,8 +554,10 @@ function profileRoutes(){
 byId('provider-profile').onchange=()=>{byId('provider-key').value='';byId('settings-status').textContent='';profileRoutes();api.postMessage({type:'discardProviderKey'});};
 byId('provider-name').onchange=()=>{byId('provider-key').value='';api.postMessage({type:'discardProviderKey'});};
 byId('profile-use').onclick=()=>{byId('provider-key').value='';api.postMessage({type:'select-provider',id:byId('provider-profile').value});};
-byId('settings').onclick=()=>{byId('provider-key').value='';byId('settings-status').textContent='';settings.showModal();byId('provider-key').focus();api.postMessage({type:'mcp-refresh'});};
+byId('settings').onclick=()=>{byId('provider-key').value='';byId('settings-status').textContent='';settings.showModal();byId('provider-key').focus();api.postMessage({type:'mcp-refresh'});api.postMessage({type:'connections-refresh'});};
 byId('mcp-refresh').onclick=()=>api.postMessage({type:'mcp-refresh'});
+byId('connections-refresh').onclick=()=>api.postMessage({type:'connections-refresh'});
+byId('connection-form').onsubmit=event=>{event.preventDefault();const name=byId('connection-name').value.trim(),origin=byId('connection-origin').value.trim();if(!name||!origin)return;const identity=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;byId('connection-add').disabled=true;byId('connections-status').textContent='Saving Nexus address…';api.postMessage({type:'connection-save',id:'nexus-'+identity,name,origin});};
 function renderMcpSettings(message){
   const list=byId('mcp-servers');list.replaceChildren();byId('mcp-refresh').disabled=!!message.busy;
   byId('mcp-status').textContent=message.error||(!message.available?'MCP sign-in is unavailable on this backend.':message.servers.length?'':'No MCP servers configured.');
@@ -613,6 +615,15 @@ window.addEventListener('message',event=>{
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
   else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);profiles.value=m.active;profileRoutes();}
+  else if(m.type==='connections-state'){
+    const list=byId('connections-list'),busy=!!m.busy;byId('connection-add').disabled=busy;byId('connections-refresh').disabled=busy;
+    if(m.busy){byId('connections-status').textContent=m.text||'Updating connections…';return;}
+    if(m.error){byId('connections-status').textContent=m.error;return;}
+    const state=m.state;if(!state||!Array.isArray(state.profiles)){byId('connections-status').textContent='Invalid connection profile response.';return;}list.replaceChildren();
+    byId('connections-status').textContent=m.completed==='connection-save'?'Nexus address saved. It remains unconnected; Local stays active.':m.completed==='connection-remove'?'Connection removed. Local stays active.':`${state.profiles.length} saved connection${state.profiles.length===1?'':'s'} · active: ${state.profiles.find(profile=>profile.id===state.active_id)?.name||'unknown'}`;
+    if(m.completed==='connection-save'){byId('connection-name').value='';byId('connection-origin').value='';}
+    for(const profile of state.profiles){const row=node('div',undefined,'connection-profile'),heading=node('div',undefined,'mcp-heading');heading.append(node('strong',profile.name),node('span',profile.id===state.active_id?'Active':'Not connected','hint'));row.append(heading);if(profile.kind==='nexus')row.append(node('p',profile.origin,'hint'),node('p','Authentication and remote command/event routing are not implemented. Local remains active.','hint'));else row.append(node('p','This xMind runtime · SQLite and workspace run locally.','hint'));if(profile.kind==='nexus'){const remove=node('button','Remove connection');remove.type='button';remove.onclick=()=>{if(!window.confirm(`Remove “${profile.name}”? This retires its ID permanently.`))return;byId('connection-add').disabled=true;byId('connections-status').textContent='Removing connection…';api.postMessage({type:'connection-remove',id:profile.id});};row.append(remove);}list.append(row);}
+  }
   else if(m.type==='provider-wire'){const label=byId('provider-mode');label.textContent=m.wire==='gemini-generate-content'?'Gemini GenerateContent':m.wire==='anthropic-messages'?'Claude Messages':providerWireLabel(m.wire)||'';label.hidden=!label.textContent;}
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
   else if(m.type==='mcp-authorization'){renderMcpSettings(m);}

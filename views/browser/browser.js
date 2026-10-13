@@ -177,6 +177,16 @@ class BrowserController {
   }
   async command(message){if(this.disposed||!message||typeof message.type!=='string')return;const version=this.generation;
     if(message.type==='mcp-refresh')return this.readMcp();
+    if(message.type==='connections-refresh'||message.type==='connection-save'||message.type==='connection-remove'){
+      const report=(state,completed)=>{if(this.current(version))this.post({type:'connections-state',state,...(completed?{completed}:{})});};
+      try{
+        if(message.type!=='connections-refresh'&&this.current(version))this.post({type:'connections-state',busy:true,text:message.type==='connection-save'?'Saving Nexus address…':'Removing connection…'});
+        if(message.type==='connection-save')await this.client.saveConnectionProfile(message.id,message.name,message.origin);
+        else if(message.type==='connection-remove')await this.client.removeConnectionProfile(message.id);
+        report(await this.client.connectionProfiles(),message.type==='connections-refresh'?undefined:message.type);
+      }catch(error){if(this.current(version))this.post({type:'connections-state',error:error.message});}
+      return;
+    }
     if(['mcp-start','mcp-renew','mcp-cancel','mcp-open'].includes(message.type)){
       try{if(!this.mcpController)await this.readMcp();if(message.type==='mcp-start')await this.mcpController.start(message.server);else if(message.type==='mcp-renew')await this.mcpController.start(message.server,true);else if(message.type==='mcp-cancel')await this.mcpController.cancel(message.server);else this.mcpController.open(message.server,this.link);}
       catch(error){if(!this.disposed)this.post({type:'mcp-error',text:error.message});}return;
