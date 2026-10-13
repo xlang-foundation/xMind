@@ -558,6 +558,7 @@ byId('profile-use').onclick=()=>{byId('provider-key').value='';api.postMessage({
 settings.addEventListener('close',()=>{settingsProfileSelection=undefined;});
 byId('settings').onclick=()=>{settingsProfileSelection=profileState?.active||'';byId('provider-key').value='';byId('settings-status').textContent='';settings.showModal();byId('provider-key').focus();api.postMessage({type:'mcp-refresh'});api.postMessage({type:'connections-refresh'});};
 byId('mcp-refresh').onclick=()=>api.postMessage({type:'mcp-refresh'});
+byId('mcp-resources-refresh').onclick=()=>api.postMessage({type:'mcp-resources-refresh'});
 byId('connections-refresh').onclick=()=>api.postMessage({type:'connections-refresh'});
 byId('connection-form').onsubmit=event=>{event.preventDefault();const name=byId('connection-name').value.trim(),origin=byId('connection-origin').value.trim();if(!name||!origin)return;const identity=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;byId('connection-add').disabled=true;byId('connections-status').textContent='Saving Nexus address…';api.postMessage({type:'connection-save',id:'nexus-'+identity,name,origin});};
 function renderMcpSettings(message){
@@ -572,6 +573,18 @@ function renderMcpSettings(message){
     if(pending){if(attempt.state==='awaiting_callback'&&!attempt.cancellation_requested)button('Open sign-in page','mcp-open');const cancel=button(attempt.cancellation_requested?'Cancelling…':'Cancel request','mcp-cancel');cancel.disabled=!!message.busy||attempt.cancellation_requested;}
     else if(server.enabled&&server.configured){if(server.state==='needs_login'&&attempt?.state!=='connected')button('Sign in','mcp-start');if(server.credential_revision>0&&['authorized','needs_login'].includes(server.state))button('Renew grant','mcp-renew');}
     row.append(actions);list.append(row);
+  }
+}
+function renderMcpResources(message){
+  const list=byId('mcp-resources');list.replaceChildren();byId('mcp-resources-refresh').disabled=!!message.busy;
+  byId('mcp-resources-status').textContent=message.busy?'Connecting to configured MCP servers…':message.error||(!message.catalog?'Resource catalog has not been loaded.':message.catalog.servers.length?`${message.catalog.resources.length} resource${message.catalog.resources.length===1?'':'s'} found.`:'No MCP servers configured.');
+  const catalog=message.catalog;if(!catalog||message.busy)return;
+  const stateLabels={disabled:'Disabled',unsupported:'Resource discovery unsupported',authorization_required:'Sign in required',unavailable:'Unavailable',connected:'Connected'};
+  for(const server of catalog.servers){
+    const resources=catalog.resources.filter(item=>item.server_id===server.id),row=node('section',undefined,'mcp-server'),heading=node('div',undefined,'mcp-heading');heading.append(node('strong',server.id),node('span',stateLabels[server.state]||'Unavailable','hint'));row.append(heading);
+    if(server.state==='connected'&&!resources.length)row.append(node('p','No resources published by this server.','hint'));
+    for(const item of resources.slice(0,100)){const resource=item.resource,detail=node('div',undefined,'mcp-resource');detail.append(node('strong',resource.name||resource.title||resource.uri));detail.append(node('code',resource.uri));if(resource.mimeType)detail.append(node('span',resource.mimeType,'hint'));if(resource.description)detail.append(node('p',resource.description,'hint'));row.append(detail);}
+    if(resources.length>100)row.append(node('p',`Showing 100 of ${resources.length} resources.`,'hint'));list.append(row);
   }
 }
 byId('settings-close').onclick=()=>{api.postMessage({type:'discardProviderKey'});settings.close();};
@@ -629,6 +642,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='provider-wire'){const label=byId('provider-mode');label.textContent=m.wire==='gemini-generate-content'?'Gemini GenerateContent':m.wire==='anthropic-messages'?'Claude Messages':providerWireLabel(m.wire)||'';label.hidden=!label.textContent;}
   else if(m.type==='settings-state'){byId('settings-status').textContent=m.text;byId('settings-save').disabled=!!m.busy;if(m.complete && settings.open)settings.close();}
   else if(m.type==='mcp-authorization'){renderMcpSettings(m);}
+  else if(m.type==='mcp-resources'){renderMcpResources(m);}
   else if(m.type==='mcp-error'){byId('mcp-status').textContent=m.text;}
   else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;forkCapability=m.forkSessions===true;refreshRename();refreshForkControls();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}byId('send').disabled=!canExecute()||activeRun||sessionBusy;renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
   else if(m.type==='user'){entry('user',{content:m.text});resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();clearRunActivity();}

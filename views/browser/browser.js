@@ -177,6 +177,11 @@ class BrowserController {
   }
   async command(message){if(this.disposed||!message||typeof message.type!=='string')return;const version=this.generation;
     if(message.type==='mcp-refresh')return this.readMcp();
+    if(message.type==='mcp-resources-refresh'){
+      this.post({type:'mcp-resources',busy:true});
+      try{const catalog=await this.client.mcpResources();if(this.current(version))this.post({type:'mcp-resources',busy:false,catalog});}
+      catch(error){if(this.current(version))this.post({type:'mcp-resources',busy:false,error:error.message});}return;
+    }
     if(message.type==='connections-refresh'||message.type==='connection-save'||message.type==='connection-remove'){
       const report=(state,completed)=>{if(this.current(version))this.post({type:'connections-state',state,...(completed?{completed}:{})});};
       try{

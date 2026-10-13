@@ -14533,7 +14533,7 @@
         "sourceSha256": "c9cdcfae613295a96299364649ea3b90d35a66e930c13846131ce2917e071a39",
         "surface": "GET /v1/mcp/resources; xmind_cli mcp-resources",
         "sourceAnchor": "\"/v1/mcp/resources\"",
-        "gap": "The local native backend discovers and paginates configured MCP resource catalogs with authentication and secret-reflection suppression. OpenCode's location query and response schema are not implemented, and editor acceptance remains unverified.",
+        "gap": "The local native backend discovers and paginates configured MCP resource catalogs with authentication and secret-reflection suppression. Browser and VS Code settings now expose explicit resource discovery with bounded, text-only rendering; OpenCode's location query and response schema are not implemented, and live rendered editor acceptance remains unverified.",
         "verifiedParity": false,
         "scope": "Source candidate and native integration coverage; not verified OpenCode contract parity."
       },

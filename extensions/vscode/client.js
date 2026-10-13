@@ -128,6 +128,7 @@ class BackendClient {
     planInteger(expected_revision);return validateProviderProfiles(await this.request('/v1/provider/configuration/import',{path,expected_revision}),true);
   }
   async mcpAuthorizationServers() { return validateMcpAuthorizationServers(await this.request('/v1/mcp/authorization/servers')); }
+  async mcpResources() { return validateMcpResourceCatalog(await this.request('/v1/mcp/resources')); }
   async startMcpAuthorization(server_id,expected_config_revision,expected_credential_revision,request_id) {
     mcpServerIdentity(server_id);planInteger(expected_config_revision,1);planInteger(expected_credential_revision);executionIdentity(request_id);
     return validateMcpAuthorizationAttempt(await this.request('/v1/mcp/authorization/attempts',{server_id,expected_config_revision,expected_credential_revision,request_id}),{id:request_id,server_id,config_revision:expected_config_revision,credential_revision:expected_credential_revision});
@@ -697,6 +698,22 @@ function validateConnectionProfiles(value){
 }
 function mcpFields(value,fields){if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field)))throw new Error('Invalid MCP authorization metadata');}
 function mcpServerIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(value))throw new Error('Invalid MCP server identity');return value;}
+function validateMcpResourceCatalog(value){
+  if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==2||!Object.hasOwn(value,'servers')||!Object.hasOwn(value,'resources')||!Array.isArray(value.servers)||!Array.isArray(value.resources)||value.servers.length>16||value.resources.length>1024)throw new Error('Invalid MCP resource catalog');
+  const servers=new Map();for(const server of value.servers){
+    if(!server||typeof server!=='object'||Array.isArray(server)||!['id','revision','enabled','state'].every(key=>Object.hasOwn(server,key)))throw new Error('Invalid MCP resource server');
+    const allowed=server.state==='connected'?['id','revision','enabled','state','resource_count']:['id','revision','enabled','state'];if(Object.keys(server).length!==allowed.length||allowed.some(key=>!Object.hasOwn(server,key)))throw new Error('Invalid MCP resource server');
+    mcpServerIdentity(server.id);planInteger(server.revision,1);if(typeof server.enabled!=='boolean'||!['disabled','unsupported','connected','authorization_required','unavailable'].includes(server.state)||server.state==='connected'&&!server.enabled)throw new Error('Invalid MCP resource server state');
+    if(server.state==='connected'&&(!Number.isSafeInteger(server.resource_count)||server.resource_count<0||server.resource_count>1024))throw new Error('Invalid MCP resource count');if(servers.has(server.id))throw new Error('Duplicate MCP resource server');servers.set(server.id,server);
+  }
+  const identities=new Set();for(const item of value.resources){
+    if(!item||typeof item!=='object'||Array.isArray(item)||Object.keys(item).length!==3||!Object.hasOwn(item,'server_id')||!Object.hasOwn(item,'config_revision')||!Object.hasOwn(item,'resource'))throw new Error('Invalid MCP resource entry');
+    const server=servers.get(mcpServerIdentity(item.server_id));planInteger(item.config_revision,1);if(!server||server.state!=='connected'||server.revision!==item.config_revision||!item.resource||typeof item.resource!=='object'||Array.isArray(item.resource)||typeof item.resource.uri!=='string'||!item.resource.uri||item.resource.uri.length>16384)throw new Error('Invalid MCP resource binding');
+    if(item.resource.name!==undefined&&(typeof item.resource.name!=='string'||item.resource.name.length>4096)||item.resource.title!==undefined&&(typeof item.resource.title!=='string'||item.resource.title.length>4096)||item.resource.description!==undefined&&(typeof item.resource.description!=='string'||item.resource.description.length>16384)||item.resource.mimeType!==undefined&&(typeof item.resource.mimeType!=='string'||item.resource.mimeType.length>256))throw new Error('Invalid MCP resource metadata');
+    const identity=item.server_id+'\0'+item.resource.uri;if(identities.has(identity))throw new Error('Duplicate MCP resource URI');identities.add(identity);
+  }
+  for(const [id,server] of servers)if(server.state==='connected'&&server.resource_count!==value.resources.filter(item=>item.server_id===id).length)throw new Error('MCP resource count changed');return value;
+}
 function validateMcpAuthorizationServers(value){
   mcpFields(value,['servers']);if(!Array.isArray(value.servers)||value.servers.length>16)throw new Error('Invalid MCP authorization servers');
   const ids=new Set();for(const server of value.servers){
@@ -852,5 +869,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
-else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpAuthorizationAttempt,McpAuthorizationController};
+if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController};
+else globalThis.XMindBackend={BackendClient,EventStreamSubscription,backendOrigin,validateToken,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController};

@@ -461,6 +461,12 @@ async function activate(context) {
           await vscode.commands.executeCommand(choice.command);
         } else if(message.type==='mcp-refresh'){
           await readMcp();
+        } else if(message.type==='mcp-resources-refresh'){
+          const resourceClient=client,resourceGeneration=generation,resourceEpoch=workspaceBackend.epoch;
+          const current=()=>panel===view&&client===resourceClient&&generation===resourceGeneration&&workspaceBackend.epoch===resourceEpoch&&configuredOrigin()===resourceClient.baseUrl;
+          post({type:'mcp-resources',busy:true});
+          try{const catalog=await resourceClient.mcpResources();if(current())post({type:'mcp-resources',busy:false,catalog});}
+          catch(error){if(current())post({type:'mcp-resources',busy:false,error:error.message});}
         } else if(['connections-refresh','connection-save','connection-remove'].includes(message.type)){
           const connectionClient=client,connectionGeneration=generation,connectionEpoch=workspaceBackend.epoch;
           const current=()=>panel===view&&client===connectionClient&&generation===connectionGeneration&&workspaceBackend.epoch===connectionEpoch&&configuredOrigin()===connectionClient.baseUrl;

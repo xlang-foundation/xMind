@@ -37,6 +37,7 @@ function harness(options={}) {
     if(target.pathname==='/v1/vcs/base')return {ok:true,json:async()=>options.vcsBase??null};
     if(target.pathname==='/v1/vcs/diff')return {ok:true,json:async()=>options.vcsDiff||[]};
     if(target.pathname.startsWith('/v1/mcp/authorization/'))return options.mcp?{ok:true,json:async()=>options.mcp(target.pathname,requestOptions)}:{ok:false,status:404,json:async()=>({detail:'Synthetic backend has no MCP login API'})};
+    if(target.pathname==='/v1/mcp/resources')return {ok:true,json:async()=>options.mcpResources||{servers:[],resources:[]}};
     let data;
     if(target.pathname.endsWith('/context/compact')){const body=JSON.parse(requestOptions.body);contextRequests.push(body);options.contextRecord={...options.contextRecord,head_revision:options.contextRecord.head_revision+1};data={id:body.id,state:'pending'};}
     else if(target.pathname.includes('/context/requests/'))data={id:target.pathname.split('/').at(-1),state:'completed'};
@@ -188,6 +189,11 @@ test('sidebar MCP login is bound to its backend and closing the sidebar detaches
  const h=harness({mcp:(path,options)=>{if(path.endsWith('/servers'))return {servers:[server]};if(path==='/v1/mcp/authorization/attempts'){const request=JSON.parse(options.body);admissions.push(request);value={id:request.request_id,server_id:request.server_id,config_revision:1,credential_revision:0,state:'discovering',authorization_url:null,expires_unix_ms:9999999999999,reason:null,cancellation_requested:false};}return value;}});await h.commands.get('agentflow.open')();const view=h.views[0];
  try{view.receive({type:'mcp-refresh'});await until(()=>view.posted.findLast(m=>m.type==='mcp-authorization')?.busy===false);view.receive({type:'mcp-start',server:server.id});await until(()=>view.posted.findLast(m=>m.type==='mcp-authorization')?.attempts.length===1);assert.equal(admissions.length,1);assert.equal(admissions[0].expected_config_revision,1);assert.equal(admissions[0].expected_credential_revision,0);assert.deepEqual(Object.keys(admissions[0]).sort(),['expected_config_revision','expected_credential_revision','request_id','server_id']);const saved=h.state.get('xmind.mcp.login');assert.equal(saved.url,'http://127.0.0.1:8765');assert.equal(saved.attempts[0].id,admissions[0].request_id);assert.ok(!JSON.stringify(saved).includes('authorization_url'));}
  finally{view.close();}assert.ok(!h.requests.some(path=>path.endsWith('/cancel')));
+});
+test('sidebar loads MCP resources from the currently opened workspace backend on explicit request',async()=>{
+ const catalog={servers:[{id:'tools.peer',revision:4,enabled:true,state:'connected',resource_count:1}],resources:[{server_id:'tools.peer',config_revision:4,resource:{uri:'fixture://readme',name:'README'}}]};const h=harness({mcpResources:catalog});await h.commands.get('agentflow.open')();const view=h.views[0];
+ try{view.receive({type:'mcp-resources-refresh'});await until(()=>view.posted.some(value=>value.type==='mcp-resources'&&value.busy===false));assert.ok(h.requests.includes('/v1/mcp/resources'));assert.deepEqual(JSON.parse(JSON.stringify(view.posted.findLast(value=>value.type==='mcp-resources'))),{type:'mcp-resources',busy:false,catalog});}
+ finally{view.close();}
 });
 test('right sidebar Settings manages public connection metadata through its opened workspace backend',async()=>{
  const h=harness();await h.commands.get('agentflow.open')();const view=h.views[0];
