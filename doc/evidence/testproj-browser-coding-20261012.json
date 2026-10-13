@@ -69,12 +69,18 @@
       "frontend_root": 200,
       "backend_docs": 200,
       "backend_openapi": 200,
+      "backend_endpoints": {
+        "/api/health": 200,
+        "/api/catalog/stats": 200,
+        "/api/models": 200
+      },
       "routes": ["/api/health", "/api/catalog/stats", "/api/models", "/api/models/{model_id}"]
     },
     "interactions": [
       "Selecting Image Classification changed the URL, narrowed results from 12 models to 3, and exposed the accessible Remove filter button.",
       "Activating Remove filter returned to 12 models and cleared the query string.",
-      "Searching for bert returned 2 models and updated the URL; Reset restored the unfiltered catalog."
+      "Searching for bert returned 2 models and updated the URL; Reset restored the unfiltered catalog.",
+      "Opening the GPT-2 card navigated to its populated model-detail view; Back to catalog returned to the catalog."
     ],
     "visual_check": "Desktop viewport showed the catalog hero, seeded-data disclosure, search/filter controls, and model cards without a loading/error state.",
     "limits": ["No mobile viewport override was available in this browser-control surface.", "No live Edge visual validation was performed."]
