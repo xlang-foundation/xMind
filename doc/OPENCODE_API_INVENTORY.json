@@ -14527,8 +14527,16 @@
         "mcp"
       ],
       "status": "missing",
-      "nativeStatus": "unmapped",
-      "nativeEvidence": null,
+      "nativeStatus": "partial-source-unverified",
+      "nativeEvidence": {
+        "source": "Native/src/mcp_resource_catalog.cpp",
+        "sourceSha256": "c9cdcfae613295a96299364649ea3b90d35a66e930c13846131ce2917e071a39",
+        "surface": "GET /v1/mcp/resources; xmind_cli mcp-resources",
+        "sourceAnchor": "\"/v1/mcp/resources\"",
+        "gap": "The local native backend discovers and paginates configured MCP resource catalogs with authentication and secret-reflection suppression. OpenCode's location query and response schema are not implemented, and editor acceptance remains unverified.",
+        "verifiedParity": false,
+        "scope": "Source candidate and native integration coverage; not verified OpenCode contract parity."
+      },
       "agentflowEvidence": null,
       "upstreamContract": {
         "parameters": [

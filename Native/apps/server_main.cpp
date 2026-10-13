@@ -28,6 +28,7 @@
 #include "agentflow/workspace_registry.hpp"
 #include "agentflow/local_profile.hpp"
 #include "agentflow/mcp_oauth_service.hpp"
+#include "agentflow/mcp_resource_catalog.hpp"
 #include "agentflow/xlang_python_config.hpp"
 #include "agentflow/pty_sessions.hpp"
 #include "nlohmann/json.hpp"
@@ -360,6 +361,7 @@ int run_server(int argc,char** argv) {
         std::unique_ptr<agentflow::BackendOwnerControl> owner_control;
         if(runtime_generation){const bool managed_profile=options.contains("--profile-state");if(managed_profile)runtime_generation->require_loaded_server_image();else runtime_generation->require_current_server();const auto actual=executor->execution_workspace();if(actual.root!=startup_workspace->root_path()||actual.workspace_id!=startup_workspace->identity())throw std::runtime_error("Qualified execution workspace changed during startup");owner_control=std::make_unique<agentflow::BackendOwnerControl>(persistence,*executor,*runtime_generation,graph_execution,auth,managed_profile);}
         auto mcp_oauth=std::make_unique<agentflow::McpOAuthService>(persistence,mcp_settings);
+        auto mcp_resources=std::make_unique<agentflow::NativeMcpResourceCatalog>(persistence,mcp_settings);
         std::unique_ptr<agentflow::PtySessions> terminals;
         if(executor&&options.contains("--workspace"))terminals=std::make_unique<agentflow::PtySessions>(executor->execution_workspace().root,system_command_shell());
 #endif
@@ -371,7 +373,7 @@ int run_server(int argc,char** argv) {
 #endif
             ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()},provider_setup,graph_execution,provider_profiles
 #if defined(_WIN32)
-            ,owner_control.get(),mcp_oauth.get(),terminals.get()
+            ,owner_control.get(),mcp_oauth.get(),terminals.get(),mcp_resources.get()
 #endif
         );const auto bound=server.bind(port);
 #if defined(_WIN32)
