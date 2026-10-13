@@ -51,6 +51,16 @@
     },
     "run_completion": "The file update and build succeeded, but xMind recorded a provider HTTP 400 (invalid_request_error) before a final agent response. No safe code or parameter was returned; the cause is still unknown."
   },
+  "saved_history_recovery": {
+    "action": "After the failed run, sent a no-tools follow-up asking for a concise summary of its persisted results.",
+    "outcome": "The run completed and accurately reported the restored filter controls, npm build exit code 0, Vite 6.4.4, 36 transformed modules and 583 ms build. No additional file or process tools were invoked.",
+    "model": "claude-sonnet-5-5",
+    "provider_reported_input_tokens": 21695,
+    "provider_reported_output_tokens": 590,
+    "first_token_ms": 5130,
+    "total_model_ms": 5260,
+    "implication": "A new turn recovered the final response from saved tool history; this does not identify the cause of the preceding HTTP 400 or prove automatic recovery."
+  },
   "live_model_zoo_validation": {
     "browser": "Codex in-app browser on the local machine; Edge was unavailable through the available browser-control surface.",
     "frontend_url": "http://127.0.0.1:5173/",
@@ -70,7 +80,7 @@
     "limits": ["No mobile viewport override was available in this browser-control surface.", "No live Edge visual validation was performed."]
   },
   "limitations": [
-    "Both multi-step coding runs applied their authorized file changes and produced a successful Vite build, but ended on provider HTTP 400 before a final response. The safe diagnostic does not identify the cause.",
+    "Both original multi-step coding runs ended on provider HTTP 400 before a final response. Their authorized edits were applied, the follow-up build exited 0, and a separate subsequent turn recovered a final summary from persisted results. The safe diagnostic does not identify the 400 cause or establish automatic recovery.",
     "The earlier selected DeepSeek conversation was cancelled after growing to about 64,000 input tokens and many tool turns; it was not used for these clean-session checks.",
     "The page was visually and interactively checked in the Codex in-app browser; Microsoft Edge and mobile viewport checks remain open.",
     "Backend route availability was checked over HTTP, but separate API contract or failure-path tests were not run."
