@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-13",
+  "result": "passed",
+  "scope": "Official xlang3 lrpc smoke against the Release runtime selected by the xMind native CMake build",
+  "xlang3Branch": "fix/pytest-pathaware-hook-proxy",
+  "xlang3SourceRevision": "b3ec9bf4",
+  "originMainBase": "f0c425cff5b6bf47f18144b31e4dc1ac16c9a9f7",
+  "xmindCmakeRuntime": "D:/CantorAI2026/xlang3/build-pytest-pathaware/Release",
+  "xmindCopiedRuntimeDllMatches": true,
+  "command": "pwsh -NoProfile -File tests/ipc/run_lrpc_smoke.ps1 -XLang3 build-pytest-pathaware/Release/xlang3.exe -NativeClient build-pytest-pathaware/Release/xlang3_cpp_ipc_client.exe",
+  "checks": [
+    "xlang3 script client",
+    "four parallel xlang3 script clients",
+    "native C++ ImportRemote client",
+    "nested values, returned objects/callables, binary transfers, payload-limit rejection and post-failure recovery"
+  ],
+  "exitCode": 0,
+  "output": [
+    "C++ shared-memory IPC passed",
+    "ipc lrpc smoke ok"
+  ],
+  "binarySha256": {
+    "xlang3.exe": "1d78fbf391214691db92b80b9939697cc4cfbebd1dcb6f40842cea81341cfcc5",
+    "xlang3_runtime.dll": "88c109a947e5e085e99cb58be52ba7b1a3fe07ab9dcd2c3d20b469fc285bb068",
+    "xlang3_cpp_ipc_client.exe": "faa540e23c722abb03380bcee6dc8f00fce25c65c6dda2e54c7347955c6515e4"
+  },
+  "cpythonExecuted": false,
+  "agentWorkerIntegration": false,
+  "throughputClaimed": false
+}

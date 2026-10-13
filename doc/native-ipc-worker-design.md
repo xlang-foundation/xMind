@@ -23,6 +23,19 @@ The three executed binary hashes were unchanged. No SDK rebuild, CPython
 execution, primary xlang3 checkout mutation or throughput benchmark occurred.
 [Scoped local evidence](evidence/xlang3-ipc-foundation-local.json).
 
+## xMind-selected runtime validation — 2026-10-13
+
+The official `tests/ipc/run_lrpc_smoke.ps1` was rerun against the exact
+`build-pytest-pathaware/Release` xlang3 runtime selected in the xMind native
+CMake cache. The script client, four concurrent script clients, and native
+C++ `ImportRemote` client all passed, including nested values, returned
+objects/callables, binary transfers, payload-limit rejection and recovery.
+The xlang3 runtime DLL copied beside the xMind native build has the same
+SHA-256 as the tested DLL. The complete sanitized invocation and binary hashes
+are in [selected-runtime evidence](evidence/xlang3-ipc-selected-runtime-20261013.json).
+This closes the exact-runtime transport smoke gap only; xMind worker identity,
+authorization, agent dispatch and failure reconciliation remain unimplemented.
+
 Further failure, ownership and authorization acceptance must be performed
 against the exact runtime selected for xMind before production IPC admission.
 The existing probe returns endpoint process identity; endpoint discovery alone
