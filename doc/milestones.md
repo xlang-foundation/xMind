@@ -1,5 +1,24 @@
 # Reviewable milestones
 
+## Post-fix native provider and MCP regression gate — 2026-10-13
+
+The exact pushed xMind source `ccaeb07` passes the full **144/144 native
+Release CTest suite in 676.83 seconds**, with no failures or skips. This includes
+Responses-history wire preservation, Claude/Gemini/DeepSeek cross-wire history
+checks, modern and legacy official MCP SDK tool peers, native MCP resources,
+graph/MCP/A2A, CLI, and managed local-profile/view lifecycle tests. The first
+run's three failures and the four passing focused retests are preserved beside
+the clean full rerun. Rebuilding also exercised the separate configured
+`build/native` output tree and left the active backend build directory alone.
+[Full CTest output](evidence/native-144-ctest-postfix-20261013.log),
+[failure/fix history](evidence/native-144-ctest-20261013.log).
+
+The source-generated OpenCode V2.0.26 inventory was refreshed against its
+pinned commit: **141 operations, 32 partial native source candidates, 109
+unmapped, and zero verified operation-level parity**. OpenCode and LiteLLM
+remain references; no foreign implementation was added. The broader coding,
+CLI/editor and endpoint parity gaps remain open in [PARITY.md](PARITY.md).
+
 ## Backend-paired xlang3 process profile — 2026-10-13
 
 When a Windows local backend initializes its trusted process registry, its

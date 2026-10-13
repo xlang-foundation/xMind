@@ -1,23 +1,25 @@
 # Current native validation
 
-## Provider history bridge — 2026-10-13
+## Native provider history, MCP SDK and Release validation — 2026-10-13
 
-The native gateway now validates recognized Claude, Gemini, Responses and
-DeepSeek receipts against saved assistant data, then strips only foreign-wire
-receipts in a request copy. Durable conversation history and same-wire receipts
-remain intact. Canonical text, tool calls and tool results can cross to another
-supported serializer; opaque reasoning/signatures and target-incompatible
-history remain rejected before transport. Release contracts passed **3/3**:
-the bridge conversion contract, Gemini history replay contract, and a synthetic
-HTTP/SSE acceptance that switches Claude tool history to Gemini. Exact output:
-[provider-history-bridge-local-20261013.log](evidence/provider-history-bridge-local-20261013.log).
+The full Release build succeeded in `build/native`, which uses an isolated
+contract output directory. Anthropic, Gemini and DeepSeek history receipts are
+validated before canonical text/tool projection onto compatible foreign wires.
+Responses receipts are retained only for Responses replay; switching to Chat
+fails with the durable `incompatible_provider_history` reason. A synthetic
+Claude-to-Gemini tool-history transport remains covered. The official MCP SDK
+modern and legacy tool peers pass their actual approval, denial, cancellation
+and uncertainty flows; native resource-catalog tests run against the separate
+native peer that implements those methods.
 
-The full native all-target build was not completed in the active local build
-directory because its existing xMind process holds `xmind.exe` and the staged
-`xlang3_runtime.dll` open; MSBuild reported access denied while copying the
-runtime and LNK1104 for the executable. The focused bridge/provider contracts
-were built and passed against the existing Release runtime. Hosted native
-validation remains authoritative for the full source.
+The first full 144-test run exposed three failures: the Responses-to-Chat
+fail-closed contract and two SDK tests that mistakenly ran native-only resource
+modes against SDK tool-only peers. Those issues were corrected; the four focused
+regression contracts passed, then the complete post-fix Release suite passed
+**144/144 in 676.83 seconds**, with zero failures or skips. The full transcript
+is [native-144-ctest-postfix-20261013.log](evidence/native-144-ctest-postfix-20261013.log).
+The earlier failures and their focused retest are retained at
+[native-144-ctest-20261013.log](evidence/native-144-ctest-20261013.log).
 
 ## Packaged xlang3 plugin integration — 2026-10-13
 
