@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-13",
+  "result": "passed",
+  "scope": "Local packaged xMind runtime startup with xlang3 pytest compatibility branch",
+  "xmindSourceRevision": "74111500119112242f4027cb08881026d5e48011",
+  "xmindCurrentMainRevision": "37d862f7bb22d245a8310e2d64988348267c725c",
+  "xlang3Branch": "fix/pytest-pathaware-hook-proxy",
+  "xlang3Revision": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+  "runtimeManifestSha256": "0fb615a901515da8e48d5b4e1cff12acc242e63e641eb2f6a1235f1adc9f19fd",
+  "vsixSha256": "6d337d2af47f2b851b9ae1cefedf2c4012e349877c96e3e7ce6daa53fc3714b6",
+  "checks": {
+    "packagedNativeCli": "xmind.exe --help passed",
+    "freshProfile": "profile-info returned started=true for TestProj",
+    "profileServer": "sessions returned an empty JSON list from the fresh SQLite profile",
+    "managedRuntimeCopy": "xlang3.exe hash matched the bundled xlang3.exe",
+    "sqliteCreatedBytes": 638976,
+    "temporaryOwner": "stopped after idle acceptance"
+  },
+  "limits": [
+    "No model request or workspace write was part of this runtime smoke test.",
+    "The installed VS Code host process-to-owner link remains separately unverified.",
+    "The package was built from xMind 7411150 source and xlang3 f6bbc56; xMind main HEAD now contains a documentation-only validation checkpoint on top."
+  ]
+}

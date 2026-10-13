@@ -1,5 +1,18 @@
 # Current native validation
 
+## Packaged runtime owner startup with xlang3 compatibility branch — 2026-10-13
+
+The packaged `xmind.exe` started a fresh local TestProj profile with
+`started=true`, created its SQLite database, and served the CLI `sessions`
+request from that profile. The managed runtime copy's `xlang3.exe` SHA-256
+matched the VSIX-bundled executable. The isolated, idle owner was stopped after
+the check. This directly verifies package-to-native-owner startup with xlang3
+branch `fix/pytest-pathaware-hook-proxy` at `f6bbc56`; it does not include a
+model request or workspace write, and the installed VS Code host's attribution
+to this owner remains unverified. The package binaries came from xMind source
+`7411150`; current xMind main `37d862f` adds the validation record.
+[Run evidence](evidence/native-packaged-runtime-owner-smoke-20261013.json).
+
 ## Live webpage provider and coding acceptance — 2026-10-13
 
 The local webpage loaded the saved Claude, Gemini, DeepSeek and OpenAI profiles
