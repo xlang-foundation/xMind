@@ -13,9 +13,18 @@ TestProj's Model Zoo backend passed **9/9** pytest API tests on xlang3 with
 pytest 8.4.2, FastAPI 0.120.4 and Pydantic 2.13.5. TestProj's broad Pydantic
 `<3.0` constraint also admits Pydantic 2.14.1, which requires native Pydantic
 Core 2.50.1; that combination remains unsupported by the pinned 2.46.5
-implementation. xMind still builds against xlang3 `main` `f0c425cf`; this
-candidate is not merged or installed in xMind's active runtime, so the webpage
-and VS Code pytest flow remain unverified with the fix. The branch benchmark
+implementation. An isolated xMind Release build against the candidate passed
+**137/137 native CTest contracts**; the webpage adapter passed **99/99 browser
+tests**. A live local browser-adapter session attached to TestProj without a
+server-token prompt, discovered **13 Claude, 11 Gemini, 2 DeepSeek and 20
+OpenAI models** from the saved `.config/providers.yaml`, selected OpenAI
+`gpt-4.1`, and completed a read-only Model Zoo design review with **29,690 input
+and 592 output tokens**. It made no TestProj edits. This validates the candidate
+through the xMind server and browser session/API paths. A visible external Edge
+interaction and the VS Code pytest flow remain unverified. xMind's default build
+still uses xlang3 `main` `f0c425cf`; the candidate is not merged or installed as
+the default runtime. The live candidate preview is available at
+`http://127.0.0.1:60543/ui/` while its local backend remains running. The branch benchmark
 [report](https://github.com/CantorAI/xlang3/blob/d5d2f7c7/doc/performance/data/pytest-pathaware-hook-proxy-20261012.json)
 records per-case results.
 
