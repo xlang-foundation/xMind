@@ -25,6 +25,8 @@ const peer=createServer((request,response)=>{
       assert.equal(body.model,prompt==='allowed'?'synthetic-edit-alternate':'synthetic-edit-protocol-model');assert.equal(body.stream_options.include_usage,true);
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
       if(prompt==='stale-recover'){
+        assert.match(body.messages.findLast(message=>message.role==='system').content,/Trusted workspace edit recovery policy/);
+        assert.match(body.messages.findLast(message=>message.role==='system').content,/do not ask the user to restate the request/);
         const step=(recoverySteps.get(prompt)??0)+1;recoverySteps.set(prompt,step);
         const call=(name,args)=>({index:0,id:`stale-recover-${step}`,type:'function',function:{name,arguments:JSON.stringify(args)}});
         if(step===1){assert.equal(tool,undefined);delta={tool_calls:[call('edit_file',{path:'stale-recovery.txt',old_text:'stale text from earlier context',new_text:'recovered edit'})]};finish='tool_calls';}

@@ -11,9 +11,18 @@ the stale call left the file unchanged, `read_file` returned the current
 contents, a newly approved exact edit succeeded, and the final file contained
 only the approved replacement. Release `native_agent_runner_contract` and
 `native_agent_edit_http_contract` passed **2/2**. This is backend contract
-evidence; live recovery through the webpage and VS Code clients remains to be
-verified. The original TestProj browser run still required manual completion of
-the repair after repeated stale-edit conflicts.
+evidence.
+
+The same race was then exercised in the live webpage with OpenAI `gpt-4.1` on
+TestProj. After the first exact edit reached approval, the disposable test file
+was changed from `version=baseline` to `version=current`. Approving the stale
+proposal produced `content_conflict` with no write. The model reread the actual
+file, proposed a fresh edit from `version=current` to `version=recovered`, and
+completed after the second normal approval. The run reported no other files
+modified; the recovered bytes were verified and the temporary test file was
+removed. This acceptance used an isolated verified xMind Release package and
+profile. It verifies this webpage recovery path with one real provider/model;
+VS Code recovery and broader conflict cases remain open.
 
 ## TestProj webpage coding acceptance — 2026-10-13
 
@@ -33,9 +42,9 @@ search/task/framework filters, and a model saved from API page 2 appearing in
 Saved Models after returning to page 1. Unsave removed records immediately and
 the empty state appeared when the final saved record was removed. Test saves
 were cleared after the check. This validates one local browser coding workflow
-and the Model Zoo test project; it does not establish reliable model-authored
-file edits after a content conflict, full pytest/API test suites, or installed
-VS Code write/command acceptance. No backend or model-data files changed.
+and the Model Zoo test project. Full pytest/API test suites and installed VS
+Code write/command acceptance remain open. No backend or model-data files
+changed.
 
 ## xlang3 pytest and mmap compatibility branch — 2026-10-13
 

@@ -462,6 +462,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         ModelRequest request;request.include_usage=settings_.provider.stream_usage==Capability::supported;
         request.max_output_tokens=settings_.max_output_tokens;
         auto agent_instructions=settings_.instructions;
+        if(settings_.approved_edits&&workspace_){
+            agent_instructions.append("\n\nTrusted workspace edit recovery policy: If an edit/create/patch call returns content_conflict, reread the current file or target state before retrying. When the user's requested outcome remains clear from the current contents, make a fresh tool call based on those contents and preserve unrelated intervening changes; do not ask the user to restate the request only because an old precondition changed. The fresh proposal still requires the normal approval. Stop and explain or ask only when the new state makes the requested outcome genuinely ambiguous. Never repeat stale arguments or claim a write occurred before approval and a successful tool result.");
+        }
         if(!graph_instructions.empty()){
             agent_instructions.append("\n\nSelected agent instructions (trusted backend snapshot):\n");
             agent_instructions+=graph_instructions;
@@ -819,7 +822,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const A2aEffectNotDispatched&) {output={{"error",{{"code","a2a_not_dispatched"},{"message","Remote A2A request was not dispatched"}}}};}
                 catch(const ProcessBeforeDispatchError&) {output={{"error",{{"code","process_not_dispatched"},{"message","Process did not execute; launch preconditions were unavailable or changed"}}}};}
                 catch(const ToolGuidanceChanged&) {output={{"error",{{"code","repository_instructions_required"},{"message","Approved proposal was retired without dispatch because repository guidance changed. Updated guidance will be supplied before a new call and new approval."}}}};}
-                catch(const ToolContentConflict&) {output={{"error",{{"code","content_conflict"},{"message","No file effect was applied because the current contents or target preconditions changed. Re-read the current state with read_file or search_files, rebuild the appropriate edit/create/patch arguments from that state, and retry with a fresh call; do not repeat stale arguments. For edit_file, old_text must exactly match the current file contents."}}}};}
+                catch(const ToolContentConflict&) {output={{"error",{{"code","content_conflict"},{"message","No file effect was applied because the current contents or target preconditions changed. Re-read the current state with read_file or search_files, then make a fresh edit/create/patch call from that state. If the user's requested result remains clear, preserve unrelated changes and retry without asking them to restate it; normal approval still applies. Stop only if the new state makes the requested outcome ambiguous. Do not repeat stale arguments. For edit_file, old_text must exactly match the current file contents."}}}};}
                 catch(const ToolCancelled&) {throw;}
                 catch(const XlangPythonCancelled&) {throw ToolCancelled("Trusted xlang3 tool call cancelled");}
                 catch(const XlangPythonExecutionError&) {output={{"error",{{"code","xlang3_tool_failed"},{"message","Trusted xlang3 tool execution failed"}}}};}

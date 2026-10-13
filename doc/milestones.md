@@ -7,8 +7,12 @@ now receives instructions to reread current contents and create a fresh
 proposal. The native HTTP integration contract verified that a stale proposal
 has no file effect, the agent reads the actual workspace file, and only the
 freshly approved exact edit is applied. Both the native runner and edit HTTP
-contracts pass in Release. The model peer is synthetic, so live webpage and
-VS Code recovery still need validation.
+contracts pass in Release. A live webpage run with OpenAI `gpt-4.1` then
+reproduced the race in TestProj: after the file changed between proposal and
+approval, the stale edit was rejected, the model reread the current bytes, and
+it submitted a fresh `version=current` to `version=recovered` proposal. The
+second normal approval completed the run; the temporary smoke-test file was
+removed after verifying its contents. VS Code recovery remains to be tested.
 
 ## Live webpage coding pass against TestProj — 2026-10-12
 
