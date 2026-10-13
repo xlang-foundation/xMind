@@ -1,5 +1,16 @@
 # Reviewable milestones
 
+## Batched coding-edit guidance after live TestProj run — 2026-10-13
+
+The coding tools now direct the model to use one `apply_patch` proposal for
+related edits and multiple hunks, and reserve `edit_file` for a focused literal
+replacement. Per-file controller approval, exact-context matching, and partial
+batch reporting are unchanged. This addresses the live TestProj run where many
+small sequential edits exhausted the run before its successful Vite build could
+be reported; the focused native Release `native_patch_tool_contract` passes.
+This verifies tool-contract guidance only: a follow-up live browser run is still
+needed to measure whether batching resolves the timeout in practice.
+
 ## Post-fix native provider and MCP regression gate — 2026-10-13
 
 The exact pushed xMind source `ccaeb07` passes the full **144/144 native
