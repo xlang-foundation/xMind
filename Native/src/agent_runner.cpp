@@ -819,7 +819,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const A2aEffectNotDispatched&) {output={{"error",{{"code","a2a_not_dispatched"},{"message","Remote A2A request was not dispatched"}}}};}
                 catch(const ProcessBeforeDispatchError&) {output={{"error",{{"code","process_not_dispatched"},{"message","Process did not execute; launch preconditions were unavailable or changed"}}}};}
                 catch(const ToolGuidanceChanged&) {output={{"error",{{"code","repository_instructions_required"},{"message","Approved proposal was retired without dispatch because repository guidance changed. Updated guidance will be supplied before a new call and new approval."}}}};}
-                catch(const ToolContentConflict&) {output={{"error",{{"code","content_conflict"},{"message","File contents, identity, replacement count or target absence no longer match the operation"}}}};}
+                catch(const ToolContentConflict&) {output={{"error",{{"code","content_conflict"},{"message","No file effect was applied because the current contents or target preconditions changed. Re-read the current state with read_file or search_files, rebuild the appropriate edit/create/patch arguments from that state, and retry with a fresh call; do not repeat stale arguments. For edit_file, old_text must exactly match the current file contents."}}}};}
                 catch(const ToolCancelled&) {throw;}
                 catch(const XlangPythonCancelled&) {throw ToolCancelled("Trusted xlang3 tool call cancelled");}
                 catch(const XlangPythonExecutionError&) {output={{"error",{{"code","xlang3_tool_failed"},{"message","Trusted xlang3 tool execution failed"}}}};}

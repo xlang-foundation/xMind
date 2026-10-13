@@ -15,6 +15,7 @@ let child,port,errors='',peerError,requests=0;
 const continuations=new Map();
 const scopeSteps=new Map();
 const approvalSteps=new Map();
+const recoverySteps=new Map();
 const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});request.on('end',async()=>{
     try {
@@ -23,7 +24,14 @@ const peer=createServer((request,response)=>{
       const prompt=body.messages.findLast(message=>message.role==='user').content;
       assert.equal(body.model,prompt==='allowed'?'synthetic-edit-alternate':'synthetic-edit-protocol-model');assert.equal(body.stream_options.include_usage,true);
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
-      if(prompt.startsWith('approval-')){
+      if(prompt==='stale-recover'){
+        const step=(recoverySteps.get(prompt)??0)+1;recoverySteps.set(prompt,step);
+        const call=(name,args)=>({index:0,id:`stale-recover-${step}`,type:'function',function:{name,arguments:JSON.stringify(args)}});
+        if(step===1){assert.equal(tool,undefined);delta={tool_calls:[call('edit_file',{path:'stale-recovery.txt',old_text:'stale text from earlier context',new_text:'recovered edit'})]};finish='tool_calls';}
+        else if(step===2){const outcome=JSON.parse(tool.content);assert.equal(outcome.error.code,'content_conflict');assert.match(outcome.error.message,/No file effect was applied/);assert.match(outcome.error.message,/read_file/);assert.equal(await readFile(join(workspace,'stale-recovery.txt'),'utf8'),'original\n');delta={tool_calls:[call('read_file',{path:'stale-recovery.txt'})]};finish='tool_calls';}
+        else if(step===3){const current=JSON.parse(tool.content);assert.equal(current.content,'original\n','Recovery must use the exact bytes returned by the fresh read');delta={tool_calls:[call('edit_file',{path:current.path,old_text:current.content,new_text:'recovered edit'})]};finish='tool_calls';}
+        else {const outcome=JSON.parse(tool.content);assert.ok(outcome.operation_id&&outcome.content_sha256,'The fresh retry must reach normal exact approval');continuations.set(prompt,outcome);delta={content:'Synthetic continuation after reread, fresh proposal, approval and actual edit'};finish='stop';}
+      }else if(prompt.startsWith('approval-')){
         const step=(approvalSteps.get(prompt)??0)+1;approvalSteps.set(prompt,step);const creation=prompt==='approval-create';
         const call={index:0,id:`${prompt}-${step}`,type:'function',function:{name:creation?'create_file':'edit_file',arguments:JSON.stringify(creation?{path:`${prompt}/target.txt`,content:'approval create applied\n'}:{path:`${prompt}/target.txt`,old_text:'original',new_text:'approval edit applied'})}};
         const outcome=tool?JSON.parse(tool.content):undefined;
@@ -120,10 +128,19 @@ async function stop() {
   if(child && child.exitCode===null) {const exited=new Promise(resolve=>child.once('exit',resolve));child.kill();await exited;}
 }
 try {
-  await mkdir(workspace);await Promise.all(['allowed','denied','stale','cancelled','interrupted'].map(name=>writeFile(join(workspace,`${name}.txt`),'original\n')));
+  await mkdir(workspace);await Promise.all(['allowed','denied','stale','cancelled','interrupted','stale-recovery'].map(name=>writeFile(join(workspace,`${name}.txt`),'original\n')));
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));await start();
   assert.equal((await api('/v1/health')).file_edit_proposals,true,'Advertised native permission must match the actual create/edit tool catalogue and approval execution below');
   assert.deepEqual(cli('models'),{default_model:'synthetic-edit-protocol-model',models:[{id:'synthetic-edit-protocol-model'},{id:'synthetic-edit-alternate'}]});
+  await api('/v1/sessions',{id:'stale-recover',title:'Fresh edit after a stale precondition'});
+  const recoveryRun=cli('run','stale-recover','stale-recover');
+  const [recoveryProposal]=await until(()=>api(`/v1/runs/${recoveryRun.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'));
+  assert.equal(recoverySteps.get('stale-recover'),3,'The agent must report the conflict, reread actual bytes and submit one fresh edit');
+  assert.equal(recoveryProposal.tool,'replace_file');assert.equal(JSON.parse(recoveryProposal.arguments_json).before_content,'original\n');
+  assert.equal(await readFile(join(workspace,'stale-recovery.txt'),'utf8'),'original\n','No write may occur before the fresh proposal is approved');
+  const recoveryEvents=await api(`/v1/runs/${recoveryRun.id}/events`);assert.equal(recoveryEvents.filter(event=>event.kind==='tool.failed'&&event.data.data.error?.code==='content_conflict').length,1);assert.ok(recoveryEvents.some(event=>event.kind==='tool.completed'&&event.data.name==='read_file'));
+  cli('decide',recoveryProposal.id,'allow');await until(()=>api(`/v1/runs/${recoveryRun.id}`),value=>value.state==='completed');
+  assert.equal(recoverySteps.get('stale-recover'),4);assert.equal((await api(`/v1/operations/${recoveryProposal.id}`)).state,'succeeded');assert.equal(await readFile(join(workspace,'stale-recovery.txt'),'utf8'),'recovered edit');
   for(const [name,decision] of [['allowed','allow'],['denied','deny']]){
     const records=await approvedChat(name,decision),proposal=records.find(record=>record.type==='operation_review').operation;
     assert.equal((await api(`/v1/operations/${proposal.id}`)).state,decision==='allow'?'succeeded':'denied');
@@ -228,7 +245,7 @@ try {
   assert.equal(await readFile(join(workspace,'allowed.txt'),'utf8'),'changed allowed\n');
   const retired=await fetch(`http://127.0.0.1:${port}/v1/operations/${interrupted.id}/decision`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({decision:'allow'}),signal:AbortSignal.timeout(5000)});
   assert.equal(retired.status,409,'Restart must not grant an unused approval to a retired owner');
-  const additionalConsoleRequests=1 /* resumed denial continuation */ + 1 /* new cancellation case */;
+  const additionalConsoleRequests=1 /* resumed denial continuation */ + 1 /* new cancellation case */ + 4 /* stale edit, exact reread, fresh approved retry and actual outcome continuation */;
   const parentCreationRequests=3;assert.equal(scopeSteps.get('scope-create-parents'),parentCreationRequests,'New parent creation has exactly guidance discovery, one effect request and actual continuation');
   assert.equal(requests,48+additionalConsoleRequests+parentCreationRequests,'Original scenario baseline plus checked console-control and parent-creation calls');if(peerError) throw peerError;
   console.log('Compiled native agent edit loop passed: real approved edits, denial, stale content, cancellation, actual tool-result continuation and pending-approval restart recovery. Inference is synthetic.');

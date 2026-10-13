@@ -1,5 +1,15 @@
 # Reviewable milestones
 
+## Native agent recovery after stale edit — 2026-10-13
+
+When an `edit_file` proposal is rejected because the file changed, the agent
+now receives instructions to reread current contents and create a fresh
+proposal. The native HTTP integration contract verified that a stale proposal
+has no file effect, the agent reads the actual workspace file, and only the
+freshly approved exact edit is applied. Both the native runner and edit HTTP
+contracts pass in Release. The model peer is synthetic, so live webpage and
+VS Code recovery still need validation.
+
 ## Live webpage coding pass against TestProj — 2026-10-12
 
 The webpage xMind client completed a model-assisted catalog design task against

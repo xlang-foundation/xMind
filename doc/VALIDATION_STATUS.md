@@ -1,5 +1,20 @@
 # Current native validation
 
+## Native agent stale-edit recovery — 2026-10-13
+
+The agent now receives explicit recovery guidance when an edit proposal fails
+because its file preconditions are stale: no effect was applied, it must reread
+the current file, and it must submit a fresh proposal based on those bytes.
+`edit_file` documents the same behavior. The native HTTP agent contract exercised
+the full sequence with a synthetic model peer and a real temporary workspace:
+the stale call left the file unchanged, `read_file` returned the current
+contents, a newly approved exact edit succeeded, and the final file contained
+only the approved replacement. Release `native_agent_runner_contract` and
+`native_agent_edit_http_contract` passed **2/2**. This is backend contract
+evidence; live recovery through the webpage and VS Code clients remains to be
+verified. The original TestProj browser run still required manual completion of
+the repair after repeated stale-edit conflicts.
+
 ## TestProj webpage coding acceptance — 2026-10-13
 
 The local xMind webpage was connected to the saved TestProj workspace and ran
