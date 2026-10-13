@@ -13,6 +13,16 @@ covering managed startup, encrypted rendezvous, concurrent attach,
 profile-preserving upgrade/recovery and persisted graph history. Exact CTest
 output: [native-cli-vscode-shared-profile-20261013.log](evidence/native-cli-vscode-shared-profile-20261013.log).
 
+## Live native CLI agent turn — 2026-10-13
+
+From `xmind chat` on that same TestProj profile, Claude Sonnet 4.6 read
+`model-zoo/frontend/package.json` through the native `read_file` tool and
+reported the package name and Vue 3 framework. The run completed with CLI exit
+status **0**, returned provider-reported usage for both model calls, and made
+no workspace changes. This verifies one live CLI provider/tool cycle, not
+approval-based writes, terminal execution or full interactive CLI parity.
+[Sanitized run metadata](evidence/cli-live-modelzoo-20261013.json).
+
 ## Native A2A Windows contract checkpoint — 2026-10-13
 
 The local Release build passed all seven focused A2A CTests on Windows:
