@@ -1,0 +1,11 @@
+Test project D:/CantorAI2026/xMind/build/native-xlang3-d5d2f7
+    Start 14: native_gemini_history_contract
+1/3 Test #14: native_gemini_history_contract ............   Passed    0.11 sec
+    Start 15: native_provider_history_bridge_contract
+2/3 Test #15: native_provider_history_bridge_contract ...   Passed    0.03 sec
+    Start 92: native_gemini_provider_contract
+3/3 Test #92: native_gemini_provider_contract ...........   Passed    0.21 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   0.37 sec

@@ -42,6 +42,9 @@ Json receipt(const ModelMessage& message,const std::string& model){
     return original;
 }
 }
+void validate_deepseek_history_message(const ModelMessage& message,const std::string& model){
+    try{(void)receipt(message,model);}catch(const Json::exception&){incompatible();}
+}
 std::string serialize_deepseek_request(const ChatProviderConfig& config,const ModelRequest& request){
     if(config.wire!=ProviderWire::chat_completions||config.chat_dialect!=ChatDialect::deepseek)
         throw std::invalid_argument("DeepSeek requires its explicit native chat policy");

@@ -48,6 +48,10 @@ struct ChatProviderConfig {
     // Explicit backend dialect; never inferred from an endpoint or model ID.
     ChatDialect chat_dialect=ChatDialect::openai;
 };
+// Validate saved native provider receipts and make a per-request canonical
+// projection when conversation history crosses provider wires. The persisted
+// history is never modified.
+ModelRequest project_provider_history(const ChatProviderConfig& target,const ModelRequest& request);
 // Pure native request serialization; no model/provider availability is inferred.
 std::string serialize_chat_request(const ChatProviderConfig& config,const ModelRequest& request);
 // Common field/correlation validation for the bounded Responses input window.

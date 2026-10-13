@@ -61,13 +61,14 @@ ModelCompletion complete_model(const ChatProviderConfig& config,const ModelReque
     if(config.chat_dialect!=ChatDialect::openai&&
         (config.chat_dialect!=ChatDialect::deepseek||config.wire!=ProviderWire::chat_completions))
         throw std::invalid_argument("Invalid provider chat dialect binding");
-    if(config.wire==ProviderWire::chat_completions)return complete_chat(config,request,bearer,std::move(sink),cancel);
+    const auto projected=project_provider_history(config,request);const auto& history=projected;
+    if(config.wire==ProviderWire::chat_completions)return complete_chat(config,history,bearer,std::move(sink),cancel);
     if(config.wire==ProviderWire::gemini_generate_content){
         if(!sink)throw std::invalid_argument("Model event sink is required");
         if(config.reasoning_effort)throw std::invalid_argument("Gemini reasoning controls are not implemented");
         if(request.include_usage&&config.stream_usage!=Capability::supported)throw std::invalid_argument("Gemini usage capability is unknown or unsupported");
         if(request.max_output_tokens&&config.output_limit!=Capability::supported)throw std::invalid_argument("Gemini output capability is unknown or unsupported");
-        const auto adapted=gemini_model_request(request,config.tools);
+        const auto adapted=gemini_model_request(history,config.tools);
         const auto wire=complete_gemini({config.endpoint,config.model,config.deadline,config.idle_timeout},adapted,bearer,[&](const ModelEvent& event){
             if(event.kind=="model.finish"||event.kind=="model.done")return;
             if(event.kind=="model.usage")sink({event.kind,gemini_model_usage(event.json)});else sink(event);
@@ -77,7 +78,7 @@ ModelCompletion complete_model(const ChatProviderConfig& config,const ModelReque
         sink({"model.finish",nlohmann::json{{"reason",result.finish_reason},{"provider_reason",wire.provider_finish_reason}}.dump()});sink({"model.done","{}"});return result;
     }
     if(config.wire==ProviderWire::anthropic_messages){
-        const auto body=serialize_anthropic_request(config,request);
+        const auto body=serialize_anthropic_request(config,history);
         if(!sink)throw std::invalid_argument("Model event sink is required");
         if(!bearer)throw std::invalid_argument("Claude requires a backend credential");
         AnthropicStream stream([&](const ModelEvent& event){
@@ -87,14 +88,14 @@ ModelCompletion complete_model(const ChatProviderConfig& config,const ModelReque
         post_event_stream({config.endpoint,body,config.deadline,config.idle_timeout,CredentialHeader::x_api_key,ProviderHttpProtocol::anthropic},bearer,[&](std::string_view bytes){stream.feed(bytes);},cancel);
         auto result=stream.finish();
         result.usage_json=anthropic_model_usage(result.usage_json);
-        std::set<std::string> names;for(const auto& tool:request.tools)names.insert(tool.name);
+        std::set<std::string> names;for(const auto& tool:history.tools)names.insert(tool.name);
         for(const auto& call:result.tool_calls)if(!names.contains(call.name))throw ModelProtocolError("Provider requested a tool outside this request");
         sink({"model.done","{}"});return result;
     }
     if(config.wire!=ProviderWire::responses)throw std::invalid_argument("Unsupported provider wire");
-    const auto body=serialize_responses_request(config,request);if(!sink)throw std::invalid_argument("Model event sink is required");
+    const auto body=serialize_responses_request(config,history);if(!sink)throw std::invalid_argument("Model event sink is required");
     ResponsesStream stream([&](const ModelEvent& event){if(event.kind!="model.done")sink(event);});
     post_event_stream({config.endpoint,body,config.deadline,config.idle_timeout},bearer,[&](std::string_view bytes){stream.feed(bytes);},cancel);
-    auto result=stream.finish();std::set<std::string> names;for(const auto& tool:request.tools)names.insert(tool.name);for(const auto& call:result.tool_calls)if(!names.contains(call.name))throw ModelProtocolError("Provider requested a tool outside this request");sink({"model.done","{}"});return result;
+    auto result=stream.finish();std::set<std::string> names;for(const auto& tool:history.tools)names.insert(tool.name);for(const auto& call:result.tool_calls)if(!names.contains(call.name))throw ModelProtocolError("Provider requested a tool outside this request");sink({"model.done","{}"});return result;
 }
 }

@@ -1,5 +1,24 @@
 # Current native validation
 
+## Provider history bridge — 2026-10-13
+
+The native gateway now validates recognized Claude, Gemini, Responses and
+DeepSeek receipts against saved assistant data, then strips only foreign-wire
+receipts in a request copy. Durable conversation history and same-wire receipts
+remain intact. Canonical text, tool calls and tool results can cross to another
+supported serializer; opaque reasoning/signatures and target-incompatible
+history remain rejected before transport. Release contracts passed **3/3**:
+the bridge conversion contract, Gemini history replay contract, and a synthetic
+HTTP/SSE acceptance that switches Claude tool history to Gemini. Exact output:
+[provider-history-bridge-local-20261013.log](evidence/provider-history-bridge-local-20261013.log).
+
+The full native all-target build was not completed in the active local build
+directory because its existing xMind process holds `xmind.exe` and the staged
+`xlang3_runtime.dll` open; MSBuild reported access denied while copying the
+runtime and LNK1104 for the executable. The focused bridge/provider contracts
+were built and passed against the existing Release runtime. Hosted native
+validation remains authoritative for the full source.
+
 ## Packaged xlang3 plugin integration — 2026-10-13
 
 xMind main `9caef7c` now pins xlang3 compatibility branch commit `f6bbc56` and

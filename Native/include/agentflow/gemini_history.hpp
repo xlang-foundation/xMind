@@ -12,6 +12,8 @@ ModelCompletion gemini_model_completion(const GeminiCompletion& completion,
 // Normalize only supplied provider counts for native completion/event consumers.
 // Missing counts remain absent; no tokens are estimated or summed.
 std::string gemini_model_usage(const std::string& usage_json);
+// Verify one saved Gemini receipt against its canonical assistant message.
+void validate_gemini_history_message(const ModelMessage& message);
 // Replay native conversation history through its checked Gemini receipts.
 // Tool outputs remain ordinary strings inside functionResponse.response objects.
 GeminiRequest gemini_model_request(const ModelRequest& request,Capability function_calls);

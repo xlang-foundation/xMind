@@ -144,6 +144,10 @@ Json provider_items(const ModelMessage& message){
 }
 }
 
+void validate_gemini_history_message(const ModelMessage& message){
+    const auto items=provider_items(message);if(items.empty())throw IncompatibleProviderHistory("Gemini receipt is missing");(void)receipt(message,items);
+}
+
 std::string gemini_model_usage(const std::string& usage_json){
     try{return usage(usage_json);}catch(const std::invalid_argument&){throw ModelProtocolError("Invalid Gemini usage");}catch(const Json::exception&){throw ModelProtocolError("Invalid Gemini usage");}
 }
@@ -184,8 +188,34 @@ GeminiRequest gemini_model_request(const ModelRequest& request,Capability functi
         if(message.role==MessageRole::user){result.contents.push_back({GeminiRole::user,{GeminiPart{GeminiPartKind::text,message.content}}});continue;}
         if(message.role!=MessageRole::assistant)invalid();
         if(items.empty()){
-            if(!message.tool_calls.empty())throw IncompatibleProviderHistory("Gemini tool history requires an original receipt");
-            result.contents.push_back({GeminiRole::model,{GeminiPart{GeminiPartKind::text,message.content}}});continue;
+            if(message.tool_calls.empty()){
+                result.contents.push_back({GeminiRole::model,{GeminiPart{GeminiPartKind::text,message.content}}});continue;
+            }
+            // Canonical tool calls come from another provider wire. Gemini
+            // accepts the arguments and names directly, but its optional call
+            // ID is provider-owned, so keep the native ID only for validating
+            // the following tool results and omit it from the outgoing part.
+            if(function_calls!=Capability::supported)invalid();
+            std::set<std::string> pending_ids;GeminiContent model;model.role=GeminiRole::model;
+            if(!message.content.empty()){GeminiPart text;text.text=message.content;model.parts.push_back(std::move(text));}
+            for(const auto& call:message.tool_calls){
+                internal_id(call.id);if(!native_ids.insert(call.id).second||!pending_ids.insert(call.id).second)
+                    throw IncompatibleProviderHistory("Duplicate Gemini native call identity");
+                function_name(call.name);object(call.arguments_json);account(bytes,call.id.size());account(bytes,call.name.size());account(bytes,call.arguments_json.size());
+                GeminiPart part;part.kind=GeminiPartKind::function_call;part.name=call.name;part.object_json=call.arguments_json;model.parts.push_back(std::move(part));
+            }
+            result.contents.push_back(std::move(model));
+            std::vector<std::optional<GeminiPart>> responses(message.tool_calls.size());
+            for(std::size_t answered=0;answered<message.tool_calls.size();++answered){
+                if(++index>=request.messages.size())invalid();const auto& answer=request.messages[index];
+                if(answer.role!=MessageRole::tool||!answer.tool_calls.empty()||!answer.refusal.empty())invalid();
+                utf8(answer.content);account(bytes,answer.content.size());account(bytes,answer.provider_items_json.size());account(bytes,answer.tool_call_id.size());
+                if(!provider_items(answer).empty())throw IncompatibleProviderHistory("Gemini tool outputs cannot carry provider history");
+                internal_id(answer.tool_call_id);const auto found=std::find_if(message.tool_calls.begin(),message.tool_calls.end(),[&](const auto& call){return call.id==answer.tool_call_id;});
+                if(found==message.tool_calls.end())invalid();const auto call_index=static_cast<std::size_t>(std::distance(message.tool_calls.begin(),found));if(responses[call_index])invalid();
+                GeminiPart part;part.kind=GeminiPartKind::function_response;part.name=found->name;part.object_json=Json{{"output",answer.content}}.dump();responses[call_index]=std::move(part);
+            }
+            GeminiContent turn;turn.role=GeminiRole::user;for(auto& response:responses){if(!response)invalid();turn.parts.push_back(std::move(*response));}result.contents.push_back(std::move(turn));continue;
         }
         auto replay=receipt(message,items);for(const auto& call:message.tool_calls){account(bytes,call.id.size());account(bytes,call.name.size());account(bytes,call.arguments_json.size());}
         // A provider may naturally stop without producing a part. Its receipt
