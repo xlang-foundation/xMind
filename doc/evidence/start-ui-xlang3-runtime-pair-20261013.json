@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-13",
+  "scope": "xMind start-ui default runtime selection and fresh VS Code development-host startup",
+  "xmind_base_revision": "606229444ddb104ca903fc18115679513f46721f",
+  "xlang3_compatibility_branch_revision": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "runtime_selection": "AGENTFLOW_XLANG3_RUNTIME_DIR read from build/native/CMakeCache.txt; no -RuntimeDirectory argument supplied",
+  "configured_runtime_directory": "D:\\CantorAI2026\\xlang3\\build-pytest-pathaware\\Release",
+  "staged_snapshot": "D:\\CantorAI2026\\xMind\\.agentflow\\xlang3-testproj-check\\runtime-953cc2fb270740b79060d8154f534432",
+  "executable_sha256": "1d78fbf391214691db92b80b9939697cc4cfbebd1dcb6f40842cea81341cfcc5",
+  "runtime_dll_sha256": "88c109a947e5e085e99cb58be52ba7b1a3fe07ab9dcd2c3d20b469fc285bb068",
+  "paired_snapshot_hashes_verified": true,
+  "xmind_server_hash_matches_build": true,
+  "xlang3_probe": "xlang3",
+  "backend_started": true,
+  "visible_development_host_started": true,
+  "model_configured": false,
+  "provider_inference_performed": false,
+  "limitations": [
+    "This verifies launcher pairing and local xlang3 startup, not an agent-issued pytest run through the xlang3 profile.",
+    "The fresh preview has no active model selection, so no provider inference was performed."
+  ]
+}

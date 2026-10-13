@@ -76,6 +76,15 @@ xlang3 branch pytest path; a mobile viewport review, broader coding coverage
 and OpenCode parity remain open. See
 [`testproj-vscode-coding-20261013.json`](evidence/testproj-vscode-coding-20261013.json).
 
+The xMind development-host launcher now takes its default xlang3 runtime from
+the same `build/native/CMakeCache.txt` as the C++ server, and verifies their
+runtime DLLs before staging. A fresh VS Code host opened TestProj with the
+`build-pytest-pathaware/Release` executable selected by that cache; both
+snapshot hashes matched, and an xlang3 startup probe passed. This removes the
+launcher’s stale sibling-runtime selection for the managed process profile. It
+does not yet prove a new-profile AgentRunner pytest run or provider-backed
+coding session. [Exact local evidence](evidence/start-ui-xlang3-runtime-pair-20261013.json).
+
 ## Latest verified native coding checkpoint (2026-10-11)
 
 Single-agent and graph runs now route reads, process execution, file creation,

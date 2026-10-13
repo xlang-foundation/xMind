@@ -28,6 +28,7 @@ foreach($uiArgument in @($CodeExecutable,$RuntimeDirectory,$BundleDirectory,$Ser
     if($uiArgument -and $uiArgument.IndexOfAny([char[]]@([char]0,[char]10,[char]13,[char]34)) -ge 0){throw 'Preview arguments cannot contain quotes or control characters.'}
 }
 $uiProject=Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot 'xlang3-runtime.ps1')
 $uiOpenWorkspace=$uiProject
 if($Workspace){
     $uiOpenWorkspace=[System.IO.Path]::GetFullPath($Workspace)
@@ -54,7 +55,7 @@ if($BundleDirectory){
     }
     $uiBuildProvenance=Get-Content -LiteralPath (Join-Path $uiBundle 'provenance.json') -Raw|ConvertFrom-Json
 }else{
-    if(-not $RuntimeDirectory){$RuntimeDirectory=Join-Path (Split-Path $uiProject -Parent) 'xlang3/build/Release'}
+    $RuntimeDirectory=Get-XMindXlang3RuntimeDirectory -ProjectRoot $uiProject -RequestedRuntimeDirectory $RuntimeDirectory
     $uiModules=Join-Path $RuntimeDirectory 'modules'
 }
 if(-not (Test-Path -LiteralPath $uiServer)) {throw 'A verified native server build is required.'}

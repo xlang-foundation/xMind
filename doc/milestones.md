@@ -19,6 +19,21 @@ unmapped, and zero verified operation-level parity**. OpenCode and LiteLLM
 remain references; no foreign implementation was added. The broader coding,
 CLI/editor and endpoint parity gaps remain open in [PARITY.md](PARITY.md).
 
+## CMake-paired xlang3 selection for the TestProj development host — 2026-10-13
+
+The VS Code launcher now reads `AGENTFLOW_XLANG3_RUNTIME_DIR` from the same
+`build/native/CMakeCache.txt` used for xMind when no explicit runtime override
+is given. It keeps the DLL pair check and snapshots the selected runtime before
+launching the editor, avoiding an accidental mismatch with a stale sibling
+`xlang3/build/Release` directory. The four-case PowerShell selection contract
+passes. A fresh VS Code development host opened TestProj; its snapshotted
+`xlang3.exe` and runtime DLL exactly matched the configured compatibility
+branch, and an xlang3 interpreter probe succeeded. No provider inference was
+performed because the fresh profile had no active model; actual AgentRunner
+pytest acceptance through the selected profile remains open.
+[Runtime-pair evidence](evidence/start-ui-xlang3-runtime-pair-20261013.json),
+[selection test](../Tools/tests/xlang3-runtime.test.ps1).
+
 ## Backend-paired xlang3 process profile — 2026-10-13
 
 When a Windows local backend initializes its trusted process registry, its

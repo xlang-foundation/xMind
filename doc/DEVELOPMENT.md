@@ -30,6 +30,14 @@ For an already prepared sibling runtime, the default entry point is:
 .\Tools\agentflow.ps1 -Action Build
 ```
 
+`Tools/start-ui.ps1` pairs the VS Code development host with the xlang3 runtime
+recorded in `build/native/CMakeCache.txt` when `-RuntimeDirectory` is omitted.
+It verifies the server/runtime DLL pair before snapshotting it, so the preview
+does not pair an xMind server built against one runtime DLL with a stale sibling
+interpreter. An explicit `-RuntimeDirectory` still takes precedence. The selection
+contract can be run with
+`pwsh -NoProfile -File Tools/tests/xlang3-runtime.test.ps1`.
+
 The helper checks for live xlang3 benchmarks, verifies vendored schema sources,
 installs the independent Node SDK fixtures without lifecycle scripts, builds
 Release and runs CTest. Exit 3 means the build was deferred; it is not a test

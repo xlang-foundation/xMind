@@ -21,6 +21,20 @@ is [native-144-ctest-postfix-20261013.log](evidence/native-144-ctest-postfix-202
 The earlier failures and their focused retest are retained at
 [native-144-ctest-20261013.log](evidence/native-144-ctest-20261013.log).
 
+## xMind development-host runtime selection — 2026-10-13
+
+When `Tools/start-ui.ps1` omits `-RuntimeDirectory`, it now reads the runtime
+paired with `build/native` from `CMakeCache.txt`, then verifies the xMind and
+xlang3 runtime DLL hashes before snapshotting the interpreter. A four-case
+PowerShell contract covers configured-cache selection, explicit override,
+missing paired executable and fresh-checkout fallback. A fresh VS Code
+development host opened TestProj using the CMake-paired
+`build-pytest-pathaware/Release` runtime; the staged executable and DLL hashes
+matched their sources, and xlang3 started successfully. This verifies default
+runtime selection and host startup only: the fresh preview has no active model,
+and an agent-issued TestProj pytest run remains to be verified.
+[Acceptance record](evidence/start-ui-xlang3-runtime-pair-20261013.json).
+
 ## Packaged xlang3 plugin integration — 2026-10-13
 
 xMind main `9caef7c` now pins xlang3 compatibility branch commit `f6bbc56` and
