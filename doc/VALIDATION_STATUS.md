@@ -13,9 +13,10 @@ contracts and Visual Studio debugpy launch smoke. TestProj's Model Zoo backend
 passed **9/9** pytest API tests on xlang3 with pytest 8.4.2, FastAPI 0.120.4
 and Pydantic 2.14.1. The earlier 11-case performance gate (21 paired samples
 per case) passed on the preceding branch checkpoint before this facade update.
-An isolated xMind Release build against the earlier candidate passed
-**137/137 native CTest contracts**; the webpage adapter passed **99/99 browser
-tests** and the VS Code extension passed **320/320 extension tests**. A live
+An isolated xMind Release rebuild against candidate `1df2603a` passed
+**137/137 native CTest contracts** in 612 seconds ([full test log](evidence/native-xmind-xlang3-1df2603a-ctest.log)). An earlier webpage-adapter run passed
+**99/99 browser tests** and the VS Code extension passed **320/320 extension
+tests**. A live
 local browser-adapter session attached to TestProj without a server-token prompt,
 discovered **13 Claude, 11 Gemini, 2 DeepSeek and 20
 OpenAI models** from the saved `.config/providers.yaml`, selected OpenAI

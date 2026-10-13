@@ -131,10 +131,12 @@ based on xlang3 `main` `f0c425cf`. It adds lazy pytest hook lookup, native
 zero-copy mmap buffer exports with close/lifetime checks, and the Pydantic Core
 2.50.1 pure-Python facade plus iterative schema-gather bridge. The full xlang3
 Release suite passes **56/56 CTest contracts**, and TestProj's Model Zoo
-backend passes **9/9** pytest API tests with Pydantic 2.14.1 on xlang3. The
-11-case Release performance gate passed on the prior branch checkpoint before
-the facade update. xMind still pins xlang3 `main` `f0c425cf`; the candidate has
-not been merged or deployed into the active xMind runtime. See the [detailed
+backend passes **9/9** pytest API tests with Pydantic 2.14.1 on xlang3. An
+isolated xMind Release rebuild against the candidate passes **137/137 native
+CTest contracts** ([full log](evidence/native-xmind-xlang3-1df2603a-ctest.log)).
+The 11-case Release performance gate passed on the prior branch checkpoint
+before the facade update. xMind still pins xlang3 `main` `f0c425cf`; the
+candidate has not been merged or deployed into the active xMind runtime. See the [detailed
 validation and report](VALIDATION_STATUS.md#xlang3-pytest-and-mmap-compatibility-branch--2026-10-13).
 
 ## VS Code coding-flow verification against TestProj — 2026-10-12
