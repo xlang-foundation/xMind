@@ -42,6 +42,22 @@ native source candidates, and zero verified operation-level parity**. Worker
 placement for a full agent, a reusable worker pool, resource limits and OS
 sandboxing remain open; this checkpoint does not establish broad coding parity.
 
+## Live browser coding acceptance (2026-10-13)
+
+The local xMind browser completed a real DeepSeek-assisted stylesheet task in
+the TestProj Model Zoo workspace. It applied one scoped `style.css` change,
+then invoked the trusted native PowerShell process profile to run
+`npm.cmd run build` from `model-zoo/frontend`; Vite 6.4.4 transformed 36
+modules and exited 0 in 700 ms. The browser displayed provider-reported input
+and output tokens and measured model timings. A separate accessibility-tree
+inspection of the live catalog returned HTTP 200 and found its demo-data
+disclosure, filters, model cards, pagination and detail links. The combined
+browser and VS Code contract suites pass **421/421**. This proves one live
+browser write/build flow and client contract coverage; it does not establish
+visual-quality review, live VS Code editing, broad project coverage or
+operation-level OpenCode parity. See
+[`testproj-browser-coding-20261013.json`](evidence/testproj-browser-coding-20261013.json).
+
 ## Latest verified native coding checkpoint (2026-10-11)
 
 Single-agent and graph runs now route reads, process execution, file creation,
