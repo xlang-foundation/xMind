@@ -45,7 +45,7 @@ function unfinishedReport(observed){
  // objectives, tool content, provider receipts or arbitrary outcome members.
  process.stderr.write('Synthetic dynamic-engine unfinished nodes: '+JSON.stringify(nodes)+'\n');
 }
-const release=setInterval(()=>{if(existsSync(join(workspace,'release-final-human')))while(held.length){const item=held.shift();send(item.response,item.wire);}},10);
+const release=setInterval(()=>{for(let i=held.length-1;i>=0;i--){const item=held[i];if(existsSync(join(workspace,item.marker))){held.splice(i,1);send(item.response,item.wire);}}},10);
 const peer=createServer((request,response)=>{
  const chunks=[];let size=0;request.on('data',bytes=>{size+=bytes.length;if(size>1024*1024){request.destroy();return;}chunks.push(bytes);});
  request.on('end',()=>{try{
@@ -54,7 +54,7 @@ const peer=createServer((request,response)=>{
   const names=body.tools.map(tool=>tool.name).sort(),source=content(body.messages),parent=names.includes('plan_tasks');
   const readTools=['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill'];
   if(parent)assert.deepEqual(names,[...readTools,'edit_file','create_file','apply_patch','plan_tasks','revise_plan','inspect_plan'].sort(),'Ordinary Agent planning retains existing exact coding authority');
-  const owner=parent?(['main','final-human','cancel','expiry'].find(label=>source.includes('fixture-'+label+'-parent'))):(['left','right','code','verify'].find(label=>source.includes('fixture-main-'+label+':')));
+  const owner=parent?(['main','final-human','restart-human','cancel','expiry'].find(label=>source.includes('fixture-'+label+'-parent'))):(['left','right','code','verify'].find(label=>source.includes('fixture-main-'+label+':')));
   assert.ok(owner,'Unknown actual execution objective');const count=(counts.get(owner)??0)+1;counts.set(owner,count);requests.push({owner,count});
   const last=results(body.messages).at(-1),signature=(parent?'opaque-parent-':'opaque-child-')+owner+'-'+count;
   const providerThinking=body.messages.filter(message=>message.role==='assistant').flatMap(message=>message.content??[]).filter(block=>block.type==='thinking');
@@ -79,9 +79,9 @@ const peer=createServer((request,response)=>{
     send(response,start(17)+thought(signature)+text('Synthetic signed parent observed failure, same-plan revision, human input, the independently approved child edit and verified actual target bytes.')+terminal('end_turn',6));return;
    }
    if(count===1){assert.equal(last,undefined);send(response,start(7)+thought(signature)+tool('plan_tasks',owner+'-plan-origin',planQuestion(owner))+terminal('tool_use',3));return;}
-   assert.equal(owner,'final-human','Expiry/cancel may not perform any provider continuation');assert.equal(count,2);assert.equal(last.tool_use_id,'final-human-plan-origin');
-   const observed=JSON.parse(last.content);assert.equal(observed.finished,true);assert.equal(observed.nodes.length,1);assert.equal(observed.nodes[0].type,'human');assert.equal(observed.nodes[0].child_run_id,undefined);assert.equal(JSON.parse(observed.nodes[0].outcome_json).input_json,'{"answer":"confirmed"}');
-   held.push({response,wire:start(7)+thought(signature)+text('Synthetic final human-only continuation completed without a child.')+terminal('end_turn',3)});return;
+   assert.ok(owner==='final-human'||owner==='restart-human','Expiry/cancel may not perform any provider continuation');assert.equal(count,2);assert.equal(last.tool_use_id,owner+'-plan-origin');
+   const observed=JSON.parse(last.content);assert.equal(observed.finished,true);assert.equal(observed.nodes.length,1);assert.equal(observed.nodes[0].type,'human');assert.equal(observed.nodes[0].child_run_id,undefined);assert.equal(JSON.parse(observed.nodes[0].outcome_json).input_json,owner==='final-human'?'{"answer":"confirmed"}':'{"answer":"review after restart"}');
+   held.push({response,marker:owner==='final-human'?'release-final-human':'release-restart-human',wire:start(7)+thought(signature)+text('Synthetic human-only continuation completed without a child.')+terminal('end_turn',3)});return;
   }
   assert.ok(!names.some(name=>['plan_tasks','revise_plan','inspect_plan','delegate_tasks'].includes(name)),'Native depth-one child cannot delegate or plan');
   assert.deepEqual(names,(owner==='code'?[...readTools,'edit_file','create_file','apply_patch']:readTools).sort(),'Registered preset exposes exact inherited or read-only authority');
@@ -107,6 +107,6 @@ try{
  await mkdir(workspace);for(const side of ['left','right'])await writeFile(join(workspace,side+'.txt'),'Actual dynamic '+side+' file bytes\n');await writeFile(join(workspace,'target.txt'),'original\n');
  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
  const result=await promisify(execFile)(executable,[folder,modules,stdlib,`http://127.0.0.1:${peer.address().port}/messages`,workspace],{windowsHide:true,timeout:60000,maxBuffer:1024*1024});
- if(failure)throw failure;assert.deepEqual(Object.fromEntries(counts),{main:3,left:2,right:2,code:2,verify:2,'final-human':2,cancel:1,expiry:1});assert.equal(requests.length,15);assert.equal(barrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');process.stdout.write(result.stdout);
+ if(failure)throw failure;assert.deepEqual(Object.fromEntries(counts),{main:3,left:2,right:2,code:2,verify:2,'final-human':2,'restart-human':2,cancel:1,expiry:1});assert.equal(requests.length,17);assert.equal(barrier.length,0);assert.equal(held.length,0);assert.equal(await readFile(join(workspace,'target.txt'),'utf8'),'reviewed dynamic plan\n');process.stdout.write(result.stdout);
 }catch(error){if(failure)throw failure;throw error;}
 finally{clearInterval(release);peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));await rm(folder,{recursive:true,force:true});}
