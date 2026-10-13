@@ -34,6 +34,16 @@ tool cycle on the shared backend; it does not establish interactive approval
 coverage or broad shell compatibility.
 [Sanitized run metadata](evidence/cli-live-process-build-20261013.json).
 
+## Native CLI approved file write — 2026-10-13
+
+Claude Sonnet 4.6 issued one native `create_file` proposal in the same TestProj
+CLI workspace. The CLI displayed the exact operation and accepted `/allow` for
+that operation ID; the run completed with exit status **0**. I independently
+verified the created file's 55 bytes and SHA-256, then removed the temporary
+acceptance file. This confirms one live model-to-file-write approval path from
+the CLI; edit/patch approval, richer diff review, and full coding parity remain
+open. [Sanitized run metadata](evidence/cli-live-approved-file-write-20261013.json).
+
 ## Narrow browser sidebar layout — 2026-10-13
 
 Live inspection found a cascade-order bug at a **648 px** viewport: the

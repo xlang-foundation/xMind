@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-13",
+  "result": "passed",
+  "scope": "Live provider-backed CLI create_file with exact operation approval on the shared TestProj backend",
+  "command": "xmind --workspace D:\\CantorAI2026\\TestProj chat",
+  "runId": "d4e2b504d7644ff663097a053f8ec859",
+  "sessionId": "10336c2a44fcc44d186f538d9554c8be",
+  "operationId": "be57fa5fb5904de291b8bf8c61a4e3de",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-6",
+  "toolCall": "create_file",
+  "approval": "CLI /allow for the displayed operation ID",
+  "path": "xmind-cli-write-acceptance.txt",
+  "verifiedBytes": 55,
+  "verifiedSha256": "02d2f7a4af4001fdf1ab37de7d2aeacf99e80661ed24d95748d5b1ce2e9b3e05",
+  "runState": "completed",
+  "cliExitStatus": 0,
+  "providerUsage": {
+    "inputTokens": 4404,
+    "outputTokens": 146
+  },
+  "temporaryFileRemovedAfterVerification": true,
+  "providerSecretsRecorded": false
+}
