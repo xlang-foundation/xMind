@@ -5,6 +5,9 @@
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/provider_setup.hpp"
 #include "agentflow/provider_profile_setup.hpp"
+#if defined(_WIN32)
+#include "agentflow/connection_profiles.hpp"
+#endif
 #include "agentflow/graph_service.hpp"
 #include "agentflow/dynamic_plan.hpp"
 #include "agentflow/a2a_task_control.hpp"
@@ -287,6 +290,7 @@ struct HttpServer::Impl {
 #endif
     PersistenceService& persistence;
 #if defined(_WIN32)
+    ConnectionProfiles connection_profiles;
     A2aRemoteAgentRegistry remote_agents;
 #endif
     RunExecutor* executor;
@@ -377,6 +381,7 @@ struct HttpServer::Impl {
     }
     Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth,PtySessions* pty):persistence(store),
 #if defined(_WIN32)
+        connection_profiles(store),
         remote_agents(store),
 #endif
         executor(execution),owner_control(owner),mcp_oauth(oauth),terminals(pty),recovery(inspection),mcp_servers(std::move(configured)),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token) {
@@ -404,7 +409,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|models|language-servers|language-server/query|process/profiles|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -537,6 +542,51 @@ struct HttpServer::Impl {
             const auto models=executor?executor->models():std::vector<std::string>{};
             reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"session_fork",true},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()}});
         }));
+#if defined(_WIN32)
+        const auto connection_metadata=[](const ConnectionProfileCatalog& catalog){
+            auto entries=Json::array();
+            for(const auto& profile:catalog.profiles){
+                const bool local=profile.kind==ConnectionKind::local;
+                entries.push_back({{"id",profile.id},{"name",profile.name},{"kind",local?"local":"nexus"},
+                    {"origin",profile.origin},{"revision",profile.revision},{"status",local?"connected":"not_connected"},
+                    {"command_routing",local},{"authenticated",local}});
+            }
+            return Json{{"revision",catalog.revision},{"active_id",catalog.active_id},{"profiles",std::move(entries)}};
+        };
+        const auto expected_connection_revision=[](const Json& input){
+            if(!input.contains("expected_revision")||!input["expected_revision"].is_number_integer()||
+               input["expected_revision"]<0||input["expected_revision"]>9007199254740991)
+                throw std::invalid_argument("Invalid connection profile revision");
+            return input["expected_revision"].get<std::int64_t>();
+        };
+        server.Get("/v1/connections",guarded([this,connection_metadata](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())
+                throw std::invalid_argument("Connection profiles do not accept query parameters");
+            reply(response,connection_metadata(connection_profiles.load_or_initialize()));
+        }));
+        server.Post("/v1/connections",guarded([this,connection_metadata,expected_connection_revision](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>262144)
+                throw std::invalid_argument("Connection profile update exceeds limits");
+            const auto input=body(request,{"profiles","expected_revision"});
+            if(!input.contains("profiles")||!input["profiles"].is_array()||input["profiles"].size()>32)
+                throw std::invalid_argument("Connection update requires a profile array");
+            const auto catalog=connection_profiles.apply(Json{{"profiles",input["profiles"]}}.dump(),expected_connection_revision(input));
+            reply(response,connection_metadata(catalog));
+        }));
+        server.Post("/v1/connections/select",guarded([this,connection_metadata,expected_connection_revision](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>8192)
+                throw std::invalid_argument("Connection selection request exceeds limits");
+            const auto input=body(request,{"id","expected_revision"});
+            const auto id=string_field(input,"id",64);
+            const auto revision=expected_connection_revision(input);
+            const auto catalog=connection_profiles.load_or_initialize();
+            const auto selected=std::find_if(catalog.profiles.begin(),catalog.profiles.end(),[&](const auto& profile){return profile.id==id;});
+            if(selected==catalog.profiles.end())throw NotFound("Connection profile not found");
+            if(selected->kind==ConnectionKind::nexus)
+                throw Conflict("Nexus profile is not authenticated; the active connection remains unchanged");
+            reply(response,connection_metadata(connection_profiles.select(id,revision)));
+        }));
+#endif
         server.Get("/v1/agents",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Agent catalogue does not accept query parameters");
             if(!executor||!executor->supports_agent_selection())throw RunUnavailable("Named agent selection is unavailable");

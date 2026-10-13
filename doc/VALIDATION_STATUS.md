@@ -1,5 +1,17 @@
 # Current native validation
 
+## Authenticated connection-profile HTTP contract — 2026-10-12
+
+Release `xmind.exe`, the connection-profile SQLite contract, the new
+connection-profile HTTP contract and the existing backend owner/view-session
+HTTP contract build. Focused CTest passes **3/3**. The new loopback HTTP test
+verifies owner authentication, origin-bound view access, Local initialization,
+catalog revision checks, rejection of unknown credential fields, an explicit
+`not_connected` Nexus status, fail-closed Nexus selection and SQLite restart
+recovery. This adds authenticated catalog read/configuration and Local
+selection; it does not provide a browser/CLI picker, Nexus authentication or
+remote command/event routing. [Exact Release CTest output](evidence/native-connection-profiles-http-local-20261012.log).
+
 ## xlang3 main integration and native Release gate — 2026-10-12
 
 The xMind Release build uses the pushed xlang3 `main` revision

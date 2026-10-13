@@ -1,5 +1,19 @@
 # Reviewable milestones
 
+## Authenticated Local/Nexus profile catalog API — 2026-10-12
+
+The native local HTTP backend now exposes `GET /v1/connections`,
+`POST /v1/connections` and `POST /v1/connections/select` over the existing
+owner-authenticated transport. Local and same-machine origin-bound view
+credentials can read and update the public catalog. Nexus endpoints are
+reported as `not_connected`; unknown credential fields are rejected, and
+selecting an unauthenticated Nexus entry returns a conflict without changing
+the active Local profile. The primary Release `xmind.exe` target builds and
+the focused profile, HTTP and owner/view-session contracts pass **3/3**.
+Browser/CLI profile pickers, encrypted Nexus authentication, and remote
+command/event routing remain unimplemented. See the [connection profile
+contract](connection-profiles.md) and [exact test output](evidence/native-connection-profiles-http-local-20261012.log).
+
 ## Claude adaptive-turn handling and browser coding verification — 2026-10-12
 
 Anthropic adaptive-thinking model families now receive a bounded 16,384-token
