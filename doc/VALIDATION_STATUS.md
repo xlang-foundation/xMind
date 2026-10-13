@@ -1,5 +1,24 @@
 # Current native validation
 
+## Managed runtime recovery and VS Code provider import — 2026-10-13
+
+Stopped managed profiles now replace an obsolete runtime directly only after
+the protected process ID/birth record proves its owner exited. Recovery keeps
+the existing SQLite profile and saved port, then starts the currently verified
+runtime; it no longer tries to restart an old server that rejects current
+managed launch arguments. Separately, the local view adapter now routes provider
+configuration import with its backend credential only when the request uses the
+exact trusted provider file selected at adapter startup. Other file paths and
+untrusted view-session imports are refused.
+
+The Release `native_local_profile_contract`,
+`native_local_view_provider_config_contract`, and `native_local_view_contract`
+pass. The focused profile test verifies stable origin and exact sessions,
+history, and graph state after dead-owner recovery. The view tests verify
+trusted provider import and that view sessions cannot use the import route.
+The VS Code suite passes **320/320**. Packaged Dev Host reconnection and a live
+provider-profile import remain the next acceptance check.
+
 ## Native agent stale-edit recovery — 2026-10-13
 
 The agent now receives explicit recovery guidance when an edit proposal fails

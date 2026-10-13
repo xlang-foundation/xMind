@@ -847,6 +847,26 @@ int run_local_view(int argc, char **argv) {
                         agentflow::inspect_owner_process_birth(GetCurrentProcessId());
                     body = lease.dump();
                     headers.emplace("Authorization", "Bearer " + master);
+                } else if (host && request.path == "/v1/provider/configuration/import" && request.method == "POST") {
+                    require(request.target == request.path && !options.provider_config.empty(),
+                            "Trusted provider configuration import is unavailable");
+                    std::set<std::string> keys;
+                    const auto input = Json::parse(body, [&](int depth, Json::parse_event_t event, Json &value) {
+                        require(depth <= 2, "Invalid trusted provider import request");
+                        if (event == Json::parse_event_t::key)
+                            require(keys.insert(value.get<std::string>()).second,
+                                    "Duplicate trusted provider import field");
+                        return true;
+                    });
+                    require(input.is_object() && input.size() == 2 && input.contains("path") &&
+                                input.at("path").is_string() && input.at("path").get<std::string>() == options.provider_config &&
+                                input.contains("expected_revision") && input.at("expected_revision").is_number_integer() &&
+                                input.at("expected_revision").get<std::int64_t>() >= 0,
+                            "Trusted provider import must use its configured path and current revision");
+                    // The backend deliberately excludes configuration-file import
+                    // from view-session permissions. Only this authenticated host
+                    // path can import the exact file selected at adapter startup.
+                    headers.emplace("Authorization", "Bearer " + master);
                 } else if (host) {
                     std::lock_guard lock(credential_mutex);
                     if (expires - now() < 60000)
@@ -854,6 +874,10 @@ int run_local_view(int argc, char **argv) {
                     headers.emplace("Authorization", "View " + credential);
                     headers.emplace("X-XMind-View-Origin", origin);
                 } else {
+                    if (request.path == "/v1/provider/configuration/import") {
+                        response(output, 403, "Trusted provider configuration import requires the local host");
+                        return;
+                    }
                     if (request.get_header_value_count("X-XMind-View-Origin") != 1) {
                         response(output, 403, "Browser view origin required");
                         return;
