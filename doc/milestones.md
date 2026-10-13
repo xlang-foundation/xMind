@@ -1,5 +1,20 @@
 # Reviewable milestones
 
+## MCP catalogue invalidation and same-run refresh — 2026-10-12
+
+Run-owned MCP list-change notifications now invalidate the catalogue shared by
+the notification observer and native registry. The registry checks before
+proposal and after human approval, so stale bindings never reach a remote
+effect. AgentRunner reports the blocked call to the model, rediscovers tools,
+and continues with current definitions. Direct graph MCP nodes use pinned
+aliases, so they fail closed and require a graph revision when the peer
+catalogue changes. HTTP integration contracts cover AgentRunner refresh and
+graph fail-closed behavior; the native effect contract exercises a catalogue
+change during approval and confirms durable operation retirement without
+dispatch. Crash recovery/reconnect and live external-peer acceptance remain
+open. Validation is recorded in
+[current validation](VALIDATION_STATUS.md#mcp-catalogue-invalidation-during-a-run--2026-10-12).
+
 ## MCP run-owned subscriptions for agents and graphs — 2026-10-12
 
 `McpToolClient` exposes `listen_subscriptions` for modern HTTP and stdio peers,
@@ -16,8 +31,8 @@ Streamable HTTP listener shutdown before child completion. The HTTP AgentRunner
 also proves its MCP tool waits for controller approval and its listener closes
 before `run.completed`.
 Graph, AgentRunner, HTTP/stdio and official modern/legacy SDK contracts pass
-**10/10**. Crash recovery/reconnect, live external-peer acceptance and
-automatic same-run catalogue refresh remain open. [Validation and limits](VALIDATION_STATUS.md#mcp-2026-07-28-subscriptionslisten-for-agents-and-graphs--2026-10-12)
+**10/10**. Crash recovery/reconnect and live external-peer acceptance remain
+open. [Validation and limits](VALIDATION_STATUS.md#mcp-2026-07-28-subscriptionslisten-for-agents-and-graphs--2026-10-12)
 and [exact test output](evidence/native-mcp-subscription-lifecycle-local-20261012.log).
 
 ## MCP modern HTTP subscriptions/listen — 2026-10-12

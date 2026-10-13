@@ -513,12 +513,13 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             JsonSchema schema(registration.definition.input_schema_json);(void)schema;
             request.tools.push_back(registration.definition);
         }
-        struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<std::vector<SecretBytes>> private_credentials=std::make_unique<std::vector<SecretBytes>>();std::unique_ptr<McpToolRegistry> registry;};
+        struct McpRuntime {std::unique_ptr<McpToolClient> client;std::unique_ptr<std::vector<SecretBytes>> private_credentials=std::make_unique<std::vector<SecretBytes>>();std::shared_ptr<std::atomic<bool>> catalogue_invalidated=std::make_shared<std::atomic<bool>>(false);std::unique_ptr<McpToolRegistry> registry;};
         std::vector<McpRuntime> mcp_runtimes;std::map<std::string,McpToolRegistry*> mcp_tools;Json approval_bindings=Json::array();
         std::unique_ptr<A2aAgentToolRegistry> a2a_tools;
         const auto native_tools=request.tools;
         auto close_mcp=[&]{mcp_tools.clear();mcp_runtimes.clear();approval_bindings=Json::array();};
         auto discover_mcp=[&]{
+        stop_mcp_observers();
         close_mcp();request.tools=native_tools;
         for(const auto& server:settings_.mcp_servers) {
             if(!server.enabled)continue;cancelled(token);
@@ -526,7 +527,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             cancelled(token);if(std::chrono::steady_clock::now()>=run_deadline)throw RootBudgetDeadlineExceeded("Root execution deadline elapsed before MCP launch");
             McpRuntime runtime;runtime.client=connect_mcp_client(server,persistence_,run_deadline,token,runtime.private_credentials.get());
             persistence_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",runtime.client->server().protocol_version}}.dump()).get();
-            runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,run_deadline,token,runtime.private_credentials.get());
+            runtime.registry=std::make_unique<McpToolRegistry>(*runtime.client,persistence_,*workspace_,server.id,server.revision,run_deadline,token,runtime.private_credentials.get(),runtime.catalogue_invalidated);
             const auto definitions=runtime.registry->definitions();
             for(const auto& definition:definitions){if(request.tools.size()>=64 || !mcp_tools.emplace(definition.name,runtime.registry.get()).second)throw std::invalid_argument("Model tool catalogue exceeds limits or has an alias collision");request.tools.push_back(definition);}
             const auto bindings=Json::parse(runtime.registry->approval_bindings_json());
@@ -537,7 +538,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 try {
                     auto observer_client=connect_mcp_client(server,persistence_,run_deadline,token);
                     auto observer=std::make_unique<McpRunSubscriptionObserver>(persistence_,id,
-                        server.id,server.revision,std::move(observer_client),*filter,run_deadline);
+                        server.id,server.revision,std::move(observer_client),*filter,run_deadline,runtime.catalogue_invalidated);
                     observer->start();mcp_observers.push_back(std::move(observer));
                 } catch(const std::exception&) {
                     persistence_.append_event(id,"mcp.subscription.unavailable",
@@ -729,7 +730,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             }
             std::vector<std::string> results;std::vector<ModelMessage> continuation;
             continuation.push_back({MessageRole::assistant,response.content,response.tool_calls,{},response.refusal,response.provider_items_json});
-            std::size_t index=0;
+            std::size_t index=0;bool refresh_mcp_after_turn=false;
             for(const auto& call:response.tool_calls) {
                 cancelled(token);
                 const auto activity=id+":"+(reservation?reservation->attempt_id:std::to_string(turn))+":"+std::to_string(index++);
@@ -806,6 +807,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const DelegationCapacityUnavailable&){output={{"error",{{"code","delegation_capacity_unavailable"},{"message","No children were admitted; the native leaf queue is full"}}}};}
                 catch(const PermissionDenied&) {output={{"error",{{"code","permission_denied"},{"message","Controller denied this operation; the requested effect was not dispatched"}}}};}
                 catch(const PermissionExpired&) {output={{"error",{{"code","permission_expired"},{"message","Approval expired; the requested effect was not dispatched"}}}};}
+                catch(const McpCatalogueChanged&) {refresh_mcp_after_turn=true;output={{"error",{{"code","mcp_catalogue_changed"},{"message","MCP catalogue changed before dispatch; no effect occurred. Available tools were refreshed; reconsider this call."}}}};}
                 catch(const McpEffectNotDispatched&) {output={{"error",{{"code","mcp_not_dispatched"},{"message","MCP request was not dispatched"}}}};}
                 catch(const A2aEffectNotDispatched&) {output={{"error",{{"code","a2a_not_dispatched"},{"message","Remote A2A request was not dispatched"}}}};}
                 catch(const ProcessBeforeDispatchError&) {output={{"error",{{"code","process_not_dispatched"},{"message","Process did not execute; launch preconditions were unavailable or changed"}}}};}
@@ -827,6 +829,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             const bool delegated=std::any_of(response.tool_calls.begin(),response.tool_calls.end(),[](const auto& call){return call.name=="delegate_tasks";});
             try{persistence_.record_tool_turn(id,reply.dump(),std::move(results),repository_context?std::optional<SkillSelections>{repository_context->skills().selections()}:std::nullopt).get();}
             catch(...){if(delegated)throw DelegationOutcomeUnrecorded("Delegation parent conversation could not be committed; recovery is required");throw;}
+            if(refresh_mcp_after_turn){refresh_tools();}
             if(!context_manager)for(auto& next:continuation) request.messages.push_back(std::move(next));
         }
         return terminate(RunState::failed,{{"reason","model_turn_limit"}});

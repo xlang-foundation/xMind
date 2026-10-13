@@ -4,9 +4,12 @@
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/instruction_precondition.hpp"
 #include "agentflow/secret_protection.hpp"
+#include <atomic>
+#include <memory>
 
 namespace agentflow {
 struct McpEffectUncertain : std::runtime_error {using std::runtime_error::runtime_error;};
+struct McpCatalogueChanged : std::runtime_error {using std::runtime_error::runtime_error;};
 struct McpOutcomeUnrecorded : std::runtime_error {using std::runtime_error::runtime_error;};
 struct McpEffectNotDispatched : std::runtime_error {using std::runtime_error::runtime_error;};
 struct McpReadFailed : std::runtime_error {using std::runtime_error::runtime_error;};
@@ -20,7 +23,8 @@ class McpToolRegistry {
 public:
     McpToolRegistry(McpToolClient& client,PersistenceService& store,WorkspaceTools& workspace,
         std::string config_id,std::int64_t config_revision,McpToolClient::Deadline deadline,
-        std::stop_token cancel={},const std::vector<SecretBytes>* private_credentials=nullptr);
+        std::stop_token cancel={},const std::vector<SecretBytes>* private_credentials=nullptr,
+        std::shared_ptr<std::atomic<bool>> catalogue_invalidated={});
     ~McpToolRegistry();
     McpToolRegistry(const McpToolRegistry&)=delete;
     McpToolRegistry& operator=(const McpToolRegistry&)=delete;

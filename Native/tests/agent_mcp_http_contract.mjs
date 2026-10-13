@@ -56,7 +56,7 @@ async function pendingOperations(runId){const items=await api(`/v1/runs/${runId}
 async function configure(mode){const path=join(folder,'config.json');await writeFile(path,JSON.stringify({servers:[{id:'fixture',transport:'stdio',executable:process.execPath,working_directory:folder,arguments:[fixture,mode,effect,marker,'credential-fixture',...(sdkEra?[sdkEra]:[])],credentials:[{name:'MCP_TEST_KEY',scope:'server',id:`credential-${mode}`}]}]}));return admin(['import-mcp',path]);}
 try{
   await mkdir(workspace);await writeFile(effect,'');await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
-  assert.equal((await configure(sdkEra?'normal':'subscription')).servers[0].revision,1);
+  assert.equal((await configure(sdkEra?'normal':'subscription-no-change')).servers[0].revision,1);
   admin(['put-mcp-credential','fixture','MCP_TEST_KEY','XMIND_SETUP_SECRET'],{...env,XMIND_SETUP_SECRET:secret});
   await start();const metadata={servers:[{id:'fixture',revision:1,enabled:true,transport:'stdio'}],runtime_state:'per_run'};
   assert.deepEqual(cli('mcp-servers'),metadata);
@@ -67,17 +67,7 @@ try{
     const connected=events.filter(event=>event.kind==='mcp.connected');assert.equal(connected.length,1);
     assert.equal(connected[0].data.protocol_version,sdkEra==='legacy'?'2025-11-25':'2026-07-28');
     assert.equal(events.find(event=>event.kind==='mcp.discovered').data.tool_count,1);
-    if(name==='allowed'&&!sdkEra){
-      const observed=await until(()=>api('/v1/runs/'+run.id+'/events?after=0'),items=>items.some(event=>event.kind==='mcp.subscription.overflow'));
-      const notification=observed.find(event=>event.kind==='mcp.subscription.notification');
-      assert.equal(notification.data.method,'notifications/tools/list_changed');
-      assert.equal(notification.data.refresh_next_run,true);
-      assert.ok(observed.some(event=>event.kind==='mcp.subscription.acknowledged'));
-      assert.equal(observed.filter(event=>event.kind==='mcp.subscription.notification').length,64);
-      assert.equal(observed.filter(event=>event.kind==='mcp.subscription.overflow').length,1);
-      assert.equal(JSON.stringify(observed).includes(secret),false,'Untrusted MCP notification payload must not be persisted');
-      assert.equal(JSON.stringify(observed).includes('untrustedPayload'),false);
-    }
+    if(name==='allowed'&&!sdkEra){const observed=await api('/v1/runs/'+run.id+'/events?after=0');assert.ok(observed.some(event=>event.kind==='mcp.subscription.acknowledged'));assert.equal(observed.filter(event=>event.kind==='mcp.subscription.notification').length,0,'A quiet subscription must not invent catalogue changes');}
     assert.equal(await readFile(effect,'utf8'),name==='allowed'?'':'allowed');
     assert.ok(operation.arguments_json.includes('1.00000000000000000001'));
     if(name==='cancelled')cli('cancel',run.id);else cli('decide',operation.id,name==='denied'?'deny':'allow');

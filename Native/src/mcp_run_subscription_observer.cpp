@@ -33,9 +33,11 @@ std::optional<McpSubscriptionFilter> mcp_run_subscription_filter(const McpServer
 
 McpRunSubscriptionObserver::McpRunSubscriptionObserver(PersistenceService& store,std::string run,
     std::string server,std::int64_t revision,std::unique_ptr<McpToolClient> client,
-    McpSubscriptionFilter filter,McpToolClient::Deadline deadline)
+    McpSubscriptionFilter filter,McpToolClient::Deadline deadline,
+    std::shared_ptr<std::atomic<bool>> catalogue_invalidated)
     :store_(store),run_(std::move(run)),server_(std::move(server)),revision_(revision),
-     client_(std::move(client)),filter_(std::move(filter)),deadline_(deadline) {}
+     client_(std::move(client)),filter_(std::move(filter)),deadline_(deadline),
+     catalogue_invalidated_(std::move(catalogue_invalidated)) {}
 
 McpRunSubscriptionObserver::~McpRunSubscriptionObserver(){stop();}
 
@@ -65,17 +67,18 @@ void McpRunSubscriptionObserver::observe(std::stop_token stop) noexcept {
     std::size_t notifications=0;bool overflow_recorded=false;
     try {
         const auto accepted=client_->listen_subscriptions(filter_,[&](const McpWireMessage& message) {
+            const bool refresh=message.method=="notifications/tools/list_changed"||
+                message.method=="notifications/prompts/list_changed"||
+                message.method=="notifications/resources/list_changed";
+            if(refresh&&catalogue_invalidated_)catalogue_invalidated_->store(true,std::memory_order_release);
             if(notifications>=64) {
                 if(!overflow_recorded){overflow_recorded=true;persist("mcp.subscription.overflow",Json{{"limit",64}}.dump());}
                 return;
             }
             ++notifications;
-            const bool refresh=message.method=="notifications/tools/list_changed"||
-                message.method=="notifications/prompts/list_changed"||
-                message.method=="notifications/resources/list_changed";
             // Peer payloads and resource URIs may contain secrets.
             persist("mcp.subscription.notification",Json{{"method",message.method},
-                {"refresh_next_run",refresh}}.dump());
+                {"refresh_next_run",refresh},{"catalogue_invalidated",refresh}}.dump());
         },deadline_,stop,[&](const McpSubscriptionAcknowledgement& accepted) {
             persist("mcp.subscription.acknowledged",Json{{"filter",filter_json(accepted.notifications)}}.dump());
         });

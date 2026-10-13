@@ -87,14 +87,15 @@ no model response or usage is invented for an MCP-only graph.
 For modern `2026-07-28` peers advertising list-change notifications, each direct
 MCP graph child opens a separate run-owned listener alongside its effect
 client. Validated acknowledgement and bounded notification metadata are
-journaled on the child run; peer payloads and resource URIs are excluded. The
-observer stays active while the child waits for controller approval and is
-stopped/joined before the child commits success, denial, cancellation or
-failure. Notification metadata requests catalogue refresh on the next run;
-same-run rebinding or effect replay is not performed. The stdio graph peer
-contract checks the cap, payload exclusion and closure on approved, denied and
-cancelled paths; a separate HTTP fixture verifies SSE cancellation before the
-child completes. See [current lifecycle evidence](evidence/native-mcp-subscription-lifecycle-local-20261012.log).
+journaled on the child run; peer payloads and resource URIs are excluded. A
+list-change marks the registry stale. Dispatch checks this flag before
+proposal and again after approval, preventing stale definitions from reaching
+the peer. Graph aliases are pinned, so the child fails closed and the graph
+must be revised before retry; it never silently rebinds the node. The observer
+is stopped/joined before the child commits a terminal state. Stdio contracts
+cover quiet subscriptions on approved, denied and cancelled paths; HTTP tests
+exercise catalogue invalidation, no-effect failure and approval-race
+retirement. See [current lifecycle evidence](evidence/native-mcp-subscription-lifecycle-local-20261012.log).
 
 ## Failure and recovery
 

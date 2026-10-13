@@ -38,9 +38,10 @@ struct McpToolRegistry::Impl {
     };
     McpToolClient& client;PersistenceService& store;WorkspaceTools& workspace;
     const std::vector<SecretBytes>* private_credentials;
+    std::shared_ptr<std::atomic<bool>> catalogue_invalidated;
     std::string config_id,protocol_version;std::int64_t revision;
     std::map<std::string,Entry> entries;
-    Impl(McpToolClient& peer,PersistenceService& persistence,WorkspaceTools& root,std::string id,std::int64_t version,const std::vector<SecretBytes>* credentials):client(peer),store(persistence),workspace(root),private_credentials(credentials),config_id(std::move(id)),revision(version) {}
+    Impl(McpToolClient& peer,PersistenceService& persistence,WorkspaceTools& root,std::string id,std::int64_t version,const std::vector<SecretBytes>* credentials,std::shared_ptr<std::atomic<bool>> invalidated):client(peer),store(persistence),workspace(root),private_credentials(credentials),catalogue_invalidated(std::move(invalidated)),config_id(std::move(id)),revision(version) {}
     Json approval_binding(const Entry& entry) const {
         if(entry.kind==EntryKind::tool)return {{"server_config_id",config_id},{"config_revision",revision},
             {"peer_tool",entry.peer_name},{"alias",entry.alias},{"catalogue_fingerprint",entry.fingerprint},
@@ -57,7 +58,7 @@ struct McpToolRegistry::Impl {
     }
 };
 McpToolRegistry::McpToolRegistry(McpToolClient& client,PersistenceService& store,WorkspaceTools& workspace,
-    std::string id,std::int64_t revision,McpToolClient::Deadline deadline,std::stop_token cancel,const std::vector<SecretBytes>* private_credentials):impl_(std::make_unique<Impl>(client,store,workspace,std::move(id),revision,private_credentials)) {
+    std::string id,std::int64_t revision,McpToolClient::Deadline deadline,std::stop_token cancel,const std::vector<SecretBytes>* private_credentials,std::shared_ptr<std::atomic<bool>> catalogue_invalidated):impl_(std::make_unique<Impl>(client,store,workspace,std::move(id),revision,private_credentials,std::move(catalogue_invalidated))) {
     auto& state=*impl_;
     if(state.config_id.empty() || state.config_id.size()>128 || state.config_id.find('\0')!=std::string::npos || revision<=0)throw std::invalid_argument("Invalid trusted MCP configuration identity");
     if(!client.ready())throw McpProtocolError("MCP discovery requires a ready owned client");
@@ -111,6 +112,10 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
     std::int64_t expiry,McpToolClient::Deadline deadline,std::stop_token cancel,InstructionPrecondition guidance) {
     auto& state=*impl_;const auto found=state.entries.find(alias);
     if(found==state.entries.end())throw std::invalid_argument("Tool is not registered on this backend");
+    const auto record_invalidation=[&](const char* phase){state.store.append_event(run,"mcp.catalogue.invalidated",Json{{"server_id",state.config_id},{"config_revision",state.revision},{"alias",alias},{"phase",phase},{"effect_dispatched",false}}.dump()).get();};
+    if(state.catalogue_invalidated&&state.catalogue_invalidated->load(std::memory_order_acquire)){
+        record_invalidation("before_proposal");throw McpCatalogueChanged("MCP catalogue changed before proposal; no effect occurred");
+    }
     const auto& entry=found->second;SchemaWorker().evaluate(entry.schema_json,arguments,deadline,cancel);
     const auto approved=mcp_compact_object(arguments);
     if(!state.client.ready())throw McpEffectNotDispatched("MCP peer is unavailable before proposal");
@@ -125,12 +130,20 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
         try{state.store.finish_operation(id,outcome,result).get();}
         catch(...){throw McpOutcomeUnrecorded("MCP outcome could not be recorded; stop execution and recover the claim");}
     };
+    if(state.catalogue_invalidated&&state.catalogue_invalidated->load(std::memory_order_acquire)){
+        record_invalidation("after_approval");finish(OperationState::failed,R"({"reason":"mcp_catalogue_changed_before_dispatch"})");
+        throw McpCatalogueChanged("MCP catalogue changed after approval; no effect occurred");
+    }
     if(cancel.stop_requested() || std::chrono::steady_clock::now()>=deadline) {
         finish(OperationState::failed,R"({"reason":"stopped_before_mcp_dispatch"})");throw McpEffectNotDispatched("MCP operation stopped before dispatch");
     }
     try{if(guidance.verify)guidance.verify(cancel);}
     catch(const ToolGuidanceChanged&){finish(OperationState::failed,R"({"reason":"repository_instructions_changed_before_mcp_dispatch"})");throw;}
     catch(...){finish(OperationState::failed,R"({"reason":"guidance_unavailable_before_mcp_dispatch"})");throw McpEffectNotDispatched("MCP guidance could not be verified before dispatch");}
+    if(state.catalogue_invalidated&&state.catalogue_invalidated->load(std::memory_order_acquire)){
+        record_invalidation("before_dispatch");finish(OperationState::failed,R"({"reason":"mcp_catalogue_changed_before_dispatch"})");
+        throw McpCatalogueChanged("MCP catalogue changed before dispatch; no effect occurred");
+    }
     McpToolReply reply;McpReadOnlyReply readonly;
     try {if(entry.kind==EntryKind::tool)reply=state.client.call_tool(entry.peer_name,approved,deadline,cancel);else if(entry.kind==EntryKind::resource)readonly=state.client.read_resource(entry.resource_uri,deadline,cancel);else readonly=state.client.get_prompt(entry.peer_name,approved,deadline,cancel);}
     catch(const McpDispatchFailure& failure) {
@@ -171,6 +184,7 @@ std::string McpToolRegistry::invoke(const std::string& id,const std::string& run
     catch(const McpEffectUncertain&){throw;}
     catch(const McpEffectNotDispatched&){throw;}
     catch(const McpReadFailed&){throw;}
+    catch(const McpCatalogueChanged&){throw;}
     catch(...){throw McpOutcomeUnrecorded("Claimed MCP outcome could not be encoded or recorded; recovery is required");}
 }
 }

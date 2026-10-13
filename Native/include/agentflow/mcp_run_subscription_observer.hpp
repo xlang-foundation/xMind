@@ -2,6 +2,7 @@
 
 #include "agentflow/mcp_tool_client.hpp"
 #include "agentflow/persistence_service.hpp"
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -18,7 +19,7 @@ class McpRunSubscriptionObserver {
 public:
     McpRunSubscriptionObserver(PersistenceService& store,std::string run,std::string server,
         std::int64_t revision,std::unique_ptr<McpToolClient> client,McpSubscriptionFilter filter,
-        McpToolClient::Deadline deadline);
+        McpToolClient::Deadline deadline,std::shared_ptr<std::atomic<bool>> catalogue_invalidated={});
     ~McpRunSubscriptionObserver();
     McpRunSubscriptionObserver(const McpRunSubscriptionObserver&)=delete;
     McpRunSubscriptionObserver& operator=(const McpRunSubscriptionObserver&)=delete;
@@ -33,6 +34,7 @@ private:
     std::unique_ptr<McpToolClient> client_;
     McpSubscriptionFilter filter_;
     McpToolClient::Deadline deadline_;
+    std::shared_ptr<std::atomic<bool>> catalogue_invalidated_;
     std::jthread worker_;
 };
 

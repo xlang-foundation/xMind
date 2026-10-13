@@ -1,0 +1,27 @@
+Test project D:/CantorAI2026/xMind/build/native
+      Start  42: native_graph_mcp_contract
+ 1/11 Test  #42: native_graph_mcp_contract .....................   Passed    5.72 sec
+      Start  43: native_graph_mcp_http_contract
+ 2/11 Test  #43: native_graph_mcp_http_contract ................   Passed    3.00 sec
+      Start  44: native_graph_mcp_http_subscription_contract
+ 3/11 Test  #44: native_graph_mcp_http_subscription_contract ...   Passed    0.63 sec
+      Start  66: native_mcp_client_contract
+ 4/11 Test  #66: native_mcp_client_contract ....................   Passed    1.36 sec
+      Start  67: native_mcp_http_readonly_contract
+ 5/11 Test  #67: native_mcp_http_readonly_contract .............   Passed    0.19 sec
+      Start  72: native_mcp_effect_contract
+ 6/11 Test  #72: native_mcp_effect_contract ....................   Passed   11.40 sec
+      Start  75: native_agent_runner_contract
+ 7/11 Test  #75: native_agent_runner_contract ..................   Passed    6.96 sec
+      Start 103: native_agent_mcp_http_contract
+ 8/11 Test #103: native_agent_mcp_http_contract ................   Passed    2.61 sec
+      Start 104: native_agent_mcp_http_subscription_contract
+ 9/11 Test #104: native_agent_mcp_http_subscription_contract ...   Passed    0.80 sec
+      Start 105: native_mcp_sdk_modern_contract
+10/11 Test #105: native_mcp_sdk_modern_contract ................   Passed    3.56 sec
+      Start 106: native_mcp_sdk_legacy_contract
+11/11 Test #106: native_mcp_sdk_legacy_contract ................   Passed    2.87 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Total Test time (real) =  39.13 sec

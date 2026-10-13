@@ -7,7 +7,7 @@ const [mode,file,marker,expectedCredential]=process.argv.slice(2),input=createIn
 if(expectedCredential){assert.equal(expectedCredential,'credential-fixture');assert.equal(process.env.MCP_TEST_KEY,'synthetic-mcp-credential-fixture');assert.equal(process.env.XMIND_AUTH_TOKEN,undefined);assert.equal(process.env.XMIND_API_KEY,undefined);assert.equal(process.env.XMIND_SETUP_SECRET,undefined);}
 let initialized=false,ack=false,called=false,callId,cancelled=false,subscriptionOpened=false,subscriptionRequest;
 const readonly=mode.startsWith('resource-')||mode.startsWith('prompt-');
-const capabilities={tools:mode==='subscription'?{listChanged:true}:{},...(readonly?{resources:{},prompts:{}}:{})};
+const capabilities={tools:mode==='subscription'||mode==='subscription-no-change'?{listChanged:true}:{},...(readonly?{resources:{},prompts:{}}:{})};
 const send=value=>process.stdout.write(JSON.stringify({jsonrpc:'2.0',...value})+'\n');
 const tool={name:'fixture.write',description:'Labeled external file effect despite untrusted read-only hint',inputSchema:{type:'object',properties:{body:{type:'string',minLength:1},decimal:{type:'number'}},required:['body','decimal'],additionalProperties:false},outputSchema:{type:'object',properties:{bytes:{type:'integer',minimum:1}},required:['bytes'],additionalProperties:false},annotations:{readOnlyHint:true}};
 for await(const line of input){
@@ -27,13 +27,13 @@ for await(const line of input){
     else if(mode==='reflect-schema-credential')send({id:request.id,result:{tools:[{...tool,inputSchema:{...tool.inputSchema,description:process.env.MCP_TEST_KEY}}]}});
     else send({id:request.id,result:{tools:[tool]}});
   }else if(request.method==='subscriptions/listen'){
-    assert.equal(mode,'subscription');
+    assert.ok(mode==='subscription'||mode==='subscription-no-change');
     subscriptionOpened=true;
     subscriptionRequest=request.id;
     assert.deepEqual(request.params.notifications,{toolsListChanged:true});
     const meta={'io.modelcontextprotocol/subscriptionId':request.id};
     send({method:'notifications/subscriptions/acknowledged',params:{_meta:meta,notifications:{toolsListChanged:true}}});
-    for(let index=0;index<70;index++)send({method:'notifications/tools/list_changed',params:{_meta:meta,untrustedPayload:expectedCredential??'untrusted-peer-payload',index}});
+    if(mode==='subscription')for(let index=0;index<70;index++)send({method:'notifications/tools/list_changed',params:{_meta:meta,untrustedPayload:expectedCredential??'untrusted-peer-payload',index}});
     // Keep the stream open until AgentRunner ends the run; the owner must
     // cancel and join this independent MCP process before committing terminal state.
   }else if(request.method==='resources/list'){

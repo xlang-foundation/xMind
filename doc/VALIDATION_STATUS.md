@@ -1,5 +1,21 @@
 # Current native validation
 
+## MCP catalogue invalidation during a run — 2026-10-12
+
+Validated `tools/list_changed`, `prompts/list_changed` and
+`resources/list_changed` notifications now set a run-owned invalidation flag
+shared with the registry. The registry checks before proposing and again after
+approval but before remote dispatch. A change during approval durably fails
+the claimed operation without calling the peer. AgentRunner returns a bounded
+error to the model, refreshes the configured catalogue in the same run, and
+lets the model reconsider with current definitions. A pinned graph MCP node
+fails closed on catalogue drift, since its immutable alias/revision cannot be
+silently rebound. Synthetic HTTP AgentRunner and graph contracts cover these
+paths, including absence of a stale peer effect. Focused Release results will
+passed **11/11** (AgentRunner, graph MCP, registry effects, transports and SDK
+peers). [Exact Release CTest output](evidence/native-mcp-catalogue-invalidation-local-20261012.log).
+Crash recovery/reconnect and live external-peer acceptance remain open.
+
 ## MCP 2026-07-28 subscriptions/listen for agents and graphs — 2026-10-12
 
 The shared `McpToolClient::listen_subscriptions` validator covers stdio and
@@ -20,8 +36,7 @@ for controller approval and provider token metrics persist. Dedicated stdio
 and HTTP transport contracts verify acknowledgement ordering. Graph/MCP,
 AgentRunner, stdio/HTTP transport and official modern/legacy SDK contracts pass
 **10/10**.
-Crash recovery/reconnect, automatic in-run catalogue refresh and live
-external-peer acceptance remain open. [Exact Release CTest output](evidence/native-mcp-subscription-lifecycle-local-20261012.log);
+Crash recovery/reconnect and live external-peer acceptance remain open. [Exact Release CTest output](evidence/native-mcp-subscription-lifecycle-local-20261012.log);
 [transport scope](native-mcp-http.md).
 
 ## MCP 2026-07-28 HTTP subscriptions/listen — 2026-10-12

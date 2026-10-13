@@ -14,16 +14,19 @@ const folder=await mkdtemp(join(tmpdir(),'xmind-agent-http-subscription-'));
 const workspace=join(folder,'workspace'),db=join(folder,'state.sqlite'),effect=join(workspace,'effect.txt');
 const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};
 delete env.XMIND_API_KEY;delete env.XMIND_SETUP_SECRET;
-let backend,backendPort,backendErrors='',providerError,mcpError,providerRequests=0,mcpMethods=[];
+let backend,backendPort,backendErrors='',providerError,mcpError,providerRequests=0,mcpMethods=[],subscriptionCount=0,notificationResolve,currentRunId;
+const firstCatalogueChange=new Promise(resolve=>notificationResolve=resolve);
 let listenerClosedResolve;const listenerClosed=new Promise(resolve=>listenerClosedResolve=resolve);
 const provider=createServer((request,response)=>{
-  let source='';request.on('data',chunk=>source+=chunk);request.on('end',()=>{
+  let source='';request.on('data',chunk=>source+=chunk);request.on('end',async()=>{
     try{
       providerRequests++;const body=JSON.parse(source),names=body.tools.map(item=>item.function.name);
       const mcpNames=names.filter(name=>/^mcp_[a-f0-9]{48}$/.test(name));assert.equal(mcpNames.length,1,JSON.stringify(names));
       assert.equal(source.includes('http-subscription-credential'),false);
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
-      if(tool){const result=JSON.parse(tool.content);assert.equal(result.acknowledged_by_peer,true);assert.equal(result.independently_verified,false);delta={content:'HTTP MCP result consumed by AgentRunner'};finish='stop';}
+      if(!tool){await firstCatalogueChange;await until(()=>api(`/v1/runs/${currentRunId}/events?after=0`),events=>events.some(event=>event.kind==='mcp.subscription.overflow'),'complete notification burst');}
+      if(tool){const result=JSON.parse(tool.content);if(result.error?.code==='mcp_catalogue_changed'){delta={tool_calls:[{index:0,id:`http-mcp-effect-${providerRequests}`,type:'function',function:{name:mcpNames[0],arguments:'{"body":"http-approved"}'}}]};finish='tool_calls';}
+        else{assert.equal(result.acknowledged_by_peer,true);assert.equal(result.independently_verified,false);delta={content:'HTTP MCP result consumed after catalogue refresh'};finish='stop';}}
       else{delta={tool_calls:[{index:0,id:'http-mcp-effect-1',type:'function',function:{name:mcpNames[0],arguments:'{"body":"http-approved"}'}}]};finish='tool_calls';}
       response.writeHead(200,{'Content-Type':'text/event-stream'});
       response.end(`data: ${JSON.stringify({choices:[{index:0,delta,finish_reason:null}]})}\n\ndata: ${JSON.stringify({choices:[{index:0,delta:{},finish_reason:finish}]})}\n\ndata: ${JSON.stringify({choices:[],usage:{prompt_tokens:17,completion_tokens:9,total_tokens:26}})}\n\ndata: [DONE]\n\n`);
@@ -48,7 +51,7 @@ const mcp=createServer((request,response)=>{
         const meta={'io.modelcontextprotocol/subscriptionId':message.id};
         const event=value=>`data: ${JSON.stringify(value)}\r\n\r\n`;
         response.write(event({jsonrpc:'2.0',method:'notifications/subscriptions/acknowledged',params:{_meta:meta,notifications:{toolsListChanged:true}}}));
-        for(let index=0;index<70;index++)response.write(event({jsonrpc:'2.0',method:'notifications/tools/list_changed',params:{_meta:meta,untrustedPayload:'http-subscription-credential-'+index}}));
+        if(++subscriptionCount===1){for(let index=0;index<70;index++)response.write(event({jsonrpc:'2.0',method:'notifications/tools/list_changed',params:{_meta:meta,untrustedPayload:'http-subscription-credential-'+index}}));notificationResolve();}
         response.on('close',()=>{if(!response.writableEnded){writeFile(join(folder,'http-listener-closed'),'peer observed HTTP listener disconnect').then(listenerClosedResolve).catch(error=>{mcpError=error;listenerClosedResolve();});}});
         return;
       }else if(message.method==='tools/call'){
@@ -75,15 +78,15 @@ try{
   const serverList=cli('mcp-servers');assert.deepEqual(serverList.servers,[{id:'http-fixture',revision:1,enabled:true,transport:'http'}]);
   await api('/v1/sessions',{id:'http-subscription',title:'HTTP MCP subscription lifecycle'});
   const run=cli('run','http-subscription','Use the configured HTTP MCP tool.');
-  const [operation]=await until(async()=>api(`/v1/runs/${run.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'),'MCP approval request');
-  assert.ok(operation.id,`Approval operation has no ID: ${JSON.stringify(operation)}`);
+  currentRunId=run.id;
   const observed=await until(()=>api(`/v1/runs/${run.id}/events?after=0`),events=>events.some(event=>event.kind==='mcp.subscription.overflow'),'HTTP notification overflow guard');
   assert.ok(observed.some(event=>event.kind==='mcp.subscription.acknowledged'));
   assert.equal(observed.filter(event=>event.kind==='mcp.subscription.notification').length,64);
   assert.equal(observed.filter(event=>event.kind==='mcp.subscription.overflow').length,1);
   assert.equal(JSON.stringify(observed).includes('http-subscription-credential'),false,'HTTP peer notification payload must not be persisted');
   assert.ok(mcpMethods.includes('subscriptions/listen'));
-  assert.equal(await readFile(effect,'utf8').catch(()=>''),'','HTTP MCP effect must wait for approval');
+  const [operation]=await until(async()=>api(`/v1/runs/${run.id}/operations`),items=>items.some(item=>item.state==='awaiting_approval'),'refreshed MCP approval request');
+  assert.ok(operation.id,`Approval operation has no ID: ${JSON.stringify(operation)}`);assert.equal(await readFile(effect,'utf8').catch(()=>''),'','HTTP MCP effect must wait for approval');
   cli('decide',operation.id,'allow');
   const completed=await until(()=>api(`/v1/runs/${run.id}`),value=>value.state==='completed','completed HTTP MCP AgentRunner turn');
   assert.equal(completed.state,'completed');assert.equal(await readFile(effect,'utf8'),'http-approved');
@@ -94,9 +97,10 @@ try{
   assert.equal(closed.data.outcome,'stopped');
   assert.equal(finalEvents.at(-1).kind,'run.completed');
   assert.equal(JSON.stringify(finalEvents).includes('http-subscription-credential'),false);
-  const history=cli('history','http-subscription');assert.equal(history.length,4);assert.deepEqual(history[3].data.usage,{prompt_tokens:17,completion_tokens:9,total_tokens:26});
-  assert.deepEqual(mcpMethods,['server/discover','tools/list','server/discover','subscriptions/listen','tools/call']);
-  console.log('Native HTTP MCP AgentRunner subscription lifecycle passed: acknowledgement, bounded sanitized events, approval-gated tool effect, listener cancellation and durable pre-terminal closure. Provider response is synthetic; HTTP MCP peer exercises native transport.');
+  const history=cli('history','http-subscription');assert.equal(history.length,6);assert.deepEqual(history[5].data.usage,{prompt_tokens:17,completion_tokens:9,total_tokens:26});
+  assert.ok(finalEvents.some(event=>event.kind==='mcp.catalogue.invalidated'&&event.data.phase==='before_proposal'));
+  assert.deepEqual(mcpMethods,['server/discover','tools/list','server/discover','subscriptions/listen','server/discover','tools/list','server/discover','subscriptions/listen','tools/call']);
+  console.log('Native HTTP MCP AgentRunner subscription lifecycle passed: list-change invalidation blocks stale aliases, refreshes the catalogue within the same run, and permits only the reconsidered approved effect. Notifications are bounded and sanitized; listener closure precedes terminal state.');
 }finally{
   await stop();provider.closeAllConnections();mcp.closeAllConnections();await Promise.all([new Promise(resolve=>provider.close(resolve)),new Promise(resolve=>mcp.close(resolve))]);
   assert.equal(resolve(folder).startsWith(resolve(tmpdir())),true);await rm(folder,{recursive:true,force:true});

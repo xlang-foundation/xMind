@@ -47,8 +47,8 @@ Operation proposed(PersistenceService& store,const std::string& id){
 struct Task {
     std::stop_source cancel;std::promise<std::string> discovered_bindings;
     std::shared_future<std::string> bindings;std::future<std::string> result;
-    Task(PersistenceService& store,char** argv,std::filesystem::path root,std::string run,std::string id,std::string mode,std::string arguments=R"({"body":"actual native MCP effect\n","decimal":1.00000000000000000001})",std::optional<std::filesystem::path> shared_server_root={}):
-        bindings(discovered_bindings.get_future().share()),result(std::async(std::launch::async,[this,&store,argv,root,run,id,mode,arguments,shared_server_root]{
+    Task(PersistenceService& store,char** argv,std::filesystem::path root,std::string run,std::string id,std::string mode,std::string arguments=R"({"body":"actual native MCP effect\n","decimal":1.00000000000000000001})",std::optional<std::filesystem::path> shared_server_root={},std::shared_ptr<std::atomic<bool>> catalogue_invalidated={}):
+        bindings(discovered_bindings.get_future().share()),result(std::async(std::launch::async,[this,&store,argv,root,run,id,mode,arguments,shared_server_root,catalogue_invalidated]{
             const auto started=std::chrono::steady_clock::now();const char* phase="connect";
             const auto peer_root=shared_server_root.value_or(root);const auto config_id="fixture-server-"+peer_root.filename().string();
             WorkspaceTools workspace(root.string());McpStdioConfiguration client_config{argv[1],argv[3],{argv[2],mode,(peer_root/"effect.txt").string(),(peer_root/"effect.marker").string()},{}};std::vector<SecretBytes> private_credentials;
@@ -61,7 +61,7 @@ struct Task {
                 client.connect(std::chrono::steady_clock::now()+5s,cancel.get_token());
                 phase="catalogue";
                 McpToolClient& owned_peer=client;
-                McpToolRegistry registry(owned_peer,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token(),&private_credentials);
+                McpToolRegistry registry(owned_peer,store,workspace,config_id,7,std::chrono::steady_clock::now()+5s,cancel.get_token(),&private_credentials,catalogue_invalidated);
                 const auto definitions=registry.definitions();const auto snapshot=registry.approval_bindings_json();const auto metadata=Json::parse(snapshot);
                 const bool reading=mode.starts_with("resource-")||mode.starts_with("prompt-");const auto desired_kind=mode.starts_with("resource-")?"resource":mode.starts_with("prompt-")?"prompt":"tool";
                 require(definitions.size()==(reading?3u:1u),"Native registry must expose every advertised MCP kind with bounded aliases");
@@ -120,6 +120,11 @@ int main(int argc,char** argv){
                 const auto complete=store.operation(mode).get();require(complete.state==OperationState::succeeded && complete.decision_actor=="fixture-controller","Acknowledged effect must be durably attributed");
                 Task duplicate(store,argv,workspace,mode,mode,mode);rejects<Conflict>([&]{duplicate.result.get();});require(contents(workspace/"effect.txt")=="actual native MCP effect\n","One operation identity must not replay an actual peer effect");
                 store.transition(mode,RunState::running,RunState::completed).get();
+            }
+            {
+                const std::string mode="catalogue-changed-after-approval";const auto workspace=root(mode);auto invalidated=std::make_shared<std::atomic<bool>>(false);start(store,mode);Task task(store,argv,workspace,mode,mode,"normal",R"({"body":"must not dispatch","decimal":1})",{},invalidated);const auto proposal=proposed(store,mode);
+                require(proposal.state==OperationState::awaiting_approval&&contents(workspace/"effect.txt").empty(),"MCP effect must remain gated while approval is pending");invalidated->store(true,std::memory_order_release);store.decide_operation(mode,OperationDecision::allow,"fixture-controller").get();rejects<McpCatalogueChanged>([&]{task.result.get();});
+                const auto retired=store.operation(mode).get();require(retired.state==OperationState::failed&&Json::parse(retired.result_json)["reason"]=="mcp_catalogue_changed_before_dispatch"&&contents(workspace/"effect.txt").empty()&&!std::filesystem::exists(workspace/"effect.marker"),"A catalogue change during approval must durably retire the operation without invoking or replaying the peer effect");store.transition(mode,RunState::running,RunState::failed).get();
             }
             for(const auto& item:std::vector<std::pair<std::string,std::string>>{{"resource-read","{}"},{"prompt-read",R"({"topic":"AgentFlow"})"}}){
                 const auto& mode=item.first;const auto workspace=root(mode);start(store,mode);Task task(store,argv,workspace,mode,mode,mode,item.second);const auto proposal=proposed(store,mode);

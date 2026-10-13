@@ -168,7 +168,8 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
             catch(const NotFound&){throw McpCredentialUnavailable("Graph MCP credential is unavailable");}
             catch(const Conflict&){throw McpCredentialUnavailable("Graph MCP credential binding is unavailable");}
             store_.append_event(id,"mcp.connected",Json{{"server_id",server.id},{"config_revision",server.revision},{"protocol_version",client->server().protocol_version},{"source","graph"}}.dump()).get();
-            McpToolRegistry registry(*client,store_,*workspace_,server.id,server.revision,deadline,cancel,&private_credentials);
+            auto catalogue_invalidated=std::make_shared<std::atomic<bool>>(false);
+            McpToolRegistry registry(*client,store_,*workspace_,server.id,server.revision,deadline,cancel,&private_credentials,catalogue_invalidated);
             const auto definitions=registry.definitions();
             store_.append_event(id,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()},{"source","graph"}}.dump()).get();
             if(std::none_of(definitions.begin(),definitions.end(),[&](const auto& definition){return definition.name==name;}))return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_mcp_alias_unavailable"})").get();
@@ -178,7 +179,7 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
                 try {
                     auto observer_client=connect_mcp_client(server,store_,deadline,cancel);
                     observer=std::make_unique<McpRunSubscriptionObserver>(store_,id,server.id,
-                        server.revision,std::move(observer_client),*filter,deadline);
+                        server.revision,std::move(observer_client),*filter,deadline,catalogue_invalidated);
                     observer->start();
                 } catch(const std::exception&) {
                     store_.append_event(id,"mcp.subscription.unavailable",
@@ -234,6 +235,7 @@ Run GraphRunner::tool(const std::string& id,GraphPreparedNode node,std::stop_tok
         else result=Json::parse(workspace_->invoke(name,source,cancel));
         store_.append_event(id,"tool.completed",Json{{"name",name},{"data",result},{"source","graph"}}.dump()).get();result["source"]="graph_tool";return store_.complete_run(id,result.dump()).get();
     }catch(const EditOutcomeUnrecorded&){throw;}catch(const ProcessOutcomeUnrecorded&){throw;}catch(const McpOutcomeUnrecorded&){throw;}
+    catch(const McpCatalogueChanged&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_mcp_catalogue_changed"})").get();}
     catch(const McpEffectUncertain&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_mcp_effect_uncertain"})").get();}
     catch(const WorkspaceEffectUncertain&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_workspace_effect_quarantined"})").get();}
     catch(const McpEffectNotDispatched&){return store_.transition(id,RunState::running,RunState::failed,R"({"reason":"graph_mcp_not_dispatched"})").get();}
