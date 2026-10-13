@@ -138,6 +138,10 @@ int run_local_view(int argc, char **argv) {
                 options.approved_edits = false;
                 continue;
             }
+            if (key == "--upgrade-backend") {
+                options.upgrade_backend = true;
+                continue;
+            }
             require(i + 1 < argc && *argv[i + 1], "Native view option requires a value");
             const std::string value = argv[++i];
             if (key == "--workspace")
