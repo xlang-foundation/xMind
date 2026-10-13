@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-12",
+  "scope": "Read-only VS Code extension smoke test in the already opened TestProj workspace",
+  "workspace": "D:/CantorAI2026/TestProj",
+  "xmind_run_id": "57cc96f67a804a7e8e69bc8c3feebee5",
+  "provider": {
+    "id": "deepseek",
+    "model": "deepseek-flash",
+    "credential": "reused from the local xMind profile; no key was exposed"
+  },
+  "prompt_scope": "Inspect the Vue catalog entrypoint/API client and FastAPI route definitions. Report the actual catalog endpoint. Do not edit files, run commands, or start processes.",
+  "result": {
+    "state": "completed",
+    "catalog_endpoint": "GET /api/models",
+    "trace": [
+      "model-zoo/frontend/src/api/client.js: API_BASE defaults to /api and listModels calls /models",
+      "model-zoo/frontend/src/views/HomeView.vue: the catalog view calls listModels",
+      "model-zoo/backend: APIRouter(prefix=/models) defines GET at the empty route and the app mounts it under /api",
+      "model-zoo/backend/tests/test_api.py: route contract test covers the endpoint"
+    ],
+    "reported_side_effects": "No discrepancies, edits, or commands run"
+  },
+  "visible_model_call_metrics": [
+    {
+      "input_tokens": 24690,
+      "output_tokens": 440,
+      "total_tokens": 25130,
+      "cached_tokens": 22784,
+      "reasoning_tokens": 175,
+      "time_to_first_token_seconds": 1.02,
+      "duration_seconds": 2.79
+    },
+    {
+      "input_tokens": 25439,
+      "output_tokens": 192,
+      "total_tokens": 25631,
+      "cached_tokens": 24960,
+      "reasoning_tokens": 98,
+      "time_to_first_token_seconds": 0.94,
+      "duration_seconds": 1.95
+    }
+  ],
+  "limitations": [
+    "This was a read-only inspection, not a coding change or end-to-end build/test run.",
+    "Metrics record the first two model calls visible in the extension panel, not a complete aggregate for any additional internal calls.",
+    "TestProj is not a Git repository, so no source diff or commit provenance is available."
+  ]
+}

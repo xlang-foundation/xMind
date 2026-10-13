@@ -1,5 +1,42 @@
 # Current native validation
 
+## Live webpage coding flow and Model Zoo design pass — 2026-10-12
+
+From the xMind webpage on the saved TestProj workspace, DeepSeek Flash
+inspected the current Vue/FastAPI implementation and proposed one
+`patch_file` edit. After reviewing and approving that file-level diff in xMind,
+the run changed only `model-zoo/frontend/src/style.css`: catalog cards gained
+stronger title/owner hierarchy, aligned summary/stat rows, a focus/hover accent
+rule, and tighter small-screen card spacing. The edit also removed a duplicate
+`--line` declaration. It preserved the Vue templates, model data, controls,
+accessibility markup and illustrative-data disclosure.
+
+The same xMind run invoked its managed PowerShell process tool from
+`model-zoo/frontend`; `npm.cmd run build` exited **0**. Vite 6.4.4 transformed
+36 modules and built in **700 ms**, with no stderr. The browser page refreshed
+with the new card styling. Live interactions still returned three
+Image Classification results, Clear all restored 12 models, and search for
+`bert` returned two matches. An independent local API request to
+`GET /api/models?page_size=2` returned HTTP **200**, two entries and total **12**.
+No backend pytest was run, so this does not clear the existing xlang3/pytest
+hook-lookup compatibility failure. Phone-sized rendering and the full Vue/API
+test suites remain to be exercised. [Sanitized evidence](evidence/testproj-webpage-design-run-20261012.json).
+
+## VS Code workspace and API inspection smoke test — 2026-10-12
+
+In the running VS Code Extension Development Host, the xMind extension used the
+opened `D:\\CantorAI2026\\TestProj` workspace and its saved local DeepSeek
+credential. The `deepseek-flash` run completed a read-only inspection and
+identified the catalog request as `GET /api/models`, tracing it from the Vue
+API client through `HomeView.vue` to the FastAPI router and its route contract
+test. The run explicitly reported no edits, shell commands, or process starts.
+The extension displayed per-call usage and timing metrics; the first two
+visible calls used 24,690 input / 440 output tokens (2.79 s total, 1.02 s to
+first token) and 25,439 input / 192 output tokens (1.95 s total, 0.94 s to
+first token). This verifies workspace binding, saved-key model discovery and a
+successful read-only VS Code request. It does not verify file writes, command
+execution, or a full coding task. [Sanitized run evidence](evidence/testproj-vscode-inspection-20261012.json).
+
 ## Live webpage workspace creation and switching — 2026-10-12
 
 In the external Edge xMind webpage, the workspace settings dialog created a

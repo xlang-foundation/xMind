@@ -1,5 +1,32 @@
 # Reviewable milestones
 
+## Live webpage coding pass against TestProj — 2026-10-12
+
+The webpage xMind client completed a model-assisted catalog design task against
+the selected TestProj workspace. DeepSeek Flash proposed one CSS-only patch;
+the user-authorized xMind review flow applied it to
+`model-zoo/frontend/src/style.css`. The managed xlang3-backed process tool ran
+`npm.cmd run build` successfully (exit **0**; Vite 6.4.4, 36 modules, 700 ms,
+empty stderr). The refreshed catalog rendered, task filtering returned 3
+Image Classification entries, Clear all restored 12, and `bert` search
+returned 2. A separate live FastAPI request returned HTTP 200 with 2 entries
+and total 12. This verifies a complete bounded web coding cycle with one
+approved edit, managed command execution, and independent browser/API checks;
+mobile viewport and pytest acceptance remain open. See the
+[sanitized run record](evidence/testproj-webpage-design-run-20261012.json).
+
+## VS Code opened-workspace and saved-provider smoke test — 2026-10-12
+
+The live VS Code Extension Development Host selected the existing TestProj
+workspace and discovered two DeepSeek models from the xMind local profile,
+without re-entering or exposing its provider key. A read-only
+`deepseek-flash` run traced the Model Zoo catalog request from the Vue client
+to FastAPI and returned `GET /api/models`; it completed with no file edits,
+commands, or process starts. The extension displayed token and latency metrics
+for model calls. This verifies a real VS Code workspace-bound inference turn,
+not the outstanding write/approval/build workflow. See the
+[sanitized run record](evidence/testproj-vscode-inspection-20261012.json).
+
 ## Webpage workspace creation and switching acceptance — 2026-10-12
 
 The live Edge xMind page created a second local workspace from the existing
