@@ -15,8 +15,9 @@ The packaged xlang3 executable then ran the real Model Zoo backend test suite
 from TestProj with its installed pure Python dependencies: **9 passed**, with
 one AnyIO deprecation warning. A packaged xMind server also reached its local
 listening state from this runtime. The test used xlang3 with bytecode writing
-disabled; it did not execute CPython or contact a provider. The full hosted CI
-gate still needs to run against this updated pin. Exact local package and test
+disabled; it did not execute CPython or contact a provider. The hosted view
+and extension gate now passes on the updated source; the separate native
+Windows package/contract gate remains pending. Exact local package and test
 results are in the [smoke record](evidence/xlang3-runtime-module-package-20261013.json).
 
 The paired xlang3 process path now adds `-B` for every xlang3 profile so native
@@ -36,9 +37,10 @@ view files, 276 extension tests and 81 browser tests. The current source
 inventory is 57 tracked files (59 including its two pinned vendor files), and
 the actual complete suites pass **328/328** extension tests and **105/105**
 browser tests on this machine. The gate's exact inventory and pass-count
-expectations now match those measured results. Local suite runs passed; the
-guarded aggregate gate requires its isolated GitHub runner, so hosted
-acceptance remains pending on the updated commit.
+expectations now match those measured results. The guarded aggregate gate
+passed on `70bc353` with 328/328 extension and 105/105 browser contracts and
+its source/asset immutability check; see the [hosted run](https://github.com/xlang-foundation/xMind/actions/runs/38458592874).
+The separate native Windows package/contract gate has not passed yet.
 
 ## Installed VS Code extension attaches to the xlang3 branch owner — 2026-10-13
 
