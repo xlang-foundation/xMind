@@ -19,6 +19,18 @@ unverified. Backend pytest did not run: `xlang3 -m pip install pytest` failed in
 pip dependency resolution with `memoryview() requires a bytes-like object`;
 tests were not run under CPython.
 
+Follow-up inspection of the preserved local run records confirms that every
+Claude `tool_use` ID has one matching `tool_result` in order for the failed
+continuation. The profile database also has a trusted PowerShell process
+profile (`auto_approve=true`, 600,000 ms maximum); this confirms that local
+process execution is configured, but does not establish that the failed agent
+run invoked it. The TestProj frontend production build passed again, and the
+live FastAPI health and GPT-2 detail endpoints returned real records. The
+Anthropic response body is deliberately not persisted because it may echo
+prompt or credential data, so the exact provider-side reason for HTTP 400 is
+still unknown. A fresh external Edge interaction could not be performed in
+this Codex host because its external-browser surface is unavailable.
+
 ## xlang3 main integration and native Release gate — 2026-10-12
 
 xMind now pins the pushed xlang3 `main` revision
