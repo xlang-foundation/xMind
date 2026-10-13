@@ -2,6 +2,7 @@
 #include "agentflow/local_profile.hpp"
 #include "agentflow/workspace_registry.hpp"
 #include "agentflow/workspace_tools.hpp"
+#include "agentflow/agent_worker.hpp"
 #include "nlohmann/json.hpp"
 #include <charconv>
 #include <cstdlib>
@@ -42,13 +43,14 @@ void help(){
         "  xmind [connection options] git-diff MODE [BASE [CONTEXT]] [--folder-id ID]\n"
         "  xmind view --ready-file FILE [local profile options]\n"
         "  xmind admin [native administration arguments]\n"
-        "  xmind schema-worker   (private bounded schema protocol)\n\n"
+        "  xmind schema-worker   (private bounded schema protocol)\n"
+        "  xmind worker         (private xlang3 agent tool worker)\n\n"
         "Without --port, the console discovers or starts its persistent local workspace profile.\n"
         "workspace init uses --workspace (or the current directory) as the first folder. Add folders later with workspace add-folder; workspace info lists IDs accepted by Git commands.\n"
         "--config selects provider YAML; --python-tools-config selects trusted embedded xlang3 tools; --language-server-config selects trusted LSP servers; --process-config selects trusted process profiles.\n"
         "--upgrade-backend safely replaces the managed profile runtime when the current owner supports it.\n"
         "Explicit --port attaches to an operator-selected backend using XMIND_AUTH_TOKEN.\n"
-        "No key is accepted on the command line. Agent-worker execution remains pending.\n"
+        "No key is accepted on the command line. Worker execution is private to the local runtime.\n"
         "Closing the console leaves backend runs alive; /cancel explicitly cancels a run.\n";
 }
 int port_number(const std::string& value){
@@ -97,9 +99,9 @@ int dispatch(int argc,char** argv){
 #if defined(_WIN32)
         else if(mode=="admin")entry=run_admin;
         else if(mode=="view")entry=run_local_view;
+        else if(mode=="worker")entry=agentflow::run_agent_worker;
 #endif
         if(entry){std::vector<char*> forwarded{argv[0]};for(int i=2;i<argc;++i)forwarded.push_back(argv[i]);forwarded.push_back(nullptr);return entry(static_cast<int>(forwarded.size()-1),forwarded.data());}
-        if(mode=="worker")throw std::invalid_argument("Agent worker execution is not implemented yet");
     }
     int first=1;std::string port="8765",workspace;bool named_port=false;agentflow::LocalProfileOptions options;std::set<std::string> seen;
     while(first<argc&&std::string_view(argv[first]).starts_with("--")){

@@ -46,10 +46,15 @@ XlangPythonToolConfig parse_xlang_python_tool_config(std::string_view source){
         throw std::invalid_argument("Trusted xlang3 tool configuration requires an absolute code root and at most 32 tools");
     std::set<std::string> names;
     for(const auto& item:root.at("tools")){
-        exact_fields(item,{"name","description","input_schema","module","function"});
+        exact_fields(item,{"name","description","input_schema","module","function","execution"});
         XlangPythonToolDefinition tool;
         tool.name=required_text(item,"name",128);tool.description=required_text(item,"description",4096);
         tool.module=required_text(item,"module",256);tool.function=required_text(item,"function",256);
+        if(item.contains("execution")){
+            if(!item.at("execution").is_string())throw std::invalid_argument("Invalid trusted xlang3 tool execution placement");
+            tool.execution=item.at("execution").get<std::string>();
+        }
+        if(tool.execution!="in_process"&&tool.execution!="worker")throw std::invalid_argument("Invalid trusted xlang3 tool execution placement");
         validate_agent_tool_allowlist(std::vector<std::string>{tool.name});
         if(!names.insert(tool.name).second||!module_name(tool.module,true)||!module_name(tool.function,false)||
             !item.contains("input_schema")||!item.at("input_schema").is_object())
@@ -70,7 +75,7 @@ XlangPythonToolConfig import_xlang_python_tool_config(PersistenceService& store,
     auto config=parse_xlang_python_tool_config(source);
     Json tools=Json::array();
     for(const auto& tool:config.tools)tools.push_back({{"name",tool.name},{"description",tool.description},
-        {"input_schema",Json::parse(tool.input_schema_json)},{"module",tool.module},{"function",tool.function}});
+        {"input_schema",Json::parse(tool.input_schema_json)},{"module",tool.module},{"function",tool.function},{"execution",tool.execution}});
     const auto encoded=Json{{"code_root",config.code_root},{"tools",std::move(tools)}}.dump();
     store.put_information("xlang-python-tools","catalog",encoded).get();
     return config;

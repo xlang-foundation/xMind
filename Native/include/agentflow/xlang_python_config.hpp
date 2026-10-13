@@ -9,6 +9,7 @@ namespace agentflow {
 
 struct XlangPythonToolDefinition {
     std::string name,description,input_schema_json,module,function;
+    std::string execution="in_process";
 };
 struct XlangPythonToolConfig {
     std::string code_root;

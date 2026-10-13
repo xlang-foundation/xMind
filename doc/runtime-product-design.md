@@ -11,8 +11,9 @@ planning, graph readiness, scheduling, cancellation, budgets and recovery.
 An agent is an LLM-driven execution instance. Its normal loop requests a model,
 executes permitted tools and supplies actual results to the next model turn.
 Another turn is not automatically another agent. Delegation explicitly creates
-a child execution. The runtime can execute an agent in process or assign an
-isolated worker once worker placement has been implemented and verified.
+a child execution. The agent loop currently runs in the backend process. A
+trusted registered xlang3 tool can execute in-process or in a short-lived
+`xmind` worker; durable agent-level worker placement remains pending.
 
 **Coding Agent / Harness** is a first-class application of that runtime. It
 supplies coding agent definitions, repository instructions, skills, workspace
@@ -115,7 +116,7 @@ The product entry point is `xmind.exe`:
 | --- | --- |
 | `xmind serve` | Persistent authenticated backend, called xMind Runtime |
 | `xmind` | Console client; discover/start or attach to a selected local runtime |
-| `xmind worker` | Internally launched agent worker with embedded xlang3; reserved until actual worker execution is implemented |
+| `xmind worker` | Private xlang3 worker for one trusted registered-tool invocation |
 
 One executable can run in multiple processes. Closing a console/view detaches
 observation; it does not cancel agent execution. The runtime owns durable
@@ -142,12 +143,14 @@ after the actual SDK API and cross-process ownership rules are verified. It
 carries the same versioned command/event contracts and authorization as HTTP.
 Browser JavaScript cannot directly attach to that native transport; the browser
 adapter bridges it if selected. No performance claim is made before measurement.
-The existing pinned SDK now passed its official script/parallel/native IPC smoke;
-[worker integration and remaining acceptance](native-ipc-worker-design.md) remain
-separate from that transport foundation.
+[The pinned SDK passed its official script/parallel/native IPC smoke, and the
+local registered-tool worker path now passes an actual xlang3 tool call.](native-ipc-worker-design.md)
+Durable agent workers and remaining failure/lease acceptance remain separate.
 
-Worker mode offers process/crash isolation and resource limits. Scheduling,
-approval authority, durable state and effect receipts remain runtime-owned.
+Tool worker mode gives a single invocation a child-process crash boundary and
+terminates it on cancellation; it does not impose OS resource limits or
+sandboxing. Scheduling, approval authority, durable state and effect receipts
+remain runtime-owned.
 Worker loss requires recorded reconciliation; an unknown effect cannot be
 silently retried. Worker placement and sandbox policy are separate settings.
 
@@ -191,9 +194,9 @@ integration through real pause, incremental resume, reconnect, detach and an
 approved file effect; exact scope is recorded in
 [native event-feed evidence](native-event-stream.md). A fresh rendered
 installation and live-provider SSE remain separate acceptance. Pending delivery
-also includes callable agent/tool authoring, reusable nested super-agents,
-shared scheduling/worker placement, xlang3 IPC, Local/Nexus connection
-integration and remaining provider/coding parity.
+also includes durable agent-level worker placement, reusable nested
+super-agents, shared scheduling, Local/Nexus connection integration and
+remaining provider/coding parity.
 
 The [committed event transport](native-event-stream.md) passed its full native
 gate at `7a148ff`, then the production reader, browser subscription, active-feed
@@ -203,6 +206,6 @@ remains a distinct requirement.
 
 Required acceptance covers the actual consolidated server/console, existing
 native contracts, client adapters and a fresh installed profile, then stream
-disconnect/replay, equivalent declarative/code registration and real worker
-crash/cancellation/effect reconciliation. A passing parser or dispatcher fixture
+disconnect/replay, equivalent declarative/code registration and real agent
+worker crash/cancellation/effect reconciliation. A passing parser or dispatcher fixture
 does not establish those product boundaries.

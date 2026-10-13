@@ -38,7 +38,7 @@ async function inventory(prefix=''){
  for(const item of (await readdir(directory,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))){
   const name=prefix?prefix+'/'+item.name:item.name;
   need(runtime.relativeFile(name)&&!item.isSymbolicLink(),'Bundle path is unsupported.');
-  if(item.isDirectory()){need(name==='modules'||name==='licenses'||name.startsWith('licenses/'),'Bundle directory is unsupported.');await inventory(name);}
+  if(item.isDirectory()){need(name==='modules'||name==='worker'||name==='licenses'||name.startsWith('licenses/'),'Bundle directory is unsupported.');await inventory(name);}
   else {need(item.isFile()&&['native','license','metadata'].includes(runtime.runtimeFileKind(name)),'Bundle file is unsupported.');const raw=await bytes(join(bundle,...name.split('/')));total+=raw.length;need(total<=256*1024*1024,'Bundle exceeds its byte limit.');files[name]=sha(raw);}
   need(Object.keys(files).length<=128,'Bundle exceeds the reviewed source inventory limit.');
  }

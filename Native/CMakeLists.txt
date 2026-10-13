@@ -69,6 +69,12 @@ target_include_directories(agentflow_xlang3 INTERFACE "${AGENTFLOW_XLANG3_SOURCE
 add_library(agentflow_xlang_python STATIC src/xlang_python.cpp src/xlang_authoring_program.cpp)
 target_include_directories(agentflow_xlang_python PUBLIC include PRIVATE third_party)
 target_link_libraries(agentflow_xlang_python PUBLIC agentflow_xlang3)
+add_library(agentflow_xlang_worker STATIC src/agent_worker.cpp)
+target_include_directories(agentflow_xlang_worker PUBLIC include PRIVATE third_party)
+target_link_libraries(agentflow_xlang_worker PUBLIC agentflow_xlang_python agentflow_xlang3)
+if(WIN32)
+  target_link_libraries(agentflow_xlang_worker PRIVATE bcrypt)
+endif()
 add_library(agentflow_core STATIC src/backend_lease.cpp src/xlang_sqlite.cpp src/repository.cpp src/legacy_owner.cpp src/persistence_service.cpp src/graph.cpp src/dynamic_plan.cpp src/context_digest.cpp src/context_selection.cpp)
 find_package(Threads REQUIRED)
 target_include_directories(agentflow_core PUBLIC include PRIVATE third_party)
@@ -197,7 +203,7 @@ if(WIN32)
   target_link_libraries(agentflow_runtime PUBLIC agentflow_agent agentflow_graph_execution PRIVATE agentflow_provider_transport agentflow_authoring agentflow_json_schema agentflow_language_server_tools yaml-cpp::yaml-cpp bcrypt)
   target_link_libraries(agentflow_runtime PRIVATE agentflow_vcs)
   target_include_directories(agentflow_agent PUBLIC include PRIVATE third_party)
-  target_link_libraries(agentflow_agent PUBLIC agentflow_core agentflow_agent_definitions PRIVATE agentflow_xlang_python agentflow_json_schema agentflow_chat_provider agentflow_workspace agentflow_edits agentflow_mcp_effects agentflow_mcp_configuration agentflow_mcp_client_factory agentflow_mcp_run_observer agentflow_process_effects agentflow_language_server_tools agentflow_language_server bcrypt)
+  target_link_libraries(agentflow_agent PUBLIC agentflow_core agentflow_agent_definitions PRIVATE agentflow_xlang_python agentflow_xlang_worker agentflow_json_schema agentflow_chat_provider agentflow_workspace agentflow_edits agentflow_mcp_effects agentflow_mcp_configuration agentflow_mcp_client_factory agentflow_mcp_run_observer agentflow_process_effects agentflow_language_server_tools agentflow_language_server bcrypt)
 endif()
 add_library(agentflow_a2a STATIC src/a2a_task_control.cpp)
 target_include_directories(agentflow_a2a PUBLIC include PRIVATE third_party)
@@ -265,10 +271,14 @@ target_include_directories(xmind PRIVATE include third_party/cpp-httplib third_p
 target_link_libraries(xmind PRIVATE agentflow_secrets agentflow_console_transport agentflow_http agentflow_instruction_configuration agentflow_json_schema agentflow_mcp_wire Threads::Threads)
 if(WIN32)
   target_sources(xmind PRIVATE apps/admin_main.cpp apps/local_view_main.cpp)
-  target_link_libraries(xmind PRIVATE agentflow_local_profile agentflow_runtime agentflow_process_configuration agentflow_language_server_configuration agentflow_mcp_configuration agentflow_mcp_client_factory agentflow_mcp_effects agentflow_graph agentflow_owner_process agentflow_backend_owner_control agentflow_legacy_owner_process agentflow_xlang_python bcrypt ws2_32 crypt32 shell32 ole32)
+  target_link_libraries(xmind PRIVATE agentflow_local_profile agentflow_runtime agentflow_process_configuration agentflow_language_server_configuration agentflow_mcp_configuration agentflow_mcp_client_factory agentflow_mcp_effects agentflow_graph agentflow_owner_process agentflow_backend_owner_control agentflow_legacy_owner_process agentflow_xlang_python agentflow_xlang_worker bcrypt ws2_32 crypt32 shell32 ole32)
   target_link_libraries(xmind_server PRIVATE agentflow_local_profile)
   add_custom_command(TARGET xmind POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
     "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:xmind>")
+  add_custom_command(TARGET xmind POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:xmind>/worker"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${CMAKE_CURRENT_SOURCE_DIR}/worker/agent_worker.py" "$<TARGET_FILE_DIR:xmind>/worker/agent_worker.py")
 endif()
 target_link_libraries(xmind_persistence_demo PRIVATE agentflow_core)
 if(WIN32)
@@ -786,6 +796,16 @@ if(BUILD_TESTING)
     add_test(NAME native_xlang_python_config_contract COMMAND agentflow_xlang_python_config_contract
       "${CMAKE_CURRENT_BINARY_DIR}/xlang-python-tools.sqlite" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_xlang_python_config_contract PROPERTIES TIMEOUT 30)
+    add_executable(agentflow_xlang_worker_contract tests/agent_worker_contract.cpp)
+    target_include_directories(agentflow_xlang_worker_contract PRIVATE third_party)
+    target_link_libraries(agentflow_xlang_worker_contract PRIVATE agentflow_xlang_worker)
+    add_dependencies(agentflow_xlang_worker_contract xmind)
+    add_custom_command(TARGET agentflow_xlang_worker_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_xlang_worker_contract>")
+    add_test(NAME native_xlang3_shared_memory_worker_contract COMMAND agentflow_xlang_worker_contract
+      "$<TARGET_FILE:xmind>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures")
+    set_tests_properties(native_xlang3_shared_memory_worker_contract PROPERTIES TIMEOUT 60)
     add_executable(agentflow_agent_service_contract tests/agent_service_contract.cpp)
     target_link_libraries(agentflow_agent_service_contract PRIVATE agentflow_agent)
     add_custom_command(TARGET agentflow_agent_service_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
@@ -801,16 +821,17 @@ if(BUILD_TESTING)
     target_link_libraries(agentflow_agent_runner_contract PRIVATE agentflow_agent agentflow_runtime agentflow_xlang_python)
     add_custom_command(TARGET agentflow_agent_runner_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_runner_contract>")
+    add_dependencies(agentflow_agent_runner_contract xmind)
     if(AGENTFLOW_NODE_EXECUTABLE)
       if(AGENTFLOW_RUST_ANALYZER_EXECUTABLE)
         add_test(NAME native_agent_runner_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
           "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_runner_peer.mjs" "$<TARGET_FILE:agentflow_agent_runner_contract>"
-          "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "${AGENTFLOW_RUST_ANALYZER_EXECUTABLE}")
+          "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "${AGENTFLOW_RUST_ANALYZER_EXECUTABLE}" "$<TARGET_FILE:xmind>")
         set_tests_properties(native_agent_runner_contract PROPERTIES TIMEOUT 120)
       else()
         add_test(NAME native_agent_runner_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
           "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_runner_peer.mjs" "$<TARGET_FILE:agentflow_agent_runner_contract>"
-          "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+          "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "$<TARGET_FILE:xmind>")
         set_tests_properties(native_agent_runner_contract PROPERTIES TIMEOUT 45)
       endif()
     endif()

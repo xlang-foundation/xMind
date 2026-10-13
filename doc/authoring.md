@@ -129,6 +129,7 @@ tools:
         text: {type: string}
       required: [text]
       additionalProperties: false
+    execution: worker
 ```
 
 `text_tools.py` exports `def uppercase(args): ...`; it receives a JSON object
@@ -141,12 +142,13 @@ restarts. Changed configuration applies on the next backend launch. Registered
 tools enter the regular model catalogue, and named-agent `tools` allowlists
 continue to narrow which ones a conversation may use.
 
-These functions execute in-process with the xMind server's privileges. They
-are trusted code, not a sandbox; they can perform effects outside xMind's
-workspace approval APIs. A synchronous function that blocks cannot be forcibly
-interrupted, so cancellation is checked immediately before and after its call.
-Hard interruption and full effect mediation remain open work for an isolated
-out-of-process runtime.
+The default `execution: in_process` runs with the xMind server's privileges.
+Trusted code is not a sandbox and can perform effects outside xMind's workspace
+approval APIs. Set `execution: worker` to run the registered function in a
+short-lived child xMind process over xlang3 shared-memory IPC. The backend
+retains the model loop and approvals; cancellation terminates that child. This
+process boundary does not restrict filesystem or network access, and it is not
+an OS sandbox. Worker pooling and full effect mediation remain open work.
 
 ## Trusted xlang3 programming mode
 
@@ -244,8 +246,8 @@ inline instructions, per-agent native tool allowlists, revisioned single-agent
 conversation selection, trusted startup-registered xlang3 Python tools in the
 AgentRunner catalogue, and trusted xlang3 programs that register named agent
 and graph definitions through the native authoring API. Native effect mediation
-for trusted code and forcibly interruptible/out-of-process Python calls remain
-incomplete. Workspace Markdown skill discovery and selection are implemented,
+for trusted code and durable agent-level worker execution remain incomplete.
+Workspace Markdown skill discovery and selection are implemented,
 while the full command/skill lifecycle still has documented gaps.
 Those authoring styles must eventually produce the same validated native
 definitions, tool registry and permission receipts; parser acceptance alone

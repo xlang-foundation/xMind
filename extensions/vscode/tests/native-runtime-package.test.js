@@ -33,7 +33,7 @@ test('staging preserves accepted native bytes and pure source while excluding in
   for(const name of ['python.exe','synthetic.pyc','synthetic.pyd'])await fs.writeFile(path.join(f.options.stdlibSource,name),'Synthetic excluded bytes');
   for(const directory of ['__pycache__','site-packages','.config']){await fs.mkdir(path.join(f.options.stdlibSource,directory));await fs.writeFile(path.join(f.options.stdlibSource,directory,'hidden.py'),'Synthetic excluded bytes');}
   const result=await(await packager).stageNativeRuntime(f.options);
-  assert.equal(result.nativeFiles,5);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,12);assert.equal(result.nativeExecuted,false);assert.equal(result.configAccessed,false);assert.equal(result.installed,false);
+  assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,13);assert.equal(result.nativeExecuted,false);assert.equal(result.configAccessed,false);assert.equal(result.installed,false);
   const verified=await verifyNativeRuntime(f.options.out);assert.equal(verified.manifest.sourceManifestSha256,f.options.bundleManifestSha256);
   for(const name of REQUIRED_NATIVE)assert.deepEqual(await fs.readFile(path.join(f.options.out,name)),await fs.readFile(path.join(f.options.bundle,name)));
   assert.deepEqual(await fs.readFile(path.join(f.options.out,'stdlib/synthetic_extra.py')),Buffer.from('# Synthetic source synthetic_extra.py\r\n'));
@@ -42,7 +42,7 @@ test('staging preserves accepted native bytes and pure source while excluding in
 
 test('unified staging binds one product executable and rejects legacy launcher injection',async t=>{
  const f=await fixture(t);const result=await(await packager).stageNativeRuntime(f.options);
- assert.equal(result.nativeFiles,5);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,12);
+ assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,13);
  const verified=await verifyNativeRuntime(f.options.out);assert.equal(verified.manifest.schemaVersion,1);
  assert.equal(verified.manifest.files['xmind.exe'],f.manifest.files['xmind.exe']);
  for(const name of ['xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe'])await assert.rejects(fs.stat(path.join(f.options.out,name)),{code:'ENOENT'});

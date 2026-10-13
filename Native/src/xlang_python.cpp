@@ -21,12 +21,12 @@ void cancelled(std::stop_token token){if(token.stop_requested())throw XlangPytho
 }
 
 XlangPythonCallable::XlangPythonCallable(std::string modules_root,std::string stdlib_root,
-    std::string code_root,std::string module,std::string function)
+    std::string code_root,std::string module,std::string function,std::string worker_executable)
     :modules_root_(std::move(modules_root)),stdlib_root_(std::move(stdlib_root)),
-     code_root_(std::move(code_root)),module_(std::move(module)),function_(std::move(function)){
+     code_root_(std::move(code_root)),module_(std::move(module)),function_(std::move(function)),worker_executable_(std::move(worker_executable)){
     if(modules_root_.empty()||stdlib_root_.empty()||code_root_.empty()||
         modules_root_.find('\0')!=std::string::npos||stdlib_root_.find('\0')!=std::string::npos||
-        code_root_.find('\0')!=std::string::npos||!identifier(module_,true)||!identifier(function_))
+        code_root_.find('\0')!=std::string::npos||worker_executable_.find('\0')!=std::string::npos||!identifier(module_,true)||!identifier(function_))
         throw std::invalid_argument("Invalid trusted xlang3 callable binding");
 }
 

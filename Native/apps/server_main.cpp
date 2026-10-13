@@ -218,7 +218,8 @@ int run_server(int argc,char** argv) {
             const auto code_root_utf8=utf8(code_root);
             for(const auto& tool:config.tools)xlang_python_tools.push_back({
                 agentflow::ModelToolDefinition{tool.name,tool.description,tool.input_schema_json},
-                agentflow::XlangPythonCallable(options.at("--modules"),options.at("--stdlib"),code_root_utf8,tool.module,tool.function)});
+                agentflow::XlangPythonCallable(options.at("--modules"),options.at("--stdlib"),code_root_utf8,tool.module,tool.function),
+                tool.execution=="worker"?agentflow::XlangPythonExecution::worker:agentflow::XlangPythonExecution::in_process});
         }
 #else
         if(options.contains("--python-tools-config"))throw std::invalid_argument("Trusted xlang3 tool registrations require the native Windows agent runtime");

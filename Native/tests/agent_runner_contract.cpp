@@ -60,7 +60,7 @@ Run cancel_after_stream(AgentRunner& runner,PersistenceService& store,const std:
 }
 }
 int main(int argc,char** argv) {
-    if(argc!=6&&argc!=7) return 2;
+    if(argc!=7&&argc!=8) return 2;
     try {
         const std::vector<std::string> roots{argv[2],argv[3]};
         PersistenceService store(argv[1],roots);
@@ -92,7 +92,7 @@ int main(int argc,char** argv) {
         bool captured_membership=false;for(const auto& event:store.events("multi-folder").get())if(event.kind=="agent.workspace_membership"){
             const auto membership=Json::parse(event.json);captured_membership=membership.at("revision")==2&&membership.at("folders").size()==2&&membership.at("folders")[1].at("root")==attached_canonical;
         }require(captured_membership,"Run admission must durably retain the exact folder identities and roots used by child executions");
-        if(argc==7){
+        if(argc==8){
             const auto profile=rust_profile(argv[6]);create_rust_project(std::filesystem::u8path(primary_root),"agentflow_lsp_primary","primary_symbol");create_rust_project(std::filesystem::u8path(attached_canonical),"agentflow_lsp_attached","attached_symbol");
             const auto late_root=(std::filesystem::path(argv[4]).parent_path()/L"late-attached").string();WorkspaceTools late(late_root);const auto late_id=late.identity(),late_canonical=late.root_path();std::atomic_bool late_attached=false;
             create_rust_project(std::filesystem::u8path(late_canonical),"agentflow_lsp_late","late_symbol");
@@ -149,6 +149,14 @@ int main(int argc,char** argv) {
         require(python_runner.execute("python-tool").state==RunState::completed,"Registered xlang3 callable must execute through the actual model/tool loop");
         const auto python_history=store.history("python-tool").get();require(python_history.size()==4,"Actual xlang3 tool result and model continuation must be persisted together");
         const auto python_result=Json::parse(Json::parse(python_history[2].json).at("content").get<std::string>());require(python_result==Json{{"value","XMIND"}},"Actual xlang3 result must reach the model as JSON tool content");
+        auto worker_catalogue=Json::parse(authored.python_tools_config_json);worker_catalogue["tools"][0]["execution"]="worker";
+        const auto registered_worker=import_xlang_python_tool_config(store,worker_catalogue.dump());
+        store.create_session("python-tool-worker","xlang3 worker tool fixture").get();auto worker_settings=settings;worker_settings.provider.endpoint=base+"/python-tool-worker";
+        for(const auto& tool:registered_worker.tools)worker_settings.xlang_python_tools.push_back({ModelToolDefinition{tool.name,tool.description,tool.input_schema_json},XlangPythonCallable(argv[2],argv[3],registered_worker.code_root,tool.module,tool.function,argv[argc-1]),tool.execution=="worker"?XlangPythonExecution::worker:XlangPythonExecution::in_process});
+        AgentRunner worker_runner(store,worker_settings);worker_runner.start("python-tool-worker","python-tool-worker","Run the registered tool in the local xlang3 worker");
+        require(worker_runner.execute("python-tool-worker").state==RunState::completed,"Registered worker callable must execute through the actual agent/model tool loop");
+        const auto worker_history=store.history("python-tool-worker").get();require(worker_history.size()==4,"Actual worker tool result and model continuation must be persisted together");
+        const auto worker_result=Json::parse(Json::parse(worker_history[2].json).at("content").get<std::string>());require(worker_result==Json{{"value","XMIND"}},"Shared-memory worker result must reach the model as JSON tool content");
         store.create_session("python-tool-filtered","Named agent xlang3 allowlist fixture").get();auto filtered=python;filtered.provider.endpoint=base+"/python-tool-filtered";filtered.tool_allowlist=std::vector<std::string>{"read_file"};
         AgentRunner filtered_runner(store,filtered);filtered_runner.start("python-tool-filtered","python-tool-filtered","Do not expose the registered Python tool");
         require(filtered_runner.execute("python-tool-filtered").state==RunState::completed,"Agent allowlists must narrow the registered xlang3 tool catalogue");

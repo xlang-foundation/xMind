@@ -799,7 +799,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         output=Json::parse(delegation_->invoke(id,call,reply.dump(),frozen,budget,token));
                     } else if(const auto registered=xlang_tools.find(call.name);registered!=xlang_tools.end()) {
                         JsonSchema schema(registered->second->definition.input_schema_json);schema.validate_object(call.arguments_json);
-                        output=Json::parse(registered->second->callable.invoke_json(call.arguments_json,token));
+                        const auto& tool=*registered->second;
+                        output=Json::parse(tool.execution==XlangPythonExecution::worker?
+                            tool.callable.invoke_json_worker(call.arguments_json,token):
+                            tool.callable.invoke_json(call.arguments_json,token));
                     } else if(const auto registered=mcp_tools.find(call.name);registered!=mcp_tools.end()) {
                         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+settings_.run_timeout.count();
                         output=Json::parse(registered->second->invoke(operation_id(),id,call.name,call.arguments_json,expiry,run_deadline,token,std::move(guidance)));

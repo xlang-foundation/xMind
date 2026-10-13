@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1640" height="1380" viewBox="0 0 1640 1380" role="img" aria-labelledby="title desc">
   <title id="title">xMind — Agent Runtime, Coding Harness and AI Model Gateway</title>
-  <desc id="desc">Agreed target architecture: one xmind executable supplies persistent serve and console modes. Three native components are Agent Runtime, Coding Agent and Harness, and AI Model Gateway. YAML and Markdown with optional xlang3 Python and programming APIs define Agent, Tool and Graph. Optional planning and scheduling belong to the runtime. Native workers and shared-memory IPC are pending. UI HTTP SSE is planned. Old xMind, OpenCode and LiteLLM are design references. The diagram is a design, not completion evidence.</desc>
+  <desc id="desc">Agreed target architecture: one xmind executable supplies persistent serve and console modes. Three native components are Agent Runtime, Coding Agent and Harness, and AI Model Gateway. YAML and Markdown with optional xlang3 Python and programming APIs define Agent, Tool and Graph. Optional planning and scheduling belong to the runtime. Registered tools can run in-process or in a short-lived xlang3 shared-memory worker; durable agent workers remain pending. UI HTTP SSE is implemented. Old xMind, OpenCode and LiteLLM are design references. The diagram is a design, not completion evidence.</desc>
   <defs>
     <style>
       text { font-family: 'Segoe UI', Arial, sans-serif; fill: #142439; }
@@ -78,7 +78,7 @@
   <rect x="981" y="487" width="579" height="108" rx="12" class="native"/>
   <text x="1003" y="520" class="label">Runtime execution and placement</text>
   <text x="1003" y="550" class="body">Model / tool loop · budgets · cancellation · recovery</text>
-  <text x="1003" y="577" class="body">In process or workers · xlang3 IPC requires validation</text>
+  <text x="1003" y="577" class="body">Tools: in process or short-lived xlang3 worker</text>
   <path d="M958 542H979" class="flow"/>
 
   <rect x="395" y="620" width="1165" height="168" rx="12" class="native"/>
