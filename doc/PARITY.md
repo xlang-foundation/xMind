@@ -82,8 +82,11 @@ runtime DLLs before staging. A fresh VS Code host opened TestProj with the
 `build-pytest-pathaware/Release` executable selected by that cache; both
 snapshot hashes matched, and an xlang3 startup probe passed. This removes the
 launcher’s stale sibling-runtime selection for the managed process profile. It
-does not yet prove a new-profile AgentRunner pytest run or provider-backed
-coding session. [Exact local evidence](evidence/start-ui-xlang3-runtime-pair-20261013.json).
+also supports an actual AgentRunner pytest run through the paired xlang3
+process profile; see
+[TestProj AgentRunner evidence](evidence/testproj-agentrunner-xlang3-pytest-20261013.json).
+The earlier launcher-pairing evidence is available at
+[runtime-pair evidence](evidence/start-ui-xlang3-runtime-pair-20261013.json).
 
 ## Latest verified native coding checkpoint (2026-10-11)
 
