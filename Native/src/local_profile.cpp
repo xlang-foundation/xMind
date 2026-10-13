@@ -517,7 +517,8 @@ Child launch(Store &store, Json &state) {
                                    L"--workspace",
                                    wide(state.at("workspace").get<std::string>()),
                                    L"--port",
-                                   state.contains("replacement_port")?std::to_wstring(state.at("replacement_port").get<int>()):L"0",
+                                   state.contains("replacement_port")?std::to_wstring(state.at("replacement_port").get<int>()):
+                                       (state.at("port").get<int>()>0?std::to_wstring(state.at("port").get<int>()):L"0"),
                                    L"--runtime-manifest-sha256",
                                    wide(state.at("manifest").get<std::string>()),
                                    L"--profile-state",
@@ -755,6 +756,21 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         std::string loaded_manifest;
         if(options.upgrade_backend&&!state.contains("owner_receipt")&&!state.contains("upgrade_intent"))
             loaded_manifest=context_digest(file_bytes(absolute(loaded_root())/L"native-runtime-manifest.json",4*1024*1024));
+        if(options.upgrade_backend&&!state.contains("owner_receipt")&&!state.contains("upgrade_intent")&&state.value("phase",std::string{})=="ready"){
+            const auto previous_pid=state.at("pid").get<std::uint32_t>();
+            if(previous_pid&&observe_owner_exit(previous_pid,state.at("birth").get<std::string>(),0).exited){
+                // Reopen the saved generation first so upgrade authorization is
+                // anchored to a live authenticated owner. Its persisted launch
+                // configuration remains authoritative during this recovery.
+                require(CloseHandle(lock.value)!=0,"Cannot release the profile lock before recovering its stopped owner");
+                lock.value=INVALID_HANDLE_VALUE;
+                auto recovery=options;recovery.upgrade_backend=false;recovery.defer_busy_upgrade=false;
+                recovery.provider_config.clear();recovery.graphs_config.clear();recovery.python_tools_config.clear();
+                recovery.language_server_config.clear();recovery.process_config.clear();
+                (void)connect_local_profile(recovery);
+                return connect_local_profile(options);
+            }
+        }
         for (const auto &[field, value] : std::array<std::pair<const char *, std::string>, 3>{
                  {{"provider_config", options.provider_config}, {"graphs_config", options.graphs_config},
                   {"python_tools_config", options.python_tools_config}}})
