@@ -88,6 +88,19 @@ process profile; see
 The earlier launcher-pairing evidence is available at
 [runtime-pair evidence](evidence/start-ui-xlang3-runtime-pair-20261013.json).
 
+## Repository-aware coding process guidance (2026-10-13)
+
+Inspection of the active TestProj run showed that a combined `git status` and
+`git diff` command ran from a folder without `.git`; the status check failed,
+then Git printed its full usage text. The model-visible `run_process` tool
+description now tells the coding agent to confirm repository context before
+Git diff, avoid chaining dependent Git commands, and continue non-Git review
+with bounded workspace file tools. Release `native_process_executor_contract`,
+`native_agent_process_http_contract` and `native_xlang3_default_process_contract`
+passed after rebuild. This verifies the updated tool description reaches a
+real synthetic model request, not changed behavior in the already-running
+TestProj run; live acceptance of this guidance remains open.
+
 ## Native single-session lookup (2026-10-13)
 
 The backend now exposes `GET /v1/sessions/{id}` for the existing durable

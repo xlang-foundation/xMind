@@ -26,6 +26,9 @@ const peer=createServer((request,response)=>{
       const processDescription=body.tools.find(tool=>tool.function.name==='run_process').function.description;
       assert.ok(processDescription.includes('Do not detach child processes with shell-level Start-Process'),'Agent must keep long-lived child-process ownership inside the native process manager');
       assert.ok(processDescription.includes('use background=true so the native runtime owns and joins the process'),'Agent must be told how to safely start development servers');
+      assert.ok(processDescription.includes('confirm the target directory is a Git repository before running Git diff commands'),'Agent must establish repository context before requesting a Git diff');
+      assert.ok(processDescription.includes('Do not chain Git status and diff commands'),'A failed Git precondition must not trigger a noisy follow-up command');
+      assert.ok(processDescription.includes('skip Git review and inspect the relevant files with workspace tools'),'Non-Git workspace review must continue through native file tools');
       const tool=body.messages.findLast(message=>message.role==='tool');let delta,finish;
       if(tool){assert.notEqual(name,'stale-executable','A changed sealed executable must reject before another provider request');const result=JSON.parse(tool.content);continued.set(name,result);
         if(name==='background'&&tool.tool_call_id==='fixture-background'){
