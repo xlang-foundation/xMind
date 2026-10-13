@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+## Native CLI connection catalog management — 2026-10-12
+
+The native CLI now lists connection profiles, saves and removes Local/Nexus
+catalog metadata, and selects profiles through the authenticated local backend.
+It validates the backend catalog before printing it, uses the catalog revision
+for every mutation, and sends no provider or server credentials. An
+unauthenticated Nexus selection fails closed and leaves Local selected. Release
+`xmind_cli` and `xmind_server` build; the CLI, general HTTP CLI and connection
+profile HTTP contracts pass **3/3**. This does not add browser or VS Code
+selection, Nexus authentication, or remote command/event routing. See the
+[connection profile contract](connection-profiles.md) and [exact test output](evidence/native-connection-profiles-cli-local-20261012.log).
+
 ## Authenticated Local/Nexus profile catalog API — 2026-10-12
 
 The native local HTTP backend now exposes `GET /v1/connections`,

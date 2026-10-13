@@ -44,6 +44,39 @@ std::string provider_profile_identity(const std::string& value){
         throw std::invalid_argument("Invalid provider profile identity");
     return value;
 }
+std::string connection_profile_identity(const std::string& value){
+    if(value.empty()||value.size()>64||value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos)
+        throw std::invalid_argument("Invalid connection profile identity");
+    return value;
+}
+nlohmann::json validate_connection_catalog(const nlohmann::json& value){
+    using Json=nlohmann::json;
+    constexpr std::int64_t maximum=9007199254740991;
+    if(!value.is_object()||value.size()!=3||!value.contains("revision")||!value["revision"].is_number_integer()||value["revision"]<1||value["revision"]>maximum||
+       !value.contains("active_id")||!value["active_id"].is_string()||!value.contains("profiles")||!value["profiles"].is_array()||value["profiles"].empty()||value["profiles"].size()>32)
+        throw std::runtime_error("Invalid backend connection profile catalog");
+    const auto active=connection_profile_identity(value["active_id"].get<std::string>());
+    std::set<std::string> ids;bool local=false,active_found=false;
+    for(const auto& profile:value["profiles"]){
+        if(!profile.is_object()||profile.size()!=8||!profile.contains("id")||!profile["id"].is_string()||!profile.contains("name")||!profile["name"].is_string()||
+           !profile.contains("kind")||!profile["kind"].is_string()||!profile.contains("origin")||!profile["origin"].is_string()||
+           !profile.contains("revision")||!profile["revision"].is_number_integer()||!profile.contains("status")||!profile["status"].is_string()||
+           !profile.contains("command_routing")||!profile["command_routing"].is_boolean()||!profile.contains("authenticated")||!profile["authenticated"].is_boolean())
+            throw std::runtime_error("Invalid backend connection profile entry");
+        const auto id=connection_profile_identity(profile["id"].get<std::string>()),kind=profile["kind"].get<std::string>();
+        const auto& name=profile["name"].get_ref<const std::string&>();const auto& origin=profile["origin"].get_ref<const std::string&>();
+        if(name.empty()||name.size()>128||name.find_first_of("\r\n")!=std::string::npos||name.find('\0')!=std::string::npos||!ids.insert(id).second||
+           profile["revision"]<1||profile["revision"]>value["revision"]||profile["revision"]>maximum)
+            throw std::runtime_error("Invalid backend connection profile identity or revision");
+        const bool is_local=kind=="local";
+        if((!is_local&&kind!="nexus")||(is_local&&(id!="local"||!origin.empty()))||(!is_local&&(id=="local"||!origin.starts_with("https://")||origin.find_first_of("@?#\\ \t\r\n")!=std::string::npos))||
+           profile["status"]!=(is_local?"connected":"not_connected")||profile["command_routing"]!=is_local||profile["authenticated"]!=is_local)
+            throw std::runtime_error("Backend connection profile reports an invalid connection state");
+        local|=is_local;active_found|=id==active;
+    }
+    if(!local||!active_found)throw std::runtime_error("Backend connection profile catalog has no active Local profile");
+    return value;
+}
  nlohmann::json provider_admission_binding(const nlohmann::json& metadata){
     using Json=nlohmann::json;
     if(!metadata.is_object()||!metadata.contains("revision")||!metadata["revision"].is_number_integer()||metadata["revision"]<0||metadata["revision"]>9007199254740991||!metadata.contains("active")||!metadata["active"].is_string()||!metadata.contains("profiles")||!metadata["profiles"].is_array())throw std::runtime_error("Invalid backend provider admission metadata");
@@ -1043,7 +1076,7 @@ int terminal_attach(agentflow::ConsoleTransport& client,int port,const std::stri
 
 int cli_main(int argc,char** argv,const std::string& workspace,const std::function<agentflow::LocalProfileConnection()>& profile) {
     try {
-        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, fork-session SESSION [BEFORE_MESSAGE_ID], history, terminals SESSION, terminal-create SESSION [TITLE], terminal-attach SESSION [TITLE] [--console], terminal-output ID [AFTER], terminal-input ID UTF8, terminal-resize ID ROWS COLUMNS, terminal-close ID, runs, run, cancel, status, git-status [FOLDER_ID], git-info [FOLDER_ID], git-branches [FOLDER_ID], git-base [FOLDER_ID], git-diff MODE [BASE [CONTEXT]] [--folder-id ID], events, watch, models, agents, session-agent SESSION, set-agent SESSION AGENT_ID|default EXPECTED_REVISION AGENT_REVISION, skills, session-skills, set-skills SESSION SNAPSHOT_JSON_FILE [ID...], provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, a2a-agents, a2a-register ID CARD_URL true|false EXPECTED_REVISION [BEARER_ENV], a2a-enable ID true|false EXPECTED_REVISION, a2a-remove ID EXPECTED_REVISION, a2a-inspect OPERATION_ID [--include-artifacts], a2a-cancel OPERATION_ID, a2a-follow-up OPERATION_ID SEQUENCE MESSAGE, process-profiles, process-output OPERATION_ID stdout|stderr [AFTER [LIMIT]], operations, operation, inspect-edit, decide, append-message)");
+        if(argc<3) throw std::invalid_argument("Usage: xmind_cli PORT COMMAND [ARGS] (commands: health, connections, connection-save ID NAME HTTPS_ORIGIN EXPECTED_REVISION, connection-remove ID EXPECTED_REVISION, connection-select ID EXPECTED_REVISION, chat [SESSION [MODEL]], sessions, create-session, rename-session SESSION TITLE EXPECTED_TITLE, fork-session SESSION [BEFORE_MESSAGE_ID], history, terminals, terminal-create SESSION [TITLE], terminal-attach SESSION [TITLE] [--console], terminal-output ID [AFTER], terminal-input ID UTF8, terminal-resize ID ROWS COLUMNS, terminal-close ID, runs, run, cancel, status, git-status [FOLDER_ID], git-info [FOLDER_ID], git-branches [FOLDER_ID], git-base [FOLDER_ID], git-diff MODE [BASE [CONTEXT]] [--folder-id ID], events, watch, models, agents, session-agent SESSION, set-agent SESSION AGENT_ID|default EXPECTED_REVISION AGENT_REVISION, skills, session-skills, set-skills SESSION SNAPSHOT_JSON_FILE [ID...], provider-profiles, profile-models ID ROUTE REVISION [KEY_ENV], save-profile ID ROUTE MODEL REVISION [KEY_ENV] [--activate], select-profile ID REVISION, provider, provider-models [KEY_ENV REVISION], configure-provider MODEL KEY_ENV REVISION, graphs, graph-run SESSION GRAPH REV PROMPT [MODEL], graph ROOT, graph-input ROOT NODE REV JSON_FILE, graph-events ROOT [AFTER], graph-watch ROOT [AFTER], graph-children ROOT, planning, plan-input ROOT REQUEST REV SEQUENCE JSON_FILE, resume-plan ROOT REV SEQUENCE, instructions, mcp-servers, a2a-agents, a2a-register ID CARD_URL true|false EXPECTED_REVISION [BEARER_ENV], a2a-enable ID true|false EXPECTED_REVISION, a2a-remove ID EXPECTED_REVISION, a2a-inspect OPERATION_ID [--include-artifacts], a2a-cancel OPERATION_ID, a2a-follow-up OPERATION_ID SEQUENCE MESSAGE, process-profiles, process-output OPERATION_ID stdout|stderr [AFTER [LIMIT]], operations, operation, inspect-edit, decide, append-message)");
         const std::string port_text=argv[1],command=argv[2];int port=0;
         const auto parsed=std::from_chars(port_text.data(),port_text.data()+port_text.size(),port);
         if(parsed.ec!=std::errc{} || parsed.ptr!=port_text.data()+port_text.size() || port<1 || port>65535) throw std::invalid_argument("Invalid port");
@@ -1054,8 +1087,12 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         };
         auto terminal_id=[](const std::string& value){if(value.size()!=32||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid terminal ID");return value;};
         auto terminal_dimension=[](const std::string& value){const auto parsed=event_cursor(value);if(parsed<1||parsed>500)throw std::invalid_argument("Terminal dimension is outside its supported range");return parsed;};
-        using Json=nlohmann::json;std::string path,chat_model,mcp_id,terminal_session,terminal_title="xMind CLI";Json body;bool post=false,watch=false,graph_watch=false,chat=false,terminal_attach_command=false,terminal_force_console=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false,vcs_status=false,vcs_info=false,vcs_branches=false,vcs_base=false,vcs_diff=false;std::int64_t watch_cursor=0;
+        using Json=nlohmann::json;std::string path,chat_model,mcp_id,terminal_session,terminal_title="xMind CLI",connection_id,connection_name,connection_origin;Json body;bool post=false,watch=false,graph_watch=false,chat=false,terminal_attach_command=false,terminal_force_console=false,saved_provider_key=false,profile_operation=false,mcp_operation=false,a2a_operation=false,vcs_status=false,vcs_info=false,vcs_branches=false,vcs_base=false,vcs_diff=false,connection_operation=false,connection_save=false,connection_remove=false;std::int64_t watch_cursor=0,connection_expected_revision=0;
         if(command=="health" && argc==3) path="/v1/health";
+        else if(command=="connections"&&argc==3){path="/v1/connections";connection_operation=true;}
+        else if(command=="connection-select"&&argc==5){connection_id=connection_profile_identity(argv[3]);connection_expected_revision=provider_revision(argv[4]);path="/v1/connections/select";body={{"id",connection_id},{"expected_revision",connection_expected_revision}};post=true;connection_operation=true;}
+        else if(command=="connection-save"&&argc==7){connection_id=connection_profile_identity(argv[3]);connection_name=argv[4];connection_origin=argv[5];connection_expected_revision=provider_revision(argv[6]);if(connection_id=="local"||connection_name.empty()||connection_name.size()>128||connection_name.find_first_of("\r\n")!=std::string::npos||connection_name.find('\0')!=std::string::npos||connection_origin.empty()||connection_origin.size()>8192)throw std::invalid_argument("Invalid Nexus connection profile fields");connection_save=true;connection_operation=true;}
+        else if(command=="connection-remove"&&argc==5){connection_id=connection_profile_identity(argv[3]);connection_expected_revision=provider_revision(argv[4]);if(connection_id=="local")throw std::invalid_argument("The Local connection profile cannot be removed");connection_remove=true;connection_operation=true;}
         else if(command=="chat" && argc>=3 && argc<=5){chat=true;if(argc>=4)path=id(argv[3]);if(argc==5)chat_model=argv[4];}
         else if(command=="sessions" && argc==3) path="/v1/sessions";
         else if(command=="create-session" && argc==4) {path="/v1/sessions";body={{"title",argv[3]}};post=true;}
@@ -1192,6 +1229,24 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         agentflow::ConsoleTransport client(port,selected);
         client.set_connection_timeout(5,0);client.set_read_timeout(15,0);client.set_write_timeout(5,0);client.set_follow_location(false);
         const httplib::Headers headers{{"Authorization",std::string("Bearer ")+auth}};
+        if(connection_save||connection_remove){
+            const auto current=client.Get("/v1/connections",headers);
+            if(!current||current->status!=200)throw std::runtime_error("Cannot inspect the backend connection profile catalog");
+            const auto catalog=validate_connection_catalog(Json::parse(current->body));
+            auto profiles=Json::array();
+            for(const auto& existing:catalog["profiles"])profiles.push_back({{"id",existing["id"]},{"name",existing["name"]},{"kind",existing["kind"]},{"origin",existing["origin"]}});
+            const auto found=std::find_if(profiles.begin(),profiles.end(),[&](const auto& item){return item.value("id",std::string{})==connection_id;});
+            if(connection_save){
+                const Json profile{{"id",connection_id},{"name",connection_name},{"kind","nexus"},{"origin",connection_origin}};
+                if(found==profiles.end())profiles.push_back(profile);
+                else *found=profile;
+                if(profiles.size()>32)throw std::invalid_argument("Connection catalog is full");
+            }else{
+                if(found==profiles.end())throw std::invalid_argument("Nexus connection profile was not found");
+                profiles.erase(found);
+            }
+            path="/v1/connections";body={{"profiles",std::move(profiles)},{"expected_revision",connection_expected_revision}};post=true;
+        }
         if(terminal_attach_command)return terminal_attach(client,port,selected,headers,terminal_session,terminal_title,terminal_force_console);
         if(chat)return chat_session(client,headers,path,chat_model);
         if(mcp_operation){if(command=="mcp-login-watch")return mcp_watch(client,headers,mcp_id);std::cout<<mcp_command(client,headers,command,mcp_id).dump(2)<<'\n'<<std::flush;if(!std::cout)throw std::runtime_error("MCP observation output unavailable; backend sign-in continues");return 0;}
@@ -1222,10 +1277,11 @@ int cli_main(int argc,char** argv,const std::string& workspace,const std::functi
         if(!response) throw std::runtime_error("Cannot reach xMind Server");
         if(response->status<200 || response->status>=300) {
             if(profile_operation)std::cerr<<provider_rejection(response->body).dump()<<'\n'<<"Backend rejected provider profile request (HTTP "<<response->status<<"). No automatic retry or selection fallback.\n";
-            else {std::cerr<<Json::parse(response->body).dump()<<'\n';if(command=="set-skills")std::cerr<<"Backend rejected session skill change (HTTP "<<response->status<<"). No automatic retry.\n";}
+            else {std::cerr<<Json::parse(response->body).dump()<<'\n';if(command=="set-skills")std::cerr<<"Backend rejected session skill change (HTTP "<<response->status<<"). No automatic retry.\n";if(connection_operation)std::cerr<<"Connection profile request was not applied; no fallback or implicit profile change occurred.\n";}
             return 1;
         }
-        const auto result=Json::parse(response->body);
+        auto result=Json::parse(response->body);
+        if(connection_operation)result=validate_connection_catalog(result);
         if(vcs_status){
             if(!result.is_array()||result.size()>4096)throw std::runtime_error("Invalid native Git status response");
             for(const auto& item:result){

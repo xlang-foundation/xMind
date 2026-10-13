@@ -1,5 +1,16 @@
 # Current native validation
 
+## Native CLI connection catalog management — 2026-10-12
+
+Release `xmind_cli` and `xmind_server` build. The real server/CLI contract,
+general HTTP CLI contract and connection-profile HTTP contract pass **3/3**.
+CLI commands list, save, remove and select connection profiles using the
+backend's revisioned catalog. Test coverage confirms Nexus metadata contains no
+credentials, unauthenticated Nexus selection leaves Local active, retired IDs
+cannot be reused, and insecure origins are rejected. This is metadata and
+available-profile selection only; Nexus authentication/remote routing and
+browser/VS Code selection remain open. [Exact Release CTest output](evidence/native-connection-profiles-cli-local-20261012.log).
+
 ## Authenticated connection-profile HTTP contract — 2026-10-12
 
 Release `xmind.exe`, the connection-profile SQLite contract, the new

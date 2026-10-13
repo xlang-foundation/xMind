@@ -5,8 +5,10 @@ through the authenticated local backend at `GET /v1/connections` and
 `POST /v1/connections`; it stores Local/Nexus profile metadata and active
 selection. Local selection is revision-checked. A configured Nexus endpoint is
 reported as `not_connected`, and selection fails closed until authentication
-and remote command/event routing exist. The browser and CLI do not yet expose a
-profile picker. Model-provider profiles are a separate configuration domain.
+and remote command/event routing exist. The native CLI can list, save and remove
+connection metadata and select an available profile; it cannot activate an
+unauthenticated Nexus profile. The browser does not yet expose a profile picker.
+Model-provider profiles are a separate configuration domain.
 
 ![Connection architecture](connection-profiles.svg)
 
@@ -15,8 +17,12 @@ profile picker. Model-provider profiles are a separate configuration domain.
 The sidebar has a connection selector with **Local** as the initial profile.
 Settings manages named Nexus connections. The bottom model selector lists models
 available in the selected connection; provider setup belongs to that connection.
-CLI uses the same backend profile identity. Browser and VS Code are views of the
-backend profile registry, rather than separate registries with copied secrets.
+CLI uses the same backend profile identity through `connections`,
+`connection-save`, `connection-remove` and `connection-select`. These commands
+manage public connection metadata only; provider keys and server credentials do
+not pass through the catalog. Browser and VS Code are intended to be views of
+the backend profile registry, rather than separate registries with copied
+secrets.
 
 Adding a Nexus URL creates an unconnected configuration. Authentication verifies
 the server identity and negotiates the protocol. The server returns the user's
@@ -78,7 +84,8 @@ profile does not transfer, cancel or reinterpret already admitted work.
    binding; exercise unavailable, expired and incompatible connections.
 4. Authorized workspace enrollment, fenced leases and durable effect receipts;
    validate two workers, revocation, reassignment and lost replies.
-5. CLI, browser and right VS Code sidebar integration against these real backends.
+5. CLI catalog management is implemented; browser and right VS Code profile
+   selection still need integration against these real backends.
 
 The private server owns team policy, PostgreSQL and scheduling. Cantor Cluster
 will attach behind that private scheduler/worker boundary. It must preserve
