@@ -60,6 +60,12 @@ struct WorkspaceGlob {
     std::size_t scanned_entries=0,scanned_directories=0,skipped_entries=0,ignored_entries=0,ignore_files=0;
     bool truncated=false;
 };
+struct WorkspaceFindEntry {std::string path,type;};
+struct WorkspaceFind {
+    std::vector<WorkspaceFindEntry> entries;
+    std::vector<std::string> limits;
+    bool truncated=false;
+};
 // Workspace boundary is an opened OS directory, not a caller-controlled path.
 // Model definitions remain read-only; backend mutations require separate policy contracts.
 class WorkspaceTools {
@@ -136,13 +142,15 @@ public:
     WorkspaceSearch search_files(const std::string& query,const WorkspaceSearchOptions& options,std::stop_token cancel={}) const;
     WorkspaceGlob glob_files(const std::string& pattern,const std::string& path=".",
         bool hidden=false,std::size_t limit=100,std::stop_token cancel={},bool respect_ignore=true) const;
+    WorkspaceFind find_files(const std::string& query,const std::string& path=".",
+        std::size_t limit=100,std::stop_token cancel={},bool hidden=false,bool respect_ignore=true,std::string type="file") const;
     static std::vector<ModelToolDefinition> definitions();
     // Validate exact built-in argument shapes and return a bounded JSON result.
     std::string invoke(const std::string& name,const std::string& arguments_json,std::stop_token cancel={}) const;
 private:
     WorkspaceGlob discover_files(const std::string& pattern,const std::string& path,bool hidden,
         std::size_t limit,std::stop_token cancel,bool respect_ignore,
-        const std::function<bool(const std::string&)>& visitor={}) const;
+        const std::function<bool(const std::string&,bool)>& visitor={}) const;
     WorkspaceSnapshot read_snapshot(const std::string& path,bool capture_version,std::stop_token cancel,bool require_text=true,std::size_t max_bytes=1024*1024,std::size_t* bytes_read=nullptr) const;
     struct Impl;
     std::unique_ptr<Impl> impl_;

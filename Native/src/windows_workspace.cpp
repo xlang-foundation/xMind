@@ -692,7 +692,34 @@ WorkspaceGlob WorkspaceTools::glob_files(const std::string& pattern,const std::s
     if(!limit||limit>1000)throw std::invalid_argument("Glob result limit must be 1-1000");
     return discover_files(pattern,input,hidden,limit,cancel,respect_ignore);
 }
-WorkspaceGlob WorkspaceTools::discover_files(const std::string& pattern,const std::string& input,bool hidden,std::size_t limit,std::stop_token cancel,bool respect_ignore,const std::function<bool(const std::string&)>& visitor) const {
+WorkspaceFind WorkspaceTools::find_files(const std::string& query,const std::string& input,std::size_t limit,std::stop_token cancel,bool hidden,bool respect_ignore,std::string type) const {
+    if(query.empty()||query.size()>4096||!valid_text(query))throw std::invalid_argument("File finder query must be UTF-8 text of 1-4096 bytes");
+    if(!limit||limit>1000)throw std::invalid_argument("File finder result limit must be 1-1000");
+    if(type!="file"&&type!="directory")throw std::invalid_argument("File finder type must be file or directory");
+    const auto fold=[](std::string value){for(auto& byte:value)if(byte>='A'&&byte<='Z')byte=static_cast<char>(byte+('a'-'A'));return value;};
+    const auto needle=fold(query);std::vector<std::pair<std::int64_t,std::string>> matches;matches.reserve(256);
+    const auto score=[&](const std::string& path)->std::optional<std::int64_t>{
+        const auto candidate=fold(path);std::size_t cursor=0,first=std::string::npos,gaps=0,previous=0;
+        for(const unsigned char wanted:needle){
+            const auto found=candidate.find(static_cast<char>(wanted),cursor);if(found==std::string::npos)return {};
+            if(first==std::string::npos)first=found;else gaps+=found-previous-1;
+            previous=found;cursor=found+1;
+        }
+        std::int64_t value=static_cast<std::int64_t>(first)*32+static_cast<std::int64_t>(gaps)*8;
+        if(candidate.find(needle)!=std::string::npos)value-=100000;
+        const auto basename=path.find_last_of('/');if(basename!=std::string::npos&&first>basename)value-=512;
+        return value;
+    };
+    auto traversed=discover_files("!**/.git/**",input,hidden,10000,cancel,respect_ignore,[&](const std::string& path,bool directory){
+        if((type=="directory")==directory)if(const auto rank=score(path))matches.emplace_back(*rank,path);
+        return true;
+    });
+    std::stable_sort(matches.begin(),matches.end(),[](const auto& a,const auto& b){return a.first==b.first?a.second<b.second:a.first<b.first;});
+    WorkspaceFind result;result.truncated=traversed.truncated;result.limits=std::move(traversed.limits);
+    if(matches.size()>limit){result.truncated=true;if(std::find(result.limits.begin(),result.limits.end(),"result_limit")==result.limits.end())result.limits.push_back("result_limit");matches.resize(limit);}
+    result.entries.reserve(matches.size());for(auto& item:matches)result.entries.push_back({std::move(item.second),type});return result;
+}
+WorkspaceGlob WorkspaceTools::discover_files(const std::string& pattern,const std::string& input,bool hidden,std::size_t limit,std::stop_token cancel,bool respect_ignore,const std::function<bool(const std::string&,bool)>& visitor) const {
     const bool negative=pattern.starts_with('!');const PathGlob compiled(negative?pattern.substr(1):pattern);check_cancel(cancel);
     auto relative=relative_path(input);while(relative.size()>1&&relative.back()=='/')relative.pop_back();
     const auto workspace=identity();PathIgnore ignores;
@@ -760,10 +787,11 @@ WorkspaceGlob WorkspaceTools::discover_files(const std::string& pattern,const st
                 if(respect_ignore&&(negative||!matched)&&ignores.ignored(path,directory_entry,steps,cancel)){++result.ignored_entries;continue;}
                 if(entry.kind=="directory"){
                     if(!(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))throw ToolFileError("Glob entry changed type");
+                    if(visitor){if(visited_files==limit){bounded("file_limit");stopped=true;break;}++visited_files;if(!visitor(path,true)){bounded("consumer_limit");stopped=true;break;}}
                     if(depth==32){bounded("depth_limit");continue;}walk(opened.value,path,matching,depth+1);
                 }else{
                     if(!negative&&!matched)continue;
-                    if(visitor){if(visited_files==limit){bounded("file_limit");stopped=true;break;}++visited_files;if(!visitor(path)){bounded("consumer_limit");stopped=true;break;}continue;}
+                    if(visitor){if(visited_files==limit){bounded("file_limit");stopped=true;break;}++visited_files;if(!visitor(path,false)){bounded("consumer_limit");stopped=true;break;}continue;}
                     if(result.paths.size()==limit){bounded("result_limit");stopped=true;break;}
                     std::size_t cost=4;for(const unsigned char byte:path)cost+=byte<32?6:(byte=='"'||byte=='\\'?2:1);
                     if(output_bytes+cost>50*1024){bounded("output_limit");stopped=true;break;}output_bytes+=cost;result.paths.push_back(path);
@@ -788,7 +816,7 @@ WorkspaceSearch WorkspaceTools::search_files(const std::string& query,const Work
     WorkspaceSearch result;std::size_t bytes=0,output_bytes=256;
     const auto bounded=[&](const std::string& reason){result.truncated=true;if(std::find(result.limits.begin(),result.limits.end(),reason)==result.limits.end())result.limits.push_back(reason);};
     const auto json_cost=[](std::string_view text){std::size_t size=0;for(const unsigned char byte:text)size+=byte<32?6:(byte=='"'||byte=='\\'?2:1);return size;};
-    const auto visit=[&](const std::string& path){
+    const auto visit=[&](const std::string& path,bool){
             if(bytes>=64*1024*1024){bounded("byte_limit");return false;}
             WorkspaceFile file;
             try {auto read=read_snapshot(path,false,cancel,true,64*1024*1024-bytes,&bytes);file={std::move(read.path),std::move(read.content)};}
@@ -824,7 +852,7 @@ WorkspaceSearch WorkspaceTools::search_files(const std::string& query,const Work
         for(const auto& reason:found.limits)bounded(reason);
     }else{
         if(supplied.ends_with('/'))throw ToolFileError("A directory search path must name a directory");
-        if(GetFileType(target.value)!=FILE_TYPE_DISK||info.nNumberOfLinks!=1)throw ToolAccessDenied("Search requires a regular single-link file");visit(relative);
+        if(GetFileType(target.value)!=FILE_TYPE_DISK||info.nNumberOfLinks!=1)throw ToolAccessDenied("Search requires a regular single-link file");visit(relative,false);
     }
     check_cancel(cancel);impl_->verify(target.value);if(identity()!=workspace)throw ToolAccessDenied("Workspace identity changed during search");
     return result;

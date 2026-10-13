@@ -47,6 +47,7 @@ public:
     virtual std::vector<WorkspaceVcsFileDiff> vcs_diff(std::string_view,std::optional<std::string>,unsigned,std::string={})const{throw RunUnavailable("Workspace VCS diff is unavailable");}
     virtual bool supports_workspace_browsing()const{return false;}
     virtual WorkspaceListing browse_workspace_files(const std::string&)const{throw RunUnavailable("Workspace browsing is unavailable");}
+    virtual WorkspaceFind find_workspace_files(const std::string&,const std::string&,std::size_t,bool,bool,std::string)const{throw RunUnavailable("Workspace filename search is unavailable");}
     virtual WorkspaceFile browse_workspace_file(const std::string&)const{throw RunUnavailable("Workspace file preview is unavailable");}
     virtual bool supports_file_edit_proposals()const{return false;}
     virtual bool supports_skill_catalogue()const{return false;}

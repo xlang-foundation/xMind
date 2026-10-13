@@ -24,8 +24,8 @@ const peer=createServer((request,response)=>{
     try {
       requests++;const body=JSON.parse(source),prompt=body.messages.findLast(message=>message.role==='user').content;
       const names=body.tools.map(tool=>tool.function.name),mcpNames=names.filter(name=>/^mcp_[a-f0-9]{48}$/.test(name));
-      assert.deepEqual(names.slice(0,7),['read_repository_instructions','read_file','list_files','search_files','glob_files','list_skills','load_skill']);assert.equal(mcpNames.length,1,JSON.stringify(names));assert.ok(names.includes('delegate_tasks'));
-      const allowedExtras=new Set(['run_process','wait_process','plan_tasks','revise_plan','inspect_plan','delegate_tasks',mcpNames[0]]);assert.ok(names.slice(7).every(name=>allowedExtras.has(name)),JSON.stringify(names));
+      assert.deepEqual(names.slice(0,8),['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill']);assert.equal(mcpNames.length,1,JSON.stringify(names));assert.ok(names.includes('delegate_tasks'));
+      const allowedExtras=new Set(['run_process','wait_process','plan_tasks','revise_plan','inspect_plan','delegate_tasks',mcpNames[0]]);assert.ok(names.slice(8).every(name=>allowedExtras.has(name)),JSON.stringify(names));
       if(names.includes('run_process'))assert.ok(names.includes('wait_process'),'Process execution must expose its paired join tool');
       const planningNames=['plan_tasks','revise_plan','inspect_plan'].filter(name=>names.includes(name));assert.ok(planningNames.length===0||planningNames.length===3,'Planning tools must be exposed as a complete set');
       assert.equal(new Set(names).size,names.length,'Tool names must be unique');assert.equal(body.stream_options.include_usage,true);

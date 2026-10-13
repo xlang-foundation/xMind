@@ -749,7 +749,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 try {
                     bool guidance_ready=true;InstructionPrecondition guidance;std::optional<PreparedPatch> prepared_patch;
                     RepositoryInstructionContext* selected_repository_context=repository_context.get();WorkspaceTools* selected_workspace=workspace_.get();std::string selected_folder_id=workspace_?workspace_->identity():std::string{};
-                    const bool folder_scoped=call.name=="read_file"||call.name=="edit_file"||call.name=="create_file"||call.name=="list_files"||call.name=="search_files"||call.name=="glob_files"||call.name=="run_process"||call.name=="apply_patch";
+                    const bool folder_scoped=call.name=="read_file"||call.name=="edit_file"||call.name=="create_file"||call.name=="list_files"||call.name=="search_files"||call.name=="find_files"||call.name=="glob_files"||call.name=="run_process"||call.name=="apply_patch";
                     std::size_t selected_folder_index=0;
                     Json scoped_args;
                     if(folder_scoped){try{scoped_args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid scoped tool JSON");}

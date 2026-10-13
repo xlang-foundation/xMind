@@ -411,13 +411,14 @@ struct HttpServer::Impl {
             const auto supplied=request.get_header_value("Authorization");
             static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|interrupt|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
+            static const std::regex workspace_find_route(R"(^/v1/workspace/find$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
             const bool stream=std::regex_match(request.path,stream_route);
             static const std::regex mcp_auth_read(R"(^/v1/mcp/authorization/(servers|attempts/[A-Za-z0-9_-]+)$)");
             static const std::regex mcp_auth_write(R"(^/v1/mcp/authorization/(attempts(/[A-Za-z0-9_-]+/cancel)?|renewals)$)");
             const bool mcp_authorized=(request.method=="GET"&&std::regex_match(request.path,mcp_auth_read))||(request.method=="POST"&&std::regex_match(request.path,mcp_auth_write));
-            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && (mcp_authorized||(stream&&request.method=="GET")||(!stream&&(std::regex_match(request.path,view_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((request.method=="GET"&&std::regex_match(request.path,workspace_find_route))||mcp_authorized||(stream&&request.method=="GET")||(!stream&&(std::regex_match(request.path,view_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
                 catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
@@ -690,6 +691,20 @@ struct HttpServer::Impl {
             for(const auto& entry:listing.entries)entries.push_back({{"name",entry.name},{"kind",entry.kind}});
             reply(response,{{"path",path},{"workspace_id",workspace.workspace_id},{"entries",std::move(entries)},{"truncated",listing.truncated}});
         }));
+        server.Get("/v1/workspace/find",guarded([this](const Request& request,Response& response){
+            const std::set<std::string> allowed{"query","path","type","limit","hidden","respect_ignore"};
+            if(request.params.size()>allowed.size())throw std::invalid_argument("Invalid workspace filename search query");
+            for(const auto& [key,value]:request.params)if(!allowed.contains(key)||request.params.count(key)!=1)throw std::invalid_argument("Invalid or duplicate workspace filename search parameter");
+            if(!request.has_param("query"))throw std::invalid_argument("Workspace filename search requires query");
+            const auto query=request.get_param_value("query"),path=request.has_param("path")?request.get_param_value("path"):std::string(".");
+            const auto type=request.has_param("type")?request.get_param_value("type"):std::string("file");std::size_t limit=100;
+            if(request.has_param("limit")){const auto value=request.get_param_value("limit");const auto parsed=std::from_chars(value.data(),value.data()+value.size(),limit);if(value.empty()||parsed.ec!=std::errc{}||parsed.ptr!=value.data()+value.size()||!limit||limit>1000)throw std::invalid_argument("Workspace filename search limit must be between 1 and 1000");}
+            const auto boolean=[&](const char* key,bool fallback){if(!request.has_param(key))return fallback;const auto value=request.get_param_value(key);if(value=="true")return true;if(value=="false")return false;throw std::invalid_argument("Workspace filename search booleans must be true or false");};
+            if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Workspace filename search requires an opened root");
+            const auto workspace=executor->execution_workspace();const auto found=executor->find_workspace_files(query,path,limit,boolean("hidden",false),boolean("respect_ignore",true),type);auto entries=Json::array();
+            for(const auto& entry:found.entries)entries.push_back({{"path",entry.path},{"type",entry.type}});
+            reply(response,{{"path",path},{"workspace_id",workspace.workspace_id},{"entries",std::move(entries)},{"truncated",found.truncated},{"limits",found.limits}});
+        }));
         server.Get("/v1/workspace/file",guarded([this](const Request& request,Response& response){
             const auto path=workspace_browse_path(request);if(path==".")throw std::invalid_argument("Workspace file path is required");if(!executor||!executor->supports_workspace_browsing())throw RunUnavailable("Workspace file preview requires an opened root");
             const auto workspace=executor->execution_workspace();const auto file=executor->browse_workspace_file(path);
@@ -746,7 +761,7 @@ struct HttpServer::Impl {
         server.Get("/v1/agent/delegation",guarded([this](const Request& request,Response& response){
             if(!request.params.empty())throw std::invalid_argument("Delegation metadata does not accept query parameters");
             const bool enabled=executor&&executor->supports_delegation();
-            auto presets=Json::array();if(enabled)presets.push_back({{"id","workspace.inspect"},{"revision",1},{"readonly",true},{"tools",{"read_file","list_files","search_files","glob_files","read_repository_instructions","list_skills","load_skill"}}});
+            auto presets=Json::array();if(enabled)presets.push_back({{"id","workspace.inspect"},{"revision",1},{"readonly",true},{"tools",{"read_file","list_files","search_files","find_files","glob_files","read_repository_instructions","list_skills","load_skill"}}});
             reply(response,{{"enabled",enabled},{"presets",std::move(presets)},{"limits",enabled?Json{{"tasks_per_batch",4},{"parallel_children",2},{"total_children",8},{"depth",1},{"model_calls",32},{"leaf_turns",4},{"child_result_bytes",32768},{"tool_result_bytes",65536}}:Json(nullptr)}});
         }));
         if(setup){

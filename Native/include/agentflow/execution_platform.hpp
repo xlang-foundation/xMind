@@ -23,6 +23,7 @@ public:
     std::vector<WorkspaceVcsFileDiff> vcs_diff(std::string_view,std::optional<std::string>,unsigned,std::string folder_id={})const override;
     bool supports_workspace_browsing()const override{return static_cast<bool>(workspace_binding_);}
     WorkspaceListing browse_workspace_files(const std::string& path)const override;
+    WorkspaceFind find_workspace_files(const std::string& query,const std::string& path,std::size_t limit,bool hidden,bool respect_ignore,std::string type)const override;
     WorkspaceFile browse_workspace_file(const std::string& path)const override;
     bool supports_skill_catalogue()const override;
     bool supports_session_skills()const override{return supports_skill_catalogue();}

@@ -119,6 +119,11 @@ WorkspaceListing ExecutionPlatform::browse_workspace_files(const std::string& pa
     const auto workspace=execution_workspace();auto listing=workspace_binding_->browse_files(path);
     validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());return listing;
 }
+WorkspaceFind ExecutionPlatform::find_workspace_files(const std::string& query,const std::string& path,std::size_t limit,bool hidden,bool respect_ignore,std::string type)const{
+    if(!workspace_binding_)throw RunUnavailable("Workspace filename search requires an opened root");
+    const auto workspace=execution_workspace();auto found=workspace_binding_->find_files(query,path,limit,{},hidden,respect_ignore,std::move(type));
+    validate_workspace_admission({workspace.workspace_id,workspace.authority_id},execution_workspace());return found;
+}
 WorkspaceFile ExecutionPlatform::browse_workspace_file(const std::string& path)const{
     if(!workspace_binding_)throw RunUnavailable("Workspace file preview requires an opened root");
     const auto workspace=execution_workspace();auto file=workspace_binding_->browse_file(path);

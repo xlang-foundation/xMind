@@ -367,6 +367,10 @@ WorkspaceListing ProviderProfileRuntime::browse_workspace_files(const std::strin
     std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Workspace browsing requires an opened root");
     const auto workspace=impl_->workspace_metadata();auto listing=impl_->workspace_binding->browse_files(path);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},impl_->workspace_metadata());return listing;
 }
+WorkspaceFind ProviderProfileRuntime::find_workspace_files(const std::string& query,const std::string& path,std::size_t limit,bool hidden,bool respect_ignore,std::string type)const{
+    std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Workspace filename search requires an opened root");
+    const auto workspace=impl_->workspace_metadata();auto found=impl_->workspace_binding->find_files(query,path,limit,{},hidden,respect_ignore,std::move(type));validate_workspace_admission({workspace.workspace_id,workspace.authority_id},impl_->workspace_metadata());return found;
+}
 WorkspaceFile ProviderProfileRuntime::browse_workspace_file(const std::string& path)const{
     std::lock_guard lock(impl_->mutex);if(!impl_->workspace_binding)throw RunUnavailable("Workspace file preview requires an opened root");
     const auto workspace=impl_->workspace_metadata();auto file=impl_->workspace_binding->browse_file(path);validate_workspace_admission({workspace.workspace_id,workspace.authority_id},impl_->workspace_metadata());return file;
