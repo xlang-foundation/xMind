@@ -29,6 +29,7 @@ void check_tools(const ModelCompletion& result) {
 int main() {
     try {
         require(model_protocol_diagnostic(ModelProtocolError("Model output token limit reached before completing the agent turn"))=="model_output_limit","A truncated agent turn must have a clear, provider-safe diagnostic");
+        require(model_protocol_diagnostic(ModelProtocolError("private fixture validation detail"))=="model_response_invalid","Unclassified response failures must use a stable content-free diagnostic");
         for(std::size_t boundary=0;boundary<=tools.size();++boundary) {
             std::vector<ModelEvent> events;ChatCompletionStream stream([&](const ModelEvent& event){events.push_back(event);});
             stream.feed(std::string_view(tools).substr(0,boundary));stream.feed(std::string_view(tools).substr(boundary));

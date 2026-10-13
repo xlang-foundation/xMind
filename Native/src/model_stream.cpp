@@ -99,7 +99,10 @@ std::string_view model_protocol_diagnostic(const ModelProtocolError& error) {
         {"Incomplete Claude stream","anthropic_stream_incomplete"},
         {"Incomplete or invalid model stream","chat_stream_incomplete"}})
         if(message==text)return code;
-    return {};
+    // Never persist provider exception text as a UI diagnostic. Preserve the
+    // detailed allowlist above, but make unknown validation failures visible
+    // as a stable, content-free category instead of an unclassified run error.
+    return "model_response_invalid";
 }
 namespace {
 using Json=nlohmann::json;

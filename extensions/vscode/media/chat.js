@@ -204,7 +204,7 @@ const protocolDiagnosticCodes=new Set([
   'responses_sequence_invalid','responses_event_type_mismatch','responses_item_identity_mismatch',
   'responses_identity_mismatch','responses_model_identity_mismatch','responses_final_identity_mismatch',
   'responses_message_mismatch','responses_text_mismatch','responses_summary_mismatch',
-  'responses_usage_invalid','responses_limit_exceeded','chat_stream_incomplete',
+  'responses_usage_invalid','responses_limit_exceeded','chat_stream_incomplete','model_response_invalid',
   'anthropic_overloaded_error','anthropic_rate_limit_error','anthropic_server_error','anthropic_stream_error'
 ]);
 function runFailure(data){

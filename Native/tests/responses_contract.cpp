@@ -237,6 +237,6 @@ int main(){try{
     require(model_protocol_diagnostic(ModelProtocolError("Incomplete Responses stream"))=="responses_stream_incomplete");
     require(model_protocol_diagnostic(ModelProtocolError("Provider response failed or was incomplete"))=="responses_provider_incomplete");
     require(model_protocol_diagnostic(ModelProtocolError("Invalid Responses JSON event"))=="responses_json_invalid");
-    require(model_protocol_diagnostic(ModelProtocolError("private synthetic provider payload"))=="");
+    require(model_protocol_diagnostic(ModelProtocolError("private synthetic provider payload"))=="model_response_invalid");
     std::cout<<"Native Responses request and SSE contract passed byte fragmentation, output identity/lifecycle validation, reasoning-only nonempty encrypted-content variation with exact bounded done-source continuation, strict other-field rejection, bounded value-free first-mismatch structural diagnostics, usage normalization, stateless reasoning/tool continuation, safe invariant diagnostics and malformed/incomplete rejection. All model output is synthetic.\n";
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

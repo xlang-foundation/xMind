@@ -270,6 +270,7 @@ test('model protocol failure shows only recognized diagnostics and preserves con
   for(const protocol_error_code of ['private-fixture-key','<script>fixtureAttack()</script>','responses_arguments_mismatch private-fixture-key',null,{}]){
     r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code}}});assert.equal(card.querySelector('details'),null);assert.ok(!card.textContent.includes('private-fixture-key'));assert.equal(card.querySelector('script'),null);
   }
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code:'model_response_invalid'}}});assert.equal(card.querySelector('pre').textContent,'model_response_invalid');
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'agent_error',protocol_error_code:'responses_arguments_mismatch'}}});assert.equal(card.querySelector('details'),null);r.send({type:'reset-run'});assert.equal(card.hidden,true);r.dom.window.close();
 });
 test('provider failures remain visible through transcript refresh without invented replies or metrics',()=>{

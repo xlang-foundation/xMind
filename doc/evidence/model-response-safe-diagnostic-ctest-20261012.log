@@ -1,0 +1,9 @@
+Test project D:/CantorAI2026/xMind/build/goal-current
+    Start  9: model_stream_protocol_contract
+1/2 Test  #9: model_stream_protocol_contract .......   Passed    0.07 sec
+    Start 18: native_responses_protocol_contract
+2/2 Test #18: native_responses_protocol_contract ...   Passed    0.14 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.23 sec
