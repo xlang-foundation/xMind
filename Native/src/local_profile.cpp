@@ -749,6 +749,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
     auto lock = store.lock();
     Json state;
     bool started = false;
+    bool recovered_stopped_owner = false;
     std::unique_ptr<VerifiedRuntimeGeneration> source_generation, runtime;
     if (fs::exists(store.directory / L"profile.state")) {
         state = store.state();
@@ -756,19 +757,22 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         std::string loaded_manifest;
         if(options.upgrade_backend&&!state.contains("owner_receipt")&&!state.contains("upgrade_intent"))
             loaded_manifest=context_digest(file_bytes(absolute(loaded_root())/L"native-runtime-manifest.json",4*1024*1024));
-        if(options.upgrade_backend&&!state.contains("owner_receipt")&&!state.contains("upgrade_intent")&&state.value("phase",std::string{})=="ready"){
+        if(options.upgrade_backend&&!state.contains("owner_receipt")&&!state.contains("upgrade_intent")){
+            const auto phase=state.value("phase",std::string{});
+            const bool recoverable_phase=phase=="ready"||phase=="starting"||phase=="preparing";
             const auto previous_pid=state.at("pid").get<std::uint32_t>();
-            if(previous_pid&&observe_owner_exit(previous_pid,state.at("birth").get<std::string>(),0).exited){
-                // Reopen the saved generation first so upgrade authorization is
-                // anchored to a live authenticated owner. Its persisted launch
-                // configuration remains authoritative during this recovery.
-                require(CloseHandle(lock.value)!=0,"Cannot release the profile lock before recovering its stopped owner");
-                lock.value=INVALID_HANDLE_VALUE;
-                auto recovery=options;recovery.upgrade_backend=false;recovery.defer_busy_upgrade=false;
-                recovery.provider_config.clear();recovery.graphs_config.clear();recovery.python_tools_config.clear();
-                recovery.language_server_config.clear();recovery.process_config.clear();
-                (void)connect_local_profile(recovery);
-                return connect_local_profile(options);
+            const bool previous_owner_exited=!previous_pid||observe_owner_exit(previous_pid,state.value("birth",std::string{}),0).exited;
+            if(recoverable_phase&&previous_owner_exited){
+                // The protected profile record and process birth prove the old
+                // owner is gone. Replace its generation directly: older saved
+                // runtimes may no longer understand the current managed launch
+                // arguments, so attempting to restart them can strand a healthy
+                // SQLite profile in "starting" forever.
+                const int saved_port=state.value("port",0);
+                auto [replacement,digest]=stage_current_runtime(store,workspace);
+                state["runtime"]=text(replacement);state["manifest"]=digest;
+                state["phase"]="preparing";state["pid"]=0;state["birth"]="";state["port"]=saved_port;
+                store.write(state);recovered_stopped_owner=true;
             }
         }
         for (const auto &[field, value] : std::array<std::pair<const char *, std::string>, 3>{
@@ -784,6 +788,9 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing language-server configuration");
         if(language_server_configuration_changed&&!options.upgrade_backend)
             throw std::invalid_argument("Profile launch configuration changed; update the existing backend explicitly");
+        if(recovered_stopped_owner&&language_server_configuration_changed){
+            state["language_server_config"]=requested_language_server_path;state["language_server_config_pending"]=true;store.write(state);
+        }
         if(state.contains("upgrade_intent")&&language_server_configuration_changed){
             state["language_server_config"]=requested_language_server_path;state["language_server_config_pending"]=true;store.write(state);
         }
@@ -796,13 +803,16 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing process configuration");
         if(process_configuration_changed&&!options.upgrade_backend)
             throw std::invalid_argument("Process configuration changed; update the existing backend explicitly");
+        if(recovered_stopped_owner&&process_configuration_changed){
+            state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;store.write(state);
+        }
         if(state.contains("upgrade_intent")&&process_configuration_changed){
             state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;store.write(state);
         }
         if (options.approved_edits)
             require(state.at("approved_edits") == *options.approved_edits,
                     "Profile edit policy changed; update the existing backend explicitly");
-        if(state.contains("owner_receipt")||(options.upgrade_backend&&(process_configuration_changed||language_server_configuration_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
+        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(process_configuration_changed||language_server_configuration_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
             bool deferred_busy_upgrade=false;
             if(!state.contains("owner_receipt")){
                 if(!state.contains("upgrade_intent")){
