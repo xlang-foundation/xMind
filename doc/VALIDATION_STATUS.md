@@ -11,8 +11,8 @@ error to the model, refreshes the configured catalogue in the same run, and
 lets the model reconsider with current definitions. A pinned graph MCP node
 fails closed on catalogue drift, since its immutable alias/revision cannot be
 silently rebound. Synthetic HTTP AgentRunner and graph contracts cover these
-paths, including absence of a stale peer effect. Focused Release results will
-passed **11/11** (AgentRunner, graph MCP, registry effects, transports and SDK
+paths, including absence of a stale peer effect. Focused Release tests passed
+**11/11** (AgentRunner, graph MCP, registry effects, transports and SDK
 peers). [Exact Release CTest output](evidence/native-mcp-catalogue-invalidation-local-20261012.log).
 Crash recovery/reconnect and live external-peer acceptance remain open.
 
@@ -25,17 +25,17 @@ to the run journal as soon as the acknowledgement is validated, and joins the
 listener before terminal state is committed.
 Events include only validated method and refresh metadata: payloads and resource
 URIs are excluded, and each listener is capped at 64 notification events with
-one overflow record. Held-open synthetic stdio and Streamable HTTP AgentRunner
-integrations send 70 notifications with credential-shaped values and verify
-sanitization, the cap, overflow marker, cancellation and durable closure
+one overflow record. Held-open synthetic HTTP AgentRunner integrations send 70
+notifications with credential-shaped values and verify sanitization, the cap,
+overflow marker, cancellation and durable closure
 before run completion. Direct graph MCP tool children use the same observer;
 stdio graph tests verify closure for approved, denied and cancelled runs, and
-an HTTP graph test verifies the live SSE path and closure before child
-completion. The HTTP AgentRunner integration also verifies an MCP effect waits
+an HTTP graph test verifies list-change invalidation and closure before child
+failure. The HTTP AgentRunner integration also verifies an MCP effect waits
 for controller approval and provider token metrics persist. Dedicated stdio
 and HTTP transport contracts verify acknowledgement ordering. Graph/MCP,
 AgentRunner, stdio/HTTP transport and official modern/legacy SDK contracts pass
-**10/10**.
+**10/10** at the subscription-lifecycle checkpoint.
 Crash recovery/reconnect and live external-peer acceptance remain open. [Exact Release CTest output](evidence/native-mcp-subscription-lifecycle-local-20261012.log);
 [transport scope](native-mcp-http.md).
 
