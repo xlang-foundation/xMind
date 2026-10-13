@@ -979,6 +979,16 @@ struct HttpServer::Impl {
             if(!request.params.empty())throw std::invalid_argument("Session lookup does not accept query parameters");
             reply(response,encode(persistence.session(identifier(request.matches[1])).get()));
         }));
+        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/messages)",guarded([this](const Request& request,Response& response) {
+            if(request.params.size()>2||(request.target.find('?')!=std::string::npos&&request.params.empty())||request.params.count("limit")>1||request.params.count("before")>1)throw std::invalid_argument("Invalid message history query");
+            for(const auto& [name,value]:request.params){(void)value;if(name!="limit"&&name!="before")throw std::invalid_argument("Unknown message history query");}
+            std::size_t limit=100;
+            if(request.has_param("limit")){const auto value=request.get_param_value("limit");std::uint64_t parsed_value=0;const auto parsed=std::from_chars(value.data(),value.data()+value.size(),parsed_value);if(value.empty()||parsed.ec!=std::errc{}||parsed.ptr!=value.data()+value.size()||parsed_value<1||parsed_value>1000)throw std::invalid_argument("Message history limit must be between 1 and 1000");limit=static_cast<std::size_t>(parsed_value);}
+            std::optional<std::int64_t> before;
+            if(request.has_param("before")){const auto value=request.get_param_value("before");if(!value.starts_with("msg_")||value.size()<5||value.find_first_not_of("0123456789",4)!=std::string::npos)throw std::invalid_argument("Message cursor must match ^msg_[0-9]+$");std::int64_t sequence=0;const auto parsed=std::from_chars(value.data()+4,value.data()+value.size(),sequence);if(parsed.ec!=std::errc{}||parsed.ptr!=value.data()+value.size()||sequence<1||sequence>9007199254740991LL)throw std::invalid_argument("Invalid message cursor");before=sequence;}
+            const auto page=persistence.history_page(identifier(request.matches[1]),before,limit).get();Json messages=Json::array();for(const auto& item:page.messages)messages.push_back(encode(item));
+            reply(response,{{"messages",std::move(messages)},{"has_more",page.next_before_sequence.has_value()},{"next_before",page.next_before_sequence?Json("msg_"+std::to_string(*page.next_before_sequence)):Json(nullptr)}});
+        }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/messages/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {
             if(!request.params.empty())throw std::invalid_argument("Message lookup does not accept query parameters");
             const std::string message_id=request.matches[2];

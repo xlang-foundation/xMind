@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-13",
+  "scope": "Native xMind bounded session history pages",
+  "base_revision": "4a48eb5",
+  "implementation": {
+    "route": "GET /v1/sessions/{id}/messages",
+    "query": [
+      "limit: optional integer 1..1000, default 100",
+      "before: optional session-scoped msg_<sequence> boundary"
+    ],
+    "storage": "xlang3 SQLite query fetches at most limit+1 rows and returns the latest page in chronological order",
+    "response": "{messages, has_more, next_before}",
+    "cli": "history-page SESSION LIMIT [BEFORE_MESSAGE_ID]",
+    "compatibility": "Existing /history route remains unchanged; this does not claim OpenCode operation parity or rendered UI adoption."
+  },
+  "validation": {
+    "release_targets": [
+      "xmind_cli",
+      "xmind_server"
+    ],
+    "native_contract": {
+      "test": "native_http_cli_contract",
+      "result": "passed",
+      "duration_seconds": 3.63,
+      "cases": [
+        "three pages across a twelve-message transcript",
+        "chronological order and no-skip cursor continuation",
+        "HTTP and console CLI page equivalence",
+        "limit boundaries and unknown/duplicate query rejection",
+        "malformed and missing cursor rejection",
+        "existing single-message route remains available"
+      ]
+    },
+    "client_and_adapter_contracts": {
+      "command": "node --test extensions/vscode/tests/client.test.js views/browser/tests/server.test.cjs",
+      "result": "passed",
+      "passed": 55,
+      "failed": 0
+    },
+    "source_whitespace_check": "git diff --check passed"
+  },
+  "parity_limit": "OpenCode typed message/part projection, type filter, selectable order, opaque cursor semantics, and rendered browser/VS Code history-page adoption remain incomplete."
+}

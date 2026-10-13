@@ -162,6 +162,7 @@ public:
     void append_message(const std::string& id,const std::string& role,const std::string& json);
     Message message(const std::string& id,std::int64_t sequence);
     std::vector<Message> history(const std::string& id);
+    MessagePage history_page(const std::string& id,std::optional<std::int64_t> before_sequence,std::size_t count);
     void put_information(const std::string& category,const std::string& id,const std::string& json);
     // Exact durable compare-and-swap; null expected means create only if absent.
     void compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected);

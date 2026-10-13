@@ -1950,6 +1950,18 @@ std::vector<Message> Repository::history(const std::string& id) {
         result.push_back({integer(row[0]),text(row[1]),text(row[2])});
     return result;
 }
+MessagePage Repository::history_page(const std::string& id,std::optional<std::int64_t> before_sequence,std::size_t count) {
+    if(count<1||count>1000)throw std::invalid_argument("Message page size must be between 1 and 1000");
+    session(id);if(before_sequence)message(id,*before_sequence);
+    const auto rows=before_sequence
+        ?impl_->database.execute("SELECT seq,role,payload FROM messages WHERE session_id=? AND execution_run_id IS NULL AND seq<? ORDER BY seq DESC LIMIT ?",{id,*before_sequence,static_cast<std::int64_t>(count+1)}).rows
+        :impl_->database.execute("SELECT seq,role,payload FROM messages WHERE session_id=? AND execution_run_id IS NULL ORDER BY seq DESC LIMIT ?",{id,static_cast<std::int64_t>(count+1)}).rows;
+    MessagePage page;const bool more=rows.size()>count;const auto included=std::min(rows.size(),count);
+    page.messages.reserve(included);
+    for(std::size_t i=0;i<included;++i)page.messages.push_back({integer(rows[i][0]),text(rows[i][1]),text(rows[i][2])});
+    if(more&&!page.messages.empty())page.next_before_sequence=page.messages.back().sequence;
+    std::reverse(page.messages.begin(),page.messages.end());return page;
+}
 namespace {
 constexpr const char* backend_owner_category="native-backend-owner";
 void owner_identity(const std::string& value){if(value.size()!=32||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid native owner identity");}

@@ -147,6 +147,7 @@ public:
     std::future<void> append_message(std::string id,std::string role,std::string json);
     std::future<Message> message(std::string id,std::int64_t sequence);
     std::future<std::vector<Message>> history(std::string id);
+    std::future<MessagePage> history_page(std::string id,std::optional<std::int64_t> before_sequence,std::size_t count);
     std::future<void> put_information(std::string category,std::string id,std::string json);
     // A protected managed-owner replacement may stage only this trusted
     // process-profile record while quiesced, before it is activated.

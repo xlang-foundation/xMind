@@ -4,6 +4,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace agentflow {
 enum class RunState { queued, running, paused, completed, failed, cancelled };
@@ -27,6 +28,7 @@ struct Session {
 struct Run { std::string id, session_id; RunState state; std::string parent_id,node_id;bool graph_root=false;std::string provider_context_json; };
 struct Event { std::int64_t sequence; std::string run_id, kind, json; };
 struct Message { std::int64_t sequence; std::string role, json; };
+struct MessagePage { std::vector<Message> messages; std::optional<std::int64_t> next_before_sequence; };
 struct ProcessOutputArtifact {
     std::string operation_id,run_id,state;
     std::uint64_t stdout_bytes=0,stderr_bytes=0;

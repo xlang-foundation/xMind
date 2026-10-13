@@ -1,5 +1,27 @@
 # Current native validation
 
+## Bounded native session history — 2026-10-13
+
+The native server now exposes SQL-bounded `GET /v1/sessions/{id}/messages`
+pages, and the console CLI exposes `history-page SESSION LIMIT
+[BEFORE_MESSAGE_ID]`. Pages return the latest messages in chronological order;
+each `next_before` boundary continues to the preceding page. Limits are capped
+at 1,000, and cursors are checked against the requested session. The shared
+client validates response shape and cursor consistency, and the local browser
+adapter allows this authenticated read route. Existing full-history clients
+remain supported. This provides bounded retrieval and does not yet replace
+unbounded history loading in either rendered chat view.
+
+Release `native_http_cli_contract` passed **1/1** (3.63 seconds), covering
+three pages of a twelve-message transcript, continuation without skipped or
+repeated messages, HTTP/CLI equivalence, limits, malformed and missing
+cursors, unknown/duplicate query parameters and single-message lookup.
+Browser adapter and shared-client contracts passed **55/55**. Full OpenCode
+message/part projection, message-type filters, selectable ordering, opaque
+cursors and rendered UI adoption remain incomplete. See
+[bounded-history scope](native-session-history-pages.md) and
+[local evidence](evidence/native-session-history-pages-20261013.json).
+
 ## Native provider history, MCP SDK and Release validation — 2026-10-13
 
 The full Release build succeeded in `build/native`, which uses an isolated

@@ -26,6 +26,14 @@ test('process output client validates paginated byte artifacts without text coer
  assert.deepEqual(await client.processOutput('process-op','stderr',12,64),page);assert.equal(new URL(requests[0].url).pathname,'/v1/operations/process-op/output');assert.equal(new URL(requests[0].url).search,'?channel=stderr&after=12&limit=64');
  for(const args of [['process-op','input',0,64],['process-op','stdout',-1,64],['process-op','stdout',0,262144]])await assert.rejects(client.processOutput(...args),/process output/i);page.next_offset=16;await assert.rejects(client.processOutput('process-op','stderr',12,64),/native process output page/i);
 });
+test('session history page client validates bounded chronological pages and cursor shape',async()=>{
+ const requests=[],page={messages:[8,9].map(seq=>({id:`msg_${seq}`,seq,role:'user',data:{content:`m${seq}`}})),has_more:true,next_before:'msg_8'};
+ const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>page};});
+ assert.deepEqual(await client.historyPage('session',2),page);assert.equal(new URL(requests[0].url).pathname,'/v1/sessions/session/messages');assert.equal(new URL(requests[0].url).search,'?limit=2');
+ assert.deepEqual(await client.historyPage('session',2,'msg_8'),page);assert.equal(new URL(requests[1].url).search,'?limit=2&before=msg_8');
+ await assert.rejects(client.historyPage('session',0),/page size/);await assert.rejects(client.historyPage('session',1001),/page size/);await assert.rejects(client.historyPage('session',10,'msg_bad'),/cursor/);
+ page.next_before='msg_7';await assert.rejects(client.historyPage('session',2),/history page/);
+});
 test('session fork client binds the selected source and exact before-message boundary',async()=>{
  const requests=[],receipt={id:'forked',title:'Saved session (fork #1)',parent_id:'saved',fork:{session_id:'saved',boundary_type:'before',message_id:'msg_9'}};
  const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{requests.push({url,options});return{ok:true,json:async()=>receipt};});

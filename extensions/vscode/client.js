@@ -235,6 +235,15 @@ class BackendClient {
     return value;
   }
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }
+  async historyPage(id,limit=100,before) {
+    executionIdentity(id);if(!Number.isSafeInteger(limit)||limit<1||limit>1000)throw new Error('Invalid session history page size');
+    if(before!==undefined&&(typeof before!=='string'||!/^msg_[1-9][0-9]*$/.test(before)))throw new Error('Invalid session history cursor');
+    const query=new URLSearchParams({limit:String(limit)});if(before!==undefined)query.set('before',before);
+    const value=await this.request(`/v1/sessions/${encodeURIComponent(id)}/messages?${query}`);
+    if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).sort().join(',')!=='has_more,messages,next_before'||!Array.isArray(value.messages)||value.messages.length>limit||typeof value.has_more!=='boolean'||(value.next_before!==null&&(typeof value.next_before!=='string'||!/^msg_[1-9][0-9]*$/.test(value.next_before)))||value.has_more!==(value.next_before!==null)||(value.has_more&&(!value.messages.length||value.next_before!==value.messages[0].id)))throw new Error('Invalid session history page');
+    let prior=0;for(const item of value.messages){if(!item||typeof item!=='object'||!Number.isSafeInteger(item.seq)||item.seq<=prior||item.id!==`msg_${item.seq}`||typeof item.role!=='string'||!item.data||typeof item.data!=='object'||Array.isArray(item.data))throw new Error('Invalid session history message');prior=item.seq;}
+    return value;
+  }
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
   run(session_id, prompt, model_id,binding) { return this.request('/v1/runs', { session_id, prompt, ...(model_id ? {model_id} : {}),...profileBindingFields(binding) }); }
   events(id, after) { return this.request(`/v1/runs/${encodeURIComponent(id)}/events?after=${after}`); }
