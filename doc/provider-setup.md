@@ -114,6 +114,15 @@ values; missing cache counters are not invented. Each supplied cache counter
 must fit its actual prompt count. Reasoning events remain separate from answer
 text, and response metrics use the same sidebar history renderer.
 
+Cross-provider replay validates saved Anthropic, Gemini and DeepSeek receipts
+before projecting their canonical text and tool calls onto a compatible target
+wire. The request copy is projected; persisted history remains unchanged.
+Responses receipts stay on the Responses wire because continuation and
+reasoning semantics are not represented by canonical chat messages. Selecting
+a Chat wire with Responses history fails with the durable
+`incompatible_provider_history` reason instead of silently changing protocols.
+Synthetic bridge, provider-setup and tool-history contracts cover both paths.
+
 The gateway and profile lifecycle fixtures are synthetic provider tests of real
 native transport, AgentRunner, workspace tools and embedded xlang3 SQLite.
 In the second complete attempt, the gateway contract passed in **0.54 seconds**

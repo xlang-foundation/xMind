@@ -9,7 +9,7 @@ namespace agentflow {
 namespace {
 using Json=nlohmann::json;
 enum class Source {anthropic,gemini,responses,deepseek};
-struct Receipt {Source source;std::string model;};
+struct Receipt {Source source;std::string model;bool portable{true};};
 [[noreturn]] void incompatible(){throw IncompatibleProviderHistory("Saved provider history cannot be safely converted for this model");}
 Json parse(const std::string& source){
     if(source.size()>4*1024*1024)incompatible();std::vector<std::set<std::string>> keys;
@@ -38,8 +38,12 @@ std::optional<Receipt> receipt(const ModelMessage& message){
         }
         bool responses=true;
         for(const auto& item:items){if(!item.is_object())incompatible();const auto item_type=item.value("type",std::string{});
-            if(item_type!="message"&&item_type!="function_call"&&item_type!="reasoning")responses=false;}
-        if(responses)return Receipt{Source::responses,{}};
+            if(item_type!="message"&&item_type!="function_call"&&item_type!="reasoning")responses=false;
+        }
+        // Responses receipts can carry continuation and reasoning semantics that
+        // are not represented by canonical chat messages; preserve them only on
+        // the Responses wire and fail closed when selecting another protocol.
+        if(responses)return Receipt{Source::responses,{},false};
     }catch(const Json::exception&){incompatible();}
     incompatible();
 }
@@ -71,7 +75,7 @@ ModelRequest project_provider_history(const ChatProviderConfig& target,const Mod
     if(request.canonical_window&&target.wire!=ProviderWire::responses)
         throw IncompatibleProviderHistory("Canonical context requires the Responses wire");
     ModelRequest projected=request;std::vector<std::optional<Receipt>> receipts;receipts.reserve(request.messages.size());bool needs_projection=false;
-    for(const auto& message:request.messages){auto value=receipt(message);if(value&&!native_for(target,*value))needs_projection=true;receipts.push_back(std::move(value));}
+    for(const auto& message:request.messages){auto value=receipt(message);if(value&&!native_for(target,*value)){if(!value->portable)incompatible();needs_projection=true;}receipts.push_back(std::move(value));}
     if(!needs_projection)return projected;
     for(const auto source:{Source::anthropic,Source::gemini,Source::responses,Source::deepseek})validate_source(request,receipts,source);
     for(std::size_t index=0;index<receipts.size();++index)if(receipts[index]&&!native_for(target,*receipts[index]))projected.messages[index].provider_items_json="[]";
