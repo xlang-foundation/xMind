@@ -311,6 +311,41 @@ nlohmann::json provider_rejection(const std::string& source){
 // Observation only: ending this client never grants, cancels or owns execution.
 // Each flushed NDJSON record is an actual persisted backend event. Its seq can
 // be supplied on reconnect; process-output hex is never written as terminal code.
+void print_preview_side(const char* marker,const std::string& content){
+    constexpr std::size_t max_lines=40,max_bytes=8192,max_line_bytes=1024;
+    std::size_t offset=0,lines=0,bytes=0;bool truncated=false;
+    if(content.empty()){std::cerr<<"  "<<marker<<" (empty)\n";return;}
+    while(offset<content.size()){
+        if(lines>=max_lines||bytes>=max_bytes){truncated=true;break;}
+        const auto end=content.find('\n',offset);const auto length=(end==std::string::npos?content.size():end)-offset;
+        const auto take=std::min(length,max_line_bytes);const auto line=content.substr(offset,take);
+        const auto encoded=nlohmann::json(line).dump(-1,' ',false,nlohmann::json::error_handler_t::replace);
+        if(bytes+encoded.size()>max_bytes){truncated=true;break;}
+        std::cerr<<"  "<<marker<<" "<<encoded<<'\n';bytes+=encoded.size();++lines;
+        if(take<length){truncated=true;break;}
+        if(end==std::string::npos)break;offset=end+1;
+    }
+    if(truncated)std::cerr<<"  … preview truncated; the operation record above retains the exact approved bytes\n";
+}
+void print_operation_preview(const nlohmann::json& operation)noexcept{
+    using Json=nlohmann::json;
+    try{
+        if(!operation.is_object()||!operation.contains("tool")||!operation["tool"].is_string()||!operation.contains("arguments_json")||!operation["arguments_json"].is_string())return;
+        const auto tool=operation["tool"].get<std::string>();if(tool!="create_file"&&tool!="replace_file"&&tool!="patch_file")return;
+        const auto plan=Json::parse(operation["arguments_json"].get<std::string>());if(!plan.is_object()||!plan.contains("path")||!plan["path"].is_string())return;
+        const auto action=tool=="create_file"?std::string("add"):tool=="replace_file"?std::string("update"):plan.value("action",std::string("change"));
+        std::cerr<<"\nFile change preview · "<<Json(plan["path"].get<std::string>()).dump()<<" · "<<action;
+        if(plan.contains("patch_index")&&plan.contains("patch_file_count")&&plan["patch_index"].is_number_unsigned()&&plan["patch_file_count"].is_number_unsigned())std::cerr<<" · file "<<(plan["patch_index"].get<std::size_t>()+1)<<" of "<<plan["patch_file_count"].get<std::size_t>();
+        if(action=="move"&&plan.contains("destination_path")&&plan["destination_path"].is_string())std::cerr<<" → "<<Json(plan["destination_path"].get<std::string>()).dump();
+        std::cerr<<"\n";
+        if(plan.value("before_exists",tool=="replace_file"||action!="add")){
+            const auto before=plan.value("before_content",std::string{});if(before.empty())std::cerr<<"  --- before (empty)\n";else print_preview_side("-",before);
+        }else std::cerr<<"  --- before (new file)\n";
+        if(plan.value("after_exists",action!="delete")){
+            const auto after=plan.value("after_content",std::string{});if(after.empty())std::cerr<<"  +++ after (empty)\n";else print_preview_side("+",after);
+        }else std::cerr<<"  +++ after (file deleted)\n";
+    }catch(...){std::cerr<<"\nFile change preview unavailable; inspect the exact operation record before deciding.\n";}
+}
 class ChatInput {
     struct State {
         std::mutex mutex;
@@ -472,7 +507,8 @@ int watch_run(agentflow::ConsoleTransport& client,const httplib::Headers& header
                 // authority, expiry and effect preconditions on the decision.
                 std::cout<<Json{{"type","operation_review"},{"operation",operation}}.dump()<<'\n'<<std::flush;
                 if(!std::cout)throw std::runtime_error("Approval review output is unavailable");
-                std::cerr<<"Review the exact operation above. Enter /allow "<<operationId<<", /deny "<<operationId<<", /cancel or /exit to detach.\n";
+                print_operation_preview(operation);
+                std::cerr<<"Review the exact operation and any file preview above. Enter /allow "<<operationId<<", /deny "<<operationId<<", /cancel or /exit to detach.\n";
                 std::string decision;
                 if(!input||!input->read_line(decision))throw std::runtime_error("CLI detached before a decision; backend execution remains owned by the server");
                 if(decision=="/exit"){std::cerr<<"Detached from run "<<run<<"; backend execution continues.\n";return run_detached;}

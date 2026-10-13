@@ -1,5 +1,17 @@
 # Reviewable milestones
 
+## Human-readable CLI edit and patch approval previews — 2026-10-13
+
+The interactive console still emits its exact JSON `operation_review` record
+for machine clients, and now also prints a readable per-file before/after
+preview for `create_file`, `replace_file` and `patch_file`. Paths and lines are
+JSON-escaped before terminal rendering, and each side is bounded to 40 lines
+and 8 KiB. The same durable operation ID remains the only approval target.
+Focused Release CTests for the native agent edit and patch HTTP flows passed
+2/2 with real temporary files and synthetic inference. Live-model CLI
+edit/patch acceptance remains open; prior live CLI acceptance covered a
+`create_file` approval.
+
 ## Batched coding-edit guidance after live TestProj run — 2026-10-13
 
 The coding tools now direct the model to use one `apply_patch` proposal for

@@ -202,8 +202,19 @@ CLI workspace. The CLI displayed the exact operation and accepted `/allow` for
 that operation ID; the run completed with exit status **0**. I independently
 verified the created file's 55 bytes and SHA-256, then removed the temporary
 acceptance file. This confirms one live model-to-file-write approval path from
-the CLI; edit/patch approval, richer diff review, and full coding parity remain
-open. [Sanitized run metadata](evidence/cli-live-approved-file-write-20261013.json).
+the CLI; live-model edit/patch approval remains unverified. [Sanitized run metadata](evidence/cli-live-approved-file-write-20261013.json).
+
+## Interactive CLI file-change previews — 2026-10-13
+
+The unified CLI now follows its machine-readable `operation_review` event with
+a concise per-file before/after preview for create, edit and patch operations.
+File paths and lines are JSON-escaped before terminal output, and each side is
+bounded to 40 lines and 8 KiB. The exact durable operation event remains
+available to machine clients, and `/allow`/`/deny` still target the same
+operation ID. Focused Release CTests `native_agent_edit_http_contract` and
+`native_agent_patch_http_contract` passed 2/2 with actual files and approval
+decisions against synthetic inference. This does not claim live-model CLI
+edit/patch acceptance or complete coding parity.
 
 ## Narrow browser sidebar layout — 2026-10-13
 
