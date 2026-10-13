@@ -975,6 +975,10 @@ struct HttpServer::Impl {
             server.Post(R"(/v1/terminals/([0-9a-f]{32})/close)",guarded([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Terminal close does not accept query parameters");body(request,{});terminals->close(request.matches[1]);reply(response,{{"closed",true}});}));
         }
         server.Get("/v1/sessions",guarded([this](const Request&,Response& response) {reply(response,encode_all(persistence.sessions().get()));}));
+        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {
+            if(!request.params.empty())throw std::invalid_argument("Session lookup does not accept query parameters");
+            reply(response,encode(persistence.session(identifier(request.matches[1])).get()));
+        }));
         server.Get("/v1/process/profiles",guarded([this](const Request& request,Response& response) {
             if(!request.params.empty())throw std::invalid_argument("Process metadata does not accept query parameters");
             Json profiles=Json::array();for(const auto& item:process_profiles)profiles.push_back({{"id",item.id},{"revision",item.revision},{"max_timeout_ms",item.max_timeout_ms}});

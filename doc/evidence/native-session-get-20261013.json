@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-13",
+  "scope": "Native xMind single-session metadata lookup",
+  "implementation": "GET /v1/sessions/{id} delegates to the SQLite-backed persistence.session lookup and returns the existing public Session representation.",
+  "success_case": {
+    "request": "GET /v1/sessions/shared",
+    "status": 200,
+    "response": {
+      "id": "shared",
+      "title": "HTTP and CLI"
+    }
+  },
+  "failure_cases": [
+    {
+      "request": "GET /v1/sessions/missing-session",
+      "status": 404
+    },
+    {
+      "request": "GET /v1/sessions/shared?unexpected=true",
+      "status": 400
+    }
+  ],
+  "verification": {
+    "test": "native_http_cli_contract",
+    "result": "passed",
+    "duration_seconds": 3.74
+  },
+  "parity_limit": "This adds native lookup behavior only. OpenCode's complete session metadata contract and operation-level parity are not claimed."
+}

@@ -118,6 +118,9 @@ try {
   assert.equal((await request('/v1/sessions', {title: 'media'}, {'Content-Type': 'text/plain'})).status, 400);
   const session = await request('/v1/sessions', {id: 'shared', title: 'HTTP and CLI'});
   assert.equal(session.status, 201);assert.equal(cli('sessions')[0].id, 'shared');
+  assert.deepEqual(await request('/v1/sessions/shared'),{status:200,data:{id:'shared',title:'HTTP and CLI'}},'Single-session lookup returns the durable session record');
+  assert.equal((await request('/v1/sessions/missing-session')).status,404,'Single-session lookup reports absent records');
+  assert.equal((await request('/v1/sessions/shared?unexpected=true')).status,400,'Single-session lookup rejects unsupported query parameters');
   assert.equal((await request('/v1/sessions',{id:'shared',title:'duplicate'})).status,409);
   const second = cli('create-session', 'CLI-created');
   assert.equal((await request('/v1/sessions')).data.length, 2);

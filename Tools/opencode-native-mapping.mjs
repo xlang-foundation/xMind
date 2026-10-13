@@ -5,6 +5,7 @@ export const nativePartial = {
   'agent.list': [http, 'GET /v1/agents', 'executor->agent_definitions', 'Only persisted ID/revision/model metadata is returned; OpenCode mode, permission, description, hidden/default and source metadata remain incomplete.'],
   'agent.get': [http, 'GET /v1/agents/{id}', 'executor->agent_definition', 'Persisted model and instructions are readable; OpenCode mode, permission, description, hidden/default and source metadata remain incomplete.'],
   'session.list': [http, 'GET /v1/sessions', '"/v1/sessions"', 'Location/project scoping, filters and pagination remain to be compared.'],
+  'session.get': [http, 'GET /v1/sessions/{id}', 'persistence.session', 'The native single-record endpoint returns ID, title and fork ancestry; full OpenCode session metadata and response parity remain incomplete.'],
   'session.create': [http, 'POST /v1/sessions', 'persistence.create_session', 'The upstream session fields, agent/environment configuration and full creation lifecycle remain incomplete.'],
   'session.update': [http, 'POST /v1/sessions/{id}/title', 'persistence.rename_session', 'Only optimistic title updates exist; other upstream session metadata changes remain incomplete.'],
   'session.fork': [http, 'POST /v1/sessions/{id}/fork; xmind_cli fork-session', 'persistence.fork_session', 'Durable full/before-message transcript branches, ancestry and agent/workspace-skill snapshots exist; browser/VS Code fork controls and full upstream session metadata remain incomplete.'],
