@@ -1,5 +1,22 @@
 # Current native validation
 
+## Claude coding response budget and live VS Code write — 2026-10-13
+
+The native provider gateway now assigns a bounded 16,384-token default to
+current Claude coding model families (Sonnet 4.5/4.6 and Opus 4.5–4.8, plus
+the newer supported families); explicit application limits still take
+precedence, and legacy families retain 4,096. The native profile runtime
+contract verifies the Sonnet 4.6 request budget and persisted provider
+provenance (**1/1** focused CTest passed).
+
+In the live VS Code Extension Development Host, the saved TestProj workspace
+ran Claude Sonnet 4.6, proposed the exact single-line `edit_file` change for
+the Model Zoo search landmark, and completed after the normal approval. The
+saved run reports 4,823 input and 148 output tokens. The changed Vue project
+then passed `npm.cmd run build` (37 modules, 656 ms). This verifies one live
+provider-backed coding write and production build; broader installed-package
+and coding parity acceptance remain open.
+
 ## Managed runtime recovery and VS Code provider import — 2026-10-13
 
 Stopped managed profiles now replace an obsolete runtime directly only after
