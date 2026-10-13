@@ -19517,12 +19517,12 @@
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
         "source": "Native/src/http_server.cpp",
-        "sourceSha256": "4863419bd4e0a909b96e1707b2370c47485470ad8c5366823ab5ec7372d10042",
-        "surface": "POST /v1/runs/{id}/cancel",
+        "sourceSha256": "bf8c6db934b0e7165773d7e233f6a1d1699d426b10358778f7ed423adada7553",
+        "surface": "POST /v1/sessions/{id}/interrupt; xmind_cli session-interrupt",
         "sourceAnchor": "executor->cancel",
-        "gap": "Run cancellation exists; session-level interruption and resumable upstream semantics remain incomplete.",
+        "gap": "Live session cancellation, idle idempotence, missing-session errors and CLI exposure pass a synthetic-peer loopback contract. The response acknowledges cancellation before asserting runner settlement; resume=true and upstream wait-for-settlement semantics remain unsupported/unverified until durable session continuation is implemented.",
         "verifiedParity": false,
-        "scope": "Source candidate only; this mapping does not establish matching contracts, executed tests or CLI/editor acceptance."
+        "scope": "Focused native loopback HTTP, origin-bound local view and CLI contract verified. resume=true, wait-for-settlement semantics and full upstream parity remain unverified."
       },
       "agentflowEvidence": null,
       "upstreamContract": {

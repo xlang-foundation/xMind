@@ -409,7 +409,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|interrupt|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
@@ -979,6 +979,28 @@ struct HttpServer::Impl {
         }));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/runs)",guarded([this](const Request& request,Response& response) {
             reply(response,encode_all(persistence.runs(identifier(request.matches[1])).get()));
+        }));
+        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/interrupt)",guarded([this](const Request& request,Response& response) {
+            body(request,{});
+            if(request.params.size()>1||(!request.params.empty()&&(request.params.count("resume")!=1||request.get_param_value("resume")!="false")))
+                throw std::invalid_argument("Session interruption supports only resume=false; durable session resume is unavailable");
+            const auto session=identifier(request.matches[1]);
+            const auto runs=persistence.runs(session).get();
+            bool interrupted=false;
+            if(!executor){reply(response,{{"interrupted",false}});return;}
+            for(const auto& run:runs){
+                if(run.state!=RunState::queued&&run.state!=RunState::running&&run.state!=RunState::paused)continue;
+                try{executor->cancel(run.id);interrupted=true;}
+                catch(const Conflict&){
+                    const auto current=persistence.run(run.id).get();
+                    if(current.state==RunState::queued||current.state==RunState::running||current.state==RunState::paused)throw;
+                }
+                catch(const NotFound&){
+                    const auto current=persistence.run(run.id).get();
+                    if(current.state==RunState::queued||current.state==RunState::running||current.state==RunState::paused)throw;
+                }
+            }
+            reply(response,{{"interrupted",interrupted}});
         }));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {reply(response,encode(persistence.run(identifier(request.matches[1])).get()));}));
         server.Get(R"(/v1/runs/([A-Za-z0-9_-]+)/plan)",guarded([this](const Request& request,Response& response){

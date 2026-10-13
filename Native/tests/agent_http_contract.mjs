@@ -238,6 +238,16 @@ try {
   // Queued cancellation frees bounded admission capacity before the worker exits.
   assert.equal((await api('/v1/runs',{id:'replacement-run',session_id:'overflow',prompt:'Read README again'})).status,202);
   cli('cancel','held-run');await terminal('held-run','cancelled');
+  await session('http-interrupt');
+  assert.equal((await api('/v1/runs',{id:'http-interrupt-run',session_id:'http-interrupt',prompt:'hold-stream'})).status,202);
+  await streaming('http-interrupt-run');
+  const viewInterrupt=await fetch(`http://127.0.0.1:${port}/v1/sessions/http-interrupt/interrupt?resume=false`,{method:'POST',headers:{...viewHeaders,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(10000)});
+  assert.equal(viewInterrupt.status,200,'An origin-bound local view may interrupt its active session');assert.deepEqual(await viewInterrupt.json(),{interrupted:true});
+  await terminal('http-interrupt-run','cancelled');
+  assert.deepEqual((await api('/v1/sessions/http-interrupt/interrupt',{})),{status:200,data:{interrupted:false}},'Idle interruption is an idempotent no-op');
+  assert.equal((await api('/v1/sessions/absent-session/interrupt',{})).status,404);
+  assert.equal((await api('/v1/sessions/http-interrupt/interrupt?resume=true',{})).status,400,'Unsupported resume must fail explicitly');
+  assert.deepEqual(cli('session-interrupt','http-interrupt'),{interrupted:false},'CLI exposes the session interrupt contract');
   const cancelledAttachmentRequests=requestsByPrompt.get('hold-stream'),cancelledAttachmentRuns=cli('runs','held');
   const cancelledAttachment=await chatResult(2,'/watch held-run\n/exit\n');
   assert.equal(cancelledAttachment.find(record=>record.type==='run_attached').run.id,'held-run');assert.equal(cancelledAttachment.find(record=>record.type==='turn_finished').exit_status,2);assert.equal(requestsByPrompt.get('hold-stream'),cancelledAttachmentRequests,'Unrelated queued work may execute while the cancelled task is inspected');assert.ok(!cancelledAttachment.some(record=>record.type==='run'));assert.deepEqual(cli('runs','held'),cancelledAttachmentRuns,'Viewing cancellation cannot restart the run');

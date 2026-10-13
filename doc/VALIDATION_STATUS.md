@@ -1,5 +1,20 @@
 # Current native validation
 
+## Session-level interrupt — 2026-10-12
+
+The native HTTP server now supports `POST /v1/sessions/{id}/interrupt` and
+the console exposes `session-interrupt SESSION [false]`. A focused loopback
+test confirms cancellation of a live streamed run, idle idempotence, 404 for a
+missing session, explicit rejection of unsupported `resume=true`, and the CLI
+response shape. Release server and CLI builds succeeded; CTest passed
+`native_agent_http_contract` **1/1**. OpenCode-style resume/continuation remains
+incomplete because xMind does not yet have a durable session inbox and resume
+scheduler. The route acknowledges cancellation while the run settles
+asynchronously, so OpenCode's wait-for-settlement behavior is also incomplete.
+This checkpoint verifies the cancellation request only; it is not full session
+API parity. The per-operation evidence and current source hash are recorded in
+[the API inventory](OPENCODE_API_INVENTORY.json).
+
 ## Native CLI connection catalog management — 2026-10-12
 
 Release `xmind_cli` and `xmind_server` build. The real server/CLI contract,
