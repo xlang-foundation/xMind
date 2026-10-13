@@ -33,11 +33,13 @@ std::string model_identity(const ProviderProfileRoute& route,const std::string& 
     return model;
 }
 std::int64_t anthropic_default_output_tokens(const std::string& model){
-    // Sonnet 5, Opus 5, Fable 5 and Mythos 5 use adaptive thinking by default.
-    // Messages max_tokens covers thinking plus visible output, so 4096 can be
-    // exhausted before an agent finishes a tool cycle. Keep the default
-    // bounded and preserve any explicit application limit.
-    if(model.starts_with("claude-sonnet-5")||model.starts_with("claude-opus-5")||model.starts_with("claude-fable-5")||model.starts_with("claude-mythos-5"))return 16384;
+    // Newer Claude coding models can return large edit proposals. The Messages
+    // max_tokens limit covers the whole generated response, so 4096 can cut a
+    // file edit off before its tool arguments close. Keep a bounded default
+    // while preserving any explicit application limit.
+    if(model.starts_with("claude-sonnet-5")||model.starts_with("claude-opus-5")||model.starts_with("claude-fable-5")||model.starts_with("claude-mythos-5")||
+       model.starts_with("claude-sonnet-4-5")||model.starts_with("claude-opus-4-5")||model.starts_with("claude-sonnet-4-6")||model.starts_with("claude-opus-4-6")||
+       model.starts_with("claude-opus-4-7")||model.starts_with("claude-opus-4-8"))return 16384;
     return 4096;
 }
 bool anthropic_adaptive_model(const std::string& model){

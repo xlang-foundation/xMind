@@ -41,10 +41,10 @@ ProviderProfileRuntimeMetadata select(ProviderProfileRuntime& runtime,const std:
 }
 void reply(PersistenceService& store,const std::string& session,const std::string& content){const auto history=store.history(session).get();require(history.size()==2,"Actual native run must commit its user and assistant messages");const auto value=Json::parse(history.back().json);require(value.at("content")==content&&value.contains("usage"),"Actual provider reply and usage must reach durable history");}
 void provenance(PersistenceService& store,const std::string& session,const std::string& profile,std::int64_t revision,const std::string& model){
-    const bool claude=profile=="claude";
+    const bool claude=profile.starts_with("claude");
     const auto expected=Json{{"profile_id",profile},{"profile_revision",revision},{"route_id",claude?"anthropic.messages":"openai.chat"},{"provider",claude?"anthropic":"openai"},{"wire",claude?"anthropic-messages":"chat-completions"},{"model_id",model}};
     const auto history=store.history(session).get();require(history.size()==2,"Provenance requires the actual persisted task and response");
-    const auto runs=store.runs(session).get();require(runs.size()==1&&Json::parse(runs[0].provider_context_json)==expected,"Run descriptor must project its own saved admission context");
+    const auto runs=store.runs(session).get();if(runs.size()!=1||Json::parse(runs[0].provider_context_json)!=expected)throw std::runtime_error("Run descriptor must project its own saved admission context for "+session+"; expected "+expected.dump()+"; actual "+(runs.empty()?std::string("<missing>"):runs[0].provider_context_json));
     for(const auto& message:history){const auto record=Json::parse(message.json);require(record.at("provider_context")==expected,"Durable provenance must retain the profile version and actual selected model");require(message.json.find("runtime-openai-fixture-key")==std::string::npos&&message.json.find("runtime-claude-fixture-key")==std::string::npos&&message.json.find("credential_id")==std::string::npos&&message.json.find("endpoint")==std::string::npos,"Public provenance cannot contain credentials or destinations");}
 }
 void workspace_binding_contract(const std::filesystem::path& owned,const std::vector<std::string>& imports,const std::string& origin){
@@ -252,16 +252,23 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         const auto response=Json::parse(default_history.back().json);
         require(response.at("usage").at("input_tokens")==3&&response.at("usage").at("output_tokens")==4&&response.at("provider_items").at(0).at("type")=="anthropic_content","Default Claude request must return actual native stream metrics and its original receipt");
         require(store.credentials("server").get().size()==1&&store.operations("claude-default-run").get().empty(),"Default output policy cannot rotate credentials or invent effects");
+        const auto sonnet46=runtime.save_profile("claude46","anthropic.messages","claude-sonnet-4-6-fixture",key("runtime-claude-fixture-key"),1,true);
+        require(sonnet46.revision==2&&sonnet46.active=="claude46","Sonnet 4.6 profile must activate with the next provider revision");
+        store.create_session("claude-46-default","Synthetic Claude Sonnet 4.6 default output budget").get();
+        const auto newer=client.Post("/v1/runs",authorized,R"({"id":"claude-46-default-run","session_id":"claude-46-default","prompt":"Claude Sonnet 4.6 default output fixture","provider_profile_id":"claude46","expected_provider_revision":2})","application/json");
+        require(newer&&newer->status==202,"Sonnet 4.6 must admit its model-family output default");
+        wait(store,"claude-46-default-run",RunState::completed);reply(store,"claude-46-default","Actual Claude fixture reply");provenance(store,"claude-46-default","claude46",1,"claude-sonnet-4-6-fixture");
+        default_registry=store.information("native-provider-profiles","registry").get();
     }
     {
         PersistenceService store(default_database,imports);AgentSettings default_base;
         ProviderProfileRuntime runtime(store,default_base,policy(origin),1,8);
-        require(runtime.configuration().revision==1&&runtime.configuration().active=="claude"&&store.credentials("server").get().size()==1&&store.information("native-provider-profiles","registry").get()==default_registry,"Default output policy must reopen the same saved registry/key without publication");
+        require(runtime.configuration().revision==2&&runtime.configuration().active=="claude46"&&store.credentials("server").get().size()==2&&store.information("native-provider-profiles","registry").get()==default_registry,"Default output policy must reopen the same saved registry/key without publication");
         const auto restored=store.history("claude-default").get();require(restored.size()==default_history.size(),"Default-output restart must preserve both conversation rows");
         for(std::size_t index=0;index<restored.size();++index)require(restored[index].sequence==default_history[index].sequence&&restored[index].role==default_history[index].role&&restored[index].json==default_history[index].json,"Default-output restart must preserve exact history bytes");
         store.create_session("claude-default-reopened","Synthetic reopened default output-budget profile").get();
         runtime.submit("claude-default-reopened-run","claude-default-reopened","Claude profile reopened default output fixture");
-        wait(store,"claude-default-reopened-run",RunState::completed);reply(store,"claude-default-reopened","Actual Claude fixture reply");provenance(store,"claude-default-reopened","claude",1,"claude-sonnet-5-fixture");
+        wait(store,"claude-default-reopened-run",RunState::completed);reply(store,"claude-default-reopened","Actual Claude fixture reply");provenance(store,"claude-default-reopened","claude46",1,"claude-sonnet-4-6-fixture");
         require(store.operations("claude-default-reopened-run").get().empty()&&store.information("native-provider-profiles","registry").get()==default_registry,"Reopened default request cannot alter the saved provider or dispatch effects");
     }
     workspace_binding_contract(std::filesystem::u8path(argv[1]),imports,origin);
