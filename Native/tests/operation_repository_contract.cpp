@@ -174,7 +174,7 @@ int main(int argc,char** argv) {
 #if defined(_WIN32)
          require(upgraded.credentials("local").size()==1,"v2 migration must preserve encrypted credential metadata");
 #endif
-         XlangSqlite inspect(legacy,roots);require(std::get<std::int64_t>(inspect.execute("PRAGMA user_version").rows[0][0])==16,"Operation schema migration must advance to current version");}
+         XlangSqlite inspect(legacy,roots);require(std::get<std::int64_t>(inspect.execute("PRAGMA user_version").rows[0][0])==17,"Operation schema migration must advance to current version");}
         const auto resource_database=(folder.path/"resources.sqlite").string();
         {
             Repository store(resource_database,roots);start(store,"a");start(store,"b");start(store,"c");

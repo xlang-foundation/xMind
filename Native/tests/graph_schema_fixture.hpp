@@ -9,6 +9,10 @@
 inline void remove_skill_schema_fixture(agentflow::XlangSqlite& database){
     const auto scalar=[&](const std::string& sql){return std::get<std::int64_t>(database.execute(sql).rows.at(0).at(0));};
     auto version=scalar("PRAGMA user_version");if(version==12)return;
+    // Schema 17 only widens the direct-agent budget CHECK. These fixtures
+    // contain no direct-agent rows; the context reconstruction below replaces
+    // that table with the exact historical schema when it needs to.
+    if(version==17){database.execute("PRAGMA user_version=16");version=16;}
     if(version==16){
         if(scalar("SELECT count(*) FROM session_forks")!=0)
             throw std::runtime_error("Legacy fixture cannot discard actual session fork lineage");

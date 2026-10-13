@@ -8,7 +8,7 @@ import runtime from '../extensions/vscode/native-runtime.js';
 import {stageNativeRuntime} from '../extensions/vscode/scripts/package-native-runtime.mjs';
 if(process.env.GITHUB_ACTIONS!=='true')throw Error('Native CI staging requires an isolated GitHub runner.');
 const root=resolve(import.meta.dirname,'..'),evidence=join(root,'build/ci-evidence'),bundle=join(root,'build/native-distribution');
-const sdkRevision='8151a334a5e2ed0183b40ba6a98d1010b6cd96ae',stdlibRevision='ebf955df7a89ed0c7968f79faec1de49f61ed7cb';
+const sdkRevision='f0c425cff5b6bf47f18144b31e4dc1ac16c9a9f7',stdlibRevision='ebf955df7a89ed0c7968f79faec1de49f61ed7cb';
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const need=(condition,message)=>{if(!condition)throw Error(message);};
 const gitRevision=directory=>execFileSync('git',['-C',directory,'rev-parse','HEAD'],{encoding:'utf8',windowsHide:true}).trim();

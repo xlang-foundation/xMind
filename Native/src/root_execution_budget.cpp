@@ -15,7 +15,7 @@ RootExecutionBudget::RootExecutionBudget(PersistenceService& store,RootBudgetRec
     :store_(store),root_(std::move(record.root_run_id)),policy_(record.spec.policy_id),deadline_(deadline),cancel_(cancel),parallel_(static_cast<std::size_t>(record.spec.max_parallel)),
       segment_(std::move(segment)),backend_identity_(std::move(backend_identity)),active_started_(std::chrono::steady_clock::now()){
     if(root_.empty() || record.spec.max_parallel<0 || record.spec.max_parallel>2||
-       (record.spec.max_parallel==0&&record.spec.policy_id!="native.context"))throw std::invalid_argument("Invalid root execution budget");
+       (record.spec.max_parallel==0&&record.spec.policy_id!="native.context"&&record.spec.policy_id!="native.direct-agent"))throw std::invalid_argument("Invalid root execution budget");
     if(segment_&&((record.spec.policy_id!="native.dynamic-plan"&&record.spec.policy_id!="native.graph-context")||segment_->root_run_id!=root_||segment_->state!="open"||
         segment_->id.empty()||segment_->remaining_active_ms<1||segment_->remaining_active_ms>record.spec.wall_limit_ms||
         backend_identity_.size()!=64||backend_identity_.find_first_not_of("0123456789abcdef")!=std::string::npos))

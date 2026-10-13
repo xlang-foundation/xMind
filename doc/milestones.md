@@ -1,5 +1,22 @@
 # Reviewable milestones
 
+## xlang3 main integration and native Release gate — 2026-10-12
+
+xMind now pins the pushed xlang3 `main` revision
+`f0c425cff5b6bf47f18144b31e4dc1ac16c9a9f7`, which includes native SQLite
+transaction and AES-GCM compatibility. A Release build with the embedded
+xlang3 runtime passed all **138/138** native contracts in **173.58 seconds**.
+The schema-17 migration preserves budget rows, dependent triggers and foreign
+keys while admitting ordinary direct-agent budgets with zero child capacity.
+Direct coding runs now recheck trusted process executable identities before
+each model turn, so a changed executable ends the run before another provider
+request. The long local-profile, local-view and provider-configuration
+contracts passed. The xlang3-hosted pure-Python `cryptography` install remains
+blocked by the separate missing `mmap` API; no native xlang3 change was made.
+This is a source Release gate, not a claim of complete installed IDE or live
+provider acceptance. See the [full test output](evidence/native-release-ctest-schema17-20261012.log)
+and [current validation](VALIDATION_STATUS.md#xlang3-main-integration-and-native-release-gate--2026-10-12).
+
 ## VS Code coding-flow verification against TestProj — 2026-10-12
 
 The xMind right-sidebar extension targeted the opened `D:\CantorAI2026\TestProj`

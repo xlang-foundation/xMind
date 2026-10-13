@@ -80,9 +80,9 @@ void bounded_identity(const std::string& value,std::size_t limit=128){
         throw std::invalid_argument("Invalid execution identity");
 }
 Json budget_provider_identity(const RootBudgetSpec& spec){
-    const bool context=spec.policy_id=="native.context",graph=spec.policy_id=="native.graph-context";
-    if((!context&&!graph&&spec.policy_id!="native.delegation" && spec.policy_id!="native.dynamic-plan") || spec.policy_revision!=1 || spec.workspace_identity.empty() || spec.workspace_identity.size()>4096 || spec.workspace_identity.find('\0')!=std::string::npos ||
-        (context?(spec.max_children!=0||spec.max_parallel!=0):(spec.max_children<1 || spec.max_children>8 || spec.max_parallel<1 || spec.max_parallel>2)) || spec.max_model_calls<1 || spec.max_model_calls>32 || spec.wall_limit_ms<1 || spec.wall_limit_ms>3600000 || spec.provider_identity_json.size()>4096)
+    const bool context=spec.policy_id=="native.context",graph=spec.policy_id=="native.graph-context",direct=spec.policy_id=="native.direct-agent";
+    if((!context&&!graph&&!direct&&spec.policy_id!="native.delegation" && spec.policy_id!="native.dynamic-plan") || spec.policy_revision!=1 || spec.workspace_identity.empty() || spec.workspace_identity.size()>4096 || spec.workspace_identity.find('\0')!=std::string::npos ||
+        ((context||direct)?(spec.max_children!=0||spec.max_parallel!=0):(spec.max_children<1 || spec.max_children>8 || spec.max_parallel<1 || spec.max_parallel>2)) || spec.max_model_calls<1 || spec.max_model_calls>32 || spec.wall_limit_ms<1 || spec.wall_limit_ms>3600000 || spec.provider_identity_json.size()>4096)
         throw std::invalid_argument("Invalid native execution budget policy");
     const auto identity=Json::parse(object_json(spec.provider_identity_json));
     if(identity.size()==6){(void)provider_context(identity);return identity;}
@@ -517,7 +517,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     auto& db=impl_->database; Transaction transaction(db);
     const auto version=integer(db.execute("PRAGMA user_version").rows.at(0).at(0));
     const auto application=integer(db.execute("PRAGMA application_id").rows.at(0).at(0));
-    if(version>16)throw DatabaseError("Database schema requires a newer xMind runtime");
+    if(version>17)throw DatabaseError("Database schema requires a newer xMind runtime");
     if((version==0 && application!=0) || (version!=0 && application!=0x584d494e))
         throw DatabaseError("Database is not the target xMind repository");
     // Reject a closed or malformed durable owner before schema writes. Direct
@@ -546,7 +546,7 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
             "CREATE INDEX session_messages ON messages(session_id,seq)",
             "CREATE TABLE information(category TEXT NOT NULL,id TEXT NOT NULL,payload TEXT NOT NULL CHECK(json_valid(payload)),PRIMARY KEY(category,id))",
             "PRAGMA application_id=0x584d494e", "PRAGMA user_version=1"}) db.execute(sql);
-    } else if(version<1 || version>16) throw DatabaseError("Unsupported target repository version");
+    } else if(version<1 || version>17) throw DatabaseError("Unsupported target repository version");
     if(version<2) {
         db.execute("CREATE TABLE credentials(scope TEXT NOT NULL,id TEXT NOT NULL,purpose TEXT NOT NULL,label TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),protection TEXT NOT NULL,ciphertext BLOB NOT NULL CHECK(length(ciphertext)>0),PRIMARY KEY(scope,id))");
         db.execute("CREATE TABLE retired_credentials(scope TEXT NOT NULL,id TEXT NOT NULL,PRIMARY KEY(scope,id))");
@@ -771,6 +771,23 @@ Repository::Repository(const std::string& file,const std::vector<std::string>& r
     if(version<16){
         db.execute("CREATE TABLE session_forks(session_id TEXT PRIMARY KEY NOT NULL REFERENCES sessions(id),parent_session_id TEXT NOT NULL REFERENCES sessions(id),boundary_sequence INTEGER NOT NULL CHECK(boundary_sequence>0),boundary_type TEXT NOT NULL CHECK(boundary_type IN ('before','through')),CHECK(session_id!=parent_session_id))");
         db.execute("PRAGMA user_version=16");
+    }
+    if(version<17){
+        // Direct agents need a durable root call/time allowance even when
+        // they cannot delegate. Replace only the constrained budget table,
+        // preserving every row and all dependent triggers/foreign keys.
+        db.execute("PRAGMA defer_foreign_keys=ON");
+        const auto budget_triggers=db.execute("SELECT name,sql FROM sqlite_master WHERE type='trigger' AND instr(sql,'agent_execution_budgets')>0 ORDER BY name").rows;
+        for(const auto& row:budget_triggers){const auto name=text(row[0]);if(name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")!=std::string::npos)throw DatabaseError("Invalid direct-agent budget migration trigger identity");db.execute("DROP TRIGGER \""+name+"\"");}
+        db.execute("CREATE TABLE direct_budget_replacement(root_run_id TEXT PRIMARY KEY NOT NULL REFERENCES runs(id),policy_id TEXT NOT NULL,policy_revision INTEGER NOT NULL CHECK(policy_revision>0),workspace_identity TEXT NOT NULL,provider_identity_json TEXT NOT NULL CHECK(json_valid(provider_identity_json) AND json_type(provider_identity_json)='object'),max_children INTEGER NOT NULL CHECK(max_children BETWEEN 0 AND 8),max_parallel INTEGER NOT NULL CHECK(max_parallel BETWEEN 0 AND 2),max_model_calls INTEGER NOT NULL CHECK(max_model_calls BETWEEN 1 AND 32),wall_limit_ms INTEGER NOT NULL CHECK(wall_limit_ms BETWEEN 1 AND 3600000),children_admitted INTEGER NOT NULL DEFAULT 0 CHECK(children_admitted BETWEEN 0 AND max_children),model_calls_reserved INTEGER NOT NULL DEFAULT 0 CHECK(model_calls_reserved BETWEEN 0 AND max_model_calls),parent_calls_held INTEGER NOT NULL DEFAULT 0 CHECK(parent_calls_held>=0),revision INTEGER NOT NULL DEFAULT 1 CHECK(revision>0),planned_children_reserved INTEGER NOT NULL DEFAULT 0 CHECK(planned_children_reserved>=0 AND planned_children_reserved+children_admitted<=max_children),CHECK(model_calls_reserved+parent_calls_held<=max_model_calls),CHECK((policy_id IN ('native.context','native.direct-agent') AND max_children=0 AND max_parallel=0) OR (policy_id IN ('native.delegation','native.dynamic-plan','native.graph-context') AND max_children BETWEEN 1 AND 8 AND max_parallel BETWEEN 1 AND 2)))");
+        db.execute("INSERT INTO direct_budget_replacement SELECT root_run_id,policy_id,policy_revision,workspace_identity,provider_identity_json,max_children,max_parallel,max_model_calls,wall_limit_ms,children_admitted,model_calls_reserved,parent_calls_held,revision,planned_children_reserved FROM agent_execution_budgets");
+        db.execute("DROP TABLE agent_execution_budgets");
+        db.execute("ALTER TABLE direct_budget_replacement RENAME TO agent_execution_budgets");
+        for(const auto& row:budget_triggers)db.execute(text(row[1]));
+        db.execute("PRAGMA user_version=17");
+        if(!db.execute("PRAGMA foreign_key_check").rows.empty())throw DatabaseError("Direct-agent budget migration did not preserve foreign key ownership");
+        db.execute("PRAGMA defer_foreign_keys=OFF");
+        if(integer(db.execute("PRAGMA defer_foreign_keys").rows.at(0).at(0))!=0||integer(db.execute("PRAGMA foreign_keys").rows.at(0).at(0))!=1)throw DatabaseError("Direct-agent budget migration foreign key enforcement differs");
     }
     // The prepared owner and all authorized migrations commit together. A
     // publication/commit failure cannot leave schema writes without ownership.

@@ -275,7 +275,11 @@ int run_server(int argc,char** argv) {
             bind_workspace_membership(settings);
             settings.approved_edits=options.contains("--workspace-edits");
             settings.mcp_servers=mcp_settings;
-            settings.process_profiles=process_profiles;
+            // A server can start before a browser creates/selects its first
+            // workspace. Keep the local shell catalog configured for that
+            // later workspace, but do not bind execution tools to an agent
+            // whose request has no verified workspace.
+            if(settings.workspace)settings.process_profiles=process_profiles;
             settings.language_servers=language_servers;
             settings.instruction_policy=instruction_policy;
             settings.xlang_python_tools=xlang_python_tools;
@@ -306,7 +310,7 @@ int run_server(int argc,char** argv) {
         }
 #if defined(_WIN32)
         if(!executor){
-            agentflow::AgentSettings settings;settings.mcp_servers=mcp_settings;settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.instruction_policy=instruction_policy;settings.xlang_python_tools=xlang_python_tools;
+            agentflow::AgentSettings settings;settings.mcp_servers=mcp_settings;if(options.contains("--workspace"))settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.instruction_policy=instruction_policy;settings.xlang_python_tools=xlang_python_tools;
             if(options.contains("--workspace"))settings.workspace=options.at("--workspace");settings.approved_edits=options.contains("--workspace-edits");
             bind_workspace_membership(settings);
             // The configured profile generation enables the registered leaf

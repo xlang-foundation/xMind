@@ -191,7 +191,8 @@ std::string provider_context_json(const AgentSettings& settings,const std::strin
 }
 std::optional<RootBudgetSpec> AgentRunner::execution_budget(const std::string& model_id)const{
     if((!settings_.delegation||!delegation_)&&(!settings_.planning||!planning_)){
-        if(!settings_.context)return {};
+        if(!settings_.context)return RootBudgetSpec{"native.direct-agent",1,workspace_?workspace_->identity():"workspace:none",
+            execution_identity(settings_,model_id),0,0,static_cast<std::int64_t>(std::min(settings_.max_turns,std::size_t{32})),settings_.run_timeout.count()};
         return RootBudgetSpec{"native.context",1,workspace_?workspace_->identity():"workspace:none",
             execution_identity(settings_,model_id),0,0,32,settings_.run_timeout.count()};
     }
@@ -609,6 +610,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             cancelled(token);
             if(!leaf&&budget&&delegation_&&!delegation_->healthy())throw DelegationOutcomeUnrecorded("Native delegation owner is faulted");
             if(dynamic_root){if(!planning_->healthy())throw DynamicOutcomeUnrecorded("Native planning owner is faulted");validate_dynamic_owner(id,provider.model);}
+            else if(!leaf&&process_)try{for(const auto& profile:settings_.process_profiles)
+                if(profile.executable_id.empty()||ForegroundProcess::executable_identity(profile.executable)!=profile.executable_id)
+                    throw ProcessBeforeDispatchError("Admitted process binding changed");
+            }catch(const ProcessBeforeDispatchError&){throw;}catch(const std::filesystem::filesystem_error&){throw ProcessBeforeDispatchError("Admitted process binding is unavailable");}
             if(repository_context){
                 auto current=agent_instructions+repository_context->prepare(token);
                 for(const auto& folder_id:active_attached_guidance){auto& context=*attached_repository_contexts.at(folder_id);current.append("\n\nRepository guidance for registered workspace folder "+folder_id+" (all paths below are relative to this folder):\n");current+=context.prepare(token);}
@@ -847,6 +852,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
       catch(const NativeChildOutcomeUnrecorded&){throw;}
       catch(const DynamicHumanExpired&){return terminate(RunState::failed,{{"reason","human_input_expired"}});}
       catch(const DynamicPlanUnavailable&){return terminate(RunState::failed,{{"reason","dynamic_configuration_changed"}});}
+      catch(const ProcessBeforeDispatchError&){return terminate(RunState::failed,{{"reason","dynamic_configuration_changed"}});}
       catch(const PermissionCancelled&) {return terminate(timed_out?RunState::failed:RunState::cancelled,{{"reason",timed_out?"agent_timeout":"cancelled"}});}
       catch(const ToolGuidanceChanged&) {return terminate(RunState::failed,{{"reason","skill_context_unavailable"}});}
       catch(const ToolMutationUncertain&) {return terminate(RunState::failed,{{"reason","file_effect_uncertain"}});}

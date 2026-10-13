@@ -1,5 +1,25 @@
 # Current native validation
 
+## xlang3 main integration and native Release gate — 2026-10-12
+
+The xMind Release build uses the pushed xlang3 `main` revision
+`f0c425cff5b6bf47f18144b31e4dc1ac16c9a9f7`, with CPython bridging disabled.
+The complete native CTest suite passes **138/138** contracts in **173.58
+seconds**. This includes the schema-17 populated migration and foreign-key
+checks, direct-agent budget/run contracts, process identity drift handling,
+the MCP/A2A and graph contracts, and local profile/view/provider-configuration
+integrations. The migration preserves existing budget records and dependent
+foreign keys while adding the `native.direct-agent` zero-child policy. The
+process contract verifies a changed trusted executable fails the run before a
+follow-up model request. Full output is preserved in
+[CTest evidence](evidence/native-release-ctest-schema17-20261012.log).
+
+The xlang3-hosted pure-Python `cryptography` package probe still stops at
+`ModuleNotFoundError: mmap`; this suite does not validate that package. No
+xlang3 native API was changed pending the user's decision on that separate
+compatibility gap. This source Release gate also does not establish a complete
+installed VS Code/IDE or live-provider acceptance run.
+
 ## MCP catalogue invalidation during a run — 2026-10-12
 
 Validated `tools/list_changed`, `prompts/list_changed` and

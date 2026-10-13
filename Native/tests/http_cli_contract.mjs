@@ -83,7 +83,7 @@ try {
   await start();
   await idleConnectionFairness();
   assert.equal((await request('/v1/health')).data.agent_execution, false);
-  assert.deepEqual(cli('process-profiles'),{profiles:[],runtime_state:'per_operation'},'Unconfigured native server must not invent process profiles or running processes');
+  const processCatalog=cli('process-profiles');assert.equal(processCatalog.runtime_state,'per_operation');assert.equal(processCatalog.profiles.length,1,'Windows local server provides one trusted built-in shell profile');assert.ok(['powershell','cmd'].includes(processCatalog.profiles[0].id));assert.equal(processCatalog.profiles[0].max_timeout_ms,600000,'The built-in shell is bounded');
   assert.equal((await request('/v1/process/profiles',undefined,{Authorization:''})).status,401);
   assert.equal((await request('/v1/process/profiles?executable=spoof')).status,400,'Discovery cannot select executable paths');
   assert.equal((await request('/v1/agent/instructions',undefined,{Authorization:''})).status,401);
