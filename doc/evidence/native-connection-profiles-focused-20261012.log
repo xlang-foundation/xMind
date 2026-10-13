@@ -1,0 +1,19 @@
+Start testing: Oct 12 21:09 Pacific Daylight Time
+----------------------------------------------------------
+130/136 Testing: native_connection_profiles_contract
+130/136 Test: native_connection_profiles_contract
+Command: "D:/CantorAI2026/xMind/build/native-connections-main/Release/agentflow_connection_profiles_contract.exe" "D:/CantorAI2026/xlang3/build/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/native-connections-main
+"native_connection_profiles_contract" start time: Oct 12 21:09 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native xlang3 connection-profile registry passed first-use Local selection, YAML/JSON idempotence, HTTPS endpoint checks, unknown credential-field rejection, revision conflicts, profile retirement and SQLite reopen. Nexus authentication, command routing, UI selection and remote execution remain unimplemented by this checkpoint.
+<end of output>
+Test time =   0.21 sec
+----------------------------------------------------------
+Test Passed.
+"native_connection_profiles_contract" end time: Oct 12 21:09 Pacific Daylight Time
+"native_connection_profiles_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 12 21:09 Pacific Daylight Time

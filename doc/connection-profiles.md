@@ -1,9 +1,10 @@
 # Local and Nexus connection profiles
 
-This is the target connection contract. Profile persistence, Nexus enrollment
-and distributed dispatch are not implemented. Model-provider profiles are a
-separate configuration domain; their native implementation does not establish
-connection-profile support.
+This is the target connection contract. The first native SQLite catalog
+checkpoint is implemented; it stores Local/Nexus profile metadata and active
+selection. Authentication, Nexus enrollment, distributed dispatch, HTTP/CLI
+exposure and client selection are not implemented. Model-provider profiles
+are a separate configuration domain.
 
 ![Connection architecture](connection-profiles.svg)
 
@@ -63,8 +64,10 @@ profile does not transfer, cancel or reinterpret already admitted work.
 
 ## Implementation and acceptance order
 
-1. Native connection registry with Local default, encrypted references and
-   revision checks; preserve current sessions and model configuration.
+1. Native SQLite connection catalog with Local default, revision checks and
+   retired-ID protection is implemented. Backend-owned encrypted credential
+   references and preservation/ownership tests for existing sessions and
+   model configuration remain to be integrated.
 2. Shared binding interface and connection-scoped run/event identities; verify
    that switching profiles cannot cross session, cursor or credential boundaries.
 3. Private Nexus authentication and negotiation, then public authenticated client

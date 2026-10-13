@@ -1,0 +1,37 @@
+#pragma once
+#include "agentflow/persistence_service.hpp"
+#include <cstdint>
+#include <mutex>
+#include <string>
+#include <vector>
+
+namespace agentflow {
+enum class ConnectionKind {local,nexus};
+struct ConnectionProfile {
+    std::string id,name,origin;
+    ConnectionKind kind=ConnectionKind::local;
+    std::int64_t revision=0;
+};
+struct ConnectionProfileCatalog {
+    std::int64_t revision=0;
+    std::string active_id;
+    std::vector<ConnectionProfile> profiles;
+    std::vector<std::string> retired_ids;
+};
+
+// Persistent public connection metadata only. Authentication remains a
+// separate backend-owned encrypted credential and is added by the connector
+// enrollment flow, never by this YAML/JSON configuration surface.
+class ConnectionProfiles {
+public:
+    explicit ConnectionProfiles(PersistenceService& store):store_(store){}
+    ConnectionProfileCatalog load();
+    ConnectionProfileCatalog load_or_initialize();
+    ConnectionProfileCatalog apply(const std::string& source,std::int64_t expected_revision);
+    ConnectionProfileCatalog select(const std::string& id,std::int64_t expected_revision);
+private:
+    ConnectionProfileCatalog load_unlocked();
+    PersistenceService& store_;
+    std::mutex mutex_;
+};
+}
