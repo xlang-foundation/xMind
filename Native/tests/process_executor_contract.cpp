@@ -52,7 +52,7 @@ void owner(PersistenceService& store,const std::string& run="run",const std::str
     store.create_session(session,"Actual approved process contract").get();store.start_prompt_run(run,session,R"({"content":"actual native process fixture"})").get();store.transition(run,RunState::queued,RunState::running).get();
 }
 }
-int main(int argc,char** argv){if(argc!=7)return 2;try{
+int main(int argc,char** argv){if(argc!=8)return 2;try{
     const auto started=std::chrono::steady_clock::now();
     const auto phase=[&](const char* name){std::cerr<<"[process-contract] phase="<<name<<" elapsed_ms="<<std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-started).count()<<'\n'<<std::flush;};
     phase("workspace-setup");
@@ -88,6 +88,17 @@ int main(int argc,char** argv){if(argc!=7)return 2;try{
         require(Json::parse(result["stdout"]["data"].get<std::string>())["inherited"]==false && store.operation("allowed").get().state==OperationState::succeeded,"Actual output and successful journal required");
         require(output(store,"allowed")==std::pair{result["stdout"]["data"].get<std::string>(),result["stderr"]["data"].get<std::string>()},"Durable channels must equal actual observed output bytes");
         rejects<Conflict>([&]{executor.invoke("allowed","run",args("normal","duplicate.txt"),now()+600000);});require(!std::filesystem::exists(root/"duplicate.txt"),"Duplicate operation must not dispatch again");
+        phase("xlang3-workspace-import-path");
+        std::filesystem::create_directories(root/".xlang3-site");
+        {std::ofstream module(root/".xlang3-site"/"xmind_process_probe.py");module<<"VALUE = 'xlang3-workspace-package-visible'\n";require(bool(module),"xlang3 package-path fixture must be created");}
+        ProcessExecutor xlang_executor(store,workspace,root.string(),{{"xlang3",argv[7],1,{"-c"},10s}});
+        const auto xlang_request=Json{{"profile","xlang3"},{"arguments",Json::array({"import xmind_process_probe; print(xmind_process_probe.VALUE)"})},{"workdir","."}}.dump();
+        Task xlang_task(xlang_executor,"xlang3-import-path",xlang_request);const auto xlang_record=proposed(store,"xlang3-import-path");const auto xlang_payload=Json::parse(xlang_record.spec.arguments_json);
+        require(xlang_payload["environment"].size()==1&&xlang_payload["environment"][0]["name"]=="PYTHONPATH","Approved xlang3 process proposal must bind its Python import path");
+        const auto xlang_path=xlang_payload["environment"][0]["value"].get<std::string>();
+        require(xlang_path.find(".xlang3-site")!=std::string::npos&&xlang_path.find("modules")!=std::string::npos,"Approved xlang3 process proposal must bind the paired runtime and workspace package search paths");
+        store.decide_operation("xlang3-import-path",OperationDecision::allow,"actual-fixture-controller").get();
+        const auto xlang_result=Json::parse(xlang_task.result.get());require(xlang_result["exit_code"]==0&&xlang_result["stdout"]["data"]=="xlang3-workspace-package-visible\r\n"&&store.operation("xlang3-import-path").get().state==OperationState::succeeded, ("Paired xlang3 process must import a pure-Python dependency from the workspace target: "+xlang_result.dump()).c_str());
         phase("trusted-process-profile");
         ProcessExecutor trusted_executor(store,workspace,root.string(),{{"trusted-fixture",argv[1],1,{argv[2]},10s,{},true}});
         const auto trusted_arguments=Json{{"profile","trusted-fixture"},{"arguments",Json::array({"normal","trusted-approved.txt"})},{"workdir","."}}.dump();

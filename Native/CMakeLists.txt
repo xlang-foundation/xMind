@@ -662,7 +662,7 @@ if(BUILD_TESTING)
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_process_executor_contract>")
     add_test(NAME native_process_executor_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/process_executor_peer.mjs"
       "$<TARGET_FILE:agentflow_process_executor_contract>" "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/process_peer.mjs"
-      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "${AGENTFLOW_POWERSHELL_EXECUTABLE}")
+      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "${AGENTFLOW_POWERSHELL_EXECUTABLE}" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/xlang3.exe")
     set_tests_properties(native_process_executor_contract PROPERTIES TIMEOUT 60)
     add_executable(agentflow_conpty_cli_harness tests/conpty_cli_harness.cpp)
     add_test(NAME native_agent_process_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_process_http_contract.mjs"

@@ -91,7 +91,7 @@ ModelToolDefinition ProcessExecutor::definition() const {
     std::string description="Run a command through a registered backend profile with literal arguments and a relative workspace directory. The trusted backend profile determines whether each operation requires approval. Set background=true for long-running work; then call wait_process with the returned job_id before giving a final answer. Do not detach child processes with shell-level Start-Process, start, or output redirection; use background=true so the native runtime owns and joins the process. Background commands keep their exact authorization, timeout and workspace/profile resource lock. A configured shell profile may interpret its arguments as shell text.";
     if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="powershell";}))description+=" For the powershell profile, pass one complete PowerShell script as arguments[0]; it uses a no-profile, noninteractive PowerShell process and runs without a per-command approval prompt.";
     if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="cmd";}))description+=" For the cmd profile, pass one complete Windows command as arguments[0]; it uses the system command processor and runs without a per-command approval prompt.";
-    if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="xlang3";}))description+=" Use the xlang3 profile to run Python-compatible workspace scripts, tests and package commands. Its executable is pinned to the xlang3 runtime paired with this xMind backend, so it does not depend on whichever xlang3.exe happens to appear first on machine PATH.";
+    if(std::any_of(profiles_.begin(),profiles_.end(),[](const auto& profile){return profile.id=="xlang3";}))description+=" Use the xlang3 profile to run Python-compatible workspace scripts, tests and package commands. Its executable is pinned to the xlang3 runtime paired with this xMind backend, so it does not depend on whichever xlang3.exe happens to appear first on machine PATH. xMind adds the paired runtime modules and a .xlang3-site directory in the selected working directory to PYTHONPATH when those directories exist.";
     return {"run_process",std::move(description),
         schema};
 }
@@ -163,7 +163,23 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
     if(ForegroundProcess::directory_identity(root)!=launch.workspace_root_id)throw ToolAccessDenied("Process workspace path identity changed");
     launch.working_directory=utf8((std::filesystem::u8path(root)/path).lexically_normal());launch.working_directory_id=ForegroundProcess::directory_identity(launch.working_directory);
     if(launch.working_directory_id!=public_directory_id)throw ToolAccessDenied("Process working directory changed during public workspace admission");
-    OperationSpec spec{run,workspace_id,"run_process",Json{{"workspace_id",workspace_id},{"workspace_revision",workspace_revision},{"folder_id",folder_id},{"target_workspace_id",launch.workspace_root_id},{"profile_id",found->id},{"profile_revision",found->revision},{"executable",launch.executable},{"executable_id",launch.executable_id},{"arguments",launch.arguments},{"workdir",utf8(path.lexically_normal())},{"directory_id",launch.working_directory_id},{"timeout_ms",launch.timeout.count()},{"output_limit",launch.output_limit},{"background",background}}.dump(),{"process-profile:"+found->id}};
+    if(found->id=="xlang3") {
+        std::vector<std::filesystem::path> import_paths;
+        const auto modules=std::filesystem::u8path(found->executable).parent_path()/L"modules";
+        if(std::filesystem::is_directory(modules))import_paths.push_back(modules);
+        const auto site_packages=std::filesystem::u8path(launch.working_directory)/L".xlang3-site";
+        if(std::filesystem::is_directory(site_packages))import_paths.push_back(site_packages);
+        if(!import_paths.empty()) {
+            std::string python_path;
+            for(const auto& import_path:import_paths) {
+                if(!python_path.empty())python_path.push_back(';');
+                const auto value=import_path.u8string();python_path.append(reinterpret_cast<const char*>(value.data()),value.size());
+            }
+            launch.environment.emplace_back("PYTHONPATH",std::move(python_path));
+        }
+    }
+    Json environment=Json::array();for(const auto& [name,value]:launch.environment)environment.push_back({{"name",name},{"value",value}});
+    OperationSpec spec{run,workspace_id,"run_process",Json{{"workspace_id",workspace_id},{"workspace_revision",workspace_revision},{"folder_id",folder_id},{"target_workspace_id",launch.workspace_root_id},{"profile_id",found->id},{"profile_revision",found->revision},{"executable",launch.executable},{"executable_id",launch.executable_id},{"arguments",launch.arguments},{"environment",std::move(environment)},{"workdir",utf8(path.lexically_normal())},{"directory_id",launch.working_directory_id},{"timeout_ms",launch.timeout.count()},{"output_limit",launch.output_limit},{"background",background}}.dump(),{"process-profile:"+found->id}};
     guidance.validate();if(guidance.verify){auto payload=Json::parse(spec.arguments_json);payload["repository_guidance"]=Json::parse(guidance.metadata_json);spec.arguments_json=payload.dump();}
     const auto trusted_actor=found->auto_approve?"trusted-process-profile:"+found->id:std::string{};
     PermissionWaiter(store_).acquire(id,spec,expiry,cancel,trusted_actor);
