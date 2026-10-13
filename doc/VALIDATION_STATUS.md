@@ -2,18 +2,18 @@
 
 ## xlang3 pytest and mmap compatibility branch — 2026-10-13
 
-The pushed xlang3 candidate [`d5d2f7c7`](https://github.com/CantorAI/xlang3/commit/d5d2f7c7)
-is based on current xlang3 `main` `f0c425cf`. It fixes pytest's lazy
+The pushed xlang3 candidate [`1df2603a`](https://github.com/CantorAI/xlang3/commit/1df2603a)
+is based on xlang3 `main` `f0c425cf`. It fixes pytest's lazy
 `PathAwareHookProxy` keyword lookup and native `memoryview(mmap)` buffer
 exports, including derived-view lifetime and close protection. It also stages
-the matching pure-Python Pydantic Core 2.46.5 facade beside xlang3's native
-implementation. Candidate Release validation passed the full xlang3 CLI
-fixture suite and the 11-case performance gate (21 paired samples per case).
-TestProj's Model Zoo backend passed **9/9** pytest API tests on xlang3 with
-pytest 8.4.2, FastAPI 0.120.4 and Pydantic 2.13.5. TestProj's broad Pydantic
-`<3.0` constraint also admits Pydantic 2.14.1, which requires native Pydantic
-Core 2.50.1; that combination remains unsupported by the pinned 2.46.5
-implementation. An isolated xMind Release build against the candidate passed
+the Pydantic Core 2.50.1 pure-Python facade and iterative schema-gather bridge
+beside xlang3's native validation/serialization core. The full xlang3 Release
+suite passed **56/56 CTest contracts**, including the pytest and schema-gather
+contracts and Visual Studio debugpy launch smoke. TestProj's Model Zoo backend
+passed **9/9** pytest API tests on xlang3 with pytest 8.4.2, FastAPI 0.120.4
+and Pydantic 2.14.1. The earlier 11-case performance gate (21 paired samples
+per case) passed on the preceding branch checkpoint before this facade update.
+An isolated xMind Release build against the earlier candidate passed
 **137/137 native CTest contracts**; the webpage adapter passed **99/99 browser
 tests** and the VS Code extension passed **320/320 extension tests**. A live
 local browser-adapter session attached to TestProj without a server-token prompt,
@@ -23,8 +23,8 @@ OpenAI models** from the saved `.config/providers.yaml`, selected OpenAI
 and 592 output tokens**. It made no TestProj edits. This validates the candidate
 through the xMind server and browser session/API paths. A visible external Edge
 interaction and the VS Code pytest flow remain unverified. xMind's default build
-still uses xlang3 `main` `f0c425cf`; the candidate is not merged or installed as
-the default runtime. The live candidate preview is available at
+still uses xlang3 `main` `f0c425cf`; candidate `1df2603a` is pushed but not
+merged or installed as the default runtime. The live candidate preview is available at
 `http://127.0.0.1:60543/ui/` while its local backend remains running. The branch benchmark
 [report](https://github.com/CantorAI/xlang3/blob/d5d2f7c7/doc/performance/data/pytest-pathaware-hook-proxy-20261012.json)
 records per-case results.

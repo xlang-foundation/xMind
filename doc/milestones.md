@@ -126,15 +126,15 @@ and [current validation](VALIDATION_STATUS.md#xlang3-main-integration-and-native
 
 ## xlang3 pytest and mmap compatibility candidate — 2026-10-13
 
-The pushed xlang3 branch `fix/pytest-pathaware-hook-proxy` at `d5d2f7c7` is
-based on current xlang3 `main` `f0c425cf`. It adds lazy pytest hook lookup,
-native zero-copy mmap buffer exports with close/lifetime checks, and the
-matching pure-Python Pydantic Core 2.46.5 facade. The xlang3 CLI fixture suite
-passes, TestProj's Model Zoo backend passes **9/9** pytest API tests on xlang3
-with Pydantic 2.13.5, and the full 11-case Release performance gate passes.
-Pydantic 2.14.1 requires core 2.50.1 and remains outside this candidate's
-compatibility. xMind still pins xlang3 `main` `f0c425cf`; the candidate has not
-been merged or deployed into the active xMind runtime. See the [detailed
+The pushed xlang3 branch `fix/pytest-pathaware-hook-proxy` at `1df2603a` is
+based on xlang3 `main` `f0c425cf`. It adds lazy pytest hook lookup, native
+zero-copy mmap buffer exports with close/lifetime checks, and the Pydantic Core
+2.50.1 pure-Python facade plus iterative schema-gather bridge. The full xlang3
+Release suite passes **56/56 CTest contracts**, and TestProj's Model Zoo
+backend passes **9/9** pytest API tests with Pydantic 2.14.1 on xlang3. The
+11-case Release performance gate passed on the prior branch checkpoint before
+the facade update. xMind still pins xlang3 `main` `f0c425cf`; the candidate has
+not been merged or deployed into the active xMind runtime. See the [detailed
 validation and report](VALIDATION_STATUS.md#xlang3-pytest-and-mmap-compatibility-branch--2026-10-13).
 
 ## VS Code coding-flow verification against TestProj — 2026-10-12
