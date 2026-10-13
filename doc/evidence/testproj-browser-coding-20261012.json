@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-12",
+  "scope": "Live local-browser acceptance on the existing TestProj profile",
+  "xmind_source_revision": "2a41758acd56c4136c2a04a69dc9eca46dc4e5e0",
+  "xlang3_source_revision": "f0c425cff5b6bf47f18144b31e4dc1ac16c9a9f7",
+  "workspace": "TestProj/model-zoo",
+  "provider": {
+    "id": "claude",
+    "model": "claude-sonnet-5-5",
+    "credential": "reused from the local xMind profile; not exposed"
+  },
+  "coding_attempt": {
+    "scope": "Frontend catalog layout, filters, and model-detail navigation",
+    "read_files": [
+      "model-zoo/README.md",
+      "model-zoo/frontend/src/views/HomeView.vue",
+      "model-zoo/frontend/src/views/ModelDetailView.vue",
+      "model-zoo/frontend/src/api/client.js",
+      "model-zoo/frontend/src/components/ModelCard.vue",
+      "model-zoo/frontend/src/style.css",
+      "model-zoo/frontend/src/router/index.js"
+    ],
+    "applied_patch": "An approved HomeView.vue update added URL-synchronized catalog filters and improved the narrower-screen filter layout.",
+    "outcome": "The run later stopped on provider HTTP 400. The persisted safe diagnostic showed type invalid_request_error, with no code or parameter. A final agent response was not completed."
+  },
+  "isolated_checks": {
+    "read_file_tool_cycle": "A fresh Claude conversation read model-zoo/README.md through one read_file call and completed with a one-sentence project summary.",
+    "frontend_build": {
+      "command": "npm.cmd run build",
+      "working_directory": "model-zoo/frontend",
+      "execution": "xMind native process tool via its trusted PowerShell profile",
+      "exit_code": 0,
+      "vite": "6.4.4",
+      "transformed_modules": 36,
+      "build_duration_ms": 640,
+      "stderr_bytes": 0
+    }
+  },
+  "limitations": [
+    "The complete multi-step coding run did not reach a final response; the cause of the provider HTTP 400 remains unidentified.",
+    "The earlier selected DeepSeek conversation was cancelled after growing to about 64,000 input tokens and many tool turns; it was not used for these clean-session checks.",
+    "The rebuilt Model Zoo page was not visually checked in Microsoft Edge because the available browser-control surface exposed only the in-app browser, and Edge was unavailable there.",
+    "Responsive browser interaction and backend tests were not exercised in this checkpoint."
+  ]
+}
