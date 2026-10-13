@@ -16,7 +16,7 @@ function harness(options={}) {
   let pendingHistory;
   let pendingOperation;
   let operations=options.operations||[];
-  let sidebarProvider,folderListener;const backendOwners=[];
+  let sidebarProvider,folderListener,saveListener,gitTreeProvider;const backendOwners=[];
   const renameRequests=[],forkRequests=[],decisions=[],providerRequests=[],discoveryRequests=[],connectionUpdates=[],inputPrompts=[],pickers=[],graphRequests=[],humanInputs=[],planInputs=[],planResumes=[],contextRequests=[],graphResumes=[];
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const fetchImpl=async (url,requestOptions)=>{
@@ -24,6 +24,7 @@ function harness(options={}) {
     const target=new URL(url);requests.push(target.pathname+target.search);
     if(target.pathname==='/v1/workspace'){const owner=backendOwners[0];assert.ok(owner);return {ok:true,json:async()=>owner.metadata};}
     if(target.pathname==='/v1/workspace/membership'){const owner=backendOwners[0];assert.ok(owner);return {ok:true,json:async()=>options.workspaceMembership||({workspace_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,revision:1,primary_folder_id:owner.metadata.workspace_id,folders:[{folder_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,ordinal:0}]})};}
+    if(target.pathname==='/v1/vcs/status')return{ok:true,json:async()=>options.vcsStatus||[]};
     if(target.pathname==='/v1/workspaces/add'){const body=JSON.parse(requestOptions.body),owner=backendOwners[0];assert.equal(body.workspace_id,owner.metadata.workspace_id);assert.equal(body.root,options.workspaceFolderToAdd||'D:\\Shared');return {ok:true,json:async()=>({workspace_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,revision:2,primary_folder_id:owner.metadata.workspace_id,folders:[{folder_id:owner.metadata.workspace_id,name:'TestProj',root:owner.metadata.root,ordinal:0},{folder_id:'windows-local-file-v1:2:shared',name:'Shared',root:body.root,ordinal:1}]})};}
     if(target.pathname==='/v1/vcs/init'){vcsInitializations.push(JSON.parse(requestOptions.body));return {ok:true,status:204,json:async()=>{throw new Error('204 responses have no JSON body');}};}
     if(target.pathname==='/v1/connections'){
@@ -115,15 +116,23 @@ function harness(options={}) {
     // still owns retirement and cursor acknowledgement in these host fixtures.
     eventStream(id,options){return new Promise(resolve=>streams.push({id,options,resolve}));}
   }
+  class TestEventEmitter{
+    listeners=[];
+    event=listener=>{this.listeners.push(listener);return{dispose:()=>{this.listeners=this.listeners.filter(value=>value!==listener);}};};
+    fire(value){for(const listener of this.listeners)listener(value);}
+  }
+  class TestTreeItem{constructor(label,collapsibleState){this.label=label;this.collapsibleState=collapsibleState;}}
   const vscode={
     ExtensionMode:{Development:2},ConfigurationTarget:{Global:1},
+    EventEmitter:TestEventEmitter,TreeItem:TestTreeItem,TreeItemCollapsibleState:{None:0,Expanded:2},ThemeIcon:class{constructor(id){this.id=id;}},
     Uri:{joinPath:(root,...parts)=>[root,...parts].join('/'),parse:value=>({toString:()=>value})},
-    workspace:{isTrusted:true,workspaceFolders:options.workspaceFolders||[{name:'TestProj',uri:{fsPath:'D:\\TestProj',toString:()=> 'file:///D:/TestProj'}}],onDidChangeWorkspaceFolders:callback=>{folderListener=callback;return {dispose(){}};},getConfiguration:()=>({get:()=> 'http://localhost:8765',update:async()=>{}}),openTextDocument:async options=>{openedDocuments.push(options);return {language:options.language,getText:()=>options.content};},registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
+    workspace:{isTrusted:true,workspaceFolders:options.workspaceFolders||[{name:'TestProj',uri:{fsPath:'D:\\TestProj',toString:()=> 'file:///D:/TestProj'}}],onDidChangeWorkspaceFolders:callback=>{folderListener=callback;return {dispose(){}};},onDidSaveTextDocument:callback=>{saveListener=callback;return{dispose(){}};},getConfiguration:()=>({get:()=> 'http://localhost:8765',update:async()=>{}}),openTextDocument:async options=>{openedDocuments.push(options);return {language:options.language,getText:()=>options.content};},registerTextDocumentContentProvider:(scheme,provider)=>{assert.equal(scheme,'xmind-review');documentProvider=provider;return {dispose(){}};}},
     ViewColumn:{Beside:2},
     commands:{registerCommand:(name,callback)=>{commands.set(name,callback);return {dispose(){}};},
       executeCommand:async (name,...args)=>{if(name==='vscode.diff'){comparisons.push(args);return;}if(['workbench.view.extension.xmind','workbench.view.explorer'].includes(name))return;if(commands.has(name))return await commands.get(name)(...args);assert.equal(name,'xmind.workspace.focus');if(options.clearEditorOnSidebar)vscode.window.activeTextEditor=undefined;sidebarProvider.resolveWebviewView(makeView());}},
     window:{activeTextEditor:options.editor,showQuickPick:async(items,settings)=>{pickers.push({items,settings});const label=options.quickPickLabels?.length?options.quickPickLabels.shift():(options.quickPickLabel??options.modelInput);return items.find(item=>item.label===label);},showInputBox:async prompt=>{inputPrompts.push(prompt);if(prompt.title==='xMind: OpenAI API key'){assert.equal(prompt.password,true);return options.keyInput;}if(prompt.title==='xMind: Git base reference'){assert.notEqual(prompt.password,true);return options.baseInput;}assert.equal(prompt.password,true);return token;},showTextDocument:async(document,settings)=>{shownDocuments.push({document,settings});return {};},showErrorMessage:message=>{errors.push(message);return options.errorChoice;},showInformationMessage:message=>{information.push(message);return undefined;},showWarningMessage:async(message,...choices)=>{warnings.push({message,choices});return typeof options.cancelChoice==='function'?await options.cancelChoice():options.cancelChoice;},
-      registerWebviewViewProvider:(id,provider)=>{assert.equal(id,'xmind.workspace');sidebarProvider=provider;return {dispose(){}};}}
+      registerWebviewViewProvider:(id,provider)=>{assert.equal(id,'xmind.workspace');sidebarProvider=provider;return {dispose(){}};},
+      registerTreeDataProvider:(id,provider)=>{assert.equal(id,'xmind.gitChanges');gitTreeProvider=provider;return{dispose(){}};}}
   };
   function makeView(){
         const view={posted:[],webview:{html:'',cspSource:'https://fixture-webview',asWebviewUri:uri=>({toString:()=>uri}),postMessage:message=>{view.posted.push(message);return Promise.resolve(true);},
@@ -159,11 +168,11 @@ function harness(options={}) {
   const sandbox={module:{exports:{}},URL,require:name=>name==='vscode'?vscode:name==='./client'?{BackendClient:TestClient,backendOrigin,validateToken,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,validatePlanObservation,validatePlanInputText,ContextViewController,validateGraphContext,EventStreamSubscription,McpAuthorizationController}:name==='./webview'?require('../webview'):require(name),
     setTimeout:(callback,delay)=>{bootstrapTasks.push(callback);scheduledTasks.push({callback,delay});return scheduledTasks.length;},clearTimeout(){},setInterval:callback=>{const id=++intervalID;intervals.set(id,callback);return id;},clearInterval:id=>intervals.delete(id)};
   if(options.bootstrap)sandbox.process={env:{XMIND_UI_BACKEND_ORIGIN:'http://localhost:8765',XMIND_UI_BOOTSTRAP_TOKEN:token,XMIND_UI_READY_FILE:'labeled-fixture-marker'}};
-  const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
+  const originalRequire=sandbox.require;sandbox.require=name=>name==='./workspace-backend'?{WorkspaceBackend:TestWorkspaceBackend,machineSetting:(_,key)=>key==='backendUrl'?'http://localhost:8765':undefined}:name==='./language-server-editor'?{LanguageServerEditor:TestLanguageServerEditor}:name==='./native-runtime'?{resolveNativeRuntime:async()=>{throw new Error('No actual runtime in mocked host');}}:name==='./editor-selection'?{captureEditorSelection:options.captureSelection??require('../editor-selection').captureEditorSelection}:name==='./browser-view'?require('../browser-view'):name==='./terminal'?require('../terminal'):name==='./patch-review'?require('../patch-review'):name==='./edit-review'?require('../edit-review'):name==='./git-changes-tree'?require('../git-changes-tree'):name==='node:fs'?{writeFileSync:(_,data)=>ready.push(JSON.parse(data))}:originalRequire(name);
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../extension.js'),'utf8'),sandbox,{filename:'extension.js'});
   const activation=sandbox.module.exports.activate(context);
-  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),
-    backendOwners,backendUpgradeRequests,changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
+  return {token,commands,secrets,requests,views,intervals,streams,scheduledTasks,state,errors,warnings,information,vcsInitializations,openedDocuments,shownDocuments,context,renameRequests,forkRequests,decisions,comparisons,activation,bootstrapTasks,ready,providerRequests,discoveryRequests,connectionUpdates,inputPrompts,pickers,graphRequests,humanInputs,planInputs,planResumes,contextRequests,graphResumes,languageServerEditorCalls,bootstrapEnvironment:sandbox.process?.env,reviewText:uri=>documentProvider.provideTextDocumentContent(uri),gitTreeProvider:()=>gitTreeProvider,
+    backendOwners,backendUpgradeRequests,saveDocument(document={}){return saveListener?.(document);},changeWorkspace(fsPath){vscode.workspace.workspaceFolders=[{name:'Changed',uri:{fsPath,toString:()=> 'file:///'+fsPath}}];folderListener();},
     configureBackend(health,catalogue){options.health=health;options.catalogue=catalogue;},
     configureRuns(runs){options.runs=runs;},
     pauseOperation(promise) {pendingOperation=promise;},
@@ -673,6 +682,14 @@ test('Git initialization command confirms the selected VS Code workspace and use
 });
 test('Git initialization command cancellation does not send a backend mutation',async()=>{const h=harness();await h.activation;await h.commands.get('agentflow.initializeGit')();assert.equal(h.warnings.length,1);assert.equal(h.vcsInitializations.length,0);h.views[0].close();});
 
+test('Git Changes tree refresh reads every registered folder through the connected native backend',async()=>{
+ const membership={workspace_id:'windows-local-file-v1:1:0',name:'TestProj',root:'D:\\TestProj',revision:2,primary_folder_id:'windows-local-file-v1:1:0',folders:[{folder_id:'windows-local-file-v1:1:0',name:'TestProj',root:'D:\\TestProj',ordinal:0},{folder_id:'windows-local-file-v1:2:shared',name:'Shared',root:'D:\\Shared',ordinal:1}]};
+ const h=harness({workspaceMembership:membership,vcsStatus:[{file:'src/main.cpp',additions:3,deletions:1,status:'modified'}]});await h.activation;await h.commands.get('agentflow.refreshGitChanges')();
+ assert.ok(h.requests.includes('/v1/vcs/status'));assert.ok(h.requests.includes('/v1/vcs/status?folder_id=windows-local-file-v1%3A2%3Ashared'));
+ const folders=h.gitTreeProvider().getChildren();assert.deepEqual(Array.from(folders,item=>item.label),['TestProj','Shared']);assert.equal(h.gitTreeProvider().getChildren(folders[0])[0].label,'src/main.cpp');assert.equal(h.gitTreeProvider().getChildren(folders[1])[0].label,'src/main.cpp');
+ const before=h.requests.filter(route=>route.startsWith('/v1/vcs/status')).length;h.saveDocument();await until(()=>h.requests.filter(route=>route.startsWith('/v1/vcs/status')).length>before);assert.deepEqual(h.errors,[]);h.views[0].close();
+});
+
 test('VS Code can explicitly attach another opened folder to its native workspace',async()=>{
  const folders=[{name:'TestProj',uri:{fsPath:'D:\\TestProj',toString:()=> 'file:///D:/TestProj'}},{name:'Shared',uri:{fsPath:'D:\\Shared',toString:()=> 'file:///D:/Shared'}}],h=harness({workspaceFolders:folders,quickPickLabel:'Shared',workspaceFolderToAdd:'D:\\Shared'});
  await h.activation;await h.commands.get('agentflow.addWorkspaceFolder')();
@@ -684,7 +701,7 @@ test('Git status command uses the opened workspace and shows native file counts'
  assert.ok(h.requests.includes('/v1/vcs/status'));assert.match(h.pickers.at(-1).settings.title,/D:\\TestProj/);assert.deepEqual(JSON.parse(JSON.stringify(h.pickers.at(-1).items)),[{label:'modified  "src/main.cpp"',description:'+3 −1'},{label:'added  "new file.txt"',description:'+2 −0'}]);assert.deepEqual(h.errors,[]);h.views[0].close();
 });
 test('VS Code sidebar Git menu routes its selected action through the guarded native command',async()=>{
- const h=harness({quickPickLabels:['Git status'],vcsStatus:[]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='capabilities'));view.receive({type:'git-menu'});await until(()=>h.requests.includes('/v1/vcs/status'));assert.equal(h.pickers[0].settings.title,'xMind: Workspace Git');assert.deepEqual(JSON.parse(JSON.stringify(h.pickers[0].items.map(item=>item.label))),['Git status','Review Git diff','Initialize Git repository']);assert.match(h.information[0],/may not be a Git repository/);view.close();
+ const h=harness({quickPickLabels:['Git status'],vcsStatus:[]});await h.commands.get('agentflow.open')();const view=h.views[0];view.receive({type:'ready'});await until(()=>view.posted.some(message=>message.type==='capabilities'));view.receive({type:'git-menu'});await until(()=>h.requests.includes('/v1/vcs/status')&&(h.information.length>0||h.errors.length>0));assert.equal(h.pickers[0].settings.title,'xMind: Workspace Git');assert.deepEqual(JSON.parse(JSON.stringify(h.pickers[0].items.map(item=>item.label))),['Git status','Review Git diff','Initialize Git repository']);assert.match(h.information[0],/may not be a Git repository/);view.close();
 });
 test('Git status command explains empty status without claiming Git was initialized',async()=>{
  const h=harness({vcsStatus:[]});await h.activation;await h.commands.get('agentflow.gitStatus')();assert.match(h.information[0],/No changed files reported by Git/);assert.match(h.information[0],/may not be a Git repository/);h.views[0].close();

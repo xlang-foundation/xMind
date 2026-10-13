@@ -42,6 +42,12 @@
           "name": "xMind",
           "type": "webview"
         }
+      ],
+      "explorer": [
+        {
+          "id": "xmind.gitChanges",
+          "name": "xMind Git Changes"
+        }
       ]
     },
     "commands": [
@@ -86,8 +92,28 @@
         "title": "xMind: Show Git Status"
       },
       {
+        "command": "agentflow.refreshGitChanges",
+        "title": "xMind: Refresh Git Changes"
+      },
+      {
         "command": "agentflow.gitDiff",
         "title": "xMind: Review Git Diff"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "agentflow.refreshGitChanges",
+          "when": "view == xmind.gitChanges",
+          "group": "navigation",
+          "icon": "$(refresh)"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "xmind.gitChanges",
+        "contents": "Refresh to view Git changes from the opened workspace. Status comes from the shared native xMind backend. [Refresh](command:agentflow.refreshGitChanges)"
       }
     ],
     "configuration": {

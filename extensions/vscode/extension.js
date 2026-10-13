@@ -11,6 +11,7 @@ const { resolveNativeRuntime } = require('./native-runtime');
 const { captureEditorSelection } = require('./editor-selection');
 const { XMindPseudoterminal } = require('./terminal');
 const { LanguageServerEditor } = require('./language-server-editor');
+const { GitChangesTreeProvider } = require('./git-changes-tree');
 
 async function activate(context) {
   const browserViews=browserViewLauncher(vscode,context);
@@ -64,6 +65,8 @@ async function activate(context) {
   const graphStateKey = 'xmind.workflow';
   const connectionState=()=>({url:client.baseUrl,...(workspaceBackend.stateFields?.()||{})});
   const savedConnection=record=>{const scope=workspaceBackend.stateFields?.();return scope?record?.workspace_id===scope.workspace_id&&record?.profile_directory===scope.profile_directory:record?.url===client.baseUrl;};
+  const gitChanges = new GitChangesTreeProvider(vscode);
+  if(vscode.window.registerTreeDataProvider)context.subscriptions.push(vscode.window.registerTreeDataProvider('xmind.gitChanges',gitChanges));
 
   const post = message => panel?.webview.postMessage(message.type==='capabilities'?{...message,fileEditProposals:client?health?.file_edit_proposals:undefined}:message);
   async function readSkills(){
@@ -155,6 +158,7 @@ async function activate(context) {
       const finalEvents=await client.graphEvents(id,cursor);if(version!==generation || !panel)return;
       for(const event of finalEvents){if(event.seq<=cursor)continue;if(event.run_id!==id&&!owned.has(event.run_id))throw new Error('Final event does not belong to the observed graph.');post({type:event.run_id===id?'event':'graph-event',event,node_id:owned.get(event.run_id)?.node_id});cursor=event.seq;}
       const history=await client.history(sessionId);if(version!==generation || !panel)return;post({type:'transcript',history});
+      await refreshGitChangesSnapshot().catch(()=>{});
     }
   }
   async function poll() {
@@ -200,6 +204,7 @@ async function activate(context) {
         const history = await client.history(sessionId);
         if (version !== generation) return;
         post({ type: 'transcript', history });
+        await refreshGitChangesSnapshot().catch(()=>{});
 
       }
     } catch (error) { if (version === generation) post({ type: 'error', text: error.message }); }
@@ -219,7 +224,7 @@ async function activate(context) {
     let snapshot=await observeOwnedRun(client,run,sessionId,cursor);if(version!==generation||!panel)return;publish(snapshot);
     run=await client.status(id);if(version!==generation||!panel)return;
     validRoot(run);
-    if(['completed','failed','cancelled'].includes(run.state)){snapshot=await observeOwnedRun(client,run,sessionId,cursor);if(version!==generation||!panel)return;publish(snapshot);}
+    if(['completed','failed','cancelled'].includes(run.state)){snapshot=await observeOwnedRun(client,run,sessionId,cursor);if(version!==generation||!panel)return;publish(snapshot);await refreshGitChangesSnapshot().catch(()=>{});}
     await readPlan(id,version);if(version!==generation||!panel)return;
     const history=await client.history(sessionId),runs=await client.runs(sessionId);if(version!==generation||!panel)return;
     sessionRuns=runs;presentRuns();post({type:'transcript',history,preserveLive:['queued','running','paused'].includes(run.state)});post({type:'status',text:run.state});
@@ -769,6 +774,7 @@ async function activate(context) {
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
   function disconnectWorkspace(){
+    gitChanges.clear('Connect xMind and refresh to load Git changes.');
     for(const terminal of [...terminalBridges])terminal.dispose();terminalBridges.clear();
     languageServerEditor.disconnect();
     contextReadyView=undefined;pendingEditorContexts=[];
@@ -811,6 +817,27 @@ async function activate(context) {
     const selected=await vscode.window.showQuickPick(group.folders.map(folder=>({label:folder.name,description:folder.root,folder})),{title,placeHolder:'Choose the registered folder whose Git repository to use'});
     if(!selected)return undefined;workspaceBackend.assert(ticket);return selected.folder;
   }
+  async function refreshGitChangesSnapshot(){
+    if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before reading Git status.');
+    const target=client,view=panel,owner=workspaceBackend.active;
+    if(!target||!owner||!view)throw new Error('Connect the opened workspace before refreshing Git Changes.');
+    const ticket=await workspaceBackend.prepare();workspaceBackend.assert(ticket);
+    if(ticket.origin!==target.baseUrl||owner.origin!==ticket.origin)throw new Error('The selected xMind workspace changed.');
+    const group=await target.workspaceMembership();workspaceBackend.assert(ticket);
+    if(group.workspace_id!==owner.metadata.workspace_id||group.root.toLowerCase()!==owner.metadata.root.toLowerCase())throw new Error('The native workspace membership changed. Reconnect before refreshing Git Changes.');
+    const folders=await Promise.all(group.folders.map(async folder=>({
+      name:folder.name,root:folder.root,folder_id:folder.folder_id,ordinal:folder.ordinal,
+      changes:await target.vcsStatus(folder.ordinal===0?undefined:folder.folder_id)
+    })));
+    workspaceBackend.assert(ticket);
+    if(panel!==view||client!==target||workspaceBackend.active!==owner)throw new Error('The xMind workspace changed while refreshing Git Changes.');
+    gitChanges.setFolders(folders);
+    return folders;
+  }
+  context.subscriptions.push(vscode.commands.registerCommand('agentflow.refreshGitChanges',async()=>{
+    try{if(!client)await open();await refreshGitChangesSnapshot();}
+    catch(error){gitChanges.clear(`Git status unavailable: ${error.message}`);vscode.window.showErrorMessage(error.message);}
+  }));
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.initializeGit',async()=>{
     try{
       if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before initializing Git.');
@@ -823,6 +850,7 @@ async function activate(context) {
       if(answer!=='Initialize Git')return;
       if(panel!==view||client!==target)throw new Error('The xMind view changed before Git initialization.');workspaceBackend.assert(ticket);
       await target.initializeGitRepository(folder.ordinal===0?undefined:folder.folder_id);
+      await refreshGitChangesSnapshot();
       vscode.window.showInformationMessage(`Git repository initialized in ${folder.root}.`);
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
@@ -836,6 +864,7 @@ async function activate(context) {
       const folder=await chooseGitFolder(target,owner,ticket,'xMind: Git Status Folder');if(!folder)return;
       const values=await target.vcsStatus(folder.ordinal===0?undefined:folder.folder_id);workspaceBackend.assert(ticket);
       if(panel!==view||client!==target)throw new Error('The xMind view changed while reading Git status.');
+      await refreshGitChangesSnapshot();
       if(!values.length){vscode.window.showInformationMessage(`No changed files reported by Git for ${folder.root}. The folder may not be a Git repository.`);return;}
       const items=values.map(item=>({label:`${item.status}  ${JSON.stringify(item.file)}`,description:`+${item.additions} −${item.deletions}`}));
       await vscode.window.showQuickPick(items,{title:`Git status · ${folder.root}`,placeHolder:`${values.length} changed file${values.length===1?'':'s'} · line counts appear beside each path`});
@@ -873,6 +902,9 @@ async function activate(context) {
   }));
   if(vscode.workspace.onDidChangeWorkspaceFolders)context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(()=>{
     reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
+  }));
+  if(vscode.workspace.onDidSaveTextDocument)context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(()=>{
+    if(client&&panel&&workspaceBackend.active)refreshGitChangesSnapshot().catch(()=>{});
   }));
   if(vscode.workspace.onDidChangeConfiguration)context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event=>{
     if(['backendMode','backendUrl','runtimeDirectory','stdlibSource','providerConfigPath','languageServerConfigPath','processConfigPath','workspaceEdits'].some(key=>event.affectsConfiguration('agentflow.'+key)))reconnectWorkspace().catch(error=>vscode.window.showErrorMessage(error.message));
