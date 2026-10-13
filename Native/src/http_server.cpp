@@ -34,6 +34,7 @@
 #include <mutex>
 #include <span>
 #include <string_view>
+#include <filesystem>
 #if defined(_WIN32)
 #include "agentflow/view_sessions.hpp"
 #include "agentflow/vcs_service.hpp"
@@ -411,7 +412,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|interrupt|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(skills|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|mcp/resource|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions(/[A-Za-z0-9_-]+/(history|runs|title|interrupt|skills|agent|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|a2a/(inspect|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(skills|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/context(/requests/[A-Za-z0-9_-]+)?)$)");
             static const std::regex workspace_find_route(R"(^/v1/workspace/find$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
@@ -900,6 +901,46 @@ struct HttpServer::Impl {
             if(!mcp_resources){reply(response,{{"servers",Json::array()},{"resources",Json::array()}});return;}
             response.set_content(mcp_resources->list_json(),"application/json");
             response.set_header("Cache-Control","no-store");response.set_header("X-Content-Type-Options","nosniff");
+        }));
+        server.Get("/v1/mcp/resource",guarded([this](const Request& request,Response& response) {
+            if(request.params.size()>1||request.get_param_value_count("location[directory]")>1||
+                (!request.params.empty()&&request.get_param_value_count("location[directory]")!=1))
+                throw std::invalid_argument("MCP resource catalog accepts only one location[directory]");
+            std::string directory;
+            if(request.has_param("location[directory]")){
+                directory=request.get_param_value("location[directory]");
+                if(directory.empty()||directory.size()>32768||std::any_of(directory.begin(),directory.end(),[](unsigned char c){return c<0x20||c==0x7f;}))
+                    throw std::invalid_argument("Invalid MCP resource location");
+                const std::filesystem::path path(directory);
+                if(!path.is_absolute())throw std::invalid_argument("MCP resource location must be an absolute directory");
+                directory=path.lexically_normal().string();
+            }else{
+                const auto workspace=executor?executor->execution_workspace():ExecutionWorkspaceMetadata{};
+                directory=workspace.configured?workspace.root:std::filesystem::current_path().string();
+            }
+            Json catalog={{"resources",Json::array()},{"templates",Json::array()}};
+            if(mcp_resources){
+                const auto raw=Json::parse(mcp_resources->list_json());
+                if(!raw.is_object()||!raw.contains("resources")||!raw.at("resources").is_array()||!raw.contains("templates")||!raw.at("templates").is_array())
+                    throw std::runtime_error("MCP resource catalog returned an invalid payload");
+                for(const auto& item:raw.at("resources")){
+                    if(!item.is_object()||!item.contains("server_id")||!item.at("server_id").is_string()||!item.contains("resource")||!item.at("resource").is_object())continue;
+                    const auto& resource=item.at("resource");if(!resource.contains("name")||!resource.at("name").is_string()||!resource.contains("uri")||!resource.at("uri").is_string())continue;
+                    Json projected={{"server",item.at("server_id")},{"name",resource.at("name")},{"uri",resource.at("uri")}};
+                    if(resource.contains("description")&&resource.at("description").is_string())projected["description"]=resource.at("description");
+                    if(resource.contains("mimeType")&&resource.at("mimeType").is_string())projected["mimeType"]=resource.at("mimeType");
+                    catalog["resources"].push_back(std::move(projected));
+                }
+                for(const auto& item:raw.at("templates")){
+                    if(!item.is_object()||!item.contains("server_id")||!item.at("server_id").is_string()||!item.contains("template")||!item.at("template").is_object())continue;
+                    const auto& value=item.at("template");if(!value.contains("name")||!value.at("name").is_string()||!value.contains("uriTemplate")||!value.at("uriTemplate").is_string())continue;
+                    Json projected={{"server",item.at("server_id")},{"name",value.at("name")},{"uriTemplate",value.at("uriTemplate")}};
+                    if(value.contains("description")&&value.at("description").is_string())projected["description"]=value.at("description");
+                    if(value.contains("mimeType")&&value.at("mimeType").is_string())projected["mimeType"]=value.at("mimeType");
+                    catalog["templates"].push_back(std::move(projected));
+                }
+            }
+            reply(response,{{"location",{{"directory",directory}}},{"data",std::move(catalog)}});
         }));
         if(mcp_oauth){
             const auto encode_authorization=[](const McpOAuthAttemptStatus& value){return Json{{"id",value.id},{"server_id",value.server_id},{"state",value.state},{"config_revision",value.config_revision},{"credential_revision",value.credential_revision},{"authorization_url",value.authorization_url.empty()?Json(nullptr):Json(value.authorization_url)},{"expires_unix_ms",value.expires_unix_ms},{"reason",value.reason.empty()?Json(nullptr):Json(value.reason)},{"cancellation_requested",value.cancellation_requested}};};

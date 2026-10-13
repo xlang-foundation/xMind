@@ -14529,13 +14529,13 @@
       "status": "missing",
       "nativeStatus": "partial-source-unverified",
       "nativeEvidence": {
-        "source": "Native/src/mcp_resource_catalog.cpp",
-        "sourceSha256": "78f3412274c6d3a212420747157f5d2ce732a6f678550e2d5b11b964469ac3a9",
-        "surface": "GET /v1/mcp/resources; xmind_cli mcp-resources",
-        "sourceAnchor": "\"/v1/mcp/resources\"",
-        "gap": "The local native backend discovers and paginates configured MCP resources and resource templates with authentication and secret-reflection suppression; the browser settings empty-catalog state passed a live authenticated acceptance. OpenCode's location query and exact response schema are not implemented, and a populated catalog has not been visually accepted in the editor.",
+        "source": "Native/src/http_server.cpp",
+        "sourceSha256": "6cbf64e2daaced435afb8b110be1c50a90313d7992e59239d754f95ac78cef2d",
+        "surface": "GET /v1/mcp/resource (OpenCode-shaped location/data contract); GET /v1/mcp/resources (xMind UI); xmind_cli mcp-resources",
+        "sourceAnchor": "server.Get(\"/v1/mcp/resource\"",
+        "gap": "The authenticated location-scoped route normalizes the active or requested directory, rejects unknown, duplicate and relative queries, projects resources and URI templates to the exact public schema, and is covered by a real native HTTP contract test. Populated editor acceptance and end-to-end interoperability with OpenCode clients remain unverified.",
         "verifiedParity": false,
-        "scope": "Source candidate and native integration coverage; not verified OpenCode contract parity."
+        "scope": "Operation-specific native HTTP contract verified; no full OpenCode interoperability or rendered populated-editor acceptance claimed."
       },
       "agentflowEvidence": null,
       "upstreamContract": {

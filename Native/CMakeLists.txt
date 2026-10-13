@@ -496,6 +496,17 @@ if(BUILD_TESTING)
     add_test(NAME native_planning_http_contract COMMAND agentflow_planning_http_contract
       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
     set_tests_properties(native_planning_http_contract PROPERTIES TIMEOUT 60)
+    add_executable(agentflow_mcp_resource_route_contract tests/mcp_resource_route_contract.cpp)
+    target_include_directories(agentflow_mcp_resource_route_contract PRIVATE third_party third_party/cpp-httplib)
+    target_link_libraries(agentflow_mcp_resource_route_contract PRIVATE agentflow_runtime agentflow_http)
+    add_custom_command(TARGET agentflow_mcp_resource_route_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_mcp_resource_route_contract>")
+    if(MSVC)
+      target_compile_options(agentflow_mcp_resource_route_contract PRIVATE /utf-8)
+    endif()
+    add_test(NAME native_mcp_resource_route_contract COMMAND agentflow_mcp_resource_route_contract
+      "${CMAKE_CURRENT_BINARY_DIR}/mcp-resource-route-contract.sqlite" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+    set_tests_properties(native_mcp_resource_route_contract PROPERTIES TIMEOUT 45)
     add_executable(agentflow_native_child_executor_contract tests/native_child_executor_contract.cpp)
     target_include_directories(agentflow_native_child_executor_contract PRIVATE third_party)
     target_link_libraries(agentflow_native_child_executor_contract PRIVATE agentflow_agent)

@@ -1,5 +1,18 @@
 # Reviewable milestones
 
+## OpenCode-shaped MCP resource location route — 2026-10-13
+
+The native HTTP API now exposes `GET /v1/mcp/resource?location[directory]=...`
+with the pinned OpenCode `location` plus `data.resources`/`data.templates`
+shape, while retaining xMind's existing `/v1/mcp/resources` UI catalog. The
+native contract test verifies exact public fields, path normalization, rejection
+of unknown/duplicate/relative location queries, and bearer authentication. The
+full browser and VS Code Node suites pass **432/432**; the browser adapter only
+forwards the exact location query. This advances xMind only and does not claim
+full OpenCode interoperability or populated editor acceptance.
+[Native contract output](evidence/native-mcp-resource-location-contract-20261013.log),
+[browser/VS Code output](evidence/mcp-resource-location-browser-vscode-tests-20261013.log).
+
 ## VS Code process validation on the xlang3 compatibility branch — 2026-10-13
 
 The live VS Code Extension Development Host completed TestProj's xlang3-backed
