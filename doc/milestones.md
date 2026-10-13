@@ -8,8 +8,11 @@ replacement. Per-file controller approval, exact-context matching, and partial
 batch reporting are unchanged. This addresses the live TestProj run where many
 small sequential edits exhausted the run before its successful Vite build could
 be reported; the focused native Release `native_patch_tool_contract` passes.
-This verifies tool-contract guidance only: a follow-up live browser run is still
-needed to measure whether batching resolves the timeout in practice.
+A completed coding run in the external xMind browser then made one approved
+`patch_file` update to `TestProj/model-zoo/frontend/src/style.css` and ran
+`npm.cmd run build`: exit 0, Vite 6.4.4, 36 modules transformed, built in
+700 ms, with no stderr. This verifies the real page's write-and-build path. It
+does not by itself establish that all longer coding requests avoid timeouts.
 
 ## Post-fix native provider and MCP regression gate — 2026-10-13
 
