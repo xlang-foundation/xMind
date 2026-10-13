@@ -10,9 +10,11 @@ requested build. Independent verification passed: the frontend production
 build, xlang3-hosted FastAPI health/catalog/stats requests, and external Edge
 checks for search, task filtering and model-detail navigation. This proves the
 workspace binding, real file writes, API-backed page and these browser actions;
-it does not pass the full coding run. The backend pytest entry point remains
-incompatible with xlang3's current pytest hook proxy. See [exact scope and
-outcomes](evidence/testproj-vscode-coding-flow-20261012.json).
+it does not pass the full coding run. A narrower Claude retry failed with the
+same validation message after reading the Vue file, before making changes or
+running a build. The run panel did not expose a safe protocol diagnostic code.
+The backend pytest entry point remains incompatible with xlang3's current
+pytest hook proxy. See [exact scope and outcomes](evidence/testproj-vscode-coding-flow-20261012.json).
 
 ## MCP catalogue invalidation and same-run refresh — 2026-10-12
 
