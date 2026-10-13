@@ -1,5 +1,24 @@
 # Current native validation
 
+## Packaged xlang3 plugin integration — 2026-10-13
+
+xMind main `9caef7c` now pins xlang3 compatibility branch commit `f6bbc56` and
+stages the selected xlang3 plugins required by xMind and its Python dependency
+path. The accepted plugin inventory contains 20 `.x3pkg.dll` files and three
+pure Pydantic facade sources; probe and sample packages, `.pyd`, bytecode and
+linker artifacts are excluded. A local package smoke staged 1,921 files from
+the actual xMind and xlang3 Release binaries plus pure Python 3.14 library
+sources. The compiled Windows runtime-generation verifier accepted the exact
+staged manifest (`d5577048…aebeef2`).
+
+The packaged xlang3 executable then ran the real Model Zoo backend test suite
+from TestProj with its installed pure Python dependencies: **9 passed**, with
+one AnyIO deprecation warning. A packaged xMind server also reached its local
+listening state from this runtime. The test used xlang3 with bytecode writing
+disabled; it did not execute CPython or contact a provider. The full hosted CI
+gate still needs to run against this updated pin. Exact local package and test
+results are in the [smoke record](evidence/xlang3-runtime-module-package-20261013.json).
+
 ## Installed VS Code extension attaches to the xlang3 branch owner — 2026-10-13
 
 VS Code 1.141.0 loaded installed xMind extension 0.1.10 in a trusted TestProj

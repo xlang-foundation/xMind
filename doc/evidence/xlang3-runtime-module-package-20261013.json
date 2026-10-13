@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-13",
+  "result": "passed",
+  "scope": "Local xMind package smoke using the actual xlang3 compatibility branch build; the hosted CI gate has not yet run against the updated pin.",
+  "xmindSourceRevision": "9caef7cb6698dfc10048301ca6a781ddf7adb13b",
+  "xlang3SourceRevision": "f6bbc561673e3c166dc0dab9062cb24db26432a1",
+  "runtimeManifestSha256": "d557704816cae04483e24712d5eba1508e1f8a9d6034b67c46ccdfe02aebeef2",
+  "packaging": {
+    "sourceBundleFiles": 51,
+    "runtimeManifestFiles": 1921,
+    "xlang3PluginDlls": 20,
+    "purePythonFacadeFiles": 3,
+    "sourceLibraryFiles": 1869,
+    "cpythonExecuted": false
+  },
+  "nativeRuntimeGenerationVerifier": {
+    "verified": true,
+    "selfVerified": false,
+    "actualPackagedBinaries": true
+  },
+  "testProject": {
+    "workspace": "D:/CantorAI2026/TestProj/model-zoo/backend",
+    "command": "xlang3.exe -B -m pytest",
+    "exitCode": 0,
+    "passed": 9,
+    "warnings": [
+      "AnyIO BlockingPortal alias deprecation"
+    ],
+    "providerRequests": 0
+  },
+  "serverStartup": {
+    "startedFromStagedRuntime": true,
+    "reachedLocalListeningState": true,
+    "unauthenticatedHealthProbe": 401
+  }
+}
